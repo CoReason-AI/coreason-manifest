@@ -18,8 +18,13 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
+    "mcp>=1.26.0",
     "pydantic>=2.12.5",
 ]
+
+[project.scripts]
+coreason-export = "coreason_manifest.cli.export:main"
+coreason-mcp = "coreason_manifest.cli.mcp_server:main"
 
 [project.urls]
 Homepage = "https://github.com/CoReason-AI/coreason_manifest"

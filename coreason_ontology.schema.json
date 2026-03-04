@@ -1,0 +1,752 @@
+{
+  "$defs": {
+    "AdjudicationRubric": {
+      "additionalProperties": false,
+      "description": "Rubric defining multiple criteria and passing threshold for algorithmic adjudication.",
+      "properties": {
+        "rubric_id": {
+          "description": "Unique identifier for the rubric.",
+          "title": "Rubric Id",
+          "type": "string"
+        },
+        "criteria": {
+          "description": "List of criteria used in the rubric.",
+          "items": {
+            "$ref": "#/$defs/GradingCriteria"
+          },
+          "title": "Criteria",
+          "type": "array"
+        },
+        "passing_threshold": {
+          "description": "The minimum score required to pass.",
+          "title": "Passing Threshold",
+          "type": "number"
+        }
+      },
+      "required": [
+        "rubric_id",
+        "criteria",
+        "passing_threshold"
+      ],
+      "title": "AdjudicationRubric",
+      "type": "object"
+    },
+    "AgentNode": {
+      "additionalProperties": false,
+      "description": "A node representing an autonomous agent.",
+      "properties": {
+        "description": {
+          "description": "A description of the node's function.",
+          "title": "Description",
+          "type": "string"
+        },
+        "type": {
+          "const": "agent",
+          "default": "agent",
+          "description": "Discriminator for an Agent node.",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "description"
+      ],
+      "title": "AgentNode",
+      "type": "object"
+    },
+    "AnyNode": {
+      "description": "A discriminated union of all valid workflow nodes.",
+      "discriminator": {
+        "mapping": {
+          "agent": "#/$defs/AgentNode",
+          "human": "#/$defs/HumanNode",
+          "system": "#/$defs/SystemNode"
+        },
+        "propertyName": "type"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/AgentNode"
+        },
+        {
+          "$ref": "#/$defs/HumanNode"
+        },
+        {
+          "$ref": "#/$defs/SystemNode"
+        }
+      ]
+    },
+    "AnyStateEvent": {
+      "description": "A discriminated union of state events.",
+      "discriminator": {
+        "mapping": {
+          "belief_update": "#/$defs/BeliefUpdateEvent",
+          "observation": "#/$defs/ObservationEvent",
+          "system_fault": "#/$defs/SystemFaultEvent"
+        },
+        "propertyName": "type"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/ObservationEvent"
+        },
+        {
+          "$ref": "#/$defs/BeliefUpdateEvent"
+        },
+        {
+          "$ref": "#/$defs/SystemFaultEvent"
+        }
+      ]
+    },
+    "AnyTopology": {
+      "description": "A discriminated union of workflow topologies.",
+      "discriminator": {
+        "mapping": {
+          "council": "#/$defs/CouncilTopology",
+          "dag": "#/$defs/DAGTopology",
+          "swarm": "#/$defs/SwarmTopology"
+        },
+        "propertyName": "type"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/DAGTopology"
+        },
+        {
+          "$ref": "#/$defs/CouncilTopology"
+        },
+        {
+          "$ref": "#/$defs/SwarmTopology"
+        }
+      ]
+    },
+    "BeliefUpdateEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "description": "A unique identifier for the event.",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "The timestamp when the event occurred.",
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "type": {
+          "const": "belief_update",
+          "default": "belief_update",
+          "description": "Discriminator type for a belief update event.",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "event_id",
+        "timestamp"
+      ],
+      "title": "BeliefUpdateEvent",
+      "type": "object"
+    },
+    "ConstitutionalRule": {
+      "additionalProperties": false,
+      "description": "Defines a constitutional rule for AI governance.",
+      "properties": {
+        "rule_id": {
+          "description": "Unique identifier for the constitutional rule.",
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "description": {
+          "description": "Detailed description of the rule.",
+          "title": "Description",
+          "type": "string"
+        },
+        "severity": {
+          "description": "Severity level if the rule is violated.",
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ],
+          "title": "Severity",
+          "type": "string"
+        },
+        "forbidden_intents": {
+          "description": "List of intents that are forbidden by this rule.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Forbidden Intents",
+          "type": "array"
+        }
+      },
+      "required": [
+        "rule_id",
+        "description",
+        "severity",
+        "forbidden_intents"
+      ],
+      "title": "ConstitutionalRule",
+      "type": "object"
+    },
+    "CouncilTopology": {
+      "additionalProperties": false,
+      "description": "A Council workflow topology involving multiple voting members and an adjudicator.",
+      "properties": {
+        "nodes": {
+          "additionalProperties": {
+            "$ref": "#/$defs/AnyNode"
+          },
+          "description": "Flat registry of all nodes in this topology.",
+          "propertyNames": {
+            "$ref": "#/$defs/NodeID"
+          },
+          "title": "Nodes",
+          "type": "object"
+        },
+        "type": {
+          "const": "council",
+          "default": "council",
+          "description": "Discriminator for a Council topology.",
+          "title": "Type",
+          "type": "string"
+        },
+        "adjudicator_id": {
+          "$ref": "#/$defs/NodeID",
+          "description": "The NodeID of the adjudicator that synthesizes the council's output."
+        }
+      },
+      "required": [
+        "nodes",
+        "adjudicator_id"
+      ],
+      "title": "CouncilTopology",
+      "type": "object"
+    },
+    "DAGTopology": {
+      "additionalProperties": false,
+      "description": "A Directed Acyclic Graph workflow topology.",
+      "properties": {
+        "nodes": {
+          "additionalProperties": {
+            "$ref": "#/$defs/AnyNode"
+          },
+          "description": "Flat registry of all nodes in this topology.",
+          "propertyNames": {
+            "$ref": "#/$defs/NodeID"
+          },
+          "title": "Nodes",
+          "type": "object"
+        },
+        "type": {
+          "const": "dag",
+          "default": "dag",
+          "description": "Discriminator for a DAG topology.",
+          "title": "Type",
+          "type": "string"
+        },
+        "allow_cycles": {
+          "default": false,
+          "description": "Configuration indicating if cycles are allowed during validation.",
+          "title": "Allow Cycles",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "nodes"
+      ],
+      "title": "DAGTopology",
+      "type": "object"
+    },
+    "EpistemicLedger": {
+      "additionalProperties": false,
+      "properties": {
+        "history": {
+          "description": "An append-only, cryptographic ledger of state events.",
+          "items": {
+            "$ref": "#/$defs/AnyStateEvent"
+          },
+          "title": "History",
+          "type": "array"
+        }
+      },
+      "required": [
+        "history"
+      ],
+      "title": "EpistemicLedger",
+      "type": "object"
+    },
+    "GovernancePolicy": {
+      "additionalProperties": false,
+      "description": "Defines a governance policy comprising multiple constitutional rules.",
+      "properties": {
+        "policy_name": {
+          "description": "Name of the governance policy.",
+          "title": "Policy Name",
+          "type": "string"
+        },
+        "version": {
+          "$ref": "#/$defs/SemanticVersion",
+          "description": "Semantic version of the governance policy."
+        },
+        "rules": {
+          "description": "List of constitutional rules included in this policy.",
+          "items": {
+            "$ref": "#/$defs/ConstitutionalRule"
+          },
+          "title": "Rules",
+          "type": "array"
+        }
+      },
+      "required": [
+        "policy_name",
+        "version",
+        "rules"
+      ],
+      "title": "GovernancePolicy",
+      "type": "object"
+    },
+    "GradingCriteria": {
+      "additionalProperties": false,
+      "description": "Defines criteria used for grading LLM behavior or output.",
+      "properties": {
+        "criterion_id": {
+          "description": "Unique identifier for the grading criterion.",
+          "title": "Criterion Id",
+          "type": "string"
+        },
+        "description": {
+          "description": "Detailed description of what is being graded.",
+          "title": "Description",
+          "type": "string"
+        },
+        "weight": {
+          "description": "Weight or significance of this criterion.",
+          "title": "Weight",
+          "type": "number"
+        }
+      },
+      "required": [
+        "criterion_id",
+        "description",
+        "weight"
+      ],
+      "title": "GradingCriteria",
+      "type": "object"
+    },
+    "HumanNode": {
+      "additionalProperties": false,
+      "description": "A node representing a human participant in the workflow.",
+      "properties": {
+        "description": {
+          "description": "A description of the node's function.",
+          "title": "Description",
+          "type": "string"
+        },
+        "type": {
+          "const": "human",
+          "default": "human",
+          "description": "Discriminator for a Human node.",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "description"
+      ],
+      "title": "HumanNode",
+      "type": "object"
+    },
+    "LogEnvelope": {
+      "additionalProperties": false,
+      "description": "An out-of-band telemetry log envelope.",
+      "properties": {
+        "timestamp": {
+          "description": "The UNIX timestamp of the log event.",
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "level": {
+          "description": "The severity level of the log event.",
+          "enum": [
+            "DEBUG",
+            "INFO",
+            "WARNING",
+            "ERROR",
+            "CRITICAL"
+          ],
+          "title": "Level",
+          "type": "string"
+        },
+        "message": {
+          "description": "The primary log message.",
+          "title": "Message",
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/$defs/MetadataDict",
+          "description": "Contextual key-value metadata associated with the event."
+        }
+      },
+      "required": [
+        "timestamp",
+        "level",
+        "message"
+      ],
+      "title": "LogEnvelope",
+      "type": "object"
+    },
+    "MetadataDict": {
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/TelemetryScalar"
+          },
+          {
+            "items": {
+              "$ref": "#/$defs/TelemetryScalar"
+            },
+            "type": "array"
+          }
+        ]
+      },
+      "type": "object"
+    },
+    "ModelProfile": {
+      "additionalProperties": false,
+      "description": "Abstraction for an underlying LLM provider in liquid compute.",
+      "properties": {
+        "model_name": {
+          "description": "The identifier of the underlying model.",
+          "title": "Model Name",
+          "type": "string"
+        },
+        "provider": {
+          "description": "The name of the provider hosting the model.",
+          "title": "Provider",
+          "type": "string"
+        },
+        "context_window_size": {
+          "description": "The maximum context window size in tokens.",
+          "title": "Context Window Size",
+          "type": "integer"
+        },
+        "capabilities": {
+          "description": "A list of supported capabilities by the model.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Capabilities",
+          "type": "array"
+        },
+        "rate_card": {
+          "$ref": "#/$defs/RateCard",
+          "description": "The economic cost definition associated with the model."
+        }
+      },
+      "required": [
+        "model_name",
+        "provider",
+        "context_window_size",
+        "capabilities",
+        "rate_card"
+      ],
+      "title": "ModelProfile",
+      "type": "object"
+    },
+    "NodeID": {
+      "description": "Unique identifier for a node in the graph. Alphanumeric, underscores, hyphens only.",
+      "examples": [
+        "agent_1",
+        "start-node",
+        "MyNode"
+      ],
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[a-zA-Z0-9_-]+$",
+      "type": "string"
+    },
+    "ObservationEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "description": "A unique identifier for the event.",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "The timestamp when the event occurred.",
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "type": {
+          "const": "observation",
+          "default": "observation",
+          "description": "Discriminator type for an observation event.",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "event_id",
+        "timestamp"
+      ],
+      "title": "ObservationEvent",
+      "type": "object"
+    },
+    "RateCard": {
+      "additionalProperties": false,
+      "description": "Economic constraints for liquid compute operations.",
+      "properties": {
+        "cost_per_million_input_tokens": {
+          "description": "The cost per 1 million input tokens provided to the model.",
+          "title": "Cost Per Million Input Tokens",
+          "type": "number"
+        },
+        "cost_per_million_output_tokens": {
+          "description": "The cost per 1 million output tokens generated by the model.",
+          "title": "Cost Per Million Output Tokens",
+          "type": "number"
+        },
+        "currency": {
+          "description": "The currency of the associated costs.",
+          "title": "Currency",
+          "type": "string"
+        }
+      },
+      "required": [
+        "cost_per_million_input_tokens",
+        "cost_per_million_output_tokens",
+        "currency"
+      ],
+      "title": "RateCard",
+      "type": "object"
+    },
+    "SemanticVersion": {
+      "description": "A semantic version string (e.g., '1.0.0').",
+      "examples": [
+        "1.0.0",
+        "0.1.0",
+        "2.12.5"
+      ],
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "type": "string"
+    },
+    "SpanTrace": {
+      "additionalProperties": false,
+      "description": "An execution window span trace.",
+      "properties": {
+        "span_id": {
+          "description": "The unique identifier for this execution span.",
+          "title": "Span Id",
+          "type": "string"
+        },
+        "parent_span_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The identifier of the parent span, if any.",
+          "title": "Parent Span Id"
+        },
+        "start_time": {
+          "description": "The UNIX timestamp when the span started.",
+          "title": "Start Time",
+          "type": "number"
+        },
+        "end_time": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The UNIX timestamp when the span ended.",
+          "title": "End Time"
+        },
+        "status": {
+          "description": "The completion status of the span.",
+          "enum": [
+            "OK",
+            "ERROR",
+            "PENDING"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/$defs/MetadataDict",
+          "description": "Contextual key-value metadata associated with the span execution."
+        }
+      },
+      "required": [
+        "span_id",
+        "start_time",
+        "status"
+      ],
+      "title": "SpanTrace",
+      "type": "object"
+    },
+    "SwarmTopology": {
+      "additionalProperties": false,
+      "description": "A dynamic Swarm workflow topology.",
+      "properties": {
+        "nodes": {
+          "additionalProperties": {
+            "$ref": "#/$defs/AnyNode"
+          },
+          "description": "Flat registry of all nodes in this topology.",
+          "propertyNames": {
+            "$ref": "#/$defs/NodeID"
+          },
+          "title": "Nodes",
+          "type": "object"
+        },
+        "type": {
+          "const": "swarm",
+          "default": "swarm",
+          "description": "Discriminator for a Swarm topology.",
+          "title": "Type",
+          "type": "string"
+        },
+        "spawning_threshold": {
+          "default": 3,
+          "description": "Threshold limit for dynamic spawning of additional nodes.",
+          "title": "Spawning Threshold",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "nodes"
+      ],
+      "title": "SwarmTopology",
+      "type": "object"
+    },
+    "SystemFaultEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "description": "A unique identifier for the event.",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "The timestamp when the event occurred.",
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "type": {
+          "const": "system_fault",
+          "default": "system_fault",
+          "description": "Discriminator type for a system fault event.",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "event_id",
+        "timestamp"
+      ],
+      "title": "SystemFaultEvent",
+      "type": "object"
+    },
+    "SystemNode": {
+      "additionalProperties": false,
+      "description": "A node representing a deterministic system capability.",
+      "properties": {
+        "description": {
+          "description": "A description of the node's function.",
+          "title": "Description",
+          "type": "string"
+        },
+        "type": {
+          "const": "system",
+          "default": "system",
+          "description": "Discriminator for a System node.",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "description"
+      ],
+      "title": "SystemNode",
+      "type": "object"
+    },
+    "TelemetryScalar": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "integer"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "WorkflowEnvelope": {
+      "additionalProperties": false,
+      "description": "The root envelope for an orchestrated workflow payload.",
+      "properties": {
+        "manifest_version": {
+          "$ref": "#/$defs/SemanticVersion",
+          "description": "The semantic version of this workflow manifestation schema."
+        },
+        "topology": {
+          "$ref": "#/$defs/AnyTopology",
+          "description": "The underlying topology governing execution routing."
+        }
+      },
+      "required": [
+        "manifest_version",
+        "topology"
+      ],
+      "title": "WorkflowEnvelope",
+      "type": "object"
+    },
+    "WorkingMemorySnapshot": {
+      "additionalProperties": false,
+      "properties": {
+        "system_prompt": {
+          "description": "The active system prompt guiding the agent's behavior.",
+          "title": "System Prompt",
+          "type": "string"
+        },
+        "active_context": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "A dictionary representing the active context variables for the agent.",
+          "title": "Active Context",
+          "type": "object"
+        }
+      },
+      "required": [
+        "system_prompt",
+        "active_context"
+      ],
+      "title": "WorkingMemorySnapshot",
+      "type": "object"
+    }
+  },
+  "title": "Coreason Ontology",
+  "description": "Unified JSON Schema for the Coreason Manifest"
+}
