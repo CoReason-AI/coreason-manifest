@@ -7,7 +7,7 @@ from coreason_manifest.spec.topologies.scivis_drafting import (
 )
 
 
-def test_scivis_drafting_flow_initialization():
+def test_scivis_drafting_flow_initialization() -> None:
     flow = SciVisDraftingFlow()
 
     assert "metadata" in flow.model_dump()
@@ -41,7 +41,7 @@ def test_scivis_drafting_flow_initialization():
     assert drafter_critic_edge is not None
 
 
-def test_scivis_drafting_blackboard_initialization():
+def test_scivis_drafting_blackboard_initialization() -> None:
     from coreason_manifest.presentation.scivis.scientific_vis import SciVisIntent, VisInformationType
 
     intent = SciVisIntent(

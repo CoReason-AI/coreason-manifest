@@ -33,14 +33,6 @@ class CrossoverStrategy(StrEnum):
 
 AllowedAction = Literal["click", "type", "scroll", "screenshot", "drag", "hover", "hotkey"]
 CoordinateSystem = Literal["absolute_px", "normalized_0_1"]
-GraphRetrievalMode = Literal[
-    "local",
-    "global",
-    "hybrid",
-    "forward_snowball",
-    "backward_snowball",
-    "bidirectional_snowball",
-]
 GuidedDecodingMode = Literal["json_schema", "regex", "grammar", "none"]
 
 
@@ -508,38 +500,10 @@ class GraphReasoning(BaseReasoning):
 
     type: Literal["graph"] = "graph"
 
-    # 1. The Database Connection
-    graph_store: Annotated[str, Field(description="Identifier for the Knowledge Graph (e.g. 'neo4j-prod').")]
-
-    # 2. The Model acting as the 'Graph Navigator'
-    # Used to generate Cypher/Gremlin queries or extract entity keywords from the prompt.
-    extraction_model: Annotated[
-        ModelRef | None, Field(description="Model used to translate user prompt into graph queries.")
-    ] = None
-
-    # 3. Graph Retrieval Strategies
-    # local: "Entity-Centric". Good for "Who is X?" or "How are X and Y related?"
-    # global: "Corpus-Centric". Good for "What are the themes?" (uses pre-computed community summaries).
-    # hybrid: The best of both worlds.
-    retrieval_mode: Annotated[
-        GraphRetrievalMode,
-        Field(
-            description=(
-                "Strategy for traversing the graph. "
-                "local/global/hybrid are for semantic community detection. "
-                "snowball modes execute temporal citation network traversals."
-            )
-        ),
-    ] = "local"
-
-    # Local Mode Constraints
-    max_hops: Annotated[int, Field(description="Traversal depth for local neighbor search.")] = 2
-
-    # Global Mode Constraints
-    # GraphRAG builds hierarchical communities (Level 0 = Root, Level 1 = Broad Clusters, Level 2 = Specifics).
-    community_level: Annotated[
-        int, Field(description="For global search: which level of community summaries to query.")
-    ] = 1
+    semantic_intent: Annotated[str, Field(description="The high-level objective.")]
+    anchor_nodes: Annotated[list[str], Field(description="Strict entry points.")]
+    max_hops: Annotated[int, Field(description="Depth limit to prevent graph explosion.")]
+    allowed_edge_types: Annotated[list[str], Field(description="Strict boundary filters.")]
 
 
 class WasmExecutionReasoning(BaseReasoning):
