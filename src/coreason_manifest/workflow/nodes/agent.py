@@ -148,19 +148,21 @@ class AgentNode(Node):
 
     @model_validator(mode="after")
     def validate_dynamic_prompt_resilience(self) -> "AgentNode":
-        if isinstance(self.profile, CognitiveProfile):
-            if isinstance(self.profile.persona, MCPPromptRef):
-                if self.profile.persona.fallback_persona is None:
-                    has_timeout = False
-                    if self.operational_policy is not None:
-                        if self.operational_policy.compute is not None:
-                            if self.operational_policy.compute.max_execution_time_seconds is not None:
-                                has_timeout = True
+        if (
+            isinstance(self.profile, CognitiveProfile)
+            and isinstance(self.profile.persona, MCPPromptRef)
+            and self.profile.persona.fallback_persona is None
+        ):
+            has_timeout = (
+                self.operational_policy is not None
+                and self.operational_policy.compute is not None
+                and self.operational_policy.compute.max_execution_time_seconds is not None
+            )
 
-                    if not has_timeout:
-                        raise ValueError(
-                            "AgentNode relies on a dynamic MCPPromptRef without a fallback_persona. "
-                            "To prevent infinite cognitive hangs during network partitioning, "
-                            "an operational_policy.compute.max_execution_time_seconds must be defined."
-                        )
+            if not has_timeout:
+                raise ValueError(
+                    "AgentNode relies on a dynamic MCPPromptRef without a fallback_persona. "
+                    "To prevent infinite cognitive hangs during network partitioning, "
+                    "an operational_policy.compute.max_execution_time_seconds must be defined."
+                )
         return self
