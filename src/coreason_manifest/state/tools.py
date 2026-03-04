@@ -1,5 +1,5 @@
 from enum import StrEnum
-from typing import Annotated, Any, Literal
+from typing import Annotated, Literal
 
 from pydantic import Field, HttpUrl, model_validator
 
@@ -79,42 +79,8 @@ class ToolCapability(BaseTool):
     type: Literal["capability"] = Field("capability", description="Discriminator for polymorphic tools.")
 
 
-class MCPResourceTemplate(CoreasonModel):
-    """Template for MCP resources."""
-
-    uri_template: str = Field(description="The URI template for the resource.")
-    name: str = Field(description="The name of the template.")
-    description: str | None = Field(default=None, description="Description of the template.")
-    mime_type: str | None = Field(default=None, description="The MIME type of the resource.")
-
-
-class MCPPrompt(CoreasonModel):
-    """Template for MCP prompts."""
-
-    name: str = Field(description="The name of the prompt.")
-    description: str | None = Field(default=None, description="Description of the prompt.")
-    arguments: list[dict[str, Any]] | None = Field(default_factory=list, description="Arguments for the prompt.")
-
-
-class MCPTool(BaseTool):
-    """
-    Definition of a remote Model Context Protocol (MCP) tool server.
-    """
-
-    type: Literal["mcp_tool"] = Field("mcp_tool", description="Discriminator for MCP tools.")
-    server_uri: HttpUrl = Field(..., description="The connection URI for the MCP server.")
-    mcp_version: str = Field(..., description="The MCP version supported by the server.")
-    supported_capabilities: list[str] = Field(
-        default_factory=list, description="List of capability flags (e.g., 'resources', 'prompts', 'logging')."
-    )
-    prompts: list[MCPPrompt] = Field(default_factory=list, description="List of exposed MCP prompts.")
-    resource_templates: list[MCPResourceTemplate] = Field(
-        default_factory=list, description="List of exposed MCP resource templates."
-    )
-
-
 # Polymorphic Tool Type (Extensible for future)
-AnyTool = Annotated[ToolCapability | MCPTool, Field(discriminator="type")]
+AnyTool = ToolCapability
 
 
 class ToolPack(CoreasonModel):
