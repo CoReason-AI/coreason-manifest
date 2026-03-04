@@ -923,16 +923,16 @@ def _check_cal_deduplication_guard(flow: LinearFlow | GraphFlow) -> list[Complia
     return reports
 
 
-def _check_prisma_ledger_mandate(flow) -> list:
+def _check_prisma_ledger_mandate(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     """Epic 7 Cohesion: Document-dropping swarms MUST have a PRISMA Attrition Ledger."""
     from coreason_manifest.core.security.compliance import ComplianceReport, RemediationAction
     from coreason_manifest.workflow.topology import get_unified_topology
 
-    reports = []
+    reports: list[ComplianceReport] = []
     nodes, _ = get_unified_topology(flow)
 
     for node in nodes:
-        if type(node).__name__ == "SwarmNode" and (
+        if isinstance(node, SwarmNode) and (
             getattr(node, "cal_config", None) is not None
             or getattr(node, "reducer_function", None) == "epistemic_deduplication"
         ):
@@ -946,7 +946,7 @@ def _check_prisma_ledger_mandate(flow) -> list:
             if not has_ledger:
                 reports.append(
                     ComplianceReport(
-                        code="ERR_PRISMA_LEDGER_MISSING_011",
+                        code=cast("ErrorCatalog", "ERR_PRISMA_LEDGER_MISSING_011"),
                         severity="violation",
                         message=(
                             f"SwarmNode '{node.id}' performs document exclusion (CAL or Deduplication) "
@@ -964,16 +964,16 @@ def _check_prisma_ledger_mandate(flow) -> list:
     return reports
 
 
-def _check_harmonization_vision_guard(flow) -> list:
+def _check_harmonization_vision_guard(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     """Epic 7 Cohesion: Harmonization Swarms MUST use Multimodal Vision RAG."""
     from coreason_manifest.core.security.compliance import ComplianceReport, RemediationAction
     from coreason_manifest.workflow.topology import get_unified_topology
 
-    reports = []
+    reports: list[ComplianceReport] = []
     nodes, _ = get_unified_topology(flow)
 
     for node in nodes:
-        if type(node).__name__ == "SwarmNode" and getattr(node, "reducer_function", None) == "protocol_harmonization":
+        if isinstance(node, SwarmNode) and getattr(node, "reducer_function", None) == "protocol_harmonization":
             is_vision = False
             if flow.definitions and getattr(node, "worker_profile", None) in flow.definitions.profiles:
                 profile = flow.definitions.profiles[node.worker_profile]
@@ -984,7 +984,7 @@ def _check_harmonization_vision_guard(flow) -> list:
             if not is_vision:
                 reports.append(
                     ComplianceReport(
-                        code="ERR_HARMONIZATION_REQUIRES_VISION_012",
+                        code=cast("ErrorCatalog", "ERR_HARMONIZATION_REQUIRES_VISION_012"),
                         severity="violation",
                         message=(
                             f"SwarmNode '{node.id}' performs protocol_harmonization but its worker_profile "
@@ -1002,12 +1002,12 @@ def _check_harmonization_vision_guard(flow) -> list:
     return reports
 
 
-def _check_visual_extraction_inspector_guard(flow) -> list:
+def _check_visual_extraction_inspector_guard(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     """Epic 7 Cohesion: Visual Extraction MUST be topologically verified by a Spatial Inspector."""
     from coreason_manifest.core.security.compliance import ComplianceReport, RemediationAction
     from coreason_manifest.workflow.topology import get_unified_topology
 
-    reports = []
+    reports: list[ComplianceReport] = []
     if type(flow).__name__ != "GraphFlow":
         return reports
 
@@ -1042,7 +1042,7 @@ def _check_visual_extraction_inspector_guard(flow) -> list:
             if not is_guarded:
                 reports.append(
                     ComplianceReport(
-                        code="ERR_VISUAL_EXTRACTION_UNGUARDED_013",
+                        code=cast("ErrorCatalog", "ERR_VISUAL_EXTRACTION_UNGUARDED_013"),
                         severity="violation",
                         message=(
                             f"Node '{node.id}' uses VisualExtractionReasoning but its output is not "
@@ -1050,7 +1050,7 @@ def _check_visual_extraction_inspector_guard(flow) -> list:
                         ),
                         node_id=node.id,
                         remediation=RemediationAction(
-                            type="add_inspector_guard",
+                            type="add_guard_node",
                             target_node_id=node.id,
                             patch_data=[],
                             description="Route this node's output to a VisualInspectorNode verifying bounding boxes.",
