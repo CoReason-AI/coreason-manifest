@@ -8,10 +8,12 @@ dynamic discovery, semantic compression, and on-the-fly synthesis capabilities.
 
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import Field
+
+from coreason_manifest.core.common.base import CoreasonModel
 
 
-class CognitiveLoadTrimmer(BaseModel):
+class CognitiveLoadTrimmer(CoreasonModel):
     """
     Defines the orchestrator's strategy for managing the LLM context window.
 
@@ -20,7 +22,9 @@ class CognitiveLoadTrimmer(BaseModel):
     """
 
     max_tool_tokens: int = Field(
-        ..., description="The absolute maximum number of tokens allowed for tool descriptions in the prompt."
+        ...,
+        gt=0,
+        description="The absolute maximum number of tokens allowed for tool descriptions in the prompt.",
     )
 
     auto_provision_subagent: bool = Field(
@@ -36,7 +40,7 @@ class CognitiveLoadTrimmer(BaseModel):
     )
 
 
-class JITToolSynthesisConfig(BaseModel):
+class JITToolSynthesisConfig(CoreasonModel):
     """
     Declares the algorithmic process for generating a net-new tool on the fly.
 
@@ -56,11 +60,13 @@ class JITToolSynthesisConfig(BaseModel):
     )
 
     max_synthesis_time_ms: int = Field(
-        ..., description="Timeout (in milliseconds) for the generation and testing loop."
+        ...,
+        gt=0,
+        description="Timeout (in milliseconds) for the generation and testing loop.",
     )
 
 
-class SemanticToolchain(BaseModel):
+class SemanticToolchain(CoreasonModel):
     """
     Represents a DAG of micro-tools linked by vector similarity rather than hardcoded edges.
 

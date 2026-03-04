@@ -22,18 +22,34 @@ def test_cognitive_load_trimmer_valid() -> None:
 
 def test_cognitive_load_trimmer_invalid_bounds() -> None:
     """Test that context_compression_ratio validates its bounds."""
-    with pytest.raises(ValidationError):
+    with pytest.raises(ValidationError, match=r"Input should be greater than or equal to 0"):
         CognitiveLoadTrimmer(
             max_tool_tokens=1024,
             auto_provision_subagent=False,
             context_compression_ratio=-0.1,  # Below 0.0
         )
 
-    with pytest.raises(ValidationError):
+    with pytest.raises(ValidationError, match=r"Input should be less than or equal to 1"):
         CognitiveLoadTrimmer(
             max_tool_tokens=1024,
             auto_provision_subagent=False,
             context_compression_ratio=1.1,  # Above 1.0
+        )
+
+
+def test_cognitive_load_trimmer_invalid_tokens() -> None:
+    """Test that max_tool_tokens must be strictly positive."""
+    with pytest.raises(ValidationError, match=r"Input should be greater than 0"):
+        CognitiveLoadTrimmer(
+            max_tool_tokens=0,
+            auto_provision_subagent=False,
+            context_compression_ratio=0.5,
+        )
+    with pytest.raises(ValidationError, match=r"Input should be greater than 0"):
+        CognitiveLoadTrimmer(
+            max_tool_tokens=-10,
+            auto_provision_subagent=False,
+            context_compression_ratio=0.5,
         )
 
 
@@ -53,12 +69,23 @@ def test_jit_tool_synthesis_config_valid() -> None:
 
 def test_jit_tool_synthesis_config_invalid_profile() -> None:
     """Test that wasm_sandbox_profile must be a valid Literal."""
-    with pytest.raises(ValidationError):
+    with pytest.raises(ValidationError, match=r"Input should be 'strict', 'network-enabled' or 'fs-read-only'"):
         JITToolSynthesisConfig(
             generation_model_uri="model://sota/2026",
-            wasm_sandbox_profile="invalid_profile",
+            wasm_sandbox_profile="invalid_profile",  # type: ignore[arg-type]
             verification_assertion="assert tool.execute() is not None",
             max_synthesis_time_ms=5000,
+        )
+
+
+def test_jit_tool_synthesis_config_invalid_time() -> None:
+    """Test that max_synthesis_time_ms must be strictly positive."""
+    with pytest.raises(ValidationError, match=r"Input should be greater than 0"):
+        JITToolSynthesisConfig(
+            generation_model_uri="model://sota/2026",
+            wasm_sandbox_profile="strict",
+            verification_assertion="assert tool.execute() is not None",
+            max_synthesis_time_ms=0,
         )
 
 
@@ -101,7 +128,7 @@ def test_semantic_toolchain_valid_with_fallback() -> None:
 
 def test_semantic_toolchain_invalid_bounds() -> None:
     """Test that similarity_threshold validates its bounds."""
-    with pytest.raises(ValidationError):
+    with pytest.raises(ValidationError, match=r"Input should be greater than or equal to 0"):
         SemanticToolchain(
             macro_intent_hash="0x1111",
             discovered_tool_uris=[],
@@ -109,7 +136,7 @@ def test_semantic_toolchain_invalid_bounds() -> None:
             load_strategy="ephemeral",
         )
 
-    with pytest.raises(ValidationError):
+    with pytest.raises(ValidationError, match=r"Input should be less than or equal to 1"):
         SemanticToolchain(
             macro_intent_hash="0x1111",
             discovered_tool_uris=[],
@@ -120,10 +147,10 @@ def test_semantic_toolchain_invalid_bounds() -> None:
 
 def test_semantic_toolchain_invalid_strategy() -> None:
     """Test that load_strategy must be a valid Literal."""
-    with pytest.raises(ValidationError):
+    with pytest.raises(ValidationError, match=r"Input should be 'lazy_eval', 'eager_mount' or 'ephemeral'"):
         SemanticToolchain(
             macro_intent_hash="0x1111",
             discovered_tool_uris=[],
             similarity_threshold=0.5,
-            load_strategy="invalid_strategy",
+            load_strategy="invalid_strategy",  # type: ignore[arg-type]
         )
