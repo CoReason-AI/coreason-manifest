@@ -140,28 +140,74 @@ class BaseTopology(CoreasonModel):
     topology_type: str
 
 
-class DAGTopology(BaseTopology):
-    """A strict sequential/branching pipeline enforcing a Directed Acyclic Graph."""
+class ExplicitGraphTopology(BaseTopology):
+    """Intermediate boundary for topologies that rely on explicit node-to-node edges."""
 
-    topology_type: Literal["dag"] = "dag"
     nodes: dict[str, AnyNode]
     edges: list[Edge]
     entry_point: NodeID | None = None
 
     @model_validator(mode="after")
-    def validate_dag_structure(self) -> "DAGTopology":
-        """
-        Utilizes Kahn's Algorithm (iterative topological sort) for cycle detection to guarantee memory
-        safety and prevent RecursionErrors on massively deep graphs.
-        """
+    def validate_structural_integrity(self) -> "ExplicitGraphTopology":
+        """Enforces base structural rules: No empty graphs, no dangling edges, valid entry points."""
         valid_ids = set(self.nodes.keys())
 
+        if not self.nodes:
+            raise ManifestError.critical_halt(
+                code=ManifestErrorCode.VAL_TOPOLOGY_EMPTY,
+                message="Graph must contain at least one node.",
+            )
+
+        seen_ids = set()
+        for key, node in self.nodes.items():
+            if key != node.id:
+                raise ManifestError.critical_halt(
+                    code=ManifestErrorCode.VAL_TOPOLOGY_ID_MISMATCH,
+                    message=f"Routing contradiction: Node dictionary key '{key}' does not match inner ID '{node.id}'.",
+                    context={"dict_key": key, "node_id": node.id},
+                )
+            if node.id in seen_ids:
+                raise ManifestError.critical_halt(
+                    code=ManifestErrorCode.VAL_TOPOLOGY_NODE_ID_COLLISION,
+                    message=f"Internal collision defense: Node ID '{node.id}' appears multiple times.",
+                    context={"node_id": node.id},
+                )
+            seen_ids.add(node.id)
+
+        if self.entry_point and self.entry_point not in valid_ids:
+            raise ManifestError.critical_halt(
+                code=ManifestErrorCode.VAL_TOPOLOGY_MISSING_ENTRY,
+                message=f"Entry point '{self.entry_point}' not found in nodes.",
+            )
+
+        for edge in self.edges:
+            if edge.from_node not in valid_ids:
+                raise ManifestError.critical_halt(
+                    code=ManifestErrorCode.VAL_TOPOLOGY_DANGLING_EDGE,
+                    message=f"Source '{edge.from_node}' not found in graph nodes.",
+                )
+            if edge.to_node not in valid_ids:
+                raise ManifestError.critical_halt(
+                    code=ManifestErrorCode.VAL_TOPOLOGY_DANGLING_EDGE,
+                    message=f"Target '{edge.to_node}' not found in graph nodes.",
+                )
+        return self
+
+
+class DAGTopology(ExplicitGraphTopology):
+    """A strict sequential/branching pipeline enforcing a Directed Acyclic Graph."""
+
+    topology_type: Literal["dag"] = "dag"
+
+    @model_validator(mode="after")
+    def validate_dag_structure(self) -> "DAGTopology":
+        """Utilizes Kahn's Algorithm for strict cycle detection."""
+        valid_ids = set(self.nodes.keys())
         adj_map: dict[str, set[str]] = {n: set() for n in valid_ids}
         in_degree: dict[str, int] = dict.fromkeys(valid_ids, 0)
 
         for edge in self.edges:
-            if edge.from_node in valid_ids and edge.to_node in valid_ids:
-                adj_map[edge.from_node].add(edge.to_node)
+            adj_map[edge.from_node].add(edge.to_node)
 
         for neighbors in adj_map.values():
             for neighbor in neighbors:
@@ -187,13 +233,10 @@ class DAGTopology(BaseTopology):
         return self
 
 
-class DCGTopology(BaseTopology):
+class DCGTopology(ExplicitGraphTopology):
     """A Directed Cyclic Graph for ReAct loops and reflection, explicitly allowing cycles."""
 
     topology_type: Literal["dcg"] = "dcg"
-    nodes: dict[str, AnyNode]
-    edges: list[Edge]
-    entry_point: NodeID | None = None
     max_iterations: int = Field(default=10, description="Circuit breaker for maximum loop iterations.")
 
 
