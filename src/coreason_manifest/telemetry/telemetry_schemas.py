@@ -1,16 +1,16 @@
 from datetime import UTC, datetime
 from enum import StrEnum
-from typing import Annotated, Any, ClassVar, Literal
+from typing import Any, ClassVar, Literal
 from uuid import uuid4
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import Field, model_validator
 
-from coreason_manifest.core.common.base import CoreasonModel
+from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.core.common.exceptions import ManifestError, ManifestErrorCode
 from coreason_manifest.workflow.exceptions import LineageIntegrityError
 
 
-class HardwareFingerprint(CoreasonModel):
+class HardwareFingerprint(CoreasonBaseModel):
     """
     Hardware characteristics used to fingerprint the specific GPU/Compute node
     running the inference. Critical for epistemic custody tracing.
@@ -21,7 +21,7 @@ class HardwareFingerprint(CoreasonModel):
     vram_allocated: int = Field(..., description="VRAM allocated for the model in megabytes.")
 
 
-class AgentSignature(CoreasonModel):
+class AgentSignature(CoreasonBaseModel):
     """
     Software and runtime parameters used to fingerprint the specific LLM agent
     instance generating the epistemic event.
@@ -34,7 +34,7 @@ class AgentSignature(CoreasonModel):
     inference_engine: str = Field(..., description="Engine used for inference (e.g., vLLM, llama.cpp).")
 
 
-class CryptographicSignature(CoreasonModel):
+class CryptographicSignature(CoreasonBaseModel):
     """
     Standard definition for a cryptographic signature proving origin and integrity.
     """
@@ -57,22 +57,19 @@ class NodeState(StrEnum):
     CANCELLED = "CANCELLED"
 
 
-class NodeExecution(CoreasonModel):
+class NodeExecution(CoreasonBaseModel):
     """
     Telemetry record for a single node execution attempt.
     Includes Veritas integrity fields for cryptographic chaining.
-    Inherits CoreasonModel.
     """
 
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-
-    node_id: str
-    state: NodeState
-    inputs: dict[str, Any]
-    outputs: dict[str, Any]
-    error: str | None = None
-    timestamp: datetime
-    duration_ms: float
+    node_id: str = Field(..., description="ID of the executed node.")
+    state: NodeState = Field(..., description="Final state of the node execution.")
+    inputs: dict[str, Any] = Field(..., description="Inputs provided to the node.")
+    outputs: dict[str, Any] = Field(..., description="Outputs produced by the node.")
+    error: str | None = Field(default=None, description="Error message, if any.")
+    timestamp: datetime = Field(..., description="Timestamp of the execution.")
+    duration_ms: float = Field(..., description="Duration of the execution in milliseconds.")
     attributes: dict[str, str | int | float | bool] = Field(default_factory=dict)
 
     # --- TRACE CONTEXT (Standard Telemetry) ---
@@ -89,7 +86,7 @@ class NodeExecution(CoreasonModel):
 
     # --- VERITAS INTEGRITY RESTORATION ---
     hash_version: Literal["v2"] = Field(default="v2", description="Cryptographic hashing protocol version.")
-    execution_hash: Annotated[str | None, Field(description="SHA-256 hash of inputs+outputs+config.")] = None
+    execution_hash: str | None = Field(default=None, description="SHA-256 hash of inputs+outputs+config.")
 
     # Topology: Support both Linear (parent_hash) and DAG (parent_hashes)
     parent_hash: str | None = Field(default=None, description="Hash of the single parent execution (Linear).")
@@ -140,7 +137,7 @@ class NodeExecution(CoreasonModel):
         return data
 
     @model_validator(mode="after")
-    def validate_trace_integrity(self) -> "NodeExecution":
+    def validate_trace_integrity(self) -> NodeExecution:
         """Enforce strict trace integrity and lineage validity.
 
         Raises:
@@ -162,13 +159,11 @@ class NodeExecution(CoreasonModel):
         return self
 
 
-class HumanSteeringEvent(CoreasonModel):
+class HumanSteeringEvent(CoreasonBaseModel):
     """
     Records a state mutation injected by a human (Time Travel/Steering).
     Used to preserve the Merkle execution trace when state is altered mid-flight.
     """
-
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     checkpoint_id: str = Field(..., description="Unique ID for this checkpoint.")
     timestamp: datetime = Field(..., description="When the mutation occurred.")
@@ -176,14 +171,12 @@ class HumanSteeringEvent(CoreasonModel):
     human_identity: str = Field(..., description="ID/Email of the human operator.")
 
 
-class MemoryMutationEvent(CoreasonModel):
+class MemoryMutationEvent(CoreasonBaseModel):
     """
     Telemetry record for memory mutations (ADD, UPDATE, DELETE, EVICT, CONSOLIDATE)
     within the 4-tier memory subsystem. Ensures the Merkle DAG lineage isn't broken
     by implicit state changes.
     """
-
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     request_id: str | None = Field(
         default_factory=lambda: str(uuid4()), description="Unique ID for this mutation event."
@@ -209,13 +202,13 @@ class MemoryMutationEvent(CoreasonModel):
 
     # --- VERITAS INTEGRITY RESTORATION ---
     hash_version: Literal["v2"] = Field(default="v2", description="Cryptographic hashing protocol version.")
-    mutation_hash: Annotated[str | None, Field(description="SHA-256 hash of the mutation payload.")] = None
+    mutation_hash: str | None = Field(default=None, description="SHA-256 hash of the mutation payload.")
     parent_hash: str | None = Field(default=None, description="Hash of the preceding execution state.")
 
     _hash_exclude_: ClassVar[set[str]] = {"mutation_hash"}
 
     @model_validator(mode="after")
-    def validate_trace_integrity(self) -> "MemoryMutationEvent":
+    def validate_trace_integrity(self) -> MemoryMutationEvent:
         """Enforce strict trace integrity and lineage validity.
 
         Raises:
@@ -237,29 +230,25 @@ class MemoryMutationEvent(CoreasonModel):
         return self
 
 
-class ExecutionSnapshot(BaseModel):
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-
-    node_states: dict[str, NodeState]
-    active_path: list[str]
+class ExecutionSnapshot(CoreasonBaseModel):
+    node_states: dict[str, NodeState] = Field(..., description="Current states of all nodes in the snapshot.")
+    active_path: list[str] = Field(..., description="List of node IDs in the active execution path.")
 
 
-class SecurityViolationEvent(CoreasonModel):
+class SecurityViolationEvent(CoreasonBaseModel):
     """
     SIEM-Native Security Alerting Contract.
     Emitted when the identity middleware detects malicious activity or strict policy breaches.
     """
 
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-
     # Event Classification
     event_type: Literal[
         "invalid_signature",
         "expired_token",
-        "ssrf_attempt",  # Blocked attempt to query internal/malicious IdP URIs
-        "jwks_rate_limit_exceeded",  # Potential DoS attack via forced key refreshes
-        "issuer_mismatch",  # Token issuer does not match trusted authorities
-        "insufficient_scope",  # Token lacks the required capability bounds
+        "ssrf_attempt",
+        "jwks_rate_limit_exceeded",
+        "issuer_mismatch",
+        "insufficient_scope",
     ] = Field(..., description="Machine-readable taxonomy of the security violation.")
 
     severity: Literal["low", "medium", "high", "critical"] = Field(
@@ -279,13 +268,11 @@ class SecurityViolationEvent(CoreasonModel):
     )
 
 
-class AuthLifecycleEvent(CoreasonModel):
+class AuthLifecycleEvent(CoreasonBaseModel):
     """
     Zero-Knowledge Identity Telemetry.
     Tracks authentication state changes strictly without leaking PII.
     """
-
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     request_id: str | None = Field(default_factory=lambda: str(uuid4()))
     parent_request_id: str | None = None
@@ -308,7 +295,7 @@ class AuthLifecycleEvent(CoreasonModel):
     trace_id: str | None = Field(None, description="W3C traceparent ID linking to the agent execution.")
 
     @model_validator(mode="after")
-    def validate_trace_integrity(self) -> "AuthLifecycleEvent":
+    def validate_trace_integrity(self) -> AuthLifecycleEvent:
         """Enforce strict trace integrity and lineage validity.
 
         Raises:

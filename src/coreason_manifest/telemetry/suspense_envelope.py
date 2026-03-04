@@ -9,9 +9,9 @@ from coreason_manifest.telemetry.telemetry_schemas import AgentSignature, Hardwa
 
 
 class StreamSuspenseEnvelope(BaseEnvelope):
-    op: Literal["suspense_mount"]
-    p: SuspenseConfig
-    target_node_id: str | None = None
+    op: Literal["suspense_mount"] = Field("suspense_mount", description="Discriminator field.")
+    p: SuspenseConfig = Field(..., description="Suspense config payload.")
+    target_node_id: str | None = Field(default=None, description="Optional target node ID.")
     hardware_fingerprint: HardwareFingerprint | None = Field(default=None, description="Hardware fingerprint.")
     agent_signature: AgentSignature | None = Field(default=None, description="Agent footprint.")
     ledger_history_snapshot: list[EpistemicEvent] = Field(

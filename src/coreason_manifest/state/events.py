@@ -2,11 +2,12 @@ from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Annotated, Any, Literal, Protocol, runtime_checkable
 
-from pydantic import ConfigDict, Field, model_validator
+from pydantic import Field, model_validator
 
-from coreason_manifest.core.common.base import CoreasonModel
+from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.core.primitives.types import GitSHA
 from coreason_manifest.core.primitives.wasm_types import WasiCapability
+from coreason_manifest.state.persistence import JSONPatchOperation
 
 
 @runtime_checkable
@@ -33,7 +34,17 @@ class EventType(StrEnum):
     # Other event types can be added here
 
 
-class LegacyPayload(CoreasonModel):
+class StateRewindRequest(CoreasonBaseModel):
+    """
+    Contract for rewinding state.
+    """
+
+    original_state: dict[str, Any] = Field(..., description="The original state to reverse patches from.")
+    patches: list[JSONPatchOperation] = Field(..., description="The patches to reverse.")
+    trace_id: str | None = Field(default=None, description="The trace ID.")
+
+
+class LegacyPayload(CoreasonBaseModel):
     """
     Temporary bounded recursive wrapper for unstructured JSON values.
     """
@@ -42,7 +53,7 @@ class LegacyPayload(CoreasonModel):
     data: dict[str, Any] = Field(default_factory=dict, description="Arbitrary unstructured data.")
 
 
-class GraphRetrievalTrace(CoreasonModel):
+class GraphRetrievalTrace(CoreasonBaseModel):
     """
     A cryptographic trace linking a semantic traversal request to its topological response.
     """
@@ -54,12 +65,10 @@ class GraphRetrievalTrace(CoreasonModel):
     edges_retrieved_count: int = Field(..., description="Number of edges returned.")
 
 
-class WasmExecutionTrace(CoreasonModel):
+class WasmExecutionTrace(CoreasonBaseModel):
     """
     A cryptographic trace recording the exact deterministic outcome of external Wasm execution.
     """
-
-    model_config = ConfigDict(extra="forbid")
 
     trace_type: Literal["wasm_execution"] = Field("wasm_execution", description="Tagged union discriminator.")
     executed_module_hash: GitSHA = Field(..., description="SHA-256 hash or Git SHA of the executed module.")
@@ -70,7 +79,7 @@ class WasmExecutionTrace(CoreasonModel):
     output_payload_hash: str = Field(..., description="SHA-256 hash of the output payload.")
 
 
-class EpistemicAnchor(CoreasonModel):
+class EpistemicAnchor(CoreasonBaseModel):
     """
     A reference to maintain the Chain of Custody.
     """
@@ -83,7 +92,7 @@ class EpistemicAnchor(CoreasonModel):
     )
 
 
-class EpistemicEvent(CoreasonModel):
+class EpistemicEvent(CoreasonBaseModel):
     """
     An immutable event appended to the ledger representing a state mutation.
     """
@@ -103,7 +112,7 @@ class EpistemicEvent(CoreasonModel):
     )
 
     @model_validator(mode="after")
-    def validate_utc(self) -> "EpistemicEvent":
+    def validate_utc(self) -> EpistemicEvent:
         """Ensure the timestamp is UTC."""
         if self.timestamp.tzinfo is None or self.timestamp.tzinfo != UTC:
             # We enforce UTC strictly for the distributed ledger
