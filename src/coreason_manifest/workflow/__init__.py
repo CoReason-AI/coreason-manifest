@@ -1,7 +1,7 @@
 from coreason_manifest.workflow.bidding import Bid, yield_to_suspense
 from coreason_manifest.workflow.blackboard import BlackboardBrokerConfig
 from coreason_manifest.workflow.exceptions import LineageIntegrityError
-from coreason_manifest.workflow.flow import Blackboard, Edge, WorkflowEnvelope
+from coreason_manifest.workflow.flow import Blackboard, Edge, MCPServerExport, WorkflowEnvelope
 from coreason_manifest.workflow.nodes import (
     AgentNode,
     AnyNode,
@@ -35,6 +35,7 @@ __all__ = [
     "InspectorNode",
     "InspectorNodeBase",
     "LineageIntegrityError",
+    "MCPServerExport",
     "Node",
     "PlaceholderNode",
     "PlannerNode",

@@ -4,6 +4,7 @@ from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from coreason_manifest.adapters.mcp.server import MCPPromptRef
 from coreason_manifest.compute.reasoning import FastPath, ReasoningConfig
 from coreason_manifest.core.common.base import CoreasonModel
 from coreason_manifest.core.common.semantic import SemanticRef
@@ -13,20 +14,6 @@ from coreason_manifest.oversight.intervention import EscalationCriteria
 from coreason_manifest.state.memory import MemorySubsystem
 
 from .base import Node
-
-
-class MCPPromptRef(CoreasonModel):
-    """Reference to a remote prompt via the Model Context Protocol (MCP)."""
-
-    server_id: str = Field(..., description="The ID of the MCP server to connect to.")
-    prompt_name: str = Field(..., description="The exact semantic identifier on the remote server.")
-    arguments: dict[str, Any] = Field(
-        default_factory=dict, description="Variables to inject into the remote prompt template."
-    )
-    fallback_persona: str | None = Field(None, description="Optional static fallback string if the server times out.")
-    prompt_hash: str | None = Field(
-        None, description="Optional SHA-256 hash to cryptographically pin the remote prompt."
-    )
 
 
 class CognitiveProfile(CoreasonModel):

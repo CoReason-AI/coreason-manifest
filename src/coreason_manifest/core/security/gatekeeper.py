@@ -150,27 +150,13 @@ def _check_domain_whitelist(flow: WorkflowEnvelope, tool_map: dict[str, AnyTool]
                 )
 
     # EPIC 4: Zero-Trust MCP Egress Validation
-    mcp_clients = getattr(flow, "mcp_clients", [])
-    if isinstance(mcp_clients, dict):
-        mcp_clients = list(mcp_clients.values())
-
-    for client in mcp_clients:
-        transport = getattr(client, "transport", None)
-        if not transport:
+    for idx, client in enumerate(flow.mcp_clients):
+        if not client.transport:
             continue
 
-        t_type = getattr(transport, "type", "")
-        if t_type == "sse":
-            uri = getattr(transport, "uri", None)
-            if uri:
-                # uri could be a Pydantic HttpUrl or a string
-                host = getattr(uri, "host", None)
-                if not host:
-                    from urllib.parse import urlparse
-
-                    parsed = urlparse(str(uri))
-                    host = parsed.hostname
-
+        if client.transport.type == "sse":
+            if client.transport.uri:
+                host = client.transport.uri.host
                 if host:
                     domain = canonicalize_domain(str(host))
                     allowed = False
@@ -198,8 +184,8 @@ def _check_domain_whitelist(flow: WorkflowEnvelope, tool_map: dict[str, AnyTool]
                                 ),
                             )
                         )
-        elif t_type == "stdio":
-            command = getattr(transport, "command", "")
+        elif client.transport.type == "stdio":
+            command = client.transport.command
             if command in ["bash", "sh", "cmd", "powershell"]:
                 client_name = getattr(client, "name", "unknown_mcp_client")
                 logger.warning("mcp_stdio_unsafe", client_name=client_name, command=command)
@@ -212,7 +198,7 @@ def _check_domain_whitelist(flow: WorkflowEnvelope, tool_map: dict[str, AnyTool]
                         remediation=RemediationAction(
                             type="prune_mcp_client",
                             format="json_patch",
-                            patch_data=[{"op": "remove", "path": f"/mcp_clients/{client_name}"}],
+                            patch_data=[{"op": "remove", "path": f"/mcp_clients/{idx}"}],
                             description=f"Remove unsafe MCP client '{client_name}'",
                         ),
                     )
@@ -1154,12 +1140,7 @@ def _enforce_red_button_rule(flow: WorkflowEnvelope) -> list[ComplianceReport]:
     """
     reports: list[ComplianceReport] = []
 
-    mcp_export = getattr(flow, "mcp_export", None)
-    if not mcp_export:
-        return reports
-
-    is_exported = getattr(mcp_export, "expose_as_tool", False)
-    if not is_exported:
+    if not flow.mcp_export or not flow.mcp_export.expose_as_tool:
         return reports
 
     nodes, _ = get_unified_topology(flow)
