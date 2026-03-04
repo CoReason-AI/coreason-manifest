@@ -5,7 +5,7 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
-from coreason_manifest.adapters.mcp.server import (
+from coreason_manifest.adapters.mcp.schemas import (
     MCPPromptRef,
     MCPResourceList,
     MCPServerConfig,

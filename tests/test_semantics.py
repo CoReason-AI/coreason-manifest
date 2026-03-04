@@ -59,13 +59,13 @@ def test_pydantic_field_descriptions() -> None:
                     if isinstance(body_item, ast.AnnAssign):
                         # It's a typed class attribute
                         # We need to ensure the value is a call to Field
+                        target_id = getattr(body_item.target, "id", "unknown")
                         assert body_item.value is not None, (
-                            f"Class attribute '{body_item.target.id}' in '{node.name}' ({py_file}) "
+                            f"Class attribute '{target_id}' in '{node.name}' ({py_file}) "
                             f"must be explicitly assigned a Field(...)."
                         )
                         assert isinstance(body_item.value, ast.Call), (
-                            f"Class attribute '{body_item.target.id}' in '{node.name}' ({py_file}) "
-                            f"must be a call to Field(...)."
+                            f"Class attribute '{target_id}' in '{node.name}' ({py_file}) must be a call to Field(...)."
                         )
                         func = body_item.value.func
                         if isinstance(func, ast.Name):
@@ -76,13 +76,13 @@ def test_pydantic_field_descriptions() -> None:
                             func_name = ""
 
                         assert func_name == "Field", (
-                            f"Class attribute '{body_item.target.id}' in '{node.name}' ({py_file}) "
+                            f"Class attribute '{target_id}' in '{node.name}' ({py_file}) "
                             f"must be initialized with Field(...)."
                         )
 
                         # Check that 'description' is in keywords
                         has_description = any(kw.arg == "description" for kw in body_item.value.keywords)
                         assert has_description, (
-                            f"Class attribute '{body_item.target.id}' in '{node.name}' ({py_file}) "
+                            f"Class attribute '{target_id}' in '{node.name}' ({py_file}) "
                             f"must have a 'description' kwarg in Field(...)."
                         )
