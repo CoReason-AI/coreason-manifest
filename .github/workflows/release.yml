@@ -2,28 +2,15 @@ name: Release
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - 'v*.*.*'
 
 permissions:
   contents: write
-  pull-requests: write
-  id-token: write # Required for PyPI OIDC Trusted Publishing
+  id-token: write # Required for PyPI OIDC Trusted Publishing and Sigstore
 
 jobs:
-  release-please:
-    runs-on: ubuntu-latest
-    outputs:
-      release_created: ${{ steps.release.outputs.release_created }}
-    steps:
-      - uses: google-github-actions/release-please-action@v4
-        id: release
-        with:
-          release-type: python
-
-  publish:
-    needs: release-please
-    if: ${{ needs.release-please.outputs.release_created }}
+  release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -32,9 +19,42 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
+          python-version: "3.14"
 
-      - name: Build Wheel
+      - name: Install dependencies
+        run: uv sync --all-extras --dev
+
+      - name: Export JSON Schema
+        run: uv run coreason-export
+
+      - name: Build Artifacts
         run: uv build
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          format: spdx-json
+          output-file: sbom.spdx.json
+
+      - name: Sign Wheel
+        uses: sigstore/gh-action-sigstore-python@v3.0.0
+        with:
+          inputs: >-
+            dist/*.whl
+            dist/*.tar.gz
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*.whl
+            dist/*.tar.gz
+            dist/*.whl.sig
+            dist/*.tar.gz.sig
+            dist/*.whl.crt
+            dist/*.tar.gz.crt
+            coreason_ontology.schema.json
+            sbom.spdx.json
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
