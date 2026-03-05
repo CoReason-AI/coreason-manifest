@@ -42,11 +42,13 @@ def test_fallback_sla_rejects_non_positive_timeout(timeout_seconds: int) -> None
 @given(forbidden_intents=st.lists(st.just(""), min_size=1))
 def test_constitutional_rule_rejects_empty_strings(forbidden_intents: list[str]) -> None:
     with pytest.raises(ValidationError):
-        ConstitutionalRule(
-            rule_id="rule-1",
-            description="desc",
-            severity="critical",
-            forbidden_intents=forbidden_intents,
+        ConstitutionalRule.model_validate(
+            {
+                "rule_id": "rule-1",
+                "description": "desc",
+                "severity": "critical",
+                "forbidden_intents": forbidden_intents,
+            }
         )
 
 
@@ -55,11 +57,13 @@ def test_constitutional_rule_deduplicates_or_rejects_duplicate_strings(forbidden
     # If using set, Pydantic should deduplicate or raise error if list has duplicates.
     # We test that it's structurally impossible to have duplicates in the model.
     try:
-        rule = ConstitutionalRule(
-            rule_id="rule-2",
-            description="desc",
-            severity="critical",
-            forbidden_intents=forbidden_intents,
+        rule = ConstitutionalRule.model_validate(
+            {
+                "rule_id": "rule-2",
+                "description": "desc",
+                "severity": "critical",
+                "forbidden_intents": forbidden_intents,
+            }
         )
         # If it succeeds, it MUST be deduplicated by Pydantic (converted to set)
         assert len(rule.forbidden_intents) == len(set(forbidden_intents))
