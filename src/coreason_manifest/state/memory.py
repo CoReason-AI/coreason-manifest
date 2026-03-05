@@ -10,6 +10,7 @@ from typing import Self
 from pydantic import Field, model_validator
 
 from coreason_manifest.core.base import CoreasonBaseModel
+from coreason_manifest.state.argumentation import ArgumentGraph
 from coreason_manifest.state.events import AnyStateEvent
 
 
@@ -26,6 +27,10 @@ class WorkingMemorySnapshot(CoreasonBaseModel):
     system_prompt: str = Field(description="The active system prompt guiding the agent's behavior.")
     active_context: dict[str, str] = Field(
         description="A dictionary representing the active context variables for the agent."
+    )
+    argumentation: ArgumentGraph | None = Field(
+        default=None,
+        description="The formal graph of non-monotonic claims and defeasible attacks currently active in the swarm's working memory.",
     )
 
 
