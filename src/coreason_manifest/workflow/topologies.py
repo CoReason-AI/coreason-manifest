@@ -5,13 +5,27 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
-from typing import Annotated, Literal, Self
+from typing import Annotated, Any, Literal, Self
 
 from pydantic import Field, model_validator
 
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.core.primitives import NodeID
 from coreason_manifest.workflow.nodes import AnyNode
+
+
+class StateContract(CoreasonBaseModel):
+    """
+    A strict Cryptographic State Contract (Typed Blackboard) for multi-agent memory sharing.
+    """
+
+    schema_definition: dict[str, Any] = Field(
+        description="A strict JSON Schema dictionary defining the required shape of the shared memory blackboard."
+    )
+    strict_validation: bool = Field(
+        default=True,
+        description="If True, the orchestrator must reject any state mutation that fails the schema definition.",
+    )
 
 
 class DiversityConstraint(CoreasonBaseModel):
@@ -50,6 +64,9 @@ class BaseTopology(CoreasonBaseModel):
     """
 
     nodes: dict[NodeID, AnyNode] = Field(description="Flat registry of all nodes in this topology.")
+    shared_state_contract: StateContract | None = Field(
+        default=None, description="The schema-on-write contract governing the internal state of this topology."
+    )
 
 
 class DAGTopology(BaseTopology):
