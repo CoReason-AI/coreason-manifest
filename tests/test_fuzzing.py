@@ -20,6 +20,7 @@ from coreason_manifest.oversight.resilience import (
 )
 from coreason_manifest.presentation.scivis import AnyPanel, CohortAttritionGrid, InsightCard, TimeSeriesPanel
 from coreason_manifest.state.events import AnyStateEvent, BeliefUpdateEvent, ObservationEvent, SystemFaultEvent
+from coreason_manifest.state.semantic import SemanticEdge, SemanticNode
 from coreason_manifest.testing.chaos import ChaosExperiment
 from coreason_manifest.workflow.nodes import AgentNode, AnyNode, HumanNode, SystemNode
 
@@ -28,6 +29,8 @@ chaos_adapter: TypeAdapter[ChaosExperiment] = TypeAdapter(ChaosExperiment)
 event_adapter: TypeAdapter[AnyStateEvent] = TypeAdapter(AnyStateEvent)
 panel_adapter: TypeAdapter[AnyPanel] = TypeAdapter(AnyPanel)
 resilience_adapter: TypeAdapter[AnyResiliencePayload] = TypeAdapter(AnyResiliencePayload)
+semantic_node_adapter: TypeAdapter[SemanticNode] = TypeAdapter(SemanticNode)
+semantic_edge_adapter: TypeAdapter[SemanticEdge] = TypeAdapter(SemanticEdge)
 
 
 @given(
@@ -232,3 +235,107 @@ def test_chaosexperiment_fuzzing(
     parsed = chaos_adapter.validate_python(payload)
     assert isinstance(parsed, ChaosExperiment)
     assert parsed.experiment_id == experiment_id
+
+
+@given(
+    st.fixed_dictionaries(
+        {
+            "node_id": st.text(),
+            "label": st.text(),
+            "text_chunk": st.text(),
+            "embedding": st.one_of(
+                st.none(),
+                st.fixed_dictionaries(
+                    {
+                        "vector": st.lists(st.floats(allow_nan=False, allow_infinity=False)),
+                        "dimensionality": st.integers(),
+                        "model_name": st.text(),
+                    }
+                ),
+            ),
+            "provenance": st.fixed_dictionaries(
+                {
+                    "extracted_by": st.text(
+                        min_size=1, max_size=128, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
+                    ),
+                    "source_event_id": st.text(),
+                }
+            ),
+            "tier": st.sampled_from(["working", "episodic", "semantic"]),
+            "temporal_bounds": st.one_of(
+                st.none(),
+                st.fixed_dictionaries(
+                    {
+                        "valid_from": st.one_of(st.none(), st.floats(allow_nan=False, allow_infinity=False)),
+                        "valid_to": st.one_of(st.none(), st.floats(allow_nan=False, allow_infinity=False)),
+                        "interval_type": st.one_of(
+                            st.none(),
+                            st.sampled_from(["strictly_precedes", "overlaps", "contains", "causes", "mitigates"]),
+                        ),
+                    }
+                ),
+            ),
+            "salience": st.one_of(
+                st.none(),
+                st.fixed_dictionaries(
+                    {
+                        "baseline_importance": st.floats(allow_nan=False, allow_infinity=False),
+                        "decay_rate": st.floats(allow_nan=False, allow_infinity=False),
+                    }
+                ),
+            ),
+        }
+    )
+)
+def test_semanticnode_fuzzing(payload: dict[str, Any]) -> None:
+    parsed = semantic_node_adapter.validate_python(payload)
+    assert isinstance(parsed, SemanticNode)
+
+
+@given(
+    st.fixed_dictionaries(
+        {
+            "edge_id": st.text(),
+            "subject_node_id": st.text(),
+            "object_node_id": st.text(),
+            "predicate": st.text(),
+            "embedding": st.one_of(
+                st.none(),
+                st.fixed_dictionaries(
+                    {
+                        "vector": st.lists(st.floats(allow_nan=False, allow_infinity=False)),
+                        "dimensionality": st.integers(),
+                        "model_name": st.text(),
+                    }
+                ),
+            ),
+            "provenance": st.one_of(
+                st.none(),
+                st.fixed_dictionaries(
+                    {
+                        "extracted_by": st.text(
+                            min_size=1, max_size=128, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
+                        ),
+                        "source_event_id": st.text(),
+                    }
+                ),
+            ),
+            "temporal_bounds": st.one_of(
+                st.none(),
+                st.fixed_dictionaries(
+                    {
+                        "valid_from": st.one_of(st.none(), st.floats(allow_nan=False, allow_infinity=False)),
+                        "valid_to": st.one_of(st.none(), st.floats(allow_nan=False, allow_infinity=False)),
+                        "interval_type": st.one_of(
+                            st.none(),
+                            st.sampled_from(["strictly_precedes", "overlaps", "contains", "causes", "mitigates"]),
+                        ),
+                    }
+                ),
+            ),
+        }
+    )
+)
+def test_semanticedge_fuzzing(payload: dict[str, Any]) -> None:
+    parsed = semantic_edge_adapter.validate_python(payload)
+    assert isinstance(parsed, SemanticEdge)

@@ -14,7 +14,18 @@ from coreason_manifest.oversight import (
     ConstitutionalRule,
     GovernancePolicy,
 )
-from coreason_manifest.state import EpistemicLedger, WorkingMemorySnapshot
+from coreason_manifest.state import (
+    CausalInterval,
+    EpistemicLedger,
+    MemoryProvenance,
+    MemoryTier,
+    SalienceProfile,
+    SemanticEdge,
+    SemanticNode,
+    TemporalBounds,
+    VectorEmbedding,
+    WorkingMemorySnapshot,
+)
 from coreason_manifest.telemetry import LogEnvelope, SpanTrace
 from coreason_manifest.testing.chaos import ChaosExperiment, FaultInjectionProfile, FaultType, SteadyStateHypothesis
 from coreason_manifest.testing.red_team import AdversaryProfile, AiTMStrategy, AttackVector
@@ -27,6 +38,7 @@ __all__ = [
     "AnyInterventionPayload",
     "AnyResiliencePayload",
     "AttackVector",
+    "CausalInterval",
     "ChaosExperiment",
     "ConstitutionalRule",
     "CoreasonBaseModel",
@@ -35,12 +47,19 @@ __all__ = [
     "FaultType",
     "GovernancePolicy",
     "LogEnvelope",
+    "MemoryProvenance",
+    "MemoryTier",
     "ModelProfile",
     "NodeID",
     "RateCard",
+    "SalienceProfile",
+    "SemanticEdge",
+    "SemanticNode",
     "SemanticVersion",
     "SpanTrace",
     "SteadyStateHypothesis",
+    "TemporalBounds",
+    "VectorEmbedding",
     "WorkflowEnvelope",
     "WorkingMemorySnapshot",
 ]
