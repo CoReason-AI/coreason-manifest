@@ -31,7 +31,7 @@ from coreason_manifest.workflow.topologies import StateContract
 
 @st.composite
 def draw_reflex_policy(draw: Any) -> dict[str, Any]:
-    return draw(
+    res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
                 "confidence_threshold": st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False),
@@ -39,11 +39,12 @@ def draw_reflex_policy(draw: Any) -> dict[str, Any]:
             }
         )
     )
+    return res
 
 
 @st.composite
 def draw_epistemic_policy(draw: Any) -> dict[str, Any]:
-    return draw(
+    res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
                 "active": st.booleans(),
@@ -52,11 +53,12 @@ def draw_epistemic_policy(draw: Any) -> dict[str, Any]:
             }
         )
     )
+    return res
 
 
 @st.composite
 def draw_correction_policy(draw: Any) -> dict[str, Any]:
-    return draw(
+    res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
                 "max_loops": st.integers(min_value=0, max_value=50),
@@ -64,11 +66,12 @@ def draw_correction_policy(draw: Any) -> dict[str, Any]:
             }
         )
     )
+    return res
 
 
 @st.composite
 def draw_intervention_policy(draw: Any) -> dict[str, Any]:
-    return draw(
+    res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
                 "trigger": st.sampled_from(
@@ -96,6 +99,7 @@ def draw_intervention_policy(draw: Any) -> dict[str, Any]:
             }
         )
     )
+    return res
 
 
 @st.composite
