@@ -2,8 +2,6 @@ name: CI
 
 on:
   push:
-    branches:
-      - main
   pull_request:
 
 jobs:
@@ -106,14 +104,13 @@ jobs:
       - name: Prompt/Template Fuzzing
         run: uv run scripts/llm_fuzz.py
 
-  test:
-    name: Python ${{ matrix.python-version }} on ${{ matrix.os }}
+  test-ubuntu:
+    name: Test (Ubuntu) - Python ${{ matrix.python-version }}
     needs: [lint-and-audit, schema-contracts]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
         python-version: ["3.14", "3.14t"]
 
     steps:
@@ -141,9 +138,45 @@ jobs:
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
 
+  test-extended:
+    name: Python ${{ matrix.python-version }} on ${{ matrix.os }}
+    needs: test-ubuntu
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+        python-version: ["3.14", "3.14t"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: uv sync --all-extras --dev
+
+      - name: Set PYTHON_GIL for Free-Threading
+        if: matrix.python-version == '3.14t'
+        shell: bash
+        run: echo "PYTHON_GIL=0" >> $GITHUB_ENV
+
+      - name: Pytest
+        run: uv run pytest tests/ --cov=coreason_manifest --cov-report=xml --cov-fail-under=95
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+
   reproducible-builds:
     name: Reproducible Builds (Determinism Verification)
-    needs: test
+    needs: [test-ubuntu, test-extended]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
