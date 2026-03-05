@@ -13,6 +13,7 @@ from hypothesis import strategies as st
 from pydantic import TypeAdapter, ValidationError
 
 from coreason_manifest.oversight.governance import GlobalGovernance
+from coreason_manifest.oversight.intervention import InterventionPolicy
 from coreason_manifest.oversight.resilience import (
     AnyResiliencePayload,
     CircuitBreakerTrip,
@@ -36,6 +37,7 @@ panel_adapter: TypeAdapter[AnyPanel] = TypeAdapter(AnyPanel)
 resilience_adapter: TypeAdapter[AnyResiliencePayload] = TypeAdapter(AnyResiliencePayload)
 global_governance_adapter: TypeAdapter[GlobalGovernance] = TypeAdapter(GlobalGovernance)
 state_contract_adapter: TypeAdapter[StateContract] = TypeAdapter(StateContract)
+intervention_policy_adapter: TypeAdapter[InterventionPolicy] = TypeAdapter(InterventionPolicy)
 
 
 @given(
@@ -70,6 +72,37 @@ state_contract_adapter: TypeAdapter[StateContract] = TypeAdapter(StateContract)
             }
         ),
     ),
+    st.one_of(
+        st.none(),
+        st.lists(
+            st.fixed_dictionaries(
+                {
+                    "trigger": st.sampled_from(
+                        [
+                            "on_start",
+                            "on_node_transition",
+                            "before_tool_execution",
+                            "on_failure",
+                            "on_consensus_reached",
+                            "on_max_loops_reached",
+                        ]
+                    ),
+                    "blocking": st.booleans(),
+                    "scope": st.one_of(
+                        st.none(),
+                        st.fixed_dictionaries(
+                            {
+                                "allowed_fields": st.lists(st.text()),
+                                "json_schema_whitelist": st.dictionaries(
+                                    st.text(), st.one_of(st.text(), st.integers(), st.booleans())
+                                ),
+                            }
+                        ),
+                    ),
+                }
+            )
+        ),
+    ),
 )
 def test_anynode_routing(
     node_type: str,
@@ -78,8 +111,12 @@ def test_anynode_routing(
     reflex_policy: dict[str, Any] | None,
     epistemic_policy: dict[str, Any] | None,
     correction_policy: dict[str, Any] | None,
+    intervention_policies: list[dict[str, Any]] | None,
 ) -> None:
     payload: dict[str, Any] = {"type": node_type, "description": description}
+    if intervention_policies is not None:
+        payload["intervention_policies"] = intervention_policies
+
     if node_type == "agent":
         if action_space_id is not None:
             payload["action_space_id"] = action_space_id

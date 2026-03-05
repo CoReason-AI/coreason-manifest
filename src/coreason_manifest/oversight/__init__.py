@@ -11,8 +11,10 @@ from .intervention import (
     AnyInterventionPayload,
     BoundedInterventionScope,
     FallbackSLA,
+    InterventionPolicy,
     InterventionRequest,
     InterventionVerdict,
+    LifecycleTrigger,
 )
 from .resilience import AnyResiliencePayload, CircuitBreakerTrip, FallbackTrigger, QuarantineOrder
 
@@ -29,7 +31,9 @@ __all__ = [
     "GlobalGovernance",
     "GovernancePolicy",
     "GradingCriteria",
+    "InterventionPolicy",
     "InterventionRequest",
     "InterventionVerdict",
+    "LifecycleTrigger",
     "QuarantineOrder",
 ]

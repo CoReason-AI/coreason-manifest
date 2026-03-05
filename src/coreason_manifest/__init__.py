@@ -14,6 +14,8 @@ from coreason_manifest.oversight import (
     ConstitutionalRule,
     GlobalGovernance,
     GovernancePolicy,
+    InterventionPolicy,
+    LifecycleTrigger,
 )
 from coreason_manifest.state import (
     CausalInterval,
@@ -59,6 +61,8 @@ __all__ = [
     "FaultType",
     "GlobalGovernance",
     "GovernancePolicy",
+    "InterventionPolicy",
+    "LifecycleTrigger",
     "LogEnvelope",
     "MCPClientBinding",
     "MCPTransport",
