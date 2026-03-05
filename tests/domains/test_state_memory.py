@@ -21,10 +21,9 @@ def state_event_strategy(draw: st.DrawFn) -> AnyStateEvent:
 
     if event_type == "observation":
         return ObservationEvent(event_id=event_id, timestamp=timestamp, type="observation")
-    elif event_type == "belief_update":
+    if event_type == "belief_update":
         return BeliefUpdateEvent(event_id=event_id, timestamp=timestamp, type="belief_update")
-    else:
-        return SystemFaultEvent(event_id=event_id, timestamp=timestamp, type="system_fault")
+    return SystemFaultEvent(event_id=event_id, timestamp=timestamp, type="system_fault")
 
 
 @given(st.lists(state_event_strategy(), min_size=1, max_size=100))
