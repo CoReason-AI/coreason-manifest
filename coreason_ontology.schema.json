@@ -1061,6 +1061,22 @@
           },
           "title": "History",
           "type": "array"
+        },
+        "checkpoints": {
+          "description": "Hard temporal anchors allowing O(1) state restoration.",
+          "items": {
+            "$ref": "#/$defs/TemporalCheckpoint"
+          },
+          "title": "Checkpoints",
+          "type": "array"
+        },
+        "active_rollbacks": {
+          "description": "Causal invalidations actively enforced on the execution tree.",
+          "items": {
+            "$ref": "#/$defs/RollbackRequest"
+          },
+          "title": "Active Rollbacks",
+          "type": "array"
         }
       },
       "required": [
@@ -1828,6 +1844,17 @@
       "title": "ObservationEvent",
       "type": "object"
     },
+    "PatchOperation": {
+      "enum": [
+        "add",
+        "remove",
+        "replace",
+        "copy",
+        "move",
+        "test"
+      ],
+      "type": "string"
+    },
     "PermissionBoundary": {
       "additionalProperties": false,
       "description": "Zero-trust security boundaries for tool execution.",
@@ -1974,6 +2001,35 @@
         "action"
       ],
       "title": "RedactionRule",
+      "type": "object"
+    },
+    "RollbackRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "request_id": {
+          "description": "Unique identifier for the causal rollback operation.",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "target_event_id": {
+          "description": "The ID of the corrupted event in the EpistemicLedger to revert to.",
+          "title": "Target Event Id",
+          "type": "string"
+        },
+        "invalidated_node_ids": {
+          "description": "A list of nodes whose operational histories are causally tainted and must be flushed.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Invalidated Node Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "request_id",
+        "target_event_id"
+      ],
+      "title": "RollbackRequest",
       "type": "object"
     },
     "SalienceProfile": {
@@ -2288,6 +2344,60 @@
         "schema_definition"
       ],
       "title": "StateContract",
+      "type": "object"
+    },
+    "StateDiff": {
+      "additionalProperties": false,
+      "properties": {
+        "diff_id": {
+          "description": "Unique identifier for this state differential.",
+          "title": "Diff Id",
+          "type": "string"
+        },
+        "patches": {
+          "description": "The exact, ordered sequence of operations to apply.",
+          "items": {
+            "$ref": "#/$defs/StatePatch"
+          },
+          "title": "Patches",
+          "type": "array"
+        }
+      },
+      "required": [
+        "diff_id"
+      ],
+      "title": "StateDiff",
+      "type": "object"
+    },
+    "StatePatch": {
+      "additionalProperties": false,
+      "properties": {
+        "op": {
+          "$ref": "#/$defs/PatchOperation",
+          "description": "The strict RFC 6902 JSON Patch operation."
+        },
+        "path": {
+          "description": "The JSON pointer indicating the exact state vector to mutate.",
+          "title": "Path",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The payload to insert or test, if applicable.",
+          "title": "Value"
+        }
+      },
+      "required": [
+        "op",
+        "path"
+      ],
+      "title": "StatePatch",
       "type": "object"
     },
     "SteadyStateHypothesis": {
@@ -2620,6 +2730,33 @@
         }
       },
       "title": "TemporalBounds",
+      "type": "object"
+    },
+    "TemporalCheckpoint": {
+      "additionalProperties": false,
+      "properties": {
+        "checkpoint_id": {
+          "description": "Unique identifier for the temporal anchor.",
+          "title": "Checkpoint Id",
+          "type": "string"
+        },
+        "ledger_index": {
+          "description": "The exact array index in the EpistemicLedger this checkpoint represents.",
+          "title": "Ledger Index",
+          "type": "integer"
+        },
+        "state_hash": {
+          "description": "The canonical RFC 8785 SHA-256 hash of the entire topology at this exact index.",
+          "title": "State Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "checkpoint_id",
+        "ledger_index",
+        "state_hash"
+      ],
+      "title": "TemporalCheckpoint",
       "type": "object"
     },
     "TerminalStateSnapshot": {

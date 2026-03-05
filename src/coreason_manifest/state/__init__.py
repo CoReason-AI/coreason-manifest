@@ -12,6 +12,13 @@ from coreason_manifest.state.argumentation import (
     DefeasibleAttack,
     EvidentiaryWarrant,
 )
+from coreason_manifest.state.differentials import (
+    PatchOperation,
+    RollbackRequest,
+    StateDiff,
+    StatePatch,
+    TemporalCheckpoint,
+)
 from coreason_manifest.state.events import (
     AnyStateEvent,
     BaseStateEvent,
@@ -55,11 +62,16 @@ __all__ = [
     "MemoryProvenance",
     "MemoryTier",
     "ObservationEvent",
+    "PatchOperation",
+    "RollbackRequest",
     "SalienceProfile",
     "SemanticEdge",
     "SemanticNode",
+    "StateDiff",
+    "StatePatch",
     "SystemFaultEvent",
     "TemporalBounds",
+    "TemporalCheckpoint",
     "TerminalStateSnapshot",
     "VectorEmbedding",
     "WorkingMemorySnapshot",

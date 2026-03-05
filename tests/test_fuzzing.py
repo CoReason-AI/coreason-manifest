@@ -24,6 +24,7 @@ from coreason_manifest.oversight.resilience import (
 from coreason_manifest.presentation.scivis import AnyPanel, GrammarPanel, InsightCard
 from coreason_manifest.state.argumentation import ArgumentGraph
 from coreason_manifest.state.events import AnyStateEvent, BeliefUpdateEvent, ObservationEvent, SystemFaultEvent
+from coreason_manifest.state.memory import EpistemicLedger
 from coreason_manifest.state.semantic import SemanticEdge, SemanticNode
 from coreason_manifest.testing.chaos import ChaosExperiment
 from coreason_manifest.tooling import ActionSpace, ToolDefinition
@@ -699,3 +700,94 @@ information_flow_policy_adapter: TypeAdapter[InformationFlowPolicy] = TypeAdapte
 def test_dlp_policy_fuzzing(payload: dict[str, Any]) -> None:
     parsed = information_flow_policy_adapter.validate_python(payload)
     assert isinstance(parsed, InformationFlowPolicy)
+
+
+@st.composite
+def draw_state_patch(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "op": st.sampled_from(["add", "remove", "replace", "copy", "move", "test"]),
+                "path": st.text(),
+                "value": st.one_of(
+                    st.none(), st.text(), st.integers(), st.booleans(), st.dictionaries(st.text(), st.text())
+                ),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_state_diff(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "diff_id": st.text(),
+                "patches": st.lists(draw_state_patch()),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_rollback_request(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "request_id": st.text(),
+                "target_event_id": st.text(),
+                "invalidated_node_ids": st.lists(st.text()),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_temporal_checkpoint(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "checkpoint_id": st.text(),
+                "ledger_index": st.integers(min_value=0),
+                "state_hash": st.text(),
+            }
+        )
+    )
+    return res
+
+
+epistemic_ledger_adapter: TypeAdapter[EpistemicLedger] = TypeAdapter(EpistemicLedger)
+
+
+@st.composite
+def draw_any_state_event(draw: Any) -> dict[str, Any]:
+    event_type = draw(st.sampled_from(["observation", "belief_update", "system_fault"]))
+    payload: dict[str, Any] = {
+        "type": event_type,
+        "event_id": draw(st.text()),
+        "timestamp": draw(st.floats(allow_nan=False, allow_infinity=False)),
+    }
+    return payload
+
+
+@st.composite
+def draw_epistemic_ledger(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "history": st.lists(draw_any_state_event()),
+                "checkpoints": st.lists(draw_temporal_checkpoint()),
+                "active_rollbacks": st.lists(draw_rollback_request()),
+            }
+        )
+    )
+    return res
+
+
+@given(draw_epistemic_ledger())
+def test_differentials_routing(payload: dict[str, Any]) -> None:
+    parsed = epistemic_ledger_adapter.validate_python(payload)
+    assert isinstance(parsed, EpistemicLedger)
