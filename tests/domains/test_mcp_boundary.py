@@ -148,13 +148,13 @@ def test_mcp_server_tool_schemas() -> None:
     # we can inject a dummy object into the namespace temporarily.
     import coreason_manifest
 
-    coreason_manifest.DummyInvalid = object
-    coreason_manifest.__all__.append("DummyInvalid")
+    setattr(coreason_manifest, "DummyInvalid", object)
+    getattr(coreason_manifest, "__all__").append("DummyInvalid")
     try:
         with pytest.raises(ValueError, match="is not a valid schema model"):
             get_schema("DummyInvalid")
     finally:
-        coreason_manifest.__all__.remove("DummyInvalid")
+        getattr(coreason_manifest, "__all__").remove("DummyInvalid")
         delattr(coreason_manifest, "DummyInvalid")
 
 
@@ -197,7 +197,7 @@ async def test_mcp_stdio_server_happy_path() -> None:
     mock_stdout = MockAsyncFile([])
 
     # Use the original context manager mechanism
-    async with stdio.stdio_server(stdin=mock_stdin, stdout=mock_stdout) as (read_stream, write_stream):
+    async with stdio.stdio_server(stdin=mock_stdin, stdout=mock_stdout) as (read_stream, write_stream):  # type: ignore
         # 1. Valid payload
         msg1 = await read_stream.receive()
         assert hasattr(msg1, "message")
@@ -223,7 +223,7 @@ async def test_mcp_stdio_server_happy_path() -> None:
                 msg4 = await read_stream.receive()
                 assert isinstance(msg4, Exception)
                 assert "5MB" in str(msg4)
-        except anyio.EndOfStream, TimeoutError:
+        except (anyio.EndOfStream, TimeoutError):
             # Sometimes mock iterators close before emitting the bomb if task group already finished
             pass
 
@@ -382,18 +382,18 @@ async def test_uptime_assertion_poison_pill() -> None:
 
     original_validate = mcp.types.JSONRPCMessage.model_validate
 
-    def fake_validate(*args, **kwargs):
+    def fake_validate(*args: Any, **kwargs: Any) -> Any:
         # We only want to intercept the internal error creation which has id=None
         if isinstance(args[0], dict) and args[0].get("id") is None and args[0].get("error"):
             raise ValidationError.from_exception_data("mock", line_errors=[])
         return original_validate(*args, **kwargs)
 
-    mcp.types.JSONRPCMessage.model_validate = fake_validate
+    mcp.types.JSONRPCMessage.model_validate = fake_validate  # type: ignore[method-assign]
     try:
         # Pass Exception to trigger the second except block in _safe_handle_message
         await server._handle_message(Exception("trigger fallback"), mock_session, None)  # type: ignore
     finally:
-        mcp.types.JSONRPCMessage.model_validate = original_validate
+        mcp.types.JSONRPCMessage.model_validate = original_validate  # type: ignore[method-assign]
 
     assert len(mock_session._write_stream.sent_messages) >= 1
     sent_msg2 = mock_session._write_stream.sent_messages[0]
