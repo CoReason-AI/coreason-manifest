@@ -12,6 +12,7 @@ from coreason_manifest.oversight import (
     AnyInterventionPayload,
     AnyResiliencePayload,
     ConstitutionalRule,
+    GlobalGovernance,
     GovernancePolicy,
 )
 from coreason_manifest.state import (
@@ -38,7 +39,7 @@ from coreason_manifest.tooling import (
     SideEffectProfile,
     ToolDefinition,
 )
-from coreason_manifest.workflow import WorkflowEnvelope
+from coreason_manifest.workflow import StateContract, WorkflowEnvelope
 
 __all__ = [
     "ActionSpace",
@@ -56,6 +57,7 @@ __all__ = [
     "ExecutionSLA",
     "FaultInjectionProfile",
     "FaultType",
+    "GlobalGovernance",
     "GovernancePolicy",
     "LogEnvelope",
     "MCPClientBinding",
@@ -72,6 +74,7 @@ __all__ = [
     "SemanticVersion",
     "SideEffectProfile",
     "SpanTrace",
+    "StateContract",
     "SteadyStateHypothesis",
     "TemporalBounds",
     "ToolDefinition",

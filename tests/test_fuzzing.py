@@ -12,6 +12,7 @@ from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import TypeAdapter, ValidationError
 
+from coreason_manifest.oversight.governance import GlobalGovernance
 from coreason_manifest.oversight.resilience import (
     AnyResiliencePayload,
     CircuitBreakerTrip,
@@ -24,6 +25,7 @@ from coreason_manifest.state.semantic import SemanticEdge, SemanticNode
 from coreason_manifest.testing.chaos import ChaosExperiment
 from coreason_manifest.tooling import ActionSpace, ToolDefinition
 from coreason_manifest.workflow.nodes import AgentNode, AnyNode, HumanNode, SystemNode
+from coreason_manifest.workflow.topologies import StateContract
 
 node_adapter: TypeAdapter[AnyNode] = TypeAdapter(AnyNode)
 chaos_adapter: TypeAdapter[ChaosExperiment] = TypeAdapter(ChaosExperiment)
@@ -32,6 +34,8 @@ tool_definition_adapter: TypeAdapter[ToolDefinition] = TypeAdapter(ToolDefinitio
 event_adapter: TypeAdapter[AnyStateEvent] = TypeAdapter(AnyStateEvent)
 panel_adapter: TypeAdapter[AnyPanel] = TypeAdapter(AnyPanel)
 resilience_adapter: TypeAdapter[AnyResiliencePayload] = TypeAdapter(AnyResiliencePayload)
+global_governance_adapter: TypeAdapter[GlobalGovernance] = TypeAdapter(GlobalGovernance)
+state_contract_adapter: TypeAdapter[StateContract] = TypeAdapter(StateContract)
 
 
 @given(
@@ -403,3 +407,32 @@ def test_semanticedge_fuzzing(payload: dict[str, Any]) -> None:
     parsed = semantic_edge_adapter.validate_python(payload)
     assert isinstance(parsed, SemanticEdge)
     assert parsed.edge_id == payload["edge_id"]
+
+
+@given(
+    st.fixed_dictionaries(
+        {
+            "max_budget_usd": st.floats(allow_nan=False, allow_infinity=False),
+            "max_global_tokens": st.integers(),
+            "global_timeout_seconds": st.integers(),
+        }
+    )
+)
+def test_global_governance_fuzzing(payload: dict[str, Any]) -> None:
+    parsed = global_governance_adapter.validate_python(payload)
+    assert isinstance(parsed, GlobalGovernance)
+    assert parsed.max_budget_usd == payload["max_budget_usd"]
+
+
+@given(
+    st.fixed_dictionaries(
+        {
+            "schema_definition": st.dictionaries(st.text(), st.one_of(st.text(), st.integers(), st.booleans())),
+            "strict_validation": st.booleans(),
+        }
+    )
+)
+def test_state_contract_fuzzing(payload: dict[str, Any]) -> None:
+    parsed = state_contract_adapter.validate_python(payload)
+    assert isinstance(parsed, StateContract)
+    assert parsed.strict_validation == payload["strict_validation"]
