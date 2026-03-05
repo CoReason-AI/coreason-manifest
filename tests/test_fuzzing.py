@@ -29,7 +29,7 @@ from coreason_manifest.state.semantic import SemanticEdge, SemanticNode
 from coreason_manifest.testing.chaos import ChaosExperiment
 from coreason_manifest.tooling import ActionSpace, ToolDefinition
 from coreason_manifest.workflow.auctions import AuctionState
-from coreason_manifest.workflow.nodes import AgentNode, AnyNode, HumanNode, SystemNode
+from coreason_manifest.workflow.nodes import AgentNode, AnyNode, HumanNode, SandboxedNode, SystemNode
 from coreason_manifest.workflow.topologies import AnyTopology, StateContract
 
 
@@ -138,6 +138,44 @@ def draw_system_node_payload(draw: Any) -> dict[str, Any]:
     return payload
 
 
+@st.composite
+def draw_resource_ceilings(draw: Any) -> dict[str, Any]:
+    return {
+        "max_memory_bytes": draw(st.integers(min_value=0)),
+        "max_instruction_cycles": draw(st.one_of(st.none(), st.integers(min_value=0))),
+    }
+
+
+@st.composite
+def draw_syscall_boundary(draw: Any) -> dict[str, Any]:
+    return {
+        "allowed_syscalls": draw(st.lists(st.text())),
+    }
+
+
+@st.composite
+def draw_network_namespace(draw: Any) -> dict[str, Any]:
+    return {
+        "allow_egress": draw(st.booleans()),
+        "allowed_hosts": draw(st.lists(st.text())),
+    }
+
+
+@st.composite
+def draw_sandboxed_node_payload(draw: Any) -> dict[str, Any]:
+    payload: dict[str, Any] = {
+        "type": "sandboxed",
+        "description": draw(st.text()),
+        "runtime_engine": draw(st.sampled_from(["wasm", "gvisor", "firecracker", "bpf"])),
+        "resource_ceilings": draw(draw_resource_ceilings()),
+        "syscalls": draw(draw_syscall_boundary()),
+        "network": draw(draw_network_namespace()),
+    }
+    if draw(st.booleans()):
+        payload["intervention_policies"] = draw(st.lists(draw_intervention_policy()))
+    return payload
+
+
 node_adapter: TypeAdapter[AnyNode] = TypeAdapter(AnyNode)
 chaos_adapter: TypeAdapter[ChaosExperiment] = TypeAdapter(ChaosExperiment)
 action_space_adapter: TypeAdapter[ActionSpace] = TypeAdapter(ActionSpace)
@@ -150,7 +188,14 @@ state_contract_adapter: TypeAdapter[StateContract] = TypeAdapter(StateContract)
 intervention_policy_adapter: TypeAdapter[InterventionPolicy] = TypeAdapter(InterventionPolicy)
 
 
-@given(st.one_of(draw_agent_node_payload(), draw_human_node_payload(), draw_system_node_payload()))
+@given(
+    st.one_of(
+        draw_agent_node_payload(),
+        draw_human_node_payload(),
+        draw_system_node_payload(),
+        draw_sandboxed_node_payload(),
+    )
+)
 def test_anynode_routing(payload: dict[str, Any]) -> None:
     parsed = node_adapter.validate_python(payload)
     node_type = payload["type"]
@@ -160,11 +205,13 @@ def test_anynode_routing(payload: dict[str, Any]) -> None:
         assert isinstance(parsed, HumanNode)
     elif node_type == "system":
         assert isinstance(parsed, SystemNode)
+    elif node_type == "sandboxed":
+        assert isinstance(parsed, SandboxedNode)
 
 
 @given(st.text())
 def test_anynode_invalid(invalid_type: str) -> None:
-    if invalid_type in ["agent", "human", "system"]:
+    if invalid_type in ["agent", "human", "system", "sandboxed"]:
         return
     payload = {"type": invalid_type, "description": "test"}
     with pytest.raises(ValidationError):

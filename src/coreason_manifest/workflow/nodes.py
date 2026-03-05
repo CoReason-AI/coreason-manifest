@@ -9,6 +9,7 @@ from typing import Annotated, Literal
 
 from pydantic import Field
 
+from coreason_manifest.compute.sandboxing import NetworkNamespace, ResourceCeilings, RuntimeEngine, SyscallBoundary
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.oversight.intervention import InterventionPolicy
 
@@ -95,8 +96,20 @@ class SystemNode(BaseNode):
     type: Literal["system"] = Field(default="system", description="Discriminator for a System node.")
 
 
+class SandboxedNode(BaseNode):
+    """
+    A node representing a mathematical, hardware-level isolation limit (e.g., WASM/MicroVM constraints).
+    """
+
+    type: Literal["sandboxed"] = Field(default="sandboxed", description="Discriminator for a Sandboxed node.")
+    runtime_engine: RuntimeEngine = Field(description="The underlying micro-isolation technology.")
+    resource_ceilings: ResourceCeilings = Field(description="Hardware-level limits.")
+    syscalls: SyscallBoundary = Field(description="The operating system interface boundary.")
+    network: NetworkNamespace = Field(description="The isolated network namespace.")
+
+
 type AnyNode = Annotated[
-    AgentNode | HumanNode | SystemNode,
+    AgentNode | HumanNode | SystemNode | SandboxedNode,
     Field(
         discriminator="type",
         description="A discriminated union of all valid workflow nodes.",

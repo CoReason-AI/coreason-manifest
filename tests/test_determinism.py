@@ -5,6 +5,7 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
+from coreason_manifest.compute.sandboxing import NetworkNamespace, ResourceCeilings, SyscallBoundary
 from coreason_manifest.compute.stochastic import CrossoverStrategy, FitnessObjective, MutationPolicy
 from coreason_manifest.oversight.dlp import InformationFlowPolicy, RedactionRule
 from coreason_manifest.presentation.intents import DraftingIntent, PresentationEnvelope
@@ -24,7 +25,7 @@ from coreason_manifest.testing.chaos import ChaosExperiment, FaultInjectionProfi
 from coreason_manifest.tooling import ActionSpace, PermissionBoundary, SideEffectProfile, ToolDefinition
 from coreason_manifest.workflow.auctions import AgentBid, AuctionState, TaskAnnouncement
 from coreason_manifest.workflow.envelope import WorkflowEnvelope
-from coreason_manifest.workflow.nodes import AgentNode
+from coreason_manifest.workflow.nodes import AgentNode, SandboxedNode
 from coreason_manifest.workflow.topologies import DAGTopology, EvolutionaryTopology
 
 
@@ -49,6 +50,27 @@ def test_workflow_envelope_determinism() -> None:
 
     assert env1.model_dump_canonical() == env2.model_dump_canonical()
     assert hash(env1) == hash(env2)
+
+
+def test_sandboxing_determinism() -> None:
+    node1 = SandboxedNode(
+        description="Isolated node 1",
+        runtime_engine="wasm",
+        resource_ceilings=ResourceCeilings(max_memory_bytes=1024),
+        syscalls=SyscallBoundary(allowed_syscalls=["write", "read", "exit"]),
+        network=NetworkNamespace(allow_egress=False, allowed_hosts=["b.com", "a.com"]),
+    )
+
+    node2 = SandboxedNode(
+        description="Isolated node 1",
+        runtime_engine="wasm",
+        resource_ceilings=ResourceCeilings(max_memory_bytes=1024),
+        syscalls=SyscallBoundary(allowed_syscalls=["exit", "read", "write"]),
+        network=NetworkNamespace(allow_egress=False, allowed_hosts=["a.com", "b.com"]),
+    )
+
+    assert node1.model_dump_canonical() == node2.model_dump_canonical()
+    assert hash(node1) == hash(node2)
 
 
 def test_evolutionary_determinism() -> None:

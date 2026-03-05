@@ -11,6 +11,12 @@ from coreason_manifest.compute.profiles import (
     QoSClassification,
     RateCard,
 )
+from coreason_manifest.compute.sandboxing import (
+    NetworkNamespace,
+    ResourceCeilings,
+    RuntimeEngine,
+    SyscallBoundary,
+)
 from coreason_manifest.compute.stochastic import (
     CrossoverStrategy,
     CrossoverType,
@@ -30,7 +36,11 @@ __all__ = [
     "FitnessObjective",
     "ModelProfile",
     "MutationPolicy",
+    "NetworkNamespace",
     "OptimizationDirection",
     "QoSClassification",
     "RateCard",
+    "ResourceCeilings",
+    "RuntimeEngine",
+    "SyscallBoundary",
 ]
