@@ -1,3 +1,5 @@
+from typing import Any
+
 import hypothesis.strategies as st
 import pytest
 from hypothesis import HealthCheck, given, settings
@@ -5,7 +7,6 @@ from mcp.server import Server
 from mcp.shared.session import SessionMessage  # type: ignore
 from mcp.types import JSONRPCMessage
 from pydantic import ValidationError
-from typing import Any
 
 from coreason_manifest.adapters.mcp.schemas import BoundedJSONRPCRequest
 from coreason_manifest.cli.mcp_server import _global_error_handler_shield

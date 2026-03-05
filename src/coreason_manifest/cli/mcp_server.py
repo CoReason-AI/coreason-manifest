@@ -64,8 +64,9 @@ def _global_error_handler_shield() -> None:
     import mcp.server.stdio
     from mcp.server import Server
     from mcp.server.session import ServerSession
-    from mcp.shared.session import BaseSession
-    from mcp.shared.session import SessionMessage  # type: ignore
+    from mcp.shared.session import (
+        SessionMessage,  # type: ignore
+    )
     from pydantic import ValidationError
 
     from coreason_manifest.adapters.mcp.schemas import JSONRPCError, JSONRPCErrorResponse
