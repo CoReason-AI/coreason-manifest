@@ -9,7 +9,7 @@ import hashlib
 import json
 from typing import Any, Self
 
-from pydantic import Field, model_validator
+from pydantic import ConfigDict, Field, model_validator
 
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.core.primitives import GitSHA
@@ -21,6 +21,8 @@ class CustodyRecord(CoreasonBaseModel):
     Cryptographic state of an agent to ensure full traceability and provenance.
     """
 
+    model_config = ConfigDict(frozen=True)
+
     prompt_template_sha: GitSHA = Field(description="The cryptographic SHA of the prompt template used.")
     context_hash: str = Field(description="The cryptographic hash of the input context provided to the agent.")
     temperature: float = Field(description="The temperature parameter used for generating the response.")
@@ -30,6 +32,8 @@ class ExecutionNode(CoreasonBaseModel):
     """
     Cryptographic state of an execution node in a Merkle DAG trace.
     """
+
+    model_config = ConfigDict(frozen=True)
 
     request_id: str = Field(description="The unique ID for this specific execution.")
     parent_request_id: str | None = Field(default=None, description="The ID of the parent request.")
