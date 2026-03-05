@@ -16,6 +16,8 @@ from coreason_manifest.state.semantic import (
     TemporalBounds,
     VectorEmbedding,
 )
+from coreason_manifest.testing.chaos import ChaosExperiment, FaultInjectionProfile, SteadyStateHypothesis
+from coreason_manifest.tooling import ActionSpace, PermissionBoundary, SideEffectProfile, ToolDefinition
 from coreason_manifest.workflow.envelope import WorkflowEnvelope
 from coreason_manifest.workflow.nodes import AgentNode
 from coreason_manifest.workflow.topologies import DAGTopology
@@ -42,6 +44,33 @@ def test_workflow_envelope_determinism() -> None:
 
     assert env1.model_dump_canonical() == env2.model_dump_canonical()
     assert hash(env1) == hash(env2)
+
+
+def test_tooling_determinism() -> None:
+    side_effects = SideEffectProfile(is_idempotent=True, mutates_state=False)
+    permissions = PermissionBoundary(network_access=False, allowed_domains=None, file_system_read_only=True)
+
+    tool1 = ToolDefinition(
+        tool_name="my_tool",
+        description="A deterministic tool",
+        input_schema={"a": 1, "b": 2},
+        side_effects=side_effects,
+        permissions=permissions,
+    )
+
+    tool2 = ToolDefinition(
+        tool_name="my_tool",
+        description="A deterministic tool",
+        input_schema={"b": 2, "a": 1},
+        side_effects=side_effects,
+        permissions=permissions,
+    )
+
+    space1 = ActionSpace(action_space_id="space_1", native_tools=[tool1], mcp_servers=[])
+    space2 = ActionSpace(action_space_id="space_1", native_tools=[tool2], mcp_servers=[])
+
+    assert space1.model_dump_canonical() == space2.model_dump_canonical()
+    assert hash(space1) == hash(space2)
 
 
 def test_presentation_envelope_determinism() -> None:
@@ -102,3 +131,17 @@ def test_semantic_memory_determinism() -> None:
 
     assert node1.model_dump_canonical() == node2.model_dump_canonical()
     assert hash(node1) == hash(node2)
+
+
+def test_chaos_determinism() -> None:
+    fault1 = FaultInjectionProfile(fault_type="latency_spike", target_node_id="node_a", intensity=0.8)
+    fault2 = FaultInjectionProfile(fault_type="context_overload", target_node_id="node_b", intensity=0.5)
+
+    hypothesis = SteadyStateHypothesis(expected_max_latency=100.0, max_loops_allowed=5, required_tool_usage=["tool_x"])
+
+    env1 = ChaosExperiment(experiment_id="exp_01", hypothesis=hypothesis, faults=[fault1, fault2])
+
+    env2 = ChaosExperiment(experiment_id="exp_01", hypothesis=hypothesis, faults=[fault1, fault2])
+
+    assert env1.model_dump_canonical() == env2.model_dump_canonical()
+    assert hash(env1) == hash(env2)

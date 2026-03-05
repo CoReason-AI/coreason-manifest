@@ -28,6 +28,108 @@ from coreason_manifest.tooling import ActionSpace, ToolDefinition
 from coreason_manifest.workflow.nodes import AgentNode, AnyNode, HumanNode, SystemNode
 from coreason_manifest.workflow.topologies import StateContract
 
+
+@st.composite
+def draw_reflex_policy(draw: Any) -> dict[str, Any]:
+    return draw(
+        st.fixed_dictionaries(
+            {
+                "confidence_threshold": st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False),
+                "allowed_read_only_tools": st.lists(st.text()),
+            }
+        )
+    )
+
+
+@st.composite
+def draw_epistemic_policy(draw: Any) -> dict[str, Any]:
+    return draw(
+        st.fixed_dictionaries(
+            {
+                "active": st.booleans(),
+                "dissonance_threshold": st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False),
+                "action_on_gap": st.sampled_from(["fail", "probe", "clarify"]),
+            }
+        )
+    )
+
+
+@st.composite
+def draw_correction_policy(draw: Any) -> dict[str, Any]:
+    return draw(
+        st.fixed_dictionaries(
+            {
+                "max_loops": st.integers(min_value=0, max_value=50),
+                "rollback_on_failure": st.booleans(),
+            }
+        )
+    )
+
+
+@st.composite
+def draw_intervention_policy(draw: Any) -> dict[str, Any]:
+    return draw(
+        st.fixed_dictionaries(
+            {
+                "trigger": st.sampled_from(
+                    [
+                        "on_start",
+                        "on_node_transition",
+                        "before_tool_execution",
+                        "on_failure",
+                        "on_consensus_reached",
+                        "on_max_loops_reached",
+                    ]
+                ),
+                "blocking": st.booleans(),
+                "scope": st.one_of(
+                    st.none(),
+                    st.fixed_dictionaries(
+                        {
+                            "allowed_fields": st.lists(st.text()),
+                            "json_schema_whitelist": st.dictionaries(
+                                st.text(), st.one_of(st.text(), st.integers(), st.booleans())
+                            ),
+                        }
+                    ),
+                ),
+            }
+        )
+    )
+
+
+@st.composite
+def draw_agent_node_payload(draw: Any) -> dict[str, Any]:
+    payload: dict[str, Any] = {"type": "agent", "description": draw(st.text())}
+    if draw(st.booleans()):
+        payload["intervention_policies"] = draw(st.lists(draw_intervention_policy()))
+    if draw(st.booleans()):
+        payload["action_space_id"] = draw(st.text())
+    if draw(st.booleans()):
+        payload["reflex_policy"] = draw(draw_reflex_policy())
+    if draw(st.booleans()):
+        payload["epistemic_policy"] = draw(draw_epistemic_policy())
+    if draw(st.booleans()):
+        payload["correction_policy"] = draw(draw_correction_policy())
+    return payload
+
+
+@st.composite
+def draw_human_node_payload(draw: Any) -> dict[str, Any]:
+    payload: dict[str, Any] = {"type": "human", "description": draw(st.text())}
+    if draw(st.booleans()):
+        payload["intervention_policies"] = draw(st.lists(draw_intervention_policy()))
+    return payload
+
+
+@st.composite
+def draw_system_node_payload(draw: Any) -> dict[str, Any]:
+    payload: dict[str, Any] = {"type": "system", "description": draw(st.text())}
+    if draw(st.booleans()):
+        payload["intervention_policies"] = draw(st.lists(draw_intervention_policy()))
+    return payload
+
+
 node_adapter: TypeAdapter[AnyNode] = TypeAdapter(AnyNode)
 chaos_adapter: TypeAdapter[ChaosExperiment] = TypeAdapter(ChaosExperiment)
 action_space_adapter: TypeAdapter[ActionSpace] = TypeAdapter(ActionSpace)
@@ -40,94 +142,10 @@ state_contract_adapter: TypeAdapter[StateContract] = TypeAdapter(StateContract)
 intervention_policy_adapter: TypeAdapter[InterventionPolicy] = TypeAdapter(InterventionPolicy)
 
 
-@given(
-    st.sampled_from(["agent", "human", "system"]),
-    st.text(),
-    st.one_of(st.none(), st.text()),
-    st.one_of(
-        st.none(),
-        st.fixed_dictionaries(
-            {
-                "confidence_threshold": st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False),
-                "allowed_read_only_tools": st.lists(st.text()),
-            }
-        ),
-    ),
-    st.one_of(
-        st.none(),
-        st.fixed_dictionaries(
-            {
-                "active": st.booleans(),
-                "dissonance_threshold": st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False),
-                "action_on_gap": st.sampled_from(["fail", "probe", "clarify"]),
-            }
-        ),
-    ),
-    st.one_of(
-        st.none(),
-        st.fixed_dictionaries(
-            {
-                "max_loops": st.integers(min_value=0, max_value=50),
-                "rollback_on_failure": st.booleans(),
-            }
-        ),
-    ),
-    st.one_of(
-        st.none(),
-        st.lists(
-            st.fixed_dictionaries(
-                {
-                    "trigger": st.sampled_from(
-                        [
-                            "on_start",
-                            "on_node_transition",
-                            "before_tool_execution",
-                            "on_failure",
-                            "on_consensus_reached",
-                            "on_max_loops_reached",
-                        ]
-                    ),
-                    "blocking": st.booleans(),
-                    "scope": st.one_of(
-                        st.none(),
-                        st.fixed_dictionaries(
-                            {
-                                "allowed_fields": st.lists(st.text()),
-                                "json_schema_whitelist": st.dictionaries(
-                                    st.text(), st.one_of(st.text(), st.integers(), st.booleans())
-                                ),
-                            }
-                        ),
-                    ),
-                }
-            )
-        ),
-    ),
-)
-def test_anynode_routing(
-    node_type: str,
-    description: str,
-    action_space_id: str | None,
-    reflex_policy: dict[str, Any] | None,
-    epistemic_policy: dict[str, Any] | None,
-    correction_policy: dict[str, Any] | None,
-    intervention_policies: list[dict[str, Any]] | None,
-) -> None:
-    payload: dict[str, Any] = {"type": node_type, "description": description}
-    if intervention_policies is not None:
-        payload["intervention_policies"] = intervention_policies
-
-    if node_type == "agent":
-        if action_space_id is not None:
-            payload["action_space_id"] = action_space_id
-        if reflex_policy is not None:
-            payload["reflex_policy"] = reflex_policy
-        if epistemic_policy is not None:
-            payload["epistemic_policy"] = epistemic_policy
-        if correction_policy is not None:
-            payload["correction_policy"] = correction_policy
-
+@given(st.one_of(draw_agent_node_payload(), draw_human_node_payload(), draw_system_node_payload()))
+def test_anynode_routing(payload: dict[str, Any]) -> None:
     parsed = node_adapter.validate_python(payload)
+    node_type = payload["type"]
     if node_type == "agent":
         assert isinstance(parsed, AgentNode)
     elif node_type == "human":
