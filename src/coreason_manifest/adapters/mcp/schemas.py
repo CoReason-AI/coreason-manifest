@@ -21,13 +21,71 @@ from pydantic import Field, HttpUrl, field_validator
 from coreason_manifest.core.base import CoreasonBaseModel
 
 
-class MCPClientMessage(CoreasonBaseModel):
+class JSONRPCError(CoreasonBaseModel):
+    """JSON-RPC 2.0 Error object."""
+
+    code: int = Field(..., description="A Number that indicates the error type that occurred.")
+    message: str = Field(..., description="A String providing a short description of the error.")
+    data: Any | None = Field(
+        default=None,
+        description="A Primitive or Structured value that contains additional information about the error.",
+    )
+
+
+class JSONRPCErrorResponse(CoreasonBaseModel):
+    """JSON-RPC 2.0 Error Response object."""
+
+    jsonrpc: Literal["2.0"] = Field(..., description="JSON-RPC version.")
+    error: JSONRPCError = Field(..., description="The error object.")
+    id: str | int | None = Field(default=None, description="The request ID that this error corresponds to.")
+
+
+class BoundedJSONRPCRequest(CoreasonBaseModel):
+    """Base schema enforcing rigorous JSON-RPC 2.0 boundaries to prevent DoS attacks."""
+
+    jsonrpc: Literal["2.0"] = Field(..., description="JSON-RPC version.")
+    method: str = Field(..., max_length=1000, description="Method to be invoked.")
+    params: dict[str, Any] | None = Field(default=None, description="Payload parameters.")
+    id: str | int | None = Field(default=None, description="Unique request identifier.")
+
+    @field_validator("params", mode="before")
+    @classmethod
+    def validate_params_depth_and_size(cls, v: Any) -> Any:
+        """Enforce strict depth and size constraints to prevent RAM exhaustion and DoS attacks."""
+        if v is None:
+            return {}
+
+        if not isinstance(v, dict):
+            raise ValueError("params must be a dictionary")
+
+        def _enforce_limits(obj: Any, current_depth: int) -> None:
+            if current_depth > 10:
+                raise ValueError("JSON payload exceeds maximum depth of 10")
+
+            if isinstance(obj, dict):
+                if len(obj) > 100:
+                    raise ValueError("Dictionary exceeds maximum of 100 keys")
+                for key, val in obj.items():
+                    if len(key) > 1000:
+                        raise ValueError("Dictionary key exceeds maximum length of 1000")
+                    _enforce_limits(val, current_depth + 1)
+            elif isinstance(obj, list):
+                if len(obj) > 1000:
+                    raise ValueError("List exceeds maximum of 1000 elements")
+                for item in obj:
+                    _enforce_limits(item, current_depth + 1)
+            elif isinstance(obj, str):
+                if len(obj) > 10000:
+                    raise ValueError("String exceeds maximum length of 10000 characters")
+
+        _enforce_limits(v, 0)
+        return v
+
+
+class MCPClientMessage(BoundedJSONRPCRequest):
     """Strict JSON-RPC 2.0 structure for MCP client messages."""
 
-    jsonrpc: Literal["2.0"] = Field(default="2.0", description="JSON-RPC version.")
     method: Literal["mcp.ui.emit_intent"] = Field(..., description="Method for intent bubbling.")
-    params: dict[str, Any] = Field(default_factory=dict, description="Payload parameters.")
-    id: str | int = Field(..., description="Unique request identifier.")
 
 
 class StdioTransportConfig(CoreasonBaseModel):
