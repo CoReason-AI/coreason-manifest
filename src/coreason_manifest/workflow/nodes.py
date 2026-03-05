@@ -60,6 +60,9 @@ class AgentNode(BaseNode):
     """
 
     type: Literal["agent"] = Field(default="agent", description="Discriminator for an Agent node.")
+    action_space_id: str | None = Field(
+        default=None, description="The ID of the specific ActionSpace (curated tool environment) bound to this agent."
+    )
     reflex_policy: System1Reflex | None = Field(
         default=None, description="The policy governing System 1 reflex actions."
     )

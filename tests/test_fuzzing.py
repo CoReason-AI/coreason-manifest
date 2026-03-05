@@ -21,10 +21,13 @@ from coreason_manifest.oversight.resilience import (
 from coreason_manifest.presentation.scivis import AnyPanel, CohortAttritionGrid, InsightCard, TimeSeriesPanel
 from coreason_manifest.state.events import AnyStateEvent, BeliefUpdateEvent, ObservationEvent, SystemFaultEvent
 from coreason_manifest.testing.chaos import ChaosExperiment
+from coreason_manifest.tooling import ActionSpace, ToolDefinition
 from coreason_manifest.workflow.nodes import AgentNode, AnyNode, HumanNode, SystemNode
 
 node_adapter: TypeAdapter[AnyNode] = TypeAdapter(AnyNode)
 chaos_adapter: TypeAdapter[ChaosExperiment] = TypeAdapter(ChaosExperiment)
+action_space_adapter: TypeAdapter[ActionSpace] = TypeAdapter(ActionSpace)
+tool_definition_adapter: TypeAdapter[ToolDefinition] = TypeAdapter(ToolDefinition)
 event_adapter: TypeAdapter[AnyStateEvent] = TypeAdapter(AnyStateEvent)
 panel_adapter: TypeAdapter[AnyPanel] = TypeAdapter(AnyPanel)
 resilience_adapter: TypeAdapter[AnyResiliencePayload] = TypeAdapter(AnyResiliencePayload)
@@ -33,6 +36,7 @@ resilience_adapter: TypeAdapter[AnyResiliencePayload] = TypeAdapter(AnyResilienc
 @given(
     st.sampled_from(["agent", "human", "system"]),
     st.text(),
+    st.one_of(st.none(), st.text()),
     st.one_of(
         st.none(),
         st.fixed_dictionaries(
@@ -65,12 +69,15 @@ resilience_adapter: TypeAdapter[AnyResiliencePayload] = TypeAdapter(AnyResilienc
 def test_anynode_routing(
     node_type: str,
     description: str,
+    action_space_id: str | None,
     reflex_policy: dict[str, Any] | None,
     epistemic_policy: dict[str, Any] | None,
     correction_policy: dict[str, Any] | None,
 ) -> None:
     payload: dict[str, Any] = {"type": node_type, "description": description}
     if node_type == "agent":
+        if action_space_id is not None:
+            payload["action_space_id"] = action_space_id
         if reflex_policy is not None:
             payload["reflex_policy"] = reflex_policy
         if epistemic_policy is not None:
@@ -268,3 +275,54 @@ def test_stack_exhaustion_dos_execution_node() -> None:
 
     with pytest.raises(ValidationError):
         ExecutionNode(request_id="req1", inputs=payload, outputs="test")
+@given(
+    st.fixed_dictionaries(
+        {
+            "action_space_id": st.text(),
+            "native_tools": st.lists(
+                st.fixed_dictionaries(
+                    {
+                        "tool_name": st.text(),
+                        "description": st.text(),
+                        "input_schema": st.dictionaries(st.text(), st.one_of(st.text(), st.integers())),
+                        "side_effects": st.fixed_dictionaries(
+                            {
+                                "is_idempotent": st.booleans(),
+                                "mutates_state": st.booleans(),
+                            }
+                        ),
+                        "permissions": st.fixed_dictionaries(
+                            {
+                                "network_access": st.booleans(),
+                                "allowed_domains": st.one_of(st.none(), st.lists(st.text())),
+                                "file_system_read_only": st.booleans(),
+                            }
+                        ),
+                        "sla": st.one_of(
+                            st.none(),
+                            st.fixed_dictionaries(
+                                {
+                                    "max_execution_time_ms": st.integers(),
+                                    "max_memory_mb": st.one_of(st.none(), st.integers()),
+                                }
+                            ),
+                        ),
+                    }
+                )
+            ),
+            "mcp_servers": st.lists(
+                st.fixed_dictionaries(
+                    {
+                        "server_uri": st.text(),
+                        "transport_type": st.sampled_from(["stdio", "sse", "http"]),
+                        "allowed_mcp_tools": st.one_of(st.none(), st.lists(st.text())),
+                    }
+                )
+            ),
+        }
+    )
+)
+def test_actionspace_fuzzing(payload: dict[str, Any]) -> None:
+    parsed = action_space_adapter.validate_python(payload)
+    assert isinstance(parsed, ActionSpace)
+    assert parsed.action_space_id == payload["action_space_id"]
