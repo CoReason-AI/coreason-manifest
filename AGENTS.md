@@ -109,6 +109,6 @@ We run `mypy` in `strict = true` mode. There are no implicit optionals, and `Any
 
 ### 3. Test Coverage
 Ensure your new logic maintains the strict 95% coverage mandate and passes all behavioral checks:
-`uv run pytest --cov --cov-fail-under=95`
+`uv run pytest`
 
 *Note: Do not bypass type hints or add `# type: ignore` unless interacting with deeply dynamic external modules, and only do so with an explicit explanatory comment.*

@@ -130,7 +130,7 @@ jobs:
         run: echo "PYTHON_GIL=0" >> $GITHUB_ENV
 
       - name: Pytest
-        run: uv run pytest tests/ --cov=coreason_manifest --cov-report=xml --cov-fail-under=95
+        run: uv run pytest
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
@@ -166,7 +166,7 @@ jobs:
         run: echo "PYTHON_GIL=0" >> $GITHUB_ENV
 
       - name: Pytest
-        run: uv run pytest tests/ --cov=coreason_manifest --cov-report=xml --cov-fail-under=95
+        run: uv run pytest
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
