@@ -306,6 +306,7 @@
         "mapping": {
           "agent": "#/$defs/AgentNode",
           "human": "#/$defs/HumanNode",
+          "sandboxed": "#/$defs/SandboxedNode",
           "system": "#/$defs/SystemNode"
         },
         "propertyName": "type"
@@ -319,6 +320,9 @@
         },
         {
           "$ref": "#/$defs/SystemNode"
+        },
+        {
+          "$ref": "#/$defs/SandboxedNode"
         }
       ]
     },
@@ -350,6 +354,7 @@
         "mapping": {
           "council": "#/$defs/CouncilTopology",
           "dag": "#/$defs/DAGTopology",
+          "evolutionary": "#/$defs/EvolutionaryTopology",
           "swarm": "#/$defs/SwarmTopology"
         },
         "propertyName": "type"
@@ -363,6 +368,9 @@
         },
         {
           "$ref": "#/$defs/SwarmTopology"
+        },
+        {
+          "$ref": "#/$defs/EvolutionaryTopology"
         }
       ]
     },
@@ -858,6 +866,37 @@
       "title": "CouncilTopology",
       "type": "object"
     },
+    "CrossoverStrategy": {
+      "additionalProperties": false,
+      "description": "The mathematical rules for combining elite agents.",
+      "properties": {
+        "strategy_type": {
+          "$ref": "#/$defs/CrossoverType",
+          "description": "The heuristic method for blending successful parent agents."
+        },
+        "blending_factor": {
+          "description": "The proportional mix ratio when merging vector properties.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Blending Factor",
+          "type": "number"
+        }
+      },
+      "required": [
+        "strategy_type",
+        "blending_factor"
+      ],
+      "title": "CrossoverStrategy",
+      "type": "object"
+    },
+    "CrossoverType": {
+      "enum": [
+        "uniform_blend",
+        "single_point",
+        "heuristic"
+      ],
+      "type": "string"
+    },
     "CustodyRecord": {
       "additionalProperties": false,
       "description": "Cryptographic state of an agent to ensure full traceability and provenance.",
@@ -1016,6 +1055,78 @@
       "title": "DefeasibleAttack",
       "type": "object"
     },
+    "DistributionProfile": {
+      "additionalProperties": false,
+      "description": "Profile defining a probability density function.",
+      "properties": {
+        "distribution_type": {
+          "$ref": "#/$defs/DistributionType",
+          "description": "The mathematical shape of the probability density function."
+        },
+        "mean": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The expected value (mu) of the distribution.",
+          "title": "Mean"
+        },
+        "variance": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematical variance (sigma squared).",
+          "title": "Variance"
+        },
+        "confidence_interval_95": {
+          "anyOf": [
+            {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The 95% probability bounds.",
+          "title": "Confidence Interval 95"
+        }
+      },
+      "required": [
+        "distribution_type"
+      ],
+      "title": "DistributionProfile",
+      "type": "object"
+    },
+    "DistributionType": {
+      "enum": [
+        "gaussian",
+        "uniform",
+        "beta"
+      ],
+      "type": "string"
+    },
     "DiversityConstraint": {
       "additionalProperties": false,
       "description": "Constraints enforcing cognitive heterogeneity.",
@@ -1159,6 +1270,89 @@
         "justification"
       ],
       "title": "EvidentiaryWarrant",
+      "type": "object"
+    },
+    "EvolutionaryTopology": {
+      "additionalProperties": false,
+      "description": "An Evolutionary workflow topology that mutates and breeds agents over generations.",
+      "properties": {
+        "nodes": {
+          "additionalProperties": {
+            "$ref": "#/$defs/AnyNode"
+          },
+          "description": "Flat registry of all nodes in this topology.",
+          "propertyNames": {
+            "$ref": "#/$defs/NodeID"
+          },
+          "title": "Nodes",
+          "type": "object"
+        },
+        "shared_state_contract": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StateContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The schema-on-write contract governing the internal state of this topology."
+        },
+        "information_flow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/InformationFlowPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The structural Data Loss Prevention (DLP) contract governing all state mutations in this topology."
+        },
+        "type": {
+          "const": "evolutionary",
+          "default": "evolutionary",
+          "description": "Discriminator for an Evolutionary topology.",
+          "title": "Type",
+          "type": "string"
+        },
+        "generations": {
+          "description": "The absolute limit on evolutionary breeding cycles.",
+          "title": "Generations",
+          "type": "integer"
+        },
+        "population_size": {
+          "description": "The number of concurrent agents instantiated per generation.",
+          "title": "Population Size",
+          "type": "integer"
+        },
+        "mutation": {
+          "$ref": "#/$defs/MutationPolicy",
+          "description": "The constraints governing random heuristic mutations."
+        },
+        "crossover": {
+          "$ref": "#/$defs/CrossoverStrategy"
+        },
+        "fitness_objectives": {
+          "description": "The multi-dimensional criteria used to score and cull the population.",
+          "items": {
+            "$ref": "#/$defs/FitnessObjective"
+          },
+          "title": "Fitness Objectives",
+          "type": "array"
+        }
+      },
+      "required": [
+        "nodes",
+        "generations",
+        "population_size",
+        "mutation",
+        "crossover",
+        "fitness_objectives"
+      ],
+      "title": "EvolutionaryTopology",
       "type": "object"
     },
     "ExecutionSLA": {
@@ -1306,6 +1500,33 @@
         }
       },
       "title": "FederatedStateSnapshot",
+      "type": "object"
+    },
+    "FitnessObjective": {
+      "additionalProperties": false,
+      "description": "A specific objective function to optimize within a generation.",
+      "properties": {
+        "target_metric": {
+          "description": "The specific telemetry or execution metric to evaluate (e.g., 'latency', 'accuracy').",
+          "title": "Target Metric",
+          "type": "string"
+        },
+        "direction": {
+          "$ref": "#/$defs/OptimizationDirection",
+          "description": "Whether the algorithm should maximize or minimize this metric."
+        },
+        "weight": {
+          "default": 1.0,
+          "description": "The relative importance of this objective in a multi-objective generation.",
+          "title": "Weight",
+          "type": "number"
+        }
+      },
+      "required": [
+        "target_metric",
+        "direction"
+      ],
+      "title": "FitnessObjective",
       "type": "object"
     },
     "GitSHA": {
@@ -1804,6 +2025,52 @@
       "title": "ModelProfile",
       "type": "object"
     },
+    "MutationPolicy": {
+      "additionalProperties": false,
+      "description": "Constraints governing random heuristic mutations.",
+      "properties": {
+        "mutation_rate": {
+          "description": "The probability that a given agent parameter will randomly mutate between generations.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Mutation Rate",
+          "type": "number"
+        },
+        "temperature_shift_variance": {
+          "description": "The maximum allowed delta for an agent's temperature during mutation.",
+          "title": "Temperature Shift Variance",
+          "type": "number"
+        }
+      },
+      "required": [
+        "mutation_rate",
+        "temperature_shift_variance"
+      ],
+      "title": "MutationPolicy",
+      "type": "object"
+    },
+    "NetworkNamespace": {
+      "additionalProperties": false,
+      "description": "The isolated network namespace.",
+      "properties": {
+        "allow_egress": {
+          "default": false,
+          "description": "Whether the sandbox can initiate outbound network connections.",
+          "title": "Allow Egress",
+          "type": "boolean"
+        },
+        "allowed_hosts": {
+          "description": "A strict allowlist of external domains/IPs.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Allowed Hosts",
+          "type": "array"
+        }
+      },
+      "title": "NetworkNamespace",
+      "type": "object"
+    },
     "NodeID": {
       "description": "Unique identifier for a node in the graph. Alphanumeric, underscores, hyphens only.",
       "examples": [
@@ -1843,6 +2110,13 @@
       ],
       "title": "ObservationEvent",
       "type": "object"
+    },
+    "OptimizationDirection": {
+      "enum": [
+        "maximize",
+        "minimize"
+      ],
+      "type": "string"
     },
     "PatchOperation": {
       "enum": [
@@ -2003,6 +2277,35 @@
       "title": "RedactionRule",
       "type": "object"
     },
+    "ResourceCeilings": {
+      "additionalProperties": false,
+      "description": "Hardware-level limits.",
+      "properties": {
+        "max_memory_bytes": {
+          "description": "The absolute memory ceiling for the sandbox.",
+          "title": "Max Memory Bytes",
+          "type": "integer"
+        },
+        "max_instruction_cycles": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional limit on CPU instructions to prevent infinite loops.",
+          "title": "Max Instruction Cycles"
+        }
+      },
+      "required": [
+        "max_memory_bytes"
+      ],
+      "title": "ResourceCeilings",
+      "type": "object"
+    },
     "RollbackRequest": {
       "additionalProperties": false,
       "properties": {
@@ -2032,6 +2335,15 @@
       "title": "RollbackRequest",
       "type": "object"
     },
+    "RuntimeEngine": {
+      "enum": [
+        "wasm",
+        "gvisor",
+        "firecracker",
+        "bpf"
+      ],
+      "type": "string"
+    },
     "SalienceProfile": {
       "additionalProperties": false,
       "properties": {
@@ -2051,6 +2363,54 @@
         "decay_rate"
       ],
       "title": "SalienceProfile",
+      "type": "object"
+    },
+    "SandboxedNode": {
+      "additionalProperties": false,
+      "description": "A node representing a mathematical, hardware-level isolation limit (e.g., WASM/MicroVM constraints).",
+      "properties": {
+        "description": {
+          "description": "A description of the node's function.",
+          "title": "Description",
+          "type": "string"
+        },
+        "intervention_policies": {
+          "description": "A declarative list of proactive oversight hooks bound to this node's lifecycle.",
+          "items": {
+            "$ref": "#/$defs/InterventionPolicy"
+          },
+          "title": "Intervention Policies",
+          "type": "array"
+        },
+        "type": {
+          "const": "sandboxed",
+          "default": "sandboxed",
+          "description": "Discriminator for a Sandboxed node.",
+          "title": "Type",
+          "type": "string"
+        },
+        "runtime_engine": {
+          "$ref": "#/$defs/RuntimeEngine",
+          "description": "The underlying micro-isolation technology."
+        },
+        "resource_ceilings": {
+          "$ref": "#/$defs/ResourceCeilings"
+        },
+        "syscalls": {
+          "$ref": "#/$defs/SyscallBoundary"
+        },
+        "network": {
+          "$ref": "#/$defs/NetworkNamespace"
+        }
+      },
+      "required": [
+        "description",
+        "runtime_engine",
+        "resource_ceilings",
+        "syscalls",
+        "network"
+      ],
+      "title": "SandboxedNode",
       "type": "object"
     },
     "SanitizationAction": {
@@ -2519,6 +2879,22 @@
         "nodes"
       ],
       "title": "SwarmTopology",
+      "type": "object"
+    },
+    "SyscallBoundary": {
+      "additionalProperties": false,
+      "description": "The operating system interface boundary.",
+      "properties": {
+        "allowed_syscalls": {
+          "description": "A strict allowlist of POSIX system calls permitted by the sandbox.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Allowed Syscalls",
+          "type": "array"
+        }
+      },
+      "title": "SyscallBoundary",
       "type": "object"
     },
     "System1Reflex": {
