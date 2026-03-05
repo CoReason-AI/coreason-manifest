@@ -76,27 +76,19 @@ def test_massive_concurrency() -> None:
 
 @given(
     spawning_threshold=st.integers(min_value=1, max_value=1000),
-    max_concurrent_agents=st.integers(min_value=1, max_value=1000)
+    max_concurrent_agents=st.integers(min_value=1, max_value=1000),
 )
 def test_swarm_deadlock_proof(spawning_threshold: int, max_concurrent_agents: int) -> None:
     """The Swarm Deadlock Proof."""
     if spawning_threshold > max_concurrent_agents:
         try:
-            SwarmTopology(
-                nodes={},
-                spawning_threshold=spawning_threshold,
-                max_concurrent_agents=max_concurrent_agents
-            )
+            SwarmTopology(nodes={}, spawning_threshold=spawning_threshold, max_concurrent_agents=max_concurrent_agents)
             pytest.fail("Should have raised ValidationError")
         except ValidationError:
             pass
     else:
         # Should succeed
-        SwarmTopology(
-            nodes={},
-            spawning_threshold=spawning_threshold,
-            max_concurrent_agents=max_concurrent_agents
-        )
+        SwarmTopology(nodes={}, spawning_threshold=spawning_threshold, max_concurrent_agents=max_concurrent_agents)
 
 
 def _writer_thread(idx: int, shared_list: list[ExecutionNode]) -> None:

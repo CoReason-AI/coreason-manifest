@@ -20,6 +20,7 @@ class CustodyRecord(CoreasonBaseModel):
     """
     Cryptographic state of an agent to ensure full traceability and provenance.
     """
+
     model_config = ConfigDict(frozen=True)
 
     prompt_template_sha: GitSHA = Field(description="The cryptographic SHA of the prompt template used.")
@@ -31,6 +32,7 @@ class ExecutionNode(CoreasonBaseModel):
     """
     Cryptographic state of an execution node in a Merkle DAG trace.
     """
+
     model_config = ConfigDict(frozen=True)
 
     request_id: str = Field(description="The unique ID for this specific execution.")

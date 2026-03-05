@@ -1003,14 +1003,14 @@
           "type": "integer"
         },
         "max_concurrent_agents": {
+          "default": 10,
           "description": "The absolute ceiling for concurrent agent threads.",
           "title": "Max Concurrent Agents",
           "type": "integer"
         }
       },
       "required": [
-        "nodes",
-        "max_concurrent_agents"
+        "nodes"
       ],
       "title": "SwarmTopology",
       "type": "object"
