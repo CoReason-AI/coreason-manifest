@@ -416,6 +416,24 @@
           "title": "Type",
           "type": "string"
         },
+        "edges": {
+          "description": "List of edges between nodes.",
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "$ref": "#/$defs/NodeID"
+              },
+              {
+                "$ref": "#/$defs/NodeID"
+              }
+            ],
+            "type": "array"
+          },
+          "title": "Edges",
+          "type": "array"
+        },
         "allow_cycles": {
           "default": false,
           "description": "Configuration indicating if cycles are allowed during validation.",
@@ -505,6 +523,8 @@
         },
         "dissonance_threshold": {
           "description": "The threshold for cognitive dissonance before triggering an action.",
+          "maximum": 1.0,
+          "minimum": 0.0,
           "title": "Dissonance Threshold",
           "type": "number"
         },
@@ -822,6 +842,8 @@
       "properties": {
         "max_loops": {
           "description": "The maximum number of self-correction loops allowed.",
+          "maximum": 50,
+          "minimum": 0,
           "title": "Max Loops",
           "type": "integer"
         },
@@ -989,6 +1011,8 @@
       "properties": {
         "confidence_threshold": {
           "description": "The confidence threshold required to execute a reflex action.",
+          "maximum": 1.0,
+          "minimum": 0.0,
           "title": "Confidence Threshold",
           "type": "number"
         },
