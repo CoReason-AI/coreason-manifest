@@ -96,7 +96,6 @@ def test_semantic_memory_determinism() -> None:
     assert hash(node1) == hash(node2)
 
 
-
 def test_unicode_determinism() -> None:
     text_nfc = unicodedata.normalize("NFC", "Café")
     text_nfd = unicodedata.normalize("NFD", "Café")

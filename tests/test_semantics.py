@@ -87,6 +87,7 @@ def test_pydantic_field_descriptions() -> None:
                             f"must have a 'description' kwarg in Field(...)."
                         )
 
+
 def test_models_inherit_coreason_base() -> None:
     """
     Assertion 4: Prove all schema inherit from CoreasonBaseModel,

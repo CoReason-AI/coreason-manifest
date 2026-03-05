@@ -404,6 +404,7 @@ def test_semanticedge_fuzzing(payload: dict[str, Any]) -> None:
     assert isinstance(parsed, SemanticEdge)
     assert parsed.edge_id == payload["edge_id"]
 
+
 def test_deep_nesting_dos() -> None:
 
     from pydantic import ValidationError
@@ -424,6 +425,7 @@ def test_deep_nesting_dos() -> None:
         )
 
     assert "Data structure too deep" in str(exc.value)
+
 
 def test_ssti_defense() -> None:
     from pydantic import ValidationError
