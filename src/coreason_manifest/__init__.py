@@ -18,9 +18,19 @@ from coreason_manifest.state import EpistemicLedger, WorkingMemorySnapshot
 from coreason_manifest.telemetry import LogEnvelope, SpanTrace
 from coreason_manifest.testing.chaos import ChaosExperiment, FaultInjectionProfile, FaultType, SteadyStateHypothesis
 from coreason_manifest.testing.red_team import AdversaryProfile, AiTMStrategy, AttackVector
+from coreason_manifest.tooling import (
+    ActionSpace,
+    ExecutionSLA,
+    MCPClientBinding,
+    MCPTransport,
+    PermissionBoundary,
+    SideEffectProfile,
+    ToolDefinition,
+)
 from coreason_manifest.workflow import WorkflowEnvelope
 
 __all__ = [
+    "ActionSpace",
     "AdjudicationRubric",
     "AdversaryProfile",
     "AiTMStrategy",
@@ -31,16 +41,22 @@ __all__ = [
     "ConstitutionalRule",
     "CoreasonBaseModel",
     "EpistemicLedger",
+    "ExecutionSLA",
     "FaultInjectionProfile",
     "FaultType",
     "GovernancePolicy",
     "LogEnvelope",
+    "MCPClientBinding",
+    "MCPTransport",
     "ModelProfile",
     "NodeID",
+    "PermissionBoundary",
     "RateCard",
     "SemanticVersion",
+    "SideEffectProfile",
     "SpanTrace",
     "SteadyStateHypothesis",
+    "ToolDefinition",
     "WorkflowEnvelope",
     "WorkingMemorySnapshot",
 ]
