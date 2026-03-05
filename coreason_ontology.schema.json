@@ -815,6 +815,18 @@
           "default": null,
           "description": "The schema-on-write contract governing the internal state of this topology."
         },
+        "information_flow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/InformationFlowPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The structural Data Loss Prevention (DLP) contract governing all state mutations in this topology."
+        },
         "type": {
           "const": "council",
           "default": "council",
@@ -900,6 +912,18 @@
           "default": null,
           "description": "The schema-on-write contract governing the internal state of this topology."
         },
+        "information_flow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/InformationFlowPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The structural Data Loss Prevention (DLP) contract governing all state mutations in this topology."
+        },
         "type": {
           "const": "dag",
           "default": "dag",
@@ -949,6 +973,16 @@
       ],
       "title": "DAGTopology",
       "type": "object"
+    },
+    "DataClassification": {
+      "enum": [
+        "phi",
+        "pii",
+        "pci",
+        "confidential",
+        "public"
+      ],
+      "type": "string"
     },
     "DefeasibleAttack": {
       "additionalProperties": false,
@@ -1384,6 +1418,36 @@
         "description"
       ],
       "title": "HumanNode",
+      "type": "object"
+    },
+    "InformationFlowPolicy": {
+      "additionalProperties": false,
+      "description": "Mathematical Data Loss Prevention (DLP) contract that bounds the graph.",
+      "properties": {
+        "policy_id": {
+          "description": "Unique identifier for this macroscopic flow control policy.",
+          "title": "Policy Id",
+          "type": "string"
+        },
+        "active": {
+          "default": true,
+          "description": "Whether this policy is currently enforcing data sanitization.",
+          "title": "Active",
+          "type": "boolean"
+        },
+        "rules": {
+          "description": "The array of sanitization rules to enforce.",
+          "items": {
+            "$ref": "#/$defs/RedactionRule"
+          },
+          "title": "Rules",
+          "type": "array"
+        }
+      },
+      "required": [
+        "policy_id"
+      ],
+      "title": "InformationFlowPolicy",
       "type": "object"
     },
     "InterventionPolicy": {
@@ -1867,6 +1931,51 @@
       "title": "RateCard",
       "type": "object"
     },
+    "RedactionRule": {
+      "additionalProperties": false,
+      "description": "A specific rule for algorithmic data sanitization.",
+      "properties": {
+        "rule_id": {
+          "description": "Unique identifier for the sanitization rule.",
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "classification": {
+          "$ref": "#/$defs/DataClassification",
+          "description": "The category of sensitive data this rule targets."
+        },
+        "target_pattern": {
+          "description": "The semantic entity type or declarative regex pattern to identify.",
+          "title": "Target Pattern",
+          "type": "string"
+        },
+        "action": {
+          "$ref": "#/$defs/SanitizationAction",
+          "description": "The required algorithmic response when this pattern is detected."
+        },
+        "replacement_token": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The strictly typed string to insert if the action is 'redact'.",
+          "title": "Replacement Token"
+        }
+      },
+      "required": [
+        "rule_id",
+        "classification",
+        "target_pattern",
+        "action"
+      ],
+      "title": "RedactionRule",
+      "type": "object"
+    },
     "SalienceProfile": {
       "additionalProperties": false,
       "properties": {
@@ -1887,6 +1996,15 @@
       ],
       "title": "SalienceProfile",
       "type": "object"
+    },
+    "SanitizationAction": {
+      "enum": [
+        "redact",
+        "hash",
+        "drop_event",
+        "trigger_quarantine"
+      ],
+      "type": "string"
     },
     "SelfCorrectionPolicy": {
       "additionalProperties": false,
@@ -2242,6 +2360,18 @@
           ],
           "default": null,
           "description": "The schema-on-write contract governing the internal state of this topology."
+        },
+        "information_flow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/InformationFlowPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The structural Data Loss Prevention (DLP) contract governing all state mutations in this topology."
         },
         "type": {
           "const": "swarm",

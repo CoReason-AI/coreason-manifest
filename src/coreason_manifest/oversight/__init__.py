@@ -6,6 +6,7 @@
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
 from .adjudication import AdjudicationRubric, AdjudicationVerdict, GradingCriteria
+from .dlp import DataClassification, InformationFlowPolicy, RedactionRule, SanitizationAction
 from .governance import ConstitutionalRule, GlobalGovernance, GovernancePolicy
 from .intervention import (
     AnyInterventionPayload,
@@ -26,14 +27,18 @@ __all__ = [
     "BoundedInterventionScope",
     "CircuitBreakerTrip",
     "ConstitutionalRule",
+    "DataClassification",
     "FallbackSLA",
     "FallbackTrigger",
     "GlobalGovernance",
     "GovernancePolicy",
     "GradingCriteria",
+    "InformationFlowPolicy",
     "InterventionPolicy",
     "InterventionRequest",
     "InterventionVerdict",
     "LifecycleTrigger",
     "QuarantineOrder",
+    "RedactionRule",
+    "SanitizationAction",
 ]
