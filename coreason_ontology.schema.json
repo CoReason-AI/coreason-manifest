@@ -385,6 +385,7 @@
         },
         "text_chunk": {
           "description": "The natural language representation of the proposition.",
+          "maxLength": 50000,
           "title": "Text Chunk",
           "type": "string"
         },
@@ -413,6 +414,7 @@
             "$ref": "#/$defs/ArgumentClaim"
           },
           "description": "A registry of all active claims, keyed by claim_id.",
+          "maxProperties": 10000,
           "title": "Claims",
           "type": "object"
         },
@@ -421,6 +423,7 @@
             "$ref": "#/$defs/DefeasibleAttack"
           },
           "description": "A registry of all directed attack edges, keyed by attack_id.",
+          "maxProperties": 10000,
           "title": "Attacks",
           "type": "object"
         }
@@ -1190,6 +1193,7 @@
           "items": {
             "$ref": "#/$defs/AnyStateEvent"
           },
+          "maxItems": 10000,
           "title": "History",
           "type": "array"
         },
@@ -1480,6 +1484,7 @@
           "items": {
             "$ref": "#/$defs/SpanEvent"
           },
+          "maxItems": 5000,
           "title": "Events",
           "type": "array"
         }
@@ -2550,6 +2555,7 @@
         },
         "text_chunk": {
           "description": "The raw natural language representation of the memory.",
+          "maxLength": 50000,
           "title": "Text Chunk",
           "type": "string"
         },

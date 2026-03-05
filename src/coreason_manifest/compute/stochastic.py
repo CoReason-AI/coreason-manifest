@@ -5,9 +5,9 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
-from typing import Literal
+from typing import Any, Literal
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from coreason_manifest.core.base import CoreasonBaseModel
 
@@ -25,6 +25,12 @@ class DistributionProfile(CoreasonBaseModel):
     mean: float | None = Field(default=None, description="The expected value (mu) of the distribution.")
     variance: float | None = Field(default=None, description="The mathematical variance (sigma squared).")
     confidence_interval_95: tuple[float, float] | None = Field(default=None, description="The 95% probability bounds.")
+
+    @model_validator(mode="after")
+    def validate_confidence_interval(self) -> Any:
+        if self.confidence_interval_95 is not None and self.confidence_interval_95[0] >= self.confidence_interval_95[1]:
+            raise ValueError("confidence_interval_95 must have interval[0] < interval[1]")
+        return self
 
 
 class FitnessObjective(CoreasonBaseModel):

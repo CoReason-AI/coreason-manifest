@@ -5,9 +5,9 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
-from typing import Literal
+from typing import Any, Literal
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.core.primitives import NodeID
@@ -29,6 +29,12 @@ class TemporalBounds(CoreasonBaseModel):
         default=None, description="The Allen's interval algebra or causal relationship classification."
     )
 
+    @model_validator(mode="after")
+    def validate_temporal_bounds(self) -> Any:
+        if self.valid_from is not None and self.valid_to is not None and self.valid_to < self.valid_from:
+            raise ValueError("valid_to cannot be before valid_from")
+        return self
+
 
 class MemoryProvenance(CoreasonBaseModel):
     extracted_by: NodeID = Field(description="The ID of the agent node that extracted this memory.")
@@ -43,7 +49,7 @@ class SalienceProfile(CoreasonBaseModel):
 class SemanticNode(CoreasonBaseModel):
     node_id: str = Field(description="The unique identifier of this semantic concept.")
     label: str = Field(description="The categorical label of the node (e.g., 'Person', 'Concept').")
-    text_chunk: str = Field(description="The raw natural language representation of the memory.")
+    text_chunk: str = Field(max_length=50000, description="The raw natural language representation of the memory.")
     embedding: VectorEmbedding | None = Field(
         default=None, description="The dense vector representation of the text chunk."
     )

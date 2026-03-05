@@ -27,7 +27,7 @@ class EvidentiaryWarrant(CoreasonBaseModel):
 class ArgumentClaim(CoreasonBaseModel):
     claim_id: str = Field(description="Unique identifier for this specific logical proposition.")
     proponent_id: str = Field(description="The NodeID of the agent or system that advanced this claim.")
-    text_chunk: str = Field(description="The natural language representation of the proposition.")
+    text_chunk: str = Field(max_length=50000, description="The natural language representation of the proposition.")
     warrants: list[EvidentiaryWarrant] = Field(
         default_factory=list, description="The foundational premises supporting this claim."
     )
@@ -43,7 +43,11 @@ class DefeasibleAttack(CoreasonBaseModel):
 
 
 class ArgumentGraph(CoreasonBaseModel):
-    claims: dict[str, ArgumentClaim] = Field(description="A registry of all active claims, keyed by claim_id.")
+    claims: dict[str, ArgumentClaim] = Field(
+        max_length=10000, description="A registry of all active claims, keyed by claim_id."
+    )
     attacks: dict[str, DefeasibleAttack] = Field(
-        default_factory=dict, description="A registry of all directed attack edges, keyed by attack_id."
+        default_factory=dict,
+        max_length=10000,
+        description="A registry of all directed attack edges, keyed by attack_id.",
     )
