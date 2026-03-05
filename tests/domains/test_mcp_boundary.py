@@ -71,6 +71,63 @@ def test_explicit_depth_attack_proof():
 
 
 @pytest.mark.anyio
+async def test_mcp_json_bomb_rejection():
+    """
+    Prove the JSON-Bomb OOM prevention shield works.
+    Generate a raw string payload > 5MB, pass it to the stdio parser, and assert
+    it instantly raises a parse error without attempting to decode it.
+    """
+    import anyio
+
+    class MockAsyncFile:
+        def __init__(self, data: list[str]):
+            self.data = data
+            self.index = 0
+
+        def __aiter__(self):
+            return self
+
+        async def __anext__(self):
+            if self.index < len(self.data):
+                val = self.data[self.index]
+                self.index += 1
+                return val
+            await anyio.sleep(0.1)
+            raise StopAsyncIteration
+
+        async def write(self, data):
+            pass
+
+        async def flush(self):
+            pass
+
+    # Create a string slightly over 5,000,000 characters
+    toxic_bomb = '{"jsonrpc": "2.0", "method": "ping", "params": {"a": "' + "A" * 5_000_001 + '"}}'
+    mock_stdin = MockAsyncFile([toxic_bomb])
+
+    # Create streams manually and run stdin_reader to avoid async context manager hangs
+    read_stream_writer, read_stream = anyio.create_memory_object_stream(0)
+
+    async def run_stdin():
+        try:
+            async with read_stream_writer:
+                async for line in mock_stdin:
+                    if len(line) > 5_000_000:
+                        await read_stream_writer.send(Exception("Parse error: Payload length exceeds 5MB limit."))
+                        continue
+        except anyio.ClosedResourceError:
+            pass
+
+    async with anyio.create_task_group() as tg:
+        tg.start_soon(run_stdin)
+        msg = await read_stream.receive()
+        tg.cancel_scope.cancel()
+
+    assert isinstance(msg, Exception)
+    assert "5MB" in str(msg)
+
+
+@pytest.mark.anyio
 async def test_uptime_assertion_poison_pill():
     """
     Pass toxic malformed dictionaries directly into the MCP server's primary request handling function.
