@@ -29,7 +29,7 @@ class FallbackSLA(CoreasonBaseModel):
     SLA defining bounds on human intervention delays.
     """
 
-    timeout_seconds: int = Field(description="The maximum allowed delay for a human intervention.")
+    timeout_seconds: int = Field(gt=0, description="The maximum allowed delay for a human intervention.")
     timeout_action: Literal["fail_safe", "proceed_with_defaults", "escalate"] = Field(
         description="The action to take when the timeout expires."
     )

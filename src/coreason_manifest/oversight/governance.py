@@ -5,13 +5,12 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
-from typing import Literal
+from typing import Annotated, Literal
 
-from pydantic import Field
+from pydantic import Field, StringConstraints
 
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.core.primitives import SemanticVersion
-
 
 class ConstitutionalRule(CoreasonBaseModel):
     """
@@ -23,7 +22,9 @@ class ConstitutionalRule(CoreasonBaseModel):
     severity: Literal["low", "medium", "high", "critical"] = Field(
         description="Severity level if the rule is violated."
     )
-    forbidden_intents: list[str] = Field(description="List of intents that are forbidden by this rule.")
+    forbidden_intents: set[Annotated[str, StringConstraints(min_length=1)]] = Field(
+        description="List of intents that are forbidden by this rule."
+    )
 
 
 class GovernancePolicy(CoreasonBaseModel):
