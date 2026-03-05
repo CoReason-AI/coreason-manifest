@@ -34,11 +34,12 @@ class CoreasonBaseModel(BaseModel):
 
     def __hash__(self) -> int:
         try:
-            return object.__getattribute__(self, "_cached_hash")
+            h: int = object.__getattribute__(self, "_cached_hash")
+            return h
         except AttributeError:
             h = hash(self.model_dump_canonical())
             object.__setattr__(self, "_cached_hash", h)
-            return h
+            return int(h)
 
     def model_dump_canonical(self) -> bytes:
         """Return a strictly sorted, canonical JSON serialization for cryptographic hashing."""
