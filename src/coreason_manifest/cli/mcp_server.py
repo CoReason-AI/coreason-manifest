@@ -21,14 +21,37 @@ def list_schemas() -> list[str]:
     schemas = []
 
     # Check if the model is exported and is a CoreasonBaseModel
+    import importlib
+
     from coreason_manifest.core import CoreasonBaseModel
+
+    domains = [
+        "coreason_manifest.core",
+        "coreason_manifest.oversight",
+        "coreason_manifest.state",
+        "coreason_manifest.testing",
+        "coreason_manifest.tooling",
+        "coreason_manifest.workflow",
+        "coreason_manifest.telemetry",
+        "coreason_manifest.compute",
+    ]
+
+    for domain in domains:
+        try:
+            mod = importlib.import_module(domain)
+            for name in getattr(mod, "__all__", []):
+                obj = getattr(mod, name)
+                if isinstance(obj, type) and issubclass(obj, CoreasonBaseModel) and obj is not CoreasonBaseModel:
+                    schemas.append(name)
+        except ImportError:
+            pass
 
     for name in getattr(coreason_manifest, "__all__", []):
         obj = getattr(coreason_manifest, name)
         if isinstance(obj, type) and issubclass(obj, CoreasonBaseModel) and obj is not CoreasonBaseModel:
             schemas.append(name)
 
-    return sorted(schemas)
+    return sorted(set(schemas))
 
 
 @mcp.tool()
@@ -38,12 +61,37 @@ def get_schema(schema_name: str) -> dict[str, Any]:
     Args:
         schema_name: The name of the schema to fetch (e.g., WorkingMemorySnapshot)
     """
+    import importlib
+
     from coreason_manifest.core import CoreasonBaseModel
 
-    if schema_name not in getattr(coreason_manifest, "__all__", []):
+    domains = [
+        "coreason_manifest.core",
+        "coreason_manifest.oversight",
+        "coreason_manifest.state",
+        "coreason_manifest.testing",
+        "coreason_manifest.tooling",
+        "coreason_manifest.workflow",
+        "coreason_manifest.telemetry",
+        "coreason_manifest.compute",
+    ]
+
+    obj = None
+    for domain in domains:
+        try:
+            mod = importlib.import_module(domain)
+            if schema_name in getattr(mod, "__all__", []):
+                obj = getattr(mod, schema_name)
+                break
+        except ImportError:
+            pass
+
+    if obj is None and schema_name in getattr(coreason_manifest, "__all__", []):
+        obj = getattr(coreason_manifest, schema_name)
+
+    if obj is None:
         raise ValueError(f"Schema '{schema_name}' not found in the manifest.")
 
-    obj = getattr(coreason_manifest, schema_name)
     if not isinstance(obj, type) or not issubclass(obj, CoreasonBaseModel):
         raise ValueError(f"'{schema_name}' is not a valid schema model.")
 
