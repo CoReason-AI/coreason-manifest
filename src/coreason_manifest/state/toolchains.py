@@ -5,17 +5,24 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
-from pydantic import Field
+from pydantic import Field, field_validator
 
 from coreason_manifest.core.base import CoreasonBaseModel
 
 
 class TerminalStateSnapshot(CoreasonBaseModel):
     cwd: str = Field(description="The current working directory of the terminal environment.")
-    stdout_buffer: str = Field(description="The buffered standard output captured from execution.")
+    stdout_buffer: str = Field(max_length=10000, description="The buffered standard output captured from execution.")
     last_exit_code: int | None = Field(default=None, description="The exit code of the last executed command, if any.")
+
+    @field_validator("cwd")
+    @classmethod
+    def validate_cwd(cls, v: str) -> str:
+        if ".." in v or "\0" in v:
+            raise ValueError("Path traversal or null bytes are strictly forbidden in cwd.")
+        return v
 
 
 class BrowserStateSnapshot(CoreasonBaseModel):
-    current_url: str = Field(description="The current active URL being viewed in the browser.")
+    current_url: str = Field(pattern=r"^https?://", description="The current active URL being viewed in the browser.")
     dom_hash: str = Field(description="A cryptographic hash representing the current DOM structure.")
