@@ -64,6 +64,45 @@
       "title": "AdjudicationRubric",
       "type": "object"
     },
+    "AdjudicationVerdict": {
+      "additionalProperties": false,
+      "description": "Verdict resulting from grading an LLM behavior or output against a rubric.",
+      "properties": {
+        "rubric_id": {
+          "description": "The ID of the rubric used for adjudication.",
+          "title": "Rubric Id",
+          "type": "string"
+        },
+        "target_node_id": {
+          "$ref": "#/$defs/NodeID",
+          "description": "The ID of the node that was evaluated."
+        },
+        "score": {
+          "description": "The final score assigned based on the rubric.",
+          "title": "Score",
+          "type": "integer"
+        },
+        "passed": {
+          "description": "Indicates whether the evaluation passed the threshold.",
+          "title": "Passed",
+          "type": "boolean"
+        },
+        "reasoning": {
+          "description": "Explanation or reasoning for the verdict and score.",
+          "title": "Reasoning",
+          "type": "string"
+        }
+      },
+      "required": [
+        "rubric_id",
+        "target_node_id",
+        "score",
+        "passed",
+        "reasoning"
+      ],
+      "title": "AdjudicationVerdict",
+      "type": "object"
+    },
     "AdversaryProfile": {
       "additionalProperties": false,
       "properties": {
@@ -197,6 +236,35 @@
       "title": "AiTMStrategy",
       "type": "object"
     },
+    "AmbientSignal": {
+      "additionalProperties": false,
+      "description": "Lightweight UX signal for UI rendering of progress.",
+      "properties": {
+        "status_message": {
+          "description": "A human-readable status message for the current task.",
+          "title": "Status Message",
+          "type": "string"
+        },
+        "progress": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The progress ratio from 0.0 to 1.0, or None if indeterminate.",
+          "title": "Progress"
+        }
+      },
+      "required": [
+        "status_message"
+      ],
+      "title": "AmbientSignal",
+      "type": "object"
+    },
     "AnyNode": {
       "description": "A discriminated union of all valid workflow nodes.",
       "discriminator": {
@@ -302,6 +370,27 @@
       "title": "BackpressurePolicy",
       "type": "object"
     },
+    "BaseStateEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "description": "A unique identifier for the event.",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "The timestamp when the event occurred.",
+          "title": "Timestamp",
+          "type": "number"
+        }
+      },
+      "required": [
+        "event_id",
+        "timestamp"
+      ],
+      "title": "BaseStateEvent",
+      "type": "object"
+    },
     "BeliefUpdateEvent": {
       "additionalProperties": false,
       "properties": {
@@ -382,6 +471,28 @@
       "title": "BoundedInterventionScope",
       "type": "object"
     },
+    "BrowserStateSnapshot": {
+      "additionalProperties": false,
+      "properties": {
+        "current_url": {
+          "description": "The current active URL being viewed in the browser.",
+          "pattern": "^https?://",
+          "title": "Current Url",
+          "type": "string"
+        },
+        "dom_hash": {
+          "description": "A cryptographic hash representing the current DOM structure.",
+          "title": "Dom Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "current_url",
+        "dom_hash"
+      ],
+      "title": "BrowserStateSnapshot",
+      "type": "object"
+    },
     "CausalInterval": {
       "enum": [
         "strictly_precedes",
@@ -419,6 +530,64 @@
         "faults"
       ],
       "title": "ChaosExperiment",
+      "type": "object"
+    },
+    "CircuitBreakerTrip": {
+      "additionalProperties": false,
+      "description": "Indicates that a circuit breaker has been tripped for a target node.",
+      "properties": {
+        "type": {
+          "const": "circuit_breaker",
+          "default": "circuit_breaker",
+          "description": "The type of the resilience payload.",
+          "title": "Type",
+          "type": "string"
+        },
+        "target_node_id": {
+          "$ref": "#/$defs/NodeID",
+          "description": "The ID of the node for which the circuit breaker was tripped."
+        },
+        "error_signature": {
+          "description": "Signature or summary of the error causing the trip.",
+          "title": "Error Signature",
+          "type": "string"
+        }
+      },
+      "required": [
+        "target_node_id",
+        "error_signature"
+      ],
+      "title": "CircuitBreakerTrip",
+      "type": "object"
+    },
+    "ComputeProvisioningRequest": {
+      "additionalProperties": false,
+      "description": "A request by a swarm to provision resources based on requirements.",
+      "properties": {
+        "max_budget": {
+          "description": "The maximum cost budget allowable for the provisioned compute.",
+          "title": "Max Budget",
+          "type": "number"
+        },
+        "required_capabilities": {
+          "description": "The minimal functional capabilities required by the requested compute.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Required Capabilities",
+          "type": "array"
+        },
+        "qos_class": {
+          "$ref": "#/$defs/QoSClassification",
+          "default": "interactive",
+          "description": "The Quality of Service priority, used by the compute spot market for semantic load shedding."
+        }
+      },
+      "required": [
+        "max_budget",
+        "required_capabilities"
+      ],
+      "title": "ComputeProvisioningRequest",
       "type": "object"
     },
     "ConstitutionalRule": {
@@ -522,6 +691,33 @@
         "adjudicator_id"
       ],
       "title": "CouncilTopology",
+      "type": "object"
+    },
+    "CustodyRecord": {
+      "additionalProperties": false,
+      "description": "Cryptographic state of an agent to ensure full traceability and provenance.",
+      "properties": {
+        "prompt_template_sha": {
+          "$ref": "#/$defs/GitSHA",
+          "description": "The cryptographic SHA of the prompt template used."
+        },
+        "context_hash": {
+          "description": "The cryptographic hash of the input context provided to the agent.",
+          "title": "Context Hash",
+          "type": "string"
+        },
+        "temperature": {
+          "description": "The temperature parameter used for generating the response.",
+          "title": "Temperature",
+          "type": "number"
+        }
+      },
+      "required": [
+        "prompt_template_sha",
+        "context_hash",
+        "temperature"
+      ],
+      "title": "CustodyRecord",
       "type": "object"
     },
     "DAGTopology": {
@@ -718,6 +914,61 @@
       "title": "ExecutionSLA",
       "type": "object"
     },
+    "FallbackSLA": {
+      "additionalProperties": false,
+      "description": "SLA defining bounds on human intervention delays.",
+      "properties": {
+        "timeout_seconds": {
+          "description": "The maximum allowed delay for a human intervention.",
+          "exclusiveMinimum": 0,
+          "title": "Timeout Seconds",
+          "type": "integer"
+        },
+        "timeout_action": {
+          "description": "The action to take when the timeout expires.",
+          "enum": [
+            "fail_safe",
+            "proceed_with_defaults",
+            "escalate"
+          ],
+          "title": "Timeout Action",
+          "type": "string"
+        }
+      },
+      "required": [
+        "timeout_seconds",
+        "timeout_action"
+      ],
+      "title": "FallbackSLA",
+      "type": "object"
+    },
+    "FallbackTrigger": {
+      "additionalProperties": false,
+      "description": "Indicates that fallback procedures should be triggered for a target node.",
+      "properties": {
+        "type": {
+          "const": "fallback",
+          "default": "fallback",
+          "description": "The type of the resilience payload.",
+          "title": "Type",
+          "type": "string"
+        },
+        "target_node_id": {
+          "$ref": "#/$defs/NodeID",
+          "description": "The ID of the failing node."
+        },
+        "fallback_node_id": {
+          "$ref": "#/$defs/NodeID",
+          "description": "The ID of the node to use as a fallback."
+        }
+      },
+      "required": [
+        "target_node_id",
+        "fallback_node_id"
+      ],
+      "title": "FallbackTrigger",
+      "type": "object"
+    },
     "FaultInjectionProfile": {
       "additionalProperties": false,
       "properties": {
@@ -759,6 +1010,36 @@
         "latency_spike",
         "token_throttle"
       ],
+      "type": "string"
+    },
+    "FederatedStateSnapshot": {
+      "additionalProperties": false,
+      "properties": {
+        "topology_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The identifier of the federated topology, if applicable.",
+          "title": "Topology Id"
+        }
+      },
+      "title": "FederatedStateSnapshot",
+      "type": "object"
+    },
+    "GitSHA": {
+      "description": "A full 40-character Git SHA-1 hash.",
+      "examples": [
+        "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0"
+      ],
+      "maxLength": 40,
+      "minLength": 40,
+      "pattern": "^[a-f0-9]{40}$",
       "type": "string"
     },
     "GlobalGovernance": {
@@ -910,6 +1191,130 @@
         "trigger"
       ],
       "title": "InterventionPolicy",
+      "type": "object"
+    },
+    "InterventionRequest": {
+      "additionalProperties": false,
+      "description": "Emitted when an agent needs human approval or further intervention.",
+      "properties": {
+        "type": {
+          "const": "request",
+          "default": "request",
+          "description": "The type of the intervention payload.",
+          "title": "Type",
+          "type": "string"
+        },
+        "intervention_scope": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BoundedInterventionScope"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The scope constraints bounding the intervention."
+        },
+        "fallback_sla": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FallbackSLA"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SLA constraints on the intervention delay."
+        },
+        "target_node_id": {
+          "$ref": "#/$defs/NodeID",
+          "description": "The ID of the target node."
+        },
+        "context_summary": {
+          "description": "A summary of the context requiring intervention.",
+          "title": "Context Summary",
+          "type": "string"
+        },
+        "proposed_action": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "description": "The action proposed by the agent that requires approval.",
+          "title": "Proposed Action",
+          "type": "object"
+        },
+        "adjudication_deadline": {
+          "description": "The deadline for adjudication, represented as a UNIX timestamp.",
+          "title": "Adjudication Deadline",
+          "type": "number"
+        }
+      },
+      "required": [
+        "target_node_id",
+        "context_summary",
+        "proposed_action",
+        "adjudication_deadline"
+      ],
+      "title": "InterventionRequest",
+      "type": "object"
+    },
+    "InterventionVerdict": {
+      "additionalProperties": false,
+      "description": "Emitted by a human or oversight AI to resume the swarm.",
+      "properties": {
+        "type": {
+          "const": "verdict",
+          "default": "verdict",
+          "description": "The type of the intervention payload.",
+          "title": "Type",
+          "type": "string"
+        },
+        "target_node_id": {
+          "$ref": "#/$defs/NodeID",
+          "description": "The ID of the target node."
+        },
+        "approved": {
+          "description": "Indicates whether the proposed action was approved.",
+          "title": "Approved",
+          "type": "boolean"
+        },
+        "feedback": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Optional feedback provided along with the verdict.",
+          "title": "Feedback"
+        }
+      },
+      "required": [
+        "target_node_id",
+        "approved",
+        "feedback"
+      ],
+      "title": "InterventionVerdict",
       "type": "object"
     },
     "LifecycleTrigger": {
@@ -1169,6 +1574,43 @@
         "file_system_read_only"
       ],
       "title": "PermissionBoundary",
+      "type": "object"
+    },
+    "QoSClassification": {
+      "enum": [
+        "critical",
+        "high",
+        "interactive",
+        "background_batch"
+      ],
+      "type": "string"
+    },
+    "QuarantineOrder": {
+      "additionalProperties": false,
+      "description": "Indicates that a target node should be quarantined.",
+      "properties": {
+        "type": {
+          "const": "quarantine",
+          "default": "quarantine",
+          "description": "The type of the resilience payload.",
+          "title": "Type",
+          "type": "string"
+        },
+        "target_node_id": {
+          "$ref": "#/$defs/NodeID",
+          "description": "The ID of the node to be quarantined."
+        },
+        "reason": {
+          "description": "The reason for the quarantine order.",
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "target_node_id",
+        "reason"
+      ],
+      "title": "QuarantineOrder",
       "type": "object"
     },
     "RateCard": {
@@ -1541,6 +1983,13 @@
       "title": "SteadyStateHypothesis",
       "type": "object"
     },
+    "SuspenseEnvelope": {
+      "additionalProperties": false,
+      "description": "Indicates that the swarm is waiting on a long-running process or human input.",
+      "properties": {},
+      "title": "SuspenseEnvelope",
+      "type": "object"
+    },
     "SwarmTopology": {
       "additionalProperties": false,
       "description": "A dynamic Swarm workflow topology.",
@@ -1742,6 +2191,41 @@
         }
       },
       "title": "TemporalBounds",
+      "type": "object"
+    },
+    "TerminalStateSnapshot": {
+      "additionalProperties": false,
+      "properties": {
+        "cwd": {
+          "description": "The current working directory of the terminal environment.",
+          "title": "Cwd",
+          "type": "string"
+        },
+        "stdout_buffer": {
+          "description": "The buffered standard output captured from execution.",
+          "maxLength": 10000,
+          "title": "Stdout Buffer",
+          "type": "string"
+        },
+        "last_exit_code": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The exit code of the last executed command, if any.",
+          "title": "Last Exit Code"
+        }
+      },
+      "required": [
+        "cwd",
+        "stdout_buffer"
+      ],
+      "title": "TerminalStateSnapshot",
       "type": "object"
     },
     "ToolDefinition": {

@@ -25,10 +25,39 @@ def main() -> None:
     # We should also import CoreasonBaseModel to check isinstance/issubclass
     from coreason_manifest.core import CoreasonBaseModel
 
+    # Import all domains dynamically to collect schemas
+    domains = [
+        "coreason_manifest.core",
+        "coreason_manifest.oversight",
+        "coreason_manifest.state",
+        "coreason_manifest.testing",
+        "coreason_manifest.tooling",
+        "coreason_manifest.workflow",
+        "coreason_manifest.telemetry",
+        "coreason_manifest.compute",
+    ]
+
+    for domain in domains:
+        try:
+            mod = importlib.import_module(domain)
+            for name in getattr(mod, "__all__", []):
+                obj = getattr(mod, name)
+                if isinstance(obj, type) and issubclass(obj, CoreasonBaseModel) and obj is not CoreasonBaseModel:
+                    models_to_export.append((obj, "validation"))
+        except ImportError:
+            pass
+
+    # Include any root schemas just in case
     for name in getattr(manifest, "__all__", []):
         obj = getattr(manifest, name)
         if isinstance(obj, type) and issubclass(obj, CoreasonBaseModel) and obj is not CoreasonBaseModel:
             models_to_export.append((obj, "validation"))
+
+    # Remove duplicates
+    unique_models = {}
+    for obj, type_ in models_to_export:
+        unique_models[obj] = (obj, type_)
+    models_to_export = list(unique_models.values())
 
     if not models_to_export:
         print("No models found to export.")
