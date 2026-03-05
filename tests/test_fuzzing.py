@@ -256,7 +256,9 @@ def test_chaosexperiment_fuzzing(
             "provenance": st.fixed_dictionaries(
                 {
                     "extracted_by": st.text(
-                        min_size=1, max_size=128, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
+                        min_size=1,
+                        max_size=128,
+                        alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-",
                     ),
                     "source_event_id": st.text(),
                 }
@@ -314,7 +316,9 @@ def test_semanticnode_fuzzing(payload: dict[str, Any]) -> None:
                 st.fixed_dictionaries(
                     {
                         "extracted_by": st.text(
-                            min_size=1, max_size=128, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
+                            min_size=1,
+                            max_size=128,
+                            alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-",
                         ),
                         "source_event_id": st.text(),
                     }
