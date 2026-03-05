@@ -39,9 +39,7 @@ def test_fallback_sla_rejects_non_positive_timeout(timeout_seconds: int) -> None
         )
 
 
-@given(
-    forbidden_intents=st.lists(st.just(""), min_size=1)
-)
+@given(forbidden_intents=st.lists(st.just(""), min_size=1))
 def test_constitutional_rule_rejects_empty_strings(forbidden_intents: list[str]) -> None:
     with pytest.raises(ValidationError):
         ConstitutionalRule(
@@ -52,9 +50,7 @@ def test_constitutional_rule_rejects_empty_strings(forbidden_intents: list[str])
         )
 
 
-@given(
-    forbidden_intents=st.lists(st.text(min_size=1), min_size=2).filter(lambda x: len(set(x)) < len(x))
-)
+@given(forbidden_intents=st.lists(st.text(min_size=1), min_size=2).filter(lambda x: len(set(x)) < len(x)))
 def test_constitutional_rule_deduplicates_or_rejects_duplicate_strings(forbidden_intents: list[str]) -> None:
     # If using set, Pydantic should deduplicate or raise error if list has duplicates.
     # We test that it's structurally impossible to have duplicates in the model.
@@ -90,7 +86,7 @@ def test_sandbox_success_massive_configs(
 ) -> None:
     scope = BoundedInterventionScope(
         allowed_fields=allowed_fields,
-        json_schema_whitelist=json_schema_whitelist, # type: ignore
+        json_schema_whitelist=json_schema_whitelist,  # type: ignore
     )
     sla = FallbackSLA(
         timeout_seconds=timeout_seconds,
@@ -101,7 +97,7 @@ def test_sandbox_success_massive_configs(
         fallback_sla=sla,
         target_node_id="node-1",
         context_summary=context_summary,
-        proposed_action=proposed_action, # type: ignore
+        proposed_action=proposed_action,  # type: ignore
         adjudication_deadline=adjudication_deadline,
     )
     assert req.intervention_scope is not None
