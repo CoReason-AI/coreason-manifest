@@ -20,6 +20,7 @@ from coreason_manifest.state.semantic import (
     TemporalBounds,
     VectorEmbedding,
 )
+from coreason_manifest.telemetry.schemas import ExecutionSpan, SpanEvent, TraceExportBatch
 from coreason_manifest.testing.chaos import ChaosExperiment, FaultInjectionProfile, SteadyStateHypothesis
 from coreason_manifest.tooling import ActionSpace, PermissionBoundary, SideEffectProfile, ToolDefinition
 from coreason_manifest.workflow.auctions import AgentBid, AuctionState, TaskAnnouncement
@@ -49,6 +50,32 @@ def test_workflow_envelope_determinism() -> None:
 
     assert env1.model_dump_canonical() == env2.model_dump_canonical()
     assert hash(env1) == hash(env2)
+
+
+def test_telemetry_determinism() -> None:
+    event_late = SpanEvent(name="late_event", timestamp_unix_nano=200, attributes={})
+    event_early = SpanEvent(name="early_event", timestamp_unix_nano=100, attributes={})
+
+    span_b = ExecutionSpan(
+        trace_id="t1",
+        span_id="s_b",
+        name="span_b",
+        start_time_unix_nano=100,
+        events=[event_late, event_early],
+    )
+    span_a = ExecutionSpan(
+        trace_id="t1",
+        span_id="s_a",
+        name="span_a",
+        start_time_unix_nano=100,
+        events=[event_early, event_late],
+    )
+
+    batch1 = TraceExportBatch(batch_id="b1", spans=[span_a, span_b])
+    batch2 = TraceExportBatch(batch_id="b1", spans=[span_b, span_a])
+
+    assert batch1.model_dump_canonical() == batch2.model_dump_canonical()
+    assert hash(batch1) == hash(batch2)
 
 
 def test_evolutionary_determinism() -> None:

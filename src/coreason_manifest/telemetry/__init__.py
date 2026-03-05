@@ -6,13 +6,28 @@
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
 from coreason_manifest.telemetry.custody import CustodyRecord
-from coreason_manifest.telemetry.schemas import LogEnvelope, SpanTrace
+from coreason_manifest.telemetry.schemas import (
+    ExecutionSpan,
+    LogEnvelope,
+    ObservabilityPolicy,
+    SpanEvent,
+    SpanKind,
+    SpanStatusCode,
+    SpanTrace,
+    TraceExportBatch,
+)
 from coreason_manifest.telemetry.ux import AmbientSignal, SuspenseEnvelope
 
 __all__ = [
     "AmbientSignal",
     "CustodyRecord",
+    "ExecutionSpan",
     "LogEnvelope",
+    "ObservabilityPolicy",
+    "SpanEvent",
+    "SpanKind",
+    "SpanStatusCode",
     "SpanTrace",
     "SuspenseEnvelope",
+    "TraceExportBatch",
 ]

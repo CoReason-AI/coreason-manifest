@@ -13,6 +13,7 @@ from coreason_manifest.compute.stochastic import CrossoverStrategy, FitnessObjec
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.core.primitives import NodeID
 from coreason_manifest.oversight.dlp import InformationFlowPolicy
+from coreason_manifest.telemetry.schemas import ObservabilityPolicy
 from coreason_manifest.workflow.auctions import AuctionPolicy
 from coreason_manifest.workflow.nodes import AnyNode
 
@@ -74,6 +75,9 @@ class BaseTopology(CoreasonBaseModel):
         default=None,
         description="The structural Data Loss Prevention (DLP) contract governing all state mutations in this "
         "topology.",
+    )
+    observability: ObservabilityPolicy | None = Field(
+        default=None, description="The distributed tracing rules bound to this specific execution graph."
     )
 
 

@@ -350,6 +350,7 @@
         "mapping": {
           "council": "#/$defs/CouncilTopology",
           "dag": "#/$defs/DAGTopology",
+          "evolutionary": "#/$defs/EvolutionaryTopology",
           "swarm": "#/$defs/SwarmTopology"
         },
         "propertyName": "type"
@@ -363,6 +364,9 @@
         },
         {
           "$ref": "#/$defs/SwarmTopology"
+        },
+        {
+          "$ref": "#/$defs/EvolutionaryTopology"
         }
       ]
     },
@@ -827,6 +831,18 @@
           "default": null,
           "description": "The structural Data Loss Prevention (DLP) contract governing all state mutations in this topology."
         },
+        "observability": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ObservabilityPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The distributed tracing rules bound to this specific execution graph."
+        },
         "type": {
           "const": "council",
           "default": "council",
@@ -857,6 +873,37 @@
       ],
       "title": "CouncilTopology",
       "type": "object"
+    },
+    "CrossoverStrategy": {
+      "additionalProperties": false,
+      "description": "The mathematical rules for combining elite agents.",
+      "properties": {
+        "strategy_type": {
+          "$ref": "#/$defs/CrossoverType",
+          "description": "The heuristic method for blending successful parent agents."
+        },
+        "blending_factor": {
+          "description": "The proportional mix ratio when merging vector properties.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Blending Factor",
+          "type": "number"
+        }
+      },
+      "required": [
+        "strategy_type",
+        "blending_factor"
+      ],
+      "title": "CrossoverStrategy",
+      "type": "object"
+    },
+    "CrossoverType": {
+      "enum": [
+        "uniform_blend",
+        "single_point",
+        "heuristic"
+      ],
+      "type": "string"
     },
     "CustodyRecord": {
       "additionalProperties": false,
@@ -923,6 +970,18 @@
           ],
           "default": null,
           "description": "The structural Data Loss Prevention (DLP) contract governing all state mutations in this topology."
+        },
+        "observability": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ObservabilityPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The distributed tracing rules bound to this specific execution graph."
         },
         "type": {
           "const": "dag",
@@ -1015,6 +1074,78 @@
       ],
       "title": "DefeasibleAttack",
       "type": "object"
+    },
+    "DistributionProfile": {
+      "additionalProperties": false,
+      "description": "Profile defining a probability density function.",
+      "properties": {
+        "distribution_type": {
+          "$ref": "#/$defs/DistributionType",
+          "description": "The mathematical shape of the probability density function."
+        },
+        "mean": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The expected value (mu) of the distribution.",
+          "title": "Mean"
+        },
+        "variance": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematical variance (sigma squared).",
+          "title": "Variance"
+        },
+        "confidence_interval_95": {
+          "anyOf": [
+            {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The 95% probability bounds.",
+          "title": "Confidence Interval 95"
+        }
+      },
+      "required": [
+        "distribution_type"
+      ],
+      "title": "DistributionProfile",
+      "type": "object"
+    },
+    "DistributionType": {
+      "enum": [
+        "gaussian",
+        "uniform",
+        "beta"
+      ],
+      "type": "string"
     },
     "DiversityConstraint": {
       "additionalProperties": false,
@@ -1161,6 +1292,101 @@
       "title": "EvidentiaryWarrant",
       "type": "object"
     },
+    "EvolutionaryTopology": {
+      "additionalProperties": false,
+      "description": "An Evolutionary workflow topology that mutates and breeds agents over generations.",
+      "properties": {
+        "nodes": {
+          "additionalProperties": {
+            "$ref": "#/$defs/AnyNode"
+          },
+          "description": "Flat registry of all nodes in this topology.",
+          "propertyNames": {
+            "$ref": "#/$defs/NodeID"
+          },
+          "title": "Nodes",
+          "type": "object"
+        },
+        "shared_state_contract": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StateContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The schema-on-write contract governing the internal state of this topology."
+        },
+        "information_flow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/InformationFlowPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The structural Data Loss Prevention (DLP) contract governing all state mutations in this topology."
+        },
+        "observability": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ObservabilityPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The distributed tracing rules bound to this specific execution graph."
+        },
+        "type": {
+          "const": "evolutionary",
+          "default": "evolutionary",
+          "description": "Discriminator for an Evolutionary topology.",
+          "title": "Type",
+          "type": "string"
+        },
+        "generations": {
+          "description": "The absolute limit on evolutionary breeding cycles.",
+          "title": "Generations",
+          "type": "integer"
+        },
+        "population_size": {
+          "description": "The number of concurrent agents instantiated per generation.",
+          "title": "Population Size",
+          "type": "integer"
+        },
+        "mutation": {
+          "$ref": "#/$defs/MutationPolicy",
+          "description": "The constraints governing random heuristic mutations."
+        },
+        "crossover": {
+          "$ref": "#/$defs/CrossoverStrategy"
+        },
+        "fitness_objectives": {
+          "description": "The multi-dimensional criteria used to score and cull the population.",
+          "items": {
+            "$ref": "#/$defs/FitnessObjective"
+          },
+          "title": "Fitness Objectives",
+          "type": "array"
+        }
+      },
+      "required": [
+        "nodes",
+        "generations",
+        "population_size",
+        "mutation",
+        "crossover",
+        "fitness_objectives"
+      ],
+      "title": "EvolutionaryTopology",
+      "type": "object"
+    },
     "ExecutionSLA": {
       "additionalProperties": false,
       "description": "Service Level Agreement (limits) for executing a tool.",
@@ -1188,6 +1414,83 @@
         "max_execution_time_ms"
       ],
       "title": "ExecutionSLA",
+      "type": "object"
+    },
+    "ExecutionSpan": {
+      "additionalProperties": false,
+      "properties": {
+        "trace_id": {
+          "description": "The global identifier for the entire execution causal tree.",
+          "title": "Trace Id",
+          "type": "string"
+        },
+        "span_id": {
+          "description": "The unique identifier for this specific operation.",
+          "title": "Span Id",
+          "type": "string"
+        },
+        "parent_span_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The causal link to the invoking node.",
+          "title": "Parent Span Id"
+        },
+        "name": {
+          "description": "The semantic identifier for the operation.",
+          "title": "Name",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/SpanKind",
+          "default": "internal",
+          "description": "The role of the span."
+        },
+        "start_time_unix_nano": {
+          "description": "Temporal start bound.",
+          "title": "Start Time Unix Nano",
+          "type": "integer"
+        },
+        "end_time_unix_nano": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Temporal end bound, if completed.",
+          "title": "End Time Unix Nano"
+        },
+        "status": {
+          "$ref": "#/$defs/SpanStatusCode",
+          "default": "unset",
+          "description": "The execution health flag."
+        },
+        "events": {
+          "description": "Structured log records emitted during the span.",
+          "items": {
+            "$ref": "#/$defs/SpanEvent"
+          },
+          "title": "Events",
+          "type": "array"
+        }
+      },
+      "required": [
+        "trace_id",
+        "span_id",
+        "name",
+        "start_time_unix_nano"
+      ],
+      "title": "ExecutionSpan",
       "type": "object"
     },
     "FallbackSLA": {
@@ -1306,6 +1609,33 @@
         }
       },
       "title": "FederatedStateSnapshot",
+      "type": "object"
+    },
+    "FitnessObjective": {
+      "additionalProperties": false,
+      "description": "A specific objective function to optimize within a generation.",
+      "properties": {
+        "target_metric": {
+          "description": "The specific telemetry or execution metric to evaluate (e.g., 'latency', 'accuracy').",
+          "title": "Target Metric",
+          "type": "string"
+        },
+        "direction": {
+          "$ref": "#/$defs/OptimizationDirection",
+          "description": "Whether the algorithm should maximize or minimize this metric."
+        },
+        "weight": {
+          "default": 1.0,
+          "description": "The relative importance of this objective in a multi-objective generation.",
+          "title": "Weight",
+          "type": "number"
+        }
+      },
+      "required": [
+        "target_metric",
+        "direction"
+      ],
+      "title": "FitnessObjective",
       "type": "object"
     },
     "GitSHA": {
@@ -1804,6 +2134,30 @@
       "title": "ModelProfile",
       "type": "object"
     },
+    "MutationPolicy": {
+      "additionalProperties": false,
+      "description": "Constraints governing random heuristic mutations.",
+      "properties": {
+        "mutation_rate": {
+          "description": "The probability that a given agent parameter will randomly mutate between generations.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Mutation Rate",
+          "type": "number"
+        },
+        "temperature_shift_variance": {
+          "description": "The maximum allowed delta for an agent's temperature during mutation.",
+          "title": "Temperature Shift Variance",
+          "type": "number"
+        }
+      },
+      "required": [
+        "mutation_rate",
+        "temperature_shift_variance"
+      ],
+      "title": "MutationPolicy",
+      "type": "object"
+    },
     "NodeID": {
       "description": "Unique identifier for a node in the graph. Alphanumeric, underscores, hyphens only.",
       "examples": [
@@ -1815,6 +2169,25 @@
       "minLength": 1,
       "pattern": "^[a-zA-Z0-9_-]+$",
       "type": "string"
+    },
+    "ObservabilityPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "traces_sampled": {
+          "default": true,
+          "description": "Whether the orchestrator must record telemetry for this topology.",
+          "title": "Traces Sampled",
+          "type": "boolean"
+        },
+        "detailed_events": {
+          "default": false,
+          "description": "Whether to include granular intra-tool loop events.",
+          "title": "Detailed Events",
+          "type": "boolean"
+        }
+      },
+      "title": "ObservabilityPolicy",
+      "type": "object"
     },
     "ObservationEvent": {
       "additionalProperties": false,
@@ -1843,6 +2216,13 @@
       ],
       "title": "ObservationEvent",
       "type": "object"
+    },
+    "OptimizationDirection": {
+      "enum": [
+        "maximize",
+        "minimize"
+      ],
+      "type": "string"
     },
     "PatchOperation": {
       "enum": [
@@ -2260,6 +2640,51 @@
       "title": "SideEffectProfile",
       "type": "object"
     },
+    "SpanEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "description": "The semantic name of the event.",
+          "title": "Name",
+          "type": "string"
+        },
+        "timestamp_unix_nano": {
+          "description": "The precise temporal execution point.",
+          "title": "Timestamp Unix Nano",
+          "type": "integer"
+        },
+        "attributes": {
+          "additionalProperties": true,
+          "description": "Typed metadata bound to the event.",
+          "title": "Attributes",
+          "type": "object"
+        }
+      },
+      "required": [
+        "name",
+        "timestamp_unix_nano"
+      ],
+      "title": "SpanEvent",
+      "type": "object"
+    },
+    "SpanKind": {
+      "enum": [
+        "client",
+        "server",
+        "producer",
+        "consumer",
+        "internal"
+      ],
+      "type": "string"
+    },
+    "SpanStatusCode": {
+      "enum": [
+        "unset",
+        "ok",
+        "error"
+      ],
+      "type": "string"
+    },
     "SpanTrace": {
       "additionalProperties": false,
       "description": "An execution window span trace.",
@@ -2482,6 +2907,18 @@
           ],
           "default": null,
           "description": "The structural Data Loss Prevention (DLP) contract governing all state mutations in this topology."
+        },
+        "observability": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ObservabilityPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The distributed tracing rules bound to this specific execution graph."
         },
         "type": {
           "const": "swarm",
@@ -2852,6 +3289,29 @@
         "permissions"
       ],
       "title": "ToolDefinition",
+      "type": "object"
+    },
+    "TraceExportBatch": {
+      "additionalProperties": false,
+      "properties": {
+        "batch_id": {
+          "description": "Unique identifier for this telemetry snapshot.",
+          "title": "Batch Id",
+          "type": "string"
+        },
+        "spans": {
+          "description": "A collection of execution spans to be serialized.",
+          "items": {
+            "$ref": "#/$defs/ExecutionSpan"
+          },
+          "title": "Spans",
+          "type": "array"
+        }
+      },
+      "required": [
+        "batch_id"
+      ],
+      "title": "TraceExportBatch",
       "type": "object"
     },
     "VectorEmbedding": {
