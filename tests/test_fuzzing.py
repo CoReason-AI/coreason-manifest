@@ -21,6 +21,7 @@ from coreason_manifest.oversight.resilience import (
     QuarantineOrder,
 )
 from coreason_manifest.presentation.scivis import AnyPanel, CohortAttritionGrid, InsightCard, TimeSeriesPanel
+from coreason_manifest.state.argumentation import ArgumentGraph
 from coreason_manifest.state.events import AnyStateEvent, BeliefUpdateEvent, ObservationEvent, SystemFaultEvent
 from coreason_manifest.state.semantic import SemanticEdge, SemanticNode
 from coreason_manifest.testing.chaos import ChaosExperiment
@@ -495,3 +496,68 @@ def test_state_contract_fuzzing(payload: dict[str, Any]) -> None:
     parsed = state_contract_adapter.validate_python(payload)
     assert isinstance(parsed, StateContract)
     assert parsed.strict_validation == payload["strict_validation"]
+
+
+@st.composite
+def draw_evidentiary_warrant(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "source_event_id": st.one_of(st.none(), st.text()),
+                "source_semantic_node_id": st.one_of(st.none(), st.text()),
+                "justification": st.text(),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_argument_claim(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "claim_id": st.text(),
+                "proponent_id": st.text(),
+                "text_chunk": st.text(),
+                "warrants": st.lists(draw_evidentiary_warrant()),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_defeasible_attack(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "attack_id": st.text(),
+                "source_claim_id": st.text(),
+                "target_claim_id": st.text(),
+                "attack_vector": st.sampled_from(["rebuttal", "undercutter", "underminer"]),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_argument_graph(draw: Any) -> dict[str, Any]:
+    claims = draw(st.lists(draw_argument_claim()))
+    claims_dict = {claim["claim_id"]: claim for claim in claims}
+
+    attacks = draw(st.lists(draw_defeasible_attack()))
+    attacks_dict = {attack["attack_id"]: attack for attack in attacks}
+
+    res: dict[str, Any] = {"claims": claims_dict, "attacks": attacks_dict}
+    return res
+
+
+argument_graph_adapter: TypeAdapter[ArgumentGraph] = TypeAdapter(ArgumentGraph)
+
+
+@given(draw_argument_graph())
+def test_argument_graph_fuzzing(payload: dict[str, Any]) -> None:
+    parsed = argument_graph_adapter.validate_python(payload)
+    assert isinstance(parsed, ArgumentGraph)

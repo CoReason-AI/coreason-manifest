@@ -7,6 +7,7 @@
 
 from coreason_manifest.presentation.intents import DraftingIntent, PresentationEnvelope
 from coreason_manifest.presentation.scivis import InsightCard, MacroGrid
+from coreason_manifest.state.argumentation import ArgumentClaim, ArgumentGraph, DefeasibleAttack
 from coreason_manifest.state.events import ObservationEvent
 from coreason_manifest.state.memory import EpistemicLedger
 from coreason_manifest.state.semantic import (
@@ -44,6 +45,35 @@ def test_workflow_envelope_determinism() -> None:
 
     assert env1.model_dump_canonical() == env2.model_dump_canonical()
     assert hash(env1) == hash(env2)
+
+
+def test_argumentation_determinism() -> None:
+    claim1 = ArgumentClaim(
+        claim_id="claim_1", proponent_id="agent_x", text_chunk="This sentence is false.", warrants=[]
+    )
+    claim2 = ArgumentClaim(
+        claim_id="claim_2", proponent_id="agent_y", text_chunk="The previous sentence is true.", warrants=[]
+    )
+
+    attack1 = DefeasibleAttack(
+        attack_id="attack_1", source_claim_id="claim_1", target_claim_id="claim_2", attack_vector="rebuttal"
+    )
+    attack2 = DefeasibleAttack(
+        attack_id="attack_2", source_claim_id="claim_2", target_claim_id="claim_1", attack_vector="undercutter"
+    )
+
+    graph1 = ArgumentGraph(
+        claims={"claim_1": claim1, "claim_2": claim2},
+        attacks={"attack_1": attack1, "attack_2": attack2},
+    )
+
+    graph2 = ArgumentGraph(
+        claims={"claim_2": claim2, "claim_1": claim1},
+        attacks={"attack_2": attack2, "attack_1": attack1},
+    )
+
+    assert graph1.model_dump_canonical() == graph2.model_dump_canonical()
+    assert hash(graph1) == hash(graph2)
 
 
 def test_tooling_determinism() -> None:

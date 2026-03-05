@@ -112,7 +112,7 @@
           "type": "string"
         },
         "attack_vector": {
-          "$ref": "#/$defs/AttackVector",
+          "$ref": "#/$defs/coreason_manifest__testing__red_team__AttackVector",
           "description": "The method or angle of the adversarial attack."
         },
         "goal": {
@@ -331,15 +331,66 @@
         }
       ]
     },
-    "AttackVector": {
-      "enum": [
-        "semantic_hijacking",
-        "system_prompt_extraction",
-        "sabotage",
-        "deception",
-        "data_exfiltration"
+    "ArgumentClaim": {
+      "additionalProperties": false,
+      "properties": {
+        "claim_id": {
+          "description": "Unique identifier for this specific logical proposition.",
+          "title": "Claim Id",
+          "type": "string"
+        },
+        "proponent_id": {
+          "description": "The NodeID of the agent or system that advanced this claim.",
+          "title": "Proponent Id",
+          "type": "string"
+        },
+        "text_chunk": {
+          "description": "The natural language representation of the proposition.",
+          "title": "Text Chunk",
+          "type": "string"
+        },
+        "warrants": {
+          "description": "The foundational premises supporting this claim.",
+          "items": {
+            "$ref": "#/$defs/EvidentiaryWarrant"
+          },
+          "title": "Warrants",
+          "type": "array"
+        }
+      },
+      "required": [
+        "claim_id",
+        "proponent_id",
+        "text_chunk"
       ],
-      "type": "string"
+      "title": "ArgumentClaim",
+      "type": "object"
+    },
+    "ArgumentGraph": {
+      "additionalProperties": false,
+      "properties": {
+        "claims": {
+          "additionalProperties": {
+            "$ref": "#/$defs/ArgumentClaim"
+          },
+          "description": "A registry of all active claims, keyed by claim_id.",
+          "title": "Claims",
+          "type": "object"
+        },
+        "attacks": {
+          "additionalProperties": {
+            "$ref": "#/$defs/DefeasibleAttack"
+          },
+          "description": "A registry of all directed attack edges, keyed by attack_id.",
+          "title": "Attacks",
+          "type": "object"
+        }
+      },
+      "required": [
+        "claims"
+      ],
+      "title": "ArgumentGraph",
+      "type": "object"
     },
     "BackpressurePolicy": {
       "additionalProperties": false,
@@ -797,6 +848,38 @@
       "title": "DAGTopology",
       "type": "object"
     },
+    "DefeasibleAttack": {
+      "additionalProperties": false,
+      "properties": {
+        "attack_id": {
+          "description": "Unique identifier for this directed attack edge.",
+          "title": "Attack Id",
+          "type": "string"
+        },
+        "source_claim_id": {
+          "description": "The ID of the claim mounting the attack.",
+          "title": "Source Claim Id",
+          "type": "string"
+        },
+        "target_claim_id": {
+          "description": "The ID of the claim being attacked.",
+          "title": "Target Claim Id",
+          "type": "string"
+        },
+        "attack_vector": {
+          "$ref": "#/$defs/coreason_manifest__state__argumentation__AttackVector",
+          "description": "The specific defeasible logic vector (e.g., attacking the premise, the link, or the conclusion)."
+        }
+      },
+      "required": [
+        "attack_id",
+        "source_claim_id",
+        "target_claim_id",
+        "attack_vector"
+      ],
+      "title": "DefeasibleAttack",
+      "type": "object"
+    },
     "DiversityConstraint": {
       "additionalProperties": false,
       "description": "Constraints enforcing cognitive heterogeneity.",
@@ -883,6 +966,47 @@
         "action_on_gap"
       ],
       "title": "EpistemicScanner",
+      "type": "object"
+    },
+    "EvidentiaryWarrant": {
+      "additionalProperties": false,
+      "properties": {
+        "source_event_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A link to a specific observation in the EpistemicLedger.",
+          "title": "Source Event Id"
+        },
+        "source_semantic_node_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A link to a specific concept in the Semantic Knowledge Graph.",
+          "title": "Source Semantic Node Id"
+        },
+        "justification": {
+          "description": "The logical premise explaining why this evidence supports the claim.",
+          "title": "Justification",
+          "type": "string"
+        }
+      },
+      "required": [
+        "justification"
+      ],
+      "title": "EvidentiaryWarrant",
       "type": "object"
     },
     "ExecutionSLA": {
@@ -2356,6 +2480,18 @@
           "description": "A dictionary representing the active context variables for the agent.",
           "title": "Active Context",
           "type": "object"
+        },
+        "argumentation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ArgumentGraph"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The formal graph of non-monotonic claims and defeasible attacks currently active in the swarm's working memory."
         }
       },
       "required": [
@@ -2364,6 +2500,24 @@
       ],
       "title": "WorkingMemorySnapshot",
       "type": "object"
+    },
+    "coreason_manifest__state__argumentation__AttackVector": {
+      "enum": [
+        "rebuttal",
+        "undercutter",
+        "underminer"
+      ],
+      "type": "string"
+    },
+    "coreason_manifest__testing__red_team__AttackVector": {
+      "enum": [
+        "semantic_hijacking",
+        "system_prompt_extraction",
+        "sabotage",
+        "deception",
+        "data_exfiltration"
+      ],
+      "type": "string"
     }
   },
   "title": "Coreason Ontology",

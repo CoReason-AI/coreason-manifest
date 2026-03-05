@@ -5,6 +5,13 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
+from coreason_manifest.state.argumentation import (
+    ArgumentClaim,
+    ArgumentGraph,
+    AttackVector,
+    DefeasibleAttack,
+    EvidentiaryWarrant,
+)
 from coreason_manifest.state.events import (
     AnyStateEvent,
     BaseStateEvent,
@@ -34,11 +41,16 @@ from coreason_manifest.state.toolchains import (
 
 __all__ = [
     "AnyStateEvent",
+    "ArgumentClaim",
+    "ArgumentGraph",
+    "AttackVector",
     "BaseStateEvent",
     "BeliefUpdateEvent",
     "BrowserStateSnapshot",
     "CausalInterval",
+    "DefeasibleAttack",
     "EpistemicLedger",
+    "EvidentiaryWarrant",
     "FederatedStateSnapshot",
     "MemoryProvenance",
     "MemoryTier",
