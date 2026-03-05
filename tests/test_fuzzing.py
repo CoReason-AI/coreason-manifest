@@ -30,7 +30,7 @@ from coreason_manifest.testing.chaos import ChaosExperiment
 from coreason_manifest.tooling import ActionSpace, ToolDefinition
 from coreason_manifest.workflow.auctions import AuctionState
 from coreason_manifest.workflow.nodes import AgentNode, AnyNode, HumanNode, SystemNode
-from coreason_manifest.workflow.topologies import StateContract
+from coreason_manifest.workflow.topologies import AnyTopology, StateContract
 
 
 @st.composite
@@ -169,6 +169,96 @@ def test_anynode_invalid(invalid_type: str) -> None:
     payload = {"type": invalid_type, "description": "test"}
     with pytest.raises(ValidationError):
         node_adapter.validate_python(payload)
+
+
+@st.composite
+def draw_distribution_profile(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "distribution_type": st.sampled_from(["gaussian", "uniform", "beta"]),
+                "mean": st.one_of(st.none(), st.floats(allow_nan=False, allow_infinity=False)),
+                "variance": st.one_of(st.none(), st.floats(allow_nan=False, allow_infinity=False)),
+                "confidence_interval_95": st.one_of(
+                    st.none(),
+                    st.tuples(
+                        st.floats(allow_nan=False, allow_infinity=False),
+                        st.floats(allow_nan=False, allow_infinity=False),
+                    ),
+                ),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_fitness_objective(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "target_metric": st.text(min_size=1),
+                "direction": st.sampled_from(["maximize", "minimize"]),
+                "weight": st.floats(allow_nan=False, allow_infinity=False),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_mutation_policy(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "mutation_rate": st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False),
+                "temperature_shift_variance": st.floats(allow_nan=False, allow_infinity=False),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_crossover_strategy(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "strategy_type": st.sampled_from(["uniform_blend", "single_point", "heuristic"]),
+                "blending_factor": st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_evolutionary_topology_payload(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "type": st.just("evolutionary"),
+                "nodes": st.just({}),  # For simplicity, empty nodes
+                "shared_state_contract": st.none(),
+                "information_flow": st.none(),
+                "generations": st.integers(min_value=1),
+                "population_size": st.integers(min_value=1),
+                "mutation": draw_mutation_policy(),
+                "crossover": draw_crossover_strategy(),
+                "fitness_objectives": st.lists(draw_fitness_objective(), min_size=1),
+            }
+        )
+    )
+    return res
+
+
+topology_adapter: TypeAdapter[AnyTopology] = TypeAdapter(AnyTopology)
+
+
+@given(draw_evolutionary_topology_payload())
+def test_anytopology_routing(payload: dict[str, Any]) -> None:
+    parsed = topology_adapter.validate_python(payload)
+    assert parsed.type == "evolutionary"
 
 
 @given(

@@ -9,6 +9,7 @@ from typing import Annotated, Any, Literal, Self
 
 from pydantic import Field, model_validator
 
+from coreason_manifest.compute.stochastic import CrossoverStrategy, FitnessObjective, MutationPolicy
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.core.primitives import NodeID
 from coreason_manifest.oversight.dlp import InformationFlowPolicy
@@ -168,7 +169,31 @@ class SwarmTopology(BaseTopology):
         return self
 
 
+class EvolutionaryTopology(BaseTopology):
+    """
+    An Evolutionary workflow topology that mutates and breeds agents over generations.
+    """
+
+    type: Literal["evolutionary"] = Field(
+        default="evolutionary", description="Discriminator for an Evolutionary topology."
+    )
+    generations: int = Field(description="The absolute limit on evolutionary breeding cycles.")
+    population_size: int = Field(description="The number of concurrent agents instantiated per generation.")
+    mutation: MutationPolicy = Field(description="The constraints governing random heuristic mutations.")
+    crossover: CrossoverStrategy = Field(description="The mathematical rules for combining elite agents.")
+    fitness_objectives: list[FitnessObjective] = Field(
+        description="The multi-dimensional criteria used to score and cull the population."
+    )
+
+    @model_validator(mode="after")
+    def sort_objectives(self) -> Self:
+        object.__setattr__(
+            self, "fitness_objectives", sorted(self.fitness_objectives, key=lambda obj: obj.target_metric)
+        )
+        return self
+
+
 type AnyTopology = Annotated[
-    DAGTopology | CouncilTopology | SwarmTopology,
+    DAGTopology | CouncilTopology | SwarmTopology | EvolutionaryTopology,
     Field(discriminator="type", description="A discriminated union of workflow topologies."),
 ]
