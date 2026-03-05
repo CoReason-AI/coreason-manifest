@@ -21,7 +21,10 @@ class DynamicLayoutTemplate(CoreasonBaseModel):
     @classmethod
     def validate_tstring(cls, v: str) -> str:
         """Reject any string containing Python execution patterns."""
-        forbidden_patterns = ["__import__", "eval", "exec", "open", "os.system"]
+        forbidden_patterns = [
+            "__import__", "eval", "exec", "open", "os.system",
+            "__class__", "__mro__", "__subclasses__", "__globals__", "__builtins__"
+        ]
         for pattern in forbidden_patterns:
             if pattern in v:
                 raise ValueError(f"Forbidden execution pattern detected: {pattern}")

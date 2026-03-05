@@ -86,3 +86,18 @@ def test_pydantic_field_descriptions() -> None:
                             f"Class attribute '{target_id}' in '{node.name}' ({py_file}) "
                             f"must have a 'description' kwarg in Field(...)."
                         )
+
+def test_models_inherit_coreason_base() -> None:
+    for py_file in get_all_python_files():
+        if py_file.parts[-2:] == ("core", "base.py"):
+            continue
+        with py_file.open("r", encoding="utf-8") as f:
+            tree = ast.parse(f.read(), filename=str(py_file))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ClassDef):
+                for base in node.bases:
+                    if isinstance(base, ast.Name):
+                        assert base.id != "BaseModel", (
+                            f"Class '{node.name}' in {py_file} inherits directly from BaseModel "
+                            f"instead of CoreasonBaseModel."
+                        )

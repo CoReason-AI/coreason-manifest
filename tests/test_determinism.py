@@ -53,3 +53,15 @@ def test_epistemic_ledger_determinism() -> None:
 
     assert ledger1.model_dump_canonical() == ledger2.model_dump_canonical()
     assert hash(ledger1) == hash(ledger2)
+
+import unicodedata
+def test_cryptographic_unicode_determinism() -> None:
+    from coreason_manifest.workflow.nodes import AgentNode
+    nfc = unicodedata.normalize('NFC', 'Café')
+    nfd = unicodedata.normalize('NFD', 'Café')
+    node1 = AgentNode(description=nfc)
+    node2 = AgentNode(description=nfd)
+
+    # These should be identical and hash exactly the same
+    assert node1.model_dump_canonical() == node2.model_dump_canonical()
+    assert hash(node1) == hash(node2)

@@ -14,18 +14,23 @@ from coreason_manifest.core.base import CoreasonBaseModel
 
 
 def _redact_toxic_string(v: Any) -> Any:
-    if isinstance(v, str):
-        v = re.sub(r"\b\d{3}-\d{2}-\d{4}\b", "[REDACTED]", v)
-        return re.sub(r"\bAPI_KEY_[a-zA-Z0-9]+\b", "[REDACTED]", v)
-    if isinstance(v, dict):
-        return {k: _redact_toxic_string(val) for k, val in v.items()}
-    if isinstance(v, list):
-        return [_redact_toxic_string(val) for val in v]
-    if isinstance(v, set):
-        return {_redact_toxic_string(val) for val in v}
-    if isinstance(v, tuple):
-        return tuple(_redact_toxic_string(val) for val in v)
-    return v
+    def _redact_recursive(val: Any, depth: int) -> Any:
+        if depth > 100:
+            raise ValueError("Maximum nesting depth exceeded")
+        if isinstance(val, str):
+            val = re.sub(r"\b\d{3}-\d{2}-\d{4}\b", "[REDACTED]", val)
+            return re.sub(r"\bAPI_KEY_[a-zA-Z0-9]+\b", "[REDACTED]", val)
+        if isinstance(val, dict):
+            return {k: _redact_recursive(subval, depth + 1) for k, subval in val.items()}
+        if isinstance(val, list):
+            return [_redact_recursive(subval, depth + 1) for subval in val]
+        if isinstance(val, set):
+            return {_redact_recursive(subval, depth + 1) for subval in val}
+        if isinstance(val, tuple):
+            return tuple(_redact_recursive(subval, depth + 1) for subval in val)
+        return val
+
+    return _redact_recursive(v, 0)
 
 
 PrivacySentinel = Annotated[Any, BeforeValidator(_redact_toxic_string)]

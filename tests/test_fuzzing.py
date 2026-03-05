@@ -232,3 +232,35 @@ def test_chaosexperiment_fuzzing(
     parsed = chaos_adapter.validate_python(payload)
     assert isinstance(parsed, ChaosExperiment)
     assert parsed.experiment_id == experiment_id
+
+def test_stack_exhaustion_dos() -> None:
+    from pydantic import ValidationError
+    from coreason_manifest.telemetry.schemas import LogEnvelope
+    payload: Any = "value"
+    for _ in range(2500):
+        payload = {"a": payload}
+
+    with pytest.raises(ValidationError):
+        LogEnvelope(timestamp=123.0, level="INFO", message="deep", metadata=payload)
+
+def test_ssti_defenses() -> None:
+    from pydantic import ValidationError
+    from coreason_manifest.presentation.templates import DynamicLayoutTemplate
+
+    toxic = "{event.__class__.__mro__[1].__subclasses__()}"
+    with pytest.raises(ValidationError):
+        DynamicLayoutTemplate(layout_tstring=toxic)
+
+def test_stack_exhaustion_dos_execution_node() -> None:
+    from pydantic import ValidationError
+    from coreason_manifest.telemetry.custody import ExecutionNode
+    payload: Any = "value"
+    for _ in range(2500):
+        payload = {"a": payload}
+
+    with pytest.raises(ValidationError):
+        ExecutionNode(
+            request_id="req1",
+            inputs=payload,
+            outputs="test"
+        )

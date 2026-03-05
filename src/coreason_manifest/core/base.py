@@ -6,6 +6,7 @@
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
 import json
+import unicodedata
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict
@@ -41,6 +42,8 @@ class CoreasonBaseModel(BaseModel):
             Recursively sorts dictionaries for canonical serialization while explicitly preserving
             RFC 8785 array ordering.
             """
+            if isinstance(obj, str):
+                return unicodedata.normalize("NFC", obj)
             if isinstance(obj, dict):
                 return {k: _sort_collections(v) for k, v in sorted(obj.items())}
             if isinstance(obj, list):
