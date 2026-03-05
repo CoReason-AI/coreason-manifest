@@ -9,6 +9,7 @@ from coreason_manifest.oversight.dlp import InformationFlowPolicy, RedactionRule
 from coreason_manifest.presentation.intents import DraftingIntent, PresentationEnvelope
 from coreason_manifest.presentation.scivis import ChannelEncoding, GrammarPanel, InsightCard, MacroGrid
 from coreason_manifest.state.argumentation import ArgumentClaim, ArgumentGraph, DefeasibleAttack
+from coreason_manifest.state.differentials import RollbackRequest
 from coreason_manifest.state.events import ObservationEvent
 from coreason_manifest.state.memory import EpistemicLedger
 from coreason_manifest.state.semantic import (
@@ -47,6 +48,14 @@ def test_workflow_envelope_determinism() -> None:
 
     assert env1.model_dump_canonical() == env2.model_dump_canonical()
     assert hash(env1) == hash(env2)
+
+
+def test_rollback_determinism() -> None:
+    req1 = RollbackRequest(request_id="r1", target_event_id="e_3", invalidated_node_ids=["node_z", "node_a", "node_k"])
+    req2 = RollbackRequest(request_id="r1", target_event_id="e_3", invalidated_node_ids=["node_k", "node_z", "node_a"])
+
+    assert req1.model_dump_canonical() == req2.model_dump_canonical()
+    assert hash(req1) == hash(req2)
 
 
 def test_dlp_determinism() -> None:
