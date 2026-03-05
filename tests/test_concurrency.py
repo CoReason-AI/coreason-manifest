@@ -6,11 +6,13 @@
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
 import concurrent.futures
-import random
+import secrets
 import time
 from typing import Any
 
-from hypothesis import given, strategies as st
+import pytest
+from hypothesis import given
+from hypothesis import strategies as st
 from pydantic import TypeAdapter, ValidationError
 
 from coreason_manifest.state.events import BeliefUpdateEvent, ObservationEvent, SystemFaultEvent
@@ -85,7 +87,7 @@ def test_swarm_deadlock_proof(spawning_threshold: int, max_concurrent_agents: in
                 spawning_threshold=spawning_threshold,
                 max_concurrent_agents=max_concurrent_agents
             )
-            assert False, "Should have raised ValidationError"
+            pytest.fail("Should have raised ValidationError")
         except ValidationError:
             pass
     else:
@@ -99,57 +101,61 @@ def test_swarm_deadlock_proof(spawning_threshold: int, max_concurrent_agents: in
 
 def _writer_thread(idx: int, shared_list: list[ExecutionNode]) -> None:
     """Generate deeply nested ExecutionNode payloads."""
-    time.sleep(random.uniform(0, 0.001))
+    # S311 compliant generator for jitter
+    rng = secrets.SystemRandom()
+    for j in range(200):
+        time.sleep(rng.uniform(0, 0.001))
 
-    node = ExecutionNode(
-        request_id=f"req_{idx}",
-        inputs={"nested": {"data": [1, 2, 3], "idx": idx}},
-        outputs={"result": f"out_{idx}", "nested": [{"a": 1}, {"b": 2}]},
-        parent_hashes=[f"parent_{idx}"],
-    )
+        node = ExecutionNode(
+            request_id=f"req_{idx}_{j}",
+            inputs={"nested": {"data": [1, 2, 3], "idx": idx, "j": j}},
+            outputs={"result": f"out_{idx}", "nested": [{"a": 1}, {"b": 2}]},
+            parent_hashes=[f"parent_{idx}"],
+        )
 
-    # Introduce jitter
-    time.sleep(random.uniform(0, 0.001))
-    shared_list.append(node)
+        # Introduce jitter
+        time.sleep(rng.uniform(0, 0.001))
+        shared_list.append(node)
 
-    # Verify post-instantiation mutation is blocked
-    try:
-        node.outputs = {"mutated": True}  # type: ignore
-        raise AssertionError("Should have raised exception due to frozen config")
-    except ValidationError:
-        # Pydantic V2 raises ValidationError on frozen model mutation
-        pass
-    except Exception as e:
-        # If any other exception besides ValidationError is raised, it's fine as long as mutation is blocked
-        if isinstance(e, AssertionError):
-            raise
-        pass
+        # Verify post-instantiation mutation is blocked
+        try:
+            node.outputs = {"mutated": True}  # type: ignore
+            raise AssertionError("Should have raised exception due to frozen config")
+        except ValidationError:
+            # Pydantic V2 raises ValidationError on frozen model mutation
+            pass
+        except Exception as e:
+            # If any other exception besides ValidationError is raised, it's fine as long as mutation is blocked
+            if isinstance(e, AssertionError):
+                raise
 
 
-def _reader_thread(idx: int, shared_list: list[ExecutionNode]) -> None:
+def _reader_thread(_idx: int, shared_list: list[ExecutionNode]) -> None:
     """Read and hash ExecutionNode payloads."""
-    time.sleep(random.uniform(0, 0.001))
+    rng = secrets.SystemRandom()
+    for _ in range(200):
+        time.sleep(rng.uniform(0, 0.001))
 
-    # Wait until there are items in the list to read
-    for _ in range(10):
-        if shared_list:
-            break
-        time.sleep(0.001)
+        # Wait until there are items in the list to read
+        for _wait in range(10):
+            if shared_list:
+                break
+            time.sleep(0.001)
 
-    if not shared_list:
-        return
+        if not shared_list:
+            continue
 
-    # Pick a random element from the currently available nodes
-    try:
-        node = random.choice(shared_list)
-        # Attempt to read and canonicalize hashes
-        h1 = node.node_hash
-        time.sleep(random.uniform(0, 0.001))
-        h2 = node.generate_node_hash()
+        # Pick a random element from the currently available nodes
+        try:
+            node = rng.choice(shared_list)
+            # Attempt to read and canonicalize hashes
+            h1 = node.node_hash
+            time.sleep(rng.uniform(0, 0.001))
+            h2 = node.generate_node_hash()
 
-        assert h1 == h2, "Hash mismatch"
-    except IndexError:
-        pass
+            assert h1 == h2, "Hash mismatch"
+        except IndexError:
+            pass
 
 
 def test_thread_weaver_stress_test() -> None:

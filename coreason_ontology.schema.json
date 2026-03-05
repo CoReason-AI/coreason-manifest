@@ -1001,10 +1001,16 @@
           "description": "Threshold limit for dynamic spawning of additional nodes.",
           "title": "Spawning Threshold",
           "type": "integer"
+        },
+        "max_concurrent_agents": {
+          "description": "The absolute ceiling for concurrent agent threads.",
+          "title": "Max Concurrent Agents",
+          "type": "integer"
         }
       },
       "required": [
-        "nodes"
+        "nodes",
+        "max_concurrent_agents"
       ],
       "title": "SwarmTopology",
       "type": "object"
