@@ -31,8 +31,8 @@ def test_presentation_envelope_determinism() -> None:
     intent1 = DraftingIntent()
     intent2 = DraftingIntent()
 
-    panel1 = InsightCard(title="Insight 1", markdown_content="Content 1")
-    panel2 = InsightCard(title="Insight 2", markdown_content="Content 2")
+    panel1 = InsightCard(panel_id="panel_1", title="Insight 1", markdown_content="Content 1")
+    panel2 = InsightCard(panel_id="panel_2", title="Insight 2", markdown_content="Content 2")
 
     grid1 = MacroGrid(layout_matrix=[["panel_1", "panel_2"]], panels=[panel1, panel2])
     grid2 = MacroGrid(layout_matrix=[["panel_1", "panel_2"]], panels=[panel1, panel2])

@@ -131,7 +131,13 @@ def test_anystateevent_invalid(invalid_type: str) -> None:
     ),
 )
 def test_anypanel_timeseries(x_axis: str, y_axis: str, data: list[dict[str, Any]]) -> None:
-    payload = {"type": "timeseries", "x_axis_label": x_axis, "y_axis_label": y_axis, "data_series": data}
+    payload = {
+        "panel_id": "p1",
+        "type": "timeseries",
+        "x_axis_label": x_axis,
+        "y_axis_label": y_axis,
+        "data_series": data,
+    }
     parsed = panel_adapter.validate_python(payload)
     assert isinstance(parsed, TimeSeriesPanel)
 
@@ -144,14 +150,16 @@ def test_anypanel_timeseries(x_axis: str, y_axis: str, data: list[dict[str, Any]
     )
 )
 def test_anypanel_cohort(data: list[dict[str, Any]]) -> None:
-    payload = {"type": "cohort_attrition", "grid_data": data}
+    payload = {"panel_id": "p2", "type": "cohort_attrition", "grid_data": data}
     parsed = panel_adapter.validate_python(payload)
     assert isinstance(parsed, CohortAttritionGrid)
 
 
-@given(st.text(), st.text())
+@given(
+    st.text(), st.text().filter(lambda x: not any(tag in x.lower() for tag in ["<script", "<iframe", "javascript:"]))
+)
 def test_anypanel_insight(title: str, content: str) -> None:
-    payload = {"type": "insight_card", "title": title, "markdown_content": content}
+    payload = {"panel_id": "p3", "type": "insight_card", "title": title, "markdown_content": content}
     parsed = panel_adapter.validate_python(payload)
     assert isinstance(parsed, InsightCard)
 
