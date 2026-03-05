@@ -5,7 +5,7 @@ from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import ValidationError
 
-from coreason_manifest.presentation.scivis import AnyPanel, CohortAttritionGrid, InsightCard, MacroGrid, TimeSeriesPanel
+from coreason_manifest.presentation.scivis import AnyPanel, ChannelEncoding, GrammarPanel, InsightCard, MacroGrid
 from coreason_manifest.presentation.templates import DynamicLayoutTemplate
 
 
@@ -61,7 +61,7 @@ def test_visual_ghost_node_test(ghost_id: str) -> None:
     """
     panels: list[AnyPanel] = [
         InsightCard(panel_id="panel_1", title="A", markdown_content="Safe text"),
-        TimeSeriesPanel(panel_id="panel_2", x_axis_label="X", y_axis_label="Y", data_series=[]),
+        GrammarPanel(panel_id="panel_2", title="B", data_source_id="d1", mark="point", encodings=[]),
     ]
 
     escaped_ghost_id = re.escape(ghost_id)
@@ -84,8 +84,20 @@ def test_safe_rendering_test(title: str, safe_text: str, x_label: str, y_label: 
     """
     panels: list[AnyPanel] = [
         InsightCard(panel_id="panel_1", title=title, markdown_content=safe_text),
-        TimeSeriesPanel(panel_id="panel_2", x_axis_label=x_label, y_axis_label=y_label, data_series=[{"x": 1, "y": 2}]),
-        CohortAttritionGrid(panel_id="panel_3", grid_data=[{"step": "A", "count": 100}]),
+        GrammarPanel(
+            panel_id="panel_2",
+            title=x_label,
+            data_source_id="d2",
+            mark="point",
+            encodings=[ChannelEncoding(channel="x", field="x"), ChannelEncoding(channel="y", field="y")],
+        ),
+        GrammarPanel(
+            panel_id="panel_3",
+            title=y_label,
+            data_source_id="d3",
+            mark="bar",
+            encodings=[ChannelEncoding(channel="x", field="step"), ChannelEncoding(channel="y", field="count")],
+        ),
     ]
 
     # Instantiate without error

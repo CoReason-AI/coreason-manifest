@@ -18,27 +18,51 @@ class BasePanel(CoreasonBaseModel):
     panel_id: str = Field(description="Unique identifier for the panel.")
 
 
-class TimeSeriesPanel(BasePanel):
-    """Panel representing a time-series chart."""
+type MarkType = Literal["point", "line", "area", "bar", "rect", "arc"]
+type ScaleType = Literal["linear", "log", "time", "ordinal", "nominal"]
+type EncodingChannel = Literal["x", "y", "color", "size", "opacity", "shape", "text"]
 
-    type: Literal["timeseries"] = Field(default="timeseries", description="Discriminator for a time-series panel.")
-    x_axis_label: str = Field(description="The label for the x-axis.")
-    y_axis_label: str = Field(description="The label for the y-axis.")
-    data_series: list[dict[str, str | int | float]] = Field(
-        description="A list of data points representing the time-series data."
+
+class ScaleDefinition(CoreasonBaseModel):
+    """The mathematical mapping constraint for a channel."""
+
+    type: ScaleType = Field(description="The mathematical scaling function.")
+    domain_min: float | None = Field(default=None, description="Optional hard floor for the scale.")
+    domain_max: float | None = Field(default=None, description="Optional hard ceiling for the scale.")
+
+
+class ChannelEncoding(CoreasonBaseModel):
+    """The visual property being manipulated."""
+
+    channel: EncodingChannel = Field(description="The visual property being manipulated.")
+    field: str = Field(description="The exact data key/column to bind to this channel.")
+    scale: ScaleDefinition | None = Field(
+        default=None, description="The mathematical mapping constraint for this channel."
     )
 
 
-class CohortAttritionGrid(BasePanel):
-    """Panel representing a table or grid of cohort data attrition."""
+class FacetMatrix(CoreasonBaseModel):
+    """Optional small-multiple faceting layout."""
 
-    type: Literal["cohort_attrition"] = Field(
-        default="cohort_attrition",
-        description="Discriminator for a cohort attrition grid.",
-    )
-    grid_data: list[dict[str, str | int | float]] = Field(
-        description="A list of data rows representing cohort attrition over steps."
-    )
+    row_field: str | None = Field(default=None, description="Categorical field to split into rows.")
+    column_field: str | None = Field(default=None, description="Categorical field to split into columns.")
+
+
+class GrammarPanel(BasePanel):
+    """Panel representing a deterministic, declarative visual grammar."""
+
+    type: Literal["grammar"] = Field(default="grammar", description="Discriminator for a grammar panel.")
+    title: str = Field(description="The title of the visualization.")
+    data_source_id: str = Field(description="Pointer to the data matrix being visualized.")
+    mark: MarkType = Field(description="The geometric primitive representing the data points.")
+    encodings: list[ChannelEncoding] = Field(default_factory=list, description="The array of visual bindings.")
+    facet: FacetMatrix | None = Field(default=None, description="Optional small-multiple faceting layout.")
+
+    @model_validator(mode="after")
+    def sort_encodings(self) -> Self:
+        """Mathematically sorts self.encodings by the string value of channel for deterministic hashing."""
+        object.__setattr__(self, "encodings", sorted(self.encodings, key=lambda e: e.channel))
+        return self
 
 
 class InsightCard(BasePanel):
@@ -59,7 +83,7 @@ class InsightCard(BasePanel):
         return v
 
 
-type AnyPanel = Annotated[TimeSeriesPanel | CohortAttritionGrid | InsightCard, Field(discriminator="type")]
+type AnyPanel = Annotated[GrammarPanel | InsightCard, Field(discriminator="type")]
 
 
 class MacroGrid(CoreasonBaseModel):
