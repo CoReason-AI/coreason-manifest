@@ -403,3 +403,32 @@ def test_semanticedge_fuzzing(payload: dict[str, Any]) -> None:
     parsed = semantic_edge_adapter.validate_python(payload)
     assert isinstance(parsed, SemanticEdge)
     assert parsed.edge_id == payload["edge_id"]
+
+def test_deep_nesting_dos() -> None:
+    from coreason_manifest.telemetry.custody import ExecutionNode
+    from pydantic import ValidationError
+    from typing import Any
+
+    deep_dict: dict[str, Any] = {}
+    current = deep_dict
+    for _ in range(2500):
+        current["a"] = {}
+        current = current["a"]
+
+    with pytest.raises(ValidationError) as exc:
+        ExecutionNode(
+            request_id="req1",
+            inputs=deep_dict,
+            outputs={},
+        )
+
+    assert "Data structure too deep" in str(exc.value)
+
+def test_ssti_defense() -> None:
+    from coreason_manifest.presentation.templates import DynamicLayoutTemplate
+    from pydantic import ValidationError
+
+    with pytest.raises(ValidationError) as exc:
+        DynamicLayoutTemplate(layout_tstring="{event.__class__.__mro__[1].__subclasses__()}")
+
+    assert "Forbidden execution pattern detected: __class__" in str(exc.value)

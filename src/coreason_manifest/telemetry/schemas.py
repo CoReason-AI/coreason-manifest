@@ -13,18 +13,20 @@ from pydantic import BeforeValidator, Field
 from coreason_manifest.core.base import CoreasonBaseModel
 
 
-def _redact_toxic_string(v: Any) -> Any:
+def _redact_toxic_string(v: Any, depth: int = 0) -> Any:
+    if depth > 100:
+        raise ValueError("Data structure too deep")
     if isinstance(v, str):
         v = re.sub(r"\b\d{3}-\d{2}-\d{4}\b", "[REDACTED]", v)
         return re.sub(r"\bAPI_KEY_[a-zA-Z0-9]+\b", "[REDACTED]", v)
     if isinstance(v, dict):
-        return {k: _redact_toxic_string(val) for k, val in v.items()}
+        return {k: _redact_toxic_string(val, depth + 1) for k, val in v.items()}
     if isinstance(v, list):
-        return [_redact_toxic_string(val) for val in v]
+        return [_redact_toxic_string(val, depth + 1) for val in v]
     if isinstance(v, set):
-        return {_redact_toxic_string(val) for val in v}
+        return {_redact_toxic_string(val, depth + 1) for val in v}
     if isinstance(v, tuple):
-        return tuple(_redact_toxic_string(val) for val in v)
+        return tuple(_redact_toxic_string(val, depth + 1) for val in v)
     return v
 
 

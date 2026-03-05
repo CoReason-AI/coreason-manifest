@@ -1,0 +1,13 @@
+{
+  "manifest_version": "0.24.0",
+  "topology": {
+    "type": "dag",
+    "nodes": {
+      "node1": {
+        "type": "agent",
+        "description": "Legacy agent node"
+      }
+    },
+    "edges": []
+  }
+}

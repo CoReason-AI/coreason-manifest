@@ -92,3 +92,18 @@ def test_semantic_memory_determinism() -> None:
 
     assert node1.model_dump_canonical() == node2.model_dump_canonical()
     assert hash(node1) == hash(node2)
+
+import unicodedata
+
+def test_unicode_determinism() -> None:
+    text_nfc = unicodedata.normalize("NFC", "Café")
+    text_nfd = unicodedata.normalize("NFD", "Café")
+
+    # Assert strings are different byte-wise but represent the same text
+    assert text_nfc != text_nfd
+
+    node1 = AgentNode(description=text_nfc)
+    node2 = AgentNode(description=text_nfd)
+
+    assert node1.model_dump_canonical() == node2.model_dump_canonical()
+    assert hash(node1) == hash(node2)
