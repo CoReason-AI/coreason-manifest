@@ -5,7 +5,9 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
-from pydantic import Field
+from typing import Self
+
+from pydantic import Field, model_validator
 
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.state.events import AnyStateEvent
@@ -13,6 +15,11 @@ from coreason_manifest.state.events import AnyStateEvent
 
 class EpistemicLedger(CoreasonBaseModel):
     history: list[AnyStateEvent] = Field(description="An append-only, cryptographic ledger of state events.")
+
+    @model_validator(mode="after")
+    def sort_history(self) -> Self:
+        self.history.sort(key=lambda event: event.timestamp)
+        return self
 
 
 class WorkingMemorySnapshot(CoreasonBaseModel):
