@@ -10,6 +10,7 @@ from typing import Annotated, Literal
 from pydantic import Field
 
 from coreason_manifest.core.base import CoreasonBaseModel
+from coreason_manifest.oversight.intervention import InterventionPolicy
 
 
 class BaseNode(CoreasonBaseModel):
@@ -18,6 +19,10 @@ class BaseNode(CoreasonBaseModel):
     """
 
     description: str = Field(description="A description of the node's function.")
+    intervention_policies: list[InterventionPolicy] = Field(
+        default_factory=list,
+        description="A declarative list of proactive oversight hooks bound to this node's lifecycle.",
+    )
 
 
 class System1Reflex(CoreasonBaseModel):

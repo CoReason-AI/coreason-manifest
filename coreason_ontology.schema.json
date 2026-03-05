@@ -99,6 +99,14 @@
           "title": "Description",
           "type": "string"
         },
+        "intervention_policies": {
+          "description": "A declarative list of proactive oversight hooks bound to this node's lifecycle.",
+          "items": {
+            "$ref": "#/$defs/InterventionPolicy"
+          },
+          "title": "Intervention Policies",
+          "type": "array"
+        },
         "type": {
           "const": "agent",
           "default": "agent",
@@ -322,6 +330,58 @@
       "title": "BeliefUpdateEvent",
       "type": "object"
     },
+    "BoundedInterventionScope": {
+      "additionalProperties": false,
+      "description": "Constraints bounding human interaction for interventions.",
+      "properties": {
+        "allowed_fields": {
+          "description": "List of specific fields the human is permitted to mutate.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Allowed Fields",
+          "type": "array"
+        },
+        "json_schema_whitelist": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "items": {},
+                "type": "array"
+              },
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "description": "Strict JSON Schema constraints for the human's input.",
+          "title": "Json Schema Whitelist",
+          "type": "object"
+        }
+      },
+      "required": [
+        "allowed_fields",
+        "json_schema_whitelist"
+      ],
+      "title": "BoundedInterventionScope",
+      "type": "object"
+    },
     "CausalInterval": {
       "enum": [
         "strictly_precedes",
@@ -421,6 +481,18 @@
           "title": "Nodes",
           "type": "object"
         },
+        "shared_state_contract": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StateContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The schema-on-write contract governing the internal state of this topology."
+        },
         "type": {
           "const": "council",
           "default": "council",
@@ -466,6 +538,18 @@
           },
           "title": "Nodes",
           "type": "object"
+        },
+        "shared_state_contract": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StateContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The schema-on-write contract governing the internal state of this topology."
         },
         "type": {
           "const": "dag",
@@ -677,6 +761,34 @@
       ],
       "type": "string"
     },
+    "GlobalGovernance": {
+      "additionalProperties": false,
+      "description": "Global governance bounds for a swarm executing a workflow envelope.",
+      "properties": {
+        "max_budget_usd": {
+          "description": "The absolute maximum economic cost allowed for the entire swarm lifecycle.",
+          "title": "Max Budget Usd",
+          "type": "number"
+        },
+        "max_global_tokens": {
+          "description": "The maximum aggregate token usage allowed across all nodes.",
+          "title": "Max Global Tokens",
+          "type": "integer"
+        },
+        "global_timeout_seconds": {
+          "description": "The absolute Time-To-Live (TTL) for the execution envelope before graceful termination.",
+          "title": "Global Timeout Seconds",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "max_budget_usd",
+        "max_global_tokens",
+        "global_timeout_seconds"
+      ],
+      "title": "GlobalGovernance",
+      "type": "object"
+    },
     "GovernancePolicy": {
       "additionalProperties": false,
       "description": "Defines a governance policy comprising multiple constitutional rules.",
@@ -745,6 +857,14 @@
           "title": "Description",
           "type": "string"
         },
+        "intervention_policies": {
+          "description": "A declarative list of proactive oversight hooks bound to this node's lifecycle.",
+          "items": {
+            "$ref": "#/$defs/InterventionPolicy"
+          },
+          "title": "Intervention Policies",
+          "type": "array"
+        },
         "type": {
           "const": "human",
           "default": "human",
@@ -758,6 +878,50 @@
       ],
       "title": "HumanNode",
       "type": "object"
+    },
+    "InterventionPolicy": {
+      "additionalProperties": false,
+      "description": "Proactive oversight hook bound to a specific lifecycle event.",
+      "properties": {
+        "trigger": {
+          "$ref": "#/$defs/LifecycleTrigger",
+          "description": "The exact topological lifecycle event that triggers this intervention."
+        },
+        "scope": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BoundedInterventionScope"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The strictly typed boundaries for what the human/oversight system is allowed to mutate during this pause."
+        },
+        "blocking": {
+          "default": true,
+          "description": "If True, the graph execution halts until a verdict is rendered. If False, it is an async observation.",
+          "title": "Blocking",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "trigger"
+      ],
+      "title": "InterventionPolicy",
+      "type": "object"
+    },
+    "LifecycleTrigger": {
+      "enum": [
+        "on_start",
+        "on_node_transition",
+        "before_tool_execution",
+        "on_failure",
+        "on_consensus_reached",
+        "on_max_loops_reached"
+      ],
+      "type": "string"
     },
     "LogEnvelope": {
       "additionalProperties": false,
@@ -1317,6 +1481,29 @@
       "title": "SpanTrace",
       "type": "object"
     },
+    "StateContract": {
+      "additionalProperties": false,
+      "description": "A strict Cryptographic State Contract (Typed Blackboard) for multi-agent memory sharing.",
+      "properties": {
+        "schema_definition": {
+          "additionalProperties": true,
+          "description": "A strict JSON Schema dictionary defining the required shape of the shared memory blackboard.",
+          "title": "Schema Definition",
+          "type": "object"
+        },
+        "strict_validation": {
+          "default": true,
+          "description": "If True, the orchestrator must reject any state mutation that fails the schema definition.",
+          "title": "Strict Validation",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "schema_definition"
+      ],
+      "title": "StateContract",
+      "type": "object"
+    },
     "SteadyStateHypothesis": {
       "additionalProperties": false,
       "properties": {
@@ -1368,6 +1555,18 @@
           },
           "title": "Nodes",
           "type": "object"
+        },
+        "shared_state_contract": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StateContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The schema-on-write contract governing the internal state of this topology."
         },
         "type": {
           "const": "swarm",
@@ -1458,6 +1657,14 @@
           "description": "A description of the node's function.",
           "title": "Description",
           "type": "string"
+        },
+        "intervention_policies": {
+          "description": "A declarative list of proactive oversight hooks bound to this node's lifecycle.",
+          "items": {
+            "$ref": "#/$defs/InterventionPolicy"
+          },
+          "title": "Intervention Policies",
+          "type": "array"
         },
         "type": {
           "const": "system",
@@ -1629,6 +1836,18 @@
         "topology": {
           "$ref": "#/$defs/AnyTopology",
           "description": "The underlying topology governing execution routing."
+        },
+        "governance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GlobalGovernance"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Macro-economic circuit breakers and TTL limits for the swarm."
         }
       },
       "required": [

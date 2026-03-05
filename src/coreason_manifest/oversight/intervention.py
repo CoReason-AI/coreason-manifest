@@ -12,6 +12,15 @@ from pydantic import Field
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.core.primitives import NodeID
 
+type LifecycleTrigger = Literal[
+    "on_start",
+    "on_node_transition",
+    "before_tool_execution",
+    "on_failure",
+    "on_consensus_reached",
+    "on_max_loops_reached",
+]
+
 
 class BoundedInterventionScope(CoreasonBaseModel):
     """
@@ -21,6 +30,26 @@ class BoundedInterventionScope(CoreasonBaseModel):
     allowed_fields: list[str] = Field(description="List of specific fields the human is permitted to mutate.")
     json_schema_whitelist: dict[str, str | int | float | bool | None | list[Any] | dict[str, Any]] = Field(
         description="Strict JSON Schema constraints for the human's input."
+    )
+
+
+class InterventionPolicy(CoreasonBaseModel):
+    """
+    Proactive oversight hook bound to a specific lifecycle event.
+    """
+
+    trigger: LifecycleTrigger = Field(
+        description="The exact topological lifecycle event that triggers this intervention."
+    )
+    scope: BoundedInterventionScope | None = Field(
+        default=None,
+        description="The strictly typed boundaries for what the human/oversight "
+        "system is allowed to mutate during this pause.",
+    )
+    blocking: bool = Field(
+        default=True,
+        description="If True, the graph execution halts until a verdict is rendered. "
+        "If False, it is an async observation.",
     )
 
 

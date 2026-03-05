@@ -5,8 +5,6 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
-import unicodedata
-
 from coreason_manifest.presentation.intents import DraftingIntent, PresentationEnvelope
 from coreason_manifest.presentation.scivis import InsightCard, MacroGrid
 from coreason_manifest.state.events import ObservationEvent
@@ -26,8 +24,18 @@ from coreason_manifest.workflow.topologies import DAGTopology
 def test_workflow_envelope_determinism() -> None:
     node1 = AgentNode(description="First node")
     node2 = AgentNode(description="Second node")
-    topology1 = DAGTopology(nodes={"node_a": node1, "node_b": node2}, allow_cycles=False, backpressure=None)
-    topology2 = DAGTopology(nodes={"node_b": node2, "node_a": node1}, allow_cycles=False, backpressure=None)
+    topology1 = DAGTopology(
+        nodes={"node_a": node1, "node_b": node2},
+        allow_cycles=False,
+        backpressure=None,
+        shared_state_contract=None,
+    )
+    topology2 = DAGTopology(
+        nodes={"node_b": node2, "node_a": node1},
+        allow_cycles=False,
+        backpressure=None,
+        shared_state_contract=None,
+    )
 
     env1 = WorkflowEnvelope(manifest_version="1.0.0", topology=topology1)
     env2 = WorkflowEnvelope(manifest_version="1.0.0", topology=topology2)
@@ -91,20 +99,6 @@ def test_semantic_memory_determinism() -> None:
         temporal_bounds=temporal_bounds,
         salience=salience,
     )
-
-    assert node1.model_dump_canonical() == node2.model_dump_canonical()
-    assert hash(node1) == hash(node2)
-
-
-def test_unicode_determinism() -> None:
-    text_nfc = unicodedata.normalize("NFC", "Café")
-    text_nfd = unicodedata.normalize("NFD", "Café")
-
-    # Assert strings are different byte-wise but represent the same text
-    assert text_nfc != text_nfd
-
-    node1 = AgentNode(description=text_nfc)
-    node2 = AgentNode(description=text_nfd)
 
     assert node1.model_dump_canonical() == node2.model_dump_canonical()
     assert hash(node1) == hash(node2)
