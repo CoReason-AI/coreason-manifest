@@ -51,8 +51,106 @@ def get_schema(schema_name: str) -> dict[str, Any]:
     return obj.model_json_schema()
 
 
+def _global_error_handler_shield() -> None:
+    """
+    Patch the internal MCP server request handler to natively catch all exceptions,
+    including validation errors, to guarantee the Poison Pill bounds are upheld
+    and return strict JSON-RPC Error Envelopes.
+    """
+    import json
+    import logging
+    from pydantic import ValidationError
+    from mcp.server import Server
+    from mcp.shared.session import BaseSession
+    from coreason_manifest.adapters.mcp.schemas import JSONRPCErrorResponse, JSONRPCError
+
+    original_handle_message = Server._handle_message
+    logger = logging.getLogger(__name__)
+
+    async def _safe_handle_message(
+        self,
+        message: Any,
+        session: BaseSession,
+        lifespan_context: Any,
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
+        from coreason_manifest.adapters.mcp.schemas import BoundedJSONRPCRequest
+
+        try:
+            # When the stdio parser fails, FastMCP sends the raw Exception
+            # Or if it succeeds, FastMCP parses it into a JSONRPCMessage and sends the wrapper `SessionMessage`
+            if isinstance(message, Exception):
+                raise message
+
+            # Pre-validate the internal representation to ensure it adheres to boundary conditions
+            # FastMCP `SessionMessage` encapsulates the incoming message
+            if hasattr(message, "message") and hasattr(message.message, "model_dump"):
+                raw_dict = message.message.model_dump(by_alias=True, exclude_none=True)
+                BoundedJSONRPCRequest.model_validate(raw_dict)
+
+            # Delegate to standard handler with correct signature arguments
+            await original_handle_message(self, message, session, lifespan_context, *args, **kwargs)
+        except ValidationError as ve:
+            logger.error(f"MCP Schema Validation Error: {ve}")
+            error_response = JSONRPCErrorResponse(
+                jsonrpc="2.0",
+                error=JSONRPCError(
+                    code=-32600,
+                    message="Invalid Request: Payload failed schema validation boundaries.",
+                    data=str(ve),
+                ),
+            )
+            # Use lower-level send to bypass object validation since session expects SessionMessage
+            # We'll just write the dict directly to output if possible, or wrap it
+            from mcp.types import JSONRPCMessage, JSONRPCError as McpJSONRPCError, ErrorData
+            from mcp.shared.session import SessionMessage
+
+            msg_id = getattr(message, "id", None) if hasattr(message, "id") else None
+            mcp_error = McpJSONRPCError(
+                jsonrpc="2.0",
+                id=msg_id if msg_id is not None else "",
+                error=ErrorData(
+                    code=error_response.error.code,
+                    message=error_response.error.message,
+                    data=error_response.error.data,
+                )
+            )
+            fake_msg = JSONRPCMessage(root=mcp_error)
+            await session.send_stream.send(SessionMessage(message=fake_msg))
+        except Exception as e:
+            logger.error(f"MCP Parsing/Execution Error: {e}")
+            error_response = JSONRPCErrorResponse(
+                jsonrpc="2.0",
+                error=JSONRPCError(
+                    code=-32700,
+                    message="Parse error: Invalid JSON or bounded failure.",
+                    data=str(e),
+                ),
+            )
+            from mcp.types import JSONRPCMessage, JSONRPCError as McpJSONRPCError, ErrorData
+            from mcp.shared.session import SessionMessage
+
+            msg_id = getattr(message, "id", None) if hasattr(message, "id") else None
+            mcp_error = McpJSONRPCError(
+                jsonrpc="2.0",
+                id=msg_id if msg_id is not None else "",
+                error=ErrorData(
+                    code=error_response.error.code,
+                    message=error_response.error.message,
+                    data=error_response.error.data,
+                )
+            )
+            fake_msg = JSONRPCMessage(root=mcp_error)
+            await session.send_stream.send(SessionMessage(message=fake_msg))
+
+    # Apply the monkeypatch shield
+    Server._handle_message = _safe_handle_message  # type: ignore
+
+
 def main() -> None:
     """Main entrypoint for the MCP Server using stdio transport."""
+    _global_error_handler_shield()
     mcp.run(transport="stdio")
 
 
