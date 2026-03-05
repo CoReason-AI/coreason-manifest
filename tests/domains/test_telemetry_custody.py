@@ -21,10 +21,11 @@ complex_st = st.recursive(
     lambda children: st.one_of(
         st.lists(children, max_size=5),
         st.dictionaries(st.text(), children, max_size=5),
-        st.sets(st.one_of(st.integers(), st.text(), st.booleans()), max_size=5), # Sets need hashable items
+        st.sets(st.one_of(st.integers(), st.text(), st.booleans()), max_size=5),  # Sets need hashable items
     ),
     max_leaves=10,
 )
+
 
 @given(payload=complex_st)
 def test_determinism_proof(payload: Any) -> None:
@@ -39,6 +40,7 @@ def test_determinism_proof(payload: Any) -> None:
 
     for _ in range(100):
         assert node.generate_node_hash() == expected_hash
+
 
 @given(inputs=complex_st, outputs=complex_st)
 def test_tamper_evident_proof(inputs: Any, outputs: Any) -> None:
@@ -65,6 +67,7 @@ def test_tamper_evident_proof(inputs: Any, outputs: Any) -> None:
     # n2's parent_hashes would not contain the newly computed hash. Both break the chain.
     assert verify_merkle_proof(trace) is False
 
+
 @given(inputs=complex_st, outputs=complex_st)
 def test_temporal_shuffle_proof(inputs: Any, outputs: Any) -> None:
     """
@@ -86,9 +89,10 @@ def test_temporal_shuffle_proof(inputs: Any, outputs: Any) -> None:
         random.shuffle(trace)
         assert verify_merkle_proof(trace) is True
 
+
 @given(
     ssn=st.from_regex(r"\b\d{3}-\d{2}-\d{4}\b", fullmatch=True),
-    api_key=st.from_regex(r"\bAPI_KEY_[a-zA-Z0-9]+\b", fullmatch=True)
+    api_key=st.from_regex(r"\bAPI_KEY_[a-zA-Z0-9]+\b", fullmatch=True),
 )
 def test_quarantine_proof(ssn: str, api_key: str) -> None:
     """

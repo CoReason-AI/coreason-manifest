@@ -84,6 +84,7 @@ class ExecutionNode(CoreasonBaseModel):
 class TamperError(ValueError):
     """Raised when an execution trace has been tampered with or is topologically invalid."""
 
+
 def verify_merkle_proof(trace: list[ExecutionNode]) -> bool:
     """
     Verifies a Merkle DAG trace of execution nodes.
