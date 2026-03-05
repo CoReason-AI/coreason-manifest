@@ -26,6 +26,7 @@ from coreason_manifest.state.events import AnyStateEvent, BeliefUpdateEvent, Obs
 from coreason_manifest.state.semantic import SemanticEdge, SemanticNode
 from coreason_manifest.testing.chaos import ChaosExperiment
 from coreason_manifest.tooling import ActionSpace, ToolDefinition
+from coreason_manifest.workflow.auctions import AuctionState
 from coreason_manifest.workflow.nodes import AgentNode, AnyNode, HumanNode, SystemNode
 from coreason_manifest.workflow.topologies import StateContract
 
@@ -561,3 +562,69 @@ argument_graph_adapter: TypeAdapter[ArgumentGraph] = TypeAdapter(ArgumentGraph)
 def test_argument_graph_fuzzing(payload: dict[str, Any]) -> None:
     parsed = argument_graph_adapter.validate_python(payload)
     assert isinstance(parsed, ArgumentGraph)
+
+
+@st.composite
+def draw_task_announcement(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "task_id": st.text(),
+                "required_action_space_id": st.one_of(st.none(), st.text()),
+                "max_budget_usd": st.floats(allow_nan=False, allow_infinity=False),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_agent_bid(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "agent_id": st.text(),
+                "estimated_cost_usd": st.floats(allow_nan=False, allow_infinity=False),
+                "estimated_latency_ms": st.integers(),
+                "confidence_score": st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_task_award(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "task_id": st.text(),
+                "awarded_agent_id": st.text(),
+                "cleared_price_usd": st.floats(allow_nan=False, allow_infinity=False),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_auction_state(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "announcement": draw_task_announcement(),
+                "bids": st.lists(draw_agent_bid()),
+                "award": st.one_of(st.none(), draw_task_award()),
+            }
+        )
+    )
+    return res
+
+
+auction_state_adapter: TypeAdapter[AuctionState] = TypeAdapter(AuctionState)
+
+
+@given(draw_auction_state())
+def test_auction_state_fuzzing(payload: dict[str, Any]) -> None:
+    parsed = auction_state_adapter.validate_python(payload)
+    assert isinstance(parsed, AuctionState)

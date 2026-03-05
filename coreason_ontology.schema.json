@@ -129,6 +129,41 @@
       "title": "AdversaryProfile",
       "type": "object"
     },
+    "AgentBid": {
+      "additionalProperties": false,
+      "properties": {
+        "agent_id": {
+          "description": "The NodeID of the bidder.",
+          "title": "Agent Id",
+          "type": "string"
+        },
+        "estimated_cost_usd": {
+          "description": "The node's calculated cost to fulfill the task.",
+          "title": "Estimated Cost Usd",
+          "type": "number"
+        },
+        "estimated_latency_ms": {
+          "description": "The node's estimated time to completion.",
+          "title": "Estimated Latency Ms",
+          "type": "integer"
+        },
+        "confidence_score": {
+          "description": "The node's epistemic certainty of success.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Confidence Score",
+          "type": "number"
+        }
+      },
+      "required": [
+        "agent_id",
+        "estimated_cost_usd",
+        "estimated_latency_ms",
+        "confidence_score"
+      ],
+      "title": "AgentBid",
+      "type": "object"
+    },
     "AgentNode": {
       "additionalProperties": false,
       "description": "A node representing an autonomous agent.",
@@ -391,6 +426,73 @@
       ],
       "title": "ArgumentGraph",
       "type": "object"
+    },
+    "AuctionPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "auction_type": {
+          "$ref": "#/$defs/AuctionType",
+          "description": "The market mechanism governing the auction."
+        },
+        "tie_breaker": {
+          "$ref": "#/$defs/TieBreaker",
+          "description": "The deterministic rule for resolving tied bids."
+        },
+        "max_bidding_window_ms": {
+          "description": "The absolute timeout in milliseconds for nodes to submit proposals.",
+          "title": "Max Bidding Window Ms",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "auction_type",
+        "tie_breaker",
+        "max_bidding_window_ms"
+      ],
+      "title": "AuctionPolicy",
+      "type": "object"
+    },
+    "AuctionState": {
+      "additionalProperties": false,
+      "properties": {
+        "announcement": {
+          "$ref": "#/$defs/TaskAnnouncement",
+          "description": "The original call for proposals."
+        },
+        "bids": {
+          "description": "The array of received bids.",
+          "items": {
+            "$ref": "#/$defs/AgentBid"
+          },
+          "title": "Bids",
+          "type": "array"
+        },
+        "award": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TaskAward"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The final cryptographic receipt of the auction, if resolved."
+        }
+      },
+      "required": [
+        "announcement"
+      ],
+      "title": "AuctionState",
+      "type": "object"
+    },
+    "AuctionType": {
+      "enum": [
+        "sealed_bid",
+        "dutch",
+        "vickrey"
+      ],
+      "type": "string"
     },
     "BackpressurePolicy": {
       "additionalProperties": false,
@@ -2159,6 +2261,18 @@
           "description": "The absolute ceiling for concurrent agent threads.",
           "title": "Max Concurrent Agents",
           "type": "integer"
+        },
+        "auction_policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AuctionPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematical policy governing task decentralization via Spot Markets."
         }
       },
       "required": [
@@ -2251,6 +2365,67 @@
         "description"
       ],
       "title": "SystemNode",
+      "type": "object"
+    },
+    "TaskAnnouncement": {
+      "additionalProperties": false,
+      "properties": {
+        "task_id": {
+          "description": "Unique identifier for the required task.",
+          "title": "Task Id",
+          "type": "string"
+        },
+        "required_action_space_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional restriction forcing bidders to possess a specific toolset.",
+          "title": "Required Action Space Id"
+        },
+        "max_budget_usd": {
+          "description": "The absolute ceiling price the orchestrator is willing to pay.",
+          "title": "Max Budget Usd",
+          "type": "number"
+        }
+      },
+      "required": [
+        "task_id",
+        "max_budget_usd"
+      ],
+      "title": "TaskAnnouncement",
+      "type": "object"
+    },
+    "TaskAward": {
+      "additionalProperties": false,
+      "properties": {
+        "task_id": {
+          "description": "The identifier of the resolved task.",
+          "title": "Task Id",
+          "type": "string"
+        },
+        "awarded_agent_id": {
+          "description": "The winning NodeID.",
+          "title": "Awarded Agent Id",
+          "type": "string"
+        },
+        "cleared_price_usd": {
+          "description": "The final cryptographic clearing price.",
+          "title": "Cleared Price Usd",
+          "type": "number"
+        }
+      },
+      "required": [
+        "task_id",
+        "awarded_agent_id",
+        "cleared_price_usd"
+      ],
+      "title": "TaskAward",
       "type": "object"
     },
     "TelemetryScalar": {
@@ -2351,6 +2526,15 @@
       ],
       "title": "TerminalStateSnapshot",
       "type": "object"
+    },
+    "TieBreaker": {
+      "enum": [
+        "lowest_cost",
+        "lowest_latency",
+        "highest_confidence",
+        "random"
+      ],
+      "type": "string"
     },
     "ToolDefinition": {
       "additionalProperties": false,

@@ -19,6 +19,7 @@ from coreason_manifest.state.semantic import (
 )
 from coreason_manifest.testing.chaos import ChaosExperiment, FaultInjectionProfile, SteadyStateHypothesis
 from coreason_manifest.tooling import ActionSpace, PermissionBoundary, SideEffectProfile, ToolDefinition
+from coreason_manifest.workflow.auctions import AgentBid, AuctionState, TaskAnnouncement
 from coreason_manifest.workflow.envelope import WorkflowEnvelope
 from coreason_manifest.workflow.nodes import AgentNode
 from coreason_manifest.workflow.topologies import DAGTopology
@@ -45,6 +46,20 @@ def test_workflow_envelope_determinism() -> None:
 
     assert env1.model_dump_canonical() == env2.model_dump_canonical()
     assert hash(env1) == hash(env2)
+
+
+def test_auction_determinism() -> None:
+    ann = TaskAnnouncement(task_id="t1", max_budget_usd=100.0)
+
+    bid_1 = AgentBid(agent_id="agent_a", estimated_cost_usd=10.0, estimated_latency_ms=100, confidence_score=0.9)
+    bid_2 = AgentBid(agent_id="agent_b", estimated_cost_usd=12.0, estimated_latency_ms=90, confidence_score=0.85)
+    bid_3 = AgentBid(agent_id="agent_c", estimated_cost_usd=9.0, estimated_latency_ms=110, confidence_score=0.95)
+
+    state1 = AuctionState(announcement=ann, bids=[bid_1, bid_2, bid_3])
+    state2 = AuctionState(announcement=ann, bids=[bid_3, bid_1, bid_2])
+
+    assert state1.model_dump_canonical() == state2.model_dump_canonical()
+    assert hash(state1) == hash(state2)
 
 
 def test_argumentation_determinism() -> None:
