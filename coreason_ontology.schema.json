@@ -1,37 +1,5 @@
 {
   "$defs": {
-    "ActionSpace": {
-      "additionalProperties": false,
-      "description": "A curated environment of tools accessible to an agent or node.",
-      "properties": {
-        "action_space_id": {
-          "description": "The unique identifier for this curated environment of tools.",
-          "title": "Action Space Id",
-          "type": "string"
-        },
-        "native_tools": {
-          "description": "The list of discrete, natively defined tools available in this space.",
-          "items": {
-            "$ref": "#/$defs/ToolDefinition"
-          },
-          "title": "Native Tools",
-          "type": "array"
-        },
-        "mcp_servers": {
-          "description": "The list of MCP servers mounted into this action space.",
-          "items": {
-            "$ref": "#/$defs/MCPClientBinding"
-          },
-          "title": "Mcp Servers",
-          "type": "array"
-        }
-      },
-      "required": [
-        "action_space_id"
-      ],
-      "title": "ActionSpace",
-      "type": "object"
-    },
     "AdjudicationRubric": {
       "additionalProperties": false,
       "description": "Rubric defining multiple criteria and passing threshold for algorithmic adjudication.",
@@ -105,19 +73,6 @@
           "description": "Discriminator for an Agent node.",
           "title": "Type",
           "type": "string"
-        },
-        "action_space_id": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The ID of the specific ActionSpace (curated tool environment) bound to this agent.",
-          "title": "Action Space Id"
         },
         "reflex_policy": {
           "anyOf": [
@@ -595,35 +550,6 @@
       "title": "EpistemicScanner",
       "type": "object"
     },
-    "ExecutionSLA": {
-      "additionalProperties": false,
-      "description": "Service Level Agreement (limits) for executing a tool.",
-      "properties": {
-        "max_execution_time_ms": {
-          "description": "The maximum allowed execution time in milliseconds before the orchestrator kills the process.",
-          "title": "Max Execution Time Ms",
-          "type": "integer"
-        },
-        "max_memory_mb": {
-          "anyOf": [
-            {
-              "type": "integer"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The maximum memory footprint allowed for the tool's execution sandbox.",
-          "title": "Max Memory Mb"
-        }
-      },
-      "required": [
-        "max_execution_time_ms"
-      ],
-      "title": "ExecutionSLA",
-      "type": "object"
-    },
     "FaultInjectionProfile": {
       "additionalProperties": false,
       "properties": {
@@ -788,51 +714,6 @@
       "title": "LogEnvelope",
       "type": "object"
     },
-    "MCPClientBinding": {
-      "additionalProperties": false,
-      "description": "Binding configuration for a Model Context Protocol (MCP) server.",
-      "properties": {
-        "server_uri": {
-          "description": "The URI or command path to the MCP server.",
-          "title": "Server Uri",
-          "type": "string"
-        },
-        "transport_type": {
-          "$ref": "#/$defs/MCPTransport",
-          "description": "The transport protocol used to communicate with the MCP server."
-        },
-        "allowed_mcp_tools": {
-          "anyOf": [
-            {
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "An explicit whitelist of tools the agent is allowed to invoke from this server. If None, all discovered tools are allowed.",
-          "title": "Allowed Mcp Tools"
-        }
-      },
-      "required": [
-        "server_uri",
-        "transport_type"
-      ],
-      "title": "MCPClientBinding",
-      "type": "object"
-    },
-    "MCPTransport": {
-      "enum": [
-        "stdio",
-        "sse",
-        "http"
-      ],
-      "type": "string"
-    },
     "MetadataDict": {
       "additionalProperties": {
         "anyOf": [
@@ -931,44 +812,6 @@
       "title": "ObservationEvent",
       "type": "object"
     },
-    "PermissionBoundary": {
-      "additionalProperties": false,
-      "description": "Zero-trust security boundaries for tool execution.",
-      "properties": {
-        "network_access": {
-          "description": "Whether the tool is permitted to make external network requests.",
-          "title": "Network Access",
-          "type": "boolean"
-        },
-        "allowed_domains": {
-          "anyOf": [
-            {
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Whitelist of allowed network domains if network access is true.",
-          "title": "Allowed Domains"
-        },
-        "file_system_read_only": {
-          "description": "True if the tool is strictly forbidden from writing to the disk.",
-          "title": "File System Read Only",
-          "type": "boolean"
-        }
-      },
-      "required": [
-        "network_access",
-        "file_system_read_only"
-      ],
-      "title": "PermissionBoundary",
-      "type": "object"
-    },
     "RateCard": {
       "additionalProperties": false,
       "description": "Economic constraints for liquid compute operations.",
@@ -1030,28 +873,6 @@
       ],
       "pattern": "^\\d+\\.\\d+\\.\\d+$",
       "type": "string"
-    },
-    "SideEffectProfile": {
-      "additionalProperties": false,
-      "description": "Profile for describing the side effects and idempotency of a tool.",
-      "properties": {
-        "is_idempotent": {
-          "description": "True if the tool can be safely retried multiple times without altering state beyond the first call.",
-          "title": "Is Idempotent",
-          "type": "boolean"
-        },
-        "mutates_state": {
-          "description": "True if the tool performs write operations or side-effects.",
-          "title": "Mutates State",
-          "type": "boolean"
-        }
-      },
-      "required": [
-        "is_idempotent",
-        "mutates_state"
-      ],
-      "title": "SideEffectProfile",
-      "type": "object"
     },
     "SpanTrace": {
       "additionalProperties": false,
@@ -1290,57 +1111,6 @@
           "type": "null"
         }
       ]
-    },
-    "ToolDefinition": {
-      "additionalProperties": false,
-      "description": "Declarative mathematical definition of a tool.",
-      "properties": {
-        "tool_name": {
-          "description": "The exact identifier of the tool.",
-          "title": "Tool Name",
-          "type": "string"
-        },
-        "description": {
-          "description": "Semantic description of what the tool does, used by the LLM for selection.",
-          "title": "Description",
-          "type": "string"
-        },
-        "input_schema": {
-          "additionalProperties": true,
-          "description": "The strict JSON Schema dictionary defining the required arguments.",
-          "title": "Input Schema",
-          "type": "object"
-        },
-        "side_effects": {
-          "$ref": "#/$defs/SideEffectProfile",
-          "description": "The declarative side-effect and idempotency profile of the tool."
-        },
-        "permissions": {
-          "$ref": "#/$defs/PermissionBoundary",
-          "description": "The zero-trust security boundaries for the tool's execution."
-        },
-        "sla": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/ExecutionSLA"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Execution limits for the tool."
-        }
-      },
-      "required": [
-        "tool_name",
-        "description",
-        "input_schema",
-        "side_effects",
-        "permissions"
-      ],
-      "title": "ToolDefinition",
-      "type": "object"
     },
     "WorkflowEnvelope": {
       "additionalProperties": false,
