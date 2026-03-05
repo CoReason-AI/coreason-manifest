@@ -57,11 +57,11 @@ def test_epistemic_ledger_determinism() -> None:
     assert hash(ledger1) == hash(ledger2)
 
 
-
 def test_cryptographic_unicode_determinism() -> None:
     from coreason_manifest.workflow.nodes import AgentNode
-    nfc = unicodedata.normalize('NFC', 'Café')
-    nfd = unicodedata.normalize('NFD', 'Café')
+
+    nfc = unicodedata.normalize("NFC", "Café")
+    nfd = unicodedata.normalize("NFD", "Café")
     node1 = AgentNode(description=nfc)
     node2 = AgentNode(description=nfd)
 

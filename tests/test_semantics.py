@@ -87,6 +87,7 @@ def test_pydantic_field_descriptions() -> None:
                             f"must have a 'description' kwarg in Field(...)."
                         )
 
+
 def test_models_inherit_coreason_base() -> None:
     for py_file in get_all_python_files():
         if py_file.parts[-2:] == ("core", "base.py"):
