@@ -21,7 +21,7 @@ from coreason_manifest.oversight.resilience import (
     FallbackTrigger,
     QuarantineOrder,
 )
-from coreason_manifest.presentation.scivis import AnyPanel, CohortAttritionGrid, InsightCard, TimeSeriesPanel
+from coreason_manifest.presentation.scivis import AnyPanel, GrammarPanel, InsightCard
 from coreason_manifest.state.argumentation import ArgumentGraph
 from coreason_manifest.state.events import AnyStateEvent, BeliefUpdateEvent, ObservationEvent, SystemFaultEvent
 from coreason_manifest.state.semantic import SemanticEdge, SemanticNode
@@ -195,38 +195,69 @@ def test_anystateevent_invalid(invalid_type: str) -> None:
         event_adapter.validate_python(payload)
 
 
-@given(
-    st.text(),
-    st.text(),
-    st.lists(
-        st.dictionaries(
-            st.text(), st.one_of(st.text(), st.integers(), st.floats(allow_nan=False, allow_infinity=False))
-        )
-    ),
-)
-def test_anypanel_timeseries(x_axis: str, y_axis: str, data: list[dict[str, Any]]) -> None:
-    payload = {
-        "panel_id": "p1",
-        "type": "timeseries",
-        "x_axis_label": x_axis,
-        "y_axis_label": y_axis,
-        "data_series": data,
-    }
-    parsed = panel_adapter.validate_python(payload)
-    assert isinstance(parsed, TimeSeriesPanel)
-
-
-@given(
-    st.lists(
-        st.dictionaries(
-            st.text(), st.one_of(st.text(), st.integers(), st.floats(allow_nan=False, allow_infinity=False))
+@st.composite
+def draw_scale_definition(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "type": st.sampled_from(["linear", "log", "time", "ordinal", "nominal"]),
+                "domain_min": st.one_of(st.none(), st.floats(allow_nan=False, allow_infinity=False)),
+                "domain_max": st.one_of(st.none(), st.floats(allow_nan=False, allow_infinity=False)),
+            }
         )
     )
-)
-def test_anypanel_cohort(data: list[dict[str, Any]]) -> None:
-    payload = {"panel_id": "p2", "type": "cohort_attrition", "grid_data": data}
+    return res
+
+
+@st.composite
+def draw_channel_encoding(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "channel": st.sampled_from(["x", "y", "color", "size", "opacity", "shape", "text"]),
+                "field": st.text(),
+                "scale": st.one_of(st.none(), draw_scale_definition()),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_facet_matrix(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "row_field": st.one_of(st.none(), st.text()),
+                "column_field": st.one_of(st.none(), st.text()),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_grammar_panel_payload(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "panel_id": st.text(),
+                "type": st.just("grammar"),
+                "title": st.text(),
+                "data_source_id": st.text(),
+                "mark": st.sampled_from(["point", "line", "area", "bar", "rect", "arc"]),
+                "encodings": st.lists(draw_channel_encoding()),
+                "facet": st.one_of(st.none(), draw_facet_matrix()),
+            }
+        )
+    )
+    return res
+
+
+@given(st.one_of(draw_grammar_panel_payload()))
+def test_grammar_panel_routing(payload: dict[str, Any]) -> None:
     parsed = panel_adapter.validate_python(payload)
-    assert isinstance(parsed, CohortAttritionGrid)
+    assert isinstance(parsed, GrammarPanel)
 
 
 @given(

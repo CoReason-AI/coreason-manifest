@@ -16,10 +16,15 @@ from .intents import (
 from .scivis import (
     AnyPanel,
     BasePanel,
-    CohortAttritionGrid,
+    ChannelEncoding,
+    EncodingChannel,
+    FacetMatrix,
+    GrammarPanel,
     InsightCard,
     MacroGrid,
-    TimeSeriesPanel,
+    MarkType,
+    ScaleDefinition,
+    ScaleType,
 )
 from .templates import DynamicLayoutTemplate
 
@@ -29,12 +34,17 @@ __all__ = [
     "AnyPanel",
     "BaseIntent",
     "BasePanel",
-    "CohortAttritionGrid",
+    "ChannelEncoding",
     "DraftingIntent",
     "DynamicLayoutTemplate",
+    "EncodingChannel",
     "FYIIntent",
+    "FacetMatrix",
+    "GrammarPanel",
     "InsightCard",
     "MacroGrid",
+    "MarkType",
     "PresentationEnvelope",
-    "TimeSeriesPanel",
+    "ScaleDefinition",
+    "ScaleType",
 ]

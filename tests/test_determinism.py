@@ -7,7 +7,7 @@
 
 from coreason_manifest.oversight.dlp import InformationFlowPolicy, RedactionRule
 from coreason_manifest.presentation.intents import DraftingIntent, PresentationEnvelope
-from coreason_manifest.presentation.scivis import InsightCard, MacroGrid
+from coreason_manifest.presentation.scivis import ChannelEncoding, GrammarPanel, InsightCard, MacroGrid
 from coreason_manifest.state.argumentation import ArgumentClaim, ArgumentGraph, DefeasibleAttack
 from coreason_manifest.state.events import ObservationEvent
 from coreason_manifest.state.memory import EpistemicLedger
@@ -134,6 +134,30 @@ def test_tooling_determinism() -> None:
 
     assert space1.model_dump_canonical() == space2.model_dump_canonical()
     assert hash(space1) == hash(space2)
+
+
+def test_grammar_determinism() -> None:
+    enc_x = ChannelEncoding(channel="x", field="date")
+    enc_color = ChannelEncoding(channel="color", field="category")
+
+    panel1 = GrammarPanel(
+        panel_id="p1",
+        title="T",
+        data_source_id="d1",
+        mark="point",
+        encodings=[enc_x, enc_color],
+    )
+
+    panel2 = GrammarPanel(
+        panel_id="p1",
+        title="T",
+        data_source_id="d1",
+        mark="point",
+        encodings=[enc_color, enc_x],  # Simulated out-of-order generation
+    )
+
+    assert panel1.model_dump_canonical() == panel2.model_dump_canonical()
+    assert hash(panel1) == hash(panel2)
 
 
 def test_presentation_envelope_determinism() -> None:
