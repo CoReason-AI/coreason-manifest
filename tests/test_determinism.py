@@ -9,6 +9,13 @@ from coreason_manifest.presentation.intents import DraftingIntent, PresentationE
 from coreason_manifest.presentation.scivis import InsightCard, MacroGrid
 from coreason_manifest.state.events import ObservationEvent
 from coreason_manifest.state.memory import EpistemicLedger
+from coreason_manifest.state.semantic import (
+    MemoryProvenance,
+    SalienceProfile,
+    SemanticNode,
+    TemporalBounds,
+    VectorEmbedding,
+)
 from coreason_manifest.workflow.envelope import WorkflowEnvelope
 from coreason_manifest.workflow.nodes import AgentNode
 from coreason_manifest.workflow.topologies import DAGTopology
@@ -53,3 +60,35 @@ def test_epistemic_ledger_determinism() -> None:
 
     assert ledger1.model_dump_canonical() == ledger2.model_dump_canonical()
     assert hash(ledger1) == hash(ledger2)
+
+
+def test_semantic_memory_determinism() -> None:
+    embedding = VectorEmbedding(vector=[0.1, 0.2, 0.3], dimensionality=3, model_name="test-model")
+    temporal_bounds = TemporalBounds(valid_from=100.0, valid_to=200.0, interval_type="overlaps")
+    provenance = MemoryProvenance(extracted_by="agent_1", source_event_id="event_1")
+    salience = SalienceProfile(baseline_importance=0.9, decay_rate=0.1)
+
+    node1 = SemanticNode(
+        node_id="node_1",
+        label="Concept",
+        text_chunk="A test chunk",
+        embedding=embedding,
+        provenance=provenance,
+        tier="semantic",
+        temporal_bounds=temporal_bounds,
+        salience=salience,
+    )
+
+    node2 = SemanticNode(
+        node_id="node_1",
+        label="Concept",
+        text_chunk="A test chunk",
+        embedding=embedding,
+        provenance=provenance,
+        tier="semantic",
+        temporal_bounds=temporal_bounds,
+        salience=salience,
+    )
+
+    assert node1.model_dump_canonical() == node2.model_dump_canonical()
+    assert hash(node1) == hash(node2)

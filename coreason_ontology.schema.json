@@ -322,6 +322,16 @@
       "title": "BeliefUpdateEvent",
       "type": "object"
     },
+    "CausalInterval": {
+      "enum": [
+        "strictly_precedes",
+        "overlaps",
+        "contains",
+        "causes",
+        "mitigates"
+      ],
+      "type": "string"
+    },
     "ChaosExperiment": {
       "additionalProperties": false,
       "properties": {
@@ -833,6 +843,34 @@
       ],
       "type": "string"
     },
+    "MemoryProvenance": {
+      "additionalProperties": false,
+      "properties": {
+        "extracted_by": {
+          "$ref": "#/$defs/NodeID",
+          "description": "The ID of the agent node that extracted this memory."
+        },
+        "source_event_id": {
+          "description": "The exact event ID in the EpistemicLedger that generated this fact.",
+          "title": "Source Event Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "extracted_by",
+        "source_event_id"
+      ],
+      "title": "MemoryProvenance",
+      "type": "object"
+    },
+    "MemoryTier": {
+      "enum": [
+        "working",
+        "episodic",
+        "semantic"
+      ],
+      "type": "string"
+    },
     "MetadataDict": {
       "additionalProperties": {
         "anyOf": [
@@ -997,6 +1035,27 @@
       "title": "RateCard",
       "type": "object"
     },
+    "SalienceProfile": {
+      "additionalProperties": false,
+      "properties": {
+        "baseline_importance": {
+          "description": "The starting importance score of this memory from 0.0 to 1.0.",
+          "title": "Baseline Importance",
+          "type": "number"
+        },
+        "decay_rate": {
+          "description": "The rate at which this memory's relevance decays over time.",
+          "title": "Decay Rate",
+          "type": "number"
+        }
+      },
+      "required": [
+        "baseline_importance",
+        "decay_rate"
+      ],
+      "title": "SalienceProfile",
+      "type": "object"
+    },
     "SelfCorrectionPolicy": {
       "additionalProperties": false,
       "description": "Policy for self-correction and iterative refinement.",
@@ -1019,6 +1078,148 @@
         "rollback_on_failure"
       ],
       "title": "SelfCorrectionPolicy",
+      "type": "object"
+    },
+    "SemanticEdge": {
+      "additionalProperties": false,
+      "properties": {
+        "edge_id": {
+          "description": "The unique identifier of this relationship.",
+          "title": "Edge Id",
+          "type": "string"
+        },
+        "subject_node_id": {
+          "description": "The origin SemanticNode ID.",
+          "title": "Subject Node Id",
+          "type": "string"
+        },
+        "object_node_id": {
+          "description": "The destination SemanticNode ID.",
+          "title": "Object Node Id",
+          "type": "string"
+        },
+        "predicate": {
+          "description": "The string representation of the relationship (e.g., 'WORKS_FOR').",
+          "title": "Predicate",
+          "type": "string"
+        },
+        "embedding": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/VectorEmbedding"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The dense vector representing the relationship semantics."
+        },
+        "provenance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MemoryProvenance"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional distinct provenance if the relationship was inferred separately from the nodes."
+        },
+        "temporal_bounds": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TemporalBounds"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The time window during which this relationship holds true."
+        }
+      },
+      "required": [
+        "edge_id",
+        "subject_node_id",
+        "object_node_id",
+        "predicate"
+      ],
+      "title": "SemanticEdge",
+      "type": "object"
+    },
+    "SemanticNode": {
+      "additionalProperties": false,
+      "properties": {
+        "node_id": {
+          "description": "The unique identifier of this semantic concept.",
+          "title": "Node Id",
+          "type": "string"
+        },
+        "label": {
+          "description": "The categorical label of the node (e.g., 'Person', 'Concept').",
+          "title": "Label",
+          "type": "string"
+        },
+        "text_chunk": {
+          "description": "The raw natural language representation of the memory.",
+          "title": "Text Chunk",
+          "type": "string"
+        },
+        "embedding": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/VectorEmbedding"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The dense vector representation of the text chunk."
+        },
+        "provenance": {
+          "$ref": "#/$defs/MemoryProvenance",
+          "description": "The cryptographic chain of custody for this memory."
+        },
+        "tier": {
+          "$ref": "#/$defs/MemoryTier",
+          "default": "semantic",
+          "description": "The cognitive tier this memory resides in."
+        },
+        "temporal_bounds": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TemporalBounds"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The time window during which this node is considered valid."
+        },
+        "salience": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SalienceProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The importance profile used for memory pruning."
+        }
+      },
+      "required": [
+        "node_id",
+        "label",
+        "text_chunk",
+        "provenance"
+      ],
+      "title": "SemanticNode",
       "type": "object"
     },
     "SemanticVersion": {
@@ -1291,6 +1492,51 @@
         }
       ]
     },
+    "TemporalBounds": {
+      "additionalProperties": false,
+      "properties": {
+        "valid_from": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The UNIX timestamp when this memory became true.",
+          "title": "Valid From"
+        },
+        "valid_to": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The UNIX timestamp when this memory was invalidated.",
+          "title": "Valid To"
+        },
+        "interval_type": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CausalInterval"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The Allen's interval algebra or causal relationship classification."
+        }
+      },
+      "title": "TemporalBounds",
+      "type": "object"
+    },
     "ToolDefinition": {
       "additionalProperties": false,
       "description": "Declarative mathematical definition of a tool.",
@@ -1340,6 +1586,36 @@
         "permissions"
       ],
       "title": "ToolDefinition",
+      "type": "object"
+    },
+    "VectorEmbedding": {
+      "additionalProperties": false,
+      "properties": {
+        "vector": {
+          "description": "The raw high-dimensional floating-point array.",
+          "items": {
+            "type": "number"
+          },
+          "title": "Vector",
+          "type": "array"
+        },
+        "dimensionality": {
+          "description": "The size of the vector array.",
+          "title": "Dimensionality",
+          "type": "integer"
+        },
+        "model_name": {
+          "description": "The provenance of the embedding model used (e.g., 'text-embedding-3-large').",
+          "title": "Model Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "vector",
+        "dimensionality",
+        "model_name"
+      ],
+      "title": "VectorEmbedding",
       "type": "object"
     },
     "WorkflowEnvelope": {
