@@ -17,6 +17,16 @@ from coreason_manifest.state.memory import (
     FederatedStateSnapshot,
     WorkingMemorySnapshot,
 )
+from coreason_manifest.state.semantic import (
+    CausalInterval,
+    MemoryProvenance,
+    MemoryTier,
+    SalienceProfile,
+    SemanticEdge,
+    SemanticNode,
+    TemporalBounds,
+    VectorEmbedding,
+)
 from coreason_manifest.state.toolchains import (
     BrowserStateSnapshot,
     TerminalStateSnapshot,
@@ -27,10 +37,18 @@ __all__ = [
     "BaseStateEvent",
     "BeliefUpdateEvent",
     "BrowserStateSnapshot",
+    "CausalInterval",
     "EpistemicLedger",
     "FederatedStateSnapshot",
+    "MemoryProvenance",
+    "MemoryTier",
     "ObservationEvent",
+    "SalienceProfile",
+    "SemanticEdge",
+    "SemanticNode",
     "SystemFaultEvent",
+    "TemporalBounds",
     "TerminalStateSnapshot",
+    "VectorEmbedding",
     "WorkingMemorySnapshot",
 ]
