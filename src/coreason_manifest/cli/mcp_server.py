@@ -232,15 +232,18 @@ def _global_error_handler_shield() -> None:
                 # Bypass validation to enforce RFC
                 class RFCCompliantErrorMsg:
                     def model_dump_json(self, **_kwargs: Any) -> str:
-                        return json.dumps({
-                            "jsonrpc": "2.0",
-                            "id": None,
-                            "error": {
-                                "code": error_response.error.code,
-                                "message": error_response.error.message,
-                                "data": error_response.error.data,
+                        return json.dumps(
+                            {
+                                "jsonrpc": "2.0",
+                                "id": None,
+                                "error": {
+                                    "code": error_response.error.code,
+                                    "message": error_response.error.message,
+                                    "data": error_response.error.data,
+                                },
                             }
-                        })
+                        )
+
                     def model_dump(self, **_kwargs: Any) -> dict[str, Any]:
                         return {
                             "jsonrpc": "2.0",
@@ -249,7 +252,7 @@ def _global_error_handler_shield() -> None:
                                 "code": error_response.error.code,
                                 "message": error_response.error.message,
                                 "data": error_response.error.data,
-                            }
+                            },
                         }
 
                 class RFCCompliantSessionMsg:
