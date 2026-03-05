@@ -5,6 +5,8 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
+import unicodedata
+
 from coreason_manifest.presentation.intents import DraftingIntent, PresentationEnvelope
 from coreason_manifest.presentation.scivis import InsightCard, MacroGrid
 from coreason_manifest.state.events import ObservationEvent
@@ -93,7 +95,7 @@ def test_semantic_memory_determinism() -> None:
     assert node1.model_dump_canonical() == node2.model_dump_canonical()
     assert hash(node1) == hash(node2)
 
-import unicodedata
+
 
 def test_unicode_determinism() -> None:
     text_nfc = unicodedata.normalize("NFC", "Café")

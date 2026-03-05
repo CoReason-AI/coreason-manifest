@@ -405,9 +405,10 @@ def test_semanticedge_fuzzing(payload: dict[str, Any]) -> None:
     assert parsed.edge_id == payload["edge_id"]
 
 def test_deep_nesting_dos() -> None:
-    from coreason_manifest.telemetry.custody import ExecutionNode
+
     from pydantic import ValidationError
-    from typing import Any
+
+    from coreason_manifest.telemetry.custody import ExecutionNode
 
     deep_dict: dict[str, Any] = {}
     current = deep_dict
@@ -425,8 +426,9 @@ def test_deep_nesting_dos() -> None:
     assert "Data structure too deep" in str(exc.value)
 
 def test_ssti_defense() -> None:
-    from coreason_manifest.presentation.templates import DynamicLayoutTemplate
     from pydantic import ValidationError
+
+    from coreason_manifest.presentation.templates import DynamicLayoutTemplate
 
     with pytest.raises(ValidationError) as exc:
         DynamicLayoutTemplate(layout_tstring="{event.__class__.__mro__[1].__subclasses__()}")
