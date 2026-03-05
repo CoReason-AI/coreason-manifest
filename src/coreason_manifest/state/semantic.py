@@ -32,7 +32,7 @@ class TemporalBounds(CoreasonBaseModel):
     @model_validator(mode="after")
     def validate_temporal_bounds(self) -> Any:
         if self.valid_from is not None and self.valid_to is not None and self.valid_to < self.valid_from:
-                raise ValueError("valid_to cannot be before valid_from")
+            raise ValueError("valid_to cannot be before valid_from")
         return self
 
 

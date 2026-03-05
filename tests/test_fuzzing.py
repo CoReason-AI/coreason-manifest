@@ -188,10 +188,10 @@ def draw_distribution_profile(draw: Any) -> dict[str, Any]:
     )
 
     if confidence_interval_95 is not None and confidence_interval_95[0] >= confidence_interval_95[1]:
-            confidence_interval_95 = (confidence_interval_95[1], confidence_interval_95[0])
-            if confidence_interval_95[0] >= confidence_interval_95[1]:
-                # If they are exactly equal after swap, adjust one.
-                confidence_interval_95 = (confidence_interval_95[0], confidence_interval_95[1] + 1.0)
+        confidence_interval_95 = (confidence_interval_95[1], confidence_interval_95[0])
+        if confidence_interval_95[0] >= confidence_interval_95[1]:
+            # If they are exactly equal after swap, adjust one.
+            confidence_interval_95 = (confidence_interval_95[0], confidence_interval_95[1] + 1.0)
 
     res: dict[str, Any] = {
         "distribution_type": distribution_type,
