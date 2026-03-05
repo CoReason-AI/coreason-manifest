@@ -57,7 +57,10 @@ class ExecutionNode(CoreasonBaseModel):
             if isinstance(obj, tuple):
                 return tuple([_canonicalize(v) for v in obj if v is not None])
             if isinstance(obj, set):
-                return sorted([_canonicalize(v) for v in obj if v is not None], key=lambda x: json.dumps(x, sort_keys=True))
+                return sorted(
+                    [_canonicalize(v) for v in obj if v is not None],
+                    key=lambda x: json.dumps(x, sort_keys=True),
+                )
             return obj
 
         canonical_payload = _canonicalize(payload)
