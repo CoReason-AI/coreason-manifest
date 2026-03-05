@@ -1,10 +1,11 @@
 import pytest
-from hypothesis import given, strategies as st
+from hypothesis import given
+from hypothesis import strategies as st
 from pydantic import ValidationError
 
 from coreason_manifest.oversight.adjudication import AdjudicationRubric, GradingCriteria
-from coreason_manifest.oversight.intervention import FallbackSLA, InterventionRequest, BoundedInterventionScope
 from coreason_manifest.oversight.governance import ConstitutionalRule
+from coreason_manifest.oversight.intervention import BoundedInterventionScope, FallbackSLA, InterventionRequest
 
 
 @given(

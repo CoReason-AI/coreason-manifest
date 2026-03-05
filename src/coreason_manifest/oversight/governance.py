@@ -12,6 +12,7 @@ from pydantic import Field, StringConstraints
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.core.primitives import SemanticVersion
 
+
 class ConstitutionalRule(CoreasonBaseModel):
     """
     Defines a constitutional rule for AI governance.

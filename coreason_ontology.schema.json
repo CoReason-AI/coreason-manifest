@@ -19,6 +19,7 @@
         },
         "passing_threshold": {
           "description": "The minimum score required to pass.",
+          "minimum": 0.0,
           "title": "Passing Threshold",
           "type": "number"
         }
@@ -333,10 +334,12 @@
         "forbidden_intents": {
           "description": "List of intents that are forbidden by this rule.",
           "items": {
+            "minLength": 1,
             "type": "string"
           },
           "title": "Forbidden Intents",
-          "type": "array"
+          "type": "array",
+          "uniqueItems": true
         }
       },
       "required": [
@@ -636,6 +639,7 @@
         },
         "weight": {
           "description": "Weight or significance of this criterion.",
+          "minimum": 0.0,
           "title": "Weight",
           "type": "number"
         }
