@@ -6,7 +6,7 @@
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
 from .adjudication import AdjudicationRubric, AdjudicationVerdict, GradingCriteria
-from .governance import ConstitutionalRule, GovernancePolicy
+from .governance import ConstitutionalRule, GlobalGovernance, GovernancePolicy
 from .intervention import (
     AnyInterventionPayload,
     BoundedInterventionScope,
@@ -26,6 +26,7 @@ __all__ = [
     "ConstitutionalRule",
     "FallbackSLA",
     "FallbackTrigger",
+    "GlobalGovernance",
     "GovernancePolicy",
     "GradingCriteria",
     "InterventionRequest",
