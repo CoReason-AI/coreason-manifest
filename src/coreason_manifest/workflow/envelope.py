@@ -9,7 +9,6 @@ from pydantic import Field
 
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.core.primitives import SemanticVersion
-from coreason_manifest.oversight.governance import GlobalGovernance
 from coreason_manifest.workflow.topologies import AnyTopology
 
 
@@ -20,6 +19,3 @@ class WorkflowEnvelope(CoreasonBaseModel):
 
     manifest_version: SemanticVersion = Field(description="The semantic version of this workflow manifestation schema.")
     topology: AnyTopology = Field(description="The underlying topology governing execution routing.")
-    governance: GlobalGovernance | None = Field(
-        default=None, description="Macro-economic circuit breakers and TTL limits for the swarm."
-    )

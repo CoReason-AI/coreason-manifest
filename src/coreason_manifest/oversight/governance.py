@@ -36,17 +36,3 @@ class GovernancePolicy(CoreasonBaseModel):
     policy_name: str = Field(description="Name of the governance policy.")
     version: SemanticVersion = Field(description="Semantic version of the governance policy.")
     rules: list[ConstitutionalRule] = Field(description="List of constitutional rules included in this policy.")
-
-
-class GlobalGovernance(CoreasonBaseModel):
-    """
-    Global governance bounds for a swarm executing a workflow envelope.
-    """
-
-    max_budget_usd: float = Field(
-        description="The absolute maximum economic cost allowed for the entire swarm lifecycle."
-    )
-    max_global_tokens: int = Field(description="The maximum aggregate token usage allowed across all nodes.")
-    global_timeout_seconds: int = Field(
-        description="The absolute Time-To-Live (TTL) for the execution envelope before graceful termination."
-    )

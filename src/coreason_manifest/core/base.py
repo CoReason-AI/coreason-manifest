@@ -36,11 +36,16 @@ class CoreasonBaseModel(BaseModel):
         """Return a strictly sorted, canonical JSON serialization for cryptographic hashing."""
         raw_dict = self.model_dump(mode="json", exclude_none=True, by_alias=True)
 
+        import unicodedata
+
         def _sort_collections(obj: Any) -> Any:
             """
             Recursively sorts dictionaries for canonical serialization while explicitly preserving
-            RFC 8785 array ordering.
+            RFC 8785 array ordering. String objects are NFC-normalized to ensure
+            cryptographic determinism.
             """
+            if isinstance(obj, str):
+                return unicodedata.normalize("NFC", obj)
             if isinstance(obj, dict):
                 return {k: _sort_collections(v) for k, v in sorted(obj.items())}
             if isinstance(obj, list):
