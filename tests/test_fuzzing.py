@@ -187,8 +187,7 @@ def draw_distribution_profile(draw: Any) -> dict[str, Any]:
         )
     )
 
-    if confidence_interval_95 is not None:
-        if confidence_interval_95[0] >= confidence_interval_95[1]:
+    if confidence_interval_95 is not None and confidence_interval_95[0] >= confidence_interval_95[1]:
             confidence_interval_95 = (confidence_interval_95[1], confidence_interval_95[0])
             if confidence_interval_95[0] >= confidence_interval_95[1]:
                 # If they are exactly equal after swap, adjust one.
@@ -525,11 +524,14 @@ def draw_temporal_bounds(draw: Any) -> dict[str, Any]:
     return {
         "valid_from": valid_from,
         "valid_to": valid_to,
-        "interval_type": draw(st.one_of(
-            st.none(),
-            st.sampled_from(["strictly_precedes", "overlaps", "contains", "causes", "mitigates"]),
-        )),
+        "interval_type": draw(
+            st.one_of(
+                st.none(),
+                st.sampled_from(["strictly_precedes", "overlaps", "contains", "causes", "mitigates"]),
+            )
+        ),
     }
+
 
 @given(
     st.fixed_dictionaries(
@@ -958,4 +960,4 @@ trace_export_batch_adapter: TypeAdapter[TraceExportBatch] = TypeAdapter(TraceExp
 
 @given(draw_trace_export_batch())
 def test_telemetry_routing(payload: dict[str, Any]) -> None:
-    parsed = trace_export_batch_adapter.validate_python(payload)
+    trace_export_batch_adapter.validate_python(payload)

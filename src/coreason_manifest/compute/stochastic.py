@@ -28,8 +28,7 @@ class DistributionProfile(CoreasonBaseModel):
 
     @model_validator(mode="after")
     def validate_confidence_interval(self) -> Any:
-        if self.confidence_interval_95 is not None:
-            if self.confidence_interval_95[0] >= self.confidence_interval_95[1]:
+        if self.confidence_interval_95 is not None and self.confidence_interval_95[0] >= self.confidence_interval_95[1]:
                 raise ValueError("confidence_interval_95 must have interval[0] < interval[1]")
         return self
 

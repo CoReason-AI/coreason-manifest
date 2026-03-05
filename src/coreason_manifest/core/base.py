@@ -40,8 +40,6 @@ class CoreasonBaseModel(BaseModel):
             object.__setattr__(self, "_cached_hash", h)
             return h
 
-
-
     def model_dump_canonical(self) -> bytes:
         """Return a strictly sorted, canonical JSON serialization for cryptographic hashing."""
         raw_dict = self.model_dump(mode="json", exclude_none=True, by_alias=True)
