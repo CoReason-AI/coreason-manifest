@@ -55,4 +55,6 @@ class AuctionState(CoreasonBaseModel):
     def sort_bids(self) -> AuctionState:
         """Mathematically sort bids by agent_id for deterministic hashing."""
         self.bids.sort(key=lambda bid: bid.agent_id)
+        if hasattr(self, "_cached_hash"):
+            object.__delattr__(self, "_cached_hash")
         return self

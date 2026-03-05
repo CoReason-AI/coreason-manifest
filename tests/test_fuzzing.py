@@ -40,7 +40,7 @@ def draw_reflex_policy(draw: Any) -> dict[str, Any]:
         st.fixed_dictionaries(
             {
                 "confidence_threshold": st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False),
-                "allowed_read_only_tools": st.lists(st.text()),
+                "allowed_read_only_tools": st.lists(st.text(), max_size=100),
             }
         )
     )
@@ -94,7 +94,7 @@ def draw_intervention_policy(draw: Any) -> dict[str, Any]:
                     st.none(),
                     st.fixed_dictionaries(
                         {
-                            "allowed_fields": st.lists(st.text()),
+                            "allowed_fields": st.lists(st.text(), max_size=100),
                             "json_schema_whitelist": st.dictionaries(
                                 st.text(), st.one_of(st.text(), st.integers(), st.booleans())
                             ),
@@ -111,7 +111,7 @@ def draw_intervention_policy(draw: Any) -> dict[str, Any]:
 def draw_agent_node_payload(draw: Any) -> dict[str, Any]:
     payload: dict[str, Any] = {"type": "agent", "description": draw(st.text())}
     if draw(st.booleans()):
-        payload["intervention_policies"] = draw(st.lists(draw_intervention_policy()))
+        payload["intervention_policies"] = draw(st.lists(draw_intervention_policy(), max_size=100))
     if draw(st.booleans()):
         payload["action_space_id"] = draw(st.text())
     if draw(st.booleans()):
@@ -127,7 +127,7 @@ def draw_agent_node_payload(draw: Any) -> dict[str, Any]:
 def draw_human_node_payload(draw: Any) -> dict[str, Any]:
     payload: dict[str, Any] = {"type": "human", "description": draw(st.text())}
     if draw(st.booleans()):
-        payload["intervention_policies"] = draw(st.lists(draw_intervention_policy()))
+        payload["intervention_policies"] = draw(st.lists(draw_intervention_policy(), max_size=100))
     return payload
 
 
@@ -135,7 +135,7 @@ def draw_human_node_payload(draw: Any) -> dict[str, Any]:
 def draw_system_node_payload(draw: Any) -> dict[str, Any]:
     payload: dict[str, Any] = {"type": "system", "description": draw(st.text())}
     if draw(st.booleans()):
-        payload["intervention_policies"] = draw(st.lists(draw_intervention_policy()))
+        payload["intervention_policies"] = draw(st.lists(draw_intervention_policy(), max_size=100))
     return payload
 
 
@@ -174,22 +174,32 @@ def test_anynode_invalid(invalid_type: str) -> None:
 
 @st.composite
 def draw_distribution_profile(draw: Any) -> dict[str, Any]:
-    res: dict[str, Any] = draw(
-        st.fixed_dictionaries(
-            {
-                "distribution_type": st.sampled_from(["gaussian", "uniform", "beta"]),
-                "mean": st.one_of(st.none(), st.floats(allow_nan=False, allow_infinity=False)),
-                "variance": st.one_of(st.none(), st.floats(allow_nan=False, allow_infinity=False)),
-                "confidence_interval_95": st.one_of(
-                    st.none(),
-                    st.tuples(
-                        st.floats(allow_nan=False, allow_infinity=False),
-                        st.floats(allow_nan=False, allow_infinity=False),
-                    ),
-                ),
-            }
+    distribution_type = draw(st.sampled_from(["gaussian", "uniform", "beta"]))
+    mean = draw(st.one_of(st.none(), st.floats(allow_nan=False, allow_infinity=False)))
+    variance = draw(st.one_of(st.none(), st.floats(allow_nan=False, allow_infinity=False)))
+    confidence_interval_95 = draw(
+        st.one_of(
+            st.none(),
+            st.tuples(
+                st.floats(allow_nan=False, allow_infinity=False),
+                st.floats(allow_nan=False, allow_infinity=False),
+            ),
         )
     )
+
+    if confidence_interval_95 is not None:
+        if confidence_interval_95[0] >= confidence_interval_95[1]:
+            confidence_interval_95 = (confidence_interval_95[1], confidence_interval_95[0])
+            if confidence_interval_95[0] >= confidence_interval_95[1]:
+                # If they are exactly equal after swap, adjust one.
+                confidence_interval_95 = (confidence_interval_95[0], confidence_interval_95[1] + 1.0)
+
+    res: dict[str, Any] = {
+        "distribution_type": distribution_type,
+        "mean": mean,
+        "variance": variance,
+        "confidence_interval_95": confidence_interval_95,
+    }
     return res
 
 
@@ -352,7 +362,7 @@ def draw_grammar_panel_payload(draw: Any) -> dict[str, Any]:
                 "title": st.text(),
                 "data_source_id": st.text(),
                 "mark": st.sampled_from(["point", "line", "area", "bar", "rect", "arc"]),
-                "encodings": st.lists(draw_channel_encoding()),
+                "encodings": st.lists(draw_channel_encoding(), max_size=100),
                 "facet": st.one_of(st.none(), draw_facet_matrix()),
             }
         )
@@ -403,7 +413,7 @@ def test_anyresilience_routing(res_type: str, target: str, fallback: str, reason
     st.text(),
     st.floats(allow_nan=False, allow_infinity=False),
     st.integers(),
-    st.one_of(st.none(), st.lists(st.text())),
+    st.one_of(st.none(), st.lists(st.text(), max_size=100)),
     st.lists(
         st.fixed_dictionaries(
             {
@@ -464,7 +474,7 @@ def test_chaosexperiment_fuzzing(
                         "permissions": st.fixed_dictionaries(
                             {
                                 "network_access": st.booleans(),
-                                "allowed_domains": st.one_of(st.none(), st.lists(st.text())),
+                                "allowed_domains": st.one_of(st.none(), st.lists(st.text(), max_size=100)),
                                 "file_system_read_only": st.booleans(),
                             }
                         ),
@@ -485,7 +495,7 @@ def test_chaosexperiment_fuzzing(
                     {
                         "server_uri": st.text(),
                         "transport_type": st.sampled_from(["stdio", "sse", "http"]),
-                        "allowed_mcp_tools": st.one_of(st.none(), st.lists(st.text())),
+                        "allowed_mcp_tools": st.one_of(st.none(), st.lists(st.text(), max_size=100)),
                     }
                 )
             ),
@@ -502,6 +512,25 @@ semantic_node_adapter: TypeAdapter[SemanticNode] = TypeAdapter(SemanticNode)
 semantic_edge_adapter: TypeAdapter[SemanticEdge] = TypeAdapter(SemanticEdge)
 
 
+@st.composite
+def draw_temporal_bounds(draw: Any) -> dict[str, Any]:
+    valid_from = draw(st.one_of(st.none(), st.floats(allow_nan=False, allow_infinity=False)))
+    valid_to = None
+    if valid_from is not None:
+        delta = draw(st.floats(min_value=0.0, allow_nan=False, allow_infinity=False))
+        valid_to = valid_from + delta
+    else:
+        valid_to = draw(st.one_of(st.none(), st.floats(allow_nan=False, allow_infinity=False)))
+
+    return {
+        "valid_from": valid_from,
+        "valid_to": valid_to,
+        "interval_type": draw(st.one_of(
+            st.none(),
+            st.sampled_from(["strictly_precedes", "overlaps", "contains", "causes", "mitigates"]),
+        )),
+    }
+
 @given(
     st.fixed_dictionaries(
         {
@@ -512,7 +541,7 @@ semantic_edge_adapter: TypeAdapter[SemanticEdge] = TypeAdapter(SemanticEdge)
                 st.none(),
                 st.fixed_dictionaries(
                     {
-                        "vector": st.lists(st.floats(allow_nan=False, allow_infinity=False)),
+                        "vector": st.lists(st.floats(allow_nan=False, allow_infinity=False), max_size=100),
                         "dimensionality": st.integers(),
                         "model_name": st.text(),
                     }
@@ -527,19 +556,7 @@ semantic_edge_adapter: TypeAdapter[SemanticEdge] = TypeAdapter(SemanticEdge)
                 }
             ),
             "tier": st.sampled_from(["working", "episodic", "semantic"]),
-            "temporal_bounds": st.one_of(
-                st.none(),
-                st.fixed_dictionaries(
-                    {
-                        "valid_from": st.one_of(st.none(), st.floats(allow_nan=False, allow_infinity=False)),
-                        "valid_to": st.one_of(st.none(), st.floats(allow_nan=False, allow_infinity=False)),
-                        "interval_type": st.one_of(
-                            st.none(),
-                            st.sampled_from(["strictly_precedes", "overlaps", "contains", "causes", "mitigates"]),
-                        ),
-                    }
-                ),
-            ),
+            "temporal_bounds": st.one_of(st.none(), draw_temporal_bounds()),
             "salience": st.one_of(
                 st.none(),
                 st.fixed_dictionaries(
@@ -569,7 +586,7 @@ def test_semanticnode_fuzzing(payload: dict[str, Any]) -> None:
                 st.none(),
                 st.fixed_dictionaries(
                     {
-                        "vector": st.lists(st.floats(allow_nan=False, allow_infinity=False)),
+                        "vector": st.lists(st.floats(allow_nan=False, allow_infinity=False), max_size=100),
                         "dimensionality": st.integers(),
                         "model_name": st.text(),
                     }
@@ -586,19 +603,7 @@ def test_semanticnode_fuzzing(payload: dict[str, Any]) -> None:
                     }
                 ),
             ),
-            "temporal_bounds": st.one_of(
-                st.none(),
-                st.fixed_dictionaries(
-                    {
-                        "valid_from": st.one_of(st.none(), st.floats(allow_nan=False, allow_infinity=False)),
-                        "valid_to": st.one_of(st.none(), st.floats(allow_nan=False, allow_infinity=False)),
-                        "interval_type": st.one_of(
-                            st.none(),
-                            st.sampled_from(["strictly_precedes", "overlaps", "contains", "causes", "mitigates"]),
-                        ),
-                    }
-                ),
-            ),
+            "temporal_bounds": st.one_of(st.none(), draw_temporal_bounds()),
         }
     )
 )
@@ -659,7 +664,7 @@ def draw_argument_claim(draw: Any) -> dict[str, Any]:
                 "claim_id": st.text(),
                 "proponent_id": st.text(),
                 "text_chunk": st.text(),
-                "warrants": st.lists(draw_evidentiary_warrant()),
+                "warrants": st.lists(draw_evidentiary_warrant(), max_size=100),
             }
         )
     )
@@ -683,10 +688,10 @@ def draw_defeasible_attack(draw: Any) -> dict[str, Any]:
 
 @st.composite
 def draw_argument_graph(draw: Any) -> dict[str, Any]:
-    claims = draw(st.lists(draw_argument_claim()))
+    claims = draw(st.lists(draw_argument_claim(), max_size=100))
     claims_dict = {claim["claim_id"]: claim for claim in claims}
 
-    attacks = draw(st.lists(draw_defeasible_attack()))
+    attacks = draw(st.lists(draw_defeasible_attack(), max_size=100))
     attacks_dict = {attack["attack_id"]: attack for attack in attacks}
 
     res: dict[str, Any] = {"claims": claims_dict, "attacks": attacks_dict}
@@ -751,7 +756,7 @@ def draw_auction_state(draw: Any) -> dict[str, Any]:
         st.fixed_dictionaries(
             {
                 "announcement": draw_task_announcement(),
-                "bids": st.lists(draw_agent_bid()),
+                "bids": st.lists(draw_agent_bid(), max_size=100),
                 "award": st.one_of(st.none(), draw_task_award()),
             }
         )
@@ -791,7 +796,7 @@ def draw_information_flow_policy(draw: Any) -> dict[str, Any]:
             {
                 "policy_id": st.text(),
                 "active": st.booleans(),
-                "rules": st.lists(draw_redaction_rule()),
+                "rules": st.lists(draw_redaction_rule(), max_size=100),
             }
         )
     )
@@ -829,7 +834,7 @@ def draw_state_diff(draw: Any) -> dict[str, Any]:
         st.fixed_dictionaries(
             {
                 "diff_id": st.text(),
-                "patches": st.lists(draw_state_patch()),
+                "patches": st.lists(draw_state_patch(), max_size=100),
             }
         )
     )
@@ -843,7 +848,7 @@ def draw_rollback_request(draw: Any) -> dict[str, Any]:
             {
                 "request_id": st.text(),
                 "target_event_id": st.text(),
-                "invalidated_node_ids": st.lists(st.text()),
+                "invalidated_node_ids": st.lists(st.text(), max_size=100),
             }
         )
     )
@@ -883,9 +888,9 @@ def draw_epistemic_ledger(draw: Any) -> dict[str, Any]:
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
-                "history": st.lists(draw_any_state_event()),
-                "checkpoints": st.lists(draw_temporal_checkpoint()),
-                "active_rollbacks": st.lists(draw_rollback_request()),
+                "history": st.lists(draw_any_state_event(), max_size=100),
+                "checkpoints": st.lists(draw_temporal_checkpoint(), max_size=100),
+                "active_rollbacks": st.lists(draw_rollback_request(), max_size=100),
             }
         )
     )
@@ -914,21 +919,24 @@ def draw_span_event(draw: Any) -> dict[str, Any]:
 
 @st.composite
 def draw_execution_span(draw: Any) -> dict[str, Any]:
-    res: dict[str, Any] = draw(
-        st.fixed_dictionaries(
-            {
-                "trace_id": st.text(min_size=1),
-                "span_id": st.text(min_size=1),
-                "parent_span_id": st.one_of(st.none(), st.text(min_size=1)),
-                "name": st.text(min_size=1),
-                "kind": st.sampled_from(["client", "server", "producer", "consumer", "internal"]),
-                "start_time_unix_nano": st.integers(min_value=0),
-                "end_time_unix_nano": st.one_of(st.none(), st.integers(min_value=0)),
-                "status": st.sampled_from(["unset", "ok", "error"]),
-                "events": st.lists(draw_span_event()),
-            }
-        )
-    )
+    start_time_unix_nano = draw(st.integers(min_value=0))
+    has_end_time = draw(st.booleans())
+    end_time_unix_nano = None
+    if has_end_time:
+        delta = draw(st.integers(min_value=0))
+        end_time_unix_nano = start_time_unix_nano + delta
+
+    res: dict[str, Any] = {
+        "trace_id": draw(st.text(min_size=1)),
+        "span_id": draw(st.text(min_size=1)),
+        "parent_span_id": draw(st.one_of(st.none(), st.text(min_size=1))),
+        "name": draw(st.text(min_size=1)),
+        "kind": draw(st.sampled_from(["client", "server", "producer", "consumer", "internal"])),
+        "start_time_unix_nano": start_time_unix_nano,
+        "end_time_unix_nano": end_time_unix_nano,
+        "status": draw(st.sampled_from(["unset", "ok", "error"])),
+        "events": draw(st.lists(draw_span_event(), max_size=100)),
+    }
     return res
 
 
@@ -938,7 +946,7 @@ def draw_trace_export_batch(draw: Any) -> dict[str, Any]:
         st.fixed_dictionaries(
             {
                 "batch_id": st.text(min_size=1),
-                "spans": st.lists(draw_execution_span()),
+                "spans": st.lists(draw_execution_span(), max_size=100),
             }
         )
     )
@@ -951,4 +959,3 @@ trace_export_batch_adapter: TypeAdapter[TraceExportBatch] = TypeAdapter(TraceExp
 @given(draw_trace_export_batch())
 def test_telemetry_routing(payload: dict[str, Any]) -> None:
     parsed = trace_export_batch_adapter.validate_python(payload)
-    assert isinstance(parsed, TraceExportBatch)

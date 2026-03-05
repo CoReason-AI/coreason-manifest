@@ -62,6 +62,8 @@ class GrammarPanel(BasePanel):
     def sort_encodings(self) -> Self:
         """Mathematically sorts self.encodings by the string value of channel for deterministic hashing."""
         object.__setattr__(self, "encodings", sorted(self.encodings, key=lambda e: e.channel))
+        if hasattr(self, "_cached_hash"):
+            object.__delattr__(self, "_cached_hash")
         return self
 
 
@@ -70,7 +72,7 @@ class InsightCard(BasePanel):
 
     type: Literal["insight_card"] = Field(default="insight_card", description="Discriminator for an insight card.")
     title: str = Field(description="The title of the insight card.")
-    markdown_content: str = Field(description="The semantic text summary written in Markdown.")
+    markdown_content: str = Field(max_length=50000, description="The semantic text summary written in Markdown.")
 
     @field_validator("markdown_content")
     @classmethod
@@ -100,4 +102,6 @@ class MacroGrid(CoreasonBaseModel):
             for panel_id in row:
                 if panel_id not in panel_ids:
                     raise ValueError(f"Ghost Panel referenced in layout_matrix: {panel_id}")
+        if hasattr(self, "_cached_hash"):
+            object.__delattr__(self, "_cached_hash")
         return self

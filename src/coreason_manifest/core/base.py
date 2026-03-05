@@ -29,8 +29,18 @@ class CoreasonBaseModel(BaseModel):
         strict=True,
     )
 
+    def model_post_init(self, __context: Any) -> None:
+        object.__setattr__(self, "_cached_hash", hash(self.model_dump_canonical()))
+
     def __hash__(self) -> int:
-        return hash(self.model_dump_canonical())
+        try:
+            return object.__getattribute__(self, "_cached_hash")
+        except AttributeError:
+            h = hash(self.model_dump_canonical())
+            object.__setattr__(self, "_cached_hash", h)
+            return h
+
+
 
     def model_dump_canonical(self) -> bytes:
         """Return a strictly sorted, canonical JSON serialization for cryptographic hashing."""

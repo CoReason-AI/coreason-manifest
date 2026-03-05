@@ -16,7 +16,9 @@ from coreason_manifest.state.events import AnyStateEvent
 
 
 class EpistemicLedger(CoreasonBaseModel):
-    history: list[AnyStateEvent] = Field(description="An append-only, cryptographic ledger of state events.")
+    history: list[AnyStateEvent] = Field(
+        max_length=10000, description="An append-only, cryptographic ledger of state events."
+    )
     checkpoints: list[TemporalCheckpoint] = Field(
         default_factory=list, description="Hard temporal anchors allowing O(1) state restoration."
     )
@@ -27,6 +29,8 @@ class EpistemicLedger(CoreasonBaseModel):
     @model_validator(mode="after")
     def sort_history(self) -> Self:
         self.history.sort(key=lambda event: event.timestamp)
+        if hasattr(self, "_cached_hash"):
+            object.__delattr__(self, "_cached_hash")
         return self
 
 
