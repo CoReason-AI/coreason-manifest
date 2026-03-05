@@ -421,6 +421,18 @@
           "title": "Nodes",
           "type": "object"
         },
+        "shared_state_contract": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StateContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The schema-on-write contract governing the internal state of this topology."
+        },
         "type": {
           "const": "council",
           "default": "council",
@@ -466,6 +478,18 @@
           },
           "title": "Nodes",
           "type": "object"
+        },
+        "shared_state_contract": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StateContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The schema-on-write contract governing the internal state of this topology."
         },
         "type": {
           "const": "dag",
@@ -676,6 +700,34 @@
         "token_throttle"
       ],
       "type": "string"
+    },
+    "GlobalGovernance": {
+      "additionalProperties": false,
+      "description": "Global governance bounds for a swarm executing a workflow envelope.",
+      "properties": {
+        "max_budget_usd": {
+          "description": "The absolute maximum economic cost allowed for the entire swarm lifecycle.",
+          "title": "Max Budget Usd",
+          "type": "number"
+        },
+        "max_global_tokens": {
+          "description": "The maximum aggregate token usage allowed across all nodes.",
+          "title": "Max Global Tokens",
+          "type": "integer"
+        },
+        "global_timeout_seconds": {
+          "description": "The absolute Time-To-Live (TTL) for the execution envelope before graceful termination.",
+          "title": "Global Timeout Seconds",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "max_budget_usd",
+        "max_global_tokens",
+        "global_timeout_seconds"
+      ],
+      "title": "GlobalGovernance",
+      "type": "object"
     },
     "GovernancePolicy": {
       "additionalProperties": false,
@@ -1317,6 +1369,29 @@
       "title": "SpanTrace",
       "type": "object"
     },
+    "StateContract": {
+      "additionalProperties": false,
+      "description": "A strict Cryptographic State Contract (Typed Blackboard) for multi-agent memory sharing.",
+      "properties": {
+        "schema_definition": {
+          "additionalProperties": true,
+          "description": "A strict JSON Schema dictionary defining the required shape of the shared memory blackboard.",
+          "title": "Schema Definition",
+          "type": "object"
+        },
+        "strict_validation": {
+          "default": true,
+          "description": "If True, the orchestrator must reject any state mutation that fails the schema definition.",
+          "title": "Strict Validation",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "schema_definition"
+      ],
+      "title": "StateContract",
+      "type": "object"
+    },
     "SteadyStateHypothesis": {
       "additionalProperties": false,
       "properties": {
@@ -1368,6 +1443,18 @@
           },
           "title": "Nodes",
           "type": "object"
+        },
+        "shared_state_contract": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StateContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The schema-on-write contract governing the internal state of this topology."
         },
         "type": {
           "const": "swarm",
@@ -1629,6 +1716,18 @@
         "topology": {
           "$ref": "#/$defs/AnyTopology",
           "description": "The underlying topology governing execution routing."
+        },
+        "governance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GlobalGovernance"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Macro-economic circuit breakers and TTL limits for the swarm."
         }
       },
       "required": [
