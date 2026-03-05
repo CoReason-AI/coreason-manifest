@@ -18,7 +18,7 @@ class GradingCriteria(CoreasonBaseModel):
 
     criterion_id: str = Field(description="Unique identifier for the grading criterion.")
     description: str = Field(description="Detailed description of what is being graded.")
-    weight: float = Field(description="Weight or significance of this criterion.")
+    weight: float = Field(ge=0.0, description="Weight or significance of this criterion.")
 
 
 class AdjudicationRubric(CoreasonBaseModel):
@@ -28,7 +28,7 @@ class AdjudicationRubric(CoreasonBaseModel):
 
     rubric_id: str = Field(description="Unique identifier for the rubric.")
     criteria: list[GradingCriteria] = Field(description="List of criteria used in the rubric.")
-    passing_threshold: float = Field(description="The minimum score required to pass.")
+    passing_threshold: float = Field(ge=0.0, description="The minimum score required to pass.")
 
 
 class AdjudicationVerdict(CoreasonBaseModel):
