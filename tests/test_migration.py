@@ -1,5 +1,7 @@
-from coreason_manifest.workflow.envelope import WorkflowEnvelope
 from pathlib import Path
+
+from coreason_manifest.workflow.envelope import WorkflowEnvelope
+
 
 def test_migration() -> None:
     fixture_path = Path("tests/fixtures/v0.24_workflow_legacy.json")

@@ -1,6 +1,8 @@
 import json
-import jsonschema  # type: ignore[import-untyped]
 from pathlib import Path
+
+import jsonschema  # type: ignore[import-untyped]
+
 
 def test_schema_valid() -> None:
     schema_path = Path("coreason_ontology.schema.json")

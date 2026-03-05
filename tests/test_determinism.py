@@ -5,6 +5,8 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
+import unicodedata
+
 from coreason_manifest.presentation.intents import DraftingIntent, PresentationEnvelope
 from coreason_manifest.presentation.scivis import InsightCard, MacroGrid
 from coreason_manifest.state.events import ObservationEvent
@@ -54,7 +56,8 @@ def test_epistemic_ledger_determinism() -> None:
     assert ledger1.model_dump_canonical() == ledger2.model_dump_canonical()
     assert hash(ledger1) == hash(ledger2)
 
-import unicodedata
+
+
 def test_cryptographic_unicode_determinism() -> None:
     from coreason_manifest.workflow.nodes import AgentNode
     nfc = unicodedata.normalize('NFC', 'Café')
