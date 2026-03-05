@@ -26,6 +26,7 @@ from coreason_manifest.state.argumentation import ArgumentGraph
 from coreason_manifest.state.events import AnyStateEvent, BeliefUpdateEvent, ObservationEvent, SystemFaultEvent
 from coreason_manifest.state.memory import EpistemicLedger
 from coreason_manifest.state.semantic import SemanticEdge, SemanticNode
+from coreason_manifest.telemetry.schemas import TraceExportBatch
 from coreason_manifest.testing.chaos import ChaosExperiment
 from coreason_manifest.tooling import ActionSpace, ToolDefinition
 from coreason_manifest.workflow.auctions import AuctionState
@@ -233,14 +234,28 @@ def draw_crossover_strategy(draw: Any) -> dict[str, Any]:
 
 
 @st.composite
-def draw_evolutionary_topology_payload(draw: Any) -> dict[str, Any]:
+def draw_observability_policy(draw: Any) -> dict[str, Any]:
     res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "traces_sampled": st.booleans(),
+                "detailed_events": st.booleans(),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_evolutionary_topology_payload(draw: Any) -> dict[str, Any]:
+    payload: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
                 "type": st.just("evolutionary"),
                 "nodes": st.just({}),  # For simplicity, empty nodes
                 "shared_state_contract": st.none(),
                 "information_flow": st.none(),
+                "observability": st.one_of(st.none(), draw_observability_policy()),
                 "generations": st.integers(min_value=1),
                 "population_size": st.integers(min_value=1),
                 "mutation": draw_mutation_policy(),
@@ -249,7 +264,7 @@ def draw_evolutionary_topology_payload(draw: Any) -> dict[str, Any]:
             }
         )
     )
-    return res
+    return payload
 
 
 topology_adapter: TypeAdapter[AnyTopology] = TypeAdapter(AnyTopology)
@@ -881,3 +896,59 @@ def draw_epistemic_ledger(draw: Any) -> dict[str, Any]:
 def test_differentials_routing(payload: dict[str, Any]) -> None:
     parsed = epistemic_ledger_adapter.validate_python(payload)
     assert isinstance(parsed, EpistemicLedger)
+
+
+@st.composite
+def draw_span_event(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "name": st.text(min_size=1),
+                "timestamp_unix_nano": st.integers(min_value=0),
+                "attributes": st.dictionaries(st.text(), st.one_of(st.text(), st.integers(), st.booleans())),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_execution_span(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "trace_id": st.text(min_size=1),
+                "span_id": st.text(min_size=1),
+                "parent_span_id": st.one_of(st.none(), st.text(min_size=1)),
+                "name": st.text(min_size=1),
+                "kind": st.sampled_from(["client", "server", "producer", "consumer", "internal"]),
+                "start_time_unix_nano": st.integers(min_value=0),
+                "end_time_unix_nano": st.one_of(st.none(), st.integers(min_value=0)),
+                "status": st.sampled_from(["unset", "ok", "error"]),
+                "events": st.lists(draw_span_event()),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_trace_export_batch(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "batch_id": st.text(min_size=1),
+                "spans": st.lists(draw_execution_span()),
+            }
+        )
+    )
+    return res
+
+
+trace_export_batch_adapter: TypeAdapter[TraceExportBatch] = TypeAdapter(TraceExportBatch)
+
+
+@given(draw_trace_export_batch())
+def test_telemetry_routing(payload: dict[str, Any]) -> None:
+    parsed = trace_export_batch_adapter.validate_python(payload)
+    assert isinstance(parsed, TraceExportBatch)
