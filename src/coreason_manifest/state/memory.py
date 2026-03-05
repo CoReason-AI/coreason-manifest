@@ -30,7 +30,10 @@ class WorkingMemorySnapshot(CoreasonBaseModel):
     )
     argumentation: ArgumentGraph | None = Field(
         default=None,
-        description="The formal graph of non-monotonic claims and defeasible attacks currently active in the swarm's working memory.",
+        description=(
+            "The formal graph of non-monotonic claims and defeasible "
+            "attacks currently active in the swarm's working memory."
+        ),
     )
 
 
