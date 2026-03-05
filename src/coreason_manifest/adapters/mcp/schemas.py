@@ -26,7 +26,10 @@ class JSONRPCError(CoreasonBaseModel):
 
     code: int = Field(..., description="A Number that indicates the error type that occurred.")
     message: str = Field(..., description="A String providing a short description of the error.")
-    data: Any | None = Field(default=None, description="A Primitive or Structured value that contains additional information about the error.")
+    data: Any | None = Field(
+        default=None,
+        description="A Primitive or Structured value that contains additional information about the error."
+    )
 
 
 class JSONRPCErrorResponse(CoreasonBaseModel):

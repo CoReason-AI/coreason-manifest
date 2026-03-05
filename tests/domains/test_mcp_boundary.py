@@ -1,15 +1,13 @@
-import anyio
-import json
-import pytest
-from pydantic import ValidationError
 import hypothesis.strategies as st
-from hypothesis import given, settings, HealthCheck
-
-from coreason_manifest.adapters.mcp.schemas import BoundedJSONRPCRequest, JSONRPCErrorResponse
-from coreason_manifest.cli.mcp_server import _global_error_handler_shield
+import pytest
+from hypothesis import HealthCheck, given, settings
 from mcp.server import Server
 from mcp.shared.session import SessionMessage
 from mcp.types import JSONRPCMessage
+from pydantic import ValidationError
+
+from coreason_manifest.adapters.mcp.schemas import BoundedJSONRPCRequest
+from coreason_manifest.cli.mcp_server import _global_error_handler_shield
 
 # Initialize the global shield for tests
 _global_error_handler_shield()
@@ -41,10 +39,9 @@ def test_buffer_and_depth_attack_proof(params):
     Prove that the schema triggers a ValidationError if it goes out of bounds.
     """
     payload = {"jsonrpc": "2.0", "method": "test_method", "params": params, "id": 1}
-    try:
+    import contextlib
+    with contextlib.suppress(ValidationError):
         BoundedJSONRPCRequest.model_validate(payload)
-    except ValidationError:
-        pass  # Expected if out of bounds
 
 def test_explicit_buffer_attack_proof():
     """Explicitly test a massive string buffer attack."""
@@ -118,8 +115,8 @@ async def test_uptime_assertion_poison_pill():
         "id": 42
     }
 
-    # Create a raw JSONRPCMessage (using construct to bypass strict limits if any were set on it, or just pass a valid message according to MCP types)
-    from mcp.types import ClientRequest
+    # Create a raw JSONRPCMessage (using validate to bypass limits if any were set on it,
+    # or just pass a valid message according to MCP types)
     try:
         parsed_toxic = JSONRPCMessage.model_validate(toxic_payload)
     except Exception:

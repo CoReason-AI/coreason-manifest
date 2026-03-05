@@ -57,12 +57,13 @@ def _global_error_handler_shield() -> None:
     including validation errors, to guarantee the Poison Pill bounds are upheld
     and return strict JSON-RPC Error Envelopes.
     """
-    import json
     import logging
-    from pydantic import ValidationError
+
     from mcp.server import Server
     from mcp.shared.session import BaseSession
-    from coreason_manifest.adapters.mcp.schemas import JSONRPCErrorResponse, JSONRPCError
+    from pydantic import ValidationError
+
+    from coreason_manifest.adapters.mcp.schemas import JSONRPCError, JSONRPCErrorResponse
 
     original_handle_message = Server._handle_message
     logger = logging.getLogger(__name__)
@@ -103,8 +104,9 @@ def _global_error_handler_shield() -> None:
             )
             # Use lower-level send to bypass object validation since session expects SessionMessage
             # We'll just write the dict directly to output if possible, or wrap it
-            from mcp.types import JSONRPCMessage, JSONRPCError as McpJSONRPCError, ErrorData
             from mcp.shared.session import SessionMessage
+            from mcp.types import ErrorData, JSONRPCMessage
+            from mcp.types import JSONRPCError as McpJSONRPCError
 
             msg_id = getattr(message, "id", None) if hasattr(message, "id") else None
             mcp_error = McpJSONRPCError(
@@ -128,8 +130,9 @@ def _global_error_handler_shield() -> None:
                     data=str(e),
                 ),
             )
-            from mcp.types import JSONRPCMessage, JSONRPCError as McpJSONRPCError, ErrorData
             from mcp.shared.session import SessionMessage
+            from mcp.types import ErrorData, JSONRPCMessage
+            from mcp.types import JSONRPCError as McpJSONRPCError
 
             msg_id = getattr(message, "id", None) if hasattr(message, "id") else None
             mcp_error = McpJSONRPCError(
