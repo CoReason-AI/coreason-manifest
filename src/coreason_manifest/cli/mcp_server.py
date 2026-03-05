@@ -116,7 +116,7 @@ def _global_error_handler_shield() -> None:
                     code=error_response.error.code,
                     message=error_response.error.message,
                     data=error_response.error.data,
-                )
+                ),
             )
             fake_msg = JSONRPCMessage(root=mcp_error)
             await session.send_stream.send(SessionMessage(message=fake_msg))
@@ -142,7 +142,7 @@ def _global_error_handler_shield() -> None:
                     code=error_response.error.code,
                     message=error_response.error.message,
                     data=error_response.error.data,
-                )
+                ),
             )
             fake_msg = JSONRPCMessage(root=mcp_error)
             await session.send_stream.send(SessionMessage(message=fake_msg))

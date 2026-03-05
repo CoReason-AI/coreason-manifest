@@ -28,7 +28,7 @@ class JSONRPCError(CoreasonBaseModel):
     message: str = Field(..., description="A String providing a short description of the error.")
     data: Any | None = Field(
         default=None,
-        description="A Primitive or Structured value that contains additional information about the error."
+        description="A Primitive or Structured value that contains additional information about the error.",
     )
 
 

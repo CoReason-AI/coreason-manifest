@@ -12,17 +12,20 @@ from coreason_manifest.cli.mcp_server import _global_error_handler_shield
 # Initialize the global shield for tests
 _global_error_handler_shield()
 
+
 def test_jsonrpc_fuzzer_missing_jsonrpc():
     """Prove the schema definitely rejects payloads missing 'jsonrpc' version."""
     payload = {"method": "test", "params": {}, "id": 1}
     with pytest.raises(ValidationError):
         BoundedJSONRPCRequest.model_validate(payload)
 
+
 def test_jsonrpc_fuzzer_missing_method():
     """Prove the schema definitely rejects payloads missing 'method'."""
     payload = {"jsonrpc": "2.0", "params": {}, "id": 1}
     with pytest.raises(ValidationError):
         BoundedJSONRPCRequest.model_validate(payload)
+
 
 def test_jsonrpc_fuzzer_invalid_id():
     """Prove the schema definitely rejects payloads with invalid 'id' types."""
@@ -40,8 +43,10 @@ def test_buffer_and_depth_attack_proof(params):
     """
     payload = {"jsonrpc": "2.0", "method": "test_method", "params": params, "id": 1}
     import contextlib
+
     with contextlib.suppress(ValidationError):
         BoundedJSONRPCRequest.model_validate(payload)
+
 
 def test_explicit_buffer_attack_proof():
     """Explicitly test a massive string buffer attack."""
@@ -49,6 +54,7 @@ def test_explicit_buffer_attack_proof():
     with pytest.raises(ValidationError) as exc:
         BoundedJSONRPCRequest.model_validate(payload)
     assert "String exceeds maximum length" in str(exc.value)
+
 
 def test_explicit_depth_attack_proof():
     """Explicitly test a deep nesting depth attack."""
@@ -62,6 +68,7 @@ def test_explicit_depth_attack_proof():
     with pytest.raises(ValidationError) as exc:
         BoundedJSONRPCRequest.model_validate(payload)
     assert "depth" in str(exc.value)
+
 
 @pytest.mark.anyio
 async def test_uptime_assertion_poison_pill():
@@ -108,12 +115,7 @@ async def test_uptime_assertion_poison_pill():
         current["k"] = {}
         current = current["k"]
 
-    toxic_payload = {
-        "jsonrpc": "2.0",
-        "method": "list_tools",
-        "params": nested_bomb,
-        "id": 42
-    }
+    toxic_payload = {"jsonrpc": "2.0", "method": "list_tools", "params": nested_bomb, "id": 42}
 
     # Create a raw JSONRPCMessage (using validate to bypass limits if any were set on it,
     # or just pass a valid message according to MCP types)
