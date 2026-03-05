@@ -11,10 +11,26 @@ from coreason_manifest.compute.profiles import (
     QoSClassification,
     RateCard,
 )
+from coreason_manifest.compute.stochastic import (
+    CrossoverStrategy,
+    CrossoverType,
+    DistributionProfile,
+    DistributionType,
+    FitnessObjective,
+    MutationPolicy,
+    OptimizationDirection,
+)
 
 __all__ = [
     "ComputeProvisioningRequest",
+    "CrossoverStrategy",
+    "CrossoverType",
+    "DistributionProfile",
+    "DistributionType",
+    "FitnessObjective",
     "ModelProfile",
+    "MutationPolicy",
+    "OptimizationDirection",
     "QoSClassification",
     "RateCard",
 ]

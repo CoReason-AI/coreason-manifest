@@ -5,6 +5,7 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
+from coreason_manifest.compute.stochastic import CrossoverStrategy, FitnessObjective, MutationPolicy
 from coreason_manifest.oversight.dlp import InformationFlowPolicy, RedactionRule
 from coreason_manifest.presentation.intents import DraftingIntent, PresentationEnvelope
 from coreason_manifest.presentation.scivis import ChannelEncoding, GrammarPanel, InsightCard, MacroGrid
@@ -24,7 +25,7 @@ from coreason_manifest.tooling import ActionSpace, PermissionBoundary, SideEffec
 from coreason_manifest.workflow.auctions import AgentBid, AuctionState, TaskAnnouncement
 from coreason_manifest.workflow.envelope import WorkflowEnvelope
 from coreason_manifest.workflow.nodes import AgentNode
-from coreason_manifest.workflow.topologies import DAGTopology
+from coreason_manifest.workflow.topologies import DAGTopology, EvolutionaryTopology
 
 
 def test_workflow_envelope_determinism() -> None:
@@ -48,6 +49,35 @@ def test_workflow_envelope_determinism() -> None:
 
     assert env1.model_dump_canonical() == env2.model_dump_canonical()
     assert hash(env1) == hash(env2)
+
+
+def test_evolutionary_determinism() -> None:
+    obj_acc = FitnessObjective(target_metric="accuracy", direction="maximize", weight=0.8)
+    obj_cost = FitnessObjective(target_metric="cost", direction="minimize", weight=0.2)
+
+    mutation_policy = MutationPolicy(mutation_rate=0.1, temperature_shift_variance=0.2)
+    crossover_strategy = CrossoverStrategy(strategy_type="uniform_blend", blending_factor=0.5)
+
+    top1 = EvolutionaryTopology(
+        nodes={},
+        generations=10,
+        population_size=100,
+        mutation=mutation_policy,
+        crossover=crossover_strategy,
+        fitness_objectives=[obj_acc, obj_cost],
+    )
+
+    top2 = EvolutionaryTopology(
+        nodes={},
+        generations=10,
+        population_size=100,
+        mutation=mutation_policy,
+        crossover=crossover_strategy,
+        fitness_objectives=[obj_cost, obj_acc],
+    )
+
+    assert top1.model_dump_canonical() == top2.model_dump_canonical()
+    assert hash(top1) == hash(top2)
 
 
 def test_rollback_determinism() -> None:

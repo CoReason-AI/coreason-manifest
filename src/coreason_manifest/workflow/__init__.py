@@ -30,6 +30,7 @@ from coreason_manifest.workflow.topologies import (
     CouncilTopology,
     DAGTopology,
     DiversityConstraint,
+    EvolutionaryTopology,
     StateContract,
     SwarmTopology,
 )
@@ -47,6 +48,7 @@ __all__ = [
     "DAGTopology",
     "DiversityConstraint",
     "EpistemicScanner",
+    "EvolutionaryTopology",
     "HumanNode",
     "SelfCorrectionPolicy",
     "StateContract",
