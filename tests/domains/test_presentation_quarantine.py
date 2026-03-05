@@ -61,9 +61,7 @@ def test_visual_ghost_node_test(ghost_id: str) -> None:
     """
     panels: list[AnyPanel] = [
         InsightCard(panel_id="panel_1", title="A", markdown_content="Safe text"),
-        GrammarPanel(
-            panel_id="panel_2", title="B", data_source_id="d1", mark="point", encodings=[]
-        ),
+        GrammarPanel(panel_id="panel_2", title="B", data_source_id="d1", mark="point", encodings=[]),
     ]
 
     escaped_ghost_id = re.escape(ghost_id)
