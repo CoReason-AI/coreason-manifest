@@ -46,13 +46,15 @@ def test_buffer_spillage_proof(large_buffer: str) -> None:
     assert "String should have at most 10000 characters" in str(exc_info.value)
 
 
-@given(st.one_of(
-    st.text().map(lambda s: f"..{s}"),
-    st.text().map(lambda s: f"{s}.."),
-    st.text().map(lambda s: f"\0{s}"),
-    st.text().map(lambda s: f"{s}\0"),
-    st.text().map(lambda s: f"foo{s}../bar"),
-))
+@given(
+    st.one_of(
+        st.text().map(lambda s: f"..{s}"),
+        st.text().map(lambda s: f"{s}.."),
+        st.text().map(lambda s: f"\0{s}"),
+        st.text().map(lambda s: f"{s}\0"),
+        st.text().map(lambda s: f"foo{s}../bar"),
+    )
+)
 def test_path_traversal_proof(adversarial_cwd: str) -> None:
     # 3. The Path Traversal Proof
     assume(".." in adversarial_cwd or "\0" in adversarial_cwd)
