@@ -6,12 +6,17 @@
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
 import concurrent.futures
+import random
+import time
 from typing import Any
 
-from pydantic import TypeAdapter
+from hypothesis import given, strategies as st
+from pydantic import TypeAdapter, ValidationError
 
 from coreason_manifest.state.events import BeliefUpdateEvent, ObservationEvent, SystemFaultEvent
+from coreason_manifest.telemetry.custody import ExecutionNode
 from coreason_manifest.telemetry.schemas import LogEnvelope, SpanTrace
+from coreason_manifest.workflow.topologies import SwarmTopology
 
 log_adapter = TypeAdapter(LogEnvelope)
 span_adapter = TypeAdapter(SpanTrace)
@@ -65,3 +70,103 @@ def test_massive_concurrency() -> None:
 
     assert len(results) == num_tasks
     # If it completed without exceptions/deadlocks, the test passes
+
+
+@given(
+    spawning_threshold=st.integers(min_value=1, max_value=1000),
+    max_concurrent_agents=st.integers(min_value=1, max_value=1000)
+)
+def test_swarm_deadlock_proof(spawning_threshold: int, max_concurrent_agents: int) -> None:
+    """The Swarm Deadlock Proof."""
+    if spawning_threshold > max_concurrent_agents:
+        try:
+            SwarmTopology(
+                nodes={},
+                spawning_threshold=spawning_threshold,
+                max_concurrent_agents=max_concurrent_agents
+            )
+            assert False, "Should have raised ValidationError"
+        except ValidationError:
+            pass
+    else:
+        # Should succeed
+        SwarmTopology(
+            nodes={},
+            spawning_threshold=spawning_threshold,
+            max_concurrent_agents=max_concurrent_agents
+        )
+
+
+def _writer_thread(idx: int, shared_list: list[ExecutionNode]) -> None:
+    """Generate deeply nested ExecutionNode payloads."""
+    time.sleep(random.uniform(0, 0.001))
+
+    node = ExecutionNode(
+        request_id=f"req_{idx}",
+        inputs={"nested": {"data": [1, 2, 3], "idx": idx}},
+        outputs={"result": f"out_{idx}", "nested": [{"a": 1}, {"b": 2}]},
+        parent_hashes=[f"parent_{idx}"],
+    )
+
+    # Introduce jitter
+    time.sleep(random.uniform(0, 0.001))
+    shared_list.append(node)
+
+    # Verify post-instantiation mutation is blocked
+    try:
+        node.outputs = {"mutated": True}  # type: ignore
+        raise AssertionError("Should have raised exception due to frozen config")
+    except ValidationError:
+        # Pydantic V2 raises ValidationError on frozen model mutation
+        pass
+    except Exception as e:
+        # If any other exception besides ValidationError is raised, it's fine as long as mutation is blocked
+        if isinstance(e, AssertionError):
+            raise
+        pass
+
+
+def _reader_thread(idx: int, shared_list: list[ExecutionNode]) -> None:
+    """Read and hash ExecutionNode payloads."""
+    time.sleep(random.uniform(0, 0.001))
+
+    # Wait until there are items in the list to read
+    for _ in range(10):
+        if shared_list:
+            break
+        time.sleep(0.001)
+
+    if not shared_list:
+        return
+
+    # Pick a random element from the currently available nodes
+    try:
+        node = random.choice(shared_list)
+        # Attempt to read and canonicalize hashes
+        h1 = node.node_hash
+        time.sleep(random.uniform(0, 0.001))
+        h2 = node.generate_node_hash()
+
+        assert h1 == h2, "Hash mismatch"
+    except IndexError:
+        pass
+
+
+def test_thread_weaver_stress_test() -> None:
+    """The NoGIL Thread-Weaver Stress Test."""
+    num_threads = 100
+    shared_nodes: list[ExecutionNode] = []
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=num_threads) as executor:
+        futures = []
+        for i in range(num_threads):
+            if i % 2 == 0:
+                # 50 writers
+                futures.append(executor.submit(_writer_thread, i, shared_nodes))
+            else:
+                # 50 readers
+                futures.append(executor.submit(_reader_thread, i, shared_nodes))
+
+        # Wait for all futures to complete, asserting no exceptions were raised
+        for future in concurrent.futures.as_completed(futures):
+            future.result()  # This will re-raise any exception caught in the thread
