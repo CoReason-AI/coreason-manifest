@@ -77,23 +77,17 @@ def test_explicit_keys_and_list_limits() -> None:
     # Too many keys (>100)
     many_keys_dict = {f"k{i}": "v" for i in range(105)}
     with pytest.raises(ValidationError) as exc:
-        BoundedJSONRPCRequest.model_validate(
-            {"jsonrpc": "2.0", "method": "test", "params": many_keys_dict, "id": 1}
-        )
+        BoundedJSONRPCRequest.model_validate({"jsonrpc": "2.0", "method": "test", "params": many_keys_dict, "id": 1})
     assert "Dictionary exceeds maximum of 100 keys" in str(exc.value)
 
     # Key too long (>1000)
     long_key_dict = {"K" * 1005: "v"}
     with pytest.raises(ValidationError) as exc:
-        BoundedJSONRPCRequest.model_validate(
-            {"jsonrpc": "2.0", "method": "test", "params": long_key_dict, "id": 1}
-        )
+        BoundedJSONRPCRequest.model_validate({"jsonrpc": "2.0", "method": "test", "params": long_key_dict, "id": 1})
     assert "Dictionary key exceeds maximum length of 1000" in str(exc.value)
 
     # Null params coverage
-    BoundedJSONRPCRequest.model_validate(
-        {"jsonrpc": "2.0", "method": "test", "params": None, "id": 1}
-    )
+    BoundedJSONRPCRequest.model_validate({"jsonrpc": "2.0", "method": "test", "params": None, "id": 1})
 
     # Very long string in list
     with pytest.raises(ValidationError) as exc:
@@ -112,9 +106,7 @@ def test_explicit_keys_and_list_limits() -> None:
 
     # Invalid params type
     with pytest.raises(ValidationError) as exc:
-        BoundedJSONRPCRequest.model_validate(
-            {"jsonrpc": "2.0", "method": "test", "params": "not a dict", "id": 1}
-        )
+        BoundedJSONRPCRequest.model_validate({"jsonrpc": "2.0", "method": "test", "params": "not a dict", "id": 1})
     assert "params must be a dictionary" in str(exc.value)
 
 
@@ -124,17 +116,13 @@ def test_omop_resource_template_validation() -> None:
 
     # Valid
     OMOPResourceTemplate(
-        uri_template="omop://CONCEPT/{concept_id}",
-        resource_type=OMOPDomain.CONCEPT,
-        description="test"
+        uri_template="omop://CONCEPT/{concept_id}", resource_type=OMOPDomain.CONCEPT, description="test"
     )
 
     # Invalid
     with pytest.raises(ValidationError) as exc:
         OMOPResourceTemplate(
-            uri_template="http://CONCEPT/{concept_id}",
-            resource_type=OMOPDomain.CONCEPT,
-            description="test"
+            uri_template="http://CONCEPT/{concept_id}", resource_type=OMOPDomain.CONCEPT, description="test"
         )
     assert "must follow the 'omop://' protocol" in str(exc.value)
 
@@ -159,6 +147,7 @@ def test_mcp_server_tool_schemas() -> None:
     # To get coverage on the second value error ("is not a valid schema model"),
     # we can inject a dummy object into the namespace temporarily.
     import coreason_manifest
+
     coreason_manifest.DummyInvalid = object
     coreason_manifest.__all__.append("DummyInvalid")
     try:
@@ -199,12 +188,7 @@ async def test_mcp_stdio_server_happy_path() -> None:
         async def flush(self) -> None:
             pass
 
-    valid_payload = json.dumps({
-        "jsonrpc": "2.0",
-        "method": "ping",
-        "params": {},
-        "id": 1
-    })
+    valid_payload = json.dumps({"jsonrpc": "2.0", "method": "ping", "params": {}, "id": 1})
 
     invalid_json = '{"jsonrpc": "2.0", "method": "ping", "params": {]'
     validation_error_json = '{"jsonrpc": "2.0", "method": "ping", "params": "not a dict", "id": 1}'
@@ -239,7 +223,7 @@ async def test_mcp_stdio_server_happy_path() -> None:
                 msg4 = await read_stream.receive()
                 assert isinstance(msg4, Exception)
                 assert "5MB" in str(msg4)
-        except (anyio.EndOfStream, TimeoutError):
+        except anyio.EndOfStream, TimeoutError:
             # Sometimes mock iterators close before emitting the bomb if task group already finished
             pass
 
@@ -257,7 +241,7 @@ def test_mcp_server_main_entrypoint() -> None:
 
     import coreason_manifest.cli.mcp_server as server_module
 
-    with patch.object(server_module.mcp, 'run') as mock_run:
+    with patch.object(server_module.mcp, "run") as mock_run:
         server_module.main()
         mock_run.assert_called_once_with(transport="stdio")
 
@@ -407,7 +391,7 @@ async def test_uptime_assertion_poison_pill() -> None:
     mcp.types.JSONRPCMessage.model_validate = fake_validate
     try:
         # Pass Exception to trigger the second except block in _safe_handle_message
-        await server._handle_message(Exception("trigger fallback"), mock_session, None) # type: ignore
+        await server._handle_message(Exception("trigger fallback"), mock_session, None)  # type: ignore
     finally:
         mcp.types.JSONRPCMessage.model_validate = original_validate
 
