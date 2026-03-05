@@ -4,7 +4,7 @@ import hypothesis.strategies as st
 import pytest
 from hypothesis import HealthCheck, given, settings
 from mcp.server import Server
-from mcp.shared.session import SessionMessage  # type: ignore
+from mcp.shared.session import SessionMessage  # type: ignore[attr-defined]
 from mcp.types import JSONRPCMessage
 from pydantic import ValidationError
 
