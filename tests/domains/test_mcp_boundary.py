@@ -2,9 +2,10 @@ import hypothesis.strategies as st
 import pytest
 from hypothesis import HealthCheck, given, settings
 from mcp.server import Server
-from mcp.shared.session import SessionMessage
+from mcp.shared.session import SessionMessage  # type: ignore
 from mcp.types import JSONRPCMessage
 from pydantic import ValidationError
+from typing import Any
 
 from coreason_manifest.adapters.mcp.schemas import BoundedJSONRPCRequest
 from coreason_manifest.cli.mcp_server import _global_error_handler_shield
@@ -13,21 +14,21 @@ from coreason_manifest.cli.mcp_server import _global_error_handler_shield
 _global_error_handler_shield()
 
 
-def test_jsonrpc_fuzzer_missing_jsonrpc():
+def test_jsonrpc_fuzzer_missing_jsonrpc() -> None:
     """Prove the schema definitely rejects payloads missing 'jsonrpc' version."""
     payload = {"method": "test", "params": {}, "id": 1}
     with pytest.raises(ValidationError):
         BoundedJSONRPCRequest.model_validate(payload)
 
 
-def test_jsonrpc_fuzzer_missing_method():
+def test_jsonrpc_fuzzer_missing_method() -> None:
     """Prove the schema definitely rejects payloads missing 'method'."""
     payload = {"jsonrpc": "2.0", "params": {}, "id": 1}
     with pytest.raises(ValidationError):
         BoundedJSONRPCRequest.model_validate(payload)
 
 
-def test_jsonrpc_fuzzer_invalid_id():
+def test_jsonrpc_fuzzer_invalid_id() -> None:
     """Prove the schema definitely rejects payloads with invalid 'id' types."""
     payload = {"jsonrpc": "2.0", "method": "test", "params": {}, "id": [1, 2, 3]}
     with pytest.raises(ValidationError):
@@ -36,7 +37,7 @@ def test_jsonrpc_fuzzer_invalid_id():
 
 @given(st.recursive(st.dictionaries(st.text(), st.text()), lambda children: st.dictionaries(st.text(), children)))
 @settings(max_examples=50, suppress_health_check=[HealthCheck.too_slow])
-def test_buffer_and_depth_attack_proof(params):
+def test_buffer_and_depth_attack_proof(params: dict[str, Any]) -> None:
     """
     Generate params payloads with deeply recursive JSON objects.
     Prove that the schema triggers a ValidationError if it goes out of bounds.
@@ -48,7 +49,7 @@ def test_buffer_and_depth_attack_proof(params):
         BoundedJSONRPCRequest.model_validate(payload)
 
 
-def test_explicit_buffer_attack_proof():
+def test_explicit_buffer_attack_proof() -> None:
     """Explicitly test a massive string buffer attack."""
     payload = {"jsonrpc": "2.0", "method": "test_method", "params": {"huge_string": "A" * 20000}, "id": 1}
     with pytest.raises(ValidationError) as exc:
@@ -56,9 +57,9 @@ def test_explicit_buffer_attack_proof():
     assert "String exceeds maximum length" in str(exc.value)
 
 
-def test_explicit_depth_attack_proof():
+def test_explicit_depth_attack_proof() -> None:
     """Explicitly test a deep nesting depth attack."""
-    nested = {}
+    nested: dict[str, Any] = {}
     current = nested
     for _ in range(15):
         current["k"] = {}
@@ -71,7 +72,7 @@ def test_explicit_depth_attack_proof():
 
 
 @pytest.mark.anyio
-async def test_mcp_json_bomb_rejection():
+async def test_mcp_json_bomb_rejection() -> None:
     """
     Prove the JSON-Bomb OOM prevention shield works.
     Generate a raw string payload > 5MB, pass it to the stdio parser, and assert
@@ -80,14 +81,14 @@ async def test_mcp_json_bomb_rejection():
     import anyio
 
     class MockAsyncFile:
-        def __init__(self, data: list[str]):
+        def __init__(self, data: list[str]) -> None:
             self.data = data
             self.index = 0
 
-        def __aiter__(self):
+        def __aiter__(self) -> Any:
             return self
 
-        async def __anext__(self):
+        async def __anext__(self) -> str:
             if self.index < len(self.data):
                 val = self.data[self.index]
                 self.index += 1
@@ -95,10 +96,10 @@ async def test_mcp_json_bomb_rejection():
             await anyio.sleep(0.1)
             raise StopAsyncIteration
 
-        async def write(self, data):
+        async def write(self, data: Any) -> None:
             pass
 
-        async def flush(self):
+        async def flush(self) -> None:
             pass
 
     # Create a string slightly over 5,000,000 characters
@@ -108,7 +109,7 @@ async def test_mcp_json_bomb_rejection():
     # Create streams manually and run stdin_reader to avoid async context manager hangs
     read_stream_writer, read_stream = anyio.create_memory_object_stream(0)
 
-    async def run_stdin():
+    async def run_stdin() -> None:
         try:
             async with read_stream_writer:
                 async for line in mock_stdin:
@@ -128,7 +129,7 @@ async def test_mcp_json_bomb_rejection():
 
 
 @pytest.mark.anyio
-async def test_uptime_assertion_poison_pill():
+async def test_uptime_assertion_poison_pill() -> None:
     """
     Pass toxic malformed dictionaries directly into the MCP server's primary request handling function.
     Assert that the function does not raise an exception.
@@ -138,23 +139,23 @@ async def test_uptime_assertion_poison_pill():
     server = Server("mock_server")
 
     class MockSendStream:
-        def __init__(self):
-            self.sent_messages = []
+        def __init__(self) -> None:
+            self.sent_messages: list[Any] = []
 
-        async def send(self, message):
+        async def send(self, message: Any) -> None:
             self.sent_messages.append(message)
 
     class MockSession:
-        def __init__(self):
-            self.send_stream = MockSendStream()
+        def __init__(self) -> None:
+            self._write_stream = MockSendStream()
 
     mock_session = MockSession()
 
     # Pass an Exception directly (simulating a parse failure in stdio_server)
-    await server._handle_message(Exception("Simulated Parse Error"), mock_session, None)
+    await server._handle_message(Exception("Simulated Parse Error"), mock_session, None)  # type: ignore
 
-    assert len(mock_session.send_stream.sent_messages) == 1
-    sent_msg = mock_session.send_stream.sent_messages[0]
+    assert len(mock_session._write_stream.sent_messages) == 1
+    sent_msg = mock_session._write_stream.sent_messages[0]
 
     response_dict = sent_msg.message.model_dump()
 
@@ -162,11 +163,11 @@ async def test_uptime_assertion_poison_pill():
     assert response_dict["error"]["code"] == -32700
 
     # Test with ValidationError by providing a deeply nested object that will fail internal schema validation
-    mock_session.send_stream.sent_messages.clear()
+    mock_session._write_stream.sent_messages.clear()
 
     # We create a JSONRPCMessage using pydantic's construct or parse, but since it bypasses our bounds,
     # we simulate FastMCP parsing it correctly, and then we inject it into the shield.
-    nested_bomb = {}
+    nested_bomb: dict[str, Any] = {}
     current = nested_bomb
     for _ in range(15):
         current["k"] = {}
@@ -176,6 +177,7 @@ async def test_uptime_assertion_poison_pill():
 
     # Create a raw JSONRPCMessage (using validate to bypass limits if any were set on it,
     # or just pass a valid message according to MCP types)
+    parsed_toxic: Any
     try:
         parsed_toxic = JSONRPCMessage.model_validate(toxic_payload)
     except Exception:
@@ -186,12 +188,12 @@ async def test_uptime_assertion_poison_pill():
 
     try:
         # Pass the toxic message wrapper directly. The shield should catch its own validation error or FastMCP error
-        await server._handle_message(message_wrap, mock_session, None)
+        await server._handle_message(message_wrap, mock_session, None)  # type: ignore
     except Exception as e:
         pytest.fail(f"Server raised exception instead of catching it natively: {e}")
 
-    assert len(mock_session.send_stream.sent_messages) == 1
-    sent_msg2 = mock_session.send_stream.sent_messages[0]
+    assert len(mock_session._write_stream.sent_messages) == 1
+    sent_msg2 = mock_session._write_stream.sent_messages[0]
     response_dict2 = sent_msg2.message.model_dump()
     assert response_dict2["jsonrpc"] == "2.0"
     assert response_dict2["error"]["code"] in (-32600, -32700)

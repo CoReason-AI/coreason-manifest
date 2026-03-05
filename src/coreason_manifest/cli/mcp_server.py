@@ -63,7 +63,9 @@ def _global_error_handler_shield() -> None:
 
     import mcp.server.stdio
     from mcp.server import Server
-    from mcp.shared.session import BaseSession, SessionMessage
+    from mcp.server.session import ServerSession
+    from mcp.shared.session import BaseSession
+    from mcp.shared.session import SessionMessage  # type: ignore
     from pydantic import ValidationError
 
     from coreason_manifest.adapters.mcp.schemas import JSONRPCError, JSONRPCErrorResponse
@@ -85,7 +87,7 @@ def _global_error_handler_shield() -> None:
     async def safe_stdio_server(
         stdin: anyio.AsyncFile[str] | None = None,
         stdout: anyio.AsyncFile[str] | None = None,
-    ):
+    ) -> Any:
         if not stdin:
             stdin = anyio.wrap_file(TextIOWrapper(sys.stdin.buffer, encoding="utf-8"))
         if not stdout:
@@ -94,7 +96,7 @@ def _global_error_handler_shield() -> None:
         read_stream_writer, read_stream = anyio.create_memory_object_stream(0)
         write_stream, write_stream_reader = anyio.create_memory_object_stream(0)
 
-        async def stdin_reader():
+        async def stdin_reader() -> None:
             try:
                 async with read_stream_writer:
                     async for line in stdin:
@@ -127,7 +129,7 @@ def _global_error_handler_shield() -> None:
             except anyio.ClosedResourceError:
                 await anyio.lowlevel.checkpoint()
 
-        async def stdout_writer():
+        async def stdout_writer() -> None:
             try:
                 async with write_stream_reader:
                     async for session_message in write_stream_reader:
@@ -148,9 +150,9 @@ def _global_error_handler_shield() -> None:
     original_handle_message = Server._handle_message
 
     async def _safe_handle_message(
-        self,
+        self: Any,
         message: Any,
-        session: BaseSession,
+        session: ServerSession,
         lifespan_context: Any,
         *args: Any,
         **kwargs: Any,
@@ -164,7 +166,7 @@ def _global_error_handler_shield() -> None:
             if isinstance(message, Exception):
                 # Safely extract ID if we managed to parse the dict but failed validation
                 if hasattr(message, "_raw_payload_dict"):
-                    req_id = message._raw_payload_dict.get("id")  # type: ignore
+                    req_id = message._raw_payload_dict.get("id")
                 raise message
 
             # Pre-validate the internal representation to ensure it adheres to boundary conditions
@@ -198,7 +200,7 @@ def _global_error_handler_shield() -> None:
                 ),
             )
             fake_msg = JSONRPCMessage(root=mcp_error)
-            await session.send_stream.send(SessionMessage(message=fake_msg))
+            await session._write_stream.send(SessionMessage(message=fake_msg))
         except Exception as e:
             logger.error(f"MCP Parsing/Execution Error: {e}")
             error_response = JSONRPCErrorResponse(
@@ -219,7 +221,7 @@ def _global_error_handler_shield() -> None:
             try:
                 mcp_error = McpJSONRPCError(
                     jsonrpc="2.0",
-                    id=None,  # type: ignore
+                    id=None,
                     error=ErrorData(
                         code=error_response.error.code,
                         message=error_response.error.message,
@@ -227,7 +229,7 @@ def _global_error_handler_shield() -> None:
                     ),
                 )
                 fake_msg = JSONRPCMessage(root=mcp_error)
-                await session.send_stream.send(SessionMessage(message=fake_msg))
+                await session._write_stream.send(SessionMessage(message=fake_msg))
             except ValidationError:
                 # Bypass validation to enforce RFC
                 class RFCCompliantErrorMsg:
@@ -258,7 +260,7 @@ def _global_error_handler_shield() -> None:
                 class RFCCompliantSessionMsg:
                     message = RFCCompliantErrorMsg()
 
-                await session.send_stream.send(RFCCompliantSessionMsg())  # type: ignore
+                await session._write_stream.send(RFCCompliantSessionMsg())  # type: ignore
 
     # Apply the monkeypatch shield
     Server._handle_message = _safe_handle_message  # type: ignore
