@@ -1,0 +1,58 @@
+# Copyright (c) 2025 CoReason, Inc.. All Rights Reserved
+#
+# This software is licensed under the Prosperity Public License 3.0.0.
+# The issuer of the Prosperity Public License for this software is CoReason, Inc..
+#
+# For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
+
+from typing import Literal
+
+from pydantic import Field, model_validator
+
+from coreason_manifest.core.base import CoreasonBaseModel
+
+type AuctionType = Literal["sealed_bid", "dutch", "vickrey"]
+type TieBreaker = Literal["lowest_cost", "lowest_latency", "highest_confidence", "random"]
+
+
+class AuctionPolicy(CoreasonBaseModel):
+    auction_type: AuctionType = Field(description="The market mechanism governing the auction.")
+    tie_breaker: TieBreaker = Field(description="The deterministic rule for resolving tied bids.")
+    max_bidding_window_ms: int = Field(
+        description="The absolute timeout in milliseconds for nodes to submit proposals."
+    )
+
+
+class TaskAnnouncement(CoreasonBaseModel):
+    task_id: str = Field(description="Unique identifier for the required task.")
+    required_action_space_id: str | None = Field(
+        default=None, description="Optional restriction forcing bidders to possess a specific toolset."
+    )
+    max_budget_usd: float = Field(description="The absolute ceiling price the orchestrator is willing to pay.")
+
+
+class AgentBid(CoreasonBaseModel):
+    agent_id: str = Field(description="The NodeID of the bidder.")
+    estimated_cost_usd: float = Field(description="The node's calculated cost to fulfill the task.")
+    estimated_latency_ms: int = Field(description="The node's estimated time to completion.")
+    confidence_score: float = Field(ge=0.0, le=1.0, description="The node's epistemic certainty of success.")
+
+
+class TaskAward(CoreasonBaseModel):
+    task_id: str = Field(description="The identifier of the resolved task.")
+    awarded_agent_id: str = Field(description="The winning NodeID.")
+    cleared_price_usd: float = Field(description="The final cryptographic clearing price.")
+
+
+class AuctionState(CoreasonBaseModel):
+    announcement: TaskAnnouncement = Field(description="The original call for proposals.")
+    bids: list[AgentBid] = Field(default_factory=list, description="The array of received bids.")
+    award: TaskAward | None = Field(
+        default=None, description="The final cryptographic receipt of the auction, if resolved."
+    )
+
+    @model_validator(mode="after")
+    def sort_bids(self) -> AuctionState:
+        """Mathematically sort bids by agent_id for deterministic hashing."""
+        self.bids.sort(key=lambda bid: bid.agent_id)
+        return self

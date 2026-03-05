@@ -5,6 +5,15 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
+from coreason_manifest.workflow.auctions import (
+    AgentBid,
+    AuctionPolicy,
+    AuctionState,
+    AuctionType,
+    TaskAnnouncement,
+    TaskAward,
+    TieBreaker,
+)
 from coreason_manifest.workflow.envelope import WorkflowEnvelope
 from coreason_manifest.workflow.nodes import (
     AgentNode,
@@ -26,9 +35,13 @@ from coreason_manifest.workflow.topologies import (
 )
 
 __all__ = [
+    "AgentBid",
     "AgentNode",
     "AnyNode",
     "AnyTopology",
+    "AuctionPolicy",
+    "AuctionState",
+    "AuctionType",
     "BackpressurePolicy",
     "CouncilTopology",
     "DAGTopology",
@@ -40,5 +53,8 @@ __all__ = [
     "SwarmTopology",
     "System1Reflex",
     "SystemNode",
+    "TaskAnnouncement",
+    "TaskAward",
+    "TieBreaker",
     "WorkflowEnvelope",
 ]
