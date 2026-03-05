@@ -11,6 +11,7 @@ from pydantic import Field, model_validator
 
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.core.primitives import NodeID
+from coreason_manifest.oversight.dlp import InformationFlowPolicy
 from coreason_manifest.workflow.auctions import AuctionPolicy
 from coreason_manifest.workflow.nodes import AnyNode
 
@@ -67,6 +68,11 @@ class BaseTopology(CoreasonBaseModel):
     nodes: dict[NodeID, AnyNode] = Field(description="Flat registry of all nodes in this topology.")
     shared_state_contract: StateContract | None = Field(
         default=None, description="The schema-on-write contract governing the internal state of this topology."
+    )
+    information_flow: InformationFlowPolicy | None = Field(
+        default=None,
+        description="The structural Data Loss Prevention (DLP) contract governing all state mutations in this "
+        "topology.",
     )
 
 

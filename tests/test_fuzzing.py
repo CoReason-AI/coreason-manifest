@@ -12,6 +12,7 @@ from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import TypeAdapter, ValidationError
 
+from coreason_manifest.oversight.dlp import InformationFlowPolicy
 from coreason_manifest.oversight.governance import GlobalGovernance
 from coreason_manifest.oversight.intervention import InterventionPolicy
 from coreason_manifest.oversight.resilience import (
@@ -628,3 +629,42 @@ auction_state_adapter: TypeAdapter[AuctionState] = TypeAdapter(AuctionState)
 def test_auction_state_fuzzing(payload: dict[str, Any]) -> None:
     parsed = auction_state_adapter.validate_python(payload)
     assert isinstance(parsed, AuctionState)
+
+
+@st.composite
+def draw_redaction_rule(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "rule_id": st.text(),
+                "classification": st.sampled_from(["phi", "pii", "pci", "confidential", "public"]),
+                "target_pattern": st.text(),
+                "action": st.sampled_from(["redact", "hash", "drop_event", "trigger_quarantine"]),
+                "replacement_token": st.one_of(st.none(), st.text()),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_information_flow_policy(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "policy_id": st.text(),
+                "active": st.booleans(),
+                "rules": st.lists(draw_redaction_rule()),
+            }
+        )
+    )
+    return res
+
+
+information_flow_policy_adapter: TypeAdapter[InformationFlowPolicy] = TypeAdapter(InformationFlowPolicy)
+
+
+@given(draw_information_flow_policy())
+def test_dlp_policy_fuzzing(payload: dict[str, Any]) -> None:
+    parsed = information_flow_policy_adapter.validate_python(payload)
+    assert isinstance(parsed, InformationFlowPolicy)

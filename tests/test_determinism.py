@@ -5,6 +5,7 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
+from coreason_manifest.oversight.dlp import InformationFlowPolicy, RedactionRule
 from coreason_manifest.presentation.intents import DraftingIntent, PresentationEnvelope
 from coreason_manifest.presentation.scivis import InsightCard, MacroGrid
 from coreason_manifest.state.argumentation import ArgumentClaim, ArgumentGraph, DefeasibleAttack
@@ -46,6 +47,23 @@ def test_workflow_envelope_determinism() -> None:
 
     assert env1.model_dump_canonical() == env2.model_dump_canonical()
     assert hash(env1) == hash(env2)
+
+
+def test_dlp_determinism() -> None:
+    rule_a = RedactionRule(
+        rule_id="a_phi_redact",
+        classification="phi",
+        target_pattern="pattern_a",
+        action="redact",
+        replacement_token="[REDACTED]",  # noqa: S106
+    )
+    rule_b = RedactionRule(rule_id="b_pii_hash", classification="pii", target_pattern="pattern_b", action="hash")
+
+    policy1 = InformationFlowPolicy(policy_id="p1", rules=[rule_a, rule_b])
+    policy2 = InformationFlowPolicy(policy_id="p1", rules=[rule_b, rule_a])
+
+    assert policy1.model_dump_canonical() == policy2.model_dump_canonical()
+    assert hash(policy1) == hash(policy2)
 
 
 def test_auction_determinism() -> None:
