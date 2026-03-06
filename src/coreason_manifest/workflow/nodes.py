@@ -5,9 +5,8 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
-from typing import Annotated, Literal
+from typing import TYPE_CHECKING, Annotated, Literal
 
-from typing import TYPE_CHECKING
 from pydantic import Field
 
 from coreason_manifest.core.base import CoreasonBaseModel
@@ -107,7 +106,7 @@ class CompositeNode(BaseNode):
     """
 
     type: Literal["composite"] = Field(default="composite", description="Discriminator for a Composite node.")
-    topology: "AnyTopology" = Field(description="The encapsulated subgraph to execute.")
+    topology: "AnyTopology" = Field(description="The encapsulated subgraph to execute.")  # noqa: UP037
     input_mappings: list[InputMapping] = Field(default_factory=list, description="Explicit state projection inputs.")
     output_mappings: list[OutputMapping] = Field(default_factory=list, description="Explicit state projection outputs.")
 
