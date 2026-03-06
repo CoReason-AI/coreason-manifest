@@ -1660,7 +1660,7 @@
           "items": {
             "$ref": "#/$defs/SpanEvent"
           },
-          "maxItems": 5000,
+          "maxItems": 10000,
           "title": "Events",
           "type": "array"
         }
