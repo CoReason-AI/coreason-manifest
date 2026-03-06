@@ -3,7 +3,7 @@ from pydantic import TypeAdapter, ValidationError
 
 from coreason_manifest.workflow.topologies import AnyTopology
 
-topology_adapter = TypeAdapter(AnyTopology)
+topology_adapter: TypeAdapter[AnyTopology] = TypeAdapter(AnyTopology)
 
 
 def test_cwe_674_deep_linear_chain() -> None:
