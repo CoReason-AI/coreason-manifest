@@ -820,7 +820,7 @@ def test_semanticedge_fuzzing(payload: dict[str, Any]) -> None:
 @given(
     st.fixed_dictionaries(
         {
-            "max_budget_usd": st.floats(allow_nan=False, allow_infinity=False),
+            "max_budget_cents": st.integers(min_value=0),
             "max_global_tokens": st.integers(),
             "global_timeout_seconds": st.integers(),
         }
@@ -829,7 +829,7 @@ def test_semanticedge_fuzzing(payload: dict[str, Any]) -> None:
 def test_global_governance_fuzzing(payload: dict[str, Any]) -> None:
     parsed = global_governance_adapter.validate_python(payload)
     assert isinstance(parsed, GlobalGovernance)
-    assert parsed.max_budget_usd == payload["max_budget_usd"]
+    assert parsed.max_budget_cents == payload["max_budget_cents"]
 
 
 @given(
@@ -921,7 +921,7 @@ def draw_task_announcement(draw: Any) -> dict[str, Any]:
                     st.none(),
                     st.text(min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"),
                 ),
-                "max_budget_usd": st.floats(allow_nan=False, allow_infinity=False),
+                "max_budget_cents": st.integers(min_value=0),
             }
         )
     )
@@ -934,7 +934,7 @@ def draw_agent_bid(draw: Any) -> dict[str, Any]:
         st.fixed_dictionaries(
             {
                 "agent_id": st.text(),
-                "estimated_cost_usd": st.floats(allow_nan=False, allow_infinity=False),
+                "estimated_cost_cents": st.integers(min_value=0),
                 "estimated_latency_ms": st.integers(),
                 "confidence_score": st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False),
             }
@@ -950,7 +950,7 @@ def draw_task_award(draw: Any) -> dict[str, Any]:
             {
                 "task_id": st.text(),
                 "awarded_agent_id": st.text(),
-                "cleared_price_usd": st.floats(allow_nan=False, allow_infinity=False),
+                "cleared_price_cents": st.integers(min_value=0),
             }
         )
     )
@@ -1286,7 +1286,7 @@ def draw_workflow_envelope(draw: Any) -> dict[str, Any]:
                     st.none(),
                     st.fixed_dictionaries(
                         {
-                            "max_budget_usd": st.floats(allow_nan=False, allow_infinity=False),
+                            "max_budget_cents": st.integers(min_value=0),
                             "max_global_tokens": st.integers(),
                             "global_timeout_seconds": st.integers(),
                         }

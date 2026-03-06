@@ -206,11 +206,11 @@ def test_dlp_determinism() -> None:
 
 
 def test_auction_determinism() -> None:
-    ann = TaskAnnouncement(task_id="t1", max_budget_usd=100.0)
+    ann = TaskAnnouncement(task_id="t1", max_budget_cents=10000)
 
-    bid_1 = AgentBid(agent_id="agent_a", estimated_cost_usd=10.0, estimated_latency_ms=100, confidence_score=0.9)
-    bid_2 = AgentBid(agent_id="agent_b", estimated_cost_usd=12.0, estimated_latency_ms=90, confidence_score=0.85)
-    bid_3 = AgentBid(agent_id="agent_c", estimated_cost_usd=9.0, estimated_latency_ms=110, confidence_score=0.95)
+    bid_1 = AgentBid(agent_id="agent_a", estimated_cost_cents=1000, estimated_latency_ms=100, confidence_score=0.9)
+    bid_2 = AgentBid(agent_id="agent_b", estimated_cost_cents=1200, estimated_latency_ms=90, confidence_score=0.85)
+    bid_3 = AgentBid(agent_id="agent_c", estimated_cost_cents=900, estimated_latency_ms=110, confidence_score=0.95)
 
     state1 = AuctionState(announcement=ann, bids=[bid_1, bid_2, bid_3])
     state2 = AuctionState(announcement=ann, bids=[bid_3, bid_1, bid_2])

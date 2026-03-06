@@ -60,7 +60,7 @@ class GlobalGovernance(CoreasonBaseModel):
     Global governance bounds for a swarm executing a workflow envelope.
     """
 
-    max_budget_usd: float = Field(
+    max_budget_cents: int = Field(
         description="The absolute maximum economic cost allowed for the entire swarm lifecycle."
     )
     max_global_tokens: int = Field(description="The maximum aggregate token usage allowed across all nodes.")
