@@ -14,24 +14,20 @@ from coreason_manifest.workflow.auctions import (
     TaskAward,
     TieBreaker,
 )
+from coreason_manifest.workflow.constraints import BackpressurePolicy, DiversityConstraint, StateContract
 from coreason_manifest.workflow.envelope import WorkflowEnvelope
 from coreason_manifest.workflow.nodes import (
     AgentNode,
     AnyNode,
-    EpistemicScanner,
     HumanNode,
-    SelfCorrectionPolicy,
-    System1Reflex,
     SystemNode,
 )
+from coreason_manifest.workflow.policies import EpistemicScanner, SelfCorrectionPolicy, System1Reflex
 from coreason_manifest.workflow.topologies import (
     AnyTopology,
-    BackpressurePolicy,
     CouncilTopology,
     DAGTopology,
-    DiversityConstraint,
     EvolutionaryTopology,
-    StateContract,
     SwarmTopology,
 )
 
