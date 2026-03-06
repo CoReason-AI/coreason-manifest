@@ -37,7 +37,7 @@ from coreason_manifest.telemetry.custody import CustodyRecord
 from coreason_manifest.telemetry.schemas import TraceExportBatch
 from coreason_manifest.testing.chaos import ChaosExperiment
 from coreason_manifest.tooling import ActionSpace, ToolDefinition
-from coreason_manifest.workflow.auctions import AuctionState
+from coreason_manifest.workflow.auctions import AuctionState, TaskAward
 from coreason_manifest.workflow.envelope import WorkflowEnvelope
 from coreason_manifest.workflow.nodes import AgentNode, AnyNode, CompositeNode, HumanNode, SystemNode
 from coreason_manifest.workflow.topologies import AnyTopology, StateContract
@@ -985,6 +985,16 @@ auction_state_adapter: TypeAdapter[AuctionState] = TypeAdapter(AuctionState)
 def test_auction_state_fuzzing(payload: dict[str, Any]) -> None:
     parsed = auction_state_adapter.validate_python(payload)
     assert isinstance(parsed, AuctionState)
+
+
+def test_task_award_syndicate_invalid() -> None:
+    payload = {
+        "task_id": "test_task",
+        "awarded_syndicate": {"agent_1": 50, "agent_2": 40},
+        "cleared_price_cents": 100,
+    }
+    with pytest.raises(ValueError, match="Syndicate allocation sum must exactly equal cleared_price_cents"):
+        TypeAdapter(TaskAward).validate_python(payload)
 
 
 @st.composite
