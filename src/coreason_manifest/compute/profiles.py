@@ -14,6 +14,25 @@ from coreason_manifest.core.base import CoreasonBaseModel
 type QoSClassification = Literal["critical", "high", "interactive", "background_batch"]
 
 
+class RoutingFrontier(CoreasonBaseModel):
+    """
+    Mathematical Pareto boundaries for dynamic spot-market liquid compute.
+    """
+
+    max_latency_ms: int = Field(
+        gt=0, description="The absolute physical speed limit acceptable for time-to-first-token or total generation."
+    )
+    max_cost_microcents_per_token: int = Field(
+        gt=0, description="The strict financial ceiling. MUST be an integer to maintain cryptographic determinism."
+    )
+    min_capability_score: float = Field(
+        ge=0.0, le=1.0, description="The cognitive capability floor required for the task (0.0 to 1.0)."
+    )
+    tradeoff_preference: Literal["latency_optimized", "cost_optimized", "capability_optimized", "balanced"] = Field(
+        description="The mathematical optimization vector to break ties within the frontier."
+    )
+
+
 class RateCard(CoreasonBaseModel):
     """
     Economic constraints for liquid compute operations.
