@@ -1357,8 +1357,8 @@ def test_execution_span_cached_hash_sort_events() -> None:
     res1 = span.validate_temporal_bounds()  # type: ignore
     assert not hasattr(res1, "_cached_hash")
 
-    res1._cached_hash = 12345  # type: ignore
-    res2 = res1.sort_events()  # type: ignore
+    res1._cached_hash = 12345
+    res2 = res1.sort_events()
     assert not hasattr(res2, "_cached_hash")
     assert res2.events[0].name == "e1"
 
