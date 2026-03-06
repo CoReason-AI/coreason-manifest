@@ -30,8 +30,8 @@ class ExecutionSpan(CoreasonBaseModel):
     parent_span_id: str | None = Field(default=None, description="The causal link to the invoking node.")
     name: str = Field(description="The semantic identifier for the operation.")
     kind: SpanKind = Field(default="internal", description="The role of the span.")
-    start_time_unix_nano: int = Field(description="Temporal start bound.")
-    end_time_unix_nano: int | None = Field(default=None, description="Temporal end bound, if completed.")
+    start_time_unix_nano: int = Field(ge=0, description="Temporal start bound.")
+    end_time_unix_nano: int | None = Field(default=None, ge=0, description="Temporal end bound, if completed.")
     status: SpanStatusCode = Field(default="unset", description="The execution health flag.")
     events: list[SpanEvent] = Field(
         default_factory=list, max_length=10000, description="Structured log records emitted during the span."

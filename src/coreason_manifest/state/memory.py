@@ -28,7 +28,7 @@ class EpistemicLedger(CoreasonBaseModel):
 
     @model_validator(mode="after")
     def sort_history(self) -> Self:
-        self.history.sort(key=lambda event: event.timestamp)
+        object.__setattr__(self, "history", sorted(self.history, key=lambda event: event.timestamp))
         return self
 
 
