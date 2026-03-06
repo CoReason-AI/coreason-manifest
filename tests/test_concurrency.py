@@ -48,9 +48,9 @@ def instantiate_and_hash(index: int) -> tuple[int, int, int]:
 
     # StateEvent
     if index % 3 == 0:
-        event: Any = ObservationEvent(event_id=f"ev_{index}", timestamp=index * 1.5)
+        event: Any = ObservationEvent(event_id=f"ev_{index}", timestamp=index * 1.5, payload={})
     elif index % 3 == 1:
-        event = BeliefUpdateEvent(event_id=f"ev_{index}", timestamp=index * 1.5)
+        event = BeliefUpdateEvent(event_id=f"ev_{index}", timestamp=index * 1.5, payload={})
     else:
         event = SystemFaultEvent(event_id=f"ev_{index}", timestamp=index * 1.5)
 

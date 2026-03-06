@@ -283,14 +283,25 @@ def test_presentation_envelope_determinism() -> None:
 
 
 def test_epistemic_ledger_determinism() -> None:
-    event1 = ObservationEvent(event_id="obs_1", timestamp=100.0)
-    event2 = ObservationEvent(event_id="obs_2", timestamp=200.0)
+    event1 = ObservationEvent(event_id="obs_1", timestamp=100.0, payload={})
+    event2 = ObservationEvent(event_id="obs_2", timestamp=200.0, payload={})
 
     ledger1 = EpistemicLedger(history=[event1, event2])
     ledger2 = EpistemicLedger(history=[event1, event2])
 
     assert ledger1.model_dump_canonical() == ledger2.model_dump_canonical()
     assert hash(ledger1) == hash(ledger2)
+
+
+def test_epistemic_payload_canonical_hashing() -> None:
+    data = {"temperature": 72, "humidity": 0.5, "status": "nominal"}
+    scrambled_data = {"status": "nominal", "temperature": 72, "humidity": 0.5}
+
+    event_a = ObservationEvent(event_id="obs_1", timestamp=100.0, payload=data)
+    event_b = ObservationEvent(event_id="obs_1", timestamp=100.0, payload=scrambled_data)
+
+    assert hash(event_a) == hash(event_b)
+    assert event_a.model_dump_canonical() == event_b.model_dump_canonical()
 
 
 def test_semantic_memory_determinism() -> None:

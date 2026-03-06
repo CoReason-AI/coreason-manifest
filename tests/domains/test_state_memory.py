@@ -18,11 +18,18 @@ def state_event_strategy(draw: st.DrawFn) -> AnyStateEvent:
     event_type = draw(st.sampled_from(["observation", "belief_update", "system_fault"]))
     event_id = draw(st.text(min_size=1, max_size=50))
     timestamp = draw(st.floats(min_value=0.0, max_value=1e10, allow_nan=False, allow_infinity=False))
+    payload = draw(
+        st.dictionaries(
+            st.text(),
+            st.one_of(st.text(), st.integers(), st.floats(allow_nan=False, allow_infinity=False), st.booleans()),
+            max_size=5,
+        )
+    )
 
     if event_type == "observation":
-        return ObservationEvent(event_id=event_id, timestamp=timestamp, type="observation")
+        return ObservationEvent(event_id=event_id, timestamp=timestamp, type="observation", payload=payload)
     if event_type == "belief_update":
-        return BeliefUpdateEvent(event_id=event_id, timestamp=timestamp, type="belief_update")
+        return BeliefUpdateEvent(event_id=event_id, timestamp=timestamp, type="belief_update", payload=payload)
     return SystemFaultEvent(event_id=event_id, timestamp=timestamp, type="system_fault")
 
 
