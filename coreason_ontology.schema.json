@@ -608,6 +608,14 @@
           ],
           "default": null,
           "description": "The specific topological node that synthesized this belief update."
+        },
+        "causal_attributions": {
+          "description": "Immutable audit trail of prior states that forced this specific cognitive synthesis.",
+          "items": {
+            "$ref": "#/$defs/CausalAttribution"
+          },
+          "title": "Causal Attributions",
+          "type": "array"
         }
       },
       "required": [
@@ -690,6 +698,29 @@
         "dom_hash"
       ],
       "title": "BrowserStateSnapshot",
+      "type": "object"
+    },
+    "CausalAttribution": {
+      "additionalProperties": false,
+      "properties": {
+        "source_event_id": {
+          "description": "The exact event ID in the EpistemicLedger that influenced this belief.",
+          "title": "Source Event Id",
+          "type": "string"
+        },
+        "influence_weight": {
+          "description": "The mathematical attention/importance weight (0.0 to 1.0) assigned to this source by the agent.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Influence Weight",
+          "type": "number"
+        }
+      },
+      "required": [
+        "source_event_id",
+        "influence_weight"
+      ],
+      "title": "CausalAttribution",
       "type": "object"
     },
     "CausalInterval": {
@@ -1215,16 +1246,6 @@
       ],
       "title": "DAGTopology",
       "type": "object"
-    },
-    "DataClassification": {
-      "enum": [
-        "phi",
-        "pii",
-        "pci",
-        "confidential",
-        "public"
-      ],
-      "type": "string"
     },
     "DefeasibleAttack": {
       "additionalProperties": false,
@@ -2674,7 +2695,7 @@
           "type": "string"
         },
         "classification": {
-          "$ref": "#/$defs/DataClassification",
+          "$ref": "#/$defs/coreason_manifest__oversight__dlp__DataClassification",
           "description": "The category of sensitive data this rule targets."
         },
         "target_pattern": {
@@ -2732,6 +2753,16 @@
       ],
       "title": "RedactionRule",
       "type": "object"
+    },
+    "RiskLevel": {
+      "description": "Risk classification for governance.\nOrder matters: safe < standard < critical.",
+      "enum": [
+        "safe",
+        "standard",
+        "critical"
+      ],
+      "title": "RiskLevel",
+      "type": "string"
     },
     "RollbackRequest": {
       "additionalProperties": false,
@@ -3886,6 +3917,34 @@
           "default": null,
           "description": "The ephemeral session boundary for this execution.",
           "title": "Session Id"
+        },
+        "max_risk_tolerance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RiskLevel"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The absolute maximum enterprise risk threshold permitted for this topology."
+        },
+        "allowed_data_classifications": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/coreason_manifest__core__primitives__DataClassification"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The declarative whitelist of data classifications permitted to flow through this graph.",
+          "title": "Allowed Data Classifications"
         }
       },
       "required": [
@@ -3930,6 +3989,27 @@
       ],
       "title": "WorkingMemorySnapshot",
       "type": "object"
+    },
+    "coreason_manifest__core__primitives__DataClassification": {
+      "description": "Standardized Information Flow Control (IFC) clearance levels.",
+      "enum": [
+        "public",
+        "internal",
+        "confidential",
+        "restricted"
+      ],
+      "title": "DataClassification",
+      "type": "string"
+    },
+    "coreason_manifest__oversight__dlp__DataClassification": {
+      "enum": [
+        "phi",
+        "pii",
+        "pci",
+        "confidential",
+        "public"
+      ],
+      "type": "string"
     },
     "coreason_manifest__state__argumentation__AttackVector": {
       "enum": [

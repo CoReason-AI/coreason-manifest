@@ -425,7 +425,7 @@ def test_anytopology_routing(payload: dict[str, Any]) -> None:
 
 @st.composite
 def draw_causal_attribution(draw: Any) -> dict[str, Any]:
-    return draw(
+    res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
                 "source_event_id": st.text(min_size=1),
@@ -433,6 +433,7 @@ def draw_causal_attribution(draw: Any) -> dict[str, Any]:
             }
         )
     )
+    return res
 
 
 @st.composite
