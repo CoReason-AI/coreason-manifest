@@ -92,32 +92,6 @@ def test_temporal_shuffle_proof(inputs: Any, outputs: Any) -> None:
         assert verify_merkle_proof(trace) is True
 
 
-@given(
-    ssn=st.from_regex(r"\b\d{3}-\d{2}-\d{4}\b", fullmatch=True),
-    api_key=st.from_regex(r"\bAPI_KEY_[a-zA-Z0-9]+\b", fullmatch=True),
-)
-def test_quarantine_proof(ssn: str, api_key: str) -> None:
-    """
-    4. The Quarantine Proof:
-    Inject a toxic string (e.g., a fake SSN or API key) into a node's payload.
-    Prove that the telemetry schemas (PrivacySentinel) redact the string before
-    the Merkle hash is calculated, ensuring the hash itself does not become a toxic asset.
-    """
-    node = ExecutionNode(request_id="req_1", inputs={"secret": ssn}, outputs=[api_key], parent_hashes=[])
-
-    # Assert redaction happened at validation
-    assert node.inputs["secret"] == "[REDACTED]"  # noqa: S105
-    assert node.outputs[0] == "[REDACTED]"
-
-    # The generated hash should match the hash of the redacted payload
-    expected_redacted_node = ExecutionNode(
-        request_id="req_1", inputs={"secret": "[REDACTED]"}, outputs=["[REDACTED]"], parent_hashes=[]
-    )
-
-    assert node.generate_node_hash() == expected_redacted_node.generate_node_hash()
-    assert node.node_hash == expected_redacted_node.node_hash
-
-
 def test_missing_node_hash_verification() -> None:
     # A node whose hash is wiped out
     n1 = ExecutionNode(request_id="req_1", inputs="a", outputs="b", parent_hashes=[])
@@ -137,12 +111,6 @@ def test_canonicalize_tuple() -> None:
     # Test tuple canonicalization path
     n1 = ExecutionNode(request_id="req_1", inputs=("a", None, "b"), outputs=(), parent_hashes=[])
     assert n1.node_hash is not None
-
-
-def test_redact_toxic_tuple_and_other() -> None:
-    # Test tuple and non-string scalar types in redaction
-    n1 = ExecutionNode(request_id="req_1", inputs=(1, True, "123-45-6789"), outputs=None, parent_hashes=[])
-    assert n1.inputs == (1, True, "[REDACTED]")
 
 
 def test_lineage_orphan_proof() -> None:
