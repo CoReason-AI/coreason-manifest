@@ -1008,7 +1008,7 @@ def draw_agent_bid(draw: Any) -> dict[str, Any]:
 
 @st.composite
 def draw_escrow_policy(draw: Any, max_escrow: int) -> dict[str, Any]:
-    return draw(
+    res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
                 "escrow_locked_cents": st.integers(min_value=0, max_value=max_escrow),
@@ -1019,6 +1019,7 @@ def draw_escrow_policy(draw: Any, max_escrow: int) -> dict[str, Any]:
             }
         )
     )
+    return res
 
 
 @st.composite

@@ -1586,6 +1586,34 @@
       "title": "EpistemicScanner",
       "type": "object"
     },
+    "EscrowPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "escrow_locked_cents": {
+          "description": "The strictly typed integer amount of capital cryptographically locked prior to execution.",
+          "minimum": 0,
+          "title": "Escrow Locked Cents",
+          "type": "integer"
+        },
+        "release_condition_metric": {
+          "description": "A declarative pointer to the SLA or QA rubric required to release the funds.",
+          "title": "Release Condition Metric",
+          "type": "string"
+        },
+        "refund_target_node_id": {
+          "description": "The exact NodeID to return funds to if the release condition fails.",
+          "title": "Refund Target Node Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "escrow_locked_cents",
+        "release_condition_metric",
+        "refund_target_node_id"
+      ],
+      "title": "EscrowPolicy",
+      "type": "object"
+    },
     "EvictionPolicy": {
       "additionalProperties": false,
       "properties": {
@@ -3916,6 +3944,18 @@
           "description": "The final cryptographic clearing price.",
           "title": "Cleared Price Cents",
           "type": "integer"
+        },
+        "escrow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EscrowPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The conditional economic escrow locking the compute budget."
         }
       },
       "required": [
