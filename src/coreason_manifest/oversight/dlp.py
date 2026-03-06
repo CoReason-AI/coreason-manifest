@@ -23,7 +23,7 @@ class RedactionRule(CoreasonBaseModel):
     rule_id: str = Field(description="Unique identifier for the sanitization rule.")
     classification: DataClassification = Field(description="The category of sensitive data this rule targets.")
     target_pattern: str = Field(description="The semantic entity type or declarative regex pattern to identify.")
-    target_regex_pattern: str = Field(max_length=2000, description="The dynamic regex pattern to target.")
+    target_regex_pattern: str = Field(max_length=200, description="The dynamic regex pattern to target.")
     context_exclusion_zones: list[str] | None = Field(
         default=None, max_length=100, description="Specific JSON paths where this rule should NOT apply."
     )

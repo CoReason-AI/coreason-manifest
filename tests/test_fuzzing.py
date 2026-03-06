@@ -972,7 +972,7 @@ def draw_redaction_rule(draw: Any) -> dict[str, Any]:
                 "rule_id": st.text(),
                 "classification": st.sampled_from(["phi", "pii", "pci", "confidential", "public"]),
                 "target_pattern": st.text(),
-                "target_regex_pattern": st.text(max_size=2000),
+                "target_regex_pattern": st.text(max_size=200),
                 "context_exclusion_zones": st.one_of(st.none(), st.lists(st.text(), max_size=100)),
                 "action": st.sampled_from(["redact", "hash", "drop_event", "trigger_quarantine"]),
                 "replacement_token": st.one_of(st.none(), st.text()),

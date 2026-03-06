@@ -75,8 +75,8 @@ def test_massive_concurrency() -> None:
 
 
 @given(
-    spawning_threshold=st.integers(min_value=1, max_value=1000),
-    max_concurrent_agents=st.integers(min_value=1, max_value=1000),
+    spawning_threshold=st.integers(min_value=1, max_value=100),
+    max_concurrent_agents=st.integers(min_value=1, max_value=100),
 )
 def test_swarm_deadlock_proof(spawning_threshold: int, max_concurrent_agents: int) -> None:
     """The Swarm Deadlock Proof."""

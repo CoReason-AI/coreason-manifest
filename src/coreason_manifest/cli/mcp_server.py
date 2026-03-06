@@ -156,7 +156,7 @@ def _global_error_handler_shield() -> None:
 
                         try:
                             # 1. Manual parsing step for RFC strict error mapping
-                            payload_dict = json.loads(line)
+                            payload_dict = await anyio.to_thread.run_sync(json.loads, line)
                         except json.JSONDecodeError as e:  # pragma: no cover
                             # Complete parse failure -> id MUST be None
                             logger.error(f"JSON Decode Error: {e}")
