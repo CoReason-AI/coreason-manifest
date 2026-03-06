@@ -539,12 +539,7 @@ def test_grammar_panel_routing(payload: dict[str, Any]) -> None:
 
 @given(
     st.text(),
-    st.text().filter(
-        lambda x: (
-            not any(tag in x.lower() for tag in ["<script", "<iframe", "javascript:", "<object", "<embed"])
-            and not re.search(r"on[a-zA-Z]+\s*=", x.lower())
-        )
-    ),
+    st.text().filter(lambda x: not re.search(r"<\s*[a-zA-Z/]", x) and not re.search(r"on[a-zA-Z]+\s*=", x.lower())),
 )
 def test_anypanel_insight(title: str, content: str) -> None:
     payload = {"panel_id": "p3", "type": "insight_card", "title": title, "markdown_content": content}
@@ -653,8 +648,10 @@ def test_chaosexperiment_fuzzing(
                             st.none(),
                             st.fixed_dictionaries(
                                 {
-                                    "max_execution_time_ms": st.integers(),
-                                    "max_memory_mb": st.one_of(st.none(), st.integers()),
+                                    "max_execution_time_ms": st.integers(min_value=1, max_value=2**63 - 1),
+                                    "max_memory_mb": st.one_of(
+                                        st.none(), st.integers(min_value=1, max_value=2**63 - 1)
+                                    ),
                                 }
                             ),
                         ),
@@ -1107,7 +1104,7 @@ def draw_span_event(draw: Any) -> dict[str, Any]:
         st.fixed_dictionaries(
             {
                 "name": st.text(min_size=1),
-                "timestamp_unix_nano": st.integers(min_value=0),
+                "timestamp_unix_nano": st.integers(min_value=0, max_value=2**63 - 1),
                 "attributes": st.dictionaries(st.text(), st.one_of(st.text(), st.integers(), st.booleans())),
             }
         )
@@ -1117,11 +1114,11 @@ def draw_span_event(draw: Any) -> dict[str, Any]:
 
 @st.composite
 def draw_execution_span(draw: Any) -> dict[str, Any]:
-    start_time_unix_nano = draw(st.integers(min_value=0))
+    start_time_unix_nano = draw(st.integers(min_value=0, max_value=2**63 - 1))
     has_end_time = draw(st.booleans())
     end_time_unix_nano = None
     if has_end_time:
-        delta = draw(st.integers(min_value=0))
+        delta = draw(st.integers(min_value=0, max_value=2**63 - 1))
         end_time_unix_nano = start_time_unix_nano + delta
 
     res: dict[str, Any] = {

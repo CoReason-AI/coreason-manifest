@@ -43,10 +43,11 @@ class ExecutionSLA(CoreasonBaseModel):
     """
 
     max_execution_time_ms: int = Field(
-        description="The maximum allowed execution time in milliseconds before the orchestrator kills the process."
+        gt=0,
+        description="The maximum allowed execution time in milliseconds before the orchestrator kills the process.",
     )
     max_memory_mb: int | None = Field(
-        default=None, description="The maximum memory footprint allowed for the tool's execution sandbox."
+        default=None, gt=0, description="The maximum memory footprint allowed for the tool's execution sandbox."
     )
 
 
