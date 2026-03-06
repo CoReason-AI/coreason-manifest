@@ -23,9 +23,12 @@ def test_mcp_server_schemas() -> None:
     with pytest.raises(ValueError, match="Schema 'NonExistentSchema' not found"):
         get_schema("NonExistentSchema")
 
+
 def test_export_main_import_error(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
     import importlib
+
     original_import_module = importlib.import_module
+
     def mock_import_module(name: str, *args, **kwargs):
         if name == "coreason_manifest":
             raise ImportError("Simulated ImportError")
@@ -38,10 +41,13 @@ def test_export_main_import_error(monkeypatch: pytest.MonkeyPatch, capsys: pytes
     captured = capsys.readouterr()
     assert "Failed to import coreason_manifest" in captured.out
 
+
 def test_export_main_domain_import_error(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     monkeypatch.chdir(tmp_path)
     import importlib
+
     original_import_module = importlib.import_module
+
     def mock_import_module(name: str, *args, **kwargs):
         if name == "coreason_manifest.core":
             raise ImportError("Simulated domain ImportError")
@@ -51,10 +57,12 @@ def test_export_main_domain_import_error(monkeypatch: pytest.MonkeyPatch, tmp_pa
     export_main()
     assert (tmp_path / "coreason_ontology.schema.json").exists()
 
+
 def test_export_main_no_models(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
     import coreason_manifest.cli.export as export_module
 
     original_import_module = export_module.importlib.import_module
+
     def mock_import_module(name: str, *args, **kwargs):
         mod = original_import_module(name, *args, **kwargs)
         if hasattr(mod, "__all__"):
@@ -69,8 +77,10 @@ def test_export_main_no_models(monkeypatch: pytest.MonkeyPatch, capsys: pytest.C
     captured = capsys.readouterr()
     assert "No models found to export." in captured.out
 
+
 def test_mcp_server_schemas_import_error(monkeypatch: pytest.MonkeyPatch) -> None:
     import importlib
+
     original_import_module = importlib.import_module
 
     def mock_import_module(name: str, *args, **kwargs):
@@ -82,8 +92,10 @@ def test_mcp_server_schemas_import_error(monkeypatch: pytest.MonkeyPatch) -> Non
     schemas = list_schemas()
     assert len(schemas) > 0
 
+
 def test_mcp_server_get_schema_import_error(monkeypatch: pytest.MonkeyPatch) -> None:
     import importlib
+
     original_import_module = importlib.import_module
 
     def mock_import_module(name: str, *args, **kwargs):

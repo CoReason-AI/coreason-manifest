@@ -1289,24 +1289,23 @@ def test_workflow_envelope_fuzzing(payload: dict[str, Any]) -> None:
     parsed = workflow_envelope_adapter.validate_python(payload)
     assert isinstance(parsed, WorkflowEnvelope)
 
+
 def test_stochastic_invalid_confidence_interval() -> None:
     from coreason_manifest.compute.stochastic import DistributionProfile
+
     with pytest.raises(ValueError, match="confidence_interval_95 must have interval"):
-        DistributionProfile(
-            distribution_type="gaussian",
-            confidence_interval_95=(10.0, 5.0)
-        )
+        DistributionProfile(distribution_type="gaussian", confidence_interval_95=(10.0, 5.0))
     with pytest.raises(ValueError, match="confidence_interval_95 must have interval"):
-        DistributionProfile(
-            distribution_type="gaussian",
-            confidence_interval_95=(10.0, 10.0)
-        )
+        DistributionProfile(distribution_type="gaussian", confidence_interval_95=(10.0, 10.0))
+
 
 def test_primitives_risk_level_weight() -> None:
     from coreason_manifest.core.primitives import RiskLevel
+
     assert RiskLevel.SAFE.weight == 0
     assert RiskLevel.STANDARD.weight == 1
     assert RiskLevel.CRITICAL.weight == 2
+
 
 def test_dynamic_layout_template_forbidden_patterns() -> None:
     from coreason_manifest.presentation.templates import DynamicLayoutTemplate
@@ -1316,30 +1315,32 @@ def test_dynamic_layout_template_forbidden_patterns() -> None:
         with pytest.raises(ValueError, match="Forbidden execution pattern detected"):
             DynamicLayoutTemplate(layout_tstring=f"Test {pattern} string")
 
+
 def test_dynamic_layout_template_valid() -> None:
     from coreason_manifest.presentation.templates import DynamicLayoutTemplate
+
     # A valid test to cover line 28 (return v)
     t = DynamicLayoutTemplate(layout_tstring="valid_tstring_content")
     assert t.layout_tstring == "valid_tstring_content"
 
+
 def test_semantic_temporal_bounds_invalid() -> None:
     from coreason_manifest.state.semantic import TemporalBounds
+
     with pytest.raises(ValueError, match="valid_to cannot be before valid_from"):
         TemporalBounds(valid_from=100.0, valid_to=50.0)
 
+
 def test_execution_span_invalid_temporal_bounds() -> None:
     from coreason_manifest.telemetry.schemas import ExecutionSpan
+
     with pytest.raises(ValueError, match="end_time_unix_nano cannot be before start_time_unix_nano"):
-        ExecutionSpan(
-            trace_id="t1",
-            span_id="s1",
-            name="test",
-            start_time_unix_nano=1000,
-            end_time_unix_nano=500
-        )
+        ExecutionSpan(trace_id="t1", span_id="s1", name="test", start_time_unix_nano=1000, end_time_unix_nano=500)
+
 
 def test_execution_span_cached_hash_sort_events() -> None:
     from coreason_manifest.telemetry.schemas import ExecutionSpan, SpanEvent
+
     span = ExecutionSpan(
         trace_id="t1",
         span_id="s1",
@@ -1348,7 +1349,7 @@ def test_execution_span_cached_hash_sort_events() -> None:
         events=[
             SpanEvent(name="e2", timestamp_unix_nano=2000),
             SpanEvent(name="e1", timestamp_unix_nano=1500),
-        ]
+        ],
     )
     # Simulate a hash being cached
     span._cached_hash = 12345
@@ -1364,28 +1365,31 @@ def test_execution_span_cached_hash_sort_events() -> None:
     assert not hasattr(span, "_cached_hash")
     assert span.events[0].name == "e1"
 
+
 def test_trace_export_batch_cached_hash_sort_spans() -> None:
     from coreason_manifest.telemetry.schemas import ExecutionSpan, TraceExportBatch
+
     batch = TraceExportBatch(
         batch_id="b1",
         spans=[
             ExecutionSpan(trace_id="t1", span_id="s2", name="test2", start_time_unix_nano=1000),
             ExecutionSpan(trace_id="t1", span_id="s1", name="test1", start_time_unix_nano=1000),
-        ]
+        ],
     )
     batch._cached_hash = 12345
     batch.sort_spans()
     assert not hasattr(batch, "_cached_hash")
     assert batch.spans[0].span_id == "s1"
 
+
 def test_spec_init_import() -> None:
     import coreason_manifest.spec
+
     assert hasattr(coreason_manifest.spec, "__all__")
+
 
 def test_stochastic_valid_confidence_interval() -> None:
     from coreason_manifest.compute.stochastic import DistributionProfile
-    dp = DistributionProfile(
-        distribution_type="gaussian",
-        confidence_interval_95=(5.0, 10.0)
-    )
+
+    dp = DistributionProfile(distribution_type="gaussian", confidence_interval_95=(5.0, 10.0))
     assert dp.confidence_interval_95 == (5.0, 10.0)
