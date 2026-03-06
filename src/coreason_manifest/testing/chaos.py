@@ -17,6 +17,9 @@ type FaultType = Literal[
     "format_corruption",
     "latency_spike",
     "token_throttle",
+    "network_degradation",
+    "temporal_dilation",
+    "dependency_blackout",
 ]
 
 
