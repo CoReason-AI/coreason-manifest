@@ -148,7 +148,7 @@ def draw_agent_attestation(draw: Any) -> dict[str, Any]:
 
 @st.composite
 def draw_routing_frontier(draw: Any) -> dict[str, Any]:
-    return draw(
+    res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
                 "max_latency_ms": st.integers(min_value=1),
@@ -160,6 +160,7 @@ def draw_routing_frontier(draw: Any) -> dict[str, Any]:
             }
         )
     )
+    return res
 
 
 @st.composite
