@@ -70,8 +70,6 @@ def test_export_main_no_models(monkeypatch: pytest.MonkeyPatch, capsys: pytest.C
             monkeypatch.setattr(mod, "__all__", [])
         return mod
 
-    import importlib
-
     monkeypatch.setattr(importlib, "import_module", mock_import_module)
 
     with pytest.raises(SystemExit) as exc_info:

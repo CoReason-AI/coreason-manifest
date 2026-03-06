@@ -1354,13 +1354,13 @@ def test_execution_span_cached_hash_sort_events() -> None:
     span._cached_hash = 12345  # type: ignore
 
     # Instance method call works fine at runtime but mypy struggles due to PydanticDescriptorProxy wrapping
-    span.validate_temporal_bounds()  # type: ignore
-    assert not hasattr(span, "_cached_hash")
+    res1 = span.validate_temporal_bounds()  # type: ignore
+    assert not hasattr(res1, "_cached_hash")
 
-    span._cached_hash = 12345  # type: ignore
-    span.sort_events()  # type: ignore
-    assert not hasattr(span, "_cached_hash")
-    assert span.events[0].name == "e1"
+    res1._cached_hash = 12345  # type: ignore
+    res2 = res1.sort_events()  # type: ignore
+    assert not hasattr(res2, "_cached_hash")
+    assert res2.events[0].name == "e1"
 
 
 def test_trace_export_batch_cached_hash_sort_spans() -> None:
@@ -1374,9 +1374,9 @@ def test_trace_export_batch_cached_hash_sort_spans() -> None:
         ],
     )
     batch._cached_hash = 12345  # type: ignore
-    batch.sort_spans()  # type: ignore
-    assert not hasattr(batch, "_cached_hash")
-    assert batch.spans[0].span_id == "s1"
+    res = batch.sort_spans()  # type: ignore
+    assert not hasattr(res, "_cached_hash")
+    assert res.spans[0].span_id == "s1"
 
 
 def test_spec_init_import() -> None:
