@@ -147,8 +147,27 @@ def draw_agent_attestation(draw: Any) -> dict[str, Any]:
 
 
 @st.composite
+def draw_routing_frontier(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "max_latency_ms": st.integers(min_value=1),
+                "max_cost_microcents_per_token": st.integers(min_value=1),
+                "min_capability_score": st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False),
+                "tradeoff_preference": st.sampled_from(
+                    ["latency_optimized", "cost_optimized", "capability_optimized", "balanced"]
+                ),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
 def draw_agent_node_payload(draw: Any) -> dict[str, Any]:
     payload: dict[str, Any] = {"type": "agent", "description": draw(st.text())}
+    if draw(st.booleans()):
+        payload["compute_frontier"] = draw(draw_routing_frontier())
     if draw(st.booleans()):
         payload["agent_attestation"] = draw(draw_agent_attestation())
     if draw(st.booleans()):

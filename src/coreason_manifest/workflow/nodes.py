@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Annotated, Literal
 
 from pydantic import Field
 
+from coreason_manifest.compute.profiles import RoutingFrontier
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.oversight.dlp import SecureSubSession
 
@@ -85,6 +86,9 @@ class AgentNode(BaseNode):
     """
 
     type: Literal["agent"] = Field(default="agent", description="Discriminator for an Agent node.")
+    compute_frontier: RoutingFrontier | None = Field(
+        default=None, description="The dynamic spot-market compute requirements for this agent."
+    )
     agent_attestation: AgentAttestation | None = Field(
         default=None, description="The cryptographic identity passport and AI-BOM for the agent."
     )

@@ -222,6 +222,18 @@
           "title": "Type",
           "type": "string"
         },
+        "compute_frontier": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RoutingFrontier"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The dynamic spot-market compute requirements for this agent."
+        },
         "agent_attestation": {
           "anyOf": [
             {
@@ -2939,6 +2951,50 @@
         "target_event_id"
       ],
       "title": "RollbackRequest",
+      "type": "object"
+    },
+    "RoutingFrontier": {
+      "additionalProperties": false,
+      "description": "Mathematical Pareto boundaries for dynamic spot-market liquid compute.",
+      "properties": {
+        "max_latency_ms": {
+          "description": "The absolute physical speed limit acceptable for time-to-first-token or total generation.",
+          "exclusiveMinimum": 0,
+          "title": "Max Latency Ms",
+          "type": "integer"
+        },
+        "max_cost_microcents_per_token": {
+          "description": "The strict financial ceiling. MUST be an integer to maintain cryptographic determinism.",
+          "exclusiveMinimum": 0,
+          "title": "Max Cost Microcents Per Token",
+          "type": "integer"
+        },
+        "min_capability_score": {
+          "description": "The cognitive capability floor required for the task (0.0 to 1.0).",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Min Capability Score",
+          "type": "number"
+        },
+        "tradeoff_preference": {
+          "description": "The mathematical optimization vector to break ties within the frontier.",
+          "enum": [
+            "latency_optimized",
+            "cost_optimized",
+            "capability_optimized",
+            "balanced"
+          ],
+          "title": "Tradeoff Preference",
+          "type": "string"
+        }
+      },
+      "required": [
+        "max_latency_ms",
+        "max_cost_microcents_per_token",
+        "min_capability_score",
+        "tradeoff_preference"
+      ],
+      "title": "RoutingFrontier",
       "type": "object"
     },
     "SalienceProfile": {
