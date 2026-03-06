@@ -539,7 +539,9 @@ def test_grammar_panel_routing(payload: dict[str, Any]) -> None:
 
 @given(
     st.text(),
-    st.text().filter(lambda x: not re.search(r"<\s*[a-zA-Z/]", x) and not re.search(r"on[a-zA-Z]+\s*=", x.lower())),
+    st.text().filter(
+        lambda x: not bool(re.search(r"<[^=\s\d]", x)) and not bool(re.search(r"on[a-zA-Z]+\s*=", x.lower()))
+    ),
 )
 def test_anypanel_insight(title: str, content: str) -> None:
     payload = {"panel_id": "p3", "type": "insight_card", "title": title, "markdown_content": content}

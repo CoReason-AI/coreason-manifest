@@ -76,12 +76,15 @@ class InsightCard(BasePanel):
     @field_validator("markdown_content")
     @classmethod
     def sanitize_markdown(cls, v: str) -> str:
-        """Reject adversarial HTML tags."""
+        """Strictly restrict '<' to mathematical contexts to prevent XSS."""
         v_lower = v.lower()
         if re.search(r"on[a-zA-Z]+\s*=", v_lower):
             raise ValueError("Forbidden HTML event handler detected.")
-        if re.search(r"<\s*[a-zA-Z/]", v):
-            raise ValueError("HTML tags are strictly prohibited. Use standard Markdown.")
+        if re.search(r"<[^=\s\d]", v):
+            raise ValueError(
+                "HTML tags are prohibited. '<' may only be used as a mathematical operator "
+                "followed by a space, digit, or '='."
+            )
         return v
 
 
