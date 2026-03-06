@@ -13,6 +13,7 @@ from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import TypeAdapter, ValidationError
 
+from coreason_manifest.core.primitives import DataClassification, RiskLevel
 from coreason_manifest.oversight.dlp import InformationFlowPolicy
 from coreason_manifest.oversight.governance import GlobalGovernance
 from coreason_manifest.oversight.intervention import (
@@ -423,6 +424,18 @@ def test_anytopology_routing(payload: dict[str, Any]) -> None:
 
 
 @st.composite
+def draw_causal_attribution(draw: Any) -> dict[str, Any]:
+    return draw(
+        st.fixed_dictionaries(
+            {
+                "source_event_id": st.text(min_size=1),
+                "influence_weight": st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False),
+            }
+        )
+    )
+
+
+@st.composite
 def _local_draw_any_state_event(draw: Any) -> dict[str, Any]:
     event_type = draw(st.sampled_from(["observation", "belief_update", "system_fault"]))
     payload: dict[str, Any] = {
@@ -448,6 +461,8 @@ def _local_draw_any_state_event(draw: Any) -> dict[str, Any]:
                 ),
             )
         )
+        if event_type == "belief_update":
+            payload["causal_attributions"] = draw(st.lists(draw_causal_attribution(), max_size=10))
     return payload
 
 
@@ -1287,6 +1302,24 @@ def draw_workflow_envelope(draw: Any) -> dict[str, Any]:
                 ),
                 "tenant_id": st.one_of(st.none(), st.text(max_size=255)),
                 "session_id": st.one_of(st.none(), st.text(max_size=255)),
+                "max_risk_tolerance": st.one_of(
+                    st.none(),
+                    st.sampled_from([RiskLevel.SAFE, RiskLevel.STANDARD, RiskLevel.CRITICAL]),
+                ),
+                "allowed_data_classifications": st.one_of(
+                    st.none(),
+                    st.lists(
+                        st.sampled_from(
+                            [
+                                DataClassification.PUBLIC,
+                                DataClassification.INTERNAL,
+                                DataClassification.CONFIDENTIAL,
+                                DataClassification.RESTRICTED,
+                            ]
+                        ),
+                        max_size=10,
+                    ),
+                ),
             }
         )
     )

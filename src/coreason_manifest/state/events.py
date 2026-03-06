@@ -30,6 +30,15 @@ class ObservationEvent(BaseStateEvent):
     )
 
 
+class CausalAttribution(CoreasonBaseModel):
+    source_event_id: str = Field(description="The exact event ID in the EpistemicLedger that influenced this belief.")
+    influence_weight: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="The mathematical attention/importance weight (0.0 to 1.0) assigned to this source by the agent.",
+    )
+
+
 class BeliefUpdateEvent(BaseStateEvent):
     type: Literal["belief_update"] = Field(
         default="belief_update", description="Discriminator type for a belief update event."
@@ -39,6 +48,10 @@ class BeliefUpdateEvent(BaseStateEvent):
     )
     source_node_id: NodeID | None = Field(
         default=None, description="The specific topological node that synthesized this belief update."
+    )
+    causal_attributions: list[CausalAttribution] = Field(
+        default_factory=list,
+        description="Immutable audit trail of prior states that forced this specific cognitive synthesis.",
     )
 
 

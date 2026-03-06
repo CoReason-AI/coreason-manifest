@@ -8,7 +8,7 @@
 from pydantic import Field
 
 from coreason_manifest.core.base import CoreasonBaseModel
-from coreason_manifest.core.primitives import SemanticVersion
+from coreason_manifest.core.primitives import DataClassification, RiskLevel, SemanticVersion
 from coreason_manifest.oversight.governance import GlobalGovernance
 from coreason_manifest.workflow.topologies import AnyTopology
 
@@ -28,4 +28,11 @@ class WorkflowEnvelope(CoreasonBaseModel):
     )
     session_id: str | None = Field(
         default=None, max_length=255, description="The ephemeral session boundary for this execution."
+    )
+    max_risk_tolerance: RiskLevel | None = Field(
+        default=None, description="The absolute maximum enterprise risk threshold permitted for this topology."
+    )
+    allowed_data_classifications: list[DataClassification] | None = Field(
+        default=None,
+        description="The declarative whitelist of data classifications permitted to flow through this graph.",
     )
