@@ -47,6 +47,18 @@ class FitnessObjective(CoreasonBaseModel):
     )
 
 
+class VerifiableEntropy(CoreasonBaseModel):
+    """Passive cryptographic envelope for verifiable random functions."""
+
+    vrf_proof: str = Field(
+        min_length=10, description="The zero-knowledge cryptographic proof of fair random generation."
+    )
+    public_key: str = Field(
+        min_length=10, description="The public key of the oracle or node used to verify the VRF proof."
+    )
+    seed_hash: str = Field(min_length=10, description="The SHA-256 hash of the origin seed used to initialize the VRF.")
+
+
 class MutationPolicy(CoreasonBaseModel):
     """Constraints governing random heuristic mutations."""
 
@@ -58,6 +70,9 @@ class MutationPolicy(CoreasonBaseModel):
     temperature_shift_variance: float = Field(
         description="The maximum allowed delta for an agent's temperature during mutation."
     )
+    verifiable_entropy: VerifiableEntropy | None = Field(
+        default=None, description="The cryptographic envelope proving the fairness of the applied mutation rate."
+    )
 
 
 class CrossoverStrategy(CoreasonBaseModel):
@@ -66,4 +81,7 @@ class CrossoverStrategy(CoreasonBaseModel):
     strategy_type: CrossoverType = Field(description="The heuristic method for blending successful parent agents.")
     blending_factor: float = Field(
         ge=0.0, le=1.0, description="The proportional mix ratio when merging vector properties."
+    )
+    verifiable_entropy: VerifiableEntropy | None = Field(
+        default=None, description="The cryptographic envelope proving the fairness of the applied crossover logic."
     )
