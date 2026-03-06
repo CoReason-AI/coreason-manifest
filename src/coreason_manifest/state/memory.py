@@ -11,7 +11,7 @@ from pydantic import Field, model_validator
 
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.state.argumentation import ArgumentGraph
-from coreason_manifest.state.differentials import RollbackRequest, TemporalCheckpoint
+from coreason_manifest.state.differentials import MigrationContract, RollbackRequest, TemporalCheckpoint
 from coreason_manifest.state.events import AnyStateEvent
 
 
@@ -44,6 +44,10 @@ class EpistemicLedger(CoreasonBaseModel):
     eviction_policy: EvictionPolicy | None = Field(
         default=None,
         description="The strict mathematical boundary governing context window compression.",
+    )
+    migration_contracts: list[MigrationContract] = Field(
+        default_factory=list,
+        description="Declarative rules to translate historical states to the current active schema version.",
     )
 
     @model_validator(mode="after")

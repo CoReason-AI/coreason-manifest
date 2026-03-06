@@ -1197,6 +1197,21 @@ def draw_eviction_policy(draw: Any) -> dict[str, Any]:
 
 
 @st.composite
+def draw_migration_contract(draw: Any) -> dict[str, Any]:
+    return draw(
+        st.fixed_dictionaries(
+            {
+                "contract_id": st.text(min_size=1),
+                "source_version": st.text(min_size=1),
+                "target_version": st.text(min_size=1),
+                "path_transformations": st.dictionaries(st.text(min_size=1), st.text(min_size=1), max_size=10),
+                "dropped_paths": st.lists(st.text(min_size=1), max_size=10),
+            }
+        )
+    )
+
+
+@st.composite
 def draw_epistemic_ledger(draw: Any) -> dict[str, Any]:
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(
@@ -1205,6 +1220,7 @@ def draw_epistemic_ledger(draw: Any) -> dict[str, Any]:
                 "checkpoints": st.lists(draw_temporal_checkpoint(), max_size=100),
                 "active_rollbacks": st.lists(draw_rollback_request(), max_size=100),
                 "eviction_policy": st.one_of(st.none(), draw_eviction_policy()),
+                "migration_contracts": st.lists(draw_migration_contract(), max_size=10),
             }
         )
     )
