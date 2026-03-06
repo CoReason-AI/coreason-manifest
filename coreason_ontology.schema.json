@@ -708,6 +708,42 @@
       "title": "BeliefUpdateEvent",
       "type": "object"
     },
+    "BilateralSLA": {
+      "additionalProperties": false,
+      "properties": {
+        "receiving_tenant_id": {
+          "description": "The strict enterprise identifier of the foreign B2B tenant receiving this payload.",
+          "maxLength": 255,
+          "title": "Receiving Tenant Id",
+          "type": "string"
+        },
+        "max_permitted_classification": {
+          "$ref": "#/$defs/coreason_manifest__core__primitives__DataClassification",
+          "description": "The absolute highest data sensitivity allowed to cross this federated boundary."
+        },
+        "liability_limit_cents": {
+          "description": "The strict financial cap on cross-tenant economic liability.",
+          "minimum": 0,
+          "title": "Liability Limit Cents",
+          "type": "integer"
+        },
+        "permitted_geographic_regions": {
+          "description": "Explicit whitelist of geographic regions or cloud enclaves where execution is legally permitted (Data Residency Pinning).",
+          "items": {
+            "type": "string"
+          },
+          "title": "Permitted Geographic Regions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "receiving_tenant_id",
+        "max_permitted_classification",
+        "liability_limit_cents"
+      ],
+      "title": "BilateralSLA",
+      "type": "object"
+    },
     "BoundedInterventionScope": {
       "additionalProperties": false,
       "description": "Constraints bounding human interaction for interventions.",
@@ -4209,6 +4245,18 @@
           "default": null,
           "description": "The declarative whitelist of data classifications permitted to flow through this graph.",
           "title": "Allowed Data Classifications"
+        },
+        "federated_sla": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BilateralSLA"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The B2B Service Level Agreement contract that must be mathematically satisfied before multi-tenant graph coupling."
         }
       },
       "required": [
