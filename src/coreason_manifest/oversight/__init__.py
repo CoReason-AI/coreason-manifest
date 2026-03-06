@@ -6,7 +6,7 @@
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
 from .adjudication import AdjudicationRubric, AdjudicationVerdict, GradingCriteria
-from .dlp import DataClassification, InformationFlowPolicy, RedactionRule, SanitizationAction
+from .dlp import DataClassification, InformationFlowPolicy, RedactionRule, SanitizationAction, SecureSubSession
 from .governance import ConstitutionalRule, GlobalGovernance, GovernancePolicy
 from .intervention import (
     AnyInterventionPayload,
@@ -41,4 +41,5 @@ __all__ = [
     "QuarantineOrder",
     "RedactionRule",
     "SanitizationAction",
+    "SecureSubSession",
 ]

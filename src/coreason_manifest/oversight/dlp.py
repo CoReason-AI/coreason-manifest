@@ -23,10 +23,27 @@ class RedactionRule(CoreasonBaseModel):
     rule_id: str = Field(description="Unique identifier for the sanitization rule.")
     classification: DataClassification = Field(description="The category of sensitive data this rule targets.")
     target_pattern: str = Field(description="The semantic entity type or declarative regex pattern to identify.")
+    target_regex_pattern: str = Field(max_length=2000, description="The dynamic regex pattern to target.")
+    context_exclusion_zones: list[str] | None = Field(
+        default=None, max_length=100, description="Specific JSON paths where this rule should NOT apply."
+    )
     action: SanitizationAction = Field(description="The required algorithmic response when this pattern is detected.")
     replacement_token: str | None = Field(
         default=None, description="The strictly typed string to insert if the action is 'redact'."
     )
+
+
+class SecureSubSession(CoreasonBaseModel):
+    """
+    Declarative boundary for handling unredacted secrets within a temporarily isolated memory partition.
+    """
+
+    session_id: str = Field(max_length=255, description="Unique identifier for the secure session.")
+    allowed_vault_keys: list[str] = Field(
+        max_length=100, description="List of enterprise vault keys the agent is temporarily allowed to access."
+    )
+    max_ttl_seconds: int = Field(ge=1, le=3600, description="Maximum time-to-live for the unredacted memory partition.")
+    description: str = Field(max_length=2000, description="Audit justification for this temporary secure session.")
 
 
 class InformationFlowPolicy(CoreasonBaseModel):

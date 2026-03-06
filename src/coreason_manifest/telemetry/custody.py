@@ -12,7 +12,6 @@ from typing import Any, Self
 from pydantic import ConfigDict, Field, model_validator
 
 from coreason_manifest.core.base import CoreasonBaseModel
-from coreason_manifest.core.primitives import GitSHA
 from coreason_manifest.telemetry.schemas import PrivacySentinel
 
 
@@ -23,9 +22,20 @@ class CustodyRecord(CoreasonBaseModel):
 
     model_config = ConfigDict(frozen=True)
 
-    prompt_template_sha: GitSHA = Field(description="The cryptographic SHA of the prompt template used.")
-    context_hash: str = Field(description="The cryptographic hash of the input context provided to the agent.")
-    temperature: float = Field(description="The temperature parameter used for generating the response.")
+    record_id: str = Field(max_length=255, description="Unique identifier for this chain-of-custody entry.")
+    source_node_id: str = Field(max_length=255, description="The execution node that emitted the original data.")
+    applied_policy_id: str = Field(
+        max_length=255, description="The ID of the InformationFlowPolicy successfully applied."
+    )
+    pre_redaction_hash: str | None = Field(
+        default=None,
+        max_length=255,
+        description="Optional SHA-256 hash of the raw toxic data for isolated audit vaults.",
+    )
+    post_redaction_hash: str = Field(
+        max_length=255, description="The definitive SHA-256 hash of the sanitized, mathematically clean payload."
+    )
+    redaction_timestamp_unix_nano: int = Field(description="The precise temporal point the redaction was completed.")
 
 
 class ExecutionNode(CoreasonBaseModel):

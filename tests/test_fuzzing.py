@@ -26,6 +26,7 @@ from coreason_manifest.state.argumentation import ArgumentGraph
 from coreason_manifest.state.events import AnyStateEvent, BeliefUpdateEvent, ObservationEvent, SystemFaultEvent
 from coreason_manifest.state.memory import EpistemicLedger
 from coreason_manifest.state.semantic import SemanticEdge, SemanticNode
+from coreason_manifest.telemetry.custody import CustodyRecord
 from coreason_manifest.telemetry.schemas import TraceExportBatch
 from coreason_manifest.testing.chaos import ChaosExperiment
 from coreason_manifest.tooling import ActionSpace, ToolDefinition
@@ -108,12 +109,29 @@ def draw_intervention_policy(draw: Any) -> dict[str, Any]:
 
 
 @st.composite
+def draw_secure_sub_session(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "session_id": st.text(max_size=255),
+                "allowed_vault_keys": st.lists(st.text(), max_size=100),
+                "max_ttl_seconds": st.integers(min_value=1, max_value=3600),
+                "description": st.text(max_size=2000),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
 def draw_agent_node_payload(draw: Any) -> dict[str, Any]:
     payload: dict[str, Any] = {"type": "agent", "description": draw(st.text())}
     if draw(st.booleans()):
         payload["intervention_policies"] = draw(st.lists(draw_intervention_policy(), max_size=100))
     if draw(st.booleans()):
         payload["action_space_id"] = draw(st.text())
+    if draw(st.booleans()):
+        payload["secure_sub_session"] = draw(draw_secure_sub_session())
     if draw(st.booleans()):
         payload["reflex_policy"] = draw(draw_reflex_policy())
     if draw(st.booleans()):
@@ -870,6 +888,8 @@ def draw_redaction_rule(draw: Any) -> dict[str, Any]:
                 "rule_id": st.text(),
                 "classification": st.sampled_from(["phi", "pii", "pci", "confidential", "public"]),
                 "target_pattern": st.text(),
+                "target_regex_pattern": st.text(max_size=2000),
+                "context_exclusion_zones": st.one_of(st.none(), st.lists(st.text(), max_size=100)),
                 "action": st.sampled_from(["redact", "hash", "drop_event", "trigger_quarantine"]),
                 "replacement_token": st.one_of(st.none(), st.text()),
             }
@@ -1038,6 +1058,32 @@ def draw_trace_export_batch(draw: Any) -> dict[str, Any]:
 
 
 trace_export_batch_adapter: TypeAdapter[TraceExportBatch] = TypeAdapter(TraceExportBatch)
+
+
+@st.composite
+def draw_custody_record(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "record_id": st.text(max_size=255),
+                "source_node_id": st.text(max_size=255),
+                "applied_policy_id": st.text(max_size=255),
+                "pre_redaction_hash": st.one_of(st.none(), st.text(max_size=255)),
+                "post_redaction_hash": st.text(max_size=255),
+                "redaction_timestamp_unix_nano": st.integers(),
+            }
+        )
+    )
+    return res
+
+
+custody_record_adapter: TypeAdapter[CustodyRecord] = TypeAdapter(CustodyRecord)
+
+
+@given(draw_custody_record())
+def test_custody_routing(payload: dict[str, Any]) -> None:
+    parsed = custody_record_adapter.validate_python(payload)
+    assert isinstance(parsed, CustodyRecord)
 
 
 @given(draw_trace_export_batch())
