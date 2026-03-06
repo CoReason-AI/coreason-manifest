@@ -1788,7 +1788,10 @@
         "incorrect_context",
         "format_corruption",
         "latency_spike",
-        "token_throttle"
+        "token_throttle",
+        "network_degradation",
+        "temporal_dilation",
+        "dependency_blackout"
       ],
       "type": "string"
     },
