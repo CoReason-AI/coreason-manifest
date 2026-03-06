@@ -47,7 +47,7 @@ def test_polymorphic_xss_proof(payload: str) -> None:
     Generate adversarial Markdown strings containing malicious tags
     and prove that InsightCard definitively rejects them via a ValidationError.
     """
-    with pytest.raises(ValidationError, match="HTML tags are strictly prohibited"):
+    with pytest.raises(ValidationError, match="HTML tags are prohibited."):
         InsightCard(panel_id="panel_1", title="Insight Title", markdown_content=payload)
 
 
@@ -92,10 +92,7 @@ def test_visual_ghost_node_test(ghost_id: str) -> None:
 @given(
     title=st.text(min_size=1),
     safe_text=st.text().filter(
-        lambda x: (
-            not any(tag in x.lower() for tag in ["<script", "<iframe", "javascript:", "<object", "<embed"])
-            and not re.search(r"on[a-zA-Z]+\s*=", x.lower())
-        )
+        lambda x: not bool(re.search(r"<[^=\s\d]", x)) and not bool(re.search(r"on[a-zA-Z]+\s*=", x.lower()))
     ),
     x_label=st.text(min_size=1),
     y_label=st.text(min_size=1),
