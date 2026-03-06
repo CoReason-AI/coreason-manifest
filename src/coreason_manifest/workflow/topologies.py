@@ -5,7 +5,7 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
-from typing import Annotated, Any, Literal, Self
+from typing import Annotated, Literal, Self
 
 from pydantic import Field, model_validator
 
@@ -15,51 +15,8 @@ from coreason_manifest.core.primitives import NodeID
 from coreason_manifest.oversight.dlp import InformationFlowPolicy
 from coreason_manifest.telemetry.schemas import ObservabilityPolicy
 from coreason_manifest.workflow.auctions import AuctionPolicy
+from coreason_manifest.workflow.constraints import BackpressurePolicy, DiversityConstraint, StateContract
 from coreason_manifest.workflow.nodes import AnyNode
-
-
-class StateContract(CoreasonBaseModel):
-    """
-    A strict Cryptographic State Contract (Typed Blackboard) for multi-agent memory sharing.
-    """
-
-    schema_definition: dict[str, Any] = Field(
-        description="A strict JSON Schema dictionary defining the required shape of the shared memory blackboard."
-    )
-    strict_validation: bool = Field(
-        default=True,
-        description="If True, the orchestrator must reject any state mutation that fails the schema definition.",
-    )
-
-
-class DiversityConstraint(CoreasonBaseModel):
-    """
-    Constraints enforcing cognitive heterogeneity.
-    """
-
-    min_adversaries: int = Field(
-        description="The minimum number of adversarial or 'Devil's Advocate' roles required to prevent groupthink."
-    )
-    model_variance_required: bool = Field(
-        description="If True, forces the orchestrator to route sub-agents to different foundational models."
-    )
-    temperature_variance: float | None = Field(
-        default=None, description="Required statistical variance in temperature settings across the council."
-    )
-
-
-class BackpressurePolicy(CoreasonBaseModel):
-    """
-    Declarative backpressure constraints.
-    """
-
-    max_queue_depth: int = Field(
-        description="The maximum number of unprocessed messages/observations "
-        "allowed between connected nodes before yielding."
-    )
-    token_budget_per_branch: float | None = Field(
-        default=None, description="The maximum token cost allowed per execution branch before rate-limiting."
-    )
 
 
 class BaseTopology(CoreasonBaseModel):
