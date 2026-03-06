@@ -2264,6 +2264,18 @@
           "description": "The exact event ID in the EpistemicLedger that generated this fact.",
           "title": "Source Event Id",
           "type": "string"
+        },
+        "spatial_anchor": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SpatialAnchor"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The physical coordinate matrix where this data was extracted."
         }
       },
       "required": [
@@ -2855,6 +2867,21 @@
           "title": "Object Node Id",
           "type": "string"
         },
+        "confidence_score": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The probabilistic certainty of this logical connection.",
+          "title": "Confidence Score"
+        },
         "predicate": {
           "description": "The string representation of the relationship (e.g., 'WORKS_FOR').",
           "title": "Predicate",
@@ -2917,6 +2944,17 @@
         "label": {
           "description": "The categorical label of the node (e.g., 'Person', 'Concept').",
           "title": "Label",
+          "type": "string"
+        },
+        "scope": {
+          "default": "session",
+          "description": "The cryptographic namespace partitioning boundary. Global is public, Tenant is corporate, Session is ephemeral.",
+          "enum": [
+            "global",
+            "tenant",
+            "session"
+          ],
+          "title": "Scope",
           "type": "string"
         },
         "text_chunk": {
@@ -3118,6 +3156,75 @@
         "status"
       ],
       "title": "SpanTrace",
+      "type": "object"
+    },
+    "SpatialAnchor": {
+      "additionalProperties": false,
+      "properties": {
+        "page_number": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The physical page or slide number.",
+          "title": "Page Number"
+        },
+        "bounding_box": {
+          "anyOf": [
+            {
+              "maxItems": 4,
+              "minItems": 4,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The strictly typed [x_min, y_min, x_max, y_max] coordinate matrix.",
+          "title": "Bounding Box"
+        },
+        "block_type": {
+          "anyOf": [
+            {
+              "enum": [
+                "paragraph",
+                "table",
+                "figure",
+                "footnote",
+                "header"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The structural classification of the source region.",
+          "title": "Block Type"
+        }
+      },
+      "title": "SpatialAnchor",
       "type": "object"
     },
     "StateContract": {
@@ -3739,6 +3846,34 @@
           ],
           "default": null,
           "description": "Macro-economic circuit breakers and TTL limits for the swarm."
+        },
+        "tenant_id": {
+          "anyOf": [
+            {
+              "maxLength": 255,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The enterprise tenant boundary for this execution.",
+          "title": "Tenant Id"
+        },
+        "session_id": {
+          "anyOf": [
+            {
+              "maxLength": 255,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The ephemeral session boundary for this execution.",
+          "title": "Session Id"
         }
       },
       "required": [

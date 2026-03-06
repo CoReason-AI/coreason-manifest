@@ -13,6 +13,18 @@ from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.core.primitives import NodeID
 
 type MemoryTier = Literal["working", "episodic", "semantic"]
+
+
+class SpatialAnchor(CoreasonBaseModel):
+    page_number: int | None = Field(default=None, description="The physical page or slide number.")
+    bounding_box: tuple[float, float, float, float] | None = Field(
+        default=None, description="The strictly typed [x_min, y_min, x_max, y_max] coordinate matrix."
+    )
+    block_type: Literal["paragraph", "table", "figure", "footnote", "header"] | None = Field(
+        default=None, description="The structural classification of the source region."
+    )
+
+
 type CausalInterval = Literal["strictly_precedes", "overlaps", "contains", "causes", "mitigates"]
 
 
@@ -39,6 +51,9 @@ class TemporalBounds(CoreasonBaseModel):
 class MemoryProvenance(CoreasonBaseModel):
     extracted_by: NodeID = Field(description="The ID of the agent node that extracted this memory.")
     source_event_id: str = Field(description="The exact event ID in the EpistemicLedger that generated this fact.")
+    spatial_anchor: SpatialAnchor | None = Field(
+        default=None, description="The physical coordinate matrix where this data was extracted."
+    )
 
 
 class SalienceProfile(CoreasonBaseModel):
@@ -49,6 +64,13 @@ class SalienceProfile(CoreasonBaseModel):
 class SemanticNode(CoreasonBaseModel):
     node_id: str = Field(description="The unique identifier of this semantic concept.")
     label: str = Field(description="The categorical label of the node (e.g., 'Person', 'Concept').")
+    scope: Literal["global", "tenant", "session"] = Field(
+        default="session",
+        description=(
+            "The cryptographic namespace partitioning boundary. "
+            "Global is public, Tenant is corporate, Session is ephemeral."
+        ),
+    )
     text_chunk: str = Field(max_length=50000, description="The raw natural language representation of the memory.")
     embedding: VectorEmbedding | None = Field(
         default=None, description="The dense vector representation of the text chunk."
@@ -67,6 +89,9 @@ class SemanticEdge(CoreasonBaseModel):
     edge_id: str = Field(description="The unique identifier of this relationship.")
     subject_node_id: str = Field(description="The origin SemanticNode ID.")
     object_node_id: str = Field(description="The destination SemanticNode ID.")
+    confidence_score: float | None = Field(
+        default=None, ge=0.0, le=1.0, description="The probabilistic certainty of this logical connection."
+    )
     predicate: str = Field(description="The string representation of the relationship (e.g., 'WORKS_FOR').")
     embedding: VectorEmbedding | None = Field(
         default=None, description="The dense vector representing the relationship semantics."

@@ -38,6 +38,7 @@ from coreason_manifest.state.semantic import (
     SalienceProfile,
     SemanticEdge,
     SemanticNode,
+    SpatialAnchor,
     TemporalBounds,
     VectorEmbedding,
 )
@@ -67,6 +68,7 @@ __all__ = [
     "SalienceProfile",
     "SemanticEdge",
     "SemanticNode",
+    "SpatialAnchor",
     "StateDiff",
     "StatePatch",
     "SystemFaultEvent",
