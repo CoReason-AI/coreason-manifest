@@ -37,6 +37,7 @@ from coreason_manifest.telemetry.schemas import TraceExportBatch
 from coreason_manifest.testing.chaos import ChaosExperiment
 from coreason_manifest.tooling import ActionSpace, ToolDefinition
 from coreason_manifest.workflow.auctions import AuctionState
+from coreason_manifest.workflow.envelope import WorkflowEnvelope
 from coreason_manifest.workflow.nodes import AgentNode, AnyNode, CompositeNode, HumanNode, SystemNode
 from coreason_manifest.workflow.topologies import AnyTopology, StateContract
 
@@ -670,6 +671,31 @@ semantic_edge_adapter: TypeAdapter[SemanticEdge] = TypeAdapter(SemanticEdge)
 
 
 @st.composite
+def draw_spatial_anchor(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "page_number": st.one_of(st.none(), st.integers()),
+                "bounding_box": st.one_of(
+                    st.none(),
+                    st.tuples(
+                        st.floats(allow_nan=False, allow_infinity=False),
+                        st.floats(allow_nan=False, allow_infinity=False),
+                        st.floats(allow_nan=False, allow_infinity=False),
+                        st.floats(allow_nan=False, allow_infinity=False),
+                    ),
+                ),
+                "block_type": st.one_of(
+                    st.none(),
+                    st.sampled_from(["paragraph", "table", "figure", "footnote", "header"]),
+                ),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
 def draw_temporal_bounds(draw: Any) -> dict[str, Any]:
     valid_from = draw(st.one_of(st.none(), st.floats(allow_nan=False, allow_infinity=False)))
     valid_to = None
@@ -707,12 +733,14 @@ def draw_temporal_bounds(draw: Any) -> dict[str, Any]:
                     }
                 ),
             ),
+            "scope": st.sampled_from(["global", "tenant", "session"]),
             "provenance": st.fixed_dictionaries(
                 {
                     "extracted_by": st.text(
                         min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
                     ),
                     "source_event_id": st.text(),
+                    "spatial_anchor": st.one_of(st.none(), draw_spatial_anchor()),
                 }
             ),
             "tier": st.sampled_from(["working", "episodic", "semantic"]),
@@ -741,6 +769,9 @@ def test_semanticnode_fuzzing(payload: dict[str, Any]) -> None:
             "edge_id": st.text(),
             "subject_node_id": st.text(),
             "object_node_id": st.text(),
+            "confidence_score": st.one_of(
+                st.none(), st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False)
+            ),
             "predicate": st.text(),
             "embedding": st.one_of(
                 st.none(),
@@ -1222,3 +1253,38 @@ def test_anyinterventionpayload_routing(payload: dict[str, Any]) -> None:
         assert isinstance(parsed, InterventionVerdict)
     elif payload_type == "override":
         assert isinstance(parsed, OverrideIntent)
+
+
+workflow_envelope_adapter: TypeAdapter[WorkflowEnvelope] = TypeAdapter(WorkflowEnvelope)
+
+
+@st.composite
+def draw_workflow_envelope(draw: Any) -> dict[str, Any]:
+    # We will generate a basic workflow envelope payload with optional tenant_id and session_id
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "manifest_version": st.sampled_from(["1.0.0", "1.1.0", "2.0.0"]),
+                "topology": draw_evolutionary_topology_payload(),
+                "governance": st.one_of(
+                    st.none(),
+                    st.fixed_dictionaries(
+                        {
+                            "max_budget_usd": st.floats(allow_nan=False, allow_infinity=False),
+                            "max_global_tokens": st.integers(),
+                            "global_timeout_seconds": st.integers(),
+                        }
+                    ),
+                ),
+                "tenant_id": st.one_of(st.none(), st.text(max_size=255)),
+                "session_id": st.one_of(st.none(), st.text(max_size=255)),
+            }
+        )
+    )
+    return res
+
+
+@given(draw_workflow_envelope())
+def test_workflow_envelope_fuzzing(payload: dict[str, Any]) -> None:
+    parsed = workflow_envelope_adapter.validate_python(payload)
+    assert isinstance(parsed, WorkflowEnvelope)
