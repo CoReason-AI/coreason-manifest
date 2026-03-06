@@ -5,6 +5,7 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
+import re
 from typing import Annotated, Literal, Self
 
 from pydantic import Field, field_validator, model_validator
@@ -76,9 +77,12 @@ class InsightCard(BasePanel):
     @classmethod
     def sanitize_markdown(cls, v: str) -> str:
         """Reject adversarial HTML tags."""
-        forbidden_tags = ["<script", "<iframe", "javascript:"]
+        v_lower = v.lower()
+        if re.search(r"on[a-zA-Z]+\s*=", v_lower):
+            raise ValueError("Forbidden HTML event handler detected.")
+        forbidden_tags = ["<script", "javascript:", "<iframe", "<object", "<embed"]
         for tag in forbidden_tags:
-            if tag in v.lower():
+            if tag in v_lower:
                 raise ValueError(f"Forbidden HTML tag detected: {tag}")
         return v
 

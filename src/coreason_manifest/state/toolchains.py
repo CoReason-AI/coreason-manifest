@@ -5,6 +5,8 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
+import re
+
 from pydantic import Field, field_validator
 
 from coreason_manifest.core.base import CoreasonBaseModel
@@ -20,6 +22,8 @@ class TerminalStateSnapshot(CoreasonBaseModel):
     def validate_cwd(cls, v: str) -> str:
         if ".." in v or "\0" in v:
             raise ValueError("Path traversal or null bytes are strictly forbidden in cwd.")
+        if v.startswith("/") or re.match(r"^[A-Za-z]:[\\/]", v):
+            raise ValueError("Absolute paths are strictly forbidden in cwd.")
         return v
 
 
