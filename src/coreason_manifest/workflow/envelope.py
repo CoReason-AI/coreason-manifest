@@ -23,7 +23,10 @@ class BilateralSLA(CoreasonBaseModel):
     liability_limit_cents: int = Field(ge=0, description="The strict financial cap on cross-tenant economic liability.")
     permitted_geographic_regions: list[str] = Field(
         default_factory=list,
-        description="Explicit whitelist of geographic regions or cloud enclaves where execution is legally permitted (Data Residency Pinning).",
+        description=(
+            "Explicit whitelist of geographic regions or cloud enclaves where execution "
+            "is legally permitted (Data Residency Pinning)."
+        ),
     )
 
 
@@ -52,5 +55,8 @@ class WorkflowEnvelope(CoreasonBaseModel):
     )
     federated_sla: BilateralSLA | None = Field(
         default=None,
-        description="The B2B Service Level Agreement contract that must be mathematically satisfied before multi-tenant graph coupling.",
+        description=(
+            "The B2B Service Level Agreement contract that must be mathematically "
+            "satisfied before multi-tenant graph coupling."
+        ),
     )
