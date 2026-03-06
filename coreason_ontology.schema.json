@@ -1577,12 +1577,14 @@
       "properties": {
         "max_execution_time_ms": {
           "description": "The maximum allowed execution time in milliseconds before the orchestrator kills the process.",
+          "exclusiveMinimum": 0,
           "title": "Max Execution Time Ms",
           "type": "integer"
         },
         "max_memory_mb": {
           "anyOf": [
             {
+              "exclusiveMinimum": 0,
               "type": "integer"
             },
             {
@@ -1638,12 +1640,14 @@
         },
         "start_time_unix_nano": {
           "description": "Temporal start bound.",
+          "minimum": 0,
           "title": "Start Time Unix Nano",
           "type": "integer"
         },
         "end_time_unix_nano": {
           "anyOf": [
             {
+              "minimum": 0,
               "type": "integer"
             },
             {
