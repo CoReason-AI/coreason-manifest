@@ -14,7 +14,13 @@ from pydantic import TypeAdapter, ValidationError
 
 from coreason_manifest.oversight.dlp import InformationFlowPolicy
 from coreason_manifest.oversight.governance import GlobalGovernance
-from coreason_manifest.oversight.intervention import InterventionPolicy
+from coreason_manifest.oversight.intervention import (
+    AnyInterventionPayload,
+    InterventionPolicy,
+    InterventionRequest,
+    InterventionVerdict,
+    OverrideIntent,
+)
 from coreason_manifest.oversight.resilience import (
     AnyResiliencePayload,
     CircuitBreakerTrip,
@@ -171,10 +177,25 @@ def draw_output_mapping(draw: Any) -> dict[str, Any]:
     return {"child_key": draw(st.text()), "parent_key": draw(st.text())}
 
 
+@st.composite
+def draw_consensus_policy(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "strategy": st.sampled_from(["unanimous", "majority", "debate_rounds"]),
+                "tie_breaker_node_id": st.one_of(
+                    st.none(),
+                    st.text(min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"),
+                ),
+                "max_debate_rounds": st.one_of(st.none(), st.integers(min_value=1, max_value=100)),
+            }
+        )
+    )
+    return res
+
+
 def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> st.SearchStrategy[dict[str, Any]]:
-    # Instead of defining a complex topology that needs many other policies not yet defined,
-    # we just define a simple DAG topology. NodeID pattern requires '^[a-zA-Z0-9_-]+$'
-    return st.fixed_dictionaries(
+    dag_strategy = st.fixed_dictionaries(
         {
             "type": st.just("dag"),
             "nodes": st.dictionaries(
@@ -190,6 +211,38 @@ def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> 
             "backpressure": st.none(),
         }
     )
+
+    # To satisfy the model_validator `check_adjudicator_id` in `CouncilTopology`,
+    # `adjudicator_id` MUST be present in `nodes`.
+    # Let's write a small map strategy to ensure `adjudicator_id` is a key in `nodes`.
+    def _council_mapper(payload: dict[str, Any]) -> dict[str, Any]:
+        if not payload["nodes"]:
+            return payload
+        # Pick the first node ID as the adjudicator_id
+        payload["adjudicator_id"] = next(iter(payload["nodes"].keys()))
+        return payload
+
+    council_strategy = st.fixed_dictionaries(
+        {
+            "type": st.just("council"),
+            "nodes": st.dictionaries(
+                st.text(min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"),
+                nodes_strategy,
+                min_size=1,
+                max_size=5,
+            ),
+            "shared_state_contract": st.none(),
+            "information_flow": st.none(),
+            "observability": st.none(),
+            "adjudicator_id": st.text(
+                min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
+            ),
+            "diversity_policy": st.none(),
+            "consensus_policy": st.one_of(st.none(), draw_consensus_policy()),
+        }
+    ).map(_council_mapper)
+
+    return st.one_of(dag_strategy, council_strategy)
 
 
 def draw_composite_node_payload(
@@ -1089,3 +1142,83 @@ def test_custody_routing(payload: dict[str, Any]) -> None:
 @given(draw_trace_export_batch())
 def test_telemetry_routing(payload: dict[str, Any]) -> None:
     trace_export_batch_adapter.validate_python(payload)
+
+
+@st.composite
+def draw_override_intent(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "type": st.just("override"),
+                "authorized_node_id": st.text(
+                    min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
+                ),
+                "target_node_id": st.text(
+                    min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
+                ),
+                "override_action": st.dictionaries(
+                    st.text(), st.one_of(st.text(), st.integers(), st.floats(), st.booleans(), st.none())
+                ),
+                "justification": st.text(max_size=2000),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_intervention_request(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "type": st.just("request"),
+                "intervention_scope": st.none(),
+                "fallback_sla": st.none(),
+                "target_node_id": st.text(
+                    min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
+                ),
+                "context_summary": st.text(),
+                "proposed_action": st.dictionaries(
+                    st.text(), st.one_of(st.text(), st.integers(), st.floats(), st.booleans(), st.none())
+                ),
+                "adjudication_deadline": st.floats(allow_nan=False, allow_infinity=False),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_intervention_verdict(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "type": st.just("verdict"),
+                "target_node_id": st.text(
+                    min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
+                ),
+                "approved": st.booleans(),
+                "feedback": st.one_of(st.none(), st.text()),
+            }
+        )
+    )
+    return res
+
+
+def draw_any_intervention_payload() -> st.SearchStrategy[dict[str, Any]]:
+    return st.one_of(draw_intervention_request(), draw_intervention_verdict(), draw_override_intent())
+
+
+intervention_payload_adapter: TypeAdapter[AnyInterventionPayload] = TypeAdapter(AnyInterventionPayload)
+
+
+@given(draw_any_intervention_payload())
+def test_anyinterventionpayload_routing(payload: dict[str, Any]) -> None:
+    parsed = intervention_payload_adapter.validate_python(payload)
+    payload_type = payload["type"]
+    if payload_type == "request":
+        assert isinstance(parsed, InterventionRequest)
+    elif payload_type == "verdict":
+        assert isinstance(parsed, InterventionVerdict)
+    elif payload_type == "override":
+        assert isinstance(parsed, OverrideIntent)
