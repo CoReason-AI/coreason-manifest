@@ -660,7 +660,7 @@ def test_chaosexperiment_fuzzing(
                         ),
                     }
                 ),
-                unique_by=lambda t: t["tool_name"],
+                unique_by=lambda t: t["tool_name"] if isinstance(t, dict) and "tool_name" in t else str(t),
             ),
             "mcp_servers": st.lists(
                 st.fixed_dictionaries(
