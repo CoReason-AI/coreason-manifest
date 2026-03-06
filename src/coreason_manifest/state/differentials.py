@@ -30,7 +30,8 @@ class StateDiff(CoreasonBaseModel):
         description="Strict scalar logical clock used for deterministic LWW (Last-Writer-Wins) conflict resolution.",
     )
     vector_clock: dict[str, int] = Field(
-        description="Causal history mapping of all known NodeIDs to their latest logical mutation count at the time of authoring."
+        description="Causal history mapping of all known NodeIDs to their latest logical "
+        "mutation count at the time of authoring."
     )
     patches: list[StatePatch] = Field(
         default_factory=list, description="The exact, ordered sequence of operations to apply."
