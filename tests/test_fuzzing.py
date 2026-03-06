@@ -406,7 +406,7 @@ def draw_fitness_objective(draw: Any) -> dict[str, Any]:
 
 @st.composite
 def draw_verifiable_entropy(draw: Any) -> dict[str, Any]:
-    return draw(
+    res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
                 "vrf_proof": st.text(min_size=10),
@@ -415,6 +415,7 @@ def draw_verifiable_entropy(draw: Any) -> dict[str, Any]:
             }
         )
     )
+    return res
 
 
 @st.composite

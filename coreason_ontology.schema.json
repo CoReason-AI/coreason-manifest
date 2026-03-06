@@ -1189,6 +1189,18 @@
           "minimum": 0.0,
           "title": "Blending Factor",
           "type": "number"
+        },
+        "verifiable_entropy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/VerifiableEntropy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The cryptographic envelope proving the fairness of the applied crossover logic."
         }
       },
       "required": [
@@ -2576,6 +2588,18 @@
           "description": "The maximum allowed delta for an agent's temperature during mutation.",
           "title": "Temperature Shift Variance",
           "type": "number"
+        },
+        "verifiable_entropy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/VerifiableEntropy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The cryptographic envelope proving the fairness of the applied mutation rate."
         }
       },
       "required": [
@@ -4164,6 +4188,37 @@
         "model_name"
       ],
       "title": "VectorEmbedding",
+      "type": "object"
+    },
+    "VerifiableEntropy": {
+      "additionalProperties": false,
+      "description": "Passive cryptographic envelope for verifiable random functions.",
+      "properties": {
+        "vrf_proof": {
+          "description": "The zero-knowledge cryptographic proof of fair random generation.",
+          "minLength": 10,
+          "title": "Vrf Proof",
+          "type": "string"
+        },
+        "public_key": {
+          "description": "The public key of the oracle or node used to verify the VRF proof.",
+          "minLength": 10,
+          "title": "Public Key",
+          "type": "string"
+        },
+        "seed_hash": {
+          "description": "The SHA-256 hash of the origin seed used to initialize the VRF.",
+          "minLength": 10,
+          "title": "Seed Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "vrf_proof",
+        "public_key",
+        "seed_hash"
+      ],
+      "title": "VerifiableEntropy",
       "type": "object"
     },
     "WorkflowEnvelope": {
