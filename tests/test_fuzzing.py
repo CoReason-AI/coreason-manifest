@@ -133,7 +133,7 @@ def draw_secure_sub_session(draw: Any) -> dict[str, Any]:
 
 @st.composite
 def draw_agent_attestation(draw: Any) -> dict[str, Any]:
-    return draw(
+    res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
                 "training_lineage_hash": st.from_regex(r"^[a-f0-9]{64}$", fullmatch=True),
@@ -142,6 +142,7 @@ def draw_agent_attestation(draw: Any) -> dict[str, Any]:
             }
         )
     )
+    return res
 
 
 @st.composite

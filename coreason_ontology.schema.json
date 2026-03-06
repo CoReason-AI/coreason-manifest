@@ -132,6 +132,36 @@
       "title": "AdversaryProfile",
       "type": "object"
     },
+    "AgentAttestation": {
+      "additionalProperties": false,
+      "description": "Cryptographic identity passport and AI-BOM for the agent.",
+      "properties": {
+        "training_lineage_hash": {
+          "description": "The exact SHA-256 Merkle root of the agent's training lineage.",
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Training Lineage Hash",
+          "type": "string"
+        },
+        "developer_signature": {
+          "description": "The cryptographic signature of the developer/vendor.",
+          "title": "Developer Signature",
+          "type": "string"
+        },
+        "capability_merkle_root": {
+          "description": "The SHA-256 Merkle root of the agent's verified semantic capabilities.",
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Capability Merkle Root",
+          "type": "string"
+        }
+      },
+      "required": [
+        "training_lineage_hash",
+        "developer_signature",
+        "capability_merkle_root"
+      ],
+      "title": "AgentAttestation",
+      "type": "object"
+    },
     "AgentBid": {
       "additionalProperties": false,
       "properties": {
@@ -191,6 +221,18 @@
           "description": "Discriminator for an Agent node.",
           "title": "Type",
           "type": "string"
+        },
+        "agent_attestation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AgentAttestation"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The cryptographic identity passport and AI-BOM for the agent."
         },
         "action_space_id": {
           "anyOf": [
@@ -2590,6 +2632,22 @@
           "description": "True if the tool is strictly forbidden from writing to the disk.",
           "title": "File System Read Only",
           "type": "boolean"
+        },
+        "auth_requirements": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "An explicit list of authentication protocol identifiers (e.g., 'oauth2:github', 'mtls:internal') the orchestrator must negotiate before allocating compute.",
+          "title": "Auth Requirements"
         }
       },
       "required": [
