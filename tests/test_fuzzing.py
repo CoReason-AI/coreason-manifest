@@ -1328,6 +1328,27 @@ workflow_envelope_adapter: TypeAdapter[WorkflowEnvelope] = TypeAdapter(WorkflowE
 
 
 @st.composite
+def draw_bilateral_sla(draw: Any) -> dict[str, Any]:
+    return draw(
+        st.fixed_dictionaries(
+            {
+                "receiving_tenant_id": st.text(min_size=1, max_size=255),
+                "max_permitted_classification": st.sampled_from(
+                    [
+                        DataClassification.PUBLIC,
+                        DataClassification.INTERNAL,
+                        DataClassification.CONFIDENTIAL,
+                        DataClassification.RESTRICTED,
+                    ]
+                ),
+                "liability_limit_cents": st.integers(min_value=0),
+                "permitted_geographic_regions": st.lists(st.text(min_size=1), max_size=10),
+            }
+        )
+    )
+
+
+@st.composite
 def draw_workflow_envelope(draw: Any) -> dict[str, Any]:
     # We will generate a basic workflow envelope payload with optional tenant_id and session_id
     res: dict[str, Any] = draw(
@@ -1365,6 +1386,7 @@ def draw_workflow_envelope(draw: Any) -> dict[str, Any]:
                         max_size=10,
                     ),
                 ),
+                "federated_sla": st.one_of(st.none(), draw_bilateral_sla()),
             }
         )
     )
