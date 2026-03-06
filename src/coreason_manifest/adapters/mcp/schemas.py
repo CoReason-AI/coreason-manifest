@@ -11,9 +11,6 @@ Native Model Context Protocol (MCP) Integration for the CoReason Manifest.
 This module defines the core MCP connection primitives and pure, passive contracts.
 """
 
-import re
-from collections.abc import Mapping
-from enum import StrEnum
 from typing import Any, Literal
 
 from pydantic import Field, HttpUrl, field_validator
@@ -136,99 +133,3 @@ class MCPPromptRef(CoreasonBaseModel):
     arguments: dict[str, Any] = Field(default_factory=dict, description="Arguments to fill the prompt template.")
     fallback_persona: str | None = Field(default=None, description="A fallback persona if the prompt fails to load.")
     prompt_hash: str | None = Field(default=None, description="Cryptographic hash for prompt integrity verification.")
-
-
-class OMOPDomain(StrEnum):
-    """
-    Standard OMOP domains for resource types.
-    """
-
-    CONCEPT = "CONCEPT"
-    COHORT_DEFINITION = "COHORT_DEFINITION"
-    CONCEPT_ANCESTOR = "CONCEPT_ANCESTOR"
-    PHENOTYPE_EVALUATION = "PHENOTYPE_EVALUATION"
-
-
-class OMOPResourceTemplate(CoreasonBaseModel):
-    """
-    Represents an MCP Resource Template exposing OMOP standard constructs to an AI agent securely.
-    """
-
-    uri_template: str = Field(
-        ...,
-        description="The URI template for the resource, matching an omop:// protocol pattern.",
-    )
-    resource_type: OMOPDomain = Field(
-        ...,
-        description="The standard OMOP domain for the resource.",
-    )
-    description: str = Field(
-        ...,
-        description="Documents exactly what epidemiological data this resource yields.",
-    )
-
-    @field_validator("uri_template")
-    @classmethod
-    def validate_uri_template(cls, v: str) -> str:
-        """Ensure the URI template strictly matches the omop:// protocol pattern."""
-        if not re.match(r"^omop://(?:[a-zA-Z0-9_/-]+|/\{[a-zA-Z0-9_]+\})+$", v):
-            raise ValueError("uri_template must follow the 'omop://' protocol pattern")
-        return v
-
-
-class CohortDiagnosticsRequest(CoreasonBaseModel):
-    """
-    Declarative input contract for an MCP Tool wrapping OHDSI CohortDiagnostics software.
-    """
-
-    inclusion_rules: list[str | Mapping[str, Any]] = Field(
-        ...,
-        description="Array of heavily typed JSON-logic or criteria string representations.",
-    )
-    target_cohort_ids: list[int] = Field(
-        ...,
-        description="List of target cohort IDs.",
-    )
-    comparator_cohort_ids: list[int] | None = Field(
-        default=None,
-        description="Optional list of comparator cohort IDs.",
-    )
-    evaluation_windows: list[int] = Field(
-        ...,
-        description="List of integers representing days (e.g., [0, 30, 365]).",
-    )
-    diagnostic_flags: dict[str, bool] = Field(
-        ...,
-        description="Mapping of string flags to booleans, matching the R package's execution parameters.",
-    )
-
-
-class EpistemicPromptManifest(CoreasonBaseModel):
-    """
-    MCP Prompt specifically bounded for phenotype development and clinical reasoning.
-    """
-
-    prompt_id: str = Field(
-        ...,
-        description="The unique identifier for the prompt.",
-    )
-    version: str = Field(
-        ...,
-        description="The version string of the prompt.",
-    )
-    instruction_template: str = Field(
-        ...,
-        description="The core LLM directive.",
-    )
-    citation_requirement_schema: str | None = Field(
-        default=None,
-        description="If populated, this maps to the SyntaxTreeCitationAnchor defined in the uncertainty module.",
-    )
-    expected_output_schema: str = Field(
-        ...,
-        description="Reference to the Pydantic model the LLM must return.",
-    )
-    reproducibility_hash: str = Field(
-        ...,
-        description="Cryptographically locks the exact phrasing of the prompt for peer-reviewed publication tracking.",
-    )

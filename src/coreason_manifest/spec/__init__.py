@@ -5,10 +5,4 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
-from .clinical import CohortDefinition, ConceptSet, ObservationRecord
-
-__all__ = [
-    "CohortDefinition",
-    "ConceptSet",
-    "ObservationRecord",
-]
+__all__ = []
