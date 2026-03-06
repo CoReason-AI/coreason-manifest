@@ -120,10 +120,17 @@ def test_dlp_determinism() -> None:
         rule_id="a_phi_redact",
         classification="phi",
         target_pattern="pattern_a",
+        target_regex_pattern="pattern_a",
         action="redact",
         replacement_token="[REDACTED]",  # noqa: S106
     )
-    rule_b = RedactionRule(rule_id="b_pii_hash", classification="pii", target_pattern="pattern_b", action="hash")
+    rule_b = RedactionRule(
+        rule_id="b_pii_hash",
+        classification="pii",
+        target_pattern="pattern_b",
+        target_regex_pattern="pattern_b",
+        action="hash",
+    )
 
     policy1 = InformationFlowPolicy(policy_id="p1", rules=[rule_a, rule_b])
     policy2 = InformationFlowPolicy(policy_id="p1", rules=[rule_b, rule_a])
