@@ -48,8 +48,7 @@ class MigrationContract(CoreasonBaseModel):
     dropped_paths: list[str] = Field(
         default_factory=list,
         description=(
-            "Explicit whitelist of JSON Pointers that are safely deprecated "
-            "and intentionally dropped during migration."
+            "Explicit whitelist of JSON Pointers that are safely deprecated and intentionally dropped during migration."
         ),
     )
 
