@@ -35,6 +35,12 @@ class PermissionBoundary(CoreasonBaseModel):
         default=None, description="Whitelist of allowed network domains if network access is true."
     )
     file_system_read_only: bool = Field(description="True if the tool is strictly forbidden from writing to the disk.")
+    auth_requirements: list[str] | None = Field(
+        default=None,
+        description="An explicit list of authentication protocol identifiers "
+        "(e.g., 'oauth2:github', 'mtls:internal') the orchestrator "
+        "must negotiate before allocating compute.",
+    )
 
 
 class ExecutionSLA(CoreasonBaseModel):
