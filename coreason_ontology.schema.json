@@ -570,11 +570,30 @@
           "description": "Discriminator type for a belief update event.",
           "title": "Type",
           "type": "string"
+        },
+        "payload": {
+          "additionalProperties": true,
+          "description": "The semantic representation of the agent's internal cognitive shift or synthesis.",
+          "title": "Payload",
+          "type": "object"
+        },
+        "source_node_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NodeID"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The specific topological node that synthesized this belief update."
         }
       },
       "required": [
         "event_id",
-        "timestamp"
+        "timestamp",
+        "payload"
       ],
       "title": "BeliefUpdateEvent",
       "type": "object"
@@ -2213,11 +2232,30 @@
           "description": "Discriminator type for an observation event.",
           "title": "Type",
           "type": "string"
+        },
+        "payload": {
+          "additionalProperties": true,
+          "description": "The raw, lossless semantic output captured from the environment or tool execution.",
+          "title": "Payload",
+          "type": "object"
+        },
+        "source_node_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NodeID"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The specific topological node that generated this observation."
         }
       },
       "required": [
         "event_id",
-        "timestamp"
+        "timestamp",
+        "payload"
       ],
       "title": "ObservationEvent",
       "type": "object"

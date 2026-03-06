@@ -901,7 +901,8 @@ epistemic_ledger_adapter: TypeAdapter[EpistemicLedger] = TypeAdapter(EpistemicLe
 
 @st.composite
 def draw_any_state_event(draw: Any) -> dict[str, Any]:
-    return draw(_local_draw_any_state_event())
+    res: dict[str, Any] = draw(_local_draw_any_state_event())
+    return res
 
 
 @st.composite
