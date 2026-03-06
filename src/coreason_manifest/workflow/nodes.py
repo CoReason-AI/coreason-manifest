@@ -13,7 +13,11 @@ from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.oversight.intervention import InterventionPolicy
 from coreason_manifest.workflow.policies import (
     EpistemicScanner as EpistemicScanner,
+)
+from coreason_manifest.workflow.policies import (
     SelfCorrectionPolicy as SelfCorrectionPolicy,
+)
+from coreason_manifest.workflow.policies import (
     System1Reflex as System1Reflex,
 )
 

@@ -17,7 +17,11 @@ from coreason_manifest.telemetry.schemas import ObservabilityPolicy
 from coreason_manifest.workflow.auctions import AuctionPolicy
 from coreason_manifest.workflow.constraints import (
     BackpressurePolicy as BackpressurePolicy,
+)
+from coreason_manifest.workflow.constraints import (
     DiversityConstraint as DiversityConstraint,
+)
+from coreason_manifest.workflow.constraints import (
     StateContract as StateContract,
 )
 from coreason_manifest.workflow.nodes import AnyNode
