@@ -1007,16 +1007,37 @@ def draw_agent_bid(draw: Any) -> dict[str, Any]:
 
 
 @st.composite
+def draw_escrow_policy(draw: Any, max_escrow: int) -> dict[str, Any]:
+    return draw(
+        st.fixed_dictionaries(
+            {
+                "escrow_locked_cents": st.integers(min_value=0, max_value=max_escrow),
+                "release_condition_metric": st.text(min_size=1),
+                "refund_target_node_id": st.text(
+                    min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
+                ),
+            }
+        )
+    )
+
+
+@st.composite
 def draw_task_award(draw: Any) -> dict[str, Any]:
     price = draw(st.integers(min_value=0))
-    # To strictly satisfy the zero-sum validator without fuzzer timeouts,
-    # we allocate 100% of the price to a single generated agent ID.
+    # Allocate 100% of the price to a single generated agent ID to satisfy zero-sum rules
     agent_id = draw(st.text(min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"))
-    return {
+
+    award: dict[str, Any] = {
         "task_id": draw(st.text()),
         "awarded_syndicate": {agent_id: price},
         "cleared_price_cents": price,
     }
+
+    if draw(st.booleans()):
+        # CRITICAL: Pass the generated price to bound the escrow generation
+        award["escrow"] = draw(draw_escrow_policy(max_escrow=price))
+
+    return award
 
 
 @st.composite

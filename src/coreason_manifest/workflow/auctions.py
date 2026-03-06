@@ -31,6 +31,18 @@ class TaskAnnouncement(CoreasonBaseModel):
     max_budget_cents: int = Field(description="The absolute ceiling price the orchestrator is willing to pay.")
 
 
+class EscrowPolicy(CoreasonBaseModel):
+    escrow_locked_cents: int = Field(
+        ge=0, description="The strictly typed integer amount of capital cryptographically locked prior to execution."
+    )
+    release_condition_metric: str = Field(
+        description="A declarative pointer to the SLA or QA rubric required to release the funds."
+    )
+    refund_target_node_id: str = Field(
+        description="The exact NodeID to return funds to if the release condition fails."
+    )
+
+
 class AgentBid(CoreasonBaseModel):
     agent_id: str = Field(description="The NodeID of the bidder.")
     estimated_cost_cents: int = Field(description="The node's calculated cost to fulfill the task.")
@@ -44,6 +56,16 @@ class TaskAward(CoreasonBaseModel):
         description="Strict mapping of agent NodeIDs to their exact fractional payout in cents."
     )
     cleared_price_cents: int = Field(description="The final cryptographic clearing price.")
+    escrow: EscrowPolicy | None = Field(
+        default=None, description="The conditional economic escrow locking the compute budget."
+    )
+
+    @model_validator(mode="after")
+    def validate_escrow_bounds(self) -> Self:
+        """Ensures locked funds do not exceed the cleared auction price."""
+        if self.escrow is not None and self.escrow.escrow_locked_cents > self.cleared_price_cents:
+            raise ValueError("Escrow locked amount cannot exceed the total cleared price.")
+        return self
 
     @model_validator(mode="after")
     def verify_syndicate_allocation(self) -> Self:
