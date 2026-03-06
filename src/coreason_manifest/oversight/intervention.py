@@ -62,6 +62,9 @@ class FallbackSLA(CoreasonBaseModel):
     timeout_action: Literal["fail_safe", "proceed_with_defaults", "escalate"] = Field(
         description="The action to take when the timeout expires."
     )
+    escalation_target_node_id: NodeID | None = Field(
+        default=None, description="The specific NodeID to route the execution to if the escalate action is triggered."
+    )
 
 
 class InterventionRequest(CoreasonBaseModel):
@@ -93,4 +96,22 @@ class InterventionVerdict(CoreasonBaseModel):
     feedback: str | None = Field(description="Optional feedback provided along with the verdict.")
 
 
-type AnyInterventionPayload = Annotated[InterventionRequest | InterventionVerdict, Field(discriminator="type")]
+class OverrideIntent(CoreasonBaseModel):
+    """
+    Dictatorial oversight override payload.
+    """
+
+    type: Literal["override"] = Field(default="override", description="The type of the intervention payload.")
+    authorized_node_id: NodeID = Field(description="The NodeID of the human or agent executing the override.")
+    target_node_id: NodeID = Field(description="The NodeID being forcefully overridden.")
+    override_action: dict[str, str | int | float | bool | None] = Field(
+        description="The exact payload forcefully injected into the state."
+    )
+    justification: str = Field(
+        max_length=2000, description="Cryptographic audit justification for bypassing algorithmic consensus."
+    )
+
+
+type AnyInterventionPayload = Annotated[
+    InterventionRequest | InterventionVerdict | OverrideIntent, Field(discriminator="type")
+]

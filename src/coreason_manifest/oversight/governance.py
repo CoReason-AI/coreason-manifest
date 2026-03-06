@@ -10,7 +10,7 @@ from typing import Annotated, Literal
 from pydantic import Field, StringConstraints
 
 from coreason_manifest.core.base import CoreasonBaseModel
-from coreason_manifest.core.primitives import SemanticVersion
+from coreason_manifest.core.primitives import NodeID, SemanticVersion
 
 
 class ConstitutionalRule(CoreasonBaseModel):
@@ -36,6 +36,23 @@ class GovernancePolicy(CoreasonBaseModel):
     policy_name: str = Field(description="Name of the governance policy.")
     version: SemanticVersion = Field(description="Semantic version of the governance policy.")
     rules: list[ConstitutionalRule] = Field(description="List of constitutional rules included in this policy.")
+
+
+class ConsensusPolicy(CoreasonBaseModel):
+    """
+    Explicit ruleset governing how a council resolves disagreements.
+    """
+
+    strategy: Literal["unanimous", "majority", "debate_rounds"] = Field(
+        description="The mathematical rule for reaching agreement."
+    )
+    tie_breaker_node_id: NodeID | None = Field(
+        default=None, description="The node authorized to break deadlocks if unanimity or majority fails."
+    )
+    max_debate_rounds: int | None = Field(
+        default=None,
+        description="The maximum number of argument/rebuttal cycles permitted before forced adjudication.",
+    )
 
 
 class GlobalGovernance(CoreasonBaseModel):

@@ -837,6 +837,52 @@
       "title": "ComputeProvisioningRequest",
       "type": "object"
     },
+    "ConsensusPolicy": {
+      "additionalProperties": false,
+      "description": "Explicit ruleset governing how a council resolves disagreements.",
+      "properties": {
+        "strategy": {
+          "description": "The mathematical rule for reaching agreement.",
+          "enum": [
+            "unanimous",
+            "majority",
+            "debate_rounds"
+          ],
+          "title": "Strategy",
+          "type": "string"
+        },
+        "tie_breaker_node_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NodeID"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The node authorized to break deadlocks if unanimity or majority fails."
+        },
+        "max_debate_rounds": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The maximum number of argument/rebuttal cycles permitted before forced adjudication.",
+          "title": "Max Debate Rounds"
+        }
+      },
+      "required": [
+        "strategy"
+      ],
+      "title": "ConsensusPolicy",
+      "type": "object"
+    },
     "ConstitutionalRule": {
       "additionalProperties": false,
       "description": "Defines a constitutional rule for AI governance.",
@@ -955,6 +1001,18 @@
           ],
           "default": null,
           "description": "Constraints enforcing cognitive heterogeneity across the council."
+        },
+        "consensus_policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ConsensusPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The explicit ruleset governing how the council resolves disagreements."
         }
       },
       "required": [
@@ -1635,6 +1693,18 @@
           ],
           "title": "Timeout Action",
           "type": "string"
+        },
+        "escalation_target_node_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NodeID"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The specific NodeID to route the execution to if the escalate action is triggered."
         }
       },
       "required": [
@@ -2398,6 +2468,65 @@
         "parent_key"
       ],
       "title": "OutputMapping",
+      "type": "object"
+    },
+    "OverrideIntent": {
+      "additionalProperties": false,
+      "description": "Dictatorial oversight override payload.",
+      "properties": {
+        "type": {
+          "const": "override",
+          "default": "override",
+          "description": "The type of the intervention payload.",
+          "title": "Type",
+          "type": "string"
+        },
+        "authorized_node_id": {
+          "$ref": "#/$defs/NodeID",
+          "description": "The NodeID of the human or agent executing the override."
+        },
+        "target_node_id": {
+          "$ref": "#/$defs/NodeID",
+          "description": "The NodeID being forcefully overridden."
+        },
+        "override_action": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "description": "The exact payload forcefully injected into the state.",
+          "title": "Override Action",
+          "type": "object"
+        },
+        "justification": {
+          "description": "Cryptographic audit justification for bypassing algorithmic consensus.",
+          "maxLength": 2000,
+          "title": "Justification",
+          "type": "string"
+        }
+      },
+      "required": [
+        "authorized_node_id",
+        "target_node_id",
+        "override_action",
+        "justification"
+      ],
+      "title": "OverrideIntent",
       "type": "object"
     },
     "PatchOperation": {

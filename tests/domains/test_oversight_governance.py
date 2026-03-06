@@ -79,6 +79,9 @@ def test_constitutional_rule_deduplicates_or_rejects_duplicate_strings(forbidden
     context_summary=st.text(),
     proposed_action=st.dictionaries(st.text(), st.integers()),
     adjudication_deadline=st.floats(min_value=0.0, allow_nan=False, allow_infinity=False),
+    escalation_target_node_id=st.one_of(
+        st.none(), st.text(min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")
+    ),
 )
 def test_sandbox_success_massive_configs(
     allowed_fields: list[str],
@@ -87,6 +90,7 @@ def test_sandbox_success_massive_configs(
     context_summary: str,
     proposed_action: dict[str, int],
     adjudication_deadline: float,
+    escalation_target_node_id: str | None,
 ) -> None:
     scope = BoundedInterventionScope(
         allowed_fields=allowed_fields,
@@ -95,6 +99,7 @@ def test_sandbox_success_massive_configs(
     sla = FallbackSLA(
         timeout_seconds=timeout_seconds,
         timeout_action="fail_safe",
+        escalation_target_node_id=escalation_target_node_id,
     )
     req = InterventionRequest(
         intervention_scope=scope,

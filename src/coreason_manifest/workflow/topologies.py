@@ -13,6 +13,7 @@ from coreason_manifest.compute.stochastic import CrossoverStrategy, FitnessObjec
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.core.primitives import NodeID
 from coreason_manifest.oversight.dlp import InformationFlowPolicy
+from coreason_manifest.oversight.governance import ConsensusPolicy
 from coreason_manifest.telemetry.schemas import ObservabilityPolicy
 from coreason_manifest.workflow.auctions import AuctionPolicy
 from coreason_manifest.workflow.nodes import AnyNode
@@ -152,6 +153,9 @@ class CouncilTopology(BaseTopology):
     adjudicator_id: NodeID = Field(description="The NodeID of the adjudicator that synthesizes the council's output.")
     diversity_policy: DiversityConstraint | None = Field(
         default=None, description="Constraints enforcing cognitive heterogeneity across the council."
+    )
+    consensus_policy: ConsensusPolicy | None = Field(
+        default=None, description="The explicit ruleset governing how the council resolves disagreements."
     )
 
     @model_validator(mode="after")
