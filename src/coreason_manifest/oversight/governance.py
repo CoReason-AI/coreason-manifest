@@ -65,5 +65,5 @@ class GlobalGovernance(CoreasonBaseModel):
     )
     max_global_tokens: int = Field(description="The maximum aggregate token usage allowed across all nodes.")
     global_timeout_seconds: int = Field(
-        description="The absolute Time-To-Live (TTL) for the execution envelope before graceful termination."
+        ge=0, description="The absolute Time-To-Live (TTL) for the execution envelope before graceful termination."
     )

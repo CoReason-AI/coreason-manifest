@@ -578,7 +578,7 @@ def test_anyresilience_routing(res_type: str, target: str, fallback: str, reason
 
 @given(
     st.text(),
-    st.floats(allow_nan=False, allow_infinity=False),
+    st.floats(min_value=0.0, allow_nan=False, allow_infinity=False),
     st.integers(),
     st.one_of(st.none(), st.lists(st.text(), max_size=100)),
     st.lists(
@@ -659,7 +659,8 @@ def test_chaosexperiment_fuzzing(
                             ),
                         ),
                     }
-                )
+                ),
+                unique_by=lambda t: t["tool_name"],
             ),
             "mcp_servers": st.lists(
                 st.fixed_dictionaries(
@@ -681,6 +682,17 @@ def test_actionspace_fuzzing(payload: dict[str, Any]) -> None:
 
 semantic_node_adapter: TypeAdapter[SemanticNode] = TypeAdapter(SemanticNode)
 semantic_edge_adapter: TypeAdapter[SemanticEdge] = TypeAdapter(SemanticEdge)
+
+
+@st.composite
+def draw_vector_embedding(draw: Any) -> dict[str, Any]:
+    vector = draw(st.lists(st.floats(allow_nan=False, allow_infinity=False), max_size=100))
+    res: dict[str, Any] = {
+        "vector": vector,
+        "dimensionality": len(vector),
+        "model_name": draw(st.text()),
+    }
+    return res
 
 
 @st.composite
@@ -710,13 +722,13 @@ def draw_spatial_anchor(draw: Any) -> dict[str, Any]:
 
 @st.composite
 def draw_temporal_bounds(draw: Any) -> dict[str, Any]:
-    valid_from = draw(st.one_of(st.none(), st.floats(allow_nan=False, allow_infinity=False)))
+    valid_from = draw(st.one_of(st.none(), st.floats(min_value=0.0, allow_nan=False, allow_infinity=False)))
     valid_to = None
     if valid_from is not None:
         delta = draw(st.floats(min_value=0.0, allow_nan=False, allow_infinity=False))
         valid_to = valid_from + delta
     else:
-        valid_to = draw(st.one_of(st.none(), st.floats(allow_nan=False, allow_infinity=False)))
+        valid_to = draw(st.one_of(st.none(), st.floats(min_value=0.0, allow_nan=False, allow_infinity=False)))
 
     return {
         "valid_from": valid_from,
@@ -738,13 +750,7 @@ def draw_temporal_bounds(draw: Any) -> dict[str, Any]:
             "text_chunk": st.text(),
             "embedding": st.one_of(
                 st.none(),
-                st.fixed_dictionaries(
-                    {
-                        "vector": st.lists(st.floats(allow_nan=False, allow_infinity=False), max_size=100),
-                        "dimensionality": st.integers(),
-                        "model_name": st.text(),
-                    }
-                ),
+                draw_vector_embedding(),
             ),
             "scope": st.sampled_from(["global", "tenant", "session"]),
             "provenance": st.fixed_dictionaries(
@@ -788,13 +794,7 @@ def test_semanticnode_fuzzing(payload: dict[str, Any]) -> None:
             "predicate": st.text(),
             "embedding": st.one_of(
                 st.none(),
-                st.fixed_dictionaries(
-                    {
-                        "vector": st.lists(st.floats(allow_nan=False, allow_infinity=False), max_size=100),
-                        "dimensionality": st.integers(),
-                        "model_name": st.text(),
-                    }
-                ),
+                draw_vector_embedding(),
             ),
             "provenance": st.one_of(
                 st.none(),
@@ -822,7 +822,7 @@ def test_semanticedge_fuzzing(payload: dict[str, Any]) -> None:
         {
             "max_budget_usd": st.floats(allow_nan=False, allow_infinity=False),
             "max_global_tokens": st.integers(),
-            "global_timeout_seconds": st.integers(),
+            "global_timeout_seconds": st.integers(min_value=0),
         }
     )
 )
@@ -935,7 +935,7 @@ def draw_agent_bid(draw: Any) -> dict[str, Any]:
             {
                 "agent_id": st.text(),
                 "estimated_cost_usd": st.floats(allow_nan=False, allow_infinity=False),
-                "estimated_latency_ms": st.integers(),
+                "estimated_latency_ms": st.integers(min_value=0),
                 "confidence_score": st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False),
             }
         )
@@ -1288,7 +1288,7 @@ def draw_workflow_envelope(draw: Any) -> dict[str, Any]:
                         {
                             "max_budget_usd": st.floats(allow_nan=False, allow_infinity=False),
                             "max_global_tokens": st.integers(),
-                            "global_timeout_seconds": st.integers(),
+                            "global_timeout_seconds": st.integers(min_value=0),
                         }
                     ),
                 ),

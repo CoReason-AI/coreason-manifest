@@ -27,7 +27,7 @@ class FaultInjectionProfile(CoreasonBaseModel):
 
 
 class SteadyStateHypothesis(CoreasonBaseModel):
-    expected_max_latency: float = Field(description="The expected maximum latency under normal conditions.")
+    expected_max_latency: float = Field(ge=0.0, description="The expected maximum latency under normal conditions.")
     max_loops_allowed: int = Field(description="The maximum allowed loops for the swarm to reach a conclusion.")
     required_tool_usage: list[str] | None = Field(
         default=None, description="A list of required tools that must be utilized."
