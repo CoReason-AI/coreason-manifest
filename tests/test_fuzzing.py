@@ -285,14 +285,39 @@ def test_anytopology_routing(payload: dict[str, Any]) -> None:
     assert parsed.type == "evolutionary"
 
 
-@given(
-    st.sampled_from(["observation", "belief_update", "system_fault"]),
-    st.text(),
-    st.floats(allow_nan=False, allow_infinity=False),
-)
-def test_anystateevent_routing(event_type: str, event_id: str, timestamp: float) -> None:
-    payload = {"type": event_type, "event_id": event_id, "timestamp": timestamp}
+@st.composite
+def _local_draw_any_state_event(draw: Any) -> dict[str, Any]:
+    event_type = draw(st.sampled_from(["observation", "belief_update", "system_fault"]))
+    payload: dict[str, Any] = {
+        "type": event_type,
+        "event_id": draw(st.text()),
+        "timestamp": draw(st.floats(allow_nan=False, allow_infinity=False)),
+    }
+    if event_type in ("observation", "belief_update"):
+        payload["payload"] = draw(
+            st.dictionaries(
+                st.text(),
+                st.one_of(st.text(), st.integers(), st.floats(allow_nan=False, allow_infinity=False), st.booleans()),
+                max_size=5,
+            )
+        )
+        payload["source_node_id"] = draw(
+            st.one_of(
+                st.none(),
+                st.text(
+                    min_size=1,
+                    max_size=128,
+                    alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-",
+                ),
+            )
+        )
+    return payload
+
+
+@given(_local_draw_any_state_event())
+def test_anystateevent_routing(payload: dict[str, Any]) -> None:
     parsed = event_adapter.validate_python(payload)
+    event_type = payload["type"]
     if event_type == "observation":
         assert isinstance(parsed, ObservationEvent)
     elif event_type == "belief_update":
@@ -876,13 +901,7 @@ epistemic_ledger_adapter: TypeAdapter[EpistemicLedger] = TypeAdapter(EpistemicLe
 
 @st.composite
 def draw_any_state_event(draw: Any) -> dict[str, Any]:
-    event_type = draw(st.sampled_from(["observation", "belief_update", "system_fault"]))
-    payload: dict[str, Any] = {
-        "type": event_type,
-        "event_id": draw(st.text()),
-        "timestamp": draw(st.floats(allow_nan=False, allow_infinity=False)),
-    }
-    return payload
+    return draw(_local_draw_any_state_event())
 
 
 @st.composite
