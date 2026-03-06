@@ -1,3 +1,4 @@
+from typing import Any
 from pathlib import Path
 
 import pytest
@@ -29,7 +30,7 @@ def test_export_main_import_error(monkeypatch: pytest.MonkeyPatch, capsys: pytes
 
     original_import_module = importlib.import_module
 
-    def mock_import_module(name: str, *args, **kwargs):
+    def mock_import_module(name: str, *args: Any, **kwargs: Any) -> Any:
         if name == "coreason_manifest":
             raise ImportError("Simulated ImportError")
         return original_import_module(name, *args, **kwargs)
@@ -48,7 +49,7 @@ def test_export_main_domain_import_error(monkeypatch: pytest.MonkeyPatch, tmp_pa
 
     original_import_module = importlib.import_module
 
-    def mock_import_module(name: str, *args, **kwargs):
+    def mock_import_module(name: str, *args: Any, **kwargs: Any) -> Any:
         if name == "coreason_manifest.core":
             raise ImportError("Simulated domain ImportError")
         return original_import_module(name, *args, **kwargs)
@@ -60,16 +61,18 @@ def test_export_main_domain_import_error(monkeypatch: pytest.MonkeyPatch, tmp_pa
 
 def test_export_main_no_models(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
     import coreason_manifest.cli.export as export_module
+    import importlib
 
-    original_import_module = export_module.importlib.import_module
+    original_import_module = importlib.import_module
 
-    def mock_import_module(name: str, *args, **kwargs):
+    def mock_import_module(name: str, *args: Any, **kwargs: Any) -> Any:
         mod = original_import_module(name, *args, **kwargs)
-        if hasattr(mod, "__all__"):
+        if name.startswith("coreason_manifest") and hasattr(mod, "__all__"):
             monkeypatch.setattr(mod, "__all__", [])
         return mod
 
-    monkeypatch.setattr(export_module.importlib, "import_module", mock_import_module)
+    import importlib
+    monkeypatch.setattr(importlib, "import_module", mock_import_module)
 
     with pytest.raises(SystemExit) as exc_info:
         export_main()
@@ -83,7 +86,7 @@ def test_mcp_server_schemas_import_error(monkeypatch: pytest.MonkeyPatch) -> Non
 
     original_import_module = importlib.import_module
 
-    def mock_import_module(name: str, *args, **kwargs):
+    def mock_import_module(name: str, *args: Any, **kwargs: Any) -> Any:
         if name == "coreason_manifest.core":
             raise ImportError("Simulated domain ImportError for mcp_server")
         return original_import_module(name, *args, **kwargs)
@@ -98,7 +101,7 @@ def test_mcp_server_get_schema_import_error(monkeypatch: pytest.MonkeyPatch) -> 
 
     original_import_module = importlib.import_module
 
-    def mock_import_module(name: str, *args, **kwargs):
+    def mock_import_module(name: str, *args: Any, **kwargs: Any) -> Any:
         if name == "coreason_manifest.core":
             raise ImportError("Simulated domain ImportError for mcp_server")
         return original_import_module(name, *args, **kwargs)

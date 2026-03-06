@@ -1351,17 +1351,14 @@ def test_execution_span_cached_hash_sort_events() -> None:
             SpanEvent(name="e1", timestamp_unix_nano=1500),
         ],
     )
-    # Simulate a hash being cached
-    span._cached_hash = 12345
-    # Trigger sorting by mutating (if possible) or just explicitly calling the validator
-    # Re-validating or simply re-assigning might trigger it?
-    # Pydantic validators run on creation. To test lines 44-46 and 52-54, we can manually trigger the methods.
-    # Actually, validators in mode="after" are instance methods.
-    span.validate_temporal_bounds()
+    span._cached_hash = 12345  # type: ignore
+
+    # Instance method call works fine at runtime but mypy struggles due to PydanticDescriptorProxy wrapping
+    span.validate_temporal_bounds()  # type: ignore
     assert not hasattr(span, "_cached_hash")
 
-    span._cached_hash = 12345
-    span.sort_events()
+    span._cached_hash = 12345  # type: ignore
+    span.sort_events()  # type: ignore
     assert not hasattr(span, "_cached_hash")
     assert span.events[0].name == "e1"
 
@@ -1376,8 +1373,8 @@ def test_trace_export_batch_cached_hash_sort_spans() -> None:
             ExecutionSpan(trace_id="t1", span_id="s1", name="test1", start_time_unix_nano=1000),
         ],
     )
-    batch._cached_hash = 12345
-    batch.sort_spans()
+    batch._cached_hash = 12345  # type: ignore
+    batch.sort_spans()  # type: ignore
     assert not hasattr(batch, "_cached_hash")
     assert batch.spans[0].span_id == "s1"
 
