@@ -11,7 +11,11 @@ from pydantic import Field
 
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.oversight.intervention import InterventionPolicy
-from coreason_manifest.workflow.policies import EpistemicScanner, SelfCorrectionPolicy, System1Reflex
+from coreason_manifest.workflow.policies import (
+    EpistemicScanner as EpistemicScanner,
+    SelfCorrectionPolicy as SelfCorrectionPolicy,
+    System1Reflex as System1Reflex,
+)
 
 
 class BaseNode(CoreasonBaseModel):

@@ -15,7 +15,11 @@ from coreason_manifest.core.primitives import NodeID
 from coreason_manifest.oversight.dlp import InformationFlowPolicy
 from coreason_manifest.telemetry.schemas import ObservabilityPolicy
 from coreason_manifest.workflow.auctions import AuctionPolicy
-from coreason_manifest.workflow.constraints import BackpressurePolicy, DiversityConstraint, StateContract
+from coreason_manifest.workflow.constraints import (
+    BackpressurePolicy as BackpressurePolicy,
+    DiversityConstraint as DiversityConstraint,
+    StateContract as StateContract,
+)
 from coreason_manifest.workflow.nodes import AnyNode
 
 
