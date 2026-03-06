@@ -34,7 +34,7 @@ class ExecutionSpan(CoreasonBaseModel):
     end_time_unix_nano: int | None = Field(default=None, description="Temporal end bound, if completed.")
     status: SpanStatusCode = Field(default="unset", description="The execution health flag.")
     events: list[SpanEvent] = Field(
-        default_factory=list, max_length=5000, description="Structured log records emitted during the span."
+        default_factory=list, max_length=10000, description="Structured log records emitted during the span."
     )
 
     @model_validator(mode="after")
