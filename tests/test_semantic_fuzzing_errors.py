@@ -1,7 +1,9 @@
 import pytest
 from pydantic import ValidationError
+
 from coreason_manifest.state.semantic import VectorEmbedding
-from coreason_manifest.tooling.environments import ActionSpace, ToolDefinition, MCPClientBinding
+from coreason_manifest.tooling.environments import ActionSpace
+
 
 def test_vector_embedding_dimensionality_mismatch():
     with pytest.raises(ValidationError) as exc_info:
