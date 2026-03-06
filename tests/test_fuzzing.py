@@ -635,6 +635,9 @@ def test_anyresilience_routing(res_type: str, target: str, fallback: str, reason
                         "format_corruption",
                         "latency_spike",
                         "token_throttle",
+                        "network_degradation",
+                        "temporal_dilation",
+                        "dependency_blackout",
                     ]
                 ),
                 "target_node_id": st.one_of(st.none(), st.text()),
