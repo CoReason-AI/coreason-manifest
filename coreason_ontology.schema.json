@@ -3387,6 +3387,25 @@
           "title": "Diff Id",
           "type": "string"
         },
+        "author_node_id": {
+          "description": "The exact NodeID of the agent or system that authored this state mutation.",
+          "title": "Author Node Id",
+          "type": "string"
+        },
+        "lamport_timestamp": {
+          "description": "Strict scalar logical clock used for deterministic LWW (Last-Writer-Wins) conflict resolution.",
+          "minimum": 0,
+          "title": "Lamport Timestamp",
+          "type": "integer"
+        },
+        "vector_clock": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "description": "Causal history mapping of all known NodeIDs to their latest logical mutation count at the time of authoring.",
+          "title": "Vector Clock",
+          "type": "object"
+        },
         "patches": {
           "description": "The exact, ordered sequence of operations to apply.",
           "items": {
@@ -3397,7 +3416,10 @@
         }
       },
       "required": [
-        "diff_id"
+        "diff_id",
+        "author_node_id",
+        "lamport_timestamp",
+        "vector_clock"
       ],
       "title": "StateDiff",
       "type": "object"

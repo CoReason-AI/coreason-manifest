@@ -1096,6 +1096,14 @@ def draw_state_diff(draw: Any) -> dict[str, Any]:
         st.fixed_dictionaries(
             {
                 "diff_id": st.text(),
+                "author_node_id": st.text(
+                    min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
+                ),
+                "lamport_timestamp": st.integers(min_value=0),
+                "vector_clock": st.dictionaries(
+                    st.text(min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"),
+                    st.integers(min_value=0),
+                ),
                 "patches": st.lists(draw_state_patch(), max_size=100),
             }
         )
