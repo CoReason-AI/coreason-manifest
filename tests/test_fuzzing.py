@@ -488,7 +488,7 @@ def draw_causal_attribution(draw: Any) -> dict[str, Any]:
 
 @st.composite
 def draw_zkp(draw: Any) -> dict[str, Any]:
-    return draw(
+    res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
                 "proof_protocol": st.sampled_from(["zk-SNARK", "zk-STARK", "plonk", "bulletproofs"]),
@@ -498,6 +498,7 @@ def draw_zkp(draw: Any) -> dict[str, Any]:
             }
         )
     )
+    return res
 
 
 @st.composite
