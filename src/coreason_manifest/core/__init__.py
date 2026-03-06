@@ -6,6 +6,20 @@
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
 from .base import CoreasonBaseModel
+from .enums import (
+    CrossoverType,
+    DistributionType,
+    EncodingChannel,
+    InterventionTrigger,
+    MarkType,
+    NodeType,
+    OptimizationDirection,
+    PatchOperation,
+    ScaleType,
+    SpanKind,
+    SpanStatusCode,
+    TopologyType,
+)
 from .primitives import (
     DataClassification,
     GitSHA,
@@ -19,12 +33,24 @@ from .primitives import (
 
 __all__ = [
     "CoreasonBaseModel",
+    "CrossoverType",
     "DataClassification",
+    "DistributionType",
+    "EncodingChannel",
     "GitSHA",
+    "InterventionTrigger",
+    "MarkType",
     "NodeID",
+    "NodeType",
+    "OptimizationDirection",
+    "PatchOperation",
     "ProfileID",
     "RiskLevel",
+    "ScaleType",
     "SemanticVersion",
+    "SpanKind",
+    "SpanStatusCode",
     "SystemRole",
     "ToolID",
+    "TopologyType",
 ]
