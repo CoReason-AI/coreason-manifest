@@ -5,7 +5,7 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
-from typing import Self
+from typing import Literal, Self
 
 from pydantic import Field, model_validator
 
@@ -13,6 +13,22 @@ from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.state.argumentation import ArgumentGraph
 from coreason_manifest.state.differentials import RollbackRequest, TemporalCheckpoint
 from coreason_manifest.state.events import AnyStateEvent
+
+
+class EvictionPolicy(CoreasonBaseModel):
+    strategy: Literal["fifo", "salience_decay", "summarize"] = Field(
+        description="The mathematical heuristic used to select which semantic memories are evicted or compressed."
+    )
+    max_retained_tokens: int = Field(
+        gt=0, description="The maximum allowed physical footprint of the active context window."
+    )
+    protected_event_ids: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Explicit list of cryptographic anchors (Event IDs) the orchestrator "
+            "is mathematically forbidden from evicting."
+        ),
+    )
 
 
 class EpistemicLedger(CoreasonBaseModel):
@@ -24,6 +40,10 @@ class EpistemicLedger(CoreasonBaseModel):
     )
     active_rollbacks: list[RollbackRequest] = Field(
         default_factory=list, description="Causal invalidations actively enforced on the execution tree."
+    )
+    eviction_policy: EvictionPolicy | None = Field(
+        default=None,
+        description="The strict mathematical boundary governing context window compression.",
     )
 
     @model_validator(mode="after")

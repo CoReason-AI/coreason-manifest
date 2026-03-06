@@ -1052,6 +1052,20 @@ def draw_redaction_rule(draw: Any) -> dict[str, Any]:
 
 
 @st.composite
+def draw_semantic_firewall_policy(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "max_input_tokens": st.integers(min_value=1),
+                "forbidden_intents": st.lists(st.text(), max_size=10),
+                "action_on_violation": st.sampled_from(["drop", "quarantine", "redact"]),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
 def draw_information_flow_policy(draw: Any) -> dict[str, Any]:
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(
@@ -1059,6 +1073,7 @@ def draw_information_flow_policy(draw: Any) -> dict[str, Any]:
                 "policy_id": st.text(),
                 "active": st.booleans(),
                 "rules": st.lists(draw_redaction_rule(), max_size=100),
+                "semantic_firewall": st.one_of(st.none(), draw_semantic_firewall_policy()),
             }
         )
     )
@@ -1149,6 +1164,20 @@ def draw_any_state_event(draw: Any) -> dict[str, Any]:
 
 
 @st.composite
+def draw_eviction_policy(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "strategy": st.sampled_from(["fifo", "salience_decay", "summarize"]),
+                "max_retained_tokens": st.integers(min_value=1),
+                "protected_event_ids": st.lists(st.text(), max_size=100),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
 def draw_epistemic_ledger(draw: Any) -> dict[str, Any]:
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(
@@ -1156,6 +1185,7 @@ def draw_epistemic_ledger(draw: Any) -> dict[str, Any]:
                 "history": st.lists(draw_any_state_event(), max_size=100),
                 "checkpoints": st.lists(draw_temporal_checkpoint(), max_size=100),
                 "active_rollbacks": st.lists(draw_rollback_request(), max_size=100),
+                "eviction_policy": st.one_of(st.none(), draw_eviction_policy()),
             }
         )
     )

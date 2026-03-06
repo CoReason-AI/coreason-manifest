@@ -46,6 +46,22 @@ class SecureSubSession(CoreasonBaseModel):
     description: str = Field(max_length=2000, description="Audit justification for this temporary secure session.")
 
 
+class SemanticFirewallPolicy(CoreasonBaseModel):
+    max_input_tokens: int = Field(
+        gt=0, description="The absolute physical ceiling of tokens allowed in a single ingress payload."
+    )
+    forbidden_intents: list[str] = Field(
+        default_factory=list,
+        description=(
+            "A strict list of semantic intents (e.g., 'role_override', "
+            "'system_prompt_leak') that trigger immediate quarantine."
+        ),
+    )
+    action_on_violation: Literal["drop", "quarantine", "redact"] = Field(
+        description="The deterministic action the orchestrator must take if a firewall rule is violated."
+    )
+
+
 class InformationFlowPolicy(CoreasonBaseModel):
     """
     Mathematical Data Loss Prevention (DLP) contract that bounds the graph.
@@ -54,6 +70,10 @@ class InformationFlowPolicy(CoreasonBaseModel):
     policy_id: str = Field(description="Unique identifier for this macroscopic flow control policy.")
     active: bool = Field(default=True, description="Whether this policy is currently enforcing data sanitization.")
     rules: list[RedactionRule] = Field(default_factory=list, description="The array of sanitization rules to enforce.")
+    semantic_firewall: SemanticFirewallPolicy | None = Field(
+        default=None,
+        description="The active cognitive defense perimeter against adversarial control-flow overrides.",
+    )
 
     @model_validator(mode="after")
     def sort_rules(self) -> Self:
