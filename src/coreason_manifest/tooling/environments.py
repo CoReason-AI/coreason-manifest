@@ -5,9 +5,9 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
-from typing import Literal
+from typing import Any, Literal
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.tooling.schemas import ToolDefinition
@@ -43,3 +43,10 @@ class ActionSpace(CoreasonBaseModel):
     mcp_servers: list[MCPClientBinding] = Field(
         default_factory=list, description="The list of MCP servers mounted into this action space."
     )
+
+    @model_validator(mode="after")
+    def verify_unique_tool_namespaces(self) -> Any:
+        tool_names = {t.tool_name for t in self.native_tools}
+        if len(tool_names) < len(self.native_tools):
+            raise ValueError("Tool names within an ActionSpace must be strictly unique.")
+        return self

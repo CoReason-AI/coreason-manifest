@@ -33,9 +33,17 @@ class VectorEmbedding(CoreasonBaseModel):
     dimensionality: int = Field(description="The size of the vector array.")
     model_name: str = Field(description="The provenance of the embedding model used (e.g., 'text-embedding-3-large').")
 
+    @model_validator(mode="after")
+    def verify_dimensionality(self) -> Any:
+        if len(self.vector) != self.dimensionality:
+            raise ValueError(f"Dimensionality mismatch: expected {self.dimensionality}, got {len(self.vector)}")
+        return self
+
 
 class TemporalBounds(CoreasonBaseModel):
-    valid_from: float | None = Field(default=None, description="The UNIX timestamp when this memory became true.")
+    valid_from: float | None = Field(
+        default=None, ge=0.0, description="The UNIX timestamp when this memory became true."
+    )
     valid_to: float | None = Field(default=None, description="The UNIX timestamp when this memory was invalidated.")
     interval_type: CausalInterval | None = Field(
         default=None, description="The Allen's interval algebra or causal relationship classification."
