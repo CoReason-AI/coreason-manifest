@@ -34,7 +34,7 @@ class TaskAnnouncement(CoreasonBaseModel):
 class AgentBid(CoreasonBaseModel):
     agent_id: str = Field(description="The NodeID of the bidder.")
     estimated_cost_cents: int = Field(description="The node's calculated cost to fulfill the task.")
-    estimated_latency_ms: int = Field(description="The node's estimated time to completion.")
+    estimated_latency_ms: int = Field(ge=0, description="The node's estimated time to completion.")
     confidence_score: float = Field(ge=0.0, le=1.0, description="The node's epistemic certainty of success.")
 
 
