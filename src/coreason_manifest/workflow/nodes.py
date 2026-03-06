@@ -65,12 +65,29 @@ class SelfCorrectionPolicy(CoreasonBaseModel):
     rollback_on_failure: bool = Field(description="Whether to rollback to the previous state on failure.")
 
 
+class AgentAttestation(CoreasonBaseModel):
+    """
+    Cryptographic identity passport and AI-BOM for the agent.
+    """
+
+    training_lineage_hash: str = Field(
+        pattern=r"^[a-f0-9]{64}$", description="The exact SHA-256 Merkle root of the agent's training lineage."
+    )
+    developer_signature: str = Field(description="The cryptographic signature of the developer/vendor.")
+    capability_merkle_root: str = Field(
+        pattern=r"^[a-f0-9]{64}$", description="The SHA-256 Merkle root of the agent's verified semantic capabilities."
+    )
+
+
 class AgentNode(BaseNode):
     """
     A node representing an autonomous agent.
     """
 
     type: Literal["agent"] = Field(default="agent", description="Discriminator for an Agent node.")
+    agent_attestation: AgentAttestation | None = Field(
+        default=None, description="The cryptographic identity passport and AI-BOM for the agent."
+    )
     action_space_id: str | None = Field(
         default=None, description="The ID of the specific ActionSpace (curated tool environment) bound to this agent."
     )

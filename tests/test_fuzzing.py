@@ -132,8 +132,23 @@ def draw_secure_sub_session(draw: Any) -> dict[str, Any]:
 
 
 @st.composite
+def draw_agent_attestation(draw: Any) -> dict[str, Any]:
+    return draw(
+        st.fixed_dictionaries(
+            {
+                "training_lineage_hash": st.from_regex(r"^[a-f0-9]{64}$", fullmatch=True),
+                "developer_signature": st.text(min_size=1),
+                "capability_merkle_root": st.from_regex(r"^[a-f0-9]{64}$", fullmatch=True),
+            }
+        )
+    )
+
+
+@st.composite
 def draw_agent_node_payload(draw: Any) -> dict[str, Any]:
     payload: dict[str, Any] = {"type": "agent", "description": draw(st.text())}
+    if draw(st.booleans()):
+        payload["agent_attestation"] = draw(draw_agent_attestation())
     if draw(st.booleans()):
         payload["intervention_policies"] = draw(st.lists(draw_intervention_policy(), max_size=100))
     if draw(st.booleans()):
@@ -644,6 +659,7 @@ def test_chaosexperiment_fuzzing(
                                 "network_access": st.booleans(),
                                 "allowed_domains": st.one_of(st.none(), st.lists(st.text(), max_size=100)),
                                 "file_system_read_only": st.booleans(),
+                                "auth_requirements": st.one_of(st.none(), st.lists(st.text(), max_size=100)),
                             }
                         ),
                         "sla": st.one_of(
