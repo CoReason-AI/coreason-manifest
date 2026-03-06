@@ -305,6 +305,7 @@
       "discriminator": {
         "mapping": {
           "agent": "#/$defs/AgentNode",
+          "composite": "#/$defs/CompositeNode",
           "human": "#/$defs/HumanNode",
           "system": "#/$defs/SystemNode"
         },
@@ -319,6 +320,9 @@
         },
         {
           "$ref": "#/$defs/SystemNode"
+        },
+        {
+          "$ref": "#/$defs/CompositeNode"
         }
       ]
     },
@@ -718,6 +722,58 @@
         "error_signature"
       ],
       "title": "CircuitBreakerTrip",
+      "type": "object"
+    },
+    "CompositeNode": {
+      "additionalProperties": false,
+      "description": "A node that encapsulates a nested workflow topology.",
+      "properties": {
+        "description": {
+          "description": "A description of the node's function.",
+          "title": "Description",
+          "type": "string"
+        },
+        "intervention_policies": {
+          "description": "A declarative list of proactive oversight hooks bound to this node's lifecycle.",
+          "items": {
+            "$ref": "#/$defs/InterventionPolicy"
+          },
+          "title": "Intervention Policies",
+          "type": "array"
+        },
+        "type": {
+          "const": "composite",
+          "default": "composite",
+          "description": "Discriminator for a Composite node.",
+          "title": "Type",
+          "type": "string"
+        },
+        "topology": {
+          "$ref": "#/$defs/AnyTopology",
+          "description": "The encapsulated subgraph to execute."
+        },
+        "input_mappings": {
+          "description": "Explicit state projection inputs.",
+          "items": {
+            "$ref": "#/$defs/InputMapping"
+          },
+          "title": "Input Mappings",
+          "type": "array"
+        },
+        "output_mappings": {
+          "description": "Explicit state projection outputs.",
+          "items": {
+            "$ref": "#/$defs/OutputMapping"
+          },
+          "title": "Output Mappings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "description",
+        "topology"
+      ],
+      "title": "CompositeNode",
       "type": "object"
     },
     "ComputeProvisioningRequest": {
@@ -1801,6 +1857,28 @@
       "title": "InformationFlowPolicy",
       "type": "object"
     },
+    "InputMapping": {
+      "additionalProperties": false,
+      "description": "Dictates how keys from a parent's shared_state_contract map to a nested topology's state.",
+      "properties": {
+        "parent_key": {
+          "description": "The key in the parent's shared state contract.",
+          "title": "Parent Key",
+          "type": "string"
+        },
+        "child_key": {
+          "description": "The mapped key in the nested topology's state contract.",
+          "title": "Child Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "parent_key",
+        "child_key"
+      ],
+      "title": "InputMapping",
+      "type": "object"
+    },
     "InterventionPolicy": {
       "additionalProperties": false,
       "description": "Proactive oversight hook bound to a specific lifecycle event.",
@@ -2228,6 +2306,28 @@
         "minimize"
       ],
       "type": "string"
+    },
+    "OutputMapping": {
+      "additionalProperties": false,
+      "description": "Dictates how keys from a nested topology's state map back to a parent's shared_state_contract.",
+      "properties": {
+        "child_key": {
+          "description": "The key in the nested topology's state contract.",
+          "title": "Child Key",
+          "type": "string"
+        },
+        "parent_key": {
+          "description": "The mapped key in the parent's shared state contract.",
+          "title": "Parent Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "child_key",
+        "parent_key"
+      ],
+      "title": "OutputMapping",
+      "type": "object"
     },
     "PatchOperation": {
       "enum": [
