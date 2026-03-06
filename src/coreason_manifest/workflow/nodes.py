@@ -7,10 +7,16 @@
 
 from typing import Annotated, Literal
 
+from typing import TYPE_CHECKING
 from pydantic import Field
 
 from coreason_manifest.core.base import CoreasonBaseModel
+
+if TYPE_CHECKING:
+    from coreason_manifest.workflow.topologies import AnyTopology
+
 from coreason_manifest.oversight.intervention import InterventionPolicy
+from coreason_manifest.workflow.constraints import InputMapping, OutputMapping
 
 
 class BaseNode(CoreasonBaseModel):
@@ -95,8 +101,19 @@ class SystemNode(BaseNode):
     type: Literal["system"] = Field(default="system", description="Discriminator for a System node.")
 
 
+class CompositeNode(BaseNode):
+    """
+    A node that encapsulates a nested workflow topology.
+    """
+
+    type: Literal["composite"] = Field(default="composite", description="Discriminator for a Composite node.")
+    topology: "AnyTopology" = Field(description="The encapsulated subgraph to execute.")
+    input_mappings: list[InputMapping] = Field(default_factory=list, description="Explicit state projection inputs.")
+    output_mappings: list[OutputMapping] = Field(default_factory=list, description="Explicit state projection outputs.")
+
+
 type AnyNode = Annotated[
-    AgentNode | HumanNode | SystemNode,
+    AgentNode | HumanNode | SystemNode | CompositeNode,
     Field(
         discriminator="type",
         description="A discriminated union of all valid workflow nodes.",
