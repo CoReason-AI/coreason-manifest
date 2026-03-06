@@ -1,5 +1,5 @@
-from typing import Any
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -60,7 +60,6 @@ def test_export_main_domain_import_error(monkeypatch: pytest.MonkeyPatch, tmp_pa
 
 
 def test_export_main_no_models(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
-    import coreason_manifest.cli.export as export_module
     import importlib
 
     original_import_module = importlib.import_module
@@ -72,6 +71,7 @@ def test_export_main_no_models(monkeypatch: pytest.MonkeyPatch, capsys: pytest.C
         return mod
 
     import importlib
+
     monkeypatch.setattr(importlib, "import_module", mock_import_module)
 
     with pytest.raises(SystemExit) as exc_info:
