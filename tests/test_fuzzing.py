@@ -1329,7 +1329,7 @@ workflow_envelope_adapter: TypeAdapter[WorkflowEnvelope] = TypeAdapter(WorkflowE
 
 @st.composite
 def draw_bilateral_sla(draw: Any) -> dict[str, Any]:
-    return draw(
+    res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
                 "receiving_tenant_id": st.text(min_size=1, max_size=255),
@@ -1346,6 +1346,7 @@ def draw_bilateral_sla(draw: Any) -> dict[str, Any]:
             }
         )
     )
+    return res
 
 
 @st.composite
