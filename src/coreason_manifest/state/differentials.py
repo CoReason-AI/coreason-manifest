@@ -22,6 +22,16 @@ class StatePatch(CoreasonBaseModel):
 
 class StateDiff(CoreasonBaseModel):
     diff_id: str = Field(description="Unique identifier for this state differential.")
+    author_node_id: str = Field(
+        description="The exact NodeID of the agent or system that authored this state mutation."
+    )
+    lamport_timestamp: int = Field(
+        ge=0,
+        description="Strict scalar logical clock used for deterministic LWW (Last-Writer-Wins) conflict resolution.",
+    )
+    vector_clock: dict[str, int] = Field(
+        description="Causal history mapping of all known NodeIDs to their latest logical mutation count at the time of authoring."
+    )
     patches: list[StatePatch] = Field(
         default_factory=list, description="The exact, ordered sequence of operations to apply."
     )
