@@ -1053,7 +1053,7 @@ def draw_redaction_rule(draw: Any) -> dict[str, Any]:
 
 @st.composite
 def draw_semantic_firewall_policy(draw: Any) -> dict[str, Any]:
-    return draw(
+    res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
                 "max_input_tokens": st.integers(min_value=1),
@@ -1062,6 +1062,7 @@ def draw_semantic_firewall_policy(draw: Any) -> dict[str, Any]:
             }
         )
     )
+    return res
 
 
 @st.composite
@@ -1156,7 +1157,7 @@ def draw_any_state_event(draw: Any) -> dict[str, Any]:
 
 @st.composite
 def draw_eviction_policy(draw: Any) -> dict[str, Any]:
-    return draw(
+    res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
                 "strategy": st.sampled_from(["fifo", "salience_decay", "summarize"]),
@@ -1165,6 +1166,7 @@ def draw_eviction_policy(draw: Any) -> dict[str, Any]:
             }
         )
     )
+    return res
 
 
 @st.composite
