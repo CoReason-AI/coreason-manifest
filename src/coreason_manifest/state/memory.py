@@ -29,8 +29,6 @@ class EpistemicLedger(CoreasonBaseModel):
     @model_validator(mode="after")
     def sort_history(self) -> Self:
         self.history.sort(key=lambda event: event.timestamp)
-        if hasattr(self, "_cached_hash"):
-            object.__delattr__(self, "_cached_hash")
         return self
 
 

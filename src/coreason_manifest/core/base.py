@@ -29,9 +29,6 @@ class CoreasonBaseModel(BaseModel):
         strict=True,
     )
 
-    def model_post_init(self, __context: Any) -> None:
-        object.__setattr__(self, "_cached_hash", hash(self.model_dump_canonical()))
-
     def __hash__(self) -> int:
         try:
             h: int = object.__getattribute__(self, "_cached_hash")

@@ -62,6 +62,4 @@ class InformationFlowPolicy(CoreasonBaseModel):
         """
         # Because the model is frozen, we bypass attribute assignment tracking
         object.__setattr__(self, "rules", sorted(self.rules, key=lambda r: r.rule_id))
-        if hasattr(self, "_cached_hash"):
-            object.__delattr__(self, "_cached_hash")
         return self

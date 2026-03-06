@@ -62,8 +62,6 @@ class GrammarPanel(BasePanel):
     def sort_encodings(self) -> Self:
         """Mathematically sorts self.encodings by the string value of channel for deterministic hashing."""
         object.__setattr__(self, "encodings", sorted(self.encodings, key=lambda e: e.channel))
-        if hasattr(self, "_cached_hash"):
-            object.__delattr__(self, "_cached_hash")
         return self
 
 
@@ -102,6 +100,4 @@ class MacroGrid(CoreasonBaseModel):
             for panel_id in row:
                 if panel_id not in panel_ids:
                     raise ValueError(f"Ghost Panel referenced in layout_matrix: {panel_id}")
-        if hasattr(self, "_cached_hash"):
-            object.__delattr__(self, "_cached_hash")
         return self

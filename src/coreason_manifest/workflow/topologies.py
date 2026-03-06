@@ -139,8 +139,6 @@ class DAGTopology(BaseTopology):
                         recursion_stack.remove(curr)
                         stack.pop()
 
-        if hasattr(self, "_cached_hash"):
-            object.__delattr__(self, "_cached_hash")
         return self
 
 
@@ -162,8 +160,6 @@ class CouncilTopology(BaseTopology):
     def check_adjudicator_id(self) -> Self:
         if self.adjudicator_id not in self.nodes:
             raise ValueError(f"Adjudicator ID '{self.adjudicator_id}' is not in nodes registry.")
-        if hasattr(self, "_cached_hash"):
-            object.__delattr__(self, "_cached_hash")
         return self
 
 
@@ -186,8 +182,6 @@ class SwarmTopology(BaseTopology):
     def enforce_concurrency_ceiling(self) -> Self:
         if self.spawning_threshold > self.max_concurrent_agents:
             raise ValueError("spawning_threshold cannot exceed max_concurrent_agents")
-        if hasattr(self, "_cached_hash"):
-            object.__delattr__(self, "_cached_hash")
         return self
 
 
@@ -212,8 +206,6 @@ class EvolutionaryTopology(BaseTopology):
         object.__setattr__(
             self, "fitness_objectives", sorted(self.fitness_objectives, key=lambda obj: obj.target_metric)
         )
-        if hasattr(self, "_cached_hash"):
-            object.__delattr__(self, "_cached_hash")
         return self
 
 
