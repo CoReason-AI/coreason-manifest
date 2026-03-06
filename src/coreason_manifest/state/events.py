@@ -5,11 +5,12 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 
 from pydantic import Field
 
 from coreason_manifest.core.base import CoreasonBaseModel
+from coreason_manifest.core.primitives import NodeID
 
 
 class BaseStateEvent(CoreasonBaseModel):
@@ -21,13 +22,23 @@ class ObservationEvent(BaseStateEvent):
     type: Literal["observation"] = Field(
         default="observation", description="Discriminator type for an observation event."
     )
-    # Adding arbitrary payload to make it useful, even though not explicitly asked,
-    # to be safe, I'll just stick strictly to the requested structure or minimalist
+    payload: dict[str, Any] = Field(
+        description="The raw, lossless semantic output captured from the environment or tool execution."
+    )
+    source_node_id: NodeID | None = Field(
+        default=None, description="The specific topological node that generated this observation."
+    )
 
 
 class BeliefUpdateEvent(BaseStateEvent):
     type: Literal["belief_update"] = Field(
         default="belief_update", description="Discriminator type for a belief update event."
+    )
+    payload: dict[str, Any] = Field(
+        description="The semantic representation of the agent's internal cognitive shift or synthesis."
+    )
+    source_node_id: NodeID | None = Field(
+        default=None, description="The specific topological node that synthesized this belief update."
     )
 
 

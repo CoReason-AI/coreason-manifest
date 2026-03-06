@@ -18,6 +18,7 @@ from coreason_manifest.workflow.envelope import WorkflowEnvelope
 from coreason_manifest.workflow.nodes import (
     AgentNode,
     AnyNode,
+    CompositeNode,
     EpistemicScanner,
     HumanNode,
     SelfCorrectionPolicy,
@@ -35,6 +36,8 @@ from coreason_manifest.workflow.topologies import (
     SwarmTopology,
 )
 
+CompositeNode.model_rebuild()
+
 __all__ = [
     "AgentBid",
     "AgentNode",
@@ -44,6 +47,7 @@ __all__ = [
     "AuctionState",
     "AuctionType",
     "BackpressurePolicy",
+    "CompositeNode",
     "CouncilTopology",
     "DAGTopology",
     "DiversityConstraint",

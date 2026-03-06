@@ -105,7 +105,7 @@ class DAGTopology(BaseTopology):
             if target not in self.nodes:
                 raise ValueError(f"Edge target '{target}' does not exist in nodes registry.")
 
-        # Step 2: Cycle detection
+        # Step 2: Cycle detection (Iterative DFS to avoid RecursionError CWE-674)
         if not self.allow_cycles:
             adj: dict[NodeID, list[NodeID]] = {node_id: [] for node_id in self.nodes}
             for source, target in self.edges:
@@ -114,21 +114,29 @@ class DAGTopology(BaseTopology):
             visited: set[NodeID] = set()
             recursion_stack: set[NodeID] = set()
 
-            def dfs(node: NodeID) -> bool:
-                visited.add(node)
-                recursion_stack.add(node)
-                for neighbor in adj[node]:
-                    if neighbor not in visited:
-                        if dfs(neighbor):
-                            return True
-                    elif neighbor in recursion_stack:
-                        return True
-                recursion_stack.remove(node)
-                return False
+            for start_node in self.nodes:
+                if start_node in visited:
+                    continue
 
-            for node in self.nodes:
-                if node not in visited and dfs(node):
-                    raise ValueError("Graph contains cycles but allow_cycles is False.")
+                # The stack holds tuples of (node, neighbor_iterator)
+                # This explicitly replicates the system call stack on the heap.
+                stack = [(start_node, iter(adj[start_node]))]
+                visited.add(start_node)
+                recursion_stack.add(start_node)
+
+                while stack:
+                    curr, neighbors = stack[-1]
+                    try:
+                        neighbor = next(neighbors)
+                        if neighbor not in visited:
+                            visited.add(neighbor)
+                            recursion_stack.add(neighbor)
+                            stack.append((neighbor, iter(adj[neighbor])))
+                        elif neighbor in recursion_stack:
+                            raise ValueError("Graph contains cycles but allow_cycles is False.")
+                    except StopIteration:
+                        recursion_stack.remove(curr)
+                        stack.pop()
 
         if hasattr(self, "_cached_hash"):
             object.__delattr__(self, "_cached_hash")

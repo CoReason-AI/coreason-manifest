@@ -25,8 +25,47 @@ from coreason_manifest.testing.chaos import ChaosExperiment, FaultInjectionProfi
 from coreason_manifest.tooling import ActionSpace, PermissionBoundary, SideEffectProfile, ToolDefinition
 from coreason_manifest.workflow.auctions import AgentBid, AuctionState, TaskAnnouncement
 from coreason_manifest.workflow.envelope import WorkflowEnvelope
-from coreason_manifest.workflow.nodes import AgentNode
-from coreason_manifest.workflow.topologies import DAGTopology, EvolutionaryTopology
+from coreason_manifest.workflow.nodes import AgentNode, CompositeNode
+from coreason_manifest.workflow.topologies import DAGTopology, EvolutionaryTopology, SwarmTopology
+
+
+def test_composite_node_determinism() -> None:
+    # Encapsulated swarm topology
+    swarm_top1 = SwarmTopology(
+        nodes={"agent_1": AgentNode(description="worker")},
+        spawning_threshold=2,
+        max_concurrent_agents=5,
+    )
+    swarm_top2 = SwarmTopology(
+        nodes={"agent_1": AgentNode(description="worker")},
+        spawning_threshold=2,
+        max_concurrent_agents=5,
+    )
+
+    composite_node1 = CompositeNode(
+        description="A nested graph",
+        topology=swarm_top1,
+        input_mappings=[],
+        output_mappings=[],
+    )
+    composite_node2 = CompositeNode(
+        description="A nested graph",
+        topology=swarm_top2,
+        input_mappings=[],
+        output_mappings=[],
+    )
+
+    dag1 = DAGTopology(
+        nodes={"comp_1": composite_node1},
+        allow_cycles=False,
+    )
+    dag2 = DAGTopology(
+        nodes={"comp_1": composite_node2},
+        allow_cycles=False,
+    )
+
+    assert dag1.model_dump_canonical() == dag2.model_dump_canonical()
+    assert hash(dag1) == hash(dag2)
 
 
 def test_workflow_envelope_determinism() -> None:
@@ -251,14 +290,25 @@ def test_presentation_envelope_determinism() -> None:
 
 
 def test_epistemic_ledger_determinism() -> None:
-    event1 = ObservationEvent(event_id="obs_1", timestamp=100.0)
-    event2 = ObservationEvent(event_id="obs_2", timestamp=200.0)
+    event1 = ObservationEvent(event_id="obs_1", timestamp=100.0, payload={})
+    event2 = ObservationEvent(event_id="obs_2", timestamp=200.0, payload={})
 
     ledger1 = EpistemicLedger(history=[event1, event2])
     ledger2 = EpistemicLedger(history=[event1, event2])
 
     assert ledger1.model_dump_canonical() == ledger2.model_dump_canonical()
     assert hash(ledger1) == hash(ledger2)
+
+
+def test_epistemic_payload_canonical_hashing() -> None:
+    data = {"temperature": 72, "humidity": 0.5, "status": "nominal"}
+    scrambled_data = {"status": "nominal", "temperature": 72, "humidity": 0.5}
+
+    event_a = ObservationEvent(event_id="obs_1", timestamp=100.0, payload=data)
+    event_b = ObservationEvent(event_id="obs_1", timestamp=100.0, payload=scrambled_data)
+
+    assert hash(event_a) == hash(event_b)
+    assert event_a.model_dump_canonical() == event_b.model_dump_canonical()
 
 
 def test_semantic_memory_determinism() -> None:

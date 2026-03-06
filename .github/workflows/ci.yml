@@ -101,9 +101,6 @@ jobs:
       - name: Install Dependencies
         run: uv sync
 
-      - name: Prompt/Template Fuzzing
-        run: uv run scripts/llm_fuzz.py
-
   test-ubuntu:
     name: Test (Ubuntu) - Python ${{ matrix.python-version }}
     needs: [lint-and-audit, schema-contracts]

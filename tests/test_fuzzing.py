@@ -31,7 +31,7 @@ from coreason_manifest.telemetry.schemas import TraceExportBatch
 from coreason_manifest.testing.chaos import ChaosExperiment
 from coreason_manifest.tooling import ActionSpace, ToolDefinition
 from coreason_manifest.workflow.auctions import AuctionState
-from coreason_manifest.workflow.nodes import AgentNode, AnyNode, HumanNode, SystemNode
+from coreason_manifest.workflow.nodes import AgentNode, AnyNode, CompositeNode, HumanNode, SystemNode
 from coreason_manifest.workflow.topologies import AnyTopology, StateContract
 
 
@@ -157,6 +157,66 @@ def draw_system_node_payload(draw: Any) -> dict[str, Any]:
     return payload
 
 
+def draw_base_node_payload() -> st.SearchStrategy[dict[str, Any]]:
+    return st.one_of(draw_agent_node_payload(), draw_human_node_payload(), draw_system_node_payload())
+
+
+@st.composite
+def draw_input_mapping(draw: Any) -> dict[str, Any]:
+    return {"parent_key": draw(st.text()), "child_key": draw(st.text())}
+
+
+@st.composite
+def draw_output_mapping(draw: Any) -> dict[str, Any]:
+    return {"child_key": draw(st.text()), "parent_key": draw(st.text())}
+
+
+def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> st.SearchStrategy[dict[str, Any]]:
+    # Instead of defining a complex topology that needs many other policies not yet defined,
+    # we just define a simple DAG topology. NodeID pattern requires '^[a-zA-Z0-9_-]+$'
+    return st.fixed_dictionaries(
+        {
+            "type": st.just("dag"),
+            "nodes": st.dictionaries(
+                st.text(min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"),
+                nodes_strategy,
+                max_size=5,
+            ),
+            "shared_state_contract": st.none(),
+            "information_flow": st.none(),
+            "observability": st.none(),
+            "edges": st.just([]),
+            "allow_cycles": st.booleans(),
+            "backpressure": st.none(),
+        }
+    )
+
+
+def draw_composite_node_payload(
+    topology_strategy: st.SearchStrategy[dict[str, Any]],
+) -> st.SearchStrategy[dict[str, Any]]:
+    return st.fixed_dictionaries(
+        {
+            "type": st.just("composite"),
+            "description": st.text(),
+            "intervention_policies": st.lists(draw_intervention_policy(), max_size=10),
+            "topology": topology_strategy,
+            "input_mappings": st.lists(draw_input_mapping(), max_size=5),
+            "output_mappings": st.lists(draw_output_mapping(), max_size=5),
+        }
+    )
+
+
+def draw_any_node_recursive() -> st.SearchStrategy[dict[str, Any]]:
+    def extend_node(node_strategy: st.SearchStrategy[dict[str, Any]]) -> st.SearchStrategy[dict[str, Any]]:
+        # Combining topologies recursively:
+        topologies = draw_topology_payload(node_strategy)
+        return st.one_of(node_strategy, draw_composite_node_payload(topologies))
+
+    base_nodes = draw_base_node_payload()
+    return st.recursive(base_nodes, extend_node, max_leaves=3)
+
+
 node_adapter: TypeAdapter[AnyNode] = TypeAdapter(AnyNode)
 chaos_adapter: TypeAdapter[ChaosExperiment] = TypeAdapter(ChaosExperiment)
 action_space_adapter: TypeAdapter[ActionSpace] = TypeAdapter(ActionSpace)
@@ -169,7 +229,7 @@ state_contract_adapter: TypeAdapter[StateContract] = TypeAdapter(StateContract)
 intervention_policy_adapter: TypeAdapter[InterventionPolicy] = TypeAdapter(InterventionPolicy)
 
 
-@given(st.one_of(draw_agent_node_payload(), draw_human_node_payload(), draw_system_node_payload()))
+@given(draw_any_node_recursive())
 def test_anynode_routing(payload: dict[str, Any]) -> None:
     parsed = node_adapter.validate_python(payload)
     node_type = payload["type"]
@@ -179,11 +239,13 @@ def test_anynode_routing(payload: dict[str, Any]) -> None:
         assert isinstance(parsed, HumanNode)
     elif node_type == "system":
         assert isinstance(parsed, SystemNode)
+    elif node_type == "composite":
+        assert isinstance(parsed, CompositeNode)
 
 
 @given(st.text())
 def test_anynode_invalid(invalid_type: str) -> None:
-    if invalid_type in ["agent", "human", "system"]:
+    if invalid_type in ["agent", "human", "system", "composite"]:
         return
     payload = {"type": invalid_type, "description": "test"}
     with pytest.raises(ValidationError):
@@ -303,14 +365,39 @@ def test_anytopology_routing(payload: dict[str, Any]) -> None:
     assert parsed.type == "evolutionary"
 
 
-@given(
-    st.sampled_from(["observation", "belief_update", "system_fault"]),
-    st.text(),
-    st.floats(allow_nan=False, allow_infinity=False),
-)
-def test_anystateevent_routing(event_type: str, event_id: str, timestamp: float) -> None:
-    payload = {"type": event_type, "event_id": event_id, "timestamp": timestamp}
+@st.composite
+def _local_draw_any_state_event(draw: Any) -> dict[str, Any]:
+    event_type = draw(st.sampled_from(["observation", "belief_update", "system_fault"]))
+    payload: dict[str, Any] = {
+        "type": event_type,
+        "event_id": draw(st.text()),
+        "timestamp": draw(st.floats(allow_nan=False, allow_infinity=False)),
+    }
+    if event_type in ("observation", "belief_update"):
+        payload["payload"] = draw(
+            st.dictionaries(
+                st.text(),
+                st.one_of(st.text(), st.integers(), st.floats(allow_nan=False, allow_infinity=False), st.booleans()),
+                max_size=5,
+            )
+        )
+        payload["source_node_id"] = draw(
+            st.one_of(
+                st.none(),
+                st.text(
+                    min_size=1,
+                    max_size=128,
+                    alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-",
+                ),
+            )
+        )
+    return payload
+
+
+@given(_local_draw_any_state_event())
+def test_anystateevent_routing(payload: dict[str, Any]) -> None:
     parsed = event_adapter.validate_python(payload)
+    event_type = payload["type"]
     if event_type == "observation":
         assert isinstance(parsed, ObservationEvent)
     elif event_type == "belief_update":
@@ -896,13 +983,8 @@ epistemic_ledger_adapter: TypeAdapter[EpistemicLedger] = TypeAdapter(EpistemicLe
 
 @st.composite
 def draw_any_state_event(draw: Any) -> dict[str, Any]:
-    event_type = draw(st.sampled_from(["observation", "belief_update", "system_fault"]))
-    payload: dict[str, Any] = {
-        "type": event_type,
-        "event_id": draw(st.text()),
-        "timestamp": draw(st.floats(allow_nan=False, allow_infinity=False)),
-    }
-    return payload
+    res: dict[str, Any] = draw(_local_draw_any_state_event())
+    return res
 
 
 @st.composite
