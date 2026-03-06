@@ -1198,7 +1198,7 @@ def draw_eviction_policy(draw: Any) -> dict[str, Any]:
 
 @st.composite
 def draw_migration_contract(draw: Any) -> dict[str, Any]:
-    return draw(
+    res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
                 "contract_id": st.text(min_size=1),
@@ -1209,6 +1209,7 @@ def draw_migration_contract(draw: Any) -> dict[str, Any]:
             }
         )
     )
+    return res
 
 
 @st.composite
