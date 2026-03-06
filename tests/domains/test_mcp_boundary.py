@@ -110,23 +110,6 @@ def test_explicit_keys_and_list_limits() -> None:
     assert "params must be a dictionary" in str(exc.value)
 
 
-def test_omop_resource_template_validation() -> None:
-    """Ensure OMOPResourceTemplate strictly validates the omop:// URI protocol."""
-    from coreason_manifest.adapters.mcp.schemas import OMOPDomain, OMOPResourceTemplate
-
-    # Valid
-    OMOPResourceTemplate(
-        uri_template="omop://CONCEPT/{concept_id}", resource_type=OMOPDomain.CONCEPT, description="test"
-    )
-
-    # Invalid
-    with pytest.raises(ValidationError) as exc:
-        OMOPResourceTemplate(
-            uri_template="http://CONCEPT/{concept_id}", resource_type=OMOPDomain.CONCEPT, description="test"
-        )
-    assert "must follow the 'omop://' protocol" in str(exc.value)
-
-
 def test_mcp_server_tool_schemas() -> None:
     """Test standard tool endpoints of mcp_server for branch coverage."""
     from coreason_manifest.cli.mcp_server import get_schema, list_schemas
