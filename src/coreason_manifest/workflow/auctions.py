@@ -28,12 +28,12 @@ class TaskAnnouncement(CoreasonBaseModel):
     required_action_space_id: str | None = Field(
         default=None, description="Optional restriction forcing bidders to possess a specific toolset."
     )
-    max_budget_usd: float = Field(description="The absolute ceiling price the orchestrator is willing to pay.")
+    max_budget_cents: int = Field(description="The absolute ceiling price the orchestrator is willing to pay.")
 
 
 class AgentBid(CoreasonBaseModel):
     agent_id: str = Field(description="The NodeID of the bidder.")
-    estimated_cost_usd: float = Field(description="The node's calculated cost to fulfill the task.")
+    estimated_cost_cents: int = Field(description="The node's calculated cost to fulfill the task.")
     estimated_latency_ms: int = Field(description="The node's estimated time to completion.")
     confidence_score: float = Field(ge=0.0, le=1.0, description="The node's epistemic certainty of success.")
 
@@ -41,7 +41,7 @@ class AgentBid(CoreasonBaseModel):
 class TaskAward(CoreasonBaseModel):
     task_id: str = Field(description="The identifier of the resolved task.")
     awarded_agent_id: str = Field(description="The winning NodeID.")
-    cleared_price_usd: float = Field(description="The final cryptographic clearing price.")
+    cleared_price_cents: int = Field(description="The final cryptographic clearing price.")
 
 
 class AuctionState(CoreasonBaseModel):
@@ -54,5 +54,5 @@ class AuctionState(CoreasonBaseModel):
     @model_validator(mode="after")
     def sort_bids(self) -> AuctionState:
         """Mathematically sort bids by agent_id for deterministic hashing."""
-        self.bids.sort(key=lambda bid: bid.agent_id)
+        object.__setattr__(self, "bids", sorted(self.bids, key=lambda bid: bid.agent_id))
         return self
