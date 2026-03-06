@@ -1353,7 +1353,6 @@ def test_execution_span_cached_hash_sort_events() -> None:
     # Simulate a hash being cached
     span._cached_hash = 12345
     # Trigger sorting by mutating (if possible) or just explicitly calling the validator
-    from pydantic import TypeAdapter
     # Re-validating or simply re-assigning might trigger it?
     # Pydantic validators run on creation. To test lines 44-46 and 52-54, we can manually trigger the methods.
     # Actually, validators in mode="after" are instance methods.
@@ -1366,7 +1365,7 @@ def test_execution_span_cached_hash_sort_events() -> None:
     assert span.events[0].name == "e1"
 
 def test_trace_export_batch_cached_hash_sort_spans() -> None:
-    from coreason_manifest.telemetry.schemas import TraceExportBatch, ExecutionSpan
+    from coreason_manifest.telemetry.schemas import ExecutionSpan, TraceExportBatch
     batch = TraceExportBatch(
         batch_id="b1",
         spans=[

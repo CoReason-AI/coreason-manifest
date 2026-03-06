@@ -70,7 +70,6 @@ def test_export_main_no_models(monkeypatch: pytest.MonkeyPatch, capsys: pytest.C
     assert "No models found to export." in captured.out
 
 def test_mcp_server_schemas_import_error(monkeypatch: pytest.MonkeyPatch) -> None:
-    import coreason_manifest.cli.mcp_server as mcp_server_module
     import importlib
     original_import_module = importlib.import_module
 
@@ -84,7 +83,6 @@ def test_mcp_server_schemas_import_error(monkeypatch: pytest.MonkeyPatch) -> Non
     assert len(schemas) > 0
 
 def test_mcp_server_get_schema_import_error(monkeypatch: pytest.MonkeyPatch) -> None:
-    import coreason_manifest.cli.mcp_server as mcp_server_module
     import importlib
     original_import_module = importlib.import_module
 
