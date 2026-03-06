@@ -200,7 +200,7 @@ def draw_consensus_policy(draw: Any) -> dict[str, Any]:
 
 @st.composite
 def draw_backpressure_policy(draw: Any) -> dict[str, Any]:
-    return draw(
+    res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
                 "max_queue_depth": st.integers(min_value=1),
@@ -210,6 +210,7 @@ def draw_backpressure_policy(draw: Any) -> dict[str, Any]:
             }
         )
     )
+    return res
 
 
 def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> st.SearchStrategy[dict[str, Any]]:

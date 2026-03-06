@@ -533,7 +533,7 @@
         "token_budget_per_branch": {
           "anyOf": [
             {
-              "type": "number"
+              "type": "integer"
             },
             {
               "type": "null"
@@ -542,6 +542,34 @@
           "default": null,
           "description": "The maximum token cost allowed per execution branch before rate-limiting.",
           "title": "Token Budget Per Branch"
+        },
+        "max_tokens_per_minute": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The maximum kinetic velocity of token consumption allowed before the circuit breaker trips.",
+          "title": "Max Tokens Per Minute"
+        },
+        "max_requests_per_minute": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The maximum kinetic velocity of API requests allowed.",
+          "title": "Max Requests Per Minute"
         }
       },
       "required": [
@@ -3576,10 +3604,13 @@
           "title": "Task Id",
           "type": "string"
         },
-        "awarded_agent_id": {
-          "description": "The winning NodeID.",
-          "title": "Awarded Agent Id",
-          "type": "string"
+        "awarded_syndicate": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "description": "Strict mapping of agent NodeIDs to their exact fractional payout in cents.",
+          "title": "Awarded Syndicate",
+          "type": "object"
         },
         "cleared_price_cents": {
           "description": "The final cryptographic clearing price.",
@@ -3589,7 +3620,7 @@
       },
       "required": [
         "task_id",
-        "awarded_agent_id",
+        "awarded_syndicate",
         "cleared_price_cents"
       ],
       "title": "TaskAward",
