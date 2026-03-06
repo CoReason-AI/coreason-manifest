@@ -2116,6 +2116,39 @@
       "title": "GradingCriteria",
       "type": "object"
     },
+    "HomomorphicEncryptionProfile": {
+      "additionalProperties": false,
+      "properties": {
+        "fhe_scheme": {
+          "description": "The specific homomorphic encryption dialect used to encode the ciphertext.",
+          "enum": [
+            "ckks",
+            "bgv",
+            "bfv",
+            "tfhe"
+          ],
+          "title": "Fhe Scheme",
+          "type": "string"
+        },
+        "public_key_id": {
+          "description": "The identifier of the public evaluation key the orchestrator must load to perform math on this payload.",
+          "title": "Public Key Id",
+          "type": "string"
+        },
+        "ciphertext_blob": {
+          "description": "The base64-encoded homomorphic ciphertext.",
+          "title": "Ciphertext Blob",
+          "type": "string"
+        }
+      },
+      "required": [
+        "fhe_scheme",
+        "public_key_id",
+        "ciphertext_blob"
+      ],
+      "title": "HomomorphicEncryptionProfile",
+      "type": "object"
+    },
     "HumanNode": {
       "additionalProperties": false,
       "description": "A node representing a human participant in the workflow.",
@@ -3322,6 +3355,18 @@
           ],
           "default": null,
           "description": "The importance profile used for memory pruning."
+        },
+        "fhe_profile": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HomomorphicEncryptionProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The cryptographic envelope enabling privacy-preserving computation directly on this node's encrypted state."
         }
       },
       "required": [

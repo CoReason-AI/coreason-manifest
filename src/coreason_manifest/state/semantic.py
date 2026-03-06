@@ -74,7 +74,9 @@ class HomomorphicEncryptionProfile(CoreasonBaseModel):
         description="The specific homomorphic encryption dialect used to encode the ciphertext."
     )
     public_key_id: str = Field(
-        description="The identifier of the public evaluation key the orchestrator must load to perform math on this payload."
+        description=(
+            "The identifier of the public evaluation key the orchestrator must load to perform math on this payload."
+        )
     )
     ciphertext_blob: str = Field(description="The base64-encoded homomorphic ciphertext.")
 
@@ -103,7 +105,10 @@ class SemanticNode(CoreasonBaseModel):
     )
     fhe_profile: HomomorphicEncryptionProfile | None = Field(
         default=None,
-        description="The cryptographic envelope enabling privacy-preserving computation directly on this node's encrypted state.",
+        description=(
+            "The cryptographic envelope enabling privacy-preserving computation "
+            "directly on this node's encrypted state."
+        ),
     )
 
 
