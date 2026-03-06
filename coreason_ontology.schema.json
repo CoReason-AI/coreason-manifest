@@ -137,10 +137,10 @@
           "title": "Agent Id",
           "type": "string"
         },
-        "estimated_cost_usd": {
+        "estimated_cost_cents": {
           "description": "The node's calculated cost to fulfill the task.",
-          "title": "Estimated Cost Usd",
-          "type": "number"
+          "title": "Estimated Cost Cents",
+          "type": "integer"
         },
         "estimated_latency_ms": {
           "description": "The node's estimated time to completion.",
@@ -157,7 +157,7 @@
       },
       "required": [
         "agent_id",
-        "estimated_cost_usd",
+        "estimated_cost_cents",
         "estimated_latency_ms",
         "confidence_score"
       ],
@@ -1835,10 +1835,10 @@
       "additionalProperties": false,
       "description": "Global governance bounds for a swarm executing a workflow envelope.",
       "properties": {
-        "max_budget_usd": {
+        "max_budget_cents": {
           "description": "The absolute maximum economic cost allowed for the entire swarm lifecycle.",
-          "title": "Max Budget Usd",
-          "type": "number"
+          "title": "Max Budget Cents",
+          "type": "integer"
         },
         "max_global_tokens": {
           "description": "The maximum aggregate token usage allowed across all nodes.",
@@ -1852,7 +1852,7 @@
         }
       },
       "required": [
-        "max_budget_usd",
+        "max_budget_cents",
         "max_global_tokens",
         "global_timeout_seconds"
       ],
@@ -3545,15 +3545,15 @@
           "description": "Optional restriction forcing bidders to possess a specific toolset.",
           "title": "Required Action Space Id"
         },
-        "max_budget_usd": {
+        "max_budget_cents": {
           "description": "The absolute ceiling price the orchestrator is willing to pay.",
-          "title": "Max Budget Usd",
-          "type": "number"
+          "title": "Max Budget Cents",
+          "type": "integer"
         }
       },
       "required": [
         "task_id",
-        "max_budget_usd"
+        "max_budget_cents"
       ],
       "title": "TaskAnnouncement",
       "type": "object"
@@ -3571,16 +3571,16 @@
           "title": "Awarded Agent Id",
           "type": "string"
         },
-        "cleared_price_usd": {
+        "cleared_price_cents": {
           "description": "The final cryptographic clearing price.",
-          "title": "Cleared Price Usd",
-          "type": "number"
+          "title": "Cleared Price Cents",
+          "type": "integer"
         }
       },
       "required": [
         "task_id",
         "awarded_agent_id",
-        "cleared_price_usd"
+        "cleared_price_cents"
       ],
       "title": "TaskAward",
       "type": "object"
