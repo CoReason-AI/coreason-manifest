@@ -51,6 +51,7 @@
         },
         "passing_threshold": {
           "description": "The minimum score required to pass.",
+          "maximum": 100.0,
           "minimum": 0.0,
           "title": "Passing Threshold",
           "type": "number"
@@ -79,6 +80,8 @@
         },
         "score": {
           "description": "The final score assigned based on the rubric.",
+          "maximum": 100,
+          "minimum": 0,
           "title": "Score",
           "type": "integer"
         },
@@ -144,6 +147,7 @@
         },
         "estimated_latency_ms": {
           "description": "The node's estimated time to completion.",
+          "minimum": 0,
           "title": "Estimated Latency Ms",
           "type": "integer"
         },
@@ -1847,6 +1851,7 @@
         },
         "global_timeout_seconds": {
           "description": "The absolute Time-To-Live (TTL) for the execution envelope before graceful termination.",
+          "minimum": 0,
           "title": "Global Timeout Seconds",
           "type": "integer"
         }
@@ -3309,6 +3314,7 @@
       "properties": {
         "expected_max_latency": {
           "description": "The expected maximum latency under normal conditions.",
+          "minimum": 0.0,
           "title": "Expected Max Latency",
           "type": "number"
         },
@@ -3610,6 +3616,7 @@
         "valid_from": {
           "anyOf": [
             {
+              "minimum": 0.0,
               "type": "number"
             },
             {
