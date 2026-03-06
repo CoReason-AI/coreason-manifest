@@ -173,7 +173,9 @@ class SwarmTopology(BaseTopology):
         default=3,
         description="Threshold limit for dynamic spawning of additional nodes.",
     )
-    max_concurrent_agents: int = Field(default=10, description="The absolute ceiling for concurrent agent threads.")
+    max_concurrent_agents: int = Field(
+        default=10, le=100, description="The absolute ceiling for concurrent agent threads."
+    )
     auction_policy: AuctionPolicy | None = Field(
         default=None, description="The mathematical policy governing task decentralization via Spot Markets."
     )

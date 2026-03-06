@@ -2675,7 +2675,7 @@
         },
         "target_regex_pattern": {
           "description": "The dynamic regex pattern to target.",
-          "maxLength": 2000,
+          "maxLength": 200,
           "title": "Target Regex Pattern",
           "type": "string"
         },
@@ -3415,6 +3415,7 @@
         "max_concurrent_agents": {
           "default": 10,
           "description": "The absolute ceiling for concurrent agent threads.",
+          "maximum": 100,
           "title": "Max Concurrent Agents",
           "type": "integer"
         },
