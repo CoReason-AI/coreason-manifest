@@ -58,8 +58,16 @@ class BackpressurePolicy(CoreasonBaseModel):
         description="The maximum number of unprocessed messages/observations "
         "allowed between connected nodes before yielding."
     )
-    token_budget_per_branch: float | None = Field(
+    token_budget_per_branch: int | None = Field(
         default=None, description="The maximum token cost allowed per execution branch before rate-limiting."
+    )
+    max_tokens_per_minute: int | None = Field(
+        default=None,
+        gt=0,
+        description="The maximum kinetic velocity of token consumption allowed before the circuit breaker trips.",
+    )
+    max_requests_per_minute: int | None = Field(
+        default=None, gt=0, description="The maximum kinetic velocity of API requests allowed."
     )
 
 

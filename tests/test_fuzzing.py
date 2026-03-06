@@ -198,6 +198,20 @@ def draw_consensus_policy(draw: Any) -> dict[str, Any]:
     return res
 
 
+@st.composite
+def draw_backpressure_policy(draw: Any) -> dict[str, Any]:
+    return draw(
+        st.fixed_dictionaries(
+            {
+                "max_queue_depth": st.integers(min_value=1),
+                "token_budget_per_branch": st.one_of(st.none(), st.integers(min_value=1)),
+                "max_tokens_per_minute": st.one_of(st.none(), st.integers(min_value=1)),
+                "max_requests_per_minute": st.one_of(st.none(), st.integers(min_value=1)),
+            }
+        )
+    )
+
+
 def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> st.SearchStrategy[dict[str, Any]]:
     dag_strategy = st.fixed_dictionaries(
         {
@@ -212,7 +226,7 @@ def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> 
             "observability": st.none(),
             "edges": st.just([]),
             "allow_cycles": st.booleans(),
-            "backpressure": st.none(),
+            "backpressure": st.one_of(st.none(), draw_backpressure_policy()),
         }
     )
 
@@ -938,16 +952,15 @@ def draw_agent_bid(draw: Any) -> dict[str, Any]:
 
 @st.composite
 def draw_task_award(draw: Any) -> dict[str, Any]:
-    res: dict[str, Any] = draw(
-        st.fixed_dictionaries(
-            {
-                "task_id": st.text(),
-                "awarded_agent_id": st.text(),
-                "cleared_price_cents": st.integers(min_value=0),
-            }
-        )
-    )
-    return res
+    price = draw(st.integers(min_value=0))
+    # To strictly satisfy the zero-sum validator without fuzzer timeouts,
+    # we allocate 100% of the price to a single generated agent ID.
+    agent_id = draw(st.text(min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"))
+    return {
+        "task_id": draw(st.text()),
+        "awarded_syndicate": {agent_id: price},
+        "cleared_price_cents": price,
+    }
 
 
 @st.composite

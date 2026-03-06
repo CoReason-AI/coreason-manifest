@@ -5,7 +5,7 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
-from typing import Literal
+from typing import Literal, Self
 
 from pydantic import Field, model_validator
 
@@ -40,8 +40,16 @@ class AgentBid(CoreasonBaseModel):
 
 class TaskAward(CoreasonBaseModel):
     task_id: str = Field(description="The identifier of the resolved task.")
-    awarded_agent_id: str = Field(description="The winning NodeID.")
+    awarded_syndicate: dict[str, int] = Field(
+        description="Strict mapping of agent NodeIDs to their exact fractional payout in cents."
+    )
     cleared_price_cents: int = Field(description="The final cryptographic clearing price.")
+
+    @model_validator(mode="after")
+    def verify_syndicate_allocation(self) -> Self:
+        if sum(self.awarded_syndicate.values()) != self.cleared_price_cents:
+            raise ValueError("Syndicate allocation sum must exactly equal cleared_price_cents")
+        return self
 
 
 class AuctionState(CoreasonBaseModel):
