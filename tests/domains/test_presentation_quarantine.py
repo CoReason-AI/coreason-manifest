@@ -36,6 +36,8 @@ def test_tstring_rce_fuzzer(payload: str) -> None:
             '<a href="javascript:void(0)">',
             '<iframe src="malicious.com">',
             "<SCRIPT>alert(1)</SCRIPT>",
+            "<object data='data:text/html;base64,...'></object>",
+            "<embed src='malicious.swf'>",
         ]
     )
 )
@@ -46,6 +48,24 @@ def test_polymorphic_xss_proof(payload: str) -> None:
     and prove that InsightCard definitively rejects them via a ValidationError.
     """
     with pytest.raises(ValidationError, match="Forbidden HTML tag detected"):
+        InsightCard(panel_id="panel_1", title="Insight Title", markdown_content=payload)
+
+
+@given(
+    payload=st.sampled_from(
+        [
+            "<img src='x' onerror='alert(1)'>",
+            "<svg onload=alert(1)>",
+            '<body onmouseover="javascript:alert(1)">',
+        ]
+    )
+)
+def test_polymorphic_event_handler_proof(payload: str) -> None:
+    """
+    2.1 The Polymorphic Event Handler Proof:
+    Generate adversarial strings with inline HTML event handlers and prove they are rejected.
+    """
+    with pytest.raises(ValidationError, match="Forbidden HTML event handler detected"):
         InsightCard(panel_id="panel_1", title="Insight Title", markdown_content=payload)
 
 
@@ -71,7 +91,12 @@ def test_visual_ghost_node_test(ghost_id: str) -> None:
 
 @given(
     title=st.text(min_size=1),
-    safe_text=st.text().filter(lambda x: not any(tag in x.lower() for tag in ["<script", "<iframe", "javascript:"])),
+    safe_text=st.text().filter(
+        lambda x: (
+            not any(tag in x.lower() for tag in ["<script", "<iframe", "javascript:", "<object", "<embed"])
+            and not re.search(r"on[a-zA-Z]+\s*=", x.lower())
+        )
+    ),
     x_label=st.text(min_size=1),
     y_label=st.text(min_size=1),
 )

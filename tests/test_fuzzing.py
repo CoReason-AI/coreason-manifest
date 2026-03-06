@@ -5,6 +5,7 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
+import re
 from typing import Any
 
 import pytest
@@ -136,7 +137,9 @@ def draw_agent_node_payload(draw: Any) -> dict[str, Any]:
     if draw(st.booleans()):
         payload["intervention_policies"] = draw(st.lists(draw_intervention_policy(), max_size=100))
     if draw(st.booleans()):
-        payload["action_space_id"] = draw(st.text())
+        payload["action_space_id"] = draw(
+            st.text(min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")
+        )
     if draw(st.booleans()):
         payload["secure_sub_session"] = draw(draw_secure_sub_session())
     if draw(st.booleans()):
@@ -535,7 +538,13 @@ def test_grammar_panel_routing(payload: dict[str, Any]) -> None:
 
 
 @given(
-    st.text(), st.text().filter(lambda x: not any(tag in x.lower() for tag in ["<script", "<iframe", "javascript:"]))
+    st.text(),
+    st.text().filter(
+        lambda x: (
+            not any(tag in x.lower() for tag in ["<script", "<iframe", "javascript:", "<object", "<embed"])
+            and not re.search(r"on[a-zA-Z]+\s*=", x.lower())
+        )
+    ),
 )
 def test_anypanel_insight(title: str, content: str) -> None:
     payload = {"panel_id": "p3", "type": "insight_card", "title": title, "markdown_content": content}
@@ -616,11 +625,15 @@ def test_chaosexperiment_fuzzing(
 @given(
     st.fixed_dictionaries(
         {
-            "action_space_id": st.text(),
+            "action_space_id": st.text(
+                min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
+            ),
             "native_tools": st.lists(
                 st.fixed_dictionaries(
                     {
-                        "tool_name": st.text(),
+                        "tool_name": st.text(
+                            min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
+                        ),
                         "description": st.text(),
                         "input_schema": st.dictionaries(st.text(), st.one_of(st.text(), st.integers())),
                         "side_effects": st.fixed_dictionaries(
@@ -904,7 +917,10 @@ def draw_task_announcement(draw: Any) -> dict[str, Any]:
         st.fixed_dictionaries(
             {
                 "task_id": st.text(),
-                "required_action_space_id": st.one_of(st.none(), st.text()),
+                "required_action_space_id": st.one_of(
+                    st.none(),
+                    st.text(min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"),
+                ),
                 "max_budget_usd": st.floats(allow_nan=False, allow_infinity=False),
             }
         )

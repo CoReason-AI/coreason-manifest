@@ -48,7 +48,9 @@ type NodeID = Annotated[
 type ToolID = Annotated[
     str,
     Field(
+        pattern=r"^[a-zA-Z0-9_-]+$",
         min_length=1,
+        max_length=128,
         description="Identifier for a tool or capability.",
         examples=["calculator", "web_search"],
     ),
@@ -57,7 +59,9 @@ type ToolID = Annotated[
 type ProfileID = Annotated[
     str,
     Field(
+        pattern=r"^[a-zA-Z0-9_-]+$",
         min_length=1,
+        max_length=128,
         description="Identifier for a cognitive profile.",
         examples=["default_assistant", "code_expert"],
     ),
