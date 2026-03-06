@@ -41,15 +41,11 @@ class ExecutionSpan(CoreasonBaseModel):
     def validate_temporal_bounds(self) -> Any:
         if self.end_time_unix_nano is not None and self.end_time_unix_nano < self.start_time_unix_nano:
             raise ValueError("end_time_unix_nano cannot be before start_time_unix_nano")
-        if hasattr(self, "_cached_hash"):
-            object.__delattr__(self, "_cached_hash")
         return self
 
     @model_validator(mode="after")
     def sort_events(self) -> Any:
         object.__setattr__(self, "events", sorted(self.events, key=lambda e: e.timestamp_unix_nano))
-        if hasattr(self, "_cached_hash"):
-            object.__delattr__(self, "_cached_hash")
         return self
 
 
@@ -62,8 +58,6 @@ class TraceExportBatch(CoreasonBaseModel):
     @model_validator(mode="after")
     def sort_spans(self) -> Any:
         object.__setattr__(self, "spans", sorted(self.spans, key=lambda s: s.span_id))
-        if hasattr(self, "_cached_hash"):
-            object.__delattr__(self, "_cached_hash")
         return self
 
 

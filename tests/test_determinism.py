@@ -91,6 +91,33 @@ def test_workflow_envelope_determinism() -> None:
     assert hash(env1) == hash(env2)
 
 
+def test_lazy_hashing_performance_and_coverage() -> None:
+    """
+    Prove that CoreasonBaseModel uses lazy hashing.
+    It should not have a _cached_hash upon instantiation, but should compute
+    and store it when hash() is explicitly called, hitting the AttributeError fallback.
+    """
+    from coreason_manifest.workflow.nodes import SystemNode
+
+    # Instantiate a frozen model
+    node = SystemNode(description="Test lazy hash")
+
+    # 1. Prove the hash is NOT eagerly computed (saves performance)
+    assert not hasattr(node, "_cached_hash")
+
+    # 2. Trigger the __hash__ method (hits the except AttributeError block)
+    first_hash = hash(node)
+
+    # 3. Prove the hash is now cached
+    assert hasattr(node, "_cached_hash")
+
+    # 4. Trigger the __hash__ method again (hits the try block)
+    second_hash = hash(node)
+
+    # 5. Prove determinism and cache retrieval
+    assert first_hash == second_hash
+
+
 def test_telemetry_determinism() -> None:
     event_late = SpanEvent(name="late_event", timestamp_unix_nano=200, attributes={})
     event_early = SpanEvent(name="early_event", timestamp_unix_nano=100, attributes={})

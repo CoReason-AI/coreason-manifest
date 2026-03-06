@@ -38,8 +38,6 @@ class RollbackRequest(CoreasonBaseModel):
     @model_validator(mode="after")
     def sort_invalidated_nodes(self) -> Self:
         object.__setattr__(self, "invalidated_node_ids", sorted(self.invalidated_node_ids))
-        if hasattr(self, "_cached_hash"):
-            object.__delattr__(self, "_cached_hash")
         return self
 
 
