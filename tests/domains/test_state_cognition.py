@@ -81,6 +81,7 @@ def test_invalid_bounds_rejected() -> None:
 
 def test_canonical_hashing_determinism() -> None:
     from typing import Any
+
     kwargs1: dict[str, Any] = {
         "aleatoric_entropy": 0.5,
         "epistemic_uncertainty": 0.2,
