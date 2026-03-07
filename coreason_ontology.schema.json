@@ -380,6 +380,14 @@
           "default": null,
           "description": "The dynamic spot-market compute requirements for this agent."
         },
+        "peft_adapters": {
+          "description": "A declarative list of ephemeral PEFT/LoRA weights required to be hot-swapped during this agent's execution.",
+          "items": {
+            "$ref": "#/$defs/PeftAdapterContract"
+          },
+          "title": "Peft Adapters",
+          "type": "array"
+        },
         "agent_attestation": {
           "anyOf": [
             {
@@ -4624,6 +4632,67 @@
         "test"
       ],
       "type": "string"
+    },
+    "PeftAdapterContract": {
+      "additionalProperties": false,
+      "description": "Declarative contract for dynamically mounting a Parameter-Efficient Fine-Tuning (PEFT) adapter.",
+      "properties": {
+        "adapter_id": {
+          "description": "Unique identifier for the requested LoRA adapter.",
+          "title": "Adapter Id",
+          "type": "string"
+        },
+        "safetensors_hash": {
+          "description": "The SHA-256 hash of the cold-storage adapter weights file ensuring supply-chain zero-trust.",
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Safetensors Hash",
+          "type": "string"
+        },
+        "base_model_hash": {
+          "description": "The SHA-256 hash of the exact foundational model this adapter was mathematically trained against.",
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Base Model Hash",
+          "type": "string"
+        },
+        "adapter_rank": {
+          "description": "The low-rank intrinsic dimension (r) of the update matrices, used by the orchestrator to calculate VRAM cost.",
+          "exclusiveMinimum": 0,
+          "title": "Adapter Rank",
+          "type": "integer"
+        },
+        "target_modules": {
+          "description": "The explicit list of attention head modules to inject (e.g., ['q_proj', 'v_proj']).",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Target Modules",
+          "type": "array"
+        },
+        "eviction_ttl_seconds": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The time-to-live before the inference engine forcefully evicts this adapter from the LRU cache.",
+          "title": "Eviction Ttl Seconds"
+        }
+      },
+      "required": [
+        "adapter_id",
+        "safetensors_hash",
+        "base_model_hash",
+        "adapter_rank",
+        "target_modules"
+      ],
+      "title": "PeftAdapterContract",
+      "type": "object"
     },
     "PermissionBoundary": {
       "additionalProperties": false,
