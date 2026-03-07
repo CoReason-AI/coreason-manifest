@@ -1150,7 +1150,7 @@ def draw_barge_in_interrupt_event(draw: Any) -> dict[str, Any]:
 
 @st.composite
 def draw_counterfactual_regret_event(draw: Any) -> dict[str, Any]:
-    return draw(
+    res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
                 "type": st.just("counterfactual_regret"),
@@ -1165,6 +1165,7 @@ def draw_counterfactual_regret_event(draw: Any) -> dict[str, Any]:
             }
         )
     )
+    return res
 
 
 @st.composite
@@ -1184,7 +1185,8 @@ def _local_draw_any_state_event(draw: Any) -> dict[str, Any]:
         return res
 
     if event_type == "counterfactual_regret":
-        return draw(draw_counterfactual_regret_event())
+        cf_res: dict[str, Any] = draw(draw_counterfactual_regret_event())
+        return cf_res
 
     payload: dict[str, Any] = {
         "type": event_type,
