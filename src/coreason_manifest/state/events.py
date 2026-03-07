@@ -37,7 +37,8 @@ class HardwareEnclaveAttestation(CoreasonBaseModel):
         description="The physical silicon architecture generating the root-of-trust quote."
     )
     platform_measurement_hash: str = Field(
-        description="The cryptographic hash of the Platform Configuration Registers (PCRs) proving the memory state was physically isolated."
+        description="The cryptographic hash of the Platform Configuration Registers (PCRs) proving the memory state "
+        "was physically isolated."
     )
     hardware_signature_blob: str = Field(
         description="The base64-encoded hardware quote signed by the silicon manufacturer's master private key."

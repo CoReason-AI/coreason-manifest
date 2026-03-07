@@ -699,6 +699,18 @@
           "title": "Causal Attributions",
           "type": "array"
         },
+        "hardware_attestation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HardwareEnclaveAttestation"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The physical hardware root-of-trust proving this belief was synthesized in a secure enclave."
+        },
         "zk_proof": {
           "anyOf": [
             {
@@ -2176,6 +2188,39 @@
       "title": "GradingCriteria",
       "type": "object"
     },
+    "HardwareEnclaveAttestation": {
+      "additionalProperties": false,
+      "properties": {
+        "enclave_type": {
+          "description": "The physical silicon architecture generating the root-of-trust quote.",
+          "enum": [
+            "intel_tdx",
+            "amd_sev_snp",
+            "aws_nitro",
+            "nvidia_cc"
+          ],
+          "title": "Enclave Type",
+          "type": "string"
+        },
+        "platform_measurement_hash": {
+          "description": "The cryptographic hash of the Platform Configuration Registers (PCRs) proving the memory state was physically isolated.",
+          "title": "Platform Measurement Hash",
+          "type": "string"
+        },
+        "hardware_signature_blob": {
+          "description": "The base64-encoded hardware quote signed by the silicon manufacturer's master private key.",
+          "title": "Hardware Signature Blob",
+          "type": "string"
+        }
+      },
+      "required": [
+        "enclave_type",
+        "platform_measurement_hash",
+        "hardware_signature_blob"
+      ],
+      "title": "HardwareEnclaveAttestation",
+      "type": "object"
+    },
     "HomomorphicEncryptionProfile": {
       "additionalProperties": false,
       "properties": {
@@ -2801,6 +2846,18 @@
           ],
           "default": null,
           "description": "The specific topological node that generated this observation."
+        },
+        "hardware_attestation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HardwareEnclaveAttestation"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The physical hardware root-of-trust proving this observation was generated in a secure enclave."
         },
         "zk_proof": {
           "anyOf": [
