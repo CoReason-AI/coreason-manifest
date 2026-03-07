@@ -679,6 +679,7 @@
         "mapping": {
           "barge_in": "#/$defs/BargeInInterruptEvent",
           "belief_update": "#/$defs/BeliefUpdateEvent",
+          "counterfactual_regret": "#/$defs/CounterfactualRegretEvent",
           "hypothesis": "#/$defs/HypothesisGenerationEvent",
           "observation": "#/$defs/ObservationEvent",
           "system_fault": "#/$defs/SystemFaultEvent"
@@ -700,6 +701,9 @@
         },
         {
           "$ref": "#/$defs/BargeInInterruptEvent"
+        },
+        {
+          "$ref": "#/$defs/CounterfactualRegretEvent"
         }
       ]
     },
@@ -2033,6 +2037,73 @@
         "adjudicator_id"
       ],
       "title": "CouncilTopology",
+      "type": "object"
+    },
+    "CounterfactualRegretEvent": {
+      "additionalProperties": false,
+      "description": "A cryptographic record of an agent simulating an alternative timeline to calculate epistemic regret\nand update its policy.",
+      "properties": {
+        "event_id": {
+          "description": "A unique identifier for the event.",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "The timestamp when the event occurred.",
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "type": {
+          "const": "counterfactual_regret",
+          "default": "counterfactual_regret",
+          "description": "Discriminator type for a counterfactual regret event.",
+          "title": "Type",
+          "type": "string"
+        },
+        "historical_event_id": {
+          "description": "The specific historical state node where the agent mathematically diverged to simulate an alternative path.",
+          "title": "Historical Event Id",
+          "type": "string"
+        },
+        "counterfactual_intervention": {
+          "description": "The specific alternative action or do-calculus intervention applied in the simulation.",
+          "title": "Counterfactual Intervention",
+          "type": "string"
+        },
+        "expected_utility_actual": {
+          "description": "The computed utility of the trajectory that was actually executed.",
+          "title": "Expected Utility Actual",
+          "type": "number"
+        },
+        "expected_utility_simulated": {
+          "description": "The computed utility of the simulated counterfactual trajectory.",
+          "title": "Expected Utility Simulated",
+          "type": "number"
+        },
+        "epistemic_regret": {
+          "description": "The mathematical variance (simulated - actual) representing the opportunity cost of the historical decision.",
+          "title": "Epistemic Regret",
+          "type": "number"
+        },
+        "policy_update_gradients": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "description": "The stateless routing gradient adjustments derived from the calculated regret, used to self-correct future routing.",
+          "title": "Policy Update Gradients",
+          "type": "object"
+        }
+      },
+      "required": [
+        "event_id",
+        "timestamp",
+        "historical_event_id",
+        "counterfactual_intervention",
+        "expected_utility_actual",
+        "expected_utility_simulated",
+        "epistemic_regret"
+      ],
+      "title": "CounterfactualRegretEvent",
       "type": "object"
     },
     "CrossoverStrategy": {

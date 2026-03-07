@@ -1149,8 +1149,32 @@ def draw_barge_in_interrupt_event(draw: Any) -> dict[str, Any]:
 
 
 @st.composite
+def draw_counterfactual_regret_event(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "type": st.just("counterfactual_regret"),
+                "event_id": st.text(min_size=1),
+                "timestamp": st.floats(allow_nan=False, allow_infinity=False),
+                "historical_event_id": st.text(min_size=1),
+                "counterfactual_intervention": st.text(min_size=1),
+                "expected_utility_actual": st.floats(allow_nan=False, allow_infinity=False),
+                "expected_utility_simulated": st.floats(allow_nan=False, allow_infinity=False),
+                "epistemic_regret": st.floats(allow_nan=False, allow_infinity=False),
+                "policy_update_gradients": st.dictionaries(st.text(), st.floats(allow_nan=False, allow_infinity=False)),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
 def _local_draw_any_state_event(draw: Any) -> dict[str, Any]:
-    event_type = draw(st.sampled_from(["observation", "belief_update", "system_fault", "hypothesis", "barge_in"]))
+    event_type = draw(
+        st.sampled_from(
+            ["observation", "belief_update", "system_fault", "hypothesis", "barge_in", "counterfactual_regret"]
+        )
+    )
 
     if event_type == "barge_in":
         barge_in_res: dict[str, Any] = draw(draw_barge_in_interrupt_event())
@@ -1159,6 +1183,10 @@ def _local_draw_any_state_event(draw: Any) -> dict[str, Any]:
     if event_type == "hypothesis":
         res: dict[str, Any] = draw(draw_hypothesis_generation_event())
         return res
+
+    if event_type == "counterfactual_regret":
+        cf_res: dict[str, Any] = draw(draw_counterfactual_regret_event())
+        return cf_res
 
     payload: dict[str, Any] = {
         "type": event_type,
@@ -1214,11 +1242,22 @@ def test_anystateevent_routing(payload: dict[str, Any]) -> None:
         from coreason_manifest.state.events import BargeInInterruptEvent
 
         assert isinstance(parsed, BargeInInterruptEvent)
+    elif event_type == "counterfactual_regret":
+        from coreason_manifest.state.events import CounterfactualRegretEvent
+
+        assert isinstance(parsed, CounterfactualRegretEvent)
 
 
 @given(st.text())
 def test_anystateevent_invalid(invalid_type: str) -> None:
-    if invalid_type in ["observation", "belief_update", "system_fault", "hypothesis", "barge_in"]:
+    if invalid_type in [
+        "observation",
+        "belief_update",
+        "system_fault",
+        "hypothesis",
+        "barge_in",
+        "counterfactual_regret",
+    ]:
         return
     payload = {"type": invalid_type, "event_id": "test", "timestamp": 123.0}
     with pytest.raises(ValidationError):
