@@ -32,6 +32,55 @@
       "title": "ActionSpace",
       "type": "object"
     },
+    "ActiveInferenceContract": {
+      "additionalProperties": false,
+      "properties": {
+        "task_id": {
+          "description": "Unique identifier for this active inference execution.",
+          "minLength": 1,
+          "title": "Task Id",
+          "type": "string"
+        },
+        "target_hypothesis_id": {
+          "description": "The HypothesisGenerationEvent this task is attempting to falsify.",
+          "title": "Target Hypothesis Id",
+          "type": "string"
+        },
+        "target_condition_id": {
+          "description": "The specific FalsificationCondition being tested.",
+          "title": "Target Condition Id",
+          "type": "string"
+        },
+        "selected_tool_name": {
+          "description": "The exact tool from the ActionSpace allocated for this experiment.",
+          "title": "Selected Tool Name",
+          "type": "string"
+        },
+        "expected_information_gain": {
+          "description": "The mathematically estimated reduction in Epistemic Uncertainty (entropy) this tool call will yield.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Expected Information Gain",
+          "type": "number"
+        },
+        "execution_cost_budget_cents": {
+          "description": "The maximum economic expenditure authorized to run this specific scientific test.",
+          "minimum": 0,
+          "title": "Execution Cost Budget Cents",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "task_id",
+        "target_hypothesis_id",
+        "target_condition_id",
+        "selected_tool_name",
+        "expected_information_gain",
+        "execution_cost_budget_cents"
+      ],
+      "title": "ActiveInferenceContract",
+      "type": "object"
+    },
     "AdjudicationRubric": {
       "additionalProperties": false,
       "description": "Rubric defining multiple criteria and passing threshold for algorithmic adjudication.",
@@ -342,6 +391,18 @@
           ],
           "default": null,
           "description": "The ruleset governing how intermediate thoughts are scored and pruned."
+        },
+        "active_inference_policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ActiveInferenceContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The formal contract demanding mathematical proof of Expected Information Gain before authorizing tool execution."
         }
       },
       "required": [
@@ -437,6 +498,7 @@
       "discriminator": {
         "mapping": {
           "belief_update": "#/$defs/BeliefUpdateEvent",
+          "hypothesis": "#/$defs/HypothesisGenerationEvent",
           "observation": "#/$defs/ObservationEvent",
           "system_fault": "#/$defs/SystemFaultEvent"
         },
@@ -451,6 +513,9 @@
         },
         {
           "$ref": "#/$defs/SystemFaultEvent"
+        },
+        {
+          "$ref": "#/$defs/HypothesisGenerationEvent"
         }
       ]
     },
@@ -2282,6 +2347,47 @@
       "title": "FallbackTrigger",
       "type": "object"
     },
+    "FalsificationCondition": {
+      "additionalProperties": false,
+      "properties": {
+        "condition_id": {
+          "description": "Unique identifier for this falsification test.",
+          "minLength": 1,
+          "title": "Condition Id",
+          "type": "string"
+        },
+        "description": {
+          "description": "Semantic description of what observation would prove the parent hypothesis is false.",
+          "title": "Description",
+          "type": "string"
+        },
+        "required_tool_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The specific ActionSpace tool required to test this condition (e.g., 'sql_query_db').",
+          "title": "Required Tool Name"
+        },
+        "falsifying_observation_signature": {
+          "description": "The expected data schema or regex pattern that, if returned by the tool, kills the hypothesis.",
+          "title": "Falsifying Observation Signature",
+          "type": "string"
+        }
+      },
+      "required": [
+        "condition_id",
+        "description",
+        "falsifying_observation_signature"
+      ],
+      "title": "FalsificationCondition",
+      "type": "object"
+    },
     "FaultInjectionProfile": {
       "additionalProperties": false,
       "properties": {
@@ -2604,6 +2710,76 @@
         "description"
       ],
       "title": "HumanNode",
+      "type": "object"
+    },
+    "HypothesisGenerationEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "description": "A unique identifier for the event.",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "The timestamp when the event occurred.",
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "type": {
+          "const": "hypothesis",
+          "default": "hypothesis",
+          "description": "Discriminator for a hypothesis generation event.",
+          "title": "Type",
+          "type": "string"
+        },
+        "hypothesis_id": {
+          "description": "Unique identifier for this abductive leap.",
+          "minLength": 1,
+          "title": "Hypothesis Id",
+          "type": "string"
+        },
+        "premise_text": {
+          "description": "The natural language explanation of the abductive theory.",
+          "title": "Premise Text",
+          "type": "string"
+        },
+        "bayesian_prior": {
+          "description": "The agent's initial probabilistic belief in this hypothesis before testing.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Bayesian Prior",
+          "type": "number"
+        },
+        "falsification_conditions": {
+          "description": "The list of strict conditions that the orchestrator must test to attempt to disprove this premise.",
+          "items": {
+            "$ref": "#/$defs/FalsificationCondition"
+          },
+          "minItems": 1,
+          "title": "Falsification Conditions",
+          "type": "array"
+        },
+        "status": {
+          "default": "active",
+          "description": "The current validity state of this hypothesis in the EpistemicLedger.",
+          "enum": [
+            "active",
+            "falsified",
+            "verified"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "event_id",
+        "timestamp",
+        "hypothesis_id",
+        "premise_text",
+        "bayesian_prior",
+        "falsification_conditions"
+      ],
+      "title": "HypothesisGenerationEvent",
       "type": "object"
     },
     "InformationFlowPolicy": {
