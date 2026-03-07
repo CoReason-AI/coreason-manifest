@@ -57,6 +57,11 @@ class ModelProfile(CoreasonBaseModel):
     context_window_size: int = Field(description="The maximum context window size in tokens.")
     capabilities: list[str] = Field(description="A list of supported capabilities by the model.")
     rate_card: RateCard = Field(description="The economic cost definition associated with the model.")
+    supported_functional_experts: list[str] = Field(
+        default_factory=list,
+        description="A declarative list of specialized functional expert clusters (e.g., 'falsifier', 'synthesizer') "
+        "physically present in this model's architecture.",
+    )
 
 
 class ComputeProvisioningRequest(CoreasonBaseModel):

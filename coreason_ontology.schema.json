@@ -32,6 +32,50 @@
       "title": "ActionSpace",
       "type": "object"
     },
+    "ActivationSteeringContract": {
+      "additionalProperties": false,
+      "description": "Hardware-level contract for Representation Engineering via activation injection/ablation.",
+      "properties": {
+        "steering_vector_hash": {
+          "description": "The SHA-256 hash of the extracted RepE control tensor (e.g., the 'caution' vector).",
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Steering Vector Hash",
+          "type": "string"
+        },
+        "injection_layers": {
+          "description": "The specific transformer layer indices where this vector must be applied.",
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 1,
+          "title": "Injection Layers",
+          "type": "array"
+        },
+        "scaling_factor": {
+          "description": "The mathematical magnitude/strength of the injection (can be negative for ablation).",
+          "title": "Scaling Factor",
+          "type": "number"
+        },
+        "vector_modality": {
+          "description": "The tensor operation to perform: add the vector, subtract it, or clamp activations to its bounds.",
+          "enum": [
+            "additive",
+            "ablation",
+            "clamping"
+          ],
+          "title": "Vector Modality",
+          "type": "string"
+        }
+      },
+      "required": [
+        "steering_vector_hash",
+        "injection_layers",
+        "scaling_factor",
+        "vector_modality"
+      ],
+      "title": "ActivationSteeringContract",
+      "type": "object"
+    },
     "ActiveInferenceContract": {
       "additionalProperties": false,
       "properties": {
@@ -1114,6 +1158,44 @@
       "title": "CircuitBreakerTrip",
       "type": "object"
     },
+    "CognitiveRoutingDirective": {
+      "additionalProperties": false,
+      "description": "Hardware-level contract overriding MoE routing to enforce functional/specialist paths.",
+      "properties": {
+        "dynamic_top_k": {
+          "description": "The exact number of functional experts the router must activate per token. High values simulate deep cognitive strain.",
+          "minimum": 1,
+          "title": "Dynamic Top K",
+          "type": "integer"
+        },
+        "routing_temperature": {
+          "description": "The temperature applied to the router's softmax gate, controlling how deterministically it picks experts.",
+          "minimum": 0.0,
+          "title": "Routing Temperature",
+          "type": "number"
+        },
+        "expert_logit_biases": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "description": "Explicit tensor biases applied to the router gate. Keys are expert IDs (e.g., 'expert_falsifier'), values are logit modifiers.",
+          "title": "Expert Logit Biases",
+          "type": "object"
+        },
+        "enforce_functional_isolation": {
+          "default": false,
+          "description": "If True, the orchestrator applies a hard mask (-inf) to any expert not explicitly boosted in expert_logit_biases.",
+          "title": "Enforce Functional Isolation",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "dynamic_top_k",
+        "routing_temperature"
+      ],
+      "title": "CognitiveRoutingDirective",
+      "type": "object"
+    },
     "CognitiveStateProfile": {
       "additionalProperties": false,
       "properties": {
@@ -1138,19 +1220,29 @@
           "title": "Divergence Tolerance",
           "type": "number"
         },
-        "active_steering_vector_hash": {
+        "activation_steering": {
           "anyOf": [
             {
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
+              "$ref": "#/$defs/ActivationSteeringContract"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "The SHA-256 hash of the specific Representation Engineering control vector applied to the residual stream.",
-          "title": "Active Steering Vector Hash"
+          "description": "The precise mathematical contract for altering the LLM's residual stream to enforce this mood."
+        },
+        "moe_routing_directive": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CognitiveRoutingDirective"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The physical hardware mandate overriding default MoE token routing to enforce this cognitive state."
         }
       },
       "required": [
@@ -3405,6 +3497,14 @@
         "rate_card": {
           "$ref": "#/$defs/RateCard",
           "description": "The economic cost definition associated with the model."
+        },
+        "supported_functional_experts": {
+          "description": "A declarative list of specialized functional expert clusters (e.g., 'falsifier', 'synthesizer') physically present in this model's architecture.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Supported Functional Experts",
+          "type": "array"
         }
       },
       "required": [
