@@ -7,6 +7,7 @@
 
 from pydantic import Field
 
+from coreason_manifest.compute.neuromodulation import ActivationSteeringContract, CognitiveRoutingDirective
 from coreason_manifest.core.base import CoreasonBaseModel
 
 
@@ -38,9 +39,12 @@ class CognitiveStateProfile(CoreasonBaseModel):
         description="The 'curiosity' metric; dictates how far the MoE router is allowed to stray "
         "from high-probability distributions.",
     )
-    active_steering_vector_hash: str | None = Field(
+    activation_steering: ActivationSteeringContract | None = Field(
         default=None,
-        pattern=r"^[a-f0-9]{64}$",
-        description="The SHA-256 hash of the specific Representation Engineering control vector "
-        "applied to the residual stream.",
+        description="The precise mathematical contract for altering the LLM's residual stream to enforce this mood.",
+    )
+    moe_routing_directive: CognitiveRoutingDirective | None = Field(
+        default=None,
+        description="The physical hardware mandate overriding default MoE token routing to "
+        "enforce this cognitive state.",
     )

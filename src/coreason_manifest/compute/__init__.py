@@ -6,6 +6,7 @@
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
 from coreason_manifest.compute.inference import ActiveInferenceContract
+from coreason_manifest.compute.neuromodulation import ActivationSteeringContract, CognitiveRoutingDirective
 from coreason_manifest.compute.profiles import (
     ComputeProvisioningRequest,
     ModelProfile,
@@ -23,7 +24,9 @@ from coreason_manifest.compute.stochastic import (
 )
 
 __all__ = [
+    "ActivationSteeringContract",
     "ActiveInferenceContract",
+    "CognitiveRoutingDirective",
     "ComputeProvisioningRequest",
     "CrossoverStrategy",
     "CrossoverType",

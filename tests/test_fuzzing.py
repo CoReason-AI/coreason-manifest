@@ -190,6 +190,38 @@ def draw_active_inference_contract(draw: Any) -> dict[str, Any]:
 
 
 @st.composite
+def draw_activation_steering_contract(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "steering_vector_hash": st.from_regex(r"^[a-f0-9]{64}$", fullmatch=True),
+                "injection_layers": st.lists(st.integers(min_value=0), min_size=1, max_size=10),
+                "scaling_factor": st.floats(allow_nan=False, allow_infinity=False),
+                "vector_modality": st.sampled_from(["additive", "ablation", "clamping"]),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_cognitive_routing_directive(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "dynamic_top_k": st.integers(min_value=1, max_value=100),
+                "routing_temperature": st.floats(min_value=0.0, allow_nan=False, allow_infinity=False),
+                "expert_logit_biases": st.dictionaries(
+                    st.text(min_size=1), st.floats(allow_nan=False, allow_infinity=False), max_size=10
+                ),
+                "enforce_functional_isolation": st.booleans(),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
 def draw_cognitive_state_profile(draw: Any) -> dict[str, Any]:
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(
@@ -197,7 +229,8 @@ def draw_cognitive_state_profile(draw: Any) -> dict[str, Any]:
                 "urgency_index": st.floats(min_value=0.0, max_value=1.0),
                 "caution_index": st.floats(min_value=0.0, max_value=1.0),
                 "divergence_tolerance": st.floats(min_value=0.0, max_value=1.0),
-                "active_steering_vector_hash": st.one_of(st.none(), st.from_regex(r"^[a-f0-9]{64}$", fullmatch=True)),
+                "activation_steering": st.one_of(st.none(), draw_activation_steering_contract()),
+                "moe_routing_directive": st.one_of(st.none(), draw_cognitive_routing_directive()),
             }
         )
     )

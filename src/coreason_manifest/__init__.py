@@ -6,6 +6,7 @@
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
 from coreason_manifest.compute.inference import ActiveInferenceContract
+from coreason_manifest.compute.neuromodulation import ActivationSteeringContract, CognitiveRoutingDirective
 from coreason_manifest.compute.test_time import EscalationContract, ProcessRewardContract
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.core.primitives import NodeID, SemanticVersion
@@ -17,9 +18,11 @@ from coreason_manifest.workflow.nodes import AnyNode
 from coreason_manifest.workflow.topologies import AnyTopology
 
 __all__ = [
+    "ActivationSteeringContract",
     "ActiveInferenceContract",
     "AnyNode",
     "AnyTopology",
+    "CognitiveRoutingDirective",
     "CognitiveStateProfile",
     "CognitiveUncertaintyProfile",
     "CoreasonBaseModel",
