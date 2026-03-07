@@ -405,12 +405,27 @@ def draw_fitness_objective(draw: Any) -> dict[str, Any]:
 
 
 @st.composite
+def draw_verifiable_entropy(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "vrf_proof": st.text(min_size=10),
+                "public_key": st.text(min_size=10),
+                "seed_hash": st.text(min_size=10),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
 def draw_mutation_policy(draw: Any) -> dict[str, Any]:
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
                 "mutation_rate": st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False),
                 "temperature_shift_variance": st.floats(allow_nan=False, allow_infinity=False),
+                "verifiable_entropy": st.one_of(st.none(), draw_verifiable_entropy()),
             }
         )
     )
@@ -424,6 +439,7 @@ def draw_crossover_strategy(draw: Any) -> dict[str, Any]:
             {
                 "strategy_type": st.sampled_from(["uniform_blend", "single_point", "heuristic"]),
                 "blending_factor": st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False),
+                "verifiable_entropy": st.one_of(st.none(), draw_verifiable_entropy()),
             }
         )
     )
