@@ -930,7 +930,7 @@ def test_semanticedge_fuzzing(payload: dict[str, Any]) -> None:
 
 @st.composite
 def draw_formal_verification_contract(draw: Any) -> dict[str, Any]:
-    return draw(
+    res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
                 "proof_system": st.sampled_from(["tla_plus", "lean4", "coq", "z3"]),
@@ -939,6 +939,7 @@ def draw_formal_verification_contract(draw: Any) -> dict[str, Any]:
             }
         )
     )
+    return res
 
 
 @given(
