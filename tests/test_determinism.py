@@ -7,8 +7,8 @@
 
 from coreason_manifest.compute.stochastic import CrossoverStrategy, FitnessObjective, MutationPolicy
 from coreason_manifest.oversight.dlp import InformationFlowPolicy, RedactionRule
-from coreason_manifest.presentation.intents import DraftingIntent, PresentationEnvelope
-from coreason_manifest.presentation.scivis import ChannelEncoding, GrammarPanel, InsightCard, MacroGrid
+from coreason_manifest.presentation.intents import InformationalIntent
+from coreason_manifest.presentation.scivis import ChannelEncoding, GrammarPanel
 from coreason_manifest.state.argumentation import ArgumentClaim, ArgumentGraph, DefeasibleAttack
 from coreason_manifest.state.differentials import RollbackRequest
 from coreason_manifest.state.events import ObservationEvent
@@ -299,21 +299,12 @@ def test_grammar_determinism() -> None:
     assert hash(panel1) == hash(panel2)
 
 
-def test_presentation_envelope_determinism() -> None:
-    intent1 = DraftingIntent()
-    intent2 = DraftingIntent()
+def test_presentation_intent_determinism() -> None:
+    intent1 = InformationalIntent(message="Message 1", timeout_action="rollback")
+    intent2 = InformationalIntent(message="Message 1", timeout_action="rollback")
 
-    panel1 = InsightCard(panel_id="panel_1", title="Insight 1", markdown_content="Content 1")
-    panel2 = InsightCard(panel_id="panel_2", title="Insight 2", markdown_content="Content 2")
-
-    grid1 = MacroGrid(layout_matrix=[["panel_1", "panel_2"]], panels=[panel1, panel2])
-    grid2 = MacroGrid(layout_matrix=[["panel_1", "panel_2"]], panels=[panel1, panel2])
-
-    env1 = PresentationEnvelope(intent=intent1, grid=grid1)
-    env2 = PresentationEnvelope(intent=intent2, grid=grid2)
-
-    assert env1.model_dump_canonical() == env2.model_dump_canonical()
-    assert hash(env1) == hash(env2)
+    assert intent1.model_dump_canonical() == intent2.model_dump_canonical()
+    assert hash(intent1) == hash(intent2)
 
 
 def test_epistemic_ledger_determinism() -> None:

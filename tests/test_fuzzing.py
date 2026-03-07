@@ -1646,7 +1646,7 @@ presentation_intent_adapter: TypeAdapter[AnyPresentationIntent] = TypeAdapter(An
 
 @st.composite
 def draw_informational_intent(draw: Any) -> dict[str, Any]:
-    return draw(
+    res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
                 "type": st.just("informational"),
@@ -1655,11 +1655,12 @@ def draw_informational_intent(draw: Any) -> dict[str, Any]:
             }
         )
     )
+    return res
 
 
 @st.composite
 def draw_drafting_intent(draw: Any) -> dict[str, Any]:
-    return draw(
+    res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
                 "type": st.just("drafting"),
@@ -1669,11 +1670,12 @@ def draw_drafting_intent(draw: Any) -> dict[str, Any]:
             }
         )
     )
+    return res
 
 
 @st.composite
 def draw_adjudication_intent(draw: Any) -> dict[str, Any]:
-    return draw(
+    res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
                 "type": st.just("forced_adjudication"),
@@ -1683,11 +1685,12 @@ def draw_adjudication_intent(draw: Any) -> dict[str, Any]:
             }
         )
     )
+    return res
 
 
 @st.composite
 def draw_escalation_intent(draw: Any) -> dict[str, Any]:
-    return draw(
+    res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
                 "type": st.just("escalation"),
@@ -1697,6 +1700,7 @@ def draw_escalation_intent(draw: Any) -> dict[str, Any]:
             }
         )
     )
+    return res
 
 
 def draw_any_presentation_intent() -> st.SearchStrategy[dict[str, Any]]:
