@@ -1,7 +1,5 @@
-import pytest
-from hypothesis import assume, given
+from hypothesis import given
 from hypothesis import strategies as st
-from pydantic import ValidationError
 
 from coreason_manifest.state.events import (
     AnyStateEvent,
@@ -40,5 +38,3 @@ def test_temporal_chaos_proof(events: list[AnyStateEvent]) -> None:
     # Assert sorted by timestamp
     for i in range(len(ledger.history) - 1):
         assert ledger.history[i].timestamp <= ledger.history[i + 1].timestamp
-
-
