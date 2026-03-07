@@ -15,12 +15,16 @@ from .schemas import (
     SideEffectProfile,
     ToolDefinition,
 )
+from .spatial import BoundingBox, NormalizedCoordinate, SpatialKinematicAction
 
 __all__ = [
     "ActionSpace",
+    "BoundingBox",
     "ExecutionSLA",
     "MCPClientBinding",
+    "NormalizedCoordinate",
     "PermissionBoundary",
     "SideEffectProfile",
+    "SpatialKinematicAction",
     "ToolDefinition",
 ]
