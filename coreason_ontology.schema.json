@@ -3402,6 +3402,14 @@
           ],
           "default": null,
           "description": "The active cognitive defense perimeter against adversarial control-flow overrides."
+        },
+        "latent_firewalls": {
+          "description": "The list of tensor-level mechanistic firewalls monitoring the forward pass for adversarial intent.",
+          "items": {
+            "$ref": "#/$defs/SaeLatentFirewall"
+          },
+          "title": "Latent Firewalls",
+          "type": "array"
         }
       },
       "required": [
@@ -5080,6 +5088,71 @@
         "activation_magnitude"
       ],
       "title": "SaeFeatureActivation",
+      "type": "object"
+    },
+    "SaeLatentFirewall": {
+      "additionalProperties": false,
+      "description": "A real-time mechanistic interpretability boundary that monitors and controls specific neural circuits.",
+      "properties": {
+        "target_feature_index": {
+          "description": "The exact dimensional index of the monosemantic feature in the Sparse Autoencoder dictionary.",
+          "minimum": 0,
+          "title": "Target Feature Index",
+          "type": "integer"
+        },
+        "monitored_layers": {
+          "description": "The specific transformer layer indices where this feature activation must be monitored.",
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 1,
+          "title": "Monitored Layers",
+          "type": "array"
+        },
+        "max_activation_threshold": {
+          "description": "The mathematical magnitude limit. If the feature activates beyond this, the firewall trips.",
+          "minimum": 0.0,
+          "title": "Max Activation Threshold",
+          "type": "number"
+        },
+        "violation_action": {
+          "description": "The tensor-level remediation applied when the threshold is breached.",
+          "enum": [
+            "clamp",
+            "halt",
+            "quarantine"
+          ],
+          "title": "Violation Action",
+          "type": "string"
+        },
+        "clamp_value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "If violation_action is 'clamp', the physical value to which the activation tensor is forced.",
+          "title": "Clamp Value"
+        },
+        "sae_dictionary_hash": {
+          "description": "The SHA-256 hash of the exact SAE projection matrix required to decode this feature.",
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Sae Dictionary Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "target_feature_index",
+        "monitored_layers",
+        "max_activation_threshold",
+        "violation_action",
+        "sae_dictionary_hash"
+      ],
+      "title": "SaeLatentFirewall",
       "type": "object"
     },
     "SalienceProfile": {
