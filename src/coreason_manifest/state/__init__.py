@@ -12,12 +12,19 @@ from coreason_manifest.state.argumentation import (
     DefeasibleAttack,
     EvidentiaryWarrant,
 )
+from coreason_manifest.state.cognition import (
+    CognitiveStateProfile,
+    CognitiveUncertaintyProfile,
+)
 from coreason_manifest.state.differentials import (
     PatchOperation,
     RollbackRequest,
     StateDiff,
     StatePatch,
     TemporalCheckpoint,
+)
+from coreason_manifest.state.embodied import (
+    EmbodiedSensoryVector,
 )
 from coreason_manifest.state.events import (
     AnyStateEvent,
@@ -58,7 +65,10 @@ __all__ = [
     "BeliefUpdateEvent",
     "BrowserDOMState",
     "CausalInterval",
+    "CognitiveStateProfile",
+    "CognitiveUncertaintyProfile",
     "DefeasibleAttack",
+    "EmbodiedSensoryVector",
     "EpistemicLedger",
     "EvidentiaryWarrant",
     "FederatedStateSnapshot",

@@ -65,6 +65,51 @@ def draw_reflex_policy(draw: Any) -> dict[str, Any]:
 
 
 @st.composite
+def draw_cognitive_state_profile(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "urgency_index": st.floats(min_value=0.0, max_value=1.0),
+                "caution_index": st.floats(min_value=0.0, max_value=1.0),
+                "divergence_tolerance": st.floats(min_value=0.0, max_value=1.0),
+                "active_steering_vector_hash": st.one_of(st.none(), st.from_regex(r"^[a-f0-9]{64}$", fullmatch=True)),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_cognitive_uncertainty_profile(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "aleatoric_entropy": st.floats(min_value=0.0, max_value=1.0),
+                "epistemic_uncertainty": st.floats(min_value=0.0, max_value=1.0),
+                "semantic_consistency_score": st.floats(min_value=0.0, max_value=1.0),
+                "requires_abductive_escalation": st.booleans(),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_embodied_sensory_vector(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "sensory_modality": st.sampled_from(["video", "audio", "spatial_telemetry"]),
+                "bayesian_surprise_score": st.floats(min_value=0.0),
+                "temporal_duration_ms": st.integers(min_value=1, max_value=86400000),
+                "salience_threshold_breached": st.booleans(),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
 def draw_epistemic_policy(draw: Any) -> dict[str, Any]:
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(
@@ -189,6 +234,8 @@ def draw_agent_node_payload(draw: Any) -> dict[str, Any]:
         payload["reflex_policy"] = draw(draw_reflex_policy())
     if draw(st.booleans()):
         payload["epistemic_policy"] = draw(draw_epistemic_policy())
+    if draw(st.booleans()):
+        payload["baseline_cognitive_state"] = draw(draw_cognitive_state_profile())
     if draw(st.booleans()):
         payload["correction_policy"] = draw(draw_correction_policy())
     return payload
@@ -631,6 +678,10 @@ def _local_draw_any_state_event(draw: Any) -> dict[str, Any]:
             payload["hardware_attestation"] = draw(draw_hardware_attestation())
         if event_type == "observation" and draw(st.booleans()):
             payload["toolchain_snapshot"] = draw(draw_any_toolchain_state())
+        if event_type == "observation" and draw(st.booleans()):
+            payload["sensory_trigger"] = draw(draw_embodied_sensory_vector())
+        if event_type == "belief_update" and draw(st.booleans()):
+            payload["uncertainty_profile"] = draw(draw_cognitive_uncertainty_profile())
     return payload
 
 
