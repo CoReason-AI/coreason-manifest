@@ -26,38 +26,14 @@ def main() -> None:
     from coreason_manifest.core import CoreasonBaseModel
 
     # Import all domains dynamically to collect schemas
-    domains = [
-        "coreason_manifest.core",
-        "coreason_manifest.oversight",
-        "coreason_manifest.state",
-        "coreason_manifest.testing",
-        "coreason_manifest.tooling",
-        "coreason_manifest.workflow",
-        "coreason_manifest.telemetry",
-        "coreason_manifest.compute",
-    ]
-
-    for domain in domains:
-        try:
-            mod = importlib.import_module(domain)
-            for name in getattr(mod, "__all__", []):
-                obj = getattr(mod, name)
-                if isinstance(obj, type) and issubclass(obj, CoreasonBaseModel) and obj is not CoreasonBaseModel:
-                    models_to_export.append((obj, "validation"))
-        except ImportError:
-            pass
-
-    # Include any root schemas just in case
+    # Dynamically discover all schemas from the single source of truth (the root __all__)
     for name in getattr(manifest, "__all__", []):
         obj = getattr(manifest, name)
         if isinstance(obj, type) and issubclass(obj, CoreasonBaseModel) and obj is not CoreasonBaseModel:
             models_to_export.append((obj, "validation"))
 
-    # Remove duplicates
-    unique_models = {}
-    for obj, type_ in models_to_export:
-        unique_models[obj] = (obj, type_)
-    models_to_export = list(unique_models.values())
+    # Mathematical deterministic sort based on class name to guarantee stable Merkle hashing
+    models_to_export = sorted(models_to_export, key=lambda x: x[0].__name__)
 
     if not models_to_export:
         print("No models found to export.")
