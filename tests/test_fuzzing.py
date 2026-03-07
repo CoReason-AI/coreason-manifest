@@ -71,7 +71,7 @@ def draw_did_string(draw: Any) -> str:
 
 @st.composite
 def draw_vc_presentation(draw: Any) -> dict[str, Any]:
-    return draw(
+    res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
                 "presentation_format": st.sampled_from(["jwt_vc", "ldp_vc", "sd_jwt", "zkp_vc"]),
@@ -81,6 +81,7 @@ def draw_vc_presentation(draw: Any) -> dict[str, Any]:
             }
         )
     )
+    return res
 
 
 @st.composite
