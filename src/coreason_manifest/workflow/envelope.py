@@ -5,12 +5,28 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
+from typing import Literal
+
 from pydantic import Field
 
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.core.primitives import DataClassification, RiskLevel, SemanticVersion
 from coreason_manifest.oversight.governance import GlobalGovernance
 from coreason_manifest.workflow.topologies import AnyTopology
+
+
+class PostQuantumSignature(CoreasonBaseModel):
+    pq_algorithm: Literal["ml-dsa", "slh-dsa", "falcon"] = Field(
+        description="The NIST FIPS post-quantum cryptographic algorithm used."
+    )
+    public_key_id: str = Field(description="The identifier of the post-quantum public evaluation key.")
+    pq_signature_blob: str = Field(
+        max_length=100000,
+        description=(
+            "The base64-encoded post-quantum signature. Bounded to 100KB to safely accommodate "
+            "massive SPHINCS+ hash trees without OOM crashes."
+        ),
+    )
 
 
 class BilateralSLA(CoreasonBaseModel):
@@ -27,6 +43,9 @@ class BilateralSLA(CoreasonBaseModel):
             "Explicit whitelist of geographic regions or cloud enclaves where execution "
             "is legally permitted (Data Residency Pinning)."
         ),
+    )
+    pq_signature: PostQuantumSignature | None = Field(
+        default=None, description="The quantum-resistant signature securing the multi-tenant legal boundary."
     )
 
 
@@ -59,4 +78,7 @@ class WorkflowEnvelope(CoreasonBaseModel):
             "The B2B Service Level Agreement contract that must be mathematically "
             "satisfied before multi-tenant graph coupling."
         ),
+    )
+    pq_signature: PostQuantumSignature | None = Field(
+        default=None, description="The quantum-resistant signature securing the root execution graph."
     )

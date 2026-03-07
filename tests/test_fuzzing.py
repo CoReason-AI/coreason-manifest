@@ -1487,6 +1487,20 @@ workflow_envelope_adapter: TypeAdapter[WorkflowEnvelope] = TypeAdapter(WorkflowE
 
 
 @st.composite
+def draw_pq_signature(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "pq_algorithm": st.sampled_from(["ml-dsa", "slh-dsa", "falcon"]),
+                "public_key_id": st.text(min_size=1),
+                "pq_signature_blob": st.text(min_size=10, max_size=100000),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
 def draw_bilateral_sla(draw: Any) -> dict[str, Any]:
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(
@@ -1502,6 +1516,7 @@ def draw_bilateral_sla(draw: Any) -> dict[str, Any]:
                 ),
                 "liability_limit_cents": st.integers(min_value=0),
                 "permitted_geographic_regions": st.lists(st.text(min_size=1), max_size=10),
+                "pq_signature": st.one_of(st.none(), draw_pq_signature()),
             }
         )
     )
@@ -1548,6 +1563,7 @@ def draw_workflow_envelope(draw: Any) -> dict[str, Any]:
                     ),
                 ),
                 "federated_sla": st.one_of(st.none(), draw_bilateral_sla()),
+                "pq_signature": st.one_of(st.none(), draw_pq_signature()),
             }
         )
     )
