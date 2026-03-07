@@ -1952,8 +1952,6 @@ def draw_epistemic_ledger(draw: Any) -> dict[str, Any]:
     return res
 
 
-
-
 @settings(max_examples=10, suppress_health_check=[HealthCheck.too_slow])
 @given(draw_epistemic_ledger())
 def test_differentials_routing(payload: dict[str, Any]) -> None:

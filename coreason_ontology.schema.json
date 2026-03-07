@@ -320,6 +320,12 @@
           "title": "Estimated Latency Ms",
           "type": "integer"
         },
+        "estimated_carbon_gco2eq": {
+          "description": "The agent's mathematical projection of the environmental cost to execute this inference task.",
+          "minimum": 0.0,
+          "title": "Estimated Carbon Gco2Eq",
+          "type": "number"
+        },
         "confidence_score": {
           "description": "The node's epistemic certainty of success.",
           "maximum": 1.0,
@@ -332,6 +338,7 @@
         "agent_id",
         "estimated_cost_cents",
         "estimated_latency_ms",
+        "estimated_carbon_gco2eq",
         "confidence_score"
       ],
       "title": "AgentBid",
@@ -1147,6 +1154,20 @@
           },
           "title": "Permitted Geographic Regions",
           "type": "array"
+        },
+        "max_permitted_grid_carbon_intensity": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Absolute legal ESG mandate. The execution graph will quarantine any federated node operating on a grid exceeding this gCO2eq/kWh threshold.",
+          "title": "Max Permitted Grid Carbon Intensity"
         },
         "pq_signature": {
           "anyOf": [
@@ -3064,6 +3085,20 @@
           "title": "Max Global Tokens",
           "type": "integer"
         },
+        "max_carbon_budget_gco2eq": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The absolute physical energy footprint allowed for this execution graph. If exceeded, the orchestrator terminates the swarm.",
+          "title": "Max Carbon Budget Gco2Eq"
+        },
         "global_timeout_seconds": {
           "description": "The absolute Time-To-Live (TTL) for the execution envelope before graceful termination.",
           "minimum": 0,
@@ -4926,10 +4961,25 @@
             "latency_optimized",
             "cost_optimized",
             "capability_optimized",
+            "carbon_optimized",
             "balanced"
           ],
           "title": "Tradeoff Preference",
           "type": "string"
+        },
+        "max_carbon_intensity_gco2eq_kwh": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The maximum operational carbon intensity of the physical data center grid allowed for this agent's routing.",
+          "title": "Max Carbon Intensity Gco2Eq Kwh"
         }
       },
       "required": [
