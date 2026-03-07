@@ -47,6 +47,10 @@ class AgentBid(CoreasonBaseModel):
     agent_id: str = Field(description="The NodeID of the bidder.")
     estimated_cost_cents: int = Field(description="The node's calculated cost to fulfill the task.")
     estimated_latency_ms: int = Field(ge=0, description="The node's estimated time to completion.")
+    estimated_carbon_gco2eq: float = Field(
+        ge=0.0,
+        description="The agent's mathematical projection of the environmental cost to execute this inference task.",
+    )
     confidence_score: float = Field(ge=0.0, le=1.0, description="The node's epistemic certainty of success.")
 
 

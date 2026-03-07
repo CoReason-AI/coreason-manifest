@@ -44,6 +44,14 @@ class BilateralSLA(CoreasonBaseModel):
             "is legally permitted (Data Residency Pinning)."
         ),
     )
+    max_permitted_grid_carbon_intensity: float | None = Field(
+        default=None,
+        ge=0.0,
+        description=(
+            "Absolute legal ESG mandate. The execution graph will quarantine any "
+            "federated node operating on a grid exceeding this gCO2eq/kWh threshold."
+        ),
+    )
     pq_signature: PostQuantumSignature | None = Field(
         default=None, description="The quantum-resistant signature securing the multi-tenant legal boundary."
     )

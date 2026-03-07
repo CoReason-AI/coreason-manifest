@@ -106,6 +106,14 @@ class GlobalGovernance(CoreasonBaseModel):
         description="The absolute maximum economic cost allowed for the entire swarm lifecycle."
     )
     max_global_tokens: int = Field(description="The maximum aggregate token usage allowed across all nodes.")
+    max_carbon_budget_gco2eq: float | None = Field(
+        default=None,
+        ge=0.0,
+        description=(
+            "The absolute physical energy footprint allowed for this execution graph. "
+            "If exceeded, the orchestrator terminates the swarm."
+        ),
+    )
     global_timeout_seconds: int = Field(
         ge=0, description="The absolute Time-To-Live (TTL) for the execution envelope before graceful termination."
     )

@@ -28,8 +28,16 @@ class RoutingFrontier(CoreasonBaseModel):
     min_capability_score: float = Field(
         ge=0.0, le=1.0, description="The cognitive capability floor required for the task (0.0 to 1.0)."
     )
-    tradeoff_preference: Literal["latency_optimized", "cost_optimized", "capability_optimized", "balanced"] = Field(
-        description="The mathematical optimization vector to break ties within the frontier."
+    tradeoff_preference: Literal[
+        "latency_optimized", "cost_optimized", "capability_optimized", "carbon_optimized", "balanced"
+    ] = Field(description="The mathematical optimization vector to break ties within the frontier.")
+    max_carbon_intensity_gco2eq_kwh: float | None = Field(
+        default=None,
+        ge=0.0,
+        description=(
+            "The maximum operational carbon intensity of the physical data center "
+            "grid allowed for this agent's routing."
+        ),
     )
 
 

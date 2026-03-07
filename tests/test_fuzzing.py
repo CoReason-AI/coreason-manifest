@@ -8,7 +8,7 @@ import re
 from typing import Any
 
 import pytest
-from hypothesis import given, settings
+from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 from pydantic import TypeAdapter, ValidationError
 
@@ -439,7 +439,10 @@ def draw_routing_frontier(draw: Any) -> dict[str, Any]:
                 "max_cost_microcents_per_token": st.integers(min_value=1),
                 "min_capability_score": st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False),
                 "tradeoff_preference": st.sampled_from(
-                    ["latency_optimized", "cost_optimized", "capability_optimized", "balanced"]
+                    ["latency_optimized", "cost_optimized", "capability_optimized", "carbon_optimized", "balanced"]
+                ),
+                "max_carbon_intensity_gco2eq_kwh": st.one_of(
+                    st.none(), st.floats(min_value=0.0, allow_nan=False, allow_infinity=False)
                 ),
             }
         )
@@ -1543,6 +1546,9 @@ def draw_formal_verification_contract(draw: Any) -> dict[str, Any]:
             "max_global_tokens": st.integers(),
             "global_timeout_seconds": st.integers(min_value=0),
             "formal_verification": st.one_of(st.none(), draw_formal_verification_contract()),
+            "max_carbon_budget_gco2eq": st.one_of(
+                st.none(), st.floats(min_value=0.0, allow_nan=False, allow_infinity=False)
+            ),
         }
     )
 )
@@ -1656,6 +1662,7 @@ def draw_agent_bid(draw: Any) -> dict[str, Any]:
                 "agent_id": draw_did_string(),
                 "estimated_cost_cents": st.integers(min_value=0),
                 "estimated_latency_ms": st.integers(min_value=0),
+                "estimated_carbon_gco2eq": st.floats(min_value=0.0, allow_nan=False, allow_infinity=False),
                 "confidence_score": st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False),
             }
         )
@@ -1945,7 +1952,9 @@ def draw_epistemic_ledger(draw: Any) -> dict[str, Any]:
     return res
 
 
-@settings(max_examples=10)
+
+
+@settings(max_examples=10, suppress_health_check=[HealthCheck.too_slow])
 @given(draw_epistemic_ledger())
 def test_differentials_routing(payload: dict[str, Any]) -> None:
     parsed = epistemic_ledger_adapter.validate_python(payload)
@@ -2151,6 +2160,9 @@ def draw_bilateral_sla(draw: Any) -> dict[str, Any]:
                 ),
                 "liability_limit_cents": st.integers(min_value=0),
                 "permitted_geographic_regions": st.lists(st.text(min_size=1), max_size=10),
+                "max_permitted_grid_carbon_intensity": st.one_of(
+                    st.none(), st.floats(min_value=0.0, allow_nan=False, allow_infinity=False)
+                ),
                 "pq_signature": st.one_of(st.none(), draw_pq_signature()),
             }
         )
