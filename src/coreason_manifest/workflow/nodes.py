@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Annotated, Literal
 
 from pydantic import Field
 
-from coreason_manifest.compute.inference import ActiveInferenceContract, AnalogicalMappingTask
+from coreason_manifest.compute.inference import ActiveInferenceContract, AnalogicalMappingTask, InterventionalCausalTask
 from coreason_manifest.compute.profiles import RoutingFrontier
 from coreason_manifest.compute.symbolic import NeuroSymbolicHandoff
 from coreason_manifest.compute.test_time import EscalationContract, ProcessRewardContract
@@ -130,6 +130,10 @@ class AgentNode(BaseNode):
     )
     analogical_policy: AnalogicalMappingTask | None = Field(
         default=None, description="The formal contract forcing the agent to execute cross-domain lateral thinking."
+    )
+    interventional_policy: InterventionalCausalTask | None = Field(
+        default=None,
+        description="The formal contract authorizing the agent to mutate variables to prove Pearlian causation.",
     )
     symbolic_handoff_policy: NeuroSymbolicHandoff | None = Field(
         default=None,

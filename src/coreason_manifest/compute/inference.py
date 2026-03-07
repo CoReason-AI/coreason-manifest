@@ -26,6 +26,27 @@ class AnalogicalMappingTask(CoreasonBaseModel):
     )
 
 
+class InterventionalCausalTask(CoreasonBaseModel):
+    task_id: str = Field(min_length=1, description="Unique identifier for this causal intervention.")
+    target_hypothesis_id: str = Field(description="The hypothesis containing the SCM being tested.")
+    intervention_variable: str = Field(
+        description="The specific node $X$ in the SCM the agent is forcing to a specific state."
+    )
+    do_operator_state: str = Field(
+        description="The exact value or condition forced upon the intervention_variable, "
+        "isolating it from its historical causes."
+    )
+    expected_causal_information_gain: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="The mathematical proof of entropy reduction yielded specifically by "
+        "breaking the confounding back-doors.",
+    )
+    execution_cost_budget_cents: int = Field(
+        ge=0, description="The maximum economic expenditure authorized to run this specific causal intervention."
+    )
+
+
 class ActiveInferenceContract(CoreasonBaseModel):
     task_id: str = Field(min_length=1, description="Unique identifier for this active inference execution.")
     target_hypothesis_id: str = Field(description="The HypothesisGenerationEvent this task is attempting to falsify.")

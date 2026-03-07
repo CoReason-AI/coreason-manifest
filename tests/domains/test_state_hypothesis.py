@@ -9,7 +9,12 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.compute.inference import ActiveInferenceContract
-from coreason_manifest.state.events import FalsificationCondition, HypothesisGenerationEvent
+from coreason_manifest.state.events import (
+    CausalDirectedEdge,
+    FalsificationCondition,
+    HypothesisGenerationEvent,
+    StructuralCausalModel,
+)
 
 
 def test_hypothesis_generation_event_valid() -> None:
@@ -35,6 +40,39 @@ def test_hypothesis_generation_event_valid() -> None:
     assert hypothesis.bayesian_prior == 0.75
     assert len(hypothesis.falsification_conditions) == 1
     assert hypothesis.falsification_conditions[0].condition_id == "cond-1"
+
+
+def test_hypothesis_causal_model() -> None:
+    causal_edge = CausalDirectedEdge(
+        source_variable="smoking",
+        target_variable="cancer",
+        edge_type="direct_cause",
+    )
+    scm = StructuralCausalModel(
+        observed_variables=["smoking", "cancer"],
+        latent_variables=["genetics"],
+        causal_edges=[causal_edge],
+    )
+    hypothesis = HypothesisGenerationEvent(
+        event_id="evt-2",
+        timestamp=123.456,
+        hypothesis_id="hyp-2",
+        premise_text="Smoking causes cancer.",
+        bayesian_prior=0.9,
+        falsification_conditions=[
+            FalsificationCondition(
+                condition_id="cond-2",
+                description="Must not observe correlation.",
+                falsifying_observation_signature="No correlation",
+            )
+        ],
+        status="active",
+        causal_model=scm,
+    )
+
+    assert hypothesis.causal_model is not None
+    assert len(hypothesis.causal_model.causal_edges) == 1
+    assert hypothesis.causal_model.causal_edges[0].edge_type == "direct_cause"
 
 
 def test_hypothesis_bayesian_prior_bounds() -> None:
