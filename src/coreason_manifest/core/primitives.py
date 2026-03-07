@@ -8,7 +8,7 @@
 from enum import StrEnum
 from typing import Annotated
 
-from pydantic import Field
+from pydantic import Field, StringConstraints
 
 # =========================================================================
 #  DOMAIN VOCABULARY (Living Standard)
@@ -34,15 +34,9 @@ type GitSHA = Annotated[
     ),
 ]
 
-type NodeID = Annotated[
+NodeID = Annotated[
     str,
-    Field(
-        pattern=r"^[a-zA-Z0-9_-]+$",
-        min_length=1,
-        max_length=128,
-        description="Unique identifier for a node in the graph. Alphanumeric, underscores, hyphens only.",
-        examples=["agent_1", "start-node", "MyNode"],
-    ),
+    StringConstraints(min_length=7, pattern=r"^did:[a-z0-9]+:[a-zA-Z0-9.\-_:]+$"),
 ]
 
 type ToolID = Annotated[

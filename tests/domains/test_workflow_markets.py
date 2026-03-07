@@ -13,17 +13,21 @@ from coreason_manifest.workflow.markets import HypothesisStake, PredictionMarket
 
 def test_hypothesis_stake_rejects_zero_or_negative_cents() -> None:
     with pytest.raises(ValidationError) as exc_info:
-        HypothesisStake(agent_id="agent-1", target_hypothesis_id="hyp-1", staked_cents=0, implied_probability=0.5)
+        HypothesisStake(
+            agent_id="did:web:agent-1", target_hypothesis_id="hyp-1", staked_cents=0, implied_probability=0.5
+        )
     assert "gt" in str(exc_info.value) or "greater than" in str(exc_info.value)
 
     with pytest.raises(ValidationError) as exc_info2:
-        HypothesisStake(agent_id="agent-1", target_hypothesis_id="hyp-1", staked_cents=-10, implied_probability=0.5)
+        HypothesisStake(
+            agent_id="did:web:agent-1", target_hypothesis_id="hyp-1", staked_cents=-10, implied_probability=0.5
+        )
     assert "gt" in str(exc_info2.value) or "greater than" in str(exc_info2.value)
 
 
 def test_hypothesis_stake_valid() -> None:
     stake = HypothesisStake(
-        agent_id="agent-1", target_hypothesis_id="hyp-1", staked_cents=100, implied_probability=0.75
+        agent_id="did:web:agent-1", target_hypothesis_id="hyp-1", staked_cents=100, implied_probability=0.75
     )
     assert stake.staked_cents == 100
     assert stake.implied_probability == 0.75

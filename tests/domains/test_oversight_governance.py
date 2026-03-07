@@ -101,9 +101,7 @@ def test_prediction_market_policy_bounds() -> None:
     context_summary=st.text(),
     proposed_action=st.dictionaries(st.text(), st.integers()),
     adjudication_deadline=st.floats(min_value=0.0, allow_nan=False, allow_infinity=False),
-    escalation_target_node_id=st.one_of(
-        st.none(), st.text(min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")
-    ),
+    escalation_target_node_id=st.one_of(st.none(), st.from_regex(r"^did:[a-z0-9]+:[a-zA-Z0-9.\-_:]+$", fullmatch=True)),
 )
 def test_sandbox_success_massive_configs(
     allowed_fields: list[str],
@@ -126,7 +124,7 @@ def test_sandbox_success_massive_configs(
     req = InterventionRequest(
         intervention_scope=scope,
         fallback_sla=sla,
-        target_node_id="node-1",
+        target_node_id="did:web:node-1",
         context_summary=context_summary,
         proposed_action=proposed_action,  # type: ignore
         adjudication_deadline=adjudication_deadline,

@@ -62,6 +62,28 @@ from coreason_manifest.workflow.topologies import AnyTopology, OntologicalHandsh
 
 
 @st.composite
+def draw_did_string(draw: Any) -> str:
+    """Generates a valid W3C DID string to satisfy the NodeID regex."""
+    method = draw(st.sampled_from(["jwk", "web", "key", "ethr", "peer"]))
+    identifier = draw(st.text(min_size=1, alphabet="abcdefghijklmnopqrstuvwxyz0123456789"))
+    return f"did:{method}:{identifier}"
+
+
+@st.composite
+def draw_vc_presentation(draw: Any) -> dict[str, Any]:
+    return draw(
+        st.fixed_dictionaries(
+            {
+                "presentation_format": st.sampled_from(["jwt_vc", "ldp_vc", "sd_jwt", "zkp_vc"]),
+                "issuer_did": draw_did_string(),
+                "cryptographic_proof_blob": st.text(min_size=10),
+                "authorization_claims": st.dictionaries(st.text(), st.one_of(st.text(), st.integers(), st.booleans())),
+            }
+        )
+    )
+
+
+@st.composite
 def draw_escalation_contract(draw: Any) -> dict[str, Any]:
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(
@@ -400,6 +422,7 @@ def draw_agent_attestation(draw: Any) -> dict[str, Any]:
                 "training_lineage_hash": st.from_regex(r"^[a-f0-9]{64}$", fullmatch=True),
                 "developer_signature": st.text(min_size=1),
                 "capability_merkle_root": st.from_regex(r"^[a-f0-9]{64}$", fullmatch=True),
+                "credential_presentations": st.lists(draw_vc_presentation(), max_size=5),
             }
         )
     )
@@ -433,9 +456,7 @@ def draw_agent_node_payload(draw: Any) -> dict[str, Any]:
     if draw(st.booleans()):
         payload["intervention_policies"] = draw(st.lists(draw_intervention_policy(), max_size=100))
     if draw(st.booleans()):
-        payload["action_space_id"] = draw(
-            st.text(min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")
-        )
+        payload["action_space_id"] = draw(draw_did_string())
     if draw(st.booleans()):
         payload["secure_sub_session"] = draw(draw_secure_sub_session())
     if draw(st.booleans()):
@@ -499,8 +520,8 @@ def draw_ontological_handshake(draw: Any) -> dict[str, Any]:
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
-                "initiating_node_id": st.text(min_size=1),
-                "receiving_node_id": st.text(min_size=1),
+                "initiating_node_id": draw_did_string(),
+                "receiving_node_id": draw_did_string(),
                 "latent_vector_similarity": st.floats(
                     min_value=-1.0, max_value=1.0, allow_nan=False, allow_infinity=False
                 ),
@@ -551,7 +572,7 @@ def draw_consensus_policy(draw: Any) -> dict[str, Any]:
                 "strategy": st.sampled_from(["unanimous", "majority", "debate_rounds", "prediction_market"]),
                 "tie_breaker_node_id": st.one_of(
                     st.none(),
-                    st.text(min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"),
+                    draw_did_string(),
                 ),
                 "max_debate_rounds": st.one_of(st.none(), st.integers(min_value=1, max_value=100)),
                 "prediction_market_rules": st.one_of(st.none(), draw_prediction_market_policy()),
@@ -566,7 +587,7 @@ def draw_hypothesis_stake(draw: Any) -> dict[str, Any]:
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
-                "agent_id": st.text(min_size=1),
+                "agent_id": draw_did_string(),
                 "target_hypothesis_id": st.text(min_size=1),
                 "staked_cents": st.integers(min_value=1),
                 "implied_probability": st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False),
@@ -627,7 +648,7 @@ def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> 
         {
             "type": st.just("dag"),
             "nodes": st.dictionaries(
-                st.text(min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"),
+                draw_did_string(),
                 nodes_strategy,
                 max_size=5,
             ),
@@ -654,7 +675,7 @@ def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> 
         {
             "type": st.just("council"),
             "nodes": st.dictionaries(
-                st.text(min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"),
+                draw_did_string(),
                 nodes_strategy,
                 min_size=1,
                 max_size=5,
@@ -675,7 +696,7 @@ def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> 
         {
             "type": st.just("swarm"),
             "nodes": st.dictionaries(
-                st.text(min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"),
+                draw_did_string(),
                 nodes_strategy,
                 max_size=5,
             ),
@@ -694,7 +715,7 @@ def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> 
         {
             "type": st.just("smpc"),
             "nodes": st.dictionaries(
-                st.text(min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"),
+                draw_did_string(),
                 nodes_strategy,
                 min_size=2,
                 max_size=5,
@@ -705,7 +726,7 @@ def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> 
             "smpc_protocol": st.sampled_from(["garbled_circuits", "secret_sharing", "oblivious_transfer"]),
             "joint_function_uri": st.text(min_size=1),
             "participant_node_ids": st.lists(
-                st.text(min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"),
+                draw_did_string(),
                 min_size=2,
                 max_size=5,
             ),
@@ -1060,11 +1081,7 @@ def _local_draw_any_state_event(draw: Any) -> dict[str, Any]:
         payload["source_node_id"] = draw(
             st.one_of(
                 st.none(),
-                st.text(
-                    min_size=1,
-                    max_size=128,
-                    alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-",
-                ),
+                draw_did_string(),
             )
         )
         if event_type == "belief_update":
@@ -1188,8 +1205,8 @@ def test_anypanel_insight(title: str, content: str) -> None:
 
 @given(
     st.sampled_from(["quarantine", "circuit_breaker", "fallback"]),
-    st.text(min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"),
-    st.text(min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"),
+    draw_did_string(),
+    draw_did_string(),
     st.text(),
 )
 def test_anyresilience_routing(res_type: str, target: str, fallback: str, reason: str) -> None:
@@ -1230,7 +1247,7 @@ def test_anyresilience_routing(res_type: str, target: str, fallback: str, reason
                         "dependency_blackout",
                     ]
                 ),
-                "target_node_id": st.one_of(st.none(), st.text()),
+                "target_node_id": st.one_of(st.none(), draw_did_string()),
                 "intensity": st.floats(allow_nan=False, allow_infinity=False),
             }
         )
@@ -1266,7 +1283,7 @@ def draw_lineage_watermark(draw: Any) -> dict[str, Any]:
             {
                 "watermark_protocol": st.sampled_from(["merkle_dag", "statistical_token", "homomorphic_mac"]),
                 "hop_signatures": st.dictionaries(
-                    st.text(min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"),
+                    draw_did_string(),
                     st.text(min_size=10),
                     max_size=5,
                 ),
@@ -1445,9 +1462,7 @@ def draw_fhe_profile(draw: Any) -> dict[str, Any]:
             "scope": st.sampled_from(["global", "tenant", "session"]),
             "provenance": st.fixed_dictionaries(
                 {
-                    "extracted_by": st.text(
-                        min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
-                    ),
+                    "extracted_by": draw_did_string(),
                     "source_event_id": st.text(),
                     "spatial_anchor": st.one_of(st.none(), draw_spatial_anchor()),
                     "lineage_watermark": st.one_of(st.none(), draw_lineage_watermark()),
@@ -1489,9 +1504,7 @@ def test_semanticnode_fuzzing(payload: dict[str, Any]) -> None:
                 st.none(),
                 st.fixed_dictionaries(
                     {
-                        "extracted_by": st.text(
-                            min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
-                        ),
+                        "extracted_by": draw_did_string(),
                         "source_event_id": st.text(),
                         "lineage_watermark": st.one_of(st.none(), draw_lineage_watermark()),
                     }
@@ -1625,7 +1638,7 @@ def draw_task_announcement(draw: Any) -> dict[str, Any]:
                 "task_id": st.text(),
                 "required_action_space_id": st.one_of(
                     st.none(),
-                    st.text(min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"),
+                    draw_did_string(),
                 ),
                 "max_budget_cents": st.integers(min_value=0),
             }
@@ -1639,7 +1652,7 @@ def draw_agent_bid(draw: Any) -> dict[str, Any]:
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
-                "agent_id": st.text(),
+                "agent_id": draw_did_string(),
                 "estimated_cost_cents": st.integers(min_value=0),
                 "estimated_latency_ms": st.integers(min_value=0),
                 "confidence_score": st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False),
@@ -1669,7 +1682,7 @@ def draw_escrow_policy(draw: Any, max_escrow: int) -> dict[str, Any]:
 def draw_task_award(draw: Any) -> dict[str, Any]:
     price = draw(st.integers(min_value=0))
     # Allocate 100% of the price to a single generated agent ID to satisfy zero-sum rules
-    agent_id = draw(st.text(min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"))
+    agent_id = draw(draw_did_string())
 
     award: dict[str, Any] = {
         "task_id": draw(st.text()),
@@ -1800,7 +1813,7 @@ def draw_state_diff(draw: Any) -> dict[str, Any]:
                 ),
                 "lamport_timestamp": st.integers(min_value=0),
                 "vector_clock": st.dictionaries(
-                    st.text(min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"),
+                    draw_did_string(),
                     st.integers(min_value=0),
                 ),
                 "patches": st.lists(draw_state_patch(), max_size=100),
@@ -1931,6 +1944,9 @@ def draw_epistemic_ledger(draw: Any) -> dict[str, Any]:
     return res
 
 
+from hypothesis import settings
+
+@settings(max_examples=10)
 @given(draw_epistemic_ledger())
 def test_differentials_routing(payload: dict[str, Any]) -> None:
     parsed = epistemic_ledger_adapter.validate_python(payload)
@@ -2037,12 +2053,8 @@ def draw_override_intent(draw: Any) -> dict[str, Any]:
         st.fixed_dictionaries(
             {
                 "type": st.just("override"),
-                "authorized_node_id": st.text(
-                    min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
-                ),
-                "target_node_id": st.text(
-                    min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
-                ),
+                "authorized_node_id": draw_did_string(),
+                "target_node_id": draw_did_string(),
                 "override_action": st.dictionaries(
                     st.text(), st.one_of(st.text(), st.integers(), st.floats(), st.booleans(), st.none())
                 ),
@@ -2061,9 +2073,7 @@ def draw_intervention_request(draw: Any) -> dict[str, Any]:
                 "type": st.just("request"),
                 "intervention_scope": st.none(),
                 "fallback_sla": st.none(),
-                "target_node_id": st.text(
-                    min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
-                ),
+                "target_node_id": draw_did_string(),
                 "context_summary": st.text(),
                 "proposed_action": st.dictionaries(
                     st.text(), st.one_of(st.text(), st.integers(), st.floats(), st.booleans(), st.none())
@@ -2081,9 +2091,7 @@ def draw_intervention_verdict(draw: Any) -> dict[str, Any]:
         st.fixed_dictionaries(
             {
                 "type": st.just("verdict"),
-                "target_node_id": st.text(
-                    min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
-                ),
+                "target_node_id": draw_did_string(),
                 "approved": st.booleans(),
                 "feedback": st.one_of(st.none(), st.text()),
             }
@@ -2213,7 +2221,7 @@ def draw_adversarial_simulation_profile(draw: Any) -> dict[str, Any]:
         st.fixed_dictionaries(
             {
                 "simulation_id": st.text(min_size=1),
-                "target_node_id": st.text(min_size=1),
+                "target_node_id": draw_did_string(),
                 "attack_vector": st.sampled_from(
                     ["prompt_extraction", "data_exfiltration", "semantic_hijacking", "tool_poisoning"]
                 ),

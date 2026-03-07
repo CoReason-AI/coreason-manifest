@@ -13,23 +13,23 @@ def test_epistemic_ledger_snapshot(snapshot: SnapshotAssertion) -> None:
                 "type": "belief_update",
                 "event_id": "evt_1",
                 "timestamp": 1700000000.0,
-                "source_node_id": "node_1",
+                "source_node_id": "did:web:node_1",
                 "payload": {
                     "semantic_node": {
-                        "node_id": "node_1",
+                        "node_id": "did:web:node_1",
                         "label": "Person",
                         "scope": "tenant",
                         "text_chunk": "John Doe",
                         "provenance": {
-                            "extracted_by": "agent_1",
+                            "extracted_by": "did:web:agent_1",
                             "source_event_id": "evt_0",
                             "spatial_anchor": {"bounding_box": [10.5, 20.0, 100.5, 200.0], "block_type": "figure"},
                         },
                     },
                     "semantic_edge": {
                         "edge_id": "edge_1",
-                        "subject_node_id": "node_1",
-                        "object_node_id": "node_2",
+                        "subject_node_id": "did:web:node_1",
+                        "object_node_id": "did:web:node_2",
                         "confidence_score": 0.85,
                         "predicate": "WORKS_FOR",
                     },
@@ -46,7 +46,7 @@ def test_epistemic_ledger_snapshot(snapshot: SnapshotAssertion) -> None:
 def test_custody_record_snapshot(snapshot: SnapshotAssertion) -> None:
     payload = {
         "record_id": "rec_1",
-        "source_node_id": "node_1",
+        "source_node_id": "did:web:node_1",
         "applied_policy_id": "pol_1",
         "pre_redaction_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "post_redaction_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -64,13 +64,13 @@ def test_fractal_router_snapshot(snapshot: SnapshotAssertion) -> None:
         "topology": {
             "type": "dag",
             "nodes": {
-                "comp_1": {
+                "did:web:comp_1": {
                     "type": "composite",
                     "description": "Outer topology",
                     "topology": {
                         "type": "council",
-                        "adjudicator_id": "adj_1",
-                        "nodes": {"adj_1": {"type": "system", "description": "The adjudicator"}},
+                        "adjudicator_id": "did:web:adj_1",
+                        "nodes": {"did:web:adj_1": {"type": "system", "description": "The adjudicator"}},
                         "consensus_policy": {"strategy": "debate_rounds", "max_debate_rounds": 3},
                     },
                 }

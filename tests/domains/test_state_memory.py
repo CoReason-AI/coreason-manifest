@@ -47,7 +47,7 @@ def test_temporal_chaos_proof(events: list[AnyStateEvent]) -> None:
 @st.composite
 def draw_theory_of_mind_snapshot(draw: st.DrawFn) -> TheoryOfMindSnapshot:
     return TheoryOfMindSnapshot(
-        target_agent_id=draw(st.text(min_size=1)),
+        target_agent_id=draw(st.from_regex(r"^did:[a-z0-9]+:[a-zA-Z0-9.\-_:]+$", fullmatch=True)),
         assumed_shared_beliefs=draw(st.lists(st.text())),
         identified_knowledge_gaps=draw(st.lists(st.text())),
         empathy_confidence_score=draw(st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False)),

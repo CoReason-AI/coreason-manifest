@@ -19,7 +19,7 @@ from coreason_manifest.workflow.topologies import CouncilTopology, DAGTopology, 
 
 # Strategy for valid NodeIDs (alphanumeric, underscores, hyphens)
 # Also must have a minimum length of 1 based on core primitives.
-valid_node_id_st = st.from_regex(r"^[a-zA-Z0-9_-]+$", fullmatch=True)
+valid_node_id_st = st.from_regex(r"^did:[a-z0-9]+:[a-zA-Z0-9.\-_:]+$", fullmatch=True)
 
 # Strategy for BaseNode attributes
 base_node_attrs = {
@@ -77,7 +77,7 @@ def test_dag_topology_cycle_success(nodes: dict[str, Any], data: DataObject) -> 
 @given(nodes=nodes_dict_st(), data=st.data())
 def test_dag_topology_referential_integrity_adversarial(nodes: dict[str, Any], data: DataObject) -> None:
     """Prove that injecting a ghost node into an edge tuple always raises a ValidationError."""
-    ghost_node = "ghost_node_123"
+    ghost_node = "did:web:ghost_node_123"
     assume(ghost_node not in nodes)
 
     keys = list(nodes.keys())
@@ -108,7 +108,7 @@ def test_council_topology_referential_integrity_success(nodes: dict[str, Any], a
 @given(nodes=nodes_dict_st())
 def test_council_topology_referential_integrity_adversarial(nodes: dict[str, Any]) -> None:
     """Test 2: Prove that injecting a guaranteed dangling pointer always raises a ValidationError."""
-    rogue_id = "rogue_ghost_node"
+    rogue_id = "did:web:rogue_ghost_node"
     assume(rogue_id not in nodes)
 
     with pytest.raises(ValidationError) as exc_info:
