@@ -16,6 +16,7 @@ from coreason_manifest.oversight.dlp import InformationFlowPolicy
 from coreason_manifest.oversight.governance import ConsensusPolicy
 from coreason_manifest.telemetry.schemas import ObservabilityPolicy
 from coreason_manifest.workflow.auctions import AuctionPolicy
+from coreason_manifest.workflow.markets import MarketResolution, PredictionMarketState
 from coreason_manifest.workflow.nodes import AnyNode
 
 
@@ -212,6 +213,13 @@ class SwarmTopology(BaseTopology):
     )
     auction_policy: AuctionPolicy | None = Field(
         default=None, description="The mathematical policy governing task decentralization via Spot Markets."
+    )
+    active_prediction_markets: list[PredictionMarketState] = Field(
+        default_factory=list, description="The live algorithmic betting markets resolving swarm consensus."
+    )
+    resolved_markets: list[MarketResolution] = Field(
+        default_factory=list,
+        description="The immutable records of finalized markets and reputation capital distributions.",
     )
 
     @model_validator(mode="after")
