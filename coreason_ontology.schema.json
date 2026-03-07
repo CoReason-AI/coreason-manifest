@@ -746,6 +746,18 @@
           },
           "title": "Permitted Geographic Regions",
           "type": "array"
+        },
+        "pq_signature": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PostQuantumSignature"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The quantum-resistant signature securing the multi-tenant legal boundary."
         }
       },
       "required": [
@@ -2976,6 +2988,39 @@
       "title": "PermissionBoundary",
       "type": "object"
     },
+    "PostQuantumSignature": {
+      "additionalProperties": false,
+      "properties": {
+        "pq_algorithm": {
+          "description": "The NIST FIPS post-quantum cryptographic algorithm used.",
+          "enum": [
+            "ml-dsa",
+            "slh-dsa",
+            "falcon"
+          ],
+          "title": "Pq Algorithm",
+          "type": "string"
+        },
+        "public_key_id": {
+          "description": "The identifier of the post-quantum public evaluation key.",
+          "title": "Public Key Id",
+          "type": "string"
+        },
+        "pq_signature_blob": {
+          "description": "The base64-encoded post-quantum signature. Bounded to 100KB to safely accommodate massive SPHINCS+ hash trees without OOM crashes.",
+          "maxLength": 100000,
+          "title": "Pq Signature Blob",
+          "type": "string"
+        }
+      },
+      "required": [
+        "pq_algorithm",
+        "public_key_id",
+        "pq_signature_blob"
+      ],
+      "title": "PostQuantumSignature",
+      "type": "object"
+    },
     "QoSClassification": {
       "enum": [
         "critical",
@@ -4472,6 +4517,18 @@
           ],
           "default": null,
           "description": "The B2B Service Level Agreement contract that must be mathematically satisfied before multi-tenant graph coupling."
+        },
+        "pq_signature": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PostQuantumSignature"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The quantum-resistant signature securing the root execution graph."
         }
       },
       "required": [
