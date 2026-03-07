@@ -18,9 +18,9 @@
           "type": "array"
         },
         "mcp_servers": {
-          "description": "The list of MCP servers mounted into this action space.",
+          "description": "The array of verified external Model Context Protocol servers mounted into this action space.",
           "items": {
-            "$ref": "#/$defs/MCPClientBinding"
+            "$ref": "#/$defs/MCPServerManifest"
           },
           "title": "Mcp Servers",
           "type": "array"
@@ -2653,6 +2653,38 @@
       "title": "LogEnvelope",
       "type": "object"
     },
+    "MCPCapabilityWhitelist": {
+      "additionalProperties": false,
+      "description": "A zero-trust boundary defining exactly which JSON-RPC capabilities\nthe execution node is authorized to mount from the remote server.",
+      "properties": {
+        "allowed_tools": {
+          "description": "The explicit whitelist of function names the node is allowed to call.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Allowed Tools",
+          "type": "array"
+        },
+        "allowed_resources": {
+          "description": "The explicit whitelist of resource URIs the node is allowed to read.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Allowed Resources",
+          "type": "array"
+        },
+        "allowed_prompts": {
+          "description": "The explicit whitelist of workflow templates the node is allowed to trigger.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Allowed Prompts",
+          "type": "array"
+        }
+      },
+      "title": "MCPCapabilityWhitelist",
+      "type": "object"
+    },
     "MCPClientBinding": {
       "additionalProperties": false,
       "description": "Binding configuration for a Model Context Protocol (MCP) server.",
@@ -2688,6 +2720,51 @@
         "transport_type"
       ],
       "title": "MCPClientBinding",
+      "type": "object"
+    },
+    "MCPServerManifest": {
+      "additionalProperties": false,
+      "description": "The structural contract for mounting an external Model Context Protocol server.",
+      "properties": {
+        "server_uri": {
+          "description": "The network URI for SSE/HTTP, or the command execution string for stdio.",
+          "title": "Server Uri",
+          "type": "string"
+        },
+        "transport_type": {
+          "description": "The physical transport layer protocol used to stream the JSON-RPC packets.",
+          "enum": [
+            "stdio",
+            "sse",
+            "http"
+          ],
+          "title": "Transport Type",
+          "type": "string"
+        },
+        "binary_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional SHA-256 hash of the local binary to prevent supply-chain execution attacks over stdio.",
+          "title": "Binary Hash"
+        },
+        "capability_whitelist": {
+          "$ref": "#/$defs/MCPCapabilityWhitelist",
+          "description": "The strict capability bounds enforced by the orchestrator prior to connection."
+        }
+      },
+      "required": [
+        "server_uri",
+        "transport_type",
+        "capability_whitelist"
+      ],
+      "title": "MCPServerManifest",
       "type": "object"
     },
     "MCPTransport": {

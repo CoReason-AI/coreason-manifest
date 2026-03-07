@@ -779,7 +779,7 @@ def draw_lineage_watermark(draw: Any) -> dict[str, Any]:
 
 @st.composite
 def draw_mcp_capability_whitelist(draw: Any) -> dict[str, Any]:
-    return draw(
+    res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
                 "allowed_tools": st.lists(st.text(), max_size=100),
@@ -788,11 +788,12 @@ def draw_mcp_capability_whitelist(draw: Any) -> dict[str, Any]:
             }
         )
     )
+    return res
 
 
 @st.composite
 def draw_mcp_server_manifest(draw: Any) -> dict[str, Any]:
-    return draw(
+    res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
                 "server_uri": st.text(min_size=1),
@@ -802,6 +803,7 @@ def draw_mcp_server_manifest(draw: Any) -> dict[str, Any]:
             }
         )
     )
+    return res
 
 
 @given(
