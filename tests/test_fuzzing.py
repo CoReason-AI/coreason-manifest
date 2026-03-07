@@ -37,6 +37,7 @@ from coreason_manifest.state.semantic import SemanticEdge, SemanticNode
 from coreason_manifest.telemetry.custody import CustodyRecord
 from coreason_manifest.telemetry.schemas import TraceExportBatch
 from coreason_manifest.testing.chaos import ChaosExperiment
+from coreason_manifest.testing.red_team import AdversarialSimulationProfile
 from coreason_manifest.tooling import ActionSpace, ToolDefinition
 from coreason_manifest.workflow.auctions import AuctionState, TaskAward
 from coreason_manifest.workflow.envelope import WorkflowEnvelope
@@ -1632,3 +1633,34 @@ def draw_workflow_envelope(draw: Any) -> dict[str, Any]:
 def test_workflow_envelope_fuzzing(payload: dict[str, Any]) -> None:
     parsed = workflow_envelope_adapter.validate_python(payload)
     assert isinstance(parsed, WorkflowEnvelope)
+
+
+adversarial_adapter: TypeAdapter[AdversarialSimulationProfile] = TypeAdapter(AdversarialSimulationProfile)
+
+
+@st.composite
+def draw_adversarial_simulation_profile(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "simulation_id": st.text(min_size=1),
+                "target_node_id": st.text(min_size=1),
+                "attack_vector": st.sampled_from(
+                    ["prompt_extraction", "data_exfiltration", "semantic_hijacking", "tool_poisoning"]
+                ),
+                "synthetic_payload": st.one_of(
+                    st.text(), st.dictionaries(st.text(), st.one_of(st.text(), st.integers(), st.booleans()))
+                ),
+                "expected_firewall_trip": st.one_of(st.none(), st.text(min_size=1)),
+            }
+        )
+    )
+    return res
+
+
+@given(draw_adversarial_simulation_profile())
+def test_adversarial_simulation_routing(payload: dict[str, Any]) -> None:
+    parsed = adversarial_adapter.validate_python(payload)
+    assert isinstance(parsed, AdversarialSimulationProfile)
+    assert parsed.simulation_id == payload["simulation_id"]
+    assert parsed.target_node_id == payload["target_node_id"]
