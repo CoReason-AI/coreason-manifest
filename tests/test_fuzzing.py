@@ -1764,6 +1764,23 @@ def draw_semantic_firewall_policy(draw: Any) -> dict[str, Any]:
 
 
 @st.composite
+def draw_sae_latent_firewall(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "target_feature_index": st.integers(min_value=0),
+                "monitored_layers": st.lists(st.integers(min_value=0), min_size=1, max_size=10),
+                "max_activation_threshold": st.floats(min_value=0.0, allow_nan=False, allow_infinity=False),
+                "violation_action": st.sampled_from(["clamp", "halt", "quarantine"]),
+                "clamp_value": st.one_of(st.none(), st.floats(allow_nan=False, allow_infinity=False)),
+                "sae_dictionary_hash": st.from_regex(r"^[a-f0-9]{64}$", fullmatch=True),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
 def draw_information_flow_policy(draw: Any) -> dict[str, Any]:
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(
@@ -1772,6 +1789,7 @@ def draw_information_flow_policy(draw: Any) -> dict[str, Any]:
                 "active": st.booleans(),
                 "rules": st.lists(draw_redaction_rule(), max_size=100),
                 "semantic_firewall": st.one_of(st.none(), draw_semantic_firewall_policy()),
+                "latent_firewalls": st.lists(draw_sae_latent_firewall(), max_size=10),
             }
         )
     )

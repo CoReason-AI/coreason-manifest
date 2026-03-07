@@ -33,6 +33,34 @@ class ActivationSteeringContract(CoreasonBaseModel):
     )
 
 
+class SaeLatentFirewall(CoreasonBaseModel):
+    """A real-time mechanistic interpretability boundary that monitors and controls specific neural circuits."""
+
+    target_feature_index: int = Field(
+        ge=0,
+        description="The exact dimensional index of the monosemantic feature in the Sparse Autoencoder dictionary.",
+    )
+    monitored_layers: list[int] = Field(
+        min_length=1,
+        description="The specific transformer layer indices where this feature activation must be monitored.",
+    )
+    max_activation_threshold: float = Field(
+        ge=0.0,
+        description="The mathematical magnitude limit. If the feature activates beyond this, the firewall trips.",
+    )
+    violation_action: Literal["clamp", "halt", "quarantine"] = Field(
+        description="The tensor-level remediation applied when the threshold is breached.",
+    )
+    clamp_value: float | None = Field(
+        default=None,
+        description="If violation_action is 'clamp', the physical value to which the activation tensor is forced.",
+    )
+    sae_dictionary_hash: str = Field(
+        pattern=r"^[a-f0-9]{64}$",
+        description="The SHA-256 hash of the exact SAE projection matrix required to decode this feature.",
+    )
+
+
 class CognitiveRoutingDirective(CoreasonBaseModel):
     """
     Hardware-level contract overriding MoE routing to enforce functional/specialist paths.
