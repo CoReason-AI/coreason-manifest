@@ -59,6 +59,34 @@ class VerifiableEntropy(CoreasonBaseModel):
     seed_hash: str = Field(min_length=10, description="The SHA-256 hash of the origin seed used to initialize the VRF.")
 
 
+class LogitSteganographyContract(CoreasonBaseModel):
+    """Cryptographic contract for embedding undeniable, un-strippable provenance signatures
+    directly into the token entropy."""
+
+    verification_public_key_id: str = Field(
+        description="The DID or public key identifier required by an auditor to reconstruct the PRF "
+        "and verify the watermark."
+    )
+    prf_seed_hash: str = Field(
+        pattern=r"^[a-f0-9]{64}$",
+        description="The SHA-256 hash of the cryptographic seed used to initialize the pseudo-random function (PRF).",
+    )
+    watermark_strength_delta: float = Field(
+        gt=0.0,
+        description="The exact logit scalar (bias) injected into the 'green list' vocabulary partition "
+        "before Gumbel-Softmax sampling.",
+    )
+    target_bits_per_token: float = Field(
+        gt=0.0,
+        description="The information-theoretic density of the payload being embedded into the generative stream.",
+    )
+    context_history_window: int = Field(
+        ge=0,
+        description="The k-gram rolling window size of preceding tokens hashed into the PRF state "
+        "to ensure robustness against text cropping.",
+    )
+
+
 class MutationPolicy(CoreasonBaseModel):
     """Constraints governing random heuristic mutations."""
 

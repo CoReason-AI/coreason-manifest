@@ -368,6 +368,18 @@
           "title": "Type",
           "type": "string"
         },
+        "logit_steganography": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LogitSteganographyContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The cryptographic contract forcing this agent to embed an undeniable provenance signature into its generative token stream."
+        },
         "compute_frontier": {
           "anyOf": [
             {
@@ -4003,6 +4015,50 @@
         "message"
       ],
       "title": "LogEnvelope",
+      "type": "object"
+    },
+    "LogitSteganographyContract": {
+      "additionalProperties": false,
+      "description": "Cryptographic contract for embedding undeniable, un-strippable provenance signatures\ndirectly into the token entropy.",
+      "properties": {
+        "verification_public_key_id": {
+          "description": "The DID or public key identifier required by an auditor to reconstruct the PRF and verify the watermark.",
+          "title": "Verification Public Key Id",
+          "type": "string"
+        },
+        "prf_seed_hash": {
+          "description": "The SHA-256 hash of the cryptographic seed used to initialize the pseudo-random function (PRF).",
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Prf Seed Hash",
+          "type": "string"
+        },
+        "watermark_strength_delta": {
+          "description": "The exact logit scalar (bias) injected into the 'green list' vocabulary partition before Gumbel-Softmax sampling.",
+          "exclusiveMinimum": 0.0,
+          "title": "Watermark Strength Delta",
+          "type": "number"
+        },
+        "target_bits_per_token": {
+          "description": "The information-theoretic density of the payload being embedded into the generative stream.",
+          "exclusiveMinimum": 0.0,
+          "title": "Target Bits Per Token",
+          "type": "number"
+        },
+        "context_history_window": {
+          "description": "The k-gram rolling window size of preceding tokens hashed into the PRF state to ensure robustness against text cropping.",
+          "minimum": 0,
+          "title": "Context History Window",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "verification_public_key_id",
+        "prf_seed_hash",
+        "watermark_strength_delta",
+        "target_bits_per_token",
+        "context_history_window"
+      ],
+      "title": "LogitSteganographyContract",
       "type": "object"
     },
     "MCPCapabilityWhitelist": {

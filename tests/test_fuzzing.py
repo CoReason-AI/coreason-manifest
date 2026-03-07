@@ -485,8 +485,28 @@ def draw_routing_frontier(draw: Any) -> dict[str, Any]:
 
 
 @st.composite
+def draw_logit_steganography_contract(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "verification_public_key_id": draw_did_string(),
+                "prf_seed_hash": st.from_regex(r"^[a-f0-9]{64}$", fullmatch=True),
+                "watermark_strength_delta": st.floats(
+                    min_value=0.1, max_value=10.0, allow_nan=False, allow_infinity=False
+                ),
+                "target_bits_per_token": st.floats(min_value=0.1, max_value=5.0, allow_nan=False, allow_infinity=False),
+                "context_history_window": st.integers(min_value=0, max_value=100),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
 def draw_agent_node_payload(draw: Any) -> dict[str, Any]:
     payload: dict[str, Any] = {"type": "agent", "description": draw(st.text())}
+    if draw(st.booleans()):
+        payload["logit_steganography"] = draw(draw_logit_steganography_contract())
     if draw(st.booleans()):
         payload["compute_frontier"] = draw(draw_routing_frontier())
     if draw(st.booleans()):
