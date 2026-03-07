@@ -252,7 +252,43 @@ class BargeInInterruptEvent(BaseStateEvent):
     )
 
 
+class CounterfactualRegretEvent(BaseStateEvent):
+    """A cryptographic record of an agent simulating an alternative timeline to calculate epistemic regret
+    and update its policy."""
+
+    type: Literal["counterfactual_regret"] = Field(
+        default="counterfactual_regret", description="Discriminator type for a counterfactual regret event."
+    )
+    historical_event_id: str = Field(
+        description="The specific historical state node where the agent mathematically diverged "
+        "to simulate an alternative path."
+    )
+    counterfactual_intervention: str = Field(
+        description="The specific alternative action or do-calculus intervention applied in the simulation."
+    )
+    expected_utility_actual: float = Field(
+        description="The computed utility of the trajectory that was actually executed."
+    )
+    expected_utility_simulated: float = Field(
+        description="The computed utility of the simulated counterfactual trajectory."
+    )
+    epistemic_regret: float = Field(
+        description="The mathematical variance (simulated - actual) representing the opportunity "
+        "cost of the historical decision."
+    )
+    policy_update_gradients: dict[str, float] = Field(
+        default_factory=dict,
+        description="The stateless routing gradient adjustments derived from the calculated regret, "
+        "used to self-correct future routing.",
+    )
+
+
 type AnyStateEvent = Annotated[
-    ObservationEvent | BeliefUpdateEvent | SystemFaultEvent | HypothesisGenerationEvent | BargeInInterruptEvent,
+    ObservationEvent
+    | BeliefUpdateEvent
+    | SystemFaultEvent
+    | HypothesisGenerationEvent
+    | BargeInInterruptEvent
+    | CounterfactualRegretEvent,
     Field(discriminator="type", description="A discriminated union of state events."),
 ]
