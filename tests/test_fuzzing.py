@@ -100,7 +100,7 @@ def draw_escalation_contract(draw: Any) -> dict[str, Any]:
 
 @st.composite
 def draw_dynamic_convergence_sla(draw: Any) -> dict[str, Any]:
-    return draw(
+    res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
                 "convergence_delta_epsilon": st.floats(
@@ -111,6 +111,7 @@ def draw_dynamic_convergence_sla(draw: Any) -> dict[str, Any]:
             }
         )
     )
+    return res
 
 
 @st.composite
