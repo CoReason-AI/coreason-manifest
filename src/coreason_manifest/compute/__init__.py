@@ -5,7 +5,7 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
-from coreason_manifest.compute.inference import ActiveInferenceContract
+from coreason_manifest.compute.inference import ActiveInferenceContract, AnalogicalMappingTask
 from coreason_manifest.compute.neuromodulation import ActivationSteeringContract, CognitiveRoutingDirective
 from coreason_manifest.compute.profiles import (
     ComputeProvisioningRequest,
@@ -22,10 +22,12 @@ from coreason_manifest.compute.stochastic import (
     MutationPolicy,
     OptimizationDirection,
 )
+from coreason_manifest.compute.symbolic import NeuroSymbolicHandoff
 
 __all__ = [
     "ActivationSteeringContract",
     "ActiveInferenceContract",
+    "AnalogicalMappingTask",
     "CognitiveRoutingDirective",
     "ComputeProvisioningRequest",
     "CrossoverStrategy",
@@ -35,6 +37,7 @@ __all__ = [
     "FitnessObjective",
     "ModelProfile",
     "MutationPolicy",
+    "NeuroSymbolicHandoff",
     "OptimizationDirection",
     "QoSClassification",
     "RateCard",

@@ -36,6 +36,7 @@ from coreason_manifest.state.events import (
 from coreason_manifest.state.memory import (
     EpistemicLedger,
     FederatedStateSnapshot,
+    TheoryOfMindSnapshot,
     WorkingMemorySnapshot,
 )
 from coreason_manifest.state.semantic import (
@@ -87,6 +88,7 @@ __all__ = [
     "TemporalBounds",
     "TemporalCheckpoint",
     "TerminalBufferState",
+    "TheoryOfMindSnapshot",
     "VectorEmbedding",
     "WorkingMemorySnapshot",
 ]

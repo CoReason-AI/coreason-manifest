@@ -10,6 +10,22 @@ from pydantic import Field
 from coreason_manifest.core.base import CoreasonBaseModel
 
 
+class AnalogicalMappingTask(CoreasonBaseModel):
+    task_id: str = Field(min_length=1, description="Unique identifier for this lateral thinking task.")
+    source_domain: str = Field(
+        description="The unrelated abstract concept space (e.g., 'thermodynamics', 'mycelial networks')."
+    )
+    target_domain: str = Field(description="The actual problem space currently being solved.")
+    required_isomorphisms: int = Field(
+        ge=1,
+        description="The exact number of structural/logical mappings the agent must "
+        "successfully bridge between the two domains.",
+    )
+    divergence_temperature_override: float = Field(
+        ge=0.0, description="The specific high-temperature sampling override required to force this creative leap."
+    )
+
+
 class ActiveInferenceContract(CoreasonBaseModel):
     task_id: str = Field(min_length=1, description="Unique identifier for this active inference execution.")
     target_hypothesis_id: str = Field(description="The HypothesisGenerationEvent this task is attempting to falsify.")

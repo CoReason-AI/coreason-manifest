@@ -9,8 +9,9 @@ from typing import TYPE_CHECKING, Annotated, Literal
 
 from pydantic import Field
 
-from coreason_manifest.compute.inference import ActiveInferenceContract
+from coreason_manifest.compute.inference import ActiveInferenceContract, AnalogicalMappingTask
 from coreason_manifest.compute.profiles import RoutingFrontier
+from coreason_manifest.compute.symbolic import NeuroSymbolicHandoff
 from coreason_manifest.compute.test_time import EscalationContract, ProcessRewardContract
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.oversight.dlp import SecureSubSession
@@ -126,6 +127,13 @@ class AgentNode(BaseNode):
         default=None,
         description="The formal contract demanding mathematical proof of Expected Information Gain "
         "before authorizing tool execution.",
+    )
+    analogical_policy: AnalogicalMappingTask | None = Field(
+        default=None, description="The formal contract forcing the agent to execute cross-domain lateral thinking."
+    )
+    symbolic_handoff_policy: NeuroSymbolicHandoff | None = Field(
+        default=None,
+        description="The API-like contract allowing the agent to offload rigid logic to deterministic CPU solvers.",
     )
 
 

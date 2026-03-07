@@ -402,6 +402,10 @@ def draw_agent_node_payload(draw: Any) -> dict[str, Any]:
         payload["prm_policy"] = draw(draw_process_reward_contract())
     if draw(st.booleans()):
         payload["active_inference_policy"] = draw(draw_active_inference_contract())
+    if draw(st.booleans()):
+        payload["analogical_policy"] = draw(draw_analogical_mapping_task())
+    if draw(st.booleans()):
+        payload["symbolic_handoff_policy"] = draw(draw_neuro_symbolic_handoff())
     return payload
 
 
@@ -2046,3 +2050,35 @@ def test_presentation_intent_routing(payload: dict[str, Any]) -> None:
     elif payload["type"] == "escalation":
         assert isinstance(parsed, EscalationIntent)
         assert parsed.tripped_rule_id == payload["tripped_rule_id"]
+
+
+@st.composite
+def draw_analogical_mapping_task(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "task_id": st.text(min_size=1),
+                "source_domain": st.text(),
+                "target_domain": st.text(),
+                "required_isomorphisms": st.integers(min_value=1),
+                "divergence_temperature_override": st.floats(min_value=0.0, allow_nan=False, allow_infinity=False),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_neuro_symbolic_handoff(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "handoff_id": st.text(min_size=1),
+                "solver_protocol": st.sampled_from(["z3", "lean4", "coq", "tla_plus", "sympy"]),
+                "formal_grammar_payload": st.text(),
+                "expected_proof_schema": st.dictionaries(st.text(), st.one_of(st.text(), st.integers(), st.booleans())),
+                "timeout_ms": st.integers(min_value=1),
+            }
+        )
+    )
+    return res
