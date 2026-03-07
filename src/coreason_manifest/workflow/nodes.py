@@ -87,7 +87,7 @@ class AgentAttestation(CoreasonBaseModel):
     credential_presentations: list[VerifiableCredentialPresentation] = Field(
         default_factory=list,
         description="The wallet of selective disclosure credentials proving the agent's identity, clearance, "
-        "and budget authorization."
+        "and budget authorization.",
     )
 
 
