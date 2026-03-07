@@ -43,6 +43,7 @@ from coreason_manifest.state.events import (
     HypothesisGenerationEvent,
     ObservationEvent,
     SystemFaultEvent,
+    InterventionalCausalTask,
 )
 from coreason_manifest.state.memory import EpistemicLedger
 from coreason_manifest.state.semantic import (
@@ -57,7 +58,7 @@ from coreason_manifest.tooling import ActionSpace, ToolDefinition
 from coreason_manifest.workflow.auctions import AuctionState, TaskAward
 from coreason_manifest.workflow.envelope import WorkflowEnvelope
 from coreason_manifest.workflow.nodes import AgentNode, AnyNode, CompositeNode, HumanNode, SystemNode
-from coreason_manifest.workflow.topologies import AnyTopology, StateContract
+from coreason_manifest.workflow.topologies import AnyTopology, StateContract, OntologicalHandshake
 
 
 @st.composite
@@ -204,21 +205,12 @@ def draw_hypothesis_generation_event(draw: Any) -> dict[str, Any]:
 
 @st.composite
 def draw_interventional_causal_task(draw: Any) -> dict[str, Any]:
-    res: dict[str, Any] = draw(
-        st.fixed_dictionaries(
-            {
-                "task_id": st.text(min_size=1),
-                "target_hypothesis_id": st.text(),
-                "intervention_variable": st.text(),
-                "do_operator_state": st.text(),
-                "expected_causal_information_gain": st.floats(
-                    min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False
-                ),
-                "execution_cost_budget_cents": st.integers(min_value=0),
-            }
-        )
-    )
-    return res
+    return draw(st.fixed_dictionaries({
+        "task_id": st.text(min_size=1),
+        "target_variable": st.text(min_size=1),
+        "do_operator_interventions": st.dictionaries(st.text(), st.one_of(st.text(), st.integers())),
+        "expected_information_gain": st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False)
+    }))
 
 
 @st.composite
@@ -444,23 +436,7 @@ def draw_agent_node_payload(draw: Any) -> dict[str, Any]:
     if draw(st.booleans()):
         payload["epistemic_policy"] = draw(draw_epistemic_policy())
     if draw(st.booleans()):
-        payload["baseline_cognitive_state"] = draw(draw_cognitive_state_profile())
-    if draw(st.booleans()):
         payload["correction_policy"] = draw(draw_correction_policy())
-    if draw(st.booleans()):
-        payload["escalation_policy"] = draw(draw_escalation_contract())
-    if draw(st.booleans()):
-        payload["prm_policy"] = draw(draw_process_reward_contract())
-    if draw(st.booleans()):
-        payload["active_inference_policy"] = draw(draw_active_inference_contract())
-    if draw(st.booleans()):
-        payload["analogical_policy"] = draw(draw_analogical_mapping_task())
-    if draw(st.booleans()):
-        payload["symbolic_handoff_policy"] = draw(draw_neuro_symbolic_handoff())
-    if draw(st.booleans()):
-        payload["interventional_policy"] = draw(draw_interventional_causal_task())
-    if draw(st.booleans()):
-        payload["audit_policy"] = draw(draw_mechanistic_audit_contract())
     return payload
 
 
@@ -496,37 +472,22 @@ def draw_output_mapping(draw: Any) -> dict[str, Any]:
 
 @st.composite
 def draw_dimensional_projection_contract(draw: Any) -> dict[str, Any]:
-    res: dict[str, Any] = draw(
-        st.fixed_dictionaries(
-            {
-                "source_model_name": st.text(min_size=1),
-                "target_model_name": st.text(min_size=1),
-                "projection_matrix_hash": st.text(min_size=10),
-                "isometry_preservation_score": st.floats(
-                    min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False
-                ),
-            }
-        )
-    )
-    return res
+    return draw(st.fixed_dictionaries({
+        "source_dimensionality": st.integers(min_value=1),
+        "target_dimensionality": st.integers(min_value=1),
+        "isometry_preservation_score": st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False),
+        "projection_matrix_hash": st.text(min_size=10)
+    }))
 
 
 @st.composite
 def draw_ontological_handshake(draw: Any) -> dict[str, Any]:
-    res: dict[str, Any] = draw(
-        st.fixed_dictionaries(
-            {
-                "handshake_id": st.text(min_size=1),
-                "participant_node_ids": st.lists(st.text(min_size=1), min_size=2, max_size=5),
-                "measured_cosine_similarity": st.floats(
-                    min_value=-1.0, max_value=1.0, allow_nan=False, allow_infinity=False
-                ),
-                "alignment_status": st.sampled_from(["aligned", "projected", "fallback_triggered", "incommensurable"]),
-                "applied_projection": st.one_of(st.none(), draw_dimensional_projection_contract()),
-            }
-        )
-    )
-    return res
+    return draw(st.fixed_dictionaries({
+        "initiating_node_id": st.text(min_size=1),
+        "receiving_node_id": st.text(min_size=1),
+        "latent_vector_similarity": st.floats(min_value=-1.0, max_value=1.0, allow_nan=False, allow_infinity=False),
+        "projection_contract": st.one_of(st.none(), draw_dimensional_projection_contract())
+    }))
 
 
 @st.composite
@@ -2037,6 +1998,16 @@ def test_custody_routing(payload: dict[str, Any]) -> None:
 @given(draw_trace_export_batch())
 def test_telemetry_routing(payload: dict[str, Any]) -> None:
     trace_export_batch_adapter.validate_python(payload)
+
+
+@given(draw_interventional_causal_task())
+def test_interventional_causal_task_routing(payload: dict[str, Any]) -> None:
+    TypeAdapter(InterventionalCausalTask).validate_python(payload)
+
+
+@given(draw_ontological_handshake())
+def test_ontological_handshake_routing(payload: dict[str, Any]) -> None:
+    TypeAdapter(OntologicalHandshake).validate_python(payload)
 
 
 @st.composite
