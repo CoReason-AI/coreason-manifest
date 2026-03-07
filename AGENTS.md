@@ -7,13 +7,54 @@
 **Current Status:** Pure Data Library
 **Role:** Definitive Source of Truth for Schemas and Contracts.
 
-### THE "DOMAIN-AGNOSTIC CORE" MANDATE
+## **0. The AI-Native Universal Ontology Directive**
+
+**CRITICAL CONTEXT:** This repository is NOT a standard human-centric software package. It is an AI-Native **Universal Unified Ontology** designed for a tightly coupled, proprietary swarm ecosystem. 
+
+You must evaluate and modify this repository based on the capabilities of LLMs with near-infinite context windows, NOT traditional human engineering limitations (like Conway's Law or cognitive load).
+
+* **Tight Coupling is a Feature:** Do NOT attempt to decouple, federate, or split this repository into sub-packages (e.g., separating UI schemas from Cryptography schemas). We intentionally maintain a single, massive "God Context." This allows the swarm to perform zero-shot, cross-domain synthesis.
+* **Ignore "Separation of Concerns" (SoC) Anti-Patterns:** Do not raise architectural warnings about semantic monoliths. The entire universe of the ecosystem's state, memory, orchestration, and compute MUST live together in this single, version-locked artifact to guarantee deterministic "vibe" alignment.
+* **Focus on Logical Contradictions:** Your primary architectural duty is to ensure there are no mathematical or ontological contradictions between the disparate domains.
+
+---
+
+## **0.1 The SOTA Lexicon & Conceptual Grounding**
+
+To maintain the pristine, mathematically rigorous nature of this ontology, all agents must strictly adhere to the following 2026+ state-of-the-art conceptual definitions when generating schemas, variables, and documentation:
+
+### **Cognitive Architecture & Compute**
+* **Representation Engineering (RepE) & Activation Steering:** Manipulating a model's internal latent representations (using contrastive concept vectors) to systematically steer behavior during the forward pass, without relying on prompt engineering. (e.g., `ActivationSteeringContract`).
+* **Test-Time Compute (System 2):** Dynamically unlocking compute budgets during inference to explore "Latent Scratchpads" and non-monotonic reasoning branches.
+* **Process Reward Models (PRM):** Evaluator models that score intermediate reasoning steps, enforcing a `pruning_threshold` to kill hallucinating branches before they consume further token budgets.
+* **PEFT LRU Cache:** Treating low-rank adapter (LoRA) weights as ephemeral compute assets loaded directly into GPU VRAM, governed by strict eviction TTLs.
+
+### **Epistemology & Causal Inference**
+* **Active Inference:** Algorithmic policy where agents call tools explicitly to maximize *Expected Information Gain* and reduce *Epistemic Uncertainty*.
+* **Structural Causal Models (SCMs):** Pearlian Directed Acyclic Graphs mapping causality (direct causes, confounders, colliders), verified via interventional tasks (the Do-Operator).
+* **Defeasible Reasoning:** Truth-maintenance where logic is non-monotonic. Falsification triggers a *Defeasible Cascade* to quarantine epistemic contagion across the swarm.
+
+### **Decentralized Identity (Zero-Trust)**
+* **Verifiable Credentials Data Model (VCDM v2.0):** The definitive standard for expressing cryptographically secure attestations.
+* **Decentralized Identifiers (DIDs) & SD-JWT:** Globally unique identifiers combined with Selective Disclosure JWTs, allowing agents to prove capabilities without revealing underlying private keys.
+* **Post-Quantum Cryptography (PQC):** The integration of NIST FIPS standard algorithms (e.g., ML-DSA, SLH-DSA) to secure Merkle traces and bilateral SLAs.
+
+### **Swarm Orchestration & Kinematics**
+* **Logarithmic Market Scoring Rule (LMSR):** The mathematical AMM function used to guarantee infinite liquidity and bound maximum loss in algorithmic prediction markets.
+* **Secure Multi-Party Computation (SMPC):** Protocols (e.g., Garbled Circuits) allowing participant nodes to jointly evaluate functions over private inputs.
+* **Spatial Kinematics:** The mathematical modeling of OS-level tool use, utilizing non-linear Bezier curves to simulate human pointer trajectories and bypass anti-bot heuristics.
+
+---
+
+## **0.2 THE "DOMAIN-AGNOSTIC CORE" MANDATE**
 This library (`coreason-manifest`) is a universal, Layer-0 orchestration kernel. It must remain strictly isolated from specific industry verticals, business logic, or domain ontologies.
 
 When generating or modifying schemas, you MUST adhere to the following constraints:
 * **No Vertical Ontologies:** Never hardcode domain-specific fields. You are strictly forbidden from implementing healthcare structures (e.g., OMOP, FHIR, `patient_id`), finance structures (e.g., `ticker`, `trade_volume`), or proprietary enterprise logic.
 * **Universal Naming Conventions:** Use generic, mathematical, or structural nomenclature. Instead of `patient_id`, use `tenant_id`. Instead of `medical_record`, use `data_source_id`.
 * **Extensibility over Hardcoding:** If a schema must capture domain-specific data, it must do so via passive, untyped extension points (e.g., `payload: dict[str, Any]`), allowing the downstream user to define their own vertical logic.
+
+---
 
 ## **1. The "No Execution" Directives**
 
