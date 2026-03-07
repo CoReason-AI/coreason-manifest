@@ -785,6 +785,35 @@ def draw_lineage_watermark(draw: Any) -> dict[str, Any]:
     return res
 
 
+@st.composite
+def draw_mcp_capability_whitelist(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "allowed_tools": st.lists(st.text(), max_size=100),
+                "allowed_resources": st.lists(st.text(), max_size=100),
+                "allowed_prompts": st.lists(st.text(), max_size=100),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_mcp_server_manifest(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "server_uri": st.text(min_size=1),
+                "transport_type": st.sampled_from(["stdio", "sse", "http"]),
+                "binary_hash": st.one_of(st.none(), st.text(min_size=10)),
+                "capability_whitelist": draw_mcp_capability_whitelist(),
+            }
+        )
+    )
+    return res
+
+
 @given(
     st.fixed_dictionaries(
         {
@@ -828,15 +857,7 @@ def draw_lineage_watermark(draw: Any) -> dict[str, Any]:
                 ),
                 unique_by=lambda t: t["tool_name"] if isinstance(t, dict) and "tool_name" in t else str(t),
             ),
-            "mcp_servers": st.lists(
-                st.fixed_dictionaries(
-                    {
-                        "server_uri": st.text(),
-                        "transport_type": st.sampled_from(["stdio", "sse", "http"]),
-                        "allowed_mcp_tools": st.one_of(st.none(), st.lists(st.text(), max_size=100)),
-                    }
-                )
-            ),
+            "mcp_servers": st.lists(draw_mcp_server_manifest(), max_size=10),
         }
     )
 )
@@ -1642,6 +1663,7 @@ def test_workflow_envelope_fuzzing(payload: dict[str, Any]) -> None:
     assert isinstance(parsed, WorkflowEnvelope)
 
 
+
 presentation_intent_adapter: TypeAdapter[AnyPresentationIntent] = TypeAdapter(AnyPresentationIntent)
 
 
@@ -1653,8 +1675,12 @@ def draw_informational_intent(draw: Any) -> dict[str, Any]:
                 "type": st.just("informational"),
                 "message": st.text(min_size=1),
                 "timeout_action": st.sampled_from(["rollback", "proceed_default", "terminate"]),
-adversarial_adapter: TypeAdapter[AdversarialSimulationProfile] = TypeAdapter(AdversarialSimulationProfile)
+            }
+        )
+    )
+    return res
 
+adversarial_adapter: TypeAdapter[AdversarialSimulationProfile] = TypeAdapter(AdversarialSimulationProfile)
 
 @st.composite
 def draw_adversarial_simulation_profile(draw: Any) -> dict[str, Any]:
@@ -1674,7 +1700,6 @@ def draw_adversarial_simulation_profile(draw: Any) -> dict[str, Any]:
         )
     )
     return res
-
 
 @st.composite
 def draw_drafting_intent(draw: Any) -> dict[str, Any]:
@@ -1739,6 +1764,7 @@ def test_presentation_intent_routing(payload: dict[str, Any]) -> None:
         assert isinstance(parsed, AdjudicationIntent)
     elif payload_type == "escalation":
         assert isinstance(parsed, EscalationIntent)
+
 @given(draw_adversarial_simulation_profile())
 def test_adversarial_simulation_routing(payload: dict[str, Any]) -> None:
     parsed = adversarial_adapter.validate_python(payload)

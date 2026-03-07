@@ -18,6 +18,41 @@ from pydantic import Field, HttpUrl, field_validator
 from coreason_manifest.core.base import CoreasonBaseModel
 
 
+class MCPCapabilityWhitelist(CoreasonBaseModel):
+    """
+    A zero-trust boundary defining exactly which JSON-RPC capabilities
+    the execution node is authorized to mount from the remote server.
+    """
+
+    allowed_tools: list[str] = Field(
+        default_factory=list, description="The explicit whitelist of function names the node is allowed to call."
+    )
+    allowed_resources: list[str] = Field(
+        default_factory=list, description="The explicit whitelist of resource URIs the node is allowed to read."
+    )
+    allowed_prompts: list[str] = Field(
+        default_factory=list, description="The explicit whitelist of workflow templates the node is allowed to trigger."
+    )
+
+
+class MCPServerManifest(CoreasonBaseModel):
+    """
+    The structural contract for mounting an external Model Context Protocol server.
+    """
+
+    server_uri: str = Field(description="The network URI for SSE/HTTP, or the command execution string for stdio.")
+    transport_type: Literal["stdio", "sse", "http"] = Field(
+        description="The physical transport layer protocol used to stream the JSON-RPC packets."
+    )
+    binary_hash: str | None = Field(
+        default=None,
+        description="Optional SHA-256 hash of the local binary to prevent supply-chain execution attacks over stdio.",
+    )
+    capability_whitelist: MCPCapabilityWhitelist = Field(
+        description="The strict capability bounds enforced by the orchestrator prior to connection."
+    )
+
+
 class JSONRPCError(CoreasonBaseModel):
     """JSON-RPC 2.0 Error object."""
 

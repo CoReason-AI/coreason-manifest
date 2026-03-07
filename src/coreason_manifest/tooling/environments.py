@@ -9,6 +9,7 @@ from typing import Any, Literal
 
 from pydantic import Field, model_validator
 
+from coreason_manifest.adapters.mcp.schemas import MCPServerManifest
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.tooling.schemas import ToolDefinition
 
@@ -40,8 +41,9 @@ class ActionSpace(CoreasonBaseModel):
     native_tools: list[ToolDefinition] = Field(
         default_factory=list, description="The list of discrete, natively defined tools available in this space."
     )
-    mcp_servers: list[MCPClientBinding] = Field(
-        default_factory=list, description="The list of MCP servers mounted into this action space."
+    mcp_servers: list[MCPServerManifest] = Field(
+        default_factory=list,
+        description="The array of verified external Model Context Protocol servers mounted into this action space.",
     )
 
     @model_validator(mode="after")
