@@ -172,6 +172,19 @@ class CausalDirectedEdge(CoreasonBaseModel):
     )
 
 
+class InterventionalCausalTask(CoreasonBaseModel):
+    """A rigid do-calculus intervention forcing the agent to simulate a reality manipulation."""
+
+    task_id: str = Field(description="Unique identifier for this causal intervention.")
+    target_variable: str = Field(description="The dependent variable Y being measured.")
+    do_operator_interventions: dict[str, Any] = Field(
+        description="The strict do(X=x) topological amputations applied to the causal graph."
+    )
+    expected_information_gain: float = Field(
+        ge=0.0, le=1.0, description="The calculated certainty bounded [0.0, 1.0] expected from this test."
+    )
+
+
 class StructuralCausalModel(CoreasonBaseModel):
     observed_variables: list[str] = Field(description="The nodes in the DAG that the agent can passively measure.")
     latent_variables: list[str] = Field(description="The unobserved confounders the agent suspects exist.")

@@ -7,6 +7,14 @@
 **Current Status:** Pure Data Library
 **Role:** Definitive Source of Truth for Schemas and Contracts.
 
+### THE "DOMAIN-AGNOSTIC CORE" MANDATE
+This library (`coreason-manifest`) is a universal, Layer-0 orchestration kernel. It must remain strictly isolated from specific industry verticals, business logic, or domain ontologies.
+
+When generating or modifying schemas, you MUST adhere to the following constraints:
+* **No Vertical Ontologies:** Never hardcode domain-specific fields. You are strictly forbidden from implementing healthcare structures (e.g., OMOP, FHIR, `patient_id`), finance structures (e.g., `ticker`, `trade_volume`), or proprietary enterprise logic.
+* **Universal Naming Conventions:** Use generic, mathematical, or structural nomenclature. Instead of `patient_id`, use `tenant_id`. Instead of `medical_record`, use `data_source_id`.
+* **Extensibility over Hardcoding:** If a schema must capture domain-specific data, it must do so via passive, untyped extension points (e.g., `payload: dict[str, Any]`), allowing the downstream user to define their own vertical logic.
+
 ## **1. The "No Execution" Directives**
 
 You are strictly forbidden from introducing "Active" or "Runtime" logic into this repository. Adhere to the following architectural laws without exception:
