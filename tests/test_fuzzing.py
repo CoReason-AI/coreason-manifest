@@ -205,12 +205,18 @@ def draw_hypothesis_generation_event(draw: Any) -> dict[str, Any]:
 
 @st.composite
 def draw_interventional_causal_task(draw: Any) -> dict[str, Any]:
-    return draw(st.fixed_dictionaries({
-        "task_id": st.text(min_size=1),
-        "target_variable": st.text(min_size=1),
-        "do_operator_interventions": st.dictionaries(st.text(), st.one_of(st.text(), st.integers())),
-        "expected_information_gain": st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False)
-    }))
+    return draw(
+        st.fixed_dictionaries(
+            {
+                "task_id": st.text(min_size=1),
+                "target_variable": st.text(min_size=1),
+                "do_operator_interventions": st.dictionaries(st.text(), st.one_of(st.text(), st.integers())),
+                "expected_information_gain": st.floats(
+                    min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False
+                ),
+            }
+        )
+    )
 
 
 @st.composite
@@ -472,22 +478,34 @@ def draw_output_mapping(draw: Any) -> dict[str, Any]:
 
 @st.composite
 def draw_dimensional_projection_contract(draw: Any) -> dict[str, Any]:
-    return draw(st.fixed_dictionaries({
-        "source_dimensionality": st.integers(min_value=1),
-        "target_dimensionality": st.integers(min_value=1),
-        "isometry_preservation_score": st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False),
-        "projection_matrix_hash": st.text(min_size=10)
-    }))
+    return draw(
+        st.fixed_dictionaries(
+            {
+                "source_dimensionality": st.integers(min_value=1),
+                "target_dimensionality": st.integers(min_value=1),
+                "isometry_preservation_score": st.floats(
+                    min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False
+                ),
+                "projection_matrix_hash": st.text(min_size=10),
+            }
+        )
+    )
 
 
 @st.composite
 def draw_ontological_handshake(draw: Any) -> dict[str, Any]:
-    return draw(st.fixed_dictionaries({
-        "initiating_node_id": st.text(min_size=1),
-        "receiving_node_id": st.text(min_size=1),
-        "latent_vector_similarity": st.floats(min_value=-1.0, max_value=1.0, allow_nan=False, allow_infinity=False),
-        "projection_contract": st.one_of(st.none(), draw_dimensional_projection_contract())
-    }))
+    return draw(
+        st.fixed_dictionaries(
+            {
+                "initiating_node_id": st.text(min_size=1),
+                "receiving_node_id": st.text(min_size=1),
+                "latent_vector_similarity": st.floats(
+                    min_value=-1.0, max_value=1.0, allow_nan=False, allow_infinity=False
+                ),
+                "projection_contract": st.one_of(st.none(), draw_dimensional_projection_contract()),
+            }
+        )
+    )
 
 
 @st.composite
