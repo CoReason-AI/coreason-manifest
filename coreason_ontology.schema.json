@@ -1555,6 +1555,14 @@
           ],
           "default": null,
           "description": "The strict mathematical boundary governing context window compression."
+        },
+        "migration_contracts": {
+          "description": "Declarative rules to translate historical states to the current active schema version.",
+          "items": {
+            "$ref": "#/$defs/MigrationContract"
+          },
+          "title": "Migration Contracts",
+          "type": "array"
         }
       },
       "required": [
@@ -2529,6 +2537,49 @@
           }
         ]
       },
+      "type": "object"
+    },
+    "MigrationContract": {
+      "additionalProperties": false,
+      "properties": {
+        "contract_id": {
+          "description": "Unique identifier for this structural migration mapping.",
+          "title": "Contract Id",
+          "type": "string"
+        },
+        "source_version": {
+          "description": "The exact semantic version string of the payload before migration.",
+          "title": "Source Version",
+          "type": "string"
+        },
+        "target_version": {
+          "description": "The exact semantic version string of the payload after migration.",
+          "title": "Target Version",
+          "type": "string"
+        },
+        "path_transformations": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "A strict mapping of old RFC 6902 JSON Pointers to new JSON Pointers.",
+          "title": "Path Transformations",
+          "type": "object"
+        },
+        "dropped_paths": {
+          "description": "Explicit whitelist of JSON Pointers that are safely deprecated and intentionally dropped during migration.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Dropped Paths",
+          "type": "array"
+        }
+      },
+      "required": [
+        "contract_id",
+        "source_version",
+        "target_version"
+      ],
+      "title": "MigrationContract",
       "type": "object"
     },
     "ModelProfile": {

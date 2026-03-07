@@ -38,6 +38,21 @@ class StateDiff(CoreasonBaseModel):
     )
 
 
+class MigrationContract(CoreasonBaseModel):
+    contract_id: str = Field(description="Unique identifier for this structural migration mapping.")
+    source_version: str = Field(description="The exact semantic version string of the payload before migration.")
+    target_version: str = Field(description="The exact semantic version string of the payload after migration.")
+    path_transformations: dict[str, str] = Field(
+        default_factory=dict, description="A strict mapping of old RFC 6902 JSON Pointers to new JSON Pointers."
+    )
+    dropped_paths: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Explicit whitelist of JSON Pointers that are safely deprecated and intentionally dropped during migration."
+        ),
+    )
+
+
 class RollbackRequest(CoreasonBaseModel):
     request_id: str = Field(description="Unique identifier for the causal rollback operation.")
     target_event_id: str = Field(description="The ID of the corrupted event in the EpistemicLedger to revert to.")
