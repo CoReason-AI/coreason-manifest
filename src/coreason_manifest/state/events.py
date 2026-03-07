@@ -32,6 +32,19 @@ class ZeroKnowledgeProof(CoreasonBaseModel):
     cryptographic_blob: str = Field(description="The base64-encoded succinct cryptographic proof payload.")
 
 
+class HardwareEnclaveAttestation(CoreasonBaseModel):
+    enclave_type: Literal["intel_tdx", "amd_sev_snp", "aws_nitro", "nvidia_cc"] = Field(
+        description="The physical silicon architecture generating the root-of-trust quote."
+    )
+    platform_measurement_hash: str = Field(
+        description="The cryptographic hash of the Platform Configuration Registers (PCRs) proving the memory state "
+        "was physically isolated."
+    )
+    hardware_signature_blob: str = Field(
+        description="The base64-encoded hardware quote signed by the silicon manufacturer's master private key."
+    )
+
+
 class ObservationEvent(BaseStateEvent):
     type: Literal["observation"] = Field(
         default="observation", description="Discriminator type for an observation event."
@@ -41,6 +54,10 @@ class ObservationEvent(BaseStateEvent):
     )
     source_node_id: NodeID | None = Field(
         default=None, description="The specific topological node that generated this observation."
+    )
+    hardware_attestation: HardwareEnclaveAttestation | None = Field(
+        default=None,
+        description="The physical hardware root-of-trust proving this observation was generated in a secure enclave.",
     )
     zk_proof: ZeroKnowledgeProof | None = Field(
         default=None, description="The mathematical attestation proving this observation was generated securely."
@@ -69,6 +86,10 @@ class BeliefUpdateEvent(BaseStateEvent):
     causal_attributions: list[CausalAttribution] = Field(
         default_factory=list,
         description="Immutable audit trail of prior states that forced this specific cognitive synthesis.",
+    )
+    hardware_attestation: HardwareEnclaveAttestation | None = Field(
+        default=None,
+        description="The physical hardware root-of-trust proving this belief was synthesized in a secure enclave.",
     )
     zk_proof: ZeroKnowledgeProof | None = Field(
         default=None,
