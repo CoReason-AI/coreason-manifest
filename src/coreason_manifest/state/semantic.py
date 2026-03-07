@@ -32,20 +32,20 @@ class DimensionalProjectionContract(CoreasonBaseModel):
     source_model_name: str = Field(description="The native embedding model of the origin agent.")
     target_model_name: str = Field(description="The native embedding model of the destination agent.")
     projection_matrix_hash: str = Field(
-        description="The SHA-256 hash of the exact mathematical matrix used to compress or translate the latent dimensions."
+        description="The SHA-256 hash of the exact mathematical matrix used to "
+        "compress or translate the latent dimensions."
     )
     isometry_preservation_score: float = Field(
         ge=0.0,
         le=1.0,
-        description="Mathematical proof (e.g., Earth Mover's Distance preservation) of how accurately relative semantic distances were maintained during projection.",
+        description="Mathematical proof (e.g., Earth Mover's Distance preservation) of "
+        "how accurately relative semantic distances were maintained during projection.",
     )
 
 
 class OntologicalHandshake(CoreasonBaseModel):
     handshake_id: str = Field(min_length=1, description="The unique identifier for the handshake.")
-    participant_node_ids: list[str] = Field(
-        min_length=2, description="The agents establishing semantic alignment."
-    )
+    participant_node_ids: list[str] = Field(min_length=2, description="The agents establishing semantic alignment.")
     measured_cosine_similarity: float = Field(
         ge=-1.0,
         le=1.0,

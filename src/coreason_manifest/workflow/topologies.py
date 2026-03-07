@@ -60,11 +60,13 @@ class OntologicalAlignmentPolicy(CoreasonBaseModel):
         description="The absolute minimum latent vector similarity required to allow swarm communication.",
     )
     require_isometry_proof: bool = Field(
-        description="If True, the orchestrator must reject dimensional projections that fall below a safe isometry preservation score."
+        description="If True, the orchestrator must reject dimensional projections that fall below "
+        "a safe isometry preservation score."
     )
     fallback_state_contract: StateContract | None = Field(
         default=None,
-        description="The rigid external JSON schema to force agents to use if their latent vector geometries are hopelessly incommensurable.",
+        description="The rigid external JSON schema to force agents to use if their "
+        "latent vector geometries are hopelessly incommensurable.",
     )
 
 
@@ -184,7 +186,8 @@ class CouncilTopology(BaseTopology):
     )
     ontological_alignment: OntologicalAlignmentPolicy | None = Field(
         default=None,
-        description="The pre-flight execution gate forcing agents to mathematically align their latent semantics before participating in the topology.",
+        description="The pre-flight execution gate forcing agents to mathematically align their latent "
+        "semantics before participating in the topology.",
     )
 
     @model_validator(mode="after")
@@ -261,7 +264,8 @@ class SMPCTopology(BaseTopology):
     )
     ontological_alignment: OntologicalAlignmentPolicy | None = Field(
         default=None,
-        description="The pre-flight execution gate forcing agents to mathematically align their latent semantics before participating in the topology.",
+        description="The pre-flight execution gate forcing agents to mathematically align their latent "
+        "semantics before participating in the topology.",
     )
 
 

@@ -46,8 +46,6 @@ from coreason_manifest.state.events import (
 )
 from coreason_manifest.state.memory import EpistemicLedger
 from coreason_manifest.state.semantic import (
-    DimensionalProjectionContract,
-    OntologicalHandshake,
     SemanticEdge,
     SemanticNode,
 )
@@ -59,7 +57,7 @@ from coreason_manifest.tooling import ActionSpace, ToolDefinition
 from coreason_manifest.workflow.auctions import AuctionState, TaskAward
 from coreason_manifest.workflow.envelope import WorkflowEnvelope
 from coreason_manifest.workflow.nodes import AgentNode, AnyNode, CompositeNode, HumanNode, SystemNode
-from coreason_manifest.workflow.topologies import AnyTopology, OntologicalAlignmentPolicy, StateContract
+from coreason_manifest.workflow.topologies import AnyTopology, StateContract
 
 
 @st.composite
