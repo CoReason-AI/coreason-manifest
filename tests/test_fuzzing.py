@@ -660,6 +660,7 @@ def draw_backpressure_policy(draw: Any) -> dict[str, Any]:
                 "token_budget_per_branch": st.one_of(st.none(), st.integers(min_value=1)),
                 "max_tokens_per_minute": st.one_of(st.none(), st.integers(min_value=1)),
                 "max_requests_per_minute": st.one_of(st.none(), st.integers(min_value=1)),
+                "max_uninterruptible_span_ms": st.one_of(st.none(), st.integers(min_value=1)),
             }
         )
     )
@@ -1081,8 +1082,30 @@ def draw_any_toolchain_state() -> st.SearchStrategy[dict[str, Any]]:
 
 
 @st.composite
+def draw_barge_in_interrupt_event(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "type": st.just("barge_in"),
+                "event_id": st.text(min_size=1),
+                "timestamp": st.floats(allow_nan=False, allow_infinity=False),
+                "target_event_id": st.text(min_size=1),
+                "sensory_trigger": st.one_of(st.none(), draw_embodied_sensory_vector()),
+                "retained_partial_payload": st.one_of(st.none(), st.text(), st.dictionaries(st.text(), st.text())),
+                "epistemic_disposition": st.sampled_from(["discard", "retain_as_context", "mark_as_falsified"]),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
 def _local_draw_any_state_event(draw: Any) -> dict[str, Any]:
-    event_type = draw(st.sampled_from(["observation", "belief_update", "system_fault", "hypothesis"]))
+    event_type = draw(st.sampled_from(["observation", "belief_update", "system_fault", "hypothesis", "barge_in"]))
+
+    if event_type == "barge_in":
+        barge_in_res: dict[str, Any] = draw(draw_barge_in_interrupt_event())
+        return barge_in_res
 
     if event_type == "hypothesis":
         res: dict[str, Any] = draw(draw_hypothesis_generation_event())
@@ -1138,11 +1161,15 @@ def test_anystateevent_routing(payload: dict[str, Any]) -> None:
         assert isinstance(parsed, SystemFaultEvent)
     elif event_type == "hypothesis":
         assert isinstance(parsed, HypothesisGenerationEvent)
+    elif event_type == "barge_in":
+        from coreason_manifest.state.events import BargeInInterruptEvent
+
+        assert isinstance(parsed, BargeInInterruptEvent)
 
 
 @given(st.text())
 def test_anystateevent_invalid(invalid_type: str) -> None:
-    if invalid_type in ["observation", "belief_update", "system_fault", "hypothesis"]:
+    if invalid_type in ["observation", "belief_update", "system_fault", "hypothesis", "barge_in"]:
         return
     payload = {"type": invalid_type, "event_id": "test", "timestamp": 123.0}
     with pytest.raises(ValidationError):
@@ -1385,6 +1412,7 @@ def draw_mcp_server_manifest(draw: Any) -> dict[str, Any]:
                                 }
                             ),
                         ),
+                        "is_preemptible": st.booleans(),
                     }
                 ),
                 unique_by=lambda t: t["tool_name"] if isinstance(t, dict) and "tool_name" in t else str(t),

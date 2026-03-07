@@ -230,7 +230,29 @@ class HypothesisGenerationEvent(BaseStateEvent):
     )
 
 
+class BargeInInterruptEvent(BaseStateEvent):
+    """A cryptographic receipt of a continuous multimodal sequence being prematurely severed by an external stimulus."""
+
+    type: Literal["barge_in"] = Field(
+        default="barge_in", description="Discriminator type for a barge-in interruption event."
+    )
+    target_event_id: str = Field(description="The exact event ID of the active node generation cycle that was killed.")
+    sensory_trigger: EmbodiedSensoryVector | None = Field(
+        default=None,
+        description="The continuous multimodal trigger (e.g., audio spike, user saying 'stop') "
+        "that justified the interruption.",
+    )
+    retained_partial_payload: dict[str, Any] | str | None = Field(
+        default=None,
+        description="The 'stutter' state: the incomplete fragment of thought or text generated before the kill signal.",
+    )
+    epistemic_disposition: Literal["discard", "retain_as_context", "mark_as_falsified"] = Field(
+        description="Explicit instruction to the orchestrator on how to patch the shared memory blackboard "
+        "with the partial payload."
+    )
+
+
 type AnyStateEvent = Annotated[
-    ObservationEvent | BeliefUpdateEvent | SystemFaultEvent | HypothesisGenerationEvent,
+    ObservationEvent | BeliefUpdateEvent | SystemFaultEvent | HypothesisGenerationEvent | BargeInInterruptEvent,
     Field(discriminator="type", description="A discriminated union of state events."),
 ]

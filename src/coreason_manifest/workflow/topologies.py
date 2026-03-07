@@ -111,6 +111,12 @@ class BackpressurePolicy(CoreasonBaseModel):
     max_requests_per_minute: int | None = Field(
         default=None, gt=0, description="The maximum kinetic velocity of API requests allowed."
     )
+    max_uninterruptible_span_ms: int | None = Field(
+        default=None,
+        gt=0,
+        description="Systemic heartbeat constraint. A node cannot lock the thread longer than this without yielding "
+        "to poll for BargeInInterruptEvents.",
+    )
 
 
 class BaseTopology(CoreasonBaseModel):
