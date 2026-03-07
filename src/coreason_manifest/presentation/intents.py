@@ -69,7 +69,8 @@ class EscalationIntent(CoreasonBaseModel):
         description="The ID of the Data Loss Prevention (DLP) or Governance rule that blocked execution."
     )
     resolution_schema: dict[str, Any] = Field(
-        description="The strict JSON Schema requiring an explicit cryptographic sign-off or justification string to bypass the breaker."
+        description="The strict JSON Schema requiring an explicit cryptographic "
+        "sign-off or justification string to bypass the breaker."
     )
     timeout_action: Literal["rollback", "proceed_default", "terminate"] = Field(
         description="The default action is usually terminate or rollback for security escalations."
@@ -80,7 +81,8 @@ type AnyPresentationIntent = Annotated[
     InformationalIntent | DraftingIntent | AdjudicationIntent | EscalationIntent, Field(discriminator="type")
 ]
 
-# Provide backwards compatibility for AnyIntent, which tests might still refer to via PresentationEnvelope if not changed there, or __init__.py
+# Provide backwards compatibility for AnyIntent, which tests might still refer
+# to via PresentationEnvelope if not changed there, or __init__.py
 type AnyIntent = AnyPresentationIntent
 
 
