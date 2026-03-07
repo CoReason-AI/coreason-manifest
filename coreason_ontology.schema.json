@@ -425,6 +425,7 @@
           "council": "#/$defs/CouncilTopology",
           "dag": "#/$defs/DAGTopology",
           "evolutionary": "#/$defs/EvolutionaryTopology",
+          "smpc": "#/$defs/SMPCTopology",
           "swarm": "#/$defs/SwarmTopology"
         },
         "propertyName": "type"
@@ -441,6 +442,9 @@
         },
         {
           "$ref": "#/$defs/EvolutionaryTopology"
+        },
+        {
+          "$ref": "#/$defs/SMPCTopology"
         }
       ]
     },
@@ -3191,6 +3195,98 @@
         "tradeoff_preference"
       ],
       "title": "RoutingFrontier",
+      "type": "object"
+    },
+    "SMPCTopology": {
+      "additionalProperties": false,
+      "description": "A Secure Multi-Party Computation topology.",
+      "properties": {
+        "nodes": {
+          "additionalProperties": {
+            "$ref": "#/$defs/AnyNode"
+          },
+          "description": "Flat registry of all nodes in this topology.",
+          "propertyNames": {
+            "$ref": "#/$defs/NodeID"
+          },
+          "title": "Nodes",
+          "type": "object"
+        },
+        "shared_state_contract": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StateContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The schema-on-write contract governing the internal state of this topology."
+        },
+        "information_flow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/InformationFlowPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The structural Data Loss Prevention (DLP) contract governing all state mutations in this topology."
+        },
+        "observability": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ObservabilityPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The distributed tracing rules bound to this specific execution graph."
+        },
+        "type": {
+          "const": "smpc",
+          "default": "smpc",
+          "description": "Discriminator for SMPC Topology.",
+          "title": "Type",
+          "type": "string"
+        },
+        "smpc_protocol": {
+          "description": "The exact cryptographic P2P protocol the nodes must use to evaluate the function.",
+          "enum": [
+            "garbled_circuits",
+            "secret_sharing",
+            "oblivious_transfer"
+          ],
+          "title": "Smpc Protocol",
+          "type": "string"
+        },
+        "joint_function_uri": {
+          "description": "The URI or hash pointing to the exact math circuit or polynomial function the ring will collaboratively compute.",
+          "title": "Joint Function Uri",
+          "type": "string"
+        },
+        "participant_node_ids": {
+          "description": "The strict ordered list of NodeIDs participating in the Secure Multi-Party Computation ring.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 2,
+          "title": "Participant Node Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "nodes",
+        "smpc_protocol",
+        "joint_function_uri",
+        "participant_node_ids"
+      ],
+      "title": "SMPCTopology",
       "type": "object"
     },
     "SalienceProfile": {
