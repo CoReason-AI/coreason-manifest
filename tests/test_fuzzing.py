@@ -431,6 +431,23 @@ def draw_agent_attestation(draw: Any) -> dict[str, Any]:
 
 
 @st.composite
+def draw_peft_adapter_contract(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "adapter_id": st.text(min_size=1),
+                "safetensors_hash": st.from_regex(r"^[a-f0-9]{64}$", fullmatch=True),
+                "base_model_hash": st.from_regex(r"^[a-f0-9]{64}$", fullmatch=True),
+                "adapter_rank": st.integers(min_value=1, max_value=256),
+                "target_modules": st.lists(st.text(min_size=1), min_size=1, max_size=10),
+                "eviction_ttl_seconds": st.one_of(st.none(), st.integers(min_value=1)),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
 def draw_routing_frontier(draw: Any) -> dict[str, Any]:
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(
@@ -455,6 +472,8 @@ def draw_agent_node_payload(draw: Any) -> dict[str, Any]:
     payload: dict[str, Any] = {"type": "agent", "description": draw(st.text())}
     if draw(st.booleans()):
         payload["compute_frontier"] = draw(draw_routing_frontier())
+    if draw(st.booleans()):
+        payload["peft_adapters"] = draw(st.lists(draw_peft_adapter_contract(), max_size=5))
     if draw(st.booleans()):
         payload["agent_attestation"] = draw(draw_agent_attestation())
     if draw(st.booleans()):

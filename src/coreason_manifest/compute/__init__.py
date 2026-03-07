@@ -14,6 +14,7 @@ from .neuromodulation import (
     ActivationSteeringContract,
     CognitiveRoutingDirective,
 )
+from .peft import PeftAdapterContract
 from .profiles import (
     ComputeProvisioningRequest,
     ModelProfile,
@@ -49,6 +50,7 @@ __all__ = [
     "ModelProfile",
     "MutationPolicy",
     "NeuroSymbolicHandoff",
+    "PeftAdapterContract",
     "ProcessRewardContract",
     "RateCard",
     "RoutingFrontier",
