@@ -29,6 +29,13 @@ from coreason_manifest.oversight.resilience import (
     FallbackTrigger,
     QuarantineOrder,
 )
+from coreason_manifest.presentation.intents import (
+    AdjudicationIntent,
+    AnyPresentationIntent,
+    DraftingIntent,
+    EscalationIntent,
+    InformationalIntent,
+)
 from coreason_manifest.presentation.scivis import AnyPanel, GrammarPanel, InsightCard
 from coreason_manifest.state.argumentation import ArgumentGraph
 from coreason_manifest.state.events import AnyStateEvent, BeliefUpdateEvent, ObservationEvent, SystemFaultEvent
@@ -1632,3 +1639,81 @@ def draw_workflow_envelope(draw: Any) -> dict[str, Any]:
 def test_workflow_envelope_fuzzing(payload: dict[str, Any]) -> None:
     parsed = workflow_envelope_adapter.validate_python(payload)
     assert isinstance(parsed, WorkflowEnvelope)
+
+
+presentation_intent_adapter: TypeAdapter[AnyPresentationIntent] = TypeAdapter(AnyPresentationIntent)
+
+
+@st.composite
+def draw_informational_intent(draw: Any) -> dict[str, Any]:
+    return draw(
+        st.fixed_dictionaries(
+            {
+                "type": st.just("informational"),
+                "message": st.text(min_size=1),
+                "timeout_action": st.sampled_from(["rollback", "proceed_default", "terminate"]),
+            }
+        )
+    )
+
+
+@st.composite
+def draw_drafting_intent(draw: Any) -> dict[str, Any]:
+    return draw(
+        st.fixed_dictionaries(
+            {
+                "type": st.just("drafting"),
+                "context_prompt": st.text(min_size=1),
+                "resolution_schema": st.dictionaries(st.text(), st.one_of(st.text(), st.integers(), st.booleans())),
+                "timeout_action": st.sampled_from(["rollback", "proceed_default", "terminate"]),
+            }
+        )
+    )
+
+
+@st.composite
+def draw_adjudication_intent(draw: Any) -> dict[str, Any]:
+    return draw(
+        st.fixed_dictionaries(
+            {
+                "type": st.just("forced_adjudication"),
+                "deadlocked_claims": st.lists(st.text(min_size=1), min_size=2, max_size=5),
+                "resolution_schema": st.dictionaries(st.text(), st.one_of(st.text(), st.integers(), st.booleans())),
+                "timeout_action": st.sampled_from(["rollback", "proceed_default", "terminate"]),
+            }
+        )
+    )
+
+
+@st.composite
+def draw_escalation_intent(draw: Any) -> dict[str, Any]:
+    return draw(
+        st.fixed_dictionaries(
+            {
+                "type": st.just("escalation"),
+                "tripped_rule_id": st.text(min_size=1),
+                "resolution_schema": st.dictionaries(st.text(), st.one_of(st.text(), st.integers(), st.booleans())),
+                "timeout_action": st.sampled_from(["rollback", "proceed_default", "terminate"]),
+            }
+        )
+    )
+
+
+def draw_any_presentation_intent() -> st.SearchStrategy[dict[str, Any]]:
+    return st.one_of(
+        draw_informational_intent(), draw_drafting_intent(), draw_adjudication_intent(), draw_escalation_intent()
+    )
+
+
+@given(draw_any_presentation_intent())
+def test_presentation_intent_routing(payload: dict[str, Any]) -> None:
+    parsed = presentation_intent_adapter.validate_python(payload)
+    payload_type = payload["type"]
+    if payload_type == "informational":
+        assert isinstance(parsed, InformationalIntent)
+    elif payload_type == "drafting":
+        assert isinstance(parsed, DraftingIntent)
+    elif payload_type == "forced_adjudication":
+        assert isinstance(parsed, AdjudicationIntent)
+    elif payload_type == "escalation":
+        assert isinstance(parsed, EscalationIntent)

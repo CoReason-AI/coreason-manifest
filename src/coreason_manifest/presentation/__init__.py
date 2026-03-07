@@ -7,11 +7,10 @@
 
 from .intents import (
     AdjudicationIntent,
-    AnyIntent,
-    BaseIntent,
+    AnyPresentationIntent,
     DraftingIntent,
-    FYIIntent,
-    PresentationEnvelope,
+    EscalationIntent,
+    InformationalIntent,
 )
 from .scivis import (
     AnyPanel,
@@ -30,21 +29,20 @@ from .templates import DynamicLayoutTemplate
 
 __all__ = [
     "AdjudicationIntent",
-    "AnyIntent",
     "AnyPanel",
-    "BaseIntent",
+    "AnyPresentationIntent",
     "BasePanel",
     "ChannelEncoding",
     "DraftingIntent",
     "DynamicLayoutTemplate",
     "EncodingChannel",
-    "FYIIntent",
+    "EscalationIntent",
     "FacetMatrix",
     "GrammarPanel",
+    "InformationalIntent",
     "InsightCard",
     "MacroGrid",
     "MarkType",
-    "PresentationEnvelope",
     "ScaleDefinition",
     "ScaleType",
 ]
