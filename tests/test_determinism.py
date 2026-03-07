@@ -300,8 +300,12 @@ def test_grammar_determinism() -> None:
 
 
 def test_presentation_envelope_determinism() -> None:
-    intent1 = DraftingIntent()
-    intent2 = DraftingIntent()
+    intent1 = DraftingIntent(
+        context_prompt="Missing context", resolution_schema={"type": "string"}, timeout_action="rollback"
+    )
+    intent2 = DraftingIntent(
+        context_prompt="Missing context", resolution_schema={"type": "string"}, timeout_action="rollback"
+    )
 
     panel1 = InsightCard(panel_id="panel_1", title="Insight 1", markdown_content="Content 1")
     panel2 = InsightCard(panel_id="panel_2", title="Insight 2", markdown_content="Content 2")

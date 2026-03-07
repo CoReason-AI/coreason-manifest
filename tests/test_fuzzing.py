@@ -4,7 +4,6 @@
 # The issuer of the Prosperity Public License for this software is CoReason, Inc..
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
-
 import re
 from typing import Any
 
@@ -28,6 +27,13 @@ from coreason_manifest.oversight.resilience import (
     CircuitBreakerTrip,
     FallbackTrigger,
     QuarantineOrder,
+)
+from coreason_manifest.presentation.intents import (
+    AdjudicationIntent,
+    AnyPresentationIntent,
+    DraftingIntent,
+    EscalationIntent,
+    InformationalIntent,
 )
 from coreason_manifest.presentation.scivis import AnyPanel, GrammarPanel, InsightCard
 from coreason_manifest.state.argumentation import ArgumentGraph
@@ -1724,3 +1730,95 @@ def test_adversarial_simulation_routing(payload: dict[str, Any]) -> None:
     assert isinstance(parsed, AdversarialSimulationProfile)
     assert parsed.simulation_id == payload["simulation_id"]
     assert parsed.target_node_id == payload["target_node_id"]
+
+
+any_presentation_intent_adapter: TypeAdapter[AnyPresentationIntent] = TypeAdapter(AnyPresentationIntent)
+
+
+@st.composite
+def draw_informational_intent(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "type": st.just("informational"),
+                "message": st.text(),
+                "timeout_action": st.sampled_from(["rollback", "proceed_default", "terminate"]),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_drafting_intent(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "type": st.just("drafting"),
+                "context_prompt": st.text(),
+                "resolution_schema": st.dictionaries(st.text(), st.one_of(st.text(), st.integers(), st.booleans())),
+                "timeout_action": st.sampled_from(["rollback", "proceed_default", "terminate"]),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_adjudication_intent(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "type": st.just("forced_adjudication"),
+                "deadlocked_claims": st.lists(st.text(), min_size=2),
+                "resolution_schema": st.dictionaries(st.text(), st.one_of(st.text(), st.integers(), st.booleans())),
+                "timeout_action": st.sampled_from(["rollback", "proceed_default", "terminate"]),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_escalation_intent(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "type": st.just("escalation"),
+                "tripped_rule_id": st.text(),
+                "resolution_schema": st.dictionaries(st.text(), st.one_of(st.text(), st.integers(), st.booleans())),
+                "timeout_action": st.sampled_from(["rollback", "proceed_default", "terminate"]),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_any_presentation_intent(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.one_of(
+            draw_informational_intent(),
+            draw_drafting_intent(),
+            draw_adjudication_intent(),
+            draw_escalation_intent(),
+        )
+    )
+    return res
+
+
+@given(draw_any_presentation_intent())
+def test_presentation_intent_routing(payload: dict[str, Any]) -> None:
+    parsed = any_presentation_intent_adapter.validate_python(payload)
+    if payload["type"] == "informational":
+        assert isinstance(parsed, InformationalIntent)
+        assert parsed.message == payload["message"]
+    elif payload["type"] == "drafting":
+        assert isinstance(parsed, DraftingIntent)
+        assert parsed.context_prompt == payload["context_prompt"]
+    elif payload["type"] == "forced_adjudication":
+        assert isinstance(parsed, AdjudicationIntent)
+        assert parsed.deadlocked_claims == payload["deadlocked_claims"]
+    elif payload["type"] == "escalation":
+        assert isinstance(parsed, EscalationIntent)
+        assert parsed.tripped_rule_id == payload["tripped_rule_id"]
