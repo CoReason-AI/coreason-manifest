@@ -721,6 +721,23 @@ def test_chaosexperiment_fuzzing(
     assert parsed.experiment_id == experiment_id
 
 
+@st.composite
+def draw_lineage_watermark(draw: Any) -> dict[str, Any]:
+    return draw(
+        st.fixed_dictionaries(
+            {
+                "watermark_protocol": st.sampled_from(["merkle_dag", "statistical_token", "homomorphic_mac"]),
+                "hop_signatures": st.dictionaries(
+                    st.text(min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"),
+                    st.text(min_size=10),
+                    max_size=5,
+                ),
+                "tamper_evident_root": st.text(min_size=10),
+            }
+        )
+    )
+
+
 @given(
     st.fixed_dictionaries(
         {
@@ -873,6 +890,7 @@ def draw_fhe_profile(draw: Any) -> dict[str, Any]:
                     ),
                     "source_event_id": st.text(),
                     "spatial_anchor": st.one_of(st.none(), draw_spatial_anchor()),
+                    "lineage_watermark": st.one_of(st.none(), draw_lineage_watermark()),
                 }
             ),
             "tier": st.sampled_from(["working", "episodic", "semantic"]),
@@ -915,6 +933,7 @@ def test_semanticnode_fuzzing(payload: dict[str, Any]) -> None:
                             min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
                         ),
                         "source_event_id": st.text(),
+                        "lineage_watermark": st.one_of(st.none(), draw_lineage_watermark()),
                     }
                 ),
             ),

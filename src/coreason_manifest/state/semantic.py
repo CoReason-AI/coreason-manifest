@@ -56,11 +56,32 @@ class TemporalBounds(CoreasonBaseModel):
         return self
 
 
+class LineageWatermark(CoreasonBaseModel):
+    watermark_protocol: Literal["merkle_dag", "statistical_token", "homomorphic_mac"] = Field(
+        description="The mathematical methodology used to embed the chain of custody."
+    )
+    hop_signatures: dict[str, str] = Field(
+        description="A dictionary mapping intermediate participant NodeIDs to their deterministic execution signatures."
+    )
+    tamper_evident_root: str = Field(
+        description=(
+            "The overarching cryptographic hash (e.g., Merkle Root) proving "
+            "the dataset has not been laundered or structurally modified."
+        )
+    )
+
+
 class MemoryProvenance(CoreasonBaseModel):
     extracted_by: NodeID = Field(description="The ID of the agent node that extracted this memory.")
     source_event_id: str = Field(description="The exact event ID in the EpistemicLedger that generated this fact.")
     spatial_anchor: SpatialAnchor | None = Field(
         default=None, description="The physical coordinate matrix where this data was extracted."
+    )
+    lineage_watermark: LineageWatermark | None = Field(
+        default=None,
+        description=(
+            "The cryptographic, tamper-evident chain of custody tracing this memory across multiple swarm hops."
+        ),
     )
 
 
