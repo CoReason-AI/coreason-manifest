@@ -519,7 +519,7 @@ def draw_zkp(draw: Any) -> dict[str, Any]:
 
 @st.composite
 def draw_hardware_attestation(draw: Any) -> dict[str, Any]:
-    return draw(
+    res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
                 "enclave_type": st.sampled_from(["intel_tdx", "amd_sev_snp", "aws_nitro", "nvidia_cc"]),
@@ -528,6 +528,7 @@ def draw_hardware_attestation(draw: Any) -> dict[str, Any]:
             }
         )
     )
+    return res
 
 
 @st.composite
