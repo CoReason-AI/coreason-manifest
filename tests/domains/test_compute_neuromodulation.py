@@ -8,7 +8,56 @@
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.compute.neuromodulation import ActivationSteeringContract, CognitiveRoutingDirective
+from coreason_manifest.compute.neuromodulation import (
+    ActivationSteeringContract,
+    CognitiveRoutingDirective,
+    LatentSmoothingProfile,
+    SaeLatentFirewall,
+)
+
+
+def test_sae_latent_firewall_smooth_decay_missing_profile() -> None:
+    with pytest.raises(ValidationError, match="smoothing_profile must be provided"):
+        SaeLatentFirewall(
+            target_feature_index=1,
+            monitored_layers=[1, 2],
+            max_activation_threshold=1.5,
+            violation_action="smooth_decay",
+            clamp_value=0.5,
+            sae_dictionary_hash="a" * 64,
+            smoothing_profile=None,
+        )
+
+
+def test_sae_latent_firewall_smooth_decay_missing_clamp() -> None:
+    prof = LatentSmoothingProfile(decay_function="linear", transition_window_tokens=5)
+    with pytest.raises(ValidationError, match="clamp_value must be provided"):
+        SaeLatentFirewall(
+            target_feature_index=1,
+            monitored_layers=[1, 2],
+            max_activation_threshold=1.5,
+            violation_action="smooth_decay",
+            clamp_value=None,
+            sae_dictionary_hash="a" * 64,
+            smoothing_profile=prof,
+        )
+
+
+def test_sae_latent_firewall_smooth_decay_valid() -> None:
+    prof = LatentSmoothingProfile(decay_function="linear", transition_window_tokens=5)
+    fw = SaeLatentFirewall(
+        target_feature_index=1,
+        monitored_layers=[1, 2],
+        max_activation_threshold=1.5,
+        violation_action="smooth_decay",
+        clamp_value=0.5,
+        sae_dictionary_hash="a" * 64,
+        smoothing_profile=prof,
+    )
+    assert fw.violation_action == "smooth_decay"
+    assert fw.clamp_value == 0.5
+    assert fw.smoothing_profile is not None
+    assert fw.smoothing_profile.decay_function == "linear"
 
 
 def test_activation_steering_contract_valid() -> None:
