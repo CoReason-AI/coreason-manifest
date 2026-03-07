@@ -1802,7 +1802,8 @@
             "unanimous",
             "majority",
             "debate_rounds",
-            "prediction_market"
+            "prediction_market",
+            "pbft"
           ],
           "title": "Strategy",
           "type": "string"
@@ -1846,6 +1847,18 @@
           ],
           "default": null,
           "description": "The strict algorithmic mechanism rules required if the strategy is prediction_market."
+        },
+        "quorum_rules": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/QuorumPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The strict Byzantine fault tolerance limits required if the strategy is 'pbft'."
         }
       },
       "required": [
@@ -5073,6 +5086,52 @@
         "reason"
       ],
       "title": "QuarantineOrder",
+      "type": "object"
+    },
+    "QuorumPolicy": {
+      "additionalProperties": false,
+      "description": "The mathematical boundaries required to survive Byzantine failures in a decentralized swarm.",
+      "properties": {
+        "max_tolerable_faults": {
+          "description": "The maximum number of actively malicious, hallucinating, or degraded nodes (f) the swarm must survive.",
+          "minimum": 0,
+          "title": "Max Tolerable Faults",
+          "type": "integer"
+        },
+        "min_quorum_size": {
+          "description": "The minimum number of participating agents (N) required to form consensus.",
+          "exclusiveMinimum": 0,
+          "title": "Min Quorum Size",
+          "type": "integer"
+        },
+        "state_validation_metric": {
+          "description": "The cryptographic material the agents must sign to submit a valid vote.",
+          "enum": [
+            "ledger_hash",
+            "zk_proof",
+            "semantic_embedding"
+          ],
+          "title": "State Validation Metric",
+          "type": "string"
+        },
+        "byzantine_action": {
+          "description": "The deterministic punishment executed by the orchestrator against nodes that violate the consensus quorum.",
+          "enum": [
+            "quarantine",
+            "slash_escrow",
+            "ignore"
+          ],
+          "title": "Byzantine Action",
+          "type": "string"
+        }
+      },
+      "required": [
+        "max_tolerable_faults",
+        "min_quorum_size",
+        "state_validation_metric",
+        "byzantine_action"
+      ],
+      "title": "QuorumPolicy",
       "type": "object"
     },
     "RateCard": {
