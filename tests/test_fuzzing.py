@@ -205,7 +205,7 @@ def draw_hypothesis_generation_event(draw: Any) -> dict[str, Any]:
 
 @st.composite
 def draw_interventional_causal_task(draw: Any) -> dict[str, Any]:
-    return draw(
+    res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
                 "task_id": st.text(min_size=1),
@@ -217,6 +217,7 @@ def draw_interventional_causal_task(draw: Any) -> dict[str, Any]:
             }
         )
     )
+    return res
 
 
 @st.composite
@@ -478,7 +479,7 @@ def draw_output_mapping(draw: Any) -> dict[str, Any]:
 
 @st.composite
 def draw_dimensional_projection_contract(draw: Any) -> dict[str, Any]:
-    return draw(
+    res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
                 "source_dimensionality": st.integers(min_value=1),
@@ -490,11 +491,12 @@ def draw_dimensional_projection_contract(draw: Any) -> dict[str, Any]:
             }
         )
     )
+    return res
 
 
 @st.composite
 def draw_ontological_handshake(draw: Any) -> dict[str, Any]:
-    return draw(
+    res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
                 "initiating_node_id": st.text(min_size=1),
@@ -506,6 +508,7 @@ def draw_ontological_handshake(draw: Any) -> dict[str, Any]:
             }
         )
     )
+    return res
 
 
 @st.composite
