@@ -318,6 +318,30 @@
           ],
           "default": null,
           "description": "The policy governing self-correction loops."
+        },
+        "escalation_policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EscalationContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematical boundary authorizing the agent to spin up Test-Time Compute."
+        },
+        "prm_policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ProcessRewardContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The ruleset governing how intermediate thoughts are scored and pruned."
         }
       },
       "required": [
@@ -750,6 +774,18 @@
           ],
           "default": null,
           "description": "The mathematical quantification of doubt associated with this synthesized belief."
+        },
+        "scratchpad_trace": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LatentScratchpadTrace"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The cryptographic record of the non-monotonic internal monologue that justifies this belief."
         }
       },
       "required": [
@@ -1838,6 +1874,37 @@
       "title": "EpistemicScanner",
       "type": "object"
     },
+    "EscalationContract": {
+      "additionalProperties": false,
+      "properties": {
+        "uncertainty_escalation_threshold": {
+          "description": "The exact Epistemic Uncertainty score that triggers the opening of the Latent Scratchpad.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Uncertainty Escalation Threshold",
+          "type": "number"
+        },
+        "max_latent_tokens_budget": {
+          "description": "The maximum number of hidden tokens the orchestrator is authorized to buy for the internal monologue.",
+          "exclusiveMinimum": 0,
+          "title": "Max Latent Tokens Budget",
+          "type": "integer"
+        },
+        "max_test_time_compute_ms": {
+          "description": "The physical time limit allowed for the scratchpad search before forcing a timeout.",
+          "exclusiveMinimum": 0,
+          "title": "Max Test Time Compute Ms",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "uncertainty_escalation_threshold",
+        "max_latent_tokens_budget",
+        "max_test_time_compute_ms"
+      ],
+      "title": "EscalationContract",
+      "type": "object"
+    },
     "EscrowPolicy": {
       "additionalProperties": false,
       "properties": {
@@ -2760,6 +2827,60 @@
       "title": "InterventionVerdict",
       "type": "object"
     },
+    "LatentScratchpadTrace": {
+      "additionalProperties": false,
+      "properties": {
+        "trace_id": {
+          "description": "Unique identifier for this entire test-time compute session.",
+          "minLength": 1,
+          "title": "Trace Id",
+          "type": "string"
+        },
+        "explored_branches": {
+          "description": "All logical paths the agent attempted.",
+          "items": {
+            "$ref": "#/$defs/ThoughtBranch"
+          },
+          "title": "Explored Branches",
+          "type": "array"
+        },
+        "discarded_branches": {
+          "description": "A list of branch_ids that were explicitly pruned due to logical dead-ends.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Discarded Branches",
+          "type": "array"
+        },
+        "resolution_branch_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The branch_id that successfully resolved the uncertainty and led to the final output.",
+          "title": "Resolution Branch Id"
+        },
+        "total_latent_tokens": {
+          "description": "The total compute expenditure (in tokens) spent purely on internal reasoning.",
+          "minimum": 0,
+          "title": "Total Latent Tokens",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "trace_id",
+        "explored_branches",
+        "discarded_branches",
+        "total_latent_tokens"
+      ],
+      "title": "LatentScratchpadTrace",
+      "type": "object"
+    },
     "LifecycleTrigger": {
       "enum": [
         "on_start",
@@ -3482,6 +3603,43 @@
         "pq_signature_blob"
       ],
       "title": "PostQuantumSignature",
+      "type": "object"
+    },
+    "ProcessRewardContract": {
+      "additionalProperties": false,
+      "properties": {
+        "pruning_threshold": {
+          "description": "If a ThoughtBranch's prm_score falls below this threshold, the orchestrator MUST halt its generation.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Pruning Threshold",
+          "type": "number"
+        },
+        "max_backtracks_allowed": {
+          "description": "The absolute limit on how many times the agent can start a new branch before throwing a SystemFaultEvent.",
+          "minimum": 0,
+          "title": "Max Backtracks Allowed",
+          "type": "integer"
+        },
+        "evaluator_model_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The specific PRM model used to score the logic (e.g., 'math-prm-v2').",
+          "title": "Evaluator Model Name"
+        }
+      },
+      "required": [
+        "pruning_threshold",
+        "max_backtracks_allowed"
+      ],
+      "title": "ProcessRewardContract",
       "type": "object"
     },
     "QoSClassification": {
@@ -4840,6 +4998,57 @@
         "env_variables_hash"
       ],
       "title": "TerminalBufferState",
+      "type": "object"
+    },
+    "ThoughtBranch": {
+      "additionalProperties": false,
+      "properties": {
+        "branch_id": {
+          "description": "Unique identifier for this line of reasoning.",
+          "minLength": 1,
+          "title": "Branch Id",
+          "type": "string"
+        },
+        "parent_branch_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The branch this thought diverged from, enabling tree reconstruction.",
+          "title": "Parent Branch Id"
+        },
+        "latent_content_hash": {
+          "description": "The SHA-256 hash of the raw scratchpad text generated in this branch.",
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Latent Content Hash",
+          "type": "string"
+        },
+        "prm_score": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The logical validity score assigned to this branch by the Process Reward Model.",
+          "title": "Prm Score"
+        }
+      },
+      "required": [
+        "branch_id",
+        "latent_content_hash"
+      ],
+      "title": "ThoughtBranch",
       "type": "object"
     },
     "TieBreaker": {
