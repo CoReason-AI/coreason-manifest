@@ -12,8 +12,8 @@ def test_cwe_674_deep_linear_chain() -> None:
     """
     payload = {
         "type": "dag",
-        "nodes": {f"node_{i}": {"type": "system", "description": "pass"} for i in range(5000)},
-        "edges": [(f"node_{i}", f"node_{i + 1}") for i in range(4999)],
+        "nodes": {f"did:web:node_{i}": {"type": "system", "description": "pass"} for i in range(5000)},
+        "edges": [(f"did:web:node_{i}", f"did:web:node_{i + 1}") for i in range(4999)],
         "allow_cycles": False,
     }
 
@@ -28,13 +28,13 @@ def test_cwe_674_deep_cycle_detection() -> None:
     Prove that a 5000-deep graph containing a cycle raises a ValidationError
     without causing a RecursionError or hanging.
     """
-    edges = [(f"node_{i}", f"node_{i + 1}") for i in range(4999)]
+    edges = [(f"did:web:node_{i}", f"did:web:node_{i + 1}") for i in range(4999)]
     # Connect the tail to the head to create a loop-back cycle
-    edges.append(("node_4999", "node_0"))
+    edges.append(("did:web:node_4999", "did:web:node_0"))
 
     payload = {
         "type": "dag",
-        "nodes": {f"node_{i}": {"type": "system", "description": "pass"} for i in range(5000)},
+        "nodes": {f"did:web:node_{i}": {"type": "system", "description": "pass"} for i in range(5000)},
         "edges": edges,
         "allow_cycles": False,
     }

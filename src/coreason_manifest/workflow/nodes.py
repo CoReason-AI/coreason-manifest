@@ -14,6 +14,7 @@ from coreason_manifest.compute.profiles import RoutingFrontier
 from coreason_manifest.compute.symbolic import NeuroSymbolicHandoff
 from coreason_manifest.compute.test_time import EscalationContract, ProcessRewardContract
 from coreason_manifest.core.base import CoreasonBaseModel
+from coreason_manifest.core.identity import VerifiableCredentialPresentation
 from coreason_manifest.oversight.dlp import SecureSubSession
 from coreason_manifest.state.cognition import CognitiveStateProfile
 
@@ -82,6 +83,11 @@ class AgentAttestation(CoreasonBaseModel):
     developer_signature: str = Field(description="The cryptographic signature of the developer/vendor.")
     capability_merkle_root: str = Field(
         pattern=r"^[a-f0-9]{64}$", description="The SHA-256 Merkle root of the agent's verified semantic capabilities."
+    )
+    credential_presentations: list[VerifiableCredentialPresentation] = Field(
+        default_factory=list,
+        description="The wallet of selective disclosure credentials proving the agent's identity, clearance, "
+        "and budget authorization.",
     )
 
 

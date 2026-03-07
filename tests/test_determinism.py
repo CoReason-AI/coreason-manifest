@@ -32,12 +32,12 @@ from coreason_manifest.workflow.topologies import DAGTopology, EvolutionaryTopol
 def test_composite_node_determinism() -> None:
     # Encapsulated swarm topology
     swarm_top1 = SwarmTopology(
-        nodes={"agent_1": AgentNode(description="worker")},
+        nodes={"did:web:agent_1": AgentNode(description="worker")},
         spawning_threshold=2,
         max_concurrent_agents=5,
     )
     swarm_top2 = SwarmTopology(
-        nodes={"agent_1": AgentNode(description="worker")},
+        nodes={"did:web:agent_1": AgentNode(description="worker")},
         spawning_threshold=2,
         max_concurrent_agents=5,
     )
@@ -56,11 +56,11 @@ def test_composite_node_determinism() -> None:
     )
 
     dag1 = DAGTopology(
-        nodes={"comp_1": composite_node1},
+        nodes={"did:web:comp_1": composite_node1},
         allow_cycles=False,
     )
     dag2 = DAGTopology(
-        nodes={"comp_1": composite_node2},
+        nodes={"did:web:comp_1": composite_node2},
         allow_cycles=False,
     )
 
@@ -72,13 +72,13 @@ def test_workflow_envelope_determinism() -> None:
     node1 = AgentNode(description="First node")
     node2 = AgentNode(description="Second node")
     topology1 = DAGTopology(
-        nodes={"node_a": node1, "node_b": node2},
+        nodes={"did:web:node_a": node1, "did:web:node_b": node2},
         allow_cycles=False,
         backpressure=None,
         shared_state_contract=None,
     )
     topology2 = DAGTopology(
-        nodes={"node_b": node2, "node_a": node1},
+        nodes={"did:web:node_b": node2, "did:web:node_a": node1},
         allow_cycles=False,
         backpressure=None,
         shared_state_contract=None,
@@ -174,8 +174,16 @@ def test_evolutionary_determinism() -> None:
 
 
 def test_rollback_determinism() -> None:
-    req1 = RollbackRequest(request_id="r1", target_event_id="e_3", invalidated_node_ids=["node_z", "node_a", "node_k"])
-    req2 = RollbackRequest(request_id="r1", target_event_id="e_3", invalidated_node_ids=["node_k", "node_z", "node_a"])
+    req1 = RollbackRequest(
+        request_id="r1",
+        target_event_id="e_3",
+        invalidated_node_ids=["did:web:node_z", "did:web:node_a", "did:web:node_k"],
+    )
+    req2 = RollbackRequest(
+        request_id="r1",
+        target_event_id="e_3",
+        invalidated_node_ids=["did:web:node_k", "did:web:node_z", "did:web:node_a"],
+    )
 
     assert req1.model_dump_canonical() == req2.model_dump_canonical()
     assert hash(req1) == hash(req2)
@@ -208,9 +216,15 @@ def test_dlp_determinism() -> None:
 def test_auction_determinism() -> None:
     ann = TaskAnnouncement(task_id="t1", max_budget_cents=10000)
 
-    bid_1 = AgentBid(agent_id="agent_a", estimated_cost_cents=1000, estimated_latency_ms=100, confidence_score=0.9)
-    bid_2 = AgentBid(agent_id="agent_b", estimated_cost_cents=1200, estimated_latency_ms=90, confidence_score=0.85)
-    bid_3 = AgentBid(agent_id="agent_c", estimated_cost_cents=900, estimated_latency_ms=110, confidence_score=0.95)
+    bid_1 = AgentBid(
+        agent_id="did:web:agent_a", estimated_cost_cents=1000, estimated_latency_ms=100, confidence_score=0.9
+    )
+    bid_2 = AgentBid(
+        agent_id="did:web:agent_b", estimated_cost_cents=1200, estimated_latency_ms=90, confidence_score=0.85
+    )
+    bid_3 = AgentBid(
+        agent_id="did:web:agent_c", estimated_cost_cents=900, estimated_latency_ms=110, confidence_score=0.95
+    )
 
     state1 = AuctionState(announcement=ann, bids=[bid_1, bid_2, bid_3])
     state2 = AuctionState(announcement=ann, bids=[bid_3, bid_1, bid_2])
@@ -345,11 +359,11 @@ def test_epistemic_payload_canonical_hashing() -> None:
 def test_semantic_memory_determinism() -> None:
     embedding = VectorEmbedding(vector=[0.1, 0.2, 0.3], dimensionality=3, model_name="test-model")
     temporal_bounds = TemporalBounds(valid_from=100.0, valid_to=200.0, interval_type="overlaps")
-    provenance = MemoryProvenance(extracted_by="agent_1", source_event_id="event_1")
+    provenance = MemoryProvenance(extracted_by="did:web:agent_1", source_event_id="event_1")
     salience = SalienceProfile(baseline_importance=0.9, decay_rate=0.1)
 
     node1 = SemanticNode(
-        node_id="node_1",
+        node_id="did:web:node_1",
         label="Concept",
         text_chunk="A test chunk",
         embedding=embedding,
@@ -360,7 +374,7 @@ def test_semantic_memory_determinism() -> None:
     )
 
     node2 = SemanticNode(
-        node_id="node_1",
+        node_id="did:web:node_1",
         label="Concept",
         text_chunk="A test chunk",
         embedding=embedding,
@@ -375,8 +389,8 @@ def test_semantic_memory_determinism() -> None:
 
 
 def test_chaos_determinism() -> None:
-    fault1 = FaultInjectionProfile(fault_type="latency_spike", target_node_id="node_a", intensity=0.8)
-    fault2 = FaultInjectionProfile(fault_type="context_overload", target_node_id="node_b", intensity=0.5)
+    fault1 = FaultInjectionProfile(fault_type="latency_spike", target_node_id="did:web:node_a", intensity=0.8)
+    fault2 = FaultInjectionProfile(fault_type="context_overload", target_node_id="did:web:node_b", intensity=0.5)
 
     hypothesis = SteadyStateHypothesis(expected_max_latency=100.0, max_loops_allowed=5, required_tool_usage=["tool_x"])
 

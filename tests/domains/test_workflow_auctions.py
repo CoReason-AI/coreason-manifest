@@ -7,12 +7,12 @@ from coreason_manifest.workflow.auctions import TaskAward
 def test_task_award_escrow_invalid() -> None:
     payload = {
         "task_id": "test_task",
-        "awarded_syndicate": {"agent_1": 100},
+        "awarded_syndicate": {"did:web:agent_1": 100},
         "cleared_price_cents": 100,
         "escrow": {
             "escrow_locked_cents": 150,
             "release_condition_metric": "quality_score > 0.9",
-            "refund_target_node_id": "org_wallet_1",
+            "refund_target_node_id": "did:web:org_wallet_1",
         },
     }
     with pytest.raises(ValidationError, match=r"Escrow locked amount cannot exceed the total cleared price"):
