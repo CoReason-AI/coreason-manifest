@@ -45,7 +45,10 @@ from coreason_manifest.state.events import (
     SystemFaultEvent,
 )
 from coreason_manifest.state.memory import EpistemicLedger
-from coreason_manifest.state.semantic import SemanticEdge, SemanticNode
+from coreason_manifest.state.semantic import (
+    SemanticEdge,
+    SemanticNode,
+)
 from coreason_manifest.telemetry.custody import CustodyRecord
 from coreason_manifest.telemetry.schemas import TraceExportBatch
 from coreason_manifest.testing.chaos import ChaosExperiment
@@ -492,6 +495,57 @@ def draw_output_mapping(draw: Any) -> dict[str, Any]:
 
 
 @st.composite
+def draw_dimensional_projection_contract(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "source_model_name": st.text(min_size=1),
+                "target_model_name": st.text(min_size=1),
+                "projection_matrix_hash": st.text(min_size=10),
+                "isometry_preservation_score": st.floats(
+                    min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False
+                ),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_ontological_handshake(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "handshake_id": st.text(min_size=1),
+                "participant_node_ids": st.lists(st.text(min_size=1), min_size=2, max_size=5),
+                "measured_cosine_similarity": st.floats(
+                    min_value=-1.0, max_value=1.0, allow_nan=False, allow_infinity=False
+                ),
+                "alignment_status": st.sampled_from(["aligned", "projected", "fallback_triggered", "incommensurable"]),
+                "applied_projection": st.one_of(st.none(), draw_dimensional_projection_contract()),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_ontological_alignment_policy(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "min_cosine_similarity": st.floats(
+                    min_value=-1.0, max_value=1.0, allow_nan=False, allow_infinity=False
+                ),
+                "require_isometry_proof": st.booleans(),
+                "fallback_state_contract": st.none(),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
 def draw_consensus_policy(draw: Any) -> dict[str, Any]:
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(
@@ -568,6 +622,7 @@ def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> 
             ),
             "diversity_policy": st.none(),
             "consensus_policy": st.one_of(st.none(), draw_consensus_policy()),
+            "ontological_alignment": st.one_of(st.none(), draw_ontological_alignment_policy()),
         }
     ).map(_council_mapper)
 
@@ -590,6 +645,7 @@ def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> 
                 min_size=2,
                 max_size=5,
             ),
+            "ontological_alignment": st.one_of(st.none(), draw_ontological_alignment_policy()),
         }
     )
 

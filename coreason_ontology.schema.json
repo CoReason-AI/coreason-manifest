@@ -1687,6 +1687,18 @@
           ],
           "default": null,
           "description": "The explicit ruleset governing how the council resolves disagreements."
+        },
+        "ontological_alignment": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OntologicalAlignmentPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The pre-flight execution gate forcing agents to mathematically align their latent semantics before participating in the topology."
         }
       },
       "required": [
@@ -1974,6 +1986,41 @@
         "quarantined_event_ids"
       ],
       "title": "DefeasibleCascade",
+      "type": "object"
+    },
+    "DimensionalProjectionContract": {
+      "additionalProperties": false,
+      "properties": {
+        "source_model_name": {
+          "description": "The native embedding model of the origin agent.",
+          "title": "Source Model Name",
+          "type": "string"
+        },
+        "target_model_name": {
+          "description": "The native embedding model of the destination agent.",
+          "title": "Target Model Name",
+          "type": "string"
+        },
+        "projection_matrix_hash": {
+          "description": "The SHA-256 hash of the exact mathematical matrix used to compress or translate the latent dimensions.",
+          "title": "Projection Matrix Hash",
+          "type": "string"
+        },
+        "isometry_preservation_score": {
+          "description": "Mathematical proof (e.g., Earth Mover's Distance preservation) of how accurately relative semantic distances were maintained during projection.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Isometry Preservation Score",
+          "type": "number"
+        }
+      },
+      "required": [
+        "source_model_name",
+        "target_model_name",
+        "projection_matrix_hash",
+        "isometry_preservation_score"
+      ],
+      "title": "DimensionalProjectionContract",
       "type": "object"
     },
     "DistributionProfile": {
@@ -4102,6 +4149,100 @@
       "title": "ObservationEvent",
       "type": "object"
     },
+    "OntologicalAlignmentPolicy": {
+      "additionalProperties": false,
+      "description": "The pre-flight execution gate forcing agents to mathematically align their latent semantics.",
+      "properties": {
+        "min_cosine_similarity": {
+          "description": "The absolute minimum latent vector similarity required to allow swarm communication.",
+          "maximum": 1.0,
+          "minimum": -1.0,
+          "title": "Min Cosine Similarity",
+          "type": "number"
+        },
+        "require_isometry_proof": {
+          "description": "If True, the orchestrator must reject dimensional projections that fall below a safe isometry preservation score.",
+          "title": "Require Isometry Proof",
+          "type": "boolean"
+        },
+        "fallback_state_contract": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StateContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The rigid external JSON schema to force agents to use if their latent vector geometries are hopelessly incommensurable."
+        }
+      },
+      "required": [
+        "min_cosine_similarity",
+        "require_isometry_proof"
+      ],
+      "title": "OntologicalAlignmentPolicy",
+      "type": "object"
+    },
+    "OntologicalHandshake": {
+      "additionalProperties": false,
+      "properties": {
+        "handshake_id": {
+          "description": "The unique identifier for the handshake.",
+          "minLength": 1,
+          "title": "Handshake Id",
+          "type": "string"
+        },
+        "participant_node_ids": {
+          "description": "The agents establishing semantic alignment.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 2,
+          "title": "Participant Node Ids",
+          "type": "array"
+        },
+        "measured_cosine_similarity": {
+          "description": "The calculated geometric alignment of the agents' core definitions.",
+          "maximum": 1.0,
+          "minimum": -1.0,
+          "title": "Measured Cosine Similarity",
+          "type": "number"
+        },
+        "alignment_status": {
+          "description": "The final verdict of the handshake protocol.",
+          "enum": [
+            "aligned",
+            "projected",
+            "fallback_triggered",
+            "incommensurable"
+          ],
+          "title": "Alignment Status",
+          "type": "string"
+        },
+        "applied_projection": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DimensionalProjectionContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The projection applied if the agents natively used different embedding dimensionalities."
+        }
+      },
+      "required": [
+        "handshake_id",
+        "participant_node_ids",
+        "measured_cosine_similarity",
+        "alignment_status"
+      ],
+      "title": "OntologicalHandshake",
+      "type": "object"
+    },
     "OptimizationDirection": {
       "enum": [
         "maximize",
@@ -4623,6 +4764,18 @@
           "minItems": 2,
           "title": "Participant Node Ids",
           "type": "array"
+        },
+        "ontological_alignment": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OntologicalAlignmentPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The pre-flight execution gate forcing agents to mathematically align their latent semantics before participating in the topology."
         }
       },
       "required": [

@@ -23,9 +23,10 @@ from coreason_manifest.state.events import (
     ZeroKnowledgeProof,
 )
 from coreason_manifest.state.scratchpad import LatentScratchpadTrace, ThoughtBranch
+from coreason_manifest.state.semantic import DimensionalProjectionContract, OntologicalHandshake
 from coreason_manifest.workflow.envelope import WorkflowEnvelope
 from coreason_manifest.workflow.nodes import AnyNode
-from coreason_manifest.workflow.topologies import AnyTopology
+from coreason_manifest.workflow.topologies import AnyTopology, OntologicalAlignmentPolicy
 
 __all__ = [
     "ActivationSteeringContract",
@@ -39,6 +40,7 @@ __all__ = [
     "CognitiveUncertaintyProfile",
     "CoreasonBaseModel",
     "DefeasibleCascade",
+    "DimensionalProjectionContract",
     "EmbodiedSensoryVector",
     "EscalationContract",
     "InterventionalCausalTask",
@@ -47,6 +49,8 @@ __all__ = [
     "NeuralAuditAttestation",
     "NeuroSymbolicHandoff",
     "NodeID",
+    "OntologicalAlignmentPolicy",
+    "OntologicalHandshake",
     "ProcessRewardContract",
     "SaeFeatureActivation",
     "SemanticVersion",

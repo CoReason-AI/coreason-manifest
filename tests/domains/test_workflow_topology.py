@@ -15,7 +15,7 @@ from coreason_manifest.workflow.nodes import (
     System1Reflex,
     SystemNode,
 )
-from coreason_manifest.workflow.topologies import CouncilTopology, DAGTopology
+from coreason_manifest.workflow.topologies import CouncilTopology, DAGTopology, OntologicalAlignmentPolicy
 
 # Strategy for valid NodeIDs (alphanumeric, underscores, hyphens)
 # Also must have a minimum length of 1 based on core primitives.
@@ -122,6 +122,13 @@ def test_system1_reflex_mathematical_bounds(confidence_threshold: float) -> None
     """Test 3: Prove System1Reflex decisively rejects values outside [0.0, 1.0]."""
     with pytest.raises(ValidationError):
         System1Reflex(confidence_threshold=confidence_threshold, allowed_read_only_tools=["tool_a"])
+
+
+@given(min_cosine_similarity=st.floats(max_value=-1.000001) | st.floats(min_value=1.000001))
+def test_ontological_alignment_policy_mathematical_bounds(min_cosine_similarity: float) -> None:
+    """Test: Prove OntologicalAlignmentPolicy decisively rejects values outside [-1.0, 1.0]."""
+    with pytest.raises(ValidationError):
+        OntologicalAlignmentPolicy(min_cosine_similarity=min_cosine_similarity, require_isometry_proof=True)
 
 
 @given(dissonance_threshold=st.floats(max_value=-0.000001) | st.floats(min_value=1.000001))
