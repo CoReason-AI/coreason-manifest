@@ -665,6 +665,7 @@
       "description": "A discriminated union of state events.",
       "discriminator": {
         "mapping": {
+          "barge_in": "#/$defs/BargeInInterruptEvent",
           "belief_update": "#/$defs/BeliefUpdateEvent",
           "hypothesis": "#/$defs/HypothesisGenerationEvent",
           "observation": "#/$defs/ObservationEvent",
@@ -684,6 +685,9 @@
         },
         {
           "$ref": "#/$defs/HypothesisGenerationEvent"
+        },
+        {
+          "$ref": "#/$defs/BargeInInterruptEvent"
         }
       ]
     },
@@ -905,12 +909,101 @@
           "default": null,
           "description": "The maximum kinetic velocity of API requests allowed.",
           "title": "Max Requests Per Minute"
+        },
+        "max_uninterruptible_span_ms": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Systemic heartbeat constraint. A node cannot lock the thread longer than this without yielding to poll for BargeInInterruptEvents.",
+          "title": "Max Uninterruptible Span Ms"
         }
       },
       "required": [
         "max_queue_depth"
       ],
       "title": "BackpressurePolicy",
+      "type": "object"
+    },
+    "BargeInInterruptEvent": {
+      "additionalProperties": false,
+      "description": "A cryptographic receipt of a continuous multimodal sequence being prematurely severed by an external stimulus.",
+      "properties": {
+        "event_id": {
+          "description": "A unique identifier for the event.",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "The timestamp when the event occurred.",
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "type": {
+          "const": "barge_in",
+          "default": "barge_in",
+          "description": "Discriminator type for a barge-in interruption event.",
+          "title": "Type",
+          "type": "string"
+        },
+        "target_event_id": {
+          "description": "The exact event ID of the active node generation cycle that was killed.",
+          "title": "Target Event Id",
+          "type": "string"
+        },
+        "sensory_trigger": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EmbodiedSensoryVector"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The continuous multimodal trigger (e.g., audio spike, user saying 'stop') that justified the interruption."
+        },
+        "retained_partial_payload": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The 'stutter' state: the incomplete fragment of thought or text generated before the kill signal.",
+          "title": "Retained Partial Payload"
+        },
+        "epistemic_disposition": {
+          "description": "Explicit instruction to the orchestrator on how to patch the shared memory blackboard with the partial payload.",
+          "enum": [
+            "discard",
+            "retain_as_context",
+            "mark_as_falsified"
+          ],
+          "title": "Epistemic Disposition",
+          "type": "string"
+        }
+      },
+      "required": [
+        "event_id",
+        "timestamp",
+        "target_event_id",
+        "epistemic_disposition"
+      ],
+      "title": "BargeInInterruptEvent",
       "type": "object"
     },
     "BaseNode": {
@@ -6669,6 +6762,12 @@
           ],
           "default": null,
           "description": "Execution limits for the tool."
+        },
+        "is_preemptible": {
+          "default": false,
+          "description": "If True, the orchestrator is authorized to send a SIGINT to abort this tool's execution mid-flight if a BargeInInterruptEvent occurs.",
+          "title": "Is Preemptible",
+          "type": "boolean"
         }
       },
       "required": [
