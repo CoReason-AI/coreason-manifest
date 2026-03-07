@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Annotated, Literal
 
 from pydantic import Field
 
+from coreason_manifest.compute.inference import ActiveInferenceContract
 from coreason_manifest.compute.profiles import RoutingFrontier
 from coreason_manifest.compute.test_time import EscalationContract, ProcessRewardContract
 from coreason_manifest.core.base import CoreasonBaseModel
@@ -120,6 +121,11 @@ class AgentNode(BaseNode):
     )
     prm_policy: ProcessRewardContract | None = Field(
         default=None, description="The ruleset governing how intermediate thoughts are scored and pruned."
+    )
+    active_inference_policy: ActiveInferenceContract | None = Field(
+        default=None,
+        description="The formal contract demanding mathematical proof of Expected Information Gain "
+        "before authorizing tool execution.",
     )
 
 

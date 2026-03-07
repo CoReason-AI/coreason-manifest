@@ -124,7 +124,42 @@ class SystemFaultEvent(BaseStateEvent):
     )
 
 
+class FalsificationCondition(CoreasonBaseModel):
+    condition_id: str = Field(min_length=1, description="Unique identifier for this falsification test.")
+    description: str = Field(
+        description="Semantic description of what observation would prove the parent hypothesis is false."
+    )
+    required_tool_name: str | None = Field(
+        default=None,
+        description="The specific ActionSpace tool required to test this condition (e.g., 'sql_query_db').",
+    )
+    falsifying_observation_signature: str = Field(
+        description="The expected data schema or regex pattern that, if returned by the tool, kills the hypothesis."
+    )
+
+
+class HypothesisGenerationEvent(BaseStateEvent):
+    type: Literal["hypothesis"] = Field(
+        default="hypothesis", description="Discriminator for a hypothesis generation event."
+    )
+    hypothesis_id: str = Field(min_length=1, description="Unique identifier for this abductive leap.")
+    premise_text: str = Field(description="The natural language explanation of the abductive theory.")
+    bayesian_prior: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="The agent's initial probabilistic belief in this hypothesis before testing.",
+    )
+    falsification_conditions: list[FalsificationCondition] = Field(
+        min_length=1,
+        description="The list of strict conditions that the orchestrator must test to attempt to "
+        "disprove this premise.",
+    )
+    status: Literal["active", "falsified", "verified"] = Field(
+        default="active", description="The current validity state of this hypothesis in the EpistemicLedger."
+    )
+
+
 type AnyStateEvent = Annotated[
-    ObservationEvent | BeliefUpdateEvent | SystemFaultEvent,
+    ObservationEvent | BeliefUpdateEvent | SystemFaultEvent | HypothesisGenerationEvent,
     Field(discriminator="type", description="A discriminated union of state events."),
 ]

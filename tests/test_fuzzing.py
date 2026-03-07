@@ -37,7 +37,13 @@ from coreason_manifest.presentation.intents import (
 )
 from coreason_manifest.presentation.scivis import AnyPanel, GrammarPanel, InsightCard
 from coreason_manifest.state.argumentation import ArgumentGraph
-from coreason_manifest.state.events import AnyStateEvent, BeliefUpdateEvent, ObservationEvent, SystemFaultEvent
+from coreason_manifest.state.events import (
+    AnyStateEvent,
+    BeliefUpdateEvent,
+    HypothesisGenerationEvent,
+    ObservationEvent,
+    SystemFaultEvent,
+)
 from coreason_manifest.state.memory import EpistemicLedger
 from coreason_manifest.state.semantic import SemanticEdge, SemanticNode
 from coreason_manifest.telemetry.custody import CustodyRecord
@@ -120,6 +126,61 @@ def draw_reflex_policy(draw: Any) -> dict[str, Any]:
             {
                 "confidence_threshold": st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False),
                 "allowed_read_only_tools": st.lists(st.text(), max_size=100),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_falsification_condition(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "condition_id": st.text(min_size=1),
+                "description": st.text(),
+                "required_tool_name": st.one_of(st.none(), st.text()),
+                "falsifying_observation_signature": st.text(),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_hypothesis_generation_event(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "type": st.just("hypothesis"),
+                "hypothesis_id": st.text(min_size=1),
+                "premise_text": st.text(),
+                "bayesian_prior": st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False),
+                "falsification_conditions": st.lists(
+                    draw_falsification_condition(), min_size=1, max_size=10, unique_by=lambda x: x["condition_id"]
+                ),
+                "status": st.sampled_from(["active", "falsified", "verified"]),
+                "event_id": st.text(min_size=1),
+                "timestamp": st.floats(allow_nan=False, allow_infinity=False),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_active_inference_contract(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "task_id": st.text(min_size=1),
+                "target_hypothesis_id": st.text(),
+                "target_condition_id": st.text(),
+                "selected_tool_name": st.text(),
+                "expected_information_gain": st.floats(
+                    min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False
+                ),
+                "execution_cost_budget_cents": st.integers(min_value=0),
             }
         )
     )
@@ -304,6 +365,8 @@ def draw_agent_node_payload(draw: Any) -> dict[str, Any]:
         payload["escalation_policy"] = draw(draw_escalation_contract())
     if draw(st.booleans()):
         payload["prm_policy"] = draw(draw_process_reward_contract())
+    if draw(st.booleans()):
+        payload["active_inference_policy"] = draw(draw_active_inference_contract())
     return payload
 
 
@@ -712,7 +775,12 @@ def draw_any_toolchain_state() -> st.SearchStrategy[dict[str, Any]]:
 
 @st.composite
 def _local_draw_any_state_event(draw: Any) -> dict[str, Any]:
-    event_type = draw(st.sampled_from(["observation", "belief_update", "system_fault"]))
+    event_type = draw(st.sampled_from(["observation", "belief_update", "system_fault", "hypothesis"]))
+
+    if event_type == "hypothesis":
+        res: dict[str, Any] = draw(draw_hypothesis_generation_event())
+        return res
+
     payload: dict[str, Any] = {
         "type": event_type,
         "event_id": draw(st.text()),
@@ -763,11 +831,13 @@ def test_anystateevent_routing(payload: dict[str, Any]) -> None:
         assert isinstance(parsed, BeliefUpdateEvent)
     elif event_type == "system_fault":
         assert isinstance(parsed, SystemFaultEvent)
+    elif event_type == "hypothesis":
+        assert isinstance(parsed, HypothesisGenerationEvent)
 
 
 @given(st.text())
 def test_anystateevent_invalid(invalid_type: str) -> None:
-    if invalid_type in ["observation", "belief_update", "system_fault"]:
+    if invalid_type in ["observation", "belief_update", "system_fault", "hypothesis"]:
         return
     payload = {"type": invalid_type, "event_id": "test", "timestamp": 123.0}
     with pytest.raises(ValidationError):
