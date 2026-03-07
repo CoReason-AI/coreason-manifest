@@ -32,8 +32,11 @@ from coreason_manifest.state.events import (
     AnyStateEvent,
     BaseStateEvent,
     BeliefUpdateEvent,
+    NeuralAuditAttestation,
     ObservationEvent,
+    SaeFeatureActivation,
     SystemFaultEvent,
+    ZeroKnowledgeProof,
 )
 from coreason_manifest.state.memory import (
     EpistemicLedger,
@@ -78,9 +81,11 @@ __all__ = [
     "FederatedStateSnapshot",
     "MemoryProvenance",
     "MemoryTier",
+    "NeuralAuditAttestation",
     "ObservationEvent",
     "PatchOperation",
     "RollbackRequest",
+    "SaeFeatureActivation",
     "SalienceProfile",
     "SemanticEdge",
     "SemanticNode",
@@ -95,4 +100,5 @@ __all__ = [
     "TruthMaintenancePolicy",
     "VectorEmbedding",
     "WorkingMemorySnapshot",
+    "ZeroKnowledgeProof",
 ]

@@ -483,6 +483,18 @@
           ],
           "default": null,
           "description": "The API-like contract allowing the agent to offload rigid logic to deterministic CPU solvers."
+        },
+        "audit_policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MechanisticAuditContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The adaptive trigger policy for executing deep mechanistic interpretability brain-scans on this agent."
         }
       },
       "required": [
@@ -973,6 +985,18 @@
           ],
           "default": null,
           "description": "The cryptographic record of the non-monotonic internal monologue that justifies this belief."
+        },
+        "neural_audit": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NeuralAuditAttestation"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematical brain-scan proving exactly which neural circuits fired to generate this event."
         }
       },
       "required": [
@@ -3596,6 +3620,54 @@
       ],
       "type": "string"
     },
+    "MechanisticAuditContract": {
+      "additionalProperties": false,
+      "properties": {
+        "trigger_conditions": {
+          "description": "The specific architectural events that authorize the orchestrator to halt generation and extract internal activations.",
+          "items": {
+            "enum": [
+              "on_tool_call",
+              "on_belief_update",
+              "on_quarantine",
+              "on_falsification"
+            ],
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Trigger Conditions",
+          "type": "array"
+        },
+        "target_layers": {
+          "description": "The specific transformer block indices the execution engine must read from.",
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 1,
+          "title": "Target Layers",
+          "type": "array"
+        },
+        "max_features_per_layer": {
+          "description": "The top-k features to extract, preventing memory overflow.",
+          "exclusiveMinimum": 0,
+          "title": "Max Features Per Layer",
+          "type": "integer"
+        },
+        "require_zk_commitments": {
+          "default": true,
+          "description": "If True, the orchestrator MUST generate cryptographic latent state proofs alongside the activation reads.",
+          "title": "Require Zk Commitments",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "trigger_conditions",
+        "target_layers",
+        "max_features_per_layer"
+      ],
+      "title": "MechanisticAuditContract",
+      "type": "object"
+    },
     "MemoryProvenance": {
       "additionalProperties": false,
       "properties": {
@@ -3793,6 +3865,40 @@
       "title": "MutationPolicy",
       "type": "object"
     },
+    "NeuralAuditAttestation": {
+      "additionalProperties": false,
+      "properties": {
+        "audit_id": {
+          "description": "Unique identifier for this mechanistic interpretability snapshot.",
+          "minLength": 1,
+          "title": "Audit Id",
+          "type": "string"
+        },
+        "layer_activations": {
+          "additionalProperties": {
+            "items": {
+              "$ref": "#/$defs/SaeFeatureActivation"
+            },
+            "type": "array"
+          },
+          "description": "A mapping of specific transformer layer indices to their top-k activated SAE features.",
+          "title": "Layer Activations",
+          "type": "object"
+        },
+        "causal_scrubbing_applied": {
+          "default": false,
+          "description": "Cryptographic proof that the orchestrator actively resampled or ablated this circuit to verify its causal responsibility for the output.",
+          "title": "Causal Scrubbing Applied",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "audit_id",
+        "layer_activations"
+      ],
+      "title": "NeuralAuditAttestation",
+      "type": "object"
+    },
     "NeuroSymbolicHandoff": {
       "additionalProperties": false,
       "properties": {
@@ -3974,6 +4080,18 @@
           ],
           "default": null,
           "description": "The continuous multimodal trigger that forced this discrete observation."
+        },
+        "neural_audit": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NeuralAuditAttestation"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematical brain-scan proving exactly which neural circuits fired to generate this event."
         }
       },
       "required": [
@@ -4514,6 +4632,41 @@
         "participant_node_ids"
       ],
       "title": "SMPCTopology",
+      "type": "object"
+    },
+    "SaeFeatureActivation": {
+      "additionalProperties": false,
+      "properties": {
+        "feature_index": {
+          "description": "The exact dimensional index of the monosemantic feature in the Sparse Autoencoder dictionary.",
+          "minimum": 0,
+          "title": "Feature Index",
+          "type": "integer"
+        },
+        "activation_magnitude": {
+          "description": "The mathematical strength of this feature's activation during the forward pass.",
+          "title": "Activation Magnitude",
+          "type": "number"
+        },
+        "interpretability_label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The human-readable semantic concept mapped to this feature (e.g., 'sycophancy', 'truth_retrieval').",
+          "title": "Interpretability Label"
+        }
+      },
+      "required": [
+        "feature_index",
+        "activation_magnitude"
+      ],
+      "title": "SaeFeatureActivation",
       "type": "object"
     },
     "SalienceProfile": {
@@ -6065,6 +6218,14 @@
           "description": "The base64-encoded succinct cryptographic proof payload.",
           "title": "Cryptographic Blob",
           "type": "string"
+        },
+        "latent_state_commitments": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Cryptographic bindings (hashes) of intermediate residual stream states to prevent activation spoofing.",
+          "title": "Latent State Commitments",
+          "type": "object"
         }
       },
       "required": [
