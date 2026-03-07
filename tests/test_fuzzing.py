@@ -99,6 +99,22 @@ def draw_escalation_contract(draw: Any) -> dict[str, Any]:
 
 
 @st.composite
+def draw_dynamic_convergence_sla(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "convergence_delta_epsilon": st.floats(
+                    min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False
+                ),
+                "lookback_window_steps": st.integers(min_value=1, max_value=100),
+                "minimum_reasoning_steps": st.integers(min_value=1, max_value=100),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
 def draw_process_reward_contract(draw: Any) -> dict[str, Any]:
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(
@@ -106,6 +122,7 @@ def draw_process_reward_contract(draw: Any) -> dict[str, Any]:
                 "pruning_threshold": st.floats(min_value=0.0, max_value=1.0),
                 "max_backtracks_allowed": st.integers(min_value=0),
                 "evaluator_model_name": st.one_of(st.none(), st.text()),
+                "convergence_sla": st.one_of(st.none(), draw_dynamic_convergence_sla()),
             }
         )
     )
