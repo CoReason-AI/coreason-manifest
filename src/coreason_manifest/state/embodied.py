@@ -21,7 +21,9 @@ class EmbodiedSensoryVector(CoreasonBaseModel):
         description="The calculated KL divergence between the agent's prior belief and the incoming sensory evidence.",
     )
     temporal_duration_ms: int = Field(
-        gt=0, description="The exact length of the continuous stream segment encapsulated by this observation."
+        gt=0,
+        le=86400000,
+        description="The exact length of the continuous stream segment encapsulated by this observation.",
     )
     salience_threshold_breached: bool = Field(
         default=True, description="Mathematical proof that the anomaly was severe enough to warrant a memory snapshot."

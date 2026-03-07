@@ -1729,6 +1729,7 @@
         "temporal_duration_ms": {
           "description": "The exact length of the continuous stream segment encapsulated by this observation.",
           "exclusiveMinimum": 0,
+          "maximum": 86400000,
           "title": "Temporal Duration Ms",
           "type": "integer"
         },
