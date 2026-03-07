@@ -5,24 +5,35 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
-from coreason_manifest.compute.inference import ActiveInferenceContract, AnalogicalMappingTask
-from coreason_manifest.compute.neuromodulation import ActivationSteeringContract, CognitiveRoutingDirective
-from coreason_manifest.compute.profiles import (
+from .inference import (
+    ActiveInferenceContract,
+    AnalogicalMappingTask,
+    InterventionalCausalTask,
+)
+from .neuromodulation import (
+    ActivationSteeringContract,
+    CognitiveRoutingDirective,
+)
+from .profiles import (
     ComputeProvisioningRequest,
     ModelProfile,
-    QoSClassification,
     RateCard,
+    RoutingFrontier,
 )
-from coreason_manifest.compute.stochastic import (
+from .stochastic import (
     CrossoverStrategy,
-    CrossoverType,
     DistributionProfile,
-    DistributionType,
     FitnessObjective,
     MutationPolicy,
-    OptimizationDirection,
+    VerifiableEntropy,
 )
-from coreason_manifest.compute.symbolic import NeuroSymbolicHandoff
+from .symbolic import (
+    NeuroSymbolicHandoff,
+)
+from .test_time import (
+    EscalationContract,
+    ProcessRewardContract,
+)
 
 __all__ = [
     "ActivationSteeringContract",
@@ -31,14 +42,15 @@ __all__ = [
     "CognitiveRoutingDirective",
     "ComputeProvisioningRequest",
     "CrossoverStrategy",
-    "CrossoverType",
     "DistributionProfile",
-    "DistributionType",
+    "EscalationContract",
     "FitnessObjective",
+    "InterventionalCausalTask",
     "ModelProfile",
     "MutationPolicy",
     "NeuroSymbolicHandoff",
-    "OptimizationDirection",
-    "QoSClassification",
+    "ProcessRewardContract",
     "RateCard",
+    "RoutingFrontier",
+    "VerifiableEntropy",
 ]

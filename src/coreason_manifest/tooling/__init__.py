@@ -5,14 +5,21 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
-from coreason_manifest.tooling.environments import ActionSpace, MCPClientBinding, MCPTransport
-from coreason_manifest.tooling.schemas import ExecutionSLA, PermissionBoundary, SideEffectProfile, ToolDefinition
+from .environments import (
+    ActionSpace,
+    MCPClientBinding,
+)
+from .schemas import (
+    ExecutionSLA,
+    PermissionBoundary,
+    SideEffectProfile,
+    ToolDefinition,
+)
 
 __all__ = [
     "ActionSpace",
     "ExecutionSLA",
     "MCPClientBinding",
-    "MCPTransport",
     "PermissionBoundary",
     "SideEffectProfile",
     "ToolDefinition",

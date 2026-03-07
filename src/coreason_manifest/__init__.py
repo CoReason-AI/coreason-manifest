@@ -11,6 +11,7 @@ from coreason_manifest.compute.symbolic import NeuroSymbolicHandoff
 from coreason_manifest.compute.test_time import EscalationContract, ProcessRewardContract
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.core.primitives import NodeID, SemanticVersion
+from coreason_manifest.oversight import PredictionMarketPolicy
 from coreason_manifest.oversight.audit import MechanisticAuditContract
 from coreason_manifest.state.cognition import CognitiveStateProfile, CognitiveUncertaintyProfile
 from coreason_manifest.state.differentials import DefeasibleCascade, TruthMaintenancePolicy
@@ -24,8 +25,8 @@ from coreason_manifest.state.events import (
 )
 from coreason_manifest.state.scratchpad import LatentScratchpadTrace, ThoughtBranch
 from coreason_manifest.state.semantic import DimensionalProjectionContract, OntologicalHandshake
+from coreason_manifest.workflow import HypothesisStake, MarketResolution, PredictionMarketState
 from coreason_manifest.workflow.envelope import WorkflowEnvelope
-from coreason_manifest.workflow.markets import HypothesisStake, MarketResolution, PredictionMarketState
 from coreason_manifest.workflow.nodes import AnyNode
 from coreason_manifest.workflow.topologies import AnyTopology, OntologicalAlignmentPolicy
 
@@ -54,6 +55,7 @@ __all__ = [
     "NodeID",
     "OntologicalAlignmentPolicy",
     "OntologicalHandshake",
+    "PredictionMarketPolicy",
     "PredictionMarketState",
     "ProcessRewardContract",
     "SaeFeatureActivation",
