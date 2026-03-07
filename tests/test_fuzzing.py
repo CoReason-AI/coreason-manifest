@@ -1085,7 +1085,7 @@ def test_task_award_escrow_invalid() -> None:
             "refund_target_node_id": "org_wallet_1",
         }
     }
-    with pytest.raises(ValueError, match="Escrow locked amount cannot exceed the total cleared price."):
+    with pytest.raises(ValueError, match=r"Escrow locked amount cannot exceed the total cleared price\."):
         TypeAdapter(TaskAward).validate_python(payload)
 
 
