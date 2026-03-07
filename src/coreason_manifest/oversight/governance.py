@@ -55,6 +55,27 @@ class ConsensusPolicy(CoreasonBaseModel):
     )
 
 
+class FormalVerificationContract(CoreasonBaseModel):
+    """
+    Passive schema defining a mathematical proof of safety invariants.
+    """
+
+    proof_system: Literal["tla_plus", "lean4", "coq", "z3"] = Field(
+        description="The mathematical dialect and theorem prover used to compile the proof."
+    )
+    invariant_theorem: str = Field(
+        description=(
+            "The exact mathematical assertion or safety invariant being proven "
+            "(e.g., 'No data classified as CONFIDENTIAL routes externally')."
+        )
+    )
+    compiled_proof_hash: str = Field(
+        description=(
+            "The SHA-256 fingerprint of the verified proof object that the Rust/C++ orchestrator must load and check."
+        )
+    )
+
+
 class GlobalGovernance(CoreasonBaseModel):
     """
     Global governance bounds for a swarm executing a workflow envelope.
@@ -66,4 +87,8 @@ class GlobalGovernance(CoreasonBaseModel):
     max_global_tokens: int = Field(description="The maximum aggregate token usage allowed across all nodes.")
     global_timeout_seconds: int = Field(
         ge=0, description="The absolute Time-To-Live (TTL) for the execution envelope before graceful termination."
+    )
+    formal_verification: FormalVerificationContract | None = Field(
+        default=None,
+        description="The mathematical proof of structural correctness mandated for this execution graph.",
     )
