@@ -4189,6 +4189,7 @@
       "additionalProperties": false,
       "properties": {
         "handshake_id": {
+          "description": "The unique identifier for the handshake.",
           "minLength": 1,
           "title": "Handshake Id",
           "type": "string"
