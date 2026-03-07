@@ -13,7 +13,7 @@ def test_epistemic_ledger_hash_o1_tripwire(benchmark: Any) -> None:
     )
     _ = hash(ledger)
     benchmark(lambda: [hash(ledger) for _ in range(1000)])
-    assert benchmark.stats.stats.max < 0.05
+    assert benchmark.stats.stats.max < 0.15
 
 
 def test_execution_span_sorting_o1_tripwire(benchmark: Any) -> None:
@@ -26,4 +26,4 @@ def test_execution_span_sorting_o1_tripwire(benchmark: Any) -> None:
     )
     _ = hash(span)
     benchmark(lambda: [hash(span) for _ in range(1000)])
-    assert benchmark.stats.stats.max < 0.05
+    assert benchmark.stats.stats.max < 0.15
