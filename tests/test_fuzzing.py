@@ -777,6 +777,33 @@ def draw_lineage_watermark(draw: Any) -> dict[str, Any]:
     return res
 
 
+@st.composite
+def draw_mcp_capability_whitelist(draw: Any) -> dict[str, Any]:
+    return draw(
+        st.fixed_dictionaries(
+            {
+                "allowed_tools": st.lists(st.text(), max_size=100),
+                "allowed_resources": st.lists(st.text(), max_size=100),
+                "allowed_prompts": st.lists(st.text(), max_size=100),
+            }
+        )
+    )
+
+
+@st.composite
+def draw_mcp_server_manifest(draw: Any) -> dict[str, Any]:
+    return draw(
+        st.fixed_dictionaries(
+            {
+                "server_uri": st.text(min_size=1),
+                "transport_type": st.sampled_from(["stdio", "sse", "http"]),
+                "binary_hash": st.one_of(st.none(), st.text(min_size=10)),
+                "capability_whitelist": draw_mcp_capability_whitelist(),
+            }
+        )
+    )
+
+
 @given(
     st.fixed_dictionaries(
         {
@@ -820,15 +847,7 @@ def draw_lineage_watermark(draw: Any) -> dict[str, Any]:
                 ),
                 unique_by=lambda t: t["tool_name"] if isinstance(t, dict) and "tool_name" in t else str(t),
             ),
-            "mcp_servers": st.lists(
-                st.fixed_dictionaries(
-                    {
-                        "server_uri": st.text(),
-                        "transport_type": st.sampled_from(["stdio", "sse", "http"]),
-                        "allowed_mcp_tools": st.one_of(st.none(), st.lists(st.text(), max_size=100)),
-                    }
-                )
-            ),
+            "mcp_servers": st.lists(draw_mcp_server_manifest(), max_size=10),
         }
     )
 )
