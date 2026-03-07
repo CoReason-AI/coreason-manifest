@@ -928,12 +928,27 @@ def test_semanticedge_fuzzing(payload: dict[str, Any]) -> None:
     assert parsed.edge_id == payload["edge_id"]
 
 
+@st.composite
+def draw_formal_verification_contract(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "proof_system": st.sampled_from(["tla_plus", "lean4", "coq", "z3"]),
+                "invariant_theorem": st.text(min_size=1),
+                "compiled_proof_hash": st.text(min_size=10),
+            }
+        )
+    )
+    return res
+
+
 @given(
     st.fixed_dictionaries(
         {
             "max_budget_cents": st.integers(min_value=0),
             "max_global_tokens": st.integers(),
             "global_timeout_seconds": st.integers(min_value=0),
+            "formal_verification": st.one_of(st.none(), draw_formal_verification_contract()),
         }
     )
 )
@@ -1508,6 +1523,7 @@ def draw_workflow_envelope(draw: Any) -> dict[str, Any]:
                             "max_budget_cents": st.integers(min_value=0),
                             "max_global_tokens": st.integers(),
                             "global_timeout_seconds": st.integers(min_value=0),
+                            "formal_verification": st.one_of(st.none(), draw_formal_verification_contract()),
                         }
                     ),
                 ),

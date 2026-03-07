@@ -2088,6 +2088,40 @@
       "title": "FitnessObjective",
       "type": "object"
     },
+    "FormalVerificationContract": {
+      "additionalProperties": false,
+      "description": "Passive schema defining a mathematical proof of safety invariants.",
+      "properties": {
+        "proof_system": {
+          "description": "The mathematical dialect and theorem prover used to compile the proof.",
+          "enum": [
+            "tla_plus",
+            "lean4",
+            "coq",
+            "z3"
+          ],
+          "title": "Proof System",
+          "type": "string"
+        },
+        "invariant_theorem": {
+          "description": "The exact mathematical assertion or safety invariant being proven (e.g., 'No data classified as CONFIDENTIAL routes externally').",
+          "title": "Invariant Theorem",
+          "type": "string"
+        },
+        "compiled_proof_hash": {
+          "description": "The SHA-256 fingerprint of the verified proof object that the Rust/C++ orchestrator must load and check.",
+          "title": "Compiled Proof Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "proof_system",
+        "invariant_theorem",
+        "compiled_proof_hash"
+      ],
+      "title": "FormalVerificationContract",
+      "type": "object"
+    },
     "GlobalGovernance": {
       "additionalProperties": false,
       "description": "Global governance bounds for a swarm executing a workflow envelope.",
@@ -2107,6 +2141,18 @@
           "minimum": 0,
           "title": "Global Timeout Seconds",
           "type": "integer"
+        },
+        "formal_verification": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FormalVerificationContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematical proof of structural correctness mandated for this execution graph."
         }
       },
       "required": [
