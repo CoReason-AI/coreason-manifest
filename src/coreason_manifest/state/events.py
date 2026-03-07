@@ -13,6 +13,7 @@ from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.core.primitives import NodeID
 from coreason_manifest.state.cognition import CognitiveUncertaintyProfile
 from coreason_manifest.state.embodied import EmbodiedSensoryVector
+from coreason_manifest.state.scratchpad import LatentScratchpadTrace
 from coreason_manifest.state.toolchains import AnyToolchainState
 
 
@@ -110,6 +111,10 @@ class BeliefUpdateEvent(BaseStateEvent):
     uncertainty_profile: CognitiveUncertaintyProfile | None = Field(
         default=None,
         description="The mathematical quantification of doubt associated with this synthesized belief.",
+    )
+    scratchpad_trace: LatentScratchpadTrace | None = Field(
+        default=None,
+        description="The cryptographic record of the non-monotonic internal monologue that justifies this belief.",
     )
 
 

@@ -52,6 +52,68 @@ from coreason_manifest.workflow.topologies import AnyTopology, StateContract
 
 
 @st.composite
+def draw_escalation_contract(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "uncertainty_escalation_threshold": st.floats(min_value=0.0, max_value=1.0),
+                "max_latent_tokens_budget": st.integers(min_value=1),
+                "max_test_time_compute_ms": st.integers(min_value=1),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_process_reward_contract(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "pruning_threshold": st.floats(min_value=0.0, max_value=1.0),
+                "max_backtracks_allowed": st.integers(min_value=0),
+                "evaluator_model_name": st.one_of(st.none(), st.text()),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_thought_branch(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "branch_id": st.text(min_size=1),
+                "parent_branch_id": st.one_of(st.none(), st.text()),
+                "latent_content_hash": st.from_regex(r"^[a-f0-9]{64}$", fullmatch=True),
+                "prm_score": st.one_of(st.none(), st.floats(min_value=0.0, max_value=1.0)),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_latent_scratchpad_trace(draw: Any) -> dict[str, Any]:
+    explored_branches = draw(st.lists(draw_thought_branch(), min_size=1, max_size=5))
+    explored_branch_ids = [branch["branch_id"] for branch in explored_branches]
+
+    # ensure resolution_branch_id and discarded_branches are valid if generated
+    resolution_branch_id = draw(st.one_of(st.none(), st.sampled_from(explored_branch_ids)))
+    discarded_branches = draw(st.lists(st.sampled_from(explored_branch_ids), max_size=len(explored_branch_ids)))
+
+    res: dict[str, Any] = {
+        "trace_id": draw(st.text(min_size=1)),
+        "explored_branches": explored_branches,
+        "discarded_branches": discarded_branches,
+        "resolution_branch_id": resolution_branch_id,
+        "total_latent_tokens": draw(st.integers(min_value=0)),
+    }
+    return res
+
+
+@st.composite
 def draw_reflex_policy(draw: Any) -> dict[str, Any]:
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(
@@ -238,6 +300,10 @@ def draw_agent_node_payload(draw: Any) -> dict[str, Any]:
         payload["baseline_cognitive_state"] = draw(draw_cognitive_state_profile())
     if draw(st.booleans()):
         payload["correction_policy"] = draw(draw_correction_policy())
+    if draw(st.booleans()):
+        payload["escalation_policy"] = draw(draw_escalation_contract())
+    if draw(st.booleans()):
+        payload["prm_policy"] = draw(draw_process_reward_contract())
     return payload
 
 
@@ -682,6 +748,8 @@ def _local_draw_any_state_event(draw: Any) -> dict[str, Any]:
             payload["sensory_trigger"] = draw(draw_embodied_sensory_vector())
         if event_type == "belief_update" and draw(st.booleans()):
             payload["uncertainty_profile"] = draw(draw_cognitive_uncertainty_profile())
+        if event_type == "belief_update" and draw(st.booleans()):
+            payload["scratchpad_trace"] = draw(draw_latent_scratchpad_trace())
     return payload
 
 

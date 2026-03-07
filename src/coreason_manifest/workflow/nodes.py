@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Annotated, Literal
 from pydantic import Field
 
 from coreason_manifest.compute.profiles import RoutingFrontier
+from coreason_manifest.compute.test_time import EscalationContract, ProcessRewardContract
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.oversight.dlp import SecureSubSession
 from coreason_manifest.state.cognition import CognitiveStateProfile
@@ -113,6 +114,12 @@ class AgentNode(BaseNode):
     )
     correction_policy: SelfCorrectionPolicy | None = Field(
         default=None, description="The policy governing self-correction loops."
+    )
+    escalation_policy: EscalationContract | None = Field(
+        default=None, description="The mathematical boundary authorizing the agent to spin up Test-Time Compute."
+    )
+    prm_policy: ProcessRewardContract | None = Field(
+        default=None, description="The ruleset governing how intermediate thoughts are scored and pruned."
     )
 
 
