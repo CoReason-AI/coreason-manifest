@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Annotated, Literal
 from pydantic import Field
 
 from coreason_manifest.compute.inference import ActiveInferenceContract, AnalogicalMappingTask, InterventionalCausalTask
+from coreason_manifest.compute.peft import PeftAdapterContract
 from coreason_manifest.compute.profiles import RoutingFrontier
 from coreason_manifest.compute.symbolic import NeuroSymbolicHandoff
 from coreason_manifest.compute.test_time import EscalationContract, ProcessRewardContract
@@ -99,6 +100,11 @@ class AgentNode(BaseNode):
     type: Literal["agent"] = Field(default="agent", description="Discriminator for an Agent node.")
     compute_frontier: RoutingFrontier | None = Field(
         default=None, description="The dynamic spot-market compute requirements for this agent."
+    )
+    peft_adapters: list[PeftAdapterContract] = Field(
+        default_factory=list,
+        description="A declarative list of ephemeral PEFT/LoRA weights required to be hot-swapped "
+        "during this agent's execution.",
     )
     agent_attestation: AgentAttestation | None = Field(
         default=None, description="The cryptographic identity passport and AI-BOM for the agent."
