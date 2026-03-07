@@ -11,6 +11,8 @@ from pydantic import Field
 
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.core.primitives import NodeID
+from coreason_manifest.state.cognition import CognitiveUncertaintyProfile
+from coreason_manifest.state.embodied import EmbodiedSensoryVector
 from coreason_manifest.state.toolchains import AnyToolchainState
 
 
@@ -67,6 +69,10 @@ class ObservationEvent(BaseStateEvent):
         default=None,
         description="The immutable cryptographic snapshot of the external environment at the moment of observation.",
     )
+    sensory_trigger: EmbodiedSensoryVector | None = Field(
+        default=None,
+        description="The continuous multimodal trigger that forced this discrete observation.",
+    )
 
 
 class CausalAttribution(CoreasonBaseModel):
@@ -100,6 +106,10 @@ class BeliefUpdateEvent(BaseStateEvent):
         default=None,
         description="The mathematical attestation proving this belief synthesis was generated "
         "securely without model-downgrade fraud.",
+    )
+    uncertainty_profile: CognitiveUncertaintyProfile | None = Field(
+        default=None,
+        description="The mathematical quantification of doubt associated with this synthesized belief.",
     )
 
 

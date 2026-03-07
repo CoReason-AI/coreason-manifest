@@ -12,6 +12,7 @@ from pydantic import Field
 from coreason_manifest.compute.profiles import RoutingFrontier
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.oversight.dlp import SecureSubSession
+from coreason_manifest.state.cognition import CognitiveStateProfile
 
 if TYPE_CHECKING:
     from coreason_manifest.workflow.topologies import AnyTopology
@@ -99,6 +100,10 @@ class AgentNode(BaseNode):
         default=None,
         description="Declarative boundary for handling unredacted secrets "
         "within a temporarily isolated memory partition.",
+    )
+    baseline_cognitive_state: CognitiveStateProfile | None = Field(
+        default=None,
+        description="The default biochemical 'mood' simulated for this agent via Representation Engineering.",
     )
     reflex_policy: System1Reflex | None = Field(
         default=None, description="The policy governing System 1 reflex actions."

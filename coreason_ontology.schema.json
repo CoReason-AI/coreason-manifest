@@ -271,6 +271,18 @@
           "default": null,
           "description": "Declarative boundary for handling unredacted secrets within a temporarily isolated memory partition."
         },
+        "baseline_cognitive_state": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CognitiveStateProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The default biochemical 'mood' simulated for this agent via Representation Engineering."
+        },
         "reflex_policy": {
           "anyOf": [
             {
@@ -726,6 +738,18 @@
           ],
           "default": null,
           "description": "The mathematical attestation proving this belief synthesis was generated securely without model-downgrade fraud."
+        },
+        "uncertainty_profile": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CognitiveUncertaintyProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematical quantification of doubt associated with this synthesized belief."
         }
       },
       "required": [
@@ -987,6 +1011,92 @@
         "error_signature"
       ],
       "title": "CircuitBreakerTrip",
+      "type": "object"
+    },
+    "CognitiveStateProfile": {
+      "additionalProperties": false,
+      "properties": {
+        "urgency_index": {
+          "description": "Drives latency requirements; high urgency forces fast, heuristic System 1 routing.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Urgency Index",
+          "type": "number"
+        },
+        "caution_index": {
+          "description": "Drives precision; high caution injects analytical/falsification steering vectors.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Caution Index",
+          "type": "number"
+        },
+        "divergence_tolerance": {
+          "description": "The 'curiosity' metric; dictates how far the MoE router is allowed to stray from high-probability distributions.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Divergence Tolerance",
+          "type": "number"
+        },
+        "active_steering_vector_hash": {
+          "anyOf": [
+            {
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the specific Representation Engineering control vector applied to the residual stream.",
+          "title": "Active Steering Vector Hash"
+        }
+      },
+      "required": [
+        "urgency_index",
+        "caution_index",
+        "divergence_tolerance"
+      ],
+      "title": "CognitiveStateProfile",
+      "type": "object"
+    },
+    "CognitiveUncertaintyProfile": {
+      "additionalProperties": false,
+      "properties": {
+        "aleatoric_entropy": {
+          "description": "Irreducible ambiguity detected in the input task or environment.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Aleatoric Entropy",
+          "type": "number"
+        },
+        "epistemic_uncertainty": {
+          "description": "The model's internal lack of knowledge, calculated via semantic disagreement.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Epistemic Uncertainty",
+          "type": "number"
+        },
+        "semantic_consistency_score": {
+          "description": "The degree to which multiple sampled latent thoughts align on the same conclusion.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Semantic Consistency Score",
+          "type": "number"
+        },
+        "requires_abductive_escalation": {
+          "description": "True if epistemic_uncertainty breaches the safety threshold, requiring System 2 test-time compute.",
+          "title": "Requires Abductive Escalation",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "aleatoric_entropy",
+        "epistemic_uncertainty",
+        "semantic_consistency_score",
+        "requires_abductive_escalation"
+      ],
+      "title": "CognitiveUncertaintyProfile",
       "type": "object"
     },
     "CompositeNode": {
@@ -1595,6 +1705,46 @@
         "model_variance_required"
       ],
       "title": "DiversityConstraint",
+      "type": "object"
+    },
+    "EmbodiedSensoryVector": {
+      "additionalProperties": false,
+      "properties": {
+        "sensory_modality": {
+          "description": "The continuous data stream being monitored.",
+          "enum": [
+            "video",
+            "audio",
+            "spatial_telemetry"
+          ],
+          "title": "Sensory Modality",
+          "type": "string"
+        },
+        "bayesian_surprise_score": {
+          "description": "The calculated KL divergence between the agent's prior belief and the incoming sensory evidence.",
+          "minimum": 0.0,
+          "title": "Bayesian Surprise Score",
+          "type": "number"
+        },
+        "temporal_duration_ms": {
+          "description": "The exact length of the continuous stream segment encapsulated by this observation.",
+          "exclusiveMinimum": 0,
+          "title": "Temporal Duration Ms",
+          "type": "integer"
+        },
+        "salience_threshold_breached": {
+          "default": true,
+          "description": "Mathematical proof that the anomaly was severe enough to warrant a memory snapshot.",
+          "title": "Salience Threshold Breached",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "sensory_modality",
+        "bayesian_surprise_score",
+        "temporal_duration_ms"
+      ],
+      "title": "EmbodiedSensoryVector",
       "type": "object"
     },
     "EpistemicLedger": {
@@ -3125,6 +3275,18 @@
           "default": null,
           "description": "The immutable cryptographic snapshot of the external environment at the moment of observation.",
           "title": "Toolchain Snapshot"
+        },
+        "sensory_trigger": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EmbodiedSensoryVector"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The continuous multimodal trigger that forced this discrete observation."
         }
       },
       "required": [

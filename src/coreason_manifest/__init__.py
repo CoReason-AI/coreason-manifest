@@ -7,6 +7,8 @@
 
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.core.primitives import NodeID, SemanticVersion
+from coreason_manifest.state.cognition import CognitiveStateProfile, CognitiveUncertaintyProfile
+from coreason_manifest.state.embodied import EmbodiedSensoryVector
 from coreason_manifest.workflow.envelope import WorkflowEnvelope
 from coreason_manifest.workflow.nodes import AnyNode
 from coreason_manifest.workflow.topologies import AnyTopology
@@ -14,7 +16,10 @@ from coreason_manifest.workflow.topologies import AnyTopology
 __all__ = [
     "AnyNode",
     "AnyTopology",
+    "CognitiveStateProfile",
+    "CognitiveUncertaintyProfile",
     "CoreasonBaseModel",
+    "EmbodiedSensoryVector",
     "NodeID",
     "SemanticVersion",
     "WorkflowEnvelope",
