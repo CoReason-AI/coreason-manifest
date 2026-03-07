@@ -1074,6 +1074,21 @@ def test_task_award_syndicate_invalid() -> None:
         TypeAdapter(TaskAward).validate_python(payload)
 
 
+def test_task_award_escrow_invalid() -> None:
+    payload = {
+        "task_id": "test_task",
+        "awarded_syndicate": {"agent_1": 100},
+        "cleared_price_cents": 100,
+        "escrow": {
+            "escrow_locked_cents": 150,
+            "release_condition_metric": "quality_score > 0.9",
+            "refund_target_node_id": "org_wallet_1",
+        }
+    }
+    with pytest.raises(ValueError, match="Escrow locked amount cannot exceed the total cleared price."):
+        TypeAdapter(TaskAward).validate_python(payload)
+
+
 @st.composite
 def draw_redaction_rule(draw: Any) -> dict[str, Any]:
     res: dict[str, Any] = draw(
