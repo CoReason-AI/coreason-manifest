@@ -723,7 +723,7 @@ def test_chaosexperiment_fuzzing(
 
 @st.composite
 def draw_lineage_watermark(draw: Any) -> dict[str, Any]:
-    return draw(
+    res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
                 "watermark_protocol": st.sampled_from(["merkle_dag", "statistical_token", "homomorphic_mac"]),
@@ -736,6 +736,7 @@ def draw_lineage_watermark(draw: Any) -> dict[str, Any]:
             }
         )
     )
+    return res
 
 
 @given(

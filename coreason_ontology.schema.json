@@ -2472,6 +2472,41 @@
       ],
       "type": "string"
     },
+    "LineageWatermark": {
+      "additionalProperties": false,
+      "properties": {
+        "watermark_protocol": {
+          "description": "The mathematical methodology used to embed the chain of custody.",
+          "enum": [
+            "merkle_dag",
+            "statistical_token",
+            "homomorphic_mac"
+          ],
+          "title": "Watermark Protocol",
+          "type": "string"
+        },
+        "hop_signatures": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "A dictionary mapping intermediate participant NodeIDs to their deterministic execution signatures.",
+          "title": "Hop Signatures",
+          "type": "object"
+        },
+        "tamper_evident_root": {
+          "description": "The overarching cryptographic hash (e.g., Merkle Root) proving the dataset has not been laundered or structurally modified.",
+          "title": "Tamper Evident Root",
+          "type": "string"
+        }
+      },
+      "required": [
+        "watermark_protocol",
+        "hop_signatures",
+        "tamper_evident_root"
+      ],
+      "title": "LineageWatermark",
+      "type": "object"
+    },
     "LogEnvelope": {
       "additionalProperties": false,
       "description": "An out-of-band telemetry log envelope.",
@@ -2579,6 +2614,18 @@
           ],
           "default": null,
           "description": "The physical coordinate matrix where this data was extracted."
+        },
+        "lineage_watermark": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LineageWatermark"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The cryptographic, tamper-evident chain of custody tracing this memory across multiple swarm hops."
         }
       },
       "required": [
