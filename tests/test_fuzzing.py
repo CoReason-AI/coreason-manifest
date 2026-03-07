@@ -102,7 +102,9 @@ def draw_thought_branch(draw: Any) -> dict[str, Any]:
 
 @st.composite
 def draw_latent_scratchpad_trace(draw: Any) -> dict[str, Any]:
-    explored_branches = draw(st.lists(draw_thought_branch(), min_size=1, max_size=5))
+    explored_branches = draw(
+        st.lists(draw_thought_branch(), min_size=1, max_size=5, unique_by=lambda b: b["branch_id"])
+    )
     explored_branch_ids = [branch["branch_id"] for branch in explored_branches]
 
     # ensure resolution_branch_id and discarded_branches are valid if generated
