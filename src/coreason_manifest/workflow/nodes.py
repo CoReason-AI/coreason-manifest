@@ -12,6 +12,7 @@ from pydantic import Field
 from coreason_manifest.compute.inference import ActiveInferenceContract, AnalogicalMappingTask, InterventionalCausalTask
 from coreason_manifest.compute.peft import PeftAdapterContract
 from coreason_manifest.compute.profiles import RoutingFrontier
+from coreason_manifest.compute.stochastic import LogitSteganographyContract
 from coreason_manifest.compute.symbolic import NeuroSymbolicHandoff
 from coreason_manifest.compute.test_time import EscalationContract, ProcessRewardContract
 from coreason_manifest.core.base import CoreasonBaseModel
@@ -98,6 +99,10 @@ class AgentNode(BaseNode):
     """
 
     type: Literal["agent"] = Field(default="agent", description="Discriminator for an Agent node.")
+    logit_steganography: LogitSteganographyContract | None = Field(
+        default=None,
+        description="The cryptographic contract forcing this agent to embed an undeniable provenance signature into its generative token stream.",
+    )
     compute_frontier: RoutingFrontier | None = Field(
         default=None, description="The dynamic spot-market compute requirements for this agent."
     )

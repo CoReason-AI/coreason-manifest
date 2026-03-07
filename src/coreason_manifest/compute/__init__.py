@@ -26,6 +26,7 @@ from .stochastic import (
     CrossoverStrategy,
     DistributionProfile,
     FitnessObjective,
+    LogitSteganographyContract,
     MutationPolicy,
     VerifiableEntropy,
 )
@@ -49,6 +50,7 @@ __all__ = [
     "FitnessObjective",
     "InterventionalCausalTask",
     "LatentSmoothingProfile",
+    "LogitSteganographyContract",
     "ModelProfile",
     "MutationPolicy",
     "NeuroSymbolicHandoff",
