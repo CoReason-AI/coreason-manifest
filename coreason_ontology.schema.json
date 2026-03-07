@@ -199,6 +199,67 @@
       "title": "AdjudicationVerdict",
       "type": "object"
     },
+    "AdversarialSimulationProfile": {
+      "additionalProperties": false,
+      "description": "A deterministic red-team configuration defining a structural attack vector\nto continuously validate semantic firewalls and execution bounds.",
+      "properties": {
+        "simulation_id": {
+          "description": "The unique identifier for this red-team experiment.",
+          "title": "Simulation Id",
+          "type": "string"
+        },
+        "target_node_id": {
+          "description": "The exact NodeID the 'Judas Node' will attempt to compromise.",
+          "title": "Target Node Id",
+          "type": "string"
+        },
+        "attack_vector": {
+          "description": "The mathematically predictable category of structural sabotage being simulated.",
+          "enum": [
+            "prompt_extraction",
+            "data_exfiltration",
+            "semantic_hijacking",
+            "tool_poisoning"
+          ],
+          "title": "Attack Vector",
+          "type": "string"
+        },
+        "synthetic_payload": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The raw poisoned text or malicious JSON-RPC schema injected into the target's context window.",
+          "title": "Synthetic Payload"
+        },
+        "expected_firewall_trip": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The exact rule_id of the InformationFlowPolicy or Governance bound expected to block this attack. Used for automated test assertions.",
+          "title": "Expected Firewall Trip"
+        }
+      },
+      "required": [
+        "simulation_id",
+        "target_node_id",
+        "attack_vector",
+        "synthetic_payload"
+      ],
+      "title": "AdversarialSimulationProfile",
+      "type": "object"
+    },
     "AdversaryProfile": {
       "additionalProperties": false,
       "properties": {
@@ -871,6 +932,30 @@
       "title": "BackpressurePolicy",
       "type": "object"
     },
+    "BaseNode": {
+      "additionalProperties": false,
+      "description": "Base configuration for any execution node in a topology.",
+      "properties": {
+        "description": {
+          "description": "A description of the node's function.",
+          "title": "Description",
+          "type": "string"
+        },
+        "intervention_policies": {
+          "description": "A declarative list of proactive oversight hooks bound to this node's lifecycle.",
+          "items": {
+            "$ref": "#/$defs/InterventionPolicy"
+          },
+          "title": "Intervention Policies",
+          "type": "array"
+        }
+      },
+      "required": [
+        "description"
+      ],
+      "title": "BaseNode",
+      "type": "object"
+    },
     "BaseStateEvent": {
       "additionalProperties": false,
       "properties": {
@@ -890,6 +975,64 @@
         "timestamp"
       ],
       "title": "BaseStateEvent",
+      "type": "object"
+    },
+    "BaseTopology": {
+      "additionalProperties": false,
+      "description": "Base configuration for any workflow topology.",
+      "properties": {
+        "nodes": {
+          "additionalProperties": {
+            "$ref": "#/$defs/AnyNode"
+          },
+          "description": "Flat registry of all nodes in this topology.",
+          "propertyNames": {
+            "$ref": "#/$defs/NodeID"
+          },
+          "title": "Nodes",
+          "type": "object"
+        },
+        "shared_state_contract": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StateContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The schema-on-write contract governing the internal state of this topology."
+        },
+        "information_flow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/InformationFlowPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The structural Data Loss Prevention (DLP) contract governing all state mutations in this topology."
+        },
+        "observability": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ObservabilityPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The distributed tracing rules bound to this specific execution graph."
+        }
+      },
+      "required": [
+        "nodes"
+      ],
+      "title": "BaseTopology",
       "type": "object"
     },
     "BeliefUpdateEvent": {
@@ -2522,6 +2665,79 @@
         "fitness_objectives"
       ],
       "title": "EvolutionaryTopology",
+      "type": "object"
+    },
+    "ExecutionNode": {
+      "additionalProperties": false,
+      "description": "Cryptographic state of an execution node in a Merkle DAG trace.",
+      "properties": {
+        "request_id": {
+          "description": "The unique ID for this specific execution.",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "parent_request_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The ID of the parent request.",
+          "title": "Parent Request Id"
+        },
+        "root_request_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The ID of the trace root.",
+          "title": "Root Request Id"
+        },
+        "inputs": {
+          "description": "The inputs provided to the execution node.",
+          "title": "Inputs"
+        },
+        "outputs": {
+          "description": "The outputs generated by the execution node.",
+          "title": "Outputs"
+        },
+        "parent_hashes": {
+          "description": "A list of cryptographic hashes of parent execution nodes.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Parent Hashes",
+          "type": "array"
+        },
+        "node_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The cryptographic SHA-256 hash of this node.",
+          "title": "Node Hash"
+        }
+      },
+      "required": [
+        "request_id",
+        "inputs",
+        "outputs"
+      ],
+      "title": "ExecutionNode",
       "type": "object"
     },
     "ExecutionSLA": {

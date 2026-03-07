@@ -5,15 +5,22 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
-from .chaos import ChaosExperiment, FaultInjectionProfile, FaultType, SteadyStateHypothesis
-from .red_team import AdversaryProfile, AiTMStrategy, AttackVector
+from .chaos import (
+    ChaosExperiment,
+    FaultInjectionProfile,
+    SteadyStateHypothesis,
+)
+from .red_team import (
+    AdversarialSimulationProfile,
+    AdversaryProfile,
+    AiTMStrategy,
+)
 
 __all__ = [
+    "AdversarialSimulationProfile",
     "AdversaryProfile",
     "AiTMStrategy",
-    "AttackVector",
     "ChaosExperiment",
     "FaultInjectionProfile",
-    "FaultType",
     "SteadyStateHypothesis",
 ]
