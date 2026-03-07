@@ -9,6 +9,7 @@ from typing import Literal, Self
 
 from pydantic import Field, model_validator
 
+from coreason_manifest.compute.neuromodulation import SaeLatentFirewall
 from coreason_manifest.core.base import CoreasonBaseModel
 
 type DataClassification = Literal["phi", "pii", "pci", "confidential", "public"]
@@ -73,6 +74,12 @@ class InformationFlowPolicy(CoreasonBaseModel):
     semantic_firewall: SemanticFirewallPolicy | None = Field(
         default=None,
         description="The active cognitive defense perimeter against adversarial control-flow overrides.",
+    )
+    latent_firewalls: list[SaeLatentFirewall] = Field(
+        default_factory=list,
+        description=(
+            "The list of tensor-level mechanistic firewalls monitoring the forward pass for adversarial intent."
+        ),
     )
 
     @model_validator(mode="after")
