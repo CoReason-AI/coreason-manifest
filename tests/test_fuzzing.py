@@ -813,7 +813,7 @@ def draw_temporal_bounds(draw: Any) -> dict[str, Any]:
 
 @st.composite
 def draw_fhe_profile(draw: Any) -> dict[str, Any]:
-    return draw(
+    res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
                 "fhe_scheme": st.sampled_from(["ckks", "bgv", "bfv", "tfhe"]),
@@ -822,6 +822,7 @@ def draw_fhe_profile(draw: Any) -> dict[str, Any]:
             }
         )
     )
+    return res
 
 
 @given(
