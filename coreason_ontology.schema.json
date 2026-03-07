@@ -460,6 +460,18 @@
           "default": null,
           "description": "The formal contract forcing the agent to execute cross-domain lateral thinking."
         },
+        "interventional_policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/InterventionalCausalTask"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The formal contract authorizing the agent to mutate variables to prove Pearlian causation."
+        },
         "symbolic_handoff_policy": {
           "anyOf": [
             {
@@ -1155,6 +1167,41 @@
         "influence_weight"
       ],
       "title": "CausalAttribution",
+      "type": "object"
+    },
+    "CausalDirectedEdge": {
+      "additionalProperties": false,
+      "properties": {
+        "source_variable": {
+          "description": "The independent variable $X$.",
+          "minLength": 1,
+          "title": "Source Variable",
+          "type": "string"
+        },
+        "target_variable": {
+          "description": "The dependent variable $Y$.",
+          "minLength": 1,
+          "title": "Target Variable",
+          "type": "string"
+        },
+        "edge_type": {
+          "description": "The specific Pearlian topological relationship between the two variables.",
+          "enum": [
+            "direct_cause",
+            "confounder",
+            "collider",
+            "mediator"
+          ],
+          "title": "Edge Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_variable",
+        "target_variable",
+        "edge_type"
+      ],
+      "title": "CausalDirectedEdge",
       "type": "object"
     },
     "CausalInterval": {
@@ -2993,6 +3040,18 @@
           ],
           "title": "Status",
           "type": "string"
+        },
+        "causal_model": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StructuralCausalModel"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The formal DAG representing the agent's structural assumptions about the environment."
         }
       },
       "required": [
@@ -3225,6 +3284,55 @@
         "feedback"
       ],
       "title": "InterventionVerdict",
+      "type": "object"
+    },
+    "InterventionalCausalTask": {
+      "additionalProperties": false,
+      "properties": {
+        "task_id": {
+          "description": "Unique identifier for this causal intervention.",
+          "minLength": 1,
+          "title": "Task Id",
+          "type": "string"
+        },
+        "target_hypothesis_id": {
+          "description": "The hypothesis containing the SCM being tested.",
+          "title": "Target Hypothesis Id",
+          "type": "string"
+        },
+        "intervention_variable": {
+          "description": "The specific node $X$ in the SCM the agent is forcing to a specific state.",
+          "title": "Intervention Variable",
+          "type": "string"
+        },
+        "do_operator_state": {
+          "description": "The exact value or condition forced upon the intervention_variable, isolating it from its historical causes.",
+          "title": "Do Operator State",
+          "type": "string"
+        },
+        "expected_causal_information_gain": {
+          "description": "The mathematical proof of entropy reduction yielded specifically by breaking the confounding back-doors.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Expected Causal Information Gain",
+          "type": "number"
+        },
+        "execution_cost_budget_cents": {
+          "description": "The maximum economic expenditure authorized to run this specific causal intervention.",
+          "minimum": 0,
+          "title": "Execution Cost Budget Cents",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "task_id",
+        "target_hypothesis_id",
+        "intervention_variable",
+        "do_operator_state",
+        "expected_causal_information_gain",
+        "execution_cost_budget_cents"
+      ],
+      "title": "InterventionalCausalTask",
       "type": "object"
     },
     "LatentScratchpadTrace": {
@@ -4577,6 +4685,18 @@
           ],
           "default": null,
           "description": "The time window during which this relationship holds true."
+        },
+        "causal_relationship": {
+          "default": "undirected",
+          "description": "The Pearlian directionality of the semantic relationship.",
+          "enum": [
+            "causes",
+            "confounds",
+            "correlates_with",
+            "undirected"
+          ],
+          "title": "Causal Relationship",
+          "type": "string"
         }
       },
       "required": [
@@ -5064,6 +5184,42 @@
         "max_loops_allowed"
       ],
       "title": "SteadyStateHypothesis",
+      "type": "object"
+    },
+    "StructuralCausalModel": {
+      "additionalProperties": false,
+      "properties": {
+        "observed_variables": {
+          "description": "The nodes in the DAG that the agent can passively measure.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Observed Variables",
+          "type": "array"
+        },
+        "latent_variables": {
+          "description": "The unobserved confounders the agent suspects exist.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Latent Variables",
+          "type": "array"
+        },
+        "causal_edges": {
+          "description": "The declared topological mapping of causality.",
+          "items": {
+            "$ref": "#/$defs/CausalDirectedEdge"
+          },
+          "title": "Causal Edges",
+          "type": "array"
+        }
+      },
+      "required": [
+        "observed_variables",
+        "latent_variables",
+        "causal_edges"
+      ],
+      "title": "StructuralCausalModel",
       "type": "object"
     },
     "SuspenseEnvelope": {

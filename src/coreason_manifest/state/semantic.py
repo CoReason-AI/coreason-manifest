@@ -151,3 +151,6 @@ class SemanticEdge(CoreasonBaseModel):
     temporal_bounds: TemporalBounds | None = Field(
         default=None, description="The time window during which this relationship holds true."
     )
+    causal_relationship: Literal["causes", "confounds", "correlates_with", "undirected"] = Field(
+        default="undirected", description="The Pearlian directionality of the semantic relationship."
+    )

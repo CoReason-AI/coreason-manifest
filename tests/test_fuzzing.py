@@ -135,6 +135,34 @@ def draw_reflex_policy(draw: Any) -> dict[str, Any]:
 
 
 @st.composite
+def draw_causal_directed_edge(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "source_variable": st.text(min_size=1),
+                "target_variable": st.text(min_size=1),
+                "edge_type": st.sampled_from(["direct_cause", "confounder", "collider", "mediator"]),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_structural_causal_model(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "observed_variables": st.lists(st.text(), max_size=100),
+                "latent_variables": st.lists(st.text(), max_size=100),
+                "causal_edges": st.lists(draw_causal_directed_edge(), max_size=100),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
 def draw_falsification_condition(draw: Any) -> dict[str, Any]:
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(
@@ -164,6 +192,26 @@ def draw_hypothesis_generation_event(draw: Any) -> dict[str, Any]:
                 "status": st.sampled_from(["active", "falsified", "verified"]),
                 "event_id": st.text(min_size=1),
                 "timestamp": st.floats(allow_nan=False, allow_infinity=False),
+                "causal_model": st.one_of(st.none(), draw_structural_causal_model()),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_interventional_causal_task(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "task_id": st.text(min_size=1),
+                "target_hypothesis_id": st.text(),
+                "intervention_variable": st.text(),
+                "do_operator_state": st.text(),
+                "expected_causal_information_gain": st.floats(
+                    min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False
+                ),
+                "execution_cost_budget_cents": st.integers(min_value=0),
             }
         )
     )
@@ -406,6 +454,8 @@ def draw_agent_node_payload(draw: Any) -> dict[str, Any]:
         payload["analogical_policy"] = draw(draw_analogical_mapping_task())
     if draw(st.booleans()):
         payload["symbolic_handoff_policy"] = draw(draw_neuro_symbolic_handoff())
+    if draw(st.booleans()):
+        payload["interventional_policy"] = draw(draw_interventional_causal_task())
     return payload
 
 
@@ -1272,6 +1322,7 @@ def test_semanticnode_fuzzing(payload: dict[str, Any]) -> None:
                 ),
             ),
             "temporal_bounds": st.one_of(st.none(), draw_temporal_bounds()),
+            "causal_relationship": st.sampled_from(["causes", "confounds", "correlates_with", "undirected"]),
         }
     )
 )

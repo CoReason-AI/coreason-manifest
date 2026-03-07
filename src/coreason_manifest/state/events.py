@@ -124,6 +124,20 @@ class SystemFaultEvent(BaseStateEvent):
     )
 
 
+class CausalDirectedEdge(CoreasonBaseModel):
+    source_variable: str = Field(min_length=1, description="The independent variable $X$.")
+    target_variable: str = Field(min_length=1, description="The dependent variable $Y$.")
+    edge_type: Literal["direct_cause", "confounder", "collider", "mediator"] = Field(
+        description="The specific Pearlian topological relationship between the two variables."
+    )
+
+
+class StructuralCausalModel(CoreasonBaseModel):
+    observed_variables: list[str] = Field(description="The nodes in the DAG that the agent can passively measure.")
+    latent_variables: list[str] = Field(description="The unobserved confounders the agent suspects exist.")
+    causal_edges: list[CausalDirectedEdge] = Field(description="The declared topological mapping of causality.")
+
+
 class FalsificationCondition(CoreasonBaseModel):
     condition_id: str = Field(min_length=1, description="Unique identifier for this falsification test.")
     description: str = Field(
@@ -156,6 +170,10 @@ class HypothesisGenerationEvent(BaseStateEvent):
     )
     status: Literal["active", "falsified", "verified"] = Field(
         default="active", description="The current validity state of this hypothesis in the EpistemicLedger."
+    )
+    causal_model: StructuralCausalModel | None = Field(
+        default=None,
+        description="The formal DAG representing the agent's structural assumptions about the environment.",
     )
 
 
