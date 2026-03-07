@@ -518,6 +518,19 @@ def draw_zkp(draw: Any) -> dict[str, Any]:
 
 
 @st.composite
+def draw_hardware_attestation(draw: Any) -> dict[str, Any]:
+    return draw(
+        st.fixed_dictionaries(
+            {
+                "enclave_type": st.sampled_from(["intel_tdx", "amd_sev_snp", "aws_nitro", "nvidia_cc"]),
+                "platform_measurement_hash": st.text(min_size=10),
+                "hardware_signature_blob": st.text(min_size=20),
+            }
+        )
+    )
+
+
+@st.composite
 def _local_draw_any_state_event(draw: Any) -> dict[str, Any]:
     event_type = draw(st.sampled_from(["observation", "belief_update", "system_fault"]))
     payload: dict[str, Any] = {
@@ -547,6 +560,8 @@ def _local_draw_any_state_event(draw: Any) -> dict[str, Any]:
             payload["causal_attributions"] = draw(st.lists(draw_causal_attribution(), max_size=10))
         if draw(st.booleans()):
             payload["zk_proof"] = draw(draw_zkp())
+        if draw(st.booleans()):
+            payload["hardware_attestation"] = draw(draw_hardware_attestation())
     return payload
 
 
