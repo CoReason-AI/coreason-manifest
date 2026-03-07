@@ -38,12 +38,29 @@ class GovernancePolicy(CoreasonBaseModel):
     rules: list[ConstitutionalRule] = Field(description="List of constitutional rules included in this policy.")
 
 
+class PredictionMarketPolicy(CoreasonBaseModel):
+    """
+    The ruleset governing the market. It enforces Sybil resistance
+    (via quadratic staking) and dictates when the market stops trading.
+    """
+
+    staking_function: Literal["linear", "quadratic"] = Field(
+        description="The mathematical curve applied to stakes. Quadratic enforces Sybil resistance."
+    )
+    min_liquidity_cents: int = Field(ge=0, description="Minimum liquidity required.")
+    convergence_delta_threshold: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="The threshold indicating the market price has stabilized enough to trigger the resolution oracle.",
+    )
+
+
 class ConsensusPolicy(CoreasonBaseModel):
     """
     Explicit ruleset governing how a council resolves disagreements.
     """
 
-    strategy: Literal["unanimous", "majority", "debate_rounds"] = Field(
+    strategy: Literal["unanimous", "majority", "debate_rounds", "prediction_market"] = Field(
         description="The mathematical rule for reaching agreement."
     )
     tie_breaker_node_id: NodeID | None = Field(
@@ -52,6 +69,10 @@ class ConsensusPolicy(CoreasonBaseModel):
     max_debate_rounds: int | None = Field(
         default=None,
         description="The maximum number of argument/rebuttal cycles permitted before forced adjudication.",
+    )
+    prediction_market_rules: PredictionMarketPolicy | None = Field(
+        default=None,
+        description="The strict algorithmic mechanism rules required if the strategy is prediction_market.",
     )
 
 

@@ -1520,7 +1520,8 @@
           "enum": [
             "unanimous",
             "majority",
-            "debate_rounds"
+            "debate_rounds",
+            "prediction_market"
           ],
           "title": "Strategy",
           "type": "string"
@@ -1549,6 +1550,18 @@
           "default": null,
           "description": "The maximum number of argument/rebuttal cycles permitted before forced adjudication.",
           "title": "Max Debate Rounds"
+        },
+        "prediction_market_rules": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PredictionMarketPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The strict algorithmic mechanism rules required if the strategy is prediction_market."
         }
       },
       "required": [
@@ -3136,6 +3149,45 @@
       "title": "HypothesisGenerationEvent",
       "type": "object"
     },
+    "HypothesisStake": {
+      "additionalProperties": false,
+      "description": "The mathematical record of an agent taking a financial/compute position on a specific causal hypothesis.",
+      "properties": {
+        "agent_id": {
+          "description": "The ID of the agent placing the stake.",
+          "minLength": 1,
+          "title": "Agent Id",
+          "type": "string"
+        },
+        "target_hypothesis_id": {
+          "description": "The exact HypothesisGenerationEvent the agent is betting on.",
+          "minLength": 1,
+          "title": "Target Hypothesis Id",
+          "type": "string"
+        },
+        "staked_cents": {
+          "description": "The volume of capital or compute budget committed to this position.",
+          "exclusiveMinimum": 0,
+          "title": "Staked Cents",
+          "type": "integer"
+        },
+        "implied_probability": {
+          "description": "The agent's calculated internal confidence score.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Implied Probability",
+          "type": "number"
+        }
+      },
+      "required": [
+        "agent_id",
+        "target_hypothesis_id",
+        "staked_cents",
+        "implied_probability"
+      ],
+      "title": "HypothesisStake",
+      "type": "object"
+    },
     "InformationFlowPolicy": {
       "additionalProperties": false,
       "description": "Mathematical Data Loss Prevention (DLP) contract that bounds the graph.",
@@ -3666,6 +3718,47 @@
         "http"
       ],
       "type": "string"
+    },
+    "MarketResolution": {
+      "additionalProperties": false,
+      "description": "The resolution state of an algorithmic prediction market.",
+      "properties": {
+        "market_id": {
+          "description": "The ID of the prediction market.",
+          "minLength": 1,
+          "title": "Market Id",
+          "type": "string"
+        },
+        "winning_hypothesis_id": {
+          "description": "The hypothesis ID that was verified.",
+          "title": "Winning Hypothesis Id",
+          "type": "string"
+        },
+        "falsified_hypothesis_ids": {
+          "description": "The hypothesis IDs that were falsified.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Falsified Hypothesis Ids",
+          "type": "array"
+        },
+        "payout_distribution": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "description": "The deterministic mapping of agent IDs to their earned compute budget/cents based on Brier scoring.",
+          "title": "Payout Distribution",
+          "type": "object"
+        }
+      },
+      "required": [
+        "market_id",
+        "winning_hypothesis_id",
+        "falsified_hypothesis_ids",
+        "payout_distribution"
+      ],
+      "title": "MarketResolution",
+      "type": "object"
     },
     "MechanisticAuditContract": {
       "additionalProperties": false,
@@ -4427,6 +4520,89 @@
         "pq_signature_blob"
       ],
       "title": "PostQuantumSignature",
+      "type": "object"
+    },
+    "PredictionMarketPolicy": {
+      "additionalProperties": false,
+      "description": "The ruleset governing the market. It enforces Sybil resistance\n(via quadratic staking) and dictates when the market stops trading.",
+      "properties": {
+        "staking_function": {
+          "description": "The mathematical curve applied to stakes. Quadratic enforces Sybil resistance.",
+          "enum": [
+            "linear",
+            "quadratic"
+          ],
+          "title": "Staking Function",
+          "type": "string"
+        },
+        "min_liquidity_cents": {
+          "description": "Minimum liquidity required.",
+          "minimum": 0,
+          "title": "Min Liquidity Cents",
+          "type": "integer"
+        },
+        "convergence_delta_threshold": {
+          "description": "The threshold indicating the market price has stabilized enough to trigger the resolution oracle.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Convergence Delta Threshold",
+          "type": "number"
+        }
+      },
+      "required": [
+        "staking_function",
+        "min_liquidity_cents",
+        "convergence_delta_threshold"
+      ],
+      "title": "PredictionMarketPolicy",
+      "type": "object"
+    },
+    "PredictionMarketState": {
+      "additionalProperties": false,
+      "description": "The state of the Automated Market Maker (AMM) using Robin Hanson's\nLogarithmic Market Scoring Rule (LMSR) to ensure infinite liquidity.",
+      "properties": {
+        "market_id": {
+          "description": "The ID of the prediction market.",
+          "minLength": 1,
+          "title": "Market Id",
+          "type": "string"
+        },
+        "resolution_oracle_condition_id": {
+          "description": "The specific FalsificationCondition ID whose execution will trigger the market payout.",
+          "title": "Resolution Oracle Condition Id",
+          "type": "string"
+        },
+        "lmsr_b_parameter": {
+          "description": "The liquidity parameter defining the market depth and max loss for the AMM.",
+          "exclusiveMinimum": 0.0,
+          "title": "Lmsr B Parameter",
+          "type": "number"
+        },
+        "order_book": {
+          "description": "The immutable ledger of all stakes placed by the swarm.",
+          "items": {
+            "$ref": "#/$defs/HypothesisStake"
+          },
+          "title": "Order Book",
+          "type": "array"
+        },
+        "current_market_probabilities": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "description": "Mapping of hypothesis IDs to their current LMSR-calculated market price (probability).",
+          "title": "Current Market Probabilities",
+          "type": "object"
+        }
+      },
+      "required": [
+        "market_id",
+        "resolution_oracle_condition_id",
+        "lmsr_b_parameter",
+        "order_book",
+        "current_market_probabilities"
+      ],
+      "title": "PredictionMarketState",
       "type": "object"
     },
     "ProcessRewardContract": {
@@ -5617,6 +5793,22 @@
           ],
           "default": null,
           "description": "The mathematical policy governing task decentralization via Spot Markets."
+        },
+        "active_prediction_markets": {
+          "description": "The live algorithmic betting markets resolving swarm consensus.",
+          "items": {
+            "$ref": "#/$defs/PredictionMarketState"
+          },
+          "title": "Active Prediction Markets",
+          "type": "array"
+        },
+        "resolved_markets": {
+          "description": "The immutable records of finalized markets and reputation capital distributions.",
+          "items": {
+            "$ref": "#/$defs/MarketResolution"
+          },
+          "title": "Resolved Markets",
+          "type": "array"
         }
       },
       "required": [

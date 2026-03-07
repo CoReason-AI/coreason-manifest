@@ -546,16 +546,79 @@ def draw_ontological_alignment_policy(draw: Any) -> dict[str, Any]:
 
 
 @st.composite
+def draw_prediction_market_policy(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "staking_function": st.sampled_from(["linear", "quadratic"]),
+                "min_liquidity_cents": st.integers(min_value=0),
+                "convergence_delta_threshold": st.floats(
+                    min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False
+                ),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
 def draw_consensus_policy(draw: Any) -> dict[str, Any]:
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
-                "strategy": st.sampled_from(["unanimous", "majority", "debate_rounds"]),
+                "strategy": st.sampled_from(["unanimous", "majority", "debate_rounds", "prediction_market"]),
                 "tie_breaker_node_id": st.one_of(
                     st.none(),
                     st.text(min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"),
                 ),
                 "max_debate_rounds": st.one_of(st.none(), st.integers(min_value=1, max_value=100)),
+                "prediction_market_rules": st.one_of(st.none(), draw_prediction_market_policy()),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_hypothesis_stake(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "agent_id": st.text(min_size=1),
+                "target_hypothesis_id": st.text(min_size=1),
+                "staked_cents": st.integers(min_value=1),
+                "implied_probability": st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_prediction_market_state(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "market_id": st.text(min_size=1),
+                "resolution_oracle_condition_id": st.text(),
+                "lmsr_b_parameter": st.floats(min_value=0.01, allow_nan=False, allow_infinity=False),
+                "order_book": st.lists(draw_hypothesis_stake(), max_size=10),
+                "current_market_probabilities": st.dictionaries(st.text(), st.floats(), max_size=10),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_market_resolution(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "market_id": st.text(min_size=1),
+                "winning_hypothesis_id": st.text(),
+                "falsified_hypothesis_ids": st.lists(st.text(), max_size=10),
+                "payout_distribution": st.dictionaries(st.text(), st.integers(), max_size=10),
             }
         )
     )
@@ -626,6 +689,25 @@ def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> 
         }
     ).map(_council_mapper)
 
+    swarm_strategy = st.fixed_dictionaries(
+        {
+            "type": st.just("swarm"),
+            "nodes": st.dictionaries(
+                st.text(min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"),
+                nodes_strategy,
+                max_size=5,
+            ),
+            "shared_state_contract": st.none(),
+            "information_flow": st.none(),
+            "observability": st.none(),
+            "spawning_threshold": st.integers(min_value=1, max_value=10),
+            "max_concurrent_agents": st.integers(min_value=10, max_value=100),
+            "auction_policy": st.none(),
+            "active_prediction_markets": st.lists(draw_prediction_market_state(), max_size=10),
+            "resolved_markets": st.lists(draw_market_resolution(), max_size=10),
+        }
+    )
+
     smpc_strategy = st.fixed_dictionaries(
         {
             "type": st.just("smpc"),
@@ -649,7 +731,7 @@ def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> 
         }
     )
 
-    return st.one_of(dag_strategy, council_strategy, smpc_strategy)
+    return st.one_of(dag_strategy, council_strategy, swarm_strategy, smpc_strategy)
 
 
 def draw_composite_node_payload(

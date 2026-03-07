@@ -15,6 +15,7 @@ from coreason_manifest.workflow.auctions import (
     TieBreaker,
 )
 from coreason_manifest.workflow.envelope import WorkflowEnvelope
+from coreason_manifest.workflow.markets import HypothesisStake, MarketResolution, PredictionMarketState
 from coreason_manifest.workflow.nodes import (
     AgentNode,
     AnyNode,
@@ -55,7 +56,10 @@ __all__ = [
     "EpistemicScanner",
     "EvolutionaryTopology",
     "HumanNode",
+    "HypothesisStake",
+    "MarketResolution",
     "OntologicalAlignmentPolicy",
+    "PredictionMarketState",
     "SelfCorrectionPolicy",
     "StateContract",
     "SwarmTopology",

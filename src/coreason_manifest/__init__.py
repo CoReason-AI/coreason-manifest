@@ -25,6 +25,7 @@ from coreason_manifest.state.events import (
 from coreason_manifest.state.scratchpad import LatentScratchpadTrace, ThoughtBranch
 from coreason_manifest.state.semantic import DimensionalProjectionContract, OntologicalHandshake
 from coreason_manifest.workflow.envelope import WorkflowEnvelope
+from coreason_manifest.workflow.markets import HypothesisStake, MarketResolution, PredictionMarketState
 from coreason_manifest.workflow.nodes import AnyNode
 from coreason_manifest.workflow.topologies import AnyTopology, OntologicalAlignmentPolicy
 
@@ -43,14 +44,17 @@ __all__ = [
     "DimensionalProjectionContract",
     "EmbodiedSensoryVector",
     "EscalationContract",
+    "HypothesisStake",
     "InterventionalCausalTask",
     "LatentScratchpadTrace",
+    "MarketResolution",
     "MechanisticAuditContract",
     "NeuralAuditAttestation",
     "NeuroSymbolicHandoff",
     "NodeID",
     "OntologicalAlignmentPolicy",
     "OntologicalHandshake",
+    "PredictionMarketState",
     "ProcessRewardContract",
     "SaeFeatureActivation",
     "SemanticVersion",

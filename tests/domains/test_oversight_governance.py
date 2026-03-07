@@ -4,7 +4,7 @@ from hypothesis import strategies as st
 from pydantic import ValidationError
 
 from coreason_manifest.oversight.adjudication import AdjudicationRubric, GradingCriteria
-from coreason_manifest.oversight.governance import ConstitutionalRule
+from coreason_manifest.oversight.governance import ConstitutionalRule, PredictionMarketPolicy
 from coreason_manifest.oversight.intervention import BoundedInterventionScope, FallbackSLA, InterventionRequest
 
 
@@ -70,6 +70,28 @@ def test_constitutional_rule_deduplicates_or_rejects_duplicate_strings(forbidden
         assert len(rule.forbidden_intents) < len(forbidden_intents)
     except ValidationError:
         pass  # Also acceptable if it rejects lists with duplicates (depending on strict mode)
+
+
+def test_prediction_market_policy_bounds() -> None:
+    # Test valid bounds
+    policy = PredictionMarketPolicy(
+        staking_function="quadratic", min_liquidity_cents=0, convergence_delta_threshold=0.5
+    )
+    assert policy.staking_function == "quadratic"
+
+    # Test invalid min_liquidity_cents
+    with pytest.raises(ValidationError) as exc_info:
+        PredictionMarketPolicy(staking_function="quadratic", min_liquidity_cents=-1, convergence_delta_threshold=0.5)
+    assert "ge" in str(exc_info.value) or "greater than or equal" in str(exc_info.value)
+
+    # Test invalid convergence_delta_threshold
+    with pytest.raises(ValidationError) as exc_info2:
+        PredictionMarketPolicy(staking_function="linear", min_liquidity_cents=100, convergence_delta_threshold=-0.1)
+    assert "ge" in str(exc_info2.value) or "greater than or equal" in str(exc_info2.value)
+
+    with pytest.raises(ValidationError) as exc_info3:
+        PredictionMarketPolicy(staking_function="linear", min_liquidity_cents=100, convergence_delta_threshold=1.1)
+    assert "le" in str(exc_info3.value) or "less than or equal" in str(exc_info3.value)
 
 
 @given(

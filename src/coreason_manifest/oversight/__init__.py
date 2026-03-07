@@ -8,7 +8,7 @@
 from .adjudication import AdjudicationRubric, AdjudicationVerdict, GradingCriteria
 from .audit import MechanisticAuditContract
 from .dlp import DataClassification, InformationFlowPolicy, RedactionRule, SanitizationAction, SecureSubSession
-from .governance import ConsensusPolicy, ConstitutionalRule, GlobalGovernance, GovernancePolicy
+from .governance import ConsensusPolicy, ConstitutionalRule, GlobalGovernance, GovernancePolicy, PredictionMarketPolicy
 from .intervention import (
     AnyInterventionPayload,
     BoundedInterventionScope,
@@ -43,6 +43,7 @@ __all__ = [
     "LifecycleTrigger",
     "MechanisticAuditContract",
     "OverrideIntent",
+    "PredictionMarketPolicy",
     "QuarantineOrder",
     "RedactionRule",
     "SanitizationAction",
