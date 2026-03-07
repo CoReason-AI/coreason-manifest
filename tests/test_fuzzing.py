@@ -605,21 +605,33 @@ def draw_prediction_market_policy(draw: Any) -> dict[str, Any]:
 
 
 @st.composite
+def draw_quorum_policy(draw: Any) -> dict[str, Any]:
+    f = draw(st.integers(min_value=0, max_value=10))
+    n = draw(st.integers(min_value=(3 * f) + 1, max_value=100))
+    return {
+        "max_tolerable_faults": f,
+        "min_quorum_size": n,
+        "state_validation_metric": draw(st.sampled_from(["ledger_hash", "zk_proof", "semantic_embedding"])),
+        "byzantine_action": draw(st.sampled_from(["quarantine", "slash_escrow", "ignore"])),
+    }
+
+
+@st.composite
 def draw_consensus_policy(draw: Any) -> dict[str, Any]:
-    res: dict[str, Any] = draw(
-        st.fixed_dictionaries(
-            {
-                "strategy": st.sampled_from(["unanimous", "majority", "debate_rounds", "prediction_market"]),
-                "tie_breaker_node_id": st.one_of(
-                    st.none(),
-                    draw_did_string(),
-                ),
-                "max_debate_rounds": st.one_of(st.none(), st.integers(min_value=1, max_value=100)),
-                "prediction_market_rules": st.one_of(st.none(), draw_prediction_market_policy()),
-            }
-        )
-    )
-    return res
+    strategy = draw(st.sampled_from(["unanimous", "majority", "debate_rounds", "prediction_market", "pbft"]))
+    q_rules = draw(st.one_of(st.none(), draw_quorum_policy()))
+
+    # Satisfy the strict validation lock
+    if strategy == "pbft" and q_rules is None:
+        q_rules = draw(draw_quorum_policy())
+
+    return {
+        "strategy": strategy,
+        "tie_breaker_node_id": draw(st.one_of(st.none(), draw_did_string())),
+        "max_debate_rounds": draw(st.one_of(st.none(), st.integers(min_value=1, max_value=100))),
+        "prediction_market_rules": draw(st.one_of(st.none(), draw_prediction_market_policy())),
+        "quorum_rules": q_rules,
+    }
 
 
 @st.composite

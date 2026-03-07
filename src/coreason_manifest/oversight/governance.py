@@ -5,9 +5,9 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
-from typing import Annotated, Literal
+from typing import Annotated, Literal, Self
 
-from pydantic import Field, StringConstraints
+from pydantic import Field, StringConstraints, model_validator
 
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.core.primitives import NodeID, SemanticVersion
@@ -55,12 +55,41 @@ class PredictionMarketPolicy(CoreasonBaseModel):
     )
 
 
+class QuorumPolicy(CoreasonBaseModel):
+    """The mathematical boundaries required to survive Byzantine failures in a decentralized swarm."""
+
+    max_tolerable_faults: int = Field(
+        ge=0,
+        description=(
+            "The maximum number of actively malicious, hallucinating, or degraded nodes (f) the swarm must survive."
+        ),
+    )
+    min_quorum_size: int = Field(
+        gt=0, description="The minimum number of participating agents (N) required to form consensus."
+    )
+    state_validation_metric: Literal["ledger_hash", "zk_proof", "semantic_embedding"] = Field(
+        description="The cryptographic material the agents must sign to submit a valid vote."
+    )
+    byzantine_action: Literal["quarantine", "slash_escrow", "ignore"] = Field(
+        description=(
+            "The deterministic punishment executed by the orchestrator against nodes that violate the consensus quorum."
+        )
+    )
+
+    @model_validator(mode="after")
+    def enforce_bft_math(self) -> Self:
+        """Mathematically guarantees the network can reach Byzantine agreement."""
+        if self.min_quorum_size < (3 * self.max_tolerable_faults) + 1:
+            raise ValueError("Byzantine Fault Tolerance requires min_quorum_size (N) >= 3f + 1.")
+        return self
+
+
 class ConsensusPolicy(CoreasonBaseModel):
     """
     Explicit ruleset governing how a council resolves disagreements.
     """
 
-    strategy: Literal["unanimous", "majority", "debate_rounds", "prediction_market"] = Field(
+    strategy: Literal["unanimous", "majority", "debate_rounds", "prediction_market", "pbft"] = Field(
         description="The mathematical rule for reaching agreement."
     )
     tie_breaker_node_id: NodeID | None = Field(
@@ -74,6 +103,15 @@ class ConsensusPolicy(CoreasonBaseModel):
         default=None,
         description="The strict algorithmic mechanism rules required if the strategy is prediction_market.",
     )
+    quorum_rules: QuorumPolicy | None = Field(
+        default=None, description="The strict Byzantine fault tolerance limits required if the strategy is 'pbft'."
+    )
+
+    @model_validator(mode="after")
+    def validate_pbft_requirements(self) -> Self:
+        if self.strategy == "pbft" and self.quorum_rules is None:
+            raise ValueError("quorum_rules must be provided when strategy is 'pbft'.")
+        return self
 
 
 class FormalVerificationContract(CoreasonBaseModel):
