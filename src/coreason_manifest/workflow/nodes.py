@@ -20,6 +20,7 @@ from coreason_manifest.state.cognition import CognitiveStateProfile
 if TYPE_CHECKING:
     from coreason_manifest.workflow.topologies import AnyTopology
 
+from coreason_manifest.oversight.audit import MechanisticAuditContract
 from coreason_manifest.oversight.intervention import InterventionPolicy
 from coreason_manifest.workflow.constraints import InputMapping, OutputMapping
 
@@ -138,6 +139,11 @@ class AgentNode(BaseNode):
     symbolic_handoff_policy: NeuroSymbolicHandoff | None = Field(
         default=None,
         description="The API-like contract allowing the agent to offload rigid logic to deterministic CPU solvers.",
+    )
+    audit_policy: MechanisticAuditContract | None = Field(
+        default=None,
+        description="The adaptive trigger policy for executing deep mechanistic interpretability "
+        "brain-scans on this agent.",
     )
 
 

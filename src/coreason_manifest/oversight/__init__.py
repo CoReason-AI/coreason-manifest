@@ -6,6 +6,7 @@
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
 from .adjudication import AdjudicationRubric, AdjudicationVerdict, GradingCriteria
+from .audit import MechanisticAuditContract
 from .dlp import DataClassification, InformationFlowPolicy, RedactionRule, SanitizationAction, SecureSubSession
 from .governance import ConsensusPolicy, ConstitutionalRule, GlobalGovernance, GovernancePolicy
 from .intervention import (
@@ -40,6 +41,7 @@ __all__ = [
     "InterventionRequest",
     "InterventionVerdict",
     "LifecycleTrigger",
+    "MechanisticAuditContract",
     "OverrideIntent",
     "QuarantineOrder",
     "RedactionRule",

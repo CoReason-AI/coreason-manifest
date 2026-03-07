@@ -34,6 +34,38 @@ class ZeroKnowledgeProof(CoreasonBaseModel):
         description="The identifier of the public evaluation key the orchestrator must load to verify this proof."
     )
     cryptographic_blob: str = Field(description="The base64-encoded succinct cryptographic proof payload.")
+    latent_state_commitments: dict[str, str] = Field(
+        default_factory=dict,
+        description="Cryptographic bindings (hashes) of intermediate residual stream states "
+        "to prevent activation spoofing.",
+    )
+
+
+class SaeFeatureActivation(CoreasonBaseModel):
+    feature_index: int = Field(
+        ge=0,
+        description="The exact dimensional index of the monosemantic feature in the Sparse Autoencoder dictionary.",
+    )
+    activation_magnitude: float = Field(
+        description="The mathematical strength of this feature's activation during the forward pass."
+    )
+    interpretability_label: str | None = Field(
+        default=None,
+        description="The human-readable semantic concept mapped to this feature "
+        "(e.g., 'sycophancy', 'truth_retrieval').",
+    )
+
+
+class NeuralAuditAttestation(CoreasonBaseModel):
+    audit_id: str = Field(min_length=1, description="Unique identifier for this mechanistic interpretability snapshot.")
+    layer_activations: dict[int, list[SaeFeatureActivation]] = Field(
+        description="A mapping of specific transformer layer indices to their top-k activated SAE features."
+    )
+    causal_scrubbing_applied: bool = Field(
+        default=False,
+        description="Cryptographic proof that the orchestrator actively resampled or ablated this circuit "
+        "to verify its causal responsibility for the output.",
+    )
 
 
 class HardwareEnclaveAttestation(CoreasonBaseModel):
@@ -73,6 +105,10 @@ class ObservationEvent(BaseStateEvent):
     sensory_trigger: EmbodiedSensoryVector | None = Field(
         default=None,
         description="The continuous multimodal trigger that forced this discrete observation.",
+    )
+    neural_audit: NeuralAuditAttestation | None = Field(
+        default=None,
+        description="The mathematical brain-scan proving exactly which neural circuits fired to generate this event.",
     )
 
 
@@ -115,6 +151,10 @@ class BeliefUpdateEvent(BaseStateEvent):
     scratchpad_trace: LatentScratchpadTrace | None = Field(
         default=None,
         description="The cryptographic record of the non-monotonic internal monologue that justifies this belief.",
+    )
+    neural_audit: NeuralAuditAttestation | None = Field(
+        default=None,
+        description="The mathematical brain-scan proving exactly which neural circuits fired to generate this event.",
     )
 
 

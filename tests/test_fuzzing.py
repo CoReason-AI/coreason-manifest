@@ -456,6 +456,8 @@ def draw_agent_node_payload(draw: Any) -> dict[str, Any]:
         payload["symbolic_handoff_policy"] = draw(draw_neuro_symbolic_handoff())
     if draw(st.booleans()):
         payload["interventional_policy"] = draw(draw_interventional_causal_task())
+    if draw(st.booleans()):
+        payload["audit_policy"] = draw(draw_mechanistic_audit_contract())
     return payload
 
 
@@ -805,6 +807,58 @@ def draw_zkp(draw: Any) -> dict[str, Any]:
                 "public_inputs_hash": st.text(min_size=1),
                 "verifier_key_id": st.text(min_size=1),
                 "cryptographic_blob": st.text(min_size=10),
+                "latent_state_commitments": st.dictionaries(st.text(), st.text()),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_sae_feature_activation(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "feature_index": st.integers(min_value=0),
+                "activation_magnitude": st.floats(allow_nan=False, allow_infinity=False),
+                "interpretability_label": st.one_of(st.none(), st.text()),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_neural_audit_attestation(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "audit_id": st.text(min_size=1),
+                "layer_activations": st.dictionaries(
+                    st.integers(),
+                    st.lists(draw_sae_feature_activation(), max_size=10),
+                ),
+                "causal_scrubbing_applied": st.booleans(),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_mechanistic_audit_contract(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "trigger_conditions": st.lists(
+                    st.sampled_from(["on_tool_call", "on_belief_update", "on_quarantine", "on_falsification"]),
+                    min_size=1,
+                    max_size=4,
+                    unique=True,
+                ),
+                "target_layers": st.lists(st.integers(), min_size=1, max_size=10),
+                "max_features_per_layer": st.integers(min_value=1),
+                "require_zk_commitments": st.booleans(),
             }
         )
     )
@@ -907,6 +961,8 @@ def _local_draw_any_state_event(draw: Any) -> dict[str, Any]:
             payload["uncertainty_profile"] = draw(draw_cognitive_uncertainty_profile())
         if event_type == "belief_update" and draw(st.booleans()):
             payload["scratchpad_trace"] = draw(draw_latent_scratchpad_trace())
+        if event_type in ("observation", "belief_update") and draw(st.booleans()):
+            payload["neural_audit"] = draw(draw_neural_audit_attestation())
     return payload
 
 

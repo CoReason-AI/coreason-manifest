@@ -11,10 +11,17 @@ from coreason_manifest.compute.symbolic import NeuroSymbolicHandoff
 from coreason_manifest.compute.test_time import EscalationContract, ProcessRewardContract
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.core.primitives import NodeID, SemanticVersion
+from coreason_manifest.oversight.audit import MechanisticAuditContract
 from coreason_manifest.state.cognition import CognitiveStateProfile, CognitiveUncertaintyProfile
 from coreason_manifest.state.differentials import DefeasibleCascade, TruthMaintenancePolicy
 from coreason_manifest.state.embodied import EmbodiedSensoryVector
-from coreason_manifest.state.events import CausalDirectedEdge, StructuralCausalModel
+from coreason_manifest.state.events import (
+    CausalDirectedEdge,
+    NeuralAuditAttestation,
+    SaeFeatureActivation,
+    StructuralCausalModel,
+    ZeroKnowledgeProof,
+)
 from coreason_manifest.state.scratchpad import LatentScratchpadTrace, ThoughtBranch
 from coreason_manifest.workflow.envelope import WorkflowEnvelope
 from coreason_manifest.workflow.nodes import AnyNode
@@ -36,12 +43,16 @@ __all__ = [
     "EscalationContract",
     "InterventionalCausalTask",
     "LatentScratchpadTrace",
+    "MechanisticAuditContract",
+    "NeuralAuditAttestation",
     "NeuroSymbolicHandoff",
     "NodeID",
     "ProcessRewardContract",
+    "SaeFeatureActivation",
     "SemanticVersion",
     "StructuralCausalModel",
     "ThoughtBranch",
     "TruthMaintenancePolicy",
     "WorkflowEnvelope",
+    "ZeroKnowledgeProof",
 ]
