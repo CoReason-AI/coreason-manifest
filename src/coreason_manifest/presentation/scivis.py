@@ -27,37 +27,46 @@ type EncodingChannel = Literal["x", "y", "color", "size", "opacity", "shape", "t
 class ScaleDefinition(CoreasonBaseModel):
     """The mathematical mapping constraint for a channel."""
 
-    type: ScaleType = Field(description="The mathematical scaling function.")
-    domain_min: float | None = Field(default=None, description="Optional hard floor for the scale.")
-    domain_max: float | None = Field(default=None, description="Optional hard ceiling for the scale.")
+    type: Literal["linear", "log", "time", "ordinal", "nominal"] = Field(
+        description="The mathematical scale mapping data to pixels."
+    )
+    domain_min: float | None = Field(default=None, description="The optional minimum bound of the scale domain.")
+    domain_max: float | None = Field(default=None, description="The optional maximum bound of the scale domain.")
 
 
 class ChannelEncoding(CoreasonBaseModel):
     """The visual property being manipulated."""
 
-    channel: EncodingChannel = Field(description="The visual property being manipulated.")
-    field: str = Field(description="The exact data key/column to bind to this channel.")
+    channel: Literal["x", "y", "color", "size", "opacity", "shape", "text"] = Field(
+        description="The visual channel the data is mapped to."
+    )
+    field: str = Field(description="The exact column or field name from the dataset.")
     scale: ScaleDefinition | None = Field(
-        default=None, description="The mathematical mapping constraint for this channel."
+        default=None, description="Optional scale override for this specific channel."
     )
 
 
 class FacetMatrix(CoreasonBaseModel):
     """Optional small-multiple faceting layout."""
 
-    row_field: str | None = Field(default=None, description="Categorical field to split into rows.")
-    column_field: str | None = Field(default=None, description="Categorical field to split into columns.")
+    row_field: str | None = Field(default=None, description="The dataset field used to split the chart into rows.")
+    column_field: str | None = Field(
+        default=None, description="The dataset field used to split the chart into columns."
+    )
 
 
-class GrammarPanel(BasePanel):
+class GrammarPanel(CoreasonBaseModel):
     """Panel representing a deterministic, declarative visual grammar."""
 
-    type: Literal["grammar"] = Field(default="grammar", description="Discriminator for a grammar panel.")
-    title: str = Field(description="The title of the visualization.")
-    data_source_id: str = Field(description="Pointer to the data matrix being visualized.")
-    mark: MarkType = Field(description="The geometric primitive representing the data points.")
-    encodings: list[ChannelEncoding] = Field(default_factory=list, description="The array of visual bindings.")
-    facet: FacetMatrix | None = Field(default=None, description="Optional small-multiple faceting layout.")
+    panel_id: str = Field(description="The unique identifier for this UI panel.")
+    type: Literal["grammar"] = Field(default="grammar", description="Discriminator for Grammar of Graphics charts.")
+    title: str = Field(description="The human-readable title of the chart.")
+    data_source_id: str = Field(description="The cryptographic pointer to the dataset in the EpistemicLedger.")
+    mark: Literal["point", "line", "area", "bar", "rect", "arc"] = Field(
+        description="The geometric shape used to represent the data."
+    )
+    encodings: list[ChannelEncoding] = Field(description="The mapping of data fields to visual channels.")
+    facet: FacetMatrix | None = Field(default=None, description="Optional faceting matrix for small multiples.")
 
     @model_validator(mode="after")
     def sort_encodings(self) -> Self:
@@ -66,12 +75,15 @@ class GrammarPanel(BasePanel):
         return self
 
 
-class InsightCard(BasePanel):
+class InsightCard(CoreasonBaseModel):
     """Panel displaying a semantic text summary."""
 
-    type: Literal["insight_card"] = Field(default="insight_card", description="Discriminator for an insight card.")
-    title: str = Field(description="The title of the insight card.")
-    markdown_content: str = Field(max_length=50000, description="The semantic text summary written in Markdown.")
+    panel_id: str = Field(description="The unique identifier for this UI panel.")
+    type: Literal["insight_card"] = Field(
+        default="insight_card", description="Discriminator for markdown insight cards."
+    )
+    title: str = Field(description="The human-readable title of the insight.")
+    markdown_content: str = Field(description="The markdown formatted text content.")
 
     @field_validator("markdown_content")
     @classmethod
@@ -88,7 +100,10 @@ class InsightCard(BasePanel):
         return v
 
 
-type AnyPanel = Annotated[GrammarPanel | InsightCard, Field(discriminator="type")]
+type AnyPanel = Annotated[
+    GrammarPanel | InsightCard,
+    Field(discriminator="type", description="A discriminated union of presentation UI panels."),
+]
 
 
 class MacroGrid(CoreasonBaseModel):
