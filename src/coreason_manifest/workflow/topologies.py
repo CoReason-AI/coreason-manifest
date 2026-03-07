@@ -50,6 +50,26 @@ class DiversityConstraint(CoreasonBaseModel):
     )
 
 
+class DimensionalProjectionContract(CoreasonBaseModel):
+    source_dimensionality: int = Field(gt=0, description="The vector size of the source agent's latent space.")
+    target_dimensionality: int = Field(gt=0, description="The vector size of the receiving agent's latent space.")
+    isometry_preservation_score: float = Field(
+        ge=0.0, le=1.0, description="Mathematical proof of how much semantic meaning survived the translation."
+    )
+    projection_matrix_hash: str = Field(description="SHA-256 hash of the translation matrix used to map the spaces.")
+
+
+class OntologicalHandshake(CoreasonBaseModel):
+    initiating_node_id: str = Field(description="The node requesting semantic alignment.")
+    receiving_node_id: str = Field(description="The node receiving the request.")
+    latent_vector_similarity: float = Field(
+        ge=-1.0, le=1.0, description="The calculated cosine similarity between their core definitions."
+    )
+    projection_contract: DimensionalProjectionContract | None = Field(
+        default=None, description="The required projection if similarity falls below the required threshold."
+    )
+
+
 class OntologicalAlignmentPolicy(CoreasonBaseModel):
     """
     The pre-flight execution gate forcing agents to mathematically align their latent semantics.

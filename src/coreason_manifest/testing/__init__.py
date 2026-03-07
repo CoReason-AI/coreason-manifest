@@ -12,14 +12,10 @@ from .chaos import (
 )
 from .red_team import (
     AdversarialSimulationProfile,
-    AdversaryProfile,
-    AiTMStrategy,
 )
 
 __all__ = [
     "AdversarialSimulationProfile",
-    "AdversaryProfile",
-    "AiTMStrategy",
     "ChaosExperiment",
     "FaultInjectionProfile",
     "SteadyStateHypothesis",
