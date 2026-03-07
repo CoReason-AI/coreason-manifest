@@ -8,7 +8,7 @@ import re
 from typing import Any
 
 import pytest
-from hypothesis import given
+from hypothesis import given, settings
 from hypothesis import strategies as st
 from pydantic import TypeAdapter, ValidationError
 
@@ -1943,8 +1943,6 @@ def draw_epistemic_ledger(draw: Any) -> dict[str, Any]:
     )
     return res
 
-
-from hypothesis import settings
 
 @settings(max_examples=10)
 @given(draw_epistemic_ledger())

@@ -19,5 +19,6 @@ class VerifiableCredentialPresentation(CoreasonBaseModel):
         description="The base64-encoded SD-JWT or ZK-SNARK proving the claims without revealing the private key."
     )
     authorization_claims: dict[str, Any] = Field(
-        description="The strict, domain-agnostic JSON dictionary of predicates being proven (e.g., {'clearance': 'RESTRICTED'})."
+        description="The strict, domain-agnostic JSON dictionary of predicates being proven "
+        "(e.g., {'clearance': 'RESTRICTED'})."
     )
