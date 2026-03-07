@@ -1221,6 +1221,48 @@
       "title": "BoundedInterventionScope",
       "type": "object"
     },
+    "BoundingBox": {
+      "additionalProperties": false,
+      "description": "A resolution-independent spatial region.",
+      "properties": {
+        "x_min": {
+          "description": "The left boundary.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "X Min",
+          "type": "number"
+        },
+        "y_min": {
+          "description": "The top boundary.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Y Min",
+          "type": "number"
+        },
+        "x_max": {
+          "description": "The right boundary.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "X Max",
+          "type": "number"
+        },
+        "y_max": {
+          "description": "The bottom boundary.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Y Max",
+          "type": "number"
+        }
+      },
+      "required": [
+        "x_min",
+        "y_min",
+        "x_max",
+        "y_max"
+      ],
+      "title": "BoundingBox",
+      "type": "object"
+    },
     "BrowserDOMState": {
       "additionalProperties": false,
       "properties": {
@@ -4228,6 +4270,32 @@
       "title": "NeuroSymbolicHandoff",
       "type": "object"
     },
+    "NormalizedCoordinate": {
+      "additionalProperties": false,
+      "description": "A resolution-independent 2D spatial vector.",
+      "properties": {
+        "x": {
+          "description": "The normalized X-axis coordinate (0.0 = left, 1.0 = right).",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "X",
+          "type": "number"
+        },
+        "y": {
+          "description": "The normalized Y-axis coordinate (0.0 = top, 1.0 = bottom).",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Y",
+          "type": "number"
+        }
+      },
+      "required": [
+        "x",
+        "y"
+      ],
+      "title": "NormalizedCoordinate",
+      "type": "object"
+    },
     "ObservabilityPolicy": {
       "additionalProperties": false,
       "properties": {
@@ -5613,6 +5681,77 @@
         }
       },
       "title": "SpatialAnchor",
+      "type": "object"
+    },
+    "SpatialKinematicAction": {
+      "additionalProperties": false,
+      "description": "A mathematical declaration of an OS-level pointer or interaction trajectory.",
+      "properties": {
+        "action_type": {
+          "description": "The specific kinematic interaction paradigm.",
+          "enum": [
+            "click",
+            "double_click",
+            "drag_and_drop",
+            "scroll",
+            "hover",
+            "keystroke"
+          ],
+          "title": "Action Type",
+          "type": "string"
+        },
+        "target_coordinate": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NormalizedCoordinate"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The primary spatial terminus for clicks or hovers."
+        },
+        "trajectory_duration_ms": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The exact temporal duration of the movement, simulating human kinematics.",
+          "title": "Trajectory Duration Ms"
+        },
+        "bezier_control_points": {
+          "description": "Waypoints for constructing non-linear, bot-evasive movement curves.",
+          "items": {
+            "$ref": "#/$defs/NormalizedCoordinate"
+          },
+          "title": "Bezier Control Points",
+          "type": "array"
+        },
+        "expected_visual_concept": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The visual anchor (e.g., 'Submit Button'). The orchestrator must verify this semantic concept exists at the target_coordinate before executing the macro, preventing blind clicks.",
+          "title": "Expected Visual Concept"
+        }
+      },
+      "required": [
+        "action_type"
+      ],
+      "title": "SpatialKinematicAction",
       "type": "object"
     },
     "StateContract": {
