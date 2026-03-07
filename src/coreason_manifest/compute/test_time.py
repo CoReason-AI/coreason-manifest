@@ -10,7 +10,30 @@ from pydantic import Field
 from coreason_manifest.core.base import CoreasonBaseModel
 
 
+class DynamicConvergenceSLA(CoreasonBaseModel):
+    """Service Level Agreement defining the mathematical conditions for early termination of a reasoning search."""
+
+    convergence_delta_epsilon: float = Field(
+        ge=0.0,
+        description="The minimal required PRM score improvement across the lookback "
+        "window to justify continued compute.",
+    )
+    lookback_window_steps: int = Field(
+        gt=0, description="The N-step temporal window over which the PRM gradient is calculated."
+    )
+    minimum_reasoning_steps: int = Field(
+        gt=0,
+        description="The mandatory 'burn-in' period. The orchestrator cannot terminate the search "
+        "before this structural depth is reached, preventing premature collapse.",
+    )
+
+
 class ProcessRewardContract(CoreasonBaseModel):
+    convergence_sla: DynamicConvergenceSLA | None = Field(
+        default=None,
+        description="The dynamic circuit breaker that halts the search when PRM variance converges, "
+        "preventing VRAM waste.",
+    )
     pruning_threshold: float = Field(
         ge=0.0,
         le=1.0,

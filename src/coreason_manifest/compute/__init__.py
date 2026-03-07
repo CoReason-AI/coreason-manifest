@@ -33,6 +33,7 @@ from .symbolic import (
     NeuroSymbolicHandoff,
 )
 from .test_time import (
+    DynamicConvergenceSLA,
     EscalationContract,
     ProcessRewardContract,
 )
@@ -45,6 +46,7 @@ __all__ = [
     "ComputeProvisioningRequest",
     "CrossoverStrategy",
     "DistributionProfile",
+    "DynamicConvergenceSLA",
     "EscalationContract",
     "FitnessObjective",
     "InterventionalCausalTask",
