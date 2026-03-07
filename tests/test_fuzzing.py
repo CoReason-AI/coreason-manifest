@@ -844,6 +844,20 @@ def draw_temporal_bounds(draw: Any) -> dict[str, Any]:
     }
 
 
+@st.composite
+def draw_fhe_profile(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "fhe_scheme": st.sampled_from(["ckks", "bgv", "bfv", "tfhe"]),
+                "public_key_id": st.text(min_size=1),
+                "ciphertext_blob": st.text(min_size=10),
+            }
+        )
+    )
+    return res
+
+
 @given(
     st.fixed_dictionaries(
         {
@@ -872,6 +886,7 @@ def draw_temporal_bounds(draw: Any) -> dict[str, Any]:
                     }
                 ),
             ),
+            "fhe_profile": st.one_of(st.none(), draw_fhe_profile()),
         }
     )
 )

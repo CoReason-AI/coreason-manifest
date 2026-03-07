@@ -69,6 +69,18 @@ class SalienceProfile(CoreasonBaseModel):
     decay_rate: float = Field(description="The rate at which this memory's relevance decays over time.")
 
 
+class HomomorphicEncryptionProfile(CoreasonBaseModel):
+    fhe_scheme: Literal["ckks", "bgv", "bfv", "tfhe"] = Field(
+        description="The specific homomorphic encryption dialect used to encode the ciphertext."
+    )
+    public_key_id: str = Field(
+        description=(
+            "The identifier of the public evaluation key the orchestrator must load to perform math on this payload."
+        )
+    )
+    ciphertext_blob: str = Field(description="The base64-encoded homomorphic ciphertext.")
+
+
 class SemanticNode(CoreasonBaseModel):
     node_id: str = Field(description="The unique identifier of this semantic concept.")
     label: str = Field(description="The categorical label of the node (e.g., 'Person', 'Concept').")
@@ -90,6 +102,13 @@ class SemanticNode(CoreasonBaseModel):
     )
     salience: SalienceProfile | None = Field(
         default=None, description="The importance profile used for memory pruning."
+    )
+    fhe_profile: HomomorphicEncryptionProfile | None = Field(
+        default=None,
+        description=(
+            "The cryptographic envelope enabling privacy-preserving computation "
+            "directly on this node's encrypted state."
+        ),
     )
 
 
