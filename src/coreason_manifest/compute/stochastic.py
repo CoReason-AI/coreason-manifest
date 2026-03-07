@@ -60,10 +60,12 @@ class VerifiableEntropy(CoreasonBaseModel):
 
 
 class LogitSteganographyContract(CoreasonBaseModel):
-    """Cryptographic contract for embedding undeniable, un-strippable provenance signatures directly into the token entropy."""
+    """Cryptographic contract for embedding undeniable, un-strippable provenance signatures
+    directly into the token entropy."""
 
     verification_public_key_id: str = Field(
-        description="The DID or public key identifier required by an auditor to reconstruct the PRF and verify the watermark."
+        description="The DID or public key identifier required by an auditor to reconstruct the PRF "
+        "and verify the watermark."
     )
     prf_seed_hash: str = Field(
         pattern=r"^[a-f0-9]{64}$",
@@ -71,7 +73,8 @@ class LogitSteganographyContract(CoreasonBaseModel):
     )
     watermark_strength_delta: float = Field(
         gt=0.0,
-        description="The exact logit scalar (bias) injected into the 'green list' vocabulary partition before Gumbel-Softmax sampling.",
+        description="The exact logit scalar (bias) injected into the 'green list' vocabulary partition "
+        "before Gumbel-Softmax sampling.",
     )
     target_bits_per_token: float = Field(
         gt=0.0,
@@ -79,7 +82,8 @@ class LogitSteganographyContract(CoreasonBaseModel):
     )
     context_history_window: int = Field(
         ge=0,
-        description="The k-gram rolling window size of preceding tokens hashed into the PRF state to ensure robustness against text cropping.",
+        description="The k-gram rolling window size of preceding tokens hashed into the PRF state "
+        "to ensure robustness against text cropping.",
     )
 
 
