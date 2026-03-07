@@ -18,6 +18,20 @@ class BaseStateEvent(CoreasonBaseModel):
     timestamp: float = Field(description="The timestamp when the event occurred.")
 
 
+class ZeroKnowledgeProof(CoreasonBaseModel):
+    proof_protocol: Literal["zk-SNARK", "zk-STARK", "plonk", "bulletproofs"] = Field(
+        description="The mathematical dialect of the cryptographic proof."
+    )
+    public_inputs_hash: str = Field(
+        description="The SHA-256 hash of the public inputs (e.g., prompt, Lamport clock) "
+        "anchoring this proof to the specific state index."
+    )
+    verifier_key_id: str = Field(
+        description="The identifier of the public evaluation key the orchestrator must load to verify this proof."
+    )
+    cryptographic_blob: str = Field(description="The base64-encoded succinct cryptographic proof payload.")
+
+
 class ObservationEvent(BaseStateEvent):
     type: Literal["observation"] = Field(
         default="observation", description="Discriminator type for an observation event."
@@ -27,6 +41,9 @@ class ObservationEvent(BaseStateEvent):
     )
     source_node_id: NodeID | None = Field(
         default=None, description="The specific topological node that generated this observation."
+    )
+    zk_proof: ZeroKnowledgeProof | None = Field(
+        default=None, description="The mathematical attestation proving this observation was generated securely."
     )
 
 
@@ -52,6 +69,11 @@ class BeliefUpdateEvent(BaseStateEvent):
     causal_attributions: list[CausalAttribution] = Field(
         default_factory=list,
         description="Immutable audit trail of prior states that forced this specific cognitive synthesis.",
+    )
+    zk_proof: ZeroKnowledgeProof | None = Field(
+        default=None,
+        description="The mathematical attestation proving this belief synthesis was generated "
+        "securely without model-downgrade fraud.",
     )
 
 

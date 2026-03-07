@@ -487,6 +487,21 @@ def draw_causal_attribution(draw: Any) -> dict[str, Any]:
 
 
 @st.composite
+def draw_zkp(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "proof_protocol": st.sampled_from(["zk-SNARK", "zk-STARK", "plonk", "bulletproofs"]),
+                "public_inputs_hash": st.text(min_size=1),
+                "verifier_key_id": st.text(min_size=1),
+                "cryptographic_blob": st.text(min_size=10),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
 def _local_draw_any_state_event(draw: Any) -> dict[str, Any]:
     event_type = draw(st.sampled_from(["observation", "belief_update", "system_fault"]))
     payload: dict[str, Any] = {
@@ -514,6 +529,8 @@ def _local_draw_any_state_event(draw: Any) -> dict[str, Any]:
         )
         if event_type == "belief_update":
             payload["causal_attributions"] = draw(st.lists(draw_causal_attribution(), max_size=10))
+        if draw(st.booleans()):
+            payload["zk_proof"] = draw(draw_zkp())
     return payload
 
 

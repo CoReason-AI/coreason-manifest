@@ -698,6 +698,18 @@
           },
           "title": "Causal Attributions",
           "type": "array"
+        },
+        "zk_proof": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ZeroKnowledgeProof"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematical attestation proving this belief synthesis was generated securely without model-downgrade fraud."
         }
       },
       "required": [
@@ -2653,6 +2665,18 @@
           ],
           "default": null,
           "description": "The specific topological node that generated this observation."
+        },
+        "zk_proof": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ZeroKnowledgeProof"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematical attestation proving this observation was generated securely."
         }
       },
       "required": [
@@ -4300,6 +4324,45 @@
         "active_context"
       ],
       "title": "WorkingMemorySnapshot",
+      "type": "object"
+    },
+    "ZeroKnowledgeProof": {
+      "additionalProperties": false,
+      "properties": {
+        "proof_protocol": {
+          "description": "The mathematical dialect of the cryptographic proof.",
+          "enum": [
+            "zk-SNARK",
+            "zk-STARK",
+            "plonk",
+            "bulletproofs"
+          ],
+          "title": "Proof Protocol",
+          "type": "string"
+        },
+        "public_inputs_hash": {
+          "description": "The SHA-256 hash of the public inputs (e.g., prompt, Lamport clock) anchoring this proof to the specific state index.",
+          "title": "Public Inputs Hash",
+          "type": "string"
+        },
+        "verifier_key_id": {
+          "description": "The identifier of the public evaluation key the orchestrator must load to verify this proof.",
+          "title": "Verifier Key Id",
+          "type": "string"
+        },
+        "cryptographic_blob": {
+          "description": "The base64-encoded succinct cryptographic proof payload.",
+          "title": "Cryptographic Blob",
+          "type": "string"
+        }
+      },
+      "required": [
+        "proof_protocol",
+        "public_inputs_hash",
+        "verifier_key_id",
+        "cryptographic_blob"
+      ],
+      "title": "ZeroKnowledgeProof",
       "type": "object"
     },
     "coreason_manifest__core__primitives__DataClassification": {
