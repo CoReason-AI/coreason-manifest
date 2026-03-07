@@ -43,18 +43,20 @@ from coreason_manifest.state.semantic import (
     VectorEmbedding,
 )
 from coreason_manifest.state.toolchains import (
-    BrowserStateSnapshot,
-    TerminalStateSnapshot,
+    AnyToolchainState,
+    BrowserDOMState,
+    TerminalBufferState,
 )
 
 __all__ = [
     "AnyStateEvent",
+    "AnyToolchainState",
     "ArgumentClaim",
     "ArgumentGraph",
     "AttackVector",
     "BaseStateEvent",
     "BeliefUpdateEvent",
-    "BrowserStateSnapshot",
+    "BrowserDOMState",
     "CausalInterval",
     "DefeasibleAttack",
     "EpistemicLedger",
@@ -74,7 +76,7 @@ __all__ = [
     "SystemFaultEvent",
     "TemporalBounds",
     "TemporalCheckpoint",
-    "TerminalStateSnapshot",
+    "TerminalBufferState",
     "VectorEmbedding",
     "WorkingMemorySnapshot",
 ]

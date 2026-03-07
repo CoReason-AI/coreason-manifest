@@ -555,7 +555,7 @@ def draw_hardware_attestation(draw: Any) -> dict[str, Any]:
 
 @st.composite
 def draw_browser_dom_state(draw: Any) -> dict[str, Any]:
-    return draw(
+    res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
                 "type": st.just("browser"),
@@ -567,11 +567,12 @@ def draw_browser_dom_state(draw: Any) -> dict[str, Any]:
             }
         )
     )
+    return res
 
 
 @st.composite
 def draw_terminal_buffer_state(draw: Any) -> dict[str, Any]:
-    return draw(
+    res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
                 "type": st.just("terminal"),
@@ -582,6 +583,7 @@ def draw_terminal_buffer_state(draw: Any) -> dict[str, Any]:
             }
         )
     )
+    return res
 
 
 def draw_any_toolchain_state() -> st.SearchStrategy[dict[str, Any]]:
