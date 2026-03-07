@@ -1818,20 +1818,36 @@ def draw_semantic_firewall_policy(draw: Any) -> dict[str, Any]:
 
 
 @st.composite
+def draw_latent_smoothing_profile(draw: Any) -> dict[str, Any]:
+    return {
+        "decay_function": draw(st.sampled_from(["linear", "exponential", "cosine_annealing"])),
+        "transition_window_tokens": draw(st.integers(min_value=1)),
+        "decay_rate_param": draw(st.one_of(st.none(), st.floats(allow_nan=False, allow_infinity=False))),
+    }
+
+
+@st.composite
 def draw_sae_latent_firewall(draw: Any) -> dict[str, Any]:
-    res: dict[str, Any] = draw(
-        st.fixed_dictionaries(
-            {
-                "target_feature_index": st.integers(min_value=0),
-                "monitored_layers": st.lists(st.integers(min_value=0), min_size=1, max_size=10),
-                "max_activation_threshold": st.floats(min_value=0.0, allow_nan=False, allow_infinity=False),
-                "violation_action": st.sampled_from(["clamp", "halt", "quarantine"]),
-                "clamp_value": st.one_of(st.none(), st.floats(allow_nan=False, allow_infinity=False)),
-                "sae_dictionary_hash": st.from_regex(r"^[a-f0-9]{64}$", fullmatch=True),
-            }
-        )
-    )
-    return res
+    action = draw(st.sampled_from(["clamp", "halt", "quarantine", "smooth_decay"]))
+    clamp_val = draw(st.one_of(st.none(), st.floats(allow_nan=False, allow_infinity=False)))
+    smooth_prof = draw(st.one_of(st.none(), draw_latent_smoothing_profile()))
+
+    # Satisfy the strict validation lock
+    if action == "smooth_decay":
+        if clamp_val is None:
+            clamp_val = draw(st.floats(allow_nan=False, allow_infinity=False))
+        if smooth_prof is None:
+            smooth_prof = draw(draw_latent_smoothing_profile())
+
+    return {
+        "target_feature_index": draw(st.integers(min_value=0)),
+        "monitored_layers": draw(st.lists(st.integers(min_value=0), min_size=1, max_size=10)),
+        "max_activation_threshold": draw(st.floats(min_value=0.0, allow_nan=False, allow_infinity=False)),
+        "violation_action": action,
+        "clamp_value": clamp_val,
+        "sae_dictionary_hash": draw(st.from_regex(r"^[a-f0-9]{64}$", fullmatch=True)),
+        "smoothing_profile": smooth_prof,
+    }
 
 
 @st.composite

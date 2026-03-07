@@ -5,9 +5,9 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
-from typing import Literal
+from typing import Literal, Self
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from coreason_manifest.core.base import CoreasonBaseModel
 
@@ -33,6 +33,22 @@ class ActivationSteeringContract(CoreasonBaseModel):
     )
 
 
+class LatentSmoothingProfile(CoreasonBaseModel):
+    """The mathematical curve used to gently taper an adversarial activation to prevent logit collapse."""
+
+    decay_function: Literal["linear", "exponential", "cosine_annealing"] = Field(
+        description="The trigonometric or algebraic function governing the attenuation curve."
+    )
+    transition_window_tokens: int = Field(
+        gt=0,
+        description="The exact number of forward-pass generation steps over which the decay is applied.",
+    )
+    decay_rate_param: float | None = Field(
+        default=None,
+        description="The optional tuning parameter (e.g., half-life lambda for exponential decay).",
+    )
+
+
 class SaeLatentFirewall(CoreasonBaseModel):
     """A real-time mechanistic interpretability boundary that monitors and controls specific neural circuits."""
 
@@ -48,7 +64,7 @@ class SaeLatentFirewall(CoreasonBaseModel):
         ge=0.0,
         description="The mathematical magnitude limit. If the feature activates beyond this, the firewall trips.",
     )
-    violation_action: Literal["clamp", "halt", "quarantine"] = Field(
+    violation_action: Literal["clamp", "halt", "quarantine", "smooth_decay"] = Field(
         description="The tensor-level remediation applied when the threshold is breached.",
     )
     clamp_value: float | None = Field(
@@ -59,6 +75,21 @@ class SaeLatentFirewall(CoreasonBaseModel):
         pattern=r"^[a-f0-9]{64}$",
         description="The SHA-256 hash of the exact SAE projection matrix required to decode this feature.",
     )
+    smoothing_profile: LatentSmoothingProfile | None = Field(
+        default=None,
+        description="The geometric parameters for continuous attenuation if violation_action is 'smooth_decay'.",
+    )
+
+    @model_validator(mode="after")
+    def validate_smooth_decay(self) -> Self:
+        if self.violation_action == "smooth_decay":
+            if self.smoothing_profile is None:
+                raise ValueError("smoothing_profile must be provided when violation_action is 'smooth_decay'.")
+            if self.clamp_value is None:
+                raise ValueError(
+                    "clamp_value must be provided as the target asymptote when violation_action is 'smooth_decay'."
+                )
+        return self
 
 
 class CognitiveRoutingDirective(CoreasonBaseModel):

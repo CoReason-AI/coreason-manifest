@@ -3835,6 +3835,47 @@
       "title": "LatentScratchpadTrace",
       "type": "object"
     },
+    "LatentSmoothingProfile": {
+      "additionalProperties": false,
+      "description": "The mathematical curve used to gently taper an adversarial activation to prevent logit collapse.",
+      "properties": {
+        "decay_function": {
+          "description": "The trigonometric or algebraic function governing the attenuation curve.",
+          "enum": [
+            "linear",
+            "exponential",
+            "cosine_annealing"
+          ],
+          "title": "Decay Function",
+          "type": "string"
+        },
+        "transition_window_tokens": {
+          "description": "The exact number of forward-pass generation steps over which the decay is applied.",
+          "exclusiveMinimum": 0,
+          "title": "Transition Window Tokens",
+          "type": "integer"
+        },
+        "decay_rate_param": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The optional tuning parameter (e.g., half-life lambda for exponential decay).",
+          "title": "Decay Rate Param"
+        }
+      },
+      "required": [
+        "decay_function",
+        "transition_window_tokens"
+      ],
+      "title": "LatentSmoothingProfile",
+      "type": "object"
+    },
     "LifecycleTrigger": {
       "enum": [
         "on_start",
@@ -5400,7 +5441,8 @@
           "enum": [
             "clamp",
             "halt",
-            "quarantine"
+            "quarantine",
+            "smooth_decay"
           ],
           "title": "Violation Action",
           "type": "string"
@@ -5423,6 +5465,18 @@
           "pattern": "^[a-f0-9]{64}$",
           "title": "Sae Dictionary Hash",
           "type": "string"
+        },
+        "smoothing_profile": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LatentSmoothingProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The geometric parameters for continuous attenuation if violation_action is 'smooth_decay'."
         }
       },
       "required": [

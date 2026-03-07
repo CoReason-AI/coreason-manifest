@@ -13,6 +13,7 @@ from .inference import (
 from .neuromodulation import (
     ActivationSteeringContract,
     CognitiveRoutingDirective,
+    LatentSmoothingProfile,
 )
 from .peft import PeftAdapterContract
 from .profiles import (
@@ -47,6 +48,7 @@ __all__ = [
     "EscalationContract",
     "FitnessObjective",
     "InterventionalCausalTask",
+    "LatentSmoothingProfile",
     "ModelProfile",
     "MutationPolicy",
     "NeuroSymbolicHandoff",
