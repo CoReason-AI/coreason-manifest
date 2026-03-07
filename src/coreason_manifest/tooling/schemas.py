@@ -72,3 +72,8 @@ class ToolDefinition(CoreasonBaseModel):
     )
     permissions: PermissionBoundary = Field(description="The zero-trust security boundaries for the tool's execution.")
     sla: ExecutionSLA | None = Field(default=None, description="Execution limits for the tool.")
+    is_preemptible: bool = Field(
+        default=False,
+        description="If True, the orchestrator is authorized to send a SIGINT to abort this tool's execution "
+        "mid-flight if a BargeInInterruptEvent occurs.",
+    )
