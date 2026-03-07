@@ -49,6 +49,25 @@ class DiversityConstraint(CoreasonBaseModel):
     )
 
 
+class OntologicalAlignmentPolicy(CoreasonBaseModel):
+    """
+    The pre-flight execution gate forcing agents to mathematically align their latent semantics.
+    """
+
+    min_cosine_similarity: float = Field(
+        ge=-1.0,
+        le=1.0,
+        description="The absolute minimum latent vector similarity required to allow swarm communication.",
+    )
+    require_isometry_proof: bool = Field(
+        description="If True, the orchestrator must reject dimensional projections that fall below a safe isometry preservation score."
+    )
+    fallback_state_contract: StateContract | None = Field(
+        default=None,
+        description="The rigid external JSON schema to force agents to use if their latent vector geometries are hopelessly incommensurable.",
+    )
+
+
 class BackpressurePolicy(CoreasonBaseModel):
     """
     Declarative backpressure constraints.
@@ -163,6 +182,10 @@ class CouncilTopology(BaseTopology):
     consensus_policy: ConsensusPolicy | None = Field(
         default=None, description="The explicit ruleset governing how the council resolves disagreements."
     )
+    ontological_alignment: OntologicalAlignmentPolicy | None = Field(
+        default=None,
+        description="The pre-flight execution gate forcing agents to mathematically align their latent semantics before participating in the topology.",
+    )
 
     @model_validator(mode="after")
     def check_adjudicator_id(self) -> Self:
@@ -235,6 +258,10 @@ class SMPCTopology(BaseTopology):
     participant_node_ids: list[str] = Field(
         min_length=2,
         description="The strict ordered list of NodeIDs participating in the Secure Multi-Party Computation ring.",
+    )
+    ontological_alignment: OntologicalAlignmentPolicy | None = Field(
+        default=None,
+        description="The pre-flight execution gate forcing agents to mathematically align their latent semantics before participating in the topology.",
     )
 
 

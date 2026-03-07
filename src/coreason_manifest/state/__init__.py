@@ -46,8 +46,10 @@ from coreason_manifest.state.memory import (
 )
 from coreason_manifest.state.semantic import (
     CausalInterval,
+    DimensionalProjectionContract,
     MemoryProvenance,
     MemoryTier,
+    OntologicalHandshake,
     SalienceProfile,
     SemanticEdge,
     SemanticNode,
@@ -75,6 +77,7 @@ __all__ = [
     "CognitiveUncertaintyProfile",
     "DefeasibleAttack",
     "DefeasibleCascade",
+    "DimensionalProjectionContract",
     "EmbodiedSensoryVector",
     "EpistemicLedger",
     "EvidentiaryWarrant",
@@ -83,6 +86,7 @@ __all__ = [
     "MemoryTier",
     "NeuralAuditAttestation",
     "ObservationEvent",
+    "OntologicalHandshake",
     "PatchOperation",
     "RollbackRequest",
     "SaeFeatureActivation",
