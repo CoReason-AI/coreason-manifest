@@ -4,7 +4,12 @@ from hypothesis import strategies as st
 from pydantic import ValidationError
 
 from coreason_manifest.oversight.adjudication import AdjudicationRubric, GradingCriteria
-from coreason_manifest.oversight.governance import ConstitutionalRule, PredictionMarketPolicy
+from coreason_manifest.oversight.governance import (
+    ConsensusPolicy,
+    ConstitutionalRule,
+    PredictionMarketPolicy,
+    QuorumPolicy,
+)
 from coreason_manifest.oversight.intervention import BoundedInterventionScope, FallbackSLA, InterventionRequest
 
 
@@ -92,6 +97,49 @@ def test_prediction_market_policy_bounds() -> None:
     with pytest.raises(ValidationError) as exc_info3:
         PredictionMarketPolicy(staking_function="linear", min_liquidity_cents=100, convergence_delta_threshold=1.1)
     assert "le" in str(exc_info3.value) or "less than or equal" in str(exc_info3.value)
+
+
+def test_quorum_policy_enforce_bft_math() -> None:
+    # Valid quorum
+    QuorumPolicy(
+        max_tolerable_faults=1,
+        min_quorum_size=4,
+        state_validation_metric="ledger_hash",
+        byzantine_action="quarantine",
+    )
+
+    # Invalid quorum: 3 * 1 + 1 = 4, but min_quorum_size is 3
+    with pytest.raises(
+        ValidationError,
+        match=r"Byzantine Fault Tolerance requires min_quorum_size \(N\) >= 3f \+ 1\.",
+    ):
+        QuorumPolicy(
+            max_tolerable_faults=1,
+            min_quorum_size=3,
+            state_validation_metric="ledger_hash",
+            byzantine_action="quarantine",
+        )
+
+
+def test_consensus_policy_validate_pbft_requirements() -> None:
+    # Valid consensus policy with pbft
+    quorum = QuorumPolicy(
+        max_tolerable_faults=1,
+        min_quorum_size=4,
+        state_validation_metric="ledger_hash",
+        byzantine_action="quarantine",
+    )
+    ConsensusPolicy(
+        strategy="pbft",
+        quorum_rules=quorum,
+    )
+
+    # Invalid consensus policy with pbft but missing quorum_rules
+    with pytest.raises(ValidationError, match=r"quorum_rules must be provided when strategy is 'pbft'\."):
+        ConsensusPolicy(
+            strategy="pbft",
+            quorum_rules=None,
+        )
 
 
 @given(
