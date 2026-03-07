@@ -131,7 +131,9 @@ def test_mcp_server_tool_schemas() -> None:
     # we can inject a dummy object into the namespace temporarily.
     import coreason_manifest
 
-    coreason_manifest.DummyInvalid = object  # type: ignore[attr-defined]
+    class UnexportableObject:
+        pass
+    coreason_manifest.DummyInvalid = UnexportableObject  # type: ignore[attr-defined]
     coreason_manifest.__all__.append("DummyInvalid")
     try:
         with pytest.raises(ValueError, match="is not a valid schema model"):

@@ -22,12 +22,19 @@ def list_schemas() -> list[str]:
 
     # Check if the model is exported and is a CoreasonBaseModel
 
+    from pydantic import TypeAdapter
+
     from coreason_manifest.core import CoreasonBaseModel
 
     for name in getattr(coreason_manifest, "__all__", []):
         obj = getattr(coreason_manifest, name)
-        if isinstance(obj, type) and issubclass(obj, CoreasonBaseModel) and obj is not CoreasonBaseModel:
+        if obj is CoreasonBaseModel:
+            continue
+        try:
+            TypeAdapter(obj)
             schemas.append(name)
+        except Exception:  # noqa: S112
+            continue
 
     return sorted(set(schemas), key=lambda x: x)
 
@@ -40,20 +47,25 @@ def get_schema(schema_name: str) -> dict[str, Any]:
         schema_name: The name of the schema to fetch (e.g., WorkingMemorySnapshot)
     """
 
+    from pydantic import TypeAdapter
+
     from coreason_manifest.core import CoreasonBaseModel
 
-    obj = None
-    if schema_name in getattr(coreason_manifest, "__all__", []):
-        obj = getattr(coreason_manifest, schema_name)
+    obj = getattr(coreason_manifest, schema_name, None)
 
     if obj is None:
         raise ValueError(f"Schema '{schema_name}' not found in the manifest.")
 
-    if not isinstance(obj, type) or not issubclass(obj, CoreasonBaseModel):
-        raise ValueError(f"'{schema_name}' is not a valid schema model.")
+    if obj is CoreasonBaseModel:
+        raise ValueError(f"'{schema_name}' is not a valid schema model.") from None
+
+    try:
+        adapter = TypeAdapter(obj)
+    except Exception:
+        raise ValueError(f"'{schema_name}' is not a valid schema model.") from None
 
     # Generate JSON schema using Pydantic
-    return obj.model_json_schema()
+    return adapter.json_schema()
 
 
 def _global_error_handler_shield() -> None:
