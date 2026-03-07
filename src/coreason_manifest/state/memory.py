@@ -11,7 +11,13 @@ from pydantic import Field, model_validator
 
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.state.argumentation import ArgumentGraph
-from coreason_manifest.state.differentials import MigrationContract, RollbackRequest, TemporalCheckpoint
+from coreason_manifest.state.differentials import (
+    DefeasibleCascade,
+    MigrationContract,
+    RollbackRequest,
+    TemporalCheckpoint,
+    TruthMaintenancePolicy,
+)
 from coreason_manifest.state.events import AnyStateEvent
 
 
@@ -48,6 +54,14 @@ class EpistemicLedger(CoreasonBaseModel):
     migration_contracts: list[MigrationContract] = Field(
         default_factory=list,
         description="Declarative rules to translate historical states to the current active schema version.",
+    )
+    truth_maintenance_policy: TruthMaintenancePolicy | None = Field(
+        default=None,
+        description="The mathematical contract governing automated causal graph ablations and probabilistic decay.",
+    )
+    active_cascades: list[DefeasibleCascade] = Field(
+        default_factory=list,
+        description="The active state-differential payload muting specific causal subgraphs due to falsification.",
     )
 
     @model_validator(mode="after")

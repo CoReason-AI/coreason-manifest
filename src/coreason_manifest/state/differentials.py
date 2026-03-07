@@ -38,6 +38,50 @@ class StateDiff(CoreasonBaseModel):
     )
 
 
+class TruthMaintenancePolicy(CoreasonBaseModel):
+    decay_propagation_rate: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="The percentage of confidence mathematically lost per edge traversal during a defeasible cascade.",
+    )
+    epistemic_quarantine_threshold: float = Field(
+        ge=0.0,
+        le=1.0,
+        description=(
+            "The minimum certainty boundary. If an event's propagated confidence drops "
+            "below this threshold, it is legally quarantined."
+        ),
+    )
+    enforce_cross_agent_quarantine: bool = Field(
+        default=False,
+        description=(
+            "If True, the orchestrator must automatically emit global QuarantineOrders to sever "
+            "infected SemanticEdges across the swarm to prevent epistemic contagion."
+        ),
+    )
+
+
+class DefeasibleCascade(CoreasonBaseModel):
+    cascade_id: str = Field(
+        min_length=1, description="Unique identifier for this automated truth maintenance operation."
+    )
+    root_falsified_event_id: str = Field(
+        description=(
+            "The source BeliefUpdateEvent or HypothesisGenerationEvent ID that collapsed and triggered this cascade."
+        )
+    )
+    propagated_decay_factor: float = Field(
+        ge=0.0, le=1.0, description="The calculated entropy penalty applied to this specific subgraph."
+    )
+    quarantined_event_ids: list[str] = Field(
+        min_length=1, description="The strict list of downstream event IDs isolated and muted by this cascade."
+    )
+    cross_boundary_quarantine_issued: bool = Field(
+        default=False,
+        description="Cryptographic proof that this cascade was broadcast to the Swarm to halt epistemic contagion.",
+    )
+
+
 class MigrationContract(CoreasonBaseModel):
     contract_id: str = Field(description="Unique identifier for this structural migration mapping.")
     source_version: str = Field(description="The exact semantic version string of the payload before migration.")

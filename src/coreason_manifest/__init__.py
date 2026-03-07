@@ -12,6 +12,7 @@ from coreason_manifest.compute.test_time import EscalationContract, ProcessRewar
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.core.primitives import NodeID, SemanticVersion
 from coreason_manifest.state.cognition import CognitiveStateProfile, CognitiveUncertaintyProfile
+from coreason_manifest.state.differentials import DefeasibleCascade, TruthMaintenancePolicy
 from coreason_manifest.state.embodied import EmbodiedSensoryVector
 from coreason_manifest.state.scratchpad import LatentScratchpadTrace, ThoughtBranch
 from coreason_manifest.workflow.envelope import WorkflowEnvelope
@@ -28,6 +29,7 @@ __all__ = [
     "CognitiveStateProfile",
     "CognitiveUncertaintyProfile",
     "CoreasonBaseModel",
+    "DefeasibleCascade",
     "EmbodiedSensoryVector",
     "EscalationContract",
     "LatentScratchpadTrace",
@@ -36,5 +38,6 @@ __all__ = [
     "ProcessRewardContract",
     "SemanticVersion",
     "ThoughtBranch",
+    "TruthMaintenancePolicy",
     "WorkflowEnvelope",
 ]

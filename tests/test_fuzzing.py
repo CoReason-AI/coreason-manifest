@@ -1651,6 +1651,42 @@ def draw_migration_contract(draw: Any) -> dict[str, Any]:
 
 
 @st.composite
+def draw_truth_maintenance_policy(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "decay_propagation_rate": st.floats(
+                    min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False
+                ),
+                "epistemic_quarantine_threshold": st.floats(
+                    min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False
+                ),
+                "enforce_cross_agent_quarantine": st.booleans(),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_defeasible_cascade(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "cascade_id": st.text(min_size=1),
+                "root_falsified_event_id": st.text(),
+                "propagated_decay_factor": st.floats(
+                    min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False
+                ),
+                "quarantined_event_ids": st.lists(st.text(), min_size=1, max_size=100),
+                "cross_boundary_quarantine_issued": st.booleans(),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
 def draw_epistemic_ledger(draw: Any) -> dict[str, Any]:
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(
@@ -1660,6 +1696,8 @@ def draw_epistemic_ledger(draw: Any) -> dict[str, Any]:
                 "active_rollbacks": st.lists(draw_rollback_request(), max_size=100),
                 "eviction_policy": st.one_of(st.none(), draw_eviction_policy()),
                 "migration_contracts": st.lists(draw_migration_contract(), max_size=10),
+                "truth_maintenance_policy": st.one_of(st.none(), draw_truth_maintenance_policy()),
+                "active_cascades": st.lists(draw_defeasible_cascade(), max_size=100),
             }
         )
     )

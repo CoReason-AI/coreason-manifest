@@ -1859,6 +1859,52 @@
       "title": "DefeasibleAttack",
       "type": "object"
     },
+    "DefeasibleCascade": {
+      "additionalProperties": false,
+      "properties": {
+        "cascade_id": {
+          "description": "Unique identifier for this automated truth maintenance operation.",
+          "minLength": 1,
+          "title": "Cascade Id",
+          "type": "string"
+        },
+        "root_falsified_event_id": {
+          "description": "The source BeliefUpdateEvent or HypothesisGenerationEvent ID that collapsed and triggered this cascade.",
+          "title": "Root Falsified Event Id",
+          "type": "string"
+        },
+        "propagated_decay_factor": {
+          "description": "The calculated entropy penalty applied to this specific subgraph.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Propagated Decay Factor",
+          "type": "number"
+        },
+        "quarantined_event_ids": {
+          "description": "The strict list of downstream event IDs isolated and muted by this cascade.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Quarantined Event Ids",
+          "type": "array"
+        },
+        "cross_boundary_quarantine_issued": {
+          "default": false,
+          "description": "Cryptographic proof that this cascade was broadcast to the Swarm to halt epistemic contagion.",
+          "title": "Cross Boundary Quarantine Issued",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "cascade_id",
+        "root_falsified_event_id",
+        "propagated_decay_factor",
+        "quarantined_event_ids"
+      ],
+      "title": "DefeasibleCascade",
+      "type": "object"
+    },
     "DistributionProfile": {
       "additionalProperties": false,
       "description": "Profile defining a probability density function.",
@@ -2053,6 +2099,26 @@
             "$ref": "#/$defs/MigrationContract"
           },
           "title": "Migration Contracts",
+          "type": "array"
+        },
+        "truth_maintenance_policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TruthMaintenancePolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematical contract governing automated causal graph ablations and probabilistic decay."
+        },
+        "active_cascades": {
+          "description": "The active state-differential payload muting specific causal subgraphs due to falsification.",
+          "items": {
+            "$ref": "#/$defs/DefeasibleCascade"
+          },
+          "title": "Active Cascades",
           "type": "array"
         }
       },
@@ -5565,6 +5631,37 @@
         "batch_id"
       ],
       "title": "TraceExportBatch",
+      "type": "object"
+    },
+    "TruthMaintenancePolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "decay_propagation_rate": {
+          "description": "The percentage of confidence mathematically lost per edge traversal during a defeasible cascade.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Decay Propagation Rate",
+          "type": "number"
+        },
+        "epistemic_quarantine_threshold": {
+          "description": "The minimum certainty boundary. If an event's propagated confidence drops below this threshold, it is legally quarantined.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Epistemic Quarantine Threshold",
+          "type": "number"
+        },
+        "enforce_cross_agent_quarantine": {
+          "default": false,
+          "description": "If True, the orchestrator must automatically emit global QuarantineOrders to sever infected SemanticEdges across the swarm to prevent epistemic contagion.",
+          "title": "Enforce Cross Agent Quarantine",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "decay_propagation_rate",
+        "epistemic_quarantine_threshold"
+      ],
+      "title": "TruthMaintenancePolicy",
       "type": "object"
     },
     "VectorEmbedding": {

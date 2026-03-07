@@ -17,11 +17,13 @@ from coreason_manifest.state.cognition import (
     CognitiveUncertaintyProfile,
 )
 from coreason_manifest.state.differentials import (
+    DefeasibleCascade,
     PatchOperation,
     RollbackRequest,
     StateDiff,
     StatePatch,
     TemporalCheckpoint,
+    TruthMaintenancePolicy,
 )
 from coreason_manifest.state.embodied import (
     EmbodiedSensoryVector,
@@ -69,6 +71,7 @@ __all__ = [
     "CognitiveStateProfile",
     "CognitiveUncertaintyProfile",
     "DefeasibleAttack",
+    "DefeasibleCascade",
     "EmbodiedSensoryVector",
     "EpistemicLedger",
     "EvidentiaryWarrant",
@@ -89,6 +92,7 @@ __all__ = [
     "TemporalCheckpoint",
     "TerminalBufferState",
     "TheoryOfMindSnapshot",
+    "TruthMaintenancePolicy",
     "VectorEmbedding",
     "WorkingMemorySnapshot",
 ]
