@@ -554,6 +554,41 @@ def draw_hardware_attestation(draw: Any) -> dict[str, Any]:
 
 
 @st.composite
+def draw_browser_dom_state(draw: Any) -> dict[str, Any]:
+    return draw(
+        st.fixed_dictionaries(
+            {
+                "type": st.just("browser"),
+                "current_url": st.text(min_size=1),
+                "viewport_size": st.tuples(st.integers(min_value=1), st.integers(min_value=1)),
+                "dom_hash": st.text(min_size=10),
+                "accessibility_tree_hash": st.text(min_size=10),
+                "screenshot_cid": st.one_of(st.none(), st.text(min_size=10)),
+            }
+        )
+    )
+
+
+@st.composite
+def draw_terminal_buffer_state(draw: Any) -> dict[str, Any]:
+    return draw(
+        st.fixed_dictionaries(
+            {
+                "type": st.just("terminal"),
+                "working_directory": st.text(min_size=1),
+                "stdout_hash": st.text(min_size=10),
+                "stderr_hash": st.text(min_size=10),
+                "env_variables_hash": st.text(min_size=10),
+            }
+        )
+    )
+
+
+def draw_any_toolchain_state() -> st.SearchStrategy[dict[str, Any]]:
+    return st.one_of(draw_browser_dom_state(), draw_terminal_buffer_state())
+
+
+@st.composite
 def _local_draw_any_state_event(draw: Any) -> dict[str, Any]:
     event_type = draw(st.sampled_from(["observation", "belief_update", "system_fault"]))
     payload: dict[str, Any] = {
@@ -585,6 +620,8 @@ def _local_draw_any_state_event(draw: Any) -> dict[str, Any]:
             payload["zk_proof"] = draw(draw_zkp())
         if draw(st.booleans()):
             payload["hardware_attestation"] = draw(draw_hardware_attestation())
+        if event_type == "observation" and draw(st.booleans()):
+            payload["toolchain_snapshot"] = draw(draw_any_toolchain_state())
     return payload
 
 
