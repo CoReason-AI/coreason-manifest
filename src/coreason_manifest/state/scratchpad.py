@@ -5,6 +5,8 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
+from typing import Self
+
 from pydantic import Field, model_validator
 
 from coreason_manifest.core.base import CoreasonBaseModel
@@ -42,7 +44,7 @@ class LatentScratchpadTrace(CoreasonBaseModel):
     )
 
     @model_validator(mode="after")
-    def verify_referential_integrity(self) -> "LatentScratchpadTrace":
+    def verify_referential_integrity(self) -> Self:
         explored_branch_ids = {branch.branch_id for branch in self.explored_branches}
 
         if self.resolution_branch_id is not None and self.resolution_branch_id not in explored_branch_ids:
