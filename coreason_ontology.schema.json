@@ -836,26 +836,67 @@
       "title": "BoundedInterventionScope",
       "type": "object"
     },
-    "BrowserStateSnapshot": {
+    "BrowserDOMState": {
       "additionalProperties": false,
       "properties": {
+        "type": {
+          "const": "browser",
+          "default": "browser",
+          "description": "Discriminator for browser state snapshots.",
+          "title": "Type",
+          "type": "string"
+        },
         "current_url": {
-          "description": "The current active URL being viewed in the browser.",
-          "pattern": "^https?://",
+          "description": "The exact URI the headless browser was positioned at.",
           "title": "Current Url",
           "type": "string"
         },
+        "viewport_size": {
+          "description": "The [width, height] dimensions of the rendered viewport.",
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "integer"
+            }
+          ],
+          "title": "Viewport Size",
+          "type": "array"
+        },
         "dom_hash": {
-          "description": "A cryptographic hash representing the current DOM structure.",
+          "description": "The SHA-256 hash of the complete, rendered HTML Document Object Model.",
           "title": "Dom Hash",
           "type": "string"
+        },
+        "accessibility_tree_hash": {
+          "description": "The SHA-256 hash of the parsed Chrome/Firefox Accessibility Tree.",
+          "title": "Accessibility Tree Hash",
+          "type": "string"
+        },
+        "screenshot_cid": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The Content Identifier (CID) or URI pointing to the visual snapshot in cold storage.",
+          "title": "Screenshot Cid"
         }
       },
       "required": [
         "current_url",
-        "dom_hash"
+        "viewport_size",
+        "dom_hash",
+        "accessibility_tree_hash"
       ],
-      "title": "BrowserStateSnapshot",
+      "title": "BrowserDOMState",
       "type": "object"
     },
     "CausalAttribution": {
@@ -3056,6 +3097,34 @@
           ],
           "default": null,
           "description": "The mathematical attestation proving this observation was generated securely."
+        },
+        "toolchain_snapshot": {
+          "anyOf": [
+            {
+              "description": "A discriminated union of immutable external toolchain states.",
+              "discriminator": {
+                "mapping": {
+                  "browser": "#/$defs/BrowserDOMState",
+                  "terminal": "#/$defs/TerminalBufferState"
+                },
+                "propertyName": "type"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/BrowserDOMState"
+                },
+                {
+                  "$ref": "#/$defs/TerminalBufferState"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The immutable cryptographic snapshot of the external environment at the moment of observation.",
+          "title": "Toolchain Snapshot"
         }
       },
       "required": [
@@ -4570,39 +4639,44 @@
       "title": "TemporalCheckpoint",
       "type": "object"
     },
-    "TerminalStateSnapshot": {
+    "TerminalBufferState": {
       "additionalProperties": false,
       "properties": {
-        "cwd": {
-          "description": "The current working directory of the terminal environment.",
-          "title": "Cwd",
+        "type": {
+          "const": "terminal",
+          "default": "terminal",
+          "description": "Discriminator for terminal state snapshots.",
+          "title": "Type",
           "type": "string"
         },
-        "stdout_buffer": {
-          "description": "The buffered standard output captured from execution.",
-          "maxLength": 10000,
-          "title": "Stdout Buffer",
+        "working_directory": {
+          "description": "The absolute path of the active shell context.",
+          "title": "Working Directory",
           "type": "string"
         },
-        "last_exit_code": {
-          "anyOf": [
-            {
-              "type": "integer"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The exit code of the last executed command, if any.",
-          "title": "Last Exit Code"
+        "stdout_hash": {
+          "description": "The SHA-256 hash of the standard output buffer at the moment of observation.",
+          "title": "Stdout Hash",
+          "type": "string"
+        },
+        "stderr_hash": {
+          "description": "The SHA-256 hash of the standard error buffer.",
+          "title": "Stderr Hash",
+          "type": "string"
+        },
+        "env_variables_hash": {
+          "description": "The SHA-256 hash of the active environment variables matrix.",
+          "title": "Env Variables Hash",
+          "type": "string"
         }
       },
       "required": [
-        "cwd",
-        "stdout_buffer"
+        "working_directory",
+        "stdout_hash",
+        "stderr_hash",
+        "env_variables_hash"
       ],
-      "title": "TerminalStateSnapshot",
+      "title": "TerminalBufferState",
       "type": "object"
     },
     "TieBreaker": {

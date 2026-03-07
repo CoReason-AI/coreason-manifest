@@ -11,6 +11,7 @@ from pydantic import Field
 
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.core.primitives import NodeID
+from coreason_manifest.state.toolchains import AnyToolchainState
 
 
 class BaseStateEvent(CoreasonBaseModel):
@@ -61,6 +62,10 @@ class ObservationEvent(BaseStateEvent):
     )
     zk_proof: ZeroKnowledgeProof | None = Field(
         default=None, description="The mathematical attestation proving this observation was generated securely."
+    )
+    toolchain_snapshot: AnyToolchainState | None = Field(
+        default=None,
+        description="The immutable cryptographic snapshot of the external environment at the moment of observation.",
     )
 
 
