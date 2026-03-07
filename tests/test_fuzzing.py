@@ -297,7 +297,29 @@ def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> 
         }
     ).map(_council_mapper)
 
-    return st.one_of(dag_strategy, council_strategy)
+    smpc_strategy = st.fixed_dictionaries(
+        {
+            "type": st.just("smpc"),
+            "nodes": st.dictionaries(
+                st.text(min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"),
+                nodes_strategy,
+                min_size=2,
+                max_size=5,
+            ),
+            "shared_state_contract": st.none(),
+            "information_flow": st.none(),
+            "observability": st.none(),
+            "smpc_protocol": st.sampled_from(["garbled_circuits", "secret_sharing", "oblivious_transfer"]),
+            "joint_function_uri": st.text(min_size=1),
+            "participant_node_ids": st.lists(
+                st.text(min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"),
+                min_size=2,
+                max_size=5,
+            ),
+        }
+    )
+
+    return st.one_of(dag_strategy, council_strategy, smpc_strategy)
 
 
 def draw_composite_node_payload(

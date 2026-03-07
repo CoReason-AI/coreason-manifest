@@ -219,7 +219,26 @@ class EvolutionaryTopology(BaseTopology):
         return self
 
 
+class SMPCTopology(BaseTopology):
+    """
+    A Secure Multi-Party Computation topology.
+    """
+
+    type: Literal["smpc"] = Field(default="smpc", description="Discriminator for SMPC Topology.")
+    smpc_protocol: Literal["garbled_circuits", "secret_sharing", "oblivious_transfer"] = Field(
+        description="The exact cryptographic P2P protocol the nodes must use to evaluate the function."
+    )
+    joint_function_uri: str = Field(
+        description="The URI or hash pointing to the exact math circuit or polynomial function "
+        "the ring will collaboratively compute."
+    )
+    participant_node_ids: list[str] = Field(
+        min_length=2,
+        description="The strict ordered list of NodeIDs participating in the Secure Multi-Party Computation ring.",
+    )
+
+
 type AnyTopology = Annotated[
-    DAGTopology | CouncilTopology | SwarmTopology | EvolutionaryTopology,
+    DAGTopology | CouncilTopology | SwarmTopology | EvolutionaryTopology | SMPCTopology,
     Field(discriminator="type", description="A discriminated union of workflow topologies."),
 ]
