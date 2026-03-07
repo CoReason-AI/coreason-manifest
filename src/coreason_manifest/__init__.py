@@ -10,7 +10,7 @@ from coreason_manifest.compute.neuromodulation import ActivationSteeringContract
 from coreason_manifest.compute.symbolic import NeuroSymbolicHandoff
 from coreason_manifest.compute.test_time import EscalationContract, ProcessRewardContract
 from coreason_manifest.core.base import CoreasonBaseModel
-from coreason_manifest.core.primitives import NodeID, SemanticVersion
+from coreason_manifest.core.primitives import DataClassification, NodeID, SemanticVersion, SystemRole
 from coreason_manifest.oversight import PredictionMarketPolicy
 from coreason_manifest.oversight.audit import MechanisticAuditContract
 from coreason_manifest.state.cognition import CognitiveStateProfile, CognitiveUncertaintyProfile
@@ -27,12 +27,13 @@ from coreason_manifest.state.scratchpad import LatentScratchpadTrace, ThoughtBra
 from coreason_manifest.state.semantic import DimensionalProjectionContract, OntologicalHandshake
 from coreason_manifest.workflow import HypothesisStake, MarketResolution, PredictionMarketState
 from coreason_manifest.workflow.envelope import WorkflowEnvelope
-from coreason_manifest.workflow.nodes import AnyNode
+from coreason_manifest.workflow.nodes import AgentNode, AnyNode
 from coreason_manifest.workflow.topologies import AnyTopology, OntologicalAlignmentPolicy
 
 __all__ = [
     "ActivationSteeringContract",
     "ActiveInferenceContract",
+    "AgentNode",
     "AnalogicalMappingTask",
     "AnyNode",
     "AnyTopology",
@@ -41,6 +42,7 @@ __all__ = [
     "CognitiveStateProfile",
     "CognitiveUncertaintyProfile",
     "CoreasonBaseModel",
+    "DataClassification",
     "DefeasibleCascade",
     "DimensionalProjectionContract",
     "EmbodiedSensoryVector",
@@ -61,6 +63,7 @@ __all__ = [
     "SaeFeatureActivation",
     "SemanticVersion",
     "StructuralCausalModel",
+    "SystemRole",
     "ThoughtBranch",
     "TruthMaintenancePolicy",
     "WorkflowEnvelope",
