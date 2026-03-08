@@ -1,5 +1,7 @@
+import pytest
 from hypothesis import given
 from hypothesis import strategies as st
+from pydantic import ValidationError
 
 from coreason_manifest.state.events import (
     AnyStateEvent,
@@ -8,10 +10,45 @@ from coreason_manifest.state.events import (
     SystemFaultEvent,
 )
 from coreason_manifest.state.memory import (
+    CrystallizationPolicy,
     EpistemicLedger,
     TheoryOfMindSnapshot,
     WorkingMemorySnapshot,
 )
+
+
+def test_crystallization_policy_min_observations() -> None:
+    # Valid
+    CrystallizationPolicy(
+        min_observations_required=10,
+        aleatoric_entropy_threshold=0.1,
+        target_memory_tier="semantic",
+    )
+
+    # Invalid
+    with pytest.raises(ValidationError, match="Input should be greater than or equal to 10"):
+        CrystallizationPolicy(
+            min_observations_required=9,
+            aleatoric_entropy_threshold=0.1,
+            target_memory_tier="semantic",
+        )
+
+
+def test_crystallization_policy_entropy_threshold() -> None:
+    # Valid
+    CrystallizationPolicy(
+        min_observations_required=10,
+        aleatoric_entropy_threshold=0.05,
+        target_memory_tier="semantic",
+    )
+
+    # Invalid
+    with pytest.raises(ValidationError, match="Input should be less than or equal to 0.1"):
+        CrystallizationPolicy(
+            min_observations_required=10,
+            aleatoric_entropy_threshold=0.11,
+            target_memory_tier="semantic",
+        )
 
 
 @st.composite

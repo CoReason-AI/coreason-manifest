@@ -6,9 +6,14 @@
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
 import pytest
-from pydantic import ValidationError
+from pydantic import TypeAdapter, ValidationError
 
-from coreason_manifest.state.events import NeuralAuditAttestation, SaeFeatureActivation
+from coreason_manifest.state.events import (
+    AnyStateEvent,
+    EpistemicPromotionEvent,
+    NeuralAuditAttestation,
+    SaeFeatureActivation,
+)
 
 
 def test_sae_feature_activation_valid() -> None:
@@ -53,3 +58,23 @@ def test_neural_audit_attestation_invalid_empty_id() -> None:
             audit_id="",
             layer_activations={},
         )
+
+
+def test_epistemic_promotion_event_routing() -> None:
+    event_data = {
+        "type": "epistemic_promotion",
+        "event_id": "promo_123",
+        "timestamp": 1234567890.0,
+        "source_episodic_event_ids": ["obs_1", "obs_2", "obs_3"],
+        "crystallized_semantic_node_id": "sem_node_42",
+        "compression_ratio": 5.0,
+    }
+
+    adapter = TypeAdapter(AnyStateEvent)
+    parsed_event = adapter.validate_python(event_data)
+
+    assert isinstance(parsed_event, EpistemicPromotionEvent)
+    assert parsed_event.event_id == "promo_123"
+    assert parsed_event.source_episodic_event_ids == ["obs_1", "obs_2", "obs_3"]
+    assert parsed_event.crystallized_semantic_node_id == "sem_node_42"
+    assert parsed_event.compression_ratio == 5.0
