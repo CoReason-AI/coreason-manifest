@@ -40,6 +40,12 @@ class BaseNode(CoreasonBaseModel):
     """
 
     description: str = Field(description="A description of the node's function.")
+    architectural_intent: str | None = Field(
+        default=None, description="The AI's declarative rationale for selecting this node."
+    )
+    justification: str | None = Field(
+        default=None, description="Cryptographic/audit justification for this node's existence in the graph."
+    )
     intervention_policies: list[InterventionPolicy] = Field(
         default_factory=list,
         description="A declarative list of proactive oversight hooks bound to this node's lifecycle.",

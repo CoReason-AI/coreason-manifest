@@ -139,6 +139,12 @@ class BaseTopology(CoreasonBaseModel):
         default="live",
         description="The execution phase of the graph. 'draft' allows incomplete structural state.",
     )
+    architectural_intent: str | None = Field(
+        default=None, description="The AI's declarative rationale for selecting this topology."
+    )
+    justification: str | None = Field(
+        default=None, description="Cryptographic/audit justification for this topology's configuration."
+    )
     nodes: dict[NodeID, AnyNode] = Field(description="Flat registry of all nodes in this topology.")
     shared_state_contract: StateContract | None = Field(
         default=None, description="The schema-on-write contract governing the internal state of this topology."
