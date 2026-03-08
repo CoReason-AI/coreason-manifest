@@ -817,6 +817,7 @@
           "counterfactual_regret": "#/$defs/CounterfactualRegretEvent",
           "epistemic_promotion": "#/$defs/EpistemicPromotionEvent",
           "hypothesis": "#/$defs/HypothesisGenerationEvent",
+          "normative_drift": "#/$defs/NormativeDriftEvent",
           "observation": "#/$defs/ObservationEvent",
           "system_fault": "#/$defs/SystemFaultEvent",
           "tool_invocation": "#/$defs/ToolInvocationEvent"
@@ -847,6 +848,9 @@
         },
         {
           "$ref": "#/$defs/EpistemicPromotionEvent"
+        },
+        {
+          "$ref": "#/$defs/NormativeDriftEvent"
         }
       ]
     },
@@ -5937,6 +5941,52 @@
         "y"
       ],
       "title": "NormalizedCoordinate",
+      "type": "object"
+    },
+    "NormativeDriftEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "type": {
+          "const": "normative_drift",
+          "default": "normative_drift",
+          "description": "Discriminator type for a normative drift event.",
+          "title": "Type",
+          "type": "string"
+        },
+        "tripped_rule_id": {
+          "description": "The Content Identifier (CID) of the specific ConstitutionalRule causing logical friction.",
+          "title": "Tripped Rule Id",
+          "type": "string"
+        },
+        "measured_semantic_drift": {
+          "description": "The calculated probabilistic delta showing how far the swarm's observed reality is diverging from the static rule.",
+          "title": "Measured Semantic Drift",
+          "type": "number"
+        },
+        "contradiction_proof_hash": {
+          "description": "A cryptographic pointer to the internal scratchpad trace (ThoughtBranch) definitively proving the rule is obsolete or causing a loop.",
+          "title": "Contradiction Proof Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "event_id",
+        "timestamp",
+        "tripped_rule_id",
+        "measured_semantic_drift",
+        "contradiction_proof_hash"
+      ],
+      "title": "NormativeDriftEvent",
       "type": "object"
     },
     "ObservabilityPolicy": {
