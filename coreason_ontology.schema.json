@@ -866,6 +866,7 @@
         "mapping": {
           "council": "#/$defs/CouncilTopology",
           "dag": "#/$defs/DAGTopology",
+          "evaluator_optimizer": "#/$defs/EvaluatorOptimizerTopology",
           "evolutionary": "#/$defs/EvolutionaryTopology",
           "smpc": "#/$defs/SMPCTopology",
           "swarm": "#/$defs/SwarmTopology"
@@ -887,6 +888,9 @@
         },
         {
           "$ref": "#/$defs/SMPCTopology"
+        },
+        {
+          "$ref": "#/$defs/EvaluatorOptimizerTopology"
         }
       ]
     },
@@ -3148,6 +3152,88 @@
         "refund_target_node_id"
       ],
       "title": "EscrowPolicy",
+      "type": "object"
+    },
+    "EvaluatorOptimizerTopology": {
+      "additionalProperties": false,
+      "description": "A formalized Actor-Critic micro-topology enforcing strict, finite generation-evaluation-revision cycles.",
+      "properties": {
+        "nodes": {
+          "additionalProperties": {
+            "$ref": "#/$defs/AnyNode"
+          },
+          "description": "Flat registry of all nodes in this topology.",
+          "propertyNames": {
+            "$ref": "#/$defs/NodeID"
+          },
+          "title": "Nodes",
+          "type": "object"
+        },
+        "shared_state_contract": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StateContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The schema-on-write contract governing the internal state of this topology."
+        },
+        "information_flow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/InformationFlowPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The structural Data Loss Prevention (DLP) contract governing all state mutations in this topology."
+        },
+        "observability": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ObservabilityPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The distributed tracing rules bound to this specific execution graph."
+        },
+        "type": {
+          "const": "evaluator_optimizer",
+          "default": "evaluator_optimizer",
+          "description": "Discriminator for an Evaluator-Optimizer loop.",
+          "title": "Type",
+          "type": "string"
+        },
+        "generator_node_id": {
+          "$ref": "#/$defs/NodeID",
+          "description": "The ID of the actor generating the payload."
+        },
+        "evaluator_node_id": {
+          "$ref": "#/$defs/NodeID",
+          "description": "The ID of the critic scoring the payload."
+        },
+        "max_revision_loops": {
+          "description": "The absolute limit on Actor-Critic cycles to prevent infinite compute burn.",
+          "minimum": 1,
+          "title": "Max Revision Loops",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "nodes",
+        "generator_node_id",
+        "evaluator_node_id",
+        "max_revision_loops"
+      ],
+      "title": "EvaluatorOptimizerTopology",
       "type": "object"
     },
     "EvictionPolicy": {
