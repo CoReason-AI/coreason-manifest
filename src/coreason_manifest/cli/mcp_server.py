@@ -6,6 +6,7 @@
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
 import contextlib
+import json
 from typing import Any, cast
 
 from mcp.server.fastmcp import FastMCP
@@ -48,6 +49,14 @@ def get_schema(schema_name: str) -> dict[str, Any]:
         raise ValueError(f"Schema '{schema_name}' not found in the manifest.")
 
     return cast("dict[str, Any]", _AVAILABLE_SCHEMAS[schema_name])
+
+
+@mcp.resource("schema://ontology/{schema_name}")
+def get_schema_resource(schema_name: str) -> str:
+    """Read-only resource exposing the exact JSON schema required for epistemic alignment."""
+    if schema_name not in _AVAILABLE_SCHEMAS:
+        raise ValueError(f"Schema '{schema_name}' not found in the manifest.")
+    return json.dumps(_AVAILABLE_SCHEMAS[schema_name], ensure_ascii=False)
 
 
 def _global_error_handler_shield() -> None:
