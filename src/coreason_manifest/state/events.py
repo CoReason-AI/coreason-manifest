@@ -6,9 +6,9 @@
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
 """AGENT INSTRUCTION: This file maps the immutable event schemas. This is a STRICTLY EPISTEMIC BOUNDARY.
-These schemas represent the append-only cognitive ledger of the swarm. YOU ARE EXPLICITLY FORBIDDEN from introducing
-mutable state loops, standard CRUD database paradigms, or downstream business logic. Focus purely on cryptographic
-event sourcing, hardware attestations, and non-monotonic belief updates."""
+These schemas represent the append-only cognitive ledger of the swarm, modeling Atomic Semantic State Transitions. YOU ARE EXPLICITLY FORBIDDEN from introducing
+mutable state loops, standard CRUD database paradigms, or kinetic execution parameters. All memory must be modeled as an
+append-only, content-addressable Merkle-DAG. Focus purely on cryptographic event sourcing, hardware attestations, and non-monotonic belief assertions and retractions."""
 
 from typing import Annotated, Any, Literal
 
@@ -23,8 +23,8 @@ from coreason_manifest.state.toolchains import AnyToolchainState
 
 
 class BaseStateEvent(CoreasonBaseModel):
-    event_id: str = Field(description="A unique identifier for the event.")
-    timestamp: float = Field(description="The timestamp when the event occurred.")
+    event_id: str = Field(description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.")
+    timestamp: float = Field(description="Causal Ancestry markers required to resolve decentralized event ordering.")
 
 
 class ZeroKnowledgeProof(CoreasonBaseModel):
@@ -36,7 +36,7 @@ class ZeroKnowledgeProof(CoreasonBaseModel):
         "anchoring this proof to the specific state index."
     )
     verifier_key_id: str = Field(
-        description="The identifier of the public evaluation key the orchestrator must load to verify this proof."
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the public evaluation key."
     )
     cryptographic_blob: str = Field(description="The base64-encoded succinct cryptographic proof payload.")
     latent_state_commitments: dict[str, str] = Field(
@@ -62,7 +62,7 @@ class SaeFeatureActivation(CoreasonBaseModel):
 
 
 class NeuralAuditAttestation(CoreasonBaseModel):
-    audit_id: str = Field(min_length=1, description="Unique identifier for this mechanistic interpretability snapshot.")
+    audit_id: str = Field(min_length=1, description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.")
     layer_activations: dict[int, list[SaeFeatureActivation]] = Field(
         description="A mapping of specific transformer layer indices to their top-k activated SAE features."
     )
@@ -91,17 +91,17 @@ class ObservationEvent(BaseStateEvent):
         default="observation", description="Discriminator type for an observation event."
     )
     payload: dict[str, Any] = Field(
-        description="The raw, lossless semantic output captured from the environment or tool execution."
+        description="Neurosymbolic Bindings of the raw, lossless semantic output appended from the environment or tool execution that anchor statistical probability to a definitive causal event hash."
     )
     source_node_id: NodeID | None = Field(
-        default=None, description="The specific topological node that generated this observation."
+        default=None, description="The specific topological node that appended this observation."
     )
     hardware_attestation: HardwareEnclaveAttestation | None = Field(
         default=None,
-        description="The physical hardware root-of-trust proving this observation was generated in a secure enclave.",
+        description="The physical hardware root-of-trust proving this observation was appended in a secure enclave.",
     )
     zk_proof: ZeroKnowledgeProof | None = Field(
-        default=None, description="The mathematical attestation proving this observation was generated securely."
+        default=None, description="The mathematical attestation proving this observation was appended securely."
     )
     toolchain_snapshot: AnyToolchainState | None = Field(
         default=None,
@@ -113,12 +113,12 @@ class ObservationEvent(BaseStateEvent):
     )
     neural_audit: NeuralAuditAttestation | None = Field(
         default=None,
-        description="The mathematical brain-scan proving exactly which neural circuits fired to generate this event.",
+        description="The mathematical brain-scan proving exactly which neural circuits fired to append this event.",
     )
 
 
 class CausalAttribution(CoreasonBaseModel):
-    source_event_id: str = Field(description="The exact event ID in the EpistemicLedger that influenced this belief.")
+    source_event_id: str = Field(description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the source event in the Merkle-DAG.")
     influence_weight: float = Field(
         ge=0.0,
         le=1.0,
@@ -128,13 +128,13 @@ class CausalAttribution(CoreasonBaseModel):
 
 class BeliefUpdateEvent(BaseStateEvent):
     type: Literal["belief_update"] = Field(
-        default="belief_update", description="Discriminator type for a belief update event."
+        default="belief_update", description="Discriminator type for a Belief Assertion event."
     )
     payload: dict[str, Any] = Field(
-        description="The semantic representation of the agent's internal cognitive shift or synthesis."
+        description="Topologically Bounded Latent Spaces capturing the semantic representation of the agent's internal cognitive shift or synthesis that anchor statistical probability to a definitive causal event hash."
     )
     source_node_id: NodeID | None = Field(
-        default=None, description="The specific topological node that synthesized this belief update."
+        default=None, description="The specific topological node that synthesized this belief assertion."
     )
     causal_attributions: list[CausalAttribution] = Field(
         default_factory=list,
@@ -146,7 +146,7 @@ class BeliefUpdateEvent(BaseStateEvent):
     )
     zk_proof: ZeroKnowledgeProof | None = Field(
         default=None,
-        description="The mathematical attestation proving this belief synthesis was generated "
+        description="The mathematical attestation proving this belief synthesis was appended "
         "securely without model-downgrade fraud.",
     )
     uncertainty_profile: CognitiveUncertaintyProfile | None = Field(
@@ -159,7 +159,7 @@ class BeliefUpdateEvent(BaseStateEvent):
     )
     neural_audit: NeuralAuditAttestation | None = Field(
         default=None,
-        description="The mathematical brain-scan proving exactly which neural circuits fired to generate this event.",
+        description="The mathematical brain-scan proving exactly which neural circuits fired to append this event.",
     )
 
 
@@ -180,7 +180,7 @@ class CausalDirectedEdge(CoreasonBaseModel):
 class InterventionalCausalTask(CoreasonBaseModel):
     """A rigid do-calculus intervention forcing the agent to simulate a reality manipulation."""
 
-    task_id: str = Field(description="Unique identifier for this causal intervention.")
+    task_id: str = Field(description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this causal intervention to the Merkle-DAG.")
     target_variable: str = Field(description="The dependent variable Y being measured.")
     do_operator_interventions: dict[str, Any] = Field(
         description="The strict do(X=x) topological amputations applied to the causal graph."
@@ -197,7 +197,7 @@ class StructuralCausalModel(CoreasonBaseModel):
 
 
 class FalsificationCondition(CoreasonBaseModel):
-    condition_id: str = Field(min_length=1, description="Unique identifier for this falsification test.")
+    condition_id: str = Field(min_length=1, description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this falsification test to the Merkle-DAG.")
     description: str = Field(
         description="Semantic description of what observation would prove the parent hypothesis is false."
     )
@@ -214,7 +214,7 @@ class HypothesisGenerationEvent(BaseStateEvent):
     type: Literal["hypothesis"] = Field(
         default="hypothesis", description="Discriminator for a hypothesis generation event."
     )
-    hypothesis_id: str = Field(min_length=1, description="Unique identifier for this abductive leap.")
+    hypothesis_id: str = Field(min_length=1, description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this abductive leap to the Merkle-DAG.")
     premise_text: str = Field(description="The natural language explanation of the abductive theory.")
     bayesian_prior: float = Field(
         ge=0.0,
@@ -241,7 +241,7 @@ class BargeInInterruptEvent(BaseStateEvent):
     type: Literal["barge_in"] = Field(
         default="barge_in", description="Discriminator type for a barge-in interruption event."
     )
-    target_event_id: str = Field(description="The exact event ID of the active node generation cycle that was killed.")
+    target_event_id: str = Field(description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the active node generation cycle that was killed in the Merkle-DAG.")
     sensory_trigger: EmbodiedSensoryVector | None = Field(
         default=None,
         description="The continuous multimodal trigger (e.g., audio spike, user saying 'stop') "
@@ -249,7 +249,7 @@ class BargeInInterruptEvent(BaseStateEvent):
     )
     retained_partial_payload: dict[str, Any] | str | None = Field(
         default=None,
-        description="The 'stutter' state: the incomplete fragment of thought or text generated before the kill signal.",
+        description="The 'stutter' state: the incomplete fragment of thought or text appended before the kill signal.",
     )
     epistemic_disposition: Literal["discard", "retain_as_context", "mark_as_falsified"] = Field(
         description="Explicit instruction to the orchestrator on how to patch the shared memory blackboard "
@@ -265,17 +265,16 @@ class CounterfactualRegretEvent(BaseStateEvent):
         default="counterfactual_regret", description="Discriminator type for a counterfactual regret event."
     )
     historical_event_id: str = Field(
-        description="The specific historical state node where the agent mathematically diverged "
-        "to simulate an alternative path."
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the specific historical state node where the agent mathematically diverged to simulate an alternative path."
     )
     counterfactual_intervention: str = Field(
         description="The specific alternative action or do-calculus intervention applied in the simulation."
     )
     expected_utility_actual: float = Field(
-        description="The computed utility of the trajectory that was actually executed."
+        description="The calculated utility of the trajectory that was actually executed."
     )
     expected_utility_simulated: float = Field(
-        description="The computed utility of the simulated counterfactual trajectory."
+        description="The calculated utility of the simulated counterfactual trajectory."
     )
     epistemic_regret: float = Field(
         description="The mathematical variance (simulated - actual) representing the opportunity "
