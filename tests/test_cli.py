@@ -1,9 +1,12 @@
+import json
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
 from coreason_manifest.cli.export import main as export_main
 from coreason_manifest.cli.mcp_server import get_schema, list_schemas
+from coreason_manifest.cli.visualize import main as visualize_main
 
 
 def test_export_main(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -22,3 +25,58 @@ def test_mcp_server_schemas() -> None:
 
     with pytest.raises(ValueError, match="Schema 'NonExistentSchema' not found"):
         get_schema("NonExistentSchema")
+
+
+def test_visualize_valid_manifest(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    payload_path = tmp_path / "valid_manifest.json"
+    manifest_data = {
+        "manifest_id": "manifest-test-01",
+        "artifact_profile": {
+            "artifact_event_id": "root-artifact",
+            "detected_modalities": ["text", "tabular_grid"],
+            "token_density": 100,
+        },
+        "active_subgraphs": {"text": ["did:web:agent-1"]},
+        "bypassed_steps": [
+            {
+                "artifact_event_id": "root-artifact",
+                "bypassed_node_id": "did:web:agent-2",
+                "justification": "modality_mismatch",
+                "cryptographic_null_hash": "a" * 64,
+            }
+        ],
+        "branch_budgets_microcents": {"did:web:agent-1": 1000},
+    }
+    payload_path.write_text(json.dumps(manifest_data))
+
+    with patch("sys.argv", ["coreason-visualize", str(payload_path)]), patch("sys.exit") as mock_exit:
+        visualize_main()
+        mock_exit.assert_called_once_with(0)
+
+    captured = capsys.readouterr()
+    assert "graph TD" in captured.out
+    assert "did:web:agent-1" in captured.out
+    assert "did:web:agent-2" in captured.out
+    assert ":::active" in captured.out
+    assert ":::bypassed" in captured.out
+
+
+def test_visualize_invalid_manifest(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    payload_path = tmp_path / "invalid_manifest.json"
+    payload_path.write_text('{"invalid": "data"}')
+
+    with patch("sys.argv", ["coreason-visualize", str(payload_path)]), patch("sys.exit") as mock_exit:
+        visualize_main()
+        mock_exit.assert_called_once_with(1)
+
+    captured = capsys.readouterr()
+    assert "Topological Validation Error" in captured.err
+
+
+def test_visualize_missing_file(capsys: pytest.CaptureFixture[str]) -> None:
+    with patch("sys.argv", ["coreason-visualize", "ghost_file.json"]), patch("sys.exit") as mock_exit:
+        visualize_main()
+        mock_exit.assert_called_with(1)
+
+    captured = capsys.readouterr()
+    assert "not found" in captured.err
