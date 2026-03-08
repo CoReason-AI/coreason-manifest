@@ -18,7 +18,13 @@ from coreason_manifest.core.base import CoreasonBaseModel
 
 
 class ThoughtBranch(CoreasonBaseModel):
-    branch_id: str = Field(min_length=1, description="A deterministic capability pointer bounding this specific topological divergence in the Latent Scratchpad Trace.")
+    branch_id: str = Field(
+        min_length=1,
+        description=(
+            "A deterministic capability pointer bounding this specific topological divergence"
+            "in the Latent Scratchpad Trace."
+        ),
+    )
     parent_branch_id: str | None = Field(
         default=None, description="The branch this thought diverged from, enabling tree reconstruction."
     )
@@ -35,16 +41,28 @@ class ThoughtBranch(CoreasonBaseModel):
 
 
 class LatentScratchpadTrace(CoreasonBaseModel):
-    trace_id: str = Field(min_length=1, description="A Content Identifier (CID) bounding this ephemeral test-time execution tree.")
-    explored_branches: list[ThoughtBranch] = Field(description="All logical paths the agent attempted within this Ephemeral Epistemic Quarantine—a volatile workspace where probability waves collapse before being committed to the immutable ledger.")
+    trace_id: str = Field(
+        min_length=1, description=("A Content Identifier (CID) bounding this ephemeral test-time execution tree.")
+    )
+    explored_branches: list[ThoughtBranch] = Field(
+        description=(
+            "All logical paths the agent attempted within this Ephemeral Epistemic"
+            "Quarantine—a volatile workspace where probability waves collapse before being"
+            "committed to the immutable ledger."
+        )
+    )
     discarded_branches: list[str] = Field(
         description="A list of Content Identifiers (CIDs) that were explicitly pruned due to logical dead-ends."
     )
     resolution_branch_id: str | None = Field(
         default=None,
-        description="The Content Identifier (CID) that successfully resolved the uncertainty and led to the final output.",
+        description=(
+            "The Content Identifier (CID) that successfully resolved the uncertainty and ledto the final output."
+        ),
     )
-    total_latent_tokens: int = Field(ge=0, description="The total expenditure (in tokens) spent purely on internal reasoning.")
+    total_latent_tokens: int = Field(
+        ge=0, description=("The total expenditure (in tokens) spent purely on internal reasoning.")
+    )
 
     @model_validator(mode="after")
     def verify_referential_integrity(self) -> Self:

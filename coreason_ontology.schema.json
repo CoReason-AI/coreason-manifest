@@ -898,7 +898,7 @@
       "additionalProperties": false,
       "properties": {
         "claim_id": {
-          "description": "Unique identifier for this specific logical proposition.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for thisspecific logical proposition.",
           "title": "Claim Id",
           "type": "string"
         },
@@ -2601,17 +2601,17 @@
       "additionalProperties": false,
       "properties": {
         "attack_id": {
-          "description": "Unique identifier for this directed attack edge.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for thisdirected attack edge.",
           "title": "Attack Id",
           "type": "string"
         },
         "source_claim_id": {
-          "description": "The ID of the claim mounting the attack.",
+          "description": "The Content Identifier (CID) of the claim mounting the attack.",
           "title": "Source Claim Id",
           "type": "string"
         },
         "target_claim_id": {
-          "description": "The ID of the claim being attacked.",
+          "description": "The Content Identifier (CID) of the claim being attacked.",
           "title": "Target Claim Id",
           "type": "string"
         },
@@ -2633,25 +2633,25 @@
       "additionalProperties": false,
       "properties": {
         "cascade_id": {
-          "description": "Unique identifier for this automated truth maintenance operation.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for thisautomated truth maintenance operation.",
           "minLength": 1,
           "title": "Cascade Id",
           "type": "string"
         },
         "root_falsified_event_id": {
-          "description": "The source BeliefUpdateEvent or HypothesisGenerationEvent ID that collapsed and triggered this cascade.",
+          "description": "The source BeliefUpdateEvent or HypothesisGenerationEvent Content Identifier(CID) that collapsed and triggered this cascade.",
           "title": "Root Falsified Event Id",
           "type": "string"
         },
         "propagated_decay_factor": {
-          "description": "The calculated entropy penalty applied to this specific subgraph.",
+          "description": "The calculated Entropy Penalty applied to this specific subgraph.",
           "maximum": 1.0,
           "minimum": 0.0,
           "title": "Propagated Decay Factor",
           "type": "number"
         },
         "quarantined_event_ids": {
-          "description": "The strict list of downstream event IDs isolated and muted by this cascade.",
+          "description": "The strict list of downstream event Content Identifiers (CIDs) isolated andmuted by this cascade to prevent Epistemic Contagion.",
           "items": {
             "type": "string"
           },
@@ -4108,7 +4108,7 @@
           "type": "string"
         },
         "public_key_id": {
-          "description": "The identifier of the public evaluation key the orchestrator must load to perform math on this payload.",
+          "description": "The Content Identifier (CID) of the public evaluation key the orchestrator must utilize to perform privacy-preserving geometric math on ciphertext without epistemic contamination.",
           "title": "Public Key Id",
           "type": "string"
         },
@@ -4713,13 +4713,13 @@
       "additionalProperties": false,
       "properties": {
         "trace_id": {
-          "description": "Unique identifier for this entire test-time compute session.",
+          "description": "A Content Identifier (CID) bounding this ephemeral test-time execution tree.",
           "minLength": 1,
           "title": "Trace Id",
           "type": "string"
         },
         "explored_branches": {
-          "description": "All logical paths the agent attempted.",
+          "description": "All logical paths the agent attempted within this Ephemeral EpistemicQuarantine—a volatile workspace where probability waves collapse before beingcommitted to the immutable ledger.",
           "items": {
             "$ref": "#/$defs/ThoughtBranch"
           },
@@ -4727,7 +4727,7 @@
           "type": "array"
         },
         "discarded_branches": {
-          "description": "A list of branch_ids that were explicitly pruned due to logical dead-ends.",
+          "description": "A list of Content Identifiers (CIDs) that were explicitly pruned due to logical dead-ends.",
           "items": {
             "type": "string"
           },
@@ -4744,11 +4744,11 @@
             }
           ],
           "default": null,
-          "description": "The branch_id that successfully resolved the uncertainty and led to the final output.",
+          "description": "The Content Identifier (CID) that successfully resolved the uncertainty and ledto the final output.",
           "title": "Resolution Branch Id"
         },
         "total_latent_tokens": {
-          "description": "The total compute expenditure (in tokens) spent purely on internal reasoning.",
+          "description": "The total expenditure (in tokens) spent purely on internal reasoning.",
           "minimum": 0,
           "title": "Total Latent Tokens",
           "type": "integer"
@@ -4832,7 +4832,7 @@
           "additionalProperties": {
             "type": "string"
           },
-          "description": "A dictionary mapping intermediate participant NodeIDs to their deterministic execution signatures.",
+          "description": "A dictionary mapping intermediate participant NodeIDs to their deterministicexecution signatures.",
           "title": "Hop Signatures",
           "type": "object"
         },
@@ -5345,10 +5345,10 @@
       "properties": {
         "extracted_by": {
           "$ref": "#/$defs/NodeID",
-          "description": "The ID of the agent node that extracted this memory."
+          "description": "The Content Identifier (CID) of the agent node that extracted this memory."
         },
         "source_event_id": {
-          "description": "The exact event ID in the EpistemicLedger that generated this fact.",
+          "description": "The exact event Content Identifier (CID) in the EpistemicLedger that generatedthis fact.",
           "title": "Source Event Id",
           "type": "string"
         },
@@ -5412,7 +5412,7 @@
       "additionalProperties": false,
       "properties": {
         "contract_id": {
-          "description": "Unique identifier for this structural migration mapping.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for thisstructural migration mapping.",
           "title": "Contract Id",
           "type": "string"
         },
@@ -5818,7 +5818,7 @@
       "additionalProperties": false,
       "properties": {
         "handshake_id": {
-          "description": "The unique identifier for the handshake.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linkingthis semantic node to the Merkle-DAG.",
           "minLength": 1,
           "title": "Handshake Id",
           "type": "string"
@@ -6465,12 +6465,12 @@
       "additionalProperties": false,
       "properties": {
         "request_id": {
-          "description": "Unique identifier for the causal rollback operation.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for thecausal rollback operation.",
           "title": "Request Id",
           "type": "string"
         },
         "target_event_id": {
-          "description": "The ID of the corrupted event in the EpistemicLedger to revert to.",
+          "description": "The Content Identifier (CID) of the corrupted event in the EpistemicLedger torevert to.",
           "title": "Target Event Id",
           "type": "string"
         },
@@ -6949,17 +6949,17 @@
       "additionalProperties": false,
       "properties": {
         "edge_id": {
-          "description": "The unique identifier of this relationship.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linkingthis semantic node to the Merkle-DAG.",
           "title": "Edge Id",
           "type": "string"
         },
         "subject_node_id": {
-          "description": "The origin SemanticNode ID.",
+          "description": "The origin SemanticNode Content Identifier (CID).",
           "title": "Subject Node Id",
           "type": "string"
         },
         "object_node_id": {
-          "description": "The destination SemanticNode ID.",
+          "description": "The destination SemanticNode Content Identifier (CID).",
           "title": "Object Node Id",
           "type": "string"
         },
@@ -6993,7 +6993,7 @@
             }
           ],
           "default": null,
-          "description": "The dense vector representing the relationship semantics."
+          "description": "Topologically Bounded Latent Spaces used to calculate exact geometric distanceand preserve structural Isometry."
         },
         "provenance": {
           "anyOf": [
@@ -7080,7 +7080,7 @@
       "additionalProperties": false,
       "properties": {
         "node_id": {
-          "description": "The unique identifier of this semantic concept.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linkingthis semantic node to the Merkle-DAG.",
           "title": "Node Id",
           "type": "string"
         },
@@ -7116,7 +7116,7 @@
             }
           ],
           "default": null,
-          "description": "The dense vector representation of the text chunk."
+          "description": "Topologically Bounded Latent Spaces used to calculate exact geometric distanceand preserve structural Isometry."
         },
         "provenance": {
           "$ref": "#/$defs/MemoryProvenance",
@@ -7480,12 +7480,12 @@
       "additionalProperties": false,
       "properties": {
         "diff_id": {
-          "description": "Unique identifier for this state differential.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for thisstate differential.",
           "title": "Diff Id",
           "type": "string"
         },
         "author_node_id": {
-          "description": "The exact NodeID of the agent or system that authored this state mutation.",
+          "description": "The exact Lineage Watermark of the agent or system that authored this statemutation.",
           "title": "Author Node Id",
           "type": "string"
         },
@@ -7499,12 +7499,12 @@
           "additionalProperties": {
             "type": "integer"
           },
-          "description": "Causal history mapping of all known NodeIDs to their latest logical mutation count at the time of authoring.",
+          "description": "Causal history mapping of all known Lineage Watermarks to their latest logicalmutation count at the time of authoring.",
           "title": "Vector Clock",
           "type": "object"
         },
         "patches": {
-          "description": "The exact, ordered sequence of operations to apply.",
+          "description": "deterministic state vector mutations.",
           "items": {
             "$ref": "#/$defs/StatePatch"
           },
@@ -7526,10 +7526,10 @@
       "properties": {
         "op": {
           "$ref": "#/$defs/PatchOperation",
-          "description": "The strict RFC 6902 JSON Patch operation."
+          "description": "The strict RFC 6902 JSON Patch operation, acting as a deterministic state vectormutation."
         },
         "path": {
-          "description": "The JSON pointer indicating the exact state vector to mutate.",
+          "description": "The JSON pointer indicating the exact state vector to mutate deterministically.",
           "title": "Path",
           "type": "string"
         },
@@ -7541,7 +7541,7 @@
             }
           ],
           "default": null,
-          "description": "The payload to insert or test, if applicable.",
+          "description": "The payload to insert or test, if applicable, for this deterministic statevector mutation.",
           "title": "Value"
         }
       },
@@ -8023,7 +8023,7 @@
       "additionalProperties": false,
       "properties": {
         "checkpoint_id": {
-          "description": "Unique identifier for the temporal anchor.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for thetemporal anchor.",
           "title": "Checkpoint Id",
           "type": "string"
         },
@@ -8132,7 +8132,7 @@
       "additionalProperties": false,
       "properties": {
         "branch_id": {
-          "description": "Unique identifier for this line of reasoning.",
+          "description": "A deterministic capability pointer bounding this specific topological divergencein the Latent Scratchpad Trace.",
           "minLength": 1,
           "title": "Branch Id",
           "type": "string"
@@ -8272,7 +8272,7 @@
       "additionalProperties": false,
       "properties": {
         "decay_propagation_rate": {
-          "description": "The percentage of confidence mathematically lost per edge traversal during a defeasible cascade.",
+          "description": "Entropy Penalty applied per edge traversal during a defeasible cascade.",
           "maximum": 1.0,
           "minimum": 0.0,
           "title": "Decay Propagation Rate",
