@@ -20,7 +20,7 @@ from coreason_manifest.core.primitives import NodeID
 from coreason_manifest.oversight.dlp import InformationFlowPolicy
 from coreason_manifest.oversight.governance import ConsensusPolicy
 from coreason_manifest.telemetry.schemas import ObservabilityPolicy
-from coreason_manifest.workflow.auctions import AuctionPolicy
+from coreason_manifest.workflow.auctions import AuctionPolicy, EscrowPolicy
 from coreason_manifest.workflow.markets import MarketResolution, PredictionMarketState
 from coreason_manifest.workflow.nodes import AnyNode
 
@@ -227,6 +227,22 @@ class CouncilTopology(BaseTopology):
         description="The pre-flight execution gate forcing agents to mathematically align their latent "
         "semantics before participating in the topology.",
     )
+    council_escrow: EscrowPolicy | None = Field(
+        default=None,
+        description="The strictly typed mathematical surface area to lock funds specifically "
+        "for PBFT council execution and slashing.",
+    )
+
+    @model_validator(mode="after")
+    def enforce_funded_byzantine_slashing(self) -> Self:
+        if (
+            self.consensus_policy is not None
+            and self.consensus_policy.strategy == "pbft"
+            and self.consensus_policy.quorum_rules is not None
+            and self.consensus_policy.quorum_rules.byzantine_action == "slash_escrow"
+        ) and (self.council_escrow is None or self.council_escrow.escrow_locked_microcents <= 0):
+            raise ValueError("Topological Interlock Failed: PBFT with slash_escrow requires a funded council_escrow.")
+        return self
 
     @model_validator(mode="after")
     def check_adjudicator_id(self) -> Self:
