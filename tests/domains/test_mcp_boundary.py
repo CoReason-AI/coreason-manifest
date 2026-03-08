@@ -368,3 +368,19 @@ async def test_uptime_assertion_poison_pill() -> None:
     response_dict2 = sent_msg2.message.model_dump()
     assert response_dict2["jsonrpc"] == "2.0"
     assert response_dict2["error"]["code"] in (-32600, -32700)
+
+
+def test_mcp_server_resource_schemas() -> None:
+    """Test standard resource endpoints of mcp_server for branch coverage."""
+    import json
+
+    from coreason_manifest.cli.mcp_server import get_schema_resource
+
+    # Valid resource fetch
+    schema_str = get_schema_resource("AdjudicationRubric")
+    schema_dict = json.loads(schema_str)
+    assert schema_dict["title"] == "AdjudicationRubric"
+
+    # Invalid resource fetch
+    with pytest.raises(ValueError, match="not found in the manifest"):
+        get_schema_resource("GhostNodeSchema")
