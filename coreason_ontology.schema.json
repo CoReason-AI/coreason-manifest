@@ -1469,6 +1469,60 @@
       "title": "BoundedInterventionScope",
       "type": "object"
     },
+    "BoundedJSONRPCRequest": {
+      "additionalProperties": false,
+      "description": "Base schema enforcing rigorous JSON-RPC 2.0 boundaries to prevent DoS attacks.",
+      "properties": {
+        "jsonrpc": {
+          "const": "2.0",
+          "description": "JSON-RPC version.",
+          "title": "Jsonrpc",
+          "type": "string"
+        },
+        "method": {
+          "description": "Method to be invoked.",
+          "maxLength": 1000,
+          "title": "Method",
+          "type": "string"
+        },
+        "params": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Payload parameters.",
+          "title": "Params"
+        },
+        "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Unique request identifier.",
+          "title": "Id"
+        }
+      },
+      "required": [
+        "jsonrpc",
+        "method"
+      ],
+      "title": "BoundedJSONRPCRequest",
+      "type": "object"
+    },
     "BoundingBox": {
       "additionalProperties": false,
       "description": "A resolution-independent spatial region.",
@@ -4344,6 +4398,77 @@
       "title": "InterventionVerdict",
       "type": "object"
     },
+    "JSONRPCError": {
+      "additionalProperties": false,
+      "description": "JSON-RPC 2.0 Error object.",
+      "properties": {
+        "code": {
+          "description": "A Number that indicates the error type that occurred.",
+          "title": "Code",
+          "type": "integer"
+        },
+        "message": {
+          "description": "A String providing a short description of the error.",
+          "title": "Message",
+          "type": "string"
+        },
+        "data": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A Primitive or Structured value that contains additional information about the error.",
+          "title": "Data"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "title": "JSONRPCError",
+      "type": "object"
+    },
+    "JSONRPCErrorResponse": {
+      "additionalProperties": false,
+      "description": "JSON-RPC 2.0 Error Response object.",
+      "properties": {
+        "jsonrpc": {
+          "const": "2.0",
+          "description": "JSON-RPC version.",
+          "title": "Jsonrpc",
+          "type": "string"
+        },
+        "error": {
+          "$ref": "#/$defs/JSONRPCError",
+          "description": "The error object."
+        },
+        "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The request ID that this error corresponds to.",
+          "title": "Id"
+        }
+      },
+      "required": [
+        "jsonrpc",
+        "error"
+      ],
+      "title": "JSONRPCErrorResponse",
+      "type": "object"
+    },
     "LatentScratchpadTrace": {
       "additionalProperties": false,
       "properties": {
@@ -4610,7 +4735,7 @@
           "type": "string"
         },
         "transport_type": {
-          "$ref": "#/$defs/MCPTransport",
+          "$ref": "#/$defs/coreason_manifest__tooling__environments__MCPTransport",
           "description": "The transport protocol used to communicate with the MCP server."
         },
         "allowed_mcp_tools": {
@@ -4635,6 +4760,179 @@
         "transport_type"
       ],
       "title": "MCPClientBinding",
+      "type": "object"
+    },
+    "MCPClientMessage": {
+      "additionalProperties": false,
+      "description": "Strict JSON-RPC 2.0 structure for MCP client messages.",
+      "properties": {
+        "jsonrpc": {
+          "const": "2.0",
+          "description": "JSON-RPC version.",
+          "title": "Jsonrpc",
+          "type": "string"
+        },
+        "method": {
+          "const": "mcp.ui.emit_intent",
+          "description": "Method for intent bubbling.",
+          "title": "Method",
+          "type": "string"
+        },
+        "params": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Payload parameters.",
+          "title": "Params"
+        },
+        "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Unique request identifier.",
+          "title": "Id"
+        }
+      },
+      "required": [
+        "jsonrpc",
+        "method"
+      ],
+      "title": "MCPClientMessage",
+      "type": "object"
+    },
+    "MCPPromptRef": {
+      "additionalProperties": false,
+      "description": "A dynamic reference to an MCP-provided prompt template.",
+      "properties": {
+        "server_id": {
+          "description": "The ID of the MCP server providing this prompt.",
+          "title": "Server Id",
+          "type": "string"
+        },
+        "prompt_name": {
+          "description": "The name of the prompt template.",
+          "title": "Prompt Name",
+          "type": "string"
+        },
+        "arguments": {
+          "additionalProperties": true,
+          "description": "Arguments to fill the prompt template.",
+          "title": "Arguments",
+          "type": "object"
+        },
+        "fallback_persona": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A fallback persona if the prompt fails to load.",
+          "title": "Fallback Persona"
+        },
+        "prompt_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cryptographic hash for prompt integrity verification.",
+          "title": "Prompt Hash"
+        }
+      },
+      "required": [
+        "server_id",
+        "prompt_name"
+      ],
+      "title": "MCPPromptRef",
+      "type": "object"
+    },
+    "MCPResourceList": {
+      "additionalProperties": false,
+      "description": "A collection of Semantic Memory resource URIs provided by a specific MCP server.",
+      "properties": {
+        "server_id": {
+          "description": "The ID of the MCP server providing these resources.",
+          "title": "Server Id",
+          "type": "string"
+        },
+        "uris": {
+          "description": "List of resource URIs available to the agent.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Uris",
+          "type": "array"
+        }
+      },
+      "required": [
+        "server_id"
+      ],
+      "title": "MCPResourceList",
+      "type": "object"
+    },
+    "MCPServerConfig": {
+      "additionalProperties": false,
+      "description": "Configuration definition for connecting to an MCP Server.",
+      "properties": {
+        "server_id": {
+          "description": "A unique identifier for this server instance.",
+          "title": "Server Id",
+          "type": "string"
+        },
+        "transport": {
+          "description": "Polymorphic transport configuration.",
+          "discriminator": {
+            "mapping": {
+              "sse": "#/$defs/coreason_manifest__adapters__mcp__schemas__MCPTransport",
+              "stdio": "#/$defs/coreason_manifest__adapters__mcp__schemas__MCPTransport"
+            },
+            "propertyName": "type"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/coreason_manifest__adapters__mcp__schemas__MCPTransport"
+            }
+          ],
+          "title": "Transport"
+        },
+        "required_capabilities": {
+          "description": "A list of capabilities required from the MCP server.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Required Capabilities",
+          "type": "array"
+        }
+      },
+      "required": [
+        "server_id",
+        "transport"
+      ],
+      "title": "MCPServerConfig",
       "type": "object"
     },
     "MCPServerManifest": {
@@ -4681,14 +4979,6 @@
       ],
       "title": "MCPServerManifest",
       "type": "object"
-    },
-    "MCPTransport": {
-      "enum": [
-        "stdio",
-        "sse",
-        "http"
-      ],
-      "type": "string"
     },
     "MacroGrid": {
       "additionalProperties": false,
@@ -6092,6 +6382,40 @@
       "title": "SMPCTopology",
       "type": "object"
     },
+    "SSETransportConfig": {
+      "additionalProperties": false,
+      "description": "Configuration for remote SSE-based MCP transport.",
+      "properties": {
+        "type": {
+          "const": "sse",
+          "default": "sse",
+          "description": "Type of transport.",
+          "title": "Type",
+          "type": "string"
+        },
+        "uri": {
+          "description": "The HTTP URL endpoint for the SSE connection.",
+          "format": "uri",
+          "maxLength": 2083,
+          "minLength": 1,
+          "title": "Uri",
+          "type": "string"
+        },
+        "headers": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "HTTP headers, e.g., for authentication.",
+          "title": "Headers",
+          "type": "object"
+        }
+      },
+      "required": [
+        "uri"
+      ],
+      "title": "SSETransportConfig",
+      "type": "object"
+    },
     "SaeFeatureActivation": {
       "additionalProperties": false,
       "properties": {
@@ -6955,6 +7279,45 @@
         "path"
       ],
       "title": "StatePatch",
+      "type": "object"
+    },
+    "StdioTransportConfig": {
+      "additionalProperties": false,
+      "description": "Configuration for local Stdio-based MCP transport.",
+      "properties": {
+        "type": {
+          "const": "stdio",
+          "default": "stdio",
+          "description": "Type of transport.",
+          "title": "Type",
+          "type": "string"
+        },
+        "command": {
+          "description": "The command executable to run (e.g., 'node', 'python').",
+          "title": "Command",
+          "type": "string"
+        },
+        "args": {
+          "description": "List of arguments to pass to the command.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Args",
+          "type": "array"
+        },
+        "env_vars": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Environment variables required by the transport.",
+          "title": "Env Vars",
+          "type": "object"
+        }
+      },
+      "required": [
+        "command"
+      ],
+      "title": "StdioTransportConfig",
       "type": "object"
     },
     "SteadyStateHypothesis": {
@@ -7960,6 +8323,16 @@
       "title": "ZeroKnowledgeProof",
       "type": "object"
     },
+    "coreason_manifest__adapters__mcp__schemas__MCPTransport": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/StdioTransportConfig"
+        },
+        {
+          "$ref": "#/$defs/SSETransportConfig"
+        }
+      ]
+    },
     "coreason_manifest__compute__inference__InterventionalCausalTask": {
       "additionalProperties": false,
       "properties": {
@@ -8159,6 +8532,14 @@
       ],
       "title": "OntologicalHandshake",
       "type": "object"
+    },
+    "coreason_manifest__tooling__environments__MCPTransport": {
+      "enum": [
+        "stdio",
+        "sse",
+        "http"
+      ],
+      "type": "string"
     },
     "coreason_manifest__workflow__topologies__DimensionalProjectionContract": {
       "additionalProperties": false,
