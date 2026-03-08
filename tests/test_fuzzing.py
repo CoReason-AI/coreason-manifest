@@ -794,6 +794,17 @@ def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> 
             return payload
         # Pick the first node ID as the adjudicator_id
         payload["adjudicator_id"] = next(iter(payload["nodes"].keys()))
+
+        # NEW: PBFT Slashing Interlock Injection
+        consensus = payload.get("consensus_policy")
+        if consensus and consensus.get("strategy") == "pbft":
+            quorum = consensus.get("quorum_rules")
+            if quorum and quorum.get("byzantine_action") == "slash_escrow":
+                payload["council_escrow"] = {
+                    "escrow_locked_microcents": 1000,
+                    "release_condition_metric": "pbft_slash_condition",
+                    "refund_target_node_id": payload["adjudicator_id"],
+                }
         return payload
 
     council_strategy = st.fixed_dictionaries(

@@ -7,6 +7,8 @@ from hypothesis import strategies as st
 from hypothesis.strategies import DataObject
 from pydantic import TypeAdapter, ValidationError
 
+from coreason_manifest.oversight.governance import ConsensusPolicy, QuorumPolicy
+from coreason_manifest.workflow.auctions import EscrowPolicy
 from coreason_manifest.workflow.nodes import (
     AgentNode,
     EpistemicScanner,
@@ -232,3 +234,38 @@ def test_digital_twin_topology_routes_through_discriminator() -> None:
     assert topology.convergence_sla.max_monte_carlo_rollouts == 100
     assert topology.convergence_sla.variance_tolerance == 0.5
     assert topology.enforce_no_side_effects is True
+
+
+def test_council_topology_byzantine_slash_requires_escrow() -> None:
+    """Prove that CouncilTopology strictly requires a funded escrow when PBFT slashing is enabled."""
+    nodes = {"did:web:node_1": SystemNode(description="The Oracle")}
+    quorum = QuorumPolicy(
+        max_tolerable_faults=1,
+        min_quorum_size=4,
+        state_validation_metric="ledger_hash",
+        byzantine_action="slash_escrow",
+    )
+    consensus = ConsensusPolicy(strategy="pbft", quorum_rules=quorum)
+
+    # 1. Unfunded - Must Fail
+    with pytest.raises(
+        ValidationError, match="Topological Interlock Failed: PBFT with slash_escrow requires a funded council_escrow"
+    ):
+        CouncilTopology(
+            nodes=nodes,  # type: ignore
+            adjudicator_id="did:web:node_1",
+            consensus_policy=consensus,
+        )
+
+    # 2. Funded - Must Succeed
+    escrow = EscrowPolicy(
+        escrow_locked_microcents=5000, release_condition_metric="slash_on_fault", refund_target_node_id="did:web:node_1"
+    )
+    topology = CouncilTopology(
+        nodes=nodes,  # type: ignore
+        adjudicator_id="did:web:node_1",
+        consensus_policy=consensus,
+        council_escrow=escrow,
+    )
+    assert topology.council_escrow is not None
+    assert topology.council_escrow.escrow_locked_microcents == 5000
