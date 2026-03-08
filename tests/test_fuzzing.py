@@ -12,6 +12,7 @@ from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 from pydantic import TypeAdapter, ValidationError
 
+from coreason_manifest.adapters.mcp.schemas import HTTPTransportConfig, MCPServerConfig
 from coreason_manifest.core.primitives import DataClassification, RiskLevel
 from coreason_manifest.oversight.dlp import InformationFlowPolicy
 from coreason_manifest.oversight.governance import GlobalGovernance
@@ -2682,3 +2683,30 @@ def draw_neuro_symbolic_handoff(draw: Any) -> dict[str, Any]:
         )
     )
     return res
+
+
+mcp_server_config_adapter: TypeAdapter[MCPServerConfig] = TypeAdapter(MCPServerConfig)
+
+
+@st.composite
+def draw_mcp_server_config(draw: Any) -> dict[str, Any]:
+    """Generates a structural MCPServerConfig utilizing the HTTP transport boundary."""
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "server_id": st.text(min_size=1),
+                "transport": draw_http_transport_config(),
+                "required_capabilities": st.lists(st.text(), max_size=5),
+            }
+        )
+    )
+    return res
+
+
+@given(draw_mcp_server_config())
+def test_mcp_server_config_http_routing(payload: dict[str, Any]) -> None:
+    """Proves the polymorphic discriminator successfully routes HTTP payloads."""
+    parsed = mcp_server_config_adapter.validate_python(payload)
+    assert isinstance(parsed, MCPServerConfig)
+    assert isinstance(parsed.transport, HTTPTransportConfig)
+    assert parsed.transport.type == "http"
