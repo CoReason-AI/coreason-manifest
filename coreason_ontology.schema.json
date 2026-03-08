@@ -9200,6 +9200,45 @@
       "title": "System1Reflex",
       "type": "object"
     },
+    "System2RemediationPrompt": {
+      "additionalProperties": false,
+      "description": "A passive data envelope that deterministically maps a kinetic execution error\n(e.g., a Pydantic ValidationError) into a structurally rigid System 2 correction directive.",
+      "properties": {
+        "fault_id": {
+          "description": "A cryptographic Lineage Watermark (CID) tracking this specific dimensional collapse.",
+          "minLength": 1,
+          "title": "Fault Id",
+          "type": "string"
+        },
+        "target_node_id": {
+          "$ref": "#/$defs/NodeID",
+          "description": "The strict W3C DID of the agent that authored the invalid state, ensuring the fault is routed back to the exact memory partition."
+        },
+        "failing_pointers": {
+          "description": "A strictly typed array of RFC 6902 JSON Pointers isolating the exact topological coordinate of the hallucination.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Failing Pointers",
+          "type": "array"
+        },
+        "remediation_prompt": {
+          "description": "The deterministic, non-monotonic natural-language constraint the agent must satisfy.",
+          "minLength": 1,
+          "title": "Remediation Prompt",
+          "type": "string"
+        }
+      },
+      "required": [
+        "fault_id",
+        "target_node_id",
+        "failing_pointers",
+        "remediation_prompt"
+      ],
+      "title": "System2RemediationPrompt",
+      "type": "object"
+    },
     "SystemFaultEvent": {
       "additionalProperties": false,
       "properties": {

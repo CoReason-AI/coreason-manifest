@@ -14,6 +14,10 @@ from .intents import (
     InformationalIntent,
     PresentationEnvelope,
 )
+from .remediation import (
+    System2RemediationPrompt,
+    generate_correction_prompt,
+)
 from .scivis import (
     BasePanel,
     ChannelEncoding,
@@ -43,4 +47,6 @@ __all__ = [
     "MacroGrid",
     "PresentationEnvelope",
     "ScaleDefinition",
+    "System2RemediationPrompt",
+    "generate_correction_prompt",
 ]
