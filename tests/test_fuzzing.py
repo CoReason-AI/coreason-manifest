@@ -857,7 +857,33 @@ def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> 
         }
     )
 
-    return st.one_of(dag_strategy, council_strategy, swarm_strategy, smpc_strategy)
+    def _eval_opt_mapper(payload: dict[str, Any]) -> dict[str, Any]:
+        if len(payload["nodes"]) < 2:
+            return payload
+        node_ids = list(payload["nodes"].keys())
+        payload["generator_node_id"] = node_ids[0]
+        payload["evaluator_node_id"] = node_ids[1]
+        return payload
+
+    eval_opt_strategy = st.fixed_dictionaries(
+        {
+            "type": st.just("evaluator_optimizer"),
+            "nodes": st.dictionaries(
+                draw_did_string(),
+                nodes_strategy,
+                min_size=2,
+                max_size=5,
+            ),
+            "shared_state_contract": st.none(),
+            "information_flow": st.none(),
+            "observability": st.none(),
+            "generator_node_id": st.text(min_size=1),
+            "evaluator_node_id": st.text(min_size=1),
+            "max_revision_loops": st.integers(min_value=1, max_value=50),
+        }
+    ).map(_eval_opt_mapper)
+
+    return st.one_of(dag_strategy, council_strategy, swarm_strategy, smpc_strategy, eval_opt_strategy)
 
 
 def draw_composite_node_payload(
@@ -1048,6 +1074,15 @@ topology_adapter: TypeAdapter[AnyTopology] = TypeAdapter(AnyTopology)
 def test_anytopology_routing(payload: dict[str, Any]) -> None:
     parsed = topology_adapter.validate_python(payload)
     assert parsed.type == "evolutionary"
+
+
+@given(draw_topology_payload(draw_base_node_payload()))
+def test_topology_routing(payload: dict[str, Any]) -> None:
+    parsed = topology_adapter.validate_python(payload)
+    if parsed.type == "evaluator_optimizer":
+        from coreason_manifest.workflow.topologies import EvaluatorOptimizerTopology
+
+        assert isinstance(parsed, EvaluatorOptimizerTopology)
 
 
 @st.composite
