@@ -5,6 +5,11 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
+"""AGENT INSTRUCTION: This file maps the immutable argumentation schemas. This is a STRICTLY EPISTEMIC BOUNDARY.
+These schemas represent the append-only cognitive ledger of the swarm. YOU ARE EXPLICITLY FORBIDDEN from introducing
+mutable state loops, standard CRUD database paradigms, or downstream business logic. Focus purely on cryptographic
+event sourcing, hardware attestations, and non-monotonic belief updates."""
+
 from typing import Literal
 
 from pydantic import Field
