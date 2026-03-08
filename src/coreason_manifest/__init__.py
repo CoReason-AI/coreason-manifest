@@ -456,3 +456,26 @@ __all__ = [
     "WorkingMemorySnapshot",
     "ZeroKnowledgeProof",
 ]
+
+
+def _rebuild_ontology() -> None:
+    """
+    Dynamically resolves all Pydantic forward references strictly at the end of module initialization.
+    This prevents circular import death spirals by guaranteeing the entire ontology is loaded
+    into sys.modules before compilation begins.
+    """
+    import typing
+
+    # Guarantee all submodules are loaded and available in sys.modules to resolve
+    # forward references correctly during model_rebuild
+    from coreason_manifest.workflow.topologies import AnyTopology  # noqa: F401
+
+    for _name in __all__:
+        _obj = globals().get(_name)
+        if isinstance(_obj, type) and issubclass(_obj, CoreasonBaseModel) and _obj is not CoreasonBaseModel:
+            _cls: typing.Any = _obj
+            typing.cast("type[CoreasonBaseModel]", _cls).model_rebuild()
+
+
+# Execute immediately upon module load
+_rebuild_ontology()
