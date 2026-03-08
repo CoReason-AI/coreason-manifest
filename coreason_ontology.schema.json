@@ -898,7 +898,7 @@
       "additionalProperties": false,
       "properties": {
         "claim_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for thisspecific logical proposition.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this specific logical proposition.",
           "title": "Claim Id",
           "type": "string"
         },
@@ -2601,7 +2601,7 @@
       "additionalProperties": false,
       "properties": {
         "attack_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for thisdirected attack edge.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this directed attack edge.",
           "title": "Attack Id",
           "type": "string"
         },
@@ -2633,13 +2633,13 @@
       "additionalProperties": false,
       "properties": {
         "cascade_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for thisautomated truth maintenance operation.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this automated truth maintenance operation.",
           "minLength": 1,
           "title": "Cascade Id",
           "type": "string"
         },
         "root_falsified_event_id": {
-          "description": "The source BeliefUpdateEvent or HypothesisGenerationEvent Content Identifier(CID) that collapsed and triggered this cascade.",
+          "description": "The source BeliefUpdateEvent or HypothesisGenerationEvent Content Identifier (CID) that collapsed and triggered this cascade.",
           "title": "Root Falsified Event Id",
           "type": "string"
         },
@@ -2651,7 +2651,7 @@
           "type": "number"
         },
         "quarantined_event_ids": {
-          "description": "The strict list of downstream event Content Identifiers (CIDs) isolated andmuted by this cascade to prevent Epistemic Contagion.",
+          "description": "The strict list of downstream event Content Identifiers (CIDs) isolated and muted by this cascade to prevent Epistemic Contagion.",
           "items": {
             "type": "string"
           },
@@ -4719,7 +4719,7 @@
           "type": "string"
         },
         "explored_branches": {
-          "description": "All logical paths the agent attempted within this Ephemeral EpistemicQuarantine—a volatile workspace where probability waves collapse before beingcommitted to the immutable ledger.",
+          "description": "All logical paths the agent attempted within this Ephemeral Epistemic Quarantine—a volatile workspace where probability waves collapse before being committed to the immutable ledger.",
           "items": {
             "$ref": "#/$defs/ThoughtBranch"
           },
@@ -4744,7 +4744,7 @@
             }
           ],
           "default": null,
-          "description": "The Content Identifier (CID) that successfully resolved the uncertainty and ledto the final output.",
+          "description": "The Content Identifier (CID) that successfully resolved the uncertainty and led to the final output.",
           "title": "Resolution Branch Id"
         },
         "total_latent_tokens": {
@@ -4832,7 +4832,7 @@
           "additionalProperties": {
             "type": "string"
           },
-          "description": "A dictionary mapping intermediate participant NodeIDs to their deterministicexecution signatures.",
+          "description": "A dictionary mapping intermediate participant NodeIDs to their deterministic execution signatures.",
           "title": "Hop Signatures",
           "type": "object"
         },
@@ -5348,7 +5348,7 @@
           "description": "The Content Identifier (CID) of the agent node that extracted this memory."
         },
         "source_event_id": {
-          "description": "The exact event Content Identifier (CID) in the EpistemicLedger that generatedthis fact.",
+          "description": "The exact event Content Identifier (CID) in the EpistemicLedger that generated this fact.",
           "title": "Source Event Id",
           "type": "string"
         },
@@ -5412,7 +5412,7 @@
       "additionalProperties": false,
       "properties": {
         "contract_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for thisstructural migration mapping.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this structural migration mapping.",
           "title": "Contract Id",
           "type": "string"
         },
@@ -6465,12 +6465,12 @@
       "additionalProperties": false,
       "properties": {
         "request_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for thecausal rollback operation.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the causal rollback operation.",
           "title": "Request Id",
           "type": "string"
         },
         "target_event_id": {
-          "description": "The Content Identifier (CID) of the corrupted event in the EpistemicLedger torevert to.",
+          "description": "The Content Identifier (CID) of the corrupted event in the EpistemicLedger to revert to.",
           "title": "Target Event Id",
           "type": "string"
         },
@@ -6993,7 +6993,7 @@
             }
           ],
           "default": null,
-          "description": "Topologically Bounded Latent Spaces used to calculate exact geometric distanceand preserve structural Isometry."
+          "description": "Topologically Bounded Latent Spaces used to calculate exact geometric distance and preserve structural Isometry."
         },
         "provenance": {
           "anyOf": [
@@ -7080,7 +7080,7 @@
       "additionalProperties": false,
       "properties": {
         "node_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linkingthis semantic node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this semantic node to the Merkle-DAG.",
           "title": "Node Id",
           "type": "string"
         },
@@ -7116,7 +7116,7 @@
             }
           ],
           "default": null,
-          "description": "Topologically Bounded Latent Spaces used to calculate exact geometric distanceand preserve structural Isometry."
+          "description": "Topologically Bounded Latent Spaces used to calculate exact geometric distance and preserve structural Isometry."
         },
         "provenance": {
           "$ref": "#/$defs/MemoryProvenance",
@@ -7480,12 +7480,12 @@
       "additionalProperties": false,
       "properties": {
         "diff_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for thisstate differential.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this state differential.",
           "title": "Diff Id",
           "type": "string"
         },
         "author_node_id": {
-          "description": "The exact Lineage Watermark of the agent or system that authored this statemutation.",
+          "description": "The exact Lineage Watermark of the agent or system that authored this state mutation.",
           "title": "Author Node Id",
           "type": "string"
         },
@@ -7499,7 +7499,7 @@
           "additionalProperties": {
             "type": "integer"
           },
-          "description": "Causal history mapping of all known Lineage Watermarks to their latest logicalmutation count at the time of authoring.",
+          "description": "Causal history mapping of all known Lineage Watermarks to their latest logical mutation count at the time of authoring.",
           "title": "Vector Clock",
           "type": "object"
         },
@@ -7526,7 +7526,7 @@
       "properties": {
         "op": {
           "$ref": "#/$defs/PatchOperation",
-          "description": "The strict RFC 6902 JSON Patch operation, acting as a deterministic state vectormutation."
+          "description": "The strict RFC 6902 JSON Patch operation, acting as a deterministic state vector mutation."
         },
         "path": {
           "description": "The JSON pointer indicating the exact state vector to mutate deterministically.",
@@ -7541,7 +7541,7 @@
             }
           ],
           "default": null,
-          "description": "The payload to insert or test, if applicable, for this deterministic statevector mutation.",
+          "description": "The payload to insert or test, if applicable, for this deterministic state vector mutation.",
           "title": "Value"
         }
       },
@@ -8023,7 +8023,7 @@
       "additionalProperties": false,
       "properties": {
         "checkpoint_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for thetemporal anchor.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the temporal anchor.",
           "title": "Checkpoint Id",
           "type": "string"
         },
@@ -8132,7 +8132,7 @@
       "additionalProperties": false,
       "properties": {
         "branch_id": {
-          "description": "A deterministic capability pointer bounding this specific topological divergencein the Latent Scratchpad Trace.",
+          "description": "A deterministic capability pointer bounding this specific topological divergence in the Latent Scratchpad Trace.",
           "minLength": 1,
           "title": "Branch Id",
           "type": "string"

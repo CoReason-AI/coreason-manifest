@@ -32,7 +32,7 @@ class EvidentiaryWarrant(CoreasonBaseModel):
 class ArgumentClaim(CoreasonBaseModel):
     claim_id: str = Field(
         description=(
-            "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this"
+            "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this "
             "specific logical proposition."
         )
     )
@@ -46,7 +46,7 @@ class ArgumentClaim(CoreasonBaseModel):
 class DefeasibleAttack(CoreasonBaseModel):
     attack_id: str = Field(
         description=(
-            "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for thisdirected attack edge."
+            "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this directed attack edge."
         )
     )
     source_claim_id: str = Field(description="The Content Identifier (CID) of the claim mounting the attack.")

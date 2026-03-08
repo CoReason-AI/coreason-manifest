@@ -21,7 +21,7 @@ class ThoughtBranch(CoreasonBaseModel):
     branch_id: str = Field(
         min_length=1,
         description=(
-            "A deterministic capability pointer bounding this specific topological divergence"
+            "A deterministic capability pointer bounding this specific topological divergence "
             "in the Latent Scratchpad Trace."
         ),
     )
@@ -46,8 +46,8 @@ class LatentScratchpadTrace(CoreasonBaseModel):
     )
     explored_branches: list[ThoughtBranch] = Field(
         description=(
-            "All logical paths the agent attempted within this Ephemeral Epistemic"
-            "Quarantine—a volatile workspace where probability waves collapse before being"
+            "All logical paths the agent attempted within this Ephemeral Epistemic "
+            "Quarantine—a volatile workspace where probability waves collapse before being "
             "committed to the immutable ledger."
         )
     )
@@ -57,7 +57,7 @@ class LatentScratchpadTrace(CoreasonBaseModel):
     resolution_branch_id: str | None = Field(
         default=None,
         description=(
-            "The Content Identifier (CID) that successfully resolved the uncertainty and ledto the final output."
+            "The Content Identifier (CID) that successfully resolved the uncertainty and led to the final output."
         ),
     )
     total_latent_tokens: int = Field(

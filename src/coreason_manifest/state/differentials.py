@@ -21,23 +21,23 @@ type PatchOperation = Literal["add", "remove", "replace", "copy", "move", "test"
 
 class StatePatch(CoreasonBaseModel):
     op: PatchOperation = Field(
-        description=("The strict RFC 6902 JSON Patch operation, acting as a deterministic state vectormutation.")
+        description=("The strict RFC 6902 JSON Patch operation, acting as a deterministic state vector mutation.")
     )
     path: str = Field(description="The JSON pointer indicating the exact state vector to mutate deterministically.")
     value: Any | None = Field(
         default=None,
-        description=("The payload to insert or test, if applicable, for this deterministic statevector mutation."),
+        description=("The payload to insert or test, if applicable, for this deterministic state vector mutation."),
     )
 
 
 class StateDiff(CoreasonBaseModel):
     diff_id: str = Field(
         description=(
-            "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for thisstate differential."
+            "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this state differential."
         )
     )
     author_node_id: str = Field(
-        description=("The exact Lineage Watermark of the agent or system that authored this statemutation.")
+        description=("The exact Lineage Watermark of the agent or system that authored this state mutation.")
     )
     lamport_timestamp: int = Field(
         ge=0,
@@ -45,7 +45,7 @@ class StateDiff(CoreasonBaseModel):
     )
     vector_clock: dict[str, int] = Field(
         description=(
-            "Causal history mapping of all known Lineage Watermarks to their latest logical"
+            "Causal history mapping of all known Lineage Watermarks to their latest logical "
             "mutation count at the time of authoring."
         )
     )
@@ -81,13 +81,13 @@ class DefeasibleCascade(CoreasonBaseModel):
     cascade_id: str = Field(
         min_length=1,
         description=(
-            "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this"
+            "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this "
             "automated truth maintenance operation."
         ),
     )
     root_falsified_event_id: str = Field(
         description=(
-            "The source BeliefUpdateEvent or HypothesisGenerationEvent Content Identifier"
+            "The source BeliefUpdateEvent or HypothesisGenerationEvent Content Identifier "
             "(CID) that collapsed and triggered this cascade."
         )
     )
@@ -97,7 +97,7 @@ class DefeasibleCascade(CoreasonBaseModel):
     quarantined_event_ids: list[str] = Field(
         min_length=1,
         description=(
-            "The strict list of downstream event Content Identifiers (CIDs) isolated and"
+            "The strict list of downstream event Content Identifiers (CIDs) isolated and "
             "muted by this cascade to prevent Epistemic Contagion."
         ),
     )
@@ -110,7 +110,7 @@ class DefeasibleCascade(CoreasonBaseModel):
 class MigrationContract(CoreasonBaseModel):
     contract_id: str = Field(
         description=(
-            "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this"
+            "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this "
             "structural migration mapping."
         )
     )
@@ -130,11 +130,11 @@ class MigrationContract(CoreasonBaseModel):
 class RollbackRequest(CoreasonBaseModel):
     request_id: str = Field(
         description=(
-            "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for thecausal rollback operation."
+            "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the causal rollback operation."
         )
     )
     target_event_id: str = Field(
-        description=("The Content Identifier (CID) of the corrupted event in the EpistemicLedger torevert to.")
+        description=("The Content Identifier (CID) of the corrupted event in the EpistemicLedger to revert to.")
     )
     invalidated_node_ids: list[str] = Field(
         default_factory=list,
@@ -149,7 +149,7 @@ class RollbackRequest(CoreasonBaseModel):
 
 class TemporalCheckpoint(CoreasonBaseModel):
     checkpoint_id: str = Field(
-        description=("A Content Identifier (CID) acting as a cryptographic Lineage Watermark for thetemporal anchor.")
+        description=("A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the temporal anchor.")
     )
     ledger_index: int = Field(description="The exact array index in the EpistemicLedger this checkpoint represents.")
     state_hash: str = Field(

@@ -105,7 +105,7 @@ class LineageWatermark(CoreasonBaseModel):
     )
     hop_signatures: dict[str, str] = Field(
         description=(
-            "A dictionary mapping intermediate participant NodeIDs to their deterministicexecution signatures."
+            "A dictionary mapping intermediate participant NodeIDs to their deterministic execution signatures."
         )
     )
     tamper_evident_root: str = Field(
@@ -121,7 +121,7 @@ class MemoryProvenance(CoreasonBaseModel):
         description=("The Content Identifier (CID) of the agent node that extracted this memory.")
     )
     source_event_id: str = Field(
-        description=("The exact event Content Identifier (CID) in the EpistemicLedger that generatedthis fact.")
+        description=("The exact event Content Identifier (CID) in the EpistemicLedger that generated this fact.")
     )
     spatial_anchor: SpatialAnchor | None = Field(
         default=None, description="The physical coordinate matrix where this data was extracted."
@@ -156,7 +156,7 @@ class HomomorphicEncryptionProfile(CoreasonBaseModel):
 class SemanticNode(CoreasonBaseModel):
     node_id: str = Field(
         description=(
-            "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking"
+            "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking "
             "this semantic node to the Merkle-DAG."
         )
     )
@@ -172,7 +172,7 @@ class SemanticNode(CoreasonBaseModel):
     embedding: VectorEmbedding | None = Field(
         default=None,
         description=(
-            "Topologically Bounded Latent Spaces used to calculate exact geometric distance"
+            "Topologically Bounded Latent Spaces used to calculate exact geometric distance "
             "and preserve structural Isometry."
         ),
     )
@@ -209,7 +209,7 @@ class SemanticEdge(CoreasonBaseModel):
     embedding: VectorEmbedding | None = Field(
         default=None,
         description=(
-            "Topologically Bounded Latent Spaces used to calculate exact geometric distance"
+            "Topologically Bounded Latent Spaces used to calculate exact geometric distance "
             "and preserve structural Isometry."
         ),
     )
