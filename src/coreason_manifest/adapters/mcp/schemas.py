@@ -131,6 +131,16 @@ class StdioTransportConfig(CoreasonBaseModel):
     )
 
 
+class HTTPTransportConfig(CoreasonBaseModel):
+    """Configuration for stateless HTTP-based MCP transport."""
+
+    type: Literal["http"] = Field(default="http", description="Type of transport.")
+    uri: HttpUrl = Field(..., description="The HTTP URL endpoint for the stateless connection.")
+    headers: dict[str, str] = Field(
+        default_factory=dict, description="HTTP headers, strictly bounded for zero-trust credentials."
+    )
+
+
 class SSETransportConfig(CoreasonBaseModel):
     """Configuration for remote SSE-based MCP transport."""
 
@@ -139,7 +149,7 @@ class SSETransportConfig(CoreasonBaseModel):
     headers: dict[str, str] = Field(default_factory=dict, description="HTTP headers, e.g., for authentication.")
 
 
-type MCPTransport = StdioTransportConfig | SSETransportConfig
+type MCPTransport = StdioTransportConfig | SSETransportConfig | HTTPTransportConfig
 
 
 class MCPServerConfig(CoreasonBaseModel):
