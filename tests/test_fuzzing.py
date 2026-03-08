@@ -922,7 +922,6 @@ def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> 
             "generator_node_id": st.text(min_size=1),
             "evaluator_node_id": st.text(min_size=1),
             "max_revision_loops": st.integers(min_value=1, max_value=50),
-            "require_multimodal_grounding": st.booleans(),
         }
     ).map(_eval_opt_mapper)
 
@@ -1771,20 +1770,11 @@ def draw_vector_embedding(draw: Any) -> dict[str, Any]:
 
 
 @st.composite
-def draw_multimodal_token_anchor(draw: Any) -> dict[str, Any]:
-    has_span = draw(st.booleans())
-    if has_span:
-        start = draw(st.integers(min_value=0, max_value=1000))
-        end = draw(st.integers(min_value=start + 1, max_value=2000))
-    else:
-        start, end = None, None
-
+def draw_spatial_anchor(draw: Any) -> dict[str, Any]:
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
-                "token_span_start": st.just(start),
-                "token_span_end": st.just(end),
-                "visual_patch_hashes": st.lists(st.from_regex(r"^[a-f0-9]{64}$", fullmatch=True), max_size=5),
+                "page_number": st.one_of(st.none(), st.integers()),
                 "bounding_box": st.one_of(
                     st.none(),
                     st.tuples(
@@ -1796,31 +1786,12 @@ def draw_multimodal_token_anchor(draw: Any) -> dict[str, Any]:
                 ),
                 "block_type": st.one_of(
                     st.none(),
-                    st.sampled_from(["paragraph", "table", "figure", "footnote", "header", "equation"]),
+                    st.sampled_from(["paragraph", "table", "figure", "footnote", "header"]),
                 ),
             }
         )
     )
     return res
-
-
-@st.composite
-def draw_epistemic_compression_sla(draw: Any) -> dict[str, Any]:
-    return {
-        "max_entropy_loss": draw(st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False)),
-        "require_uncertainty_profile": draw(st.booleans()),
-    }
-
-
-@st.composite
-def draw_epistemic_transmutation_task(draw: Any) -> dict[str, Any]:
-    return {
-        "task_id": draw(st.text(min_size=1)),
-        "target_artifact_id": draw(st.text(min_size=1)),
-        "target_modality": draw(st.sampled_from(["text", "tabular", "visual", "symbolic"])),
-        "compression_sla": draw(draw_epistemic_compression_sla()),
-        "execution_cost_budget_cents": draw(st.integers(min_value=0)),
-    }
 
 
 @st.composite
@@ -1871,8 +1842,7 @@ def draw_fhe_profile(draw: Any) -> dict[str, Any]:
                 {
                     "extracted_by": draw_did_string(),
                     "source_event_id": st.text(),
-                    "source_artifact_id": st.one_of(st.none(), st.text()),
-                    "multimodal_anchor": st.one_of(st.none(), draw_multimodal_token_anchor()),
+                    "spatial_anchor": st.one_of(st.none(), draw_spatial_anchor()),
                     "lineage_watermark": st.one_of(st.none(), draw_lineage_watermark()),
                 }
             ),

@@ -19,13 +19,7 @@ from coreason_manifest.adapters.mcp.schemas import (
     SSETransportConfig,
     StdioTransportConfig,
 )
-from coreason_manifest.compute.inference import (
-    ActiveInferenceContract,
-    AnalogicalMappingTask,
-    EpistemicCompressionSLA,
-    EpistemicTransmutationTask,
-    InterventionalCausalTask,
-)
+from coreason_manifest.compute.inference import ActiveInferenceContract, AnalogicalMappingTask, InterventionalCausalTask
 from coreason_manifest.compute.neuromodulation import (
     ActivationSteeringContract,
     CognitiveRoutingDirective,
@@ -182,12 +176,11 @@ from coreason_manifest.state.semantic import (
     LineageWatermark,
     MemoryProvenance,
     MemoryTier,
-    MultimodalArtifact,
-    MultimodalTokenAnchor,
     OntologicalHandshake,
     SalienceProfile,
     SemanticEdge,
     SemanticNode,
+    SpatialAnchor,
     TemporalBounds,
     VectorEmbedding,
 )
@@ -332,11 +325,9 @@ __all__ = [
     "DynamicLayoutTemplate",
     "EmbodiedSensoryVector",
     "EncodingChannel",
-    "EpistemicCompressionSLA",
     "EpistemicLedger",
     "EpistemicPromotionEvent",
     "EpistemicScanner",
-    "EpistemicTransmutationTask",
     "EscalationContract",
     "EscalationIntent",
     "EscrowPolicy",
@@ -402,8 +393,6 @@ __all__ = [
     "MetadataDict",
     "MigrationContract",
     "ModelProfile",
-    "MultimodalArtifact",
-    "MultimodalTokenAnchor",
     "MutationPolicy",
     "NeuralAuditAttestation",
     "NeuroSymbolicHandoff",
@@ -454,6 +443,7 @@ __all__ = [
     "SpanKind",
     "SpanStatusCode",
     "SpanTrace",
+    "SpatialAnchor",
     "SpatialKinematicAction",
     "StateContract",
     "StateDiff",
