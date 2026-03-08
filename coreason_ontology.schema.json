@@ -1776,6 +1776,46 @@
       "title": "BrowserDOMState",
       "type": "object"
     },
+    "BypassReceipt": {
+      "additionalProperties": false,
+      "description": "The Merkle Null-Op preserving the topological chain of custody when an extraction node is intentionally\nskipped.",
+      "properties": {
+        "artifact_event_id": {
+          "description": "The exact genesis CID of the document, ensuring continuity.",
+          "minLength": 1,
+          "title": "Artifact Event Id",
+          "type": "string"
+        },
+        "bypassed_node_id": {
+          "$ref": "#/$defs/NodeID",
+          "description": "The exact extraction step in the DAG that was mathematically starved of compute."
+        },
+        "justification": {
+          "description": "The deterministic reason the orchestrator severed this execution branch.",
+          "enum": [
+            "modality_mismatch",
+            "budget_exhaustion",
+            "sla_timeout"
+          ],
+          "title": "Justification",
+          "type": "string"
+        },
+        "cryptographic_null_hash": {
+          "description": "The SHA-256 null-hash representing the skipped state to satisfy the Epistemic Ledger.",
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Cryptographic Null Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "artifact_event_id",
+        "bypassed_node_id",
+        "justification",
+        "cryptographic_null_hash"
+      ],
+      "title": "BypassReceipt",
+      "type": "object"
+    },
     "CausalAttribution": {
       "additionalProperties": false,
       "properties": {
@@ -3263,6 +3303,60 @@
       "title": "DynamicLayoutTemplate",
       "type": "object"
     },
+    "DynamicRoutingManifest": {
+      "additionalProperties": false,
+      "description": "The Softmax Router Gate dictating the active execution topology and spot compute allocation.",
+      "properties": {
+        "manifest_id": {
+          "description": "The unique Content Identifier (CID) for this routing plan.",
+          "minLength": 1,
+          "title": "Manifest Id",
+          "type": "string"
+        },
+        "artifact_profile": {
+          "$ref": "#/$defs/GlobalSemanticProfile",
+          "description": "The semantic profile governing this route."
+        },
+        "active_subgraphs": {
+          "additionalProperties": {
+            "items": {
+              "$ref": "#/$defs/NodeID"
+            },
+            "type": "array"
+          },
+          "description": "Mapping of specific modalities (e.g., 'tabular_grid') to the explicit lists of worker NodeIDs authorized to execute.",
+          "title": "Active Subgraphs",
+          "type": "object"
+        },
+        "bypassed_steps": {
+          "description": "The declarative list of steps the orchestrator is mandated to skip.",
+          "items": {
+            "$ref": "#/$defs/BypassReceipt"
+          },
+          "title": "Bypassed Steps",
+          "type": "array"
+        },
+        "branch_budgets_microcents": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "description": "The strict economic allocation of compute budget bound to specific nodes.",
+          "propertyNames": {
+            "$ref": "#/$defs/NodeID"
+          },
+          "title": "Branch Budgets Microcents",
+          "type": "object"
+        }
+      },
+      "required": [
+        "manifest_id",
+        "artifact_profile",
+        "active_subgraphs",
+        "branch_budgets_microcents"
+      ],
+      "title": "DynamicRoutingManifest",
+      "type": "object"
+    },
     "EmbodiedSensoryVector": {
       "additionalProperties": false,
       "properties": {
@@ -4505,6 +4599,45 @@
         "global_timeout_seconds"
       ],
       "title": "GlobalGovernance",
+      "type": "object"
+    },
+    "GlobalSemanticProfile": {
+      "additionalProperties": false,
+      "description": "The immutable receipt of Step 1 ingestion acting as a static structural index of the artifact.",
+      "properties": {
+        "artifact_event_id": {
+          "description": "The exact genesis CID of the document entering the routing tier.",
+          "minLength": 1,
+          "title": "Artifact Event Id",
+          "type": "string"
+        },
+        "detected_modalities": {
+          "description": "The strictly typed enum list of physical modalities detected in the artifact.",
+          "items": {
+            "enum": [
+              "text",
+              "raster_image",
+              "vector_graphics",
+              "tabular_grid"
+            ],
+            "type": "string"
+          },
+          "title": "Detected Modalities",
+          "type": "array"
+        },
+        "token_density": {
+          "description": "The mathematical token density used for downstream compute budget allocation.",
+          "minimum": 0,
+          "title": "Token Density",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "artifact_event_id",
+        "detected_modalities",
+        "token_density"
+      ],
+      "title": "GlobalSemanticProfile",
       "type": "object"
     },
     "GovernancePolicy": {

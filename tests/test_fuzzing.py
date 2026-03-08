@@ -63,6 +63,7 @@ from coreason_manifest.tooling import ActionSpace, ToolDefinition
 from coreason_manifest.workflow.auctions import AuctionState, TaskAward
 from coreason_manifest.workflow.envelope import WorkflowEnvelope
 from coreason_manifest.workflow.nodes import AgentNode, AnyNode, CompositeNode, HumanNode, SystemNode
+from coreason_manifest.workflow.routing import DynamicRoutingManifest
 from coreason_manifest.workflow.topologies import AnyTopology, OntologicalHandshake, StateContract
 
 
@@ -3021,6 +3022,60 @@ def draw_neuro_symbolic_handoff(draw: Any) -> dict[str, Any]:
 
 
 mcp_server_config_adapter: TypeAdapter[MCPServerConfig] = TypeAdapter(MCPServerConfig)
+
+
+@st.composite
+def draw_global_semantic_profile(draw: Any) -> dict[str, Any]:
+    return {
+        "artifact_event_id": draw(st.text(min_size=1)),
+        "detected_modalities": draw(
+            st.lists(st.sampled_from(["text", "raster_image", "vector_graphics", "tabular_grid"]), unique=True)
+        ),
+        "token_density": draw(st.integers(min_value=0)),
+    }
+
+
+@st.composite
+def draw_bypass_receipt(draw: Any) -> dict[str, Any]:
+    return {
+        "artifact_event_id": draw(st.text(min_size=1)),
+        "bypassed_node_id": draw(draw_did_string()),
+        "justification": draw(st.sampled_from(["modality_mismatch", "budget_exhaustion", "sla_timeout"])),
+        "cryptographic_null_hash": draw(st.from_regex(r"^[a-f0-9]{64}$", fullmatch=True)),
+    }
+
+
+@st.composite
+def draw_dynamic_routing_manifest(draw: Any) -> dict[str, Any]:
+    profile = draw(draw_global_semantic_profile())
+
+    # Bound the active subgraphs strictly to the detected modalities to pass validation
+    active_subgraphs = {}
+    for mod in profile["detected_modalities"]:
+        if draw(st.booleans()):
+            active_subgraphs[mod] = draw(st.lists(draw_did_string(), min_size=1, max_size=3))
+
+    # Bind the bypass receipt IDs to the profile ID to pass validation
+    bypassed_steps = draw(st.lists(draw_bypass_receipt(), max_size=3))
+    for bypass in bypassed_steps:
+        bypass["artifact_event_id"] = profile["artifact_event_id"]
+
+    return {
+        "manifest_id": draw(st.text(min_size=1)),
+        "artifact_profile": profile,
+        "active_subgraphs": active_subgraphs,
+        "bypassed_steps": bypassed_steps,
+        "branch_budgets_microcents": draw(st.dictionaries(draw_did_string(), st.integers(min_value=0), max_size=5)),
+    }
+
+
+routing_adapter: TypeAdapter[DynamicRoutingManifest] = TypeAdapter(DynamicRoutingManifest)
+
+
+@given(draw_dynamic_routing_manifest())
+def test_dynamic_routing_fuzzing(payload: dict[str, Any]) -> None:
+    parsed = routing_adapter.validate_python(payload)
+    assert isinstance(parsed, DynamicRoutingManifest)
 
 
 @st.composite
