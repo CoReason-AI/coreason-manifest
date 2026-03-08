@@ -466,8 +466,8 @@ __all__ = [
 
 
 def _rebuild_ontology() -> None:
-    from coreason_manifest.workflow.topologies import AnyTopology
     from coreason_manifest.workflow.federation import FederatedDiscoveryProtocol
+    from coreason_manifest.workflow.topologies import AnyTopology
 
     _ = AnyTopology
     _ = FederatedDiscoveryProtocol
