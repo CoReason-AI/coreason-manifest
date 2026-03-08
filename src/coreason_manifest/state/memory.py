@@ -8,7 +8,8 @@
 """AGENT INSTRUCTION: This file maps the immutable memory schemas. This is a STRICTLY EPISTEMIC BOUNDARY.
 These schemas represent the append-only cognitive ledger of the swarm. YOU ARE EXPLICITLY FORBIDDEN from introducing
 mutable state loops, standard CRUD database paradigms, or kinetic execution parameters. All memory must be modeled as an
-append-only, content-addressable Merkle-DAG. Focus purely on cryptographic event sourcing, hardware attestations, and non-monotonic belief assertions and retractions."""
+append-only, content-addressable Merkle-DAG. Focus purely on cryptographic event sourcing, hardware attestations,
+and non-monotonic belief assertions and retractions."""
 
 from typing import Literal, Self
 
@@ -31,7 +32,7 @@ class EvictionPolicy(CoreasonBaseModel):
         description="The mathematical heuristic used to select which semantic memories are retracted or compressed."
     )
     max_retained_tokens: int = Field(
-        gt=0, description="The maximum allowed physical footprint of the active context window."
+        gt=0, description="The strict geometric upper bound of the Epistemic Quarantine's token capacity."
     )
     protected_event_ids: list[str] = Field(
         default_factory=list,
@@ -43,7 +44,8 @@ class EvictionPolicy(CoreasonBaseModel):
 
 
 class EpistemicLedger(CoreasonBaseModel):
-    """The Committed Epistemic Ledger (crystallized truth), completely partitioned from volatile working memory or Epistemic Quarantine."""
+    """The Committed Epistemic Ledger (crystallized truth), completely partitioned from volatile working memory
+    or Epistemic Quarantine."""
 
     history: list[AnyStateEvent] = Field(
         max_length=10000, description="An append-only, cryptographic ledger of state events."
@@ -78,9 +80,14 @@ class EpistemicLedger(CoreasonBaseModel):
 
 
 class TheoryOfMindSnapshot(CoreasonBaseModel):
-    target_agent_id: str = Field(min_length=1, description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the agent whose mind is being modeled.")
+    target_agent_id: str = Field(
+        min_length=1,
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark "
+        "linking this node to the agent whose mind is being modeled.",
+    )
     assumed_shared_beliefs: list[str] = Field(
-        description="A list of Content Identifiers (CIDs) acting as cryptographic Lineage Watermarks that the modeling agent assumes the target already possesses."
+        description="A list of Content Identifiers (CIDs) acting as cryptographic Lineage Watermarks "
+        "that the modeling agent assumes the target already possesses."
     )
     identified_knowledge_gaps: list[str] = Field(
         description="Specific topics or logical premises the target agent is assumed to be missing."
@@ -95,9 +102,12 @@ class TheoryOfMindSnapshot(CoreasonBaseModel):
 class WorkingMemorySnapshot(CoreasonBaseModel):
     """Represents the Epistemic Quarantine, partitioned from the Committed Epistemic Ledger."""
 
-    system_prompt: str = Field(description="The active system prompt guiding the agent's behavior.")
+    system_prompt: str = Field(
+        description="The basal non-monotonic instruction set currently held in Epistemic Quarantine."
+    )
     active_context: dict[str, str] = Field(
-        description="A dictionary representing the active context variables for the agent."
+        description="The ephemeral latent variables and environmental bindings currently active "
+        "in Epistemic Quarantine."
     )
     argumentation: ArgumentGraph | None = Field(
         default=None,
@@ -114,5 +124,7 @@ class WorkingMemorySnapshot(CoreasonBaseModel):
 
 class FederatedStateSnapshot(CoreasonBaseModel):
     topology_id: str | None = Field(
-        default=None, description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the federated topology, if applicable."
+        default=None,
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark "
+        "linking this node to the federated topology, if applicable.",
     )
