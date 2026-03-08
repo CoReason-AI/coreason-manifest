@@ -15,7 +15,12 @@ from coreason_manifest.workflow.nodes import (
     System1Reflex,
     SystemNode,
 )
-from coreason_manifest.workflow.topologies import CouncilTopology, DAGTopology, OntologicalAlignmentPolicy
+from coreason_manifest.workflow.topologies import (
+    CouncilTopology,
+    DAGTopology,
+    EvaluatorOptimizerTopology,
+    OntologicalAlignmentPolicy,
+)
 
 # Strategy for valid NodeIDs (alphanumeric, underscores, hyphens)
 # Also must have a minimum length of 1 based on core primitives.
@@ -122,6 +127,54 @@ def test_system1_reflex_mathematical_bounds(confidence_threshold: float) -> None
     """Test 3: Prove System1Reflex decisively rejects values outside [0.0, 1.0]."""
     with pytest.raises(ValidationError):
         System1Reflex(confidence_threshold=confidence_threshold, allowed_read_only_tools=["tool_a"])
+
+
+def test_evaluator_optimizer_rejects_missing_evaluator_node() -> None:
+    nodes = {"did:web:node_a": SystemNode(description="A"), "did:web:node_b": SystemNode(description="B")}
+
+    with pytest.raises(ValidationError, match="not found in topology nodes"):
+        EvaluatorOptimizerTopology(
+            nodes=nodes,  # type: ignore
+            generator_node_id="did:web:node_a",
+            evaluator_node_id="did:web:rogue_node_c",
+            max_revision_loops=5,
+        )
+
+
+def test_evaluator_optimizer_rejects_missing_generator_node() -> None:
+    nodes = {"did:web:node_a": SystemNode(description="A"), "did:web:node_b": SystemNode(description="B")}
+
+    with pytest.raises(ValidationError, match="not found in topology nodes"):
+        EvaluatorOptimizerTopology(
+            nodes=nodes,  # type: ignore
+            generator_node_id="did:web:rogue_node_c",
+            evaluator_node_id="did:web:node_b",
+            max_revision_loops=5,
+        )
+
+
+def test_evaluator_optimizer_rejects_self_evaluation() -> None:
+    nodes = {"did:web:node_a": SystemNode(description="A")}
+
+    with pytest.raises(ValidationError, match="Generator and Evaluator cannot be the same node"):
+        EvaluatorOptimizerTopology(
+            nodes=nodes,  # type: ignore
+            generator_node_id="did:web:node_a",
+            evaluator_node_id="did:web:node_a",
+            max_revision_loops=5,
+        )
+
+
+def test_evaluator_optimizer_rejects_invalid_loops() -> None:
+    nodes = {"did:web:node_a": SystemNode(description="A"), "did:web:node_b": SystemNode(description="B")}
+
+    with pytest.raises(ValidationError, match="Input should be greater than or equal to 1"):
+        EvaluatorOptimizerTopology(
+            nodes=nodes,  # type: ignore
+            generator_node_id="did:web:node_a",
+            evaluator_node_id="did:web:node_b",
+            max_revision_loops=0,
+        )
 
 
 @given(min_cosine_similarity=st.floats(max_value=-1.000001) | st.floats(min_value=1.000001))
