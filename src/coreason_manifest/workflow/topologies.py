@@ -135,6 +135,10 @@ class BaseTopology(CoreasonBaseModel):
     Base configuration for any workflow topology.
     """
 
+    lifecycle_phase: Literal["draft", "live", "archived"] = Field(
+        default="live",
+        description="The compilation phase of the topology. 'draft' suspends strict Euclidean referential integrity.",
+    )
     nodes: dict[NodeID, AnyNode] = Field(description="Flat registry of all nodes in this topology.")
     shared_state_contract: StateContract | None = Field(
         default=None, description="The schema-on-write contract governing the internal state of this topology."
@@ -166,6 +170,9 @@ class DAGTopology(BaseTopology):
 
     @model_validator(mode="after")
     def verify_edges_exist(self) -> Self:
+        if self.lifecycle_phase != "live":
+            return self
+
         # Step 1: Referential integrity
         for source, target in self.edges:
             if source not in self.nodes:
@@ -246,7 +253,7 @@ class CouncilTopology(BaseTopology):
 
     @model_validator(mode="after")
     def check_adjudicator_id(self) -> Self:
-        if self.adjudicator_id not in self.nodes:
+        if self.lifecycle_phase == "live" and self.adjudicator_id not in self.nodes:
             raise ValueError(f"Adjudicator ID '{self.adjudicator_id}' is not in nodes registry.")
         return self
 
@@ -388,6 +395,9 @@ class EvaluatorOptimizerTopology(BaseTopology):
     @model_validator(mode="after")
     def verify_bipartite_nodes(self) -> Self:
         """Mathematically guarantees both the generator and evaluator exist in the node registry."""
+        if self.lifecycle_phase != "live":
+            return self
+
         if self.generator_node_id not in self.nodes:
             raise ValueError(f"Generator node '{self.generator_node_id}' not found in topology nodes.")
         if self.evaluator_node_id not in self.nodes:

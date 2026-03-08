@@ -780,6 +780,7 @@ def draw_digital_twin_topology_payload(
     return st.fixed_dictionaries(
         {
             "type": st.just("digital_twin"),
+            "lifecycle_phase": st.sampled_from(["draft", "live", "archived"]),
             "nodes": st.dictionaries(
                 draw_did_string(),
                 nodes_strategy,
@@ -806,6 +807,7 @@ def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> 
     dag_strategy = st.fixed_dictionaries(
         {
             "type": st.just("dag"),
+            "lifecycle_phase": st.sampled_from(["draft", "live", "archived"]),
             "nodes": st.dictionaries(
                 draw_did_string(),
                 nodes_strategy,
@@ -844,6 +846,7 @@ def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> 
     council_strategy = st.fixed_dictionaries(
         {
             "type": st.just("council"),
+            "lifecycle_phase": st.sampled_from(["draft", "live", "archived"]),
             "nodes": st.dictionaries(
                 draw_did_string(),
                 nodes_strategy,
@@ -865,6 +868,7 @@ def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> 
     swarm_strategy = st.fixed_dictionaries(
         {
             "type": st.just("swarm"),
+            "lifecycle_phase": st.sampled_from(["draft", "live", "archived"]),
             "nodes": st.dictionaries(
                 draw_did_string(),
                 nodes_strategy,
@@ -884,6 +888,7 @@ def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> 
     smpc_strategy = st.fixed_dictionaries(
         {
             "type": st.just("smpc"),
+            "lifecycle_phase": st.sampled_from(["draft", "live", "archived"]),
             "nodes": st.dictionaries(
                 draw_did_string(),
                 nodes_strategy,
@@ -915,6 +920,7 @@ def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> 
     eval_opt_strategy = st.fixed_dictionaries(
         {
             "type": st.just("evaluator_optimizer"),
+            "lifecycle_phase": st.sampled_from(["draft", "live", "archived"]),
             "nodes": st.dictionaries(
                 draw_did_string(),
                 nodes_strategy,
