@@ -1255,12 +1255,40 @@ def draw_counterfactual_regret_event(draw: Any) -> dict[str, Any]:
 
 
 @st.composite
+def draw_tool_invocation_event(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "type": st.just("tool_invocation"),
+                "event_id": st.text(min_size=1),
+                "timestamp": st.floats(allow_nan=False, allow_infinity=False),
+                "tool_name": st.text(min_size=1),
+                "parameters": st.dictionaries(st.text(), st.one_of(st.text(), st.integers(), st.booleans())),
+                "authorized_budget_cents": st.one_of(st.none(), st.integers(min_value=0)),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
 def _local_draw_any_state_event(draw: Any) -> dict[str, Any]:
     event_type = draw(
         st.sampled_from(
-            ["observation", "belief_update", "system_fault", "hypothesis", "barge_in", "counterfactual_regret"]
+            [
+                "observation",
+                "belief_update",
+                "system_fault",
+                "hypothesis",
+                "barge_in",
+                "counterfactual_regret",
+                "tool_invocation",
+            ]
         )
     )
+
+    if event_type == "tool_invocation":
+        return draw(draw_tool_invocation_event())
 
     if event_type == "barge_in":
         barge_in_res: dict[str, Any] = draw(draw_barge_in_interrupt_event())
@@ -1303,6 +1331,8 @@ def _local_draw_any_state_event(draw: Any) -> dict[str, Any]:
             payload["toolchain_snapshot"] = draw(draw_any_toolchain_state())
         if event_type == "observation" and draw(st.booleans()):
             payload["sensory_trigger"] = draw(draw_embodied_sensory_vector())
+        if event_type == "observation" and draw(st.booleans()):
+            payload["triggering_invocation_id"] = draw(st.one_of(st.none(), st.text(min_size=1)))
         if event_type == "belief_update" and draw(st.booleans()):
             payload["uncertainty_profile"] = draw(draw_cognitive_uncertainty_profile())
         if event_type == "belief_update" and draw(st.booleans()):
@@ -1332,6 +1362,10 @@ def test_anystateevent_routing(payload: dict[str, Any]) -> None:
         from coreason_manifest.state.events import CounterfactualRegretEvent
 
         assert isinstance(parsed, CounterfactualRegretEvent)
+    elif event_type == "tool_invocation":
+        from coreason_manifest.state.events import ToolInvocationEvent
+
+        assert isinstance(parsed, ToolInvocationEvent)
 
 
 @given(st.text())
@@ -1343,6 +1377,7 @@ def test_anystateevent_invalid(invalid_type: str) -> None:
         "hypothesis",
         "barge_in",
         "counterfactual_regret",
+        "tool_invocation",
     ]:
         return
     payload = {"type": invalid_type, "event_id": "test", "timestamp": 123.0}
