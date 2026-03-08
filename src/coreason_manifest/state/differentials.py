@@ -64,6 +64,10 @@ class TruthMaintenancePolicy(CoreasonBaseModel):
             "infected SemanticEdges across the swarm to prevent epistemic contagion."
         ),
     )
+    max_cascade_depth: int = Field(gt=0, description="The absolute recursion depth limit for state retractions.")
+    max_quarantine_blast_radius: int = Field(
+        gt=0, description="The maximum number of nodes allowed to be severed in a single defeasible event."
+    )
 
 
 class DefeasibleCascade(CoreasonBaseModel):

@@ -350,9 +350,9 @@
           "title": "Agent Id",
           "type": "string"
         },
-        "estimated_cost_cents": {
+        "estimated_cost_microcents": {
           "description": "The node's calculated cost to fulfill the task.",
-          "title": "Estimated Cost Cents",
+          "title": "Estimated Cost Microcents",
           "type": "integer"
         },
         "estimated_latency_ms": {
@@ -377,7 +377,7 @@
       },
       "required": [
         "agent_id",
-        "estimated_cost_cents",
+        "estimated_cost_microcents",
         "estimated_latency_ms",
         "estimated_carbon_gco2eq",
         "confidence_score"
@@ -3278,10 +3278,10 @@
     "EscrowPolicy": {
       "additionalProperties": false,
       "properties": {
-        "escrow_locked_cents": {
+        "escrow_locked_microcents": {
           "description": "The strictly typed integer amount of capital cryptographically locked prior to execution.",
           "minimum": 0,
-          "title": "Escrow Locked Cents",
+          "title": "Escrow Locked Microcents",
           "type": "integer"
         },
         "release_condition_metric": {
@@ -3296,7 +3296,7 @@
         }
       },
       "required": [
-        "escrow_locked_cents",
+        "escrow_locked_microcents",
         "release_condition_metric",
         "refund_target_node_id"
       ],
@@ -4055,9 +4055,9 @@
       "additionalProperties": false,
       "description": "Global governance bounds for a swarm executing a workflow envelope.",
       "properties": {
-        "max_budget_cents": {
+        "max_budget_microcents": {
           "description": "The absolute maximum economic cost allowed for the entire swarm lifecycle.",
-          "title": "Max Budget Cents",
+          "title": "Max Budget Microcents",
           "type": "integer"
         },
         "max_global_tokens": {
@@ -4099,7 +4099,7 @@
         }
       },
       "required": [
-        "max_budget_cents",
+        "max_budget_microcents",
         "max_global_tokens",
         "global_timeout_seconds"
       ],
@@ -4256,6 +4256,7 @@
         },
         "hardware_signature_blob": {
           "description": "The base64-encoded hardware quote signed by the silicon manufacturer's master private key.",
+          "maxLength": 8192,
           "title": "Hardware Signature Blob",
           "type": "string"
         }
@@ -4289,6 +4290,7 @@
         },
         "ciphertext_blob": {
           "description": "The base64-encoded homomorphic ciphertext.",
+          "maxLength": 5000000,
           "title": "Ciphertext Blob",
           "type": "string"
         }
@@ -4444,10 +4446,10 @@
           "title": "Target Hypothesis Id",
           "type": "string"
         },
-        "staked_cents": {
+        "staked_microcents": {
           "description": "The volume of capital or compute budget committed to this position.",
           "exclusiveMinimum": 0,
-          "title": "Staked Cents",
+          "title": "Staked Microcents",
           "type": "integer"
         },
         "implied_probability": {
@@ -4461,7 +4463,7 @@
       "required": [
         "agent_id",
         "target_hypothesis_id",
-        "staked_cents",
+        "staked_microcents",
         "implied_probability"
       ],
       "title": "HypothesisStake",
@@ -5453,7 +5455,7 @@
           "additionalProperties": {
             "type": "integer"
           },
-          "description": "The deterministic mapping of agent IDs to their earned compute budget/cents based on Brier scoring.",
+          "description": "The deterministic mapping of agent IDs to their earned compute budget/microcents based on Brier scoring.",
           "title": "Payout Distribution",
           "type": "object"
         }
@@ -6320,10 +6322,10 @@
           "title": "Staking Function",
           "type": "string"
         },
-        "min_liquidity_cents": {
+        "min_liquidity_microcents": {
           "description": "Minimum liquidity required.",
           "minimum": 0,
-          "title": "Min Liquidity Cents",
+          "title": "Min Liquidity Microcents",
           "type": "integer"
         },
         "convergence_delta_threshold": {
@@ -6336,7 +6338,7 @@
       },
       "required": [
         "staking_function",
-        "min_liquidity_cents",
+        "min_liquidity_microcents",
         "convergence_delta_threshold"
       ],
       "title": "PredictionMarketPolicy",
@@ -6358,10 +6360,10 @@
           "type": "string"
         },
         "lmsr_b_parameter": {
-          "description": "The liquidity parameter defining the market depth and max loss for the AMM.",
-          "exclusiveMinimum": 0.0,
+          "description": "The stringified decimal representing the liquidity parameter defining the market depth and max loss for the AMM.",
+          "pattern": "^\\d+\\.\\d+$",
           "title": "Lmsr B Parameter",
-          "type": "number"
+          "type": "string"
         },
         "order_book": {
           "description": "The immutable ledger of all stakes placed by the swarm.",
@@ -6373,9 +6375,9 @@
         },
         "current_market_probabilities": {
           "additionalProperties": {
-            "type": "number"
+            "type": "string"
           },
-          "description": "Mapping of hypothesis IDs to their current LMSR-calculated market price (probability).",
+          "description": "Mapping of hypothesis IDs to their current LMSR-calculated market price (probability) as stringified decimals.",
           "title": "Current Market Probabilities",
           "type": "object"
         }
@@ -8112,15 +8114,15 @@
           "description": "Optional restriction forcing bidders to possess a specific toolset.",
           "title": "Required Action Space Id"
         },
-        "max_budget_cents": {
+        "max_budget_microcents": {
           "description": "The absolute ceiling price the orchestrator is willing to pay.",
-          "title": "Max Budget Cents",
+          "title": "Max Budget Microcents",
           "type": "integer"
         }
       },
       "required": [
         "task_id",
-        "max_budget_cents"
+        "max_budget_microcents"
       ],
       "title": "TaskAnnouncement",
       "type": "object"
@@ -8137,13 +8139,13 @@
           "additionalProperties": {
             "type": "integer"
           },
-          "description": "Strict mapping of agent NodeIDs to their exact fractional payout in cents.",
+          "description": "Strict mapping of agent NodeIDs to their exact fractional payout in microcents.",
           "title": "Awarded Syndicate",
           "type": "object"
         },
-        "cleared_price_cents": {
+        "cleared_price_microcents": {
           "description": "The final cryptographic clearing price.",
-          "title": "Cleared Price Cents",
+          "title": "Cleared Price Microcents",
           "type": "integer"
         },
         "escrow": {
@@ -8162,7 +8164,7 @@
       "required": [
         "task_id",
         "awarded_syndicate",
-        "cleared_price_cents"
+        "cleared_price_microcents"
       ],
       "title": "TaskAward",
       "type": "object"
@@ -8559,11 +8561,25 @@
           "description": "If True, the orchestrator must automatically emit global QuarantineOrders to sever infected SemanticEdges across the swarm to prevent epistemic contagion.",
           "title": "Enforce Cross Agent Quarantine",
           "type": "boolean"
+        },
+        "max_cascade_depth": {
+          "description": "The absolute recursion depth limit for state retractions.",
+          "exclusiveMinimum": 0,
+          "title": "Max Cascade Depth",
+          "type": "integer"
+        },
+        "max_quarantine_blast_radius": {
+          "description": "The maximum number of nodes allowed to be severed in a single defeasible event.",
+          "exclusiveMinimum": 0,
+          "title": "Max Quarantine Blast Radius",
+          "type": "integer"
         }
       },
       "required": [
         "decay_propagation_rate",
-        "epistemic_quarantine_threshold"
+        "epistemic_quarantine_threshold",
+        "max_cascade_depth",
+        "max_quarantine_blast_radius"
       ],
       "title": "TruthMaintenancePolicy",
       "type": "object"
@@ -8571,13 +8587,12 @@
     "VectorEmbedding": {
       "additionalProperties": false,
       "properties": {
-        "vector": {
-          "description": "The raw high-dimensional floating-point array.",
-          "items": {
-            "type": "number"
-          },
-          "title": "Vector",
-          "type": "array"
+        "vector_base64": {
+          "description": "The base64-encoded dense vector array.",
+          "maxLength": 5000000,
+          "pattern": "^[A-Za-z0-9+/]*={0,2}$",
+          "title": "Vector Base64",
+          "type": "string"
         },
         "dimensionality": {
           "description": "The size of the vector array.",
@@ -8591,7 +8606,7 @@
         }
       },
       "required": [
-        "vector",
+        "vector_base64",
         "dimensionality",
         "model_name"
       ],
@@ -8864,11 +8879,13 @@
         },
         "cryptographic_blob": {
           "description": "The base64-encoded succinct cryptographic proof payload.",
+          "maxLength": 5000000,
           "title": "Cryptographic Blob",
           "type": "string"
         },
         "latent_state_commitments": {
           "additionalProperties": {
+            "maxLength": 100,
             "type": "string"
           },
           "description": "Cryptographic bindings (hashes) of intermediate residual stream states to prevent activation spoofing.",

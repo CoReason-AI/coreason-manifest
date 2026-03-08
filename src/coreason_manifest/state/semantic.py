@@ -66,15 +66,11 @@ class OntologicalHandshake(CoreasonBaseModel):
 
 
 class VectorEmbedding(CoreasonBaseModel):
-    vector: list[float] = Field(description="The raw high-dimensional floating-point array.")
+    vector_base64: str = Field(
+        pattern=r"^[A-Za-z0-9+/]*={0,2}$", max_length=5_000_000, description="The base64-encoded dense vector array."
+    )
     dimensionality: int = Field(description="The size of the vector array.")
     model_name: str = Field(description="The provenance of the embedding model used (e.g., 'text-embedding-3-large').")
-
-    @model_validator(mode="after")
-    def verify_dimensionality(self) -> Any:
-        if len(self.vector) != self.dimensionality:
-            raise ValueError(f"Dimensionality mismatch: expected {self.dimensionality}, got {len(self.vector)}")
-        return self
 
 
 class TemporalBounds(CoreasonBaseModel):
@@ -136,7 +132,7 @@ class HomomorphicEncryptionProfile(CoreasonBaseModel):
             "The identifier of the public evaluation key the orchestrator must load to perform math on this payload."
         )
     )
-    ciphertext_blob: str = Field(description="The base64-encoded homomorphic ciphertext.")
+    ciphertext_blob: str = Field(max_length=5_000_000, description="The base64-encoded homomorphic ciphertext.")
 
 
 class SemanticNode(CoreasonBaseModel):

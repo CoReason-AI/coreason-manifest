@@ -8,9 +8,9 @@ def test_task_award_escrow_invalid() -> None:
     payload = {
         "task_id": "test_task",
         "awarded_syndicate": {"did:web:agent_1": 100},
-        "cleared_price_cents": 100,
+        "cleared_price_microcents": 100,
         "escrow": {
-            "escrow_locked_cents": 150,
+            "escrow_locked_microcents": 150,
             "release_condition_metric": "quality_score > 0.9",
             "refund_target_node_id": "did:web:org_wallet_1",
         },

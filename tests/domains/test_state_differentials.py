@@ -5,7 +5,12 @@ from coreason_manifest.state.differentials import DefeasibleCascade, TruthMainte
 
 
 def test_truth_maintenance_policy_valid() -> None:
-    policy = TruthMaintenancePolicy(decay_propagation_rate=0.5, epistemic_quarantine_threshold=0.8)
+    policy = TruthMaintenancePolicy(
+        decay_propagation_rate=0.5,
+        epistemic_quarantine_threshold=0.8,
+        max_cascade_depth=10,
+        max_quarantine_blast_radius=100,
+    )
     assert policy.decay_propagation_rate == 0.5
     assert policy.epistemic_quarantine_threshold == 0.8
     assert policy.enforce_cross_agent_quarantine is False
@@ -13,18 +18,38 @@ def test_truth_maintenance_policy_valid() -> None:
 
 def test_truth_maintenance_policy_invalid_decay() -> None:
     with pytest.raises(ValidationError):
-        TruthMaintenancePolicy(decay_propagation_rate=-0.1, epistemic_quarantine_threshold=0.8)
+        TruthMaintenancePolicy(
+            decay_propagation_rate=-0.1,
+            epistemic_quarantine_threshold=0.8,
+            max_cascade_depth=10,
+            max_quarantine_blast_radius=100,
+        )
 
     with pytest.raises(ValidationError):
-        TruthMaintenancePolicy(decay_propagation_rate=1.1, epistemic_quarantine_threshold=0.8)
+        TruthMaintenancePolicy(
+            decay_propagation_rate=1.1,
+            epistemic_quarantine_threshold=0.8,
+            max_cascade_depth=10,
+            max_quarantine_blast_radius=100,
+        )
 
 
 def test_truth_maintenance_policy_invalid_quarantine_threshold() -> None:
     with pytest.raises(ValidationError):
-        TruthMaintenancePolicy(decay_propagation_rate=0.5, epistemic_quarantine_threshold=-0.1)
+        TruthMaintenancePolicy(
+            decay_propagation_rate=0.5,
+            epistemic_quarantine_threshold=-0.1,
+            max_cascade_depth=10,
+            max_quarantine_blast_radius=100,
+        )
 
     with pytest.raises(ValidationError):
-        TruthMaintenancePolicy(decay_propagation_rate=0.5, epistemic_quarantine_threshold=1.1)
+        TruthMaintenancePolicy(
+            decay_propagation_rate=0.5,
+            epistemic_quarantine_threshold=1.1,
+            max_cascade_depth=10,
+            max_quarantine_blast_radius=100,
+        )
 
 
 def test_defeasible_cascade_valid() -> None:
