@@ -5,7 +5,7 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
-from typing import Any
+from typing import Any, cast
 
 from mcp.server.fastmcp import FastMCP
 from pydantic import TypeAdapter
@@ -23,18 +23,18 @@ for _name in coreason_manifest.__all__:
     # Skip None and the abstract base class itself
     if _obj is None or _obj is CoreasonBaseModel:
         continue
-    try:
-        TypeAdapter(_obj)  # Verifies Pydantic can compile it
-        _AVAILABLE_SCHEMAS[_name] = _obj
-    except Exception:  # noqa: S110
-        # Ignore strings, simple enums, or un-adaptable objects
-        pass
+    import contextlib
+
+    with contextlib.suppress(Exception):
+        _AVAILABLE_SCHEMAS[_name] = TypeAdapter(_obj).json_schema()
+
+_SCHEMA_NAMES = sorted(_AVAILABLE_SCHEMAS.keys())
 
 
 @mcp.tool()
 def list_schemas() -> list[str]:
     """Returns a list of all available schema names exported in the root __init__.py."""
-    return sorted(_AVAILABLE_SCHEMAS.keys())
+    return _SCHEMA_NAMES
 
 
 @mcp.tool()
@@ -47,8 +47,7 @@ def get_schema(schema_name: str) -> dict[str, Any]:
     if schema_name not in _AVAILABLE_SCHEMAS:
         raise ValueError(f"Schema '{schema_name}' not found in the manifest.")
 
-    # Generate JSON schema using Pydantic
-    return TypeAdapter(_AVAILABLE_SCHEMAS[schema_name]).json_schema()
+    return cast("dict[str, Any]", _AVAILABLE_SCHEMAS[schema_name])
 
 
 def _global_error_handler_shield() -> None:
