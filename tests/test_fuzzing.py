@@ -1733,6 +1733,26 @@ def draw_mcp_server_manifest(draw: Any) -> dict[str, Any]:
     return res
 
 
+@st.composite
+def draw_ephemeral_namespace_partition(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "partition_id": st.text(min_size=1),
+                "execution_runtime": st.sampled_from(["wasm32-wasi", "riscv32-zkvm", "bpf"]),
+                "authorized_bytecode_hashes": st.lists(
+                    st.from_regex(r"^[a-f0-9]{64}$", fullmatch=True), min_size=1, max_size=5
+                ),
+                "max_ttl_seconds": st.integers(min_value=1),
+                "max_vram_mb": st.integers(min_value=1),
+                "allow_network_egress": st.booleans(),
+                "allow_subprocess_spawning": st.booleans(),
+            }
+        )
+    )
+    return res
+
+
 @given(
     st.fixed_dictionaries(
         {
@@ -1778,6 +1798,7 @@ def draw_mcp_server_manifest(draw: Any) -> dict[str, Any]:
                 unique_by=lambda t: t["tool_name"] if isinstance(t, dict) and "tool_name" in t else str(t),
             ),
             "mcp_servers": st.lists(draw_mcp_server_manifest(), max_size=10),
+            "ephemeral_partitions": st.lists(draw_ephemeral_namespace_partition(), max_size=5),
         }
     )
 )

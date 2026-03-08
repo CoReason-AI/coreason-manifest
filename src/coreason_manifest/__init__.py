@@ -225,6 +225,7 @@ from coreason_manifest.testing.chaos import ChaosExperiment, FaultInjectionProfi
 from coreason_manifest.testing.red_team import AdversarialSimulationProfile
 from coreason_manifest.tooling.environments import (
     ActionSpace,
+    EphemeralNamespacePartition,
     MCPClientBinding,
     MCPTransport,
     OntologicalSurfaceProjection,
@@ -367,6 +368,7 @@ __all__ = [
     "DynamicRoutingManifest",
     "EmbodiedSensoryVector",
     "EncodingChannel",
+    "EphemeralNamespacePartition",
     "EpistemicCompressionSLA",
     "EpistemicLedger",
     "EpistemicPromotionEvent",
