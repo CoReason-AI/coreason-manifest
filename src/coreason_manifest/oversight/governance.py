@@ -179,5 +179,7 @@ class AnchoringPolicy(CoreasonBaseModel):
     max_semantic_drift: float = Field(
         ge=0.0,
         le=1.0,
-        description="The maximum allowed cosine deviation from the anchor before the orchestrator forces a state rollback.",
+        description=(
+            "The maximum allowed cosine deviation from the anchor before the orchestrator forces a state rollback."
+        )
     )
