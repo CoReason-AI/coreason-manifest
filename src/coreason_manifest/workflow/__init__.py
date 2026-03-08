@@ -55,10 +55,6 @@ from .topologies import (
     SwarmTopology,
 )
 
-CompositeNode.model_rebuild()
-WorkflowEnvelope.model_rebuild()
-
-
 __all__ = [
     "AgentAttestation",
     "AgentBid",
