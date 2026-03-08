@@ -839,6 +839,7 @@
           "agent": "#/$defs/AgentNode",
           "composite": "#/$defs/CompositeNode",
           "human": "#/$defs/HumanNode",
+          "memoized": "#/$defs/MemoizedNode",
           "system": "#/$defs/SystemNode"
         },
         "propertyName": "type"
@@ -855,6 +856,9 @@
         },
         {
           "$ref": "#/$defs/CompositeNode"
+        },
+        {
+          "$ref": "#/$defs/MemoizedNode"
         }
       ]
     },
@@ -6491,6 +6495,63 @@
       "title": "MechanisticAuditContract",
       "type": "object"
     },
+    "MemoizedNode": {
+      "additionalProperties": false,
+      "description": "A passive structural interlock representing a historically executed graph branch.",
+      "properties": {
+        "description": {
+          "description": "A description of the node's function.",
+          "title": "Description",
+          "type": "string"
+        },
+        "intervention_policies": {
+          "description": "A declarative list of proactive oversight hooks bound to this node's lifecycle.",
+          "items": {
+            "$ref": "#/$defs/InterventionPolicy"
+          },
+          "title": "Intervention Policies",
+          "type": "array"
+        },
+        "domain_extensions": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks.",
+          "title": "Domain Extensions"
+        },
+        "type": {
+          "const": "memoized",
+          "default": "memoized",
+          "description": "Discriminator for a Memoized node.",
+          "title": "Type",
+          "type": "string"
+        },
+        "target_topology_hash": {
+          "$ref": "#/$defs/TopologyHash",
+          "description": "The exact SHA-256 fingerprint of the executed topology."
+        },
+        "expected_output_schema": {
+          "additionalProperties": true,
+          "description": "The strictly typed JSON Schema expected from the cached payload.",
+          "title": "Expected Output Schema",
+          "type": "object"
+        }
+      },
+      "required": [
+        "description",
+        "target_topology_hash",
+        "expected_output_schema"
+      ],
+      "title": "MemoizedNode",
+      "type": "object"
+    },
     "MemoryProvenance": {
       "additionalProperties": false,
       "properties": {
@@ -9892,6 +9953,11 @@
       ],
       "title": "ToolInvocationEvent",
       "type": "object"
+    },
+    "TopologyHash": {
+      "description": "A strictly typed SHA-256 hash pointing to a historically executed topological state.",
+      "pattern": "^[a-f0-9]{64}$",
+      "type": "string"
     },
     "TraceExportBatch": {
       "additionalProperties": false,

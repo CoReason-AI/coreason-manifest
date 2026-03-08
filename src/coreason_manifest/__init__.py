@@ -64,6 +64,7 @@ from coreason_manifest.core.primitives import (
     SemanticVersion,
     SystemRole,
     ToolID,
+    TopologyHash,
 )
 from coreason_manifest.oversight import PredictionMarketPolicy
 from coreason_manifest.oversight.adjudication import AdjudicationRubric, AdjudicationVerdict, GradingCriteria
@@ -260,6 +261,7 @@ from coreason_manifest.workflow.nodes import (
     CompositeNode,
     EpistemicScanner,
     HumanNode,
+    MemoizedNode,
     SelfCorrectionPolicy,
     System1Reflex,
     SystemNode,
@@ -287,6 +289,7 @@ from coreason_manifest.workflow.topologies import (
     SMPCTopology,
     StateContract,
     SwarmTopology,
+    compute_topology_hash,
 )
 
 __all__ = [
@@ -447,6 +450,7 @@ __all__ = [
     "MarketResolution",
     "MathematicalNotationExtraction",
     "MechanisticAuditContract",
+    "MemoizedNode",
     "MemoryProvenance",
     "MemoryTier",
     "MetadataDict",
@@ -537,6 +541,7 @@ __all__ = [
     "ToolDefinition",
     "ToolID",
     "ToolInvocationEvent",
+    "TopologyHash",
     "TraceExportBatch",
     "TruthMaintenancePolicy",
     "VectorEmbedding",
@@ -546,6 +551,7 @@ __all__ = [
     "WorkingMemorySnapshot",
     "ZeroKnowledgeProof",
     "align_semantic_manifolds",
+    "compute_topology_hash",
 ]
 
 

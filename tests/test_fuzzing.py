@@ -600,8 +600,24 @@ def draw_system_node_payload(draw: Any) -> dict[str, Any]:
     return payload
 
 
+@st.composite
+def draw_memoized_node_payload(draw: Any) -> dict[str, Any]:
+    payload: dict[str, Any] = {"type": "memoized", "description": draw(st.text())}
+    payload["target_topology_hash"] = draw(st.from_regex(r"^[a-f0-9]{64}$", fullmatch=True))
+    payload["expected_output_schema"] = draw(
+        st.dictionaries(st.text(), st.one_of(st.text(), st.integers(), st.booleans()))
+    )
+    if draw(st.booleans()):
+        payload["intervention_policies"] = draw(st.lists(draw_intervention_policy(), max_size=100))
+    if draw(st.booleans()):
+        payload["domain_extensions"] = draw(draw_domain_extensions())
+    return payload
+
+
 def draw_base_node_payload() -> st.SearchStrategy[dict[str, Any]]:
-    return st.one_of(draw_agent_node_payload(), draw_human_node_payload(), draw_system_node_payload())
+    return st.one_of(
+        draw_agent_node_payload(), draw_human_node_payload(), draw_system_node_payload(), draw_memoized_node_payload()
+    )
 
 
 @st.composite
@@ -1046,11 +1062,15 @@ def test_anynode_routing(payload: dict[str, Any]) -> None:
         assert isinstance(parsed, SystemNode)
     elif node_type == "composite":
         assert isinstance(parsed, CompositeNode)
+    elif node_type == "memoized":
+        from coreason_manifest.workflow.nodes import MemoizedNode
+
+        assert isinstance(parsed, MemoizedNode)
 
 
 @given(st.text())
 def test_anynode_invalid(invalid_type: str) -> None:
-    if invalid_type in ["agent", "human", "system", "composite"]:
+    if invalid_type in ["agent", "human", "system", "composite", "memoized"]:
         return
     payload = {"type": invalid_type, "description": "test"}
     with pytest.raises(ValidationError):

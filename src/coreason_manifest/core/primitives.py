@@ -74,6 +74,14 @@ type ProfileID = Annotated[
     ),
 ]
 
+type TopologyHash = Annotated[
+    str,
+    Field(
+        pattern=r"^[a-f0-9]{64}$",
+        description="A strictly typed SHA-256 hash pointing to a historically executed topological state.",
+    ),
+]
+
 
 class RiskLevel(StrEnum):
     """
