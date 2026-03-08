@@ -10,6 +10,7 @@ These schemas govern how the agent mathematically interacts with external or emb
 FORBIDDEN from writing raw script executors here. All tool definitions must be bounded by strict JSON-RPC schemas,
 permission boundaries, and side-effect profiles."""
 
+import re
 from typing import Any, Literal, Self
 
 from pydantic import Field, model_validator
@@ -38,6 +39,37 @@ class MCPClientBinding(CoreasonBaseModel):
     )
 
 
+class EphemeralNamespacePartition(CoreasonBaseModel):
+    """
+    A hermetically sealed, ephemeral execution partition for dynamic dependency resolution.
+    """
+
+    partition_id: str = Field(min_length=1, description="Unique identifier for this ephemeral partition.")
+    execution_runtime: Literal["wasm32-wasi", "riscv32-zkvm", "bpf"] = Field(
+        description="The strict virtual machine target mandated for dynamic execution."
+    )
+    authorized_bytecode_hashes: list[str] = Field(
+        min_length=1, description="The explicit whitelist of SHA-256 hashes allowed to execute within this partition."
+    )
+    max_ttl_seconds: int = Field(
+        gt=0, description="The absolute temporal guillotine before the orchestrator drops the context."
+    )
+    max_vram_mb: int = Field(gt=0, description="The strict physical VRAM ceiling allocated to this partition.")
+    allow_network_egress: bool = Field(
+        default=False, description="Capability-based flag to allow or mathematically deny network sockets."
+    )
+    allow_subprocess_spawning: bool = Field(
+        default=False, description="Capability-based flag to allow or deny OS-level process spawning."
+    )
+
+    @model_validator(mode="after")
+    def validate_cryptographic_hashes(self) -> Self:
+        for h in self.authorized_bytecode_hashes:
+            if not re.match(r"^[a-f0-9]{64}$", h):
+                raise ValueError(f"Invalid SHA-256 hash in whitelist: {h}")
+        return self
+
+
 class ActionSpace(CoreasonBaseModel):
     """
     A curated environment of tools accessible to an agent or node.
@@ -50,6 +82,10 @@ class ActionSpace(CoreasonBaseModel):
     mcp_servers: list[MCPServerManifest] = Field(
         default_factory=list,
         description="The array of verified external Model Context Protocol servers mounted into this action space.",
+    )
+    ephemeral_partitions: list[EphemeralNamespacePartition] = Field(
+        default_factory=list,
+        description="Hermetically sealed memory boundaries for dynamically resolved scripts and PEFT adapters.",
     )
 
     @model_validator(mode="after")

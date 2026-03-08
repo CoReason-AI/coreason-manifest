@@ -24,6 +24,14 @@
           },
           "title": "Mcp Servers",
           "type": "array"
+        },
+        "ephemeral_partitions": {
+          "description": "Hermetically sealed memory boundaries for dynamically resolved scripts and PEFT adapters.",
+          "items": {
+            "$ref": "#/$defs/EphemeralNamespacePartition"
+          },
+          "title": "Ephemeral Partitions",
+          "type": "array"
         }
       },
       "required": [
@@ -3490,6 +3498,70 @@
         "temporal_duration_ms"
       ],
       "title": "EmbodiedSensoryVector",
+      "type": "object"
+    },
+    "EphemeralNamespacePartition": {
+      "additionalProperties": false,
+      "description": "A hermetically sealed, ephemeral execution partition for dynamic dependency resolution.",
+      "properties": {
+        "partition_id": {
+          "description": "Unique identifier for this ephemeral partition.",
+          "minLength": 1,
+          "title": "Partition Id",
+          "type": "string"
+        },
+        "execution_runtime": {
+          "description": "The strict virtual machine target mandated for dynamic execution.",
+          "enum": [
+            "wasm32-wasi",
+            "riscv32-zkvm",
+            "bpf"
+          ],
+          "title": "Execution Runtime",
+          "type": "string"
+        },
+        "authorized_bytecode_hashes": {
+          "description": "The explicit whitelist of SHA-256 hashes allowed to execute within this partition.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Authorized Bytecode Hashes",
+          "type": "array"
+        },
+        "max_ttl_seconds": {
+          "description": "The absolute temporal guillotine before the orchestrator drops the context.",
+          "exclusiveMinimum": 0,
+          "title": "Max Ttl Seconds",
+          "type": "integer"
+        },
+        "max_vram_mb": {
+          "description": "The strict physical VRAM ceiling allocated to this partition.",
+          "exclusiveMinimum": 0,
+          "title": "Max Vram Mb",
+          "type": "integer"
+        },
+        "allow_network_egress": {
+          "default": false,
+          "description": "Capability-based flag to allow or mathematically deny network sockets.",
+          "title": "Allow Network Egress",
+          "type": "boolean"
+        },
+        "allow_subprocess_spawning": {
+          "default": false,
+          "description": "Capability-based flag to allow or deny OS-level process spawning.",
+          "title": "Allow Subprocess Spawning",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "partition_id",
+        "execution_runtime",
+        "authorized_bytecode_hashes",
+        "max_ttl_seconds",
+        "max_vram_mb"
+      ],
+      "title": "EphemeralNamespacePartition",
       "type": "object"
     },
     "EpistemicCompressionSLA": {

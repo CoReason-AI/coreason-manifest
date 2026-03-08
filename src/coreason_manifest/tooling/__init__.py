@@ -7,6 +7,7 @@
 
 from .environments import (
     ActionSpace,
+    EphemeralNamespacePartition,
     MCPClientBinding,
 )
 from .schemas import (
@@ -20,6 +21,7 @@ from .spatial import BoundingBox, NormalizedCoordinate, SpatialKinematicAction
 __all__ = [
     "ActionSpace",
     "BoundingBox",
+    "EphemeralNamespacePartition",
     "ExecutionSLA",
     "MCPClientBinding",
     "NormalizedCoordinate",
