@@ -35,7 +35,7 @@ class System2RemediationPrompt(CoreasonBaseModel):
     failing_pointers: list[str] = Field(
         min_length=1,
         description="A strictly typed array of RFC 6902 JSON Pointers isolating "
-        "the exact topological coordinate of the hallucination."
+        "the exact topological coordinate of the hallucination.",
     )
     remediation_prompt: str = Field(
         min_length=1, description="The deterministic, non-monotonic natural-language constraint the agent must satisfy."
