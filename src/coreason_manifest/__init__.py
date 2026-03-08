@@ -494,7 +494,7 @@ __all__ = [
 
 def _rebuild_ontology() -> None:
     from coreason_manifest.tooling.environments import OntologicalSurfaceProjection
-    from coreason_manifest.workflow.federation import FederatedDiscoveryProtocol, FederatedCapabilityAttestation
+    from coreason_manifest.workflow.federation import FederatedCapabilityAttestation, FederatedDiscoveryProtocol
     from coreason_manifest.workflow.topologies import AnyTopology
 
     _ = AnyTopology

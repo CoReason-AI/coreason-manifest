@@ -141,11 +141,11 @@ class WorkingMemorySnapshot(CoreasonBaseModel):
         default_factory=list,
         description="Empathetic models of other agents to compress and target outgoing communications.",
     )
-    affordance_projection: "OntologicalSurfaceProjection | None" = Field(
+    affordance_projection: OntologicalSurfaceProjection | None = Field(
         default=None,
         description="The mathematically bounded subgraph of capabilities currently available to the agent.",
     )
-    capability_attestations: list["FederatedCapabilityAttestation"] = Field(
+    capability_attestations: list[FederatedCapabilityAttestation] = Field(
         default_factory=list,
         description="Immutable cryptographic receipts of dynamically discovered external enterprise connectors.",
     )
