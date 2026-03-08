@@ -285,7 +285,7 @@ def draw_active_inference_contract(draw: Any) -> dict[str, Any]:
                 "expected_information_gain": st.floats(
                     min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False
                 ),
-                "execution_cost_budget_cents": st.integers(min_value=0),
+                "execution_cost_budget_microcents": st.integers(min_value=0),
             }
         )
     )
@@ -664,7 +664,7 @@ def draw_prediction_market_policy(draw: Any) -> dict[str, Any]:
         st.fixed_dictionaries(
             {
                 "staking_function": st.sampled_from(["linear", "quadratic"]),
-                "min_liquidity_cents": st.integers(min_value=0),
+                "min_liquidity_microcents": st.integers(min_value=0),
                 "convergence_delta_threshold": st.floats(
                     min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False
                 ),
@@ -711,7 +711,7 @@ def draw_hypothesis_stake(draw: Any) -> dict[str, Any]:
             {
                 "agent_id": draw_did_string(),
                 "target_hypothesis_id": st.text(min_size=1),
-                "staked_cents": st.integers(min_value=1),
+                "staked_microcents": st.integers(min_value=1),
                 "implied_probability": st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False),
             }
         )
@@ -726,9 +726,11 @@ def draw_prediction_market_state(draw: Any) -> dict[str, Any]:
             {
                 "market_id": st.text(min_size=1),
                 "resolution_oracle_condition_id": st.text(),
-                "lmsr_b_parameter": st.floats(min_value=0.01, allow_nan=False, allow_infinity=False),
+                "lmsr_b_parameter": st.from_regex(r"^\d+\.\d+$", fullmatch=True),
                 "order_book": st.lists(draw_hypothesis_stake(), max_size=10),
-                "current_market_probabilities": st.dictionaries(st.text(), st.floats(), max_size=10),
+                "current_market_probabilities": st.dictionaries(
+                    st.text(), st.from_regex(r"^\d+\.\d+$", fullmatch=True), max_size=10
+                ),
             }
         )
     )
@@ -1607,10 +1609,10 @@ semantic_edge_adapter: TypeAdapter[SemanticEdge] = TypeAdapter(SemanticEdge)
 
 @st.composite
 def draw_vector_embedding(draw: Any) -> dict[str, Any]:
-    vec = draw(st.lists(st.floats(allow_nan=False, allow_infinity=False), max_size=100))
+    vec = draw(st.from_regex(r"^[A-Za-z0-9+/]*={0,2}$", fullmatch=True))
     res: dict[str, Any] = {
-        "vector": vec,
-        "dimensionality": len(vec),
+        "vector_base64": vec,
+        "dimensionality": draw(st.integers(min_value=1)),
         "model_name": draw(st.text()),
     }
     return res
@@ -1763,7 +1765,7 @@ def draw_formal_verification_contract(draw: Any) -> dict[str, Any]:
 @given(
     st.fixed_dictionaries(
         {
-            "max_budget_cents": st.integers(min_value=0),
+            "max_budget_microcents": st.integers(min_value=0),
             "max_global_tokens": st.integers(),
             "global_timeout_seconds": st.integers(min_value=0),
             "formal_verification": st.one_of(st.none(), draw_formal_verification_contract()),
@@ -1776,7 +1778,7 @@ def draw_formal_verification_contract(draw: Any) -> dict[str, Any]:
 def test_global_governance_fuzzing(payload: dict[str, Any]) -> None:
     parsed = global_governance_adapter.validate_python(payload)
     assert isinstance(parsed, GlobalGovernance)
-    assert parsed.max_budget_cents == payload["max_budget_cents"]
+    assert parsed.max_budget_microcents == payload["max_budget_microcents"]
 
 
 @given(
@@ -1868,7 +1870,7 @@ def draw_task_announcement(draw: Any) -> dict[str, Any]:
                     st.none(),
                     draw_did_string(),
                 ),
-                "max_budget_cents": st.integers(min_value=0),
+                "max_budget_microcents": st.integers(min_value=0),
             }
         )
     )
@@ -1881,7 +1883,7 @@ def draw_agent_bid(draw: Any) -> dict[str, Any]:
         st.fixed_dictionaries(
             {
                 "agent_id": draw_did_string(),
-                "estimated_cost_cents": st.integers(min_value=0),
+                "estimated_cost_microcents": st.integers(min_value=0),
                 "estimated_latency_ms": st.integers(min_value=0),
                 "estimated_carbon_gco2eq": st.floats(min_value=0.0, allow_nan=False, allow_infinity=False),
                 "confidence_score": st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False),
@@ -1896,7 +1898,7 @@ def draw_escrow_policy(draw: Any, max_escrow: int) -> dict[str, Any]:
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
-                "escrow_locked_cents": st.integers(min_value=0, max_value=max_escrow),
+                "escrow_locked_microcents": st.integers(min_value=0, max_value=max_escrow),
                 "release_condition_metric": st.text(min_size=1),
                 "refund_target_node_id": st.text(
                     min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
@@ -1916,7 +1918,7 @@ def draw_task_award(draw: Any) -> dict[str, Any]:
     award: dict[str, Any] = {
         "task_id": draw(st.text()),
         "awarded_syndicate": {agent_id: price},
-        "cleared_price_cents": price,
+        "cleared_price_microcents": price,
     }
 
     if draw(st.booleans()):
@@ -1953,9 +1955,9 @@ def test_task_award_syndicate_invalid() -> None:
     payload = {
         "task_id": "test_task",
         "awarded_syndicate": {"agent_1": 50, "agent_2": 40},
-        "cleared_price_cents": 100,
+        "cleared_price_microcents": 100,
     }
-    with pytest.raises(ValueError, match="Syndicate allocation sum must exactly equal cleared_price_cents"):
+    with pytest.raises(ValueError, match="Syndicate allocation sum must exactly equal cleared_price_microcents"):
         TypeAdapter(TaskAward).validate_python(payload)
 
 
@@ -2165,6 +2167,8 @@ def draw_truth_maintenance_policy(draw: Any) -> dict[str, Any]:
                     min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False
                 ),
                 "enforce_cross_agent_quarantine": st.booleans(),
+                "max_cascade_depth": st.integers(min_value=1),
+                "max_quarantine_blast_radius": st.integers(min_value=1),
             }
         )
     )
@@ -2435,7 +2439,7 @@ def draw_workflow_envelope(draw: Any) -> dict[str, Any]:
                     st.none(),
                     st.fixed_dictionaries(
                         {
-                            "max_budget_cents": st.integers(min_value=0),
+                            "max_budget_microcents": st.integers(min_value=0),
                             "max_global_tokens": st.integers(),
                             "global_timeout_seconds": st.integers(min_value=0),
                             "formal_verification": st.one_of(st.none(), draw_formal_verification_contract()),

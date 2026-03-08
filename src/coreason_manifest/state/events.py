@@ -14,7 +14,7 @@ and retractions."""
 
 from typing import Annotated, Any, Literal
 
-from pydantic import Field
+from pydantic import Field, StringConstraints
 
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.core.primitives import NodeID
@@ -44,8 +44,10 @@ class ZeroKnowledgeProof(CoreasonBaseModel):
         description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark "
         "linking this node to the public evaluation key."
     )
-    cryptographic_blob: str = Field(description="The base64-encoded succinct cryptographic proof payload.")
-    latent_state_commitments: dict[str, str] = Field(
+    cryptographic_blob: str = Field(
+        max_length=5_000_000, description="The base64-encoded succinct cryptographic proof payload."
+    )
+    latent_state_commitments: dict[str, Annotated[str, StringConstraints(max_length=100)]] = Field(
         default_factory=dict,
         description="Cryptographic bindings (hashes) of intermediate residual stream states "
         "to prevent activation spoofing.",
@@ -92,7 +94,8 @@ class HardwareEnclaveAttestation(CoreasonBaseModel):
         "was physically isolated."
     )
     hardware_signature_blob: str = Field(
-        description="The base64-encoded hardware quote signed by the silicon manufacturer's master private key."
+        max_length=8192,
+        description="The base64-encoded hardware quote signed by the silicon manufacturer's master private key.",
     )
 
 

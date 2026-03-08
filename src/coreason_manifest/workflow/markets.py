@@ -28,7 +28,9 @@ class HypothesisStake(CoreasonBaseModel):
     target_hypothesis_id: Annotated[str, StringConstraints(min_length=1)] = Field(
         description="The exact HypothesisGenerationEvent the agent is betting on."
     )
-    staked_cents: int = Field(gt=0, description="The volume of capital or compute budget committed to this position.")
+    staked_microcents: int = Field(
+        gt=0, description="The volume of capital or compute budget committed to this position."
+    )
     implied_probability: float = Field(ge=0.0, le=1.0, description="The agent's calculated internal confidence score.")
 
 
@@ -42,12 +44,15 @@ class PredictionMarketState(CoreasonBaseModel):
     resolution_oracle_condition_id: str = Field(
         description="The specific FalsificationCondition ID whose execution will trigger the market payout."
     )
-    lmsr_b_parameter: float = Field(
-        gt=0.0, description="The liquidity parameter defining the market depth and max loss for the AMM."
+    lmsr_b_parameter: str = Field(
+        pattern=r"^\d+\.\d+$",
+        description="The stringified decimal representing the liquidity parameter "
+        "defining the market depth and max loss for the AMM.",
     )
     order_book: list[HypothesisStake] = Field(description="The immutable ledger of all stakes placed by the swarm.")
-    current_market_probabilities: dict[str, float] = Field(
-        description="Mapping of hypothesis IDs to their current LMSR-calculated market price (probability)."
+    current_market_probabilities: dict[str, str] = Field(
+        description="Mapping of hypothesis IDs to their current LMSR-calculated market price "
+        "(probability) as stringified decimals."
     )
 
 
@@ -60,6 +65,6 @@ class MarketResolution(CoreasonBaseModel):
     winning_hypothesis_id: str = Field(description="The hypothesis ID that was verified.")
     falsified_hypothesis_ids: list[str] = Field(description="The hypothesis IDs that were falsified.")
     payout_distribution: dict[str, int] = Field(
-        description="The deterministic mapping of agent IDs to their earned compute budget/cents "
+        description="The deterministic mapping of agent IDs to their earned compute budget/microcents "
         "based on Brier scoring."
     )

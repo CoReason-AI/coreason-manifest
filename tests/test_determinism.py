@@ -214,25 +214,25 @@ def test_dlp_determinism() -> None:
 
 
 def test_auction_determinism() -> None:
-    ann = TaskAnnouncement(task_id="t1", max_budget_cents=10000)
+    ann = TaskAnnouncement(task_id="t1", max_budget_microcents=10000)
 
     bid_1 = AgentBid(
         agent_id="did:web:agent_a",
-        estimated_cost_cents=1000,
+        estimated_cost_microcents=1000,
         estimated_latency_ms=100,
         estimated_carbon_gco2eq=10.0,
         confidence_score=0.9,
     )
     bid_2 = AgentBid(
         agent_id="did:web:agent_b",
-        estimated_cost_cents=800,
+        estimated_cost_microcents=800,
         estimated_latency_ms=150,
         estimated_carbon_gco2eq=8.0,
         confidence_score=0.95,
     )
     bid_3 = AgentBid(
         agent_id="did:web:agent_c",
-        estimated_cost_cents=1200,
+        estimated_cost_microcents=1200,
         estimated_latency_ms=90,
         estimated_carbon_gco2eq=12.0,
         confidence_score=0.8,
@@ -369,7 +369,7 @@ def test_epistemic_payload_canonical_hashing() -> None:
 
 
 def test_semantic_memory_determinism() -> None:
-    embedding = VectorEmbedding(vector=[0.1, 0.2, 0.3], dimensionality=3, model_name="test-model")
+    embedding = VectorEmbedding(vector_base64="dGVzdA==", dimensionality=3, model_name="test-model")
     temporal_bounds = TemporalBounds(valid_from=100.0, valid_to=200.0, interval_type="overlaps")
     provenance = MemoryProvenance(extracted_by="did:web:agent_1", source_event_id="event_1")
     salience = SalienceProfile(baseline_importance=0.9, decay_rate=0.1)
