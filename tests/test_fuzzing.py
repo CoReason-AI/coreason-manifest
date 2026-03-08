@@ -2080,6 +2080,39 @@ def draw_task_award(draw: Any) -> dict[str, Any]:
 
 
 @st.composite
+def draw_ontological_surface_projection(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "projection_id": st.text(min_size=1),
+                "action_spaces": st.just([]),  # Keep empty or inject draw_action_space if defined
+                "supported_personas": st.lists(
+                    st.text(min_size=1, alphabet="abcdefghijklmnopqrstuvwxyz0123456789_-"), max_size=5
+                ),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_federated_capability_attestation(draw: Any) -> dict[str, Any]:
+    sla = draw(draw_bilateral_sla())
+    session = draw(draw_secure_sub_session())
+
+    # Satisfy the interlock for RESTRICTED payloads
+    if sla["max_permitted_classification"] == "restricted" and not session["allowed_vault_keys"]:
+        session["allowed_vault_keys"] = ["vault_key_1"]
+
+    return {
+        "attestation_id": draw(st.text(min_size=1)),
+        "target_topology_id": draw(draw_did_string()),
+        "authorized_session": session,
+        "governing_sla": sla,
+    }
+
+
+@st.composite
 def draw_auction_state(draw: Any) -> dict[str, Any]:
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(

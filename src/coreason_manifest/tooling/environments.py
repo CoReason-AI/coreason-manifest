@@ -10,12 +10,13 @@ These schemas govern how the agent mathematically interacts with external or emb
 FORBIDDEN from writing raw script executors here. All tool definitions must be bounded by strict JSON-RPC schemas,
 permission boundaries, and side-effect profiles."""
 
-from typing import Any, Literal
+from typing import Any, Literal, Self
 
 from pydantic import Field, model_validator
 
 from coreason_manifest.adapters.mcp.schemas import MCPServerManifest
 from coreason_manifest.core.base import CoreasonBaseModel
+from coreason_manifest.core.primitives import ProfileID
 from coreason_manifest.tooling.schemas import ToolDefinition
 
 type MCPTransport = Literal["stdio", "sse", "http"]
@@ -56,4 +57,31 @@ class ActionSpace(CoreasonBaseModel):
         tool_names = {t.tool_name for t in self.native_tools}
         if len(tool_names) < len(self.native_tools):
             raise ValueError("Tool names within an ActionSpace must be strictly unique.")
+        return self
+
+
+class OntologicalSurfaceProjection(CoreasonBaseModel):
+    """
+    A mathematically bounded, declarative subgraph of all ToolDefinitions and
+    MCPServerManifests currently valid for the agent's ProfileID.
+    """
+
+    projection_id: str = Field(
+        min_length=1, description="A cryptographic Lineage Watermark bounding this specific capability set."
+    )
+    action_spaces: list[ActionSpace] = Field(
+        default_factory=list, description="The full, machine-readable declaration of accessible tools and MCP servers."
+    )
+    supported_personas: list[ProfileID] = Field(
+        default_factory=list, description="The strict list of foundational model personas available."
+    )
+
+    @model_validator(mode="after")
+    def verify_unique_action_spaces(self) -> Self:
+        space_ids = {space.action_space_id for space in self.action_spaces}
+        if len(space_ids) < len(self.action_spaces):
+            raise ValueError("Action spaces within a projection must have strictly unique action_space_ids.")
+        # Mathematically sort to guarantee deterministic hashing
+        object.__setattr__(self, "action_spaces", sorted(self.action_spaces, key=lambda x: x.action_space_id))
+        object.__setattr__(self, "supported_personas", sorted(self.supported_personas))
         return self

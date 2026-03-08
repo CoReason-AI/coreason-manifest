@@ -91,6 +91,44 @@ def test_workflow_envelope_determinism() -> None:
     assert hash(env1) == hash(env2)
 
 
+def test_affordance_projection_determinism() -> None:
+    from coreason_manifest.tooling.environments import OntologicalSurfaceProjection
+
+    proj1 = OntologicalSurfaceProjection(
+        projection_id="p1", action_spaces=[], supported_personas=["b_persona", "a_persona"]
+    )
+    proj2 = OntologicalSurfaceProjection(
+        projection_id="p1", action_spaces=[], supported_personas=["a_persona", "b_persona"]
+    )
+
+    assert proj1.model_dump_canonical() == proj2.model_dump_canonical()
+    assert hash(proj1) == hash(proj2)
+
+
+def test_federated_attestation_determinism() -> None:
+    from coreason_manifest.core.primitives import DataClassification
+    from coreason_manifest.oversight.dlp import SecureSubSession
+    from coreason_manifest.workflow.envelope import BilateralSLA
+    from coreason_manifest.workflow.federation import FederatedCapabilityAttestation
+
+    sla = BilateralSLA(
+        receiving_tenant_id="tenant_a",
+        max_permitted_classification=DataClassification.RESTRICTED,
+        liability_limit_cents=100,
+    )
+    session = SecureSubSession(session_id="s1", allowed_vault_keys=["key1"], max_ttl_seconds=3600, description="test")
+
+    att1 = FederatedCapabilityAttestation(
+        attestation_id="a1", target_topology_id="did:web:node1", authorized_session=session, governing_sla=sla
+    )
+    att2 = FederatedCapabilityAttestation(
+        attestation_id="a1", target_topology_id="did:web:node1", authorized_session=session, governing_sla=sla
+    )
+
+    assert att1.model_dump_canonical() == att2.model_dump_canonical()
+    assert hash(att1) == hash(att2)
+
+
 def test_lazy_hashing_performance_and_coverage() -> None:
     """
     Prove that CoreasonBaseModel uses lazy hashing.

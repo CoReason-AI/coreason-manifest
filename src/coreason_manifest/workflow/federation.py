@@ -5,11 +5,13 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
-from typing import Literal
+from typing import Literal, Self
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from coreason_manifest.core.base import CoreasonBaseModel
+from coreason_manifest.core.primitives import NodeID
+from coreason_manifest.oversight.dlp import SecureSubSession
 from coreason_manifest.workflow.envelope import BilateralSLA
 
 
@@ -28,3 +30,28 @@ class CrossSwarmHandshake(CoreasonBaseModel):
     status: Literal["proposed", "negotiating", "aligned", "rejected"] = Field(
         default="proposed", description="The current status of the handshake."
     )
+
+
+class FederatedCapabilityAttestation(CoreasonBaseModel):
+    """
+    An immutable cryptographic receipt proving an agent has the legal and structural authority
+    to query a remote resource.
+    """
+
+    attestation_id: str = Field(min_length=1, description="Cryptographic Lineage Watermark for the attestation.")
+    target_topology_id: NodeID = Field(description="The DID of the discovered external data lake/VPC.")
+    authorized_session: SecureSubSession = Field(
+        description="The isolated memory partition granted to the agent for this connection."
+    )
+    governing_sla: BilateralSLA = Field(
+        description="The legal and physical boundary constraints for querying this target."
+    )
+
+    @model_validator(mode="after")
+    def enforce_restricted_vault_locks(self) -> Self:
+        if (
+            self.governing_sla.max_permitted_classification == "restricted"
+            and not self.authorized_session.allowed_vault_keys
+        ):
+            raise ValueError("RESTRICTED federated connections MUST define allowed_vault_keys in the SecureSubSession.")
+        return self

@@ -11,7 +11,11 @@ mutable state loops, standard CRUD database paradigms, or kinetic execution para
 append-only, content-addressable Merkle-DAG. Focus purely on cryptographic event sourcing, hardware attestations,
 and non-monotonic belief assertions and retractions."""
 
-from typing import Literal, Self
+from typing import TYPE_CHECKING, Literal, Self
+
+if TYPE_CHECKING:
+    from coreason_manifest.tooling.environments import OntologicalSurfaceProjection
+    from coreason_manifest.workflow.federation import FederatedCapabilityAttestation
 
 from pydantic import Field, model_validator
 
@@ -136,6 +140,14 @@ class WorkingMemorySnapshot(CoreasonBaseModel):
     theory_of_mind_models: list[TheoryOfMindSnapshot] = Field(
         default_factory=list,
         description="Empathetic models of other agents to compress and target outgoing communications.",
+    )
+    affordance_projection: "OntologicalSurfaceProjection | None" = Field(
+        default=None,
+        description="The mathematically bounded subgraph of capabilities currently available to the agent.",
+    )
+    capability_attestations: list["FederatedCapabilityAttestation"] = Field(
+        default_factory=list,
+        description="Immutable cryptographic receipts of dynamically discovered external enterprise connectors.",
     )
 
 

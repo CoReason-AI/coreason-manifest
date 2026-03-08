@@ -201,7 +201,12 @@ from coreason_manifest.telemetry.schemas import (
 from coreason_manifest.telemetry.ux import AmbientSignal, SuspenseEnvelope
 from coreason_manifest.testing.chaos import ChaosExperiment, FaultInjectionProfile, FaultType, SteadyStateHypothesis
 from coreason_manifest.testing.red_team import AdversarialSimulationProfile
-from coreason_manifest.tooling.environments import ActionSpace, MCPClientBinding, MCPTransport
+from coreason_manifest.tooling.environments import (
+    ActionSpace,
+    MCPClientBinding,
+    MCPTransport,
+    OntologicalSurfaceProjection,
+)
 from coreason_manifest.tooling.schemas import ExecutionSLA, PermissionBoundary, SideEffectProfile, ToolDefinition
 from coreason_manifest.tooling.spatial import BoundingBox, NormalizedCoordinate, SpatialKinematicAction
 from coreason_manifest.workflow import HypothesisStake, MarketResolution, PredictionMarketState
@@ -217,7 +222,11 @@ from coreason_manifest.workflow.auctions import (
 )
 from coreason_manifest.workflow.constraints import InputMapping, OutputMapping
 from coreason_manifest.workflow.envelope import BilateralSLA, PostQuantumSignature, WorkflowEnvelope
-from coreason_manifest.workflow.federation import CrossSwarmHandshake, FederatedDiscoveryProtocol
+from coreason_manifest.workflow.federation import (
+    CrossSwarmHandshake,
+    FederatedCapabilityAttestation,
+    FederatedDiscoveryProtocol,
+)
 from coreason_manifest.workflow.nodes import (
     AgentAttestation,
     AgentNode,
@@ -345,6 +354,7 @@ __all__ = [
     "FalsificationCondition",
     "FaultInjectionProfile",
     "FaultType",
+    "FederatedCapabilityAttestation",
     "FederatedDiscoveryProtocol",
     "FederatedStateSnapshot",
     "FitnessObjective",
@@ -403,6 +413,7 @@ __all__ = [
     "ObservationEvent",
     "OntologicalAlignmentPolicy",
     "OntologicalHandshake",
+    "OntologicalSurfaceProjection",
     "OptimizationDirection",
     "OutputMapping",
     "OverrideIntent",
@@ -482,11 +493,14 @@ __all__ = [
 
 
 def _rebuild_ontology() -> None:
-    from coreason_manifest.workflow.federation import FederatedDiscoveryProtocol
+    from coreason_manifest.tooling.environments import OntologicalSurfaceProjection
+    from coreason_manifest.workflow.federation import FederatedDiscoveryProtocol, FederatedCapabilityAttestation
     from coreason_manifest.workflow.topologies import AnyTopology
 
     _ = AnyTopology
     _ = FederatedDiscoveryProtocol
+    _ = OntologicalSurfaceProjection
+    _ = FederatedCapabilityAttestation
     """
     Dynamically resolves all Pydantic forward references strictly at the end of module initialization.
     This prevents circular import death spirals by guaranteeing the entire ontology is loaded
