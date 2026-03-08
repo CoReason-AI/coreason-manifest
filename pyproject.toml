@@ -24,6 +24,7 @@ dependencies = [
 ]
 
 [project.scripts]
+coreason-validate = "coreason_manifest.cli.validate:main"
 coreason-export = "coreason_manifest.cli.export:main"
 coreason-mcp = "coreason_manifest.cli.mcp_server:main"
 coreason-visualize = "coreason_manifest.cli.visualize:main"

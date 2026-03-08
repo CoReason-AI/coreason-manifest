@@ -32,26 +32,27 @@ def project_envelope_to_markdown(envelope: WorkflowEnvelope) -> str:
         f"- **Type:** `{envelope.topology.type}`",
     ]
 
-    if envelope.topology.architectural_intent:
-        lines.append(f"- **Intent:** {envelope.topology.architectural_intent}")
-    if envelope.topology.justification:
-        lines.append(f"- **Justification:** *{envelope.topology.justification}*")
+    if getattr(envelope.topology, "architectural_intent", None):
+        lines.append(f"- **Intent:** {envelope.topology.architectural_intent}")  # type: ignore[union-attr]
+    if getattr(envelope.topology, "justification", None):
+        lines.append(f"- **Justification:** *{envelope.topology.justification}*")  # type: ignore[union-attr]
 
     lines.append("")
     lines.append("## Node Ledger & Personas")
 
-    for node_id, node in envelope.topology.nodes.items():
-        lines.append(f"### Node: `{node_id}`")
-        lines.append(f"- **Type:** `{node.type}`")
-        lines.append(f"- **Description:** {node.description}")
+    if hasattr(envelope.topology, "nodes"):
+        for node_id, node in getattr(envelope.topology, "nodes", {}).items():
+            lines.append(f"### Node: `{node_id}`")
+            lines.append(f"- **Type:** `{node.type}`")
+            lines.append(f"- **Description:** {node.description}")
 
-        if node.architectural_intent:
-            lines.append(f"- **Intent:** {node.architectural_intent}")
-        if node.justification:
-            lines.append(f"- **Justification:** *{node.justification}*")
+            if getattr(node, "architectural_intent", None):
+                lines.append(f"- **Intent:** {node.architectural_intent}")
+            if getattr(node, "justification", None):
+                lines.append(f"- **Justification:** *{node.justification}*")
 
         if getattr(node, "agent_attestation", None) is not None:
-            attest = node.agent_attestation  # type: ignore
+            attest = node.agent_attestation
             if attest:
                 lines.append(f"- **Lineage Hash:** `{attest.training_lineage_hash}`")
         lines.append("")
