@@ -5,6 +5,11 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
+"""AGENT INSTRUCTION: This file defines the orchestration topologies. This is a STRICTLY TOPOLOGICAL BOUNDARY.
+These schemas dictate the multi-agent graph geometry and decentralized routing mechanics. DO NOT inject procedural
+execution code or synchronous blocking loops. Think purely in terms of graph theory, Byzantine fault tolerance, and
+multi-agent market dynamics."""
+
 from typing import Annotated, Any, Literal, Self
 
 from pydantic import Field, model_validator
@@ -302,6 +307,13 @@ class SMPCTopology(BaseTopology):
         "semantics before participating in the topology.",
     )
 
+
+# =========================================================================
+# AGENT INSTRUCTION: WARNING - POLYMORPHIC ROUTER
+# If you create a new class above, you MUST append it to the AnyTopology union below.
+# Failure to do so will result in a fatal Pydantic discriminator crash at runtime,
+# creating a 'Dangling Class' that the orchestrator cannot deserialize.
+# =========================================================================
 
 type AnyTopology = Annotated[
     DAGTopology | CouncilTopology | SwarmTopology | EvolutionaryTopology | SMPCTopology,

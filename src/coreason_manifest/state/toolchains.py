@@ -5,6 +5,11 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
+"""AGENT INSTRUCTION: This file maps the immutable toolchain schemas. This is a STRICTLY EPISTEMIC BOUNDARY.
+These schemas represent the append-only cognitive ledger of the swarm. YOU ARE EXPLICITLY FORBIDDEN from introducing
+mutable state loops, standard CRUD database paradigms, or downstream business logic. Focus purely on cryptographic
+event sourcing, hardware attestations, and non-monotonic belief updates."""
+
 from typing import Annotated, Literal
 
 from pydantic import Field
@@ -32,6 +37,13 @@ class TerminalBufferState(CoreasonBaseModel):
     stderr_hash: str = Field(description="The SHA-256 hash of the standard error buffer.")
     env_variables_hash: str = Field(description="The SHA-256 hash of the active environment variables matrix.")
 
+
+# =========================================================================
+# AGENT INSTRUCTION: WARNING - POLYMORPHIC ROUTER
+# If you create a new class above, you MUST append it to the AnyToolchainState union below.
+# Failure to do so will result in a fatal Pydantic discriminator crash at runtime,
+# creating a 'Dangling Class' that the orchestrator cannot deserialize.
+# =========================================================================
 
 AnyToolchainState = Annotated[
     BrowserDOMState | TerminalBufferState,

@@ -5,6 +5,13 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
+"""AGENT INSTRUCTION: This file defines model profiles, provisioning requests, and rate cards for cognitive
+compute routing. This is a STRICTLY KINETIC BOUNDARY. These schemas orchestrate probabilistic boundaries, raw
+GPU tensor constraints, and dynamic kinetic dispatch. DO NOT inject persistent state-saving, relational
+database structures, or upstream workflow logic here. All attributes must be strictly mapped to continuous
+hardware constraints and tensor environments.
+"""
+
 from typing import Literal
 
 from pydantic import Field

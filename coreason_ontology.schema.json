@@ -125,6 +125,50 @@
       "title": "ActiveInferenceContract",
       "type": "object"
     },
+    "AdjudicationIntent": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "forced_adjudication",
+          "default": "forced_adjudication",
+          "description": "Discriminator for breaking deadlocks within a CouncilTopology.",
+          "title": "Type",
+          "type": "string"
+        },
+        "deadlocked_claims": {
+          "description": "The conflicting claim IDs or proposals the human must choose between.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 2,
+          "title": "Deadlocked Claims",
+          "type": "array"
+        },
+        "resolution_schema": {
+          "additionalProperties": true,
+          "description": "The strict JSON Schema for the tie-breaking response (usually an enum of the deadlocked_claims).",
+          "title": "Resolution Schema",
+          "type": "object"
+        },
+        "timeout_action": {
+          "description": "The action to take if the oracle is unresponsive.",
+          "enum": [
+            "rollback",
+            "proceed_default",
+            "terminate"
+          ],
+          "title": "Timeout Action",
+          "type": "string"
+        }
+      },
+      "required": [
+        "deadlocked_claims",
+        "resolution_schema",
+        "timeout_action"
+      ],
+      "title": "AdjudicationIntent",
+      "type": "object"
+    },
     "AdjudicationRubric": {
       "additionalProperties": false,
       "description": "Rubric defining multiple criteria and passing threshold for algorithmic adjudication.",
@@ -536,7 +580,7 @@
         "interventional_policy": {
           "anyOf": [
             {
-              "$ref": "#/$defs/coreason_manifest__compute__inference__InterventionalCausalTask"
+              "$ref": "#/$defs/InterventionalCausalTask"
             },
             {
               "type": "null"
@@ -670,6 +714,49 @@
         },
         {
           "$ref": "#/$defs/CompositeNode"
+        }
+      ]
+    },
+    "AnyPanel": {
+      "description": "A discriminated union of presentation UI panels.",
+      "discriminator": {
+        "mapping": {
+          "grammar": "#/$defs/GrammarPanel",
+          "insight_card": "#/$defs/InsightCard"
+        },
+        "propertyName": "type"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/GrammarPanel"
+        },
+        {
+          "$ref": "#/$defs/InsightCard"
+        }
+      ]
+    },
+    "AnyPresentationIntent": {
+      "discriminator": {
+        "mapping": {
+          "drafting": "#/$defs/DraftingIntent",
+          "escalation": "#/$defs/EscalationIntent",
+          "forced_adjudication": "#/$defs/AdjudicationIntent",
+          "informational": "#/$defs/InformationalIntent"
+        },
+        "propertyName": "type"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/InformationalIntent"
+        },
+        {
+          "$ref": "#/$defs/DraftingIntent"
+        },
+        {
+          "$ref": "#/$defs/AdjudicationIntent"
+        },
+        {
+          "$ref": "#/$defs/EscalationIntent"
         }
       ]
     },
@@ -1022,6 +1109,13 @@
       "title": "BargeInInterruptEvent",
       "type": "object"
     },
+    "BaseIntent": {
+      "additionalProperties": false,
+      "description": "Base class for presentation intents.",
+      "properties": {},
+      "title": "BaseIntent",
+      "type": "object"
+    },
     "BaseNode": {
       "additionalProperties": false,
       "description": "Base configuration for any execution node in a topology.",
@@ -1044,6 +1138,22 @@
         "description"
       ],
       "title": "BaseNode",
+      "type": "object"
+    },
+    "BasePanel": {
+      "additionalProperties": false,
+      "description": "Base class for Scientific Visualization panels.",
+      "properties": {
+        "panel_id": {
+          "description": "Unique identifier for the panel.",
+          "title": "Panel Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "panel_id"
+      ],
+      "title": "BasePanel",
       "type": "object"
     },
     "BaseStateEvent": {
@@ -1359,6 +1469,60 @@
       "title": "BoundedInterventionScope",
       "type": "object"
     },
+    "BoundedJSONRPCRequest": {
+      "additionalProperties": false,
+      "description": "Base schema enforcing rigorous JSON-RPC 2.0 boundaries to prevent DoS attacks.",
+      "properties": {
+        "jsonrpc": {
+          "const": "2.0",
+          "description": "JSON-RPC version.",
+          "title": "Jsonrpc",
+          "type": "string"
+        },
+        "method": {
+          "description": "Method to be invoked.",
+          "maxLength": 1000,
+          "title": "Method",
+          "type": "string"
+        },
+        "params": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Payload parameters.",
+          "title": "Params"
+        },
+        "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Unique request identifier.",
+          "title": "Id"
+        }
+      },
+      "required": [
+        "jsonrpc",
+        "method"
+      ],
+      "title": "BoundedJSONRPCRequest",
+      "type": "object"
+    },
     "BoundingBox": {
       "additionalProperties": false,
       "description": "A resolution-independent spatial region.",
@@ -1531,6 +1695,49 @@
         "mitigates"
       ],
       "type": "string"
+    },
+    "ChannelEncoding": {
+      "additionalProperties": false,
+      "description": "The visual property being manipulated.",
+      "properties": {
+        "channel": {
+          "description": "The visual channel the data is mapped to.",
+          "enum": [
+            "x",
+            "y",
+            "color",
+            "size",
+            "opacity",
+            "shape",
+            "text"
+          ],
+          "title": "Channel",
+          "type": "string"
+        },
+        "field": {
+          "description": "The exact column or field name from the dataset.",
+          "title": "Field",
+          "type": "string"
+        },
+        "scale": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ScaleDefinition"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional scale override for this specific channel."
+        }
+      },
+      "required": [
+        "channel",
+        "field"
+      ],
+      "title": "ChannelEncoding",
+      "type": "object"
     },
     "ChaosExperiment": {
       "additionalProperties": false,
@@ -2392,6 +2599,41 @@
       "title": "DefeasibleCascade",
       "type": "object"
     },
+    "DimensionalProjectionContract": {
+      "additionalProperties": false,
+      "properties": {
+        "source_model_name": {
+          "description": "The native embedding model of the origin agent.",
+          "title": "Source Model Name",
+          "type": "string"
+        },
+        "target_model_name": {
+          "description": "The native embedding model of the destination agent.",
+          "title": "Target Model Name",
+          "type": "string"
+        },
+        "projection_matrix_hash": {
+          "description": "The SHA-256 hash of the exact mathematical matrix used to compress or translate the latent dimensions.",
+          "title": "Projection Matrix Hash",
+          "type": "string"
+        },
+        "isometry_preservation_score": {
+          "description": "Mathematical proof (e.g., Earth Mover's Distance preservation) of how accurately relative semantic distances were maintained during projection.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Isometry Preservation Score",
+          "type": "number"
+        }
+      },
+      "required": [
+        "source_model_name",
+        "target_model_name",
+        "projection_matrix_hash",
+        "isometry_preservation_score"
+      ],
+      "title": "DimensionalProjectionContract",
+      "type": "object"
+    },
     "DistributionProfile": {
       "additionalProperties": false,
       "description": "Profile defining a probability density function.",
@@ -2499,6 +2741,46 @@
       "title": "DiversityConstraint",
       "type": "object"
     },
+    "DraftingIntent": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "drafting",
+          "default": "drafting",
+          "description": "Discriminator for requesting specific missing context from a human.",
+          "title": "Type",
+          "type": "string"
+        },
+        "context_prompt": {
+          "description": "The prompt explaining what information the swarm is missing.",
+          "title": "Context Prompt",
+          "type": "string"
+        },
+        "resolution_schema": {
+          "additionalProperties": true,
+          "description": "The strict JSON Schema the human's input must satisfy before the graph can resume.",
+          "title": "Resolution Schema",
+          "type": "object"
+        },
+        "timeout_action": {
+          "description": "The action to take if the human fails to provide the draft.",
+          "enum": [
+            "rollback",
+            "proceed_default",
+            "terminate"
+          ],
+          "title": "Timeout Action",
+          "type": "string"
+        }
+      },
+      "required": [
+        "context_prompt",
+        "resolution_schema",
+        "timeout_action"
+      ],
+      "title": "DraftingIntent",
+      "type": "object"
+    },
     "DynamicConvergenceSLA": {
       "additionalProperties": false,
       "description": "Service Level Agreement defining the mathematical conditions for early termination of a reasoning search.",
@@ -2528,6 +2810,22 @@
         "minimum_reasoning_steps"
       ],
       "title": "DynamicConvergenceSLA",
+      "type": "object"
+    },
+    "DynamicLayoutTemplate": {
+      "additionalProperties": false,
+      "description": "Schema representing a template for dynamic grid layouts.",
+      "properties": {
+        "layout_tstring": {
+          "description": "A Python 3.14 t-string template definition for dynamic UI grid evaluation.",
+          "title": "Layout Tstring",
+          "type": "string"
+        }
+      },
+      "required": [
+        "layout_tstring"
+      ],
+      "title": "DynamicLayoutTemplate",
       "type": "object"
     },
     "EmbodiedSensoryVector": {
@@ -2710,6 +3008,46 @@
         "max_test_time_compute_ms"
       ],
       "title": "EscalationContract",
+      "type": "object"
+    },
+    "EscalationIntent": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "escalation",
+          "default": "escalation",
+          "description": "Discriminator for security or economic boundary overrides.",
+          "title": "Type",
+          "type": "string"
+        },
+        "tripped_rule_id": {
+          "description": "The ID of the Data Loss Prevention (DLP) or Governance rule that blocked execution.",
+          "title": "Tripped Rule Id",
+          "type": "string"
+        },
+        "resolution_schema": {
+          "additionalProperties": true,
+          "description": "The strict JSON Schema requiring an explicit cryptographic sign-off or justification string to bypass the breaker.",
+          "title": "Resolution Schema",
+          "type": "object"
+        },
+        "timeout_action": {
+          "description": "The default action is usually terminate or rollback for security escalations.",
+          "enum": [
+            "rollback",
+            "proceed_default",
+            "terminate"
+          ],
+          "title": "Timeout Action",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tripped_rule_id",
+        "resolution_schema",
+        "timeout_action"
+      ],
+      "title": "EscalationIntent",
       "type": "object"
     },
     "EscrowPolicy": {
@@ -3097,6 +3435,55 @@
       "title": "ExecutionSpan",
       "type": "object"
     },
+    "FYIIntent": {
+      "additionalProperties": false,
+      "description": "Intent indicating the presentation is informational only.",
+      "properties": {
+        "type": {
+          "const": "fyi",
+          "default": "fyi",
+          "description": "Discriminator for an FYI intent.",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "title": "FYIIntent",
+      "type": "object"
+    },
+    "FacetMatrix": {
+      "additionalProperties": false,
+      "description": "Optional small-multiple faceting layout.",
+      "properties": {
+        "row_field": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The dataset field used to split the chart into rows.",
+          "title": "Row Field"
+        },
+        "column_field": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The dataset field used to split the chart into columns.",
+          "title": "Column Field"
+        }
+      },
+      "title": "FacetMatrix",
+      "type": "object"
+    },
     "FallbackSLA": {
       "additionalProperties": false,
       "description": "SLA defining bounds on human intervention delays.",
@@ -3455,6 +3842,76 @@
       "title": "GradingCriteria",
       "type": "object"
     },
+    "GrammarPanel": {
+      "additionalProperties": false,
+      "description": "Panel representing a deterministic, declarative visual grammar.",
+      "properties": {
+        "panel_id": {
+          "description": "The unique identifier for this UI panel.",
+          "title": "Panel Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "grammar",
+          "default": "grammar",
+          "description": "Discriminator for Grammar of Graphics charts.",
+          "title": "Type",
+          "type": "string"
+        },
+        "title": {
+          "description": "The human-readable title of the chart.",
+          "title": "Title",
+          "type": "string"
+        },
+        "data_source_id": {
+          "description": "The cryptographic pointer to the dataset in the EpistemicLedger.",
+          "title": "Data Source Id",
+          "type": "string"
+        },
+        "mark": {
+          "description": "The geometric shape used to represent the data.",
+          "enum": [
+            "point",
+            "line",
+            "area",
+            "bar",
+            "rect",
+            "arc"
+          ],
+          "title": "Mark",
+          "type": "string"
+        },
+        "encodings": {
+          "description": "The mapping of data fields to visual channels.",
+          "items": {
+            "$ref": "#/$defs/ChannelEncoding"
+          },
+          "title": "Encodings",
+          "type": "array"
+        },
+        "facet": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FacetMatrix"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional faceting matrix for small multiples."
+        }
+      },
+      "required": [
+        "panel_id",
+        "title",
+        "data_source_id",
+        "mark",
+        "encodings"
+      ],
+      "title": "GrammarPanel",
+      "type": "object"
+    },
     "HardwareEnclaveAttestation": {
       "additionalProperties": false,
       "properties": {
@@ -3723,6 +4180,39 @@
       "title": "InformationFlowPolicy",
       "type": "object"
     },
+    "InformationalIntent": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "informational",
+          "default": "informational",
+          "description": "Discriminator for read-only informational handoffs.",
+          "title": "Type",
+          "type": "string"
+        },
+        "message": {
+          "description": "The context or summary to display to the human operator.",
+          "title": "Message",
+          "type": "string"
+        },
+        "timeout_action": {
+          "description": "The orchestrator's automatic fallback if the human does not acknowledge the intent in time.",
+          "enum": [
+            "rollback",
+            "proceed_default",
+            "terminate"
+          ],
+          "title": "Timeout Action",
+          "type": "string"
+        }
+      },
+      "required": [
+        "message",
+        "timeout_action"
+      ],
+      "title": "InformationalIntent",
+      "type": "object"
+    },
     "InputMapping": {
       "additionalProperties": false,
       "description": "Dictates how keys from a parent's shared_state_contract map to a nested topology's state.",
@@ -3743,6 +4233,41 @@
         "child_key"
       ],
       "title": "InputMapping",
+      "type": "object"
+    },
+    "InsightCard": {
+      "additionalProperties": false,
+      "description": "Panel displaying a semantic text summary.",
+      "properties": {
+        "panel_id": {
+          "description": "The unique identifier for this UI panel.",
+          "title": "Panel Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "insight_card",
+          "default": "insight_card",
+          "description": "Discriminator for markdown insight cards.",
+          "title": "Type",
+          "type": "string"
+        },
+        "title": {
+          "description": "The human-readable title of the insight.",
+          "title": "Title",
+          "type": "string"
+        },
+        "markdown_content": {
+          "description": "The markdown formatted text content.",
+          "title": "Markdown Content",
+          "type": "string"
+        }
+      },
+      "required": [
+        "panel_id",
+        "title",
+        "markdown_content"
+      ],
+      "title": "InsightCard",
       "type": "object"
     },
     "InterventionPolicy": {
@@ -3906,6 +4431,126 @@
         "feedback"
       ],
       "title": "InterventionVerdict",
+      "type": "object"
+    },
+    "InterventionalCausalTask": {
+      "additionalProperties": false,
+      "properties": {
+        "task_id": {
+          "description": "Unique identifier for this causal intervention.",
+          "minLength": 1,
+          "title": "Task Id",
+          "type": "string"
+        },
+        "target_hypothesis_id": {
+          "description": "The hypothesis containing the SCM being tested.",
+          "title": "Target Hypothesis Id",
+          "type": "string"
+        },
+        "intervention_variable": {
+          "description": "The specific node $X$ in the SCM the agent is forcing to a specific state.",
+          "title": "Intervention Variable",
+          "type": "string"
+        },
+        "do_operator_state": {
+          "description": "The exact value or condition forced upon the intervention_variable, isolating it from its historical causes.",
+          "title": "Do Operator State",
+          "type": "string"
+        },
+        "expected_causal_information_gain": {
+          "description": "The mathematical proof of entropy reduction yielded specifically by breaking the confounding back-doors.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Expected Causal Information Gain",
+          "type": "number"
+        },
+        "execution_cost_budget_cents": {
+          "description": "The maximum economic expenditure authorized to run this specific causal intervention.",
+          "minimum": 0,
+          "title": "Execution Cost Budget Cents",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "task_id",
+        "target_hypothesis_id",
+        "intervention_variable",
+        "do_operator_state",
+        "expected_causal_information_gain",
+        "execution_cost_budget_cents"
+      ],
+      "title": "InterventionalCausalTask",
+      "type": "object"
+    },
+    "JSONRPCError": {
+      "additionalProperties": false,
+      "description": "JSON-RPC 2.0 Error object.",
+      "properties": {
+        "code": {
+          "description": "A Number that indicates the error type that occurred.",
+          "title": "Code",
+          "type": "integer"
+        },
+        "message": {
+          "description": "A String providing a short description of the error.",
+          "title": "Message",
+          "type": "string"
+        },
+        "data": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A Primitive or Structured value that contains additional information about the error.",
+          "title": "Data"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "title": "JSONRPCError",
+      "type": "object"
+    },
+    "JSONRPCErrorResponse": {
+      "additionalProperties": false,
+      "description": "JSON-RPC 2.0 Error Response object.",
+      "properties": {
+        "jsonrpc": {
+          "const": "2.0",
+          "description": "JSON-RPC version.",
+          "title": "Jsonrpc",
+          "type": "string"
+        },
+        "error": {
+          "$ref": "#/$defs/JSONRPCError",
+          "description": "The error object."
+        },
+        "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The request ID that this error corresponds to.",
+          "title": "Id"
+        }
+      },
+      "required": [
+        "jsonrpc",
+        "error"
+      ],
+      "title": "JSONRPCErrorResponse",
       "type": "object"
     },
     "LatentScratchpadTrace": {
@@ -4174,7 +4819,7 @@
           "type": "string"
         },
         "transport_type": {
-          "$ref": "#/$defs/MCPTransport",
+          "$ref": "#/$defs/coreason_manifest__tooling__environments__MCPTransport",
           "description": "The transport protocol used to communicate with the MCP server."
         },
         "allowed_mcp_tools": {
@@ -4199,6 +4844,179 @@
         "transport_type"
       ],
       "title": "MCPClientBinding",
+      "type": "object"
+    },
+    "MCPClientMessage": {
+      "additionalProperties": false,
+      "description": "Strict JSON-RPC 2.0 structure for MCP client messages.",
+      "properties": {
+        "jsonrpc": {
+          "const": "2.0",
+          "description": "JSON-RPC version.",
+          "title": "Jsonrpc",
+          "type": "string"
+        },
+        "method": {
+          "const": "mcp.ui.emit_intent",
+          "description": "Method for intent bubbling.",
+          "title": "Method",
+          "type": "string"
+        },
+        "params": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Payload parameters.",
+          "title": "Params"
+        },
+        "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Unique request identifier.",
+          "title": "Id"
+        }
+      },
+      "required": [
+        "jsonrpc",
+        "method"
+      ],
+      "title": "MCPClientMessage",
+      "type": "object"
+    },
+    "MCPPromptRef": {
+      "additionalProperties": false,
+      "description": "A dynamic reference to an MCP-provided prompt template.",
+      "properties": {
+        "server_id": {
+          "description": "The ID of the MCP server providing this prompt.",
+          "title": "Server Id",
+          "type": "string"
+        },
+        "prompt_name": {
+          "description": "The name of the prompt template.",
+          "title": "Prompt Name",
+          "type": "string"
+        },
+        "arguments": {
+          "additionalProperties": true,
+          "description": "Arguments to fill the prompt template.",
+          "title": "Arguments",
+          "type": "object"
+        },
+        "fallback_persona": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A fallback persona if the prompt fails to load.",
+          "title": "Fallback Persona"
+        },
+        "prompt_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cryptographic hash for prompt integrity verification.",
+          "title": "Prompt Hash"
+        }
+      },
+      "required": [
+        "server_id",
+        "prompt_name"
+      ],
+      "title": "MCPPromptRef",
+      "type": "object"
+    },
+    "MCPResourceList": {
+      "additionalProperties": false,
+      "description": "A collection of Semantic Memory resource URIs provided by a specific MCP server.",
+      "properties": {
+        "server_id": {
+          "description": "The ID of the MCP server providing these resources.",
+          "title": "Server Id",
+          "type": "string"
+        },
+        "uris": {
+          "description": "List of resource URIs available to the agent.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Uris",
+          "type": "array"
+        }
+      },
+      "required": [
+        "server_id"
+      ],
+      "title": "MCPResourceList",
+      "type": "object"
+    },
+    "MCPServerConfig": {
+      "additionalProperties": false,
+      "description": "Configuration definition for connecting to an MCP Server.",
+      "properties": {
+        "server_id": {
+          "description": "A unique identifier for this server instance.",
+          "title": "Server Id",
+          "type": "string"
+        },
+        "transport": {
+          "description": "Polymorphic transport configuration.",
+          "discriminator": {
+            "mapping": {
+              "sse": "#/$defs/coreason_manifest__adapters__mcp__schemas__MCPTransport",
+              "stdio": "#/$defs/coreason_manifest__adapters__mcp__schemas__MCPTransport"
+            },
+            "propertyName": "type"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/coreason_manifest__adapters__mcp__schemas__MCPTransport"
+            }
+          ],
+          "title": "Transport"
+        },
+        "required_capabilities": {
+          "description": "A list of capabilities required from the MCP server.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Required Capabilities",
+          "type": "array"
+        }
+      },
+      "required": [
+        "server_id",
+        "transport"
+      ],
+      "title": "MCPServerConfig",
       "type": "object"
     },
     "MCPServerManifest": {
@@ -4246,13 +5064,36 @@
       "title": "MCPServerManifest",
       "type": "object"
     },
-    "MCPTransport": {
-      "enum": [
-        "stdio",
-        "sse",
-        "http"
+    "MacroGrid": {
+      "additionalProperties": false,
+      "description": "A layout matrix containing a list of panels.",
+      "properties": {
+        "layout_matrix": {
+          "description": "A matrix defining the layout structure, using panel IDs.",
+          "items": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "title": "Layout Matrix",
+          "type": "array"
+        },
+        "panels": {
+          "description": "A list of panels included in the grid.",
+          "items": {
+            "$ref": "#/$defs/AnyPanel"
+          },
+          "title": "Panels",
+          "type": "array"
+        }
+      },
+      "required": [
+        "layout_matrix",
+        "panels"
       ],
-      "type": "string"
+      "title": "MacroGrid",
+      "type": "object"
     },
     "MarketResolution": {
       "additionalProperties": false,
@@ -4833,6 +5674,64 @@
       "title": "OntologicalAlignmentPolicy",
       "type": "object"
     },
+    "OntologicalHandshake": {
+      "additionalProperties": false,
+      "properties": {
+        "handshake_id": {
+          "description": "The unique identifier for the handshake.",
+          "minLength": 1,
+          "title": "Handshake Id",
+          "type": "string"
+        },
+        "participant_node_ids": {
+          "description": "The agents establishing semantic alignment.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 2,
+          "title": "Participant Node Ids",
+          "type": "array"
+        },
+        "measured_cosine_similarity": {
+          "description": "The calculated geometric alignment of the agents' core definitions.",
+          "maximum": 1.0,
+          "minimum": -1.0,
+          "title": "Measured Cosine Similarity",
+          "type": "number"
+        },
+        "alignment_status": {
+          "description": "The final verdict of the handshake protocol.",
+          "enum": [
+            "aligned",
+            "projected",
+            "fallback_triggered",
+            "incommensurable"
+          ],
+          "title": "Alignment Status",
+          "type": "string"
+        },
+        "applied_projection": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DimensionalProjectionContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The projection applied if the agents natively used different embedding dimensionalities."
+        }
+      },
+      "required": [
+        "handshake_id",
+        "participant_node_ids",
+        "measured_cosine_similarity",
+        "alignment_status"
+      ],
+      "title": "OntologicalHandshake",
+      "type": "object"
+    },
     "OptimizationDirection": {
       "enum": [
         "maximize",
@@ -5167,6 +6066,26 @@
         "current_market_probabilities"
       ],
       "title": "PredictionMarketState",
+      "type": "object"
+    },
+    "PresentationEnvelope": {
+      "additionalProperties": false,
+      "description": "An envelope wrapping a grid presentation and its intent.",
+      "properties": {
+        "intent": {
+          "$ref": "#/$defs/AnyPresentationIntent",
+          "description": "The reason an agent is presenting this data to a human."
+        },
+        "grid": {
+          "$ref": "#/$defs/MacroGrid",
+          "description": "The grid of panels being presented."
+        }
+      },
+      "required": [
+        "intent",
+        "grid"
+      ],
+      "title": "PresentationEnvelope",
       "type": "object"
     },
     "ProcessRewardContract": {
@@ -5605,6 +6524,40 @@
       "title": "SMPCTopology",
       "type": "object"
     },
+    "SSETransportConfig": {
+      "additionalProperties": false,
+      "description": "Configuration for remote SSE-based MCP transport.",
+      "properties": {
+        "type": {
+          "const": "sse",
+          "default": "sse",
+          "description": "Type of transport.",
+          "title": "Type",
+          "type": "string"
+        },
+        "uri": {
+          "description": "The HTTP URL endpoint for the SSE connection.",
+          "format": "uri",
+          "maxLength": 2083,
+          "minLength": 1,
+          "title": "Uri",
+          "type": "string"
+        },
+        "headers": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "HTTP headers, e.g., for authentication.",
+          "title": "Headers",
+          "type": "object"
+        }
+      },
+      "required": [
+        "uri"
+      ],
+      "title": "SSETransportConfig",
+      "type": "object"
+    },
     "SaeFeatureActivation": {
       "additionalProperties": false,
       "properties": {
@@ -5747,6 +6700,55 @@
         "trigger_quarantine"
       ],
       "type": "string"
+    },
+    "ScaleDefinition": {
+      "additionalProperties": false,
+      "description": "The mathematical mapping constraint for a channel.",
+      "properties": {
+        "type": {
+          "description": "The mathematical scale mapping data to pixels.",
+          "enum": [
+            "linear",
+            "log",
+            "time",
+            "ordinal",
+            "nominal"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "domain_min": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The optional minimum bound of the scale domain.",
+          "title": "Domain Min"
+        },
+        "domain_max": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The optional maximum bound of the scale domain.",
+          "title": "Domain Max"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "ScaleDefinition",
+      "type": "object"
     },
     "SecureSubSession": {
       "additionalProperties": false,
@@ -6419,6 +7421,45 @@
         "path"
       ],
       "title": "StatePatch",
+      "type": "object"
+    },
+    "StdioTransportConfig": {
+      "additionalProperties": false,
+      "description": "Configuration for local Stdio-based MCP transport.",
+      "properties": {
+        "type": {
+          "const": "stdio",
+          "default": "stdio",
+          "description": "Type of transport.",
+          "title": "Type",
+          "type": "string"
+        },
+        "command": {
+          "description": "The command executable to run (e.g., 'node', 'python').",
+          "title": "Command",
+          "type": "string"
+        },
+        "args": {
+          "description": "List of arguments to pass to the command.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Args",
+          "type": "array"
+        },
+        "env_vars": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Environment variables required by the transport.",
+          "title": "Env Vars",
+          "type": "object"
+        }
+      },
+      "required": [
+        "command"
+      ],
+      "title": "StdioTransportConfig",
       "type": "object"
     },
     "SteadyStateHypothesis": {
@@ -7424,54 +8465,15 @@
       "title": "ZeroKnowledgeProof",
       "type": "object"
     },
-    "coreason_manifest__compute__inference__InterventionalCausalTask": {
-      "additionalProperties": false,
-      "properties": {
-        "task_id": {
-          "description": "Unique identifier for this causal intervention.",
-          "minLength": 1,
-          "title": "Task Id",
-          "type": "string"
+    "coreason_manifest__adapters__mcp__schemas__MCPTransport": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/StdioTransportConfig"
         },
-        "target_hypothesis_id": {
-          "description": "The hypothesis containing the SCM being tested.",
-          "title": "Target Hypothesis Id",
-          "type": "string"
-        },
-        "intervention_variable": {
-          "description": "The specific node $X$ in the SCM the agent is forcing to a specific state.",
-          "title": "Intervention Variable",
-          "type": "string"
-        },
-        "do_operator_state": {
-          "description": "The exact value or condition forced upon the intervention_variable, isolating it from its historical causes.",
-          "title": "Do Operator State",
-          "type": "string"
-        },
-        "expected_causal_information_gain": {
-          "description": "The mathematical proof of entropy reduction yielded specifically by breaking the confounding back-doors.",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "Expected Causal Information Gain",
-          "type": "number"
-        },
-        "execution_cost_budget_cents": {
-          "description": "The maximum economic expenditure authorized to run this specific causal intervention.",
-          "minimum": 0,
-          "title": "Execution Cost Budget Cents",
-          "type": "integer"
+        {
+          "$ref": "#/$defs/SSETransportConfig"
         }
-      },
-      "required": [
-        "task_id",
-        "target_hypothesis_id",
-        "intervention_variable",
-        "do_operator_state",
-        "expected_causal_information_gain",
-        "execution_cost_budget_cents"
-      ],
-      "title": "InterventionalCausalTask",
-      "type": "object"
+      ]
     },
     "coreason_manifest__core__primitives__DataClassification": {
       "description": "Standardized Information Flow Control (IFC) clearance levels.",
@@ -7494,215 +8496,15 @@
       ],
       "type": "string"
     },
-    "coreason_manifest__state__events__InterventionalCausalTask": {
-      "additionalProperties": false,
-      "description": "A rigid do-calculus intervention forcing the agent to simulate a reality manipulation.",
-      "properties": {
-        "task_id": {
-          "description": "Unique identifier for this causal intervention.",
-          "title": "Task Id",
-          "type": "string"
-        },
-        "target_variable": {
-          "description": "The dependent variable Y being measured.",
-          "title": "Target Variable",
-          "type": "string"
-        },
-        "do_operator_interventions": {
-          "additionalProperties": true,
-          "description": "The strict do(X=x) topological amputations applied to the causal graph.",
-          "title": "Do Operator Interventions",
-          "type": "object"
-        },
-        "expected_information_gain": {
-          "description": "The calculated certainty bounded [0.0, 1.0] expected from this test.",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "Expected Information Gain",
-          "type": "number"
-        }
-      },
-      "required": [
-        "task_id",
-        "target_variable",
-        "do_operator_interventions",
-        "expected_information_gain"
+    "coreason_manifest__tooling__environments__MCPTransport": {
+      "enum": [
+        "stdio",
+        "sse",
+        "http"
       ],
-      "title": "InterventionalCausalTask",
-      "type": "object"
-    },
-    "coreason_manifest__state__semantic__DimensionalProjectionContract": {
-      "additionalProperties": false,
-      "properties": {
-        "source_model_name": {
-          "description": "The native embedding model of the origin agent.",
-          "title": "Source Model Name",
-          "type": "string"
-        },
-        "target_model_name": {
-          "description": "The native embedding model of the destination agent.",
-          "title": "Target Model Name",
-          "type": "string"
-        },
-        "projection_matrix_hash": {
-          "description": "The SHA-256 hash of the exact mathematical matrix used to compress or translate the latent dimensions.",
-          "title": "Projection Matrix Hash",
-          "type": "string"
-        },
-        "isometry_preservation_score": {
-          "description": "Mathematical proof (e.g., Earth Mover's Distance preservation) of how accurately relative semantic distances were maintained during projection.",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "Isometry Preservation Score",
-          "type": "number"
-        }
-      },
-      "required": [
-        "source_model_name",
-        "target_model_name",
-        "projection_matrix_hash",
-        "isometry_preservation_score"
-      ],
-      "title": "DimensionalProjectionContract",
-      "type": "object"
-    },
-    "coreason_manifest__state__semantic__OntologicalHandshake": {
-      "additionalProperties": false,
-      "properties": {
-        "handshake_id": {
-          "description": "The unique identifier for the handshake.",
-          "minLength": 1,
-          "title": "Handshake Id",
-          "type": "string"
-        },
-        "participant_node_ids": {
-          "description": "The agents establishing semantic alignment.",
-          "items": {
-            "type": "string"
-          },
-          "minItems": 2,
-          "title": "Participant Node Ids",
-          "type": "array"
-        },
-        "measured_cosine_similarity": {
-          "description": "The calculated geometric alignment of the agents' core definitions.",
-          "maximum": 1.0,
-          "minimum": -1.0,
-          "title": "Measured Cosine Similarity",
-          "type": "number"
-        },
-        "alignment_status": {
-          "description": "The final verdict of the handshake protocol.",
-          "enum": [
-            "aligned",
-            "projected",
-            "fallback_triggered",
-            "incommensurable"
-          ],
-          "title": "Alignment Status",
-          "type": "string"
-        },
-        "applied_projection": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/coreason_manifest__state__semantic__DimensionalProjectionContract"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The projection applied if the agents natively used different embedding dimensionalities."
-        }
-      },
-      "required": [
-        "handshake_id",
-        "participant_node_ids",
-        "measured_cosine_similarity",
-        "alignment_status"
-      ],
-      "title": "OntologicalHandshake",
-      "type": "object"
-    },
-    "coreason_manifest__workflow__topologies__DimensionalProjectionContract": {
-      "additionalProperties": false,
-      "properties": {
-        "source_dimensionality": {
-          "description": "The vector size of the source agent's latent space.",
-          "exclusiveMinimum": 0,
-          "title": "Source Dimensionality",
-          "type": "integer"
-        },
-        "target_dimensionality": {
-          "description": "The vector size of the receiving agent's latent space.",
-          "exclusiveMinimum": 0,
-          "title": "Target Dimensionality",
-          "type": "integer"
-        },
-        "isometry_preservation_score": {
-          "description": "Mathematical proof of how much semantic meaning survived the translation.",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "Isometry Preservation Score",
-          "type": "number"
-        },
-        "projection_matrix_hash": {
-          "description": "SHA-256 hash of the translation matrix used to map the spaces.",
-          "title": "Projection Matrix Hash",
-          "type": "string"
-        }
-      },
-      "required": [
-        "source_dimensionality",
-        "target_dimensionality",
-        "isometry_preservation_score",
-        "projection_matrix_hash"
-      ],
-      "title": "DimensionalProjectionContract",
-      "type": "object"
-    },
-    "coreason_manifest__workflow__topologies__OntologicalHandshake": {
-      "additionalProperties": false,
-      "properties": {
-        "initiating_node_id": {
-          "description": "The node requesting semantic alignment.",
-          "title": "Initiating Node Id",
-          "type": "string"
-        },
-        "receiving_node_id": {
-          "description": "The node receiving the request.",
-          "title": "Receiving Node Id",
-          "type": "string"
-        },
-        "latent_vector_similarity": {
-          "description": "The calculated cosine similarity between their core definitions.",
-          "maximum": 1.0,
-          "minimum": -1.0,
-          "title": "Latent Vector Similarity",
-          "type": "number"
-        },
-        "projection_contract": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/coreason_manifest__workflow__topologies__DimensionalProjectionContract"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The required projection if similarity falls below the required threshold."
-        }
-      },
-      "required": [
-        "initiating_node_id",
-        "receiving_node_id",
-        "latent_vector_similarity"
-      ],
-      "title": "OntologicalHandshake",
-      "type": "object"
+      "type": "string"
     }
   },
-  "title": "Coreason Ontology",
+  "title": "CoReason Shared Kernel Ontology",
   "description": "Unified JSON Schema for the Coreason Manifest"
 }

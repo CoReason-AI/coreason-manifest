@@ -5,6 +5,13 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
+"""AGENT INSTRUCTION:
+This file maps the bounded human intervention schemas. This is a STRICTLY REGULATORY BOUNDARY.
+These schemas define the Zero-Trust information flow constraints of the swarm.
+DO NOT inject kinetic execution logic here.
+All policies must be declarative, deterministic, and capable of severing memory access instantly.
+"""
+
 from typing import Annotated, Any, Literal
 
 from pydantic import Field
@@ -111,6 +118,13 @@ class OverrideIntent(CoreasonBaseModel):
         max_length=2000, description="Cryptographic audit justification for bypassing algorithmic consensus."
     )
 
+
+# =========================================================================
+# AGENT INSTRUCTION: WARNING - POLYMORPHIC ROUTER
+# If you create a new class above, you MUST append it to the AnyInterventionPayload union below.
+# Failure to do so will result in a fatal Pydantic discriminator crash at runtime,
+# creating a 'Dangling Class' that the orchestrator cannot deserialize.
+# =========================================================================
 
 type AnyInterventionPayload = Annotated[
     InterventionRequest | InterventionVerdict | OverrideIntent, Field(discriminator="type")

@@ -1,3 +1,15 @@
+# Copyright (c) 2025 CoReason, Inc.. All Rights Reserved
+#
+# This software is licensed under the Prosperity Public License 3.0.0.
+# The issuer of the Prosperity Public License for this software is CoReason, Inc..
+#
+# For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
+
+"""AGENT INSTRUCTION: This file defines the spatial and physical tool bindings. This is a STRICTLY KINEMATIC BOUNDARY.
+These schemas govern how the agent mathematically interacts with external or embodied environments. YOU ARE EXPLICITLY
+FORBIDDEN from writing raw script executors here. All tool definitions must be bounded by strict JSON-RPC schemas,
+permission boundaries, and side-effect profiles."""
+
 from typing import Literal, Self
 
 from pydantic import Field, model_validator

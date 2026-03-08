@@ -5,53 +5,36 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
-from typing import Any
+import contextlib
+from typing import Any, cast
 
 from mcp.server.fastmcp import FastMCP
+from pydantic import TypeAdapter
 
 import coreason_manifest
+from coreason_manifest.core import CoreasonBaseModel
 
 # Create an MCP server
 mcp = FastMCP("coreason-manifest-schema-service")
+
+_AVAILABLE_SCHEMAS: dict[str, Any] = {}
+
+for _name in coreason_manifest.__all__:
+    _obj = getattr(coreason_manifest, _name, None)
+    # Skip None and the abstract base class itself
+    if _obj is None or _obj is CoreasonBaseModel:
+        continue
+
+    with contextlib.suppress(Exception):
+        _AVAILABLE_SCHEMAS[_name] = TypeAdapter(_obj).json_schema()
+
+_SCHEMA_NAMES = sorted(_AVAILABLE_SCHEMAS.keys())
 
 
 @mcp.tool()
 def list_schemas() -> list[str]:
     """Returns a list of all available schema names exported in the root __init__.py."""
-    schemas = []
-
-    # Check if the model is exported and is a CoreasonBaseModel
-    import importlib
-
-    from coreason_manifest.core import CoreasonBaseModel
-
-    domains = [
-        "coreason_manifest.core",
-        "coreason_manifest.oversight",
-        "coreason_manifest.state",
-        "coreason_manifest.testing",
-        "coreason_manifest.tooling",
-        "coreason_manifest.workflow",
-        "coreason_manifest.telemetry",
-        "coreason_manifest.compute",
-    ]
-
-    for domain in domains:
-        try:
-            mod = importlib.import_module(domain)
-            for name in getattr(mod, "__all__", []):
-                obj = getattr(mod, name)
-                if isinstance(obj, type) and issubclass(obj, CoreasonBaseModel) and obj is not CoreasonBaseModel:
-                    schemas.append(name)
-        except ImportError:
-            pass
-
-    for name in getattr(coreason_manifest, "__all__", []):
-        obj = getattr(coreason_manifest, name)
-        if isinstance(obj, type) and issubclass(obj, CoreasonBaseModel) and obj is not CoreasonBaseModel:
-            schemas.append(name)
-
-    return sorted(set(schemas))
+    return _SCHEMA_NAMES
 
 
 @mcp.tool()
@@ -61,42 +44,10 @@ def get_schema(schema_name: str) -> dict[str, Any]:
     Args:
         schema_name: The name of the schema to fetch (e.g., WorkingMemorySnapshot)
     """
-    import importlib
-
-    from coreason_manifest.core import CoreasonBaseModel
-
-    domains = [
-        "coreason_manifest.core",
-        "coreason_manifest.oversight",
-        "coreason_manifest.state",
-        "coreason_manifest.testing",
-        "coreason_manifest.tooling",
-        "coreason_manifest.workflow",
-        "coreason_manifest.telemetry",
-        "coreason_manifest.compute",
-    ]
-
-    obj = None
-    for domain in domains:
-        try:
-            mod = importlib.import_module(domain)
-            if schema_name in getattr(mod, "__all__", []):
-                obj = getattr(mod, schema_name)
-                break
-        except ImportError:
-            pass
-
-    if obj is None and schema_name in getattr(coreason_manifest, "__all__", []):
-        obj = getattr(coreason_manifest, schema_name)
-
-    if obj is None:
+    if schema_name not in _AVAILABLE_SCHEMAS:
         raise ValueError(f"Schema '{schema_name}' not found in the manifest.")
 
-    if not isinstance(obj, type) or not issubclass(obj, CoreasonBaseModel):
-        raise ValueError(f"'{schema_name}' is not a valid schema model.")
-
-    # Generate JSON schema using Pydantic
-    return obj.model_json_schema()
+    return cast("dict[str, Any]", _AVAILABLE_SCHEMAS[schema_name])
 
 
 def _global_error_handler_shield() -> None:

@@ -5,6 +5,13 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
+"""AGENT INSTRUCTION:
+This file maps the fault-tolerance and resilience payload schemas. This is a STRICTLY REGULATORY BOUNDARY.
+These schemas define the Zero-Trust information flow constraints of the swarm.
+DO NOT inject kinetic execution logic here.
+All policies must be declarative, deterministic, and capable of severing memory access instantly.
+"""
+
 from typing import Annotated, Literal
 
 from pydantic import Field
@@ -44,6 +51,13 @@ class FallbackTrigger(CoreasonBaseModel):
     target_node_id: NodeID = Field(description="The ID of the failing node.")
     fallback_node_id: NodeID = Field(description="The ID of the node to use as a fallback.")
 
+
+# =========================================================================
+# AGENT INSTRUCTION: WARNING - POLYMORPHIC ROUTER
+# If you create a new class above, you MUST append it to the AnyResiliencePayload union below.
+# Failure to do so will result in a fatal Pydantic discriminator crash at runtime,
+# creating a 'Dangling Class' that the orchestrator cannot deserialize.
+# =========================================================================
 
 type AnyResiliencePayload = Annotated[
     QuarantineOrder | CircuitBreakerTrip | FallbackTrigger, Field(discriminator="type")

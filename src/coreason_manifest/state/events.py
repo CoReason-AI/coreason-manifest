@@ -5,6 +5,11 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
+"""AGENT INSTRUCTION: This file maps the immutable event schemas. This is a STRICTLY EPISTEMIC BOUNDARY.
+These schemas represent the append-only cognitive ledger of the swarm. YOU ARE EXPLICITLY FORBIDDEN from introducing
+mutable state loops, standard CRUD database paradigms, or downstream business logic. Focus purely on cryptographic
+event sourcing, hardware attestations, and non-monotonic belief updates."""
+
 from typing import Annotated, Any, Literal
 
 from pydantic import Field
@@ -282,6 +287,13 @@ class CounterfactualRegretEvent(BaseStateEvent):
         "used to self-correct future routing.",
     )
 
+
+# =========================================================================
+# AGENT INSTRUCTION: WARNING - POLYMORPHIC ROUTER
+# If you create a new class above, you MUST append it to the AnyStateEvent union below.
+# Failure to do so will result in a fatal Pydantic discriminator crash at runtime,
+# creating a 'Dangling Class' that the orchestrator cannot deserialize.
+# =========================================================================
 
 type AnyStateEvent = Annotated[
     ObservationEvent

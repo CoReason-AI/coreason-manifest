@@ -5,6 +5,11 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
+"""AGENT INSTRUCTION: This file defines the orchestration node schemas. This is a STRICTLY TOPOLOGICAL BOUNDARY.
+These schemas dictate the multi-agent graph geometry and decentralized routing mechanics. DO NOT inject procedural
+execution code or synchronous blocking loops. Think purely in terms of graph theory, Byzantine fault tolerance, and
+multi-agent market dynamics."""
+
 from typing import TYPE_CHECKING, Annotated, Literal
 
 from pydantic import Field
@@ -191,6 +196,13 @@ class CompositeNode(BaseNode):
     input_mappings: list[InputMapping] = Field(default_factory=list, description="Explicit state projection inputs.")
     output_mappings: list[OutputMapping] = Field(default_factory=list, description="Explicit state projection outputs.")
 
+
+# =========================================================================
+# AGENT INSTRUCTION: WARNING - POLYMORPHIC ROUTER
+# If you create a new class above, you MUST append it to the AnyNode union below.
+# Failure to do so will result in a fatal Pydantic discriminator crash at runtime,
+# creating a 'Dangling Class' that the orchestrator cannot deserialize.
+# =========================================================================
 
 type AnyNode = Annotated[
     AgentNode | HumanNode | SystemNode | CompositeNode,

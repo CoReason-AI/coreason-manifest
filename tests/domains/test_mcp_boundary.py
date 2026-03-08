@@ -125,21 +125,6 @@ def test_mcp_server_tool_schemas() -> None:
     with pytest.raises(ValueError, match="not found in the manifest"):
         get_schema("DoesNotExistSchema")
 
-    # Passing something that is NOT a subclass of CoreasonBaseModel, if exposed.
-    # Otherwise the DoesNotExistSchema gives enough coverage of the first ValueError.
-    # To get coverage on the second value error ("is not a valid schema model"),
-    # we can inject a dummy object into the namespace temporarily.
-    import coreason_manifest
-
-    coreason_manifest.DummyInvalid = object  # type: ignore[attr-defined]
-    coreason_manifest.__all__.append("DummyInvalid")
-    try:
-        with pytest.raises(ValueError, match="is not a valid schema model"):
-            get_schema("DummyInvalid")
-    finally:
-        coreason_manifest.__all__.remove("DummyInvalid")
-        del coreason_manifest.DummyInvalid  # type: ignore[attr-defined]
-
 
 @pytest.mark.anyio
 async def test_mcp_stdio_server_happy_path() -> None:

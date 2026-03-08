@@ -5,6 +5,13 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
+"""AGENT INSTRUCTION:
+This file defines the Scientific Visualization (SciVis) grammar. This is a STRICTLY PROJECTION BOUNDARY.
+These schemas govern how multi-dimensional agent knowledge is collapsed and encoded for human perception.
+YOU ARE EXPLICITLY FORBIDDEN from adding state-mutation or backend logic here.
+Think purely in terms of declarative graphical grammars (Marks, Channels, Scales).
+"""
+
 import re
 from typing import Annotated, Literal, Self
 
@@ -99,6 +106,13 @@ class InsightCard(CoreasonBaseModel):
             )
         return v
 
+
+# =========================================================================
+# AGENT INSTRUCTION: WARNING - POLYMORPHIC ROUTER
+# If you create a new class above, you MUST append it to the AnyPanel union below.
+# Failure to do so will result in a fatal Pydantic discriminator crash at runtime,
+# creating a 'Dangling Class' that the orchestrator cannot deserialize.
+# =========================================================================
 
 type AnyPanel = Annotated[
     GrammarPanel | InsightCard,
