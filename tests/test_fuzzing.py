@@ -552,7 +552,12 @@ def draw_domain_extensions(draw: Any) -> dict[str, Any]:
 
 @st.composite
 def draw_agent_node_payload(draw: Any) -> dict[str, Any]:
-    payload: dict[str, Any] = {"type": "agent", "description": draw(st.text())}
+    payload: dict[str, Any] = {
+        "type": "agent",
+        "description": draw(st.text()),
+        "architectural_intent": draw(st.one_of(st.none(), st.text())),
+        "justification": draw(st.one_of(st.none(), st.text())),
+    }
     if draw(st.booleans()):
         payload["logit_steganography"] = draw(draw_logit_steganography_contract())
     if draw(st.booleans()):
@@ -582,7 +587,12 @@ def draw_agent_node_payload(draw: Any) -> dict[str, Any]:
 
 @st.composite
 def draw_human_node_payload(draw: Any) -> dict[str, Any]:
-    payload: dict[str, Any] = {"type": "human", "description": draw(st.text())}
+    payload: dict[str, Any] = {
+        "type": "human",
+        "description": draw(st.text()),
+        "architectural_intent": draw(st.one_of(st.none(), st.text())),
+        "justification": draw(st.one_of(st.none(), st.text())),
+    }
     if draw(st.booleans()):
         payload["intervention_policies"] = draw(st.lists(draw_intervention_policy(), max_size=100))
     if draw(st.booleans()):
@@ -592,7 +602,12 @@ def draw_human_node_payload(draw: Any) -> dict[str, Any]:
 
 @st.composite
 def draw_system_node_payload(draw: Any) -> dict[str, Any]:
-    payload: dict[str, Any] = {"type": "system", "description": draw(st.text())}
+    payload: dict[str, Any] = {
+        "type": "system",
+        "description": draw(st.text()),
+        "architectural_intent": draw(st.one_of(st.none(), st.text())),
+        "justification": draw(st.one_of(st.none(), st.text())),
+    }
     if draw(st.booleans()):
         payload["intervention_policies"] = draw(st.lists(draw_intervention_policy(), max_size=100))
     if draw(st.booleans()):
@@ -797,6 +812,8 @@ def draw_digital_twin_topology_payload(
         {
             "type": st.just("digital_twin"),
             "lifecycle_phase": st.sampled_from(["draft", "live"]),
+            "architectural_intent": st.one_of(st.none(), st.text()),
+            "justification": st.one_of(st.none(), st.text()),
             "nodes": st.dictionaries(
                 draw_did_string(),
                 nodes_strategy,
@@ -824,6 +841,8 @@ def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> 
         {
             "type": st.just("dag"),
             "lifecycle_phase": st.sampled_from(["draft", "live"]),
+            "architectural_intent": st.one_of(st.none(), st.text()),
+            "justification": st.one_of(st.none(), st.text()),
             "nodes": st.dictionaries(
                 draw_did_string(),
                 nodes_strategy,
@@ -863,6 +882,8 @@ def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> 
         {
             "type": st.just("council"),
             "lifecycle_phase": st.sampled_from(["draft", "live"]),
+            "architectural_intent": st.one_of(st.none(), st.text()),
+            "justification": st.one_of(st.none(), st.text()),
             "nodes": st.dictionaries(
                 draw_did_string(),
                 nodes_strategy,
@@ -885,6 +906,8 @@ def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> 
         {
             "type": st.just("swarm"),
             "lifecycle_phase": st.sampled_from(["draft", "live"]),
+            "architectural_intent": st.one_of(st.none(), st.text()),
+            "justification": st.one_of(st.none(), st.text()),
             "nodes": st.dictionaries(
                 draw_did_string(),
                 nodes_strategy,
@@ -905,6 +928,8 @@ def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> 
         {
             "type": st.just("smpc"),
             "lifecycle_phase": st.sampled_from(["draft", "live"]),
+            "architectural_intent": st.one_of(st.none(), st.text()),
+            "justification": st.one_of(st.none(), st.text()),
             "nodes": st.dictionaries(
                 draw_did_string(),
                 nodes_strategy,
@@ -937,6 +962,8 @@ def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> 
         {
             "type": st.just("evaluator_optimizer"),
             "lifecycle_phase": st.sampled_from(["draft", "live"]),
+            "architectural_intent": st.one_of(st.none(), st.text()),
+            "justification": st.one_of(st.none(), st.text()),
             "nodes": st.dictionaries(
                 draw_did_string(),
                 nodes_strategy,
@@ -967,6 +994,8 @@ def draw_composite_node_payload(
         {
             "type": st.just("composite"),
             "description": st.text(),
+            "architectural_intent": st.one_of(st.none(), st.text()),
+            "justification": st.one_of(st.none(), st.text()),
             "intervention_policies": st.lists(draw_intervention_policy(), max_size=10),
             "topology": topology_strategy,
             "input_mappings": st.lists(draw_input_mapping(), max_size=5),
@@ -1131,6 +1160,8 @@ def draw_evolutionary_topology_payload(draw: Any) -> dict[str, Any]:
             {
                 "type": st.just("evolutionary"),
                 "lifecycle_phase": st.sampled_from(["draft", "live"]),
+                "architectural_intent": st.one_of(st.none(), st.text()),
+                "justification": st.one_of(st.none(), st.text()),
                 "nodes": st.just({}),  # For simplicity, empty nodes
                 "shared_state_contract": st.none(),
                 "information_flow": st.none(),
