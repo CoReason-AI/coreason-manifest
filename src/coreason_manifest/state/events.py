@@ -126,6 +126,24 @@ class ObservationEvent(BaseStateEvent):
         default=None,
         description="The mathematical brain-scan proving exactly which neural circuits fired to append this event.",
     )
+    triggering_invocation_id: str | None = Field(
+        default=None,
+        description="The Event ID of the specific ToolInvocationEvent that spawned this observation, "
+        "forming a strict bipartite directed edge.",
+    )
+
+
+class ToolInvocationEvent(BaseStateEvent):
+    """A Priori Kinetic Commitment representing the Pearlian Do-Operator prior to network execution."""
+
+    type: Literal["tool_invocation"] = Field(
+        default="tool_invocation", description="Discriminator type for a tool invocation event."
+    )
+    tool_name: str = Field(description="The exact tool targeted in the ActionSpace.")
+    parameters: dict[str, Any] = Field(description="The intended JSON-RPC payload.")
+    authorized_budget_cents: int | None = Field(
+        default=None, ge=0, description="The maximum escrow unlocked for this specific run."
+    )
 
 
 class CausalAttribution(CoreasonBaseModel):
@@ -332,6 +350,7 @@ type AnyStateEvent = Annotated[
     | SystemFaultEvent
     | HypothesisGenerationEvent
     | BargeInInterruptEvent
-    | CounterfactualRegretEvent,
+    | CounterfactualRegretEvent
+    | ToolInvocationEvent,
     Field(discriminator="type", description="A discriminated union of state events."),
 ]

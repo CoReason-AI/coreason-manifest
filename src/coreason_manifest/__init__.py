@@ -153,6 +153,7 @@ from coreason_manifest.state.events import (
     SaeFeatureActivation,
     StructuralCausalModel,
     SystemFaultEvent,
+    ToolInvocationEvent,
     ZeroKnowledgeProof,
 )
 from coreason_manifest.state.memory import (
@@ -454,6 +455,7 @@ __all__ = [
     "TieBreaker",
     "ToolDefinition",
     "ToolID",
+    "ToolInvocationEvent",
     "TraceExportBatch",
     "TruthMaintenancePolicy",
     "VectorEmbedding",

@@ -41,6 +41,7 @@ from .events import (
     SaeFeatureActivation,
     StructuralCausalModel,
     SystemFaultEvent,
+    ToolInvocationEvent,
     ZeroKnowledgeProof,
 )
 from .memory import (
@@ -117,6 +118,7 @@ __all__ = [
     "TerminalBufferState",
     "TheoryOfMindSnapshot",
     "ThoughtBranch",
+    "ToolInvocationEvent",
     "TruthMaintenancePolicy",
     "VectorEmbedding",
     "WorkingMemorySnapshot",

@@ -122,6 +122,12 @@ class BackpressurePolicy(CoreasonBaseModel):
         description="Systemic heartbeat constraint. A node cannot lock the thread longer than this without yielding "
         "to poll for BargeInInterruptEvents.",
     )
+    max_concurrent_tool_invocations: int | None = Field(
+        default=None,
+        gt=0,
+        description="The mathematical integer ceiling to prevent Sybil-like parallel mutations "
+        "against the ActionSpace.",
+    )
 
 
 class BaseTopology(CoreasonBaseModel):
