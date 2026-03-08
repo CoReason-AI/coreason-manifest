@@ -45,7 +45,7 @@ class TerminalBufferState(CoreasonBaseModel):
 # creating a 'Dangling Class' that the orchestrator cannot deserialize.
 # =========================================================================
 
-AnyToolchainState = Annotated[
+type AnyToolchainState = Annotated[
     BrowserDOMState | TerminalBufferState,
     Field(discriminator="type", description="A discriminated union of immutable external toolchain states."),
 ]
