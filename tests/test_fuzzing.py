@@ -503,6 +503,35 @@ def draw_logit_steganography_contract(draw: Any) -> dict[str, Any]:
 
 
 @st.composite
+def draw_domain_extensions(draw: Any) -> dict[str, Any]:
+    # Base JSON primitives
+    json_primitives = st.one_of(
+        st.text(max_size=50), st.integers(), st.floats(allow_nan=False, allow_infinity=False), st.booleans(), st.none()
+    )
+
+    # Generate recursive structures bounded to depth 5 (max_leaves controls scale)
+    base_dict = st.dictionaries(st.text(max_size=255), json_primitives, max_size=5)
+
+    res: dict[str, Any] = draw(
+        st.one_of(
+            base_dict,
+            st.dictionaries(
+                st.text(max_size=255),
+                st.recursive(
+                    base_dict,
+                    lambda children: st.one_of(
+                        st.lists(children, max_size=3), st.dictionaries(st.text(max_size=255), children, max_size=3)
+                    ),
+                    max_leaves=3,
+                ),
+                max_size=5,
+            ),
+        )
+    )
+    return res
+
+
+@st.composite
 def draw_agent_node_payload(draw: Any) -> dict[str, Any]:
     payload: dict[str, Any] = {"type": "agent", "description": draw(st.text())}
     if draw(st.booleans()):
@@ -525,6 +554,8 @@ def draw_agent_node_payload(draw: Any) -> dict[str, Any]:
         payload["epistemic_policy"] = draw(draw_epistemic_policy())
     if draw(st.booleans()):
         payload["correction_policy"] = draw(draw_correction_policy())
+    if draw(st.booleans()):
+        payload["domain_extensions"] = draw(draw_domain_extensions())
     return payload
 
 
@@ -533,6 +564,8 @@ def draw_human_node_payload(draw: Any) -> dict[str, Any]:
     payload: dict[str, Any] = {"type": "human", "description": draw(st.text())}
     if draw(st.booleans()):
         payload["intervention_policies"] = draw(st.lists(draw_intervention_policy(), max_size=100))
+    if draw(st.booleans()):
+        payload["domain_extensions"] = draw(draw_domain_extensions())
     return payload
 
 
@@ -541,6 +574,8 @@ def draw_system_node_payload(draw: Any) -> dict[str, Any]:
     payload: dict[str, Any] = {"type": "system", "description": draw(st.text())}
     if draw(st.booleans()):
         payload["intervention_policies"] = draw(st.lists(draw_intervention_policy(), max_size=100))
+    if draw(st.booleans()):
+        payload["domain_extensions"] = draw(draw_domain_extensions())
     return payload
 
 
@@ -821,6 +856,7 @@ def draw_composite_node_payload(
             "topology": topology_strategy,
             "input_mappings": st.lists(draw_input_mapping(), max_size=5),
             "output_mappings": st.lists(draw_output_mapping(), max_size=5),
+            "domain_extensions": st.one_of(st.none(), draw_domain_extensions()),
         }
     )
 
