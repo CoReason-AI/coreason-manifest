@@ -1353,6 +1353,23 @@ def draw_tool_invocation_event(draw: Any) -> dict[str, Any]:
 
 
 @st.composite
+def draw_persistence_commit_receipt(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "type": st.just("persistence_commit"),
+                "event_id": st.text(min_size=1),
+                "timestamp": st.floats(allow_nan=False, allow_infinity=False),
+                "lakehouse_snapshot_id": st.text(min_size=1),
+                "committed_state_diff_id": st.text(min_size=1),
+                "target_table_uri": st.text(min_size=1),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
 def _local_draw_any_state_event(draw: Any) -> dict[str, Any]:
     event_type = draw(
         st.sampled_from(
@@ -1366,9 +1383,14 @@ def _local_draw_any_state_event(draw: Any) -> dict[str, Any]:
                 "tool_invocation",
                 "epistemic_promotion",
                 "normative_drift",
+                "persistence_commit",
             ]
         )
     )
+
+    if event_type == "persistence_commit":
+        persist_res: dict[str, Any] = draw(draw_persistence_commit_receipt())
+        return persist_res
 
     if event_type == "epistemic_promotion":
         promo_res: dict[str, Any] = draw(draw_epistemic_promotion_event_payload())
@@ -1466,6 +1488,10 @@ def test_anystateevent_routing(payload: dict[str, Any]) -> None:
         from coreason_manifest.state.events import NormativeDriftEvent
 
         assert isinstance(parsed, NormativeDriftEvent)
+    elif event_type == "persistence_commit":
+        from coreason_manifest.state.events import PersistenceCommitReceipt
+
+        assert isinstance(parsed, PersistenceCommitReceipt)
 
 
 @given(st.text())
@@ -1480,6 +1506,7 @@ def test_anystateevent_invalid(invalid_type: str) -> None:
         "tool_invocation",
         "epistemic_promotion",
         "normative_drift",
+        "persistence_commit",
     ]:
         return
     payload = {"type": invalid_type, "event_id": "test", "timestamp": 123.0}
