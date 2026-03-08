@@ -1109,12 +1109,12 @@
       "description": "A cryptographic receipt of a continuous multimodal sequence being prematurely severed by an external stimulus.",
       "properties": {
         "event_id": {
-          "description": "A unique identifier for the event.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",
           "title": "Event Id",
           "type": "string"
         },
         "timestamp": {
-          "description": "The timestamp when the event occurred.",
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
           "title": "Timestamp",
           "type": "number"
         },
@@ -1126,7 +1126,7 @@
           "type": "string"
         },
         "target_event_id": {
-          "description": "The exact event ID of the active node generation cycle that was killed.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the active node generation cycle that was killed in the Merkle-DAG.",
           "title": "Target Event Id",
           "type": "string"
         },
@@ -1156,7 +1156,7 @@
             }
           ],
           "default": null,
-          "description": "The 'stutter' state: the incomplete fragment of thought or text generated before the kill signal.",
+          "description": "The 'stutter' state: the incomplete fragment of thought or text appended before the kill signal.",
           "title": "Retained Partial Payload"
         },
         "epistemic_disposition": {
@@ -1244,12 +1244,12 @@
       "additionalProperties": false,
       "properties": {
         "event_id": {
-          "description": "A unique identifier for the event.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",
           "title": "Event Id",
           "type": "string"
         },
         "timestamp": {
-          "description": "The timestamp when the event occurred.",
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
           "title": "Timestamp",
           "type": "number"
         }
@@ -1323,25 +1323,25 @@
       "additionalProperties": false,
       "properties": {
         "event_id": {
-          "description": "A unique identifier for the event.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",
           "title": "Event Id",
           "type": "string"
         },
         "timestamp": {
-          "description": "The timestamp when the event occurred.",
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
           "title": "Timestamp",
           "type": "number"
         },
         "type": {
           "const": "belief_update",
           "default": "belief_update",
-          "description": "Discriminator type for a belief update event.",
+          "description": "Discriminator type for a Belief Assertion event.",
           "title": "Type",
           "type": "string"
         },
         "payload": {
           "additionalProperties": true,
-          "description": "The semantic representation of the agent's internal cognitive shift or synthesis.",
+          "description": "Topologically Bounded Latent Spaces capturing the semantic representation of the agent's internal cognitive shift or synthesis that anchor statistical probability to a definitive causal event hash.",
           "title": "Payload",
           "type": "object"
         },
@@ -1355,7 +1355,7 @@
             }
           ],
           "default": null,
-          "description": "The specific topological node that synthesized this belief update."
+          "description": "The specific topological node that synthesized this belief assertion."
         },
         "causal_attributions": {
           "description": "Immutable audit trail of prior states that forced this specific cognitive synthesis.",
@@ -1387,7 +1387,7 @@
             }
           ],
           "default": null,
-          "description": "The mathematical attestation proving this belief synthesis was generated securely without model-downgrade fraud."
+          "description": "The mathematical attestation proving this belief synthesis was appended securely without model-downgrade fraud."
         },
         "uncertainty_profile": {
           "anyOf": [
@@ -1423,7 +1423,7 @@
             }
           ],
           "default": null,
-          "description": "The mathematical brain-scan proving exactly which neural circuits fired to generate this event."
+          "description": "The mathematical brain-scan proving exactly which neural circuits fired to append this event."
         }
       },
       "required": [
@@ -1711,7 +1711,7 @@
       "additionalProperties": false,
       "properties": {
         "source_event_id": {
-          "description": "The exact event ID in the EpistemicLedger that influenced this belief.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the source event in the Merkle-DAG.",
           "title": "Source Event Id",
           "type": "string"
         },
@@ -2333,12 +2333,12 @@
       "description": "A cryptographic record of an agent simulating an alternative timeline to calculate epistemic regret\nand update its policy.",
       "properties": {
         "event_id": {
-          "description": "A unique identifier for the event.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",
           "title": "Event Id",
           "type": "string"
         },
         "timestamp": {
-          "description": "The timestamp when the event occurred.",
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
           "title": "Timestamp",
           "type": "number"
         },
@@ -2350,7 +2350,7 @@
           "type": "string"
         },
         "historical_event_id": {
-          "description": "The specific historical state node where the agent mathematically diverged to simulate an alternative path.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the specific historical state node where the agent mathematically diverged to simulate an alternative path.",
           "title": "Historical Event Id",
           "type": "string"
         },
@@ -2360,12 +2360,12 @@
           "type": "string"
         },
         "expected_utility_actual": {
-          "description": "The computed utility of the trajectory that was actually executed.",
+          "description": "The calculated utility of the trajectory that was actually executed.",
           "title": "Expected Utility Actual",
           "type": "number"
         },
         "expected_utility_simulated": {
-          "description": "The computed utility of the simulated counterfactual trajectory.",
+          "description": "The calculated utility of the simulated counterfactual trajectory.",
           "title": "Expected Utility Simulated",
           "type": "number"
         },
@@ -2947,6 +2947,7 @@
     },
     "EpistemicLedger": {
       "additionalProperties": false,
+      "description": "The Committed Epistemic Ledger (crystallized truth), completely partitioned from volatile working memory\nor Epistemic Quarantine.",
       "properties": {
         "history": {
           "description": "An append-only, cryptographic ledger of state events.",
@@ -2958,7 +2959,7 @@
           "type": "array"
         },
         "checkpoints": {
-          "description": "Hard temporal anchors allowing O(1) state restoration.",
+          "description": "Hard temporal anchors allowing state restoration.",
           "items": {
             "$ref": "#/$defs/TemporalCheckpoint"
           },
@@ -3240,7 +3241,7 @@
       "additionalProperties": false,
       "properties": {
         "strategy": {
-          "description": "The mathematical heuristic used to select which semantic memories are evicted or compressed.",
+          "description": "The mathematical heuristic used to select which semantic memories are retracted or compressed.",
           "enum": [
             "fifo",
             "salience_decay",
@@ -3250,13 +3251,13 @@
           "type": "string"
         },
         "max_retained_tokens": {
-          "description": "The maximum allowed physical footprint of the active context window.",
+          "description": "The strict geometric upper bound of the Epistemic Quarantine's token capacity.",
           "exclusiveMinimum": 0,
           "title": "Max Retained Tokens",
           "type": "integer"
         },
         "protected_event_ids": {
-          "description": "Explicit list of cryptographic anchors (Event IDs) the orchestrator is mathematically forbidden from evicting.",
+          "description": "Explicit list of Content Identifiers (CIDs) the orchestrator is mathematically forbidden from retracting.",
           "items": {
             "type": "string"
           },
@@ -3711,7 +3712,7 @@
       "additionalProperties": false,
       "properties": {
         "condition_id": {
-          "description": "Unique identifier for this falsification test.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this falsification test to the Merkle-DAG.",
           "minLength": 1,
           "title": "Condition Id",
           "type": "string"
@@ -3807,7 +3808,7 @@
             }
           ],
           "default": null,
-          "description": "The identifier of the federated topology, if applicable.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the federated topology, if applicable.",
           "title": "Topology Id"
         }
       },
@@ -4174,12 +4175,12 @@
       "additionalProperties": false,
       "properties": {
         "event_id": {
-          "description": "A unique identifier for the event.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",
           "title": "Event Id",
           "type": "string"
         },
         "timestamp": {
-          "description": "The timestamp when the event occurred.",
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
           "title": "Timestamp",
           "type": "number"
         },
@@ -4191,7 +4192,7 @@
           "type": "string"
         },
         "hypothesis_id": {
-          "description": "Unique identifier for this abductive leap.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this abductive leap to the Merkle-DAG.",
           "minLength": 1,
           "title": "Hypothesis Id",
           "type": "string"
@@ -5540,7 +5541,7 @@
       "additionalProperties": false,
       "properties": {
         "audit_id": {
-          "description": "Unique identifier for this mechanistic interpretability snapshot.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",
           "minLength": 1,
           "title": "Audit Id",
           "type": "string"
@@ -5674,12 +5675,12 @@
       "additionalProperties": false,
       "properties": {
         "event_id": {
-          "description": "A unique identifier for the event.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",
           "title": "Event Id",
           "type": "string"
         },
         "timestamp": {
-          "description": "The timestamp when the event occurred.",
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
           "title": "Timestamp",
           "type": "number"
         },
@@ -5692,7 +5693,7 @@
         },
         "payload": {
           "additionalProperties": true,
-          "description": "The raw, lossless semantic output captured from the environment or tool execution.",
+          "description": "Neurosymbolic Bindings of the raw, lossless semantic output appended from the environment or tool execution that anchor statistical probability to a definitive causal event hash.",
           "title": "Payload",
           "type": "object"
         },
@@ -5706,7 +5707,7 @@
             }
           ],
           "default": null,
-          "description": "The specific topological node that generated this observation."
+          "description": "The specific topological node that appended this observation."
         },
         "hardware_attestation": {
           "anyOf": [
@@ -5718,7 +5719,7 @@
             }
           ],
           "default": null,
-          "description": "The physical hardware root-of-trust proving this observation was generated in a secure enclave."
+          "description": "The physical hardware root-of-trust proving this observation was appended in a secure enclave."
         },
         "zk_proof": {
           "anyOf": [
@@ -5730,7 +5731,7 @@
             }
           ],
           "default": null,
-          "description": "The mathematical attestation proving this observation was generated securely."
+          "description": "The mathematical attestation proving this observation was appended securely."
         },
         "toolchain_snapshot": {
           "anyOf": [
@@ -5766,7 +5767,7 @@
             }
           ],
           "default": null,
-          "description": "The mathematical brain-scan proving exactly which neural circuits fired to generate this event."
+          "description": "The mathematical brain-scan proving exactly which neural circuits fired to append this event."
         }
       },
       "required": [
@@ -7808,12 +7809,12 @@
       "additionalProperties": false,
       "properties": {
         "event_id": {
-          "description": "A unique identifier for the event.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",
           "title": "Event Id",
           "type": "string"
         },
         "timestamp": {
-          "description": "The timestamp when the event occurred.",
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
           "title": "Timestamp",
           "type": "number"
         },
@@ -8089,13 +8090,13 @@
       "additionalProperties": false,
       "properties": {
         "target_agent_id": {
-          "description": "The ID of the agent whose mind is being modeled.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the agent whose mind is being modeled.",
           "minLength": 1,
           "title": "Target Agent Id",
           "type": "string"
         },
         "assumed_shared_beliefs": {
-          "description": "A list of SemanticNode IDs that the modeling agent assumes the target already possesses.",
+          "description": "A list of Content Identifiers (CIDs) acting as cryptographic Lineage Watermarks that the modeling agent assumes the target already possesses.",
           "items": {
             "type": "string"
           },
@@ -8513,9 +8514,10 @@
     },
     "WorkingMemorySnapshot": {
       "additionalProperties": false,
+      "description": "Represents the Epistemic Quarantine, partitioned from the Committed Epistemic Ledger.",
       "properties": {
         "system_prompt": {
-          "description": "The active system prompt guiding the agent's behavior.",
+          "description": "The basal non-monotonic instruction set currently held in Epistemic Quarantine.",
           "title": "System Prompt",
           "type": "string"
         },
@@ -8523,7 +8525,7 @@
           "additionalProperties": {
             "type": "string"
           },
-          "description": "A dictionary representing the active context variables for the agent.",
+          "description": "The ephemeral latent variables and environmental bindings currently active in Epistemic Quarantine.",
           "title": "Active Context",
           "type": "object"
         },
@@ -8575,7 +8577,7 @@
           "type": "string"
         },
         "verifier_key_id": {
-          "description": "The identifier of the public evaluation key the orchestrator must load to verify this proof.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the public evaluation key.",
           "title": "Verifier Key Id",
           "type": "string"
         },
