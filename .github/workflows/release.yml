@@ -58,3 +58,6 @@ jobs:
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+
+      - name: Deploy Docs (Mike Multi-Versioning)
+        run: uv run mike deploy ${{ github.ref_name }} latest --update-aliases --push

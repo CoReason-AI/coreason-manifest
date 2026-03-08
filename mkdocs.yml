@@ -1,0 +1,28 @@
+site_name: CoReason Manifest
+
+theme:
+  name: material
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - toc.integrate
+    - search.suggest
+    - search.highlight
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src/]
+          options:
+            docstring_style: null
+  - mike
+  - minify
+  - git-revision-date-localized
+
+markdown_extensions:
+  - pymdownx.superfences
+  - pymdownx.tabbed
+  - pymdownx.snippets

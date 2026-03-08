@@ -32,6 +32,9 @@ jobs:
       - name: Deptry Check
         run: uv run deptry src/
 
+      - name: Docs Audit
+        run: uv run mkdocs build --strict
+
   schema-contracts:
     name: Schema Contracts (Semantic Backward-Compatibility)
     runs-on: ubuntu-latest
