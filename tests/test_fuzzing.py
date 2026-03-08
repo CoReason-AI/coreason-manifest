@@ -2715,6 +2715,7 @@ def draw_workflow_envelope(draw: Any) -> dict[str, Any]:
                         max_size=10,
                     ),
                 ),
+                "federated_discovery": st.one_of(st.none(), draw_federated_discovery_protocol_payload()),
                 "federated_sla": st.one_of(st.none(), draw_bilateral_sla()),
                 "pq_signature": st.one_of(st.none(), draw_pq_signature()),
             }
