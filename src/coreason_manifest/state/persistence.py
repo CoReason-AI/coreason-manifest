@@ -46,3 +46,15 @@ class GraphFlatteningDirective(CoreasonBaseModel):
         default=True,
         description="Forces the inclusion of MultimodalTokenAnchor hashes in the flattened row.",
     )
+
+
+class LakehousePersistenceContract(CoreasonBaseModel):
+    contract_id: str = Field(min_length=1, description="Unique UUID for this specific persistence execution.")
+    artifact_event_id: str = Field(description="The CID of the multimodal graph state that must be persisted.")
+    mount_config: LakehouseMountConfig = Field(description="The target catalog and schema evolution constraints.")
+    mutation_policy: ContinuousMutationPolicy = Field(
+        description="The declarative backpressure and write paradigm rules."
+    )
+    flattening_directive: GraphFlatteningDirective = Field(
+        description="The structural mapping rules for flattening the semantic graph into tabular columns."
+    )

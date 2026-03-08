@@ -179,6 +179,7 @@ from coreason_manifest.state.persistence import (
     ContinuousMutationPolicy,
     GraphFlatteningDirective,
     LakehouseMountConfig,
+    LakehousePersistenceContract,
 )
 from coreason_manifest.state.scratchpad import LatentScratchpadTrace, ThoughtBranch
 from coreason_manifest.state.semantic import (
@@ -418,6 +419,7 @@ __all__ = [
     "JSONRPCError",
     "JSONRPCErrorResponse",
     "LakehouseMountConfig",
+    "LakehousePersistenceContract",
     "LatentScratchpadTrace",
     "LatentSmoothingProfile",
     "LifecycleTrigger",
