@@ -402,6 +402,20 @@
           "title": "Intervention Policies",
           "type": "array"
         },
+        "domain_extensions": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks.",
+          "title": "Domain Extensions"
+        },
         "type": {
           "const": "agent",
           "default": "agent",
@@ -1147,6 +1161,20 @@
           },
           "title": "Intervention Policies",
           "type": "array"
+        },
+        "domain_extensions": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks.",
+          "title": "Domain Extensions"
         }
       },
       "required": [
@@ -1956,6 +1984,20 @@
           },
           "title": "Intervention Policies",
           "type": "array"
+        },
+        "domain_extensions": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks.",
+          "title": "Domain Extensions"
         },
         "type": {
           "const": "composite",
@@ -3976,6 +4018,20 @@
           },
           "title": "Intervention Policies",
           "type": "array"
+        },
+        "domain_extensions": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks.",
+          "title": "Domain Extensions"
         },
         "type": {
           "const": "human",
@@ -7668,6 +7724,20 @@
           },
           "title": "Intervention Policies",
           "type": "array"
+        },
+        "domain_extensions": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks.",
+          "title": "Domain Extensions"
         },
         "type": {
           "const": "system",
