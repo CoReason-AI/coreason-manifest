@@ -894,6 +894,7 @@ def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> 
             "generator_node_id": st.text(min_size=1),
             "evaluator_node_id": st.text(min_size=1),
             "max_revision_loops": st.integers(min_value=1, max_value=50),
+            "require_multimodal_grounding": st.booleans(),
         }
     ).map(_eval_opt_mapper)
 
