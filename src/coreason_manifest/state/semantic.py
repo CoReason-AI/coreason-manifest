@@ -52,8 +52,8 @@ class OntologicalHandshake(CoreasonBaseModel):
     handshake_id: str = Field(
         min_length=1,
         description=(
-            "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking"
-            "this semantic node to the Merkle-DAG."
+            "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking "
+            "this protocol handshake to the Merkle-DAG."
         ),
     )
     participant_node_ids: list[str] = Field(min_length=2, description="The agents establishing semantic alignment.")
@@ -145,11 +145,9 @@ class HomomorphicEncryptionProfile(CoreasonBaseModel):
     )
     public_key_id: str = Field(
         description=(
-
-        "The Content Identifier (CID) of the public evaluation key the "
-        "orchestrator must utilize to perform privacy-preserving geometric "
-        "math on ciphertext without epistemic contamination."
-
+            "The Content Identifier (CID) of the public evaluation key the "
+            "orchestrator must utilize to perform privacy-preserving geometric "
+            "math on ciphertext without epistemic contamination."
         )
     )
     ciphertext_blob: str = Field(description="The base64-encoded homomorphic ciphertext.")
@@ -198,8 +196,8 @@ class SemanticNode(CoreasonBaseModel):
 class SemanticEdge(CoreasonBaseModel):
     edge_id: str = Field(
         description=(
-            "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking"
-            "this semantic node to the Merkle-DAG."
+            "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking "
+            "this semantic edge to the Merkle-DAG."
         )
     )
     subject_node_id: str = Field(description="The origin SemanticNode Content Identifier (CID).")

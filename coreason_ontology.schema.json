@@ -5818,7 +5818,7 @@
       "additionalProperties": false,
       "properties": {
         "handshake_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linkingthis semantic node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this protocol handshake to the Merkle-DAG.",
           "minLength": 1,
           "title": "Handshake Id",
           "type": "string"
@@ -6949,7 +6949,7 @@
       "additionalProperties": false,
       "properties": {
         "edge_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linkingthis semantic node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this semantic edge to the Merkle-DAG.",
           "title": "Edge Id",
           "type": "string"
         },
@@ -7504,7 +7504,7 @@
           "type": "object"
         },
         "patches": {
-          "description": "deterministic state vector mutations.",
+          "description": "The exact, ordered sequence of deterministic state vector mutations.",
           "items": {
             "$ref": "#/$defs/StatePatch"
           },
@@ -8151,7 +8151,7 @@
           "title": "Parent Branch Id"
         },
         "latent_content_hash": {
-          "description": "The SHA-256 hash of the raw scratchpad text generated in this branch.",
+          "description": "The SHA-256 hash of the raw latent dimensions explored in this branch.",
           "pattern": "^[a-f0-9]{64}$",
           "title": "Latent Content Hash",
           "type": "string"

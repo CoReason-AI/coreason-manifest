@@ -49,7 +49,12 @@ class StateDiff(CoreasonBaseModel):
             "mutation count at the time of authoring."
         )
     )
-    patches: list[StatePatch] = Field(default_factory=list, description="deterministic state vector mutations.")
+    patches: list[StatePatch] = Field(
+        default_factory=list, description=(
+        "The exact, ordered sequence of deterministic state "
+        "vector mutations."
+    )
+    )
 
 
 class TruthMaintenancePolicy(CoreasonBaseModel):

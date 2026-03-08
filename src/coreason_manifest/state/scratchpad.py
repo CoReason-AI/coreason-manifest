@@ -30,7 +30,7 @@ class ThoughtBranch(CoreasonBaseModel):
     )
     latent_content_hash: str = Field(
         pattern=r"^[a-f0-9]{64}$",
-        description="The SHA-256 hash of the raw scratchpad text generated in this branch.",
+        description="The SHA-256 hash of the raw latent dimensions explored in this branch.",
     )
     prm_score: float | None = Field(
         default=None,
