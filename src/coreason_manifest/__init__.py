@@ -466,15 +466,10 @@ def _rebuild_ontology() -> None:
     """
     import typing
 
-    # Guarantee all submodules are loaded and available in sys.modules to resolve
-    # forward references correctly during model_rebuild
-    from coreason_manifest.workflow.topologies import AnyTopology  # noqa: F401
-
     for _name in __all__:
         _obj = globals().get(_name)
         if isinstance(_obj, type) and issubclass(_obj, CoreasonBaseModel) and _obj is not CoreasonBaseModel:
-            _cls: typing.Any = _obj
-            typing.cast("type[CoreasonBaseModel]", _cls).model_rebuild()
+            typing.cast("type[CoreasonBaseModel]", _obj).model_rebuild()
 
 
 # Execute immediately upon module load
