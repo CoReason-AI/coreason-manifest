@@ -8,6 +8,7 @@
 import json
 import sys
 from pathlib import Path
+from typing import Any, cast
 
 from pydantic.json_schema import models_json_schema
 
@@ -29,7 +30,7 @@ def main() -> None:
         sys.exit(0)
 
     _, top_level_schema = models_json_schema(
-        models_to_export,  # type: ignore
+        cast(Any, models_to_export),
         title="CoReason Shared Kernel Ontology",
         description="Unified JSON Schema for the Coreason Manifest",
     )
