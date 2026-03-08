@@ -49,8 +49,12 @@ def test_visualize_valid_manifest(tmp_path: Path, capsys: pytest.CaptureFixture[
     }
     payload_path.write_text(json.dumps(manifest_data))
 
-    with patch("sys.argv", ["coreason-visualize", str(payload_path)]), patch("sys.exit") as mock_exit:
-        visualize_main()
+    with (
+        patch("sys.argv", ["coreason-visualize", str(payload_path)]),
+        patch("sys.exit", side_effect=SystemExit) as mock_exit,
+    ):
+        with pytest.raises(SystemExit):
+            visualize_main()
         mock_exit.assert_called_once_with(0)
 
     captured = capsys.readouterr()
@@ -65,8 +69,12 @@ def test_visualize_invalid_manifest(tmp_path: Path, capsys: pytest.CaptureFixtur
     payload_path = tmp_path / "invalid_manifest.json"
     payload_path.write_text('{"invalid": "data"}')
 
-    with patch("sys.argv", ["coreason-visualize", str(payload_path)]), patch("sys.exit") as mock_exit:
-        visualize_main()
+    with (
+        patch("sys.argv", ["coreason-visualize", str(payload_path)]),
+        patch("sys.exit", side_effect=SystemExit) as mock_exit,
+    ):
+        with pytest.raises(SystemExit):
+            visualize_main()
         mock_exit.assert_called_once_with(1)
 
     captured = capsys.readouterr()
@@ -74,9 +82,13 @@ def test_visualize_invalid_manifest(tmp_path: Path, capsys: pytest.CaptureFixtur
 
 
 def test_visualize_missing_file(capsys: pytest.CaptureFixture[str]) -> None:
-    with patch("sys.argv", ["coreason-visualize", "ghost_file.json"]), patch("sys.exit") as mock_exit:
-        visualize_main()
-        mock_exit.assert_called_with(1)
+    with (
+        patch("sys.argv", ["coreason-visualize", "ghost_file.json"]),
+        patch("sys.exit", side_effect=SystemExit) as mock_exit,
+    ):
+        with pytest.raises(SystemExit):
+            visualize_main()
+        mock_exit.assert_called_once_with(1)
 
     captured = capsys.readouterr()
     assert "not found" in captured.err

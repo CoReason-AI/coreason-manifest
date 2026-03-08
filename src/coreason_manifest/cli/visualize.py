@@ -26,7 +26,7 @@ def project_manifest_to_mermaid(manifest: DynamicRoutingManifest) -> str:
         "    classDef bypassed fill:#f5f5f5,stroke:#9e9e9e,stroke-width:2px,stroke-dasharray: 5 5;",
     ]
 
-    safe_root_id = manifest.manifest_id.replace("-", "_")
+    safe_root_id = manifest.manifest_id.replace(":", "_").replace("-", "_").replace(".", "_")
     lines.append(f"    {safe_root_id}[{manifest.manifest_id}]")
 
     # 1. Map Structural Modalities
