@@ -33,6 +33,13 @@ class MCPCapabilityWhitelist(CoreasonBaseModel):
     allowed_prompts: list[str] = Field(
         default_factory=list, description="The explicit whitelist of workflow templates the node is allowed to trigger."
     )
+    required_licenses: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Explicit list of DUA/RBAC enterprise licenses mathematically "
+            "required to perceive and mount this capability."
+        ),
+    )
 
 
 class MCPServerManifest(CoreasonBaseModel):
