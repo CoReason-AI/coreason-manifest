@@ -270,11 +270,14 @@ from coreason_manifest.workflow.routing import (
     BypassReceipt,
     DynamicRoutingManifest,
     GlobalSemanticProfile,
+    align_semantic_manifolds,
 )
 from coreason_manifest.workflow.topologies import (
+    AdversarialMarketTopology,
     AnyTopology,
     BackpressurePolicy,
     BaseTopology,
+    ConsensusFederationTopology,
     CouncilTopology,
     DAGTopology,
     DigitalTwinTopology,
@@ -296,6 +299,7 @@ __all__ = [
     "AdjudicationIntent",
     "AdjudicationRubric",
     "AdjudicationVerdict",
+    "AdversarialMarketTopology",
     "AdversarialSimulationProfile",
     "AffineTransformMatrix",
     "AgentAttestation",
@@ -344,6 +348,7 @@ __all__ = [
     "CognitiveUncertaintyProfile",
     "CompositeNode",
     "ComputeProvisioningRequest",
+    "ConsensusFederationTopology",
     "ConsensusPolicy",
     "ConstitutionalAmendmentProposal",
     "ConstitutionalRule",
@@ -545,6 +550,7 @@ __all__ = [
     "WorkflowEnvelope",
     "WorkingMemorySnapshot",
     "ZeroKnowledgeProof",
+    "align_semantic_manifolds",
     "compute_topology_hash",
 ]
 

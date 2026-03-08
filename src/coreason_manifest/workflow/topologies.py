@@ -19,11 +19,11 @@ from coreason_manifest.compute.stochastic import CrossoverStrategy, FitnessObjec
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.core.primitives import NodeID
 from coreason_manifest.oversight.dlp import InformationFlowPolicy
-from coreason_manifest.oversight.governance import ConsensusPolicy
+from coreason_manifest.oversight.governance import ConsensusPolicy, PredictionMarketPolicy, QuorumPolicy
 from coreason_manifest.telemetry.schemas import ObservabilityPolicy
 from coreason_manifest.workflow.auctions import AuctionPolicy, EscrowPolicy
 from coreason_manifest.workflow.markets import MarketResolution, PredictionMarketState
-from coreason_manifest.workflow.nodes import AnyNode
+from coreason_manifest.workflow.nodes import AnyNode, SystemNode
 
 
 class StateContract(CoreasonBaseModel):
@@ -412,6 +412,73 @@ class EvaluatorOptimizerTopology(BaseTopology):
         return self
 
 
+class AdversarialMarketTopology(CoreasonBaseModel):
+    """
+    A Zero-Cost Macro abstraction that deterministically compiles into a Red/Blue team CouncilTopology.
+    """
+
+    type: Literal["macro_adversarial"] = Field(
+        default="macro_adversarial", description="Discriminator for adversarial macro."
+    )
+    blue_team_ids: list[NodeID] = Field(min_length=1, description="Nodes assigned to the Blue Team.")
+    red_team_ids: list[NodeID] = Field(min_length=1, description="Nodes assigned to the Red Team.")
+    adjudicator_id: NodeID = Field(description="The neutral node responsible for synthesizing the market resolution.")
+    market_rules: PredictionMarketPolicy = Field(description="The mathematical AMM rules for the debate.")
+
+    @model_validator(mode="after")
+    def verify_disjoint_sets(self) -> Self:
+        blue_set = set(self.blue_team_ids)
+        red_set = set(self.red_team_ids)
+        if blue_set.intersection(red_set):
+            raise ValueError("Topological Contradiction: A node cannot exist in both the Blue and Red teams.")
+        if self.adjudicator_id in blue_set or self.adjudicator_id in red_set:
+            raise ValueError("Topological Contradiction: The adjudicator cannot be a member of a competing team.")
+        return self
+
+    def compile_to_base_topology(self) -> CouncilTopology:
+        """Deterministically unwraps the macro into a rigid CouncilTopology."""
+        # Using dummy nodes as structural placeholders; the orchestrator binds the actual nodes
+        nodes: dict[NodeID, AnyNode] = {self.adjudicator_id: SystemNode(description="Synthesizing Adjudicator")}
+        for node_id in self.blue_team_ids:
+            nodes[node_id] = SystemNode(description="Blue Team Member")
+        for node_id in self.red_team_ids:
+            nodes[node_id] = SystemNode(description="Red Team Member")
+
+        consensus = ConsensusPolicy(strategy="prediction_market", prediction_market_rules=self.market_rules)
+
+        return CouncilTopology(nodes=nodes, adjudicator_id=self.adjudicator_id, consensus_policy=consensus)
+
+
+class ConsensusFederationTopology(CoreasonBaseModel):
+    """
+    A Zero-Cost Macro abstraction compiling into a standard PBFT CouncilTopology.
+    """
+
+    type: Literal["macro_federation"] = Field(
+        default="macro_federation", description="Discriminator for federation macro."
+    )
+    participant_ids: list[NodeID] = Field(min_length=3, description="The nodes forming the PBFT ring.")
+    adjudicator_id: NodeID = Field(description="The orchestrating sequencer for the PBFT consensus.")
+    quorum_rules: QuorumPolicy = Field(description="The strict BFT tolerance bounds.")
+
+    @model_validator(mode="after")
+    def verify_adjudicator_isolation(self) -> Self:
+        if self.adjudicator_id in self.participant_ids:
+            raise ValueError("Topological Contradiction: Adjudicator cannot act as a voting participant.")
+        return self
+
+    def compile_to_base_topology(self) -> CouncilTopology:
+        nodes: dict[NodeID, AnyNode] = {self.adjudicator_id: SystemNode(description="PBFT Sequencer")}
+        for node_id in self.participant_ids:
+            nodes[node_id] = SystemNode(description="PBFT Participant")
+
+        return CouncilTopology(
+            nodes=nodes,
+            adjudicator_id=self.adjudicator_id,
+            consensus_policy=ConsensusPolicy(strategy="pbft", quorum_rules=self.quorum_rules),
+        )
+
+
 # =========================================================================
 # AGENT INSTRUCTION: WARNING - POLYMORPHIC ROUTER
 # If you create a new class above, you MUST append it to the AnyTopology union below.
@@ -426,7 +493,9 @@ type AnyTopology = Annotated[
     | EvolutionaryTopology
     | SMPCTopology
     | EvaluatorOptimizerTopology
-    | DigitalTwinTopology,
+    | DigitalTwinTopology
+    | AdversarialMarketTopology
+    | ConsensusFederationTopology,
     Field(discriminator="type", description="A discriminated union of workflow topologies."),
 ]
 

@@ -14,6 +14,7 @@ from typing import Literal, Self
 
 from pydantic import Field, model_validator
 
+from coreason_manifest.compute.inference import EpistemicCompressionSLA, EpistemicTransmutationTask
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.core.primitives import NodeID
 
@@ -87,3 +88,31 @@ class DynamicRoutingManifest(CoreasonBaseModel):
                     "Merkle Violation: BypassReceipt artifact_event_id does not match the root artifact_profile."
                 )
         return self
+
+
+def align_semantic_manifolds(
+    task_id: str,
+    source_modalities: list[str],
+    target_modalities: list[Literal["text", "raster_image", "vector_graphics", "tabular_grid"]],
+    artifact_event_id: str,
+) -> EpistemicTransmutationTask | None:
+    """
+    A pure algebraic functor that calculates the epistemic gap between two nodes.
+    If the target requires modalities absent in the source, it emits a deterministic Transmutation Task.
+    """
+    source_set = set(source_modalities)
+    target_set = set(target_modalities)
+
+    if target_set.issubset(source_set):
+        return None
+
+    require_dense = any(mod in ["raster_image", "tabular_grid"] for mod in target_modalities)
+    density: Literal["sparse", "dense", "exhaustive"] = "dense" if require_dense else "sparse"
+
+    sla = EpistemicCompressionSLA(
+        strict_probability_retention=True, max_allowed_entropy_loss=0.01, required_grounding_density=density
+    )
+
+    return EpistemicTransmutationTask(
+        task_id=task_id, artifact_event_id=artifact_event_id, target_modalities=target_modalities, compression_sla=sla
+    )

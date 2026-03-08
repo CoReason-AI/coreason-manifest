@@ -805,6 +805,49 @@ def draw_backpressure_policy(draw: Any) -> dict[str, Any]:
     return res
 
 
+@st.composite
+def draw_adversarial_market_topology(draw: Any) -> dict[str, Any]:
+    b_team = draw(st.lists(draw_did_string(), min_size=1, max_size=3))
+    r_team = draw(st.lists(draw_did_string(), min_size=1, max_size=3))
+    adj_id = draw(draw_did_string())
+
+    # Force disjointness to pass strict validation
+    r_team = [x for x in r_team if x not in b_team and x != adj_id]
+    if not r_team:
+        r_team = [adj_id + "_red"]
+
+    if adj_id in b_team:
+        adj_id = adj_id + "_adj"
+
+    return {
+        "type": "macro_adversarial",
+        "blue_team_ids": b_team,
+        "red_team_ids": r_team,
+        "adjudicator_id": adj_id,
+        "market_rules": draw(draw_prediction_market_policy()),
+    }
+
+
+@st.composite
+def draw_consensus_federation_topology(draw: Any) -> dict[str, Any]:
+    participants = draw(st.lists(draw_did_string(), min_size=3, max_size=5))
+    adj_id = draw(draw_did_string())
+
+    if adj_id in participants:
+        adj_id = adj_id + "_adj"
+
+    # Ensure min_quorum_size is valid for PBFT
+    q_rules = draw(draw_quorum_policy())
+    q_rules["min_quorum_size"] = max(q_rules["min_quorum_size"], len(participants))
+
+    return {
+        "type": "macro_federation",
+        "participant_ids": participants,
+        "adjudicator_id": adj_id,
+        "quorum_rules": q_rules,
+    }
+
+
 def draw_digital_twin_topology_payload(
     nodes_strategy: st.SearchStrategy[dict[str, Any]],
 ) -> st.SearchStrategy[dict[str, Any]]:
@@ -981,9 +1024,18 @@ def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> 
     ).map(_eval_opt_mapper)
 
     digital_twin_strategy = draw_digital_twin_topology_payload(nodes_strategy)
+    macro_adv_strategy = draw_adversarial_market_topology()
+    macro_fed_strategy = draw_consensus_federation_topology()
 
     return st.one_of(
-        dag_strategy, council_strategy, swarm_strategy, smpc_strategy, eval_opt_strategy, digital_twin_strategy
+        dag_strategy,
+        council_strategy,
+        swarm_strategy,
+        smpc_strategy,
+        eval_opt_strategy,
+        digital_twin_strategy,
+        macro_adv_strategy,
+        macro_fed_strategy,
     )
 
 
