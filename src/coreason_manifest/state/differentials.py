@@ -50,10 +50,7 @@ class StateDiff(CoreasonBaseModel):
         )
     )
     patches: list[StatePatch] = Field(
-        default_factory=list, description=(
-        "The exact, ordered sequence of deterministic state "
-        "vector mutations."
-    )
+        default_factory=list, description=("The exact, ordered sequence of deterministic state vector mutations.")
     )
 
 
