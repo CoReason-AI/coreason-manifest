@@ -22,7 +22,7 @@ from coreason_manifest.oversight.governance import ConsensusPolicy, PredictionMa
 from coreason_manifest.telemetry.schemas import ObservabilityPolicy
 from coreason_manifest.workflow.auctions import AuctionPolicy, EscrowPolicy
 from coreason_manifest.workflow.markets import MarketResolution, PredictionMarketState
-from coreason_manifest.workflow.nodes import AnyNode
+from coreason_manifest.workflow.nodes import AnyNode, SystemNode
 
 
 class StateContract(CoreasonBaseModel):
@@ -431,15 +431,11 @@ class AdversarialMarketTopology(CoreasonBaseModel):
     def compile_to_base_topology(self) -> CouncilTopology:
         """Deterministically unwraps the macro into a rigid CouncilTopology."""
         # Using dummy nodes as structural placeholders; the orchestrator binds the actual nodes
-        from coreason_manifest.workflow.nodes import SystemNode
-
         nodes: dict[NodeID, AnyNode] = {self.adjudicator_id: SystemNode(description="Synthesizing Adjudicator")}
         for node_id in self.blue_team_ids:
             nodes[node_id] = SystemNode(description="Blue Team Member")
         for node_id in self.red_team_ids:
             nodes[node_id] = SystemNode(description="Red Team Member")
-
-        from coreason_manifest.oversight.governance import ConsensusPolicy
 
         consensus = ConsensusPolicy(strategy="prediction_market", prediction_market_rules=self.market_rules)
 
@@ -465,9 +461,6 @@ class ConsensusFederationTopology(CoreasonBaseModel):
         return self
 
     def compile_to_base_topology(self) -> CouncilTopology:
-        from coreason_manifest.oversight.governance import ConsensusPolicy
-        from coreason_manifest.workflow.nodes import SystemNode
-
         nodes: dict[NodeID, AnyNode] = {self.adjudicator_id: SystemNode(description="PBFT Sequencer")}
         for node_id in self.participant_ids:
             nodes[node_id] = SystemNode(description="PBFT Participant")

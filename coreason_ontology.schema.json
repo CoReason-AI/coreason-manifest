@@ -251,6 +251,53 @@
       "title": "AdjudicationVerdict",
       "type": "object"
     },
+    "AdversarialMarketTopology": {
+      "additionalProperties": false,
+      "description": "A Zero-Cost Macro abstraction that deterministically compiles into a Red/Blue team CouncilTopology.",
+      "properties": {
+        "type": {
+          "const": "macro_adversarial",
+          "default": "macro_adversarial",
+          "description": "Discriminator for adversarial macro.",
+          "title": "Type",
+          "type": "string"
+        },
+        "blue_team_ids": {
+          "description": "Nodes assigned to the Blue Team.",
+          "items": {
+            "$ref": "#/$defs/NodeID"
+          },
+          "minItems": 1,
+          "title": "Blue Team Ids",
+          "type": "array"
+        },
+        "red_team_ids": {
+          "description": "Nodes assigned to the Red Team.",
+          "items": {
+            "$ref": "#/$defs/NodeID"
+          },
+          "minItems": 1,
+          "title": "Red Team Ids",
+          "type": "array"
+        },
+        "adjudicator_id": {
+          "$ref": "#/$defs/NodeID",
+          "description": "The neutral node responsible for synthesizing the market resolution."
+        },
+        "market_rules": {
+          "$ref": "#/$defs/PredictionMarketPolicy",
+          "description": "The mathematical AMM rules for the debate."
+        }
+      },
+      "required": [
+        "blue_team_ids",
+        "red_team_ids",
+        "adjudicator_id",
+        "market_rules"
+      ],
+      "title": "AdversarialMarketTopology",
+      "type": "object"
+    },
     "AdversarialSimulationProfile": {
       "additionalProperties": false,
       "description": "A deterministic red-team configuration defining a structural attack vector\nto continuously validate semantic firewalls and execution bounds.",
@@ -931,6 +978,8 @@
           "digital_twin": "#/$defs/DigitalTwinTopology",
           "evaluator_optimizer": "#/$defs/EvaluatorOptimizerTopology",
           "evolutionary": "#/$defs/EvolutionaryTopology",
+          "macro_adversarial": "#/$defs/AdversarialMarketTopology",
+          "macro_federation": "#/$defs/ConsensusFederationTopology",
           "smpc": "#/$defs/SMPCTopology",
           "swarm": "#/$defs/SwarmTopology"
         },
@@ -957,6 +1006,12 @@
         },
         {
           "$ref": "#/$defs/DigitalTwinTopology"
+        },
+        {
+          "$ref": "#/$defs/AdversarialMarketTopology"
+        },
+        {
+          "$ref": "#/$defs/ConsensusFederationTopology"
         }
       ]
     },
@@ -2245,6 +2300,43 @@
         "required_capabilities"
       ],
       "title": "ComputeProvisioningRequest",
+      "type": "object"
+    },
+    "ConsensusFederationTopology": {
+      "additionalProperties": false,
+      "description": "A Zero-Cost Macro abstraction compiling into a standard PBFT CouncilTopology.",
+      "properties": {
+        "type": {
+          "const": "macro_federation",
+          "default": "macro_federation",
+          "description": "Discriminator for federation macro.",
+          "title": "Type",
+          "type": "string"
+        },
+        "participant_ids": {
+          "description": "The nodes forming the PBFT ring.",
+          "items": {
+            "$ref": "#/$defs/NodeID"
+          },
+          "minItems": 3,
+          "title": "Participant Ids",
+          "type": "array"
+        },
+        "adjudicator_id": {
+          "$ref": "#/$defs/NodeID",
+          "description": "The orchestrating sequencer for the PBFT consensus."
+        },
+        "quorum_rules": {
+          "$ref": "#/$defs/QuorumPolicy",
+          "description": "The strict BFT tolerance bounds."
+        }
+      },
+      "required": [
+        "participant_ids",
+        "adjudicator_id",
+        "quorum_rules"
+      ],
+      "title": "ConsensusFederationTopology",
       "type": "object"
     },
     "ConsensusPolicy": {
