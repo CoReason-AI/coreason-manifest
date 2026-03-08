@@ -3185,6 +3185,40 @@
       "title": "EmbodiedSensoryVector",
       "type": "object"
     },
+    "EpistemicCompressionSLA": {
+      "additionalProperties": false,
+      "properties": {
+        "strict_probability_retention": {
+          "default": true,
+          "description": "If True, forces the resulting SemanticNode to populate its uncertainty_profile.",
+          "title": "Strict Probability Retention",
+          "type": "boolean"
+        },
+        "max_allowed_entropy_loss": {
+          "description": "The maximum allowed statistical flattening of the source data. Bounded between [0.0, 1.0].",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Max Allowed Entropy Loss",
+          "type": "number"
+        },
+        "required_grounding_density": {
+          "description": "Dictates the required granularity of the MultimodalTokenAnchor (e.g., must the model map every single entity, or just the global claim?).",
+          "enum": [
+            "sparse",
+            "dense",
+            "exhaustive"
+          ],
+          "title": "Required Grounding Density",
+          "type": "string"
+        }
+      },
+      "required": [
+        "max_allowed_entropy_loss",
+        "required_grounding_density"
+      ],
+      "title": "EpistemicCompressionSLA",
+      "type": "object"
+    },
     "EpistemicLedger": {
       "additionalProperties": false,
       "description": "The Committed Epistemic Ledger (crystallized truth), completely partitioned from volatile working memory\nor Epistemic Quarantine.",
@@ -3357,6 +3391,63 @@
       "title": "EpistemicScanner",
       "type": "object"
     },
+    "EpistemicTransmutationTask": {
+      "additionalProperties": false,
+      "properties": {
+        "task_id": {
+          "description": "Unique identifier for this specific multimodal extraction intervention.",
+          "minLength": 1,
+          "title": "Task Id",
+          "type": "string"
+        },
+        "artifact_event_id": {
+          "description": "The CID of the MultimodalArtifact being processed.",
+          "title": "Artifact Event Id",
+          "type": "string"
+        },
+        "target_modalities": {
+          "description": "The specific SOTA modality resolutions required for this extraction pass.",
+          "items": {
+            "enum": [
+              "text",
+              "raster_image",
+              "vector_graphics",
+              "tabular_grid"
+            ],
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Target Modalities",
+          "type": "array"
+        },
+        "compression_sla": {
+          "$ref": "#/$defs/EpistemicCompressionSLA",
+          "description": "The strict mathematical boundary defining the maximum allowed informational entropy loss."
+        },
+        "execution_cost_budget_cents": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional maximum economic expenditure authorized to run this VLM transmutation.",
+          "title": "Execution Cost Budget Cents"
+        }
+      },
+      "required": [
+        "task_id",
+        "artifact_event_id",
+        "target_modalities",
+        "compression_sla"
+      ],
+      "title": "EpistemicTransmutationTask",
+      "type": "object"
+    },
     "EscalationContract": {
       "additionalProperties": false,
       "properties": {
@@ -3527,6 +3618,12 @@
           "minimum": 1,
           "title": "Max Revision Loops",
           "type": "integer"
+        },
+        "require_multimodal_grounding": {
+          "default": false,
+          "description": "If True, the evaluator_node_id MUST mathematically mask all tokens outside the MultimodalTokenAnchor during its forward pass to execute pure adversarial Proposer-Critique validation.",
+          "title": "Require Multimodal Grounding",
+          "type": "boolean"
         }
       },
       "required": [
@@ -5717,17 +5814,30 @@
           "title": "Source Event Id",
           "type": "string"
         },
-        "spatial_anchor": {
+        "source_artifact_id": {
           "anyOf": [
             {
-              "$ref": "#/$defs/SpatialAnchor"
+              "type": "string"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "The physical coordinate matrix where this data was extracted."
+          "description": "The CID of the Genesis MultimodalArtifact this memory was transmutated from.",
+          "title": "Source Artifact Id"
+        },
+        "multimodal_anchor": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MultimodalTokenAnchor"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The unified VLM spatial and temporal token matrix where this data was extracted."
         },
         "lineage_watermark": {
           "anyOf": [
@@ -5864,6 +5974,135 @@
         "rate_card"
       ],
       "title": "ModelProfile",
+      "type": "object"
+    },
+    "MultimodalArtifact": {
+      "additionalProperties": false,
+      "description": "AGENT INSTRUCTION: The root Genesis Block for an unstructured document entering the Merkle-DAG.",
+      "properties": {
+        "artifact_id": {
+          "description": "The definitive Content Identifier (CID) bounding the raw file.",
+          "title": "Artifact Id",
+          "type": "string"
+        },
+        "mime_type": {
+          "description": "Strict MIME typing of the source artifact (e.g., 'application/pdf').",
+          "title": "Mime Type",
+          "type": "string"
+        },
+        "byte_stream_hash": {
+          "description": "The undeniable SHA-256 hash of the pre-transmutation byte stream.",
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Byte Stream Hash",
+          "type": "string"
+        },
+        "temporal_ingest_timestamp": {
+          "description": "The UNIX timestamp anchoring the genesis block.",
+          "title": "Temporal Ingest Timestamp",
+          "type": "number"
+        }
+      },
+      "required": [
+        "artifact_id",
+        "mime_type",
+        "byte_stream_hash",
+        "temporal_ingest_timestamp"
+      ],
+      "title": "MultimodalArtifact",
+      "type": "object"
+    },
+    "MultimodalTokenAnchor": {
+      "additionalProperties": false,
+      "description": "AGENT INSTRUCTION: Unified multimodal grounding mapping extracted facts to strict 1D token spans and 2D visual\npatches.",
+      "properties": {
+        "token_span_start": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The starting index in the discrete VLM context window.",
+          "title": "Token Span Start"
+        },
+        "token_span_end": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The ending index in the discrete VLM context window.",
+          "title": "Token Span End"
+        },
+        "visual_patch_hashes": {
+          "description": "List of SHA-256 hashes corresponding to specific VQ-VAE visual patches attended to.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Visual Patch Hashes",
+          "type": "array"
+        },
+        "bounding_box": {
+          "anyOf": [
+            {
+              "maxItems": 4,
+              "minItems": 4,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The strictly typed [x_min, y_min, x_max, y_max] normalized coordinate matrix.",
+          "title": "Bounding Box"
+        },
+        "block_type": {
+          "anyOf": [
+            {
+              "enum": [
+                "paragraph",
+                "table",
+                "figure",
+                "footnote",
+                "header",
+                "equation"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The structural classification of the source region.",
+          "title": "Block Type"
+        }
+      },
+      "title": "MultimodalTokenAnchor",
       "type": "object"
     },
     "MutationPolicy": {
@@ -7760,75 +7999,6 @@
         "status"
       ],
       "title": "SpanTrace",
-      "type": "object"
-    },
-    "SpatialAnchor": {
-      "additionalProperties": false,
-      "properties": {
-        "page_number": {
-          "anyOf": [
-            {
-              "type": "integer"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The physical page or slide number.",
-          "title": "Page Number"
-        },
-        "bounding_box": {
-          "anyOf": [
-            {
-              "maxItems": 4,
-              "minItems": 4,
-              "prefixItems": [
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "number"
-                }
-              ],
-              "type": "array"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The strictly typed [x_min, y_min, x_max, y_max] coordinate matrix.",
-          "title": "Bounding Box"
-        },
-        "block_type": {
-          "anyOf": [
-            {
-              "enum": [
-                "paragraph",
-                "table",
-                "figure",
-                "footnote",
-                "header"
-              ],
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The structural classification of the source region.",
-          "title": "Block Type"
-        }
-      },
-      "title": "SpatialAnchor",
       "type": "object"
     },
     "SpatialKinematicAction": {
