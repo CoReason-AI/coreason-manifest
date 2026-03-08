@@ -223,7 +223,7 @@ def test_digital_twin_topology_routes_through_discriminator() -> None:
         "enforce_no_side_effects": True,
     }
 
-    adapter = TypeAdapter(AnyTopology)
+    adapter: TypeAdapter[AnyTopology] = TypeAdapter(AnyTopology)
     topology = adapter.validate_python(payload)
 
     assert isinstance(topology, DigitalTwinTopology)
