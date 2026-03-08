@@ -5,6 +5,7 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
+import contextlib
 from typing import Any, cast
 
 from mcp.server.fastmcp import FastMCP
@@ -23,7 +24,6 @@ for _name in coreason_manifest.__all__:
     # Skip None and the abstract base class itself
     if _obj is None or _obj is CoreasonBaseModel:
         continue
-    import contextlib
 
     with contextlib.suppress(Exception):
         _AVAILABLE_SCHEMAS[_name] = TypeAdapter(_obj).json_schema()
