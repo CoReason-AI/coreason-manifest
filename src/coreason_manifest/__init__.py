@@ -69,6 +69,7 @@ from coreason_manifest.oversight.dlp import (
     SemanticFirewallPolicy,
 )
 from coreason_manifest.oversight.governance import (
+    AnchoringPolicy,
     ConsensusPolicy,
     ConstitutionalRule,
     FormalVerificationContract,
@@ -229,6 +230,7 @@ from coreason_manifest.workflow.topologies import (
     CouncilTopology,
     DAGTopology,
     DiversityConstraint,
+    EvaluatorOptimizerTopology,
     EvolutionaryTopology,
     OntologicalAlignmentPolicy,
     SMPCTopology,
@@ -249,6 +251,7 @@ __all__ = [
     "AgentNode",
     "AmbientSignal",
     "AnalogicalMappingTask",
+    "AnchoringPolicy",
     "AnyIntent",
     "AnyInterventionPayload",
     "AnyNode",
@@ -314,6 +317,7 @@ __all__ = [
     "EscalationContract",
     "EscalationIntent",
     "EscrowPolicy",
+    "EvaluatorOptimizerTopology",
     "EvictionPolicy",
     "EvidentiaryWarrant",
     "EvolutionaryTopology",

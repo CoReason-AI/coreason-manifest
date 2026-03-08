@@ -166,6 +166,19 @@ def draw_latent_scratchpad_trace(draw: Any) -> dict[str, Any]:
 
 
 @st.composite
+def draw_anchoring_policy(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "anchor_prompt_hash": st.from_regex(r"^[a-f0-9]{64}$", fullmatch=True),
+                "max_semantic_drift": st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
 def draw_reflex_policy(draw: Any) -> dict[str, Any]:
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(
@@ -503,6 +516,35 @@ def draw_logit_steganography_contract(draw: Any) -> dict[str, Any]:
 
 
 @st.composite
+def draw_domain_extensions(draw: Any) -> dict[str, Any]:
+    # Base JSON primitives
+    json_primitives = st.one_of(
+        st.text(max_size=50), st.integers(), st.floats(allow_nan=False, allow_infinity=False), st.booleans(), st.none()
+    )
+
+    # Generate recursive structures bounded to depth 5 (max_leaves controls scale)
+    base_dict = st.dictionaries(st.text(max_size=255), json_primitives, max_size=5)
+
+    res: dict[str, Any] = draw(
+        st.one_of(
+            base_dict,
+            st.dictionaries(
+                st.text(max_size=255),
+                st.recursive(
+                    base_dict,
+                    lambda children: st.one_of(
+                        st.lists(children, max_size=3), st.dictionaries(st.text(max_size=255), children, max_size=3)
+                    ),
+                    max_leaves=3,
+                ),
+                max_size=5,
+            ),
+        )
+    )
+    return res
+
+
+@st.composite
 def draw_agent_node_payload(draw: Any) -> dict[str, Any]:
     payload: dict[str, Any] = {"type": "agent", "description": draw(st.text())}
     if draw(st.booleans()):
@@ -525,6 +567,10 @@ def draw_agent_node_payload(draw: Any) -> dict[str, Any]:
         payload["epistemic_policy"] = draw(draw_epistemic_policy())
     if draw(st.booleans()):
         payload["correction_policy"] = draw(draw_correction_policy())
+    if draw(st.booleans()):
+        payload["anchoring_policy"] = draw(draw_anchoring_policy())
+    if draw(st.booleans()):
+        payload["domain_extensions"] = draw(draw_domain_extensions())
     return payload
 
 
@@ -533,6 +579,8 @@ def draw_human_node_payload(draw: Any) -> dict[str, Any]:
     payload: dict[str, Any] = {"type": "human", "description": draw(st.text())}
     if draw(st.booleans()):
         payload["intervention_policies"] = draw(st.lists(draw_intervention_policy(), max_size=100))
+    if draw(st.booleans()):
+        payload["domain_extensions"] = draw(draw_domain_extensions())
     return payload
 
 
@@ -541,6 +589,8 @@ def draw_system_node_payload(draw: Any) -> dict[str, Any]:
     payload: dict[str, Any] = {"type": "system", "description": draw(st.text())}
     if draw(st.booleans()):
         payload["intervention_policies"] = draw(st.lists(draw_intervention_policy(), max_size=100))
+    if draw(st.booleans()):
+        payload["domain_extensions"] = draw(draw_domain_extensions())
     return payload
 
 
@@ -807,7 +857,33 @@ def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> 
         }
     )
 
-    return st.one_of(dag_strategy, council_strategy, swarm_strategy, smpc_strategy)
+    def _eval_opt_mapper(payload: dict[str, Any]) -> dict[str, Any]:
+        if len(payload["nodes"]) < 2:
+            return payload
+        node_ids = list(payload["nodes"].keys())
+        payload["generator_node_id"] = node_ids[0]
+        payload["evaluator_node_id"] = node_ids[1]
+        return payload
+
+    eval_opt_strategy = st.fixed_dictionaries(
+        {
+            "type": st.just("evaluator_optimizer"),
+            "nodes": st.dictionaries(
+                draw_did_string(),
+                nodes_strategy,
+                min_size=2,
+                max_size=5,
+            ),
+            "shared_state_contract": st.none(),
+            "information_flow": st.none(),
+            "observability": st.none(),
+            "generator_node_id": st.text(min_size=1),
+            "evaluator_node_id": st.text(min_size=1),
+            "max_revision_loops": st.integers(min_value=1, max_value=50),
+        }
+    ).map(_eval_opt_mapper)
+
+    return st.one_of(dag_strategy, council_strategy, swarm_strategy, smpc_strategy, eval_opt_strategy)
 
 
 def draw_composite_node_payload(
@@ -821,6 +897,7 @@ def draw_composite_node_payload(
             "topology": topology_strategy,
             "input_mappings": st.lists(draw_input_mapping(), max_size=5),
             "output_mappings": st.lists(draw_output_mapping(), max_size=5),
+            "domain_extensions": st.one_of(st.none(), draw_domain_extensions()),
         }
     )
 
@@ -997,6 +1074,15 @@ topology_adapter: TypeAdapter[AnyTopology] = TypeAdapter(AnyTopology)
 def test_anytopology_routing(payload: dict[str, Any]) -> None:
     parsed = topology_adapter.validate_python(payload)
     assert parsed.type == "evolutionary"
+
+
+@given(draw_topology_payload(draw_base_node_payload()))
+def test_topology_routing(payload: dict[str, Any]) -> None:
+    parsed = topology_adapter.validate_python(payload)
+    if parsed.type == "evaluator_optimizer":
+        from coreason_manifest.workflow.topologies import EvaluatorOptimizerTopology
+
+        assert isinstance(parsed, EvaluatorOptimizerTopology)
 
 
 @st.composite
