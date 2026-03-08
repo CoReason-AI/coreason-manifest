@@ -56,7 +56,8 @@ type ToolID = Annotated[
         pattern=r"^[a-zA-Z0-9_-]+$",
         min_length=1,
         max_length=128,
-        description="A cryptographically deterministic capability pointer binding the agent to a verifiable spatial environment.",
+        description="A cryptographically deterministic capability pointer binding the agent to a verifiable spatial "
+        "environment.",
         examples=["calculator", "web_search"],
     ),
 ]
@@ -67,7 +68,8 @@ type ProfileID = Annotated[
         pattern=r"^[a-zA-Z0-9_-]+$",
         min_length=1,
         max_length=128,
-        description="A deterministic cognitive routing boundary that defines the non-monotonic instruction set for the agent.",
+        description="A deterministic cognitive routing boundary that defines the non-monotonic instruction set "
+        "for the agent.",
         examples=["default_assistant", "code_expert"],
     ),
 ]
