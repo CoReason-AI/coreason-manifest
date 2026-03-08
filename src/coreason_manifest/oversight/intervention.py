@@ -119,6 +119,27 @@ class OverrideIntent(CoreasonBaseModel):
     )
 
 
+class ConstitutionalAmendmentProposal(CoreasonBaseModel):
+    """
+    Proposed amendment generated in response to normative drift detection.
+    """
+
+    type: Literal["constitutional_amendment"] = Field(
+        default="constitutional_amendment", description="The strict discriminator for this intervention payload."
+    )
+    drift_event_id: str = Field(
+        description="The CID of the NormativeDriftEvent that justified triggering this proposal."
+    )
+    proposed_patch: dict[str, Any] = Field(
+        description="A strict, structurally bounded JSON Patch (RFC 6902) proposed by the AI "
+        "to mutate the GovernancePolicy."
+    )
+    justification: str = Field(
+        description="The AI's natural language legal/logical argument for why this patch resolves the contradiction "
+        "without violating the root AnchoringPolicy."
+    )
+
+
 # =========================================================================
 # AGENT INSTRUCTION: WARNING - POLYMORPHIC ROUTER
 # If you create a new class above, you MUST append it to the AnyInterventionPayload union below.
@@ -127,5 +148,6 @@ class OverrideIntent(CoreasonBaseModel):
 # =========================================================================
 
 type AnyInterventionPayload = Annotated[
-    InterventionRequest | InterventionVerdict | OverrideIntent, Field(discriminator="type")
+    InterventionRequest | InterventionVerdict | OverrideIntent | ConstitutionalAmendmentProposal,
+    Field(discriminator="type"),
 ]
