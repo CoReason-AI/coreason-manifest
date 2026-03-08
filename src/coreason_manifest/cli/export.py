@@ -20,44 +20,18 @@ def main() -> None:
         print(f"Failed to import coreason_manifest: {e}")
         sys.exit(1)
 
-    models_to_export = []
+    from coreason_manifest.core.base import CoreasonBaseModel
 
-    # We should also import CoreasonBaseModel to check isinstance/issubclass
-    from coreason_manifest.core import CoreasonBaseModel
+    models_to_export: list[tuple[type[CoreasonBaseModel], str]] = []
 
-    # Import all domains dynamically to collect schemas
-    domains = [
-        "coreason_manifest.core",
-        "coreason_manifest.oversight",
-        "coreason_manifest.state",
-        "coreason_manifest.testing",
-        "coreason_manifest.tooling",
-        "coreason_manifest.workflow",
-        "coreason_manifest.telemetry",
-        "coreason_manifest.compute",
-    ]
-
-    for domain in domains:
-        try:
-            mod = importlib.import_module(domain)
-            for name in getattr(mod, "__all__", []):
-                obj = getattr(mod, name)
-                if isinstance(obj, type) and issubclass(obj, CoreasonBaseModel) and obj is not CoreasonBaseModel:
-                    models_to_export.append((obj, "validation"))
-        except ImportError:
-            pass
-
-    # Include any root schemas just in case
     for name in getattr(manifest, "__all__", []):
-        obj = getattr(manifest, name)
+        obj = getattr(manifest, name, None)
+        # Strictly filter for BaseModel classes only to avoid crashing models_json_schema
         if isinstance(obj, type) and issubclass(obj, CoreasonBaseModel) and obj is not CoreasonBaseModel:
             models_to_export.append((obj, "validation"))
 
-    # Remove duplicates
-    unique_models = {}
-    for obj, type_ in models_to_export:
-        unique_models[obj] = (obj, type_)
-    models_to_export = list(unique_models.values())
+    # Sort alphabetically by class name
+    models_to_export.sort(key=lambda item: item[0].__name__)
 
     if not models_to_export:
         print("No models found to export.")
