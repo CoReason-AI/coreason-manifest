@@ -308,6 +308,13 @@ class SMPCTopology(BaseTopology):
     )
 
 
+# =========================================================================
+# AGENT INSTRUCTION: WARNING - POLYMORPHIC ROUTER
+# If you create a new class above, you MUST append it to the AnyTopology union below.
+# Failure to do so will result in a fatal Pydantic discriminator crash at runtime,
+# creating a 'Dangling Class' that the orchestrator cannot deserialize.
+# =========================================================================
+
 type AnyTopology = Annotated[
     DAGTopology | CouncilTopology | SwarmTopology | EvolutionaryTopology | SMPCTopology,
     Field(discriminator="type", description="A discriminated union of workflow topologies."),

@@ -119,6 +119,13 @@ class OverrideIntent(CoreasonBaseModel):
     )
 
 
+# =========================================================================
+# AGENT INSTRUCTION: WARNING - POLYMORPHIC ROUTER
+# If you create a new class above, you MUST append it to the AnyInterventionPayload union below.
+# Failure to do so will result in a fatal Pydantic discriminator crash at runtime,
+# creating a 'Dangling Class' that the orchestrator cannot deserialize.
+# =========================================================================
+
 type AnyInterventionPayload = Annotated[
     InterventionRequest | InterventionVerdict | OverrideIntent, Field(discriminator="type")
 ]
