@@ -330,6 +330,19 @@
         "scale_type": {
           "$ref": "#/$defs/ChartAxisScale",
           "description": "The mathematical progression between min and max."
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The physical or statistical unit of measurement corresponding to this spatial axis (e.g., 'months', 'mg/dL', 'log10').",
+          "title": "Unit"
         }
       },
       "required": [
@@ -5563,6 +5576,43 @@
       "title": "LakehouseMountConfig",
       "type": "object"
     },
+    "LakehousePersistenceContract": {
+      "additionalProperties": false,
+      "properties": {
+        "contract_id": {
+          "description": "Unique UUID for this specific persistence execution.",
+          "minLength": 1,
+          "title": "Contract Id",
+          "type": "string"
+        },
+        "artifact_event_id": {
+          "description": "The CID of the multimodal graph state that must be persisted.",
+          "title": "Artifact Event Id",
+          "type": "string"
+        },
+        "mount_config": {
+          "$ref": "#/$defs/LakehouseMountConfig",
+          "description": "The target catalog and schema evolution constraints."
+        },
+        "mutation_policy": {
+          "$ref": "#/$defs/ContinuousMutationPolicy",
+          "description": "The declarative backpressure and write paradigm rules."
+        },
+        "flattening_directive": {
+          "$ref": "#/$defs/GraphFlatteningDirective",
+          "description": "The structural mapping rules for flattening the semantic graph into tabular columns."
+        }
+      },
+      "required": [
+        "contract_id",
+        "artifact_event_id",
+        "mount_config",
+        "mutation_policy",
+        "flattening_directive"
+      ],
+      "title": "LakehousePersistenceContract",
+      "type": "object"
+    },
     "LatentScratchpadTrace": {
       "additionalProperties": false,
       "properties": {
@@ -8726,6 +8776,14 @@
           },
           "title": "Data Series",
           "type": "array"
+        },
+        "legend_mappings": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "A strict mapping dictionary connecting visual markers identified in the image (e.g., '#FF0000', 'dashed_line') to their explicit semantic labels found in the chart's legend (e.g., 'Placebo Cohort').",
+          "title": "Legend Mappings",
+          "type": "object"
         }
       },
       "required": [
