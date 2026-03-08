@@ -12,6 +12,7 @@ from coreason_manifest.state.events import (
     AnyStateEvent,
     EpistemicPromotionEvent,
     NeuralAuditAttestation,
+    NormativeDriftEvent,
     SaeFeatureActivation,
 )
 
@@ -78,3 +79,23 @@ def test_epistemic_promotion_event_routing() -> None:
     assert parsed_event.source_episodic_event_ids == ["obs_1", "obs_2", "obs_3"]
     assert parsed_event.crystallized_semantic_node_id == "sem_node_42"
     assert parsed_event.compression_ratio == 5.0
+
+
+def test_normative_drift_event_routing() -> None:
+    event_data = {
+        "type": "normative_drift",
+        "event_id": "drift_456",
+        "timestamp": 1234567890.0,
+        "tripped_rule_id": "rule_789",
+        "measured_semantic_drift": 0.95,
+        "contradiction_proof_hash": "proof_hash_abc",
+    }
+
+    adapter: TypeAdapter[AnyStateEvent] = TypeAdapter(AnyStateEvent)
+    parsed_event = adapter.validate_python(event_data)
+
+    assert isinstance(parsed_event, NormativeDriftEvent)
+    assert parsed_event.event_id == "drift_456"
+    assert parsed_event.tripped_rule_id == "rule_789"
+    assert parsed_event.measured_semantic_drift == 0.95
+    assert parsed_event.contradiction_proof_hash == "proof_hash_abc"

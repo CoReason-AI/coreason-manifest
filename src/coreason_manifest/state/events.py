@@ -355,6 +355,23 @@ class EpistemicPromotionEvent(BaseStateEvent):
     )
 
 
+class NormativeDriftEvent(BaseStateEvent):
+    type: Literal["normative_drift"] = Field(
+        default="normative_drift", description="Discriminator type for a normative drift event."
+    )
+    tripped_rule_id: str = Field(
+        description="The Content Identifier (CID) of the specific ConstitutionalRule causing logical friction."
+    )
+    measured_semantic_drift: float = Field(
+        description="The calculated probabilistic delta showing how far the swarm's observed reality "
+        "is diverging from the static rule."
+    )
+    contradiction_proof_hash: str = Field(
+        description="A cryptographic pointer to the internal scratchpad trace (ThoughtBranch) "
+        "definitively proving the rule is obsolete or causing a loop."
+    )
+
+
 # =========================================================================
 # AGENT INSTRUCTION: WARNING - POLYMORPHIC ROUTER
 # If you create a new class above, you MUST append it to the AnyStateEvent union below.
@@ -370,6 +387,7 @@ type AnyStateEvent = Annotated[
     | BargeInInterruptEvent
     | CounterfactualRegretEvent
     | ToolInvocationEvent
-    | EpistemicPromotionEvent,
+    | EpistemicPromotionEvent
+    | NormativeDriftEvent,
     Field(discriminator="type", description="A discriminated union of state events."),
 ]
