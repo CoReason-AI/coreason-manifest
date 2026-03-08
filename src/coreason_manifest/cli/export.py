@@ -32,8 +32,13 @@ def main() -> None:
         print("No models found to export.")
         sys.exit(0)
 
+    pydantic_models = cast(
+        "Sequence[tuple[type[BaseModel], typing.Literal['validation']]]",
+        [(m, "validation") for m in models_to_export],
+    )
+
     _, top_level_schema = models_json_schema(
-        cast("Sequence[tuple[type[BaseModel], typing.Literal['validation']]]", models_to_export),
+        pydantic_models,
         title="CoReason Shared Kernel Ontology",
         description="Unified JSON Schema for the Coreason Manifest",
     )
