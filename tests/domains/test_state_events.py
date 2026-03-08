@@ -70,7 +70,7 @@ def test_epistemic_promotion_event_routing() -> None:
         "compression_ratio": 5.0,
     }
 
-    adapter = TypeAdapter(AnyStateEvent)
+    adapter: TypeAdapter[AnyStateEvent] = TypeAdapter(AnyStateEvent)
     parsed_event = adapter.validate_python(event_data)
 
     assert isinstance(parsed_event, EpistemicPromotionEvent)

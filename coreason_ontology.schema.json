@@ -815,6 +815,7 @@
           "barge_in": "#/$defs/BargeInInterruptEvent",
           "belief_update": "#/$defs/BeliefUpdateEvent",
           "counterfactual_regret": "#/$defs/CounterfactualRegretEvent",
+          "epistemic_promotion": "#/$defs/EpistemicPromotionEvent",
           "hypothesis": "#/$defs/HypothesisGenerationEvent",
           "observation": "#/$defs/ObservationEvent",
           "system_fault": "#/$defs/SystemFaultEvent",
@@ -843,6 +844,9 @@
         },
         {
           "$ref": "#/$defs/ToolInvocationEvent"
+        },
+        {
+          "$ref": "#/$defs/EpistemicPromotionEvent"
         }
       ]
     },
@@ -2504,6 +2508,39 @@
       ],
       "type": "string"
     },
+    "CrystallizationPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "min_observations_required": {
+          "description": "The minimum number of episodic logs needed to statistically prove a crystallized rule.",
+          "minimum": 10,
+          "title": "Min Observations Required",
+          "type": "integer"
+        },
+        "aleatoric_entropy_threshold": {
+          "description": "The entropy variance must fall below this mathematical threshold to prove absolute certainty before compression is authorized.",
+          "maximum": 0.1,
+          "title": "Aleatoric Entropy Threshold",
+          "type": "number"
+        },
+        "target_memory_tier": {
+          "description": "The destination tier where the compressed rule will be stored.",
+          "enum": [
+            "semantic",
+            "working"
+          ],
+          "title": "Target Memory Tier",
+          "type": "string"
+        }
+      },
+      "required": [
+        "min_observations_required",
+        "aleatoric_entropy_threshold",
+        "target_memory_tier"
+      ],
+      "title": "CrystallizationPolicy",
+      "type": "object"
+    },
     "CustodyRecord": {
       "additionalProperties": false,
       "description": "Cryptographic state of an agent to ensure full traceability and provenance.",
@@ -3161,12 +3198,73 @@
           },
           "title": "Active Cascades",
           "type": "array"
+        },
+        "crystallization_policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CrystallizationPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematical threshold required to compress episodic observations into semantic rules."
         }
       },
       "required": [
         "history"
       ],
       "title": "EpistemicLedger",
+      "type": "object"
+    },
+    "EpistemicPromotionEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "type": {
+          "const": "epistemic_promotion",
+          "default": "epistemic_promotion",
+          "description": "Discriminator type for an epistemic promotion event.",
+          "title": "Type",
+          "type": "string"
+        },
+        "source_episodic_event_ids": {
+          "description": "A list of CIDs (Content Identifiers) representing the raw logs being compressed and archived.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Episodic Event Ids",
+          "type": "array"
+        },
+        "crystallized_semantic_node_id": {
+          "description": "The resulting permanent W3C DID / CID of the newly minted knowledge node.",
+          "title": "Crystallized Semantic Node Id",
+          "type": "string"
+        },
+        "compression_ratio": {
+          "description": "A mathematical proof of the token savings achieved (e.g., old_token_count / new_token_count).",
+          "title": "Compression Ratio",
+          "type": "number"
+        }
+      },
+      "required": [
+        "event_id",
+        "timestamp",
+        "source_episodic_event_ids",
+        "crystallized_semantic_node_id",
+        "compression_ratio"
+      ],
+      "title": "EpistemicPromotionEvent",
       "type": "object"
     },
     "EpistemicScanner": {

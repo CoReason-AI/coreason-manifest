@@ -43,7 +43,7 @@ def test_crystallization_policy_entropy_threshold() -> None:
     )
 
     # Invalid
-    with pytest.raises(ValidationError, match="Input should be less than or equal to 0.1"):
+    with pytest.raises(ValidationError, match=r"Input should be less than or equal to 0\.1"):
         CrystallizationPolicy(
             min_observations_required=10,
             aleatoric_entropy_threshold=0.11,

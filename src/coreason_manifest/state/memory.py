@@ -33,7 +33,8 @@ class CrystallizationPolicy(CoreasonBaseModel):
     )
     aleatoric_entropy_threshold: float = Field(
         le=0.1,
-        description="The entropy variance must fall below this mathematical threshold to prove absolute certainty before compression is authorized.",
+        description="The entropy variance must fall below this mathematical threshold "
+        "to prove absolute certainty before compression is authorized.",
     )
     target_memory_tier: Literal["semantic", "working"] = Field(
         description="The destination tier where the compressed rule will be stored."
