@@ -36,3 +36,7 @@ def test_multimodal_token_anchor_bounds() -> None:
     # Proof: Start >= End
     with pytest.raises(ValidationError, match="token_span_end MUST be strictly greater than token_span_start"):
         MultimodalTokenAnchor(token_span_start=5, token_span_end=5)
+
+    # Proof: End defined, Start undefined
+    with pytest.raises(ValidationError, match="token_span_end cannot be defined without a token_span_start"):
+        MultimodalTokenAnchor(token_span_start=None, token_span_end=10)
