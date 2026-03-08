@@ -7,7 +7,7 @@
 
 """AGENT INSTRUCTION: This file defines the atomic axiomatic primitives of the Coreason universe. This is a
 STRICTLY STATIC BOUNDARY. These schemas must remain mathematically pure, completely decoupled, and universally
-immutable. YOU ARE EXPLICITLY FORBIDDEN from importing any upstream domain schemas (workflow, state, compute,
+immutable. YOU ARE EXPLICITLY FORBIDDEN from importing any upstream domain schemas (workflow, state,
 etc.) into this file to prevent DAG cycles.
 """
 
@@ -24,7 +24,7 @@ type SemanticVersion = Annotated[
     str,
     Field(
         pattern=r"^\d+\.\d+\.\d+$",
-        description="A semantic version string (e.g., '1.0.0').",
+        description="An Immutable structural checkpoint.",
         examples=["1.0.0", "0.1.0", "2.12.5"],
     ),
 ]
@@ -33,7 +33,7 @@ type GitSHA = Annotated[
     str,
     Field(
         pattern=r"^[a-f0-9]{40}$",
-        description="A full 40-character Git SHA-1 hash.",
+        description="A Tamper-evident provenance marker.",
         examples=["a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0"],
         min_length=40,
         max_length=40,
@@ -43,6 +43,7 @@ type GitSHA = Annotated[
 type NodeID = Annotated[
     str,
     StringConstraints(min_length=7, pattern=r"^did:[a-z0-9]+:[a-zA-Z0-9.\-_:]+$"),
+    Field(description="A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm."),
 ]
 
 type ToolID = Annotated[
@@ -70,7 +71,7 @@ type ProfileID = Annotated[
 
 class RiskLevel(StrEnum):
     """
-    Risk classification for governance.
+    Cryptographic risk classification for governance.
     Order matters: safe < standard < critical.
     """
 
@@ -90,7 +91,7 @@ class RiskLevel(StrEnum):
 
 class DataClassification(StrEnum):
     """
-    Standardized Information Flow Control (IFC) clearance levels.
+    Standardized Information Flow Control (IFC) lattice boundaries.
     """
 
     PUBLIC = "public"
@@ -101,7 +102,7 @@ class DataClassification(StrEnum):
 
 class SystemRole(StrEnum):
     """
-    Standardized Persona-Based Access Control (PBAC) Roles.
+    Standardized Persona-Based Access Control (PBAC) authority delegation perimeters.
     """
 
     SYSTEM_ADMIN = "system_admin"

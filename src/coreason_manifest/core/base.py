@@ -6,10 +6,11 @@
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
 """AGENT INSTRUCTION: This file enforces absolute structural rigidity and serialization boundaries across the
-Coreason manifestation models. This is a STRICTLY STATIC BOUNDARY. This baseline controls frozen immutability
-and cryptographic schema hashing to construct a Zero-Trust Architecture. YOU ARE EXPLICITLY FORBIDDEN from
-importing any upstream domain schemas (workflow, state, compute, etc.) into this file. Any upstream
-dependencies inserted here will instantly trigger a Circular Import Death Spiral.
+Coreason manifestation models. This file enforces the Law of Semantic Isometry. The schemas herein represent pure
+mathematical truth, completely divorced from kinetic execution environments or hardware states. This is a
+STRICTLY STATIC BOUNDARY. This baseline controls frozen immutability and cryptographic schema hashing to construct
+a Zero-Trust Architecture. YOU ARE EXPLICITLY FORBIDDEN from importing any upstream domain schemas (workflow, state,
+etc.) into this file. Any upstream dependencies inserted here will instantly trigger a Circular Import Death Spiral.
 """
 
 import json
@@ -21,6 +22,9 @@ from pydantic import BaseModel, ConfigDict
 class CoreasonBaseModel(BaseModel):
     """
     Base class for all domain models in the Coreason Manifest.
+
+    This model guarantees deterministic serialization for Tamper-Evident Hash Chains and
+    Merkle-Tree Attestations, preventing epistemic contamination.
 
     Enforces:
     1. Immutability (frozen=True) - Essential for distributed state consistency.
