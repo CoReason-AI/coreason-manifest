@@ -460,6 +460,7 @@ __all__ = [
 
 def _rebuild_ontology() -> None:
     from coreason_manifest.workflow.topologies import AnyTopology
+
     _ = AnyTopology
     """
     Dynamically resolves all Pydantic forward references strictly at the end of module initialization.
