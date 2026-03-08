@@ -91,6 +91,27 @@ def test_workflow_envelope_determinism() -> None:
     assert hash(env1) == hash(env2)
 
 
+def test_system2_remediation_determinism() -> None:
+    from coreason_manifest.presentation.remediation import System2RemediationPrompt
+
+    # Prove that out-of-order failing_pointers are sorted mathematically
+    prompt1 = System2RemediationPrompt(
+        fault_id="fault-123",
+        target_node_id="did:web:agent-alpha",
+        failing_pointers=["/zeta", "/alpha", "/gamma"],
+        remediation_prompt="Fix it.",
+    )
+    prompt2 = System2RemediationPrompt(
+        fault_id="fault-123",
+        target_node_id="did:web:agent-alpha",
+        failing_pointers=["/gamma", "/zeta", "/alpha"],
+        remediation_prompt="Fix it.",
+    )
+
+    assert prompt1.model_dump_canonical() == prompt2.model_dump_canonical()
+    assert hash(prompt1) == hash(prompt2)
+
+
 def test_affordance_projection_determinism() -> None:
     from coreason_manifest.tooling.environments import ActionSpace, OntologicalSurfaceProjection
 

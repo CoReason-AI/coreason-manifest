@@ -3275,3 +3275,29 @@ def test_synthetic_generation_profile_routing() -> None:
 
     parsed = adapter.validate_python(payload)
     assert isinstance(parsed, SyntheticGenerationProfile)
+
+
+@st.composite
+def draw_system2_remediation_prompt(draw: Any) -> dict[str, Any]:
+    return {
+        "fault_id": draw(st.text(min_size=1)),
+        "target_node_id": draw(draw_did_string()),
+        "failing_pointers": draw(st.lists(st.text(min_size=1), min_size=1, max_size=10)),
+        "remediation_prompt": draw(st.text(min_size=1)),
+    }
+
+
+def test_system2_remediation_prompt_fuzzing() -> None:
+    from coreason_manifest.presentation.remediation import System2RemediationPrompt
+
+    adapter = TypeAdapter(System2RemediationPrompt)
+
+    import hypothesis
+
+    @hypothesis.given(draw_system2_remediation_prompt())
+    @hypothesis.settings(max_examples=10)
+    def run_test(payload: dict[str, Any]) -> None:
+        parsed = adapter.validate_python(payload)
+        assert isinstance(parsed, System2RemediationPrompt)
+
+    run_test()

@@ -112,6 +112,7 @@ from coreason_manifest.presentation.intents import (
     InformationalIntent,
     PresentationEnvelope,
 )
+from coreason_manifest.presentation.remediation import System2RemediationPrompt
 from coreason_manifest.presentation.scivis import (
     AnyPanel,
     BasePanel,
@@ -512,6 +513,7 @@ __all__ = [
     "SwarmTopology",
     "SyntheticGenerationProfile",
     "System1Reflex",
+    "System2RemediationPrompt",
     "SystemFaultEvent",
     "SystemNode",
     "SystemRole",
