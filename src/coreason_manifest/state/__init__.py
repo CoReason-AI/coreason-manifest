@@ -73,8 +73,18 @@ from .toolchains import (
     BrowserDOMState,
     TerminalBufferState,
 )
+from .vision import (
+    AffineTransformMatrix,
+    DocumentLayoutAnalysis,
+    DocumentLayoutBlock,
+    MathematicalNotationExtraction,
+    StatisticalChartExtraction,
+    TableCell,
+    TabularDataExtraction,
+)
 
 __all__ = [
+    "AffineTransformMatrix",
     "ArgumentClaim",
     "ArgumentGraph",
     "BaseStateEvent",
@@ -87,6 +97,8 @@ __all__ = [
     "DefeasibleAttack",
     "DefeasibleCascade",
     "DimensionalProjectionContract",
+    "DocumentLayoutAnalysis",
+    "DocumentLayoutBlock",
     "EmbodiedSensoryVector",
     "EpistemicLedger",
     "EvictionPolicy",
@@ -99,6 +111,7 @@ __all__ = [
     "InterventionalCausalTask",
     "LatentScratchpadTrace",
     "LineageWatermark",
+    "MathematicalNotationExtraction",
     "MemoryProvenance",
     "MigrationContract",
     "MultimodalArtifact",
@@ -113,8 +126,11 @@ __all__ = [
     "SemanticNode",
     "StateDiff",
     "StatePatch",
+    "StatisticalChartExtraction",
     "StructuralCausalModel",
     "SystemFaultEvent",
+    "TableCell",
+    "TabularDataExtraction",
     "TemporalBounds",
     "TemporalCheckpoint",
     "TerminalBufferState",

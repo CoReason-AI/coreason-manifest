@@ -304,6 +304,44 @@
       "title": "AdversarialSimulationProfile",
       "type": "object"
     },
+    "AffineTransformMatrix": {
+      "additionalProperties": false,
+      "properties": {
+        "pixel_min": {
+          "description": "The absolute minimal visual coordinate on this axis.",
+          "title": "Pixel Min",
+          "type": "number"
+        },
+        "pixel_max": {
+          "description": "The absolute maximal visual coordinate on this axis.",
+          "title": "Pixel Max",
+          "type": "number"
+        },
+        "domain_min": {
+          "description": "The semantic/data value corresponding to pixel_min.",
+          "title": "Domain Min",
+          "type": "number"
+        },
+        "domain_max": {
+          "description": "The semantic/data value corresponding to pixel_max.",
+          "title": "Domain Max",
+          "type": "number"
+        },
+        "scale_type": {
+          "$ref": "#/$defs/ChartAxisScale",
+          "description": "The mathematical progression between min and max."
+        }
+      },
+      "required": [
+        "pixel_min",
+        "pixel_max",
+        "domain_min",
+        "domain_max",
+        "scale_type"
+      ],
+      "title": "AffineTransformMatrix",
+      "type": "object"
+    },
     "AgentAttestation": {
       "additionalProperties": false,
       "description": "Cryptographic identity passport and AI-BOM for the agent.",
@@ -1878,6 +1916,15 @@
       "title": "ChaosExperiment",
       "type": "object"
     },
+    "ChartAxisScale": {
+      "enum": [
+        "linear",
+        "log",
+        "categorical",
+        "datetime"
+      ],
+      "type": "string"
+    },
     "CircuitBreakerTrip": {
       "additionalProperties": false,
       "description": "Indicates that a circuit breaker has been tripped for a target node.",
@@ -3055,6 +3102,78 @@
         "model_variance_required"
       ],
       "title": "DiversityConstraint",
+      "type": "object"
+    },
+    "DocumentLayoutAnalysis": {
+      "additionalProperties": false,
+      "properties": {
+        "blocks": {
+          "additionalProperties": {
+            "$ref": "#/$defs/DocumentLayoutBlock"
+          },
+          "description": "Dictionary mapping block_ids to their strict spatial definitions.",
+          "title": "Blocks",
+          "type": "object"
+        },
+        "reading_order_edges": {
+          "description": "Directed edges defining the topological sort (chronological flow) of the document.",
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "type": "array"
+          },
+          "title": "Reading Order Edges",
+          "type": "array"
+        }
+      },
+      "required": [
+        "blocks"
+      ],
+      "title": "DocumentLayoutAnalysis",
+      "type": "object"
+    },
+    "DocumentLayoutBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "block_id": {
+          "description": "Unique structural identifier for this geometric region.",
+          "minLength": 1,
+          "title": "Block Id",
+          "type": "string"
+        },
+        "block_type": {
+          "description": "The taxonomic classification of the layout region.",
+          "enum": [
+            "header",
+            "paragraph",
+            "figure",
+            "table",
+            "footnote",
+            "caption",
+            "equation"
+          ],
+          "title": "Block Type",
+          "type": "string"
+        },
+        "anchor": {
+          "$ref": "#/$defs/MultimodalTokenAnchor",
+          "description": "The strict visual and token coordinate bindings for this block."
+        }
+      },
+      "required": [
+        "block_id",
+        "block_type",
+        "anchor"
+      ],
+      "title": "DocumentLayoutBlock",
       "type": "object"
     },
     "DraftingIntent": {
@@ -5786,6 +5905,47 @@
       "title": "MarketResolution",
       "type": "object"
     },
+    "MathematicalNotationExtraction": {
+      "additionalProperties": false,
+      "properties": {
+        "math_type": {
+          "description": "The structural context of the equation.",
+          "enum": [
+            "inline",
+            "display"
+          ],
+          "title": "Math Type",
+          "type": "string"
+        },
+        "syntax": {
+          "description": "The strict symbolic compilation language.",
+          "enum": [
+            "latex",
+            "mathml"
+          ],
+          "title": "Syntax",
+          "type": "string"
+        },
+        "expression": {
+          "description": "The raw, unescaped mathematical syntax string.",
+          "minLength": 1,
+          "title": "Expression",
+          "type": "string"
+        },
+        "anchor": {
+          "$ref": "#/$defs/MultimodalTokenAnchor",
+          "description": "The strict visual and token coordinate bindings. Cannot be None."
+        }
+      },
+      "required": [
+        "math_type",
+        "syntax",
+        "expression",
+        "anchor"
+      ],
+      "title": "MathematicalNotationExtraction",
+      "type": "object"
+    },
     "MechanisticAuditContract": {
       "additionalProperties": false,
       "properties": {
@@ -8247,6 +8407,43 @@
       "title": "StatePatch",
       "type": "object"
     },
+    "StatisticalChartExtraction": {
+      "additionalProperties": false,
+      "properties": {
+        "axes": {
+          "additionalProperties": {
+            "$ref": "#/$defs/AffineTransformMatrix"
+          },
+          "description": "Named axes (e.g., 'x', 'y') defining the affine transformation boundaries.",
+          "title": "Axes",
+          "type": "object"
+        },
+        "data_series": {
+          "description": "The discrete semantic tuples extracted from the chart markers.",
+          "items": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "type": "object"
+          },
+          "title": "Data Series",
+          "type": "array"
+        }
+      },
+      "required": [
+        "axes",
+        "data_series"
+      ],
+      "title": "StatisticalChartExtraction",
+      "type": "object"
+    },
     "StdioTransportConfig": {
       "additionalProperties": false,
       "description": "Configuration for local Stdio-based MCP transport.",
@@ -8571,6 +8768,72 @@
         "description"
       ],
       "title": "SystemNode",
+      "type": "object"
+    },
+    "TableCell": {
+      "additionalProperties": false,
+      "properties": {
+        "row_index": {
+          "description": "The zero-indexed absolute matrix row.",
+          "minimum": 0,
+          "title": "Row Index",
+          "type": "integer"
+        },
+        "col_index": {
+          "description": "The zero-indexed absolute matrix column.",
+          "minimum": 0,
+          "title": "Col Index",
+          "type": "integer"
+        },
+        "row_span": {
+          "default": 1,
+          "description": "The vertical height of the cell.",
+          "minimum": 1,
+          "title": "Row Span",
+          "type": "integer"
+        },
+        "col_span": {
+          "default": 1,
+          "description": "The horizontal width of the cell.",
+          "minimum": 1,
+          "title": "Col Span",
+          "type": "integer"
+        },
+        "content": {
+          "description": "The normalized text value.",
+          "title": "Content",
+          "type": "string"
+        },
+        "anchor": {
+          "$ref": "#/$defs/MultimodalTokenAnchor",
+          "description": "The physical location of the cell within the image or document."
+        }
+      },
+      "required": [
+        "row_index",
+        "col_index",
+        "content",
+        "anchor"
+      ],
+      "title": "TableCell",
+      "type": "object"
+    },
+    "TabularDataExtraction": {
+      "additionalProperties": false,
+      "properties": {
+        "cells": {
+          "description": "The sparse tensor representing all populated cells.",
+          "items": {
+            "$ref": "#/$defs/TableCell"
+          },
+          "title": "Cells",
+          "type": "array"
+        }
+      },
+      "required": [
+        "cells"
+      ],
+      "title": "TabularDataExtraction",
       "type": "object"
     },
     "TaskAnnouncement": {
