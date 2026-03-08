@@ -52,11 +52,7 @@ def _is_schema_allowed(schema_dict: dict[str, Any], granted_licenses: set[str]) 
 def list_schemas() -> list[str]:
     """Returns a list of all available schema names exported in the root __init__.py, filtered by RBAC context."""
     granted = _get_granted_licenses()
-    allowed_schemas = []
-    for name in _SCHEMA_NAMES:
-        if _is_schema_allowed(_AVAILABLE_SCHEMAS[name], granted):
-            allowed_schemas.append(name)
-    return allowed_schemas
+    return [name for name in _SCHEMA_NAMES if _is_schema_allowed(_AVAILABLE_SCHEMAS[name], granted)]
 
 
 @mcp.tool()

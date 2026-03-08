@@ -5977,6 +5977,14 @@
           },
           "title": "Allowed Prompts",
           "type": "array"
+        },
+        "required_licenses": {
+          "description": "Explicit list of DUA/RBAC enterprise licenses mathematically required to perceive and mount this capability.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Required Licenses",
+          "type": "array"
         }
       },
       "title": "MCPCapabilityWhitelist",

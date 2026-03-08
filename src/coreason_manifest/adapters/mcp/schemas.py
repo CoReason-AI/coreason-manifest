@@ -35,7 +35,10 @@ class MCPCapabilityWhitelist(CoreasonBaseModel):
     )
     required_licenses: list[str] = Field(
         default_factory=list,
-        description="Explicit list of DUA/RBAC enterprise licenses mathematically required to perceive and mount this capability.",
+        description=(
+            "Explicit list of DUA/RBAC enterprise licenses mathematically "
+            "required to perceive and mount this capability."
+        )
     )
 
 
