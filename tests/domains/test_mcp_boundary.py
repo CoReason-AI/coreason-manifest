@@ -41,6 +41,7 @@ def test_jsonrpc_fuzzer_invalid_id() -> None:
 def test_buffer_and_depth_attack_proof(params: dict[str, Any]) -> None:
     """
     Generate params payloads with deeply recursive JSON objects.
+
     Prove that the schema triggers a ValidationError if it goes out of bounds.
     """
     payload = {"jsonrpc": "2.0", "method": "test_method", "params": params, "id": 1}
@@ -218,6 +219,7 @@ def test_mcp_server_main_entrypoint() -> None:
 async def test_mcp_json_bomb_rejection() -> None:
     """
     Prove the JSON-Bomb OOM prevention shield works.
+
     Generate a raw string payload > 5MB, pass it to the stdio parser, and assert
     it instantly raises a parse error without attempting to decode it.
     """
@@ -275,6 +277,7 @@ async def test_mcp_json_bomb_rejection() -> None:
 async def test_uptime_assertion_poison_pill() -> None:
     """
     Pass toxic malformed dictionaries directly into the MCP server's primary request handling function.
+
     Assert that the function does not raise an exception.
     Assert that it gracefully returns a valid JSONRPCErrorResponse object with code -32600 or -32700.
     """

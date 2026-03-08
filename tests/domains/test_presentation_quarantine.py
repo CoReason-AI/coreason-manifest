@@ -22,6 +22,7 @@ from coreason_manifest.presentation.templates import DynamicLayoutTemplate
 def test_tstring_rce_fuzzer(payload: str) -> None:
     """
     1. The T-String RCE Fuzzer:
+
     Generate adversarial payload strings and prove that DynamicLayoutTemplate
     definitively raises a ValidationError when instantiated with them.
     """
@@ -44,6 +45,7 @@ def test_tstring_rce_fuzzer(payload: str) -> None:
 def test_polymorphic_xss_proof(payload: str) -> None:
     """
     2. The Polymorphic XSS Proof:
+
     Generate adversarial Markdown strings containing malicious tags
     and prove that InsightCard definitively rejects them via a ValidationError.
     """
@@ -63,6 +65,7 @@ def test_polymorphic_xss_proof(payload: str) -> None:
 def test_polymorphic_event_handler_proof(payload: str) -> None:
     """
     2.1 The Polymorphic Event Handler Proof:
+
     Generate adversarial strings with inline HTML event handlers and prove they are rejected.
     """
     with pytest.raises(ValidationError, match="Forbidden HTML event handler detected"):
@@ -75,6 +78,7 @@ def test_polymorphic_event_handler_proof(payload: str) -> None:
 def test_visual_ghost_node_test(ghost_id: str) -> None:
     """
     3. The Visual Ghost Node Test (Adversarial):
+
     Generate a MacroGrid payload where the layout_matrix contains a string ID
     that is absent from the panels list. Prove the model_validator catches this
     and raises a ValidationError.
@@ -100,6 +104,7 @@ def test_visual_ghost_node_test(ghost_id: str) -> None:
 def test_safe_rendering_test(title: str, safe_text: str, x_label: str, y_label: str) -> None:
     """
     4. The Safe Rendering Test (Success):
+
     Generate a structurally perfect MacroGrid with a valid layout_matrix
     that perfectly maps to the generated panel_ids, featuring clean text.
     Prove it instantiates successfully.

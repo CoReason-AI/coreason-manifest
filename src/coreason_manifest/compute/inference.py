@@ -6,6 +6,7 @@
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
 """AGENT INSTRUCTION: This file defines the inference tasks including analogical mapping, active inference, and
+
 causal interventions. This is a STRICTLY KINETIC BOUNDARY. These schemas govern non-deterministic execution
 and probabilistic boundaries of the agent's reasoning. DO NOT inject persistent state, database schemas, or
 business workflow logic here. All models must map exclusively to mathematical hardware, probabilistic

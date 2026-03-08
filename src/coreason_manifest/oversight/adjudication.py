@@ -6,6 +6,7 @@
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
 """AGENT INSTRUCTION:
+
 This file maps the algorithmic adjudication schemas. This is a STRICTLY REGULATORY BOUNDARY.
 These schemas define the Zero-Trust information flow constraints of the swarm.
 DO NOT inject kinetic execution logic here.

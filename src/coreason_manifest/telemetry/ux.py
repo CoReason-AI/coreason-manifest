@@ -6,6 +6,7 @@
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
 """AGENT INSTRUCTION: This file maps the UI/UX telemetry schemas. This is a STRICTLY OBSERVABILITY BOUNDARY.
+
 These models govern the distributed tracing and cryptographic audit trails of the swarm. Do NOT write standard
 text-logging or web-analytics schemas here. Focus entirely on tamper-evident spans, Merkle custody records, and
 cross-node span contexts."""

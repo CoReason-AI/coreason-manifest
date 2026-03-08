@@ -53,6 +53,7 @@ def get_schema(schema_name: str) -> dict[str, Any]:
 def _global_error_handler_shield() -> None:
     """
     Patch the internal MCP server request handler to natively catch all exceptions,
+
     including validation errors, to guarantee the Poison Pill bounds are upheld
     and return strict JSON-RPC Error Envelopes. Also patches the stdio server stream
     reader to protect against massive JSON-Bomb string allocations before parsing.

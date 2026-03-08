@@ -6,6 +6,7 @@
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
 """AGENT INSTRUCTION: This file defines the tooling schemas. This is a STRICTLY KINEMATIC BOUNDARY.
+
 These schemas govern how the agent mathematically interacts with external or embodied environments. YOU ARE EXPLICITLY
 FORBIDDEN from writing raw script executors here. All tool definitions must be bounded by strict JSON-RPC schemas,
 permission boundaries, and side-effect profiles."""

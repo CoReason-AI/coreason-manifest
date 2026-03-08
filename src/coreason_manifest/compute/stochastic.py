@@ -6,6 +6,7 @@
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
 """AGENT INSTRUCTION: This file contains the stochastic schemas for logit steganography, verifiable entropy,
+
 mutation policies, and continuous distribution profiles. This is a STRICTLY KINETIC BOUNDARY. These models
 enforce purely probabilistic boundaries, evolutionary non-deterministic routing, and GPU-centric generation
 constraints. DO NOT inject state-persistence mechanisms, business workflow execution, or database modeling.
@@ -68,6 +69,7 @@ class VerifiableEntropy(CoreasonBaseModel):
 
 class LogitSteganographyContract(CoreasonBaseModel):
     """Cryptographic contract for embedding undeniable, un-strippable provenance signatures
+
     directly into the token entropy."""
 
     verification_public_key_id: str = Field(

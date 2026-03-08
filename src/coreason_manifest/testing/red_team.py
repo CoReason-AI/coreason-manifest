@@ -6,6 +6,7 @@
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
 """AGENT INSTRUCTION:
+
 This file defines the Adversarial Simulation schemas. This is a STRICTLY ADVERSARIAL BOUNDARY.
 These models are not unit tests; they are systemic fault injectors designed to perturb the live
 swarm topology (e.g., node latency, memory corruption, topological severing).
@@ -22,6 +23,7 @@ from coreason_manifest.core.base import CoreasonBaseModel
 class AdversarialSimulationProfile(CoreasonBaseModel):
     """
     A deterministic red-team configuration defining a structural attack vector
+
     to continuously validate semantic firewalls and execution bounds.
     """
 

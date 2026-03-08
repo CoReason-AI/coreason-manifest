@@ -6,6 +6,7 @@
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
 """AGENT INSTRUCTION:
+
 This file defines the dynamic layout template grammar. This is a STRICTLY PROJECTION BOUNDARY.
 These schemas govern how multi-dimensional agent knowledge is collapsed and encoded for human perception.
 YOU ARE EXPLICITLY FORBIDDEN from adding state-mutation or backend logic here.

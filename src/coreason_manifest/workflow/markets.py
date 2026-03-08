@@ -6,6 +6,7 @@
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
 """AGENT INSTRUCTION: This file defines the orchestration market schemas. This is a STRICTLY TOPOLOGICAL BOUNDARY.
+
 These schemas dictate the multi-agent graph geometry and decentralized routing mechanics. DO NOT inject procedural
 execution code or synchronous blocking loops. Think purely in terms of graph theory, Byzantine fault tolerance, and
 multi-agent market dynamics."""
@@ -35,6 +36,7 @@ class HypothesisStake(CoreasonBaseModel):
 class PredictionMarketState(CoreasonBaseModel):
     """
     The state of the Automated Market Maker (AMM) using Robin Hanson's
+
     Logarithmic Market Scoring Rule (LMSR) to ensure infinite liquidity.
     """
 
