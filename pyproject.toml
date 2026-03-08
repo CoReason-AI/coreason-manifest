@@ -66,7 +66,7 @@ target-version = "py314"
 [tool.ruff.lint]
 select = [
     "E", "F", "B", "I", "UP", "SIM", "RUF", "ARG", "C4", "PT", "TCH", "FA", "PIE", "RET",
-    "PERF", "FURB", "LOG", "N", "A", "S"
+    "PERF", "FURB", "LOG", "N", "A", "S", "D205", "D419"
 ]
 ignore = ["S101", "TC001", "TC002", "TC003"]
 
