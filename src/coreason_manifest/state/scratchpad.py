@@ -18,13 +18,19 @@ from coreason_manifest.core.base import CoreasonBaseModel
 
 
 class ThoughtBranch(CoreasonBaseModel):
-    branch_id: str = Field(min_length=1, description="Unique identifier for this line of reasoning.")
+    branch_id: str = Field(
+        min_length=1,
+        description=(
+            "A deterministic capability pointer bounding this specific topological divergence "
+            "in the Latent Scratchpad Trace."
+        ),
+    )
     parent_branch_id: str | None = Field(
         default=None, description="The branch this thought diverged from, enabling tree reconstruction."
     )
     latent_content_hash: str = Field(
         pattern=r"^[a-f0-9]{64}$",
-        description="The SHA-256 hash of the raw scratchpad text generated in this branch.",
+        description="The SHA-256 hash of the raw latent dimensions explored in this branch.",
     )
     prm_score: float | None = Field(
         default=None,
@@ -35,17 +41,27 @@ class ThoughtBranch(CoreasonBaseModel):
 
 
 class LatentScratchpadTrace(CoreasonBaseModel):
-    trace_id: str = Field(min_length=1, description="Unique identifier for this entire test-time compute session.")
-    explored_branches: list[ThoughtBranch] = Field(description="All logical paths the agent attempted.")
+    trace_id: str = Field(
+        min_length=1, description=("A Content Identifier (CID) bounding this ephemeral test-time execution tree.")
+    )
+    explored_branches: list[ThoughtBranch] = Field(
+        description=(
+            "All logical paths the agent attempted within this Ephemeral Epistemic "
+            "Quarantine—a volatile workspace where probability waves collapse before being "
+            "committed to the immutable ledger."
+        )
+    )
     discarded_branches: list[str] = Field(
-        description="A list of branch_ids that were explicitly pruned due to logical dead-ends."
+        description="A list of Content Identifiers (CIDs) that were explicitly pruned due to logical dead-ends."
     )
     resolution_branch_id: str | None = Field(
         default=None,
-        description="The branch_id that successfully resolved the uncertainty and led to the final output.",
+        description=(
+            "The Content Identifier (CID) that successfully resolved the uncertainty and led to the final output."
+        ),
     )
     total_latent_tokens: int = Field(
-        ge=0, description="The total compute expenditure (in tokens) spent purely on internal reasoning."
+        ge=0, description=("The total expenditure (in tokens) spent purely on internal reasoning.")
     )
 
     @model_validator(mode="after")
