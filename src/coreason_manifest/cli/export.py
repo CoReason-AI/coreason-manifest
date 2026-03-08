@@ -7,9 +7,12 @@
 
 import json
 import sys
+import typing
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, cast
+from typing import cast
 
+from pydantic import BaseModel
 from pydantic.json_schema import models_json_schema
 
 import coreason_manifest
@@ -30,7 +33,7 @@ def main() -> None:
         sys.exit(0)
 
     _, top_level_schema = models_json_schema(
-        cast(Any, models_to_export),
+        cast("Sequence[tuple[type[BaseModel], typing.Literal['validation']]]", models_to_export),
         title="CoReason Shared Kernel Ontology",
         description="Unified JSON Schema for the Coreason Manifest",
     )
