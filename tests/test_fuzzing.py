@@ -1288,7 +1288,8 @@ def _local_draw_any_state_event(draw: Any) -> dict[str, Any]:
     )
 
     if event_type == "tool_invocation":
-        return draw(draw_tool_invocation_event())
+        tool_res: dict[str, Any] = draw(draw_tool_invocation_event())
+        return tool_res
 
     if event_type == "barge_in":
         barge_in_res: dict[str, Any] = draw(draw_barge_in_interrupt_event())
