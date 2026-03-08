@@ -91,7 +91,7 @@ class AuctionState(CoreasonBaseModel):
     )
 
     @model_validator(mode="after")
-    def sort_bids(self) -> AuctionState:
+    def sort_bids(self) -> Self:
         """Mathematically sort bids by agent_id for deterministic hashing."""
         object.__setattr__(self, "bids", sorted(self.bids, key=lambda bid: bid.agent_id))
         return self

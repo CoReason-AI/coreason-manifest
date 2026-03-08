@@ -5441,6 +5441,7 @@
       "type": "object"
     },
     "NodeID": {
+      "description": "A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.",
       "minLength": 7,
       "pattern": "^did:[a-z0-9]+:[a-zA-Z0-9.\\-_:]+$",
       "type": "string"
@@ -6271,7 +6272,7 @@
       "type": "object"
     },
     "RiskLevel": {
-      "description": "Risk classification for governance.\nOrder matters: safe < standard < critical.",
+      "description": "Cryptographic risk classification for governance.\nOrder matters: safe < standard < critical.",
       "enum": [
         "safe",
         "standard",
@@ -6993,7 +6994,7 @@
       "type": "object"
     },
     "SemanticVersion": {
-      "description": "A semantic version string (e.g., '1.0.0').",
+      "description": "An Immutable structural checkpoint.",
       "examples": [
         "1.0.0",
         "0.1.0",
@@ -8151,16 +8152,16 @@
         },
         "issuer_did": {
           "$ref": "#/$defs/NodeID",
-          "description": "The W3C DID of the trusted authority that cryptographically signed the credential."
+          "description": "The W3C DID of the trusted authority that cryptographically signed the credential, explicitly representing the delegation of authority from a human or parent principal."
         },
         "cryptographic_proof_blob": {
-          "description": "The base64-encoded SD-JWT or ZK-SNARK proving the claims without revealing the private key.",
+          "description": "The base64-encoded cryptographic proof (e.g., ZK-SNARKs, zkVM receipts, or programmable trust attestations) proving the claims without revealing the private key.",
           "title": "Cryptographic Proof Blob",
           "type": "string"
         },
         "authorization_claims": {
           "additionalProperties": true,
-          "description": "The strict, domain-agnostic JSON dictionary of predicates being proven (e.g., {'clearance': 'RESTRICTED'}).",
+          "description": "The strict, domain-agnostic JSON dictionary of strictly bounded geometric predicates that define the operational perimeter of the agent (e.g., {'clearance': 'RESTRICTED'}).",
           "title": "Authorization Claims",
           "type": "object"
         }
@@ -8419,7 +8420,7 @@
       ]
     },
     "coreason_manifest__core__primitives__DataClassification": {
-      "description": "Standardized Information Flow Control (IFC) clearance levels.",
+      "description": "Standardized Information Flow Control (IFC) lattice boundaries.",
       "enum": [
         "public",
         "internal",
