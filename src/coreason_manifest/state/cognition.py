@@ -7,8 +7,8 @@
 
 """AGENT INSTRUCTION: This file maps the immutable cognitive schemas. This is a STRICTLY EPISTEMIC BOUNDARY.
 These schemas represent the append-only cognitive ledger of the swarm. YOU ARE EXPLICITLY FORBIDDEN from introducing
-mutable state loops, standard CRUD database paradigms, or downstream business logic. Focus purely on cryptographic
-event sourcing, hardware attestations, and non-monotonic belief updates."""
+monotonic logic, standard CRUD database paradigms, or kinetic execution parameters. These models represent computable
+geometric graphs of cognition and causal inference."""
 
 from pydantic import Field
 
@@ -17,23 +17,26 @@ from coreason_manifest.core.base import CoreasonBaseModel
 
 
 class CognitiveUncertaintyProfile(CoreasonBaseModel):
+    """Structural Causal Models (SCMs) for active epistemic bounding."""
     aleatoric_entropy: float = Field(
-        ge=0.0, le=1.0, description="Irreducible ambiguity detected in the input task or environment."
+        ge=0.0, le=1.0, description="Irreducible ambiguity detected in the observational fields (P(y|x))."
     )
     epistemic_uncertainty: float = Field(
-        ge=0.0, le=1.0, description="The model's internal lack of knowledge, calculated via semantic disagreement."
+        ge=0.0, le=1.0, description="The causal gap demanding Do-Calculus Interventions (P(y|do(x)))."
     )
     semantic_consistency_score: float = Field(
-        ge=0.0, le=1.0, description="The degree to which multiple sampled latent thoughts align on the same conclusion."
+        ge=0.0, le=1.0, description="Counterfactual Geometries representing alternative timeline vectors."
     )
     requires_abductive_escalation: bool = Field(
-        description="True if epistemic_uncertainty breaches the safety threshold, requiring System 2 test-time compute."
+        description="True if epistemic_uncertainty breaches the safety threshold, requiring structural mandate "
+        "escalation."
     )
 
 
 class CognitiveStateProfile(CoreasonBaseModel):
+    """Causal Directed Acyclic Graphs (cDAGs) and constraints for state progression."""
     urgency_index: float = Field(
-        ge=0.0, le=1.0, description="Drives latency requirements; high urgency forces fast, heuristic System 1 routing."
+        ge=0.0, le=1.0, description="Drives structural constraints; high urgency forces fast heuristic routing."
     )
     caution_index: float = Field(
         ge=0.0, le=1.0, description="Drives precision; high caution injects analytical/falsification steering vectors."
@@ -41,15 +44,15 @@ class CognitiveStateProfile(CoreasonBaseModel):
     divergence_tolerance: float = Field(
         ge=0.0,
         le=1.0,
-        description="The 'curiosity' metric; dictates how far the MoE router is allowed to stray "
+        description="The 'curiosity' metric; dictates how far the router is allowed to stray "
         "from high-probability distributions.",
     )
     activation_steering: ActivationSteeringContract | None = Field(
         default=None,
-        description="The precise mathematical contract for altering the LLM's residual stream to enforce this mood.",
+        description="The precise mathematical contract for altering the residual stream to enforce this constraint.",
     )
     moe_routing_directive: CognitiveRoutingDirective | None = Field(
         default=None,
-        description="The physical hardware mandate overriding default MoE token routing to "
+        description="The structural mandate overriding default token routing to "
         "enforce this cognitive state.",
     )

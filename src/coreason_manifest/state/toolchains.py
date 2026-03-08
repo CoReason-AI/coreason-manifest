@@ -7,8 +7,8 @@
 
 """AGENT INSTRUCTION: This file maps the immutable toolchain schemas. This is a STRICTLY EPISTEMIC BOUNDARY.
 These schemas represent the append-only cognitive ledger of the swarm. YOU ARE EXPLICITLY FORBIDDEN from introducing
-mutable state loops, standard CRUD database paradigms, or downstream business logic. Focus purely on cryptographic
-event sourcing, hardware attestations, and non-monotonic belief updates."""
+monotonic logic, standard CRUD database paradigms, or kinetic execution parameters. These models represent computable
+geometric graphs of cognition and causal inference."""
 
 from typing import Annotated, Literal
 
@@ -18,24 +18,30 @@ from coreason_manifest.core.base import CoreasonBaseModel
 
 
 class BrowserDOMState(CoreasonBaseModel):
-    type: Literal["browser"] = Field(default="browser", description="Discriminator for browser state snapshots.")
-    current_url: str = Field(description="The exact URI the headless browser was positioned at.")
-    viewport_size: tuple[int, int] = Field(description="The [width, height] dimensions of the rendered viewport.")
-    dom_hash: str = Field(description="The SHA-256 hash of the complete, rendered HTML Document Object Model.")
+    type: Literal["browser"] = Field(
+        default="browser", description="Discriminator for Causal Actuators representing structural shifts."
+    )
+    current_url: str = Field(description="Spatial Execution Bounds where the agent interacts.")
+    viewport_size: tuple[int, int] = Field(description="Capability Perimeters detailing bounding coordinates.")
+    dom_hash: str = Field(description="The SHA-256 hash acting as the structural manifestation vector.")
     accessibility_tree_hash: str = Field(
-        description="The SHA-256 hash of the parsed Chrome/Firefox Accessibility Tree."
+        description="The SHA-256 hash of the accessibility tree defining Exogenous Perturbations to the state space."
     )
     screenshot_cid: str | None = Field(
-        default=None, description="The Content Identifier (CID) or URI pointing to the visual snapshot in cold storage."
+        default=None,
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the snapshot "
+        "representation.",
     )
 
 
 class TerminalBufferState(CoreasonBaseModel):
-    type: Literal["terminal"] = Field(default="terminal", description="Discriminator for terminal state snapshots.")
-    working_directory: str = Field(description="The absolute path of the active shell context.")
-    stdout_hash: str = Field(description="The SHA-256 hash of the standard output buffer at the moment of observation.")
-    stderr_hash: str = Field(description="The SHA-256 hash of the standard error buffer.")
-    env_variables_hash: str = Field(description="The SHA-256 hash of the active environment variables matrix.")
+    type: Literal["terminal"] = Field(
+        default="terminal", description="Discriminator for Causal Actuators on structural buffers."
+    )
+    working_directory: str = Field(description="Capability Perimeters defining context bounds.")
+    stdout_hash: str = Field(description="The SHA-256 hash of the Exogenous Perturbations captured.")
+    stderr_hash: str = Field(description="The SHA-256 hash tracking structural deviation anomalies.")
+    env_variables_hash: str = Field(description="The SHA-256 hash of the state-space context matrix.")
 
 
 # =========================================================================
@@ -47,5 +53,9 @@ class TerminalBufferState(CoreasonBaseModel):
 
 type AnyToolchainState = Annotated[
     BrowserDOMState | TerminalBufferState,
-    Field(discriminator="type", description="A discriminated union of immutable external toolchain states."),
+    Field(
+        discriminator="type",
+        description="A discriminated union of Causal Actuators defining "
+        "strict perimeters for Exogenous Perturbations to the causal graph.",
+    ),
 ]
