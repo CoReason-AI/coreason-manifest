@@ -1338,6 +1338,17 @@
       "additionalProperties": false,
       "description": "Base configuration for any workflow topology.",
       "properties": {
+        "lifecycle_phase": {
+          "default": "live",
+          "description": "The compilation phase of the topology. 'draft' suspends strict Euclidean referential integrity.",
+          "enum": [
+            "draft",
+            "live",
+            "archived"
+          ],
+          "title": "Lifecycle Phase",
+          "type": "string"
+        },
         "nodes": {
           "additionalProperties": {
             "$ref": "#/$defs/AnyNode"
@@ -2419,6 +2430,17 @@
       "additionalProperties": false,
       "description": "A Council workflow topology involving multiple voting members and an adjudicator.",
       "properties": {
+        "lifecycle_phase": {
+          "default": "live",
+          "description": "The compilation phase of the topology. 'draft' suspends strict Euclidean referential integrity.",
+          "enum": [
+            "draft",
+            "live",
+            "archived"
+          ],
+          "title": "Lifecycle Phase",
+          "type": "string"
+        },
         "nodes": {
           "additionalProperties": {
             "$ref": "#/$defs/AnyNode"
@@ -2782,6 +2804,17 @@
       "additionalProperties": false,
       "description": "A Directed Acyclic Graph workflow topology.",
       "properties": {
+        "lifecycle_phase": {
+          "default": "live",
+          "description": "The compilation phase of the topology. 'draft' suspends strict Euclidean referential integrity.",
+          "enum": [
+            "draft",
+            "live",
+            "archived"
+          ],
+          "title": "Lifecycle Phase",
+          "type": "string"
+        },
         "nodes": {
           "additionalProperties": {
             "$ref": "#/$defs/AnyNode"
@@ -2961,6 +2994,17 @@
       "additionalProperties": false,
       "description": "An isolated sandbox graph representing a Digital Twin.",
       "properties": {
+        "lifecycle_phase": {
+          "default": "live",
+          "description": "The compilation phase of the topology. 'draft' suspends strict Euclidean referential integrity.",
+          "enum": [
+            "draft",
+            "live",
+            "archived"
+          ],
+          "title": "Lifecycle Phase",
+          "type": "string"
+        },
         "nodes": {
           "additionalProperties": {
             "$ref": "#/$defs/AnyNode"
@@ -3801,6 +3845,17 @@
       "additionalProperties": false,
       "description": "A formalized Actor-Critic micro-topology enforcing strict, finite generation-evaluation-revision cycles.",
       "properties": {
+        "lifecycle_phase": {
+          "default": "live",
+          "description": "The compilation phase of the topology. 'draft' suspends strict Euclidean referential integrity.",
+          "enum": [
+            "draft",
+            "live",
+            "archived"
+          ],
+          "title": "Lifecycle Phase",
+          "type": "string"
+        },
         "nodes": {
           "additionalProperties": {
             "$ref": "#/$defs/AnyNode"
@@ -3965,6 +4020,17 @@
       "additionalProperties": false,
       "description": "An Evolutionary workflow topology that mutates and breeds agents over generations.",
       "properties": {
+        "lifecycle_phase": {
+          "default": "live",
+          "description": "The compilation phase of the topology. 'draft' suspends strict Euclidean referential integrity.",
+          "enum": [
+            "draft",
+            "live",
+            "archived"
+          ],
+          "title": "Lifecycle Phase",
+          "type": "string"
+        },
         "nodes": {
           "additionalProperties": {
             "$ref": "#/$defs/AnyNode"
@@ -7743,6 +7809,17 @@
       "additionalProperties": false,
       "description": "A Secure Multi-Party Computation topology.",
       "properties": {
+        "lifecycle_phase": {
+          "default": "live",
+          "description": "The compilation phase of the topology. 'draft' suspends strict Euclidean referential integrity.",
+          "enum": [
+            "draft",
+            "live",
+            "archived"
+          ],
+          "title": "Lifecycle Phase",
+          "type": "string"
+        },
         "nodes": {
           "additionalProperties": {
             "$ref": "#/$defs/AnyNode"
@@ -8859,6 +8936,17 @@
       "additionalProperties": false,
       "description": "A dynamic Swarm workflow topology.",
       "properties": {
+        "lifecycle_phase": {
+          "default": "live",
+          "description": "The compilation phase of the topology. 'draft' suspends strict Euclidean referential integrity.",
+          "enum": [
+            "draft",
+            "live",
+            "archived"
+          ],
+          "title": "Lifecycle Phase",
+          "type": "string"
+        },
         "nodes": {
           "additionalProperties": {
             "$ref": "#/$defs/AnyNode"
