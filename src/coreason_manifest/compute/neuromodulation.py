@@ -6,9 +6,8 @@
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
 """AGENT INSTRUCTION: This file maps the Cognitive Routing and Latent Smoothing profiles. This is a STRICTLY
-KINETIC BOUNDARY. These schemas define the mathematical physics and 'biochemistry' of the agent's forward
-pass. DO NOT inject persistent state or database logic here. All bounds must map to continuous probabilistic
-thresholds and tensor manipulations.
+KINETIC BOUNDARY. These schemas represent friction, hardware limits, and physical execution. This boundary
+governs probabilistic tensor logic, VRAM geometries, and exogenous spatial actuation.
 """
 
 from typing import Literal, Self
@@ -20,12 +19,12 @@ from coreason_manifest.core.base import CoreasonBaseModel
 
 class ActivationSteeringContract(CoreasonBaseModel):
     """
-    Hardware-level contract for Representation Engineering via activation injection/ablation.
+    Hardware-level contract for Representation Engineering (RepE) via activation injection/ablation.
     """
 
     steering_vector_hash: str = Field(
         pattern=r"^[a-f0-9]{64}$",
-        description="The SHA-256 hash of the extracted RepE control tensor (e.g., the 'caution' vector).",
+        description="The SHA-256 hash of the extracted RepE Latent Concept Vector applied directly to transformer layers.",
     )
     injection_layers: list[int] = Field(
         min_length=1,
@@ -40,7 +39,7 @@ class ActivationSteeringContract(CoreasonBaseModel):
 
 
 class LatentSmoothingProfile(CoreasonBaseModel):
-    """The mathematical curve used to gently taper an adversarial activation to prevent logit collapse."""
+    """The mathematical curve used to gently taper an adversarial residual stream perturbation to prevent logit collapse."""
 
     decay_function: Literal["linear", "exponential", "cosine_annealing"] = Field(
         description="The trigonometric or algebraic function governing the attenuation curve."
@@ -106,7 +105,7 @@ class CognitiveRoutingDirective(CoreasonBaseModel):
     dynamic_top_k: int = Field(
         ge=1,
         description="The exact number of functional experts the router must activate per token. "
-        "High values simulate deep cognitive strain.",
+        "High values simulate deep cognitive strain on the VRAM.",
     )
     routing_temperature: float = Field(
         ge=0.0,

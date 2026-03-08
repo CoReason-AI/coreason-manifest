@@ -6,10 +6,9 @@
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
 """AGENT INSTRUCTION: This file maps test-time computation resources like process reward modeling and escalation
-mechanisms. This is a STRICTLY KINETIC BOUNDARY. These schemas dictate non-deterministic scaling boundaries,
-probabilistic search trees, and test-time kinetic thresholds. YOU ARE EXPLICITLY FORBIDDEN from injecting
-long-term persistent state workflows, database models, or downstream business logic. Operations here translate
-strictly to hardware budgets and tensor inferences.
+mechanisms. This is a STRICTLY KINETIC BOUNDARY. These schemas represent friction, hardware limits, and
+physical execution. This boundary governs probabilistic tensor logic, VRAM geometries, and exogenous
+spatial actuation.
 """
 
 from pydantic import Field
@@ -18,7 +17,7 @@ from coreason_manifest.core.base import CoreasonBaseModel
 
 
 class DynamicConvergenceSLA(CoreasonBaseModel):
-    """Service Level Agreement defining the mathematical conditions for early termination of a reasoning search."""
+    """Service Level SLA defining the probabilistic bounds for early termination of a System 2 Search Tree."""
 
     convergence_delta_epsilon: float = Field(
         ge=0.0,
@@ -31,7 +30,7 @@ class DynamicConvergenceSLA(CoreasonBaseModel):
     minimum_reasoning_steps: int = Field(
         gt=0,
         description="The mandatory 'burn-in' period. The orchestrator cannot terminate the search "
-        "before this structural depth is reached, preventing premature collapse.",
+        "before this structural depth is reached, preventing premature collapse of Latent Token Trajectories.",
     )
 
 
@@ -66,10 +65,11 @@ class EscalationContract(CoreasonBaseModel):
     )
     max_latent_tokens_budget: int = Field(
         gt=0,
-        description="The maximum number of hidden tokens the orchestrator is authorized to buy "
-        "for the internal monologue.",
+        description="The maximum Test-Time Compute Budget of hidden tokens the orchestrator is authorized to buy "
+        "for the probabilistic rollouts.",
     )
     max_test_time_compute_ms: int = Field(
         gt=0,
-        description="The physical time limit allowed for the scratchpad search before forcing a timeout.",
+        description="The physical time limit allowed for the Latent Token Trajectories evaluated by Process Reward Models (PRMs) "
+        "search before forcing a timeout.",
     )

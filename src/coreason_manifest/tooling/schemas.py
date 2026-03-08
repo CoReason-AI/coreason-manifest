@@ -5,10 +5,9 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
-"""AGENT INSTRUCTION: This file defines the tooling schemas. This is a STRICTLY KINEMATIC BOUNDARY.
-These schemas govern how the agent mathematically interacts with external or embodied environments. YOU ARE EXPLICITLY
-FORBIDDEN from writing raw script executors here. All tool definitions must be bounded by strict JSON-RPC schemas,
-permission boundaries, and side-effect profiles."""
+"""AGENT INSTRUCTION: This file defines the tooling schemas. This is a STRICTLY KINETIC BOUNDARY.
+These schemas represent friction, hardware limits, and physical execution. This boundary governs probabilistic
+tensor logic, VRAM geometries, and exogenous spatial actuation."""
 
 from typing import Any
 
@@ -55,22 +54,22 @@ class ExecutionSLA(CoreasonBaseModel):
 
     max_execution_time_ms: int = Field(
         gt=0,
-        description="The maximum allowed execution time in milliseconds before the orchestrator kills the process.",
+        description="The Kinetic Execution Bounds time limit before the orchestrator kills the process.",
     )
     max_memory_mb: int | None = Field(
-        default=None, gt=0, description="The maximum memory footprint allowed for the tool's execution sandbox."
+        default=None, gt=0, description="The Kinetic Execution Bounds maximum memory footprint limiting the Blast Radius of the tool's execution sandbox."
     )
 
 
 class ToolDefinition(CoreasonBaseModel):
     """
-    Declarative mathematical definition of a tool.
+    Declarative mathematical definition of an Exogenous Actuator.
     """
 
-    tool_name: str = Field(description="The exact identifier of the tool.")
-    description: str = Field(description="Semantic description of what the tool does, used by the LLM for selection.")
+    tool_name: str = Field(description="The exact identifier of the Exogenous Actuator.")
+    description: str = Field(description="Semantic description of what the Exogenous Actuator does, used by the LLM for selection.")
     input_schema: dict[str, Any] = Field(
-        description="The strict JSON Schema dictionary defining the required arguments."
+        description="The strict Schema dictionary defining the required parameters."
     )
     side_effects: SideEffectProfile = Field(
         description="The declarative side-effect and idempotency profile of the tool."

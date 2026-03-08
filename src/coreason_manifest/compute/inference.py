@@ -6,10 +6,9 @@
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
 """AGENT INSTRUCTION: This file defines the inference tasks including analogical mapping, active inference, and
-causal interventions. This is a STRICTLY KINETIC BOUNDARY. These schemas govern non-deterministic execution
-and probabilistic boundaries of the agent's reasoning. DO NOT inject persistent state, database schemas, or
-business workflow logic here. All models must map exclusively to mathematical hardware, probabilistic
-thresholds, and raw GPU tensor execution.
+causal interventions. This is a STRICTLY KINETIC BOUNDARY. These schemas represent friction, hardware limits,
+and physical execution. This boundary governs probabilistic tensor logic, VRAM geometries, and exogenous
+spatial actuation.
 """
 
 from pydantic import Field
@@ -18,7 +17,10 @@ from coreason_manifest.core.base import CoreasonBaseModel
 
 
 class AnalogicalMappingTask(CoreasonBaseModel):
-    task_id: str = Field(min_length=1, description="Unique identifier for this lateral thinking task.")
+    task_id: str = Field(
+        min_length=1,
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this lateral thinking task.",
+    )
     source_domain: str = Field(
         description="The unrelated abstract concept space (e.g., 'thermodynamics', 'mycelial networks')."
     )
@@ -29,12 +31,16 @@ class AnalogicalMappingTask(CoreasonBaseModel):
         "successfully bridge between the two domains.",
     )
     divergence_temperature_override: float = Field(
-        ge=0.0, description="The specific high-temperature sampling override required to force this creative leap."
+        ge=0.0,
+        description="The specific high-temperature probabilistic execution bounds override required to force this creative leap.",
     )
 
 
 class InterventionalCausalTask(CoreasonBaseModel):
-    task_id: str = Field(min_length=1, description="Unique identifier for this causal intervention.")
+    task_id: str = Field(
+        min_length=1,
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this causal intervention.",
+    )
     target_hypothesis_id: str = Field(description="The hypothesis containing the SCM being tested.")
     intervention_variable: str = Field(
         description="The specific node $X$ in the SCM the agent is forcing to a specific state."
@@ -55,10 +61,15 @@ class InterventionalCausalTask(CoreasonBaseModel):
 
 
 class ActiveInferenceContract(CoreasonBaseModel):
-    task_id: str = Field(min_length=1, description="Unique identifier for this active inference execution.")
+    task_id: str = Field(
+        min_length=1,
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this active inference execution.",
+    )
     target_hypothesis_id: str = Field(description="The HypothesisGenerationEvent this task is attempting to falsify.")
     target_condition_id: str = Field(description="The specific FalsificationCondition being tested.")
-    selected_tool_name: str = Field(description="The exact tool from the ActionSpace allocated for this experiment.")
+    selected_tool_name: str = Field(
+        description="The exact exogenous actuator from the Spatial Geometry allocated for this experiment."
+    )
     expected_information_gain: float = Field(
         ge=0.0,
         le=1.0,
