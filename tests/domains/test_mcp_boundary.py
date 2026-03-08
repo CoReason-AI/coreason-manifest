@@ -191,7 +191,7 @@ async def test_mcp_stdio_server_happy_path() -> None:
                 msg4 = await read_stream.receive()
                 assert isinstance(msg4, Exception)
                 assert "5MB" in str(msg4)
-        except (anyio.EndOfStream, TimeoutError):
+        except anyio.EndOfStream, TimeoutError:
             # Sometimes mock iterators close before emitting the bomb if task group already finished
             pass
 
