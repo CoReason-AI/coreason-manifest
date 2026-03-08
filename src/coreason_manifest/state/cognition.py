@@ -18,6 +18,7 @@ from coreason_manifest.core.base import CoreasonBaseModel
 
 class CognitiveUncertaintyProfile(CoreasonBaseModel):
     """Structural Causal Models (SCMs) for active epistemic bounding."""
+
     aleatoric_entropy: float = Field(
         ge=0.0, le=1.0, description="Irreducible ambiguity detected in the observational fields (P(y|x))."
     )
@@ -35,6 +36,7 @@ class CognitiveUncertaintyProfile(CoreasonBaseModel):
 
 class CognitiveStateProfile(CoreasonBaseModel):
     """Causal Directed Acyclic Graphs (cDAGs) and constraints for state progression."""
+
     urgency_index: float = Field(
         ge=0.0, le=1.0, description="Drives structural constraints; high urgency forces fast heuristic routing."
     )
@@ -53,6 +55,5 @@ class CognitiveStateProfile(CoreasonBaseModel):
     )
     moe_routing_directive: CognitiveRoutingDirective | None = Field(
         default=None,
-        description="The structural mandate overriding default token routing to "
-        "enforce this cognitive state.",
+        description="The structural mandate overriding default token routing to enforce this cognitive state.",
     )

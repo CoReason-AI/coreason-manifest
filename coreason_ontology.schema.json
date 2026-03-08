@@ -847,7 +847,7 @@
       ]
     },
     "AnyToolchainState": {
-      "description": "A discriminated union of immutable external toolchain states.",
+      "description": "A discriminated union of Causal Actuators defining strict perimeters for Exogenous Perturbations to the causal graph.",
       "discriminator": {
         "mapping": {
           "browser": "#/$defs/BrowserDOMState",
@@ -911,7 +911,7 @@
           "type": "string"
         },
         "proponent_id": {
-          "description": "The NodeID of the agent or system that advanced this claim.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the agent or system that advanced this claim.",
           "title": "Proponent Id",
           "type": "string"
         },
@@ -940,12 +940,13 @@
     },
     "ArgumentGraph": {
       "additionalProperties": false,
+      "description": "A Truth Maintenance System (TMS) calculating dialectical justification for non-monotonic belief retraction.",
       "properties": {
         "claims": {
           "additionalProperties": {
             "$ref": "#/$defs/ArgumentClaim"
           },
-          "description": "A registry of all active claims, keyed by claim_id.",
+          "description": "Components of an Abstract Argumentation Framework.",
           "maxProperties": 10000,
           "title": "Claims",
           "type": "object"
@@ -954,7 +955,7 @@
           "additionalProperties": {
             "$ref": "#/$defs/DefeasibleAttack"
           },
-          "description": "A registry of all directed attack edges, keyed by attack_id.",
+          "description": "Geometric matrices of undercutting defeaters.",
           "maxProperties": 10000,
           "title": "Attacks",
           "type": "object"
@@ -1672,17 +1673,17 @@
         "type": {
           "const": "browser",
           "default": "browser",
-          "description": "Discriminator for browser state snapshots.",
+          "description": "Discriminator for Causal Actuators representing structural shifts.",
           "title": "Type",
           "type": "string"
         },
         "current_url": {
-          "description": "The exact URI the headless browser was positioned at.",
+          "description": "Spatial Execution Bounds where the agent interacts.",
           "title": "Current Url",
           "type": "string"
         },
         "viewport_size": {
-          "description": "The [width, height] dimensions of the rendered viewport.",
+          "description": "Capability Perimeters detailing bounding coordinates.",
           "maxItems": 2,
           "minItems": 2,
           "prefixItems": [
@@ -1697,12 +1698,12 @@
           "type": "array"
         },
         "dom_hash": {
-          "description": "The SHA-256 hash of the complete, rendered HTML Document Object Model.",
+          "description": "The SHA-256 hash acting as the structural manifestation vector.",
           "title": "Dom Hash",
           "type": "string"
         },
         "accessibility_tree_hash": {
-          "description": "The SHA-256 hash of the parsed Chrome/Firefox Accessibility Tree.",
+          "description": "The SHA-256 hash of the accessibility tree defining Exogenous Perturbations to the state space.",
           "title": "Accessibility Tree Hash",
           "type": "string"
         },
@@ -1716,7 +1717,7 @@
             }
           ],
           "default": null,
-          "description": "The Content Identifier (CID) or URI pointing to the visual snapshot in cold storage.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the snapshot representation.",
           "title": "Screenshot Cid"
         }
       },
@@ -1937,9 +1938,10 @@
     },
     "CognitiveStateProfile": {
       "additionalProperties": false,
+      "description": "Causal Directed Acyclic Graphs (cDAGs) and constraints for state progression.",
       "properties": {
         "urgency_index": {
-          "description": "Drives latency requirements; high urgency forces fast, heuristic System 1 routing.",
+          "description": "Drives structural constraints; high urgency forces fast heuristic routing.",
           "maximum": 1.0,
           "minimum": 0.0,
           "title": "Urgency Index",
@@ -1953,7 +1955,7 @@
           "type": "number"
         },
         "divergence_tolerance": {
-          "description": "The 'curiosity' metric; dictates how far the MoE router is allowed to stray from high-probability distributions.",
+          "description": "The 'curiosity' metric; dictates how far the router is allowed to stray from high-probability distributions.",
           "maximum": 1.0,
           "minimum": 0.0,
           "title": "Divergence Tolerance",
@@ -1969,7 +1971,7 @@
             }
           ],
           "default": null,
-          "description": "The precise mathematical contract for altering the LLM's residual stream to enforce this mood."
+          "description": "The precise mathematical contract for altering the residual stream to enforce this constraint."
         },
         "moe_routing_directive": {
           "anyOf": [
@@ -1981,7 +1983,7 @@
             }
           ],
           "default": null,
-          "description": "The physical hardware mandate overriding default MoE token routing to enforce this cognitive state."
+          "description": "The structural mandate overriding default token routing to enforce this cognitive state."
         }
       },
       "required": [
@@ -1994,30 +1996,31 @@
     },
     "CognitiveUncertaintyProfile": {
       "additionalProperties": false,
+      "description": "Structural Causal Models (SCMs) for active epistemic bounding.",
       "properties": {
         "aleatoric_entropy": {
-          "description": "Irreducible ambiguity detected in the input task or environment.",
+          "description": "Irreducible ambiguity detected in the observational fields (P(y|x)).",
           "maximum": 1.0,
           "minimum": 0.0,
           "title": "Aleatoric Entropy",
           "type": "number"
         },
         "epistemic_uncertainty": {
-          "description": "The model's internal lack of knowledge, calculated via semantic disagreement.",
+          "description": "The causal gap demanding Do-Calculus Interventions (P(y|do(x))).",
           "maximum": 1.0,
           "minimum": 0.0,
           "title": "Epistemic Uncertainty",
           "type": "number"
         },
         "semantic_consistency_score": {
-          "description": "The degree to which multiple sampled latent thoughts align on the same conclusion.",
+          "description": "Counterfactual Geometries representing alternative timeline vectors.",
           "maximum": 1.0,
           "minimum": 0.0,
           "title": "Semantic Consistency Score",
           "type": "number"
         },
         "requires_abductive_escalation": {
-          "description": "True if epistemic_uncertainty breaches the safety threshold, requiring System 2 test-time compute.",
+          "description": "True if epistemic_uncertainty breaches the safety threshold, requiring structural mandate escalation.",
           "title": "Requires Abductive Escalation",
           "type": "boolean"
         }
@@ -2672,18 +2675,18 @@
           "type": "string"
         },
         "source_claim_id": {
-          "description": "The Content Identifier (CID) of the claim mounting the attack.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the claim mounting the attack.",
           "title": "Source Claim Id",
           "type": "string"
         },
         "target_claim_id": {
-          "description": "The Content Identifier (CID) of the claim being attacked.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the claim being attacked.",
           "title": "Target Claim Id",
           "type": "string"
         },
         "attack_vector": {
           "$ref": "#/$defs/AttackVector",
-          "description": "The specific defeasible logic vector (e.g., attacking the premise, the link, or the conclusion)."
+          "description": "Geometric matrices of undercutting defeaters."
         }
       },
       "required": [
@@ -3056,7 +3059,7 @@
       "additionalProperties": false,
       "properties": {
         "sensory_modality": {
-          "description": "The continuous data stream being monitored.",
+          "description": "Multimodal Sensor Fusion and Spatial-Temporal Bindings representing Proprioceptive State and Exteroceptive Vectors.",
           "enum": [
             "video",
             "audio",
@@ -3066,13 +3069,13 @@
           "type": "string"
         },
         "bayesian_surprise_score": {
-          "description": "The calculated KL divergence between the agent's prior belief and the incoming sensory evidence.",
+          "description": "The calculated KL divergence between the prior belief and the incoming structural evidence.",
           "minimum": 0.0,
           "title": "Bayesian Surprise Score",
           "type": "number"
         },
         "temporal_duration_ms": {
-          "description": "The exact length of the continuous stream segment encapsulated by this observation.",
+          "description": "The exact length of the timeline encapsulated by this observation.",
           "exclusiveMinimum": 0,
           "maximum": 86400000,
           "title": "Temporal Duration Ms",
@@ -3080,7 +3083,7 @@
         },
         "salience_threshold_breached": {
           "default": true,
-          "description": "Mathematical proof that the anomaly was severe enough to warrant a memory snapshot.",
+          "description": "Continuous-to-Discrete Crystallization threshold being crossed.",
           "title": "Salience Threshold Breached",
           "type": "boolean"
         }
@@ -3433,7 +3436,7 @@
             }
           ],
           "default": null,
-          "description": "A link to a specific observation in the EpistemicLedger.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for a specific observation in the EpistemicLedger.",
           "title": "Source Event Id"
         },
         "source_semantic_node_id": {
@@ -3446,7 +3449,7 @@
             }
           ],
           "default": null,
-          "description": "A link to a specific concept in the Semantic Knowledge Graph.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for a specific concept in the Semantic Knowledge Graph.",
           "title": "Source Semantic Node Id"
         },
         "justification": {
@@ -8267,27 +8270,27 @@
         "type": {
           "const": "terminal",
           "default": "terminal",
-          "description": "Discriminator for terminal state snapshots.",
+          "description": "Discriminator for Causal Actuators on structural buffers.",
           "title": "Type",
           "type": "string"
         },
         "working_directory": {
-          "description": "The absolute path of the active shell context.",
+          "description": "Capability Perimeters defining context bounds.",
           "title": "Working Directory",
           "type": "string"
         },
         "stdout_hash": {
-          "description": "The SHA-256 hash of the standard output buffer at the moment of observation.",
+          "description": "The SHA-256 hash of the Exogenous Perturbations captured.",
           "title": "Stdout Hash",
           "type": "string"
         },
         "stderr_hash": {
-          "description": "The SHA-256 hash of the standard error buffer.",
+          "description": "The SHA-256 hash tracking structural deviation anomalies.",
           "title": "Stderr Hash",
           "type": "string"
         },
         "env_variables_hash": {
-          "description": "The SHA-256 hash of the active environment variables matrix.",
+          "description": "The SHA-256 hash of the state-space context matrix.",
           "title": "Env Variables Hash",
           "type": "string"
         }

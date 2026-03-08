@@ -64,9 +64,7 @@ class DefeasibleAttack(CoreasonBaseModel):
         description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the claim "
         "being attacked."
     )
-    attack_vector: AttackVector = Field(
-        description="Geometric matrices of undercutting defeaters."
-    )
+    attack_vector: AttackVector = Field(description="Geometric matrices of undercutting defeaters.")
 
 
 class ArgumentGraph(CoreasonBaseModel):
