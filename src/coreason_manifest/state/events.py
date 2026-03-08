@@ -85,21 +85,6 @@ class NeuralAuditAttestation(CoreasonBaseModel):
     )
 
 
-class HostSubstrateAttestation(CoreasonBaseModel):
-    chroot_jail_hash: str = Field(
-        pattern=r"^[a-f0-9]{64}$",
-        description="The SHA-256 hash of the isolated mount namespace.",
-    )
-    posix_mode_mask: int = Field(
-        ge=0,
-        description="The exact file permission mask read at the moment of ingestion.",
-    )
-    zk_receipt_hash: str = Field(
-        min_length=1,
-        description="The Content Identifier (CID) for the zkVM proof verifying no path-traversal occurred.",
-    )
-
-
 class HardwareEnclaveAttestation(CoreasonBaseModel):
     enclave_type: Literal["intel_tdx", "amd_sev_snp", "aws_nitro", "nvidia_cc"] = Field(
         description="The physical silicon architecture generating the root-of-trust quote."
@@ -148,10 +133,6 @@ class ObservationEvent(BaseStateEvent):
         default=None,
         description="The Event ID of the specific ToolInvocationEvent that spawned this observation, "
         "forming a strict bipartite directed edge.",
-    )
-    substrate_attestation: HostSubstrateAttestation | None = Field(
-        default=None,
-        description="Cryptographic ZK receipt of secure file ingestion.",
     )
 
 

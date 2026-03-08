@@ -70,20 +70,6 @@ class SemanticFirewallPolicy(CoreasonBaseModel):
     )
 
 
-class FilesystemIsolationContract(CoreasonBaseModel):
-    """
-    Declarative cryptographic boundary for host filesystem ingestion.
-    """
-
-    require_hardware_enclave: bool = Field(default=True, description="Mandates silicon-level isolation.")
-    max_symlink_depth: int = Field(
-        ge=0, description="Mathematically bounds symlink traversals (0 for true Zero-Trust)."
-    )
-    allowed_mount_paths: list[str] = Field(
-        min_length=1, description="Explicit allowlist of pre-computed chroot directories."
-    )
-
-
 class InformationFlowPolicy(CoreasonBaseModel):
     """
     Mathematical Data Loss Prevention (DLP) contract that bounds the graph.
@@ -101,10 +87,6 @@ class InformationFlowPolicy(CoreasonBaseModel):
         description=(
             "The list of tensor-level mechanistic firewalls monitoring the forward pass for adversarial intent."
         ),
-    )
-    filesystem_isolation: FilesystemIsolationContract | None = Field(
-        default=None,
-        description="The strict host-level isolation bounds applied to physical storage.",
     )
 
     @model_validator(mode="after")

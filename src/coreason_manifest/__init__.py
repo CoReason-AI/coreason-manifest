@@ -69,7 +69,6 @@ from coreason_manifest.oversight import PredictionMarketPolicy
 from coreason_manifest.oversight.adjudication import AdjudicationRubric, AdjudicationVerdict, GradingCriteria
 from coreason_manifest.oversight.audit import MechanisticAuditContract
 from coreason_manifest.oversight.dlp import (
-    FilesystemIsolationContract,
     InformationFlowPolicy,
     RedactionRule,
     SanitizationAction,
@@ -157,7 +156,6 @@ from coreason_manifest.state.events import (
     EpistemicPromotionEvent,
     FalsificationCondition,
     HardwareEnclaveAttestation,
-    HostSubstrateAttestation,
     HypothesisGenerationEvent,
     NeuralAuditAttestation,
     NormativeDriftEvent,
@@ -181,7 +179,6 @@ from coreason_manifest.state.persistence import (
     ContinuousMutationPolicy,
     GraphFlatteningDirective,
     LakehouseMountConfig,
-    LakehousePersistenceContract,
 )
 from coreason_manifest.state.scratchpad import LatentScratchpadTrace, ThoughtBranch
 from coreason_manifest.state.semantic import (
@@ -226,6 +223,7 @@ from coreason_manifest.telemetry.schemas import (
 from coreason_manifest.telemetry.ux import AmbientSignal, SuspenseEnvelope
 from coreason_manifest.testing.chaos import ChaosExperiment, FaultInjectionProfile, FaultType, SteadyStateHypothesis
 from coreason_manifest.testing.red_team import AdversarialSimulationProfile
+from coreason_manifest.testing.simulation import GenerativeManifoldSLA, SyntheticGenerationProfile
 from coreason_manifest.tooling.environments import (
     ActionSpace,
     EphemeralNamespacePartition,
@@ -397,9 +395,9 @@ __all__ = [
     "FederatedCapabilityAttestation",
     "FederatedDiscoveryProtocol",
     "FederatedStateSnapshot",
-    "FilesystemIsolationContract",
     "FitnessObjective",
     "FormalVerificationContract",
+    "GenerativeManifoldSLA",
     "GitSHA",
     "GlobalGovernance",
     "GlobalSemanticProfile",
@@ -410,7 +408,6 @@ __all__ = [
     "HTTPTransportConfig",
     "HardwareEnclaveAttestation",
     "HomomorphicEncryptionProfile",
-    "HostSubstrateAttestation",
     "HumanNode",
     "HypothesisGenerationEvent",
     "HypothesisStake",
@@ -425,7 +422,6 @@ __all__ = [
     "JSONRPCError",
     "JSONRPCErrorResponse",
     "LakehouseMountConfig",
-    "LakehousePersistenceContract",
     "LatentScratchpadTrace",
     "LatentSmoothingProfile",
     "LifecycleTrigger",
@@ -514,6 +510,7 @@ __all__ = [
     "StructuralCausalModel",
     "SuspenseEnvelope",
     "SwarmTopology",
+    "SyntheticGenerationProfile",
     "System1Reflex",
     "SystemFaultEvent",
     "SystemNode",

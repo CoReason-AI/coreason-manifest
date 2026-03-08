@@ -14,7 +14,6 @@ from .audit import (
     MechanisticAuditContract,
 )
 from .dlp import (
-    FilesystemIsolationContract,
     InformationFlowPolicy,
     RedactionRule,
     SecureSubSession,
@@ -51,7 +50,6 @@ __all__ = [
     "ConstitutionalRule",
     "FallbackSLA",
     "FallbackTrigger",
-    "FilesystemIsolationContract",
     "FormalVerificationContract",
     "GlobalGovernance",
     "GovernancePolicy",

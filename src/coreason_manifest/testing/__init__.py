@@ -13,10 +13,16 @@ from .chaos import (
 from .red_team import (
     AdversarialSimulationProfile,
 )
+from .simulation import (
+    GenerativeManifoldSLA,
+    SyntheticGenerationProfile,
+)
 
 __all__ = [
     "AdversarialSimulationProfile",
     "ChaosExperiment",
     "FaultInjectionProfile",
+    "GenerativeManifoldSLA",
     "SteadyStateHypothesis",
+    "SyntheticGenerationProfile",
 ]

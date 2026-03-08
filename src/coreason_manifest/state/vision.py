@@ -110,13 +110,6 @@ class AffineTransformMatrix(CoreasonBaseModel):
     domain_min: float = Field(description="The semantic/data value corresponding to pixel_min.")
     domain_max: float = Field(description="The semantic/data value corresponding to pixel_max.")
     scale_type: ChartAxisScale = Field(description="The mathematical progression between min and max.")
-    unit: str | None = Field(
-        default=None,
-        description=(
-            "The physical or statistical unit of measurement corresponding to this "
-            "spatial axis (e.g., 'months', 'mg/dL', 'log10')."
-        ),
-    )
 
 
 class StatisticalChartExtraction(CoreasonBaseModel):
@@ -126,20 +119,6 @@ class StatisticalChartExtraction(CoreasonBaseModel):
     data_series: list[dict[str, float | str]] = Field(
         description="The discrete semantic tuples extracted from the chart markers."
     )
-    legend_mappings: dict[str, str] = Field(
-        default_factory=dict,
-        description=(
-            "A strict mapping dictionary connecting visual markers identified in the image "
-            "(e.g., '#FF0000', 'dashed_line') to their explicit semantic labels found in "
-            "the chart's legend (e.g., 'Placebo Cohort')."
-        ),
-    )
-
-    @model_validator(mode="after")
-    def sort_legend_mappings(self) -> Self:
-        """Mathematically sort legend_mappings by key to guarantee deterministic cryptographic hashing."""
-        object.__setattr__(self, "legend_mappings", dict(sorted(self.legend_mappings.items())))
-        return self
 
     @model_validator(mode="after")
     def verify_dimensional_isometry(self) -> Self:

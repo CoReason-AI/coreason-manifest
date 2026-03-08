@@ -16,7 +16,6 @@ from pydantic import Field, model_validator
 
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.core.primitives import NodeID
-from coreason_manifest.state.events import HostSubstrateAttestation
 
 type MemoryTier = Literal["working", "episodic", "semantic"]
 
@@ -30,10 +29,6 @@ class MultimodalArtifact(CoreasonBaseModel):
         pattern=r"^[a-f0-9]{64}$", description="The undeniable SHA-256 hash of the pre-transmutation byte stream."
     )
     temporal_ingest_timestamp: float = Field(description="The UNIX timestamp anchoring the genesis block.")
-    substrate_attestation: HostSubstrateAttestation | None = Field(
-        default=None,
-        description="Cryptographic ZK receipt of secure file ingestion.",
-    )
 
 
 class MultimodalTokenAnchor(CoreasonBaseModel):
