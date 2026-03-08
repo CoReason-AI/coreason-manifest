@@ -40,7 +40,8 @@ class ActivationSteeringContract(CoreasonBaseModel):
 
 
 class LatentSmoothingProfile(CoreasonBaseModel):
-    """The mathematical curve used to gently taper an adversarial residual stream perturbation to prevent logit collapse."""
+    """The mathematical curve used to gently taper an adversarial residual stream perturbation
+    to prevent logit collapse."""
 
     decay_function: Literal["linear", "exponential", "cosine_annealing"] = Field(
         description="The trigonometric or algebraic function governing the attenuation curve."
