@@ -223,6 +223,7 @@ from coreason_manifest.telemetry.schemas import (
 from coreason_manifest.telemetry.ux import AmbientSignal, SuspenseEnvelope
 from coreason_manifest.testing.chaos import ChaosExperiment, FaultInjectionProfile, FaultType, SteadyStateHypothesis
 from coreason_manifest.testing.red_team import AdversarialSimulationProfile
+from coreason_manifest.testing.simulation import GenerativeManifoldSLA, SyntheticGenerationProfile
 from coreason_manifest.tooling.environments import (
     ActionSpace,
     MCPClientBinding,
@@ -394,6 +395,7 @@ __all__ = [
     "FederatedStateSnapshot",
     "FitnessObjective",
     "FormalVerificationContract",
+    "GenerativeManifoldSLA",
     "GitSHA",
     "GlobalGovernance",
     "GlobalSemanticProfile",
@@ -506,6 +508,7 @@ __all__ = [
     "StructuralCausalModel",
     "SuspenseEnvelope",
     "SwarmTopology",
+    "SyntheticGenerationProfile",
     "System1Reflex",
     "SystemFaultEvent",
     "SystemNode",

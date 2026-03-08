@@ -3215,3 +3215,42 @@ tabular_data_extraction_adapter: TypeAdapter[TabularDataExtraction] = TypeAdapte
 def test_tabular_data_extraction_fuzzing(payload: dict[str, Any]) -> None:
     parsed = tabular_data_extraction_adapter.validate_python(payload)
     assert isinstance(parsed, TabularDataExtraction)
+
+
+@st.composite
+def draw_generative_manifold_sla(draw: Any) -> dict[str, Any]:
+    depth = draw(st.integers(min_value=1, max_value=31))
+    fanout = draw(st.integers(min_value=1, max_value=31))
+    # Enforce the mathematical bound to prevent generation failures
+    if depth * fanout > 1000:
+        fanout = 1000 // depth
+
+    return {
+        "max_topological_depth": depth,
+        "max_node_fanout": max(1, fanout),
+        "max_synthetic_tokens": draw(st.integers(min_value=1, max_value=1_000_000)),
+    }
+
+
+@st.composite
+def draw_synthetic_generation_profile(draw: Any) -> dict[str, Any]:
+    return {
+        "profile_id": draw(st.text(min_size=1)),
+        "manifold_sla": draw(draw_generative_manifold_sla()),
+        "target_schema_ref": draw(st.text(min_size=1)),
+    }
+
+
+def test_synthetic_generation_profile_routing() -> None:
+    from coreason_manifest.testing.simulation import SyntheticGenerationProfile
+
+    adapter = TypeAdapter(SyntheticGenerationProfile)
+
+    payload = {
+        "profile_id": "test_prof",
+        "manifold_sla": {"max_topological_depth": 5, "max_node_fanout": 10, "max_synthetic_tokens": 5000},
+        "target_schema_ref": "AgentNode",
+    }
+
+    parsed = adapter.validate_python(payload)
+    assert isinstance(parsed, SyntheticGenerationProfile)
