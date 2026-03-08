@@ -29,6 +29,7 @@ if TYPE_CHECKING:
     from coreason_manifest.workflow.topologies import AnyTopology
 
 from coreason_manifest.oversight.audit import MechanisticAuditContract
+from coreason_manifest.oversight.governance import AnchoringPolicy
 from coreason_manifest.oversight.intervention import InterventionPolicy
 from coreason_manifest.workflow.constraints import InputMapping, OutputMapping
 
@@ -201,6 +202,10 @@ class AgentNode(BaseNode):
         default=None,
         description="The adaptive trigger policy for executing deep mechanistic interpretability "
         "brain-scans on this agent.",
+    )
+    anchoring_policy: AnchoringPolicy | None = Field(
+        default=None,
+        description="The declarative contract mathematically binding this agent to a core altruistic objective.",
     )
 
 
