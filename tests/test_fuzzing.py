@@ -167,7 +167,7 @@ def draw_latent_scratchpad_trace(draw: Any) -> dict[str, Any]:
 
 @st.composite
 def draw_anchoring_policy(draw: Any) -> dict[str, Any]:
-    return draw(
+    res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
                 "anchor_prompt_hash": st.from_regex(r"^[a-f0-9]{64}$", fullmatch=True),
@@ -175,6 +175,7 @@ def draw_anchoring_policy(draw: Any) -> dict[str, Any]:
             }
         )
     )
+    return res
 
 
 @st.composite
