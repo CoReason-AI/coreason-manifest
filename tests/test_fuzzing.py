@@ -1755,6 +1755,41 @@ def test_actionspace_fuzzing(payload: dict[str, Any]) -> None:
     assert parsed.action_space_id == payload["action_space_id"]
 
 
+def test_ontological_surface_projection_invalid_action_spaces() -> None:
+    from coreason_manifest.tooling.environments import OntologicalSurfaceProjection
+
+    with pytest.raises(ValueError, match=r"Action spaces within a projection must have .*"):
+        OntologicalSurfaceProjection(
+            projection_id="p1",
+            action_spaces=[ActionSpace(action_space_id="a1"), ActionSpace(action_space_id="a1")],
+            supported_personas=[],
+        )
+
+
+def test_federated_capability_attestation_invalid_vault_keys() -> None:
+    from coreason_manifest.core.primitives import DataClassification
+    from coreason_manifest.oversight.dlp import SecureSubSession
+    from coreason_manifest.workflow.envelope import BilateralSLA
+    from coreason_manifest.workflow.federation import FederatedCapabilityAttestation
+
+    sla = BilateralSLA(
+        receiving_tenant_id="tenant_a",
+        max_permitted_classification=DataClassification.RESTRICTED,
+        liability_limit_cents=100,
+    )
+    session = SecureSubSession(
+        session_id="s1",
+        allowed_vault_keys=[],  # Empty triggers the error
+        max_ttl_seconds=3600,
+        description="test",
+    )
+
+    with pytest.raises(ValueError, match=r"RESTRICTED federated connections MUST define allowed_vault_keys .*"):
+        FederatedCapabilityAttestation(
+            attestation_id="a1", target_topology_id="did:web:node1", authorized_session=session, governing_sla=sla
+        )
+
+
 semantic_node_adapter: TypeAdapter[SemanticNode] = TypeAdapter(SemanticNode)
 semantic_edge_adapter: TypeAdapter[SemanticEdge] = TypeAdapter(SemanticEdge)
 
@@ -2122,6 +2157,39 @@ def draw_task_award(draw: Any) -> dict[str, Any]:
         award["escrow"] = draw(draw_escrow_policy(max_escrow=price))
 
     return award
+
+
+@st.composite
+def draw_ontological_surface_projection(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "projection_id": st.text(min_size=1),
+                "action_spaces": st.just([]),  # Keep empty or inject draw_action_space if defined
+                "supported_personas": st.lists(
+                    st.text(min_size=1, alphabet="abcdefghijklmnopqrstuvwxyz0123456789_-"), max_size=5
+                ),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_federated_capability_attestation(draw: Any) -> dict[str, Any]:
+    sla = draw(draw_bilateral_sla())
+    session = draw(draw_secure_sub_session())
+
+    # Satisfy the interlock for RESTRICTED payloads
+    if sla["max_permitted_classification"] == "restricted" and not session["allowed_vault_keys"]:
+        session["allowed_vault_keys"] = ["vault_key_1"]
+
+    return {
+        "attestation_id": draw(st.text(min_size=1)),
+        "target_topology_id": draw(draw_did_string()),
+        "authorized_session": session,
+        "governing_sla": sla,
+    }
 
 
 @st.composite
