@@ -4096,6 +4096,38 @@
       ],
       "type": "string"
     },
+    "FederatedCapabilityAttestation": {
+      "additionalProperties": false,
+      "description": "An immutable cryptographic receipt proving an agent has the legal and structural authority\nto query a remote resource.",
+      "properties": {
+        "attestation_id": {
+          "description": "Cryptographic Lineage Watermark for the attestation.",
+          "minLength": 1,
+          "title": "Attestation Id",
+          "type": "string"
+        },
+        "target_topology_id": {
+          "$ref": "#/$defs/NodeID",
+          "description": "The DID of the discovered external data lake/VPC."
+        },
+        "authorized_session": {
+          "$ref": "#/$defs/SecureSubSession",
+          "description": "The isolated memory partition granted to the agent for this connection."
+        },
+        "governing_sla": {
+          "$ref": "#/$defs/BilateralSLA",
+          "description": "The legal and physical boundary constraints for querying this target."
+        }
+      },
+      "required": [
+        "attestation_id",
+        "target_topology_id",
+        "authorized_session",
+        "governing_sla"
+      ],
+      "title": "FederatedCapabilityAttestation",
+      "type": "object"
+    },
     "FederatedDiscoveryProtocol": {
       "additionalProperties": false,
       "properties": {
@@ -6296,6 +6328,39 @@
       "title": "OntologicalHandshake",
       "type": "object"
     },
+    "OntologicalSurfaceProjection": {
+      "additionalProperties": false,
+      "description": "A mathematically bounded, declarative subgraph of all ToolDefinitions and\nMCPServerManifests currently valid for the agent's ProfileID.",
+      "properties": {
+        "projection_id": {
+          "description": "A cryptographic Lineage Watermark bounding this specific capability set.",
+          "minLength": 1,
+          "title": "Projection Id",
+          "type": "string"
+        },
+        "action_spaces": {
+          "description": "The full, machine-readable declaration of accessible tools and MCP servers.",
+          "items": {
+            "$ref": "#/$defs/ActionSpace"
+          },
+          "title": "Action Spaces",
+          "type": "array"
+        },
+        "supported_personas": {
+          "description": "The strict list of foundational model personas available.",
+          "items": {
+            "$ref": "#/$defs/ProfileID"
+          },
+          "title": "Supported Personas",
+          "type": "array"
+        }
+      },
+      "required": [
+        "projection_id"
+      ],
+      "title": "OntologicalSurfaceProjection",
+      "type": "object"
+    },
     "OptimizationDirection": {
       "enum": [
         "maximize",
@@ -6694,6 +6759,17 @@
       ],
       "title": "ProcessRewardContract",
       "type": "object"
+    },
+    "ProfileID": {
+      "description": "A deterministic cognitive routing boundary that defines the non-monotonic instruction set for the agent.",
+      "examples": [
+        "default_assistant",
+        "code_expert"
+      ],
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[a-zA-Z0-9_-]+$",
+      "type": "string"
     },
     "QoSClassification": {
       "enum": [
@@ -9077,6 +9153,26 @@
             "$ref": "#/$defs/TheoryOfMindSnapshot"
           },
           "title": "Theory Of Mind Models",
+          "type": "array"
+        },
+        "affordance_projection": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OntologicalSurfaceProjection"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematically bounded subgraph of capabilities currently available to the agent."
+        },
+        "capability_attestations": {
+          "description": "Immutable cryptographic receipts of dynamically discovered external enterprise connectors.",
+          "items": {
+            "$ref": "#/$defs/FederatedCapabilityAttestation"
+          },
+          "title": "Capability Attestations",
           "type": "array"
         }
       },
