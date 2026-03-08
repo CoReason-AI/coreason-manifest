@@ -128,7 +128,8 @@ class ObservationEvent(BaseStateEvent):
     )
     triggering_invocation_id: str | None = Field(
         default=None,
-        description="The Event ID of the specific ToolInvocationEvent that spawned this observation, forming a strict bipartite directed edge.",
+        description="The Event ID of the specific ToolInvocationEvent that spawned this observation, "
+        "forming a strict bipartite directed edge.",
     )
 
 

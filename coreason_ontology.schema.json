@@ -817,7 +817,8 @@
           "counterfactual_regret": "#/$defs/CounterfactualRegretEvent",
           "hypothesis": "#/$defs/HypothesisGenerationEvent",
           "observation": "#/$defs/ObservationEvent",
-          "system_fault": "#/$defs/SystemFaultEvent"
+          "system_fault": "#/$defs/SystemFaultEvent",
+          "tool_invocation": "#/$defs/ToolInvocationEvent"
         },
         "propertyName": "type"
       },
@@ -839,6 +840,9 @@
         },
         {
           "$ref": "#/$defs/CounterfactualRegretEvent"
+        },
+        {
+          "$ref": "#/$defs/ToolInvocationEvent"
         }
       ]
     },
@@ -1096,6 +1100,20 @@
           "default": null,
           "description": "Systemic heartbeat constraint. A node cannot lock the thread longer than this without yielding to poll for BargeInInterruptEvents.",
           "title": "Max Uninterruptible Span Ms"
+        },
+        "max_concurrent_tool_invocations": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematical integer ceiling to prevent Sybil-like parallel mutations against the ActionSpace.",
+          "title": "Max Concurrent Tool Invocations"
         }
       },
       "required": [
@@ -5768,6 +5786,19 @@
           ],
           "default": null,
           "description": "The mathematical brain-scan proving exactly which neural circuits fired to append this event."
+        },
+        "triggering_invocation_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The Event ID of the specific ToolInvocationEvent that spawned this observation, forming a strict bipartite directed edge.",
+          "title": "Triggering Invocation Id"
         }
       },
       "required": [
@@ -8243,6 +8274,62 @@
         "permissions"
       ],
       "title": "ToolDefinition",
+      "type": "object"
+    },
+    "ToolInvocationEvent": {
+      "additionalProperties": false,
+      "description": "A Priori Kinetic Commitment representing the Pearlian Do-Operator prior to network execution.",
+      "properties": {
+        "event_id": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "type": {
+          "const": "tool_invocation",
+          "default": "tool_invocation",
+          "description": "Discriminator type for a tool invocation event.",
+          "title": "Type",
+          "type": "string"
+        },
+        "tool_name": {
+          "description": "The exact tool targeted in the ActionSpace.",
+          "title": "Tool Name",
+          "type": "string"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "description": "The intended JSON-RPC payload.",
+          "title": "Parameters",
+          "type": "object"
+        },
+        "authorized_budget_cents": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The maximum escrow unlocked for this specific run.",
+          "title": "Authorized Budget Cents"
+        }
+      },
+      "required": [
+        "event_id",
+        "timestamp",
+        "tool_name",
+        "parameters"
+      ],
+      "title": "ToolInvocationEvent",
       "type": "object"
     },
     "TraceExportBatch": {

@@ -125,7 +125,8 @@ class BackpressurePolicy(CoreasonBaseModel):
     max_concurrent_tool_invocations: int | None = Field(
         default=None,
         gt=0,
-        description="The mathematical integer ceiling to prevent Sybil-like parallel mutations against the ActionSpace.",
+        description="The mathematical integer ceiling to prevent Sybil-like parallel mutations "
+        "against the ActionSpace.",
     )
 
 
