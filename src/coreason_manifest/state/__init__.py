@@ -38,6 +38,7 @@ from .events import (
     InterventionalCausalTask,
     NeuralAuditAttestation,
     ObservationEvent,
+    PersistenceCommitReceipt,
     SaeFeatureActivation,
     StructuralCausalModel,
     SystemFaultEvent,
@@ -50,6 +51,11 @@ from .memory import (
     FederatedStateSnapshot,
     TheoryOfMindSnapshot,
     WorkingMemorySnapshot,
+)
+from .persistence import (
+    ContinuousMutationPolicy,
+    GraphFlatteningDirective,
+    LakehouseMountConfig,
 )
 from .scratchpad import (
     LatentScratchpadTrace,
@@ -94,6 +100,7 @@ __all__ = [
     "CausalDirectedEdge",
     "CognitiveStateProfile",
     "CognitiveUncertaintyProfile",
+    "ContinuousMutationPolicy",
     "DefeasibleAttack",
     "DefeasibleCascade",
     "DimensionalProjectionContract",
@@ -105,10 +112,12 @@ __all__ = [
     "EvidentiaryWarrant",
     "FalsificationCondition",
     "FederatedStateSnapshot",
+    "GraphFlatteningDirective",
     "HardwareEnclaveAttestation",
     "HomomorphicEncryptionProfile",
     "HypothesisGenerationEvent",
     "InterventionalCausalTask",
+    "LakehouseMountConfig",
     "LatentScratchpadTrace",
     "LineageWatermark",
     "MathematicalNotationExtraction",
@@ -119,6 +128,7 @@ __all__ = [
     "NeuralAuditAttestation",
     "ObservationEvent",
     "OntologicalHandshake",
+    "PersistenceCommitReceipt",
     "RollbackRequest",
     "SaeFeatureActivation",
     "SalienceProfile",

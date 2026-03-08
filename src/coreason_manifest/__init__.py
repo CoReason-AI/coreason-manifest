@@ -160,6 +160,7 @@ from coreason_manifest.state.events import (
     NeuralAuditAttestation,
     NormativeDriftEvent,
     ObservationEvent,
+    PersistenceCommitReceipt,
     SaeFeatureActivation,
     StructuralCausalModel,
     SystemFaultEvent,
@@ -173,6 +174,11 @@ from coreason_manifest.state.memory import (
     FederatedStateSnapshot,
     TheoryOfMindSnapshot,
     WorkingMemorySnapshot,
+)
+from coreason_manifest.state.persistence import (
+    ContinuousMutationPolicy,
+    GraphFlatteningDirective,
+    LakehouseMountConfig,
 )
 from coreason_manifest.state.scratchpad import LatentScratchpadTrace, ThoughtBranch
 from coreason_manifest.state.semantic import (
@@ -335,6 +341,7 @@ __all__ = [
     "ConsensusPolicy",
     "ConstitutionalAmendmentProposal",
     "ConstitutionalRule",
+    "ContinuousMutationPolicy",
     "CoreasonBaseModel",
     "CouncilTopology",
     "CounterfactualRegretEvent",
@@ -393,6 +400,7 @@ __all__ = [
     "GovernancePolicy",
     "GradingCriteria",
     "GrammarPanel",
+    "GraphFlatteningDirective",
     "HTTPTransportConfig",
     "HardwareEnclaveAttestation",
     "HomomorphicEncryptionProfile",
@@ -409,6 +417,7 @@ __all__ = [
     "InterventionalCausalTask",
     "JSONRPCError",
     "JSONRPCErrorResponse",
+    "LakehouseMountConfig",
     "LatentScratchpadTrace",
     "LatentSmoothingProfile",
     "LifecycleTrigger",
@@ -452,6 +461,7 @@ __all__ = [
     "PatchOperation",
     "PeftAdapterContract",
     "PermissionBoundary",
+    "PersistenceCommitReceipt",
     "PostQuantumSignature",
     "PredictionMarketPolicy",
     "PredictionMarketState",
