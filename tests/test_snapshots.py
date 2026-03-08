@@ -23,7 +23,7 @@ def test_epistemic_ledger_snapshot(snapshot: SnapshotAssertion) -> None:
                         "provenance": {
                             "extracted_by": "did:web:agent_1",
                             "source_event_id": "evt_0",
-                            "spatial_anchor": {"bounding_box": [10.5, 20.0, 100.5, 200.0], "block_type": "figure"},
+                            "multimodal_anchor": {"bounding_box": [10.5, 20.0, 100.5, 200.0], "block_type": "figure"},
                         },
                     },
                     "semantic_edge": {

@@ -379,6 +379,11 @@ class EvaluatorOptimizerTopology(BaseTopology):
     max_revision_loops: int = Field(
         ge=1, description="The absolute limit on Actor-Critic cycles to prevent infinite compute burn."
     )
+    require_multimodal_grounding: bool = Field(
+        default=False,
+        description="If True, the evaluator_node_id MUST mathematically mask all tokens outside the "
+        "MultimodalTokenAnchor during its forward pass to execute pure adversarial Proposer-Critique validation.",
+    )
 
     @model_validator(mode="after")
     def verify_bipartite_nodes(self) -> Self:
