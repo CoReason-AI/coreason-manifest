@@ -2395,6 +2395,50 @@
       "title": "CounterfactualRegretEvent",
       "type": "object"
     },
+    "CrossSwarmHandshake": {
+      "additionalProperties": false,
+      "properties": {
+        "handshake_id": {
+          "description": "Unique identifier for this B2B negotiation.",
+          "title": "Handshake Id",
+          "type": "string"
+        },
+        "initiating_tenant_id": {
+          "description": "The enterprise DID requesting the connection.",
+          "title": "Initiating Tenant Id",
+          "type": "string"
+        },
+        "receiving_tenant_id": {
+          "description": "The enterprise DID receiving the connection.",
+          "title": "Receiving Tenant Id",
+          "type": "string"
+        },
+        "offered_sla": {
+          "$ref": "#/$defs/BilateralSLA",
+          "description": "The initial legal/data boundary proposed."
+        },
+        "status": {
+          "default": "proposed",
+          "description": "The current status of the handshake.",
+          "enum": [
+            "proposed",
+            "negotiating",
+            "aligned",
+            "rejected"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "handshake_id",
+        "initiating_tenant_id",
+        "receiving_tenant_id",
+        "offered_sla"
+      ],
+      "title": "CrossSwarmHandshake",
+      "type": "object"
+    },
     "CrossoverStrategy": {
       "additionalProperties": false,
       "description": "The mathematical rules for combining elite agents.",
@@ -3794,6 +3838,33 @@
         "dependency_blackout"
       ],
       "type": "string"
+    },
+    "FederatedDiscoveryProtocol": {
+      "additionalProperties": false,
+      "properties": {
+        "broadcast_endpoints": {
+          "description": "A list of MCP URI endpoints open for B2B task bidding.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Broadcast Endpoints",
+          "type": "array"
+        },
+        "supported_ontologies": {
+          "description": "A list of cryptographic hashes of domain ontologies this swarm is capable of processing.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Supported Ontologies",
+          "type": "array"
+        }
+      },
+      "required": [
+        "broadcast_endpoints",
+        "supported_ontologies"
+      ],
+      "title": "FederatedDiscoveryProtocol",
+      "type": "object"
     },
     "FederatedStateSnapshot": {
       "additionalProperties": false,
@@ -8479,6 +8550,18 @@
           "default": null,
           "description": "The declarative whitelist of data classifications permitted to flow through this graph.",
           "title": "Allowed Data Classifications"
+        },
+        "federated_discovery": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FederatedDiscoveryProtocol"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The broadcast protocol for B2B multi-swarm discovery."
         },
         "federated_sla": {
           "anyOf": [

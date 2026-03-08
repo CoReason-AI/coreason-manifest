@@ -22,6 +22,10 @@ from .envelope import (
     PostQuantumSignature,
     WorkflowEnvelope,
 )
+from .federation import (
+    CrossSwarmHandshake,
+    FederatedDiscoveryProtocol,
+)
 from .markets import (
     HypothesisStake,
     MarketResolution,
@@ -69,12 +73,14 @@ __all__ = [
     "BilateralSLA",
     "CompositeNode",
     "CouncilTopology",
+    "CrossSwarmHandshake",
     "DAGTopology",
     "DimensionalProjectionContract",
     "DiversityConstraint",
     "EpistemicScanner",
     "EscrowPolicy",
     "EvolutionaryTopology",
+    "FederatedDiscoveryProtocol",
     "HumanNode",
     "HypothesisStake",
     "InputMapping",

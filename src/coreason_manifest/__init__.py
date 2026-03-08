@@ -211,6 +211,7 @@ from coreason_manifest.workflow.auctions import (
 )
 from coreason_manifest.workflow.constraints import InputMapping, OutputMapping
 from coreason_manifest.workflow.envelope import BilateralSLA, PostQuantumSignature, WorkflowEnvelope
+from coreason_manifest.workflow.federation import CrossSwarmHandshake, FederatedDiscoveryProtocol
 from coreason_manifest.workflow.nodes import (
     AgentAttestation,
     AgentNode,
@@ -296,6 +297,7 @@ __all__ = [
     "CoreasonBaseModel",
     "CouncilTopology",
     "CounterfactualRegretEvent",
+    "CrossSwarmHandshake",
     "CrossoverStrategy",
     "CrossoverType",
     "CustodyRecord",
@@ -331,6 +333,7 @@ __all__ = [
     "FalsificationCondition",
     "FaultInjectionProfile",
     "FaultType",
+    "FederatedDiscoveryProtocol",
     "FederatedStateSnapshot",
     "FitnessObjective",
     "FormalVerificationContract",
@@ -463,9 +466,11 @@ __all__ = [
 
 
 def _rebuild_ontology() -> None:
+    from coreason_manifest.workflow.federation import FederatedDiscoveryProtocol
     from coreason_manifest.workflow.topologies import AnyTopology
 
     _ = AnyTopology
+    _ = FederatedDiscoveryProtocol
     """
     Dynamically resolves all Pydantic forward references strictly at the end of module initialization.
     This prevents circular import death spirals by guaranteeing the entire ontology is loaded

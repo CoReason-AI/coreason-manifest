@@ -10,11 +10,14 @@ These schemas dictate the multi-agent graph geometry and decentralized routing m
 execution code or synchronous blocking loops. Think purely in terms of graph theory, Byzantine fault tolerance, and
 multi-agent market dynamics."""
 
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 from pydantic import Field
 
 from coreason_manifest.core.base import CoreasonBaseModel
+
+if TYPE_CHECKING:
+    from coreason_manifest.workflow.federation import FederatedDiscoveryProtocol
 from coreason_manifest.core.primitives import DataClassification, RiskLevel, SemanticVersion
 from coreason_manifest.oversight.governance import GlobalGovernance
 from coreason_manifest.workflow.topologies import AnyTopology
@@ -84,6 +87,9 @@ class WorkflowEnvelope(CoreasonBaseModel):
     allowed_data_classifications: list[DataClassification] | None = Field(
         default=None,
         description="The declarative whitelist of data classifications permitted to flow through this graph.",
+    )
+    federated_discovery: FederatedDiscoveryProtocol | None = Field(
+        default=None, description="The broadcast protocol for B2B multi-swarm discovery."
     )
     federated_sla: BilateralSLA | None = Field(
         default=None,
