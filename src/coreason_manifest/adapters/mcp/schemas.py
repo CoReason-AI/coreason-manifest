@@ -38,7 +38,7 @@ class MCPCapabilityWhitelist(CoreasonBaseModel):
         description=(
             "Explicit list of DUA/RBAC enterprise licenses mathematically "
             "required to perceive and mount this capability."
-        )
+        ),
     )
 
 
