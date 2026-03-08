@@ -14,7 +14,7 @@ etc.) into this file to prevent DAG cycles.
 from enum import StrEnum
 from typing import Annotated
 
-from pydantic import Field, StringConstraints
+from pydantic import Field
 
 # =========================================================================
 #  DOMAIN VOCABULARY (Living Standard)
@@ -42,8 +42,12 @@ type GitSHA = Annotated[
 
 type NodeID = Annotated[
     str,
-    StringConstraints(min_length=7, pattern=r"^did:[a-z0-9]+:[a-zA-Z0-9.\-_:]+$"),
-    Field(description="A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm."),
+    Field(
+        min_length=7,
+        pattern=r"^did:[a-z0-9]+:[a-zA-Z0-9.\-_:]+$",
+        description="A Decentralized Identifier (DID) representing a cryptographically accountable principal "
+        "within the swarm.",
+    ),
 ]
 
 type ToolID = Annotated[
@@ -52,7 +56,7 @@ type ToolID = Annotated[
         pattern=r"^[a-zA-Z0-9_-]+$",
         min_length=1,
         max_length=128,
-        description="Identifier for a tool or capability.",
+        description="A cryptographically deterministic capability pointer binding the agent to a verifiable spatial environment.",
         examples=["calculator", "web_search"],
     ),
 ]
@@ -63,7 +67,7 @@ type ProfileID = Annotated[
         pattern=r"^[a-zA-Z0-9_-]+$",
         min_length=1,
         max_length=128,
-        description="Identifier for a cognitive profile.",
+        description="A deterministic cognitive routing boundary that defines the non-monotonic instruction set for the agent.",
         examples=["default_assistant", "code_expert"],
     ),
 ]

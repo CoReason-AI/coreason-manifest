@@ -28,12 +28,14 @@ class VerifiableCredentialPresentation(CoreasonBaseModel):
         description="The exact cryptographic standard used to encode this credential presentation."
     )
     issuer_did: NodeID = Field(
-        description="The W3C DID of the trusted authority that cryptographically signed the credential, explicitly representing the delegation of authority from a human or parent principal."
+        description="The W3C DID of the trusted authority that cryptographically signed the credential, explicitly "
+        "representing the delegation of authority from a human or parent principal."
     )
     cryptographic_proof_blob: str = Field(
-        description="The base64-encoded cryptographic proof (e.g., ZK-SNARKs, zkVM receipts, or programmable trust attestations) proving the claims without revealing the private key."
+        description="The base64-encoded cryptographic proof (e.g., ZK-SNARKs, zkVM receipts, or programmable trust "
+        "attestations) proving the claims without revealing the private key."
     )
     authorization_claims: dict[str, Any] = Field(
-        description="The strict, domain-agnostic JSON dictionary of strictly bounded geometric predicates that define the operational perimeter of the agent "
-        "(e.g., {'clearance': 'RESTRICTED'})."
+        description="The strict, domain-agnostic JSON dictionary of strictly bounded geometric predicates that "
+        "define the operational perimeter of the agent (e.g., {'clearance': 'RESTRICTED'})."
     )
