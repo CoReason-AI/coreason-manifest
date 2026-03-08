@@ -269,3 +269,24 @@ def test_council_topology_byzantine_slash_requires_escrow() -> None:
     )
     assert topology.council_escrow is not None
     assert topology.council_escrow.escrow_locked_microcents == 5000
+
+
+@given(nodes=nodes_dict_st(), data=st.data())
+def test_dag_topology_draft_superposition(nodes: dict[str, Any], data: DataObject) -> None:
+    """Prove that 'draft' lifecycle_phase perfectly bypasses validation for incomplete or cyclical graphs."""
+    ghost_node = "did:web:ghost_node_123"
+    assume(ghost_node not in nodes)
+
+    keys = list(nodes.keys())
+    node_a = data.draw(st.sampled_from(keys))
+
+    # Inject a dangling pointer AND a cycle, but declare it as a draft
+    topology = DAGTopology(
+        nodes=nodes,
+        edges=[(node_a, ghost_node), (ghost_node, node_a)],
+        allow_cycles=False,
+        lifecycle_phase="draft"
+    )
+
+    assert topology.lifecycle_phase == "draft"
+    assert len(topology.edges) == 2

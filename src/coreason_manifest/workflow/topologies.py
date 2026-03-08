@@ -135,6 +135,10 @@ class BaseTopology(CoreasonBaseModel):
     Base configuration for any workflow topology.
     """
 
+    lifecycle_phase: Literal["draft", "live"] = Field(
+        default="live",
+        description="The execution phase of the graph. 'draft' allows incomplete structural state.",
+    )
     nodes: dict[NodeID, AnyNode] = Field(description="Flat registry of all nodes in this topology.")
     shared_state_contract: StateContract | None = Field(
         default=None, description="The schema-on-write contract governing the internal state of this topology."
@@ -166,6 +170,10 @@ class DAGTopology(BaseTopology):
 
     @model_validator(mode="after")
     def verify_edges_exist(self) -> Self:
+        # Mathematical Superposition: Bypass all structural validation during drafting
+        if self.lifecycle_phase == "draft":
+            return self
+
         # Step 1: Referential integrity
         for source, target in self.edges:
             if source not in self.nodes:
