@@ -4583,6 +4583,37 @@
       "title": "FormalVerificationContract",
       "type": "object"
     },
+    "GenerativeManifoldSLA": {
+      "additionalProperties": false,
+      "description": "Mathematical governor for fractal/cyclic graph synthesis.",
+      "properties": {
+        "max_topological_depth": {
+          "description": "The absolute physical depth limit for recursive encapsulation.",
+          "minimum": 1,
+          "title": "Max Topological Depth",
+          "type": "integer"
+        },
+        "max_node_fanout": {
+          "description": "The maximum number of horizontally connected nodes per topology tier.",
+          "minimum": 1,
+          "title": "Max Node Fanout",
+          "type": "integer"
+        },
+        "max_synthetic_tokens": {
+          "description": "The economic constraint on the entire generated mock payload.",
+          "minimum": 1,
+          "title": "Max Synthetic Tokens",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "max_topological_depth",
+        "max_node_fanout",
+        "max_synthetic_tokens"
+      ],
+      "title": "GenerativeManifoldSLA",
+      "type": "object"
+    },
     "GlobalGovernance": {
       "additionalProperties": false,
       "description": "Global governance bounds for a swarm executing a workflow envelope.",
@@ -8959,6 +8990,35 @@
         "nodes"
       ],
       "title": "SwarmTopology",
+      "type": "object"
+    },
+    "SyntheticGenerationProfile": {
+      "additionalProperties": false,
+      "description": "Authoritative blueprint for external fuzzing and simulation engines.",
+      "properties": {
+        "profile_id": {
+          "description": "Unique identifier for this simulation profile.",
+          "minLength": 1,
+          "title": "Profile Id",
+          "type": "string"
+        },
+        "manifold_sla": {
+          "$ref": "#/$defs/GenerativeManifoldSLA",
+          "description": "The structural topological gas limit."
+        },
+        "target_schema_ref": {
+          "description": "The string name of the Pydantic class to synthesize.",
+          "minLength": 1,
+          "title": "Target Schema Ref",
+          "type": "string"
+        }
+      },
+      "required": [
+        "profile_id",
+        "manifold_sla",
+        "target_schema_ref"
+      ],
+      "title": "SyntheticGenerationProfile",
       "type": "object"
     },
     "System1Reflex": {
