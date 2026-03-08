@@ -402,6 +402,20 @@
           "title": "Intervention Policies",
           "type": "array"
         },
+        "domain_extensions": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks.",
+          "title": "Domain Extensions"
+        },
         "type": {
           "const": "agent",
           "default": "agent",
@@ -609,6 +623,18 @@
           ],
           "default": null,
           "description": "The adaptive trigger policy for executing deep mechanistic interpretability brain-scans on this agent."
+        },
+        "anchoring_policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AnchoringPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The declarative contract mathematically binding this agent to a core altruistic objective."
         }
       },
       "required": [
@@ -686,6 +712,31 @@
         "divergence_temperature_override"
       ],
       "title": "AnalogicalMappingTask",
+      "type": "object"
+    },
+    "AnchoringPolicy": {
+      "additionalProperties": false,
+      "description": "The mathematical center of gravity preventing epistemic drift and sycophancy in the swarm.",
+      "properties": {
+        "anchor_prompt_hash": {
+          "description": "The undeniable SHA-256 hash of the core objective.",
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Anchor Prompt Hash",
+          "type": "string"
+        },
+        "max_semantic_drift": {
+          "description": "The maximum allowed cosine deviation from the anchor before the orchestrator forces a state rollback.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Max Semantic Drift",
+          "type": "number"
+        }
+      },
+      "required": [
+        "anchor_prompt_hash",
+        "max_semantic_drift"
+      ],
+      "title": "AnchoringPolicy",
       "type": "object"
     },
     "AnyNode": {
@@ -815,6 +866,7 @@
         "mapping": {
           "council": "#/$defs/CouncilTopology",
           "dag": "#/$defs/DAGTopology",
+          "evaluator_optimizer": "#/$defs/EvaluatorOptimizerTopology",
           "evolutionary": "#/$defs/EvolutionaryTopology",
           "smpc": "#/$defs/SMPCTopology",
           "swarm": "#/$defs/SwarmTopology"
@@ -836,6 +888,9 @@
         },
         {
           "$ref": "#/$defs/SMPCTopology"
+        },
+        {
+          "$ref": "#/$defs/EvaluatorOptimizerTopology"
         }
       ]
     },
@@ -1147,6 +1202,20 @@
           },
           "title": "Intervention Policies",
           "type": "array"
+        },
+        "domain_extensions": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks.",
+          "title": "Domain Extensions"
         }
       },
       "required": [
@@ -1956,6 +2025,20 @@
           },
           "title": "Intervention Policies",
           "type": "array"
+        },
+        "domain_extensions": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks.",
+          "title": "Domain Extensions"
         },
         "type": {
           "const": "composite",
@@ -3071,6 +3154,88 @@
       "title": "EscrowPolicy",
       "type": "object"
     },
+    "EvaluatorOptimizerTopology": {
+      "additionalProperties": false,
+      "description": "A formalized Actor-Critic micro-topology enforcing strict, finite generation-evaluation-revision cycles.",
+      "properties": {
+        "nodes": {
+          "additionalProperties": {
+            "$ref": "#/$defs/AnyNode"
+          },
+          "description": "Flat registry of all nodes in this topology.",
+          "propertyNames": {
+            "$ref": "#/$defs/NodeID"
+          },
+          "title": "Nodes",
+          "type": "object"
+        },
+        "shared_state_contract": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StateContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The schema-on-write contract governing the internal state of this topology."
+        },
+        "information_flow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/InformationFlowPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The structural Data Loss Prevention (DLP) contract governing all state mutations in this topology."
+        },
+        "observability": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ObservabilityPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The distributed tracing rules bound to this specific execution graph."
+        },
+        "type": {
+          "const": "evaluator_optimizer",
+          "default": "evaluator_optimizer",
+          "description": "Discriminator for an Evaluator-Optimizer loop.",
+          "title": "Type",
+          "type": "string"
+        },
+        "generator_node_id": {
+          "$ref": "#/$defs/NodeID",
+          "description": "The ID of the actor generating the payload."
+        },
+        "evaluator_node_id": {
+          "$ref": "#/$defs/NodeID",
+          "description": "The ID of the critic scoring the payload."
+        },
+        "max_revision_loops": {
+          "description": "The absolute limit on Actor-Critic cycles to prevent infinite compute burn.",
+          "minimum": 1,
+          "title": "Max Revision Loops",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "nodes",
+        "generator_node_id",
+        "evaluator_node_id",
+        "max_revision_loops"
+      ],
+      "title": "EvaluatorOptimizerTopology",
+      "type": "object"
+    },
     "EvictionPolicy": {
       "additionalProperties": false,
       "properties": {
@@ -3976,6 +4141,20 @@
           },
           "title": "Intervention Policies",
           "type": "array"
+        },
+        "domain_extensions": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks.",
+          "title": "Domain Extensions"
         },
         "type": {
           "const": "human",
@@ -7668,6 +7847,20 @@
           },
           "title": "Intervention Policies",
           "type": "array"
+        },
+        "domain_extensions": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks.",
+          "title": "Domain Extensions"
         },
         "type": {
           "const": "system",

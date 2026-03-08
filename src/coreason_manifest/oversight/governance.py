@@ -166,3 +166,20 @@ class GlobalGovernance(CoreasonBaseModel):
         default=None,
         description="The mathematical proof of structural correctness mandated for this execution graph.",
     )
+
+
+class AnchoringPolicy(CoreasonBaseModel):
+    """
+    The mathematical center of gravity preventing epistemic drift and sycophancy in the swarm.
+    """
+
+    anchor_prompt_hash: str = Field(
+        pattern=r"^[a-f0-9]{64}$", description="The undeniable SHA-256 hash of the core objective."
+    )
+    max_semantic_drift: float = Field(
+        ge=0.0,
+        le=1.0,
+        description=(
+            "The maximum allowed cosine deviation from the anchor before the orchestrator forces a state rollback."
+        ),
+    )
