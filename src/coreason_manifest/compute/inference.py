@@ -12,7 +12,9 @@ business workflow logic here. All models must map exclusively to mathematical ha
 thresholds, and raw GPU tensor execution.
 """
 
-from pydantic import Field
+from typing import Literal, Self
+
+from pydantic import Field, model_validator
 
 from coreason_manifest.core.base import CoreasonBaseModel
 
@@ -69,3 +71,50 @@ class ActiveInferenceContract(CoreasonBaseModel):
         ge=0,
         description="The maximum economic expenditure authorized to run this specific scientific test.",
     )
+
+
+class EpistemicCompressionSLA(CoreasonBaseModel):
+    strict_probability_retention: bool = Field(
+        default=True,
+        description="If True, forces the resulting SemanticNode to populate its uncertainty_profile.",
+    )
+    max_allowed_entropy_loss: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="The maximum allowed statistical flattening of the source data. Bounded between [0.0, 1.0].",
+    )
+    required_grounding_density: Literal["sparse", "dense", "exhaustive"] = Field(
+        description=(
+            "Dictates the required granularity of the MultimodalTokenAnchor "
+            "(e.g., must the model map every single entity, or just the global claim?)."
+        )
+    )
+
+
+class EpistemicTransmutationTask(CoreasonBaseModel):
+    task_id: str = Field(
+        min_length=1, description="Unique identifier for this specific multimodal extraction intervention."
+    )
+    artifact_event_id: str = Field(description="The CID of the MultimodalArtifact being processed.")
+    target_modalities: list[Literal["text", "raster_image", "vector_graphics", "tabular_grid"]] = Field(
+        min_length=1, description="The specific SOTA modality resolutions required for this extraction pass."
+    )
+    compression_sla: EpistemicCompressionSLA = Field(
+        description="The strict mathematical boundary defining the maximum allowed informational entropy loss."
+    )
+    execution_cost_budget_cents: int | None = Field(
+        default=None,
+        ge=0,
+        description="Optional maximum economic expenditure authorized to run this VLM transmutation.",
+    )
+
+    @model_validator(mode="after")
+    def validate_grounding_density_for_visuals(self) -> Self:
+        if ("tabular_grid" in self.target_modalities or "raster_image" in self.target_modalities) and (
+            self.compression_sla.required_grounding_density == "sparse"
+        ):
+            raise ValueError(
+                "Epistemic safety violation: Visual or tabular modalities require strict spatial tracking. "
+                "'required_grounding_density' cannot be 'sparse'."
+            )
+        return self

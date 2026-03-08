@@ -10,7 +10,7 @@ from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import ValidationError
 
-from coreason_manifest.state.semantic import DimensionalProjectionContract
+from coreason_manifest.state.semantic import DimensionalProjectionContract, MultimodalTokenAnchor
 
 
 @given(isometry_preservation_score=st.floats(max_value=-0.000001) | st.floats(min_value=1.000001))
@@ -23,3 +23,13 @@ def test_dimensional_projection_contract_mathematical_bounds(isometry_preservati
             projection_matrix_hash="hash",
             isometry_preservation_score=isometry_preservation_score,
         )
+
+
+def test_multimodal_token_anchor_bounds() -> None:
+    MultimodalTokenAnchor(token_span_start=5, token_span_end=10)
+    with pytest.raises(ValidationError, match="token_span_end cannot be defined without a token_span_start"):
+        MultimodalTokenAnchor(token_span_end=10)
+    with pytest.raises(ValidationError, match="token_span_end MUST be strictly greater than token_span_start"):
+        MultimodalTokenAnchor(token_span_start=5, token_span_end=5)
+    with pytest.raises(ValidationError, match="If token_span_start is defined, token_span_end MUST be defined"):
+        MultimodalTokenAnchor(token_span_start=5)
