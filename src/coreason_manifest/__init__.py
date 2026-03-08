@@ -472,7 +472,7 @@ def _rebuild_ontology() -> None:
     for _name in __all__:
         _obj = globals().get(_name)
         if isinstance(_obj, type) and issubclass(_obj, CoreasonBaseModel) and _obj is not CoreasonBaseModel:
-            typing.cast("type[CoreasonBaseModel]", _obj).model_rebuild()
+            typing.cast(typing.Any, _obj).model_rebuild()
 
 
 # Execute immediately upon module load
