@@ -39,6 +39,7 @@ from .nodes import (
     CompositeNode,
     EpistemicScanner,
     HumanNode,
+    MemoizedNode,
     SelfCorrectionPolicy,
     System1Reflex,
     SystemNode,
@@ -62,6 +63,7 @@ from .topologies import (
     SMPCTopology,
     StateContract,
     SwarmTopology,
+    compute_topology_hash,
 )
 
 __all__ = [
@@ -93,6 +95,7 @@ __all__ = [
     "HypothesisStake",
     "InputMapping",
     "MarketResolution",
+    "MemoizedNode",
     "OntologicalAlignmentPolicy",
     "OntologicalHandshake",
     "OutputMapping",
@@ -107,4 +110,5 @@ __all__ = [
     "TaskAnnouncement",
     "TaskAward",
     "WorkflowEnvelope",
+    "compute_topology_hash",
 ]

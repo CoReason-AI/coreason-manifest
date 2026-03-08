@@ -22,6 +22,7 @@ from coreason_manifest.compute.symbolic import NeuroSymbolicHandoff
 from coreason_manifest.compute.test_time import EscalationContract, ProcessRewardContract
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.core.identity import VerifiableCredentialPresentation
+from coreason_manifest.core.primitives import TopologyHash
 from coreason_manifest.oversight.dlp import SecureSubSession
 from coreason_manifest.state.cognition import CognitiveStateProfile
 
@@ -236,6 +237,18 @@ class CompositeNode(BaseNode):
     output_mappings: list[OutputMapping] = Field(default_factory=list, description="Explicit state projection outputs.")
 
 
+class MemoizedNode(BaseNode):
+    """
+    A passive structural interlock representing a historically executed graph branch.
+    """
+
+    type: Literal["memoized"] = Field(default="memoized", description="Discriminator for a Memoized node.")
+    target_topology_hash: TopologyHash = Field(description="The exact SHA-256 fingerprint of the executed topology.")
+    expected_output_schema: dict[str, Any] = Field(
+        description="The strictly typed JSON Schema expected from the cached payload."
+    )
+
+
 # =========================================================================
 # AGENT INSTRUCTION: WARNING - POLYMORPHIC ROUTER
 # If you create a new class above, you MUST append it to the AnyNode union below.
@@ -244,7 +257,7 @@ class CompositeNode(BaseNode):
 # =========================================================================
 
 type AnyNode = Annotated[
-    AgentNode | HumanNode | SystemNode | CompositeNode,
+    AgentNode | HumanNode | SystemNode | CompositeNode | MemoizedNode,
     Field(
         discriminator="type",
         description="A discriminated union of all valid workflow nodes.",
