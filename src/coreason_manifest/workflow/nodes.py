@@ -10,9 +10,9 @@ These schemas dictate the multi-agent graph geometry and decentralized routing m
 execution code or synchronous blocking loops. Think purely in terms of graph theory, Byzantine fault tolerance, and
 multi-agent market dynamics."""
 
-from typing import TYPE_CHECKING, Annotated, Literal
+from typing import TYPE_CHECKING, Annotated, Any, Literal
 
-from pydantic import Field
+from pydantic import Field, field_validator
 
 from coreason_manifest.compute.inference import ActiveInferenceContract, AnalogicalMappingTask, InterventionalCausalTask
 from coreason_manifest.compute.peft import PeftAdapterContract
@@ -43,6 +43,36 @@ class BaseNode(CoreasonBaseModel):
         default_factory=list,
         description="A declarative list of proactive oversight hooks bound to this node's lifecycle.",
     )
+    domain_extensions: dict[str, Any] | None = Field(
+        default=None,
+        description="Passive, untyped extension point for vertical domain context. "
+        "Strictly bounded to prevent JSON-bomb memory leaks.",
+    )
+
+    @field_validator("domain_extensions", mode="before")
+    @classmethod
+    def validate_domain_extensions_depth(cls, v: Any) -> Any:
+        if v is None:
+            return v
+        if not isinstance(v, dict):
+            raise ValueError("domain_extensions must be a dictionary")
+
+        def _check_depth(obj: Any, depth: int) -> None:
+            if depth > 5:
+                raise ValueError("domain_extensions exceeds maximum allowed depth of 5")
+            if isinstance(obj, dict):
+                for key, val in obj.items():
+                    if not isinstance(key, str):
+                        raise ValueError("domain_extensions keys must be strings")
+                    if len(key) > 255:
+                        raise ValueError("domain_extensions key exceeds maximum length of 255 characters")
+                    _check_depth(val, depth + 1)
+            elif isinstance(obj, list):
+                for item in obj:
+                    _check_depth(item, depth + 1)
+
+        _check_depth(v, 0)
+        return v
 
 
 class System1Reflex(CoreasonBaseModel):
