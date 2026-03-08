@@ -6,6 +6,7 @@
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
 import contextlib
+import os
 from typing import Any, cast
 
 from mcp.server.fastmcp import FastMCP
@@ -31,23 +32,47 @@ for _name in coreason_manifest.__all__:
 _SCHEMA_NAMES = sorted(_AVAILABLE_SCHEMAS.keys())
 
 
+def _get_granted_licenses() -> set[str]:
+    """Passively extracts the mathematically granted context from the environment."""
+    env_val = os.environ.get("COREASON_GRANTED_LICENSES", "")
+    if not env_val:
+        return set()
+    return {lic.strip() for lic in env_val.split(",") if lic.strip()}
+
+
+def _is_schema_allowed(schema_dict: dict[str, Any], granted_licenses: set[str]) -> bool:
+    """Calculates if the required license lattice is a strict subset of the granted lattice."""
+    required = schema_dict.get("x-required-licenses", [])
+    if not isinstance(required, list):
+        required = []
+    return set(required).issubset(granted_licenses)
+
+
 @mcp.tool()
 def list_schemas() -> list[str]:
-    """Returns a list of all available schema names exported in the root __init__.py."""
-    return _SCHEMA_NAMES
+    """Returns a list of all available schema names exported in the root __init__.py, filtered by RBAC context."""
+    granted = _get_granted_licenses()
+    allowed_schemas = []
+    for name in _SCHEMA_NAMES:
+        if _is_schema_allowed(_AVAILABLE_SCHEMAS[name], granted):
+            allowed_schemas.append(name)
+    return allowed_schemas
 
 
 @mcp.tool()
 def get_schema(schema_name: str) -> dict[str, Any]:
-    """Returns the strict Pydantic JSON schema for a specific requested model.
-
-    Args:
-        schema_name: The name of the schema to fetch (e.g., WorkingMemorySnapshot)
-    """
+    """Returns the strict Pydantic JSON schema for a specific requested model, governed by RBAC bounds."""
     if schema_name not in _AVAILABLE_SCHEMAS:
         raise ValueError(f"Schema '{schema_name}' not found in the manifest.")
 
-    return cast("dict[str, Any]", _AVAILABLE_SCHEMAS[schema_name])
+    granted = _get_granted_licenses()
+    schema_dict = cast("dict[str, Any]", _AVAILABLE_SCHEMAS[schema_name])
+
+    if not _is_schema_allowed(schema_dict, granted):
+        # Zero-Trust: If not allowed, it cryptographically does not exist for this client.
+        raise ValueError(f"Schema '{schema_name}' not found in the manifest.")
+
+    return schema_dict
 
 
 def _global_error_handler_shield() -> None:

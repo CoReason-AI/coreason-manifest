@@ -1702,6 +1702,7 @@ def draw_mcp_capability_whitelist(draw: Any) -> dict[str, Any]:
                 "allowed_tools": st.lists(st.text(), max_size=100),
                 "allowed_resources": st.lists(st.text(), max_size=100),
                 "allowed_prompts": st.lists(st.text(), max_size=100),
+                "required_licenses": st.lists(st.text(), max_size=10),
             }
         )
     )

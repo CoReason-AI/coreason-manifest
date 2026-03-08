@@ -92,3 +92,38 @@ def test_visualize_missing_file(capsys: pytest.CaptureFixture[str]) -> None:
 
     captured = capsys.readouterr()
     assert "not found" in captured.err
+
+
+def test_mcp_server_rbac_projection(monkeypatch: pytest.MonkeyPatch) -> None:
+    from coreason_manifest.cli.mcp_server import _AVAILABLE_SCHEMAS, get_schema, list_schemas
+
+    # Inject a mock proprietary schema
+    proprietary_name = "MockProprietarySchema"
+    _AVAILABLE_SCHEMAS[proprietary_name] = {"title": "MockProprietarySchema", "x-required-licenses": ["marketscan"]}
+    # We must append to _SCHEMA_NAMES to make it visible to list_schemas
+    from coreason_manifest.cli.mcp_server import _SCHEMA_NAMES
+
+    _SCHEMA_NAMES.append(proprietary_name)
+
+    try:
+        # TEST 1: Zero-Trust Default (No license)
+        monkeypatch.delenv("COREASON_GRANTED_LICENSES", raising=False)
+        schemas_denied = list_schemas()
+        assert proprietary_name not in schemas_denied
+
+        with pytest.raises(ValueError, match="not found in the manifest"):
+            get_schema(proprietary_name)
+
+        # TEST 2: Granted Context (Subset satisfied)
+        monkeypatch.setenv("COREASON_GRANTED_LICENSES", "rightfind, marketscan ")
+        schemas_allowed = list_schemas()
+        assert proprietary_name in schemas_allowed
+
+        schema = get_schema(proprietary_name)
+        assert schema["title"] == "MockProprietarySchema"
+
+    finally:
+        # Clean up
+        _AVAILABLE_SCHEMAS.pop(proprietary_name, None)
+        if proprietary_name in _SCHEMA_NAMES:
+            _SCHEMA_NAMES.remove(proprietary_name)
