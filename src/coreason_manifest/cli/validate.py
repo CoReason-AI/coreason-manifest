@@ -2,6 +2,7 @@
 AGENT INSTRUCTION: This module enforces the mathematical boundaries of the Hollow Data Plane for edge workers.
 It MUST remain pure, stateless, and entirely devoid of dynamic reflection.
 """
+
 import argparse
 import sys
 from typing import Final
@@ -20,6 +21,7 @@ SCHEMA_REGISTRY: Final[dict[str, type[BaseModel]]] = {
     "delta_update": StatePatch,
     "cognitive_sync": CognitiveStateProfile,
 }
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Coreason Manifest Offline Schema Linter")
@@ -49,6 +51,7 @@ def main() -> None:
         sys.stderr.write(e.json())
         sys.stderr.write("\n")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

@@ -8,10 +8,7 @@ def test_cli_validation_success(tmp_path: Path) -> None:
     """Proves exit code 0 on absolute topological match."""
     # Note: Requires a minimally valid JSON for DocumentLayoutAnalysis based on the schema
     valid_payload = tmp_path / "valid.json"
-    valid_payload.write_text(json.dumps({
-        "blocks": {},
-        "reading_order_edges": []
-    }))
+    valid_payload.write_text(json.dumps({"blocks": {}, "reading_order_edges": []}))
 
     result = subprocess.run(  # noqa: S603
         [sys.executable, "-m", "coreason_manifest.cli.validate", "--step=step8_vision", str(valid_payload)],
@@ -21,6 +18,7 @@ def test_cli_validation_success(tmp_path: Path) -> None:
     )
     assert result.returncode == 0
     assert not result.stderr
+
 
 def test_cli_validation_failure(tmp_path: Path) -> None:
     """Proves exit code 1 and RFC 6902 stderr projection on violation."""
@@ -35,6 +33,7 @@ def test_cli_validation_failure(tmp_path: Path) -> None:
     )
     assert result.returncode == 1
     assert "missing" in result.stderr or "extra_forbidden" in result.stderr
+
 
 def test_cli_unknown_step() -> None:
     """Proves deterministic failure on unregistered schema bounds."""
