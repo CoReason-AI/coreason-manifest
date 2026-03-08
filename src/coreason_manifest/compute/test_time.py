@@ -5,13 +5,6 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
-"""AGENT INSTRUCTION: This file maps test-time computation resources like process reward modeling and escalation
-mechanisms. This is a STRICTLY KINETIC BOUNDARY. These schemas dictate non-deterministic scaling boundaries,
-probabilistic search trees, and test-time kinetic thresholds. YOU ARE EXPLICITLY FORBIDDEN from injecting
-long-term persistent state workflows, database models, or downstream business logic. Operations here translate
-strictly to hardware budgets and tensor inferences.
-"""
-
 from pydantic import Field
 
 from coreason_manifest.core.base import CoreasonBaseModel

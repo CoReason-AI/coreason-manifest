@@ -1,10 +1,3 @@
-"""AGENT INSTRUCTION: This file enforces cryptographic identity schemas, risk levels, and verifiable credentials.
-This is a STRICTLY STATIC BOUNDARY. These schemas dictate access levels, strict roles, and data classification
-within a universally immutable Zero-Trust Architecture. YOU ARE EXPLICITLY FORBIDDEN from importing stateful,
-business workflow, or compute-based operations here. Introducing upstream domains into this module will
-trigger a fatal dependency loop.
-"""
-
 from typing import Any, Literal
 
 from pydantic import Field
