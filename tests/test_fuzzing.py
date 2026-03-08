@@ -1753,6 +1753,44 @@ def test_actionspace_fuzzing(payload: dict[str, Any]) -> None:
     assert isinstance(parsed, ActionSpace)
     assert parsed.action_space_id == payload["action_space_id"]
 
+def test_ontological_surface_projection_invalid_action_spaces() -> None:
+    from coreason_manifest.tooling.environments import OntologicalSurfaceProjection
+    with pytest.raises(ValueError, match=r"Action spaces within a projection must have .*"):
+        OntologicalSurfaceProjection(
+            projection_id="p1",
+            action_spaces=[
+                ActionSpace(action_space_id="a1"),
+                ActionSpace(action_space_id="a1")
+            ],
+            supported_personas=[]
+        )
+
+def test_federated_capability_attestation_invalid_vault_keys() -> None:
+    from coreason_manifest.core.primitives import DataClassification
+    from coreason_manifest.oversight.dlp import SecureSubSession
+    from coreason_manifest.workflow.envelope import BilateralSLA
+    from coreason_manifest.workflow.federation import FederatedCapabilityAttestation
+
+    sla = BilateralSLA(
+        receiving_tenant_id="tenant_a",
+        max_permitted_classification=DataClassification.RESTRICTED,
+        liability_limit_cents=100
+    )
+    session = SecureSubSession(
+        session_id="s1",
+        allowed_vault_keys=[], # Empty triggers the error
+        max_ttl_seconds=3600,
+        description="test"
+    )
+
+    with pytest.raises(ValueError, match=r"RESTRICTED federated connections MUST define allowed_vault_keys .*"):
+        FederatedCapabilityAttestation(
+            attestation_id="a1",
+            target_topology_id="did:web:node1",
+            authorized_session=session,
+            governing_sla=sla
+        )
+
 
 semantic_node_adapter: TypeAdapter[SemanticNode] = TypeAdapter(SemanticNode)
 semantic_edge_adapter: TypeAdapter[SemanticEdge] = TypeAdapter(SemanticEdge)

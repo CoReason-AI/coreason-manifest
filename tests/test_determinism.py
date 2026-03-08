@@ -92,13 +92,16 @@ def test_workflow_envelope_determinism() -> None:
 
 
 def test_affordance_projection_determinism() -> None:
-    from coreason_manifest.tooling.environments import OntologicalSurfaceProjection
+    from coreason_manifest.tooling.environments import ActionSpace, OntologicalSurfaceProjection
+
+    space1 = ActionSpace(action_space_id="s1")
+    space2 = ActionSpace(action_space_id="s2")
 
     proj1 = OntologicalSurfaceProjection(
-        projection_id="p1", action_spaces=[], supported_personas=["b_persona", "a_persona"]
+        projection_id="p1", action_spaces=[space2, space1], supported_personas=["b_persona", "a_persona"]
     )
     proj2 = OntologicalSurfaceProjection(
-        projection_id="p1", action_spaces=[], supported_personas=["a_persona", "b_persona"]
+        projection_id="p1", action_spaces=[space1, space2], supported_personas=["a_persona", "b_persona"]
     )
 
     assert proj1.model_dump_canonical() == proj2.model_dump_canonical()
