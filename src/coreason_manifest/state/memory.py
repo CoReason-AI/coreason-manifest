@@ -37,8 +37,7 @@ class EvictionPolicy(CoreasonBaseModel):
     protected_event_ids: list[str] = Field(
         default_factory=list,
         description=(
-            "Explicit list of Content Identifiers (CIDs) the orchestrator "
-            "is mathematically forbidden from retracting."
+            "Explicit list of Content Identifiers (CIDs) the orchestrator is mathematically forbidden from retracting."
         ),
     )
 
