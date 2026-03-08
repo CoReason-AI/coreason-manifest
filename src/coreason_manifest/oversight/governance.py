@@ -181,5 +181,5 @@ class AnchoringPolicy(CoreasonBaseModel):
         le=1.0,
         description=(
             "The maximum allowed cosine deviation from the anchor before the orchestrator forces a state rollback."
-        )
+        ),
     )
