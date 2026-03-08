@@ -8,32 +8,32 @@
 import json
 import sys
 from pathlib import Path
+from typing import Literal
 
 from pydantic.json_schema import models_json_schema
 
 import coreason_manifest
+from coreason_manifest.core.base import CoreasonBaseModel
 
 
 def main() -> None:
-    from coreason_manifest.core.base import CoreasonBaseModel
+    models_to_export: list[tuple[type[CoreasonBaseModel], Literal["validation"]]] = []
 
-    models_to_export: list[type[CoreasonBaseModel]] = []
-
-    for name in set(coreason_manifest.__all__):
+    for name in sorted(set(coreason_manifest.__all__)):
         obj = getattr(coreason_manifest, name, None)
         # Strictly filter for BaseModel classes only to avoid crashing models_json_schema
         if isinstance(obj, type) and issubclass(obj, CoreasonBaseModel) and obj is not CoreasonBaseModel:
-            models_to_export.append(obj)
+            models_to_export.append((obj, "validation"))
 
     # Sort alphabetically by class name
-    models_to_export.sort(key=lambda item: item.__name__)
+    models_to_export.sort(key=lambda item: item[0].__name__)
 
     if not models_to_export:
         print("No models found to export.")
         sys.exit(0)
 
     _, top_level_schema = models_json_schema(
-        [(obj, "validation") for obj in models_to_export],
+        models_to_export,
         title="CoReason Shared Kernel Ontology",
         description="Unified JSON Schema for the Coreason Manifest",
     )
