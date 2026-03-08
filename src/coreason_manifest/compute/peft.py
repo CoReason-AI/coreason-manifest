@@ -19,7 +19,8 @@ class PeftAdapterContract(CoreasonBaseModel):
     """Declarative PEFT Adapter Contract for dynamically mounting a hot-swappable tensor overlay."""
 
     adapter_id: str = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the requested LoRA adapter."
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark "
+        "for the requested LoRA adapter."
     )
     safetensors_hash: str = Field(
         pattern=r"^[a-f0-9]{64}$",

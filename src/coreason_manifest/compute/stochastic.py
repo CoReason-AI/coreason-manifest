@@ -28,9 +28,18 @@ class DistributionProfile(CoreasonBaseModel):
     distribution_type: DistributionType = Field(
         description="The mathematical shape of the probability density function for probabilistic tensor logic."
     )
-    mean: float | None = Field(default=None, description="The expected value (mu) of the distribution bounding physical execution.")
-    variance: float | None = Field(default=None, description="The mathematical variance (sigma squared) of the execution bounds.")
-    confidence_interval_95: tuple[float, float] | None = Field(default=None, description="The 95% probabilistic execution bounds.")
+    mean: float | None = Field(
+        default=None,
+        description="The expected value (mu) of the distribution bounding physical execution.",
+    )
+    variance: float | None = Field(
+        default=None,
+        description="The mathematical variance (sigma squared) of the execution bounds.",
+    )
+    confidence_interval_95: tuple[float, float] | None = Field(
+        default=None,
+        description="The 95% probabilistic execution bounds.",
+    )
 
     @model_validator(mode="after")
     def validate_confidence_interval(self) -> Any:
@@ -43,13 +52,16 @@ class FitnessObjective(CoreasonBaseModel):
     """A specific objective function to optimize within a generation."""
 
     target_metric: str = Field(
-        description="The specific telemetry or execution metric to evaluate (e.g., 'latency', 'accuracy') governed by hardware limits."
+        description="The specific telemetry or execution metric to evaluate (e.g., 'latency', 'accuracy') "
+        "governed by hardware limits."
     )
     direction: OptimizationDirection = Field(
         description="Whether the algorithm should maximize or minimize this metric bounded by VRAM geometries."
     )
     weight: float = Field(
-        default=1.0, description="The relative importance of this objective in a multi-objective generation dictating tensor routing."
+        default=1.0,
+        description="The relative importance of this objective in a multi-objective generation "
+        "dictating tensor routing.",
     )
 
 
@@ -57,12 +69,19 @@ class VerifiableEntropy(CoreasonBaseModel):
     """Passive cryptographic envelope for verifiable random functions."""
 
     vrf_proof: str = Field(
-        min_length=10, description="The zero-knowledge cryptographic proof of fair random generation ensuring probabilistic tensor logic boundaries."
+        min_length=10,
+        description="The zero-knowledge cryptographic proof of fair random generation "
+        "ensuring probabilistic tensor logic boundaries.",
     )
     public_key: str = Field(
-        min_length=10, description="The public key of the oracle or node used to verify the VRF proof bounded by physical execution."
+        min_length=10,
+        description="The public key of the oracle or node used to verify the VRF proof bounded by physical execution.",
     )
-    seed_hash: str = Field(min_length=10, description="The SHA-256 hash of the origin seed used to initialize the VRF for exogenous spatial actuation.")
+    seed_hash: str = Field(
+        min_length=10,
+        description="The SHA-256 hash of the origin seed used to initialize the VRF "
+        "for exogenous spatial actuation.",
+    )
 
 
 class LogitSteganographyContract(CoreasonBaseModel):
@@ -70,8 +89,8 @@ class LogitSteganographyContract(CoreasonBaseModel):
     directly into the token entropy."""
 
     verification_public_key_id: str = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark required by an auditor to reconstruct the PRF "
-        "and verify the watermark."
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark "
+        "required by an auditor to reconstruct the PRF and verify the watermark."
     )
     prf_seed_hash: str = Field(
         pattern=r"^[a-f0-9]{64}$",
@@ -99,23 +118,32 @@ class MutationPolicy(CoreasonBaseModel):
     mutation_rate: float = Field(
         ge=0.0,
         le=1.0,
-        description="The probabilistic execution bounds that a given agent parameter will randomly mutate between generations.",
+        description="The probabilistic execution bounds that a given agent parameter will "
+        "randomly mutate between generations.",
     )
     temperature_shift_variance: float = Field(
         description="The maximum allowed delta for an agent's probabilistic tensor routing during mutation."
     )
     verifiable_entropy: VerifiableEntropy | None = Field(
-        default=None, description="The cryptographic envelope proving the fairness of the applied mutation rate across VRAM geometries."
+        default=None,
+        description="The cryptographic envelope proving the fairness of the applied mutation rate "
+        "across VRAM geometries.",
     )
 
 
 class CrossoverStrategy(CoreasonBaseModel):
     """The mathematical rules for combining elite agents."""
 
-    strategy_type: CrossoverType = Field(description="The heuristic method for blending successful parent agents across execution bounds.")
+    strategy_type: CrossoverType = Field(
+        description="The heuristic method for blending successful parent agents across execution bounds."
+    )
     blending_factor: float = Field(
-        ge=0.0, le=1.0, description="The proportional mix ratio when merging vector properties across VRAM geometries."
+        ge=0.0,
+        le=1.0,
+        description="The proportional mix ratio when merging vector properties across VRAM geometries.",
     )
     verifiable_entropy: VerifiableEntropy | None = Field(
-        default=None, description="The cryptographic envelope proving the fairness of the applied crossover logic bounded by physical execution."
+        default=None,
+        description="The cryptographic envelope proving the fairness of the applied crossover logic "
+        "bounded by physical execution.",
     )

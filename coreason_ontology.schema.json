@@ -2,10 +2,10 @@
   "$defs": {
     "ActionSpace": {
       "additionalProperties": false,
-      "description": "A curated environment of tools accessible to an agent or node.",
+      "description": "A Spatial Geometry or Volatile Sandbox accessible to an agent or node.",
       "properties": {
         "action_space_id": {
-          "description": "The unique identifier for this curated environment of tools.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this Spatial Geometry.",
           "title": "Action Space Id",
           "type": "string"
         },
@@ -34,10 +34,10 @@
     },
     "ActivationSteeringContract": {
       "additionalProperties": false,
-      "description": "Hardware-level contract for Representation Engineering via activation injection/ablation.",
+      "description": "Hardware-level contract for Representation Engineering (RepE) via activation injection/ablation.",
       "properties": {
         "steering_vector_hash": {
-          "description": "The SHA-256 hash of the extracted RepE control tensor (e.g., the 'caution' vector).",
+          "description": "The SHA-256 hash of the extracted RepE Latent Concept Vector applied directly to transformer layers.",
           "pattern": "^[a-f0-9]{64}$",
           "title": "Steering Vector Hash",
           "type": "string"
@@ -80,7 +80,7 @@
       "additionalProperties": false,
       "properties": {
         "task_id": {
-          "description": "Unique identifier for this active inference execution.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this active inference execution.",
           "minLength": 1,
           "title": "Task Id",
           "type": "string"
@@ -96,7 +96,7 @@
           "type": "string"
         },
         "selected_tool_name": {
-          "description": "The exact tool from the ActionSpace allocated for this experiment.",
+          "description": "The exact exogenous actuator from the Spatial Geometry allocated for this experiment.",
           "title": "Selected Tool Name",
           "type": "string"
         },
@@ -676,7 +676,7 @@
       "additionalProperties": false,
       "properties": {
         "task_id": {
-          "description": "Unique identifier for this lateral thinking task.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this lateral thinking task.",
           "minLength": 1,
           "title": "Task Id",
           "type": "string"
@@ -698,7 +698,7 @@
           "type": "integer"
         },
         "divergence_temperature_override": {
-          "description": "The specific high-temperature sampling override required to force this creative leap.",
+          "description": "The specific high-temperature probabilistic execution bounds override required to force this creative leap.",
           "minimum": 0.0,
           "title": "Divergence Temperature Override",
           "type": "number"
@@ -1907,7 +1907,7 @@
       "description": "Hardware-level contract overriding MoE routing to enforce functional/specialist paths.",
       "properties": {
         "dynamic_top_k": {
-          "description": "The exact number of functional experts the router must activate per token. High values simulate deep cognitive strain.",
+          "description": "The exact number of functional experts the router must activate per token. High values simulate deep cognitive strain on the VRAM.",
           "minimum": 1,
           "title": "Dynamic Top K",
           "type": "integer"
@@ -2109,12 +2109,12 @@
       "description": "A request by a swarm to provision resources based on requirements.",
       "properties": {
         "max_budget": {
-          "description": "The maximum cost budget allowable for the provisioned compute.",
+          "description": "The maximum cost budget allowable for the provisioned physical execution compute.",
           "title": "Max Budget",
           "type": "number"
         },
         "required_capabilities": {
-          "description": "The minimal functional capabilities required by the requested compute.",
+          "description": "The minimal functional capabilities governed by probabilistic execution bounds required by the requested compute.",
           "items": {
             "type": "string"
           },
@@ -2486,10 +2486,10 @@
       "properties": {
         "strategy_type": {
           "$ref": "#/$defs/CrossoverType",
-          "description": "The heuristic method for blending successful parent agents."
+          "description": "The heuristic method for blending successful parent agents across execution bounds."
         },
         "blending_factor": {
-          "description": "The proportional mix ratio when merging vector properties.",
+          "description": "The proportional mix ratio when merging vector properties across VRAM geometries.",
           "maximum": 1.0,
           "minimum": 0.0,
           "title": "Blending Factor",
@@ -2505,7 +2505,7 @@
             }
           ],
           "default": null,
-          "description": "The cryptographic envelope proving the fairness of the applied crossover logic."
+          "description": "The cryptographic envelope proving the fairness of the applied crossover logic bounded by physical execution."
         }
       },
       "required": [
@@ -2916,7 +2916,7 @@
       "properties": {
         "distribution_type": {
           "$ref": "#/$defs/DistributionType",
-          "description": "The mathematical shape of the probability density function."
+          "description": "The mathematical shape of the probability density function for probabilistic tensor logic."
         },
         "mean": {
           "anyOf": [
@@ -2928,7 +2928,7 @@
             }
           ],
           "default": null,
-          "description": "The expected value (mu) of the distribution.",
+          "description": "The expected value (mu) of the distribution bounding physical execution.",
           "title": "Mean"
         },
         "variance": {
@@ -2941,7 +2941,7 @@
             }
           ],
           "default": null,
-          "description": "The mathematical variance (sigma squared).",
+          "description": "The mathematical variance (sigma squared) of the execution bounds.",
           "title": "Variance"
         },
         "confidence_interval_95": {
@@ -2964,7 +2964,7 @@
             }
           ],
           "default": null,
-          "description": "The 95% probability bounds.",
+          "description": "The 95% probabilistic execution bounds.",
           "title": "Confidence Interval 95"
         }
       },
@@ -3059,7 +3059,7 @@
     },
     "DynamicConvergenceSLA": {
       "additionalProperties": false,
-      "description": "Service Level Agreement defining the mathematical conditions for early termination of a reasoning search.",
+      "description": "Service Level SLA defining the probabilistic bounds for early termination of a System 2 Search Tree.",
       "properties": {
         "convergence_delta_epsilon": {
           "description": "The minimal required PRM score improvement across the lookback window to justify continued compute.",
@@ -3074,7 +3074,7 @@
           "type": "integer"
         },
         "minimum_reasoning_steps": {
-          "description": "The mandatory 'burn-in' period. The orchestrator cannot terminate the search before this structural depth is reached, preventing premature collapse.",
+          "description": "The mandatory 'burn-in' period. The orchestrator cannot terminate the search before this structural depth is reached, preventing premature collapse of Latent Token Trajectories.",
           "exclusiveMinimum": 0,
           "title": "Minimum Reasoning Steps",
           "type": "integer"
@@ -3328,13 +3328,13 @@
           "type": "number"
         },
         "max_latent_tokens_budget": {
-          "description": "The maximum number of hidden tokens the orchestrator is authorized to buy for the internal monologue.",
+          "description": "The maximum Test-Time Compute Budget of hidden tokens the orchestrator is authorized to buy for the probabilistic rollouts.",
           "exclusiveMinimum": 0,
           "title": "Max Latent Tokens Budget",
           "type": "integer"
         },
         "max_test_time_compute_ms": {
-          "description": "The physical time limit allowed for the scratchpad search before forcing a timeout.",
+          "description": "The physical time limit allowed for the Latent Token Trajectories evaluated by Process Reward Models (PRMs) search before forcing a timeout.",
           "exclusiveMinimum": 0,
           "title": "Max Test Time Compute Ms",
           "type": "integer"
@@ -3747,7 +3747,7 @@
       "description": "Service Level Agreement (limits) for executing a tool.",
       "properties": {
         "max_execution_time_ms": {
-          "description": "The maximum allowed execution time in milliseconds before the orchestrator kills the process.",
+          "description": "The Kinetic Execution Bounds time limit before the orchestrator kills the process.",
           "exclusiveMinimum": 0,
           "title": "Max Execution Time Ms",
           "type": "integer"
@@ -3763,7 +3763,7 @@
             }
           ],
           "default": null,
-          "description": "The maximum memory footprint allowed for the tool's execution sandbox.",
+          "description": "The Kinetic Execution Bounds maximum memory footprint limiting the Blast Radius of the tool's execution sandbox.",
           "title": "Max Memory Mb"
         }
       },
@@ -4108,17 +4108,17 @@
       "description": "A specific objective function to optimize within a generation.",
       "properties": {
         "target_metric": {
-          "description": "The specific telemetry or execution metric to evaluate (e.g., 'latency', 'accuracy').",
+          "description": "The specific telemetry or execution metric to evaluate (e.g., 'latency', 'accuracy') governed by hardware limits.",
           "title": "Target Metric",
           "type": "string"
         },
         "direction": {
           "$ref": "#/$defs/OptimizationDirection",
-          "description": "Whether the algorithm should maximize or minimize this metric."
+          "description": "Whether the algorithm should maximize or minimize this metric bounded by VRAM geometries."
         },
         "weight": {
           "default": 1.0,
-          "description": "The relative importance of this objective in a multi-objective generation.",
+          "description": "The relative importance of this objective in a multi-objective generation dictating tensor routing.",
           "title": "Weight",
           "type": "number"
         }
@@ -4883,7 +4883,7 @@
       "additionalProperties": false,
       "properties": {
         "task_id": {
-          "description": "Unique identifier for this causal intervention.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this causal intervention.",
           "minLength": 1,
           "title": "Task Id",
           "type": "string"
@@ -5055,7 +5055,7 @@
     },
     "LatentSmoothingProfile": {
       "additionalProperties": false,
-      "description": "The mathematical curve used to gently taper an adversarial activation to prevent logit collapse.",
+      "description": "The mathematical curve used to gently taper an adversarial residual stream perturbation to prevent logit collapse.",
       "properties": {
         "decay_function": {
           "description": "The trigonometric or algebraic function governing the attenuation curve.",
@@ -5184,7 +5184,7 @@
       "description": "Cryptographic contract for embedding undeniable, un-strippable provenance signatures\ndirectly into the token entropy.",
       "properties": {
         "verification_public_key_id": {
-          "description": "The DID or public key identifier required by an auditor to reconstruct the PRF and verify the watermark.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark required by an auditor to reconstruct the PRF and verify the watermark.",
           "title": "Verification Public Key Id",
           "type": "string"
         },
@@ -5746,22 +5746,22 @@
       "description": "Abstraction for an underlying LLM provider in liquid compute.",
       "properties": {
         "model_name": {
-          "description": "The identifier of the underlying model.",
+          "description": "The exact mathematical representation of the underlying probabilistic tensor logic model.",
           "title": "Model Name",
           "type": "string"
         },
         "provider": {
-          "description": "The name of the provider hosting the model.",
+          "description": "The name of the physical execution hardware limits provider hosting the model.",
           "title": "Provider",
           "type": "string"
         },
         "context_window_size": {
-          "description": "The maximum context window size in tokens.",
+          "description": "The VRAM Geometry footprint boundary of the maximum context window size in tokens.",
           "title": "Context Window Size",
           "type": "integer"
         },
         "capabilities": {
-          "description": "A list of supported capabilities by the model.",
+          "description": "A list of supported probabilistic execution bounds and capabilities bounded by the model.",
           "items": {
             "type": "string"
           },
@@ -5796,14 +5796,14 @@
       "description": "Constraints governing random heuristic mutations.",
       "properties": {
         "mutation_rate": {
-          "description": "The probability that a given agent parameter will randomly mutate between generations.",
+          "description": "The probabilistic execution bounds that a given agent parameter will randomly mutate between generations.",
           "maximum": 1.0,
           "minimum": 0.0,
           "title": "Mutation Rate",
           "type": "number"
         },
         "temperature_shift_variance": {
-          "description": "The maximum allowed delta for an agent's temperature during mutation.",
+          "description": "The maximum allowed delta for an agent's probabilistic tensor routing during mutation.",
           "title": "Temperature Shift Variance",
           "type": "number"
         },
@@ -5817,7 +5817,7 @@
             }
           ],
           "default": null,
-          "description": "The cryptographic envelope proving the fairness of the applied mutation rate."
+          "description": "The cryptographic envelope proving the fairness of the applied mutation rate across VRAM geometries."
         }
       },
       "required": [
@@ -5865,13 +5865,13 @@
       "additionalProperties": false,
       "properties": {
         "handoff_id": {
-          "description": "Unique identifier for this symbolic delegation.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this symbolic delegation.",
           "minLength": 1,
           "title": "Handoff Id",
           "type": "string"
         },
         "solver_protocol": {
-          "description": "The target deterministic math/logic engine.",
+          "description": "The target Deterministic Solver for the Neurosymbolic Handoff.",
           "enum": [
             "z3",
             "lean4",
@@ -5883,7 +5883,7 @@
           "type": "string"
         },
         "formal_grammar_payload": {
-          "description": "The raw code or formal proof syntax generated by the LLM to be evaluated.",
+          "description": "The raw code or formal proof syntax generated by the LLM as translation matrices between neural and deterministic space.",
           "title": "Formal Grammar Payload",
           "type": "string"
         },
@@ -5894,7 +5894,7 @@
           "type": "object"
         },
         "timeout_ms": {
-          "description": "The maximum compute time allocated to the symbolic solver before aborting.",
+          "description": "The Formal Verification Bounds time limit allocated to the symbolic solver before aborting.",
           "exclusiveMinimum": 0,
           "title": "Timeout Ms",
           "type": "integer"
@@ -6276,10 +6276,10 @@
     },
     "PeftAdapterContract": {
       "additionalProperties": false,
-      "description": "Declarative contract for dynamically mounting a Parameter-Efficient Fine-Tuning (PEFT) adapter.",
+      "description": "Declarative PEFT Adapter Contract for dynamically mounting a hot-swappable tensor overlay.",
       "properties": {
         "adapter_id": {
-          "description": "Unique identifier for the requested LoRA adapter.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the requested LoRA adapter.",
           "title": "Adapter Id",
           "type": "string"
         },
@@ -6296,7 +6296,7 @@
           "type": "string"
         },
         "adapter_rank": {
-          "description": "The low-rank intrinsic dimension (r) of the update matrices, used by the orchestrator to calculate VRAM cost.",
+          "description": "The low-rank intrinsic Rank Dimensionality (r) of the update matrices, used by the orchestrator to calculate VRAM Geometry footprint.",
           "exclusiveMinimum": 0,
           "title": "Adapter Rank",
           "type": "integer"
@@ -6321,7 +6321,7 @@
             }
           ],
           "default": null,
-          "description": "The time-to-live before the inference engine forcefully evicts this adapter from the LRU cache.",
+          "description": "The time-to-live before the inference engine forcefully evicts this Hot-Swappable Tensor Overlay to prevent Out-Of-Memory (OOM) routing crashes.",
           "title": "Eviction Ttl Seconds"
         }
       },
@@ -8518,21 +8518,21 @@
     },
     "ToolDefinition": {
       "additionalProperties": false,
-      "description": "Declarative mathematical definition of a tool.",
+      "description": "Declarative mathematical definition of an Exogenous Actuator.",
       "properties": {
         "tool_name": {
-          "description": "The exact identifier of the tool.",
+          "description": "The exact identifier of the Exogenous Actuator.",
           "title": "Tool Name",
           "type": "string"
         },
         "description": {
-          "description": "Semantic description of what the tool does, used by the LLM for selection.",
+          "description": "Semantic description of what the Exogenous Actuator does, used by the LLM for selection.",
           "title": "Description",
           "type": "string"
         },
         "input_schema": {
           "additionalProperties": true,
-          "description": "The strict JSON Schema dictionary defining the required arguments.",
+          "description": "The strict Schema dictionary defining the required parameters.",
           "title": "Input Schema",
           "type": "object"
         },
@@ -8771,19 +8771,19 @@
       "description": "Passive cryptographic envelope for verifiable random functions.",
       "properties": {
         "vrf_proof": {
-          "description": "The zero-knowledge cryptographic proof of fair random generation.",
+          "description": "The zero-knowledge cryptographic proof of fair random generation ensuring probabilistic tensor logic boundaries.",
           "minLength": 10,
           "title": "Vrf Proof",
           "type": "string"
         },
         "public_key": {
-          "description": "The public key of the oracle or node used to verify the VRF proof.",
+          "description": "The public key of the oracle or node used to verify the VRF proof bounded by physical execution.",
           "minLength": 10,
           "title": "Public Key",
           "type": "string"
         },
         "seed_hash": {
-          "description": "The SHA-256 hash of the origin seed used to initialize the VRF.",
+          "description": "The SHA-256 hash of the origin seed used to initialize the VRF for exogenous spatial actuation.",
           "minLength": 10,
           "title": "Seed Hash",
           "type": "string"

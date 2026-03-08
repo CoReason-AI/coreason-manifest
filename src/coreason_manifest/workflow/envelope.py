@@ -88,7 +88,7 @@ class WorkflowEnvelope(CoreasonBaseModel):
         default=None,
         description="The declarative whitelist of data classifications permitted to flow through this graph.",
     )
-    federated_discovery: FederatedDiscoveryProtocol | None = Field(
+    federated_discovery: "FederatedDiscoveryProtocol | None" = Field(
         default=None, description="The broadcast protocol for B2B multi-swarm discovery."
     )
     federated_sla: BilateralSLA | None = Field(

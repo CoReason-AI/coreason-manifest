@@ -19,7 +19,8 @@ from coreason_manifest.core.base import CoreasonBaseModel
 class AnalogicalMappingTask(CoreasonBaseModel):
     task_id: str = Field(
         min_length=1,
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this lateral thinking task.",
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark "
+        "for this lateral thinking task.",
     )
     source_domain: str = Field(
         description="The unrelated abstract concept space (e.g., 'thermodynamics', 'mycelial networks')."
@@ -32,14 +33,16 @@ class AnalogicalMappingTask(CoreasonBaseModel):
     )
     divergence_temperature_override: float = Field(
         ge=0.0,
-        description="The specific high-temperature probabilistic execution bounds override required to force this creative leap.",
+        description="The specific high-temperature probabilistic execution bounds override "
+        "required to force this creative leap.",
     )
 
 
 class InterventionalCausalTask(CoreasonBaseModel):
     task_id: str = Field(
         min_length=1,
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this causal intervention.",
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark "
+        "for this causal intervention.",
     )
     target_hypothesis_id: str = Field(description="The hypothesis containing the SCM being tested.")
     intervention_variable: str = Field(
@@ -63,7 +66,8 @@ class InterventionalCausalTask(CoreasonBaseModel):
 class ActiveInferenceContract(CoreasonBaseModel):
     task_id: str = Field(
         min_length=1,
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this active inference execution.",
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark "
+        "for this active inference execution.",
     )
     target_hypothesis_id: str = Field(description="The HypothesisGenerationEvent this task is attempting to falsify.")
     target_condition_id: str = Field(description="The specific FalsificationCondition being tested.")

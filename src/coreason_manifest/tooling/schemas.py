@@ -57,7 +57,10 @@ class ExecutionSLA(CoreasonBaseModel):
         description="The Kinetic Execution Bounds time limit before the orchestrator kills the process.",
     )
     max_memory_mb: int | None = Field(
-        default=None, gt=0, description="The Kinetic Execution Bounds maximum memory footprint limiting the Blast Radius of the tool's execution sandbox."
+        default=None,
+        gt=0,
+        description="The Kinetic Execution Bounds maximum memory footprint limiting the Blast Radius "
+        "of the tool's execution sandbox.",
     )
 
 
@@ -67,7 +70,9 @@ class ToolDefinition(CoreasonBaseModel):
     """
 
     tool_name: str = Field(description="The exact identifier of the Exogenous Actuator.")
-    description: str = Field(description="Semantic description of what the Exogenous Actuator does, used by the LLM for selection.")
+    description: str = Field(
+        description="Semantic description of what the Exogenous Actuator does, used by the LLM for selection."
+    )
     input_schema: dict[str, Any] = Field(
         description="The strict Schema dictionary defining the required parameters."
     )

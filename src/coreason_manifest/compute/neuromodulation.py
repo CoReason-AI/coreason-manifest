@@ -24,7 +24,8 @@ class ActivationSteeringContract(CoreasonBaseModel):
 
     steering_vector_hash: str = Field(
         pattern=r"^[a-f0-9]{64}$",
-        description="The SHA-256 hash of the extracted RepE Latent Concept Vector applied directly to transformer layers.",
+        description="The SHA-256 hash of the extracted RepE Latent Concept Vector applied "
+        "directly to transformer layers.",
     )
     injection_layers: list[int] = Field(
         min_length=1,

@@ -66,10 +66,18 @@ class ModelProfile(CoreasonBaseModel):
     Abstraction for an underlying LLM provider in liquid compute.
     """
 
-    model_name: str = Field(description="The exact mathematical representation of the underlying probabilistic tensor logic model.")
-    provider: str = Field(description="The name of the physical execution hardware limits provider hosting the model.")
-    context_window_size: int = Field(description="The VRAM Geometry footprint boundary of the maximum context window size in tokens.")
-    capabilities: list[str] = Field(description="A list of supported probabilistic execution bounds and capabilities bounded by the model.")
+    model_name: str = Field(
+        description="The exact mathematical representation of the underlying probabilistic tensor logic model."
+    )
+    provider: str = Field(
+        description="The name of the physical execution hardware limits provider hosting the model."
+    )
+    context_window_size: int = Field(
+        description="The VRAM Geometry footprint boundary of the maximum context window size in tokens."
+    )
+    capabilities: list[str] = Field(
+        description="A list of supported probabilistic execution bounds and capabilities bounded by the model."
+    )
     rate_card: RateCard = Field(description="The economic cost definition associated with the model.")
     supported_functional_experts: list[str] = Field(
         default_factory=list,
@@ -83,9 +91,12 @@ class ComputeProvisioningRequest(CoreasonBaseModel):
     A request by a swarm to provision resources based on requirements.
     """
 
-    max_budget: float = Field(description="The maximum cost budget allowable for the provisioned physical execution compute.")
+    max_budget: float = Field(
+        description="The maximum cost budget allowable for the provisioned physical execution compute."
+    )
     required_capabilities: list[str] = Field(
-        description="The minimal functional capabilities governed by probabilistic execution bounds required by the requested compute."
+        description="The minimal functional capabilities governed by probabilistic execution bounds "
+        "required by the requested compute."
     )
     qos_class: QoSClassification = Field(
         default="interactive",

@@ -70,6 +70,6 @@ class EscalationContract(CoreasonBaseModel):
     )
     max_test_time_compute_ms: int = Field(
         gt=0,
-        description="The physical time limit allowed for the Latent Token Trajectories evaluated by Process Reward Models (PRMs) "
-        "search before forcing a timeout.",
+        description="The physical time limit allowed for the Latent Token Trajectories evaluated by "
+        "Process Reward Models (PRMs) search before forcing a timeout.",
     )
