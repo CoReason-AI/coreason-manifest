@@ -197,6 +197,13 @@ class CompositeNode(BaseNode):
     output_mappings: list[OutputMapping] = Field(default_factory=list, description="Explicit state projection outputs.")
 
 
+# =========================================================================
+# AGENT INSTRUCTION: WARNING - POLYMORPHIC ROUTER
+# If you create a new class above, you MUST append it to the AnyNode union below.
+# Failure to do so will result in a fatal Pydantic discriminator crash at runtime,
+# creating a 'Dangling Class' that the orchestrator cannot deserialize.
+# =========================================================================
+
 type AnyNode = Annotated[
     AgentNode | HumanNode | SystemNode | CompositeNode,
     Field(

@@ -107,6 +107,13 @@ class InsightCard(CoreasonBaseModel):
         return v
 
 
+# =========================================================================
+# AGENT INSTRUCTION: WARNING - POLYMORPHIC ROUTER
+# If you create a new class above, you MUST append it to the AnyPanel union below.
+# Failure to do so will result in a fatal Pydantic discriminator crash at runtime,
+# creating a 'Dangling Class' that the orchestrator cannot deserialize.
+# =========================================================================
+
 type AnyPanel = Annotated[
     GrammarPanel | InsightCard,
     Field(discriminator="type", description="A discriminated union of presentation UI panels."),

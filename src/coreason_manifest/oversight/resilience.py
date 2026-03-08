@@ -52,6 +52,13 @@ class FallbackTrigger(CoreasonBaseModel):
     fallback_node_id: NodeID = Field(description="The ID of the node to use as a fallback.")
 
 
+# =========================================================================
+# AGENT INSTRUCTION: WARNING - POLYMORPHIC ROUTER
+# If you create a new class above, you MUST append it to the AnyResiliencePayload union below.
+# Failure to do so will result in a fatal Pydantic discriminator crash at runtime,
+# creating a 'Dangling Class' that the orchestrator cannot deserialize.
+# =========================================================================
+
 type AnyResiliencePayload = Annotated[
     QuarantineOrder | CircuitBreakerTrip | FallbackTrigger, Field(discriminator="type")
 ]

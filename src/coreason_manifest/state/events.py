@@ -288,6 +288,13 @@ class CounterfactualRegretEvent(BaseStateEvent):
     )
 
 
+# =========================================================================
+# AGENT INSTRUCTION: WARNING - POLYMORPHIC ROUTER
+# If you create a new class above, you MUST append it to the AnyStateEvent union below.
+# Failure to do so will result in a fatal Pydantic discriminator crash at runtime,
+# creating a 'Dangling Class' that the orchestrator cannot deserialize.
+# =========================================================================
+
 type AnyStateEvent = Annotated[
     ObservationEvent
     | BeliefUpdateEvent

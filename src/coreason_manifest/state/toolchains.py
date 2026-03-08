@@ -38,6 +38,13 @@ class TerminalBufferState(CoreasonBaseModel):
     env_variables_hash: str = Field(description="The SHA-256 hash of the active environment variables matrix.")
 
 
+# =========================================================================
+# AGENT INSTRUCTION: WARNING - POLYMORPHIC ROUTER
+# If you create a new class above, you MUST append it to the AnyToolchainState union below.
+# Failure to do so will result in a fatal Pydantic discriminator crash at runtime,
+# creating a 'Dangling Class' that the orchestrator cannot deserialize.
+# =========================================================================
+
 AnyToolchainState = Annotated[
     BrowserDOMState | TerminalBufferState,
     Field(discriminator="type", description="A discriminated union of immutable external toolchain states."),
