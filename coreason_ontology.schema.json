@@ -8505,6 +8505,6 @@
       "type": "string"
     }
   },
-  "title": "Coreason Ontology",
+  "title": "CoReason Shared Kernel Ontology",
   "description": "Unified JSON Schema for the Coreason Manifest"
 }

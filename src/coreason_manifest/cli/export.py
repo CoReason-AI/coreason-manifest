@@ -5,41 +5,36 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
-import importlib
 import json
 import sys
 from pathlib import Path
 
 from pydantic.json_schema import models_json_schema
 
+import coreason_manifest
+
 
 def main() -> None:
-    try:
-        manifest = importlib.import_module("coreason_manifest")
-    except ImportError as e:
-        print(f"Failed to import coreason_manifest: {e}")
-        sys.exit(1)
-
     from coreason_manifest.core.base import CoreasonBaseModel
 
-    models_to_export: list[tuple[type[CoreasonBaseModel], str]] = []
+    models_to_export: list[type[CoreasonBaseModel]] = []
 
-    for name in getattr(manifest, "__all__", []):
-        obj = getattr(manifest, name, None)
+    for name in set(coreason_manifest.__all__):
+        obj = getattr(coreason_manifest, name, None)
         # Strictly filter for BaseModel classes only to avoid crashing models_json_schema
         if isinstance(obj, type) and issubclass(obj, CoreasonBaseModel) and obj is not CoreasonBaseModel:
-            models_to_export.append((obj, "validation"))
+            models_to_export.append(obj)
 
     # Sort alphabetically by class name
-    models_to_export.sort(key=lambda item: item[0].__name__)
+    models_to_export.sort(key=lambda item: item.__name__)
 
     if not models_to_export:
         print("No models found to export.")
         sys.exit(0)
 
     _, top_level_schema = models_json_schema(
-        models_to_export,  # type: ignore
-        title="Coreason Ontology",
+        [(obj, "validation") for obj in models_to_export],
+        title="CoReason Shared Kernel Ontology",
         description="Unified JSON Schema for the Coreason Manifest",
     )
 
