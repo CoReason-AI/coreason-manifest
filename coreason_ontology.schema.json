@@ -212,11 +212,8 @@
           "type": "string"
         },
         "target_node_id": {
-          "description": "The ID of the node that was evaluated.",
-          "minLength": 7,
-          "pattern": "^did:[a-z0-9]+:[a-zA-Z0-9.\\-_:]+$",
-          "title": "Target Node Id",
-          "type": "string"
+          "$ref": "#/$defs/NodeID",
+          "description": "The ID of the node that was evaluated."
         },
         "score": {
           "description": "The final score assigned based on the rubric.",
@@ -1200,14 +1197,12 @@
       "description": "Base configuration for any workflow topology.",
       "properties": {
         "nodes": {
-          "description": "Flat registry of all nodes in this topology.",
-          "patternProperties": {
-            "^did:[a-z0-9]+:[a-zA-Z0-9.\\-_:]+$": {
-              "$ref": "#/$defs/AnyNode"
-            }
+          "additionalProperties": {
+            "$ref": "#/$defs/AnyNode"
           },
+          "description": "Flat registry of all nodes in this topology.",
           "propertyNames": {
-            "minLength": 7
+            "$ref": "#/$defs/NodeID"
           },
           "title": "Nodes",
           "type": "object"
@@ -1284,17 +1279,14 @@
         "source_node_id": {
           "anyOf": [
             {
-              "minLength": 7,
-              "pattern": "^did:[a-z0-9]+:[a-zA-Z0-9.\\-_:]+$",
-              "type": "string"
+              "$ref": "#/$defs/NodeID"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "The specific topological node that synthesized this belief update.",
-          "title": "Source Node Id"
+          "description": "The specific topological node that synthesized this belief update."
         },
         "causal_attributions": {
           "description": "Immutable audit trail of prior states that forced this specific cognitive synthesis.",
@@ -1798,11 +1790,8 @@
           "type": "string"
         },
         "target_node_id": {
-          "description": "The ID of the node for which the circuit breaker was tripped.",
-          "minLength": 7,
-          "pattern": "^did:[a-z0-9]+:[a-zA-Z0-9.\\-_:]+$",
-          "title": "Target Node Id",
-          "type": "string"
+          "$ref": "#/$defs/NodeID",
+          "description": "The ID of the node for which the circuit breaker was tripped."
         },
         "error_signature": {
           "description": "Signature or summary of the error causing the trip.",
@@ -2052,17 +2041,14 @@
         "tie_breaker_node_id": {
           "anyOf": [
             {
-              "minLength": 7,
-              "pattern": "^did:[a-z0-9]+:[a-zA-Z0-9.\\-_:]+$",
-              "type": "string"
+              "$ref": "#/$defs/NodeID"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "The node authorized to break deadlocks if unanimity or majority fails.",
-          "title": "Tie Breaker Node Id"
+          "description": "The node authorized to break deadlocks if unanimity or majority fails."
         },
         "max_debate_rounds": {
           "anyOf": [
@@ -2158,14 +2144,12 @@
       "description": "A Council workflow topology involving multiple voting members and an adjudicator.",
       "properties": {
         "nodes": {
-          "description": "Flat registry of all nodes in this topology.",
-          "patternProperties": {
-            "^did:[a-z0-9]+:[a-zA-Z0-9.\\-_:]+$": {
-              "$ref": "#/$defs/AnyNode"
-            }
+          "additionalProperties": {
+            "$ref": "#/$defs/AnyNode"
           },
+          "description": "Flat registry of all nodes in this topology.",
           "propertyNames": {
-            "minLength": 7
+            "$ref": "#/$defs/NodeID"
           },
           "title": "Nodes",
           "type": "object"
@@ -2214,11 +2198,8 @@
           "type": "string"
         },
         "adjudicator_id": {
-          "description": "The NodeID of the adjudicator that synthesizes the council's output.",
-          "minLength": 7,
-          "pattern": "^did:[a-z0-9]+:[a-zA-Z0-9.\\-_:]+$",
-          "title": "Adjudicator Id",
-          "type": "string"
+          "$ref": "#/$defs/NodeID",
+          "description": "The NodeID of the adjudicator that synthesizes the council's output."
         },
         "diversity_policy": {
           "anyOf": [
@@ -2437,14 +2418,12 @@
       "description": "A Directed Acyclic Graph workflow topology.",
       "properties": {
         "nodes": {
-          "description": "Flat registry of all nodes in this topology.",
-          "patternProperties": {
-            "^did:[a-z0-9]+:[a-zA-Z0-9.\\-_:]+$": {
-              "$ref": "#/$defs/AnyNode"
-            }
+          "additionalProperties": {
+            "$ref": "#/$defs/AnyNode"
           },
+          "description": "Flat registry of all nodes in this topology.",
           "propertyNames": {
-            "minLength": 7
+            "$ref": "#/$defs/NodeID"
           },
           "title": "Nodes",
           "type": "object"
@@ -2499,14 +2478,10 @@
             "minItems": 2,
             "prefixItems": [
               {
-                "minLength": 7,
-                "pattern": "^did:[a-z0-9]+:[a-zA-Z0-9.\\-_:]+$",
-                "type": "string"
+                "$ref": "#/$defs/NodeID"
               },
               {
-                "minLength": 7,
-                "pattern": "^did:[a-z0-9]+:[a-zA-Z0-9.\\-_:]+$",
-                "type": "string"
+                "$ref": "#/$defs/NodeID"
               }
             ],
             "type": "array"
@@ -3177,14 +3152,12 @@
       "description": "An Evolutionary workflow topology that mutates and breeds agents over generations.",
       "properties": {
         "nodes": {
-          "description": "Flat registry of all nodes in this topology.",
-          "patternProperties": {
-            "^did:[a-z0-9]+:[a-zA-Z0-9.\\-_:]+$": {
-              "$ref": "#/$defs/AnyNode"
-            }
+          "additionalProperties": {
+            "$ref": "#/$defs/AnyNode"
           },
+          "description": "Flat registry of all nodes in this topology.",
           "propertyNames": {
-            "minLength": 7
+            "$ref": "#/$defs/NodeID"
           },
           "title": "Nodes",
           "type": "object"
@@ -3525,17 +3498,14 @@
         "escalation_target_node_id": {
           "anyOf": [
             {
-              "minLength": 7,
-              "pattern": "^did:[a-z0-9]+:[a-zA-Z0-9.\\-_:]+$",
-              "type": "string"
+              "$ref": "#/$defs/NodeID"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "The specific NodeID to route the execution to if the escalate action is triggered.",
-          "title": "Escalation Target Node Id"
+          "description": "The specific NodeID to route the execution to if the escalate action is triggered."
         }
       },
       "required": [
@@ -3557,18 +3527,12 @@
           "type": "string"
         },
         "target_node_id": {
-          "description": "The ID of the failing node.",
-          "minLength": 7,
-          "pattern": "^did:[a-z0-9]+:[a-zA-Z0-9.\\-_:]+$",
-          "title": "Target Node Id",
-          "type": "string"
+          "$ref": "#/$defs/NodeID",
+          "description": "The ID of the failing node."
         },
         "fallback_node_id": {
-          "description": "The ID of the node to use as a fallback.",
-          "minLength": 7,
-          "pattern": "^did:[a-z0-9]+:[a-zA-Z0-9.\\-_:]+$",
-          "title": "Fallback Node Id",
-          "type": "string"
+          "$ref": "#/$defs/NodeID",
+          "description": "The ID of the node to use as a fallback."
         }
       },
       "required": [
@@ -4357,11 +4321,8 @@
           "description": "The SLA constraints on the intervention delay."
         },
         "target_node_id": {
-          "description": "The ID of the target node.",
-          "minLength": 7,
-          "pattern": "^did:[a-z0-9]+:[a-zA-Z0-9.\\-_:]+$",
-          "title": "Target Node Id",
-          "type": "string"
+          "$ref": "#/$defs/NodeID",
+          "description": "The ID of the target node."
         },
         "context_summary": {
           "description": "A summary of the context requiring intervention.",
@@ -4419,11 +4380,8 @@
           "type": "string"
         },
         "target_node_id": {
-          "description": "The ID of the target node.",
-          "minLength": 7,
-          "pattern": "^did:[a-z0-9]+:[a-zA-Z0-9.\\-_:]+$",
-          "title": "Target Node Id",
-          "type": "string"
+          "$ref": "#/$defs/NodeID",
+          "description": "The ID of the target node."
         },
         "approved": {
           "description": "Indicates whether the proposed action was approved.",
@@ -5206,11 +5164,8 @@
       "additionalProperties": false,
       "properties": {
         "extracted_by": {
-          "description": "The ID of the agent node that extracted this memory.",
-          "minLength": 7,
-          "pattern": "^did:[a-z0-9]+:[a-zA-Z0-9.\\-_:]+$",
-          "title": "Extracted By",
-          "type": "string"
+          "$ref": "#/$defs/NodeID",
+          "description": "The ID of the agent node that extracted this memory."
         },
         "source_event_id": {
           "description": "The exact event ID in the EpistemicLedger that generated this fact.",
@@ -5485,6 +5440,11 @@
       "title": "NeuroSymbolicHandoff",
       "type": "object"
     },
+    "NodeID": {
+      "minLength": 7,
+      "pattern": "^did:[a-z0-9]+:[a-zA-Z0-9.\\-_:]+$",
+      "type": "string"
+    },
     "NormalizedCoordinate": {
       "additionalProperties": false,
       "description": "A resolution-independent 2D spatial vector.",
@@ -5559,17 +5519,14 @@
         "source_node_id": {
           "anyOf": [
             {
-              "minLength": 7,
-              "pattern": "^did:[a-z0-9]+:[a-zA-Z0-9.\\-_:]+$",
-              "type": "string"
+              "$ref": "#/$defs/NodeID"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "The specific topological node that generated this observation.",
-          "title": "Source Node Id"
+          "description": "The specific topological node that generated this observation."
         },
         "hardware_attestation": {
           "anyOf": [
@@ -5775,18 +5732,12 @@
           "type": "string"
         },
         "authorized_node_id": {
-          "description": "The NodeID of the human or agent executing the override.",
-          "minLength": 7,
-          "pattern": "^did:[a-z0-9]+:[a-zA-Z0-9.\\-_:]+$",
-          "title": "Authorized Node Id",
-          "type": "string"
+          "$ref": "#/$defs/NodeID",
+          "description": "The NodeID of the human or agent executing the override."
         },
         "target_node_id": {
-          "description": "The NodeID being forcefully overridden.",
-          "minLength": 7,
-          "pattern": "^did:[a-z0-9]+:[a-zA-Z0-9.\\-_:]+$",
-          "title": "Target Node Id",
-          "type": "string"
+          "$ref": "#/$defs/NodeID",
+          "description": "The NodeID being forcefully overridden."
         },
         "override_action": {
           "additionalProperties": {
@@ -6160,11 +6111,8 @@
           "type": "string"
         },
         "target_node_id": {
-          "description": "The ID of the node to be quarantined.",
-          "minLength": 7,
-          "pattern": "^did:[a-z0-9]+:[a-zA-Z0-9.\\-_:]+$",
-          "title": "Target Node Id",
-          "type": "string"
+          "$ref": "#/$defs/NodeID",
+          "description": "The ID of the node to be quarantined."
         },
         "reason": {
           "description": "The reason for the quarantine order.",
@@ -6425,14 +6373,12 @@
       "description": "A Secure Multi-Party Computation topology.",
       "properties": {
         "nodes": {
-          "description": "Flat registry of all nodes in this topology.",
-          "patternProperties": {
-            "^did:[a-z0-9]+:[a-zA-Z0-9.\\-_:]+$": {
-              "$ref": "#/$defs/AnyNode"
-            }
+          "additionalProperties": {
+            "$ref": "#/$defs/AnyNode"
           },
+          "description": "Flat registry of all nodes in this topology.",
           "propertyNames": {
-            "minLength": 7
+            "$ref": "#/$defs/NodeID"
           },
           "title": "Nodes",
           "type": "object"
@@ -7550,14 +7496,12 @@
       "description": "A dynamic Swarm workflow topology.",
       "properties": {
         "nodes": {
-          "description": "Flat registry of all nodes in this topology.",
-          "patternProperties": {
-            "^did:[a-z0-9]+:[a-zA-Z0-9.\\-_:]+$": {
-              "$ref": "#/$defs/AnyNode"
-            }
+          "additionalProperties": {
+            "$ref": "#/$defs/AnyNode"
           },
+          "description": "Flat registry of all nodes in this topology.",
           "propertyNames": {
-            "minLength": 7
+            "$ref": "#/$defs/NodeID"
           },
           "title": "Nodes",
           "type": "object"
@@ -8206,11 +8150,8 @@
           "type": "string"
         },
         "issuer_did": {
-          "description": "The W3C DID of the trusted authority that cryptographically signed the credential.",
-          "minLength": 7,
-          "pattern": "^did:[a-z0-9]+:[a-zA-Z0-9.\\-_:]+$",
-          "title": "Issuer Did",
-          "type": "string"
+          "$ref": "#/$defs/NodeID",
+          "description": "The W3C DID of the trusted authority that cryptographically signed the credential."
         },
         "cryptographic_proof_blob": {
           "description": "The base64-encoded SD-JWT or ZK-SNARK proving the claims without revealing the private key.",

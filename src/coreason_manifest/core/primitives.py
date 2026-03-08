@@ -40,7 +40,7 @@ type GitSHA = Annotated[
     ),
 ]
 
-NodeID = Annotated[
+type NodeID = Annotated[
     str,
     StringConstraints(min_length=7, pattern=r"^did:[a-z0-9]+:[a-zA-Z0-9.\-_:]+$"),
 ]
