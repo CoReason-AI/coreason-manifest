@@ -56,6 +56,7 @@ from .persistence import (
     ContinuousMutationPolicy,
     GraphFlatteningDirective,
     LakehouseMountConfig,
+    LakehousePersistenceContract,
 )
 from .scratchpad import (
     LatentScratchpadTrace,
@@ -118,6 +119,7 @@ __all__ = [
     "HypothesisGenerationEvent",
     "InterventionalCausalTask",
     "LakehouseMountConfig",
+    "LakehousePersistenceContract",
     "LatentScratchpadTrace",
     "LineageWatermark",
     "MathematicalNotationExtraction",

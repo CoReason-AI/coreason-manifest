@@ -47,6 +47,7 @@ from coreason_manifest.state.events import (
     SystemFaultEvent,
 )
 from coreason_manifest.state.memory import EpistemicLedger
+from coreason_manifest.state.persistence import LakehousePersistenceContract
 from coreason_manifest.state.semantic import (
     SemanticEdge,
     SemanticNode,
@@ -3215,3 +3216,48 @@ tabular_data_extraction_adapter: TypeAdapter[TabularDataExtraction] = TypeAdapte
 def test_tabular_data_extraction_fuzzing(payload: dict[str, Any]) -> None:
     parsed = tabular_data_extraction_adapter.validate_python(payload)
     assert isinstance(parsed, TabularDataExtraction)
+
+
+@st.composite
+def draw_lakehouse_persistence_contract(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "contract_id": st.text(min_size=1),
+                "artifact_event_id": st.text(min_size=1),
+                "mount_config": st.fixed_dictionaries(
+                    {
+                        "catalog_uri": st.text(min_size=1),
+                        "table_format": st.sampled_from(["iceberg", "delta", "hudi"]),
+                        "schema_evolution_mode": st.sampled_from(["strict", "additive_only"]),
+                    }
+                ),
+                "mutation_policy": st.fixed_dictionaries(
+                    {
+                        "mutation_paradigm": st.just("append_only"),
+                        "max_uncommitted_rows": st.integers(min_value=1, max_value=10000),
+                        "micro_batch_interval_ms": st.integers(min_value=1),
+                    }
+                ),
+                "flattening_directive": st.fixed_dictionaries(
+                    {
+                        "node_projection_mode": st.sampled_from(["wide_columnar", "struct_array"]),
+                        "edge_projection_mode": st.sampled_from(["adjacency_list", "map_array"]),
+                        "preserve_cryptographic_lineage": st.booleans(),
+                    }
+                ),
+            }
+        )
+    )
+    return res
+
+
+lakehouse_persistence_contract_adapter: TypeAdapter[LakehousePersistenceContract] = TypeAdapter(
+    LakehousePersistenceContract
+)
+
+
+@given(draw_lakehouse_persistence_contract())
+def test_lakehouse_persistence_contract_fuzzing(payload: dict[str, Any]) -> None:
+    parsed = lakehouse_persistence_contract_adapter.validate_python(payload)
+    assert isinstance(parsed, LakehousePersistenceContract)

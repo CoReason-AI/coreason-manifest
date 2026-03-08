@@ -35,3 +35,23 @@ def test_mathematical_ungrounded_prevention() -> None:
     empty_anchor = MultimodalTokenAnchor()  # Neither bounding_box nor token_span
     with pytest.raises(ValidationError, match="definitive visual or token bounding box"):
         MathematicalNotationExtraction(math_type="inline", syntax="latex", expression="E=mc^2", anchor=empty_anchor)
+
+
+def test_statistical_chart_extraction_semantic_binding() -> None:
+    from coreason_manifest.state.vision import AffineTransformMatrix, StatisticalChartExtraction
+
+    axis_x = AffineTransformMatrix(
+        pixel_min=0.0, pixel_max=100.0, domain_min=0.0, domain_max=12.0, scale_type="linear", unit="Months"
+    )
+
+    # Intentionally out-of-order dictionary
+    extraction = StatisticalChartExtraction(
+        axes={"x": axis_x},
+        data_series=[{"x": 5.0, "survival_prob": 0.8}],
+        legend_mappings={"#FF0000": "Placebo", "#0000FF": "Treatment"},
+    )
+
+    assert extraction.axes["x"].unit == "Months"
+    # Prove the model_validator sorted the dictionary keys lexicographically
+    keys = list(extraction.legend_mappings.keys())
+    assert keys == ["#0000FF", "#FF0000"]
