@@ -308,6 +308,32 @@ class SMPCTopology(BaseTopology):
     )
 
 
+class EvaluatorOptimizerTopology(BaseTopology):
+    """
+    A formalized Actor-Critic micro-topology enforcing strict, finite generation-evaluation-revision cycles.
+    """
+
+    type: Literal["evaluator_optimizer"] = Field(
+        default="evaluator_optimizer", description="Discriminator for an Evaluator-Optimizer loop."
+    )
+    generator_node_id: NodeID = Field(description="The ID of the actor generating the payload.")
+    evaluator_node_id: NodeID = Field(description="The ID of the critic scoring the payload.")
+    max_revision_loops: int = Field(
+        ge=1, description="The absolute limit on Actor-Critic cycles to prevent infinite compute burn."
+    )
+
+    @model_validator(mode="after")
+    def verify_bipartite_nodes(self) -> Self:
+        """Mathematically guarantees both the generator and evaluator exist in the node registry."""
+        if self.generator_node_id not in self.nodes:
+            raise ValueError(f"Generator node '{self.generator_node_id}' not found in topology nodes.")
+        if self.evaluator_node_id not in self.nodes:
+            raise ValueError(f"Evaluator node '{self.evaluator_node_id}' not found in topology nodes.")
+        if self.generator_node_id == self.evaluator_node_id:
+            raise ValueError("Generator and Evaluator cannot be the same node.")
+        return self
+
+
 # =========================================================================
 # AGENT INSTRUCTION: WARNING - POLYMORPHIC ROUTER
 # If you create a new class above, you MUST append it to the AnyTopology union below.
@@ -316,6 +342,6 @@ class SMPCTopology(BaseTopology):
 # =========================================================================
 
 type AnyTopology = Annotated[
-    DAGTopology | CouncilTopology | SwarmTopology | EvolutionaryTopology | SMPCTopology,
+    DAGTopology | CouncilTopology | SwarmTopology | EvolutionaryTopology | SMPCTopology | EvaluatorOptimizerTopology,
     Field(discriminator="type", description="A discriminated union of workflow topologies."),
 ]
