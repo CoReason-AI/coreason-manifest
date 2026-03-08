@@ -6,7 +6,6 @@
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
 """AGENT INSTRUCTION:
-
 This file maps the global governance and consensus policy schemas. This is a STRICTLY REGULATORY BOUNDARY.
 These schemas define the Zero-Trust information flow constraints of the swarm.
 DO NOT inject kinetic execution logic here.
@@ -49,7 +48,6 @@ class GovernancePolicy(CoreasonBaseModel):
 class PredictionMarketPolicy(CoreasonBaseModel):
     """
     The ruleset governing the market. It enforces Sybil resistance
-
     (via quadratic staking) and dictates when the market stops trading.
     """
 

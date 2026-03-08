@@ -6,7 +6,6 @@
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
 """AGENT INSTRUCTION: This file maps the NeuroSymbolic handoff and dynamic symbolic validation configurations.
-
 This is a STRICTLY KINETIC BOUNDARY. These schemas dictate non-deterministic to deterministic boundary
 transitions, verification solvers, and raw computational reasoning validation. DO NOT introduce state-saving
 database paradigms or upstream orchestration loops here. All representations must map to mathematical

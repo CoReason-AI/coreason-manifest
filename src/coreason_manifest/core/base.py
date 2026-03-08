@@ -6,7 +6,6 @@
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
 """AGENT INSTRUCTION: This file enforces absolute structural rigidity and serialization boundaries across the
-
 Coreason manifestation models. This is a STRICTLY STATIC BOUNDARY. This baseline controls frozen immutability
 and cryptographic schema hashing to construct a Zero-Trust Architecture. YOU ARE EXPLICITLY FORBIDDEN from
 importing any upstream domain schemas (workflow, state, compute, etc.) into this file. Any upstream
@@ -53,7 +52,6 @@ class CoreasonBaseModel(BaseModel):
         def _sort_collections(obj: Any) -> Any:
             """
             Recursively sorts dictionaries for canonical serialization while explicitly preserving
-
             RFC 8785 array ordering.
             """
             if isinstance(obj, dict):

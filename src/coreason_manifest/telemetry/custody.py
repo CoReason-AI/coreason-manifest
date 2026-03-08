@@ -6,7 +6,6 @@
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
 """AGENT INSTRUCTION: This file maps the mechanistic observability schemas. This is a STRICTLY OBSERVABILITY BOUNDARY.
-
 These models govern the distributed tracing and cryptographic audit trails of the swarm. Do NOT write standard
 text-logging or web-analytics schemas here. Focus entirely on tamper-evident spans, Merkle custody records, and
 cross-node span contexts."""
@@ -70,7 +69,6 @@ class ExecutionNode(CoreasonBaseModel):
     def generate_node_hash(self) -> str:
         """
         Generate a strictly deterministic SHA-256 hash for the node via RFC 8785 canonicalization.
-
         Ensures identical hashes across varying architectures and thread-states (NoGIL).
         """
         payload = {
@@ -121,7 +119,6 @@ class TamperError(ValueError):
 def verify_merkle_proof(trace: list[ExecutionNode]) -> bool:
     """
     Verifies a Merkle DAG trace of execution nodes.
-
     Ensures that every node's hash is computationally valid and mathematically
     sound (matching canonical inputs/outputs) and topologically links correctly
     via Kahn's concept of parent hashes regardless of the temporal array index order.

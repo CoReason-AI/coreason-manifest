@@ -6,7 +6,6 @@
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
 """AGENT INSTRUCTION: This file maps the Cognitive Routing and Latent Smoothing profiles. This is a STRICTLY
-
 KINETIC BOUNDARY. These schemas define the mathematical physics and 'biochemistry' of the agent's forward
 pass. DO NOT inject persistent state or database logic here. All bounds must map to continuous probabilistic
 thresholds and tensor manipulations.

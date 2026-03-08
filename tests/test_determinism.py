@@ -94,7 +94,6 @@ def test_workflow_envelope_determinism() -> None:
 def test_lazy_hashing_performance_and_coverage() -> None:
     """
     Prove that CoreasonBaseModel uses lazy hashing.
-
     It should not have a _cached_hash upon instantiation, but should compute
     and store it when hash() is explicitly called, hitting the AttributeError fallback.
     """

@@ -461,14 +461,12 @@ __all__ = [
 def _rebuild_ontology() -> None:
     """
     Dynamically resolves all Pydantic forward references strictly at the end of module initialization.
-
     This prevents circular import death spirals by guaranteeing the entire ontology is loaded
     into sys.modules before compilation begins.
     """
     import typing
 
     from coreason_manifest.workflow.topologies import AnyTopology
-
     _ = AnyTopology
 
     for _name in __all__:

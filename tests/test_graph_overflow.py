@@ -26,7 +26,6 @@ def test_cwe_674_deep_linear_chain() -> None:
 def test_cwe_674_deep_cycle_detection() -> None:
     """
     Prove that a 5000-deep graph containing a cycle raises a ValidationError
-
     without causing a RecursionError or hanging.
     """
     edges = [(f"did:web:node_{i}", f"did:web:node_{i + 1}") for i in range(4999)]

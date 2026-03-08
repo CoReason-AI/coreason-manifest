@@ -6,7 +6,6 @@
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
 """AGENT INSTRUCTION: This file defines the atomic axiomatic primitives of the Coreason universe. This is a
-
 STRICTLY STATIC BOUNDARY. These schemas must remain mathematically pure, completely decoupled, and universally
 immutable. YOU ARE EXPLICITLY FORBIDDEN from importing any upstream domain schemas (workflow, state, compute,
 etc.) into this file to prevent DAG cycles.
@@ -72,7 +71,6 @@ type ProfileID = Annotated[
 class RiskLevel(StrEnum):
     """
     Risk classification for governance.
-
     Order matters: safe < standard < critical.
     """
 

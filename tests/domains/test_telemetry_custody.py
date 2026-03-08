@@ -33,7 +33,6 @@ complex_st = st.recursive(
 def test_determinism_proof(payload: Any) -> None:
     """
     1. The Determinism Proof:
-
     Prove that generating a hash for a deeply nested, randomly generated execution
     payload yields the exact same SHA-256 string 100 out of 100 times.
     """
@@ -49,7 +48,6 @@ def test_determinism_proof(payload: Any) -> None:
 def test_tamper_evident_proof(inputs: Any, outputs: Any) -> None:
     """
     2. The Tamper Evident Proof (The Shatter Protocol):
-
     Generate a valid 3-hop Merkle trace. Explicitly mutate a single byte of data
     in the outputs dictionary of Node 1. Prove that passing this mutated trace to
     verify_merkle_proof decisively returns False because the downstream parent hashes shatter.
@@ -76,7 +74,6 @@ def test_tamper_evident_proof(inputs: Any, outputs: Any) -> None:
 def test_temporal_shuffle_proof(inputs: Any, outputs: Any) -> None:
     """
     3. The Temporal Shuffle Proof:
-
     Take a valid multi-hop trace, violently shuffle the array order using random.shuffle(),
     and pass it to the verifier. Prove that the verifier successfully validates the chain
     regardless of arrival order.
@@ -119,7 +116,6 @@ def test_canonicalize_tuple() -> None:
 def test_lineage_orphan_proof() -> None:
     """
     Assert that Pydantic raises a ValidationError due to the model validator
-
     when parent_request_id is provided but root_request_id is missing.
     """
     with pytest.raises(ValidationError, match="Orphaned Lineage: parent_request_id is set but root_request_id is None"):

@@ -21,7 +21,6 @@ from coreason_manifest.core.base import CoreasonBaseModel
 class MCPCapabilityWhitelist(CoreasonBaseModel):
     """
     A zero-trust boundary defining exactly which JSON-RPC capabilities
-
     the execution node is authorized to mount from the remote server.
     """
 

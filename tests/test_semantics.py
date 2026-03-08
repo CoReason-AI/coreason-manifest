@@ -28,7 +28,6 @@ def test_no_future_imports() -> None:
 def test_no_legacy_typing_imports() -> None:
     """
     Assertion 2: Prove there are ZERO imports of uppercase typing collections
-
     (List, Dict, Tuple, Set, Union, TypeAlias, TypeVar) from the typing module.
     """
     forbidden_typing = {"List", "Dict", "Tuple", "Set", "Union", "TypeAlias", "TypeVar"}
@@ -46,7 +45,6 @@ def test_no_legacy_typing_imports() -> None:
 def test_pydantic_field_descriptions() -> None:
     """
     Assertion 3: Parse all Pydantic model class definitions and prove that
-
     every single class attribute explicitly uses Field(...) and contains a description kwarg.
     """
     for py_file in get_all_python_files():
