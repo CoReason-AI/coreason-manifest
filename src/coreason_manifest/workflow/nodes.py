@@ -70,6 +70,10 @@ class BaseNode(CoreasonBaseModel):
             elif isinstance(obj, list):
                 for item in obj:
                     _check_depth(item, depth + 1)
+            else:
+                # EXPLICIT LEAF NODE ENFORCEMENT: Prevent JSON serialization crashes
+                if obj is not None and not isinstance(obj, (str, int, float, bool)):
+                    raise ValueError(f"domain_extensions leaf values must be JSON primitives, got {type(obj).__name__}")
 
         _check_depth(v, 0)
         return v

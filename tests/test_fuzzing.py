@@ -504,11 +504,28 @@ def draw_logit_steganography_contract(draw: Any) -> dict[str, Any]:
 
 @st.composite
 def draw_domain_extensions(draw: Any) -> dict[str, Any]:
+    # Base JSON primitives
+    json_primitives = st.one_of(
+        st.text(max_size=50), st.integers(), st.floats(allow_nan=False, allow_infinity=False), st.booleans(), st.none()
+    )
+
+    # Generate recursive structures bounded to depth 5 (max_leaves controls scale)
+    base_dict = st.dictionaries(st.text(max_size=255), json_primitives, max_size=5)
+
     res: dict[str, Any] = draw(
-        st.dictionaries(
-            st.text(max_size=255),
-            st.one_of(st.text(), st.integers(), st.floats(allow_nan=False, allow_infinity=False), st.booleans()),
-            max_size=5,
+        st.one_of(
+            base_dict,
+            st.dictionaries(
+                st.text(max_size=255),
+                st.recursive(
+                    base_dict,
+                    lambda children: st.one_of(
+                        st.lists(children, max_size=3), st.dictionaries(st.text(max_size=255), children, max_size=3)
+                    ),
+                    max_leaves=3,
+                ),
+                max_size=5,
+            ),
         )
     )
     return res
