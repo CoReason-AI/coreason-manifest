@@ -4235,6 +4235,40 @@
       "title": "GrammarPanel",
       "type": "object"
     },
+    "HTTPTransportConfig": {
+      "additionalProperties": false,
+      "description": "Configuration for stateless HTTP-based MCP transport.",
+      "properties": {
+        "type": {
+          "const": "http",
+          "default": "http",
+          "description": "Type of transport.",
+          "title": "Type",
+          "type": "string"
+        },
+        "uri": {
+          "description": "The HTTP URL endpoint for the stateless connection.",
+          "format": "uri",
+          "maxLength": 2083,
+          "minLength": 1,
+          "title": "Uri",
+          "type": "string"
+        },
+        "headers": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "HTTP headers, strictly bounded for zero-trust credentials.",
+          "title": "Headers",
+          "type": "object"
+        }
+      },
+      "required": [
+        "uri"
+      ],
+      "title": "HTTPTransportConfig",
+      "type": "object"
+    },
     "HardwareEnclaveAttestation": {
       "additionalProperties": false,
       "properties": {
@@ -5322,6 +5356,7 @@
           "description": "Polymorphic transport configuration.",
           "discriminator": {
             "mapping": {
+              "http": "#/$defs/coreason_manifest__adapters__mcp__schemas__MCPTransport",
               "sse": "#/$defs/coreason_manifest__adapters__mcp__schemas__MCPTransport",
               "stdio": "#/$defs/coreason_manifest__adapters__mcp__schemas__MCPTransport"
             },
@@ -8892,6 +8927,9 @@
         },
         {
           "$ref": "#/$defs/SSETransportConfig"
+        },
+        {
+          "$ref": "#/$defs/HTTPTransportConfig"
         }
       ]
     },
