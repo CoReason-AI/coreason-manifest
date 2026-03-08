@@ -282,10 +282,7 @@ def test_dag_topology_draft_superposition(nodes: dict[str, Any], data: DataObjec
 
     # Inject a dangling pointer AND a cycle, but declare it as a draft
     topology = DAGTopology(
-        nodes=nodes,
-        edges=[(node_a, ghost_node), (ghost_node, node_a)],
-        allow_cycles=False,
-        lifecycle_phase="draft"
+        nodes=nodes, edges=[(node_a, ghost_node), (ghost_node, node_a)], allow_cycles=False, lifecycle_phase="draft"
     )
 
     assert topology.lifecycle_phase == "draft"
