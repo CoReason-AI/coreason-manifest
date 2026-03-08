@@ -314,6 +314,42 @@ class SMPCTopology(BaseTopology):
     )
 
 
+class SimulationConvergenceSLA(CoreasonBaseModel):
+    """
+    The statistical limits of the sandbox simulation.
+    """
+
+    max_monte_carlo_rollouts: int = Field(
+        gt=0,
+        description="The absolute physical limit on how many alternate futures the system is allowed to render.",
+    )
+    variance_tolerance: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="The statistical confidence required to collapse the probability wave early and save GPU VRAM.",
+    )
+
+
+class DigitalTwinTopology(BaseTopology):
+    """
+    An isolated sandbox graph representing a Digital Twin.
+    """
+
+    type: Literal["digital_twin"] = Field(
+        default="digital_twin", description="Discriminator for a Digital Twin topology."
+    )
+    target_topology_id: str = Field(
+        description="The identifier (expected to be a W3C DID) pointing to the real-world topology it is cloning."
+    )
+    convergence_sla: SimulationConvergenceSLA = Field(
+        description="The strict mathematical boundaries for the simulation."
+    )
+    enforce_no_side_effects: bool = Field(
+        default=True,
+        description="A declarative flag that instructs the runtime to mathematically sever all external write access.",
+    )
+
+
 class EvaluatorOptimizerTopology(BaseTopology):
     """
     A formalized Actor-Critic micro-topology enforcing strict, finite generation-evaluation-revision cycles.
@@ -348,6 +384,12 @@ class EvaluatorOptimizerTopology(BaseTopology):
 # =========================================================================
 
 type AnyTopology = Annotated[
-    DAGTopology | CouncilTopology | SwarmTopology | EvolutionaryTopology | SMPCTopology | EvaluatorOptimizerTopology,
+    DAGTopology
+    | CouncilTopology
+    | SwarmTopology
+    | EvolutionaryTopology
+    | SMPCTopology
+    | EvaluatorOptimizerTopology
+    | DigitalTwinTopology,
     Field(discriminator="type", description="A discriminated union of workflow topologies."),
 ]

@@ -5,7 +5,7 @@ import pytest
 from hypothesis import assume, given
 from hypothesis import strategies as st
 from hypothesis.strategies import DataObject
-from pydantic import ValidationError
+from pydantic import TypeAdapter, ValidationError
 
 from coreason_manifest.workflow.nodes import (
     AgentNode,
@@ -16,10 +16,13 @@ from coreason_manifest.workflow.nodes import (
     SystemNode,
 )
 from coreason_manifest.workflow.topologies import (
+    AnyTopology,
     CouncilTopology,
     DAGTopology,
+    DigitalTwinTopology,
     EvaluatorOptimizerTopology,
     OntologicalAlignmentPolicy,
+    SimulationConvergenceSLA,
 )
 
 # Strategy for valid NodeIDs (alphanumeric, underscores, hyphens)
@@ -191,3 +194,41 @@ def test_system1_reflex_toxic_floats(confidence_threshold: float) -> None:
     """Prove System1Reflex decisively rejects toxic floats (NaN, Inf, -Inf)."""
     with pytest.raises(ValidationError):
         System1Reflex(confidence_threshold=confidence_threshold, allowed_read_only_tools=["tool_a"])
+
+
+@given(max_monte_carlo_rollouts=st.integers(max_value=0))
+def test_simulation_convergence_sla_rejects_zero_or_negative_rollouts(max_monte_carlo_rollouts: int) -> None:
+    """Prove SimulationConvergenceSLA strictly rejects max_monte_carlo_rollouts equal to or less than 0."""
+    with pytest.raises(ValidationError):
+        SimulationConvergenceSLA(max_monte_carlo_rollouts=max_monte_carlo_rollouts, variance_tolerance=0.5)
+
+
+@given(variance_tolerance=st.floats(max_value=-0.000001) | st.floats(min_value=1.000001))
+def test_simulation_convergence_sla_rejects_out_of_bounds_variance_tolerance(variance_tolerance: float) -> None:
+    """Prove SimulationConvergenceSLA strictly rejects a variance_tolerance outside the [0.0, 1.0] bound."""
+    with pytest.raises(ValidationError):
+        SimulationConvergenceSLA(max_monte_carlo_rollouts=100, variance_tolerance=variance_tolerance)
+
+
+def test_digital_twin_topology_routes_through_discriminator() -> None:
+    """Prove DigitalTwinTopology correctly routes through the AnyTopology discriminator."""
+    payload = {
+        "type": "digital_twin",
+        "target_topology_id": "did:web:target_topology_123",
+        "nodes": {"did:web:node_1": {"type": "system", "description": "Test node"}},
+        "convergence_sla": {
+            "max_monte_carlo_rollouts": 100,
+            "variance_tolerance": 0.5,
+        },
+        "enforce_no_side_effects": True,
+    }
+
+    adapter: TypeAdapter[AnyTopology] = TypeAdapter(AnyTopology)
+    topology = adapter.validate_python(payload)
+
+    assert isinstance(topology, DigitalTwinTopology)
+    assert topology.type == "digital_twin"
+    assert topology.target_topology_id == "did:web:target_topology_123"
+    assert topology.convergence_sla.max_monte_carlo_rollouts == 100
+    assert topology.convergence_sla.variance_tolerance == 0.5
+    assert topology.enforce_no_side_effects is True

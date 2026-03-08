@@ -870,6 +870,7 @@
         "mapping": {
           "council": "#/$defs/CouncilTopology",
           "dag": "#/$defs/DAGTopology",
+          "digital_twin": "#/$defs/DigitalTwinTopology",
           "evaluator_optimizer": "#/$defs/EvaluatorOptimizerTopology",
           "evolutionary": "#/$defs/EvolutionaryTopology",
           "smpc": "#/$defs/SMPCTopology",
@@ -895,6 +896,9 @@
         },
         {
           "$ref": "#/$defs/EvaluatorOptimizerTopology"
+        },
+        {
+          "$ref": "#/$defs/DigitalTwinTopology"
         }
       ]
     },
@@ -2735,6 +2739,88 @@
         "quarantined_event_ids"
       ],
       "title": "DefeasibleCascade",
+      "type": "object"
+    },
+    "DigitalTwinTopology": {
+      "additionalProperties": false,
+      "description": "An isolated sandbox graph representing a Digital Twin.",
+      "properties": {
+        "nodes": {
+          "additionalProperties": {
+            "$ref": "#/$defs/AnyNode"
+          },
+          "description": "Flat registry of all nodes in this topology.",
+          "propertyNames": {
+            "$ref": "#/$defs/NodeID"
+          },
+          "title": "Nodes",
+          "type": "object"
+        },
+        "shared_state_contract": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StateContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The schema-on-write contract governing the internal state of this topology."
+        },
+        "information_flow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/InformationFlowPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The structural Data Loss Prevention (DLP) contract governing all state mutations in this topology."
+        },
+        "observability": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ObservabilityPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The distributed tracing rules bound to this specific execution graph."
+        },
+        "type": {
+          "const": "digital_twin",
+          "default": "digital_twin",
+          "description": "Discriminator for a Digital Twin topology.",
+          "title": "Type",
+          "type": "string"
+        },
+        "target_topology_id": {
+          "description": "The identifier (expected to be a W3C DID) pointing to the real-world topology it is cloning.",
+          "title": "Target Topology Id",
+          "type": "string"
+        },
+        "convergence_sla": {
+          "$ref": "#/$defs/SimulationConvergenceSLA",
+          "description": "The strict mathematical boundaries for the simulation."
+        },
+        "enforce_no_side_effects": {
+          "default": true,
+          "description": "A declarative flag that instructs the runtime to mathematically sever all external write access.",
+          "title": "Enforce No Side Effects",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "nodes",
+        "target_topology_id",
+        "convergence_sla"
+      ],
+      "title": "DigitalTwinTopology",
       "type": "object"
     },
     "DimensionalProjectionContract": {
@@ -7305,6 +7391,31 @@
         "mutates_state"
       ],
       "title": "SideEffectProfile",
+      "type": "object"
+    },
+    "SimulationConvergenceSLA": {
+      "additionalProperties": false,
+      "description": "The statistical limits of the sandbox simulation.",
+      "properties": {
+        "max_monte_carlo_rollouts": {
+          "description": "The absolute physical limit on how many alternate futures the system is allowed to render.",
+          "exclusiveMinimum": 0,
+          "title": "Max Monte Carlo Rollouts",
+          "type": "integer"
+        },
+        "variance_tolerance": {
+          "description": "The statistical confidence required to collapse the probability wave early and save GPU VRAM.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Variance Tolerance",
+          "type": "number"
+        }
+      },
+      "required": [
+        "max_monte_carlo_rollouts",
+        "variance_tolerance"
+      ],
+      "title": "SimulationConvergenceSLA",
       "type": "object"
     },
     "SpanEvent": {
