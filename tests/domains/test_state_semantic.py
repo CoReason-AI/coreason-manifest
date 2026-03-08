@@ -40,3 +40,10 @@ def test_multimodal_token_anchor_bounds() -> None:
     # Proof: End defined, Start undefined
     with pytest.raises(ValidationError, match="token_span_end cannot be defined without a token_span_start"):
         MultimodalTokenAnchor(token_span_start=None, token_span_end=10)
+
+    # Proof: Both start and end undefined
+    # This hits the 'elif self.token_span_end is not None:' bypass when token_span_start is None
+    # but token_span_end is ALSO None. (Line 60 in state/semantic.py return self)
+    anchor = MultimodalTokenAnchor(token_span_start=None, token_span_end=None)
+    assert anchor.token_span_start is None
+    assert anchor.token_span_end is None
