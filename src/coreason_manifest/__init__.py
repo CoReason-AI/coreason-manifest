@@ -69,6 +69,7 @@ from coreason_manifest.oversight import PredictionMarketPolicy
 from coreason_manifest.oversight.adjudication import AdjudicationRubric, AdjudicationVerdict, GradingCriteria
 from coreason_manifest.oversight.audit import MechanisticAuditContract
 from coreason_manifest.oversight.dlp import (
+    FilesystemIsolationContract,
     InformationFlowPolicy,
     RedactionRule,
     SanitizationAction,
@@ -156,6 +157,7 @@ from coreason_manifest.state.events import (
     EpistemicPromotionEvent,
     FalsificationCondition,
     HardwareEnclaveAttestation,
+    HostSubstrateAttestation,
     HypothesisGenerationEvent,
     NeuralAuditAttestation,
     NormativeDriftEvent,
@@ -392,6 +394,7 @@ __all__ = [
     "FederatedCapabilityAttestation",
     "FederatedDiscoveryProtocol",
     "FederatedStateSnapshot",
+    "FilesystemIsolationContract",
     "FitnessObjective",
     "FormalVerificationContract",
     "GitSHA",
@@ -404,6 +407,7 @@ __all__ = [
     "HTTPTransportConfig",
     "HardwareEnclaveAttestation",
     "HomomorphicEncryptionProfile",
+    "HostSubstrateAttestation",
     "HumanNode",
     "HypothesisGenerationEvent",
     "HypothesisStake",

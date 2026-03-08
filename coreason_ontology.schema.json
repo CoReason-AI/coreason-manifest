@@ -4522,6 +4522,39 @@
       "title": "FederatedStateSnapshot",
       "type": "object"
     },
+    "FilesystemIsolationContract": {
+      "additionalProperties": false,
+      "description": "Declarative cryptographic boundary for host filesystem ingestion.",
+      "properties": {
+        "require_hardware_enclave": {
+          "default": true,
+          "description": "Mandates silicon-level isolation.",
+          "title": "Require Hardware Enclave",
+          "type": "boolean"
+        },
+        "max_symlink_depth": {
+          "description": "Mathematically bounds symlink traversals (0 for true Zero-Trust).",
+          "minimum": 0,
+          "title": "Max Symlink Depth",
+          "type": "integer"
+        },
+        "allowed_mount_paths": {
+          "description": "Explicit allowlist of pre-computed chroot directories.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Allowed Mount Paths",
+          "type": "array"
+        }
+      },
+      "required": [
+        "max_symlink_depth",
+        "allowed_mount_paths"
+      ],
+      "title": "FilesystemIsolationContract",
+      "type": "object"
+    },
     "FitnessObjective": {
       "additionalProperties": false,
       "description": "A specific objective function to optimize within a generation.",
@@ -4943,6 +4976,36 @@
       "title": "HomomorphicEncryptionProfile",
       "type": "object"
     },
+    "HostSubstrateAttestation": {
+      "additionalProperties": false,
+      "properties": {
+        "chroot_jail_hash": {
+          "description": "The SHA-256 hash of the isolated mount namespace.",
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Chroot Jail Hash",
+          "type": "string"
+        },
+        "posix_mode_mask": {
+          "description": "The exact file permission mask read at the moment of ingestion.",
+          "minimum": 0,
+          "title": "Posix Mode Mask",
+          "type": "integer"
+        },
+        "zk_receipt_hash": {
+          "description": "The Content Identifier (CID) for the zkVM proof verifying no path-traversal occurred.",
+          "minLength": 1,
+          "title": "Zk Receipt Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "chroot_jail_hash",
+        "posix_mode_mask",
+        "zk_receipt_hash"
+      ],
+      "title": "HostSubstrateAttestation",
+      "type": "object"
+    },
     "HumanNode": {
       "additionalProperties": false,
       "description": "A node representing a human participant in the workflow.",
@@ -5151,6 +5214,18 @@
           },
           "title": "Latent Firewalls",
           "type": "array"
+        },
+        "filesystem_isolation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FilesystemIsolationContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The strict host-level isolation bounds applied to physical storage."
         }
       },
       "required": [
@@ -6434,6 +6509,18 @@
           "description": "The UNIX timestamp anchoring the genesis block.",
           "title": "Temporal Ingest Timestamp",
           "type": "number"
+        },
+        "substrate_attestation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HostSubstrateAttestation"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cryptographic ZK receipt of secure file ingestion."
         }
       },
       "required": [
@@ -6865,6 +6952,18 @@
           "default": null,
           "description": "The Event ID of the specific ToolInvocationEvent that spawned this observation, forming a strict bipartite directed edge.",
           "title": "Triggering Invocation Id"
+        },
+        "substrate_attestation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HostSubstrateAttestation"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cryptographic ZK receipt of secure file ingestion."
         }
       },
       "required": [

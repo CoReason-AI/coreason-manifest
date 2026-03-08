@@ -1452,6 +1452,8 @@ def _local_draw_any_state_event(draw: Any) -> dict[str, Any]:
             payload["sensory_trigger"] = draw(draw_embodied_sensory_vector())
         if event_type == "observation" and draw(st.booleans()):
             payload["triggering_invocation_id"] = draw(st.one_of(st.none(), st.text(min_size=1)))
+        if event_type == "observation" and draw(st.booleans()):
+            payload["substrate_attestation"] = draw(draw_host_substrate_attestation())
         if event_type == "belief_update" and draw(st.booleans()):
             payload["uncertainty_profile"] = draw(draw_cognitive_uncertainty_profile())
         if event_type == "belief_update" and draw(st.booleans()):
@@ -2323,6 +2325,15 @@ def draw_sae_latent_firewall(draw: Any) -> dict[str, Any]:
 
 
 @st.composite
+def draw_filesystem_isolation_contract(draw: Any) -> dict[str, Any]:
+    return {
+        "require_hardware_enclave": draw(st.booleans()),
+        "max_symlink_depth": draw(st.integers(min_value=0, max_value=10)),
+        "allowed_mount_paths": draw(st.lists(st.text(min_size=1), min_size=1, max_size=5)),
+    }
+
+
+@st.composite
 def draw_information_flow_policy(draw: Any) -> dict[str, Any]:
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(
@@ -2332,6 +2343,7 @@ def draw_information_flow_policy(draw: Any) -> dict[str, Any]:
                 "rules": st.lists(draw_redaction_rule(), max_size=100),
                 "semantic_firewall": st.one_of(st.none(), draw_semantic_firewall_policy()),
                 "latent_firewalls": st.lists(draw_sae_latent_firewall(), max_size=10),
+                "filesystem_isolation": st.one_of(st.none(), draw_filesystem_isolation_contract()),
             }
         )
     )
@@ -3191,6 +3203,15 @@ def draw_table_cell(draw: Any, r: int, c: int) -> dict[str, Any]:
         )
     )
     return res
+
+
+@st.composite
+def draw_host_substrate_attestation(draw: Any) -> dict[str, Any]:
+    return {
+        "chroot_jail_hash": draw(st.from_regex(r"^[a-f0-9]{64}$", fullmatch=True)),
+        "posix_mode_mask": draw(st.integers(min_value=0, max_value=777)),
+        "zk_receipt_hash": draw(st.text(min_size=1)),
+    }
 
 
 @st.composite
