@@ -440,6 +440,32 @@
           "title": "Description",
           "type": "string"
         },
+        "architectural_intent": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The AI's declarative rationale for selecting this node.",
+          "title": "Architectural Intent"
+        },
+        "justification": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cryptographic/audit justification for this node's existence in the graph.",
+          "title": "Justification"
+        },
         "intervention_policies": {
           "description": "A declarative list of proactive oversight hooks bound to this node's lifecycle.",
           "items": {
@@ -1276,6 +1302,32 @@
           "title": "Description",
           "type": "string"
         },
+        "architectural_intent": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The AI's declarative rationale for selecting this node.",
+          "title": "Architectural Intent"
+        },
+        "justification": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cryptographic/audit justification for this node's existence in the graph.",
+          "title": "Justification"
+        },
         "intervention_policies": {
           "description": "A declarative list of proactive oversight hooks bound to this node's lifecycle.",
           "items": {
@@ -1355,6 +1407,32 @@
           ],
           "title": "Lifecycle Phase",
           "type": "string"
+        },
+        "architectural_intent": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The AI's declarative rationale for selecting this topology.",
+          "title": "Architectural Intent"
+        },
+        "justification": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cryptographic/audit justification for this topology's configuration.",
+          "title": "Justification"
         },
         "nodes": {
           "additionalProperties": {
@@ -2160,6 +2238,32 @@
           "title": "Description",
           "type": "string"
         },
+        "architectural_intent": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The AI's declarative rationale for selecting this node.",
+          "title": "Architectural Intent"
+        },
+        "justification": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cryptographic/audit justification for this node's existence in the graph.",
+          "title": "Justification"
+        },
         "intervention_policies": {
           "description": "A declarative list of proactive oversight hooks bound to this node's lifecycle.",
           "items": {
@@ -2446,6 +2550,32 @@
           ],
           "title": "Lifecycle Phase",
           "type": "string"
+        },
+        "architectural_intent": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The AI's declarative rationale for selecting this topology.",
+          "title": "Architectural Intent"
+        },
+        "justification": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cryptographic/audit justification for this topology's configuration.",
+          "title": "Justification"
         },
         "nodes": {
           "additionalProperties": {
@@ -2820,6 +2950,32 @@
           "title": "Lifecycle Phase",
           "type": "string"
         },
+        "architectural_intent": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The AI's declarative rationale for selecting this topology.",
+          "title": "Architectural Intent"
+        },
+        "justification": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cryptographic/audit justification for this topology's configuration.",
+          "title": "Justification"
+        },
         "nodes": {
           "additionalProperties": {
             "$ref": "#/$defs/AnyNode"
@@ -3008,6 +3164,32 @@
           ],
           "title": "Lifecycle Phase",
           "type": "string"
+        },
+        "architectural_intent": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The AI's declarative rationale for selecting this topology.",
+          "title": "Architectural Intent"
+        },
+        "justification": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cryptographic/audit justification for this topology's configuration.",
+          "title": "Justification"
         },
         "nodes": {
           "additionalProperties": {
@@ -3923,6 +4105,32 @@
           "title": "Lifecycle Phase",
           "type": "string"
         },
+        "architectural_intent": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The AI's declarative rationale for selecting this topology.",
+          "title": "Architectural Intent"
+        },
+        "justification": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cryptographic/audit justification for this topology's configuration.",
+          "title": "Justification"
+        },
         "nodes": {
           "additionalProperties": {
             "$ref": "#/$defs/AnyNode"
@@ -4096,6 +4304,32 @@
           ],
           "title": "Lifecycle Phase",
           "type": "string"
+        },
+        "architectural_intent": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The AI's declarative rationale for selecting this topology.",
+          "title": "Architectural Intent"
+        },
+        "justification": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cryptographic/audit justification for this topology's configuration.",
+          "title": "Justification"
         },
         "nodes": {
           "additionalProperties": {
@@ -5114,6 +5348,32 @@
           "description": "A description of the node's function.",
           "title": "Description",
           "type": "string"
+        },
+        "architectural_intent": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The AI's declarative rationale for selecting this node.",
+          "title": "Architectural Intent"
+        },
+        "justification": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cryptographic/audit justification for this node's existence in the graph.",
+          "title": "Justification"
         },
         "intervention_policies": {
           "description": "A declarative list of proactive oversight hooks bound to this node's lifecycle.",
@@ -7916,6 +8176,32 @@
           "title": "Lifecycle Phase",
           "type": "string"
         },
+        "architectural_intent": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The AI's declarative rationale for selecting this topology.",
+          "title": "Architectural Intent"
+        },
+        "justification": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cryptographic/audit justification for this topology's configuration.",
+          "title": "Justification"
+        },
         "nodes": {
           "additionalProperties": {
             "$ref": "#/$defs/AnyNode"
@@ -9042,6 +9328,32 @@
           "title": "Lifecycle Phase",
           "type": "string"
         },
+        "architectural_intent": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The AI's declarative rationale for selecting this topology.",
+          "title": "Architectural Intent"
+        },
+        "justification": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cryptographic/audit justification for this topology's configuration.",
+          "title": "Justification"
+        },
         "nodes": {
           "additionalProperties": {
             "$ref": "#/$defs/AnyNode"
@@ -9275,6 +9587,32 @@
           "description": "A description of the node's function.",
           "title": "Description",
           "type": "string"
+        },
+        "architectural_intent": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The AI's declarative rationale for selecting this node.",
+          "title": "Architectural Intent"
+        },
+        "justification": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cryptographic/audit justification for this node's existence in the graph.",
+          "title": "Justification"
         },
         "intervention_policies": {
           "description": "A declarative list of proactive oversight hooks bound to this node's lifecycle.",
