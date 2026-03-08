@@ -5,6 +5,13 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
+"""AGENT INSTRUCTION:
+This file defines the presentation intent grammar. This is a STRICTLY PROJECTION BOUNDARY.
+These schemas govern how multi-dimensional agent knowledge is collapsed and encoded for human perception.
+YOU ARE EXPLICITLY FORBIDDEN from adding state-mutation or backend logic here.
+Think purely in terms of declarative graphical grammars (Marks, Channels, Scales).
+"""
+
 from typing import Annotated, Any, Literal
 
 from pydantic import Field

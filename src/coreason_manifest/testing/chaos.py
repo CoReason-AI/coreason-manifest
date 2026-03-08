@@ -5,6 +5,13 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
+"""AGENT INSTRUCTION:
+This file defines the Chaos Engineering schemas. This is a STRICTLY ADVERSARIAL BOUNDARY.
+These models are not unit tests; they are systemic fault injectors designed to perturb the live
+swarm topology (e.g., node latency, memory corruption, topological severing).
+Do not write standard QA schemas here. Focus entirely on Blast Radius and Steady-State Hypotheses.
+"""
+
 from typing import Literal
 
 from pydantic import Field
