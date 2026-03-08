@@ -819,6 +819,7 @@
           "hypothesis": "#/$defs/HypothesisGenerationEvent",
           "normative_drift": "#/$defs/NormativeDriftEvent",
           "observation": "#/$defs/ObservationEvent",
+          "persistence_commit": "#/$defs/PersistenceCommitReceipt",
           "system_fault": "#/$defs/SystemFaultEvent",
           "tool_invocation": "#/$defs/ToolInvocationEvent"
         },
@@ -851,6 +852,9 @@
         },
         {
           "$ref": "#/$defs/NormativeDriftEvent"
+        },
+        {
+          "$ref": "#/$defs/PersistenceCommitReceipt"
         }
       ]
     },
@@ -2289,6 +2293,39 @@
         "forbidden_intents"
       ],
       "title": "ConstitutionalRule",
+      "type": "object"
+    },
+    "ContinuousMutationPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "mutation_paradigm": {
+          "description": "Forces non-destructive graph mutations.",
+          "enum": [
+            "append_only",
+            "merge_on_read"
+          ],
+          "title": "Mutation Paradigm",
+          "type": "string"
+        },
+        "max_uncommitted_rows": {
+          "description": "Backpressure threshold before forcing a commit.",
+          "exclusiveMinimum": 0,
+          "title": "Max Uncommitted Rows",
+          "type": "integer"
+        },
+        "micro_batch_interval_ms": {
+          "description": "Temporal bound for flushing the stream.",
+          "exclusiveMinimum": 0,
+          "title": "Micro Batch Interval Ms",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "mutation_paradigm",
+        "max_uncommitted_rows",
+        "micro_batch_interval_ms"
+      ],
+      "title": "ContinuousMutationPolicy",
       "type": "object"
     },
     "CouncilTopology": {
@@ -4485,6 +4522,41 @@
       "title": "GrammarPanel",
       "type": "object"
     },
+    "GraphFlatteningDirective": {
+      "additionalProperties": false,
+      "properties": {
+        "node_projection_mode": {
+          "description": "How to flatten SemanticNode.",
+          "enum": [
+            "wide_columnar",
+            "struct_array"
+          ],
+          "title": "Node Projection Mode",
+          "type": "string"
+        },
+        "edge_projection_mode": {
+          "description": "How to flatten SemanticEdge.",
+          "enum": [
+            "adjacency_list",
+            "map_array"
+          ],
+          "title": "Edge Projection Mode",
+          "type": "string"
+        },
+        "preserve_cryptographic_lineage": {
+          "default": true,
+          "description": "Forces the inclusion of MultimodalTokenAnchor hashes in the flattened row.",
+          "title": "Preserve Cryptographic Lineage",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "node_projection_mode",
+        "edge_projection_mode"
+      ],
+      "title": "GraphFlatteningDirective",
+      "type": "object"
+    },
     "HTTPTransportConfig": {
       "additionalProperties": false,
       "description": "Configuration for stateless HTTP-based MCP transport.",
@@ -5168,6 +5240,43 @@
         "error"
       ],
       "title": "JSONRPCErrorResponse",
+      "type": "object"
+    },
+    "LakehouseMountConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "catalog_uri": {
+          "description": "The stateless endpoint of the catalog (e.g., Polaris, Nessie).",
+          "minLength": 1,
+          "title": "Catalog Uri",
+          "type": "string"
+        },
+        "table_format": {
+          "description": "Strict boundary for the destination format.",
+          "enum": [
+            "iceberg",
+            "delta",
+            "hudi"
+          ],
+          "title": "Table Format",
+          "type": "string"
+        },
+        "schema_evolution_mode": {
+          "description": "Dictates if the agent can evolve the schema.",
+          "enum": [
+            "strict",
+            "additive_only"
+          ],
+          "title": "Schema Evolution Mode",
+          "type": "string"
+        }
+      },
+      "required": [
+        "catalog_uri",
+        "table_format",
+        "schema_evolution_mode"
+      ],
+      "title": "LakehouseMountConfig",
       "type": "object"
     },
     "LatentScratchpadTrace": {
@@ -6747,6 +6856,55 @@
         "file_system_read_only"
       ],
       "title": "PermissionBoundary",
+      "type": "object"
+    },
+    "PersistenceCommitReceipt": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "type": {
+          "const": "persistence_commit",
+          "default": "persistence_commit",
+          "description": "Discriminator type for a persistence commit receipt.",
+          "title": "Type",
+          "type": "string"
+        },
+        "lakehouse_snapshot_id": {
+          "description": "The external cryptographic receipt generated by Iceberg/Delta.",
+          "minLength": 1,
+          "title": "Lakehouse Snapshot Id",
+          "type": "string"
+        },
+        "committed_state_diff_id": {
+          "description": "The internal StateDiff CID that was flushed.",
+          "minLength": 1,
+          "title": "Committed State Diff Id",
+          "type": "string"
+        },
+        "target_table_uri": {
+          "description": "The specific table mutated.",
+          "minLength": 1,
+          "title": "Target Table Uri",
+          "type": "string"
+        }
+      },
+      "required": [
+        "event_id",
+        "timestamp",
+        "lakehouse_snapshot_id",
+        "committed_state_diff_id",
+        "target_table_uri"
+      ],
+      "title": "PersistenceCommitReceipt",
       "type": "object"
     },
     "PostQuantumSignature": {
