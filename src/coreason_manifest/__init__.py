@@ -223,8 +223,7 @@ from coreason_manifest.workflow.nodes import (
     SystemNode,
 )
 from coreason_manifest.workflow.topologies import (
-    AnyTopology,
-    BackpressurePolicy,
+        BackpressurePolicy,
     BaseTopology,
     CouncilTopology,
     DAGTopology,
@@ -257,8 +256,7 @@ __all__ = [
     "AnyResiliencePayload",
     "AnyStateEvent",
     "AnyToolchainState",
-    "AnyTopology",
-    "ArgumentClaim",
+        "ArgumentClaim",
     "ArgumentGraph",
     "AttackVector",
     "AuctionPolicy",
@@ -459,6 +457,7 @@ __all__ = [
 
 
 def _rebuild_ontology() -> None:
+    from coreason_manifest.workflow.topologies import AnyTopology
     """
     Dynamically resolves all Pydantic forward references strictly at the end of module initialization.
     This prevents circular import death spirals by guaranteeing the entire ontology is loaded
