@@ -79,8 +79,7 @@ class VerifiableEntropy(CoreasonBaseModel):
     )
     seed_hash: str = Field(
         min_length=10,
-        description="The SHA-256 hash of the origin seed used to initialize the VRF "
-        "for exogenous spatial actuation.",
+        description="The SHA-256 hash of the origin seed used to initialize the VRF for exogenous spatial actuation.",
     )
 
 

@@ -73,9 +73,7 @@ class ToolDefinition(CoreasonBaseModel):
     description: str = Field(
         description="Semantic description of what the Exogenous Actuator does, used by the LLM for selection."
     )
-    input_schema: dict[str, Any] = Field(
-        description="The strict Schema dictionary defining the required parameters."
-    )
+    input_schema: dict[str, Any] = Field(description="The strict Schema dictionary defining the required parameters.")
     side_effects: SideEffectProfile = Field(
         description="The declarative side-effect and idempotency profile of the tool."
     )

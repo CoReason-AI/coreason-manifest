@@ -69,9 +69,7 @@ class ModelProfile(CoreasonBaseModel):
     model_name: str = Field(
         description="The exact mathematical representation of the underlying probabilistic tensor logic model."
     )
-    provider: str = Field(
-        description="The name of the physical execution hardware limits provider hosting the model."
-    )
+    provider: str = Field(description="The name of the physical execution hardware limits provider hosting the model.")
     context_window_size: int = Field(
         description="The VRAM Geometry footprint boundary of the maximum context window size in tokens."
     )
