@@ -30,7 +30,7 @@ class EvidentiaryWarrant(CoreasonBaseModel):
 
 
 class ArgumentClaim(CoreasonBaseModel):
-    claim_id: str = Field(description="Unique identifier for this specific logical proposition.")
+    claim_id: str = Field(description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this specific logical proposition.")
     proponent_id: str = Field(description="The NodeID of the agent or system that advanced this claim.")
     text_chunk: str = Field(max_length=50000, description="The natural language representation of the proposition.")
     warrants: list[EvidentiaryWarrant] = Field(
@@ -39,9 +39,9 @@ class ArgumentClaim(CoreasonBaseModel):
 
 
 class DefeasibleAttack(CoreasonBaseModel):
-    attack_id: str = Field(description="Unique identifier for this directed attack edge.")
-    source_claim_id: str = Field(description="The ID of the claim mounting the attack.")
-    target_claim_id: str = Field(description="The ID of the claim being attacked.")
+    attack_id: str = Field(description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this directed attack edge.")
+    source_claim_id: str = Field(description="The Content Identifier (CID) of the claim mounting the attack.")
+    target_claim_id: str = Field(description="The Content Identifier (CID) of the claim being attacked.")
     attack_vector: AttackVector = Field(
         description="The specific defeasible logic vector (e.g., attacking the premise, the link, or the conclusion)."
     )

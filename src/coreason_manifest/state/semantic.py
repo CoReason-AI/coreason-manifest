@@ -49,7 +49,7 @@ class DimensionalProjectionContract(CoreasonBaseModel):
 
 
 class OntologicalHandshake(CoreasonBaseModel):
-    handshake_id: str = Field(min_length=1, description="The unique identifier for the handshake.")
+    handshake_id: str = Field(min_length=1, description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this semantic node to the Merkle-DAG.")
     participant_node_ids: list[str] = Field(min_length=2, description="The agents establishing semantic alignment.")
     measured_cosine_similarity: float = Field(
         ge=-1.0,
@@ -109,8 +109,8 @@ class LineageWatermark(CoreasonBaseModel):
 
 
 class MemoryProvenance(CoreasonBaseModel):
-    extracted_by: NodeID = Field(description="The ID of the agent node that extracted this memory.")
-    source_event_id: str = Field(description="The exact event ID in the EpistemicLedger that generated this fact.")
+    extracted_by: NodeID = Field(description="The Content Identifier (CID) of the agent node that extracted this memory.")
+    source_event_id: str = Field(description="The exact event Content Identifier (CID) in the EpistemicLedger that generated this fact.")
     spatial_anchor: SpatialAnchor | None = Field(
         default=None, description="The physical coordinate matrix where this data was extracted."
     )
@@ -133,14 +133,14 @@ class HomomorphicEncryptionProfile(CoreasonBaseModel):
     )
     public_key_id: str = Field(
         description=(
-            "The identifier of the public evaluation key the orchestrator must load to perform math on this payload."
+            "The Content Identifier (CID) of the public evaluation key the orchestrator must utilize to perform privacy-preserving geometric math on ciphertext without epistemic contamination."
         )
     )
     ciphertext_blob: str = Field(description="The base64-encoded homomorphic ciphertext.")
 
 
 class SemanticNode(CoreasonBaseModel):
-    node_id: str = Field(description="The unique identifier of this semantic concept.")
+    node_id: str = Field(description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this semantic node to the Merkle-DAG.")
     label: str = Field(description="The categorical label of the node (e.g., 'Person', 'Concept').")
     scope: Literal["global", "tenant", "session"] = Field(
         default="session",
@@ -150,9 +150,7 @@ class SemanticNode(CoreasonBaseModel):
         ),
     )
     text_chunk: str = Field(max_length=50000, description="The raw natural language representation of the memory.")
-    embedding: VectorEmbedding | None = Field(
-        default=None, description="The dense vector representation of the text chunk."
-    )
+    embedding: VectorEmbedding | None = Field(default=None, description="Topologically Bounded Latent Spaces used to calculate exact geometric distance and preserve structural Isometry.")
     provenance: MemoryProvenance = Field(description="The cryptographic chain of custody for this memory.")
     tier: MemoryTier = Field(default="semantic", description="The cognitive tier this memory resides in.")
     temporal_bounds: TemporalBounds | None = Field(
@@ -171,16 +169,14 @@ class SemanticNode(CoreasonBaseModel):
 
 
 class SemanticEdge(CoreasonBaseModel):
-    edge_id: str = Field(description="The unique identifier of this relationship.")
-    subject_node_id: str = Field(description="The origin SemanticNode ID.")
-    object_node_id: str = Field(description="The destination SemanticNode ID.")
+    edge_id: str = Field(description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this semantic node to the Merkle-DAG.")
+    subject_node_id: str = Field(description="The origin SemanticNode Content Identifier (CID).")
+    object_node_id: str = Field(description="The destination SemanticNode Content Identifier (CID).")
     confidence_score: float | None = Field(
         default=None, ge=0.0, le=1.0, description="The probabilistic certainty of this logical connection."
     )
     predicate: str = Field(description="The string representation of the relationship (e.g., 'WORKS_FOR').")
-    embedding: VectorEmbedding | None = Field(
-        default=None, description="The dense vector representing the relationship semantics."
-    )
+    embedding: VectorEmbedding | None = Field(default=None, description="Topologically Bounded Latent Spaces used to calculate exact geometric distance and preserve structural Isometry.")
     provenance: MemoryProvenance | None = Field(
         default=None,
         description="Optional distinct provenance if the relationship was inferred separately from the nodes.",
