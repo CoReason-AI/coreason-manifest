@@ -2210,6 +2210,42 @@
       "title": "ConsensusPolicy",
       "type": "object"
     },
+    "ConstitutionalAmendmentProposal": {
+      "additionalProperties": false,
+      "description": "Proposed amendment generated in response to normative drift detection.",
+      "properties": {
+        "type": {
+          "const": "constitutional_amendment",
+          "default": "constitutional_amendment",
+          "description": "The strict discriminator for this intervention payload.",
+          "title": "Type",
+          "type": "string"
+        },
+        "drift_event_id": {
+          "description": "The CID of the NormativeDriftEvent that justified triggering this proposal.",
+          "title": "Drift Event Id",
+          "type": "string"
+        },
+        "proposed_patch": {
+          "additionalProperties": true,
+          "description": "A strict, structurally bounded JSON Patch (RFC 6902) proposed by the AI to mutate the GovernancePolicy.",
+          "title": "Proposed Patch",
+          "type": "object"
+        },
+        "justification": {
+          "description": "The AI's natural language legal/logical argument for why this patch resolves the contradiction without violating the root AnchoringPolicy.",
+          "title": "Justification",
+          "type": "string"
+        }
+      },
+      "required": [
+        "drift_event_id",
+        "proposed_patch",
+        "justification"
+      ],
+      "title": "ConstitutionalAmendmentProposal",
+      "type": "object"
+    },
     "ConstitutionalRule": {
       "additionalProperties": false,
       "description": "Defines a constitutional rule for AI governance.",

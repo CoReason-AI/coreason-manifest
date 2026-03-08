@@ -769,6 +769,34 @@ def draw_backpressure_policy(draw: Any) -> dict[str, Any]:
     return res
 
 
+def draw_digital_twin_topology_payload(
+    nodes_strategy: st.SearchStrategy[dict[str, Any]],
+) -> st.SearchStrategy[dict[str, Any]]:
+    return st.fixed_dictionaries(
+        {
+            "type": st.just("digital_twin"),
+            "nodes": st.dictionaries(
+                draw_did_string(),
+                nodes_strategy,
+                max_size=5,
+            ),
+            "shared_state_contract": st.none(),
+            "information_flow": st.none(),
+            "observability": st.none(),
+            "target_topology_id": draw_did_string(),
+            "convergence_sla": st.fixed_dictionaries(
+                {
+                    "max_monte_carlo_rollouts": st.integers(min_value=1),
+                    "variance_tolerance": st.floats(
+                        min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False
+                    ),
+                }
+            ),
+            "enforce_no_side_effects": st.booleans(),
+        }
+    )
+
+
 def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> st.SearchStrategy[dict[str, Any]]:
     dag_strategy = st.fixed_dictionaries(
         {
@@ -897,7 +925,11 @@ def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> 
         }
     ).map(_eval_opt_mapper)
 
-    return st.one_of(dag_strategy, council_strategy, swarm_strategy, smpc_strategy, eval_opt_strategy)
+    digital_twin_strategy = draw_digital_twin_topology_payload(nodes_strategy)
+
+    return st.one_of(
+        dag_strategy, council_strategy, swarm_strategy, smpc_strategy, eval_opt_strategy, digital_twin_strategy
+    )
 
 
 def draw_composite_node_payload(
@@ -1231,6 +1263,40 @@ def draw_any_toolchain_state() -> st.SearchStrategy[dict[str, Any]]:
 
 
 @st.composite
+def draw_epistemic_promotion_event_payload(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "type": st.just("epistemic_promotion"),
+                "event_id": st.text(min_size=1),
+                "timestamp": st.floats(allow_nan=False, allow_infinity=False),
+                "source_episodic_event_ids": st.lists(st.text(min_size=1), min_size=1),
+                "crystallized_semantic_node_id": st.text(min_size=1),
+                "compression_ratio": st.floats(allow_nan=False, allow_infinity=False),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_normative_drift_event_payload(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "type": st.just("normative_drift"),
+                "event_id": st.text(min_size=1),
+                "timestamp": st.floats(allow_nan=False, allow_infinity=False),
+                "tripped_rule_id": st.text(min_size=1),
+                "measured_semantic_drift": st.floats(allow_nan=False, allow_infinity=False),
+                "contradiction_proof_hash": st.text(min_size=1),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
 def draw_barge_in_interrupt_event(draw: Any) -> dict[str, Any]:
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(
@@ -1297,9 +1363,19 @@ def _local_draw_any_state_event(draw: Any) -> dict[str, Any]:
                 "barge_in",
                 "counterfactual_regret",
                 "tool_invocation",
+                "epistemic_promotion",
+                "normative_drift",
             ]
         )
     )
+
+    if event_type == "epistemic_promotion":
+        promo_res: dict[str, Any] = draw(draw_epistemic_promotion_event_payload())
+        return promo_res
+
+    if event_type == "normative_drift":
+        drift_res: dict[str, Any] = draw(draw_normative_drift_event_payload())
+        return drift_res
 
     if event_type == "tool_invocation":
         tool_res: dict[str, Any] = draw(draw_tool_invocation_event())
@@ -1381,6 +1457,14 @@ def test_anystateevent_routing(payload: dict[str, Any]) -> None:
         from coreason_manifest.state.events import ToolInvocationEvent
 
         assert isinstance(parsed, ToolInvocationEvent)
+    elif event_type == "epistemic_promotion":
+        from coreason_manifest.state.events import EpistemicPromotionEvent
+
+        assert isinstance(parsed, EpistemicPromotionEvent)
+    elif event_type == "normative_drift":
+        from coreason_manifest.state.events import NormativeDriftEvent
+
+        assert isinstance(parsed, NormativeDriftEvent)
 
 
 @given(st.text())
@@ -1393,6 +1477,8 @@ def test_anystateevent_invalid(invalid_type: str) -> None:
         "barge_in",
         "counterfactual_regret",
         "tool_invocation",
+        "epistemic_promotion",
+        "normative_drift",
     ]:
         return
     payload = {"type": invalid_type, "event_id": "test", "timestamp": 123.0}
@@ -2259,6 +2345,20 @@ def draw_defeasible_cascade(draw: Any) -> dict[str, Any]:
 
 
 @st.composite
+def draw_crystallization_policy(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "min_observations_required": st.integers(min_value=10),
+                "aleatoric_entropy_threshold": st.floats(max_value=0.1, allow_nan=False, allow_infinity=False),
+                "target_memory_tier": st.sampled_from(["semantic", "working"]),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
 def draw_epistemic_ledger(draw: Any) -> dict[str, Any]:
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(
@@ -2270,6 +2370,7 @@ def draw_epistemic_ledger(draw: Any) -> dict[str, Any]:
                 "migration_contracts": st.lists(draw_migration_contract(), max_size=10),
                 "truth_maintenance_policy": st.one_of(st.none(), draw_truth_maintenance_policy()),
                 "active_cascades": st.lists(draw_defeasible_cascade(), max_size=100),
+                "crystallization_policy": st.one_of(st.none(), draw_crystallization_policy()),
             }
         )
     )
@@ -2281,6 +2382,13 @@ def draw_epistemic_ledger(draw: Any) -> dict[str, Any]:
 def test_differentials_routing(payload: dict[str, Any]) -> None:
     parsed = epistemic_ledger_adapter.validate_python(payload)
     assert isinstance(parsed, EpistemicLedger)
+
+
+@given(draw_crystallization_policy())
+def test_crystallization_policy_fuzzing(payload: dict[str, Any]) -> None:
+    from coreason_manifest.state.memory import CrystallizationPolicy
+
+    TypeAdapter(CrystallizationPolicy).validate_python(payload)
 
 
 @st.composite
@@ -2378,6 +2486,76 @@ def test_ontological_handshake_routing(payload: dict[str, Any]) -> None:
 
 
 @st.composite
+def draw_cross_swarm_handshake_payload(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "handshake_id": st.text(min_size=1),
+                "initiating_tenant_id": draw_did_string(),
+                "receiving_tenant_id": draw_did_string(),
+                "offered_sla": draw_bilateral_sla(),
+                "status": st.sampled_from(["proposed", "negotiating", "aligned", "rejected"]),
+            }
+        )
+    )
+    return res
+
+
+@given(draw_cross_swarm_handshake_payload())
+def test_cross_swarm_handshake_fuzzing(payload: dict[str, Any]) -> None:
+    from coreason_manifest.workflow.federation import CrossSwarmHandshake
+
+    TypeAdapter(CrossSwarmHandshake).validate_python(payload)
+
+
+@st.composite
+def draw_federated_discovery_protocol_payload(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "broadcast_endpoints": st.lists(st.text(min_size=1), max_size=10),
+                "supported_ontologies": st.lists(st.text(min_size=1), max_size=10),
+            }
+        )
+    )
+    return res
+
+
+@given(draw_federated_discovery_protocol_payload())
+def test_federated_discovery_protocol_fuzzing(payload: dict[str, Any]) -> None:
+    from coreason_manifest.workflow.federation import FederatedDiscoveryProtocol
+
+    TypeAdapter(FederatedDiscoveryProtocol).validate_python(payload)
+
+
+@given(draw_dynamic_convergence_sla())
+def test_simulation_convergence_sla_fuzzing(payload: dict[str, Any]) -> None:
+    # `SimulationConvergenceSLA` is basically tested heavily if we pass `max_monte_carlo_rollouts`
+    # However we will implement explicit test given we have the strategy in digital twins payload
+    pass
+
+
+@st.composite
+def draw_simulation_convergence_sla_payload(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "max_monte_carlo_rollouts": st.integers(min_value=1),
+                "variance_tolerance": st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False),
+            }
+        )
+    )
+    return res
+
+
+@given(draw_simulation_convergence_sla_payload())
+def test_simulation_convergence_sla_standalone(payload: dict[str, Any]) -> None:
+    from coreason_manifest.workflow.topologies import SimulationConvergenceSLA
+
+    TypeAdapter(SimulationConvergenceSLA).validate_python(payload)
+
+
+@st.composite
 def draw_override_intent(draw: Any) -> dict[str, Any]:
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(
@@ -2430,8 +2608,28 @@ def draw_intervention_verdict(draw: Any) -> dict[str, Any]:
     return res
 
 
+@st.composite
+def draw_constitutional_amendment_proposal_payload(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "type": st.just("constitutional_amendment"),
+                "drift_event_id": st.text(min_size=1),
+                "proposed_patch": st.dictionaries(st.text(), st.one_of(st.text(), st.integers(), st.booleans())),
+                "justification": st.text(min_size=1),
+            }
+        )
+    )
+    return res
+
+
 def draw_any_intervention_payload() -> st.SearchStrategy[dict[str, Any]]:
-    return st.one_of(draw_intervention_request(), draw_intervention_verdict(), draw_override_intent())
+    return st.one_of(
+        draw_intervention_request(),
+        draw_intervention_verdict(),
+        draw_override_intent(),
+        draw_constitutional_amendment_proposal_payload(),
+    )
 
 
 intervention_payload_adapter: TypeAdapter[AnyInterventionPayload] = TypeAdapter(AnyInterventionPayload)
@@ -2447,6 +2645,10 @@ def test_anyinterventionpayload_routing(payload: dict[str, Any]) -> None:
         assert isinstance(parsed, InterventionVerdict)
     elif payload_type == "override":
         assert isinstance(parsed, OverrideIntent)
+    elif payload_type == "constitutional_amendment":
+        from coreason_manifest.oversight.intervention import ConstitutionalAmendmentProposal
+
+        assert isinstance(parsed, ConstitutionalAmendmentProposal)
 
 
 workflow_envelope_adapter: TypeAdapter[WorkflowEnvelope] = TypeAdapter(WorkflowEnvelope)
@@ -2531,6 +2733,7 @@ def draw_workflow_envelope(draw: Any) -> dict[str, Any]:
                         max_size=10,
                     ),
                 ),
+                "federated_discovery": st.one_of(st.none(), draw_federated_discovery_protocol_payload()),
                 "federated_sla": st.one_of(st.none(), draw_bilateral_sla()),
                 "pq_signature": st.one_of(st.none(), draw_pq_signature()),
             }
