@@ -794,6 +794,24 @@
         }
       ]
     },
+    "AnyToolchainState": {
+      "description": "A discriminated union of immutable external toolchain states.",
+      "discriminator": {
+        "mapping": {
+          "browser": "#/$defs/BrowserDOMState",
+          "terminal": "#/$defs/TerminalBufferState"
+        },
+        "propertyName": "type"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/BrowserDOMState"
+        },
+        {
+          "$ref": "#/$defs/TerminalBufferState"
+        }
+      ]
+    },
     "AnyTopology": {
       "description": "A discriminated union of workflow topologies.",
       "discriminator": {
@@ -5580,30 +5598,14 @@
         "toolchain_snapshot": {
           "anyOf": [
             {
-              "description": "A discriminated union of immutable external toolchain states.",
-              "discriminator": {
-                "mapping": {
-                  "browser": "#/$defs/BrowserDOMState",
-                  "terminal": "#/$defs/TerminalBufferState"
-                },
-                "propertyName": "type"
-              },
-              "oneOf": [
-                {
-                  "$ref": "#/$defs/BrowserDOMState"
-                },
-                {
-                  "$ref": "#/$defs/TerminalBufferState"
-                }
-              ]
+              "$ref": "#/$defs/AnyToolchainState"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "The immutable cryptographic snapshot of the external environment at the moment of observation.",
-          "title": "Toolchain Snapshot"
+          "description": "The immutable cryptographic snapshot of the external environment at the moment of observation."
         },
         "sensory_trigger": {
           "anyOf": [
