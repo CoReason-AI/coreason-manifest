@@ -10,7 +10,7 @@ These schemas represent the append-only cognitive ledger of the swarm. YOU ARE E
 mutable state loops, standard CRUD database paradigms, or downstream business logic. Focus purely on cryptographic
 event sourcing, hardware attestations, and non-monotonic belief updates."""
 
-from typing import Any, Literal
+from typing import Any, Literal, Self
 
 from pydantic import Field, model_validator
 
@@ -20,14 +20,49 @@ from coreason_manifest.core.primitives import NodeID
 type MemoryTier = Literal["working", "episodic", "semantic"]
 
 
-class SpatialAnchor(CoreasonBaseModel):
-    page_number: int | None = Field(default=None, description="The physical page or slide number.")
-    bounding_box: tuple[float, float, float, float] | None = Field(
-        default=None, description="The strictly typed [x_min, y_min, x_max, y_max] coordinate matrix."
+class MultimodalArtifact(CoreasonBaseModel):
+    """AGENT INSTRUCTION: The root Genesis Block for an unstructured document entering the Merkle-DAG."""
+
+    artifact_id: str = Field(description="The definitive Content Identifier (CID) bounding the raw file.")
+    mime_type: str = Field(description="Strict MIME typing of the source artifact (e.g., 'application/pdf').")
+    byte_stream_hash: str = Field(
+        pattern=r"^[a-f0-9]{64}$", description="The undeniable SHA-256 hash of the pre-transmutation byte stream."
     )
-    block_type: Literal["paragraph", "table", "figure", "footnote", "header"] | None = Field(
+    temporal_ingest_timestamp: float = Field(description="The UNIX timestamp anchoring the genesis block.")
+
+
+class MultimodalTokenAnchor(CoreasonBaseModel):
+    """AGENT INSTRUCTION: Unified multimodal grounding mapping extracted facts to strict 1D token spans
+    and 2D visual patches."""
+
+    token_span_start: int | None = Field(
+        default=None, ge=0, description="The starting index in the discrete VLM context window."
+    )
+    token_span_end: int | None = Field(
+        default=None, ge=0, description="The ending index in the discrete VLM context window."
+    )
+    visual_patch_hashes: list[str] = Field(
+        default_factory=list,
+        description="List of SHA-256 hashes corresponding to specific VQ-VAE visual patches attended to.",
+    )
+    bounding_box: tuple[float, float, float, float] | None = Field(
+        default=None, description="The strictly typed [x_min, y_min, x_max, y_max] normalized coordinate matrix."
+    )
+    block_type: Literal["paragraph", "table", "figure", "footnote", "header", "equation"] | None = Field(
         default=None, description="The structural classification of the source region."
     )
+
+    @model_validator(mode="after")
+    def validate_token_spans(self) -> Self:
+        """Mathematically enforce valid 1D token sequence geometry."""
+        if self.token_span_start is not None:
+            if self.token_span_end is None:
+                raise ValueError("If token_span_start is defined, token_span_end MUST be defined.")
+            if self.token_span_end <= self.token_span_start:
+                raise ValueError("token_span_end MUST be strictly greater than token_span_start.")
+        elif self.token_span_end is not None:
+            raise ValueError("token_span_end cannot be defined without a token_span_start.")
+        return self
 
 
 type CausalInterval = Literal["strictly_precedes", "overlaps", "contains", "causes", "mitigates"]
@@ -114,19 +149,21 @@ class LineageWatermark(CoreasonBaseModel):
 
 class MemoryProvenance(CoreasonBaseModel):
     extracted_by: NodeID = Field(
-        description=("The Content Identifier (CID) of the agent node that extracted this memory.")
+        description="The Content Identifier (CID) of the agent node that extracted this memory."
     )
     source_event_id: str = Field(
-        description=("The exact event Content Identifier (CID) in the EpistemicLedger that generated this fact.")
+        description="The exact event Content Identifier (CID) in the EpistemicLedger that generated this fact."
     )
-    spatial_anchor: SpatialAnchor | None = Field(
-        default=None, description="The physical coordinate matrix where this data was extracted."
+    source_artifact_id: str | None = Field(
+        default=None, description="The CID of the Genesis MultimodalArtifact this memory was transmutated from."
+    )
+    multimodal_anchor: MultimodalTokenAnchor | None = Field(
+        default=None, description="The unified VLM spatial and temporal token matrix where this data was extracted."
     )
     lineage_watermark: LineageWatermark | None = Field(
         default=None,
-        description=(
-            "The cryptographic, tamper-evident chain of custody tracing this memory across multiple swarm hops."
-        ),
+        description="The cryptographic, tamper-evident chain of custody tracing this memory "
+        "across multiple swarm hops.",
     )
 
 

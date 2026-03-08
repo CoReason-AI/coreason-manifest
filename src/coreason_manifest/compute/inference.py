@@ -12,9 +12,40 @@ business workflow logic here. All models must map exclusively to mathematical ha
 thresholds, and raw GPU tensor execution.
 """
 
+from typing import Literal
+
 from pydantic import Field
 
 from coreason_manifest.core.base import CoreasonBaseModel
+
+
+class EpistemicCompressionSLA(CoreasonBaseModel):
+    max_entropy_loss: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="The maximum allowed statistical flattening of the source data. Bounded between [0.0, 1.0].",
+    )
+    require_uncertainty_profile: bool = Field(
+        default=True,
+        description="If True, forces the resulting SemanticNode to populate its uncertainty_profile to prevent "
+        "Hallucinations of Certainty.",
+    )
+
+
+class EpistemicTransmutationTask(CoreasonBaseModel):
+    task_id: str = Field(
+        min_length=1, description="Unique identifier for this specific multimodal extraction intervention."
+    )
+    target_artifact_id: str = Field(description="The CID of the MultimodalArtifact being processed.")
+    target_modality: Literal["text", "tabular", "visual", "symbolic"] = Field(
+        description="The specific SOTA modality resolution required for this extraction pass."
+    )
+    compression_sla: EpistemicCompressionSLA = Field(
+        description="The strict mathematical boundary defining the maximum allowed informational entropy loss."
+    )
+    execution_cost_budget_cents: int = Field(
+        ge=0, description="The maximum economic expenditure authorized to run this VLM transmutation."
+    )
 
 
 class AnalogicalMappingTask(CoreasonBaseModel):

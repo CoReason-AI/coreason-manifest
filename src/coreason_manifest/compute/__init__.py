@@ -8,6 +8,8 @@
 from .inference import (
     ActiveInferenceContract,
     AnalogicalMappingTask,
+    EpistemicCompressionSLA,
+    EpistemicTransmutationTask,
     InterventionalCausalTask,
 )
 from .neuromodulation import (
@@ -48,6 +50,8 @@ __all__ = [
     "CrossoverStrategy",
     "DistributionProfile",
     "DynamicConvergenceSLA",
+    "EpistemicCompressionSLA",
+    "EpistemicTransmutationTask",
     "EscalationContract",
     "FitnessObjective",
     "InterventionalCausalTask",

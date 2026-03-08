@@ -10,7 +10,7 @@ from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import ValidationError
 
-from coreason_manifest.state.semantic import DimensionalProjectionContract
+from coreason_manifest.state.semantic import DimensionalProjectionContract, MultimodalTokenAnchor
 
 
 @given(isometry_preservation_score=st.floats(max_value=-0.000001) | st.floats(min_value=1.000001))
@@ -23,3 +23,27 @@ def test_dimensional_projection_contract_mathematical_bounds(isometry_preservati
             projection_matrix_hash="hash",
             isometry_preservation_score=isometry_preservation_score,
         )
+
+
+def test_multimodal_token_anchor_bounds() -> None:
+    # Proof: Valid
+    MultimodalTokenAnchor(token_span_start=5, token_span_end=10)
+
+    # Proof: End without Start
+    with pytest.raises(ValidationError, match="token_span_end cannot be defined without a token_span_start"):
+        MultimodalTokenAnchor(token_span_end=10)
+
+    # Proof: Start >= End
+    with pytest.raises(ValidationError, match="token_span_end MUST be strictly greater than token_span_start"):
+        MultimodalTokenAnchor(token_span_start=5, token_span_end=5)
+
+    # Proof: End defined, Start undefined
+    with pytest.raises(ValidationError, match="token_span_end cannot be defined without a token_span_start"):
+        MultimodalTokenAnchor(token_span_start=None, token_span_end=10)
+
+    # Proof: Both start and end undefined
+    # This hits the 'elif self.token_span_end is not None:' bypass when token_span_start is None
+    # but token_span_end is ALSO None. (Line 60 in state/semantic.py return self)
+    anchor = MultimodalTokenAnchor(token_span_start=None, token_span_end=None)
+    assert anchor.token_span_start is None
+    assert anchor.token_span_end is None
