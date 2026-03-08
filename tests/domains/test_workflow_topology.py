@@ -269,3 +269,44 @@ def test_council_topology_byzantine_slash_requires_escrow() -> None:
     )
     assert topology.council_escrow is not None
     assert topology.council_escrow.escrow_locked_microcents == 5000
+
+
+def test_topology_draft_relaxation_proof() -> None:
+    """Prove that 'draft' topologies permit dangling pointers, but 'live' topologies crash."""
+    nodes = {"did:web:node_1": SystemNode(description="Node 1")}
+
+    # 1. Test DAGTopology Relaxation
+    # Should FAIL when live
+    with pytest.raises(ValidationError, match="does not exist in nodes registry"):
+        DAGTopology(
+            lifecycle_phase="live",
+            nodes=nodes,  # type: ignore
+            edges=[("did:web:node_1", "did:web:ghost_node")],
+            allow_cycles=False,
+        )
+
+    # Should PASS when draft
+    dag_draft = DAGTopology(
+        lifecycle_phase="draft",
+        nodes=nodes,  # type: ignore
+        edges=[("did:web:node_1", "did:web:ghost_node")],
+        allow_cycles=False,
+    )
+    assert dag_draft.edges == [("did:web:node_1", "did:web:ghost_node")]
+
+    # 2. Test CouncilTopology Relaxation
+    # Should FAIL when live
+    with pytest.raises(ValidationError, match="is not in nodes registry"):
+        CouncilTopology(
+            lifecycle_phase="live",
+            nodes=nodes,  # type: ignore
+            adjudicator_id="did:web:ghost_adjudicator",
+        )
+
+    # Should PASS when draft
+    council_draft = CouncilTopology(
+        lifecycle_phase="draft",
+        nodes=nodes,  # type: ignore
+        adjudicator_id="did:web:ghost_adjudicator",
+    )
+    assert council_draft.adjudicator_id == "did:web:ghost_adjudicator"
