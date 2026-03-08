@@ -2341,6 +2341,18 @@
           ],
           "default": null,
           "description": "The pre-flight execution gate forcing agents to mathematically align their latent semantics before participating in the topology."
+        },
+        "council_escrow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EscrowPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The strictly typed mathematical surface area to lock funds specifically for PBFT council execution and slashing."
         }
       },
       "required": [

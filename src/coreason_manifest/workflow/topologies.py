@@ -241,9 +241,7 @@ class CouncilTopology(BaseTopology):
             and self.consensus_policy.quorum_rules is not None
             and self.consensus_policy.quorum_rules.byzantine_action == "slash_escrow"
         ) and (self.council_escrow is None or self.council_escrow.escrow_locked_microcents <= 0):
-            raise ValueError(
-                "Topological Interlock Failed: PBFT with slash_escrow requires a funded council_escrow."
-            )
+            raise ValueError("Topological Interlock Failed: PBFT with slash_escrow requires a funded council_escrow.")
         return self
 
     @model_validator(mode="after")
