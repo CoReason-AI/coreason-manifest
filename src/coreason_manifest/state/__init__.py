@@ -34,6 +34,7 @@ from .events import (
     CausalDirectedEdge,
     FalsificationCondition,
     HardwareEnclaveAttestation,
+    HostSubstrateAttestation,
     HypothesisGenerationEvent,
     InterventionalCausalTask,
     NeuralAuditAttestation,
@@ -56,6 +57,7 @@ from .persistence import (
     ContinuousMutationPolicy,
     GraphFlatteningDirective,
     LakehouseMountConfig,
+    LakehousePersistenceContract,
 )
 from .scratchpad import (
     LatentScratchpadTrace,
@@ -115,9 +117,11 @@ __all__ = [
     "GraphFlatteningDirective",
     "HardwareEnclaveAttestation",
     "HomomorphicEncryptionProfile",
+    "HostSubstrateAttestation",
     "HypothesisGenerationEvent",
     "InterventionalCausalTask",
     "LakehouseMountConfig",
+    "LakehousePersistenceContract",
     "LatentScratchpadTrace",
     "LineageWatermark",
     "MathematicalNotationExtraction",

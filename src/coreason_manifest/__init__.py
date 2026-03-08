@@ -69,6 +69,7 @@ from coreason_manifest.oversight import PredictionMarketPolicy
 from coreason_manifest.oversight.adjudication import AdjudicationRubric, AdjudicationVerdict, GradingCriteria
 from coreason_manifest.oversight.audit import MechanisticAuditContract
 from coreason_manifest.oversight.dlp import (
+    FilesystemIsolationContract,
     InformationFlowPolicy,
     RedactionRule,
     SanitizationAction,
@@ -156,6 +157,7 @@ from coreason_manifest.state.events import (
     EpistemicPromotionEvent,
     FalsificationCondition,
     HardwareEnclaveAttestation,
+    HostSubstrateAttestation,
     HypothesisGenerationEvent,
     NeuralAuditAttestation,
     NormativeDriftEvent,
@@ -179,6 +181,7 @@ from coreason_manifest.state.persistence import (
     ContinuousMutationPolicy,
     GraphFlatteningDirective,
     LakehouseMountConfig,
+    LakehousePersistenceContract,
 )
 from coreason_manifest.state.scratchpad import LatentScratchpadTrace, ThoughtBranch
 from coreason_manifest.state.semantic import (
@@ -393,6 +396,7 @@ __all__ = [
     "FederatedCapabilityAttestation",
     "FederatedDiscoveryProtocol",
     "FederatedStateSnapshot",
+    "FilesystemIsolationContract",
     "FitnessObjective",
     "FormalVerificationContract",
     "GenerativeManifoldSLA",
@@ -406,6 +410,7 @@ __all__ = [
     "HTTPTransportConfig",
     "HardwareEnclaveAttestation",
     "HomomorphicEncryptionProfile",
+    "HostSubstrateAttestation",
     "HumanNode",
     "HypothesisGenerationEvent",
     "HypothesisStake",
@@ -420,6 +425,7 @@ __all__ = [
     "JSONRPCError",
     "JSONRPCErrorResponse",
     "LakehouseMountConfig",
+    "LakehousePersistenceContract",
     "LatentScratchpadTrace",
     "LatentSmoothingProfile",
     "LifecycleTrigger",

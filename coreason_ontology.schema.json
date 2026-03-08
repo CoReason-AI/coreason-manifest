@@ -330,6 +330,19 @@
         "scale_type": {
           "$ref": "#/$defs/ChartAxisScale",
           "description": "The mathematical progression between min and max."
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The physical or statistical unit of measurement corresponding to this spatial axis (e.g., 'months', 'mg/dL', 'log10').",
+          "title": "Unit"
         }
       },
       "required": [
@@ -1338,6 +1351,17 @@
       "additionalProperties": false,
       "description": "Base configuration for any workflow topology.",
       "properties": {
+        "lifecycle_phase": {
+          "default": "live",
+          "description": "The compilation phase of the topology. 'draft' suspends strict Euclidean referential integrity.",
+          "enum": [
+            "draft",
+            "live",
+            "archived"
+          ],
+          "title": "Lifecycle Phase",
+          "type": "string"
+        },
         "nodes": {
           "additionalProperties": {
             "$ref": "#/$defs/AnyNode"
@@ -2419,6 +2443,17 @@
       "additionalProperties": false,
       "description": "A Council workflow topology involving multiple voting members and an adjudicator.",
       "properties": {
+        "lifecycle_phase": {
+          "default": "live",
+          "description": "The compilation phase of the topology. 'draft' suspends strict Euclidean referential integrity.",
+          "enum": [
+            "draft",
+            "live",
+            "archived"
+          ],
+          "title": "Lifecycle Phase",
+          "type": "string"
+        },
         "nodes": {
           "additionalProperties": {
             "$ref": "#/$defs/AnyNode"
@@ -2782,6 +2817,17 @@
       "additionalProperties": false,
       "description": "A Directed Acyclic Graph workflow topology.",
       "properties": {
+        "lifecycle_phase": {
+          "default": "live",
+          "description": "The compilation phase of the topology. 'draft' suspends strict Euclidean referential integrity.",
+          "enum": [
+            "draft",
+            "live",
+            "archived"
+          ],
+          "title": "Lifecycle Phase",
+          "type": "string"
+        },
         "nodes": {
           "additionalProperties": {
             "$ref": "#/$defs/AnyNode"
@@ -2961,6 +3007,17 @@
       "additionalProperties": false,
       "description": "An isolated sandbox graph representing a Digital Twin.",
       "properties": {
+        "lifecycle_phase": {
+          "default": "live",
+          "description": "The compilation phase of the topology. 'draft' suspends strict Euclidean referential integrity.",
+          "enum": [
+            "draft",
+            "live",
+            "archived"
+          ],
+          "title": "Lifecycle Phase",
+          "type": "string"
+        },
         "nodes": {
           "additionalProperties": {
             "$ref": "#/$defs/AnyNode"
@@ -3801,6 +3858,17 @@
       "additionalProperties": false,
       "description": "A formalized Actor-Critic micro-topology enforcing strict, finite generation-evaluation-revision cycles.",
       "properties": {
+        "lifecycle_phase": {
+          "default": "live",
+          "description": "The compilation phase of the topology. 'draft' suspends strict Euclidean referential integrity.",
+          "enum": [
+            "draft",
+            "live",
+            "archived"
+          ],
+          "title": "Lifecycle Phase",
+          "type": "string"
+        },
         "nodes": {
           "additionalProperties": {
             "$ref": "#/$defs/AnyNode"
@@ -3965,6 +4033,17 @@
       "additionalProperties": false,
       "description": "An Evolutionary workflow topology that mutates and breeds agents over generations.",
       "properties": {
+        "lifecycle_phase": {
+          "default": "live",
+          "description": "The compilation phase of the topology. 'draft' suspends strict Euclidean referential integrity.",
+          "enum": [
+            "draft",
+            "live",
+            "archived"
+          ],
+          "title": "Lifecycle Phase",
+          "type": "string"
+        },
         "nodes": {
           "additionalProperties": {
             "$ref": "#/$defs/AnyNode"
@@ -4522,6 +4601,39 @@
       "title": "FederatedStateSnapshot",
       "type": "object"
     },
+    "FilesystemIsolationContract": {
+      "additionalProperties": false,
+      "description": "Declarative cryptographic boundary for host filesystem ingestion.",
+      "properties": {
+        "require_hardware_enclave": {
+          "default": true,
+          "description": "Mandates silicon-level isolation.",
+          "title": "Require Hardware Enclave",
+          "type": "boolean"
+        },
+        "max_symlink_depth": {
+          "description": "Mathematically bounds symlink traversals (0 for true Zero-Trust).",
+          "minimum": 0,
+          "title": "Max Symlink Depth",
+          "type": "integer"
+        },
+        "allowed_mount_paths": {
+          "description": "Explicit allowlist of pre-computed chroot directories.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Allowed Mount Paths",
+          "type": "array"
+        }
+      },
+      "required": [
+        "max_symlink_depth",
+        "allowed_mount_paths"
+      ],
+      "title": "FilesystemIsolationContract",
+      "type": "object"
+    },
     "FitnessObjective": {
       "additionalProperties": false,
       "description": "A specific objective function to optimize within a generation.",
@@ -4974,6 +5086,36 @@
       "title": "HomomorphicEncryptionProfile",
       "type": "object"
     },
+    "HostSubstrateAttestation": {
+      "additionalProperties": false,
+      "properties": {
+        "chroot_jail_hash": {
+          "description": "The SHA-256 hash of the isolated mount namespace.",
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Chroot Jail Hash",
+          "type": "string"
+        },
+        "posix_mode_mask": {
+          "description": "The exact file permission mask read at the moment of ingestion.",
+          "minimum": 0,
+          "title": "Posix Mode Mask",
+          "type": "integer"
+        },
+        "zk_receipt_hash": {
+          "description": "The Content Identifier (CID) for the zkVM proof verifying no path-traversal occurred.",
+          "minLength": 1,
+          "title": "Zk Receipt Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "chroot_jail_hash",
+        "posix_mode_mask",
+        "zk_receipt_hash"
+      ],
+      "title": "HostSubstrateAttestation",
+      "type": "object"
+    },
     "HumanNode": {
       "additionalProperties": false,
       "description": "A node representing a human participant in the workflow.",
@@ -5182,6 +5324,18 @@
           },
           "title": "Latent Firewalls",
           "type": "array"
+        },
+        "filesystem_isolation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FilesystemIsolationContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The strict host-level isolation bounds applied to physical storage."
         }
       },
       "required": [
@@ -5592,6 +5746,43 @@
         "schema_evolution_mode"
       ],
       "title": "LakehouseMountConfig",
+      "type": "object"
+    },
+    "LakehousePersistenceContract": {
+      "additionalProperties": false,
+      "properties": {
+        "contract_id": {
+          "description": "Unique UUID for this specific persistence execution.",
+          "minLength": 1,
+          "title": "Contract Id",
+          "type": "string"
+        },
+        "artifact_event_id": {
+          "description": "The CID of the multimodal graph state that must be persisted.",
+          "title": "Artifact Event Id",
+          "type": "string"
+        },
+        "mount_config": {
+          "$ref": "#/$defs/LakehouseMountConfig",
+          "description": "The target catalog and schema evolution constraints."
+        },
+        "mutation_policy": {
+          "$ref": "#/$defs/ContinuousMutationPolicy",
+          "description": "The declarative backpressure and write paradigm rules."
+        },
+        "flattening_directive": {
+          "$ref": "#/$defs/GraphFlatteningDirective",
+          "description": "The structural mapping rules for flattening the semantic graph into tabular columns."
+        }
+      },
+      "required": [
+        "contract_id",
+        "artifact_event_id",
+        "mount_config",
+        "mutation_policy",
+        "flattening_directive"
+      ],
+      "title": "LakehousePersistenceContract",
       "type": "object"
     },
     "LatentScratchpadTrace": {
@@ -6465,6 +6656,18 @@
           "description": "The UNIX timestamp anchoring the genesis block.",
           "title": "Temporal Ingest Timestamp",
           "type": "number"
+        },
+        "substrate_attestation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HostSubstrateAttestation"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cryptographic ZK receipt of secure file ingestion."
         }
       },
       "required": [
@@ -6896,6 +7099,18 @@
           "default": null,
           "description": "The Event ID of the specific ToolInvocationEvent that spawned this observation, forming a strict bipartite directed edge.",
           "title": "Triggering Invocation Id"
+        },
+        "substrate_attestation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HostSubstrateAttestation"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cryptographic ZK receipt of secure file ingestion."
         }
       },
       "required": [
@@ -7774,6 +7989,17 @@
       "additionalProperties": false,
       "description": "A Secure Multi-Party Computation topology.",
       "properties": {
+        "lifecycle_phase": {
+          "default": "live",
+          "description": "The compilation phase of the topology. 'draft' suspends strict Euclidean referential integrity.",
+          "enum": [
+            "draft",
+            "live",
+            "archived"
+          ],
+          "title": "Lifecycle Phase",
+          "type": "string"
+        },
         "nodes": {
           "additionalProperties": {
             "$ref": "#/$defs/AnyNode"
@@ -8757,6 +8983,14 @@
           },
           "title": "Data Series",
           "type": "array"
+        },
+        "legend_mappings": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "A strict mapping dictionary connecting visual markers identified in the image (e.g., '#FF0000', 'dashed_line') to their explicit semantic labels found in the chart's legend (e.g., 'Placebo Cohort').",
+          "title": "Legend Mappings",
+          "type": "object"
         }
       },
       "required": [
@@ -8890,6 +9124,17 @@
       "additionalProperties": false,
       "description": "A dynamic Swarm workflow topology.",
       "properties": {
+        "lifecycle_phase": {
+          "default": "live",
+          "description": "The compilation phase of the topology. 'draft' suspends strict Euclidean referential integrity.",
+          "enum": [
+            "draft",
+            "live",
+            "archived"
+          ],
+          "title": "Lifecycle Phase",
+          "type": "string"
+        },
         "nodes": {
           "additionalProperties": {
             "$ref": "#/$defs/AnyNode"

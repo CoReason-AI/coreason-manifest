@@ -47,6 +47,7 @@ from coreason_manifest.state.events import (
     SystemFaultEvent,
 )
 from coreason_manifest.state.memory import EpistemicLedger
+from coreason_manifest.state.persistence import LakehousePersistenceContract
 from coreason_manifest.state.semantic import (
     SemanticEdge,
     SemanticNode,
@@ -780,6 +781,7 @@ def draw_digital_twin_topology_payload(
     return st.fixed_dictionaries(
         {
             "type": st.just("digital_twin"),
+            "lifecycle_phase": st.sampled_from(["draft", "live", "archived"]),
             "nodes": st.dictionaries(
                 draw_did_string(),
                 nodes_strategy,
@@ -806,6 +808,7 @@ def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> 
     dag_strategy = st.fixed_dictionaries(
         {
             "type": st.just("dag"),
+            "lifecycle_phase": st.sampled_from(["draft", "live", "archived"]),
             "nodes": st.dictionaries(
                 draw_did_string(),
                 nodes_strategy,
@@ -844,6 +847,7 @@ def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> 
     council_strategy = st.fixed_dictionaries(
         {
             "type": st.just("council"),
+            "lifecycle_phase": st.sampled_from(["draft", "live", "archived"]),
             "nodes": st.dictionaries(
                 draw_did_string(),
                 nodes_strategy,
@@ -865,6 +869,7 @@ def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> 
     swarm_strategy = st.fixed_dictionaries(
         {
             "type": st.just("swarm"),
+            "lifecycle_phase": st.sampled_from(["draft", "live", "archived"]),
             "nodes": st.dictionaries(
                 draw_did_string(),
                 nodes_strategy,
@@ -884,6 +889,7 @@ def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> 
     smpc_strategy = st.fixed_dictionaries(
         {
             "type": st.just("smpc"),
+            "lifecycle_phase": st.sampled_from(["draft", "live", "archived"]),
             "nodes": st.dictionaries(
                 draw_did_string(),
                 nodes_strategy,
@@ -915,6 +921,7 @@ def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> 
     eval_opt_strategy = st.fixed_dictionaries(
         {
             "type": st.just("evaluator_optimizer"),
+            "lifecycle_phase": st.sampled_from(["draft", "live", "archived"]),
             "nodes": st.dictionaries(
                 draw_did_string(),
                 nodes_strategy,
@@ -1452,6 +1459,8 @@ def _local_draw_any_state_event(draw: Any) -> dict[str, Any]:
             payload["sensory_trigger"] = draw(draw_embodied_sensory_vector())
         if event_type == "observation" and draw(st.booleans()):
             payload["triggering_invocation_id"] = draw(st.one_of(st.none(), st.text(min_size=1)))
+        if event_type == "observation" and draw(st.booleans()):
+            payload["substrate_attestation"] = draw(draw_host_substrate_attestation())
         if event_type == "belief_update" and draw(st.booleans()):
             payload["uncertainty_profile"] = draw(draw_cognitive_uncertainty_profile())
         if event_type == "belief_update" and draw(st.booleans()):
@@ -2323,6 +2332,15 @@ def draw_sae_latent_firewall(draw: Any) -> dict[str, Any]:
 
 
 @st.composite
+def draw_filesystem_isolation_contract(draw: Any) -> dict[str, Any]:
+    return {
+        "require_hardware_enclave": draw(st.booleans()),
+        "max_symlink_depth": draw(st.integers(min_value=0, max_value=10)),
+        "allowed_mount_paths": draw(st.lists(st.text(min_size=1), min_size=1, max_size=5)),
+    }
+
+
+@st.composite
 def draw_information_flow_policy(draw: Any) -> dict[str, Any]:
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(
@@ -2332,6 +2350,7 @@ def draw_information_flow_policy(draw: Any) -> dict[str, Any]:
                 "rules": st.lists(draw_redaction_rule(), max_size=100),
                 "semantic_firewall": st.one_of(st.none(), draw_semantic_firewall_policy()),
                 "latent_firewalls": st.lists(draw_sae_latent_firewall(), max_size=10),
+                "filesystem_isolation": st.one_of(st.none(), draw_filesystem_isolation_contract()),
             }
         )
     )
@@ -3194,6 +3213,15 @@ def draw_table_cell(draw: Any, r: int, c: int) -> dict[str, Any]:
 
 
 @st.composite
+def draw_host_substrate_attestation(draw: Any) -> dict[str, Any]:
+    return {
+        "chroot_jail_hash": draw(st.from_regex(r"^[a-f0-9]{64}$", fullmatch=True)),
+        "posix_mode_mask": draw(st.integers(min_value=0, max_value=777)),
+        "zk_receipt_hash": draw(st.text(min_size=1)),
+    }
+
+
+@st.composite
 def draw_tabular_data_extraction(draw: Any) -> dict[str, Any]:
     max_r = draw(st.integers(min_value=1, max_value=3))
     max_c = draw(st.integers(min_value=1, max_value=3))
@@ -3254,3 +3282,45 @@ def test_synthetic_generation_profile_routing() -> None:
 
     parsed = adapter.validate_python(payload)
     assert isinstance(parsed, SyntheticGenerationProfile)
+def draw_lakehouse_persistence_contract(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "contract_id": st.text(min_size=1),
+                "artifact_event_id": st.text(min_size=1),
+                "mount_config": st.fixed_dictionaries(
+                    {
+                        "catalog_uri": st.text(min_size=1),
+                        "table_format": st.sampled_from(["iceberg", "delta", "hudi"]),
+                        "schema_evolution_mode": st.sampled_from(["strict", "additive_only"]),
+                    }
+                ),
+                "mutation_policy": st.fixed_dictionaries(
+                    {
+                        "mutation_paradigm": st.just("append_only"),
+                        "max_uncommitted_rows": st.integers(min_value=1, max_value=10000),
+                        "micro_batch_interval_ms": st.integers(min_value=1),
+                    }
+                ),
+                "flattening_directive": st.fixed_dictionaries(
+                    {
+                        "node_projection_mode": st.sampled_from(["wide_columnar", "struct_array"]),
+                        "edge_projection_mode": st.sampled_from(["adjacency_list", "map_array"]),
+                        "preserve_cryptographic_lineage": st.booleans(),
+                    }
+                ),
+            }
+        )
+    )
+    return res
+
+
+lakehouse_persistence_contract_adapter: TypeAdapter[LakehousePersistenceContract] = TypeAdapter(
+    LakehousePersistenceContract
+)
+
+
+@given(draw_lakehouse_persistence_contract())
+def test_lakehouse_persistence_contract_fuzzing(payload: dict[str, Any]) -> None:
+    parsed = lakehouse_persistence_contract_adapter.validate_python(payload)
+    assert isinstance(parsed, LakehousePersistenceContract)
