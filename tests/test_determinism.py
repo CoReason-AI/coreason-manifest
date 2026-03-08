@@ -29,6 +29,21 @@ from coreason_manifest.workflow.nodes import AgentNode, CompositeNode
 from coreason_manifest.workflow.topologies import DAGTopology, EvolutionaryTopology, SwarmTopology
 
 
+def test_compute_topology_hash_determinism() -> None:
+    from coreason_manifest.workflow.nodes import SystemNode
+    from coreason_manifest.workflow.topologies import DAGTopology, compute_topology_hash
+
+    node1 = SystemNode(description="Determinism Test")
+    topology_a = DAGTopology(nodes={"did:web:node_1": node1}, allow_cycles=False)
+    topology_b = DAGTopology(nodes={"did:web:node_1": node1}, allow_cycles=False)
+
+    hash_a = compute_topology_hash(topology_a)
+    hash_b = compute_topology_hash(topology_b)
+
+    assert hash_a == hash_b
+    assert len(hash_a) == 64
+
+
 def test_composite_node_determinism() -> None:
     # Encapsulated swarm topology
     swarm_top1 = SwarmTopology(

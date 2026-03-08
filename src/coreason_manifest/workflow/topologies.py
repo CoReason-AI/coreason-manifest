@@ -10,6 +10,7 @@ These schemas dictate the multi-agent graph geometry and decentralized routing m
 execution code or synchronous blocking loops. Think purely in terms of graph theory, Byzantine fault tolerance, and
 multi-agent market dynamics."""
 
+import hashlib
 from typing import Annotated, Any, Literal, Self
 
 from pydantic import Field, model_validator
@@ -422,3 +423,10 @@ type AnyTopology = Annotated[
     | DigitalTwinTopology,
     Field(discriminator="type", description="A discriminated union of workflow topologies."),
 ]
+
+
+def compute_topology_hash(topology: "AnyTopology") -> str:
+    """
+    Deterministically computes the SOTA Merkle-DAG SHA-256 fingerprint of a given topology.
+    """
+    return hashlib.sha256(topology.model_dump_canonical()).hexdigest()

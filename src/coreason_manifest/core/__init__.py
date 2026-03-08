@@ -15,6 +15,7 @@ from .primitives import (
     SemanticVersion,
     SystemRole,
     ToolID,
+    TopologyHash,
 )
 
 __all__ = [
@@ -27,4 +28,5 @@ __all__ = [
     "SemanticVersion",
     "SystemRole",
     "ToolID",
+    "TopologyHash",
 ]
