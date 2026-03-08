@@ -166,6 +166,18 @@ def draw_latent_scratchpad_trace(draw: Any) -> dict[str, Any]:
 
 
 @st.composite
+def draw_anchoring_policy(draw: Any) -> dict[str, Any]:
+    return draw(
+        st.fixed_dictionaries(
+            {
+                "anchor_prompt_hash": st.from_regex(r"^[a-f0-9]{64}$", fullmatch=True),
+                "max_semantic_drift": st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False),
+            }
+        )
+    )
+
+
+@st.composite
 def draw_reflex_policy(draw: Any) -> dict[str, Any]:
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(
@@ -554,6 +566,8 @@ def draw_agent_node_payload(draw: Any) -> dict[str, Any]:
         payload["epistemic_policy"] = draw(draw_epistemic_policy())
     if draw(st.booleans()):
         payload["correction_policy"] = draw(draw_correction_policy())
+    if draw(st.booleans()):
+        payload["anchoring_policy"] = draw(draw_anchoring_policy())
     if draw(st.booleans()):
         payload["domain_extensions"] = draw(draw_domain_extensions())
     return payload

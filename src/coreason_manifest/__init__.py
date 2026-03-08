@@ -69,6 +69,7 @@ from coreason_manifest.oversight.dlp import (
     SemanticFirewallPolicy,
 )
 from coreason_manifest.oversight.governance import (
+    AnchoringPolicy,
     ConsensusPolicy,
     ConstitutionalRule,
     FormalVerificationContract,
@@ -249,6 +250,7 @@ __all__ = [
     "AgentNode",
     "AmbientSignal",
     "AnalogicalMappingTask",
+    "AnchoringPolicy",
     "AnyIntent",
     "AnyInterventionPayload",
     "AnyNode",
