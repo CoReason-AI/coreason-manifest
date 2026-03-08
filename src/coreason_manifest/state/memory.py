@@ -27,6 +27,20 @@ from coreason_manifest.state.differentials import (
 from coreason_manifest.state.events import AnyStateEvent
 
 
+class CrystallizationPolicy(CoreasonBaseModel):
+    min_observations_required: int = Field(
+        ge=10, description="The minimum number of episodic logs needed to statistically prove a crystallized rule."
+    )
+    aleatoric_entropy_threshold: float = Field(
+        le=0.1,
+        description="The entropy variance must fall below this mathematical threshold "
+        "to prove absolute certainty before compression is authorized.",
+    )
+    target_memory_tier: Literal["semantic", "working"] = Field(
+        description="The destination tier where the compressed rule will be stored."
+    )
+
+
 class EvictionPolicy(CoreasonBaseModel):
     strategy: Literal["fifo", "salience_decay", "summarize"] = Field(
         description="The mathematical heuristic used to select which semantic memories are retracted or compressed."
@@ -70,6 +84,10 @@ class EpistemicLedger(CoreasonBaseModel):
     active_cascades: list[DefeasibleCascade] = Field(
         default_factory=list,
         description="The active state-differential payload muting specific causal subgraphs due to falsification.",
+    )
+    crystallization_policy: CrystallizationPolicy | None = Field(
+        default=None,
+        description="The mathematical threshold required to compress episodic observations into semantic rules.",
     )
 
     @model_validator(mode="after")

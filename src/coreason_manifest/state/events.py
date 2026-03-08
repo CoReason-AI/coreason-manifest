@@ -340,6 +340,21 @@ class CounterfactualRegretEvent(BaseStateEvent):
     )
 
 
+class EpistemicPromotionEvent(BaseStateEvent):
+    type: Literal["epistemic_promotion"] = Field(
+        default="epistemic_promotion", description="Discriminator type for an epistemic promotion event."
+    )
+    source_episodic_event_ids: list[str] = Field(
+        description="A list of CIDs (Content Identifiers) representing the raw logs being compressed and archived."
+    )
+    crystallized_semantic_node_id: str = Field(
+        description="The resulting permanent W3C DID / CID of the newly minted knowledge node."
+    )
+    compression_ratio: float = Field(
+        description="A mathematical proof of the token savings achieved (e.g., old_token_count / new_token_count)."
+    )
+
+
 # =========================================================================
 # AGENT INSTRUCTION: WARNING - POLYMORPHIC ROUTER
 # If you create a new class above, you MUST append it to the AnyStateEvent union below.
@@ -354,6 +369,7 @@ type AnyStateEvent = Annotated[
     | HypothesisGenerationEvent
     | BargeInInterruptEvent
     | CounterfactualRegretEvent
-    | ToolInvocationEvent,
+    | ToolInvocationEvent
+    | EpistemicPromotionEvent,
     Field(discriminator="type", description="A discriminated union of state events."),
 ]
