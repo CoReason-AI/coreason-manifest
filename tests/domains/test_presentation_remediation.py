@@ -31,7 +31,7 @@ def test_generate_correction_prompt_translation() -> None:
 
     # Test missing field (triggering the "missing" branch)
     try:
-        MockStrictSchema(name="Bob")
+        MockStrictSchema.model_validate({"name": "Bob"})
         pytest.fail("Should have raised ValidationError")
     except ValidationError as e:
         prompt = generate_correction_prompt(error=e, target_node_id="did:web:node-1", fault_id="fault-002")
