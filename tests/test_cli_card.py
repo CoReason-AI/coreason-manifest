@@ -18,10 +18,15 @@ def test_card_valid_envelope(tmp_path: Path, capsys: pytest.CaptureFixture[str])
             "justification": "Ensures deterministic token bounds.",
             "nodes": {
                 "did:web:agent-1": {
-                    "type": "system",
+                    "type": "agent",
                     "description": "Extractor",
                     "architectural_intent": "Parse PDF",
                     "justification": "Required for preprocessing.",
+                    "agent_attestation": {
+                        "training_lineage_hash": "a" * 64,
+                        "developer_signature": "sig",
+                        "capability_merkle_root": "b" * 64,
+                    },
                 }
             },
             "edges": [],
