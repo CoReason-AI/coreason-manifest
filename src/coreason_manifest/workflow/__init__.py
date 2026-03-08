@@ -43,6 +43,11 @@ from .nodes import (
     System1Reflex,
     SystemNode,
 )
+from .routing import (
+    BypassReceipt,
+    DynamicRoutingManifest,
+    GlobalSemanticProfile,
+)
 from .topologies import (
     AnyTopology,
     BackpressurePolicy,
@@ -71,16 +76,19 @@ __all__ = [
     "BaseNode",
     "BaseTopology",
     "BilateralSLA",
+    "BypassReceipt",
     "CompositeNode",
     "CouncilTopology",
     "CrossSwarmHandshake",
     "DAGTopology",
     "DimensionalProjectionContract",
     "DiversityConstraint",
+    "DynamicRoutingManifest",
     "EpistemicScanner",
     "EscrowPolicy",
     "EvolutionaryTopology",
     "FederatedDiscoveryProtocol",
+    "GlobalSemanticProfile",
     "HumanNode",
     "HypothesisStake",
     "InputMapping",

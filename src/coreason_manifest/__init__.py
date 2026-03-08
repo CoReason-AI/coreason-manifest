@@ -237,6 +237,11 @@ from coreason_manifest.workflow.nodes import (
     System1Reflex,
     SystemNode,
 )
+from coreason_manifest.workflow.routing import (
+    BypassReceipt,
+    DynamicRoutingManifest,
+    GlobalSemanticProfile,
+)
 from coreason_manifest.workflow.topologies import (
     AnyTopology,
     BackpressurePolicy,
@@ -296,6 +301,7 @@ __all__ = [
     "BoundedJSONRPCRequest",
     "BoundingBox",
     "BrowserDOMState",
+    "BypassReceipt",
     "CausalAttribution",
     "CausalDirectedEdge",
     "CausalInterval",
@@ -330,6 +336,7 @@ __all__ = [
     "DraftingIntent",
     "DynamicConvergenceSLA",
     "DynamicLayoutTemplate",
+    "DynamicRoutingManifest",
     "EmbodiedSensoryVector",
     "EncodingChannel",
     "EpistemicCompressionSLA",
@@ -360,6 +367,7 @@ __all__ = [
     "FormalVerificationContract",
     "GitSHA",
     "GlobalGovernance",
+    "GlobalSemanticProfile",
     "GovernancePolicy",
     "GradingCriteria",
     "GrammarPanel",
