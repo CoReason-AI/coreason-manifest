@@ -51,6 +51,10 @@ from coreason_manifest.state.semantic import (
     SemanticEdge,
     SemanticNode,
 )
+from coreason_manifest.state.vision import (
+    DocumentLayoutAnalysis,
+    TabularDataExtraction,
+)
 from coreason_manifest.telemetry.custody import CustodyRecord
 from coreason_manifest.telemetry.schemas import TraceExportBatch
 from coreason_manifest.testing.chaos import ChaosExperiment
@@ -2973,3 +2977,91 @@ def test_mcp_server_config_http_routing(payload: dict[str, Any]) -> None:
     assert isinstance(parsed, MCPServerConfig)
     assert isinstance(parsed.transport, HTTPTransportConfig)
     assert parsed.transport.type == "http"
+
+
+@st.composite
+def draw_document_layout_block(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "block_id": st.text(min_size=1),
+                "block_type": st.sampled_from(
+                    ["header", "paragraph", "figure", "table", "footnote", "caption", "equation"]
+                ),
+                "anchor": draw_multimodal_token_anchor(),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_document_layout_analysis(draw: Any) -> dict[str, Any]:
+    blocks = draw(st.lists(draw_document_layout_block(), min_size=1, max_size=5, unique_by=lambda b: b["block_id"]))
+    blocks_dict = {block["block_id"]: block for block in blocks}
+    block_ids = list(blocks_dict.keys())
+
+    # Generate acyclic edges by only allowing edges from lower index to higher index
+    edges = []
+    if len(block_ids) > 1:
+        num_edges = draw(st.integers(min_value=0, max_value=len(block_ids) - 1))
+        for _ in range(num_edges):
+            i = draw(st.integers(min_value=0, max_value=len(block_ids) - 2))
+            j = draw(st.integers(min_value=i + 1, max_value=len(block_ids) - 1))
+            edges.append((block_ids[i], block_ids[j]))
+
+    res: dict[str, Any] = {
+        "blocks": blocks_dict,
+        "reading_order_edges": edges,
+    }
+    return res
+
+
+document_layout_analysis_adapter: TypeAdapter[DocumentLayoutAnalysis] = TypeAdapter(DocumentLayoutAnalysis)
+
+
+@given(draw_document_layout_analysis())
+def test_document_layout_analysis_fuzzing(payload: dict[str, Any]) -> None:
+    parsed = document_layout_analysis_adapter.validate_python(payload)
+    assert isinstance(parsed, DocumentLayoutAnalysis)
+
+
+@st.composite
+def draw_table_cell(draw: Any, r: int, c: int) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "row_index": st.just(r),
+                "col_index": st.just(c),
+                "row_span": st.just(1),
+                "col_span": st.just(1),
+                "content": st.text(),
+                "anchor": draw_multimodal_token_anchor(),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_tabular_data_extraction(draw: Any) -> dict[str, Any]:
+    max_r = draw(st.integers(min_value=1, max_value=3))
+    max_c = draw(st.integers(min_value=1, max_value=3))
+
+    cells: list[Any] = []
+    for r in range(max_r):
+        cells.extend(draw_table_cell(r=r, c=c) for c in range(max_c) if draw(st.booleans()))
+
+    res: dict[str, Any] = {
+        "cells": [draw(cell) for cell in cells],
+    }
+    return res
+
+
+tabular_data_extraction_adapter: TypeAdapter[TabularDataExtraction] = TypeAdapter(TabularDataExtraction)
+
+
+@given(draw_tabular_data_extraction())
+def test_tabular_data_extraction_fuzzing(payload: dict[str, Any]) -> None:
+    parsed = tabular_data_extraction_adapter.validate_python(payload)
+    assert isinstance(parsed, TabularDataExtraction)

@@ -192,6 +192,15 @@ from coreason_manifest.state.semantic import (
     VectorEmbedding,
 )
 from coreason_manifest.state.toolchains import AnyToolchainState, BrowserDOMState, TerminalBufferState
+from coreason_manifest.state.vision import (
+    AffineTransformMatrix,
+    DocumentLayoutAnalysis,
+    DocumentLayoutBlock,
+    MathematicalNotationExtraction,
+    StatisticalChartExtraction,
+    TableCell,
+    TabularDataExtraction,
+)
 from coreason_manifest.telemetry.custody import CustodyRecord, ExecutionNode, TamperError
 from coreason_manifest.telemetry.schemas import (
     ExecutionSpan,
@@ -262,6 +271,7 @@ __all__ = [
     "AdjudicationRubric",
     "AdjudicationVerdict",
     "AdversarialSimulationProfile",
+    "AffineTransformMatrix",
     "AgentAttestation",
     "AgentBid",
     "AgentNode",
@@ -327,6 +337,8 @@ __all__ = [
     "DistributionProfile",
     "DistributionType",
     "DiversityConstraint",
+    "DocumentLayoutAnalysis",
+    "DocumentLayoutBlock",
     "DraftingIntent",
     "DynamicConvergenceSLA",
     "DynamicLayoutTemplate",
@@ -396,6 +408,7 @@ __all__ = [
     "MacroGrid",
     "MarkType",
     "MarketResolution",
+    "MathematicalNotationExtraction",
     "MechanisticAuditContract",
     "MemoryProvenance",
     "MemoryTier",
@@ -458,6 +471,7 @@ __all__ = [
     "StateContract",
     "StateDiff",
     "StatePatch",
+    "StatisticalChartExtraction",
     "StdioTransportConfig",
     "SteadyStateHypothesis",
     "StructuralCausalModel",
@@ -467,6 +481,8 @@ __all__ = [
     "SystemFaultEvent",
     "SystemNode",
     "SystemRole",
+    "TableCell",
+    "TabularDataExtraction",
     "TamperError",
     "TaskAnnouncement",
     "TaskAward",
