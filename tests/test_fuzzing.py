@@ -1569,6 +1569,23 @@ def draw_mcp_capability_whitelist(draw: Any) -> dict[str, Any]:
 
 
 @st.composite
+def draw_http_transport_config(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "type": st.just("http"),
+                # Force a structurally valid HttpUrl to bypass basic validation and test deep nesting
+                "uri": st.sampled_from(
+                    ["http://localhost:8080", "https://api.coreason.ai/mcp", "https://10.0.0.1/rpc"]
+                ),
+                "headers": st.dictionaries(st.text(), st.text()),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
 def draw_mcp_server_manifest(draw: Any) -> dict[str, Any]:
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(

@@ -7,6 +7,7 @@
 
 from coreason_manifest.adapters.mcp.schemas import (
     BoundedJSONRPCRequest,
+    HTTPTransportConfig,
     JSONRPCError,
     JSONRPCErrorResponse,
     MCPCapabilityWhitelist,
@@ -343,6 +344,7 @@ __all__ = [
     "GovernancePolicy",
     "GradingCriteria",
     "GrammarPanel",
+    "HTTPTransportConfig",
     "HardwareEnclaveAttestation",
     "HomomorphicEncryptionProfile",
     "HumanNode",

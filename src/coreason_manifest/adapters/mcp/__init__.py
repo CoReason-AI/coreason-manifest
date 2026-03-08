@@ -6,6 +6,7 @@
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
 from coreason_manifest.adapters.mcp.schemas import (
+    HTTPTransportConfig,
     MCPPromptRef,
     MCPResourceList,
     MCPServerConfig,
@@ -15,6 +16,7 @@ from coreason_manifest.adapters.mcp.schemas import (
 )
 
 __all__ = [
+    "HTTPTransportConfig",
     "MCPPromptRef",
     "MCPResourceList",
     "MCPServerConfig",
