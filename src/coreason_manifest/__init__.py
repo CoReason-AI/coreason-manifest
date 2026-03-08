@@ -456,3 +456,21 @@ __all__ = [
     "WorkingMemorySnapshot",
     "ZeroKnowledgeProof",
 ]
+
+
+def _rebuild_ontology() -> None:
+    """
+    Dynamically resolves all Pydantic forward references strictly at the end of module initialization.
+    This prevents circular import death spirals by guaranteeing the entire ontology is loaded
+    into sys.modules before compilation begins.
+    """
+    import typing
+
+    for _name in __all__:
+        _obj = globals().get(_name)
+        if isinstance(_obj, type) and issubclass(_obj, CoreasonBaseModel) and _obj is not CoreasonBaseModel:
+            typing.cast("type[CoreasonBaseModel]", _obj).model_rebuild()
+
+
+# Execute immediately upon module load
+_rebuild_ontology()
