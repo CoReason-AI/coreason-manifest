@@ -90,6 +90,16 @@ class AuctionState(CoreasonBaseModel):
         default=None, description="The final cryptographic receipt of the auction, if resolved."
     )
 
+    clearing_timeout: int = Field(gt=0, description="Maximum wait time for auction settlement.")
+    """
+    MATHEMATICAL BOUNDARY: Must be > 0. Defines the absolute execution ceiling before forced timeout.
+    """
+
+    minimum_tick_size: float = Field(gt=0.0, description="The smallest allowable bid increment.")
+    """
+    MATHEMATICAL BOUNDARY: Must be > 0.0. Negative or zero tick sizes will instantly trigger validation faults.
+    """
+
     @model_validator(mode="after")
     def sort_bids(self) -> Self:
         """Mathematically sort bids by agent_id for deterministic hashing."""

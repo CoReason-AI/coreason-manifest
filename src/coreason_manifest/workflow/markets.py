@@ -10,11 +10,30 @@ These schemas dictate the multi-agent graph geometry and decentralized routing m
 execution code or synchronous blocking loops. Think purely in terms of graph theory, Byzantine fault tolerance, and
 multi-agent market dynamics."""
 
-from typing import Annotated
+from typing import Annotated, Self
 
-from pydantic import Field, StringConstraints
+from pydantic import Field, StringConstraints, model_validator
 
 from coreason_manifest.core.base import CoreasonBaseModel
+
+
+class MarketContract(CoreasonBaseModel):
+    minimum_collateral: float = Field(ge=0.0, description="The minimum amount of token collateral held in escrow.")
+    """
+    MATHEMATICAL BOUNDARY: Must be >= 0.0. Downstream agents must secure this collateral before execution.
+    """
+
+    slashing_penalty: float = Field(ge=0.0, description="The exact token amount slashed for Byzantine faults.")
+    """
+    MATHEMATICAL BOUNDARY: Must be >= 0.0 AND mathematically less than or equal to minimum_collateral.
+    """
+
+    @model_validator(mode="after")
+    def _enforce_economic_escrow_invariant(self) -> Self:
+        """Mathematically prove that a contract cannot penalize more than the escrowed amount."""
+        if self.slashing_penalty > self.minimum_collateral:
+            raise ValueError("ECONOMIC INVARIANT VIOLATION: slashing_penalty cannot exceed minimum_collateral.")
+        return self
 
 
 class HypothesisStake(CoreasonBaseModel):
