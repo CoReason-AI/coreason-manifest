@@ -35,6 +35,7 @@ from coreason_manifest.presentation.intents import (
     DraftingIntent,
     EscalationIntent,
     InformationalIntent,
+    RectifiedSignalTrace,
 )
 from coreason_manifest.presentation.scivis import AnyPanel, GrammarPanel, InsightCard
 from coreason_manifest.state.argumentation import ArgumentGraph
@@ -65,6 +66,65 @@ from coreason_manifest.workflow.envelope import WorkflowEnvelope
 from coreason_manifest.workflow.nodes import AgentNode, AnyNode, CompositeNode, HumanNode, SystemNode
 from coreason_manifest.workflow.routing import DynamicRoutingManifest
 from coreason_manifest.workflow.topologies import AnyTopology, OntologicalHandshake, StateContract
+
+
+def test_rectified_signal_trace_confidence_bounds() -> None:
+    """Ensure automated immune system rejects out-of-bounds confidence."""
+    with pytest.raises(ValidationError):
+        RectifiedSignalTrace(
+            stochastic_entropy_input="make it faster",
+            canonical_projection={"urn": "speed_up"},
+            semantic_shift_dictionary={"faster": "speed_up"},
+            rectification_confidence=1.01,  # Out of bounds
+        )
+
+    with pytest.raises(ValidationError):
+        RectifiedSignalTrace(
+            stochastic_entropy_input="make it faster",
+            canonical_projection={"urn": "speed_up"},
+            semantic_shift_dictionary={"faster": "speed_up"},
+            rectification_confidence=-0.01,  # Out of bounds
+        )
+
+
+def test_rectified_signal_trace_canonical_depth() -> None:
+    """Ensure automated immune system rejects recursive JSON bombs."""
+    deep_payload = {"level_1": {"level_2": {"level_3": {"level_4": {"level_5": {"level_6": "bomb"}}}}}}
+    with pytest.raises(ValidationError, match=r"Canonical projection exceeds maximum allowed nesting depth of 5\."):
+        RectifiedSignalTrace(
+            stochastic_entropy_input="stochastic payload",
+            canonical_projection=deep_payload,
+            semantic_shift_dictionary={},
+            rectification_confidence=0.99,
+        )
+
+    with pytest.raises(ValidationError, match=r"Canonical projection dictionary keys must be strings\."):
+        RectifiedSignalTrace(
+            stochastic_entropy_input="stochastic payload",
+            canonical_projection={1: "not a string"},
+            semantic_shift_dictionary={},
+            rectification_confidence=0.99,
+        )
+
+    class InvalidType:
+        pass
+
+    with pytest.raises(ValidationError, match=r"Invalid leaf node type in canonical projection:"):
+        RectifiedSignalTrace(
+            stochastic_entropy_input="stochastic payload",
+            canonical_projection=InvalidType(),
+            semantic_shift_dictionary={},
+            rectification_confidence=0.99,
+        )
+
+    # Lists
+    with pytest.raises(ValidationError, match=r"Canonical projection exceeds maximum allowed nesting depth of 5\."):
+        RectifiedSignalTrace(
+            stochastic_entropy_input="stochastic payload",
+            canonical_projection=[[[[[["bomb"]]]]]],
+            semantic_shift_dictionary={},
+            rectification_confidence=0.99,
+        )
 
 
 @st.composite

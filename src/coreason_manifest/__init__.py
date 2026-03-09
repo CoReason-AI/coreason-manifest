@@ -112,6 +112,7 @@ from coreason_manifest.presentation.intents import (
     FYIIntent,
     InformationalIntent,
     PresentationEnvelope,
+    RectifiedSignalTrace,
 )
 from coreason_manifest.presentation.remediation import System2RemediationPrompt
 from coreason_manifest.presentation.scivis import (
@@ -486,6 +487,7 @@ __all__ = [
     "QuarantineOrder",
     "QuorumPolicy",
     "RateCard",
+    "RectifiedSignalTrace",
     "RedactionRule",
     "RiskLevel",
     "RollbackRequest",
