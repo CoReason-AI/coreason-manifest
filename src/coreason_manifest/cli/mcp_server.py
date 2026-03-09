@@ -143,13 +143,18 @@ def _global_error_handler_shield() -> None:
     import anyio
     from mcp import types
 
+    MAX_PAYLOAD_BYTES = 5_000_000  # noqa: N806
+
     @asynccontextmanager
     async def safe_stdio_server(
         stdin: anyio.AsyncFile[str] | None = None,
         stdout: anyio.AsyncFile[str] | None = None,
     ) -> Any:
+        # Get the underlying raw buffer if not explicitly mocked
+        raw_stdin = sys.stdin.buffer if stdin is None else getattr(stdin, "_raw_buffer", sys.stdin.buffer)
+
         if not stdin:  # pragma: no cover
-            stdin = anyio.wrap_file(TextIOWrapper(sys.stdin.buffer, encoding="utf-8"))
+            stdin = anyio.wrap_file(TextIOWrapper(raw_stdin, encoding="utf-8"))
         if not stdout:  # pragma: no cover
             stdout = anyio.wrap_file(TextIOWrapper(sys.stdout.buffer, encoding="utf-8"))
 
@@ -159,13 +164,21 @@ def _global_error_handler_shield() -> None:
         async def stdin_reader() -> None:
             try:
                 async with read_stream_writer:
-                    async for line in stdin:
+                    while True:
+                        # DECLARATIVE GUILLOTINE: We enforce a physically bounded read at the OS/buffer level.
+                        # This mathematically prevents unbounded buffer allocation during the read phase.
+                        raw_line = await anyio.to_thread.run_sync(raw_stdin.readline, MAX_PAYLOAD_BYTES + 1)
+
+                        if not raw_line:
+                            break  # EOF reached safely
+
                         # THE JSON-BOMB PRE-PARSING LOCK
-                        if len(line) > 5_000_000:  # pragma: no cover
-                            # Reject explicitly without trying to decode
-                            logger.error("JSON Bomb detected! Line length > 5MB")
+                        if len(raw_line) > MAX_PAYLOAD_BYTES:  # pragma: no cover
+                            logger.error("JSON Bomb detected! Payload length > 5MB limit without delimiter.")
                             await read_stream_writer.send(Exception("Parse error: Payload length exceeds 5MB limit."))
-                            continue
+                            break  # Sever the transport connection; do not attempt to process further
+
+                        line = raw_line.decode("utf-8")
 
                         try:
                             # 1. Manual parsing step for RFC strict error mapping

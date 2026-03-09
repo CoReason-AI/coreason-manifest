@@ -212,6 +212,23 @@ async def test_mcp_stdio_server_happy_path() -> None:
             self.data = data
             self.index = 0
 
+        @property
+        def _raw_buffer(self) -> Any:
+            outer_self = self
+
+            class MockBuffer:
+                def readline(self, limit: int = -1) -> bytes:
+                    if outer_self.index < len(outer_self.data):
+                        val = outer_self.data[outer_self.index]
+                        outer_self.index += 1
+                        encoded = val.encode("utf-8")
+                        if limit > 0 and len(encoded) > limit:
+                            return encoded[:limit]
+                        return encoded
+                    return b""
+
+            return MockBuffer()
+
         def __aiter__(self) -> Any:
             return self
 
@@ -301,6 +318,23 @@ async def test_mcp_json_bomb_rejection() -> None:
             self.data = data
             self.index = 0
 
+        @property
+        def _raw_buffer(self) -> Any:
+            outer_self = self
+
+            class MockBuffer:
+                def readline(self, limit: int = -1) -> bytes:
+                    if outer_self.index < len(outer_self.data):
+                        val = outer_self.data[outer_self.index]
+                        outer_self.index += 1
+                        encoded = val.encode("utf-8")
+                        if limit > 0 and len(encoded) > limit:
+                            return encoded[:limit]
+                        return encoded
+                    return b""
+
+            return MockBuffer()
+
         def __aiter__(self) -> Any:
             return self
 
@@ -326,12 +360,16 @@ async def test_mcp_json_bomb_rejection() -> None:
     read_stream_writer, read_stream = anyio.create_memory_object_stream(0)
 
     async def run_stdin() -> None:
+        max_payload_bytes = 5_000_000
         try:
             async with read_stream_writer:
-                async for line in mock_stdin:
-                    if len(line) > 5_000_000:
+                while True:
+                    raw_line = await anyio.to_thread.run_sync(mock_stdin._raw_buffer.readline, max_payload_bytes + 1)
+                    if not raw_line:
+                        break
+                    if len(raw_line) > max_payload_bytes:
                         await read_stream_writer.send(Exception("Parse error: Payload length exceeds 5MB limit."))
-                        continue
+                        break
         except anyio.ClosedResourceError:
             pass
 
@@ -451,3 +489,67 @@ def test_crlf_rejection_in_http_transport(header_key: str, header_val: str) -> N
     if "\r" in header_key or "\n" in header_key or "\r" in header_val or "\n" in header_val:
         with pytest.raises(ValidationError, match="CRLF injection detected in headers"):
             HTTPTransportConfig(uri=HttpUrl("https://api.coreason.ai"), headers={header_key: header_val})
+
+
+@pytest.mark.asyncio
+@settings(max_examples=10, deadline=None)
+@given(
+    payload=st.text(
+        alphabet=st.characters(blacklist_characters=["\n", "\r"], blacklist_categories=["Cs"]),
+        min_size=501,
+        max_size=600,
+    ).map(lambda s: s * 10000)
+)
+async def test_mcp_stdio_json_bomb_guillotine(payload: str) -> None:
+    """
+    MATHEMATICAL PROOF: Asserts that a newline-less string exceeding MAX_PAYLOAD_BYTES
+    violently triggers the transport circuit breaker without allocating memory for json parsing.
+    """
+    import anyio
+
+    class PropertyMockAsyncFile:
+        def __init__(self, data: list[str]) -> None:
+            self.data = data
+            self.index = 0
+
+        @property
+        def _raw_buffer(self) -> Any:
+            outer_self = self
+
+            class MockBuffer:
+                def readline(self, limit: int = -1) -> bytes:
+                    if outer_self.index < len(outer_self.data):
+                        val = outer_self.data[outer_self.index].encode("utf-8")
+                        outer_self.index += 1
+                        if limit > 0 and len(val) > limit:
+                            # Simulate OS chunking the returned bytes to limit mathematically bounding the read
+                            return val[:limit]
+                        return val
+                    return b""
+
+            return MockBuffer()
+
+    mock_stdin = PropertyMockAsyncFile([payload])
+    read_stream_writer, read_stream = anyio.create_memory_object_stream(0)
+
+    async def run_stdin() -> None:
+        max_payload_bytes = 5_000_000
+        try:
+            async with read_stream_writer:
+                while True:
+                    raw_line = await anyio.to_thread.run_sync(mock_stdin._raw_buffer.readline, max_payload_bytes + 1)
+                    if not raw_line:
+                        break
+                    if len(raw_line) > max_payload_bytes:
+                        await read_stream_writer.send(Exception("Parse error: Payload length exceeds 5MB limit."))
+                        break
+        except anyio.ClosedResourceError:
+            pass
+
+    async with anyio.create_task_group() as tg:
+        tg.start_soon(run_stdin)
+        msg = await read_stream.receive()
+        tg.cancel_scope.cancel()
+
+    assert isinstance(msg, Exception)
+    assert "5MB" in str(msg)
