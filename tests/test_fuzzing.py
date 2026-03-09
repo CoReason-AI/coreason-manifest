@@ -3210,9 +3210,7 @@ def draw_n_dimensional_tensor_manifest(draw: Any) -> dict[str, Any]:
     dtype = TensorDType(dtype_str)
 
     shape_length = draw(st.integers(min_value=1, max_value=5))
-    shape = draw(
-        st.tuples(*(st.integers(min_value=1, max_value=4096) for _ in range(shape_length)))
-    )
+    shape = draw(st.tuples(*(st.integers(min_value=1, max_value=4096) for _ in range(shape_length))))
     calculated_bytes = math.prod(shape) * dtype.bytes_per_element
 
     res: dict[str, Any] = {
