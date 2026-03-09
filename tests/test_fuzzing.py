@@ -2099,6 +2099,13 @@ def draw_multimodal_token_anchor(draw: Any) -> dict[str, Any]:
                         st.floats(allow_nan=False, allow_infinity=False),
                         st.floats(allow_nan=False, allow_infinity=False),
                         st.floats(allow_nan=False, allow_infinity=False),
+                    ).map(
+                        lambda bbox: (
+                            min(bbox[0], bbox[2]),
+                            min(bbox[1], bbox[3]),
+                            max(bbox[0], bbox[2]),
+                            max(bbox[1], bbox[3]),
+                        )
                     ),
                 ),
                 "block_type": st.one_of(
@@ -2168,8 +2175,10 @@ def draw_epistemic_transmutation_task(draw: Any) -> dict[str, Any]:
                 st.none(),
                 st.fixed_dictionaries(
                     {
-                        "baseline_importance": st.floats(allow_nan=False, allow_infinity=False),
-                        "decay_rate": st.floats(allow_nan=False, allow_infinity=False),
+                        "baseline_importance": st.floats(
+                            min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False
+                        ),
+                        "decay_rate": st.floats(min_value=0.0, allow_nan=False, allow_infinity=False),
                     }
                 ),
             ),
