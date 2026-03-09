@@ -10,7 +10,7 @@ These schemas represent the append-only cognitive ledger of the swarm. YOU ARE E
 mutable state loops, standard CRUD database paradigms, or downstream business logic. Focus purely on cryptographic
 event sourcing, hardware attestations, and non-monotonic belief updates."""
 
-from typing import Any, Literal, Self
+from typing import Literal, Self
 
 from pydantic import Field, model_validator
 
@@ -136,7 +136,7 @@ class TemporalBounds(CoreasonBaseModel):
     )
 
     @model_validator(mode="after")
-    def validate_temporal_bounds(self) -> Any:
+    def validate_temporal_bounds(self) -> Self:
         if self.valid_from is not None and self.valid_to is not None and self.valid_to < self.valid_from:
             raise ValueError("valid_to cannot be before valid_from")
         return self
@@ -181,8 +181,10 @@ class MemoryProvenance(CoreasonBaseModel):
 
 
 class SalienceProfile(CoreasonBaseModel):
-    baseline_importance: float = Field(description="The starting importance score of this memory from 0.0 to 1.0.")
-    decay_rate: float = Field(description="The rate at which this memory's relevance decays over time.")
+    baseline_importance: float = Field(
+        ge=0.0, le=1.0, description="The starting importance score of this memory from 0.0 to 1.0."
+    )
+    decay_rate: float = Field(ge=0.0, description="The rate at which this memory's relevance decays over time.")
 
 
 class HomomorphicEncryptionProfile(CoreasonBaseModel):
