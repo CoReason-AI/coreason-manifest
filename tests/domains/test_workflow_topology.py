@@ -22,7 +22,9 @@ from coreason_manifest.workflow.topologies import (
     CouncilTopology,
     DAGTopology,
     DigitalTwinTopology,
+    DynamicalSystemsTopology,
     EvaluatorOptimizerTopology,
+    ODEGradientBounds,
     OntologicalAlignmentPolicy,
     SimulationConvergenceSLA,
 )
@@ -287,3 +289,44 @@ def test_dag_topology_draft_superposition(nodes: dict[str, Any], data: DataObjec
 
     assert topology.lifecycle_phase == "draft"
     assert len(topology.edges) == 2
+
+
+def test_dynamical_systems_temporal_bounds() -> None:
+    valid_gradients = ODEGradientBounds(max_drift_rate=1.0, decay_coefficient_min=0.1, decay_coefficient_max=0.5)
+
+    # Test valid instantiation
+    topology = DynamicalSystemsTopology(
+        nodes={},
+        continuous_time_gradients=valid_gradients,
+        max_temporal_backpropagation_ms=5000,
+        environmental_phase_shift_triggers=["0x1234567890abcdef1234567890abcdef12345678"],
+    )
+    assert topology.max_temporal_backpropagation_ms == 5000
+
+    # Test causality escrow breach (> 1 hour)
+    with pytest.raises(ValidationError):
+        DynamicalSystemsTopology(
+            nodes={},
+            continuous_time_gradients=valid_gradients,
+            max_temporal_backpropagation_ms=4000000,
+            environmental_phase_shift_triggers=["did:example:123"],
+        )
+
+
+def test_dynamical_systems_cryptographic_triggers() -> None:
+    valid_gradients = ODEGradientBounds(max_drift_rate=1.0, decay_coefficient_min=0.1, decay_coefficient_max=0.5)
+
+    # Test invalid string hallucination
+    with pytest.raises(ValidationError):
+        DynamicalSystemsTopology(
+            nodes={},
+            continuous_time_gradients=valid_gradients,
+            max_temporal_backpropagation_ms=5000,
+            environmental_phase_shift_triggers=["wait_for_weather_api"],
+        )
+
+
+def test_ode_gradient_bounds() -> None:
+    # Test mathematical inversion
+    with pytest.raises(ValidationError):
+        ODEGradientBounds(max_drift_rate=1.0, decay_coefficient_min=0.9, decay_coefficient_max=0.1)

@@ -1006,6 +1006,7 @@
           "council": "#/$defs/CouncilTopology",
           "dag": "#/$defs/DAGTopology",
           "digital_twin": "#/$defs/DigitalTwinTopology",
+          "dynamical_systems": "#/$defs/DynamicalSystemsTopology",
           "evaluator_optimizer": "#/$defs/EvaluatorOptimizerTopology",
           "evolutionary": "#/$defs/EvolutionaryTopology",
           "macro_adversarial": "#/$defs/AdversarialMarketTopology",
@@ -1042,6 +1043,9 @@
         },
         {
           "$ref": "#/$defs/ConsensusFederationTopology"
+        },
+        {
+          "$ref": "#/$defs/DynamicalSystemsTopology"
         }
       ]
     },
@@ -2941,39 +2945,6 @@
       ],
       "type": "string"
     },
-    "CrystallizationPolicy": {
-      "additionalProperties": false,
-      "properties": {
-        "min_observations_required": {
-          "description": "The minimum number of episodic logs needed to statistically prove a crystallized rule.",
-          "minimum": 10,
-          "title": "Min Observations Required",
-          "type": "integer"
-        },
-        "aleatoric_entropy_threshold": {
-          "description": "The entropy variance must fall below this mathematical threshold to prove absolute certainty before compression is authorized.",
-          "maximum": 0.1,
-          "title": "Aleatoric Entropy Threshold",
-          "type": "number"
-        },
-        "target_memory_tier": {
-          "description": "The destination tier where the compressed rule will be stored.",
-          "enum": [
-            "semantic",
-            "working"
-          ],
-          "title": "Target Memory Tier",
-          "type": "string"
-        }
-      },
-      "required": [
-        "min_observations_required",
-        "aleatoric_entropy_threshold",
-        "target_memory_tier"
-      ],
-      "title": "CrystallizationPolicy",
-      "type": "object"
-    },
     "CustodyRecord": {
       "additionalProperties": false,
       "description": "Cryptographic state of an agent to ensure full traceability and provenance.",
@@ -3720,6 +3691,130 @@
       "title": "DynamicRoutingManifest",
       "type": "object"
     },
+    "DynamicalSystemsTopology": {
+      "additionalProperties": false,
+      "description": "AGENT INSTRUCTION: This model MUST NOT contain any async or time.sleep() logic.\nIt is a strictly passive mathematical boundary for external ZK-STARK engines to resolve non-Markovian dynamics.",
+      "properties": {
+        "lifecycle_phase": {
+          "default": "live",
+          "description": "The execution phase of the graph. 'draft' allows incomplete structural state.",
+          "enum": [
+            "draft",
+            "live"
+          ],
+          "title": "Lifecycle Phase",
+          "type": "string"
+        },
+        "architectural_intent": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The AI's declarative rationale for selecting this topology.",
+          "title": "Architectural Intent"
+        },
+        "justification": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cryptographic/audit justification for this topology's configuration.",
+          "title": "Justification"
+        },
+        "nodes": {
+          "additionalProperties": {
+            "$ref": "#/$defs/AnyNode"
+          },
+          "description": "Flat registry of all nodes in this topology.",
+          "propertyNames": {
+            "$ref": "#/$defs/NodeID"
+          },
+          "title": "Nodes",
+          "type": "object"
+        },
+        "shared_state_contract": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StateContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The schema-on-write contract governing the internal state of this topology."
+        },
+        "information_flow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/InformationFlowPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The structural Data Loss Prevention (DLP) contract governing all state mutations in this topology."
+        },
+        "observability": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ObservabilityPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The distributed tracing rules bound to this specific execution graph."
+        },
+        "type": {
+          "const": "dynamical_systems",
+          "default": "dynamical_systems",
+          "description": "Discriminator for a Dynamical Systems topology.",
+          "title": "Type",
+          "type": "string"
+        },
+        "continuous_time_gradients": {
+          "$ref": "#/$defs/ODEGradientBounds",
+          "description": "The strict geometric boundaries for continuous-time drift."
+        },
+        "max_temporal_backpropagation_ms": {
+          "description": "Escrowed Causality Bound. Absolute max delay before deterministic collapse.",
+          "exclusiveMinimum": 0,
+          "maximum": 3600000,
+          "title": "Max Temporal Backpropagation Ms",
+          "type": "integer"
+        },
+        "environmental_phase_shift_triggers": {
+          "description": "List of required external cryptographic proofs (W3C DIDs or state hashes).",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Environmental Phase Shift Triggers",
+          "type": "array"
+        }
+      },
+      "required": [
+        "nodes",
+        "continuous_time_gradients",
+        "max_temporal_backpropagation_ms",
+        "environmental_phase_shift_triggers"
+      ],
+      "title": "DynamicalSystemsTopology",
+      "type": "object"
+    },
     "EmbodiedSensoryVector": {
       "additionalProperties": false,
       "properties": {
@@ -3825,6 +3920,48 @@
       "title": "EphemeralNamespacePartition",
       "type": "object"
     },
+    "EpisodicTraceMemory": {
+      "additionalProperties": false,
+      "description": "Append-only cryptographic ledger of execution causality.",
+      "properties": {
+        "trace_id": {
+          "description": "The unique identifier for the execution trace.",
+          "title": "Trace Id",
+          "type": "string"
+        },
+        "node_id": {
+          "$ref": "#/$defs/NodeID",
+          "description": "The cryptographic Lineage Watermark linking to the execution node."
+        },
+        "events": {
+          "description": "The append-only sequence of execution events.",
+          "items": {
+            "$ref": "#/$defs/AnyStateEvent"
+          },
+          "title": "Events",
+          "type": "array"
+        },
+        "parent_hash": {
+          "description": "The hash of the preceding trace memory block.",
+          "title": "Parent Hash",
+          "type": "string"
+        },
+        "merkle_root": {
+          "description": "The deterministic Merkle root of all contained events.",
+          "title": "Merkle Root",
+          "type": "string"
+        }
+      },
+      "required": [
+        "trace_id",
+        "node_id",
+        "events",
+        "parent_hash",
+        "merkle_root"
+      ],
+      "title": "EpisodicTraceMemory",
+      "type": "object"
+    },
     "EpistemicCompressionSLA": {
       "additionalProperties": false,
       "properties": {
@@ -3857,94 +3994,6 @@
         "required_grounding_density"
       ],
       "title": "EpistemicCompressionSLA",
-      "type": "object"
-    },
-    "EpistemicLedger": {
-      "additionalProperties": false,
-      "description": "The Committed Epistemic Ledger (crystallized truth), completely partitioned from volatile working memory\nor Epistemic Quarantine.",
-      "properties": {
-        "history": {
-          "description": "An append-only, cryptographic ledger of state events.",
-          "items": {
-            "$ref": "#/$defs/AnyStateEvent"
-          },
-          "maxItems": 10000,
-          "title": "History",
-          "type": "array"
-        },
-        "checkpoints": {
-          "description": "Hard temporal anchors allowing state restoration.",
-          "items": {
-            "$ref": "#/$defs/TemporalCheckpoint"
-          },
-          "title": "Checkpoints",
-          "type": "array"
-        },
-        "active_rollbacks": {
-          "description": "Causal invalidations actively enforced on the execution tree.",
-          "items": {
-            "$ref": "#/$defs/RollbackRequest"
-          },
-          "title": "Active Rollbacks",
-          "type": "array"
-        },
-        "eviction_policy": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/EvictionPolicy"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The strict mathematical boundary governing context window compression."
-        },
-        "migration_contracts": {
-          "description": "Declarative rules to translate historical states to the current active schema version.",
-          "items": {
-            "$ref": "#/$defs/MigrationContract"
-          },
-          "title": "Migration Contracts",
-          "type": "array"
-        },
-        "truth_maintenance_policy": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/TruthMaintenancePolicy"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The mathematical contract governing automated causal graph ablations and probabilistic decay."
-        },
-        "active_cascades": {
-          "description": "The active state-differential payload muting specific causal subgraphs due to falsification.",
-          "items": {
-            "$ref": "#/$defs/DefeasibleCascade"
-          },
-          "title": "Active Cascades",
-          "type": "array"
-        },
-        "crystallization_policy": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/CrystallizationPolicy"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The mathematical threshold required to compress episodic observations into semantic rules."
-        }
-      },
-      "required": [
-        "history"
-      ],
-      "title": "EpistemicLedger",
       "type": "object"
     },
     "EpistemicPromotionEvent": {
@@ -4311,41 +4360,6 @@
       "title": "EvaluatorOptimizerTopology",
       "type": "object"
     },
-    "EvictionPolicy": {
-      "additionalProperties": false,
-      "properties": {
-        "strategy": {
-          "description": "The mathematical heuristic used to select which semantic memories are retracted or compressed.",
-          "enum": [
-            "fifo",
-            "salience_decay",
-            "summarize"
-          ],
-          "title": "Strategy",
-          "type": "string"
-        },
-        "max_retained_tokens": {
-          "description": "The strict geometric upper bound of the Epistemic Quarantine's token capacity.",
-          "exclusiveMinimum": 0,
-          "title": "Max Retained Tokens",
-          "type": "integer"
-        },
-        "protected_event_ids": {
-          "description": "Explicit list of Content Identifiers (CIDs) the orchestrator is mathematically forbidden from retracting.",
-          "items": {
-            "type": "string"
-          },
-          "title": "Protected Event Ids",
-          "type": "array"
-        }
-      },
-      "required": [
-        "strategy",
-        "max_retained_tokens"
-      ],
-      "title": "EvictionPolicy",
-      "type": "object"
-    },
     "EvidentiaryWarrant": {
       "additionalProperties": false,
       "properties": {
@@ -4359,7 +4373,7 @@
             }
           ],
           "default": null,
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for a specific observation in the EpistemicLedger.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for a specific observation in the EpisodicTraceMemory.",
           "title": "Source Event Id"
         },
         "source_semantic_node_id": {
@@ -4964,26 +4978,6 @@
       "title": "FederatedDiscoveryProtocol",
       "type": "object"
     },
-    "FederatedStateSnapshot": {
-      "additionalProperties": false,
-      "properties": {
-        "topology_id": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the federated topology, if applicable.",
-          "title": "Topology Id"
-        }
-      },
-      "title": "FederatedStateSnapshot",
-      "type": "object"
-    },
     "FitnessObjective": {
       "additionalProperties": false,
       "description": "A specific objective function to optimize within a generation.",
@@ -5251,7 +5245,7 @@
           "type": "string"
         },
         "data_source_id": {
-          "description": "The cryptographic pointer to the dataset in the EpistemicLedger.",
+          "description": "The cryptographic pointer to the dataset in the EpisodicTraceMemory.",
           "title": "Data Source Id",
           "type": "string"
         },
@@ -5556,7 +5550,7 @@
         },
         "status": {
           "default": "active",
-          "description": "The current validity state of this hypothesis in the EpistemicLedger.",
+          "description": "The current validity state of this hypothesis in the EpisodicTraceMemory.",
           "enum": [
             "active",
             "falsified",
@@ -6175,6 +6169,49 @@
         "transition_window_tokens"
       ],
       "title": "LatentSmoothingProfile",
+      "type": "object"
+    },
+    "LatentWorkingMemory": {
+      "additionalProperties": false,
+      "description": "Volatile state envelope. Enforces OOM boundaries mathematically.",
+      "properties": {
+        "node_id": {
+          "$ref": "#/$defs/NodeID",
+          "description": "The cryptographic Lineage Watermark linking to the execution node."
+        },
+        "max_ttl_seconds": {
+          "description": "Maximum time to live for this memory envelope in seconds.",
+          "minimum": 1,
+          "title": "Max Ttl Seconds",
+          "type": "integer"
+        },
+        "max_context_window_tokens": {
+          "description": "The maximum allowed context tokens.",
+          "minimum": 1,
+          "title": "Max Context Window Tokens",
+          "type": "integer"
+        },
+        "current_tokens": {
+          "description": "The current token count.",
+          "minimum": 0,
+          "title": "Current Tokens",
+          "type": "integer"
+        },
+        "state_envelope": {
+          "description": "The active computational state payload.",
+          "items": {},
+          "title": "State Envelope",
+          "type": "array"
+        }
+      },
+      "required": [
+        "node_id",
+        "max_ttl_seconds",
+        "max_context_window_tokens",
+        "current_tokens",
+        "state_envelope"
+      ],
+      "title": "LatentWorkingMemory",
       "type": "object"
     },
     "LifecycleTrigger": {
@@ -6854,7 +6891,7 @@
           "description": "The Content Identifier (CID) of the agent node that extracted this memory."
         },
         "source_event_id": {
-          "description": "The exact event Content Identifier (CID) in the EpistemicLedger that generated this fact.",
+          "description": "The exact event Content Identifier (CID) in the EpisodicTraceMemory that generated this fact.",
           "title": "Source Event Id",
           "type": "string"
         },
@@ -7344,6 +7381,34 @@
         "contradiction_proof_hash"
       ],
       "title": "NormativeDriftEvent",
+      "type": "object"
+    },
+    "ODEGradientBounds": {
+      "additionalProperties": false,
+      "description": "AGENT INSTRUCTION: This model defines the strict geometric boundaries for continuous-time drift.\nIt MUST remain entirely passive.",
+      "properties": {
+        "max_drift_rate": {
+          "description": "Maximum allowable derivative vector.",
+          "title": "Max Drift Rate",
+          "type": "number"
+        },
+        "decay_coefficient_min": {
+          "description": "Minimum bounding coefficient.",
+          "title": "Decay Coefficient Min",
+          "type": "number"
+        },
+        "decay_coefficient_max": {
+          "description": "Maximum bounding coefficient.",
+          "title": "Decay Coefficient Max",
+          "type": "number"
+        }
+      },
+      "required": [
+        "max_drift_rate",
+        "decay_coefficient_min",
+        "decay_coefficient_max"
+      ],
+      "title": "ODEGradientBounds",
       "type": "object"
     },
     "ObservabilityPolicy": {
@@ -8182,6 +8247,44 @@
       "title": "RateCard",
       "type": "object"
     },
+    "RectifiedSignalTrace": {
+      "additionalProperties": false,
+      "description": "AGENT INSTRUCTION: This schema acts as a cryptographic state-transition receipt\nproving the deterministic decay of high-entropy human stochastic signals into\nlow-entropy canonical pointers. Downstream execution engines MUST mathematically\nverify this receipt before graph traversal.",
+      "properties": {
+        "stochastic_entropy_input": {
+          "description": "The high-entropy natural language input from the human.",
+          "title": "Stochastic Entropy Input",
+          "type": "string"
+        },
+        "canonical_projection": {
+          "description": "The low-entropy canonical pointer representing the intent.",
+          "title": "Canonical Projection"
+        },
+        "semantic_shift_dictionary": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Dictionary mapping high-entropy strings to canonical semantic keys.",
+          "title": "Semantic Shift Dictionary",
+          "type": "object"
+        },
+        "rectification_confidence": {
+          "description": "Mathematical confidence score of the deterministic decay.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Rectification Confidence",
+          "type": "number"
+        }
+      },
+      "required": [
+        "stochastic_entropy_input",
+        "canonical_projection",
+        "semantic_shift_dictionary",
+        "rectification_confidence"
+      ],
+      "title": "RectifiedSignalTrace",
+      "type": "object"
+    },
     "RedactionRule": {
       "additionalProperties": false,
       "description": "A specific rule for algorithmic data sanitization.",
@@ -8270,7 +8373,7 @@
           "type": "string"
         },
         "target_event_id": {
-          "description": "The Content Identifier (CID) of the corrupted event in the EpistemicLedger to revert to.",
+          "description": "The Content Identifier (CID) of the corrupted event in the EpisodicTraceMemory to revert to.",
           "title": "Target Event Id",
           "type": "string"
         },
@@ -8779,6 +8882,49 @@
         "rollback_on_failure"
       ],
       "title": "SelfCorrectionPolicy",
+      "type": "object"
+    },
+    "SemanticCrystallization": {
+      "additionalProperties": false,
+      "description": "Declarative proof-of-compression for cross-session axioms.",
+      "properties": {
+        "axiom_id": {
+          "description": "The unique identifier for this semantic axiom.",
+          "title": "Axiom Id",
+          "type": "string"
+        },
+        "source_trace_id": {
+          "description": "The ID of the trace from which this axiom was derived.",
+          "title": "Source Trace Id",
+          "type": "string"
+        },
+        "aleatoric_entropy_threshold": {
+          "description": "The statistical threshold for crystallization.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Aleatoric Entropy Threshold",
+          "type": "number"
+        },
+        "entropy_delta_score": {
+          "description": "The calculated entropy delta score.",
+          "minimum": 0.0,
+          "title": "Entropy Delta Score",
+          "type": "number"
+        },
+        "semantic_payload": {
+          "description": "The resulting declarative fact or rule.",
+          "title": "Semantic Payload",
+          "type": "string"
+        }
+      },
+      "required": [
+        "axiom_id",
+        "source_trace_id",
+        "aleatoric_entropy_threshold",
+        "entropy_delta_score",
+        "semantic_payload"
+      ],
+      "title": "SemanticCrystallization",
       "type": "object"
     },
     "SemanticEdge": {
@@ -10053,7 +10199,7 @@
           "type": "string"
         },
         "ledger_index": {
-          "description": "The exact array index in the EpistemicLedger this checkpoint represents.",
+          "description": "The exact array index in the EpisodicTraceMemory this checkpoint represents.",
           "title": "Ledger Index",
           "type": "integer"
         },
@@ -10109,48 +10255,6 @@
         "env_variables_hash"
       ],
       "title": "TerminalBufferState",
-      "type": "object"
-    },
-    "TheoryOfMindSnapshot": {
-      "additionalProperties": false,
-      "properties": {
-        "target_agent_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the agent whose mind is being modeled.",
-          "minLength": 1,
-          "title": "Target Agent Id",
-          "type": "string"
-        },
-        "assumed_shared_beliefs": {
-          "description": "A list of Content Identifiers (CIDs) acting as cryptographic Lineage Watermarks that the modeling agent assumes the target already possesses.",
-          "items": {
-            "type": "string"
-          },
-          "title": "Assumed Shared Beliefs",
-          "type": "array"
-        },
-        "identified_knowledge_gaps": {
-          "description": "Specific topics or logical premises the target agent is assumed to be missing.",
-          "items": {
-            "type": "string"
-          },
-          "title": "Identified Knowledge Gaps",
-          "type": "array"
-        },
-        "empathy_confidence_score": {
-          "description": "The mathematical confidence (0.0 to 1.0) the agent has in its model of the target's mind.",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "Empathy Confidence Score",
-          "type": "number"
-        }
-      },
-      "required": [
-        "target_agent_id",
-        "assumed_shared_beliefs",
-        "identified_knowledge_gaps",
-        "empathy_confidence_score"
-      ],
-      "title": "TheoryOfMindSnapshot",
       "type": "object"
     },
     "ThoughtBranch": {
@@ -10621,71 +10725,6 @@
         "topology"
       ],
       "title": "WorkflowEnvelope",
-      "type": "object"
-    },
-    "WorkingMemorySnapshot": {
-      "additionalProperties": false,
-      "description": "Represents the Epistemic Quarantine, partitioned from the Committed Epistemic Ledger.",
-      "properties": {
-        "system_prompt": {
-          "description": "The basal non-monotonic instruction set currently held in Epistemic Quarantine.",
-          "title": "System Prompt",
-          "type": "string"
-        },
-        "active_context": {
-          "additionalProperties": {
-            "type": "string"
-          },
-          "description": "The ephemeral latent variables and environmental bindings currently active in Epistemic Quarantine.",
-          "title": "Active Context",
-          "type": "object"
-        },
-        "argumentation": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/ArgumentGraph"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The formal graph of non-monotonic claims and defeasible attacks currently active in the swarm's working memory."
-        },
-        "theory_of_mind_models": {
-          "description": "Empathetic models of other agents to compress and target outgoing communications.",
-          "items": {
-            "$ref": "#/$defs/TheoryOfMindSnapshot"
-          },
-          "title": "Theory Of Mind Models",
-          "type": "array"
-        },
-        "affordance_projection": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/OntologicalSurfaceProjection"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The mathematically bounded subgraph of capabilities currently available to the agent."
-        },
-        "capability_attestations": {
-          "description": "Immutable cryptographic receipts of dynamically discovered external enterprise connectors.",
-          "items": {
-            "$ref": "#/$defs/FederatedCapabilityAttestation"
-          },
-          "title": "Capability Attestations",
-          "type": "array"
-        }
-      },
-      "required": [
-        "system_prompt",
-        "active_context"
-      ],
-      "title": "WorkingMemorySnapshot",
       "type": "object"
     },
     "ZeroKnowledgeProof": {
