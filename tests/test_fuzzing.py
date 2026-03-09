@@ -13,6 +13,7 @@ from hypothesis import strategies as st
 from pydantic import TypeAdapter, ValidationError
 
 from coreason_manifest.adapters.mcp.schemas import HTTPTransportConfig, MCPServerConfig
+from coreason_manifest.compute.test_time import SubstrateEnvelope
 from coreason_manifest.core.primitives import DataClassification, RiskLevel
 from coreason_manifest.oversight.dlp import InformationFlowPolicy
 from coreason_manifest.oversight.governance import GlobalGovernance
@@ -65,6 +66,18 @@ from coreason_manifest.workflow.envelope import WorkflowEnvelope
 from coreason_manifest.workflow.nodes import AgentNode, AnyNode, CompositeNode, HumanNode, SystemNode
 from coreason_manifest.workflow.routing import DynamicRoutingManifest
 from coreason_manifest.workflow.topologies import AnyTopology, OntologicalHandshake, StateContract
+
+
+@given(st.integers(max_value=0), st.integers(max_value=0), st.integers(max_value=0), st.booleans())
+def test_substrate_envelope_rejects_byzantine_allocations(tokens: int, vram: int, latency: int, halt: bool) -> None:
+    """Ensure negative or zero bounds immediately trigger compile-time/instantiation failure."""
+    with pytest.raises(ValidationError):
+        SubstrateEnvelope(
+            algorithmic_token_budget=tokens,
+            vram_frontier_bound=vram,
+            latency_sla_ms=latency,
+            probabilistic_exhaustion_halt=halt,
+        )
 
 
 @st.composite
