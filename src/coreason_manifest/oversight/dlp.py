@@ -18,8 +18,8 @@ from pydantic import Field, model_validator
 
 from coreason_manifest.compute.neuromodulation import SaeLatentFirewall
 from coreason_manifest.core.base import CoreasonBaseModel
+from coreason_manifest.core.primitives import DataClassification
 
-type DataClassification = Literal["strictly_confidential", "confidential", "internal", "public"]
 type SanitizationAction = Literal["redact", "hash", "drop_event", "trigger_quarantine"]
 
 
