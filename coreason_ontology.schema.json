@@ -5515,7 +5515,7 @@
             }
           ],
           "default": null,
-          "description": "AGENT INSTRUCTION: If set, the orchestrator MUST NOT resolve \n        this node without a cryptographically matching WetwareAttestationContract \n        supplied in the InterventionVerdict.",
+          "description": "AGENT INSTRUCTION: If set, the orchestrator MUST NOT resolve\n        this node without a cryptographically matching WetwareAttestationContract\n        supplied in the InterventionVerdict.",
           "title": "Required Attestation"
         }
       },
