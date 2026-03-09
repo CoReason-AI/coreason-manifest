@@ -3461,13 +3461,21 @@ async def test_mcp_server_malformed_uri_fuzzing(malformed_path: str) -> None:
                 pass
 
 
-@given(st.dictionaries(st.text(), st.floats(allow_nan=True, allow_infinity=True)))
+import math
+
+
+@given(st.dictionaries(st.text(min_size=1), st.floats(allow_nan=True, allow_infinity=True)))
 def test_fuzz_utility_justification_tensor_poisoning(fuzzed_vectors: dict[str, float]) -> None:
     """
-    AGENT INSTRUCTION: Ensure the AST strictly catches adversarial NaN/Inf floats
-    that bypassed standard typing schemas to protect downstream tensor allocations.
+    AGENT INSTRUCTION: Ensure the AST strictly catches adversarial NaN/Inf floats.
+    We must explicitly prove the exception is raised when toxic tensors are present.
     """
-    from contextlib import suppress
+    has_poison = any(math.isnan(v) or math.isinf(v) for v in fuzzed_vectors.values())
 
-    with suppress(ValidationError):
-        UtilityJustificationGraph(optimizing_vectors=fuzzed_vectors, superposition_variance_threshold=0.5)
+    if has_poison:
+        with pytest.raises(ValidationError, match="Tensor Poisoning Detected"):
+            UtilityJustificationGraph(optimizing_vectors=fuzzed_vectors, superposition_variance_threshold=0.5)
+    else:
+        # If Hypothesis happened to generate a clean dictionary, it MUST compile.
+        graph = UtilityJustificationGraph(optimizing_vectors=fuzzed_vectors, superposition_variance_threshold=0.5)
+        assert graph.superposition_variance_threshold == 0.5
