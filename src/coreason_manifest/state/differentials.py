@@ -165,9 +165,14 @@ class TemporalCheckpoint(CoreasonBaseModel):
 class RFC6902Patch(CoreasonBaseModel):
     """Deterministic, typed JSON patch for structural toolchain mutation."""
 
-    op: Literal["add", "remove", "replace", "move", "copy", "test"]
-    path: str
-    value: Any | None = None
+    op: Literal["add", "remove", "replace", "move", "copy", "test"] = Field(
+        description="The strict RFC 6902 JSON Patch operation."
+    )
+    path: str = Field(description="The JSON pointer indicating the exact state vector to mutate deterministically.")
+    value: Any | None = Field(
+        default=None,
+        description=("The payload to insert or test, if applicable, for this deterministic state vector mutation."),
+    )
 
 
 class AlgorithmicPlasticityDelta(CoreasonBaseModel):
