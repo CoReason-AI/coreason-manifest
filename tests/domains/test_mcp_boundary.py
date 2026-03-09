@@ -8,7 +8,8 @@ from mcp.shared.session import SessionMessage  # type: ignore[attr-defined]
 from mcp.types import JSONRPCMessage
 from pydantic import ValidationError
 
-from coreason_manifest.adapters.mcp.schemas import BoundedJSONRPCRequest
+from coreason_manifest.adapters.mcp.schemas import BoundedJSONRPCRequest, HTTPTransportConfig
+from pydantic import HttpUrl
 from coreason_manifest.cli.mcp_server import _global_error_handler_shield
 
 # Initialize the global shield for tests
@@ -441,3 +442,15 @@ async def test_uptime_assertion_poison_pill() -> None:
     response_dict2 = sent_msg2.message.model_dump()
     assert response_dict2["jsonrpc"] == "2.0"
     assert response_dict2["error"]["code"] in (-32600, -32700)
+
+@given(
+    header_key=st.text(alphabet=["\r", "\n", "A", "B"], min_size=1),
+    header_val=st.text(alphabet=["\r", "\n", "1", "2"], min_size=1)
+)
+def test_crlf_rejection_in_http_transport(header_key: str, header_val: str) -> None:
+    if "\r" in header_key or "\n" in header_key or "\r" in header_val or "\n" in header_val:
+        with pytest.raises(ValidationError, match="CRLF injection detected in headers"):
+            HTTPTransportConfig(
+                uri=HttpUrl("https://api.coreason.ai"),
+                headers={header_key: header_val}
+            )
