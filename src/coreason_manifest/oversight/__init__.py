@@ -13,6 +13,9 @@ from .adjudication import (
 from .audit import (
     MechanisticAuditContract,
 )
+from .cybernetics import (
+    CyberneticControlLoop,
+)
 from .dlp import (
     InformationFlowPolicy,
     RedactionRule,
@@ -48,6 +51,7 @@ __all__ = [
     "CircuitBreakerTrip",
     "ConsensusPolicy",
     "ConstitutionalRule",
+    "CyberneticControlLoop",
     "FallbackSLA",
     "FallbackTrigger",
     "FormalVerificationContract",

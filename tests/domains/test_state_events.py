@@ -9,12 +9,53 @@ import pytest
 from pydantic import TypeAdapter, ValidationError
 
 from coreason_manifest.state.events import (
+    ActiveInferenceYield,
     AnyStateEvent,
     EpistemicPromotionEvent,
     NeuralAuditAttestation,
     NormativeDriftEvent,
     SaeFeatureActivation,
 )
+
+
+def test_active_inference_yield_valid() -> None:
+    """Prove baseline instantiation of epistemic exhaustion receipt."""
+    event = ActiveInferenceYield(
+        event_id="evt_123",
+        timestamp=1710000000.0,
+        target_variable_urn="urn:coreason:variable:user_intent",
+        epistemic_confidence_delta=0.85,
+        canonical_projection="Need user to clarify intent.",
+        temporal_escalation_bound=3600,
+    )
+    assert event.type == "active_inference_yield"
+    assert event.epistemic_confidence_delta == 0.85
+
+
+def test_active_inference_yield_invalid_confidence() -> None:
+    """Enforce mathematical bounds on epistemic confidence."""
+    with pytest.raises(ValidationError):
+        ActiveInferenceYield(
+            event_id="evt_123",
+            timestamp=1710000000.0,
+            target_variable_urn="urn:coreason:variable:user_intent",
+            epistemic_confidence_delta=1.5,  # Invalid: > 1.0
+            canonical_projection="Need user to clarify intent.",
+            temporal_escalation_bound=3600,
+        )
+
+
+def test_active_inference_yield_invalid_temporal() -> None:
+    """Enforce physical bounds on temporal escalation."""
+    with pytest.raises(ValidationError):
+        ActiveInferenceYield(
+            event_id="evt_123",
+            timestamp=1710000000.0,
+            target_variable_urn="urn:coreason:variable:user_intent",
+            epistemic_confidence_delta=0.5,
+            canonical_projection="Need user to clarify intent.",
+            temporal_escalation_bound=0,  # Invalid: <= 0
+        )
 
 
 def test_sae_feature_activation_valid() -> None:
