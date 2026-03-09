@@ -14,7 +14,9 @@ from hypothesis import strategies as st
 from pydantic import TypeAdapter, ValidationError
 
 from coreason_manifest.adapters.mcp.schemas import HTTPTransportConfig, MCPServerConfig
+from coreason_manifest.compute.test_time import SubstrateEnvelope
 from coreason_manifest.core.primitives import DataClassification, RiskLevel
+from coreason_manifest.oversight.cybernetics import CyberneticControlLoop
 from coreason_manifest.oversight.dlp import InformationFlowPolicy
 from coreason_manifest.oversight.governance import GlobalGovernance
 from coreason_manifest.oversight.intervention import (
@@ -38,7 +40,12 @@ from coreason_manifest.presentation.intents import (
     InformationalIntent,
 )
 from coreason_manifest.presentation.scivis import AnyPanel, GrammarPanel, InsightCard
+<<<<<<< feat/utility-justification-graph-8910808043734675450
 from coreason_manifest.state.argumentation import ArgumentGraph, UtilityJustificationGraph
+=======
+from coreason_manifest.state.argumentation import ArgumentGraph
+from coreason_manifest.state.differentials import AlgorithmicPlasticityDelta, RFC6902Patch
+>>>>>>> version-0.25.0
 from coreason_manifest.state.events import (
     AnyStateEvent,
     BeliefUpdateEvent,
@@ -63,9 +70,28 @@ from coreason_manifest.testing.red_team import AdversarialSimulationProfile
 from coreason_manifest.tooling import ActionSpace, ToolDefinition
 from coreason_manifest.workflow.auctions import AuctionState, TaskAward
 from coreason_manifest.workflow.envelope import WorkflowEnvelope
-from coreason_manifest.workflow.nodes import AgentNode, AnyNode, CompositeNode, HumanNode, SystemNode
+from coreason_manifest.workflow.nodes import (
+    AgentNode,
+    AnyNode,
+    CompositeNode,
+    HumanNode,
+    KinematicDecompositionSpec,
+    SystemNode,
+)
 from coreason_manifest.workflow.routing import DynamicRoutingManifest
 from coreason_manifest.workflow.topologies import AnyTopology, OntologicalHandshake, StateContract
+
+
+@given(st.integers(max_value=0), st.integers(max_value=0), st.integers(max_value=0), st.booleans())
+def test_substrate_envelope_rejects_byzantine_allocations(tokens: int, vram: int, latency: int, halt: bool) -> None:
+    """Ensure negative or zero bounds immediately trigger compile-time/instantiation failure."""
+    with pytest.raises(ValidationError):
+        SubstrateEnvelope(
+            algorithmic_token_budget=tokens,
+            vram_frontier_bound=vram,
+            latency_sla_ms=latency,
+            probabilistic_exhaustion_halt=halt,
+        )
 
 
 @st.composite
@@ -614,6 +640,30 @@ def draw_system_node_payload(draw: Any) -> dict[str, Any]:
     if draw(st.booleans()):
         payload["domain_extensions"] = draw(draw_domain_extensions())
     return payload
+
+
+@st.composite
+def draw_kinematic_decomposition_spec_payload(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "parent_objective_vector": st.one_of(
+                    st.text(min_size=1), st.lists(st.floats(allow_nan=False, allow_infinity=False), min_size=1)
+                ),
+                "sub_topology": draw_topology_payload(draw_any_node_recursive()),
+                "tractability_boundary_proof": st.floats(
+                    min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False
+                ),
+            }
+        )
+    )
+    return res
+
+
+@given(draw_kinematic_decomposition_spec_payload())
+def test_kinematic_decomposition_spec_fuzzing(payload: dict[str, Any]) -> None:
+    parsed = TypeAdapter(KinematicDecompositionSpec).validate_python(payload)
+    assert isinstance(parsed, KinematicDecompositionSpec)
 
 
 @st.composite
@@ -2914,6 +2964,39 @@ def draw_any_intervention_payload() -> st.SearchStrategy[dict[str, Any]]:
     )
 
 
+def draw_any_resilience_payload() -> st.SearchStrategy[dict[str, Any]]:
+    return st.one_of(
+        st.fixed_dictionaries(
+            {"type": st.just("quarantine"), "target_node_id": draw_did_string(), "reason": st.text()}
+        ),
+        st.fixed_dictionaries(
+            {"type": st.just("circuit_breaker"), "target_node_id": draw_did_string(), "error_signature": st.text()}
+        ),
+        st.fixed_dictionaries(
+            {"type": st.just("fallback"), "target_node_id": draw_did_string(), "fallback_node_id": draw_did_string()}
+        ),
+    )
+
+
+@st.composite
+def draw_cybernetic_control_loop(draw: Any) -> dict[str, Any]:
+    # Prevent deterministic ValueErrors during fuzzing by avoiding byzantine_fault_detected=True
+    deviation_vector = draw(
+        st.dictionaries(
+            st.text(min_size=1),
+            st.one_of(st.text(), st.integers(), st.floats(allow_nan=False, allow_infinity=False), st.booleans()),
+        ).filter(lambda d: d.get("byzantine_fault_detected") is not True)
+    )
+
+    return {
+        "homeostatic_deviation_vector": deviation_vector,
+        "adjudication_rationale": draw(st.text()),
+        "regulatory_intervention_action": draw(
+            st.one_of(draw_any_intervention_payload(), draw_any_resilience_payload())
+        ),
+    }
+
+
 intervention_payload_adapter: TypeAdapter[AnyInterventionPayload] = TypeAdapter(AnyInterventionPayload)
 
 
@@ -2931,6 +3014,15 @@ def test_anyinterventionpayload_routing(payload: dict[str, Any]) -> None:
         from coreason_manifest.oversight.intervention import ConstitutionalAmendmentProposal
 
         assert isinstance(parsed, ConstitutionalAmendmentProposal)
+
+
+cybernetic_control_loop_adapter: TypeAdapter[CyberneticControlLoop] = TypeAdapter(CyberneticControlLoop)
+
+
+@given(draw_cybernetic_control_loop())
+def test_cybernetic_control_loop_fuzzing(payload: dict[str, Any]) -> None:
+    parsed = cybernetic_control_loop_adapter.validate_python(payload)
+    assert isinstance(parsed, CyberneticControlLoop)
 
 
 workflow_envelope_adapter: TypeAdapter[WorkflowEnvelope] = TypeAdapter(WorkflowEnvelope)
@@ -3462,6 +3554,7 @@ async def test_mcp_server_malformed_uri_fuzzing(malformed_path: str) -> None:
                 pass
 
 
+<<<<<<< feat/utility-justification-graph-8910808043734675450
 @given(st.dictionaries(st.text(min_size=1), st.floats(allow_nan=True, allow_infinity=True)))
 def test_fuzz_utility_justification_tensor_poisoning(fuzzed_vectors: dict[str, float]) -> None:
     """
@@ -3477,3 +3570,73 @@ def test_fuzz_utility_justification_tensor_poisoning(fuzzed_vectors: dict[str, f
         # If Hypothesis happened to generate a clean dictionary, it MUST compile.
         graph = UtilityJustificationGraph(optimizing_vectors=fuzzed_vectors, superposition_variance_threshold=0.5)
         assert graph.superposition_variance_threshold == 0.5
+=======
+rfc_patch_strategy = st.builds(
+    RFC6902Patch,
+    op=st.sampled_from(["add", "remove", "replace", "move", "copy", "test"]),
+    path=st.text(min_size=1, max_size=100),
+    value=st.none() | st.text() | st.integers(),
+)
+
+plasticity_delta_strategy = st.builds(
+    AlgorithmicPlasticityDelta,
+    failed_topology_hash=st.from_regex(r"^[a-f0-9]{64}$", fullmatch=True),
+    kinematic_constraint_mutation=st.lists(rfc_patch_strategy, max_size=50),
+    latent_prompt_gradient_update=st.text(max_size=8192),
+    routing_reweighting=st.floats(min_value=-1.0, max_value=1.0, allow_nan=False, allow_infinity=False),
+)
+
+
+# Rejection tests should feed dicts to TypeAdapter, otherwise st.builds fails during generation
+@given(
+    st.fixed_dictionaries(
+        {
+            "failed_topology_hash": st.from_regex(r"^[a-f0-9]{64}$", fullmatch=True),
+            "kinematic_constraint_mutation": st.just([]),
+            "latent_prompt_gradient_update": st.just(""),
+            "routing_reweighting": st.just(0.0),
+        }
+    )
+)
+def test_algorithmic_plasticity_delta_fuzzing_rejection(payload: dict[str, Any]) -> None:
+    from coreason_manifest.state.differentials import AlgorithmicPlasticityDelta
+
+    with pytest.raises(ValidationError):
+        TypeAdapter(AlgorithmicPlasticityDelta).validate_python(payload)
+
+
+# If we want a valid strategy, we can build from valid dicts
+valid_plasticity_delta_payload = st.fixed_dictionaries(
+    {
+        "failed_topology_hash": st.from_regex(r"^[a-f0-9]{64}$", fullmatch=True),
+        "kinematic_constraint_mutation": st.lists(
+            st.fixed_dictionaries(
+                {
+                    "op": st.sampled_from(["add", "remove", "replace", "move", "copy", "test"]),
+                    "path": st.text(min_size=1, max_size=100),
+                    "value": st.none() | st.text() | st.integers(),
+                }
+            ),
+            max_size=50,
+        ),
+        "latent_prompt_gradient_update": st.text(max_size=8192),
+        "routing_reweighting": st.floats(min_value=-1.0, max_value=1.0, allow_nan=False, allow_infinity=False),
+    }
+).filter(
+    lambda x: (
+        not (
+            x["routing_reweighting"] == 0.0
+            and not x["kinematic_constraint_mutation"]
+            and not x["latent_prompt_gradient_update"]
+        )
+    )
+)
+
+
+@given(valid_plasticity_delta_payload)
+def test_algorithmic_plasticity_delta_fuzzing(payload: dict[str, Any]) -> None:
+    from coreason_manifest.state.differentials import AlgorithmicPlasticityDelta
+
+    parsed = TypeAdapter(AlgorithmicPlasticityDelta).validate_python(payload)
+    assert isinstance(parsed, AlgorithmicPlasticityDelta)
+>>>>>>> version-0.25.0
