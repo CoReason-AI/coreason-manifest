@@ -63,7 +63,14 @@ from coreason_manifest.testing.red_team import AdversarialSimulationProfile
 from coreason_manifest.tooling import ActionSpace, ToolDefinition
 from coreason_manifest.workflow.auctions import AuctionState, TaskAward
 from coreason_manifest.workflow.envelope import WorkflowEnvelope
-from coreason_manifest.workflow.nodes import AgentNode, AnyNode, CompositeNode, HumanNode, SystemNode
+from coreason_manifest.workflow.nodes import (
+    AgentNode,
+    AnyNode,
+    CompositeNode,
+    HumanNode,
+    KinematicDecompositionSpec,
+    SystemNode,
+)
 from coreason_manifest.workflow.routing import DynamicRoutingManifest
 from coreason_manifest.workflow.topologies import AnyTopology, OntologicalHandshake, StateContract
 
@@ -626,6 +633,30 @@ def draw_system_node_payload(draw: Any) -> dict[str, Any]:
     if draw(st.booleans()):
         payload["domain_extensions"] = draw(draw_domain_extensions())
     return payload
+
+
+@st.composite
+def draw_kinematic_decomposition_spec_payload(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "parent_objective_vector": st.one_of(
+                    st.text(min_size=1), st.lists(st.floats(allow_nan=False, allow_infinity=False), min_size=1)
+                ),
+                "sub_topology": draw_topology_payload(draw_any_node_recursive()),
+                "tractability_boundary_proof": st.floats(
+                    min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False
+                ),
+            }
+        )
+    )
+    return res
+
+
+@given(draw_kinematic_decomposition_spec_payload())
+def test_kinematic_decomposition_spec_fuzzing(payload: dict[str, Any]) -> None:
+    parsed = TypeAdapter(KinematicDecompositionSpec).validate_python(payload)
+    assert isinstance(parsed, KinematicDecompositionSpec)
 
 
 @st.composite
