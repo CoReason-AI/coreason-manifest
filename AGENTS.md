@@ -91,6 +91,11 @@ You are strictly forbidden from introducing "Active" or "Runtime" logic into thi
 * **Forbidden:** Dependencies on execution-layer libraries (e.g., `fastapi`, `starlette`, auth middleware, database drivers like `psycopg2`).
 * **Allowed:** Pure data dependencies (`pydantic`, `pyyaml`).
 
+### Law 4: Passive Ontological Projection (The "MCP" Rule)
+* **Constraint:** Any Model Context Protocol (MCP) server implementation in this repository MUST act strictly as a passive data plane projecting structural ontology.
+* **Forbidden:** Registering kinetic or active endpoints using `@mcp.tool()`.
+* **Allowed:** Exposing strictly read-only schemas and capabilities using `@mcp.resource()` under the `schema://` URI scheme.
+
 ---
 
 ## **2. Development Protocol**
