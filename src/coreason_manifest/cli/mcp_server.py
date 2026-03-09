@@ -22,15 +22,6 @@ from coreason_manifest.core import CoreasonBaseModel
 """AGENT INSTRUCTION: This MCP Server is strictly passive. DO NOT register @mcp.tool() endpoints. Use @mcp.resource() for all ontological projections."""  # noqa: E501
 # fmt: on
 
-_GENERATIVE_BOUNDING_BOX_DIRECTIVE = """
-SYSTEM ARCHITECTURE DIRECTIVE (STRICT COMPLIANCE REQUIRED):
-You are generating a payload for the coreason-manifest. The manifest enforces a strict "Hollow Data Plane".
-1. DO NOT invent vertical ontologies or domain-specific terminology (e.g., no 'patient_id', no 'transaction_hash').
-2. You MUST use universal primitives (e.g., 'tenant_id', 'node_id', 'correlation_id').
-3. The output MUST be a pure data structure. Side effects are strictly forbidden.
-4. Adhere mathematically to the provided JSON schema projection.
-"""
-
 # Create an MCP server
 mcp = FastMCP("coreason-manifest-schema-service")
 
@@ -64,19 +55,15 @@ def _is_schema_allowed(schema_dict: dict[str, Any], granted_licenses: set[str]) 
     return set(required).issubset(granted_licenses)
 
 
-@mcp.prompt("scaffold_payload")
-async def scaffold_payload(schema_id: str) -> str:
+@mcp.resource("schema://epistemic/index")
+def get_epistemic_index() -> str:
     """
-    Project a Generative Bounding Box into the orchestrator's latent space.
-    Provides a priori alignment constraints paired with the target JSON schema.
+    AGENT INSTRUCTION: Epistemic Discovery Surface.
+    Returns a deterministic, static JSON array of all valid schema identifiers.
     """
-    if schema_id not in _AVAILABLE_SCHEMAS:
-        return "ERROR: SCHEMA_NOT_FOUND. Query the schema index to discover available ontologies."
+    import json
 
-    schema_model_json_schema = _AVAILABLE_SCHEMAS[schema_id]
-    schema_json_str = json.dumps(schema_model_json_schema, indent=2)
-
-    return f"{_GENERATIVE_BOUNDING_BOX_DIRECTIVE}\n\nTARGET SCHEMA:\n{schema_json_str}"
+    return json.dumps(sorted(_AVAILABLE_SCHEMAS.keys()))
 
 
 @mcp.resource("schema://epistemic/{name}")

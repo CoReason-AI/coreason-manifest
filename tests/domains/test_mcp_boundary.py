@@ -9,33 +9,28 @@ from mcp.types import JSONRPCMessage
 from pydantic import HttpUrl, ValidationError
 
 from coreason_manifest.adapters.mcp.schemas import BoundedJSONRPCRequest, HTTPTransportConfig
-from coreason_manifest.cli.mcp_server import (
-    _GENERATIVE_BOUNDING_BOX_DIRECTIVE,
-    _global_error_handler_shield,
-    scaffold_payload,
-)
+from coreason_manifest.cli.mcp_server import _global_error_handler_shield
 
 # Initialize the global shield for tests
 _global_error_handler_shield()
 
 
-@pytest.mark.asyncio
-async def test_mcp_prompt_scaffold_payload_success() -> None:
-    """Ensure the prompt concatenates the directive and the schema without execution logic."""
-    result = await scaffold_payload("AgentAttestation")
+def test_mcp_epistemic_index_projection() -> None:
+    """
+    AGENT INSTRUCTION: Verify O(1) Epistemic Index perfectly mirrors the ontology.
+    """
+    import json
 
-    assert "SYSTEM ARCHITECTURE DIRECTIVE" in result
-    assert "TARGET SCHEMA:" in result
-    assert "AgentAttestation" in result
-    assert _GENERATIVE_BOUNDING_BOX_DIRECTIVE in result
+    from coreason_manifest.cli.mcp_server import _AVAILABLE_SCHEMAS, get_epistemic_index
 
+    # Execute the zero-inference projection
+    result_str = get_epistemic_index()
+    result_list = json.loads(result_str)
 
-@pytest.mark.asyncio
-async def test_mcp_prompt_scaffold_payload_degradation() -> None:
-    """Ensure invalid schemas return structured text, NOT runtime exceptions."""
-    result = await scaffold_payload("HallucinatedVerticalSchema")
-
-    assert result == "ERROR: SCHEMA_NOT_FOUND. Query the schema index to discover available ontologies."
+    # Mathematically prove parity and determinism
+    expected_list = sorted(_AVAILABLE_SCHEMAS.keys())
+    assert isinstance(result_list, list), "Projected index must be a JSON array."
+    assert result_list == expected_list, "Projected manifold is out of sync with _AVAILABLE_SCHEMAS."
 
 
 def test_jsonrpc_fuzzer_missing_jsonrpc() -> None:
