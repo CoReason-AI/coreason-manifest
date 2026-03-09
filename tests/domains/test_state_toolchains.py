@@ -10,8 +10,9 @@ def test_browser_dom_ssrf_rejects_cloud_metadata() -> None:
             current_url="http://169.254.169.254/iam/credentials",
             viewport_size=(800, 600),
             dom_hash="a" * 64,
-            accessibility_tree_hash="a" * 64
+            accessibility_tree_hash="a" * 64,
         )
+
 
 def test_browser_dom_ssrf_rejects_localhost_variants() -> None:
     with pytest.raises(ValidationError, match="SSRF topological"):
@@ -19,7 +20,7 @@ def test_browser_dom_ssrf_rejects_localhost_variants() -> None:
             current_url="http://localhost:3000",
             viewport_size=(800, 600),
             dom_hash="a" * 64,
-            accessibility_tree_hash="a" * 64
+            accessibility_tree_hash="a" * 64,
         )
 
     with pytest.raises(ValidationError, match="SSRF mathematical bound"):
@@ -27,8 +28,9 @@ def test_browser_dom_ssrf_rejects_localhost_variants() -> None:
             current_url="http://127.0.0.1:5432",
             viewport_size=(800, 600),
             dom_hash="a" * 64,
-            accessibility_tree_hash="a" * 64
+            accessibility_tree_hash="a" * 64,
         )
+
 
 def test_browser_dom_accepts_global_routable() -> None:
     # Should not raise
@@ -36,6 +38,6 @@ def test_browser_dom_accepts_global_routable() -> None:
         current_url="https://github.com/coreason-ai",
         viewport_size=(800, 600),
         dom_hash="a" * 64,
-        accessibility_tree_hash="a" * 64
+        accessibility_tree_hash="a" * 64,
     )
     assert state.current_url == "https://github.com/coreason-ai"

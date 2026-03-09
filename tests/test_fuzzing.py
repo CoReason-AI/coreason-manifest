@@ -3507,14 +3507,18 @@ async def test_mcp_server_malformed_uri_fuzzing(malformed_path: str) -> None:
                 pass
 
 
-@given(st.sampled_from([
-    "http://169.254.169.254/latest/meta-data/",
-    "https://localhost:8080/admin",
-    "http://127.0.0.1",
-    "http://[::1]",
-    "file:///etc/passwd",
-    "http://kubelet.local:10250"
-]))
+@given(
+    st.sampled_from(
+        [
+            "http://169.254.169.254/latest/meta-data/",
+            "https://localhost:8080/admin",
+            "http://127.0.0.1",
+            "http://[::1]",
+            "file:///etc/passwd",
+            "http://kubelet.local:10250",
+        ]
+    )
+)
 def test_adversarial_ssrf_rejection(adversarial_url: str) -> None:
     """Mathematically prove adversarial spatial coordinates cause immediate epistemic collapse."""
     from coreason_manifest.state.toolchains import BrowserDOMState
@@ -3522,10 +3526,7 @@ def test_adversarial_ssrf_rejection(adversarial_url: str) -> None:
     with pytest.raises(ValidationError, match="SSRF"):
         # We must supply other required fields for initialization to only fail on current_url
         BrowserDOMState(
-            current_url=adversarial_url,
-            viewport_size=(800, 600),
-            dom_hash="a"*64,
-            accessibility_tree_hash="a"*64
+            current_url=adversarial_url, viewport_size=(800, 600), dom_hash="a" * 64, accessibility_tree_hash="a" * 64
         )
 
 

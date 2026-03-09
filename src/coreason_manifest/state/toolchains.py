@@ -46,8 +46,9 @@ class BrowserDOMState(CoreasonBaseModel):
 
         # 1. Topological Heuristics
         hostname_lower = hostname.lower()
-        if hostname_lower in {"localhost", "broadcasthost"} or \
-           hostname_lower.endswith((".local", ".internal", ".arpa")):
+        if hostname_lower in {"localhost", "broadcasthost"} or hostname_lower.endswith(
+            (".local", ".internal", ".arpa")
+        ):
             raise ValueError(f"SSRF topological violation detected: {hostname}")
 
         # 2. Mathematical IP Bounds
@@ -59,8 +60,7 @@ class BrowserDOMState(CoreasonBaseModel):
             # Hostname is not a direct IP address; topological checks suffice
             return url
 
-        if ip.is_private or ip.is_loopback or ip.is_link_local or \
-           ip.is_reserved or ip.is_multicast:
+        if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast:
             raise ValueError(f"SSRF mathematical bound violation detected: {ip}")
 
         return url
