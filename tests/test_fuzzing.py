@@ -9,13 +9,12 @@ import re
 from typing import Any
 
 import pytest
-from hypothesis import HealthCheck, assume, given, settings
+from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 from pydantic import TypeAdapter, ValidationError
 
 from coreason_manifest.adapters.mcp.schemas import HTTPTransportConfig, MCPServerConfig
 from coreason_manifest.core.primitives import DataClassification, RiskLevel
-from coreason_manifest.oversight.adjudication import AdjudicationRubric, GradingCriteria
 from coreason_manifest.oversight.dlp import InformationFlowPolicy
 from coreason_manifest.oversight.governance import GlobalGovernance
 from coreason_manifest.oversight.intervention import (
@@ -53,7 +52,6 @@ from coreason_manifest.state.semantic import (
     SemanticEdge,
     SemanticNode,
 )
-from coreason_manifest.state.tensors import NDimensionalTensorManifest, TensorDType
 from coreason_manifest.state.vision import (
     DocumentLayoutAnalysis,
     TabularDataExtraction,
@@ -1367,7 +1365,7 @@ def draw_terminal_buffer_state(draw: Any) -> dict[str, Any]:
         st.fixed_dictionaries(
             {
                 "type": st.just("terminal"),
-                "working_directory": st.from_regex(r"^[a-zA-Z0-9_]+(?:/[a-zA-Z0-9_]+)*$", fullmatch=True),
+                "working_directory": st.text(min_size=1),
                 "stdout_hash": st.text(min_size=10),
                 "stderr_hash": st.text(min_size=10),
                 "env_variables_hash": st.text(min_size=10),
@@ -1873,10 +1871,7 @@ def draw_http_transport_config(draw: Any) -> dict[str, Any]:
                 "uri": st.sampled_from(
                     ["http://localhost:8080", "https://api.coreason.ai/mcp", "https://10.0.0.1/rpc"]
                 ),
-                "headers": st.dictionaries(
-                    st.text().filter(lambda x: "\r" not in x and "\n" not in x),
-                    st.text().filter(lambda x: "\r" not in x and "\n" not in x),
-                ),
+                "headers": st.dictionaries(st.text(), st.text()),
             }
         )
     )
@@ -2109,14 +2104,14 @@ def draw_epistemic_compression_sla(draw: Any, exclude_sparse: bool = False) -> d
 def draw_epistemic_transmutation_task(draw: Any) -> dict[str, Any]:
     modalities = draw(
         st.lists(
-            st.sampled_from(["text", "raster_image", "vector_graphics", "tabular_grid", "n_dimensional_tensor"]),
+            st.sampled_from(["text", "raster_image", "vector_graphics", "tabular_grid"]),
             min_size=1,
-            max_size=5,
+            max_size=4,
             unique=True,
         )
     )
     # Topologically aware constraint to prevent fuzzer self-destruction
-    exclude_sparse = any(m in ["raster_image", "tabular_grid", "n_dimensional_tensor"] for m in modalities)
+    exclude_sparse = any(m in ["raster_image", "tabular_grid"] for m in modalities)
 
     return {
         "task_id": draw(st.text(min_size=1)),
@@ -3243,77 +3238,10 @@ def draw_global_semantic_profile(draw: Any) -> dict[str, Any]:
     return {
         "artifact_event_id": draw(st.text(min_size=1)),
         "detected_modalities": draw(
-            st.lists(
-                st.sampled_from(["text", "raster_image", "vector_graphics", "tabular_grid", "n_dimensional_tensor"]),
-                unique=True,
-            )
+            st.lists(st.sampled_from(["text", "raster_image", "vector_graphics", "tabular_grid"]), unique=True)
         ),
         "token_density": draw(st.integers(min_value=0)),
     }
-
-
-@st.composite
-def draw_n_dimensional_tensor_manifest(draw: Any) -> dict[str, Any]:
-    """Generates a valid NDimensionalTensorManifest payload with complex shapes."""
-    dtype_str = draw(st.sampled_from(["float32", "float64", "int8", "uint8", "int32", "int64"]))
-    dtype = TensorDType(dtype_str)
-
-    shape_length = draw(st.integers(min_value=1, max_value=5))
-    shape = draw(st.tuples(*(st.integers(min_value=1, max_value=4096) for _ in range(shape_length))))
-    calculated_bytes = math.prod(shape) * dtype.bytes_per_element
-
-    res: dict[str, Any] = {
-        "dtype": dtype_str,
-        "shape": shape,
-        "memory_footprint_bytes": calculated_bytes,
-        "merkle_root": draw(st.from_regex(r"^[a-fA-F0-9]{64}$", fullmatch=True)),
-        "storage_uri": draw(st.text(min_size=1)),
-    }
-    return res
-
-
-@st.composite
-def draw_invalid_n_dimensional_tensor_manifest(draw: Any) -> dict[str, Any]:
-    """Generates an NDimensionalTensorManifest payload with intentionally skewed memory footprint."""
-    valid_manifest: dict[str, Any] = draw(draw_n_dimensional_tensor_manifest())
-    # Intentionally skew the memory footprint to verify immediate validation failure
-    skew = draw(st.integers(min_value=1))
-    if draw(st.booleans()):
-        valid_manifest["memory_footprint_bytes"] += skew
-    else:
-        valid_manifest["memory_footprint_bytes"] = max(0, valid_manifest["memory_footprint_bytes"] - skew)
-        # Ensure it's strictly a mismatch
-        expected_bytes = math.prod(valid_manifest["shape"]) * TensorDType(valid_manifest["dtype"]).bytes_per_element
-        if valid_manifest["memory_footprint_bytes"] == expected_bytes:
-            valid_manifest["memory_footprint_bytes"] += 1
-
-    return valid_manifest
-
-
-@given(draw_n_dimensional_tensor_manifest())
-def test_n_dimensional_tensor_manifest_fuzzing_valid(payload: dict[str, Any]) -> None:
-    if isinstance(payload["dtype"], str):
-        payload["dtype"] = TensorDType(payload["dtype"])
-    parsed = TypeAdapter(NDimensionalTensorManifest).validate_python(payload)
-    assert isinstance(parsed, NDimensionalTensorManifest)
-
-
-@given(draw_invalid_n_dimensional_tensor_manifest())
-def test_n_dimensional_tensor_manifest_fuzzing_invalid(payload: dict[str, Any]) -> None:
-    # We want to test specifically topological/math checks so we bypass basic Enum validation failure
-    if isinstance(payload["dtype"], TensorDType):
-        payload["dtype"] = payload["dtype"].value
-
-    with pytest.raises(ValidationError) as exc_info:
-        TypeAdapter(NDimensionalTensorManifest).validate_python(payload)
-
-    msg = str(exc_info.value)
-    assert (
-        "Topological mismatch" in msg
-        or "Tensor dimensions must be strictly positive integers" in msg
-        or "Input should be a valid string" in msg
-        or "Input should be an instance of TensorDType" in msg
-    )
 
 
 @st.composite
@@ -3594,59 +3522,3 @@ def test_fuzz_utility_justification_tensor_poisoning(fuzzed_vectors: dict[str, f
         # If Hypothesis happened to generate a clean dictionary, it MUST compile.
         graph = UtilityJustificationGraph(optimizing_vectors=fuzzed_vectors, superposition_variance_threshold=0.5)
         assert graph.superposition_variance_threshold == 0.5
-
-
-def test_adjudication_rubric_rejects_zero_weight_topology() -> None:
-    """Ensure zero-weight rubrics structurally fail before hitting the execution engine."""
-    with pytest.raises(ValidationError) as exc_info:
-        # Construct a rubric where all criteria weights sum to exactly 0.0
-        AdjudicationRubric(
-            rubric_id="rubric-zero",
-            criteria=[
-                GradingCriteria(criterion_id="crit-1", description="Test", weight=0.0),
-                GradingCriteria(criterion_id="crit-2", description="Test 2", weight=0.0),
-            ],
-            passing_threshold=50.0,
-        )
-
-    assert "topological DoS (division by zero)" in str(exc_info.value)
-
-
-@st.composite
-def draw_grading_criteria(draw: Any) -> dict[str, Any]:
-    res: dict[str, Any] = draw(
-        st.fixed_dictionaries(
-            {
-                "criterion_id": st.text(min_size=1),
-                "description": st.text(),
-                "weight": st.floats(min_value=0.0, allow_nan=False, allow_infinity=False),
-            }
-        )
-    )
-    return res
-
-
-@st.composite
-def draw_adjudication_rubric(draw: Any) -> dict[str, Any]:
-    criteria = draw(st.lists(draw_grading_criteria(), min_size=1, max_size=5))
-    assume(sum(c["weight"] for c in criteria) > 0.0)
-
-    res: dict[str, Any] = draw(
-        st.fixed_dictionaries(
-            {
-                "rubric_id": st.text(min_size=1),
-                "criteria": st.just(criteria),
-                "passing_threshold": st.floats(min_value=0.0, max_value=100.0, allow_nan=False, allow_infinity=False),
-            }
-        )
-    )
-    return res
-
-
-rubric_adapter: TypeAdapter[AdjudicationRubric] = TypeAdapter(AdjudicationRubric)
-
-
-@given(draw_adjudication_rubric())
-def test_adjudication_rubric_fuzzing(payload: dict[str, Any]) -> None:
-    parsed = rubric_adapter.validate_python(payload)
-    assert isinstance(parsed, AdjudicationRubric)

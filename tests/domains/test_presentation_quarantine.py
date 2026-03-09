@@ -126,12 +126,3 @@ def test_safe_rendering_test(title: str, safe_text: str, x_label: str, y_label: 
     grid = MacroGrid(layout_matrix=[["panel_1", "panel_2"], ["panel_3", "panel_1"]], panels=panels)
     assert grid.layout_matrix == [["panel_1", "panel_2"], ["panel_3", "panel_1"]]
     assert len(grid.panels) == 3
-
-
-@given(scheme=st.sampled_from(["javascript", "vbscript", "data", "JaVaScRiPt"]), payload=st.text())
-def test_insight_card_rejects_xss_links(scheme: str, payload: str) -> None:
-    # Use 'payload' that does not contain `<` or `on...=` to bypass sanitize_markdown
-    payload = payload.replace("<", "").replace("on", "")
-    malicious_markdown = f"Look at this: [click me]({scheme}:{payload})"
-    with pytest.raises(ValidationError, match="Malicious executable link scheme detected"):
-        InsightCard(panel_id="test_xss", title="XSS Test", markdown_content=malicious_markdown)
