@@ -3452,6 +3452,7 @@ async def test_mcp_server_malformed_uri_fuzzing(malformed_path: str) -> None:
             # We catch any client-raised MypError or connection exceptions, the core test
             # is just that the server loop continues processing or correctly propagates errors.
             from mcp.shared.exceptions import McpError
+
             if isinstance(e, McpError):
                 pass
             else:
