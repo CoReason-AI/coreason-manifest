@@ -1756,10 +1756,20 @@ def draw_exogenous_epistemic_shock(draw: Any) -> dict[str, Any]:
 def test_epistemic_shock_escrow_interlock() -> None:
     from pydantic import ValidationError
 
-    from coreason_manifest.testing.chaos import SimulationEscrow
+    from coreason_manifest.testing.chaos import ExogenousEpistemicShock, SimulationEscrow
 
     with pytest.raises(ValidationError, match="greater than 0"):
         SimulationEscrow(locked_microcents=0)
+
+    # Test the model_validator branch in ExogenousEpistemicShock
+    with pytest.raises(ValidationError, match="ExogenousEpistemicShock requires a strictly positive economic escrow"):
+        ExogenousEpistemicShock(
+            shock_id="s1",
+            target_node_hash="a" * 64,
+            bayesian_surprise_score=0.1,
+            synthetic_payload={},
+            escrow=SimulationEscrow.model_construct(locked_microcents=0)
+        )
 
 
 @given(
