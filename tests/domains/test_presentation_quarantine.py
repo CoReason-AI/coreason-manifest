@@ -9,11 +9,14 @@ from coreason_manifest.presentation.scivis import AnyPanel, ChannelEncoding, Gra
 from coreason_manifest.presentation.templates import DynamicLayoutTemplate
 
 
-@pytest.mark.parametrize("payload", [
-    "getattr(__builtins__, 'ev' + 'al')('print(\\'hacked\\')')",
-    "__import__('o' + 's').system('echo 1')",
-    "__import__('subprocess').run(['echo', '1'])"
-])
+@pytest.mark.parametrize(
+    "payload",
+    [
+        "getattr(__builtins__, 'ev' + 'al')('print(\\'hacked\\')')",
+        "__import__('o' + 's').system('echo 1')",
+        "__import__('subprocess').run(['echo', '1'])",
+    ],
+)
 def test_dynamic_layout_template_rejects_obfuscated_rce(payload: str):
     """
     AGENT INSTRUCTION: Verify the AST boundary deterministically severs
