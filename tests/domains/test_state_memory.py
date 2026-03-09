@@ -1,105 +1,67 @@
 import pytest
-from hypothesis import given
-from hypothesis import strategies as st
 from pydantic import ValidationError
 
-from coreason_manifest.state.events import (
-    AnyStateEvent,
-    BeliefUpdateEvent,
-    ObservationEvent,
-    SystemFaultEvent,
-)
 from coreason_manifest.state.memory import (
-    CrystallizationPolicy,
-    EpistemicLedger,
-    TheoryOfMindSnapshot,
-    WorkingMemorySnapshot,
+    EpisodicTraceMemory,
+    LatentWorkingMemory,
+    SemanticCrystallization,
 )
 
 
-def test_crystallization_policy_min_observations() -> None:
+def test_latent_working_memory_oom_alarm() -> None:
     # Valid
-    CrystallizationPolicy(
-        min_observations_required=10,
-        aleatoric_entropy_threshold=0.1,
-        target_memory_tier="semantic",
+    mem = LatentWorkingMemory(
+        node_id="did:web:test",
+        max_ttl_seconds=3600,
+        max_context_window_tokens=1000,
+        current_tokens=500,
+        state_envelope=["some", "state"],
     )
+    assert mem.current_tokens == 500
 
-    # Invalid
-    with pytest.raises(ValidationError, match="Input should be greater than or equal to 10"):
-        CrystallizationPolicy(
-            min_observations_required=9,
-            aleatoric_entropy_threshold=0.1,
-            target_memory_tier="semantic",
+    # Invalid - Exceeds context bounds
+    with pytest.raises(ValidationError) as exc_info:
+        LatentWorkingMemory(
+            node_id="did:web:test",
+            max_ttl_seconds=3600,
+            max_context_window_tokens=1000,
+            current_tokens=1001,
+            state_envelope=["some", "state"],
         )
+    assert "OOM ALARM" in str(exc_info.value)
 
 
-def test_crystallization_policy_entropy_threshold() -> None:
+def test_episodic_trace_memory_byzantine_fault() -> None:
     # Valid
-    CrystallizationPolicy(
-        min_observations_required=10,
-        aleatoric_entropy_threshold=0.05,
-        target_memory_tier="semantic",
+    trace = EpisodicTraceMemory(
+        trace_id="trace_1", node_id="did:web:test", events=[], parent_hash="abc", merkle_root="valid_root"
     )
+    assert trace.merkle_root == "valid_root"
 
-    # Invalid
-    with pytest.raises(ValidationError, match=r"Input should be less than or equal to 0\.1"):
-        CrystallizationPolicy(
-            min_observations_required=10,
-            aleatoric_entropy_threshold=0.11,
-            target_memory_tier="semantic",
+    # Invalid - Missing Merkle Root (empty string triggers validation in this schema structure)
+    with pytest.raises(ValidationError) as exc_info:
+        EpisodicTraceMemory(trace_id="trace_1", node_id="did:web:test", events=[], parent_hash="abc", merkle_root="")
+    assert "Byzantine Fault" in str(exc_info.value)
+
+
+def test_semantic_crystallization_economic_validation() -> None:
+    # Valid
+    cryst = SemanticCrystallization(
+        axiom_id="ax_1",
+        source_trace_id="trace_1",
+        aleatoric_entropy_threshold=0.5,
+        entropy_delta_score=0.6,
+        semantic_payload="fact",
+    )
+    assert cryst.entropy_delta_score >= cryst.aleatoric_entropy_threshold
+
+    # Invalid - Entropy delta score below threshold
+    with pytest.raises(ValidationError) as exc_info:
+        SemanticCrystallization(
+            axiom_id="ax_1",
+            source_trace_id="trace_1",
+            aleatoric_entropy_threshold=0.5,
+            entropy_delta_score=0.4,
+            semantic_payload="fact",
         )
-
-
-@st.composite
-def state_event_strategy(draw: st.DrawFn) -> AnyStateEvent:
-    event_type = draw(st.sampled_from(["observation", "belief_update", "system_fault"]))
-    event_id = draw(st.text(min_size=1, max_size=50))
-    timestamp = draw(st.floats(min_value=0.0, max_value=1e10, allow_nan=False, allow_infinity=False))
-    payload = draw(
-        st.dictionaries(
-            st.text(),
-            st.one_of(st.text(), st.integers(), st.floats(allow_nan=False, allow_infinity=False), st.booleans()),
-            max_size=5,
-        )
-    )
-
-    if event_type == "observation":
-        return ObservationEvent(event_id=event_id, timestamp=timestamp, type="observation", payload=payload)
-    if event_type == "belief_update":
-        return BeliefUpdateEvent(event_id=event_id, timestamp=timestamp, type="belief_update", payload=payload)
-    return SystemFaultEvent(event_id=event_id, timestamp=timestamp, type="system_fault")
-
-
-@given(st.lists(state_event_strategy(), min_size=1, max_size=100))
-def test_temporal_chaos_proof(events: list[AnyStateEvent]) -> None:
-    # 1. The Temporal Chaos Proof
-    ledger = EpistemicLedger(history=events)
-
-    # Assert sorted by timestamp
-    for i in range(len(ledger.history) - 1):
-        assert ledger.history[i].timestamp <= ledger.history[i + 1].timestamp
-
-
-@st.composite
-def draw_theory_of_mind_snapshot(draw: st.DrawFn) -> TheoryOfMindSnapshot:
-    return TheoryOfMindSnapshot(
-        target_agent_id=draw(st.from_regex(r"^did:[a-z0-9]+:[a-zA-Z0-9.\-_:]+$", fullmatch=True)),
-        assumed_shared_beliefs=draw(st.lists(st.text())),
-        identified_knowledge_gaps=draw(st.lists(st.text())),
-        empathy_confidence_score=draw(st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False)),
-    )
-
-
-@given(st.text(), st.dictionaries(st.text(), st.text()), st.lists(draw_theory_of_mind_snapshot(), max_size=5))
-def test_working_memory_theory_of_mind(
-    system_prompt: str, active_context: dict[str, str], theory_of_mind_models: list[TheoryOfMindSnapshot]
-) -> None:
-    snapshot = WorkingMemorySnapshot(
-        system_prompt=system_prompt,
-        active_context=active_context,
-        theory_of_mind_models=theory_of_mind_models,
-    )
-    assert snapshot.system_prompt == system_prompt
-    assert snapshot.active_context == active_context
-    assert snapshot.theory_of_mind_models == theory_of_mind_models
+    assert "Economic Validation Failed" in str(exc_info.value)

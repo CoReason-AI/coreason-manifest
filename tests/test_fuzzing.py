@@ -35,6 +35,7 @@ from coreason_manifest.presentation.intents import (
     DraftingIntent,
     EscalationIntent,
     InformationalIntent,
+    RectifiedSignalTrace,
 )
 from coreason_manifest.presentation.scivis import AnyPanel, GrammarPanel, InsightCard
 from coreason_manifest.state.argumentation import ArgumentGraph
@@ -46,7 +47,7 @@ from coreason_manifest.state.events import (
     ObservationEvent,
     SystemFaultEvent,
 )
-from coreason_manifest.state.memory import EpistemicLedger
+from coreason_manifest.state.memory import EpisodicTraceMemory
 from coreason_manifest.state.semantic import (
     SemanticEdge,
     SemanticNode,
@@ -66,6 +67,65 @@ from coreason_manifest.workflow.envelope import WorkflowEnvelope
 from coreason_manifest.workflow.nodes import AgentNode, AnyNode, CompositeNode, HumanNode, SystemNode
 from coreason_manifest.workflow.routing import DynamicRoutingManifest
 from coreason_manifest.workflow.topologies import AnyTopology, OntologicalHandshake, StateContract
+
+
+def test_rectified_signal_trace_confidence_bounds() -> None:
+    """Ensure automated immune system rejects out-of-bounds confidence."""
+    with pytest.raises(ValidationError):
+        RectifiedSignalTrace(
+            stochastic_entropy_input="make it faster",
+            canonical_projection={"urn": "speed_up"},
+            semantic_shift_dictionary={"faster": "speed_up"},
+            rectification_confidence=1.01,  # Out of bounds
+        )
+
+    with pytest.raises(ValidationError):
+        RectifiedSignalTrace(
+            stochastic_entropy_input="make it faster",
+            canonical_projection={"urn": "speed_up"},
+            semantic_shift_dictionary={"faster": "speed_up"},
+            rectification_confidence=-0.01,  # Out of bounds
+        )
+
+
+def test_rectified_signal_trace_canonical_depth() -> None:
+    """Ensure automated immune system rejects recursive JSON bombs."""
+    deep_payload = {"level_1": {"level_2": {"level_3": {"level_4": {"level_5": {"level_6": "bomb"}}}}}}
+    with pytest.raises(ValidationError, match=r"Canonical projection exceeds maximum allowed nesting depth of 5\."):
+        RectifiedSignalTrace(
+            stochastic_entropy_input="stochastic payload",
+            canonical_projection=deep_payload,
+            semantic_shift_dictionary={},
+            rectification_confidence=0.99,
+        )
+
+    with pytest.raises(ValidationError, match=r"Canonical projection dictionary keys must be strings\."):
+        RectifiedSignalTrace(
+            stochastic_entropy_input="stochastic payload",
+            canonical_projection={1: "not a string"},
+            semantic_shift_dictionary={},
+            rectification_confidence=0.99,
+        )
+
+    class InvalidType:
+        pass
+
+    with pytest.raises(ValidationError, match=r"Invalid leaf node type in canonical projection:"):
+        RectifiedSignalTrace(
+            stochastic_entropy_input="stochastic payload",
+            canonical_projection=InvalidType(),
+            semantic_shift_dictionary={},
+            rectification_confidence=0.99,
+        )
+
+    # Lists
+    with pytest.raises(ValidationError, match=r"Canonical projection exceeds maximum allowed nesting depth of 5\."):
+        RectifiedSignalTrace(
+            stochastic_entropy_input="stochastic payload",
+            canonical_projection=[[[[[["bomb"]]]]]],
+            semantic_shift_dictionary={},
+            rectification_confidence=0.99,
+        )
 
 
 @st.composite
@@ -2549,7 +2609,7 @@ def draw_temporal_checkpoint(draw: Any) -> dict[str, Any]:
     return res
 
 
-epistemic_ledger_adapter: TypeAdapter[EpistemicLedger] = TypeAdapter(EpistemicLedger)
+episodic_trace_adapter: TypeAdapter[EpisodicTraceMemory] = TypeAdapter(EpisodicTraceMemory)
 
 
 @st.composite
@@ -2627,32 +2687,65 @@ def draw_defeasible_cascade(draw: Any) -> dict[str, Any]:
 
 
 @st.composite
-def draw_crystallization_policy(draw: Any) -> dict[str, Any]:
+def draw_semantic_crystallization(draw: Any) -> dict[str, Any]:
+    threshold = draw(st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False))
+    delta = draw(st.floats(min_value=threshold, allow_nan=False, allow_infinity=False))
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
-                "min_observations_required": st.integers(min_value=10),
-                "aleatoric_entropy_threshold": st.floats(max_value=0.1, allow_nan=False, allow_infinity=False),
-                "target_memory_tier": st.sampled_from(["semantic", "working"]),
+                "axiom_id": st.text(min_size=1),
+                "source_trace_id": st.text(min_size=1),
+                "aleatoric_entropy_threshold": st.just(threshold),
+                "entropy_delta_score": st.just(delta),
+                "semantic_payload": st.text(min_size=1),
             }
         )
     )
     return res
 
 
+@given(draw_semantic_crystallization())
+def test_semantic_crystallization_fuzzing(payload: dict[str, Any]) -> None:
+    from coreason_manifest.state.memory import SemanticCrystallization
+
+    TypeAdapter(SemanticCrystallization).validate_python(payload)
+
+
 @st.composite
-def draw_epistemic_ledger(draw: Any) -> dict[str, Any]:
+def draw_latent_working_memory(draw: Any) -> dict[str, Any]:
+    max_tokens = draw(st.integers(min_value=1))
+    current_tokens = draw(st.integers(min_value=0, max_value=max_tokens))
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
-                "history": st.lists(draw_any_state_event(), max_size=100),
-                "checkpoints": st.lists(draw_temporal_checkpoint(), max_size=100),
-                "active_rollbacks": st.lists(draw_rollback_request(), max_size=100),
-                "eviction_policy": st.one_of(st.none(), draw_eviction_policy()),
-                "migration_contracts": st.lists(draw_migration_contract(), max_size=10),
-                "truth_maintenance_policy": st.one_of(st.none(), draw_truth_maintenance_policy()),
-                "active_cascades": st.lists(draw_defeasible_cascade(), max_size=100),
-                "crystallization_policy": st.one_of(st.none(), draw_crystallization_policy()),
+                "node_id": draw_did_string(),
+                "max_ttl_seconds": st.integers(min_value=1),
+                "max_context_window_tokens": st.just(max_tokens),
+                "current_tokens": st.just(current_tokens),
+                "state_envelope": st.lists(st.text()),
+            }
+        )
+    )
+    return res
+
+
+@given(draw_latent_working_memory())
+def test_latent_working_memory_fuzzing(payload: dict[str, Any]) -> None:
+    from coreason_manifest.state.memory import LatentWorkingMemory
+
+    TypeAdapter(LatentWorkingMemory).validate_python(payload)
+
+
+@st.composite
+def draw_episodic_trace_memory(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "trace_id": st.text(min_size=1),
+                "node_id": draw_did_string(),
+                "events": st.lists(draw_any_state_event(), max_size=100),
+                "parent_hash": st.text(min_size=1),
+                "merkle_root": st.text(min_size=1),
             }
         )
     )
@@ -2660,17 +2753,10 @@ def draw_epistemic_ledger(draw: Any) -> dict[str, Any]:
 
 
 @settings(max_examples=10, suppress_health_check=[HealthCheck.too_slow])
-@given(draw_epistemic_ledger())
-def test_differentials_routing(payload: dict[str, Any]) -> None:
-    parsed = epistemic_ledger_adapter.validate_python(payload)
-    assert isinstance(parsed, EpistemicLedger)
-
-
-@given(draw_crystallization_policy())
-def test_crystallization_policy_fuzzing(payload: dict[str, Any]) -> None:
-    from coreason_manifest.state.memory import CrystallizationPolicy
-
-    TypeAdapter(CrystallizationPolicy).validate_python(payload)
+@given(draw_episodic_trace_memory())
+def test_episodic_trace_memory_fuzzing(payload: dict[str, Any]) -> None:
+    parsed = episodic_trace_adapter.validate_python(payload)
+    assert isinstance(parsed, EpisodicTraceMemory)
 
 
 @st.composite
