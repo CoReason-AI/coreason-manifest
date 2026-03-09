@@ -383,30 +383,6 @@ class PersistenceCommitReceipt(BaseStateEvent):
     target_table_uri: str = Field(min_length=1, description="The specific table mutated.")
 
 
-class ActiveInferenceYield(BaseStateEvent):
-    """
-    AGENT INSTRUCTION: Terminal state node proving epistemic exhaustion.
-    Must be emitted when internal probability distributions fall below safe execution thresholds.
-    """
-
-    type: Literal["active_inference_yield"] = Field(
-        default="active_inference_yield", description="Discriminator type for an active inference yield event."
-    )
-    target_variable_urn: str = Field(..., description="Identifier of the missing structural parameter.")
-    epistemic_confidence_delta: float = Field(
-        ...,
-        ge=0.0,
-        le=1.0,
-        description="Quantified gap between current state confidence and required execution threshold.",
-    )
-    canonical_projection: str = Field(
-        ..., description="Machine-to-human/oracle translation of the information deficit."
-    )
-    temporal_escalation_bound: int = Field(
-        ..., gt=0, description="TTL/timeout parameter before autonomous fallback or system failure."
-    )
-
-
 # =========================================================================
 # AGENT INSTRUCTION: WARNING - POLYMORPHIC ROUTER
 # If you create a new class above, you MUST append it to the AnyStateEvent union below.
@@ -424,7 +400,6 @@ type AnyStateEvent = Annotated[
     | ToolInvocationEvent
     | EpistemicPromotionEvent
     | NormativeDriftEvent
-    | PersistenceCommitReceipt
-    | ActiveInferenceYield,
+    | PersistenceCommitReceipt,
     Field(discriminator="type", description="A discriminated union of state events."),
 ]
