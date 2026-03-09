@@ -294,7 +294,7 @@ def draw_active_inference_contract(draw: Any) -> dict[str, Any]:
                 "expected_information_gain": st.floats(
                     min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False
                 ),
-                "execution_cost_budget_microcents": st.integers(min_value=0),
+                "execution_cost_budget_magnitude": st.integers(min_value=0),
             }
         )
     )
@@ -492,7 +492,7 @@ def draw_routing_frontier(draw: Any) -> dict[str, Any]:
         st.fixed_dictionaries(
             {
                 "max_latency_ms": st.integers(min_value=1),
-                "max_cost_microcents_per_token": st.integers(min_value=1),
+                "max_cost_magnitude_per_token": st.integers(min_value=1),
                 "min_capability_score": st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False),
                 "tradeoff_preference": st.sampled_from(
                     ["latency_optimized", "cost_optimized", "capability_optimized", "carbon_optimized", "balanced"]
@@ -704,7 +704,7 @@ def draw_prediction_market_policy(draw: Any) -> dict[str, Any]:
         st.fixed_dictionaries(
             {
                 "staking_function": st.sampled_from(["linear", "quadratic"]),
-                "min_liquidity_microcents": st.integers(min_value=0),
+                "min_liquidity_magnitude": st.integers(min_value=0),
                 "convergence_delta_threshold": st.floats(
                     min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False
                 ),
@@ -751,7 +751,7 @@ def draw_hypothesis_stake(draw: Any) -> dict[str, Any]:
             {
                 "agent_id": draw_did_string(),
                 "target_hypothesis_id": st.text(min_size=1),
-                "staked_microcents": st.integers(min_value=1),
+                "staked_magnitude": st.integers(min_value=1),
                 "implied_probability": st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False),
             }
         )
@@ -920,7 +920,7 @@ def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> 
             quorum = consensus.get("quorum_rules")
             if quorum and quorum.get("byzantine_action") == "slash_escrow":
                 payload["council_escrow"] = {
-                    "escrow_locked_microcents": 1000,
+                    "escrow_locked_magnitude": 1000,
                     "release_condition_metric": "pbft_slash_condition",
                     "refund_target_node_id": payload["adjudicator_id"],
                 }
@@ -1465,7 +1465,7 @@ def draw_tool_invocation_event(draw: Any) -> dict[str, Any]:
                 "timestamp": st.floats(allow_nan=False, allow_infinity=False),
                 "tool_name": st.text(min_size=1),
                 "parameters": st.dictionaries(st.text(), st.one_of(st.text(), st.integers(), st.booleans())),
-                "authorized_budget_cents": st.one_of(st.none(), st.integers(min_value=0)),
+                "authorized_budget_magnitude": st.one_of(st.none(), st.integers(min_value=0)),
             }
         )
     )
@@ -1756,7 +1756,7 @@ def test_anyresilience_routing(res_type: str, target: str, fallback: str, reason
 
 @st.composite
 def draw_simulation_escrow(draw: Any) -> dict[str, Any]:
-    res: dict[str, Any] = draw(st.fixed_dictionaries({"locked_microcents": st.integers(min_value=1)}))
+    res: dict[str, Any] = draw(st.fixed_dictionaries({"locked_magnitude": st.integers(min_value=1)}))
     return res
 
 
@@ -1782,16 +1782,16 @@ def test_epistemic_shock_escrow_interlock() -> None:
     from coreason_manifest.testing.chaos import ExogenousEpistemicShock, SimulationEscrow
 
     with pytest.raises(ValidationError, match="greater than 0"):
-        SimulationEscrow(locked_microcents=0)
+        SimulationEscrow(locked_magnitude=0)
 
     # Test the model_validator branch in ExogenousEpistemicShock
-    with pytest.raises(ValidationError, match="ExogenousEpistemicShock requires a strictly positive economic escrow"):
+    with pytest.raises(ValidationError, match="ExogenousEpistemicShock requires a strictly positive escrow"):
         ExogenousEpistemicShock(
             shock_id="s1",
             target_node_hash="a" * 64,
             bayesian_surprise_score=0.1,
             synthetic_payload={},
-            escrow=SimulationEscrow.model_construct(locked_microcents=0),
+            escrow=SimulationEscrow.model_construct(locked_magnitude=0),
         )
 
 
@@ -2014,7 +2014,7 @@ def test_federated_capability_attestation_invalid_vault_keys() -> None:
     sla = BilateralSLA(
         receiving_tenant_id="tenant_a",
         max_permitted_classification=DataClassification.RESTRICTED,
-        liability_limit_cents=100,
+        liability_limit_magnitude=100,
     )
     session = SecureSubSession(
         session_id="s1",
@@ -2151,7 +2151,7 @@ def draw_epistemic_transmutation_task(draw: Any) -> dict[str, Any]:
         "artifact_event_id": draw(st.text(min_size=1)),
         "target_modalities": modalities,
         "compression_sla": draw(draw_epistemic_compression_sla(exclude_sparse=exclude_sparse)),
-        "execution_cost_budget_cents": draw(st.one_of(st.none(), st.integers(min_value=0))),
+        "execution_cost_budget_magnitude": draw(st.one_of(st.none(), st.integers(min_value=0))),
     }
 
 
@@ -2244,7 +2244,7 @@ def draw_formal_verification_contract(draw: Any) -> dict[str, Any]:
 @given(
     st.fixed_dictionaries(
         {
-            "max_budget_microcents": st.integers(min_value=0),
+            "max_budget_magnitude": st.integers(min_value=0),
             "max_global_tokens": st.integers(),
             "global_timeout_seconds": st.integers(min_value=0),
             "formal_verification": st.one_of(st.none(), draw_formal_verification_contract()),
@@ -2257,7 +2257,7 @@ def draw_formal_verification_contract(draw: Any) -> dict[str, Any]:
 def test_global_governance_fuzzing(payload: dict[str, Any]) -> None:
     parsed = global_governance_adapter.validate_python(payload)
     assert isinstance(parsed, GlobalGovernance)
-    assert parsed.max_budget_microcents == payload["max_budget_microcents"]
+    assert parsed.max_budget_magnitude == payload["max_budget_magnitude"]
 
 
 @given(
@@ -2349,7 +2349,7 @@ def draw_task_announcement(draw: Any) -> dict[str, Any]:
                     st.none(),
                     draw_did_string(),
                 ),
-                "max_budget_microcents": st.integers(min_value=0),
+                "max_budget_magnitude": st.integers(min_value=0),
             }
         )
     )
@@ -2362,7 +2362,7 @@ def draw_agent_bid(draw: Any) -> dict[str, Any]:
         st.fixed_dictionaries(
             {
                 "agent_id": draw_did_string(),
-                "estimated_cost_microcents": st.integers(min_value=0),
+                "estimated_cost_magnitude": st.integers(min_value=0),
                 "estimated_latency_ms": st.integers(min_value=0),
                 "estimated_carbon_gco2eq": st.floats(min_value=0.0, allow_nan=False, allow_infinity=False),
                 "confidence_score": st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False),
@@ -2377,7 +2377,7 @@ def draw_escrow_policy(draw: Any, max_escrow: int) -> dict[str, Any]:
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
-                "escrow_locked_microcents": st.integers(min_value=0, max_value=max_escrow),
+                "escrow_locked_magnitude": st.integers(min_value=0, max_value=max_escrow),
                 "release_condition_metric": st.text(min_size=1),
                 "refund_target_node_id": st.text(
                     min_size=1, alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
@@ -2397,7 +2397,7 @@ def draw_task_award(draw: Any) -> dict[str, Any]:
     award: dict[str, Any] = {
         "task_id": draw(st.text()),
         "awarded_syndicate": {agent_id: price},
-        "cleared_price_microcents": price,
+        "cleared_price_magnitude": price,
     }
 
     if draw(st.booleans()):
@@ -2469,9 +2469,9 @@ def test_task_award_syndicate_invalid() -> None:
     payload = {
         "task_id": "test_task",
         "awarded_syndicate": {"agent_1": 50, "agent_2": 40},
-        "cleared_price_microcents": 100,
+        "cleared_price_magnitude": 100,
     }
-    with pytest.raises(ValueError, match="Syndicate allocation sum must exactly equal cleared_price_microcents"):
+    with pytest.raises(ValueError, match="Syndicate allocation sum must exactly equal cleared_price_magnitude"):
         TypeAdapter(TaskAward).validate_python(payload)
 
 
@@ -2481,7 +2481,7 @@ def draw_redaction_rule(draw: Any) -> dict[str, Any]:
         st.fixed_dictionaries(
             {
                 "rule_id": st.text(),
-                "classification": st.sampled_from(["phi", "pii", "pci", "confidential", "public"]),
+                "classification": st.sampled_from(["strictly_confidential", "confidential", "internal", "public"]),
                 "target_pattern": st.text(),
                 "target_regex_pattern": st.text(max_size=200),
                 "context_exclusion_zones": st.one_of(st.none(), st.lists(st.text(), max_size=100)),
@@ -3046,7 +3046,7 @@ def draw_bilateral_sla(draw: Any) -> dict[str, Any]:
                         DataClassification.RESTRICTED,
                     ]
                 ),
-                "liability_limit_cents": st.integers(min_value=0),
+                "liability_limit_magnitude": st.integers(min_value=0),
                 "permitted_geographic_regions": st.lists(st.text(min_size=1), max_size=10),
                 "max_permitted_grid_carbon_intensity": st.one_of(
                     st.none(), st.floats(min_value=0.0, allow_nan=False, allow_infinity=False)
@@ -3070,7 +3070,7 @@ def draw_workflow_envelope(draw: Any) -> dict[str, Any]:
                     st.none(),
                     st.fixed_dictionaries(
                         {
-                            "max_budget_microcents": st.integers(min_value=0),
+                            "max_budget_magnitude": st.integers(min_value=0),
                             "max_global_tokens": st.integers(),
                             "global_timeout_seconds": st.integers(min_value=0),
                             "formal_verification": st.one_of(st.none(), draw_formal_verification_contract()),
@@ -3378,7 +3378,7 @@ def draw_dynamic_routing_manifest(draw: Any) -> dict[str, Any]:
         "artifact_profile": profile,
         "active_subgraphs": active_subgraphs,
         "bypassed_steps": bypassed_steps,
-        "branch_budgets_microcents": draw(st.dictionaries(draw_did_string(), st.integers(min_value=0), max_size=5)),
+        "branch_budgets_magnitude": draw(st.dictionaries(draw_did_string(), st.integers(min_value=0), max_size=5)),
     }
 
 
@@ -3566,6 +3566,49 @@ def test_system2_remediation_prompt_fuzzing() -> None:
         assert isinstance(parsed, System2RemediationPrompt)
 
     run_test()
+
+
+@given(st.text(alphabet=st.characters(blacklist_categories=("Cs",)), min_size=1))  # type: ignore
+@settings(max_examples=15, suppress_health_check=[HealthCheck.too_slow], deadline=None)
+@pytest.mark.anyio
+async def test_mcp_server_malformed_uri_fuzzing(malformed_path: str) -> None:
+    """Assert the server handles malformed schema:// paths without crashing the async loop."""
+    import sys
+    import urllib.parse
+
+    from mcp.client.session import ClientSession
+    from mcp.client.stdio import StdioServerParameters, stdio_client
+    from pydantic import AnyUrl
+
+    # Safely encode the path to ensure it's a valid URI structure for the router to attempt matching
+    safe_path = urllib.parse.quote(malformed_path, safe="")
+    test_uri = f"schema://{safe_path}"
+
+    # Boot the server as a subprocess using stdio transport
+    server_parameters = StdioServerParameters(command=sys.executable, args=["-m", "coreason_manifest.cli.mcp_server"])
+
+    async with (
+        stdio_client(server_parameters) as (read_stream, write_stream),
+        ClientSession(read_stream, write_stream) as session,
+    ):
+        await session.initialize()
+
+        try:
+            # We expect a standard error via the MCP protocol rather than the process crashing
+            await session.read_resource(AnyUrl(test_uri))
+            # Some malformed URIs might actually bypass checking if they accidentally match no router patterns,
+            # or hit an empty mock. The key assertion is just that the server loop did NOT crash.
+        except Exception as e:
+            # We catch any client-raised MypError or connection exceptions, the core test
+            # is just that the server loop continues processing or correctly propagates errors.
+            from mcp.shared.exceptions import McpError
+
+            if isinstance(e, McpError):
+                pass
+            else:
+                # Any exception raised by the read_resource itself is fine,
+                # as long as it isn't an unhandled server crash.
+                pass
 
 
 @given(

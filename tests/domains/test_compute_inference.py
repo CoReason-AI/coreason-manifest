@@ -50,7 +50,7 @@ def test_interventional_causal_task_bounds() -> None:
             intervention_variable="X",
             do_operator_state="1",
             expected_causal_information_gain=-0.1,  # Invalid
-            execution_cost_budget_cents=100,
+            execution_cost_budget_magnitude=100,
         )
     assert "Input should be greater than or equal to 0" in str(exc.value)
 
@@ -61,7 +61,7 @@ def test_interventional_causal_task_bounds() -> None:
             intervention_variable="X",
             do_operator_state="1",
             expected_causal_information_gain=1.1,  # Invalid
-            execution_cost_budget_cents=100,
+            execution_cost_budget_magnitude=100,
         )
     assert "Input should be less than or equal to 1" in str(exc.value)
 

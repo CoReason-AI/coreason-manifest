@@ -113,7 +113,7 @@ def test_active_inference_contract_expected_information_gain_bounds() -> None:
             target_condition_id="cond-1",
             selected_tool_name="tool-1",
             expected_information_gain=-0.1,  # Invalid
-            execution_cost_budget_cents=100,
+            execution_cost_budget_magnitude=100,
         )
     assert "Input should be greater than or equal to 0" in str(exc.value)
 
@@ -124,6 +124,6 @@ def test_active_inference_contract_expected_information_gain_bounds() -> None:
             target_condition_id="cond-1",
             selected_tool_name="tool-1",
             expected_information_gain=1.1,  # Invalid
-            execution_cost_budget_cents=100,
+            execution_cost_budget_magnitude=100,
         )
     assert "Input should be less than or equal to 1" in str(exc.value)
