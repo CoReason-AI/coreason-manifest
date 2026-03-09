@@ -16,7 +16,7 @@ Introducing upstream domains into this module will trigger a fatal dependency lo
 from typing import Any, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import Field
 
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.core.primitives import NodeID
@@ -24,7 +24,7 @@ from coreason_manifest.core.primitives import NodeID
 AttestationMechanism = Literal["fido2_webauthn", "zk_snark_groth16", "pqc_ml_dsa"]
 
 
-class WetwareAttestationContract(BaseModel):
+class WetwareAttestationContract(CoreasonBaseModel):
     """
     AGENT INSTRUCTION: This model represents a SOTA cryptographic receipt
     proving a human in the loop physically authorized a state transition.

@@ -10638,6 +10638,7 @@
       "type": "object"
     },
     "WetwareAttestationContract": {
+      "additionalProperties": false,
       "description": "AGENT INSTRUCTION: This model represents a SOTA cryptographic receipt\nproving a human in the loop physically authorized a state transition.",
       "properties": {
         "mechanism": {

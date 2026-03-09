@@ -14,6 +14,11 @@ from coreason_manifest.core.primitives import NodeID
 from coreason_manifest.oversight.dlp import SecureSubSession
 from coreason_manifest.workflow.envelope import BilateralSLA
 
+"""AGENT INSTRUCTION: This file maps the federated workflow schemas. This is a STRICTLY TOPOLOGICAL BOUNDARY.
+These schemas define the zero-trust information flow constraints and cross-swarm handshakes.
+YOU ARE EXPLICITLY FORBIDDEN from introducing active network dispatch logic, socket connections,
+or mutable state loops here. Focus purely on structural DAG definitions and bilateral SLAs."""
+
 
 class FederatedDiscoveryProtocol(CoreasonBaseModel):
     broadcast_endpoints: list[str] = Field(description="A list of MCP URI endpoints open for B2B task bidding.")
