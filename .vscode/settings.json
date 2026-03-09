@@ -1,0 +1,12 @@
+{
+  "json.schemas": [
+    {
+      "fileMatch": [
+        "*.topology.json",
+        "payloads/**/*.json",
+        "*.manifest.json"
+      ],
+      "url": "./coreason_ontology.schema.json"
+    }
+  ]
+}
