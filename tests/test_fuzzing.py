@@ -3226,7 +3226,7 @@ def draw_n_dimensional_tensor_manifest(draw: Any) -> dict[str, Any]:
 @st.composite
 def draw_invalid_n_dimensional_tensor_manifest(draw: Any) -> dict[str, Any]:
     """Generates an NDimensionalTensorManifest payload with intentionally skewed memory footprint."""
-    valid_manifest = draw(draw_n_dimensional_tensor_manifest())
+    valid_manifest: dict[str, Any] = draw(draw_n_dimensional_tensor_manifest())
     # Intentionally skew the memory footprint to verify immediate validation failure
     skew = draw(st.integers(min_value=1))
     if draw(st.booleans()):
