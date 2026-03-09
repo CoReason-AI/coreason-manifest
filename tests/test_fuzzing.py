@@ -1539,11 +1539,30 @@ def _local_draw_any_state_event(draw: Any) -> dict[str, Any]:
         "timestamp": draw(st.floats(allow_nan=False, allow_infinity=False)),
     }
     if event_type in ("observation", "belief_update"):
+        json_primitives = st.one_of(
+            st.text(max_size=50),
+            st.integers(),
+            st.floats(allow_nan=False, allow_infinity=False),
+            st.booleans(),
+            st.none(),
+        )
+        base_dict = st.dictionaries(st.text(max_size=255), json_primitives, max_size=50)
+
         payload["payload"] = draw(
-            st.dictionaries(
-                st.text(),
-                st.one_of(st.text(), st.integers(), st.floats(allow_nan=False, allow_infinity=False), st.booleans()),
-                max_size=5,
+            st.one_of(
+                base_dict,
+                st.dictionaries(
+                    st.text(max_size=255),
+                    st.recursive(
+                        base_dict,
+                        lambda children: st.one_of(
+                            st.lists(children, max_size=50),
+                            st.dictionaries(st.text(max_size=255), children, max_size=50),
+                        ),
+                        max_leaves=50,
+                    ),
+                    max_size=50,
+                ),
             )
         )
         payload["source_node_id"] = draw(

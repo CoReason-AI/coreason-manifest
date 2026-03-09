@@ -5,16 +5,41 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
+from typing import Any
+
 import pytest
 from pydantic import TypeAdapter, ValidationError
 
 from coreason_manifest.state.events import (
     AnyStateEvent,
+    BeliefUpdateEvent,
     EpistemicPromotionEvent,
     NeuralAuditAttestation,
     NormativeDriftEvent,
+    ObservationEvent,
     SaeFeatureActivation,
 )
+
+
+def test_event_payload_rejects_max_depth() -> None:
+    deep_payload: dict[str, Any] = {}
+    current = deep_payload
+    for _ in range(12):
+        current["nested"] = {}
+        current = current["nested"]
+
+    with pytest.raises(ValueError, match="maximum recursion depth"):
+        ObservationEvent(event_id="obs-123", timestamp=1234567890.0, payload=deep_payload)
+
+
+def test_event_payload_rejects_max_keys() -> None:
+    wide_payload = {f"key_{i}": "val" for i in range(105)}
+    with pytest.raises(ValueError, match="maximum key count"):
+        BeliefUpdateEvent(
+            event_id="bel-123",
+            timestamp=1234567890.0,
+            payload=wide_payload,
+        )
 
 
 def test_sae_feature_activation_valid() -> None:

@@ -14,7 +14,7 @@ and retractions."""
 
 from typing import Annotated, Any, Literal
 
-from pydantic import Field, StringConstraints
+from pydantic import Field, StringConstraints, field_validator
 
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.core.primitives import NodeID
@@ -22,6 +22,40 @@ from coreason_manifest.state.cognition import CognitiveUncertaintyProfile
 from coreason_manifest.state.embodied import EmbodiedSensoryVector
 from coreason_manifest.state.scratchpad import LatentScratchpadTrace
 from coreason_manifest.state.toolchains import AnyToolchainState
+
+
+def _validate_payload_bounds(value: Any, current_depth: int = 0) -> Any:
+    """
+    AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads
+    to prevent OOM/CPU exhaustion during EpistemicLedger hashing.
+    """
+    max_depth = 10
+    max_dict_keys = 100
+    max_list_items = 1000
+    max_str_len = 10000
+
+    if current_depth > max_depth:
+        raise ValueError(f"Payload exceeds maximum recursion depth of {max_depth}")
+
+    if isinstance(value, dict):
+        if len(value) > max_dict_keys:
+            raise ValueError(f"Dictionary exceeds maximum key count of {max_dict_keys}")
+        for k, v in value.items():
+            if not isinstance(k, str):
+                raise ValueError("Dictionary keys must be strings")
+            if len(k) > max_str_len:
+                raise ValueError(f"Dictionary key exceeds max string length of {max_str_len}")
+            _validate_payload_bounds(v, current_depth + 1)
+    elif isinstance(value, list):
+        if len(value) > max_list_items:
+            raise ValueError(f"List exceeds maximum item count of {max_list_items}")
+        for item in value:
+            _validate_payload_bounds(item, current_depth + 1)
+    elif isinstance(value, str):
+        if len(value) > max_str_len:
+            raise ValueError(f"String exceeds maximum length of {max_str_len}")
+
+    return value
 
 
 class BaseStateEvent(CoreasonBaseModel):
@@ -135,6 +169,11 @@ class ObservationEvent(BaseStateEvent):
         "forming a strict bipartite directed edge.",
     )
 
+    @field_validator("payload", mode="before")
+    @classmethod
+    def enforce_payload_topology(cls, v: Any) -> Any:
+        return _validate_payload_bounds(v)
+
 
 class ToolInvocationEvent(BaseStateEvent):
     """A Priori Kinetic Commitment representing the Pearlian Do-Operator prior to network execution."""
@@ -198,6 +237,11 @@ class BeliefUpdateEvent(BaseStateEvent):
         default=None,
         description="The mathematical brain-scan proving exactly which neural circuits fired to append this event.",
     )
+
+    @field_validator("payload", mode="before")
+    @classmethod
+    def enforce_payload_topology(cls, v: Any) -> Any:
+        return _validate_payload_bounds(v)
 
 
 class SystemFaultEvent(BaseStateEvent):
