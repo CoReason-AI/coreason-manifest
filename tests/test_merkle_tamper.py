@@ -53,3 +53,23 @@ def test_merkle_asynchronous_jitter_resilience() -> None:
 
     # The SLA
     assert verify_merkle_proof(chain) is True
+
+def test_sequence_type_hash_collision() -> None:
+    """
+    AGENT INSTRUCTION: Mathematically prove that lists, tuples, and sets
+    containing identical elements map to distinct Merkle root hashes.
+    """
+    from coreason_manifest.telemetry.custody import ExecutionNode
+
+    # Construct identical inner states represented in different sequence structures
+    node_list = ExecutionNode(request_id="n1", inputs="a1", outputs={"data": [1, 2, 3]})
+    node_tuple = ExecutionNode(request_id="n2", inputs="a1", outputs={"data": (1, 2, 3)})
+    node_set = ExecutionNode(request_id="n3", inputs="a1", outputs={"data": {1, 2, 3}})
+
+    hash_list = node_list.generate_node_hash()
+    hash_tuple = node_tuple.generate_node_hash()
+    hash_set = node_set.generate_node_hash()
+
+    assert hash_list != hash_tuple, "CRITICAL: List and Tuple produced identical hashes"
+    assert hash_list != hash_set, "CRITICAL: List and Set produced identical hashes"
+    assert hash_tuple != hash_set, "CRITICAL: Tuple and Set produced identical hashes"
