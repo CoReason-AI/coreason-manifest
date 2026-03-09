@@ -14,6 +14,7 @@ from pydantic import TypeAdapter, ValidationError
 
 from coreason_manifest.adapters.mcp.schemas import HTTPTransportConfig, MCPServerConfig
 from coreason_manifest.core.primitives import DataClassification, RiskLevel
+from coreason_manifest.oversight.cybernetics import CyberneticControlLoop
 from coreason_manifest.oversight.dlp import InformationFlowPolicy
 from coreason_manifest.oversight.governance import GlobalGovernance
 from coreason_manifest.oversight.intervention import (
@@ -2913,6 +2914,39 @@ def draw_any_intervention_payload() -> st.SearchStrategy[dict[str, Any]]:
     )
 
 
+def draw_any_resilience_payload() -> st.SearchStrategy[dict[str, Any]]:
+    return st.one_of(
+        st.fixed_dictionaries(
+            {"type": st.just("quarantine"), "target_node_id": draw_did_string(), "reason": st.text()}
+        ),
+        st.fixed_dictionaries(
+            {"type": st.just("circuit_breaker"), "target_node_id": draw_did_string(), "error_signature": st.text()}
+        ),
+        st.fixed_dictionaries(
+            {"type": st.just("fallback"), "target_node_id": draw_did_string(), "fallback_node_id": draw_did_string()}
+        ),
+    )
+
+
+@st.composite
+def draw_cybernetic_control_loop(draw: Any) -> dict[str, Any]:
+    # Prevent deterministic ValueErrors during fuzzing by avoiding byzantine_fault_detected=True
+    deviation_vector = draw(
+        st.dictionaries(
+            st.text(min_size=1),
+            st.one_of(st.text(), st.integers(), st.floats(allow_nan=False, allow_infinity=False), st.booleans()),
+        ).filter(lambda d: d.get("byzantine_fault_detected") is not True)
+    )
+
+    return {
+        "homeostatic_deviation_vector": deviation_vector,
+        "adjudication_rationale": draw(st.text()),
+        "regulatory_intervention_action": draw(
+            st.one_of(draw_any_intervention_payload(), draw_any_resilience_payload())
+        ),
+    }
+
+
 intervention_payload_adapter: TypeAdapter[AnyInterventionPayload] = TypeAdapter(AnyInterventionPayload)
 
 
@@ -2930,6 +2964,15 @@ def test_anyinterventionpayload_routing(payload: dict[str, Any]) -> None:
         from coreason_manifest.oversight.intervention import ConstitutionalAmendmentProposal
 
         assert isinstance(parsed, ConstitutionalAmendmentProposal)
+
+
+cybernetic_control_loop_adapter: TypeAdapter[CyberneticControlLoop] = TypeAdapter(CyberneticControlLoop)
+
+
+@given(draw_cybernetic_control_loop())
+def test_cybernetic_control_loop_fuzzing(payload: dict[str, Any]) -> None:
+    parsed = cybernetic_control_loop_adapter.validate_python(payload)
+    assert isinstance(parsed, CyberneticControlLoop)
 
 
 workflow_envelope_adapter: TypeAdapter[WorkflowEnvelope] = TypeAdapter(WorkflowEnvelope)
