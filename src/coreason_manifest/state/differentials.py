@@ -12,7 +12,7 @@ event sourcing, hardware attestations, and non-monotonic belief updates."""
 
 from typing import Any, Literal, Self
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import Field, model_validator
 
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.core.primitives import TopologyHash
@@ -162,7 +162,7 @@ class TemporalCheckpoint(CoreasonBaseModel):
     )
 
 
-class RFC6902Patch(BaseModel):
+class RFC6902Patch(CoreasonBaseModel):
     """Deterministic, typed JSON patch for structural toolchain mutation."""
 
     op: Literal["add", "remove", "replace", "move", "copy", "test"]
@@ -170,7 +170,7 @@ class RFC6902Patch(BaseModel):
     value: Any | None = None
 
 
-class AlgorithmicPlasticityDelta(BaseModel):
+class AlgorithmicPlasticityDelta(CoreasonBaseModel):
     """
     Immutable cryptographic receipt of a cybernetic gradient update.
     Represents a declarative shift in swarm behavior following execution failure.
