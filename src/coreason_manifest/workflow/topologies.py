@@ -103,12 +103,13 @@ class ODEGradientBounds(CoreasonBaseModel):
     AGENT INSTRUCTION: This model defines the strict geometric boundaries for continuous-time drift.
     It MUST remain entirely passive.
     """
+
     max_drift_rate: float = Field(..., description="Maximum allowable derivative vector.")
     decay_coefficient_min: float = Field(..., description="Minimum bounding coefficient.")
     decay_coefficient_max: float = Field(..., description="Maximum bounding coefficient.")
 
-    @model_validator(mode='after')
-    def validate_decay_bounds(self) -> 'ODEGradientBounds':
+    @model_validator(mode="after")
+    def validate_decay_bounds(self) -> "ODEGradientBounds":
         if self.decay_coefficient_min > self.decay_coefficient_max:
             raise ValueError("decay_coefficient_min cannot exceed decay_coefficient_max")
         return self

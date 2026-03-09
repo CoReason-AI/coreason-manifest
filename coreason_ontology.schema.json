@@ -1006,6 +1006,7 @@
           "council": "#/$defs/CouncilTopology",
           "dag": "#/$defs/DAGTopology",
           "digital_twin": "#/$defs/DigitalTwinTopology",
+          "dynamical_systems": "#/$defs/DynamicalSystemsTopology",
           "evaluator_optimizer": "#/$defs/EvaluatorOptimizerTopology",
           "evolutionary": "#/$defs/EvolutionaryTopology",
           "macro_adversarial": "#/$defs/AdversarialMarketTopology",
@@ -1042,6 +1043,9 @@
         },
         {
           "$ref": "#/$defs/ConsensusFederationTopology"
+        },
+        {
+          "$ref": "#/$defs/DynamicalSystemsTopology"
         }
       ]
     },
@@ -3718,6 +3722,129 @@
         "branch_budgets_microcents"
       ],
       "title": "DynamicRoutingManifest",
+      "type": "object"
+    },
+    "DynamicalSystemsTopology": {
+      "additionalProperties": false,
+      "description": "AGENT INSTRUCTION: This model MUST NOT contain any async or time.sleep() logic.\nIt is a strictly passive mathematical boundary for external ZK-STARK engines to resolve non-Markovian dynamics.",
+      "properties": {
+        "lifecycle_phase": {
+          "default": "live",
+          "description": "The execution phase of the graph. 'draft' allows incomplete structural state.",
+          "enum": [
+            "draft",
+            "live"
+          ],
+          "title": "Lifecycle Phase",
+          "type": "string"
+        },
+        "architectural_intent": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The AI's declarative rationale for selecting this topology.",
+          "title": "Architectural Intent"
+        },
+        "justification": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cryptographic/audit justification for this topology's configuration.",
+          "title": "Justification"
+        },
+        "nodes": {
+          "additionalProperties": {
+            "$ref": "#/$defs/AnyNode"
+          },
+          "description": "Flat registry of all nodes in this topology.",
+          "propertyNames": {
+            "$ref": "#/$defs/NodeID"
+          },
+          "title": "Nodes",
+          "type": "object"
+        },
+        "shared_state_contract": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StateContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The schema-on-write contract governing the internal state of this topology."
+        },
+        "information_flow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/InformationFlowPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The structural Data Loss Prevention (DLP) contract governing all state mutations in this topology."
+        },
+        "observability": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ObservabilityPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The distributed tracing rules bound to this specific execution graph."
+        },
+        "type": {
+          "const": "dynamical_systems",
+          "default": "dynamical_systems",
+          "description": "Discriminator for a Dynamical Systems topology.",
+          "title": "Type",
+          "type": "string"
+        },
+        "continuous_time_gradients": {
+          "$ref": "#/$defs/ODEGradientBounds"
+        },
+        "max_temporal_backpropagation_ms": {
+          "description": "Escrowed Causality Bound. Absolute max delay before deterministic collapse.",
+          "exclusiveMinimum": 0,
+          "maximum": 3600000,
+          "title": "Max Temporal Backpropagation Ms",
+          "type": "integer"
+        },
+        "environmental_phase_shift_triggers": {
+          "description": "List of required external cryptographic proofs (W3C DIDs or state hashes).",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Environmental Phase Shift Triggers",
+          "type": "array"
+        }
+      },
+      "required": [
+        "nodes",
+        "continuous_time_gradients",
+        "max_temporal_backpropagation_ms",
+        "environmental_phase_shift_triggers"
+      ],
+      "title": "DynamicalSystemsTopology",
       "type": "object"
     },
     "EmbodiedSensoryVector": {
@@ -7344,6 +7471,34 @@
         "contradiction_proof_hash"
       ],
       "title": "NormativeDriftEvent",
+      "type": "object"
+    },
+    "ODEGradientBounds": {
+      "additionalProperties": false,
+      "description": "AGENT INSTRUCTION: This model defines the strict geometric boundaries for continuous-time drift.\nIt MUST remain entirely passive.",
+      "properties": {
+        "max_drift_rate": {
+          "description": "Maximum allowable derivative vector.",
+          "title": "Max Drift Rate",
+          "type": "number"
+        },
+        "decay_coefficient_min": {
+          "description": "Minimum bounding coefficient.",
+          "title": "Decay Coefficient Min",
+          "type": "number"
+        },
+        "decay_coefficient_max": {
+          "description": "Maximum bounding coefficient.",
+          "title": "Decay Coefficient Max",
+          "type": "number"
+        }
+      },
+      "required": [
+        "max_drift_rate",
+        "decay_coefficient_min",
+        "decay_coefficient_max"
+      ],
+      "title": "ODEGradientBounds",
       "type": "object"
     },
     "ObservabilityPolicy": {

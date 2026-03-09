@@ -299,7 +299,7 @@ def test_dynamical_systems_temporal_bounds() -> None:
         nodes={},
         continuous_time_gradients=valid_gradients,
         max_temporal_backpropagation_ms=5000,
-        environmental_phase_shift_triggers=["0x1234567890abcdef1234567890abcdef12345678"]
+        environmental_phase_shift_triggers=["0x1234567890abcdef1234567890abcdef12345678"],
     )
     assert topology.max_temporal_backpropagation_ms == 5000
 
@@ -309,8 +309,9 @@ def test_dynamical_systems_temporal_bounds() -> None:
             nodes={},
             continuous_time_gradients=valid_gradients,
             max_temporal_backpropagation_ms=4000000,
-            environmental_phase_shift_triggers=["did:example:123"]
+            environmental_phase_shift_triggers=["did:example:123"],
         )
+
 
 def test_dynamical_systems_cryptographic_triggers() -> None:
     valid_gradients = ODEGradientBounds(max_drift_rate=1.0, decay_coefficient_min=0.1, decay_coefficient_max=0.5)
@@ -321,8 +322,9 @@ def test_dynamical_systems_cryptographic_triggers() -> None:
             nodes={},
             continuous_time_gradients=valid_gradients,
             max_temporal_backpropagation_ms=5000,
-            environmental_phase_shift_triggers=["wait_for_weather_api"]
+            environmental_phase_shift_triggers=["wait_for_weather_api"],
         )
+
 
 def test_ode_gradient_bounds() -> None:
     # Test mathematical inversion
