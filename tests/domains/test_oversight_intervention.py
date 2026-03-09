@@ -5,11 +5,16 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
-from pydantic import TypeAdapter
+from uuid import uuid4
 
+import pytest
+from pydantic import TypeAdapter, ValidationError
+
+from coreason_manifest.core.identity import WetwareAttestationContract
 from coreason_manifest.oversight.intervention import (
     AnyInterventionPayload,
     ConstitutionalAmendmentProposal,
+    InterventionVerdict,
 )
 
 
@@ -30,3 +35,36 @@ def test_constitutional_amendment_proposal_routing() -> None:
     assert (
         parsed_payload.justification == "The prior rule threshold of 0.9 caused loop condition #42 in state tracking."
     )
+
+
+def test_intervention_verdict_matching_nonce() -> None:
+    nonce = uuid4()
+    attestation = WetwareAttestationContract(
+        mechanism="fido2_webauthn", did_subject="did:example:123", cryptographic_payload="abcd", dag_node_nonce=nonce
+    )
+    verdict = InterventionVerdict(
+        type="verdict",
+        intervention_request_id=nonce,
+        target_node_id="did:node:test",
+        approved=True,
+        feedback=None,
+        attestation=attestation,
+    )
+    assert verdict.attestation == attestation
+
+
+def test_intervention_verdict_mismatched_nonce() -> None:
+    nonce1 = uuid4()
+    nonce2 = uuid4()
+    attestation = WetwareAttestationContract(
+        mechanism="fido2_webauthn", did_subject="did:example:123", cryptographic_payload="abcd", dag_node_nonce=nonce1
+    )
+    with pytest.raises(ValidationError, match="Anti-Replay Lock Triggered"):
+        InterventionVerdict(
+            type="verdict",
+            intervention_request_id=nonce2,
+            target_node_id="did:node:test",
+            approved=True,
+            feedback=None,
+            attestation=attestation,
+        )

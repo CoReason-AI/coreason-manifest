@@ -14,11 +14,36 @@ Introducing upstream domains into this module will trigger a fatal dependency lo
 """
 
 from typing import Any, Literal
+from uuid import UUID
 
-from pydantic import Field
+from pydantic import BaseModel, Field
 
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.core.primitives import NodeID
+
+AttestationMechanism = Literal["fido2_webauthn", "zk_snark_groth16", "pqc_ml_dsa"]
+
+
+class WetwareAttestationContract(BaseModel):
+    """
+    AGENT INSTRUCTION: This model represents a SOTA cryptographic receipt
+    proving a human in the loop physically authorized a state transition.
+    """
+
+    mechanism: AttestationMechanism = Field(
+        ..., description="The SOTA cryptographic mechanism used to generate the proof."
+    )
+    did_subject: str = Field(
+        ..., pattern=r"^did:[a-z0-9]+:.*$", description="The Decentralized Identifier (DID) of the human operator."
+    )
+    cryptographic_payload: str = Field(
+        ...,
+        pattern=r"^[A-Za-z0-9+/=_-]+$",
+        description="The strictly formatted (Base64url/Hex/Multibase) signature or proof.",
+    )
+    dag_node_nonce: UUID = Field(
+        ..., description="The cryptographic nonce tightly binding this signature to the specific Merkle-DAG node."
+    )
 
 
 class VerifiableCredentialPresentation(CoreasonBaseModel):
