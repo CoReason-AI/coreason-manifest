@@ -13,6 +13,8 @@ def test_card_valid_envelope(tmp_path: Path, capsys: pytest.CaptureFixture[str])
         "manifest_version": "1.0.0",
         "topology": {
             "type": "dag",
+                "max_depth": 10,
+                "max_fan_out": 10,
             "lifecycle_phase": "live",
             "architectural_intent": "Linear extraction sequence",
             "justification": "Ensures deterministic token bounds.",

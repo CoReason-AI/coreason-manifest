@@ -63,6 +63,8 @@ def test_fractal_router_snapshot(snapshot: SnapshotAssertion) -> None:
         "session_id": "session_98765",
         "topology": {
             "type": "dag",
+            "max_depth": 10,
+            "max_fan_out": 10,
             "nodes": {
                 "did:web:comp_1": {
                     "type": "composite",

@@ -12,6 +12,8 @@ def test_cwe_674_deep_linear_chain() -> None:
     """
     payload = {
         "type": "dag",
+        "max_depth": 10,
+        "max_fan_out": 10,
         "nodes": {f"did:web:node_{i}": {"type": "system", "description": "pass"} for i in range(5000)},
         "edges": [(f"did:web:node_{i}", f"did:web:node_{i + 1}") for i in range(4999)],
         "allow_cycles": False,
@@ -34,6 +36,8 @@ def test_cwe_674_deep_cycle_detection() -> None:
 
     payload = {
         "type": "dag",
+        "max_depth": 10,
+        "max_fan_out": 10,
         "nodes": {f"did:web:node_{i}": {"type": "system", "description": "pass"} for i in range(5000)},
         "edges": edges,
         "allow_cycles": False,
