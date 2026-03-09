@@ -33,13 +33,11 @@ class CyberneticControlLoop(BaseModel):
         action = self.regulatory_intervention_action
 
         if deviation.get("byzantine_fault_detected") is True:
-            # We enforce that the action must be a severe resilience payload,
-            # represented here by asserting the schema type or specific intent.
-            # (Assuming NetworkQuarantineIntent exists in AnyResiliencePayload)
-            action_type = getattr(action, "intent", None)
-            if action_type not in ("QUARANTINE", "SLASH_STAKE", "CIRCUIT_BREAK"):
+            # Enforce that the action must be a severe resilience payload based on the ontological 'type' field
+            action_type = getattr(action, "type", None)
+            if action_type not in ("quarantine", "slash_stake", "circuit_breaker"):
                 raise ValueError(
                     "ECONOMICS_VIOLATION: A Byzantine fault requires a severe regulatory intervention "
-                    "(QUARANTINE, SLASH_STAKE, or CIRCUIT_BREAK)."
+                    "(quarantine, slash_stake, or circuit_breaker)."
                 )
         return self

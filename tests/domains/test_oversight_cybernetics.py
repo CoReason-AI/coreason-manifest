@@ -44,6 +44,28 @@ def test_byzantine_fault_requires_severe_intervention() -> None:
 
     adapter = TypeAdapter(CyberneticControlLoop)
     with pytest.raises(
-        ValueError, match="ECONOMICS_VIOLATION: A Byzantine fault requires a severe regulatory intervention"
+        ValueError,
+        match=r"ECONOMICS_VIOLATION: A Byzantine fault requires a severe regulatory intervention "
+        r"\(quarantine, slash_stake, or circuit_breaker\).",
     ):
         adapter.validate_python(payload)
+
+
+def test_byzantine_fault_accepts_severe_intervention() -> None:
+    payload = {
+        "homeostatic_deviation_vector": {"byzantine_fault_detected": True, "critical_drift": 0.99},
+        "adjudication_rationale": "Byzantine fault detected; severing malicious node.",
+        "regulatory_intervention_action": {
+            "type": "quarantine",
+            "target_node_id": "did:web:malicious-node",
+            "reason": "Cryptographic signature mismatch.",
+        },
+    }
+
+    adapter = TypeAdapter(CyberneticControlLoop)
+    # This must NOT raise a ValueError
+    obj = adapter.validate_python(payload)
+
+    # Assert structural integrity was maintained
+    assert obj.regulatory_intervention_action.type == "quarantine"
+    assert getattr(obj.regulatory_intervention_action, "target_node_id", None) == "did:web:malicious-node"
