@@ -23,7 +23,7 @@ class EvidentiaryWarrant(CoreasonBaseModel):
     source_event_id: str | None = Field(
         default=None,
         description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for a specific "
-        "observation in the EpistemicLedger.",
+        "observation in the EpisodicTraceMemory.",
     )
     source_semantic_node_id: str | None = Field(
         default=None,

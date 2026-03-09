@@ -1,14 +1,18 @@
 from pydantic import TypeAdapter
 from syrupy.assertion import SnapshotAssertion
 
-from coreason_manifest.state import EpistemicLedger
+from coreason_manifest.state import EpisodicTraceMemory
 from coreason_manifest.telemetry import CustodyRecord
 from coreason_manifest.workflow import WorkflowEnvelope
 
 
 def test_epistemic_ledger_snapshot(snapshot: SnapshotAssertion) -> None:
     payload = {
-        "history": [
+        "trace_id": "trace_1",
+        "node_id": "did:web:node_1",
+        "parent_hash": "hash1",
+        "merkle_root": "hash2",
+        "events": [
             {
                 "type": "belief_update",
                 "event_id": "evt_1",
@@ -36,10 +40,8 @@ def test_epistemic_ledger_snapshot(snapshot: SnapshotAssertion) -> None:
                 },
             }
         ],
-        "checkpoints": [],
-        "active_rollbacks": [],
     }
-    ledger = TypeAdapter(EpistemicLedger).validate_python(payload)
+    ledger = TypeAdapter(EpisodicTraceMemory).validate_python(payload)
     assert snapshot == ledger.model_dump_json(by_alias=True, exclude_none=True)
 
 
