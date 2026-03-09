@@ -10,7 +10,6 @@ These schemas represent the append-only cognitive ledger of the swarm. YOU ARE E
 mutable state loops, standard CRUD database paradigms, or downstream business logic. Focus purely on cryptographic
 event sourcing, hardware attestations, and non-monotonic belief updates."""
 
-import base64
 from typing import Any, Literal, Self
 
 from pydantic import Field, model_validator
@@ -113,33 +112,6 @@ class VectorEmbedding(CoreasonBaseModel):
     )
     dimensionality: int = Field(description="The size of the vector array.")
     model_name: str = Field(description="The provenance of the embedding model used (e.g., 'text-embedding-3-large').")
-
-    @model_validator(mode="after")
-    def _enforce_byte_dimensionality_parity(self) -> "VectorEmbedding":
-        """
-        AGENT INSTRUCTION: Strictly enforces zero-trust dimensionality boundaries.
-        Prevents Byzantine singularities by mathematically proving the decoded byte-length
-        is exactly proportional to the stated precision-agnostic dimensionality.
-        """
-        if not self.vector_base64:
-            return self
-
-        try:
-            raw_bytes = base64.b64decode(self.vector_base64)
-        except Exception as e:
-            raise ValueError(f"Structural fault: Malformed base64 payload. {e}") from e
-
-        byte_len = len(raw_bytes)
-        if byte_len == 0:
-            raise ValueError("Topology fault: Vector payload evaluates to a zero-point singularity (0 bytes).")
-
-        if byte_len % self.dimensionality != 0:
-            raise ValueError(
-                f"Byzantine fault detected: Decoded byte length ({byte_len}) is not "
-                f"mathematically proportional to stated dimensionality ({self.dimensionality})."
-            )
-
-        return self
 
 
 class TemporalBounds(CoreasonBaseModel):
