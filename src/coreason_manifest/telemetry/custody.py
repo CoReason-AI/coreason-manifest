@@ -83,20 +83,15 @@ class ExecutionNode(CoreasonBaseModel):
         def _canonicalize(obj: Any) -> Any:
             if isinstance(obj, dict):
                 return {k: _canonicalize(v) for k, v in sorted(obj.items()) if v is not None}
-            # Sequence Isometry Enforcement
             if isinstance(obj, list):
                 return [_canonicalize(v) for v in obj]
             if isinstance(obj, tuple):
-                return {"__type__": "tuple", "items": [_canonicalize(v) for v in obj]}
+                return tuple([_canonicalize(v) for v in obj])
             if isinstance(obj, set):
-                # Deterministic lexicographical sort prevents iteration entropy
-                return {
-                    "__type__": "set",
-                    "items": sorted(
-                        [_canonicalize(v) for v in obj if v is not None],
-                        key=lambda x: json.dumps(x, sort_keys=True),
-                    ),
-                }
+                return sorted(
+                    [_canonicalize(v) for v in obj if v is not None],
+                    key=lambda x: json.dumps(x, sort_keys=True),
+                )
             return obj
 
         canonical_payload = _canonicalize(payload)

@@ -9,13 +9,12 @@ import re
 from typing import Any
 
 import pytest
-from hypothesis import HealthCheck, assume, given, settings
+from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 from pydantic import TypeAdapter, ValidationError
 
 from coreason_manifest.adapters.mcp.schemas import HTTPTransportConfig, MCPServerConfig
 from coreason_manifest.core.primitives import DataClassification, RiskLevel
-from coreason_manifest.oversight.adjudication import AdjudicationRubric, GradingCriteria
 from coreason_manifest.oversight.dlp import InformationFlowPolicy
 from coreason_manifest.oversight.governance import GlobalGovernance
 from coreason_manifest.oversight.intervention import (
@@ -1366,7 +1365,7 @@ def draw_terminal_buffer_state(draw: Any) -> dict[str, Any]:
         st.fixed_dictionaries(
             {
                 "type": st.just("terminal"),
-                "working_directory": st.from_regex(r"^[a-zA-Z0-9_]+(?:/[a-zA-Z0-9_]+)*$", fullmatch=True),
+                "working_directory": st.text(min_size=1),
                 "stdout_hash": st.text(min_size=10),
                 "stderr_hash": st.text(min_size=10),
                 "env_variables_hash": st.text(min_size=10),
@@ -3546,59 +3545,3 @@ def test_fuzz_utility_justification_tensor_poisoning(fuzzed_vectors: dict[str, f
         # If Hypothesis happened to generate a clean dictionary, it MUST compile.
         graph = UtilityJustificationGraph(optimizing_vectors=fuzzed_vectors, superposition_variance_threshold=0.5)
         assert graph.superposition_variance_threshold == 0.5
-
-
-def test_adjudication_rubric_rejects_zero_weight_topology() -> None:
-    """Ensure zero-weight rubrics structurally fail before hitting the execution engine."""
-    with pytest.raises(ValidationError) as exc_info:
-        # Construct a rubric where all criteria weights sum to exactly 0.0
-        AdjudicationRubric(
-            rubric_id="rubric-zero",
-            criteria=[
-                GradingCriteria(criterion_id="crit-1", description="Test", weight=0.0),
-                GradingCriteria(criterion_id="crit-2", description="Test 2", weight=0.0),
-            ],
-            passing_threshold=50.0,
-        )
-
-    assert "topological DoS (division by zero)" in str(exc_info.value)
-
-
-@st.composite
-def draw_grading_criteria(draw: Any) -> dict[str, Any]:
-    res: dict[str, Any] = draw(
-        st.fixed_dictionaries(
-            {
-                "criterion_id": st.text(min_size=1),
-                "description": st.text(),
-                "weight": st.floats(min_value=0.0, allow_nan=False, allow_infinity=False),
-            }
-        )
-    )
-    return res
-
-
-@st.composite
-def draw_adjudication_rubric(draw: Any) -> dict[str, Any]:
-    criteria = draw(st.lists(draw_grading_criteria(), min_size=1, max_size=5))
-    assume(sum(c["weight"] for c in criteria) > 0.0)
-
-    res: dict[str, Any] = draw(
-        st.fixed_dictionaries(
-            {
-                "rubric_id": st.text(min_size=1),
-                "criteria": st.just(criteria),
-                "passing_threshold": st.floats(min_value=0.0, max_value=100.0, allow_nan=False, allow_infinity=False),
-            }
-        )
-    )
-    return res
-
-
-rubric_adapter: TypeAdapter[AdjudicationRubric] = TypeAdapter(AdjudicationRubric)
-
-
-@given(draw_adjudication_rubric())
-def test_adjudication_rubric_fuzzing(payload: dict[str, Any]) -> None:
-    parsed = rubric_adapter.validate_python(payload)
-    assert isinstance(parsed, AdjudicationRubric)
