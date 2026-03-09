@@ -6,10 +6,9 @@ from hypothesis import HealthCheck, given, settings
 from mcp.server import Server
 from mcp.shared.session import SessionMessage  # type: ignore[attr-defined]
 from mcp.types import JSONRPCMessage
-from pydantic import ValidationError
+from pydantic import HttpUrl, ValidationError
 
 from coreason_manifest.adapters.mcp.schemas import BoundedJSONRPCRequest, HTTPTransportConfig
-from pydantic import HttpUrl
 from coreason_manifest.cli.mcp_server import _global_error_handler_shield
 
 # Initialize the global shield for tests
