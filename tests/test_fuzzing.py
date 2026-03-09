@@ -61,6 +61,7 @@ from coreason_manifest.testing.chaos import ChaosExperiment
 from coreason_manifest.testing.red_team import AdversarialSimulationProfile
 from coreason_manifest.tooling import ActionSpace, ToolDefinition
 from coreason_manifest.workflow.auctions import AuctionState, TaskAward
+from coreason_manifest.workflow.constraints import KinematicFeasibilityProof
 from coreason_manifest.workflow.envelope import WorkflowEnvelope
 from coreason_manifest.workflow.nodes import AgentNode, AnyNode, CompositeNode, HumanNode, SystemNode
 from coreason_manifest.workflow.routing import DynamicRoutingManifest
@@ -3459,3 +3460,24 @@ async def test_mcp_server_malformed_uri_fuzzing(malformed_path: str) -> None:
                 # Any exception raised by the read_resource itself is fine,
                 # as long as it isn't an unhandled server crash.
                 pass
+
+
+# Strategy for strict SHA-256 generation
+sha256_strategy = st.from_regex(r"^[a-f0-9]{64}$", fullmatch=True)
+
+# Strategy for generating valid T-0 Proofs
+kinematic_proof_strategy = st.builds(
+    KinematicFeasibilityProof,
+    substrate_availability_matrix=st.dictionaries(keys=st.text(min_size=1), values=sha256_strategy, min_size=1),
+    mcp_integration_hash=sha256_strategy,
+    data_dimensionality_proof=sha256_strategy,
+    merkle_root_t0=sha256_strategy,
+)
+
+
+@given(kinematic_proof_strategy)
+def test_fuzz_kinematic_feasibility_proof(proof: KinematicFeasibilityProof):
+    """Ensure the cryptographic interlock schema mathematically holds under generative testing."""
+    assert isinstance(proof, KinematicFeasibilityProof)
+    assert len(proof.substrate_availability_matrix) >= 1
+    assert len(proof.merkle_root_t0) == 64
