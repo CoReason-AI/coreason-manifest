@@ -1731,6 +1731,37 @@ def test_anyresilience_routing(res_type: str, target: str, fallback: str, reason
         assert isinstance(parsed, FallbackTrigger)
 
 
+@st.composite
+def draw_simulation_escrow(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(st.fixed_dictionaries({"locked_microcents": st.integers(min_value=1)}))
+    return res
+
+
+@st.composite
+def draw_exogenous_epistemic_shock(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "shock_id": st.text(min_size=1),
+                "target_node_hash": st.from_regex(r"^[a-f0-9]{64}$", fullmatch=True),
+                "bayesian_surprise_score": st.floats(min_value=0.0, allow_nan=False, allow_infinity=False),
+                "synthetic_payload": st.dictionaries(st.text(), st.one_of(st.text(), st.integers(), st.booleans())),
+                "escrow": draw_simulation_escrow(),
+            }
+        )
+    )
+    return res
+
+
+def test_epistemic_shock_escrow_interlock() -> None:
+    from pydantic import ValidationError
+
+    from coreason_manifest.testing.chaos import SimulationEscrow
+
+    with pytest.raises(ValidationError, match="greater than 0"):
+        SimulationEscrow(locked_microcents=0)
+
+
 @given(
     st.text(),
     st.floats(min_value=0.0, allow_nan=False, allow_infinity=False),
@@ -1756,6 +1787,7 @@ def test_anyresilience_routing(res_type: str, target: str, fallback: str, reason
             }
         )
     ),
+    st.lists(draw_exogenous_epistemic_shock(), max_size=5),
 )
 def test_chaosexperiment_fuzzing(
     experiment_id: str,
@@ -1763,6 +1795,7 @@ def test_chaosexperiment_fuzzing(
     max_loops_allowed: int,
     required_tool_usage: list[str] | None,
     faults: list[dict[str, Any]],
+    shocks: list[dict[str, Any]],
 ) -> None:
     payload: dict[str, Any] = {
         "experiment_id": experiment_id,
@@ -1771,6 +1804,7 @@ def test_chaosexperiment_fuzzing(
             "max_loops_allowed": max_loops_allowed,
         },
         "faults": faults,
+        "shocks": shocks,
     }
     if required_tool_usage is not None:
         payload["hypothesis"]["required_tool_usage"] = required_tool_usage

@@ -7,7 +7,9 @@
 
 from .chaos import (
     ChaosExperiment,
+    ExogenousEpistemicShock,
     FaultInjectionProfile,
+    SimulationEscrow,
     SteadyStateHypothesis,
 )
 from .red_team import (
@@ -21,8 +23,10 @@ from .simulation import (
 __all__ = [
     "AdversarialSimulationProfile",
     "ChaosExperiment",
+    "ExogenousEpistemicShock",
     "FaultInjectionProfile",
     "GenerativeManifoldSLA",
+    "SimulationEscrow",
     "SteadyStateHypothesis",
     "SyntheticGenerationProfile",
 ]
