@@ -35,7 +35,7 @@ def test_multimodal_token_anchor_bounds() -> None:
         MultimodalTokenAnchor(token_span_start=5)
 
 
-def test_multimodal_token_anchor_spatial_invariant():
+def test_multimodal_token_anchor_spatial_invariant() -> None:
     """Verify that inverted bounding boxes raise strict struct-legible ValueErrors."""
     from coreason_manifest.state.semantic import MultimodalTokenAnchor
 
