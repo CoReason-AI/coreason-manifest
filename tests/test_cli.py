@@ -79,5 +79,3 @@ def test_visualize_missing_file(capsys: pytest.CaptureFixture[str]) -> None:
 
     captured = capsys.readouterr()
     assert "not found" in captured.err
-
-

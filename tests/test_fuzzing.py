@@ -3568,8 +3568,6 @@ def test_system2_remediation_prompt_fuzzing() -> None:
     run_test()
 
 
-
-
 @given(
     st.sampled_from(
         [

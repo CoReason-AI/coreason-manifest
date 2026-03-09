@@ -101,4 +101,3 @@ def test_explicit_keys_and_list_limits() -> None:
     with pytest.raises(ValidationError) as exc:
         BoundedJSONRPCRequest.model_validate({"jsonrpc": "2.0", "method": "test", "params": "not a dict", "id": 1})
     assert "params must be a dictionary" in str(exc.value)
-
