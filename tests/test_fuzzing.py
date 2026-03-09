@@ -1871,7 +1871,10 @@ def draw_http_transport_config(draw: Any) -> dict[str, Any]:
                 "uri": st.sampled_from(
                     ["http://localhost:8080", "https://api.coreason.ai/mcp", "https://10.0.0.1/rpc"]
                 ),
-                "headers": st.dictionaries(st.text(), st.text()),
+                "headers": st.dictionaries(
+                    st.text().filter(lambda x: "\r" not in x and "\n" not in x),
+                    st.text().filter(lambda x: "\r" not in x and "\n" not in x)
+                ),
             }
         )
     )
