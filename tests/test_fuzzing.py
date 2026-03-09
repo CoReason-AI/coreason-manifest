@@ -628,8 +628,7 @@ def draw_kinematic_decomposition_spec_payload(draw: Any) -> dict[str, Any]:
         st.fixed_dictionaries(
             {
                 "parent_objective_vector": st.one_of(
-                    st.text(min_size=1),
-                    st.lists(st.floats(allow_nan=False, allow_infinity=False), min_size=1)
+                    st.text(min_size=1), st.lists(st.floats(allow_nan=False, allow_infinity=False), min_size=1)
                 ),
                 "sub_topology": draw_topology_payload(draw_any_node_recursive()),
                 "tractability_boundary_proof": st.floats(
