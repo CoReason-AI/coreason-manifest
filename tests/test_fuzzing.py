@@ -1366,7 +1366,7 @@ def draw_terminal_buffer_state(draw: Any) -> dict[str, Any]:
         st.fixed_dictionaries(
             {
                 "type": st.just("terminal"),
-                "working_directory": st.text(min_size=1),
+                "working_directory": st.from_regex(r"^[a-zA-Z0-9_]+(?:/[a-zA-Z0-9_]+)*$", fullmatch=True),
                 "stdout_hash": st.text(min_size=10),
                 "stderr_hash": st.text(min_size=10),
                 "env_variables_hash": st.text(min_size=10),
