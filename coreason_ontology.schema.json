@@ -4061,7 +4061,8 @@
               "text",
               "raster_image",
               "vector_graphics",
-              "tabular_grid"
+              "tabular_grid",
+              "n_dimensional_tensor"
             ],
             "type": "string"
           },
@@ -5199,7 +5200,8 @@
               "text",
               "raster_image",
               "vector_graphics",
-              "tabular_grid"
+              "tabular_grid",
+              "n_dimensional_tensor"
             ],
             "type": "string"
           },
