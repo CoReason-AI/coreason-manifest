@@ -223,13 +223,22 @@ async def test_mcp_stdio_server_happy_path() -> None:
             await anyio.sleep(0.01)
             raise StopAsyncIteration
 
-        async def readline(self) -> str:
-            if self.index < len(self.data):
-                val = self.data[self.index]
-                self.index += 1
-                return val
-            await anyio.sleep(0.01)
-            return ""
+        @property
+        def _raw_buffer(self) -> Any:
+            outer_self = self
+
+            class MockBuffer:
+                def readline(self, limit: int = -1) -> bytes:
+                    if outer_self.index < len(outer_self.data):
+                        val = outer_self.data[outer_self.index].encode("utf-8")
+                        outer_self.index += 1
+                        if limit > 0 and len(val) > limit:
+                            # Simulate OS chunking the returned bytes to limit
+                            return val[:limit]
+                        return val
+                    return b""
+
+            return MockBuffer()
 
         async def write(self, data: Any) -> None:
             self.written = data
@@ -320,13 +329,21 @@ async def test_mcp_json_bomb_rejection() -> None:
             await anyio.sleep(0.1)
             raise StopAsyncIteration
 
-        async def readline(self) -> str:
-            if self.index < len(self.data):
-                val = self.data[self.index]
-                self.index += 1
-                return val
-            await anyio.sleep(0.1)
-            return ""
+        @property
+        def _raw_buffer(self) -> Any:
+            outer_self = self
+
+            class MockBuffer:
+                def readline(self, limit: int = -1) -> bytes:
+                    if outer_self.index < len(outer_self.data):
+                        val = outer_self.data[outer_self.index].encode("utf-8")
+                        outer_self.index += 1
+                        if limit > 0 and len(val) > limit:
+                            return val[:limit]
+                        return val
+                    return b""
+
+            return MockBuffer()
 
         async def write(self, data: Any) -> None:
             pass
@@ -346,10 +363,10 @@ async def test_mcp_json_bomb_rejection() -> None:
         try:
             async with read_stream_writer:
                 while True:
-                    line = await mock_stdin.readline()
-                    if not line:
+                    raw_line = await anyio.to_thread.run_sync(mock_stdin._raw_buffer.readline, max_payload_bytes + 1)
+                    if not raw_line:
                         break
-                    if len(line.encode("utf-8")) > max_payload_bytes:
+                    if len(raw_line) > max_payload_bytes:
                         await read_stream_writer.send(Exception("Parse error: Payload length exceeds 5MB limit."))
                         break
         except anyio.ClosedResourceError:
@@ -484,13 +501,22 @@ async def test_mcp_stdio_json_bomb_guillotine(payload: str) -> None:
             self.data = data
             self.index = 0
 
-        async def readline(self) -> str:
-            if self.index < len(self.data):
-                val = self.data[self.index]
-                self.index += 1
-                return val
-            await anyio.sleep(0.01)
-            return ""
+        @property
+        def _raw_buffer(self) -> Any:
+            outer_self = self
+
+            class MockBuffer:
+                def readline(self, limit: int = -1) -> bytes:
+                    if outer_self.index < len(outer_self.data):
+                        val = outer_self.data[outer_self.index].encode("utf-8")
+                        outer_self.index += 1
+                        if limit > 0 and len(val) > limit:
+                            # Simulate OS chunking the returned bytes to limit
+                            return val[:limit]
+                        return val
+                    return b""
+
+            return MockBuffer()
 
     mock_stdin = PropertyMockAsyncFile([payload])
     read_stream_writer, read_stream = anyio.create_memory_object_stream(0)
@@ -500,10 +526,10 @@ async def test_mcp_stdio_json_bomb_guillotine(payload: str) -> None:
         try:
             async with read_stream_writer:
                 while True:
-                    line = await mock_stdin.readline()
-                    if not line:
+                    raw_line = await anyio.to_thread.run_sync(mock_stdin._raw_buffer.readline, max_payload_bytes + 1)
+                    if not raw_line:
                         break
-                    if len(line.encode("utf-8")) > max_payload_bytes:
+                    if len(raw_line) > max_payload_bytes:
                         await read_stream_writer.send(Exception("Parse error: Payload length exceeds 5MB limit."))
                         break
         except anyio.ClosedResourceError:
