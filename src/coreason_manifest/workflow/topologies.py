@@ -16,9 +16,6 @@ from typing import Annotated, Any, Literal, Self
 
 from pydantic import Field, model_validator
 
-_DID_PATTERN = re.compile(r"^did:[a-z0-9]+:[a-zA-Z0-9.\-:_]+$")
-_HASH_PATTERN = re.compile(r"^0x[a-fA-F0-9]{40,64}$")
-
 from coreason_manifest.compute.stochastic import CrossoverStrategy, FitnessObjective, MutationPolicy
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.core.primitives import NodeID
@@ -28,6 +25,9 @@ from coreason_manifest.telemetry.schemas import ObservabilityPolicy
 from coreason_manifest.workflow.auctions import AuctionPolicy, EscrowPolicy
 from coreason_manifest.workflow.markets import MarketResolution, PredictionMarketState
 from coreason_manifest.workflow.nodes import AnyNode, SystemNode
+
+_DID_PATTERN = re.compile(r"^did:[a-z0-9]+:[a-zA-Z0-9.\-:_]+$")
+_HASH_PATTERN = re.compile(r"^0x[a-fA-F0-9]{40,64}$")
 
 
 class StateContract(CoreasonBaseModel):
