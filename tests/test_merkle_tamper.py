@@ -54,6 +54,7 @@ def test_merkle_asynchronous_jitter_resilience() -> None:
     # The SLA
     assert verify_merkle_proof(chain) is True
 
+
 def test_sequence_type_hash_collision() -> None:
     """
     AGENT INSTRUCTION: Mathematically prove that lists, tuples, and sets
