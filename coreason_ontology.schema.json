@@ -8182,6 +8182,40 @@
       "title": "RateCard",
       "type": "object"
     },
+    "RectifiedSignalTrace": {
+      "additionalProperties": false,
+      "description": "AGENT INSTRUCTION: This schema acts as a cryptographic state-transition receipt\nproving the deterministic decay of high-entropy human stochastic signals into\nlow-entropy canonical pointers. Downstream execution engines MUST mathematically\nverify this receipt before graph traversal.",
+      "properties": {
+        "stochastic_entropy_input": {
+          "title": "Stochastic Entropy Input",
+          "type": "string"
+        },
+        "canonical_projection": {
+          "title": "Canonical Projection"
+        },
+        "semantic_shift_dictionary": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Semantic Shift Dictionary",
+          "type": "object"
+        },
+        "rectification_confidence": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Rectification Confidence",
+          "type": "number"
+        }
+      },
+      "required": [
+        "stochastic_entropy_input",
+        "canonical_projection",
+        "semantic_shift_dictionary",
+        "rectification_confidence"
+      ],
+      "title": "RectifiedSignalTrace",
+      "type": "object"
+    },
     "RedactionRule": {
       "additionalProperties": false,
       "description": "A specific rule for algorithmic data sanitization.",
