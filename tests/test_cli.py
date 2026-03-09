@@ -5,6 +5,7 @@ from unittest.mock import patch
 import pytest
 
 from coreason_manifest.cli.export import main as export_main
+from coreason_manifest.cli.mcp_config import main as mcp_config_main
 from coreason_manifest.cli.mcp_server import get_epistemic_schema
 from coreason_manifest.cli.visualize import main as visualize_main
 
@@ -115,3 +116,29 @@ def test_mcp_server_rbac_projection(monkeypatch: pytest.MonkeyPatch) -> None:
     finally:
         # Clean up
         _AVAILABLE_SCHEMAS.pop(proprietary_name, None)
+
+
+def test_mcp_config_emission(capsys: pytest.CaptureFixture[str]) -> None:
+    """
+    Ensures the MCP configuration generator strictly adheres to the Dependency Airgap
+    and outputs a mathematically provable absolute path to the repository root.
+    """
+    mcp_config_main()
+    captured = capsys.readouterr()
+
+    # 1. Assert Pure JSON Emission
+    payload = json.loads(captured.out)
+    server_config = payload["mcpServers"]["coreason-manifest"]
+
+    # 2. Assert Dependency Airgap
+    assert server_config["command"] == "uv"
+
+    # 3. Assert Mathematical Path Resolution
+    args = server_config["args"]
+    assert "--directory" in args
+    dir_index = args.index("--directory") + 1
+    resolved_path = Path(args[dir_index])
+
+    assert resolved_path.is_absolute(), "Generated path must be absolute."
+    assert resolved_path.exists(), "Generated path must exist on the host file system."
+    assert (resolved_path / "pyproject.toml").exists(), "Generated path must point to the repository root."
