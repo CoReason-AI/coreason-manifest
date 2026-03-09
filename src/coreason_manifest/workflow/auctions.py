@@ -65,9 +65,7 @@ class TaskAward(CoreasonBaseModel):
         description="Strict mapping of agent NodeIDs to their exact fractional payout in magnitude."
     )
     cleared_price_magnitude: int = Field(description="The final cryptographic clearing price.")
-    escrow: EscrowPolicy | None = Field(
-        default=None, description="The conditional escrow locking the compute budget."
-    )
+    escrow: EscrowPolicy | None = Field(default=None, description="The conditional escrow locking the compute budget.")
 
     @model_validator(mode="after")
     def validate_escrow_bounds(self) -> Self:

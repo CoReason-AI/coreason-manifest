@@ -47,9 +47,7 @@ class HypothesisStake(CoreasonBaseModel):
     target_hypothesis_id: Annotated[str, StringConstraints(min_length=1)] = Field(
         description="The exact HypothesisGenerationEvent the agent is betting on."
     )
-    staked_magnitude: int = Field(
-        gt=0, description="The volume of compute budget committed to this position."
-    )
+    staked_magnitude: int = Field(gt=0, description="The volume of compute budget committed to this position.")
     implied_probability: float = Field(ge=0.0, le=1.0, description="The agent's calculated internal confidence score.")
 
 
