@@ -2481,7 +2481,14 @@ def draw_redaction_rule(draw: Any) -> dict[str, Any]:
         st.fixed_dictionaries(
             {
                 "rule_id": st.text(),
-                "classification": st.sampled_from(["strictly_confidential", "confidential", "internal", "public"]),
+                "classification": st.sampled_from(
+                    [
+                        DataClassification.PUBLIC,
+                        DataClassification.INTERNAL,
+                        DataClassification.CONFIDENTIAL,
+                        DataClassification.RESTRICTED,
+                    ]
+                ),
                 "target_pattern": st.text(),
                 "target_regex_pattern": st.text(max_size=200),
                 "context_exclusion_zones": st.one_of(st.none(), st.lists(st.text(), max_size=100)),

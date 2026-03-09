@@ -1686,7 +1686,7 @@
           "type": "string"
         },
         "max_permitted_classification": {
-          "$ref": "#/$defs/coreason_manifest__core__primitives__DataClassification",
+          "$ref": "#/$defs/DataClassification",
           "description": "The absolute highest data sensitivity allowed to cross this federated boundary."
         },
         "liability_limit_magnitude": {
@@ -3206,6 +3206,17 @@
       ],
       "title": "DAGTopology",
       "type": "object"
+    },
+    "DataClassification": {
+      "description": "Standardized Information Flow Control (IFC) lattice boundaries.",
+      "enum": [
+        "public",
+        "internal",
+        "confidential",
+        "restricted"
+      ],
+      "title": "DataClassification",
+      "type": "string"
     },
     "DefeasibleAttack": {
       "additionalProperties": false,
@@ -8311,7 +8322,7 @@
           "type": "string"
         },
         "classification": {
-          "$ref": "#/$defs/coreason_manifest__oversight__dlp__DataClassification",
+          "$ref": "#/$defs/DataClassification",
           "description": "The category of sensitive data this rule targets."
         },
         "target_pattern": {
@@ -10747,7 +10758,7 @@
           "anyOf": [
             {
               "items": {
-                "$ref": "#/$defs/coreason_manifest__core__primitives__DataClassification"
+                "$ref": "#/$defs/DataClassification"
               },
               "type": "array"
             },
@@ -10929,26 +10940,6 @@
           "$ref": "#/$defs/HTTPTransportConfig"
         }
       ]
-    },
-    "coreason_manifest__core__primitives__DataClassification": {
-      "description": "Standardized Information Flow Control (IFC) lattice boundaries.",
-      "enum": [
-        "public",
-        "internal",
-        "confidential",
-        "restricted"
-      ],
-      "title": "DataClassification",
-      "type": "string"
-    },
-    "coreason_manifest__oversight__dlp__DataClassification": {
-      "enum": [
-        "strictly_confidential",
-        "confidential",
-        "internal",
-        "public"
-      ],
-      "type": "string"
     },
     "coreason_manifest__tooling__environments__MCPTransport": {
       "enum": [

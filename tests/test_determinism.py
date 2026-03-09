@@ -265,9 +265,11 @@ def test_rollback_determinism() -> None:
 
 
 def test_dlp_determinism() -> None:
+    from coreason_manifest.core.primitives import DataClassification
+
     rule_a = RedactionRule(
         rule_id="a_phi_redact",
-        classification="strictly_confidential",
+        classification=DataClassification.RESTRICTED,
         target_pattern="pattern_a",
         target_regex_pattern="pattern_a",
         action="redact",
@@ -275,7 +277,7 @@ def test_dlp_determinism() -> None:
     )
     rule_b = RedactionRule(
         rule_id="b_pii_hash",
-        classification="confidential",
+        classification=DataClassification.CONFIDENTIAL,
         target_pattern="pattern_b",
         target_regex_pattern="pattern_b",
         action="hash",
