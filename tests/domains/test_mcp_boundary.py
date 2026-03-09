@@ -110,20 +110,93 @@ def test_explicit_keys_and_list_limits() -> None:
     assert "params must be a dictionary" in str(exc.value)
 
 
-def test_mcp_server_tool_schemas() -> None:
-    """Test standard tool endpoints of mcp_server for branch coverage."""
-    from coreason_manifest.cli.mcp_server import get_schema, list_schemas
+@pytest.mark.anyio
+async def test_mcp_server_resource_schemas() -> None:
+    """Test standard passive resource endpoints of mcp_server for branch coverage."""
+    import json
 
-    schemas = list_schemas()
-    assert len(schemas) > 0
-    # AdjudicationRubric is exported from coreason_manifest core
-    assert "AdjudicationRubric" in schemas
+    from coreason_manifest.cli.mcp_server import (
+        get_capabilities_profile,
+        get_epistemic_schema,
+        get_memoized_state,
+    )
 
-    schema_dict = get_schema("AdjudicationRubric")
+    # Test Epistemic Caching Router
+    schema_str = get_epistemic_schema("AdjudicationRubric")
+    schema_dict = json.loads(schema_str)
     assert schema_dict["title"] == "AdjudicationRubric"
 
     with pytest.raises(ValueError, match="not found in the manifest"):
-        get_schema("DoesNotExistSchema")
+        get_epistemic_schema("DoesNotExistSchema")
+
+    # Test State Memoization Router
+    valid_hash = "a" * 64
+    memoized_str = get_memoized_state(valid_hash)
+    memoized_dict = json.loads(memoized_str)
+    assert memoized_dict["title"] == "MemoizedNode"
+    assert memoized_dict["properties"]["hash"]["const"] == valid_hash
+
+    with pytest.raises(ValueError, match="Invalid hash format"):
+        get_memoized_state("invalid-hash")
+
+    # Test Capability Discovery Router
+    capabilities_str = get_capabilities_profile("ModelProfile")
+    capabilities = json.loads(capabilities_str)
+    assert isinstance(capabilities, list)
+    assert "model_name" in capabilities
+
+    with pytest.raises(ValueError, match="not found in the capabilities definitions"):
+        get_capabilities_profile("DoesNotExistProfile")
+
+    # Test Exception Block for Capability Discovery Router (missing model_json_schema)
+    import coreason_manifest.compute.profiles as profiles_module
+
+    class MockBadProfile:
+        pass
+
+    setattr(profiles_module, "MockBadProfile", MockBadProfile)  # noqa: B010
+    try:
+        bad_caps_str = get_capabilities_profile("MockBadProfile")
+        bad_caps = json.loads(bad_caps_str)
+        assert bad_caps == []
+    finally:
+        delattr(profiles_module, "MockBadProfile")
+
+
+@pytest.mark.anyio
+async def test_mcp_server_zero_trust_boot() -> None:
+    """Update fixtures to boot mcp_server and assert that len(server.list_tools()) == 0 is strictly True."""
+    import sys
+
+    from mcp.client.session import ClientSession
+    from mcp.client.stdio import StdioServerParameters, stdio_client
+
+    # Boot the server as a subprocess using stdio transport
+    server_parameters = StdioServerParameters(command=sys.executable, args=["-m", "coreason_manifest.cli.mcp_server"])
+
+    async with (
+        stdio_client(server_parameters) as (read_stream, write_stream),
+        ClientSession(read_stream, write_stream) as session,
+    ):
+        await session.initialize()
+
+        # 1. Assert len(server.list_tools()) == 0
+        tools_response = await session.list_tools()
+        assert len(tools_response.tools) == 0, "MCP server must be strictly passive with no active tools."
+
+        # 2. Assert successful retrieval from the three new schema:// resource templates.
+        templates_response = await session.list_resource_templates()
+        template_uris = [tpl.uriTemplate for tpl in templates_response.resourceTemplates]
+
+        assert "schema://epistemic/{name}" in template_uris
+        assert "schema://state/memoized/{state_hash}" in template_uris
+        assert "schema://capabilities/{profile}" in template_uris
+
+        # Retrieve specific resource
+        from pydantic import AnyUrl
+
+        epistemic_resource = await session.read_resource(AnyUrl("schema://epistemic/AdjudicationRubric"))
+        assert "AdjudicationRubric" in epistemic_resource.contents[0].text  # type: ignore
 
 
 @pytest.mark.anyio

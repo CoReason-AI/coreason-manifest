@@ -6,7 +6,10 @@
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
 import contextlib
+import inspect
+import json
 import os
+import re
 from typing import Any, cast
 
 from mcp.server.fastmcp import FastMCP
@@ -14,6 +17,10 @@ from pydantic import TypeAdapter
 
 import coreason_manifest
 from coreason_manifest.core import CoreasonBaseModel
+
+# fmt: off
+"""AGENT INSTRUCTION: This MCP Server is strictly passive. DO NOT register @mcp.tool() endpoints. Use @mcp.resource() for all ontological projections."""  # noqa: E501
+# fmt: on
 
 # Create an MCP server
 mcp = FastMCP("coreason-manifest-schema-service")
@@ -48,27 +55,61 @@ def _is_schema_allowed(schema_dict: dict[str, Any], granted_licenses: set[str]) 
     return set(required).issubset(granted_licenses)
 
 
-@mcp.tool()
-def list_schemas() -> list[str]:
-    """Returns a list of all available schema names exported in the root __init__.py, filtered by RBAC context."""
-    granted = _get_granted_licenses()
-    return [name for name in _SCHEMA_NAMES if _is_schema_allowed(_AVAILABLE_SCHEMAS[name], granted)]
-
-
-@mcp.tool()
-def get_schema(schema_name: str) -> dict[str, Any]:
-    """Returns the strict Pydantic JSON schema for a specific requested model, governed by RBAC bounds."""
-    if schema_name not in _AVAILABLE_SCHEMAS:
-        raise ValueError(f"Schema '{schema_name}' not found in the manifest.")
+@mcp.resource("schema://epistemic/{name}")
+def get_epistemic_schema(name: str) -> str:
+    """Returns the strict Pydantic JSON schema string for a specific requested model, governed by RBAC bounds."""
+    if name not in _AVAILABLE_SCHEMAS:
+        raise ValueError(f"Schema '{name}' not found in the manifest.")
 
     granted = _get_granted_licenses()
-    schema_dict = cast("dict[str, Any]", _AVAILABLE_SCHEMAS[schema_name])
+    schema_dict = cast("dict[str, Any]", _AVAILABLE_SCHEMAS[name])
 
     if not _is_schema_allowed(schema_dict, granted):
         # Zero-Trust: If not allowed, it cryptographically does not exist for this client.
-        raise ValueError(f"Schema '{schema_name}' not found in the manifest.")
+        raise ValueError(f"Schema '{name}' not found in the manifest.")
 
-    return schema_dict
+    return json.dumps(schema_dict)
+
+
+@mcp.resource("schema://state/memoized/{state_hash}")
+def get_memoized_state(state_hash: str) -> str:
+    """Returns a purely static/mock MemoizedNode JSON schema representation for the given hash."""
+    if not re.match(r"^[a-f0-9]{64}$", state_hash):
+        raise ValueError(f"Invalid hash format: '{state_hash}'. Must be a 64-character SHA-256 hex string.")
+
+    # Return a static/mock representation.
+    mock_schema = {
+        "title": "MemoizedNode",
+        "type": "object",
+        "description": "Mock MemoizedNode representation",
+        "properties": {
+            "hash": {"title": "Hash", "type": "string", "const": state_hash},
+            "type": {"title": "Type", "type": "string", "const": "memoized"},
+        },
+    }
+    return json.dumps(mock_schema)
+
+
+@mcp.resource("schema://capabilities/{profile}")
+def get_capabilities_profile(profile: str) -> str:
+    """
+    Returns a JSON array string of allowed structural capabilities
+    by intersecting the profile against profiles.py.
+    """
+    import coreason_manifest.compute.profiles as profiles_module
+
+    profile_class = getattr(profiles_module, profile, None)
+    if profile_class is None or not inspect.isclass(profile_class):
+        raise ValueError(f"Profile '{profile}' not found in the capabilities definitions.")
+
+    # Extract allowed structural capabilities from the profile class (Pydantic models)
+    try:
+        schema = profile_class.model_json_schema()
+        capabilities = list(schema.get("properties", {}).keys())
+    except Exception:
+        capabilities = []
+
+    return json.dumps(capabilities)
 
 
 def _global_error_handler_shield() -> None:
