@@ -2925,6 +2925,7 @@ def draw_intervention_verdict(draw: Any) -> dict[str, Any]:
         st.fixed_dictionaries(
             {
                 "type": st.just("verdict"),
+                "intervention_request_id": st.uuids(),
                 "target_node_id": draw_did_string(),
                 "approved": st.booleans(),
                 "feedback": st.one_of(st.none(), st.text()),

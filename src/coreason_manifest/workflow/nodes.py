@@ -21,7 +21,7 @@ from coreason_manifest.compute.stochastic import LogitSteganographyContract
 from coreason_manifest.compute.symbolic import NeuroSymbolicHandoff
 from coreason_manifest.compute.test_time import EscalationContract, ProcessRewardContract
 from coreason_manifest.core.base import CoreasonBaseModel
-from coreason_manifest.core.identity import VerifiableCredentialPresentation
+from coreason_manifest.core.identity import AttestationMechanism, VerifiableCredentialPresentation
 from coreason_manifest.core.primitives import TopologyHash
 from coreason_manifest.oversight.dlp import SecureSubSession
 from coreason_manifest.state.cognition import CognitiveStateProfile
@@ -222,6 +222,12 @@ class HumanNode(BaseNode):
     """
 
     type: Literal["human"] = Field(default="human", description="Discriminator for a Human node.")
+    required_attestation: AttestationMechanism | None = Field(
+        default=None,
+        description="""AGENT INSTRUCTION: If set, the orchestrator MUST NOT resolve
+        this node without a cryptographically matching WetwareAttestationContract
+        supplied in the InterventionVerdict.""",
+    )
 
 
 class SystemNode(BaseNode):

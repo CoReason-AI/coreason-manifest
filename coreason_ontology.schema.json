@@ -5549,6 +5549,24 @@
           "description": "Discriminator for a Human node.",
           "title": "Type",
           "type": "string"
+        },
+        "required_attestation": {
+          "anyOf": [
+            {
+              "enum": [
+                "fido2_webauthn",
+                "zk_snark_groth16",
+                "pqc_ml_dsa"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "AGENT INSTRUCTION: If set, the orchestrator MUST NOT resolve\n        this node without a cryptographically matching WetwareAttestationContract\n        supplied in the InterventionVerdict.",
+          "title": "Required Attestation"
         }
       },
       "required": [
@@ -5945,6 +5963,12 @@
           "title": "Type",
           "type": "string"
         },
+        "intervention_request_id": {
+          "description": "The cryptographic nonce uniquely identifying the intervention request.",
+          "format": "uuid",
+          "title": "Intervention Request Id",
+          "type": "string"
+        },
         "target_node_id": {
           "$ref": "#/$defs/NodeID",
           "description": "The ID of the target node."
@@ -5965,9 +5989,22 @@
           ],
           "description": "Optional feedback provided along with the verdict.",
           "title": "Feedback"
+        },
+        "attestation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/WetwareAttestationContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The cryptographic proof provided by the human operator, if required."
         }
       },
       "required": [
+        "intervention_request_id",
         "target_node_id",
         "approved",
         "feedback"
@@ -10563,6 +10600,47 @@
         "seed_hash"
       ],
       "title": "VerifiableEntropy",
+      "type": "object"
+    },
+    "WetwareAttestationContract": {
+      "description": "AGENT INSTRUCTION: This model represents a SOTA cryptographic receipt\nproving a human in the loop physically authorized a state transition.",
+      "properties": {
+        "mechanism": {
+          "description": "The SOTA cryptographic mechanism used to generate the proof.",
+          "enum": [
+            "fido2_webauthn",
+            "zk_snark_groth16",
+            "pqc_ml_dsa"
+          ],
+          "title": "Mechanism",
+          "type": "string"
+        },
+        "did_subject": {
+          "description": "The Decentralized Identifier (DID) of the human operator.",
+          "pattern": "^did:[a-z0-9]+:.*$",
+          "title": "Did Subject",
+          "type": "string"
+        },
+        "cryptographic_payload": {
+          "description": "The strictly formatted (Base64url/Hex/Multibase) signature or proof.",
+          "pattern": "^[A-Za-z0-9+/=_-]+$",
+          "title": "Cryptographic Payload",
+          "type": "string"
+        },
+        "dag_node_nonce": {
+          "description": "The cryptographic nonce tightly binding this signature to the specific Merkle-DAG node.",
+          "format": "uuid",
+          "title": "Dag Node Nonce",
+          "type": "string"
+        }
+      },
+      "required": [
+        "mechanism",
+        "did_subject",
+        "cryptographic_payload",
+        "dag_node_nonce"
+      ],
+      "title": "WetwareAttestationContract",
       "type": "object"
     },
     "WorkflowEnvelope": {

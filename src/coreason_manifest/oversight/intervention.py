@@ -13,10 +13,12 @@ All policies must be declarative, deterministic, and capable of severing memory 
 """
 
 from typing import Annotated, Any, Literal
+from uuid import UUID
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from coreason_manifest.core.base import CoreasonBaseModel
+from coreason_manifest.core.identity import WetwareAttestationContract
 from coreason_manifest.core.primitives import NodeID
 
 type LifecycleTrigger = Literal[
@@ -98,9 +100,27 @@ class InterventionVerdict(CoreasonBaseModel):
     """
 
     type: Literal["verdict"] = Field(default="verdict", description="The type of the intervention payload.")
+    intervention_request_id: UUID = Field(
+        description="The cryptographic nonce uniquely identifying the intervention request."
+    )
     target_node_id: NodeID = Field(description="The ID of the target node.")
     approved: bool = Field(description="Indicates whether the proposed action was approved.")
     feedback: str | None = Field(description="Optional feedback provided along with the verdict.")
+    attestation: WetwareAttestationContract | None = Field(
+        default=None, description="The cryptographic proof provided by the human operator, if required."
+    )
+
+    @model_validator(mode="after")
+    def verify_attestation_nonce(self) -> "InterventionVerdict":
+        """
+        Mathematically guarantees that if a cryptographic signature is presented,
+        it cannot be a replay attack from a different node in the DAG.
+        """
+        if self.attestation is not None and self.attestation.dag_node_nonce != self.intervention_request_id:
+            raise ValueError(
+                "Anti-Replay Lock Triggered: Attestation nonce does not match the intervention request ID."
+            )
+        return self
 
 
 class OverrideIntent(CoreasonBaseModel):
