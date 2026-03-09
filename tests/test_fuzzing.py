@@ -3455,4 +3455,6 @@ async def test_mcp_server_malformed_uri_fuzzing(malformed_path: str) -> None:
             if isinstance(e, McpError):
                 pass
             else:
-                pass # any exception raised by the read_resource itself is fine, as long as it isn't an unhandled server crash.
+                # Any exception raised by the read_resource itself is fine,
+                # as long as it isn't an unhandled server crash.
+                pass
