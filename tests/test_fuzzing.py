@@ -4,6 +4,7 @@
 # The issuer of the Prosperity Public License for this software is CoReason, Inc..
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
+import math
 import re
 from typing import Any
 
@@ -3459,9 +3460,6 @@ async def test_mcp_server_malformed_uri_fuzzing(malformed_path: str) -> None:
                 # Any exception raised by the read_resource itself is fine,
                 # as long as it isn't an unhandled server crash.
                 pass
-
-
-import math
 
 
 @given(st.dictionaries(st.text(min_size=1), st.floats(allow_nan=True, allow_infinity=True)))
