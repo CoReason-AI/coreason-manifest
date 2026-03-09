@@ -8,7 +8,7 @@
 """
 AGENT INSTRUCTION: This module exposes the centralized, passive logger.
 Per the Coreason Protocol, you are STRICTLY FORBIDDEN from configuring sinks
-(e.g., logger.add()) or modifying execution state here.
+(e.g., logger dot add) or modifying execution state here.
 """
 
 from loguru import logger
