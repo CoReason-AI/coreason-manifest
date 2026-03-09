@@ -183,7 +183,7 @@ class ToolInvocationEvent(BaseStateEvent):
     )
     tool_name: str = Field(description="The exact tool targeted in the ActionSpace.")
     parameters: dict[str, Any] = Field(description="The intended JSON-RPC payload.")
-    authorized_budget_cents: int | None = Field(
+    authorized_budget_magnitude: int | None = Field(
         default=None, ge=0, description="The maximum escrow unlocked for this specific run."
     )
 

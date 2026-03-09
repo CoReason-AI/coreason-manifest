@@ -44,7 +44,9 @@ class BilateralSLA(CoreasonBaseModel):
     max_permitted_classification: DataClassification = Field(
         description="The absolute highest data sensitivity allowed to cross this federated boundary."
     )
-    liability_limit_magnitude: int = Field(ge=0, description="The strict magnitude cap on cross-tenant economic liability.")
+    liability_limit_magnitude: int = Field(
+        ge=0, description="The strict magnitude cap on cross-tenant economic liability."
+    )
     permitted_geographic_regions: list[str] = Field(
         default_factory=list,
         description=(
