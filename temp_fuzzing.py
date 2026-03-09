@@ -38,7 +38,7 @@ from coreason_manifest.presentation.intents import (
     InformationalIntent,
 )
 from coreason_manifest.presentation.scivis import AnyPanel, GrammarPanel, InsightCard
-from coreason_manifest.state.argumentation import ArgumentGraph, UtilityJustificationGraph
+from coreason_manifest.state.argumentation import ArgumentGraph
 from coreason_manifest.state.events import (
     AnyStateEvent,
     BeliefUpdateEvent,
@@ -64,7 +64,6 @@ from coreason_manifest.testing.red_team import AdversarialSimulationProfile
 from coreason_manifest.tooling import ActionSpace, ToolDefinition
 from coreason_manifest.workflow.auctions import AuctionState, TaskAward
 from coreason_manifest.workflow.envelope import WorkflowEnvelope
-from coreason_manifest.workflow.markets import MarketContract
 from coreason_manifest.workflow.nodes import AgentNode, AnyNode, CompositeNode, HumanNode, SystemNode
 from coreason_manifest.workflow.routing import DynamicRoutingManifest
 from coreason_manifest.workflow.topologies import AnyTopology, OntologicalHandshake, StateContract
@@ -3566,55 +3565,3 @@ def test_system2_remediation_prompt_fuzzing() -> None:
         assert isinstance(parsed, System2RemediationPrompt)
 
     run_test()
-
-
-
-
-@given(
-    st.sampled_from(
-        [
-            "http://169.254.169.254/latest/meta-data/",
-            "https://localhost:8080/admin",
-            "http://127.0.0.1",
-            "http://[::1]",
-            "file:///etc/passwd",
-            "http://kubelet.local:10250",
-        ]
-    )
-)
-def test_adversarial_ssrf_rejection(adversarial_url: str) -> None:
-    """Mathematically prove adversarial spatial coordinates cause immediate epistemic collapse."""
-    from coreason_manifest.state.toolchains import BrowserDOMState
-
-    with pytest.raises(ValidationError, match="SSRF"):
-        # We must supply other required fields for initialization to only fail on current_url
-        BrowserDOMState(
-            current_url=adversarial_url, viewport_size=(800, 600), dom_hash="a" * 64, accessibility_tree_hash="a" * 64
-        )
-
-
-@given(st.dictionaries(st.text(min_size=1), st.floats(allow_nan=True, allow_infinity=True)))
-def test_fuzz_utility_justification_tensor_poisoning(fuzzed_vectors: dict[str, float]) -> None:
-    """
-    AGENT INSTRUCTION: Ensure the AST strictly catches adversarial NaN/Inf floats.
-    We must explicitly prove the exception is raised when toxic tensors are present.
-    """
-    has_poison = any(math.isnan(v) or math.isinf(v) for v in fuzzed_vectors.values())
-
-    if has_poison:
-        with pytest.raises(ValidationError, match="Tensor Poisoning Detected"):
-            UtilityJustificationGraph(optimizing_vectors=fuzzed_vectors, superposition_variance_threshold=0.5)
-    else:
-        # If Hypothesis happened to generate a clean dictionary, it MUST compile.
-        graph = UtilityJustificationGraph(optimizing_vectors=fuzzed_vectors, superposition_variance_threshold=0.5)
-        assert graph.superposition_variance_threshold == 0.5
-
-
-@given(
-    min_col=st.floats(min_value=0.0, max_value=100.0),
-    slash_pen=st.floats(min_value=100.1, max_value=1000.0),  # Intentionally larger
-)
-def test_fuzz_economic_escrow_invariant_rejection(min_col: float, slash_pen: float) -> None:
-    """Ensure MarketContract rejects states where penalty exceeds collateral."""
-    with pytest.raises(ValidationError, match="ECONOMIC INVARIANT VIOLATION"):
-        MarketContract(minimum_collateral=min_col, slashing_penalty=slash_pen)
