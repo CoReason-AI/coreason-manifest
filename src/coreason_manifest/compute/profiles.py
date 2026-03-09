@@ -30,7 +30,7 @@ class RoutingFrontier(CoreasonBaseModel):
         gt=0, description="The absolute physical speed limit acceptable for time-to-first-token or total generation."
     )
     max_cost_microcents_per_token: int = Field(
-        gt=0, description="The strict financial ceiling. MUST be an integer to maintain cryptographic determinism."
+        gt=0, description="The strict magnitude ceiling. MUST be an integer to maintain cryptographic determinism."
     )
     min_capability_score: float = Field(
         ge=0.0, le=1.0, description="The cognitive capability floor required for the task (0.0 to 1.0)."

@@ -155,7 +155,7 @@ class ConstitutionalAmendmentProposal(CoreasonBaseModel):
         "to mutate the GovernancePolicy."
     )
     justification: str = Field(
-        description="The AI's natural language legal/logical argument for why this patch resolves the contradiction "
+        description="The AI's natural language structural/logical argument for why this patch resolves the contradiction "
         "without violating the root AnchoringPolicy."
     )
 

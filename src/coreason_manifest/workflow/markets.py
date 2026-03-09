@@ -38,7 +38,7 @@ class MarketContract(CoreasonBaseModel):
 
 class HypothesisStake(CoreasonBaseModel):
     """
-    The mathematical record of an agent taking a financial/compute position on a specific causal hypothesis.
+    The mathematical record of an agent taking a magnitude/compute position on a specific causal hypothesis.
     """
 
     agent_id: Annotated[str, StringConstraints(min_length=1)] = Field(

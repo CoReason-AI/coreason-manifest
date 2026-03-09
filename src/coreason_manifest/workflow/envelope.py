@@ -44,24 +44,24 @@ class BilateralSLA(CoreasonBaseModel):
     max_permitted_classification: DataClassification = Field(
         description="The absolute highest data sensitivity allowed to cross this federated boundary."
     )
-    liability_limit_cents: int = Field(ge=0, description="The strict financial cap on cross-tenant economic liability.")
+    liability_limit_magnitude: int = Field(ge=0, description="The strict magnitude cap on cross-tenant economic liability.")
     permitted_geographic_regions: list[str] = Field(
         default_factory=list,
         description=(
             "Explicit whitelist of geographic regions or cloud enclaves where execution "
-            "is legally permitted (Data Residency Pinning)."
+            "is structurally permitted (Data Residency Pinning)."
         ),
     )
     max_permitted_grid_carbon_intensity: float | None = Field(
         default=None,
         ge=0.0,
         description=(
-            "Absolute legal ESG mandate. The execution graph will quarantine any "
+            "Absolute structural ESG mandate. The execution graph will quarantine any "
             "federated node operating on a grid exceeding this gCO2eq/kWh threshold."
         ),
     )
     pq_signature: PostQuantumSignature | None = Field(
-        default=None, description="The quantum-resistant signature securing the multi-tenant legal boundary."
+        default=None, description="The quantum-resistant signature securing the multi-tenant structural boundary."
     )
 
 
