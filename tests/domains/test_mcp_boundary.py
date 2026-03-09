@@ -3,9 +3,9 @@ from typing import Any
 import hypothesis.strategies as st
 import pytest
 from hypothesis import HealthCheck, given, settings
-from pydantic import HttpUrl, ValidationError
+from pydantic import ValidationError
 
-from coreason_manifest.adapters.mcp.schemas import BoundedJSONRPCRequest, HTTPTransportConfig
+from coreason_manifest.adapters.mcp.schemas import BoundedJSONRPCRequest
 
 
 def test_jsonrpc_fuzzer_missing_jsonrpc() -> None:
@@ -106,5 +106,4 @@ def test_explicit_keys_and_list_limits() -> None:
 @pytest.mark.anyio
 async def test_mcp_server_resource_schemas() -> None:
     """Test standard passive resource endpoints of mcp_server for branch coverage."""
-    import json
 
