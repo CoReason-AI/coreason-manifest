@@ -5915,7 +5915,9 @@
         },
         "intervention_request_id": {
           "description": "The cryptographic nonce uniquely identifying the intervention request.",
-          "title": "Intervention Request Id"
+          "format": "uuid",
+          "title": "Intervention Request Id",
+          "type": "string"
         },
         "target_node_id": {
           "$ref": "#/$defs/NodeID",

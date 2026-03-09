@@ -13,6 +13,7 @@ All policies must be declarative, deterministic, and capable of severing memory 
 """
 
 from typing import Annotated, Any, Literal
+from uuid import UUID
 
 from pydantic import Field, model_validator
 
@@ -99,7 +100,7 @@ class InterventionVerdict(CoreasonBaseModel):
     """
 
     type: Literal["verdict"] = Field(default="verdict", description="The type of the intervention payload.")
-    intervention_request_id: Any = Field(
+    intervention_request_id: UUID = Field(
         description="The cryptographic nonce uniquely identifying the intervention request."
     )
     target_node_id: NodeID = Field(description="The ID of the target node.")
