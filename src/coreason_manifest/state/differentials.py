@@ -138,7 +138,7 @@ class RollbackRequest(CoreasonBaseModel):
         )
     )
     target_event_id: str = Field(
-        description=("The Content Identifier (CID) of the corrupted event in the EpistemicLedger to revert to.")
+        description=("The Content Identifier (CID) of the corrupted event in the EpisodicTraceMemory to revert to.")
     )
     invalidated_node_ids: list[str] = Field(
         default_factory=list,
@@ -155,7 +155,9 @@ class TemporalCheckpoint(CoreasonBaseModel):
     checkpoint_id: str = Field(
         description=("A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the temporal anchor.")
     )
-    ledger_index: int = Field(description="The exact array index in the EpistemicLedger this checkpoint represents.")
+    ledger_index: int = Field(
+        description="The exact array index in the EpisodicTraceMemory this checkpoint represents."
+    )
     state_hash: str = Field(
         description="The canonical RFC 8785 SHA-256 hash of the entire topology at this exact index."
     )

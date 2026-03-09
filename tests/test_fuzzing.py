@@ -46,7 +46,7 @@ from coreason_manifest.state.events import (
     ObservationEvent,
     SystemFaultEvent,
 )
-from coreason_manifest.state.memory import EpistemicLedger
+from coreason_manifest.state.memory import EpisodicTraceMemory
 from coreason_manifest.state.semantic import (
     SemanticEdge,
     SemanticNode,
@@ -2548,7 +2548,7 @@ def draw_temporal_checkpoint(draw: Any) -> dict[str, Any]:
     return res
 
 
-epistemic_ledger_adapter: TypeAdapter[EpistemicLedger] = TypeAdapter(EpistemicLedger)
+epistemic_ledger_adapter: TypeAdapter[EpisodicTraceMemory] = TypeAdapter(EpisodicTraceMemory)
 
 
 @st.composite
@@ -2626,32 +2626,65 @@ def draw_defeasible_cascade(draw: Any) -> dict[str, Any]:
 
 
 @st.composite
-def draw_crystallization_policy(draw: Any) -> dict[str, Any]:
+def draw_semantic_crystallization(draw: Any) -> dict[str, Any]:
+    threshold = draw(st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False))
+    delta = draw(st.floats(min_value=threshold, allow_nan=False, allow_infinity=False))
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
-                "min_observations_required": st.integers(min_value=10),
-                "aleatoric_entropy_threshold": st.floats(max_value=0.1, allow_nan=False, allow_infinity=False),
-                "target_memory_tier": st.sampled_from(["semantic", "working"]),
+                "axiom_id": st.text(min_size=1),
+                "source_trace_id": st.text(min_size=1),
+                "aleatoric_entropy_threshold": st.just(threshold),
+                "entropy_delta_score": st.just(delta),
+                "semantic_payload": st.text(min_size=1),
             }
         )
     )
     return res
 
 
+@given(draw_semantic_crystallization())
+def test_semantic_crystallization_fuzzing(payload: dict[str, Any]) -> None:
+    from coreason_manifest.state.memory import SemanticCrystallization
+
+    TypeAdapter(SemanticCrystallization).validate_python(payload)
+
+
 @st.composite
-def draw_epistemic_ledger(draw: Any) -> dict[str, Any]:
+def draw_latent_working_memory(draw: Any) -> dict[str, Any]:
+    max_tokens = draw(st.integers(min_value=1))
+    current_tokens = draw(st.integers(min_value=0, max_value=max_tokens))
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
-                "history": st.lists(draw_any_state_event(), max_size=100),
-                "checkpoints": st.lists(draw_temporal_checkpoint(), max_size=100),
-                "active_rollbacks": st.lists(draw_rollback_request(), max_size=100),
-                "eviction_policy": st.one_of(st.none(), draw_eviction_policy()),
-                "migration_contracts": st.lists(draw_migration_contract(), max_size=10),
-                "truth_maintenance_policy": st.one_of(st.none(), draw_truth_maintenance_policy()),
-                "active_cascades": st.lists(draw_defeasible_cascade(), max_size=100),
-                "crystallization_policy": st.one_of(st.none(), draw_crystallization_policy()),
+                "node_id": draw_did_string(),
+                "max_ttl_seconds": st.integers(min_value=1),
+                "max_context_window_tokens": st.just(max_tokens),
+                "current_tokens": st.just(current_tokens),
+                "state_envelope": st.lists(st.text()),
+            }
+        )
+    )
+    return res
+
+
+@given(draw_latent_working_memory())
+def test_latent_working_memory_fuzzing(payload: dict[str, Any]) -> None:
+    from coreason_manifest.state.memory import LatentWorkingMemory
+
+    TypeAdapter(LatentWorkingMemory).validate_python(payload)
+
+
+@st.composite
+def draw_episodic_trace_memory(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "trace_id": st.text(min_size=1),
+                "node_id": draw_did_string(),
+                "events": st.lists(draw_any_state_event(), max_size=100),
+                "parent_hash": st.text(min_size=1),
+                "merkle_root": st.text(min_size=1),
             }
         )
     )
@@ -2659,17 +2692,10 @@ def draw_epistemic_ledger(draw: Any) -> dict[str, Any]:
 
 
 @settings(max_examples=10, suppress_health_check=[HealthCheck.too_slow])
-@given(draw_epistemic_ledger())
+@given(draw_episodic_trace_memory())
 def test_differentials_routing(payload: dict[str, Any]) -> None:
     parsed = epistemic_ledger_adapter.validate_python(payload)
-    assert isinstance(parsed, EpistemicLedger)
-
-
-@given(draw_crystallization_policy())
-def test_crystallization_policy_fuzzing(payload: dict[str, Any]) -> None:
-    from coreason_manifest.state.memory import CrystallizationPolicy
-
-    TypeAdapter(CrystallizationPolicy).validate_python(payload)
+    assert isinstance(parsed, EpisodicTraceMemory)
 
 
 @st.composite

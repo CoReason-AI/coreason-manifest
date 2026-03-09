@@ -275,7 +275,7 @@ class HypothesisGenerationEvent(BaseStateEvent):
         "disprove this premise.",
     )
     status: Literal["active", "falsified", "verified"] = Field(
-        default="active", description="The current validity state of this hypothesis in the EpistemicLedger."
+        default="active", description="The current validity state of this hypothesis in the EpisodicTraceMemory."
     )
     causal_model: StructuralCausalModel | None = Field(
         default=None,
