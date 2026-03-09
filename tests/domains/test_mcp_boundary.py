@@ -467,7 +467,7 @@ async def test_uptime_assertion_poison_pill() -> None:
 @settings(max_examples=10, deadline=None)
 @given(
     payload=st.text(
-        alphabet=st.characters(blacklist_characters=["\n", "\r"], blacklist_categories=("Cs",)),
+        alphabet=st.characters(blacklist_characters=["\n", "\r"], blacklist_categories=["Cs"]),
         min_size=501,
         max_size=600,
     ).map(lambda s: s * 10000)
