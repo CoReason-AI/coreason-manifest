@@ -203,3 +203,30 @@ class MCPPromptRef(CoreasonBaseModel):
     arguments: dict[str, Any] = Field(default_factory=dict, description="Arguments to fill the prompt template.")
     fallback_persona: str | None = Field(default=None, description="A fallback persona if the prompt fails to load.")
     prompt_hash: str | None = Field(default=None, description="Cryptographic hash for prompt integrity verification.")
+
+
+class CallToolRequest(BoundedJSONRPCRequest):
+    """A request to call a tool provided by an MCP server."""
+
+    method: Literal["tools/call"] = Field(..., description="The method for calling a tool.")
+    params: dict[str, Any] = Field(..., description="Parameters containing the tool name and arguments.")
+
+
+class ResourceTemplate(CoreasonBaseModel):
+    """A template for a resource provided by an MCP server."""
+
+    uri_template: str = Field(
+        ...,
+        alias="uriTemplate",
+        description="A URI template (according to RFC 6570) that can be used to construct resource URIs.",
+    )
+    name: str = Field(..., description="A human-readable name for the type of resource this template refers to.")
+    description: str | None = Field(default=None, description="A description of what this template is for.")
+    mime_type: str | None = Field(
+        default=None,
+        alias="mimeType",
+        description=(
+            "The MIME type for all resources that match this template. This should only be included "
+            "if all resources matching this template have the same type."
+        ),
+    )
