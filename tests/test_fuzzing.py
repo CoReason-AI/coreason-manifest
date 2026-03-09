@@ -52,6 +52,7 @@ from coreason_manifest.state.semantic import (
     SemanticEdge,
     SemanticNode,
 )
+from coreason_manifest.state.tensors import NDimensionalTensorManifest, TensorDType
 from coreason_manifest.state.vision import (
     DocumentLayoutAnalysis,
     TabularDataExtraction,
@@ -2060,14 +2061,14 @@ def draw_epistemic_compression_sla(draw: Any, exclude_sparse: bool = False) -> d
 def draw_epistemic_transmutation_task(draw: Any) -> dict[str, Any]:
     modalities = draw(
         st.lists(
-            st.sampled_from(["text", "raster_image", "vector_graphics", "tabular_grid"]),
+            st.sampled_from(["text", "raster_image", "vector_graphics", "tabular_grid", "n_dimensional_tensor"]),
             min_size=1,
-            max_size=4,
+            max_size=5,
             unique=True,
         )
     )
     # Topologically aware constraint to prevent fuzzer self-destruction
-    exclude_sparse = any(m in ["raster_image", "tabular_grid"] for m in modalities)
+    exclude_sparse = any(m in ["raster_image", "tabular_grid", "n_dimensional_tensor"] for m in modalities)
 
     return {
         "task_id": draw(st.text(min_size=1)),
@@ -3193,10 +3194,74 @@ def draw_global_semantic_profile(draw: Any) -> dict[str, Any]:
     return {
         "artifact_event_id": draw(st.text(min_size=1)),
         "detected_modalities": draw(
-            st.lists(st.sampled_from(["text", "raster_image", "vector_graphics", "tabular_grid"]), unique=True)
+            st.lists(
+                st.sampled_from(["text", "raster_image", "vector_graphics", "tabular_grid", "n_dimensional_tensor"]),
+                unique=True,
+            )
         ),
         "token_density": draw(st.integers(min_value=0)),
     }
+
+
+@st.composite
+def draw_n_dimensional_tensor_manifest(draw: Any) -> dict[str, Any]:
+    """Generates a valid NDimensionalTensorManifest payload with complex shapes."""
+    dtype_str = draw(st.sampled_from(["float32", "float64", "int8", "uint8", "int32", "int64"]))
+    dtype = TensorDType(dtype_str)
+
+    shape_length = draw(st.integers(min_value=1, max_value=5))
+    shape = draw(
+        st.tuples(*(st.integers(min_value=1, max_value=4096) for _ in range(shape_length)))
+    )
+    calculated_bytes = math.prod(shape) * dtype.bytes_per_element
+
+    res: dict[str, Any] = {
+        "dtype": dtype_str,
+        "shape": shape,
+        "memory_footprint_bytes": calculated_bytes,
+        "merkle_root": draw(st.from_regex(r"^[a-fA-F0-9]{64}$", fullmatch=True)),
+        "storage_uri": draw(st.text(min_size=1)),
+    }
+    return res
+
+
+@st.composite
+def draw_invalid_n_dimensional_tensor_manifest(draw: Any) -> dict[str, Any]:
+    """Generates an NDimensionalTensorManifest payload with intentionally skewed memory footprint."""
+    valid_manifest = draw(draw_n_dimensional_tensor_manifest())
+    # Intentionally skew the memory footprint to verify immediate validation failure
+    skew = draw(st.integers(min_value=1))
+    if draw(st.booleans()):
+        valid_manifest["memory_footprint_bytes"] += skew
+    else:
+        valid_manifest["memory_footprint_bytes"] = max(0, valid_manifest["memory_footprint_bytes"] - skew)
+        # Ensure it's strictly a mismatch
+        expected_bytes = math.prod(valid_manifest["shape"]) * TensorDType(valid_manifest["dtype"]).bytes_per_element
+        if valid_manifest["memory_footprint_bytes"] == expected_bytes:
+            valid_manifest["memory_footprint_bytes"] += 1
+
+    return valid_manifest
+
+
+@given(draw_n_dimensional_tensor_manifest())
+def test_n_dimensional_tensor_manifest_fuzzing_valid(payload: dict[str, Any]) -> None:
+    if isinstance(payload["dtype"], str):
+        payload["dtype"] = TensorDType(payload["dtype"])
+    parsed = TypeAdapter(NDimensionalTensorManifest).validate_python(payload)
+    assert isinstance(parsed, NDimensionalTensorManifest)
+
+
+@given(draw_invalid_n_dimensional_tensor_manifest())
+def test_n_dimensional_tensor_manifest_fuzzing_invalid(payload: dict[str, Any]) -> None:
+    # We want to test specifically topological/math checks so we bypass basic Enum validation failure
+    if isinstance(payload["dtype"], TensorDType):
+        payload["dtype"] = payload["dtype"].value
+
+    with pytest.raises(ValidationError) as exc_info:
+        TypeAdapter(NDimensionalTensorManifest).validate_python(payload)
+
+    msg = str(exc_info.value)
+    assert "Topological mismatch" in msg or "Tensor dimensions must be strictly positive integers" in msg or "Input should be a valid string" in msg or "Input should be an instance of TensorDType" in msg
 
 
 @st.composite

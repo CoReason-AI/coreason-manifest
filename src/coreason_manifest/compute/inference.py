@@ -96,9 +96,9 @@ class EpistemicTransmutationTask(CoreasonBaseModel):
         min_length=1, description="Unique identifier for this specific multimodal extraction intervention."
     )
     artifact_event_id: str = Field(description="The CID of the MultimodalArtifact being processed.")
-    target_modalities: list[Literal["text", "raster_image", "vector_graphics", "tabular_grid"]] = Field(
-        min_length=1, description="The specific SOTA modality resolutions required for this extraction pass."
-    )
+    target_modalities: list[
+        Literal["text", "raster_image", "vector_graphics", "tabular_grid", "n_dimensional_tensor"]
+    ] = Field(min_length=1, description="The specific SOTA modality resolutions required for this extraction pass.")
     compression_sla: EpistemicCompressionSLA = Field(
         description="The strict mathematical boundary defining the maximum allowed informational entropy loss."
     )

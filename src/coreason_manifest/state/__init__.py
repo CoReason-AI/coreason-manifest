@@ -75,6 +75,10 @@ from .semantic import (
     TemporalBounds,
     VectorEmbedding,
 )
+from .tensors import (
+    NDimensionalTensorManifest,
+    TensorDType,
+)
 from .toolchains import (
     BrowserDOMState,
     TerminalBufferState,
@@ -125,6 +129,7 @@ __all__ = [
     "MigrationContract",
     "MultimodalArtifact",
     "MultimodalTokenAnchor",
+    "NDimensionalTensorManifest",
     "NeuralAuditAttestation",
     "ObservationEvent",
     "OntologicalHandshake",
@@ -143,6 +148,7 @@ __all__ = [
     "TabularDataExtraction",
     "TemporalBounds",
     "TemporalCheckpoint",
+    "TensorDType",
     "TerminalBufferState",
     "TheoryOfMindSnapshot",
     "ThoughtBranch",
