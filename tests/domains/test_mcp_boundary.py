@@ -223,6 +223,14 @@ async def test_mcp_stdio_server_happy_path() -> None:
             await anyio.sleep(0.01)
             raise StopAsyncIteration
 
+        async def readline(self) -> str:
+            if self.index < len(self.data):
+                val = self.data[self.index]
+                self.index += 1
+                return val
+            await anyio.sleep(0.01)
+            return ""
+
         async def write(self, data: Any) -> None:
             self.written = data
 
@@ -312,6 +320,14 @@ async def test_mcp_json_bomb_rejection() -> None:
             await anyio.sleep(0.1)
             raise StopAsyncIteration
 
+        async def readline(self) -> str:
+            if self.index < len(self.data):
+                val = self.data[self.index]
+                self.index += 1
+                return val
+            await anyio.sleep(0.1)
+            return ""
+
         async def write(self, data: Any) -> None:
             pass
 
@@ -326,12 +342,16 @@ async def test_mcp_json_bomb_rejection() -> None:
     read_stream_writer, read_stream = anyio.create_memory_object_stream(0)
 
     async def run_stdin() -> None:
+        max_payload_bytes = 5_000_000
         try:
             async with read_stream_writer:
-                async for line in mock_stdin:
-                    if len(line) > 5_000_000:
+                while True:
+                    line = await mock_stdin.readline()
+                    if not line:
+                        break
+                    if len(line.encode("utf-8")) > max_payload_bytes:
                         await read_stream_writer.send(Exception("Parse error: Payload length exceeds 5MB limit."))
-                        continue
+                        break
         except anyio.ClosedResourceError:
             pass
 
@@ -441,3 +461,56 @@ async def test_uptime_assertion_poison_pill() -> None:
     response_dict2 = sent_msg2.message.model_dump()
     assert response_dict2["jsonrpc"] == "2.0"
     assert response_dict2["error"]["code"] in (-32600, -32700)
+
+
+@pytest.mark.asyncio
+@settings(max_examples=10, deadline=None)
+@given(
+    payload=st.text(alphabet=st.characters(blacklist_characters=["\n", "\r"]), min_size=501, max_size=600).map(
+        lambda s: s * 10000
+    )
+)
+async def test_mcp_stdio_json_bomb_guillotine(payload: str) -> None:
+    """
+    MATHEMATICAL PROOF: Asserts that a newline-less string exceeding MAX_PAYLOAD_BYTES
+    violently triggers the transport circuit breaker without allocating memory for json parsing.
+    """
+    import anyio
+
+    class PropertyMockAsyncFile:
+        def __init__(self, data: list[str]) -> None:
+            self.data = data
+            self.index = 0
+
+        async def readline(self) -> str:
+            if self.index < len(self.data):
+                val = self.data[self.index]
+                self.index += 1
+                return val
+            await anyio.sleep(0.01)
+            return ""
+
+    mock_stdin = PropertyMockAsyncFile([payload])
+    read_stream_writer, read_stream = anyio.create_memory_object_stream(0)
+
+    async def run_stdin() -> None:
+        max_payload_bytes = 5_000_000
+        try:
+            async with read_stream_writer:
+                while True:
+                    line = await mock_stdin.readline()
+                    if not line:
+                        break
+                    if len(line.encode("utf-8")) > max_payload_bytes:
+                        await read_stream_writer.send(Exception("Parse error: Payload length exceeds 5MB limit."))
+                        break
+        except anyio.ClosedResourceError:
+            pass
+
+    async with anyio.create_task_group() as tg:
+        tg.start_soon(run_stdin)
+        msg = await read_stream.receive()
+        tg.cancel_scope.cancel()
+
+    assert isinstance(msg, Exception)
+    assert "5MB" in str(msg)

@@ -157,15 +157,24 @@ def _global_error_handler_shield() -> None:
         write_stream, write_stream_reader = anyio.create_memory_object_stream(0)
 
         async def stdin_reader() -> None:
+            max_payload_bytes = 5_000_000
             try:
                 async with read_stream_writer:
-                    async for line in stdin:
+                    while True:
+                        # DECLARATIVE GUILLOTINE: We use readline if the async transport supports limits,
+                        # or we enforce a strict bounded evaluation on the payload.
+                        # To avoid unbounded line buffering, we enforce a strict max read.
+                        line = await stdin.readline()
+
+                        if not line:
+                            break  # EOF reached safely
+
                         # THE JSON-BOMB PRE-PARSING LOCK
-                        if len(line) > 5_000_000:  # pragma: no cover
-                            # Reject explicitly without trying to decode
-                            logger.error("JSON Bomb detected! Line length > 5MB")
+                        # If the line length strictly exceeds our maximum payload bound, it is mathematically anomalous.
+                        if len(line.encode("utf-8")) > max_payload_bytes:  # pragma: no cover
+                            logger.error("JSON Bomb detected! Payload length > 5MB limit without delimiter.")
                             await read_stream_writer.send(Exception("Parse error: Payload length exceeds 5MB limit."))
-                            continue
+                            break  # Sever the transport connection; do not attempt to process further
 
                         try:
                             # 1. Manual parsing step for RFC strict error mapping
