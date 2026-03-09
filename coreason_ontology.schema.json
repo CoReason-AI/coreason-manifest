@@ -2105,6 +2105,14 @@
           },
           "title": "Faults",
           "type": "array"
+        },
+        "shocks": {
+          "description": "The declarative list of exogenous Black Swan events injected into the topology.",
+          "items": {
+            "$ref": "#/$defs/ExogenousEpistemicShock"
+          },
+          "title": "Shocks",
+          "type": "array"
         }
       },
       "required": [
@@ -4700,6 +4708,48 @@
         "start_time_unix_nano"
       ],
       "title": "ExecutionSpan",
+      "type": "object"
+    },
+    "ExogenousEpistemicShock": {
+      "additionalProperties": false,
+      "properties": {
+        "shock_id": {
+          "description": "Cryptographic identifier for the Black Swan event.",
+          "minLength": 1,
+          "title": "Shock Id",
+          "type": "string"
+        },
+        "target_node_hash": {
+          "description": "Regex-bound SHA-256 string targeting a specific Merkle root in the epistemic graph.",
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Target Node Hash",
+          "type": "string"
+        },
+        "bayesian_surprise_score": {
+          "description": "Strictly bounded mathematical quantification of the epistemic decay or Variational Free Energy.",
+          "minimum": 0.0,
+          "title": "Bayesian Surprise Score",
+          "type": "number"
+        },
+        "synthetic_payload": {
+          "additionalProperties": true,
+          "description": "Bounded dictionary representing the injected hallucination or observation.",
+          "title": "Synthetic Payload",
+          "type": "object"
+        },
+        "escrow": {
+          "$ref": "#/$defs/SimulationEscrow",
+          "description": "The cryptographic Proof-of-Stake funding the shock."
+        }
+      },
+      "required": [
+        "shock_id",
+        "target_node_hash",
+        "bayesian_surprise_score",
+        "synthetic_payload",
+        "escrow"
+      ],
+      "title": "ExogenousEpistemicShock",
       "type": "object"
     },
     "FYIIntent": {
@@ -9064,6 +9114,22 @@
         "variance_tolerance"
       ],
       "title": "SimulationConvergenceSLA",
+      "type": "object"
+    },
+    "SimulationEscrow": {
+      "additionalProperties": false,
+      "properties": {
+        "locked_microcents": {
+          "description": "The strictly typed economic boundary requiring locked funds to prevent zero-cost griefing of the swarm.",
+          "exclusiveMinimum": 0,
+          "title": "Locked Microcents",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "locked_microcents"
+      ],
+      "title": "SimulationEscrow",
       "type": "object"
     },
     "SpanEvent": {

@@ -223,7 +223,14 @@ from coreason_manifest.telemetry.schemas import (
     TraceExportBatch,
 )
 from coreason_manifest.telemetry.ux import AmbientSignal, SuspenseEnvelope
-from coreason_manifest.testing.chaos import ChaosExperiment, FaultInjectionProfile, FaultType, SteadyStateHypothesis
+from coreason_manifest.testing.chaos import (
+    ChaosExperiment,
+    ExogenousEpistemicShock,
+    FaultInjectionProfile,
+    FaultType,
+    SimulationEscrow,
+    SteadyStateHypothesis,
+)
 from coreason_manifest.testing.red_team import AdversarialSimulationProfile
 from coreason_manifest.testing.simulation import GenerativeManifoldSLA, SyntheticGenerationProfile
 from coreason_manifest.tooling.environments import (
@@ -394,6 +401,7 @@ __all__ = [
     "ExecutionNode",
     "ExecutionSLA",
     "ExecutionSpan",
+    "ExogenousEpistemicShock",
     "FYIIntent",
     "FacetMatrix",
     "FallbackSLA",
@@ -506,6 +514,7 @@ __all__ = [
     "SemanticVersion",
     "SideEffectProfile",
     "SimulationConvergenceSLA",
+    "SimulationEscrow",
     "SpanEvent",
     "SpanKind",
     "SpanStatusCode",

@@ -12,9 +12,9 @@ swarm topology (e.g., node latency, memory corruption, topological severing).
 Do not write standard QA schemas here. Focus entirely on Blast Radius and Steady-State Hypotheses.
 """
 
-from typing import Literal
+from typing import Any, Literal, Self
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from coreason_manifest.core.base import CoreasonBaseModel
 
@@ -44,9 +44,44 @@ class SteadyStateHypothesis(CoreasonBaseModel):
     )
 
 
+class SimulationEscrow(CoreasonBaseModel):
+    locked_microcents: int = Field(
+        gt=0,
+        description="The strictly typed economic boundary requiring locked funds "
+        "to prevent zero-cost griefing of the swarm.",
+    )
+
+
+class ExogenousEpistemicShock(CoreasonBaseModel):
+    shock_id: str = Field(min_length=1, description="Cryptographic identifier for the Black Swan event.")
+    target_node_hash: str = Field(
+        pattern=r"^[a-f0-9]{64}$",
+        description="Regex-bound SHA-256 string targeting a specific Merkle root in the epistemic graph.",
+    )
+    bayesian_surprise_score: float = Field(
+        ge=0.0,
+        allow_inf_nan=False,
+        description="Strictly bounded mathematical quantification of the epistemic decay or Variational Free Energy.",
+    )
+    synthetic_payload: dict[str, Any] = Field(
+        description="Bounded dictionary representing the injected hallucination or observation."
+    )
+    escrow: SimulationEscrow = Field(description="The cryptographic Proof-of-Stake funding the shock.")
+
+    @model_validator(mode="after")
+    def enforce_economic_escrow(self) -> Self:
+        if self.escrow.locked_microcents <= 0:
+            raise ValueError("ExogenousEpistemicShock requires a strictly positive economic escrow to execute.")
+        return self
+
+
 class ChaosExperiment(CoreasonBaseModel):
     experiment_id: str = Field(description="The unique identifier for the chaos experiment.")
     hypothesis: SteadyStateHypothesis = Field(description="The baseline steady state hypothesis being tested.")
     faults: list[FaultInjectionProfile] = Field(
         description="The list of fault injection profiles defining the chaotic elements."
+    )
+    shocks: list[ExogenousEpistemicShock] = Field(
+        default_factory=list,
+        description="The declarative list of exogenous Black Swan events injected into the topology.",
     )
