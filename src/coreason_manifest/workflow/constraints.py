@@ -10,9 +10,7 @@ These schemas dictate the multi-agent graph geometry and decentralized routing m
 execution code or synchronous blocking loops. Think purely in terms of graph theory, Byzantine fault tolerance, and
 multi-agent market dynamics."""
 
-from typing import Annotated
-
-from pydantic import BaseModel, Field
+from pydantic import Field
 
 from coreason_manifest.core.base import CoreasonBaseModel
 
@@ -33,25 +31,3 @@ class OutputMapping(CoreasonBaseModel):
 
     child_key: str = Field(description="The key in the nested topology's state contract.")
     parent_key: str = Field(description="The mapped key in the parent's shared state contract.")
-
-
-class KinematicFeasibilityProof(BaseModel):
-    """AGENT INSTRUCTION: This object represents an undeniable T-0 structural proof.
-    Downstream orchestrators MUST verify these cryptographic receipts before igniting a graph.
-    Do not bypass these checks.
-    """
-
-    substrate_availability_matrix: dict[str, Annotated[str, Field(pattern=r"^[a-f0-9]{64}$")]] = Field(
-        ..., min_length=1, description="Map of NodeID to a SHA-256 VRAM/Compute lease receipt."
-    )
-    mcp_integration_hash: str = Field(
-        ...,
-        pattern=r"^[a-f0-9]{64}$",
-        description="Merkle root of concatenated MCP tool schemas required by the graph.",
-    )
-    data_dimensionality_proof: str = Field(
-        ..., pattern=r"^[a-f0-9]{64}$", description="Cryptographic signature of the tensor matrix bounds."
-    )
-    merkle_root_t0: str = Field(
-        ..., pattern=r"^[a-f0-9]{64}$", description="Global state matrix hash at the instant of validation."
-    )

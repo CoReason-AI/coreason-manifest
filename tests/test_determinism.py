@@ -12,7 +12,7 @@ from coreason_manifest.presentation.scivis import ChannelEncoding, GrammarPanel,
 from coreason_manifest.state.argumentation import ArgumentClaim, ArgumentGraph, DefeasibleAttack
 from coreason_manifest.state.differentials import RollbackRequest
 from coreason_manifest.state.events import ObservationEvent
-from coreason_manifest.state.memory import EpisodicTraceMemory
+from coreason_manifest.state.memory import EpistemicLedger
 from coreason_manifest.state.semantic import (
     MemoryProvenance,
     SalienceProfile,
@@ -427,12 +427,8 @@ def test_epistemic_ledger_determinism() -> None:
     event1 = ObservationEvent(event_id="obs_1", timestamp=100.0, payload={})
     event2 = ObservationEvent(event_id="obs_2", timestamp=200.0, payload={})
 
-    ledger1 = EpisodicTraceMemory(
-        trace_id="1", node_id="did:web:1", events=[event1, event2], parent_hash="p", merkle_root="m"
-    )
-    ledger2 = EpisodicTraceMemory(
-        trace_id="1", node_id="did:web:1", events=[event1, event2], parent_hash="p", merkle_root="m"
-    )
+    ledger1 = EpistemicLedger(history=[event1, event2])
+    ledger2 = EpistemicLedger(history=[event1, event2])
 
     assert ledger1.model_dump_canonical() == ledger2.model_dump_canonical()
     assert hash(ledger1) == hash(ledger2)

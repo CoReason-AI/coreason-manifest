@@ -36,11 +36,9 @@ from coreason_manifest.presentation.intents import (
     DraftingIntent,
     EscalationIntent,
     InformationalIntent,
-    RectifiedSignalTrace,
 )
 from coreason_manifest.presentation.scivis import AnyPanel, GrammarPanel, InsightCard
 from coreason_manifest.state.argumentation import ArgumentGraph, UtilityJustificationGraph
-from coreason_manifest.state.argumentation import ArgumentGraph
 from coreason_manifest.state.events import (
     AnyStateEvent,
     BeliefUpdateEvent,
@@ -49,7 +47,7 @@ from coreason_manifest.state.events import (
     ObservationEvent,
     SystemFaultEvent,
 )
-from coreason_manifest.state.memory import EpisodicTraceMemory
+from coreason_manifest.state.memory import EpistemicLedger
 from coreason_manifest.state.semantic import (
     SemanticEdge,
     SemanticNode,
@@ -64,76 +62,10 @@ from coreason_manifest.testing.chaos import ChaosExperiment
 from coreason_manifest.testing.red_team import AdversarialSimulationProfile
 from coreason_manifest.tooling import ActionSpace, ToolDefinition
 from coreason_manifest.workflow.auctions import AuctionState, TaskAward
-from coreason_manifest.workflow.constraints import KinematicFeasibilityProof
 from coreason_manifest.workflow.envelope import WorkflowEnvelope
 from coreason_manifest.workflow.nodes import AgentNode, AnyNode, CompositeNode, HumanNode, SystemNode
 from coreason_manifest.workflow.routing import DynamicRoutingManifest
-from coreason_manifest.workflow.topologies import (
-    AnyTopology,
-    DynamicalSystemsTopology,
-    ODEGradientBounds,
-    OntologicalHandshake,
-    StateContract,
-)
-
-
-def test_rectified_signal_trace_confidence_bounds() -> None:
-    """Ensure automated immune system rejects out-of-bounds confidence."""
-    with pytest.raises(ValidationError):
-        RectifiedSignalTrace(
-            stochastic_entropy_input="make it faster",
-            canonical_projection={"urn": "speed_up"},
-            semantic_shift_dictionary={"faster": "speed_up"},
-            rectification_confidence=1.01,  # Out of bounds
-        )
-
-    with pytest.raises(ValidationError):
-        RectifiedSignalTrace(
-            stochastic_entropy_input="make it faster",
-            canonical_projection={"urn": "speed_up"},
-            semantic_shift_dictionary={"faster": "speed_up"},
-            rectification_confidence=-0.01,  # Out of bounds
-        )
-
-
-def test_rectified_signal_trace_canonical_depth() -> None:
-    """Ensure automated immune system rejects recursive JSON bombs."""
-    deep_payload = {"level_1": {"level_2": {"level_3": {"level_4": {"level_5": {"level_6": "bomb"}}}}}}
-    with pytest.raises(ValidationError, match=r"Canonical projection exceeds maximum allowed nesting depth of 5\."):
-        RectifiedSignalTrace(
-            stochastic_entropy_input="stochastic payload",
-            canonical_projection=deep_payload,
-            semantic_shift_dictionary={},
-            rectification_confidence=0.99,
-        )
-
-    with pytest.raises(ValidationError, match=r"Canonical projection dictionary keys must be strings\."):
-        RectifiedSignalTrace(
-            stochastic_entropy_input="stochastic payload",
-            canonical_projection={1: "not a string"},
-            semantic_shift_dictionary={},
-            rectification_confidence=0.99,
-        )
-
-    class InvalidType:
-        pass
-
-    with pytest.raises(ValidationError, match=r"Invalid leaf node type in canonical projection:"):
-        RectifiedSignalTrace(
-            stochastic_entropy_input="stochastic payload",
-            canonical_projection=InvalidType(),
-            semantic_shift_dictionary={},
-            rectification_confidence=0.99,
-        )
-
-    # Lists
-    with pytest.raises(ValidationError, match=r"Canonical projection exceeds maximum allowed nesting depth of 5\."):
-        RectifiedSignalTrace(
-            stochastic_entropy_input="stochastic payload",
-            canonical_projection=[[[[[["bomb"]]]]]],
-            semantic_shift_dictionary={},
-            rectification_confidence=0.99,
-        )
+from coreason_manifest.workflow.topologies import AnyTopology, OntologicalHandshake, StateContract
 
 
 @st.composite
@@ -1092,33 +1024,6 @@ def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> 
         }
     ).map(_eval_opt_mapper)
 
-    st_ode_gradients = st.builds(
-        ODEGradientBounds,
-        max_drift_rate=st.floats(allow_nan=False, allow_infinity=False),
-        decay_coefficient_min=st.floats(min_value=-1e6, max_value=0, allow_nan=False, allow_infinity=False),
-        decay_coefficient_max=st.floats(min_value=0.1, max_value=1e6, allow_nan=False, allow_infinity=False),
-    )
-
-    st_crypto_triggers = st.lists(
-        st.one_of(
-            st.from_regex(r"^did:[a-z0-9]+:[a-zA-Z0-9.\-:_]+$", fullmatch=True),
-            st.from_regex(r"^0x[a-fA-F0-9]{40,64}$", fullmatch=True),
-        ),
-        min_size=1,
-        max_size=10,
-    )
-
-    st_dynamical_topology = st.builds(
-        DynamicalSystemsTopology,
-        lifecycle_phase=st.sampled_from(["draft", "live"]),
-        architectural_intent=st.one_of(st.none(), st.text()),
-        justification=st.one_of(st.none(), st.text()),
-        nodes=st.dictionaries(draw_did_string(), nodes_strategy, max_size=5),
-        continuous_time_gradients=st_ode_gradients,
-        max_temporal_backpropagation_ms=st.integers(min_value=1, max_value=3600000),
-        environmental_phase_shift_triggers=st_crypto_triggers,
-    ).map(lambda x: {**x.model_dump(exclude_unset=True), "type": "dynamical_systems"})
-
     digital_twin_strategy = draw_digital_twin_topology_payload(nodes_strategy)
     macro_adv_strategy = draw_adversarial_market_topology()
     macro_fed_strategy = draw_consensus_federation_topology()
@@ -1132,7 +1037,6 @@ def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> 
         digital_twin_strategy,
         macro_adv_strategy,
         macro_fed_strategy,
-        st_dynamical_topology,
     )
 
 
@@ -1176,7 +1080,6 @@ state_contract_adapter: TypeAdapter[StateContract] = TypeAdapter(StateContract)
 intervention_policy_adapter: TypeAdapter[InterventionPolicy] = TypeAdapter(InterventionPolicy)
 
 
-@settings(max_examples=10, suppress_health_check=[HealthCheck.too_slow], deadline=None)
 @given(draw_any_node_recursive())
 def test_anynode_routing(payload: dict[str, Any]) -> None:
     parsed = node_adapter.validate_python(payload)
@@ -2646,7 +2549,7 @@ def draw_temporal_checkpoint(draw: Any) -> dict[str, Any]:
     return res
 
 
-episodic_trace_adapter: TypeAdapter[EpisodicTraceMemory] = TypeAdapter(EpisodicTraceMemory)
+epistemic_ledger_adapter: TypeAdapter[EpistemicLedger] = TypeAdapter(EpistemicLedger)
 
 
 @st.composite
@@ -2724,65 +2627,32 @@ def draw_defeasible_cascade(draw: Any) -> dict[str, Any]:
 
 
 @st.composite
-def draw_semantic_crystallization(draw: Any) -> dict[str, Any]:
-    threshold = draw(st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False))
-    delta = draw(st.floats(min_value=threshold, allow_nan=False, allow_infinity=False))
+def draw_crystallization_policy(draw: Any) -> dict[str, Any]:
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
-                "axiom_id": st.text(min_size=1),
-                "source_trace_id": st.text(min_size=1),
-                "aleatoric_entropy_threshold": st.just(threshold),
-                "entropy_delta_score": st.just(delta),
-                "semantic_payload": st.text(min_size=1),
+                "min_observations_required": st.integers(min_value=10),
+                "aleatoric_entropy_threshold": st.floats(max_value=0.1, allow_nan=False, allow_infinity=False),
+                "target_memory_tier": st.sampled_from(["semantic", "working"]),
             }
         )
     )
     return res
 
 
-@given(draw_semantic_crystallization())
-def test_semantic_crystallization_fuzzing(payload: dict[str, Any]) -> None:
-    from coreason_manifest.state.memory import SemanticCrystallization
-
-    TypeAdapter(SemanticCrystallization).validate_python(payload)
-
-
 @st.composite
-def draw_latent_working_memory(draw: Any) -> dict[str, Any]:
-    max_tokens = draw(st.integers(min_value=1))
-    current_tokens = draw(st.integers(min_value=0, max_value=max_tokens))
+def draw_epistemic_ledger(draw: Any) -> dict[str, Any]:
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
-                "node_id": draw_did_string(),
-                "max_ttl_seconds": st.integers(min_value=1),
-                "max_context_window_tokens": st.just(max_tokens),
-                "current_tokens": st.just(current_tokens),
-                "state_envelope": st.lists(st.text()),
-            }
-        )
-    )
-    return res
-
-
-@given(draw_latent_working_memory())
-def test_latent_working_memory_fuzzing(payload: dict[str, Any]) -> None:
-    from coreason_manifest.state.memory import LatentWorkingMemory
-
-    TypeAdapter(LatentWorkingMemory).validate_python(payload)
-
-
-@st.composite
-def draw_episodic_trace_memory(draw: Any) -> dict[str, Any]:
-    res: dict[str, Any] = draw(
-        st.fixed_dictionaries(
-            {
-                "trace_id": st.text(min_size=1),
-                "node_id": draw_did_string(),
-                "events": st.lists(draw_any_state_event(), max_size=100),
-                "parent_hash": st.text(min_size=1),
-                "merkle_root": st.text(min_size=1),
+                "history": st.lists(draw_any_state_event(), max_size=100),
+                "checkpoints": st.lists(draw_temporal_checkpoint(), max_size=100),
+                "active_rollbacks": st.lists(draw_rollback_request(), max_size=100),
+                "eviction_policy": st.one_of(st.none(), draw_eviction_policy()),
+                "migration_contracts": st.lists(draw_migration_contract(), max_size=10),
+                "truth_maintenance_policy": st.one_of(st.none(), draw_truth_maintenance_policy()),
+                "active_cascades": st.lists(draw_defeasible_cascade(), max_size=100),
+                "crystallization_policy": st.one_of(st.none(), draw_crystallization_policy()),
             }
         )
     )
@@ -2790,10 +2660,17 @@ def draw_episodic_trace_memory(draw: Any) -> dict[str, Any]:
 
 
 @settings(max_examples=10, suppress_health_check=[HealthCheck.too_slow])
-@given(draw_episodic_trace_memory())
-def test_episodic_trace_memory_fuzzing(payload: dict[str, Any]) -> None:
-    parsed = episodic_trace_adapter.validate_python(payload)
-    assert isinstance(parsed, EpisodicTraceMemory)
+@given(draw_epistemic_ledger())
+def test_differentials_routing(payload: dict[str, Any]) -> None:
+    parsed = epistemic_ledger_adapter.validate_python(payload)
+    assert isinstance(parsed, EpistemicLedger)
+
+
+@given(draw_crystallization_policy())
+def test_crystallization_policy_fuzzing(payload: dict[str, Any]) -> None:
+    from coreason_manifest.state.memory import CrystallizationPolicy
+
+    TypeAdapter(CrystallizationPolicy).validate_python(payload)
 
 
 @st.composite
@@ -3600,45 +3477,3 @@ def test_fuzz_utility_justification_tensor_poisoning(fuzzed_vectors: dict[str, f
         # If Hypothesis happened to generate a clean dictionary, it MUST compile.
         graph = UtilityJustificationGraph(optimizing_vectors=fuzzed_vectors, superposition_variance_threshold=0.5)
         assert graph.superposition_variance_threshold == 0.5
-# Strategy for strict SHA-256 generation
-sha256_strategy = st.from_regex(r"^[a-f0-9]{64}$", fullmatch=True)
-
-# Strategy for generating valid T-0 Proofs
-kinematic_proof_strategy = st.builds(
-    KinematicFeasibilityProof,
-    substrate_availability_matrix=st.dictionaries(
-        keys=st.text(min_size=1), values=sha256_strategy, min_size=1, max_size=5
-    ),
-    mcp_integration_hash=sha256_strategy,
-    data_dimensionality_proof=sha256_strategy,
-    merkle_root_t0=sha256_strategy,
-)
-
-
-@settings(max_examples=10, suppress_health_check=[HealthCheck.too_slow])
-@given(kinematic_proof_strategy)
-def test_fuzz_kinematic_feasibility_proof(proof: KinematicFeasibilityProof) -> None:
-    """Ensure the cryptographic interlock schema mathematically holds under generative testing."""
-    assert isinstance(proof, KinematicFeasibilityProof)
-    assert len(proof.substrate_availability_matrix) >= 1
-    assert len(proof.merkle_root_t0) == 64
-
-
-def test_kinematic_feasibility_proof_invalid_leases() -> None:
-    # Test empty dictionary
-    with pytest.raises(ValidationError):
-        KinematicFeasibilityProof(
-            substrate_availability_matrix={},
-            mcp_integration_hash="a" * 64,
-            data_dimensionality_proof="a" * 64,
-            merkle_root_t0="a" * 64,
-        )
-
-    # Test invalid SHA-256
-    with pytest.raises(ValidationError):
-        KinematicFeasibilityProof(
-            substrate_availability_matrix={"node1": "invalid_hash"},
-            mcp_integration_hash="a" * 64,
-            data_dimensionality_proof="a" * 64,
-            merkle_root_t0="a" * 64,
-        )

@@ -1,19 +1,15 @@
 from typing import Any
 
-from coreason_manifest.state import EpisodicTraceMemory
+from coreason_manifest.state import EpistemicLedger
 from coreason_manifest.state.events import ObservationEvent
 from coreason_manifest.telemetry.schemas import ExecutionSpan, SpanEvent
 
 
 def test_epistemic_ledger_hash_o1_tripwire(benchmark: Any) -> None:
-    ledger = EpisodicTraceMemory(
-        trace_id="t1",
-        node_id="did:web:1",
-        parent_hash="p1",
-        merkle_root="m1",
-        events=[
+    ledger = EpistemicLedger(
+        history=[
             ObservationEvent(event_id=f"ev_{i}", timestamp=float(i), payload={"key": "value"}) for i in range(10000)
-        ],
+        ]
     )
     _ = hash(ledger)
     benchmark(lambda: [hash(ledger) for _ in range(1000)])
