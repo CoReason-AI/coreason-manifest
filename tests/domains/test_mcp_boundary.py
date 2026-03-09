@@ -15,6 +15,24 @@ from coreason_manifest.cli.mcp_server import _global_error_handler_shield
 _global_error_handler_shield()
 
 
+def test_mcp_epistemic_index_projection() -> None:
+    """
+    AGENT INSTRUCTION: Verify O(1) Epistemic Index perfectly mirrors the ontology.
+    """
+    import json
+
+    from coreason_manifest.cli.mcp_server import _AVAILABLE_SCHEMAS, get_epistemic_index
+
+    # Execute the zero-inference projection
+    result_str = get_epistemic_index()
+    result_list = json.loads(result_str)
+
+    # Mathematically prove parity and determinism
+    expected_list = sorted(_AVAILABLE_SCHEMAS.keys())
+    assert isinstance(result_list, list), "Projected index must be a JSON array."
+    assert result_list == expected_list, "Projected manifold is out of sync with _AVAILABLE_SCHEMAS."
+
+
 def test_jsonrpc_fuzzer_missing_jsonrpc() -> None:
     """Prove the schema definitely rejects payloads missing 'jsonrpc' version."""
     payload = {"method": "test", "params": {}, "id": 1}

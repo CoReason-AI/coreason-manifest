@@ -55,6 +55,16 @@ def _is_schema_allowed(schema_dict: dict[str, Any], granted_licenses: set[str]) 
     return set(required).issubset(granted_licenses)
 
 
+@mcp.resource("schema://epistemic/index")
+def get_epistemic_index() -> str:
+    """
+    AGENT INSTRUCTION: Epistemic Discovery Surface.
+    Returns a deterministic, static JSON array of all valid schema identifiers.
+    """
+    import json
+    return json.dumps(sorted(_AVAILABLE_SCHEMAS.keys()))
+
+
 @mcp.resource("schema://epistemic/{name}")
 def get_epistemic_schema(name: str) -> str:
     """Returns the strict Pydantic JSON schema string for a specific requested model, governed by RBAC bounds."""
