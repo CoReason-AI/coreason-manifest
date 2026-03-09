@@ -9,10 +9,33 @@ from mcp.types import JSONRPCMessage
 from pydantic import HttpUrl, ValidationError
 
 from coreason_manifest.adapters.mcp.schemas import BoundedJSONRPCRequest, HTTPTransportConfig
-from coreason_manifest.cli.mcp_server import _global_error_handler_shield
+from coreason_manifest.cli.mcp_server import (
+    _GENERATIVE_BOUNDING_BOX_DIRECTIVE,
+    _global_error_handler_shield,
+    scaffold_payload,
+)
 
 # Initialize the global shield for tests
 _global_error_handler_shield()
+
+
+@pytest.mark.asyncio
+async def test_mcp_prompt_scaffold_payload_success() -> None:
+    """Ensure the prompt concatenates the directive and the schema without execution logic."""
+    result = await scaffold_payload("AgentAttestation")
+
+    assert "SYSTEM ARCHITECTURE DIRECTIVE" in result
+    assert "TARGET SCHEMA:" in result
+    assert "AgentAttestation" in result
+    assert _GENERATIVE_BOUNDING_BOX_DIRECTIVE in result
+
+
+@pytest.mark.asyncio
+async def test_mcp_prompt_scaffold_payload_degradation() -> None:
+    """Ensure invalid schemas return structured text, NOT runtime exceptions."""
+    result = await scaffold_payload("HallucinatedVerticalSchema")
+
+    assert result == "ERROR: SCHEMA_NOT_FOUND. Query the schema index to discover available ontologies."
 
 
 def test_jsonrpc_fuzzer_missing_jsonrpc() -> None:
