@@ -266,6 +266,7 @@ def test_rollback_determinism() -> None:
 
 def test_dlp_determinism() -> None:
     from coreason_manifest.core.primitives import DataClassification
+
     rule_a = RedactionRule(
         rule_id="a_phi_redact",
         classification=DataClassification.RESTRICTED,
