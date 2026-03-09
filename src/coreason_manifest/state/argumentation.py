@@ -88,8 +88,15 @@ class EnsembleTopologySpec(CoreasonBaseModel):
     Must map to strict W3C DIDs (NodeIDs) and provide an explicit wave-collapse opcode.
     """
 
-    concurrent_branch_ids: list[NodeID] = Field(..., min_length=2)
-    fusion_function: Literal["weighted_consensus", "highest_confidence", "brier_score_collapse"]
+    concurrent_branch_ids: list[NodeID] = Field(
+        ...,
+        min_length=2,
+        description="A list of strict W3C DIDs (NodeIDs) representing concurrent topology branches.",
+    )
+    fusion_function: Literal["weighted_consensus", "highest_confidence", "brier_score_collapse"] = Field(
+        ...,
+        description="The explicit wave-collapse opcode used for resolving concurrent branches.",
+    )
 
 
 class UtilityJustificationGraph(CoreasonBaseModel):
@@ -98,10 +105,24 @@ class UtilityJustificationGraph(CoreasonBaseModel):
     If variance threshold falls below delta, fallback to deterministic ensemble superposition.
     """
 
-    optimizing_vectors: dict[str, float] = Field(default_factory=dict)
-    degrading_vectors: dict[str, float] = Field(default_factory=dict)
-    superposition_variance_threshold: float = Field(..., ge=0.0, allow_inf_nan=False)
-    ensemble_spec: EnsembleTopologySpec | None = None
+    optimizing_vectors: dict[str, float] = Field(
+        default_factory=dict,
+        description="Multi-dimensional continuous values representing optimizations.",
+    )
+    degrading_vectors: dict[str, float] = Field(
+        default_factory=dict,
+        description="Multi-dimensional continuous values representing degradations.",
+    )
+    superposition_variance_threshold: float = Field(
+        ...,
+        ge=0.0,
+        allow_inf_nan=False,
+        description="The statistical variance threshold below which deterministic fallback is enforced.",
+    )
+    ensemble_spec: EnsembleTopologySpec | None = Field(
+        default=None,
+        description="The deterministic ensemble specification to fall back on when threshold falls below delta.",
+    )
 
     @model_validator(mode="after")
     def _enforce_mathematical_interlocks(self) -> "UtilityJustificationGraph":
