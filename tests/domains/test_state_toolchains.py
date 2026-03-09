@@ -41,3 +41,23 @@ def test_browser_dom_accepts_global_routable() -> None:
         accessibility_tree_hash="a" * 64,
     )
     assert state.current_url == "https://github.com/coreason-ai"
+
+def test_browser_dom_accepts_global_ip() -> None:
+    # Coverage for line returning url after IP checks (Line 66)
+    state = BrowserDOMState(
+        current_url="https://8.8.8.8/search",
+        viewport_size=(800, 600),
+        dom_hash="a" * 64,
+        accessibility_tree_hash="a" * 64
+    )
+    assert state.current_url == "https://8.8.8.8/search"
+
+def test_browser_dom_accepts_no_hostname() -> None:
+    # Coverage for line returning url when there is no hostname (Line 45)
+    state = BrowserDOMState(
+        current_url="about:blank",
+        viewport_size=(800, 600),
+        dom_hash="a" * 64,
+        accessibility_tree_hash="a" * 64
+    )
+    assert state.current_url == "about:blank"
