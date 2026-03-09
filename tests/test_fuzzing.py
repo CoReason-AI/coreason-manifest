@@ -1768,7 +1768,7 @@ def test_epistemic_shock_escrow_interlock() -> None:
             target_node_hash="a" * 64,
             bayesian_surprise_score=0.1,
             synthetic_payload={},
-            escrow=SimulationEscrow.model_construct(locked_microcents=0)
+            escrow=SimulationEscrow.model_construct(locked_microcents=0),
         )
 
 
