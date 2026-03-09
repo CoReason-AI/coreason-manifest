@@ -38,6 +38,7 @@ from coreason_manifest.presentation.intents import (
 )
 from coreason_manifest.presentation.scivis import AnyPanel, GrammarPanel, InsightCard
 from coreason_manifest.state.argumentation import ArgumentGraph
+from coreason_manifest.state.differentials import AlgorithmicPlasticityDelta, RFC6902Patch
 from coreason_manifest.state.events import (
     AnyStateEvent,
     BeliefUpdateEvent,
@@ -3459,3 +3460,73 @@ async def test_mcp_server_malformed_uri_fuzzing(malformed_path: str) -> None:
                 # Any exception raised by the read_resource itself is fine,
                 # as long as it isn't an unhandled server crash.
                 pass
+
+
+rfc_patch_strategy = st.builds(
+    RFC6902Patch,
+    op=st.sampled_from(["add", "remove", "replace", "move", "copy", "test"]),
+    path=st.text(min_size=1, max_size=100),
+    value=st.none() | st.text() | st.integers(),
+)
+
+plasticity_delta_strategy = st.builds(
+    AlgorithmicPlasticityDelta,
+    failed_topology_hash=st.from_regex(r"^[a-f0-9]{64}$", fullmatch=True),
+    kinematic_constraint_mutation=st.lists(rfc_patch_strategy, max_size=50),
+    latent_prompt_gradient_update=st.text(max_size=8192),
+    routing_reweighting=st.floats(min_value=-1.0, max_value=1.0, allow_nan=False, allow_infinity=False),
+)
+
+
+# Rejection tests should feed dicts to TypeAdapter, otherwise st.builds fails during generation
+@given(
+    st.fixed_dictionaries(
+        {
+            "failed_topology_hash": st.from_regex(r"^[a-f0-9]{64}$", fullmatch=True),
+            "kinematic_constraint_mutation": st.just([]),
+            "latent_prompt_gradient_update": st.just(""),
+            "routing_reweighting": st.just(0.0),
+        }
+    )
+)
+def test_algorithmic_plasticity_delta_fuzzing_rejection(payload: dict[str, Any]) -> None:
+    from coreason_manifest.state.differentials import AlgorithmicPlasticityDelta
+
+    with pytest.raises(ValidationError):
+        TypeAdapter(AlgorithmicPlasticityDelta).validate_python(payload)
+
+
+# If we want a valid strategy, we can build from valid dicts
+valid_plasticity_delta_payload = st.fixed_dictionaries(
+    {
+        "failed_topology_hash": st.from_regex(r"^[a-f0-9]{64}$", fullmatch=True),
+        "kinematic_constraint_mutation": st.lists(
+            st.fixed_dictionaries(
+                {
+                    "op": st.sampled_from(["add", "remove", "replace", "move", "copy", "test"]),
+                    "path": st.text(min_size=1, max_size=100),
+                    "value": st.none() | st.text() | st.integers(),
+                }
+            ),
+            max_size=50,
+        ),
+        "latent_prompt_gradient_update": st.text(max_size=8192),
+        "routing_reweighting": st.floats(min_value=-1.0, max_value=1.0, allow_nan=False, allow_infinity=False),
+    }
+).filter(
+    lambda x: (
+        not (
+            x["routing_reweighting"] == 0.0
+            and not x["kinematic_constraint_mutation"]
+            and not x["latent_prompt_gradient_update"]
+        )
+    )
+)
+
+
+@given(valid_plasticity_delta_payload)
+def test_algorithmic_plasticity_delta_fuzzing(payload: dict[str, Any]) -> None:
+    from coreason_manifest.state.differentials import AlgorithmicPlasticityDelta
+
+    parsed = TypeAdapter(AlgorithmicPlasticityDelta).validate_python(payload)
+    assert isinstance(parsed, AlgorithmicPlasticityDelta)
