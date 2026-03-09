@@ -39,7 +39,6 @@ from .nodes import (
     CompositeNode,
     EpistemicScanner,
     HumanNode,
-    KinematicDecompositionSpec,
     MemoizedNode,
     SelfCorrectionPolicy,
     System1Reflex,
@@ -95,7 +94,6 @@ __all__ = [
     "HumanNode",
     "HypothesisStake",
     "InputMapping",
-    "KinematicDecompositionSpec",
     "MarketResolution",
     "MemoizedNode",
     "OntologicalAlignmentPolicy",
@@ -114,6 +112,3 @@ __all__ = [
     "WorkflowEnvelope",
     "compute_topology_hash",
 ]
-
-# Rebuild topological forward references to avoid Circular Import Death Spirals
-KinematicDecompositionSpec.model_rebuild()

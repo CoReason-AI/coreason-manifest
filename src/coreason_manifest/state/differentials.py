@@ -15,7 +15,6 @@ from typing import Any, Literal, Self
 from pydantic import Field, model_validator
 
 from coreason_manifest.core.base import CoreasonBaseModel
-from coreason_manifest.core.primitives import TopologyHash
 
 type PatchOperation = Literal["add", "remove", "replace", "copy", "move", "test"]
 
@@ -162,50 +161,3 @@ class TemporalCheckpoint(CoreasonBaseModel):
     state_hash: str = Field(
         description="The canonical RFC 8785 SHA-256 hash of the entire topology at this exact index."
     )
-
-
-class RFC6902Patch(CoreasonBaseModel):
-    """Deterministic, typed JSON patch for structural toolchain mutation."""
-
-    op: Literal["add", "remove", "replace", "move", "copy", "test"] = Field(
-        description="The strict RFC 6902 JSON Patch operation."
-    )
-    path: str = Field(description="The JSON pointer indicating the exact state vector to mutate deterministically.")
-    value: Any | None = Field(
-        default=None,
-        description=("The payload to insert or test, if applicable, for this deterministic state vector mutation."),
-    )
-
-
-class AlgorithmicPlasticityDelta(CoreasonBaseModel):
-    """
-    Immutable cryptographic receipt of a cybernetic gradient update.
-    Represents a declarative shift in swarm behavior following execution failure.
-    """
-
-    failed_topology_hash: TopologyHash = Field(
-        ..., description="Strict SHA-256 pointer to the degraded execution graph."
-    )
-    kinematic_constraint_mutation: list[RFC6902Patch] = Field(
-        default_factory=list, max_length=50, description="Bounded RFC 6902 patches defining toolchain state mutations."
-    )
-    latent_prompt_gradient_update: str = Field(
-        default="", max_length=8192, description="Text-based instructional embedding adjustment."
-    )
-    routing_reweighting: float = Field(
-        ..., ge=-1.0, le=1.0, description="Heuristic utility penalization for spot market routing."
-    )
-
-    @model_validator(mode="after")
-    def _enforce_economic_boundary(self) -> "AlgorithmicPlasticityDelta":
-        """Mathematically prove that a zero-sum delta does not exist."""
-        if (
-            self.routing_reweighting == 0.0
-            and not self.kinematic_constraint_mutation
-            and not self.latent_prompt_gradient_update
-        ):
-            raise ValueError(
-                "AlgorithmicPlasticityDelta cannot be empty. If routing_reweighting is 0.0, "
-                "a structural toolchain mutation or latent prompt update MUST exist."
-            )
-        return self
