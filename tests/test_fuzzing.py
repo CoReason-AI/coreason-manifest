@@ -2015,7 +2015,8 @@ def draw_vector_embedding(draw: Any) -> dict[str, Any]:
     # generate random bytes of length exactly `dim`
     raw_bytes = draw(st.binary(min_size=dim, max_size=dim))
     import base64
-    vec = base64.b64encode(raw_bytes).decode('utf-8')
+
+    vec = base64.b64encode(raw_bytes).decode("utf-8")
     res: dict[str, Any] = {
         "vector_base64": vec,
         "dimensionality": dim,
