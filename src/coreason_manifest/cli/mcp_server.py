@@ -62,6 +62,7 @@ def get_epistemic_index() -> str:
     Returns a deterministic, static JSON array of all valid schema identifiers.
     """
     import json
+
     return json.dumps(sorted(_AVAILABLE_SCHEMAS.keys()))
 
 
