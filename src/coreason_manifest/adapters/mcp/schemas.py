@@ -215,7 +215,18 @@ class CallToolRequest(BoundedJSONRPCRequest):
 class ResourceTemplate(CoreasonBaseModel):
     """A template for a resource provided by an MCP server."""
 
-    uriTemplate: str = Field(..., description="A URI template (according to RFC 6570) that can be used to construct resource URIs.")
+    uri_template: str = Field(
+        ...,
+        alias="uriTemplate",
+        description="A URI template (according to RFC 6570) that can be used to construct resource URIs.",
+    )
     name: str = Field(..., description="A human-readable name for the type of resource this template refers to.")
     description: str | None = Field(default=None, description="A description of what this template is for.")
-    mimeType: str | None = Field(default=None, description="The MIME type for all resources that match this template. This should only be included if all resources matching this template have the same type.")
+    mime_type: str | None = Field(
+        default=None,
+        alias="mimeType",
+        description=(
+            "The MIME type for all resources that match this template. This should only be included "
+            "if all resources matching this template have the same type."
+        ),
+    )
