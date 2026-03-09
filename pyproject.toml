@@ -24,12 +24,11 @@ dependencies = [
 ]
 
 [project.scripts]
-coreason-card = "coreason_manifest.cli.card:main"
+coreason-validate = "coreason_manifest.cli.validate:main"
 coreason-export = "coreason_manifest.cli.export:main"
 coreason-mcp = "coreason_manifest.cli.mcp_server:main"
-coreason-mcp-config = "coreason_manifest.cli.mcp_config:main"
-coreason-validate = "coreason_manifest.cli.validate:main"
 coreason-visualize = "coreason_manifest.cli.visualize:main"
+coreason-card = "coreason_manifest.cli.card:main"
 
 [project.urls]
 Homepage = "https://github.com/CoReason-AI/coreason_manifest"
