@@ -64,6 +64,18 @@ class MultimodalTokenAnchor(CoreasonBaseModel):
             raise ValueError("token_span_end cannot be defined without a token_span_start.")
         return self
 
+    @model_validator(mode="after")
+    def validate_spatial_geometry(self) -> Self:
+        """AGENT INSTRUCTION: Enforce mathematical spatial monotonicity."""
+        if self.bounding_box is not None:
+            x_min, y_min, x_max, y_max = self.bounding_box
+            if x_min > x_max or y_min > y_max:
+                raise ValueError(
+                    f"Spatial invariant violated: min bounds (x:{x_min}, y:{y_min}) "
+                    f"exceed max bounds (x:{x_max}, y:{y_max})"
+                )
+        return self
+
 
 type CausalInterval = Literal["strictly_precedes", "overlaps", "contains", "causes", "mitigates"]
 

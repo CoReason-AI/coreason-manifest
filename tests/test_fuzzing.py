@@ -2076,7 +2076,12 @@ def draw_multimodal_token_anchor(draw: Any) -> dict[str, Any]:
                         st.floats(allow_nan=False, allow_infinity=False),
                         st.floats(allow_nan=False, allow_infinity=False),
                         st.floats(allow_nan=False, allow_infinity=False),
-                    ),
+                    ).map(lambda bbox: (
+                        min(bbox[0], bbox[2]),
+                        min(bbox[1], bbox[3]),
+                        max(bbox[0], bbox[2]),
+                        max(bbox[1], bbox[3]),
+                    )),
                 ),
                 "block_type": st.one_of(
                     st.none(),
