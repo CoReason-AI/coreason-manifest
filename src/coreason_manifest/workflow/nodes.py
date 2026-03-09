@@ -35,6 +35,25 @@ from coreason_manifest.oversight.intervention import InterventionPolicy
 from coreason_manifest.workflow.constraints import InputMapping, OutputMapping
 
 
+class KinematicDecompositionSpec(CoreasonBaseModel):
+    """
+    AGENT INSTRUCTION: This is an immutable mathematical contract proving the fractal decomposition
+    of a high-level objective vector into a bounded sub-topology. Active execution is STRICTLY FORBIDDEN.
+    """
+    parent_objective_vector: list[float] | str = Field(
+        min_length=1,
+        description="The high-level intent or latent semantic embedding vector representing the parent objective."
+    )
+    sub_topology: "AnyTopology" = Field(
+        description="The expanded kinematic graph (allowing structural loops/recursion)."
+    )
+    tractability_boundary_proof: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="Mathematical proof bounding the conditional epistemic entropy for all terminal nodes."
+    )
+
+
 class BaseNode(CoreasonBaseModel):
     """
     Base configuration for any execution node in a topology.
