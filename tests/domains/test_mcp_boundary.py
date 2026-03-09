@@ -119,11 +119,7 @@ async def test_mcp_server_resource_schemas() -> None:
         get_capabilities_profile,
         get_epistemic_schema,
         get_memoized_state,
-        mcp,
     )
-
-    tools = await mcp.list_tools()
-    assert len(tools) == 0, "MCP server must be strictly passive with no active tools."
 
     # Test Epistemic Caching Router
     schema_str = get_epistemic_schema("AdjudicationRubric")
@@ -151,6 +147,52 @@ async def test_mcp_server_resource_schemas() -> None:
 
     with pytest.raises(ValueError, match="not found in the capabilities definitions"):
         get_capabilities_profile("DoesNotExistProfile")
+
+    # Test Exception Block for Capability Discovery Router (missing model_json_schema)
+    import coreason_manifest.compute.profiles as profiles_module
+
+    class MockBadProfile:
+        pass
+
+    setattr(profiles_module, "MockBadProfile", MockBadProfile)
+    try:
+        bad_caps_str = get_capabilities_profile("MockBadProfile")
+        bad_caps = json.loads(bad_caps_str)
+        assert bad_caps == []
+    finally:
+        delattr(profiles_module, "MockBadProfile")
+
+
+@pytest.mark.anyio
+async def test_mcp_server_zero_trust_boot() -> None:
+    """Update fixtures to boot mcp_server and assert that len(server.list_tools()) == 0 is strictly True."""
+    from mcp.client.session import ClientSession
+    from mcp.client.stdio import StdioServerParameters, stdio_client
+    import sys
+
+    # Boot the server as a subprocess using stdio transport
+    server_parameters = StdioServerParameters(command=sys.executable, args=["-m", "coreason_manifest.cli.mcp_server"])
+
+    async with stdio_client(server_parameters) as (read_stream, write_stream):
+        async with ClientSession(read_stream, write_stream) as session:
+            await session.initialize()
+
+            # 1. Assert len(server.list_tools()) == 0
+            tools_response = await session.list_tools()
+            assert len(tools_response.tools) == 0, "MCP server must be strictly passive with no active tools."
+
+            # 2. Assert successful retrieval from the three new schema:// resource templates.
+            templates_response = await session.list_resource_templates()
+            template_uris = [tpl.uriTemplate for tpl in templates_response.resourceTemplates]
+
+            assert "schema://epistemic/{name}" in template_uris
+            assert "schema://state/memoized/{state_hash}" in template_uris
+            assert "schema://capabilities/{profile}" in template_uris
+
+            # Retrieve specific resource
+            from pydantic import AnyUrl
+            epistemic_resource = await session.read_resource(AnyUrl("schema://epistemic/AdjudicationRubric"))
+            assert "AdjudicationRubric" in epistemic_resource.contents[0].text # type: ignore
 
 
 @pytest.mark.anyio

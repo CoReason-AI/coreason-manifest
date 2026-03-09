@@ -3415,3 +3415,52 @@ def test_system2_remediation_prompt_fuzzing() -> None:
         assert isinstance(parsed, System2RemediationPrompt)
 
     run_test()
+
+
+@given(st.text(alphabet=st.characters(blacklist_categories=("Cs",)), min_size=1)) # type: ignore
+@settings(max_examples=50, suppress_health_check=[HealthCheck.too_slow])
+@pytest.mark.anyio
+async def test_mcp_server_malformed_uri_fuzzing(malformed_path: str) -> None:
+    """Assert the server handles malformed schema:// paths without crashing the async loop."""
+    import urllib.parse
+
+    from mcp.server import Server
+    from mcp.types import JSONRPCMessage
+
+    # Safely encode the path to ensure it's a valid URI structure for the router to attempt matching
+    safe_path = urllib.parse.quote(malformed_path, safe='')
+    test_uri = f"schema://{safe_path}"
+
+    server = Server("mock_fuzz_server")
+
+    class MockSendStream:
+        def __init__(self) -> None:
+            self.sent_messages: list[Any] = []
+
+        async def send(self, message: Any) -> None:
+            self.sent_messages.append(message)
+
+    class MockSession:
+        def __init__(self) -> None:
+            self._write_stream = MockSendStream()
+
+    mock_session = MockSession()
+
+    payload = {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "resources/read",
+        "params": {
+            "uri": test_uri
+        }
+    }
+
+    message = JSONRPCMessage.model_validate(payload)
+
+    try:
+        # Pass the toxic message wrapper directly. The event loop must not crash.
+        from mcp.shared.session import SessionMessage  # type: ignore[attr-defined]
+        message_wrap = SessionMessage(message=message)
+        await server._handle_message(message_wrap, mock_session, None) # type: ignore
+    except Exception as e:
+        pytest.fail(f"Server raised exception instead of catching it natively: {e}")

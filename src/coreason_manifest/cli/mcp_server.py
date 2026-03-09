@@ -18,10 +18,9 @@ from pydantic import TypeAdapter
 import coreason_manifest
 from coreason_manifest.core import CoreasonBaseModel
 
-"""
-AGENT INSTRUCTION: This MCP Server is strictly passive. DO NOT register @mcp.tool() endpoints.
-Use @mcp.resource() for all ontological projections.
-"""
+# fmt: off
+"""AGENT INSTRUCTION: This MCP Server is strictly passive. DO NOT register @mcp.tool() endpoints. Use @mcp.resource() for all ontological projections."""
+# fmt: on
 
 # Create an MCP server
 mcp = FastMCP("coreason-manifest-schema-service")
