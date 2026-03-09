@@ -14,7 +14,7 @@ Think purely in terms of declarative graphical grammars (Marks, Channels, Scales
 
 from typing import Annotated, Any, Literal
 
-from pydantic import Field, field_validator
+from pydantic import Field
 
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.presentation.scivis import MacroGrid
@@ -105,42 +105,3 @@ class PresentationEnvelope(CoreasonBaseModel):
 
     intent: AnyPresentationIntent = Field(description="The reason an agent is presenting this data to a human.")
     grid: MacroGrid = Field(description="The grid of panels being presented.")
-
-
-class RectifiedSignalTrace(CoreasonBaseModel):
-    """AGENT INSTRUCTION: This schema acts as a cryptographic state-transition receipt
-    proving the deterministic decay of high-entropy human stochastic signals into
-    low-entropy canonical pointers. Downstream execution engines MUST mathematically
-    verify this receipt before graph traversal.
-    """
-
-    stochastic_entropy_input: str = Field(description="The high-entropy natural language input from the human.")
-    canonical_projection: Any = Field(description="The low-entropy canonical pointer representing the intent.")
-    semantic_shift_dictionary: dict[str, str] = Field(
-        description="Dictionary mapping high-entropy strings to canonical semantic keys."
-    )
-    rectification_confidence: float = Field(
-        ge=0.0, le=1.0, description="Mathematical confidence score of the deterministic decay."
-    )
-
-    @field_validator("canonical_projection")
-    @classmethod
-    def _enforce_primitive_depth_bounds(cls, v: Any) -> Any:
-        """Enforce strict AST/JSON-bomb limits on the canonical pointer."""
-
-        def _check_depth(obj: Any, current_depth: int) -> None:
-            if current_depth > 5:
-                raise ValueError("Canonical projection exceeds maximum allowed nesting depth of 5.")
-            if isinstance(obj, dict):
-                for key, val in obj.items():
-                    if not isinstance(key, str):
-                        raise ValueError("Canonical projection dictionary keys must be strings.")
-                    _check_depth(val, current_depth + 1)
-            elif isinstance(obj, list):
-                for item in obj:
-                    _check_depth(item, current_depth + 1)
-            elif obj is not None and not isinstance(obj, (str, int, float, bool)):
-                raise ValueError(f"Invalid leaf node type in canonical projection: {type(obj)}")
-
-        _check_depth(v, 0)
-        return v

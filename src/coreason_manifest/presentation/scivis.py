@@ -68,7 +68,7 @@ class GrammarPanel(CoreasonBaseModel):
     panel_id: str = Field(description="The unique identifier for this UI panel.")
     type: Literal["grammar"] = Field(default="grammar", description="Discriminator for Grammar of Graphics charts.")
     title: str = Field(description="The human-readable title of the chart.")
-    data_source_id: str = Field(description="The cryptographic pointer to the dataset in the EpisodicTraceMemory.")
+    data_source_id: str = Field(description="The cryptographic pointer to the dataset in the EpistemicLedger.")
     mark: Literal["point", "line", "area", "bar", "rect", "arc"] = Field(
         description="The geometric shape used to represent the data."
     )

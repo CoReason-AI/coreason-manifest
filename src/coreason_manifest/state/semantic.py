@@ -152,7 +152,7 @@ class MemoryProvenance(CoreasonBaseModel):
         description="The Content Identifier (CID) of the agent node that extracted this memory."
     )
     source_event_id: str = Field(
-        description="The exact event Content Identifier (CID) in the EpisodicTraceMemory that generated this fact."
+        description="The exact event Content Identifier (CID) in the EpistemicLedger that generated this fact."
     )
     source_artifact_id: str | None = Field(
         default=None, description="The CID of the Genesis MultimodalArtifact this memory was transmutated from."
