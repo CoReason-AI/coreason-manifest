@@ -8728,11 +8728,14 @@
       "properties": {
         "baseline_importance": {
           "description": "The starting importance score of this memory from 0.0 to 1.0.",
+          "maximum": 1.0,
+          "minimum": 0.0,
           "title": "Baseline Importance",
           "type": "number"
         },
         "decay_rate": {
           "description": "The rate at which this memory's relevance decays over time.",
+          "minimum": 0.0,
           "title": "Decay Rate",
           "type": "number"
         }
