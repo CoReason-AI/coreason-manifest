@@ -154,7 +154,7 @@ async def test_mcp_server_resource_schemas() -> None:
     class MockBadProfile:
         pass
 
-    setattr(profiles_module, "MockBadProfile", MockBadProfile)
+    setattr(profiles_module, "MockBadProfile", MockBadProfile)  # noqa: B010
     try:
         bad_caps_str = get_capabilities_profile("MockBadProfile")
         bad_caps = json.loads(bad_caps_str)
@@ -166,33 +166,37 @@ async def test_mcp_server_resource_schemas() -> None:
 @pytest.mark.anyio
 async def test_mcp_server_zero_trust_boot() -> None:
     """Update fixtures to boot mcp_server and assert that len(server.list_tools()) == 0 is strictly True."""
+    import sys
+
     from mcp.client.session import ClientSession
     from mcp.client.stdio import StdioServerParameters, stdio_client
-    import sys
 
     # Boot the server as a subprocess using stdio transport
     server_parameters = StdioServerParameters(command=sys.executable, args=["-m", "coreason_manifest.cli.mcp_server"])
 
-    async with stdio_client(server_parameters) as (read_stream, write_stream):
-        async with ClientSession(read_stream, write_stream) as session:
-            await session.initialize()
+    async with (
+        stdio_client(server_parameters) as (read_stream, write_stream),
+        ClientSession(read_stream, write_stream) as session,
+    ):
+        await session.initialize()
 
-            # 1. Assert len(server.list_tools()) == 0
-            tools_response = await session.list_tools()
-            assert len(tools_response.tools) == 0, "MCP server must be strictly passive with no active tools."
+        # 1. Assert len(server.list_tools()) == 0
+        tools_response = await session.list_tools()
+        assert len(tools_response.tools) == 0, "MCP server must be strictly passive with no active tools."
 
-            # 2. Assert successful retrieval from the three new schema:// resource templates.
-            templates_response = await session.list_resource_templates()
-            template_uris = [tpl.uriTemplate for tpl in templates_response.resourceTemplates]
+        # 2. Assert successful retrieval from the three new schema:// resource templates.
+        templates_response = await session.list_resource_templates()
+        template_uris = [tpl.uriTemplate for tpl in templates_response.resourceTemplates]
 
-            assert "schema://epistemic/{name}" in template_uris
-            assert "schema://state/memoized/{state_hash}" in template_uris
-            assert "schema://capabilities/{profile}" in template_uris
+        assert "schema://epistemic/{name}" in template_uris
+        assert "schema://state/memoized/{state_hash}" in template_uris
+        assert "schema://capabilities/{profile}" in template_uris
 
-            # Retrieve specific resource
-            from pydantic import AnyUrl
-            epistemic_resource = await session.read_resource(AnyUrl("schema://epistemic/AdjudicationRubric"))
-            assert "AdjudicationRubric" in epistemic_resource.contents[0].text # type: ignore
+        # Retrieve specific resource
+        from pydantic import AnyUrl
+
+        epistemic_resource = await session.read_resource(AnyUrl("schema://epistemic/AdjudicationRubric"))
+        assert "AdjudicationRubric" in epistemic_resource.contents[0].text  # type: ignore
 
 
 @pytest.mark.anyio

@@ -19,7 +19,7 @@ import coreason_manifest
 from coreason_manifest.core import CoreasonBaseModel
 
 # fmt: off
-"""AGENT INSTRUCTION: This MCP Server is strictly passive. DO NOT register @mcp.tool() endpoints. Use @mcp.resource() for all ontological projections."""
+"""AGENT INSTRUCTION: This MCP Server is strictly passive. DO NOT register @mcp.tool() endpoints. Use @mcp.resource() for all ontological projections."""  # noqa: E501
 # fmt: on
 
 # Create an MCP server
