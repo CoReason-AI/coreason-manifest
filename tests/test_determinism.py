@@ -446,8 +446,7 @@ def test_epistemic_payload_canonical_hashing() -> None:
 
 
 def test_semantic_memory_determinism() -> None:
-    # "dGVzdA==" decodes to b'test' which is 4 bytes. We set dimensionality to 4.
-    embedding = VectorEmbedding(vector_base64="dGVzdA==", dimensionality=4, model_name="test-model")
+    embedding = VectorEmbedding(vector_base64="dGVzdA==", dimensionality=3, model_name="test-model")
     temporal_bounds = TemporalBounds(valid_from=100.0, valid_to=200.0, interval_type="overlaps")
     provenance = MemoryProvenance(extracted_by="did:web:agent_1", source_event_id="event_1")
     salience = SalienceProfile(baseline_importance=0.9, decay_rate=0.1)

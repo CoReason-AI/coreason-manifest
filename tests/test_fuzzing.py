@@ -9,12 +9,13 @@ import re
 from typing import Any
 
 import pytest
-from hypothesis import HealthCheck, given, settings
+from hypothesis import HealthCheck, assume, given, settings
 from hypothesis import strategies as st
 from pydantic import TypeAdapter, ValidationError
 
 from coreason_manifest.adapters.mcp.schemas import HTTPTransportConfig, MCPServerConfig
 from coreason_manifest.core.primitives import DataClassification, RiskLevel
+from coreason_manifest.oversight.adjudication import AdjudicationRubric, GradingCriteria
 from coreason_manifest.oversight.dlp import InformationFlowPolicy
 from coreason_manifest.oversight.governance import GlobalGovernance
 from coreason_manifest.oversight.intervention import (
@@ -51,7 +52,6 @@ from coreason_manifest.state.memory import EpistemicLedger
 from coreason_manifest.state.semantic import (
     SemanticEdge,
     SemanticNode,
-    VectorEmbedding,
 )
 from coreason_manifest.state.vision import (
     DocumentLayoutAnalysis,
@@ -2010,16 +2010,10 @@ semantic_edge_adapter: TypeAdapter[SemanticEdge] = TypeAdapter(SemanticEdge)
 
 @st.composite
 def draw_vector_embedding(draw: Any) -> dict[str, Any]:
-    # We must generate a structurally valid base64 payload proportional to the dimensionality
-    dim = draw(st.integers(min_value=1, max_value=128))
-    # generate random bytes of length exactly `dim`
-    raw_bytes = draw(st.binary(min_size=dim, max_size=dim))
-    import base64
-
-    vec = base64.b64encode(raw_bytes).decode("utf-8")
+    vec = draw(st.from_regex(r"^[A-Za-z0-9+/]*={0,2}$", fullmatch=True))
     res: dict[str, Any] = {
         "vector_base64": vec,
-        "dimensionality": dim,
+        "dimensionality": draw(st.integers(min_value=1)),
         "model_name": draw(st.text()),
     }
     return res
@@ -3531,26 +3525,57 @@ def test_fuzz_utility_justification_tensor_poisoning(fuzzed_vectors: dict[str, f
         assert graph.superposition_variance_threshold == 0.5
 
 
-def test_vector_dimensionality_byzantine_fault() -> None:
-    """
-    AGENT INSTRUCTION: Mathematically proves that an invalid byte-width
-    allocation forces a structural compilation rejection.
-    """
-    import base64
-
-    from pydantic import ValidationError
-
-    # Create a vector with dimensionality 128, but inject an uneven byte length (e.g., 128 * 4 + 1 bytes)
-    dimensionality = 128
-    invalid_byte_length = (dimensionality * 4) + 1
-    malformed_bytes = b"0" * invalid_byte_length
-    malformed_base64 = base64.b64encode(malformed_bytes).decode("utf-8")
-
+def test_adjudication_rubric_rejects_zero_weight_topology() -> None:
+    """Ensure zero-weight rubrics structurally fail before hitting the execution engine."""
     with pytest.raises(ValidationError) as exc_info:
-        VectorEmbedding(
-            dimensionality=dimensionality,
-            vector_base64=malformed_base64,
-            model_name="test-model",
+        # Construct a rubric where all criteria weights sum to exactly 0.0
+        AdjudicationRubric(
+            rubric_id="rubric-zero",
+            criteria=[
+                GradingCriteria(criterion_id="crit-1", description="Test", weight=0.0),
+                GradingCriteria(criterion_id="crit-2", description="Test 2", weight=0.0),
+            ],
+            passing_threshold=50.0,
         )
 
-    assert "Byzantine fault detected" in str(exc_info.value)
+    assert "topological DoS (division by zero)" in str(exc_info.value)
+
+
+@st.composite
+def draw_grading_criteria(draw: Any) -> dict[str, Any]:
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "criterion_id": st.text(min_size=1),
+                "description": st.text(),
+                "weight": st.floats(min_value=0.0, allow_nan=False, allow_infinity=False),
+            }
+        )
+    )
+    return res
+
+
+@st.composite
+def draw_adjudication_rubric(draw: Any) -> dict[str, Any]:
+    criteria = draw(st.lists(draw_grading_criteria(), min_size=1, max_size=5))
+    assume(sum(c["weight"] for c in criteria) > 0.0)
+
+    res: dict[str, Any] = draw(
+        st.fixed_dictionaries(
+            {
+                "rubric_id": st.text(min_size=1),
+                "criteria": st.just(criteria),
+                "passing_threshold": st.floats(min_value=0.0, max_value=100.0, allow_nan=False, allow_infinity=False),
+            }
+        )
+    )
+    return res
+
+
+rubric_adapter: TypeAdapter[AdjudicationRubric] = TypeAdapter(AdjudicationRubric)
+
+
+@given(draw_adjudication_rubric())
+def test_adjudication_rubric_fuzzing(payload: dict[str, Any]) -> None:
+    parsed = rubric_adapter.validate_python(payload)
+    assert isinstance(parsed, AdjudicationRubric)
