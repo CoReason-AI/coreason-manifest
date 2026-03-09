@@ -9,6 +9,40 @@ from coreason_manifest.presentation.scivis import AnyPanel, ChannelEncoding, Gra
 from coreason_manifest.presentation.templates import DynamicLayoutTemplate
 
 
+@pytest.mark.parametrize(
+    "payload",
+    [
+        "getattr(__builtins__, 'ev' + 'al')('print(\\'hacked\\')')",
+        "__import__('o' + 's').system('echo 1')",
+        "__import__('subprocess').run(['echo', '1'])",
+    ],
+)
+def test_dynamic_layout_template_rejects_obfuscated_rce(payload: str) -> None:
+    """
+    AGENT INSTRUCTION: Verify the AST boundary deterministically severs
+    polymorphic string concatenation attacks prior to instantiation.
+    """
+    with pytest.raises(ValidationError, match="Kinetic execution bleed detected"):
+        DynamicLayoutTemplate(layout_tstring=payload)
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        "Not a python string at all",
+        't"{user_name}"',
+        "{{ safe_variable }}",
+    ],
+)
+def test_dynamic_layout_template_allows_valid_strings(payload: str) -> None:
+    """
+    Verify that strings not containing function calls, or strings that
+    are syntactically invalid Python, are allowed to pass the AST boundary.
+    """
+    template = DynamicLayoutTemplate(layout_tstring=payload)
+    assert template.layout_tstring == payload
+
+
 @given(
     payload=st.sampled_from(
         [
@@ -25,7 +59,7 @@ def test_tstring_rce_fuzzer(payload: str) -> None:
     Generate adversarial payload strings and prove that DynamicLayoutTemplate
     definitively raises a ValidationError when instantiated with them.
     """
-    with pytest.raises(ValidationError, match="Forbidden execution pattern detected"):
+    with pytest.raises(ValidationError, match="Kinetic execution bleed detected"):
         DynamicLayoutTemplate(layout_tstring=payload)
 
 
