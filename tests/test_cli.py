@@ -105,7 +105,7 @@ async def test_mcp_server_rbac_projection(monkeypatch: pytest.MonkeyPatch) -> No
 
         res = await mcp.read_resource(f"schema://epistemic/{proprietary_name}")
 
-        if isinstance(res, list) and len(res) > 0 and hasattr(res[0], 'content'):
+        if isinstance(res, list) and len(res) > 0 and hasattr(res[0], "content"):
             res = res[0].content
         if isinstance(res, bytes):
             res = res.decode("utf-8")

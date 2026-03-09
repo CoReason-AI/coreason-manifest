@@ -14,15 +14,28 @@ async def main() -> bool:
             ClientSession(read_stream, write_stream) as session,
         ):
             await session.initialize()
+
+            # The server is now passive. We verify it has NO tools, but HAS resource templates.
             tools_response = await session.list_tools()
-
-            tool_names = [tool.name for tool in tools_response.tools]
-
-            if "list_schemas" not in tool_names or "get_schema" not in tool_names:
-                print(f"Error: Expected tools missing. Found tools: {tool_names}")
+            if len(tools_response.tools) > 0:
+                print(f"Error: Server must be strictly passive. Found active tools: {tools_response.tools}")
                 return False
 
-            print("MCP ping successful. Required tools present.")
+            templates_response = await session.list_resource_templates()
+            templates = [template.uriTemplate for template in templates_response.resourceTemplates]
+
+            required_templates = [
+                "schema://epistemic/{name}",
+                "schema://state/memoized/{hash}",
+                "schema://capabilities/{profile}",
+            ]
+
+            for req in required_templates:
+                if req not in templates:
+                    print(f"Error: Missing required resource template {req}. Found: {templates}")
+                    return False
+
+            print("MCP ping successful. Server is strictly passive and projects proper ontological resources.")
             return True
     except Exception as e:
         print(f"Error communicating with MCP server: {e}")

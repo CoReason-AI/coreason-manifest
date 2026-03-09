@@ -55,7 +55,7 @@ def project_envelope_to_markdown(envelope: WorkflowEnvelope) -> str:
             lines.append(f"- **Justification:** *{node.justification}*")
 
         if getattr(node, "agent_attestation", None) is not None:
-            attest = getattr(node, "agent_attestation")
+            attest = node.agent_attestation
             if attest:
                 lines.append(f"- **Lineage Hash:** `{attest.training_lineage_hash}`")
         lines.append("")
