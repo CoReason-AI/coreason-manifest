@@ -33,7 +33,13 @@ class TaskAnnouncement(CoreasonBaseModel):
     required_action_space_id: str | None = Field(
         default=None, description="Optional restriction forcing bidders to possess a specific toolset."
     )
-    max_budget_microcents: int = Field(description="The absolute ceiling price the orchestrator is willing to pay.")
+    max_budget_microcents: int | None = Field(
+        default=None,
+        ge=0,
+        description=(
+            "Maximum budget available for the task, represented in microcents to avoid floating point inaccuracies."
+        ),
+    )
 
 
 class EscrowPolicy(CoreasonBaseModel):
@@ -50,7 +56,9 @@ class EscrowPolicy(CoreasonBaseModel):
 
 class AgentBid(CoreasonBaseModel):
     agent_id: str = Field(description="The NodeID of the bidder.")
-    estimated_cost_microcents: int = Field(description="The node's calculated cost to fulfill the task.")
+    estimated_cost_microcents: int = Field(
+        ..., ge=0, description="The agent's proposed cost to complete the task, in microcents."
+    )
     estimated_latency_ms: int = Field(ge=0, description="The node's estimated time to completion.")
     estimated_carbon_gco2eq: float = Field(
         ge=0.0,
@@ -64,7 +72,9 @@ class TaskAward(CoreasonBaseModel):
     awarded_syndicate: dict[str, int] = Field(
         description="Strict mapping of agent NodeIDs to their exact fractional payout in microcents."
     )
-    cleared_price_microcents: int = Field(description="The final cryptographic clearing price.")
+    cleared_price_microcents: int = Field(
+        ..., ge=0, description="The final agreed upon price for the execution of the task, in microcents."
+    )
     escrow: EscrowPolicy | None = Field(
         default=None, description="The conditional economic escrow locking the compute budget."
     )

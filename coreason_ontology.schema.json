@@ -444,7 +444,8 @@
           "type": "string"
         },
         "estimated_cost_microcents": {
-          "description": "The node's calculated cost to fulfill the task.",
+          "description": "The agent's proposed cost to complete the task, in microcents.",
+          "minimum": 0,
           "title": "Estimated Cost Microcents",
           "type": "integer"
         },
@@ -10028,14 +10029,22 @@
           "title": "Required Action Space Id"
         },
         "max_budget_microcents": {
-          "description": "The absolute ceiling price the orchestrator is willing to pay.",
-          "title": "Max Budget Microcents",
-          "type": "integer"
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Maximum budget available for the task, represented in microcents to avoid floating point inaccuracies.",
+          "title": "Max Budget Microcents"
         }
       },
       "required": [
-        "task_id",
-        "max_budget_microcents"
+        "task_id"
       ],
       "title": "TaskAnnouncement",
       "type": "object"
@@ -10057,7 +10066,8 @@
           "type": "object"
         },
         "cleared_price_microcents": {
-          "description": "The final cryptographic clearing price.",
+          "description": "The final agreed upon price for the execution of the task, in microcents.",
+          "minimum": 0,
           "title": "Cleared Price Microcents",
           "type": "integer"
         },
