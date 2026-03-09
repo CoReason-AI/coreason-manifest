@@ -114,10 +114,14 @@ class RectifiedSignalTrace(CoreasonBaseModel):
     verify this receipt before graph traversal.
     """
 
-    stochastic_entropy_input: str
-    canonical_projection: Any
-    semantic_shift_dictionary: dict[str, str]
-    rectification_confidence: float = Field(ge=0.0, le=1.0)
+    stochastic_entropy_input: str = Field(description="The high-entropy natural language input from the human.")
+    canonical_projection: Any = Field(description="The low-entropy canonical pointer representing the intent.")
+    semantic_shift_dictionary: dict[str, str] = Field(
+        description="Dictionary mapping high-entropy strings to canonical semantic keys."
+    )
+    rectification_confidence: float = Field(
+        ge=0.0, le=1.0, description="Mathematical confidence score of the deterministic decay."
+    )
 
     @field_validator("canonical_projection")
     @classmethod

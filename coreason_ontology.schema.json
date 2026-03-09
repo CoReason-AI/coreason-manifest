@@ -8187,20 +8187,24 @@
       "description": "AGENT INSTRUCTION: This schema acts as a cryptographic state-transition receipt\nproving the deterministic decay of high-entropy human stochastic signals into\nlow-entropy canonical pointers. Downstream execution engines MUST mathematically\nverify this receipt before graph traversal.",
       "properties": {
         "stochastic_entropy_input": {
+          "description": "The high-entropy natural language input from the human.",
           "title": "Stochastic Entropy Input",
           "type": "string"
         },
         "canonical_projection": {
+          "description": "The low-entropy canonical pointer representing the intent.",
           "title": "Canonical Projection"
         },
         "semantic_shift_dictionary": {
           "additionalProperties": {
             "type": "string"
           },
+          "description": "Dictionary mapping high-entropy strings to canonical semantic keys.",
           "title": "Semantic Shift Dictionary",
           "type": "object"
         },
         "rectification_confidence": {
+          "description": "Mathematical confidence score of the deterministic decay.",
           "maximum": 1.0,
           "minimum": 0.0,
           "title": "Rectification Confidence",
