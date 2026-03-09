@@ -10,9 +10,11 @@ These schemas represent the append-only cognitive ledger of the swarm. YOU ARE E
 monotonic logic, standard CRUD database paradigms, or kinetic execution parameters. These models represent computable
 geometric graphs of cognition and causal inference."""
 
+import ipaddress
+import urllib.parse
 from typing import Annotated, Literal
 
-from pydantic import Field
+from pydantic import Field, field_validator
 
 from coreason_manifest.core.base import CoreasonBaseModel
 
@@ -22,6 +24,47 @@ class BrowserDOMState(CoreasonBaseModel):
         default="browser", description="Discriminator for Causal Actuators representing structural shifts."
     )
     current_url: str = Field(description="Spatial Execution Bounds where the agent interacts.")
+
+    @field_validator("current_url")
+    @classmethod
+    def _enforce_spatial_safety(cls, url: str) -> str:
+        """
+        AGENT INSTRUCTION: Mathematically prove the requested coordinate is
+        a globally routable topology. Reject all local/private Bogon space
+        to prevent epistemic SSRF escape.
+        """
+        parsed = urllib.parse.urlparse(url)
+
+        # Prevent local file access
+        if parsed.scheme == "file":
+            raise ValueError("SSRF topological violation detected: file:// schema is forbidden")
+
+        hostname = parsed.hostname
+
+        if not hostname:
+            return url
+
+        # 1. Topological Heuristics
+        hostname_lower = hostname.lower()
+        if hostname_lower in {"localhost", "broadcasthost"} or \
+           hostname_lower.endswith((".local", ".internal", ".arpa")):
+            raise ValueError(f"SSRF topological violation detected: {hostname}")
+
+        # 2. Mathematical IP Bounds
+        try:
+            # Handle potential IPv6 bracket formatting in URLs
+            clean_hostname = hostname.strip("[]")
+            ip = ipaddress.ip_address(clean_hostname)
+        except ValueError:
+            # Hostname is not a direct IP address; topological checks suffice
+            return url
+
+        if ip.is_private or ip.is_loopback or ip.is_link_local or \
+           ip.is_reserved or ip.is_multicast:
+            raise ValueError(f"SSRF mathematical bound violation detected: {ip}")
+
+        return url
+
     viewport_size: tuple[int, int] = Field(description="Capability Perimeters detailing bounding coordinates.")
     dom_hash: str = Field(description="The SHA-256 hash acting as the structural manifestation vector.")
     accessibility_tree_hash: str = Field(

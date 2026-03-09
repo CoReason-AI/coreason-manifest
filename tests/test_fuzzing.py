@@ -1348,7 +1348,7 @@ def draw_browser_dom_state(draw: Any) -> dict[str, Any]:
         st.fixed_dictionaries(
             {
                 "type": st.just("browser"),
-                "current_url": st.text(min_size=1),
+                "current_url": st.from_regex(r"^https://[a-z0-9-]+\.(com|net|org)$", fullmatch=True),
                 "viewport_size": st.tuples(st.integers(min_value=1), st.integers(min_value=1)),
                 "dom_hash": st.text(min_size=10),
                 "accessibility_tree_hash": st.text(min_size=10),
@@ -3505,6 +3505,28 @@ async def test_mcp_server_malformed_uri_fuzzing(malformed_path: str) -> None:
                 # Any exception raised by the read_resource itself is fine,
                 # as long as it isn't an unhandled server crash.
                 pass
+
+
+@given(st.sampled_from([
+    "http://169.254.169.254/latest/meta-data/",
+    "https://localhost:8080/admin",
+    "http://127.0.0.1",
+    "http://[::1]",
+    "file:///etc/passwd",
+    "http://kubelet.local:10250"
+]))
+def test_adversarial_ssrf_rejection(adversarial_url: str) -> None:
+    """Mathematically prove adversarial spatial coordinates cause immediate epistemic collapse."""
+    from coreason_manifest.state.toolchains import BrowserDOMState
+
+    with pytest.raises(ValidationError, match="SSRF"):
+        # We must supply other required fields for initialization to only fail on current_url
+        BrowserDOMState(
+            current_url=adversarial_url,
+            viewport_size=(800, 600),
+            dom_hash="a"*64,
+            accessibility_tree_hash="a"*64
+        )
 
 
 @given(st.dictionaries(st.text(min_size=1), st.floats(allow_nan=True, allow_infinity=True)))
