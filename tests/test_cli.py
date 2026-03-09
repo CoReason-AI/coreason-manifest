@@ -5,7 +5,6 @@ from unittest.mock import patch
 import pytest
 
 from coreason_manifest.cli.export import main as export_main
-from coreason_manifest.cli.mcp_server import get_schema, list_schemas
 from coreason_manifest.cli.visualize import main as visualize_main
 
 
@@ -13,18 +12,6 @@ def test_export_main(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.chdir(tmp_path)
     export_main()
     assert (tmp_path / "coreason_ontology.schema.json").exists()
-
-
-def test_mcp_server_schemas() -> None:
-    schemas = list_schemas()
-    assert len(schemas) > 0
-    assert "WorkflowEnvelope" in schemas
-
-    schema = get_schema("WorkflowEnvelope")
-    assert schema["title"] == "WorkflowEnvelope"
-
-    with pytest.raises(ValueError, match="Schema 'NonExistentSchema' not found"):
-        get_schema("NonExistentSchema")
 
 
 def test_visualize_valid_manifest(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
@@ -94,13 +81,14 @@ def test_visualize_missing_file(capsys: pytest.CaptureFixture[str]) -> None:
     assert "not found" in captured.err
 
 
-def test_mcp_server_rbac_projection(monkeypatch: pytest.MonkeyPatch) -> None:
-    from coreason_manifest.cli.mcp_server import _AVAILABLE_SCHEMAS, get_schema, list_schemas
+@pytest.mark.anyio
+async def test_mcp_server_rbac_projection(monkeypatch: pytest.MonkeyPatch) -> None:
+    from coreason_manifest.cli.mcp_server import _AVAILABLE_SCHEMAS, mcp
 
     # Inject a mock proprietary schema
     proprietary_name = "MockProprietarySchema"
     _AVAILABLE_SCHEMAS[proprietary_name] = {"title": "MockProprietarySchema", "x-required-licenses": ["marketscan"]}
-    # We must append to _SCHEMA_NAMES to make it visible to list_schemas
+    # We must append to _SCHEMA_NAMES to make it visible
     from coreason_manifest.cli.mcp_server import _SCHEMA_NAMES
 
     _SCHEMA_NAMES.append(proprietary_name)
@@ -108,18 +96,21 @@ def test_mcp_server_rbac_projection(monkeypatch: pytest.MonkeyPatch) -> None:
     try:
         # TEST 1: Zero-Trust Default (No license)
         monkeypatch.delenv("COREASON_GRANTED_LICENSES", raising=False)
-        schemas_denied = list_schemas()
-        assert proprietary_name not in schemas_denied
 
-        with pytest.raises(ValueError, match="not found in the manifest"):
-            get_schema(proprietary_name)
+        with pytest.raises(Exception, match="not found"):
+            await mcp.read_resource(f"schema://epistemic/{proprietary_name}")
 
         # TEST 2: Granted Context (Subset satisfied)
         monkeypatch.setenv("COREASON_GRANTED_LICENSES", "rightfind, marketscan ")
-        schemas_allowed = list_schemas()
-        assert proprietary_name in schemas_allowed
 
-        schema = get_schema(proprietary_name)
+        res = await mcp.read_resource(f"schema://epistemic/{proprietary_name}")
+
+        if isinstance(res, list) and len(res) > 0 and hasattr(res[0], 'content'):
+            res = res[0].content
+        if isinstance(res, bytes):
+            res = res.decode("utf-8")
+
+        schema = json.loads(str(res))
         assert schema["title"] == "MockProprietarySchema"
 
     finally:

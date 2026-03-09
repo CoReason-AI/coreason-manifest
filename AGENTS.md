@@ -81,6 +81,11 @@ You are strictly forbidden from introducing "Active" or "Runtime" logic into thi
 * **Forbidden:** Dependencies on execution-layer libraries (e.g., `fastapi`, `starlette`, auth middleware, database drivers like `psycopg2`).
 * **Allowed:** Pure data dependencies (`pydantic`, `pyyaml`).
 
+### **Law 4: Passive Ontological Surface (The "No Kinematics" Rule)**
+* **Constraint:** The internal FastMCP server is strictly a passive projection of the Universal Ontology.
+* **Forbidden:** Registering active execution endpoints via `@mcp.tool()`.
+* **Allowed:** Exposing stateless schemas strictly via `@mcp.resource()` under `schema://` URIs.
+
 ---
 
 ## **2. Development Protocol**

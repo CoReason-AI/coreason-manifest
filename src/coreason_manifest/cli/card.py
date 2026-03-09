@@ -32,15 +32,19 @@ def project_envelope_to_markdown(envelope: WorkflowEnvelope) -> str:
         f"- **Type:** `{envelope.topology.type}`",
     ]
 
-    if envelope.topology.architectural_intent:
-        lines.append(f"- **Intent:** {envelope.topology.architectural_intent}")
-    if envelope.topology.justification:
-        lines.append(f"- **Justification:** *{envelope.topology.justification}*")
+    architectural_intent = getattr(envelope.topology, "architectural_intent", None)
+    if architectural_intent:
+        lines.append(f"- **Intent:** {architectural_intent}")
+
+    justification = getattr(envelope.topology, "justification", None)
+    if justification:
+        lines.append(f"- **Justification:** *{justification}*")
 
     lines.append("")
     lines.append("## Node Ledger & Personas")
 
-    for node_id, node in envelope.topology.nodes.items():
+    nodes = getattr(envelope.topology, "nodes", {})
+    for node_id, node in nodes.items():
         lines.append(f"### Node: `{node_id}`")
         lines.append(f"- **Type:** `{node.type}`")
         lines.append(f"- **Description:** {node.description}")
@@ -51,7 +55,7 @@ def project_envelope_to_markdown(envelope: WorkflowEnvelope) -> str:
             lines.append(f"- **Justification:** *{node.justification}*")
 
         if getattr(node, "agent_attestation", None) is not None:
-            attest = node.agent_attestation  # type: ignore
+            attest = getattr(node, "agent_attestation")
             if attest:
                 lines.append(f"- **Lineage Hash:** `{attest.training_lineage_hash}`")
         lines.append("")

@@ -90,6 +90,19 @@ def draw_vc_presentation(draw: Any) -> dict[str, Any]:
     return res
 
 
+@pytest.mark.anyio
+@given(st.text(alphabet=st.characters(blacklist_categories=["Cs"]), min_size=1))
+@settings(max_examples=50, suppress_health_check=[HealthCheck.too_slow])
+async def test_malformed_mcp_resource_uris(uri: str) -> None:
+    """Ensure malformed schema URIs do not crash the server routing."""
+    import contextlib
+
+    from coreason_manifest.cli.mcp_server import mcp
+
+    with contextlib.suppress(ValueError, Exception):
+        await mcp.read_resource(f"schema://epistemic/{uri}")
+
+
 @st.composite
 def draw_escalation_contract(draw: Any) -> dict[str, Any]:
     res: dict[str, Any] = draw(

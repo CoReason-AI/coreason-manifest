@@ -5,6 +5,8 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
+"""AGENT INSTRUCTION: This MCP Server is strictly passive. DO NOT register @mcp.tool() endpoints. Use @mcp.resource() for all ontological projections."""  # noqa: E501
+
 import contextlib
 import os
 from typing import Any, cast
@@ -48,27 +50,55 @@ def _is_schema_allowed(schema_dict: dict[str, Any], granted_licenses: set[str]) 
     return set(required).issubset(granted_licenses)
 
 
-@mcp.tool()
-def list_schemas() -> list[str]:
-    """Returns a list of all available schema names exported in the root __init__.py, filtered by RBAC context."""
-    granted = _get_granted_licenses()
-    return [name for name in _SCHEMA_NAMES if _is_schema_allowed(_AVAILABLE_SCHEMAS[name], granted)]
+@mcp.resource("schema://epistemic/{name}")
+def get_epistemic_schema(name: str) -> str:
+    import json
 
-
-@mcp.tool()
-def get_schema(schema_name: str) -> dict[str, Any]:
-    """Returns the strict Pydantic JSON schema for a specific requested model, governed by RBAC bounds."""
-    if schema_name not in _AVAILABLE_SCHEMAS:
-        raise ValueError(f"Schema '{schema_name}' not found in the manifest.")
+    if name not in _AVAILABLE_SCHEMAS:
+        raise ValueError(f"Schema '{name}' not found.")
 
     granted = _get_granted_licenses()
-    schema_dict = cast("dict[str, Any]", _AVAILABLE_SCHEMAS[schema_name])
+    schema_dict = cast("dict[str, Any]", _AVAILABLE_SCHEMAS[name])
 
     if not _is_schema_allowed(schema_dict, granted):
-        # Zero-Trust: If not allowed, it cryptographically does not exist for this client.
-        raise ValueError(f"Schema '{schema_name}' not found in the manifest.")
+        raise ValueError(f"Schema '{name}' not found.")
 
-    return schema_dict
+    return json.dumps(schema_dict)
+
+
+@mcp.resource("schema://state/memoized/{hash}")
+def get_memoized_state_schema(hash: str) -> str:  # noqa: A002
+    import json
+    import re
+
+    if not re.fullmatch(r"^[a-f0-9]{64}$", hash):
+        raise ValueError("Invalid hash: must be a valid 64-character SHA-256 hex string.")
+
+    if "MemoizedNode" not in _AVAILABLE_SCHEMAS:
+        raise ValueError("Schema 'MemoizedNode' not found.")
+
+    schema_dict = cast("dict[str, Any]", _AVAILABLE_SCHEMAS["MemoizedNode"])
+    return json.dumps(schema_dict)
+
+
+@mcp.resource("schema://capabilities/{profile}")
+def get_capabilities_profile(profile: str) -> str:
+    import json
+
+    from coreason_manifest.compute.profiles import ComputeProvisioningRequest, ModelProfile, RateCard, RoutingFrontier
+
+    profiles = {
+        "ComputeProvisioningRequest": ComputeProvisioningRequest,
+        "ModelProfile": ModelProfile,
+        "RateCard": RateCard,
+        "RoutingFrontier": RoutingFrontier,
+    }
+
+    if profile not in profiles:
+        raise ValueError(f"Capability profile '{profile}' not found.")
+
+    cls = profiles[profile]
+    return json.dumps(list(cast("Any", cls).model_fields.keys()))
 
 
 def _global_error_handler_shield() -> None:

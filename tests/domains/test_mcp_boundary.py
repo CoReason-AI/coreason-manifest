@@ -110,20 +110,62 @@ def test_explicit_keys_and_list_limits() -> None:
     assert "params must be a dictionary" in str(exc.value)
 
 
-def test_mcp_server_tool_schemas() -> None:
-    """Test standard tool endpoints of mcp_server for branch coverage."""
-    from coreason_manifest.cli.mcp_server import get_schema, list_schemas
+@pytest.mark.anyio
+async def test_mcp_server_boundaries() -> None:
+    """Prove the passive nature of the MCP server and resource routing."""
+    import json
 
-    schemas = list_schemas()
-    assert len(schemas) > 0
-    # AdjudicationRubric is exported from coreason_manifest core
-    assert "AdjudicationRubric" in schemas
+    from coreason_manifest.cli.mcp_server import mcp
 
-    schema_dict = get_schema("AdjudicationRubric")
+    # Assert 0 tools
+    tools = await mcp.list_tools()
+    assert len(tools) == 0
+
+    # 1. Epistemic Caching Router
+    epistemic_res = await mcp.read_resource("schema://epistemic/AdjudicationRubric")
+
+    # Check if the result is a string, bytes, or if it is a list/tuple of resource objects
+    if isinstance(epistemic_res, list) and len(epistemic_res) > 0 and hasattr(epistemic_res[0], "content"):
+        epistemic_res = epistemic_res[0].content
+
+    if isinstance(epistemic_res, bytes):
+        epistemic_res = epistemic_res.decode("utf-8")
+
+    schema_dict = json.loads(str(epistemic_res))
     assert schema_dict["title"] == "AdjudicationRubric"
 
-    with pytest.raises(ValueError, match="not found in the manifest"):
-        get_schema("DoesNotExistSchema")
+    with pytest.raises(ValueError, match="not found"):
+        await mcp.read_resource("schema://epistemic/DoesNotExistSchema")
+
+    # 2. State Memoization Router
+    valid_hash = "a" * 64
+    memo_res = await mcp.read_resource(f"schema://state/memoized/{valid_hash}")
+
+    if isinstance(memo_res, list) and len(memo_res) > 0 and hasattr(memo_res[0], "content"):
+        memo_res = memo_res[0].content
+
+    if isinstance(memo_res, bytes):
+        memo_res = memo_res.decode("utf-8")
+    memo_dict = json.loads(str(memo_res))
+    assert memo_dict["title"] == "MemoizedNode"
+
+    with pytest.raises(ValueError, match="Invalid hash"):
+        await mcp.read_resource("schema://state/memoized/invalidhash")
+
+    # 3. Capability Discovery Router
+    cap_res = await mcp.read_resource("schema://capabilities/RoutingFrontier")
+
+    if isinstance(cap_res, list) and len(cap_res) > 0 and hasattr(cap_res[0], "content"):
+        cap_res = cap_res[0].content
+
+    if isinstance(cap_res, bytes):
+        cap_res = cap_res.decode("utf-8")
+    cap_list = json.loads(str(cap_res))
+    assert isinstance(cap_list, list)
+    assert "max_latency_ms" in cap_list
+
+    with pytest.raises(ValueError, match="not found"):
+        await mcp.read_resource("schema://capabilities/UnknownProfile")
 
 
 @pytest.mark.anyio
