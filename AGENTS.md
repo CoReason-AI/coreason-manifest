@@ -54,6 +54,11 @@ To maintain the pristine, mathematically rigorous nature of this ontology, all a
 * **Secure Multi-Party Computation (SMPC):** Protocols (e.g., Garbled Circuits) allowing participant nodes to jointly evaluate functions over private inputs.
 * **Spatial Kinematics:** The mathematical modeling of OS-level tool use, utilizing non-linear Bezier curves to simulate human pointer trajectories and bypass anti-bot heuristics.
 
+### Ontological Projection & Discovery
+* **Model Context Protocol (MCP):** A stateless transmission substrate and Epistemic Discovery Surface used exclusively for exchanging structural data shapes (Pydantic schemas) between zero-trust nodes. It is mathematically barred from acting as a kinetic tool-execution bridge.
+* **Passive Ontological Projection:** The architectural constraint forcing nodes to expose structural boundaries (e.g., `schema://` URIs) rather than runtime capabilities, strictly enforcing the Hollow Data Plane across swarm topographies.
+* **Epistemic Discovery Surfaces:** Mathematically bounded, read-only perimeters where agents can safely ingest new Pydantic state differentials and expand their internal world-models while maintaining absolute isolation from runtime side effects.
+
 ---
 
 ## **0.2 THE "DOMAIN-AGNOSTIC CORE" MANDATE**
