@@ -86,3 +86,76 @@ def test_pydantic_field_descriptions() -> None:
                             f"Class attribute '{target_id}' in '{node.name}' ({py_file}) "
                             f"must have a 'description' kwarg in Field(...)."
                         )
+
+
+def test_no_vertical_acronyms_in_schemas() -> None:
+    """
+    Assertion 4: Asserts that a blacklist of vertical terms is completely absent
+    from all string values, docstrings, variable names, and class definitions
+    in the schemas.
+    """
+    blacklist = [
+        "phi",
+        "pci",
+        "hipaa",
+        "gdpr",
+        "emr",
+        "ehr",
+        "medical",
+        "financial",
+        "legal",
+        "healthcare",
+        "finance",
+        "patient",
+        "transaction",
+    ]
+
+    # Exclude certain valid substrings or words that might falsely trigger the exact match if not careful,
+    # but the instructions specify string values, docstrings, variable names, and field descriptions.
+    # We will do a case-insensitive check of the whole AST file source to be most robust.
+    # To avoid matching things like `morphism` which has "phi" in it, we match exact words using regex.
+    import re
+
+    # Build regex for word boundary match
+    pattern = re.compile(r"\b(" + "|".join(blacklist) + r")\b", re.IGNORECASE)
+
+    for py_file in get_all_python_files():
+        with py_file.open("r", encoding="utf-8") as f:
+            content = f.read()
+
+        # Ignore this very test file because it contains the blacklist
+        if "test_semantics.py" in str(py_file):
+            continue
+
+        # Only parse AST to selectively check for strings, ids, comments/docstrings
+        tree = ast.parse(content, filename=str(py_file))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Name):
+                if pattern.search(node.id):
+                    import pytest
+
+                    pytest.fail(f"Found blacklisted term in variable name '{node.id}' in {py_file}")
+            elif isinstance(node, ast.ClassDef):
+                if pattern.search(node.name):
+                    import pytest
+
+                    pytest.fail(f"Found blacklisted term in class name '{node.name}' in {py_file}")
+                docstring = ast.get_docstring(node)
+                if docstring and pattern.search(docstring):
+                    import pytest
+
+                    pytest.fail(f"Found blacklisted term in docstring of class '{node.name}' in {py_file}")
+            elif isinstance(node, ast.FunctionDef):
+                if pattern.search(node.name):
+                    import pytest
+
+                    pytest.fail(f"Found blacklisted term in function name '{node.name}' in {py_file}")
+                docstring = ast.get_docstring(node)
+                if docstring and pattern.search(docstring):
+                    import pytest
+
+                    pytest.fail(f"Found blacklisted term in docstring of function '{node.name}' in {py_file}")
+            elif isinstance(node, ast.Constant) and isinstance(node.value, str) and pattern.search(node.value):
+                import pytest
+
+                pytest.fail(f"Found blacklisted term in string literal '{node.value}' in {py_file}")

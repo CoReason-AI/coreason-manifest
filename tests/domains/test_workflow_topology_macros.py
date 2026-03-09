@@ -7,7 +7,7 @@ from coreason_manifest.workflow.topologies import AdversarialMarketTopology, Con
 
 def test_adversarial_market_topology_compilation() -> None:
     policy = PredictionMarketPolicy(
-        staking_function="quadratic", min_liquidity_microcents=100, convergence_delta_threshold=0.1
+        staking_function="quadratic", min_liquidity_magnitude=100, convergence_delta_threshold=0.1
     )
     macro = AdversarialMarketTopology(
         blue_team_ids=["did:web:blue_1"],
@@ -25,7 +25,7 @@ def test_adversarial_market_topology_compilation() -> None:
 
 def test_adversarial_market_topology_disjoint_failure() -> None:
     policy = PredictionMarketPolicy(
-        staking_function="quadratic", min_liquidity_microcents=100, convergence_delta_threshold=0.1
+        staking_function="quadratic", min_liquidity_magnitude=100, convergence_delta_threshold=0.1
     )
     with pytest.raises(ValidationError, match="Topological Contradiction"):
         AdversarialMarketTopology(

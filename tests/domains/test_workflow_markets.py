@@ -11,25 +11,25 @@ from pydantic import ValidationError
 from coreason_manifest.workflow.markets import HypothesisStake, PredictionMarketState
 
 
-def test_hypothesis_stake_rejects_zero_or_negative_microcents() -> None:
+def test_hypothesis_stake_rejects_zero_or_negative_magnitude() -> None:
     with pytest.raises(ValidationError) as exc_info:
         HypothesisStake(
-            agent_id="did:web:agent-1", target_hypothesis_id="hyp-1", staked_microcents=0, implied_probability=0.5
+            agent_id="did:web:agent-1", target_hypothesis_id="hyp-1", staked_magnitude=0, implied_probability=0.5
         )
     assert "gt" in str(exc_info.value) or "greater than" in str(exc_info.value)
 
     with pytest.raises(ValidationError) as exc_info2:
         HypothesisStake(
-            agent_id="did:web:agent-1", target_hypothesis_id="hyp-1", staked_microcents=-10, implied_probability=0.5
+            agent_id="did:web:agent-1", target_hypothesis_id="hyp-1", staked_magnitude=-10, implied_probability=0.5
         )
     assert "gt" in str(exc_info2.value) or "greater than" in str(exc_info2.value)
 
 
 def test_hypothesis_stake_valid() -> None:
     stake = HypothesisStake(
-        agent_id="did:web:agent-1", target_hypothesis_id="hyp-1", staked_microcents=100, implied_probability=0.75
+        agent_id="did:web:agent-1", target_hypothesis_id="hyp-1", staked_magnitude=100, implied_probability=0.75
     )
-    assert stake.staked_microcents == 100
+    assert stake.staked_magnitude == 100
     assert stake.implied_probability == 0.75
 
 

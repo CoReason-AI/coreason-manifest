@@ -26,7 +26,7 @@ class CrossSwarmHandshake(CoreasonBaseModel):
     handshake_id: str = Field(description="Unique identifier for this B2B negotiation.")
     initiating_tenant_id: str = Field(description="The enterprise DID requesting the connection.")
     receiving_tenant_id: str = Field(description="The enterprise DID receiving the connection.")
-    offered_sla: BilateralSLA = Field(description="The initial legal/data boundary proposed.")
+    offered_sla: BilateralSLA = Field(description="The initial structural/data boundary proposed.")
     status: Literal["proposed", "negotiating", "aligned", "rejected"] = Field(
         default="proposed", description="The current status of the handshake."
     )
@@ -34,7 +34,7 @@ class CrossSwarmHandshake(CoreasonBaseModel):
 
 class FederatedCapabilityAttestation(CoreasonBaseModel):
     """
-    An immutable cryptographic receipt proving an agent has the legal and structural authority
+    An immutable cryptographic receipt proving an agent has the structural authority
     to query a remote resource.
     """
 
@@ -44,7 +44,7 @@ class FederatedCapabilityAttestation(CoreasonBaseModel):
         description="The isolated memory partition granted to the agent for this connection."
     )
     governing_sla: BilateralSLA = Field(
-        description="The legal and physical boundary constraints for querying this target."
+        description="The structural and physical boundary constraints for querying this target."
     )
 
     @model_validator(mode="after")

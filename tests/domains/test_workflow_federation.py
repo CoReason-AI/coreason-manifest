@@ -39,7 +39,7 @@ def test_cross_swarm_handshake_valid() -> None:
     sla = BilateralSLA(
         receiving_tenant_id="did:example:tenant-b",
         max_permitted_classification=DataClassification.RESTRICTED,
-        liability_limit_cents=1000000,
+        liability_limit_magnitude=1000000,
         permitted_geographic_regions=["us-east-1", "eu-west-1"],
     )
 
@@ -54,7 +54,7 @@ def test_cross_swarm_handshake_valid() -> None:
     assert handshake.handshake_id == "handshake-001"
     assert handshake.initiating_tenant_id == "did:example:tenant-a"
     assert handshake.status == "proposed"
-    assert handshake.offered_sla.liability_limit_cents == 1000000
+    assert handshake.offered_sla.liability_limit_magnitude == 1000000
 
 
 def test_cross_swarm_handshake_default_status() -> None:
@@ -62,7 +62,7 @@ def test_cross_swarm_handshake_default_status() -> None:
     sla = BilateralSLA(
         receiving_tenant_id="did:example:tenant-b",
         max_permitted_classification=DataClassification.PUBLIC,
-        liability_limit_cents=0,
+        liability_limit_magnitude=0,
     )
 
     handshake = CrossSwarmHandshake(
@@ -80,7 +80,7 @@ def test_cross_swarm_handshake_invalid_status() -> None:
     sla = BilateralSLA(
         receiving_tenant_id="did:example:tenant-b",
         max_permitted_classification=DataClassification.PUBLIC,
-        liability_limit_cents=0,
+        liability_limit_magnitude=0,
     )
 
     with pytest.raises(ValidationError) as exc_info:

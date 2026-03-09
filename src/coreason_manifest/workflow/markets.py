@@ -38,7 +38,7 @@ class MarketContract(CoreasonBaseModel):
 
 class HypothesisStake(CoreasonBaseModel):
     """
-    The mathematical record of an agent taking a financial/compute position on a specific causal hypothesis.
+    The mathematical record of an agent taking a magnitude/compute position on a specific causal hypothesis.
     """
 
     agent_id: Annotated[str, StringConstraints(min_length=1)] = Field(
@@ -47,9 +47,7 @@ class HypothesisStake(CoreasonBaseModel):
     target_hypothesis_id: Annotated[str, StringConstraints(min_length=1)] = Field(
         description="The exact HypothesisGenerationEvent the agent is betting on."
     )
-    staked_microcents: int = Field(
-        gt=0, description="The volume of capital or compute budget committed to this position."
-    )
+    staked_magnitude: int = Field(gt=0, description="The volume of compute budget committed to this position.")
     implied_probability: float = Field(ge=0.0, le=1.0, description="The agent's calculated internal confidence score.")
 
 
@@ -84,6 +82,6 @@ class MarketResolution(CoreasonBaseModel):
     winning_hypothesis_id: str = Field(description="The hypothesis ID that was verified.")
     falsified_hypothesis_ids: list[str] = Field(description="The hypothesis IDs that were falsified.")
     payout_distribution: dict[str, int] = Field(
-        description="The deterministic mapping of agent IDs to their earned compute budget/microcents "
+        description="The deterministic mapping of agent IDs to their earned compute budget/magnitude "
         "based on Brier scoring."
     )

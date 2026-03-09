@@ -51,7 +51,7 @@ class InterventionalCausalTask(CoreasonBaseModel):
         description="The mathematical proof of entropy reduction yielded specifically by "
         "breaking the confounding back-doors.",
     )
-    execution_cost_budget_cents: int = Field(
+    execution_cost_budget_magnitude: int = Field(
         ge=0, description="The maximum economic expenditure authorized to run this specific causal intervention."
     )
 
@@ -67,7 +67,7 @@ class ActiveInferenceContract(CoreasonBaseModel):
         description="The mathematically estimated reduction in Epistemic Uncertainty "
         "(entropy) this tool call will yield.",
     )
-    execution_cost_budget_cents: int = Field(
+    execution_cost_budget_magnitude: int = Field(
         ge=0,
         description="The maximum economic expenditure authorized to run this specific scientific test.",
     )
@@ -102,7 +102,7 @@ class EpistemicTransmutationTask(CoreasonBaseModel):
     compression_sla: EpistemicCompressionSLA = Field(
         description="The strict mathematical boundary defining the maximum allowed informational entropy loss."
     )
-    execution_cost_budget_cents: int | None = Field(
+    execution_cost_budget_magnitude: int | None = Field(
         default=None,
         ge=0,
         description="Optional maximum economic expenditure authorized to run this VLM transmutation.",

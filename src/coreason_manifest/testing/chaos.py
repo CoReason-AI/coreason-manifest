@@ -45,9 +45,9 @@ class SteadyStateHypothesis(CoreasonBaseModel):
 
 
 class SimulationEscrow(CoreasonBaseModel):
-    locked_microcents: int = Field(
+    locked_magnitude: int = Field(
         gt=0,
-        description="The strictly typed economic boundary requiring locked funds "
+        description="The strictly typed boundary requiring locked magnitude "
         "to prevent zero-cost griefing of the swarm.",
     )
 
@@ -70,8 +70,8 @@ class ExogenousEpistemicShock(CoreasonBaseModel):
 
     @model_validator(mode="after")
     def enforce_economic_escrow(self) -> Self:
-        if self.escrow.locked_microcents <= 0:
-            raise ValueError("ExogenousEpistemicShock requires a strictly positive economic escrow to execute.")
+        if self.escrow.locked_magnitude <= 0:
+            raise ValueError("ExogenousEpistemicShock requires a strictly positive escrow to execute.")
         return self
 
 

@@ -61,6 +61,24 @@ jobs:
       - name: Semantic Diff Check
         run: uv run scripts/semantic_diff.py origin/main coreason_ontology.schema.json
 
+  mcp-conformance:
+    name: MCP Conformance (Protocol Health)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          python-version: "3.14"
+
+      - name: Install Dependencies
+        run: uv sync
+
+      - name: MCP Ping
+        run: uv run scripts/mcp_ping.py
+
   security-sast:
     name: Security SAST (AI-Specific Fuzzing & Architectural Gate)
     runs-on: ubuntu-latest

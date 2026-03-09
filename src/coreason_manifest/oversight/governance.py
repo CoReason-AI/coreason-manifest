@@ -54,7 +54,7 @@ class PredictionMarketPolicy(CoreasonBaseModel):
     staking_function: Literal["linear", "quadratic"] = Field(
         description="The mathematical curve applied to stakes. Quadratic enforces Sybil resistance."
     )
-    min_liquidity_microcents: int = Field(ge=0, description="Minimum liquidity required.")
+    min_liquidity_magnitude: int = Field(ge=0, description="Minimum liquidity required.")
     convergence_delta_threshold: float = Field(
         ge=0.0,
         le=1.0,
@@ -147,7 +147,7 @@ class GlobalGovernance(CoreasonBaseModel):
     Global governance bounds for a swarm executing a workflow envelope.
     """
 
-    max_budget_microcents: int = Field(
+    max_budget_magnitude: int = Field(
         description="The absolute maximum economic cost allowed for the entire swarm lifecycle."
     )
     max_global_tokens: int = Field(description="The maximum aggregate token usage allowed across all nodes.")

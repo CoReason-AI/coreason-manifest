@@ -151,7 +151,7 @@ def test_federated_attestation_determinism() -> None:
     sla = BilateralSLA(
         receiving_tenant_id="tenant_a",
         max_permitted_classification=DataClassification.RESTRICTED,
-        liability_limit_cents=100,
+        liability_limit_magnitude=100,
     )
     session = SecureSubSession(session_id="s1", allowed_vault_keys=["key1"], max_ttl_seconds=3600, description="test")
 
@@ -267,7 +267,7 @@ def test_rollback_determinism() -> None:
 def test_dlp_determinism() -> None:
     rule_a = RedactionRule(
         rule_id="a_phi_redact",
-        classification="phi",
+        classification="strictly_confidential",
         target_pattern="pattern_a",
         target_regex_pattern="pattern_a",
         action="redact",
@@ -275,7 +275,7 @@ def test_dlp_determinism() -> None:
     )
     rule_b = RedactionRule(
         rule_id="b_pii_hash",
-        classification="pii",
+        classification="confidential",
         target_pattern="pattern_b",
         target_regex_pattern="pattern_b",
         action="hash",
@@ -289,25 +289,25 @@ def test_dlp_determinism() -> None:
 
 
 def test_auction_determinism() -> None:
-    ann = TaskAnnouncement(task_id="t1", max_budget_microcents=10000)
+    ann = TaskAnnouncement(task_id="t1", max_budget_magnitude=10000)
 
     bid_1 = AgentBid(
         agent_id="did:web:agent_a",
-        estimated_cost_microcents=1000,
+        estimated_cost_magnitude=1000,
         estimated_latency_ms=100,
         estimated_carbon_gco2eq=10.0,
         confidence_score=0.9,
     )
     bid_2 = AgentBid(
         agent_id="did:web:agent_b",
-        estimated_cost_microcents=800,
+        estimated_cost_magnitude=800,
         estimated_latency_ms=150,
         estimated_carbon_gco2eq=8.0,
         confidence_score=0.95,
     )
     bid_3 = AgentBid(
         agent_id="did:web:agent_c",
-        estimated_cost_microcents=1200,
+        estimated_cost_magnitude=1200,
         estimated_latency_ms=90,
         estimated_carbon_gco2eq=12.0,
         confidence_score=0.8,

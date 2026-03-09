@@ -64,8 +64,8 @@ class DynamicRoutingManifest(CoreasonBaseModel):
     bypassed_steps: list[BypassReceipt] = Field(
         default_factory=list, description="The declarative list of steps the orchestrator is mandated to skip."
     )
-    branch_budgets_microcents: dict[NodeID, int] = Field(
-        description="The strict economic allocation of compute budget bound to specific nodes."
+    branch_budgets_magnitude: dict[NodeID, int] = Field(
+        description="The strict allocation of compute budget bound to specific nodes."
     )
 
     @model_validator(mode="after")

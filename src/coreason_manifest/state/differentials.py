@@ -65,7 +65,7 @@ class TruthMaintenancePolicy(CoreasonBaseModel):
         le=1.0,
         description=(
             "The minimum certainty boundary. If an event's propagated confidence drops "
-            "below this threshold, it is legally quarantined."
+            "below this threshold, it is structurally quarantined."
         ),
     )
     enforce_cross_agent_quarantine: bool = Field(

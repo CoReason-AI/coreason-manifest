@@ -16,7 +16,7 @@ def test_modality_alignment_raises_error() -> None:
             artifact_profile=profile,
             active_subgraphs={"tabular_grid": ["did:web:worker1"]},
             bypassed_steps=[],
-            branch_budgets_microcents={},
+            branch_budgets_magnitude={},
         )
 
 
@@ -40,5 +40,5 @@ def test_conservation_of_custody_raises_error() -> None:
             artifact_profile=profile,
             active_subgraphs={"text": ["did:web:worker1"]},
             bypassed_steps=[bypass],
-            branch_budgets_microcents={},
+            branch_budgets_magnitude={},
         )

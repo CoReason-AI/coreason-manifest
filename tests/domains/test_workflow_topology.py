@@ -263,7 +263,7 @@ def test_council_topology_byzantine_slash_requires_escrow() -> None:
 
     # 2. Funded - Must Succeed
     escrow = EscrowPolicy(
-        escrow_locked_microcents=5000, release_condition_metric="slash_on_fault", refund_target_node_id="did:web:node_1"
+        escrow_locked_magnitude=5000, release_condition_metric="slash_on_fault", refund_target_node_id="did:web:node_1"
     )
     topology = CouncilTopology(
         nodes=nodes,  # type: ignore
@@ -272,7 +272,7 @@ def test_council_topology_byzantine_slash_requires_escrow() -> None:
         council_escrow=escrow,
     )
     assert topology.council_escrow is not None
-    assert topology.council_escrow.escrow_locked_microcents == 5000
+    assert topology.council_escrow.escrow_locked_magnitude == 5000
 
 
 @given(nodes=nodes_dict_st(), data=st.data())
