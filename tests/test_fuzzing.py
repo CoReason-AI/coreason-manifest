@@ -51,6 +51,7 @@ from coreason_manifest.state.memory import EpistemicLedger
 from coreason_manifest.state.semantic import (
     SemanticEdge,
     SemanticNode,
+    VectorEmbedding,
 )
 from coreason_manifest.state.vision import (
     DocumentLayoutAnalysis,
@@ -2009,10 +2010,16 @@ semantic_edge_adapter: TypeAdapter[SemanticEdge] = TypeAdapter(SemanticEdge)
 
 @st.composite
 def draw_vector_embedding(draw: Any) -> dict[str, Any]:
-    vec = draw(st.from_regex(r"^[A-Za-z0-9+/]*={0,2}$", fullmatch=True))
+    # We must generate a structurally valid base64 payload proportional to the dimensionality
+    dim = draw(st.integers(min_value=1, max_value=128))
+    # generate random bytes of length exactly `dim`
+    raw_bytes = draw(st.binary(min_size=dim, max_size=dim))
+    import base64
+
+    vec = base64.b64encode(raw_bytes).decode("utf-8")
     res: dict[str, Any] = {
         "vector_base64": vec,
-        "dimensionality": draw(st.integers(min_value=1)),
+        "dimensionality": dim,
         "model_name": draw(st.text()),
     }
     return res
@@ -3522,3 +3529,28 @@ def test_fuzz_utility_justification_tensor_poisoning(fuzzed_vectors: dict[str, f
         # If Hypothesis happened to generate a clean dictionary, it MUST compile.
         graph = UtilityJustificationGraph(optimizing_vectors=fuzzed_vectors, superposition_variance_threshold=0.5)
         assert graph.superposition_variance_threshold == 0.5
+
+
+def test_vector_dimensionality_byzantine_fault() -> None:
+    """
+    AGENT INSTRUCTION: Mathematically proves that an invalid byte-width
+    allocation forces a structural compilation rejection.
+    """
+    import base64
+
+    from pydantic import ValidationError
+
+    # Create a vector with dimensionality 128, but inject an uneven byte length (e.g., 128 * 4 + 1 bytes)
+    dimensionality = 128
+    invalid_byte_length = (dimensionality * 4) + 1
+    malformed_bytes = b"0" * invalid_byte_length
+    malformed_base64 = base64.b64encode(malformed_bytes).decode("utf-8")
+
+    with pytest.raises(ValidationError) as exc_info:
+        VectorEmbedding(
+            dimensionality=dimensionality,
+            vector_base64=malformed_base64,
+            model_name="test-model",
+        )
+
+    assert "Byzantine fault detected" in str(exc_info.value)
