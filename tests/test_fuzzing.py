@@ -13,7 +13,6 @@ from hypothesis import strategies as st
 from pydantic import TypeAdapter, ValidationError
 
 from coreason_manifest.adapters.mcp.schemas import HTTPTransportConfig, MCPServerConfig
-from coreason_manifest.compute.test_time import SubstrateEnvelope
 from coreason_manifest.core.primitives import DataClassification, RiskLevel
 from coreason_manifest.oversight.cybernetics import CyberneticControlLoop
 from coreason_manifest.oversight.dlp import InformationFlowPolicy
@@ -37,6 +36,7 @@ from coreason_manifest.presentation.intents import (
     DraftingIntent,
     EscalationIntent,
     InformationalIntent,
+    RectifiedSignalTrace,
 )
 from coreason_manifest.presentation.scivis import AnyPanel, GrammarPanel, InsightCard
 from coreason_manifest.state.argumentation import ArgumentGraph
@@ -77,15 +77,62 @@ from coreason_manifest.workflow.routing import DynamicRoutingManifest
 from coreason_manifest.workflow.topologies import AnyTopology, OntologicalHandshake, StateContract
 
 
-@given(st.integers(max_value=0), st.integers(max_value=0), st.integers(max_value=0), st.booleans())
-def test_substrate_envelope_rejects_byzantine_allocations(tokens: int, vram: int, latency: int, halt: bool) -> None:
-    """Ensure negative or zero bounds immediately trigger compile-time/instantiation failure."""
+def test_rectified_signal_trace_confidence_bounds() -> None:
+    """Ensure automated immune system rejects out-of-bounds confidence."""
     with pytest.raises(ValidationError):
-        SubstrateEnvelope(
-            algorithmic_token_budget=tokens,
-            vram_frontier_bound=vram,
-            latency_sla_ms=latency,
-            probabilistic_exhaustion_halt=halt,
+        RectifiedSignalTrace(
+            stochastic_entropy_input="make it faster",
+            canonical_projection={"urn": "speed_up"},
+            semantic_shift_dictionary={"faster": "speed_up"},
+            rectification_confidence=1.01,  # Out of bounds
+        )
+
+    with pytest.raises(ValidationError):
+        RectifiedSignalTrace(
+            stochastic_entropy_input="make it faster",
+            canonical_projection={"urn": "speed_up"},
+            semantic_shift_dictionary={"faster": "speed_up"},
+            rectification_confidence=-0.01,  # Out of bounds
+        )
+
+
+def test_rectified_signal_trace_canonical_depth() -> None:
+    """Ensure automated immune system rejects recursive JSON bombs."""
+    deep_payload = {"level_1": {"level_2": {"level_3": {"level_4": {"level_5": {"level_6": "bomb"}}}}}}
+    with pytest.raises(ValidationError, match=r"Canonical projection exceeds maximum allowed nesting depth of 5\."):
+        RectifiedSignalTrace(
+            stochastic_entropy_input="stochastic payload",
+            canonical_projection=deep_payload,
+            semantic_shift_dictionary={},
+            rectification_confidence=0.99,
+        )
+
+    with pytest.raises(ValidationError, match=r"Canonical projection dictionary keys must be strings\."):
+        RectifiedSignalTrace(
+            stochastic_entropy_input="stochastic payload",
+            canonical_projection={1: "not a string"},
+            semantic_shift_dictionary={},
+            rectification_confidence=0.99,
+        )
+
+    class InvalidType:
+        pass
+
+    with pytest.raises(ValidationError, match=r"Invalid leaf node type in canonical projection:"):
+        RectifiedSignalTrace(
+            stochastic_entropy_input="stochastic payload",
+            canonical_projection=InvalidType(),
+            semantic_shift_dictionary={},
+            rectification_confidence=0.99,
+        )
+
+    # Lists
+    with pytest.raises(ValidationError, match=r"Canonical projection exceeds maximum allowed nesting depth of 5\."):
+        RectifiedSignalTrace(
+            stochastic_entropy_input="stochastic payload",
+            canonical_projection=[[[[[["bomb"]]]]]],
+            semantic_shift_dictionary={},
+            rectification_confidence=0.99,
         )
 
 
