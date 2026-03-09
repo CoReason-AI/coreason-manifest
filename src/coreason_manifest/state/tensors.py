@@ -53,7 +53,11 @@ class NDimensionalTensorManifest(CoreasonBaseModel):
                 raise ValueError(f"Tensor dimensions must be strictly positive integers. Got: {self.shape}")
 
         # Ensure we can get the bytes_per_element whether it's currently evaluated as the Enum or as its string value
-        bytes_per_element = self.dtype.bytes_per_element if isinstance(self.dtype, TensorDType) else TensorDType(self.dtype).bytes_per_element
+        bytes_per_element = (
+            self.dtype.bytes_per_element
+            if isinstance(self.dtype, TensorDType)
+            else TensorDType(self.dtype).bytes_per_element
+        )
         calculated_bytes = math.prod(self.shape) * bytes_per_element
         if calculated_bytes != self.memory_footprint_bytes:
             raise ValueError(

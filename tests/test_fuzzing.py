@@ -3261,7 +3261,12 @@ def test_n_dimensional_tensor_manifest_fuzzing_invalid(payload: dict[str, Any]) 
         TypeAdapter(NDimensionalTensorManifest).validate_python(payload)
 
     msg = str(exc_info.value)
-    assert "Topological mismatch" in msg or "Tensor dimensions must be strictly positive integers" in msg or "Input should be a valid string" in msg or "Input should be an instance of TensorDType" in msg
+    assert (
+        "Topological mismatch" in msg
+        or "Tensor dimensions must be strictly positive integers" in msg
+        or "Input should be a valid string" in msg
+        or "Input should be an instance of TensorDType" in msg
+    )
 
 
 @st.composite
