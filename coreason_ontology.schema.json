@@ -115,10 +115,10 @@
           "title": "Expected Information Gain",
           "type": "number"
         },
-        "execution_cost_budget_cents": {
+        "execution_cost_budget_magnitude": {
           "description": "The maximum economic expenditure authorized to run this specific scientific test.",
           "minimum": 0,
-          "title": "Execution Cost Budget Cents",
+          "title": "Execution Cost Budget Magnitude",
           "type": "integer"
         }
       },
@@ -128,7 +128,7 @@
         "target_condition_id",
         "selected_tool_name",
         "expected_information_gain",
-        "execution_cost_budget_cents"
+        "execution_cost_budget_magnitude"
       ],
       "title": "ActiveInferenceContract",
       "type": "object"
@@ -443,9 +443,9 @@
           "title": "Agent Id",
           "type": "string"
         },
-        "estimated_cost_microcents": {
+        "estimated_cost_magnitude": {
           "description": "The node's calculated cost to fulfill the task.",
-          "title": "Estimated Cost Microcents",
+          "title": "Estimated Cost Magnitude",
           "type": "integer"
         },
         "estimated_latency_ms": {
@@ -470,7 +470,7 @@
       },
       "required": [
         "agent_id",
-        "estimated_cost_microcents",
+        "estimated_cost_magnitude",
         "estimated_latency_ms",
         "estimated_carbon_gco2eq",
         "confidence_score"
@@ -1689,14 +1689,14 @@
           "$ref": "#/$defs/coreason_manifest__core__primitives__DataClassification",
           "description": "The absolute highest data sensitivity allowed to cross this federated boundary."
         },
-        "liability_limit_cents": {
-          "description": "The strict financial cap on cross-tenant economic liability.",
+        "liability_limit_magnitude": {
+          "description": "The strict magnitude cap on cross-tenant economic liability.",
           "minimum": 0,
-          "title": "Liability Limit Cents",
+          "title": "Liability Limit Magnitude",
           "type": "integer"
         },
         "permitted_geographic_regions": {
-          "description": "Explicit whitelist of geographic regions or cloud enclaves where execution is legally permitted (Data Residency Pinning).",
+          "description": "Explicit whitelist of geographic regions or cloud enclaves where execution is structurally permitted (Data Residency Pinning).",
           "items": {
             "type": "string"
           },
@@ -1714,7 +1714,7 @@
             }
           ],
           "default": null,
-          "description": "Absolute legal ESG mandate. The execution graph will quarantine any federated node operating on a grid exceeding this gCO2eq/kWh threshold.",
+          "description": "Absolute structural ESG mandate. The execution graph will quarantine any federated node operating on a grid exceeding this gCO2eq/kWh threshold.",
           "title": "Max Permitted Grid Carbon Intensity"
         },
         "pq_signature": {
@@ -1727,13 +1727,13 @@
             }
           ],
           "default": null,
-          "description": "The quantum-resistant signature securing the multi-tenant legal boundary."
+          "description": "The quantum-resistant signature securing the multi-tenant structural boundary."
         }
       },
       "required": [
         "receiving_tenant_id",
         "max_permitted_classification",
-        "liability_limit_cents"
+        "liability_limit_magnitude"
       ],
       "title": "BilateralSLA",
       "type": "object"
@@ -2564,7 +2564,7 @@
           "type": "object"
         },
         "justification": {
-          "description": "The AI's natural language legal/logical argument for why this patch resolves the contradiction without violating the root AnchoringPolicy.",
+          "description": "The AI's natural language structural/logical argument for why this patch resolves the contradiction without violating the root AnchoringPolicy.",
           "title": "Justification",
           "type": "string"
         }
@@ -2896,7 +2896,7 @@
         },
         "offered_sla": {
           "$ref": "#/$defs/BilateralSLA",
-          "description": "The initial legal/data boundary proposed."
+          "description": "The initial structural/data boundary proposed."
         },
         "status": {
           "default": "proposed",
@@ -3737,15 +3737,15 @@
           "title": "Bypassed Steps",
           "type": "array"
         },
-        "branch_budgets_microcents": {
+        "branch_budgets_magnitude": {
           "additionalProperties": {
             "type": "integer"
           },
-          "description": "The strict economic allocation of compute budget bound to specific nodes.",
+          "description": "The strict allocation of compute budget bound to specific nodes.",
           "propertyNames": {
             "$ref": "#/$defs/NodeID"
           },
-          "title": "Branch Budgets Microcents",
+          "title": "Branch Budgets Magnitude",
           "type": "object"
         }
       },
@@ -3753,7 +3753,7 @@
         "manifest_id",
         "artifact_profile",
         "active_subgraphs",
-        "branch_budgets_microcents"
+        "branch_budgets_magnitude"
       ],
       "title": "DynamicRoutingManifest",
       "type": "object"
@@ -4103,7 +4103,7 @@
           "$ref": "#/$defs/EpistemicCompressionSLA",
           "description": "The strict mathematical boundary defining the maximum allowed informational entropy loss."
         },
-        "execution_cost_budget_cents": {
+        "execution_cost_budget_magnitude": {
           "anyOf": [
             {
               "minimum": 0,
@@ -4115,7 +4115,7 @@
           ],
           "default": null,
           "description": "Optional maximum economic expenditure authorized to run this VLM transmutation.",
-          "title": "Execution Cost Budget Cents"
+          "title": "Execution Cost Budget Magnitude"
         }
       },
       "required": [
@@ -4201,10 +4201,10 @@
     "EscrowPolicy": {
       "additionalProperties": false,
       "properties": {
-        "escrow_locked_microcents": {
-          "description": "The strictly typed integer amount of capital cryptographically locked prior to execution.",
+        "escrow_locked_magnitude": {
+          "description": "The strictly typed integer amount cryptographically locked prior to execution.",
           "minimum": 0,
-          "title": "Escrow Locked Microcents",
+          "title": "Escrow Locked Magnitude",
           "type": "integer"
         },
         "release_condition_metric": {
@@ -4219,7 +4219,7 @@
         }
       },
       "required": [
-        "escrow_locked_microcents",
+        "escrow_locked_magnitude",
         "release_condition_metric",
         "refund_target_node_id"
       ],
@@ -4988,7 +4988,7 @@
     },
     "FederatedCapabilityAttestation": {
       "additionalProperties": false,
-      "description": "An immutable cryptographic receipt proving an agent has the legal and structural authority\nto query a remote resource.",
+      "description": "An immutable cryptographic receipt proving an agent has the structural authority\nto query a remote resource.",
       "properties": {
         "attestation_id": {
           "description": "Cryptographic Lineage Watermark for the attestation.",
@@ -5006,7 +5006,7 @@
         },
         "governing_sla": {
           "$ref": "#/$defs/BilateralSLA",
-          "description": "The legal and physical boundary constraints for querying this target."
+          "description": "The structural and physical boundary constraints for querying this target."
         }
       },
       "required": [
@@ -5161,9 +5161,9 @@
       "additionalProperties": false,
       "description": "Global governance bounds for a swarm executing a workflow envelope.",
       "properties": {
-        "max_budget_microcents": {
+        "max_budget_magnitude": {
           "description": "The absolute maximum economic cost allowed for the entire swarm lifecycle.",
-          "title": "Max Budget Microcents",
+          "title": "Max Budget Magnitude",
           "type": "integer"
         },
         "max_global_tokens": {
@@ -5205,7 +5205,7 @@
         }
       },
       "required": [
-        "max_budget_microcents",
+        "max_budget_magnitude",
         "max_global_tokens",
         "global_timeout_seconds"
       ],
@@ -5691,7 +5691,7 @@
     },
     "HypothesisStake": {
       "additionalProperties": false,
-      "description": "The mathematical record of an agent taking a financial/compute position on a specific causal hypothesis.",
+      "description": "The mathematical record of an agent taking a magnitude/compute position on a specific causal hypothesis.",
       "properties": {
         "agent_id": {
           "description": "The ID of the agent placing the stake.",
@@ -5705,10 +5705,10 @@
           "title": "Target Hypothesis Id",
           "type": "string"
         },
-        "staked_microcents": {
-          "description": "The volume of capital or compute budget committed to this position.",
+        "staked_magnitude": {
+          "description": "The volume of compute budget committed to this position.",
           "exclusiveMinimum": 0,
-          "title": "Staked Microcents",
+          "title": "Staked Magnitude",
           "type": "integer"
         },
         "implied_probability": {
@@ -5722,7 +5722,7 @@
       "required": [
         "agent_id",
         "target_hypothesis_id",
-        "staked_microcents",
+        "staked_magnitude",
         "implied_probability"
       ],
       "title": "HypothesisStake",
@@ -6075,10 +6075,10 @@
           "title": "Expected Causal Information Gain",
           "type": "number"
         },
-        "execution_cost_budget_cents": {
+        "execution_cost_budget_magnitude": {
           "description": "The maximum economic expenditure authorized to run this specific causal intervention.",
           "minimum": 0,
-          "title": "Execution Cost Budget Cents",
+          "title": "Execution Cost Budget Magnitude",
           "type": "integer"
         }
       },
@@ -6088,7 +6088,7 @@
         "intervention_variable",
         "do_operator_state",
         "expected_causal_information_gain",
-        "execution_cost_budget_cents"
+        "execution_cost_budget_magnitude"
       ],
       "title": "InterventionalCausalTask",
       "type": "object"
@@ -6779,7 +6779,7 @@
           "additionalProperties": {
             "type": "integer"
           },
-          "description": "The deterministic mapping of agent IDs to their earned compute budget/microcents based on Brier scoring.",
+          "description": "The deterministic mapping of agent IDs to their earned compute budget/magnitude based on Brier scoring.",
           "title": "Payout Distribution",
           "type": "object"
         }
@@ -8040,10 +8040,10 @@
           "title": "Staking Function",
           "type": "string"
         },
-        "min_liquidity_microcents": {
+        "min_liquidity_magnitude": {
           "description": "Minimum liquidity required.",
           "minimum": 0,
-          "title": "Min Liquidity Microcents",
+          "title": "Min Liquidity Magnitude",
           "type": "integer"
         },
         "convergence_delta_threshold": {
@@ -8056,7 +8056,7 @@
       },
       "required": [
         "staking_function",
-        "min_liquidity_microcents",
+        "min_liquidity_magnitude",
         "convergence_delta_threshold"
       ],
       "title": "PredictionMarketPolicy",
@@ -8287,16 +8287,16 @@
           "title": "Cost Per Million Output Tokens",
           "type": "number"
         },
-        "currency": {
-          "description": "The currency of the associated costs.",
-          "title": "Currency",
+        "magnitude_unit": {
+          "description": "The magnitude unit of the associated costs.",
+          "title": "Magnitude Unit",
           "type": "string"
         }
       },
       "required": [
         "cost_per_million_input_tokens",
         "cost_per_million_output_tokens",
-        "currency"
+        "magnitude_unit"
       ],
       "title": "RateCard",
       "type": "object"
@@ -8419,10 +8419,10 @@
           "title": "Max Latency Ms",
           "type": "integer"
         },
-        "max_cost_microcents_per_token": {
-          "description": "The strict financial ceiling. MUST be an integer to maintain cryptographic determinism.",
+        "max_cost_magnitude_per_token": {
+          "description": "The strict magnitude ceiling. MUST be an integer to maintain cryptographic determinism.",
           "exclusiveMinimum": 0,
-          "title": "Max Cost Microcents Per Token",
+          "title": "Max Cost Magnitude Per Token",
           "type": "integer"
         },
         "min_capability_score": {
@@ -8461,7 +8461,7 @@
       },
       "required": [
         "max_latency_ms",
-        "max_cost_microcents_per_token",
+        "max_cost_magnitude_per_token",
         "min_capability_score",
         "tradeoff_preference"
       ],
@@ -9191,15 +9191,15 @@
     "SimulationEscrow": {
       "additionalProperties": false,
       "properties": {
-        "locked_microcents": {
-          "description": "The strictly typed economic boundary requiring locked funds to prevent zero-cost griefing of the swarm.",
+        "locked_magnitude": {
+          "description": "The strictly typed boundary requiring locked magnitude to prevent zero-cost griefing of the swarm.",
           "exclusiveMinimum": 0,
-          "title": "Locked Microcents",
+          "title": "Locked Magnitude",
           "type": "integer"
         }
       },
       "required": [
-        "locked_microcents"
+        "locked_magnitude"
       ],
       "title": "SimulationEscrow",
       "type": "object"
@@ -10062,15 +10062,15 @@
           "description": "Optional restriction forcing bidders to possess a specific toolset.",
           "title": "Required Action Space Id"
         },
-        "max_budget_microcents": {
+        "max_budget_magnitude": {
           "description": "The absolute ceiling price the orchestrator is willing to pay.",
-          "title": "Max Budget Microcents",
+          "title": "Max Budget Magnitude",
           "type": "integer"
         }
       },
       "required": [
         "task_id",
-        "max_budget_microcents"
+        "max_budget_magnitude"
       ],
       "title": "TaskAnnouncement",
       "type": "object"
@@ -10087,13 +10087,13 @@
           "additionalProperties": {
             "type": "integer"
           },
-          "description": "Strict mapping of agent NodeIDs to their exact fractional payout in microcents.",
+          "description": "Strict mapping of agent NodeIDs to their exact fractional payout in magnitude.",
           "title": "Awarded Syndicate",
           "type": "object"
         },
-        "cleared_price_microcents": {
+        "cleared_price_magnitude": {
           "description": "The final cryptographic clearing price.",
-          "title": "Cleared Price Microcents",
+          "title": "Cleared Price Magnitude",
           "type": "integer"
         },
         "escrow": {
@@ -10106,13 +10106,13 @@
             }
           ],
           "default": null,
-          "description": "The conditional economic escrow locking the compute budget."
+          "description": "The conditional escrow locking the compute budget."
         }
       },
       "required": [
         "task_id",
         "awarded_syndicate",
-        "cleared_price_microcents"
+        "cleared_price_magnitude"
       ],
       "title": "TaskAward",
       "type": "object"
@@ -10440,7 +10440,7 @@
           "title": "Parameters",
           "type": "object"
         },
-        "authorized_budget_cents": {
+        "authorized_budget_magnitude": {
           "anyOf": [
             {
               "minimum": 0,
@@ -10452,7 +10452,7 @@
           ],
           "default": null,
           "description": "The maximum escrow unlocked for this specific run.",
-          "title": "Authorized Budget Cents"
+          "title": "Authorized Budget Magnitude"
         }
       },
       "required": [
@@ -10503,7 +10503,7 @@
           "type": "number"
         },
         "epistemic_quarantine_threshold": {
-          "description": "The minimum certainty boundary. If an event's propagated confidence drops below this threshold, it is legally quarantined.",
+          "description": "The minimum certainty boundary. If an event's propagated confidence drops below this threshold, it is structurally quarantined.",
           "maximum": 1.0,
           "minimum": 0.0,
           "title": "Epistemic Quarantine Threshold",
@@ -10942,10 +10942,9 @@
     },
     "coreason_manifest__oversight__dlp__DataClassification": {
       "enum": [
-        "phi",
-        "pii",
-        "pci",
+        "strictly_confidential",
         "confidential",
+        "internal",
         "public"
       ],
       "type": "string"
