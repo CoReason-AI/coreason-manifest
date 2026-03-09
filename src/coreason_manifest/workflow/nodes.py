@@ -12,7 +12,7 @@ multi-agent market dynamics."""
 
 from typing import TYPE_CHECKING, Annotated, Any, Literal
 
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, model_validator
 
 from coreason_manifest.compute.inference import ActiveInferenceContract, AnalogicalMappingTask, InterventionalCausalTask
 from coreason_manifest.compute.peft import PeftAdapterContract
@@ -247,6 +247,30 @@ class CompositeNode(BaseNode):
     topology: "AnyTopology" = Field(description="The encapsulated subgraph to execute.")
     input_mappings: list[InputMapping] = Field(default_factory=list, description="Explicit state projection inputs.")
     output_mappings: list[OutputMapping] = Field(default_factory=list, description="Explicit state projection outputs.")
+
+    @model_validator(mode="after")
+    def _enforce_topology_depth_limit(self) -> "CompositeNode":
+        """
+        AGENT INSTRUCTION: Passive structural envelope. Prevents fatal stack overflows
+        by bounding the maximum fractal depth of subgraph encapsulation to 5.
+        """
+
+        def _check_depth(topology: Any, current_depth: int) -> None:
+            if current_depth > 5:
+                raise ValueError(
+                    "CompositeNode topology encapsulation exceeds maximum allowable depth of 5. "
+                    "This violates the geometric bounds of the CoReason orchestration data plane."
+                )
+
+            # Safely traverse the instantiated topology nodes without circular execution
+            if hasattr(topology, "nodes") and isinstance(topology.nodes, dict):
+                for node in topology.nodes.values():
+                    # Identify nested CompositeNodes via their discriminator
+                    if getattr(node, "type", None) == "composite" and hasattr(node, "topology"):
+                        _check_depth(node.topology, current_depth + 1)
+
+        _check_depth(self.topology, 1)
+        return self
 
 
 class MemoizedNode(BaseNode):
