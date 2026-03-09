@@ -11,6 +11,7 @@ execution code or synchronous blocking loops. Think purely in terms of graph the
 multi-agent market dynamics."""
 
 import hashlib
+import re
 from typing import Annotated, Any, Literal, Self
 
 from pydantic import Field, model_validator
@@ -97,6 +98,22 @@ class OntologicalAlignmentPolicy(CoreasonBaseModel):
     )
 
 
+class ODEGradientBounds(CoreasonBaseModel):
+    """
+    AGENT INSTRUCTION: This model defines the strict geometric boundaries for continuous-time drift.
+    It MUST remain entirely passive.
+    """
+    max_drift_rate: float = Field(..., description="Maximum allowable derivative vector.")
+    decay_coefficient_min: float = Field(..., description="Minimum bounding coefficient.")
+    decay_coefficient_max: float = Field(..., description="Maximum bounding coefficient.")
+
+    @model_validator(mode='after')
+    def validate_decay_bounds(self) -> 'ODEGradientBounds':
+        if self.decay_coefficient_min > self.decay_coefficient_max:
+            raise ValueError("decay_coefficient_min cannot exceed decay_coefficient_max")
+        return self
+
+
 class BackpressurePolicy(CoreasonBaseModel):
     """
     Declarative backpressure constraints.
@@ -158,6 +175,41 @@ class BaseTopology(CoreasonBaseModel):
     observability: ObservabilityPolicy | None = Field(
         default=None, description="The distributed tracing rules bound to this specific execution graph."
     )
+
+
+class DynamicalSystemsTopology(BaseTopology):
+    """
+    AGENT INSTRUCTION: This model MUST NOT contain any async or time.sleep() logic.
+    It is a strictly passive mathematical boundary for external ZK-STARK engines to resolve non-Markovian dynamics.
+    """
+
+    type: Literal["dynamical_systems"] = Field(
+        default="dynamical_systems", description="Discriminator for a Dynamical Systems topology."
+    )
+    continuous_time_gradients: ODEGradientBounds
+    max_temporal_backpropagation_ms: int = Field(
+        ...,
+        gt=0,
+        le=3600000,
+        description="Escrowed Causality Bound. Absolute max delay before deterministic collapse.",
+    )
+    environmental_phase_shift_triggers: list[str] = Field(
+        ...,
+        max_length=100,
+        description="List of required external cryptographic proofs (W3C DIDs or state hashes).",
+    )
+
+    @model_validator(mode="after")
+    def validate_cryptographic_triggers(self) -> "DynamicalSystemsTopology":
+        did_pattern = re.compile(r"^did:[a-z0-9]+:[a-zA-Z0-9.\-:_]+$")
+        hash_pattern = re.compile(r"^0x[a-fA-F0-9]{40,64}$")
+
+        for trigger in self.environmental_phase_shift_triggers:
+            if not (did_pattern.match(trigger) or hash_pattern.match(trigger)):
+                raise ValueError(
+                    f"Invalid cryptographic trigger format: {trigger}. Must be W3C DID or 0x-prefixed hash."
+                )
+        return self
 
 
 class DAGTopology(BaseTopology):
@@ -495,7 +547,8 @@ type AnyTopology = Annotated[
     | EvaluatorOptimizerTopology
     | DigitalTwinTopology
     | AdversarialMarketTopology
-    | ConsensusFederationTopology,
+    | ConsensusFederationTopology
+    | DynamicalSystemsTopology,
     Field(discriminator="type", description="A discriminated union of workflow topologies."),
 ]
 

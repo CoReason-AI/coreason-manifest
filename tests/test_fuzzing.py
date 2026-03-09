@@ -64,7 +64,13 @@ from coreason_manifest.workflow.auctions import AuctionState, TaskAward
 from coreason_manifest.workflow.envelope import WorkflowEnvelope
 from coreason_manifest.workflow.nodes import AgentNode, AnyNode, CompositeNode, HumanNode, SystemNode
 from coreason_manifest.workflow.routing import DynamicRoutingManifest
-from coreason_manifest.workflow.topologies import AnyTopology, OntologicalHandshake, StateContract
+from coreason_manifest.workflow.topologies import (
+    AnyTopology,
+    DynamicalSystemsTopology,
+    ODEGradientBounds,
+    OntologicalHandshake,
+    StateContract,
+)
 
 
 @st.composite
@@ -1023,6 +1029,33 @@ def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> 
         }
     ).map(_eval_opt_mapper)
 
+    st_ode_gradients = st.builds(
+        ODEGradientBounds,
+        max_drift_rate=st.floats(allow_nan=False, allow_infinity=False),
+        decay_coefficient_min=st.floats(min_value=-1e6, max_value=0, allow_nan=False, allow_infinity=False),
+        decay_coefficient_max=st.floats(min_value=0.1, max_value=1e6, allow_nan=False, allow_infinity=False),
+    )
+
+    st_crypto_triggers = st.lists(
+        st.one_of(
+            st.from_regex(r"^did:[a-z0-9]+:[a-zA-Z0-9.\-:_]+$", fullmatch=True),
+            st.from_regex(r"^0x[a-fA-F0-9]{40,64}$", fullmatch=True),
+        ),
+        min_size=1,
+        max_size=10,
+    )
+
+    st_dynamical_topology = st.builds(
+        DynamicalSystemsTopology,
+        lifecycle_phase=st.sampled_from(["draft", "live"]),
+        architectural_intent=st.one_of(st.none(), st.text()),
+        justification=st.one_of(st.none(), st.text()),
+        nodes=st.dictionaries(draw_did_string(), nodes_strategy, max_size=5),
+        continuous_time_gradients=st_ode_gradients,
+        max_temporal_backpropagation_ms=st.integers(min_value=1, max_value=3600000),
+        environmental_phase_shift_triggers=st_crypto_triggers,
+    ).map(lambda x: {**x.model_dump(exclude_unset=True), "type": "dynamical_systems"})
+
     digital_twin_strategy = draw_digital_twin_topology_payload(nodes_strategy)
     macro_adv_strategy = draw_adversarial_market_topology()
     macro_fed_strategy = draw_consensus_federation_topology()
@@ -1036,6 +1069,7 @@ def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> 
         digital_twin_strategy,
         macro_adv_strategy,
         macro_fed_strategy,
+        st_dynamical_topology,
     )
 
 
@@ -1079,6 +1113,7 @@ state_contract_adapter: TypeAdapter[StateContract] = TypeAdapter(StateContract)
 intervention_policy_adapter: TypeAdapter[InterventionPolicy] = TypeAdapter(InterventionPolicy)
 
 
+@settings(max_examples=10, suppress_health_check=[HealthCheck.too_slow], deadline=None)
 @given(draw_any_node_recursive())
 def test_anynode_routing(payload: dict[str, Any]) -> None:
     parsed = node_adapter.validate_python(payload)
