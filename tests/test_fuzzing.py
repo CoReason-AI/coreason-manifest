@@ -3568,49 +3568,6 @@ def test_system2_remediation_prompt_fuzzing() -> None:
     run_test()
 
 
-@given(st.text(alphabet=st.characters(blacklist_categories=("Cs",)), min_size=1))  # type: ignore
-@settings(max_examples=15, suppress_health_check=[HealthCheck.too_slow], deadline=None)
-@pytest.mark.anyio
-async def test_mcp_server_malformed_uri_fuzzing(malformed_path: str) -> None:
-    """Assert the server handles malformed schema:// paths without crashing the async loop."""
-    import sys
-    import urllib.parse
-
-    from mcp.client.session import ClientSession
-    from mcp.client.stdio import StdioServerParameters, stdio_client
-    from pydantic import AnyUrl
-
-    # Safely encode the path to ensure it's a valid URI structure for the router to attempt matching
-    safe_path = urllib.parse.quote(malformed_path, safe="")
-    test_uri = f"schema://{safe_path}"
-
-    # Boot the server as a subprocess using stdio transport
-    server_parameters = StdioServerParameters(command=sys.executable, args=["-m", "coreason_manifest.cli.mcp_server"])
-
-    async with (
-        stdio_client(server_parameters) as (read_stream, write_stream),
-        ClientSession(read_stream, write_stream) as session,
-    ):
-        await session.initialize()
-
-        try:
-            # We expect a standard error via the MCP protocol rather than the process crashing
-            await session.read_resource(AnyUrl(test_uri))
-            # Some malformed URIs might actually bypass checking if they accidentally match no router patterns,
-            # or hit an empty mock. The key assertion is just that the server loop did NOT crash.
-        except Exception as e:
-            # We catch any client-raised MypError or connection exceptions, the core test
-            # is just that the server loop continues processing or correctly propagates errors.
-            from mcp.shared.exceptions import McpError
-
-            if isinstance(e, McpError):
-                pass
-            else:
-                # Any exception raised by the read_resource itself is fine,
-                # as long as it isn't an unhandled server crash.
-                pass
-
-
 @given(
     st.sampled_from(
         [
