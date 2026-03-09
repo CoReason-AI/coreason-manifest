@@ -64,6 +64,7 @@ from coreason_manifest.testing.red_team import AdversarialSimulationProfile
 from coreason_manifest.tooling import ActionSpace, ToolDefinition
 from coreason_manifest.workflow.auctions import AuctionState, TaskAward
 from coreason_manifest.workflow.envelope import WorkflowEnvelope
+from coreason_manifest.workflow.markets import MarketContract
 from coreason_manifest.workflow.nodes import AgentNode, AnyNode, CompositeNode, HumanNode, SystemNode
 from coreason_manifest.workflow.routing import DynamicRoutingManifest
 from coreason_manifest.workflow.topologies import AnyTopology, OntologicalHandshake, StateContract
@@ -899,6 +900,8 @@ def draw_topology_payload(nodes_strategy: st.SearchStrategy[dict[str, Any]]) -> 
             "edges": st.just([]),
             "allow_cycles": st.booleans(),
             "backpressure": st.one_of(st.none(), draw_backpressure_policy()),
+            "max_depth": st.integers(min_value=1, max_value=256),
+            "max_fan_out": st.integers(min_value=1, max_value=1024),
         }
     )
 
@@ -2445,6 +2448,8 @@ def draw_auction_state(draw: Any) -> dict[str, Any]:
                 "announcement": draw_task_announcement(),
                 "bids": st.lists(draw_agent_bid(), max_size=100),
                 "award": st.one_of(st.none(), draw_task_award()),
+                "clearing_timeout": st.integers(min_value=1),
+                "minimum_tick_size": st.floats(min_value=0.1, max_value=100.0, allow_nan=False, allow_infinity=False),
             }
         )
     )
@@ -3644,3 +3649,13 @@ def test_fuzz_utility_justification_tensor_poisoning(fuzzed_vectors: dict[str, f
         # If Hypothesis happened to generate a clean dictionary, it MUST compile.
         graph = UtilityJustificationGraph(optimizing_vectors=fuzzed_vectors, superposition_variance_threshold=0.5)
         assert graph.superposition_variance_threshold == 0.5
+
+
+@given(
+    min_col=st.floats(min_value=0.0, max_value=100.0),
+    slash_pen=st.floats(min_value=100.1, max_value=1000.0),  # Intentionally larger
+)
+def test_fuzz_economic_escrow_invariant_rejection(min_col: float, slash_pen: float) -> None:
+    """Ensure MarketContract rejects states where penalty exceeds collateral."""
+    with pytest.raises(ValidationError, match="ECONOMIC INVARIANT VIOLATION"):
+        MarketContract(minimum_collateral=min_col, slashing_penalty=slash_pen)

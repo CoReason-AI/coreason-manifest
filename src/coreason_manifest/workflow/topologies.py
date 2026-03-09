@@ -175,6 +175,16 @@ class DAGTopology(BaseTopology):
         default=None, description="Declarative backpressure constraints for the graph edges."
     )
 
+    max_depth: int = Field(ge=1, le=256, description="The maximum recursive depth of the routing DAG.")
+    """
+    TOPOLOGICAL BOUNDARY: Must be >= 1 and <= 256. Prevents runaway agentic cyclic recursion.
+    """
+
+    max_fan_out: int = Field(ge=1, le=1024, description="The maximum number of parallel child nodes.")
+    """
+    TOPOLOGICAL BOUNDARY: Must be >= 1 and <= 1024. Limits horizontal compute explosion.
+    """
+
     @model_validator(mode="after")
     def verify_edges_exist(self) -> Self:
         # Mathematical Superposition: Bypass all structural validation during drafting

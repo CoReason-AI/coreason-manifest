@@ -34,8 +34,8 @@ def test_compute_topology_hash_determinism() -> None:
     from coreason_manifest.workflow.topologies import DAGTopology, compute_topology_hash
 
     node1 = SystemNode(description="Determinism Test")
-    topology_a = DAGTopology(nodes={"did:web:node_1": node1}, allow_cycles=False)
-    topology_b = DAGTopology(nodes={"did:web:node_1": node1}, allow_cycles=False)
+    topology_a = DAGTopology(nodes={"did:web:node_1": node1}, allow_cycles=False, max_depth=10, max_fan_out=10)
+    topology_b = DAGTopology(nodes={"did:web:node_1": node1}, allow_cycles=False, max_depth=10, max_fan_out=10)
 
     hash_a = compute_topology_hash(topology_a)
     hash_b = compute_topology_hash(topology_b)
@@ -70,14 +70,8 @@ def test_composite_node_determinism() -> None:
         output_mappings=[],
     )
 
-    dag1 = DAGTopology(
-        nodes={"did:web:comp_1": composite_node1},
-        allow_cycles=False,
-    )
-    dag2 = DAGTopology(
-        nodes={"did:web:comp_1": composite_node2},
-        allow_cycles=False,
-    )
+    dag1 = DAGTopology(nodes={"did:web:comp_1": composite_node1}, allow_cycles=False, max_depth=10, max_fan_out=10)
+    dag2 = DAGTopology(nodes={"did:web:comp_1": composite_node2}, allow_cycles=False, max_depth=10, max_fan_out=10)
 
     assert dag1.model_dump_canonical() == dag2.model_dump_canonical()
     assert hash(dag1) == hash(dag2)
@@ -91,12 +85,16 @@ def test_workflow_envelope_determinism() -> None:
         allow_cycles=False,
         backpressure=None,
         shared_state_contract=None,
+        max_depth=10,
+        max_fan_out=10,
     )
     topology2 = DAGTopology(
         nodes={"did:web:node_b": node2, "did:web:node_a": node1},
         allow_cycles=False,
         backpressure=None,
         shared_state_contract=None,
+        max_depth=10,
+        max_fan_out=10,
     )
 
     env1 = WorkflowEnvelope(manifest_version="1.0.0", topology=topology1)
@@ -315,8 +313,8 @@ def test_auction_determinism() -> None:
         confidence_score=0.8,
     )
 
-    state1 = AuctionState(announcement=ann, bids=[bid_1, bid_2, bid_3])
-    state2 = AuctionState(announcement=ann, bids=[bid_3, bid_1, bid_2])
+    state1 = AuctionState(announcement=ann, bids=[bid_1, bid_2, bid_3], clearing_timeout=10, minimum_tick_size=0.1)
+    state2 = AuctionState(announcement=ann, bids=[bid_3, bid_1, bid_2], clearing_timeout=10, minimum_tick_size=0.1)
 
     assert state1.model_dump_canonical() == state2.model_dump_canonical()
     assert hash(state1) == hash(state2)

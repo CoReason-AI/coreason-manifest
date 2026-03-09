@@ -57,7 +57,7 @@ def test_dag_topology_referential_integrity_success(nodes: dict[str, Any], data:
     keys = list(nodes.keys())
     edges = data.draw(st.lists(st.tuples(st.sampled_from(keys), st.sampled_from(keys)), min_size=0, max_size=20))
 
-    topology = DAGTopology(nodes=nodes, edges=edges, allow_cycles=True)
+    topology = DAGTopology(nodes=nodes, edges=edges, allow_cycles=True, max_depth=10, max_fan_out=10)
     assert topology.edges == edges
 
 
@@ -69,7 +69,9 @@ def test_dag_topology_cycle_adversarial(nodes: dict[str, Any], data: DataObject)
     node_b = data.draw(st.sampled_from(keys))
 
     with pytest.raises(ValidationError) as exc_info:
-        DAGTopology(nodes=nodes, edges=[(node_a, node_b), (node_b, node_a)], allow_cycles=False)
+        DAGTopology(
+            nodes=nodes, edges=[(node_a, node_b), (node_b, node_a)], allow_cycles=False, max_depth=10, max_fan_out=10
+        )
     assert "Graph contains cycles but allow_cycles is False" in str(exc_info.value)
 
 
@@ -80,7 +82,9 @@ def test_dag_topology_cycle_success(nodes: dict[str, Any], data: DataObject) -> 
     node_a = data.draw(st.sampled_from(keys))
     node_b = data.draw(st.sampled_from(keys))
 
-    topology = DAGTopology(nodes=nodes, edges=[(node_a, node_b), (node_b, node_a)], allow_cycles=True)
+    topology = DAGTopology(
+        nodes=nodes, edges=[(node_a, node_b), (node_b, node_a)], allow_cycles=True, max_depth=10, max_fan_out=10
+    )
     assert topology.edges == [(node_a, node_b), (node_b, node_a)]
 
 
@@ -97,11 +101,11 @@ def test_dag_topology_referential_integrity_adversarial(nodes: dict[str, Any], d
     valid_edges = data.draw(st.lists(st.tuples(st.sampled_from(keys), st.sampled_from(keys)), min_size=0, max_size=5))
 
     with pytest.raises(ValidationError) as exc_info:
-        DAGTopology(nodes=nodes, edges=[*valid_edges, (valid_id_str, ghost_node)])
+        DAGTopology(nodes=nodes, edges=[*valid_edges, (valid_id_str, ghost_node)], max_depth=10, max_fan_out=10)
     assert "does not exist in nodes registry" in str(exc_info.value)
 
     with pytest.raises(ValidationError) as exc_info:
-        DAGTopology(nodes=nodes, edges=[*valid_edges, (ghost_node, valid_id_str)])
+        DAGTopology(nodes=nodes, edges=[*valid_edges, (ghost_node, valid_id_str)], max_depth=10, max_fan_out=10)
     assert "does not exist in nodes registry" in str(exc_info.value)
 
 
@@ -282,7 +286,12 @@ def test_dag_topology_draft_superposition(nodes: dict[str, Any], data: DataObjec
 
     # Inject a dangling pointer AND a cycle, but declare it as a draft
     topology = DAGTopology(
-        nodes=nodes, edges=[(node_a, ghost_node), (ghost_node, node_a)], allow_cycles=False, lifecycle_phase="draft"
+        nodes=nodes,
+        edges=[(node_a, ghost_node), (ghost_node, node_a)],
+        allow_cycles=False,
+        lifecycle_phase="draft",
+        max_depth=10,
+        max_fan_out=10,
     )
 
     assert topology.lifecycle_phase == "draft"
