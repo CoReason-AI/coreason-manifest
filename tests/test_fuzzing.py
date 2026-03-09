@@ -1799,11 +1799,17 @@ def draw_lineage_watermark(draw: Any) -> dict[str, Any]:
 
 @st.composite
 def draw_mcp_capability_whitelist(draw: Any) -> dict[str, Any]:
+    # Inject malformed URIs into allowed_resources using the instructed strategy
+    from typing import cast
+    from hypothesis.strategies import SearchStrategy
+
+    malformed_uris = draw(
+        st.lists(st.text(alphabet=st.characters(blacklist_categories=("Cs",)), min_size=1), max_size=5) # type: ignore
+    )
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
-                "allowed_tools": st.lists(st.text(), max_size=100),
-                "allowed_resources": st.lists(st.text(), max_size=100),
+                "allowed_resources": st.just(malformed_uris),
                 "allowed_prompts": st.lists(st.text(), max_size=100),
                 "required_licenses": st.lists(st.text(), max_size=10),
             }
