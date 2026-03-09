@@ -16,6 +16,9 @@ from typing import Annotated, Any, Literal, Self
 
 from pydantic import Field, model_validator
 
+_DID_PATTERN = re.compile(r"^did:[a-z0-9]+:[a-zA-Z0-9.\-:_]+$")
+_HASH_PATTERN = re.compile(r"^0x[a-fA-F0-9]{40,64}$")
+
 from coreason_manifest.compute.stochastic import CrossoverStrategy, FitnessObjective, MutationPolicy
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.core.primitives import NodeID
@@ -205,11 +208,8 @@ class DynamicalSystemsTopology(BaseTopology):
 
     @model_validator(mode="after")
     def validate_cryptographic_triggers(self) -> "DynamicalSystemsTopology":
-        did_pattern = re.compile(r"^did:[a-z0-9]+:[a-zA-Z0-9.\-:_]+$")
-        hash_pattern = re.compile(r"^0x[a-fA-F0-9]{40,64}$")
-
         for trigger in self.environmental_phase_shift_triggers:
-            if not (did_pattern.match(trigger) or hash_pattern.match(trigger)):
+            if not (_DID_PATTERN.match(trigger) or _HASH_PATTERN.match(trigger)):
                 raise ValueError(
                     f"Invalid cryptographic trigger format: {trigger}. Must be W3C DID or 0x-prefixed hash."
                 )
