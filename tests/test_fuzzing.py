@@ -3468,5 +3468,6 @@ def test_fuzz_utility_justification_tensor_poisoning(fuzzed_vectors: dict[str, f
     that bypassed standard typing schemas to protect downstream tensor allocations.
     """
     from contextlib import suppress
+
     with suppress(ValidationError):
         UtilityJustificationGraph(optimizing_vectors=fuzzed_vectors, superposition_variance_threshold=0.5)
