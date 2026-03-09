@@ -39,7 +39,6 @@ from .test_time import (
     DynamicConvergenceSLA,
     EscalationContract,
     ProcessRewardContract,
-    SubstrateEnvelope,
 )
 
 __all__ = [
@@ -65,6 +64,5 @@ __all__ = [
     "ProcessRewardContract",
     "RateCard",
     "RoutingFrontier",
-    "SubstrateEnvelope",
     "VerifiableEntropy",
 ]

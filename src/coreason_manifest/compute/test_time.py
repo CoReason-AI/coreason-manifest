@@ -17,21 +17,6 @@ from pydantic import Field
 from coreason_manifest.core.base import CoreasonBaseModel
 
 
-class SubstrateEnvelope(CoreasonBaseModel):
-    """
-    AGENT INSTRUCTION: Declarative mathematical boundaries for hardware exhaustion.
-    Downstream orchestrators MUST abort routing if node capacity cannot satisfy these bounds.
-    """
-
-    algorithmic_token_budget: int = Field(..., gt=0, description="Maximum latent activations permitted.")
-    vram_frontier_bound: int = Field(..., gt=0, description="Peak memory footprint threshold in bytes.")
-    latency_sla_ms: int = Field(..., gt=0, description="Maximum allowable clock time before forced degradation.")
-    probabilistic_exhaustion_halt: bool = Field(
-        ...,
-        description="Flag to trigger early termination if trajectory models indicate inevitable breach of envelope.",
-    )
-
-
 class DynamicConvergenceSLA(CoreasonBaseModel):
     """Service Level Agreement defining the mathematical conditions for early termination of a reasoning search."""
 

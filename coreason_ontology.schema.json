@@ -133,62 +133,6 @@
       "title": "ActiveInferenceContract",
       "type": "object"
     },
-    "ActiveInferenceYield": {
-      "additionalProperties": false,
-      "description": "AGENT INSTRUCTION: Terminal state node proving epistemic exhaustion.\nMust be emitted when internal probability distributions fall below safe execution thresholds.",
-      "properties": {
-        "event_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",
-          "title": "Event Id",
-          "type": "string"
-        },
-        "timestamp": {
-          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
-          "title": "Timestamp",
-          "type": "number"
-        },
-        "type": {
-          "const": "active_inference_yield",
-          "default": "active_inference_yield",
-          "description": "Discriminator type for an active inference yield event.",
-          "title": "Type",
-          "type": "string"
-        },
-        "target_variable_urn": {
-          "description": "Identifier of the missing structural parameter.",
-          "title": "Target Variable Urn",
-          "type": "string"
-        },
-        "epistemic_confidence_delta": {
-          "description": "Quantified gap between current state confidence and required execution threshold.",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "Epistemic Confidence Delta",
-          "type": "number"
-        },
-        "canonical_projection": {
-          "description": "Machine-to-human/oracle translation of the information deficit.",
-          "title": "Canonical Projection",
-          "type": "string"
-        },
-        "temporal_escalation_bound": {
-          "description": "TTL/timeout parameter before autonomous fallback or system failure.",
-          "exclusiveMinimum": 0,
-          "title": "Temporal Escalation Bound",
-          "type": "integer"
-        }
-      },
-      "required": [
-        "event_id",
-        "timestamp",
-        "target_variable_urn",
-        "epistemic_confidence_delta",
-        "canonical_projection",
-        "temporal_escalation_bound"
-      ],
-      "title": "ActiveInferenceYield",
-      "type": "object"
-    },
     "AdjudicationIntent": {
       "additionalProperties": false,
       "properties": {
@@ -991,7 +935,6 @@
       "description": "A discriminated union of state events.",
       "discriminator": {
         "mapping": {
-          "active_inference_yield": "#/$defs/ActiveInferenceYield",
           "barge_in": "#/$defs/BargeInInterruptEvent",
           "belief_update": "#/$defs/BeliefUpdateEvent",
           "counterfactual_regret": "#/$defs/CounterfactualRegretEvent",
@@ -1035,9 +978,6 @@
         },
         {
           "$ref": "#/$defs/PersistenceCommitReceipt"
-        },
-        {
-          "$ref": "#/$defs/ActiveInferenceYield"
         }
       ]
     },
