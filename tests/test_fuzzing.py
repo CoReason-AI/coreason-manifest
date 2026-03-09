@@ -2548,7 +2548,7 @@ def draw_temporal_checkpoint(draw: Any) -> dict[str, Any]:
     return res
 
 
-epistemic_ledger_adapter: TypeAdapter[EpisodicTraceMemory] = TypeAdapter(EpisodicTraceMemory)
+episodic_trace_adapter: TypeAdapter[EpisodicTraceMemory] = TypeAdapter(EpisodicTraceMemory)
 
 
 @st.composite
@@ -2693,8 +2693,8 @@ def draw_episodic_trace_memory(draw: Any) -> dict[str, Any]:
 
 @settings(max_examples=10, suppress_health_check=[HealthCheck.too_slow])
 @given(draw_episodic_trace_memory())
-def test_differentials_routing(payload: dict[str, Any]) -> None:
-    parsed = epistemic_ledger_adapter.validate_python(payload)
+def test_episodic_trace_memory_fuzzing(payload: dict[str, Any]) -> None:
+    parsed = episodic_trace_adapter.validate_python(payload)
     assert isinstance(parsed, EpisodicTraceMemory)
 
 
