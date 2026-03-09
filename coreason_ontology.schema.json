@@ -1169,10 +1169,24 @@
           ],
           "default": null,
           "description": "The final cryptographic receipt of the auction, if resolved."
+        },
+        "clearing_timeout": {
+          "description": "Maximum wait time for auction settlement.",
+          "exclusiveMinimum": 0,
+          "title": "Clearing Timeout",
+          "type": "integer"
+        },
+        "minimum_tick_size": {
+          "description": "The smallest allowable bid increment.",
+          "exclusiveMinimum": 0.0,
+          "title": "Minimum Tick Size",
+          "type": "number"
         }
       },
       "required": [
-        "announcement"
+        "announcement",
+        "clearing_timeout",
+        "minimum_tick_size"
       ],
       "title": "AuctionState",
       "type": "object"
@@ -3169,10 +3183,26 @@
           ],
           "default": null,
           "description": "Declarative backpressure constraints for the graph edges."
+        },
+        "max_depth": {
+          "description": "The maximum recursive depth of the routing DAG.",
+          "maximum": 256,
+          "minimum": 1,
+          "title": "Max Depth",
+          "type": "integer"
+        },
+        "max_fan_out": {
+          "description": "The maximum number of parallel child nodes.",
+          "maximum": 1024,
+          "minimum": 1,
+          "title": "Max Fan Out",
+          "type": "integer"
         }
       },
       "required": [
-        "nodes"
+        "nodes",
+        "max_depth",
+        "max_fan_out"
       ],
       "title": "DAGTopology",
       "type": "object"
