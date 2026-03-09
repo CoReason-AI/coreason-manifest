@@ -10,11 +10,13 @@ These schemas represent the append-only cognitive ledger of the swarm. YOU ARE E
 monotonic logic, standard CRUD database paradigms, or kinetic execution parameters. These models represent computable
 geometric graphs of cognition and causal inference."""
 
+import math
 from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from coreason_manifest.core.base import CoreasonBaseModel
+from coreason_manifest.core.primitives import NodeID
 
 type AttackVector = Literal["rebuttal", "undercutter", "underminer"]
 
@@ -78,3 +80,42 @@ class ArgumentGraph(CoreasonBaseModel):
         max_length=10000,
         description="Geometric matrices of undercutting defeaters.",
     )
+
+
+class EnsembleTopologySpec(CoreasonBaseModel):
+    """
+    AGENT INSTRUCTION: Declarative mapping of concurrent topology branches for test-time superposition.
+    Must map to strict W3C DIDs (NodeIDs) and provide an explicit wave-collapse opcode.
+    """
+
+    concurrent_branch_ids: list[NodeID] = Field(..., min_length=2)
+    fusion_function: Literal["weighted_consensus", "highest_confidence", "brier_score_collapse"]
+
+
+class UtilityJustificationGraph(CoreasonBaseModel):
+    """
+    AGENT INSTRUCTION: Immutable cryptographic receipt of multi-dimensional utility routing.
+    If variance threshold falls below delta, fallback to deterministic ensemble superposition.
+    """
+
+    optimizing_vectors: dict[str, float] = Field(default_factory=dict)
+    degrading_vectors: dict[str, float] = Field(default_factory=dict)
+    superposition_variance_threshold: float = Field(..., ge=0.0, allow_inf_nan=False)
+    ensemble_spec: EnsembleTopologySpec | None = None
+
+    @model_validator(mode="after")
+    def _enforce_mathematical_interlocks(self) -> "UtilityJustificationGraph":
+        # Constraint 1: Superposition Escrow
+        if self.ensemble_spec is not None and self.superposition_variance_threshold == 0.0:
+            raise ValueError(
+                "Topological Interlock Failed: ensemble_spec defined but variance threshold is 0.0. "
+                "Mathematical certainty prohibits superposition."
+            )
+
+        # Constraint 2: NaN / Inf Purge on Vectors
+        for vectors in (self.optimizing_vectors, self.degrading_vectors):
+            for key, val in vectors.items():
+                if math.isnan(val) or math.isinf(val):
+                    raise ValueError(f"Tensor Poisoning Detected: Vector '{key}' contains invalid float {val}.")
+
+        return self

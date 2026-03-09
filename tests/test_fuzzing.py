@@ -37,7 +37,7 @@ from coreason_manifest.presentation.intents import (
     InformationalIntent,
 )
 from coreason_manifest.presentation.scivis import AnyPanel, GrammarPanel, InsightCard
-from coreason_manifest.state.argumentation import ArgumentGraph
+from coreason_manifest.state.argumentation import ArgumentGraph, UtilityJustificationGraph
 from coreason_manifest.state.events import (
     AnyStateEvent,
     BeliefUpdateEvent,
@@ -3459,3 +3459,14 @@ async def test_mcp_server_malformed_uri_fuzzing(malformed_path: str) -> None:
                 # Any exception raised by the read_resource itself is fine,
                 # as long as it isn't an unhandled server crash.
                 pass
+
+
+@given(st.dictionaries(st.text(), st.floats(allow_nan=True, allow_infinity=True)))
+def test_fuzz_utility_justification_tensor_poisoning(fuzzed_vectors: dict[str, float]) -> None:
+    """
+    AGENT INSTRUCTION: Ensure the AST strictly catches adversarial NaN/Inf floats
+    that bypassed standard typing schemas to protect downstream tensor allocations.
+    """
+    from contextlib import suppress
+    with suppress(ValidationError):
+        UtilityJustificationGraph(optimizing_vectors=fuzzed_vectors, superposition_variance_threshold=0.5)
