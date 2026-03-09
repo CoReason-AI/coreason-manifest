@@ -12,7 +12,7 @@ DO NOT inject kinetic execution logic here.
 All policies must be declarative, deterministic, and capable of severing memory access instantly.
 """
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.core.primitives import NodeID
@@ -36,6 +36,18 @@ class AdjudicationRubric(CoreasonBaseModel):
     rubric_id: str = Field(description="Unique identifier for the rubric.")
     criteria: list[GradingCriteria] = Field(description="List of criteria used in the rubric.")
     passing_threshold: float = Field(ge=0.0, le=100.0, description="The minimum score required to pass.")
+
+    @model_validator(mode="after")
+    def _validate_positive_weight_sum(self) -> "AdjudicationRubric":
+        """AGENT INSTRUCTION: Mathematically guarantee L1 norm > 0.0 to prevent downstream orchestrator panics."""
+        total_weight = sum(c.weight for c in self.criteria)
+        if total_weight <= 0.0:
+            raise ValueError(
+                "AdjudicationRubric rejected: The sum of all GradingCriteria weights "
+                "must be strictly greater than 0.0 to prevent topological DoS (division "
+                "by zero) in downstream consensus engines."
+            )
+        return self
 
 
 class AdjudicationVerdict(CoreasonBaseModel):

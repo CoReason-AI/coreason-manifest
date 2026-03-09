@@ -106,6 +106,15 @@ class InsightCard(CoreasonBaseModel):
             )
         return v
 
+    @field_validator("markdown_content", mode="after")
+    @classmethod
+    def _prevent_malicious_uri_schemes(cls, v: str) -> str:
+        """AGENT INSTRUCTION: Statically sever XSS vectors embedded in markdown links."""
+        # Detects schemes like [click here](javascript:alert(1))
+        if re.search(r"\]\(\s*(javascript|vbscript|data):", v, flags=re.IGNORECASE):
+            raise ValueError("Malicious executable link scheme detected in markdown content")
+        return v
+
 
 # =========================================================================
 # AGENT INSTRUCTION: WARNING - POLYMORPHIC ROUTER

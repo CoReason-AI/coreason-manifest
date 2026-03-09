@@ -25,9 +25,9 @@ class GlobalSemanticProfile(CoreasonBaseModel):
     artifact_event_id: str = Field(
         min_length=1, description="The exact genesis CID of the document entering the routing tier."
     )
-    detected_modalities: list[Literal["text", "raster_image", "vector_graphics", "tabular_grid"]] = Field(
-        description="The strictly typed enum list of physical modalities detected in the artifact."
-    )
+    detected_modalities: list[
+        Literal["text", "raster_image", "vector_graphics", "tabular_grid", "n_dimensional_tensor"]
+    ] = Field(description="The strictly typed enum list of physical modalities detected in the artifact.")
     token_density: int = Field(
         ge=0, description="The mathematical token density used for downstream compute budget allocation."
     )
@@ -93,7 +93,7 @@ class DynamicRoutingManifest(CoreasonBaseModel):
 def align_semantic_manifolds(
     task_id: str,
     source_modalities: list[str],
-    target_modalities: list[Literal["text", "raster_image", "vector_graphics", "tabular_grid"]],
+    target_modalities: list[Literal["text", "raster_image", "vector_graphics", "tabular_grid", "n_dimensional_tensor"]],
     artifact_event_id: str,
 ) -> EpistemicTransmutationTask | None:
     """

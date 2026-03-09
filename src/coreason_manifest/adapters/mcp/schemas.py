@@ -147,6 +147,15 @@ class HTTPTransportConfig(CoreasonBaseModel):
         default_factory=dict, description="HTTP headers, strictly bounded for zero-trust credentials."
     )
 
+    @field_validator("headers", mode="after")
+    @classmethod
+    def _prevent_crlf_injection(cls, v: dict[str, str]) -> dict[str, str]:
+        """AGENT INSTRUCTION: Strictly forbid HTTP request smuggling vectors."""
+        for key, value in v.items():
+            if "\r" in key or "\n" in key or "\r" in value or "\n" in value:
+                raise ValueError("CRLF injection detected in headers")
+        return v
+
 
 class SSETransportConfig(CoreasonBaseModel):
     """Configuration for remote SSE-based MCP transport."""
@@ -154,6 +163,15 @@ class SSETransportConfig(CoreasonBaseModel):
     type: Literal["sse"] = Field(default="sse", description="Type of transport.")
     uri: HttpUrl = Field(..., description="The HTTP URL endpoint for the SSE connection.")
     headers: dict[str, str] = Field(default_factory=dict, description="HTTP headers, e.g., for authentication.")
+
+    @field_validator("headers", mode="after")
+    @classmethod
+    def _prevent_crlf_injection(cls, v: dict[str, str]) -> dict[str, str]:
+        """AGENT INSTRUCTION: Strictly forbid HTTP request smuggling vectors."""
+        for key, value in v.items():
+            if "\r" in key or "\n" in key or "\r" in value or "\n" in value:
+                raise ValueError("CRLF injection detected in headers")
+        return v
 
 
 type MCPTransport = StdioTransportConfig | SSETransportConfig | HTTPTransportConfig

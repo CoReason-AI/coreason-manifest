@@ -6,9 +6,9 @@ from hypothesis import HealthCheck, given, settings
 from mcp.server import Server
 from mcp.shared.session import SessionMessage  # type: ignore[attr-defined]
 from mcp.types import JSONRPCMessage
-from pydantic import ValidationError
+from pydantic import HttpUrl, ValidationError
 
-from coreason_manifest.adapters.mcp.schemas import BoundedJSONRPCRequest
+from coreason_manifest.adapters.mcp.schemas import BoundedJSONRPCRequest, HTTPTransportConfig
 from coreason_manifest.cli.mcp_server import _global_error_handler_shield
 
 # Initialize the global shield for tests
@@ -542,3 +542,11 @@ async def test_mcp_stdio_json_bomb_guillotine(payload: str) -> None:
 
     assert isinstance(msg, Exception)
     assert "5MB" in str(msg)
+@given(
+    header_key=st.text(alphabet=["\r", "\n", "A", "B"], min_size=1),
+    header_val=st.text(alphabet=["\r", "\n", "1", "2"], min_size=1),
+)
+def test_crlf_rejection_in_http_transport(header_key: str, header_val: str) -> None:
+    if "\r" in header_key or "\n" in header_key or "\r" in header_val or "\n" in header_val:
+        with pytest.raises(ValidationError, match="CRLF injection detected in headers"):
+            HTTPTransportConfig(uri=HttpUrl("https://api.coreason.ai"), headers={header_key: header_val})
