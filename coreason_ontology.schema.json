@@ -3819,7 +3819,8 @@
           "type": "string"
         },
         "continuous_time_gradients": {
-          "$ref": "#/$defs/ODEGradientBounds"
+          "$ref": "#/$defs/ODEGradientBounds",
+          "description": "The strict geometric boundaries for continuous-time drift."
         },
         "max_temporal_backpropagation_ms": {
           "description": "Escrowed Causality Bound. Absolute max delay before deterministic collapse.",

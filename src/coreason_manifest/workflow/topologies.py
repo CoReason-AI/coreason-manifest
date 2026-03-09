@@ -187,7 +187,10 @@ class DynamicalSystemsTopology(BaseTopology):
     type: Literal["dynamical_systems"] = Field(
         default="dynamical_systems", description="Discriminator for a Dynamical Systems topology."
     )
-    continuous_time_gradients: ODEGradientBounds
+    continuous_time_gradients: ODEGradientBounds = Field(
+        ...,
+        description="The strict geometric boundaries for continuous-time drift.",
+    )
     max_temporal_backpropagation_ms: int = Field(
         ...,
         gt=0,
