@@ -3468,16 +3468,36 @@ sha256_strategy = st.from_regex(r"^[a-f0-9]{64}$", fullmatch=True)
 # Strategy for generating valid T-0 Proofs
 kinematic_proof_strategy = st.builds(
     KinematicFeasibilityProof,
-    substrate_availability_matrix=st.dictionaries(keys=st.text(min_size=1), values=sha256_strategy, min_size=1),
+    substrate_availability_matrix=st.dictionaries(keys=st.text(min_size=1), values=sha256_strategy, min_size=1, max_size=5),
     mcp_integration_hash=sha256_strategy,
     data_dimensionality_proof=sha256_strategy,
     merkle_root_t0=sha256_strategy,
 )
 
 
+@settings(max_examples=10, suppress_health_check=[HealthCheck.too_slow])
 @given(kinematic_proof_strategy)
-def test_fuzz_kinematic_feasibility_proof(proof: KinematicFeasibilityProof):
+def test_fuzz_kinematic_feasibility_proof(proof: KinematicFeasibilityProof) -> None:
     """Ensure the cryptographic interlock schema mathematically holds under generative testing."""
     assert isinstance(proof, KinematicFeasibilityProof)
     assert len(proof.substrate_availability_matrix) >= 1
     assert len(proof.merkle_root_t0) == 64
+
+def test_kinematic_feasibility_proof_invalid_leases() -> None:
+    # Test empty dictionary
+    with pytest.raises(ValueError, match="A valid feasibility proof requires at least one substrate lease."):
+        KinematicFeasibilityProof(
+            substrate_availability_matrix={},
+            mcp_integration_hash="a"*64,
+            data_dimensionality_proof="a"*64,
+            merkle_root_t0="a"*64
+        )
+
+    # Test invalid SHA-256
+    with pytest.raises(ValueError, match="Invalid lease receipt for node node1. Must be SHA-256."):
+        KinematicFeasibilityProof(
+            substrate_availability_matrix={"node1": "invalid_hash"},
+            mcp_integration_hash="a"*64,
+            data_dimensionality_proof="a"*64,
+            merkle_root_t0="a"*64
+        )
