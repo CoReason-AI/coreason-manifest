@@ -12,6 +12,7 @@ geometric graphs of cognition and causal inference."""
 
 import ipaddress
 import urllib.parse
+import re
 from typing import Annotated, Literal
 
 from pydantic import Field, field_validator
@@ -85,6 +86,21 @@ class TerminalBufferState(CoreasonBaseModel):
     stdout_hash: str = Field(description="The SHA-256 hash of the Exogenous Perturbations captured.")
     stderr_hash: str = Field(description="The SHA-256 hash tracking structural deviation anomalies.")
     env_variables_hash: str = Field(description="The SHA-256 hash of the state-space context matrix.")
+
+    @field_validator("working_directory")
+    @classmethod
+    def _enforce_sandboxed_path(cls, v: str) -> str:
+        """
+        AGENT INSTRUCTION: Strictly confine path geometry.
+        Reject arbitrary absolute paths and traversal tokens purely mathematically.
+        """
+        if ".." in v:
+            raise ValueError("Path traversal sequences ('..') are strictly forbidden to preserve sandbox geometry.")
+        if v.startswith(("/", "\\")):
+            raise ValueError("Absolute Unix/Windows root paths are strictly forbidden.")
+        if re.match(r"^[a-zA-Z]:", v):
+            raise ValueError("Windows drive letter absolute paths are strictly forbidden.")
+        return v
 
 
 # =========================================================================
