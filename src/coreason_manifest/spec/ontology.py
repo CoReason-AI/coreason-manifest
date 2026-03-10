@@ -248,7 +248,7 @@ class CoreasonBaseModel(BaseModel):
         return json.dumps(canonical_dict, ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode("utf-8")
 
 
-class BoundingBox(CoreasonBaseModel):
+class SpatialBoundingBoxProfile(CoreasonBaseModel):
     """A resolution-independent spatial region."""
 
     x_min: float = Field(ge=0.0, le=1.0, description="The left boundary.")
@@ -313,14 +313,14 @@ class FacetMatrix(CoreasonBaseModel):
     )
 
 
-class NormalizedCoordinate(CoreasonBaseModel):
+class SpatialCoordinateProfile(CoreasonBaseModel):
     """A resolution-independent 2D spatial vector."""
 
     x: float = Field(ge=0.0, le=1.0, description="The normalized X-axis coordinate (0.0 = left, 1.0 = right).")
     y: float = Field(ge=0.0, le=1.0, description="The normalized Y-axis coordinate (0.0 = top, 1.0 = bottom).")
 
 
-class RateCard(CoreasonBaseModel):
+class ComputeRateContract(CoreasonBaseModel):
     """
     Economic constraints for liquid compute operations.
     """
@@ -344,7 +344,7 @@ class ScalePolicy(CoreasonBaseModel):
     domain_max: float | None = Field(default=None, description="The optional maximum bound of the scale domain.")
 
 
-class ChannelEncoding(CoreasonBaseModel):
+class VisualEncodingProfile(CoreasonBaseModel):
     """The visual property being manipulated."""
 
     channel: Literal["x", "y", "color", "size", "opacity", "shape", "text"] = Field(
@@ -438,7 +438,7 @@ class ModelProfile(CoreasonBaseModel):
     provider: str = Field(description="The name of the provider hosting the model.")
     context_window_size: int = Field(description="The maximum context window size in tokens.")
     capabilities: list[str] = Field(description="A list of supported capabilities by the model.")
-    rate_card: RateCard = Field(description="The economic cost definition associated with the model.")
+    rate_card: ComputeRateContract = Field(description="The economic cost definition associated with the model.")
     supported_functional_experts: list[str] = Field(
         default_factory=list,
         description="A declarative list of specialized functional expert clusters (e.g., 'falsifier', 'synthesizer') physically present in this model's architecture.",  # noqa: E501
@@ -1620,7 +1620,7 @@ class DiversityConstraint(CoreasonBaseModel):
     )
 
 
-class DocumentLayoutRegion(CoreasonBaseModel):
+class DocumentLayoutRegionState(CoreasonBaseModel):
     block_id: str = Field(min_length=1, description="Unique structural identifier for this geometric region.")
     block_type: Literal["header", "paragraph", "figure", "table", "footnote", "caption", "equation"] = Field(
         description="The taxonomic classification of the layout region."
@@ -1629,7 +1629,7 @@ class DocumentLayoutRegion(CoreasonBaseModel):
 
 
 class DocumentLayoutManifest(CoreasonBaseModel):
-    blocks: dict[str, DocumentLayoutRegion] = Field(
+    blocks: dict[str, DocumentLayoutRegionState] = Field(
         description="Dictionary mapping block_ids to their strict spatial definitions."
     )
     reading_order_edges: list[tuple[str, str]] = Field(
@@ -1807,7 +1807,7 @@ class EpistemicTransmutationTask(CoreasonBaseModel):
     task_id: str = Field(
         min_length=1, description="Unique identifier for this specific multimodal extraction intervention."
     )
-    artifact_event_id: str = Field(description="The CID of the MultimodalArtifact being processed.")
+    artifact_event_id: str = Field(description="The CID of the MultimodalArtifactReceipt being processed.")
     target_modalities: list[
         Literal["text", "raster_image", "vector_graphics", "tabular_grid", "n_dimensional_tensor"]
     ] = Field(min_length=1, description="The specific SOTA modality resolutions required for this extraction pass.")
@@ -1903,7 +1903,7 @@ class EvidentiaryWarrant(CoreasonBaseModel):
     justification: str = Field(description="The logical premise explaining why this evidence supports the claim.")
 
 
-class ArgumentClaim(CoreasonBaseModel):
+class EpistemicArgumentClaimState(CoreasonBaseModel):
     claim_id: str = Field(
         description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this specific logical proposition."  # noqa: E501
     )
@@ -1921,10 +1921,10 @@ class ArgumentClaim(CoreasonBaseModel):
         return self
 
 
-class ArgumentGraph(CoreasonBaseModel):
+class EpistemicArgumentGraphState(CoreasonBaseModel):
     """A Truth Maintenance System (TMS) calculating dialectical justification for non-monotonic belief retraction."""
 
-    claims: dict[str, ArgumentClaim] = Field(
+    claims: dict[str, EpistemicArgumentClaimState] = Field(
         max_length=10000, description="Components of an Abstract Argumentation Framework."
     )
     attacks: dict[str, DefeasibleAttack] = Field(
@@ -1932,7 +1932,7 @@ class ArgumentGraph(CoreasonBaseModel):
     )
 
 
-class ExecutionNode(CoreasonBaseModel):
+class ExecutionNodeReceipt(CoreasonBaseModel):
     """
     Cryptographic state of an execution node in a Merkle DAG trace.
     """
@@ -2158,7 +2158,7 @@ class GlobalSemanticProfile(CoreasonBaseModel):
     """The immutable receipt of Step 1 ingestion acting as a static structural index of the artifact."""
 
     artifact_event_id: str = Field(
-        min_length=1, description="The exact genesis CID of the document entering the routing tier."
+        min_length=1, description="The exact genesis CID of the MultimodalArtifactReceipt entering the routing tier."
     )
     detected_modalities: list[
         Literal["text", "raster_image", "vector_graphics", "tabular_grid", "n_dimensional_tensor"]
@@ -2229,7 +2229,7 @@ class GrammarPanel(CoreasonBaseModel):
     mark: Literal["point", "line", "area", "bar", "rect", "arc"] = Field(
         description="The geometric shape used to represent the data."
     )
-    encodings: list[ChannelEncoding] = Field(description="The mapping of data fields to visual channels.")
+    encodings: list[VisualEncodingProfile] = Field(description="The mapping of data fields to visual channels.")
     facet: FacetMatrix | None = Field(default=None, description="Optional faceting matrix for small multiples.")
 
     @model_validator(mode="after")
@@ -2308,7 +2308,7 @@ type AnyPresentationIntent = Annotated[
 type AnyIntent = AnyPresentationIntent
 
 
-class InputMapping(CoreasonBaseModel):
+class InputMappingContract(CoreasonBaseModel):
     """
     Dictates how keys from a parent's shared_state_contract map to a nested topology's state.
     """
@@ -2703,7 +2703,7 @@ class MCPClientBinding(CoreasonBaseModel):
         return self
 
 
-class MacroGrid(CoreasonBaseModel):
+class MacroGridProfile(CoreasonBaseModel):
     """A layout matrix containing a list of panels."""
 
     layout_matrix: list[list[str]] = Field(description="A matrix defining the layout structure, using panel IDs.")
@@ -2750,7 +2750,7 @@ class MarketResolutionState(CoreasonBaseModel):
     )
 
 
-class MathematicalNotationExtraction(CoreasonBaseModel):
+class MathematicalNotationExtractionState(CoreasonBaseModel):
     math_type: Literal["inline", "display"] = Field(description="The structural context of the equation.")
     syntax: Literal["latex", "mathml"] = Field(description="The strict symbolic compilation language.")
     expression: str = Field(min_length=1, description="The raw, unescaped mathematical syntax string.")
@@ -2794,7 +2794,7 @@ class EpistemicProvenance(CoreasonBaseModel):
         description="The exact event Content Identifier (CID) in the EpistemicLedgerState that generated this fact."
     )
     source_artifact_id: str | None = Field(
-        default=None, description="The CID of the Genesis MultimodalArtifact this memory was transmutated from."
+        default=None, description="The CID of the Genesis MultimodalArtifactReceipt this memory was transmutated from."
     )
     multimodal_anchor: MultimodalTokenAnchor | None = Field(
         default=None, description="The unified VLM spatial and temporal token matrix where this data was extracted."
@@ -2820,7 +2820,7 @@ class MigrationContract(CoreasonBaseModel):
     )
 
 
-class MultimodalArtifact(CoreasonBaseModel):
+class MultimodalArtifactReceipt(CoreasonBaseModel):
     """AGENT INSTRUCTION: The root Genesis Block for an unstructured document entering the Merkle-DAG."""
 
     artifact_id: str = Field(description="The definitive Content Identifier (CID) bounding the raw file.")
@@ -2950,7 +2950,7 @@ class OntologicalHandshake(CoreasonBaseModel):
     )
 
 
-class OutputMapping(CoreasonBaseModel):
+class OutputMappingContract(CoreasonBaseModel):
     """
     Dictates how keys from a nested topology's state map back to a parent's shared_state_contract.
     """
@@ -2966,8 +2966,12 @@ class CompositeNode(BaseNode):
 
     type: Literal["composite"] = Field(default="composite", description="Discriminator for a Composite node.")
     topology: "AnyTopology" = Field(description="The encapsulated subgraph to execute.")
-    input_mappings: list[InputMapping] = Field(default_factory=list, description="Explicit state projection inputs.")
-    output_mappings: list[OutputMapping] = Field(default_factory=list, description="Explicit state projection outputs.")
+    input_mappings: list[InputMappingContract] = Field(
+        default_factory=list, description="Explicit state projection inputs."
+    )
+    output_mappings: list[OutputMappingContract] = Field(
+        default_factory=list, description="Explicit state projection outputs."
+    )
 
     @model_validator(mode="after")
     def sort_composite_arrays(self) -> Self:
@@ -3060,7 +3064,7 @@ class PresentationManifest(CoreasonBaseModel):
     """An envelope wrapping a grid presentation and its intent."""
 
     intent: AnyPresentationIntent = Field(description="The reason an agent is presenting this data to a human.")
-    grid: MacroGrid = Field(description="The grid of panels being presented.")
+    grid: MacroGridProfile = Field(description="The grid of panels being presented.")
 
 
 class ProcessRewardContract(CoreasonBaseModel):
@@ -3289,13 +3293,13 @@ class SpatialKinematicAction(CoreasonBaseModel):
     action_type: Literal["click", "double_click", "drag_and_drop", "scroll", "hover", "keystroke"] = Field(
         description="The specific kinematic interaction paradigm."
     )
-    target_coordinate: NormalizedCoordinate | None = Field(
+    target_coordinate: SpatialCoordinateProfile | None = Field(
         default=None, description="The primary spatial terminus for clicks or hovers."
     )
     trajectory_duration_ms: int | None = Field(
         default=None, gt=0, description="The exact temporal duration of the movement, simulating human kinematics."
     )
-    bezier_control_points: list[NormalizedCoordinate] = Field(
+    bezier_control_points: list[SpatialCoordinateProfile] = Field(
         default_factory=list, description="Waypoints for constructing non-linear, bot-evasive movement curves."
     )
     # Note: bezier_control_points is a structurally ordered sequence (Geometry/Time) and MUST NOT be sorted.
@@ -3338,7 +3342,7 @@ class OntologicalAlignmentPolicy(CoreasonBaseModel):
     )
 
 
-class StatisticalChartExtraction(CoreasonBaseModel):
+class StatisticalChartExtractionState(CoreasonBaseModel):
     axes: dict[str, AffineTransformMatrix] = Field(
         description="Named axes (e.g., 'x', 'y') defining the affine transformation boundaries."
     )
@@ -3526,7 +3530,7 @@ class System2RemediationPrompt(CoreasonBaseModel):
         return self
 
 
-class TableCell(CoreasonBaseModel):
+class TabularCellState(CoreasonBaseModel):
     row_index: int = Field(ge=0, description="The zero-indexed absolute matrix row.")
     col_index: int = Field(ge=0, description="The zero-indexed absolute matrix column.")
     row_span: int = Field(default=1, ge=1, description="The vertical height of the cell.")
@@ -3535,8 +3539,8 @@ class TableCell(CoreasonBaseModel):
     anchor: MultimodalTokenAnchor = Field(description="The physical location of the cell within the image or document.")
 
 
-class TabularMatrixExtraction(CoreasonBaseModel):
-    cells: list[TableCell] = Field(description="The sparse tensor representing all populated cells.")
+class TabularMatrixExtractionState(CoreasonBaseModel):
+    cells: list[TabularCellState] = Field(description="The sparse tensor representing all populated cells.")
 
     @model_validator(mode="after")
     def sort_tabular_data_arrays(self) -> Self:
@@ -3610,7 +3614,7 @@ class AuctionState(CoreasonBaseModel):
 
 type TelemetryScalar = str | int | float | bool | None
 
-type MetadataDict = dict[str, TelemetryScalar | list[TelemetryScalar]]
+type TelemetryMetadataProfile = dict[str, TelemetryScalar | list[TelemetryScalar]]
 
 
 class LogEvent(CoreasonBaseModel):
@@ -3623,7 +3627,7 @@ class LogEvent(CoreasonBaseModel):
         description="The severity level of the log event."
     )
     message: str = Field(description="The primary log message.")
-    metadata: MetadataDict = Field(
+    metadata: TelemetryMetadataProfile = Field(
         default_factory=dict, description="Contextual key-value metadata associated with the event."
     )
 
@@ -3638,7 +3642,7 @@ class SpanTrace(CoreasonBaseModel):
     start_time: float = Field(description="The UNIX timestamp when the span started.")
     end_time: float | None = Field(default=None, description="The UNIX timestamp when the span ended.")
     status: Literal["OK", "ERROR", "PENDING"] = Field(description="The completion status of the span.")
-    metadata: MetadataDict = Field(
+    metadata: TelemetryMetadataProfile = Field(
         default_factory=dict, description="Contextual key-value metadata associated with the span execution."
     )
 
@@ -4415,7 +4419,7 @@ class EpistemicQuarantineSnapshot(CoreasonBaseModel):
     active_context: dict[str, str] = Field(
         description="The ephemeral latent variables and environmental bindings currently active in Epistemic Quarantine."  # noqa: E501
     )
-    argumentation: ArgumentGraph | None = Field(
+    argumentation: EpistemicArgumentGraphState | None = Field(
         default=None,
         description="The formal graph of non-monotonic claims and defeasible attacks currently active in the swarm's working memory.",  # noqa: E501
     )
