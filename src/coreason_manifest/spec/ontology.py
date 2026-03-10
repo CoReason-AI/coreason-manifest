@@ -942,7 +942,7 @@ class StateDifferentialManifest(CoreasonBaseModel):
     patches: list[StateMutationIntent] = Field(
         default_factory=list, description="The exact, ordered sequence of deterministic state vector mutations."
     )
-    # Note: patches is a structurally ordered sequence (Chronological Mutations) and MUST NOT be sorted.
+    # Topological invariant: Structurally ordered sequence. MUST NOT be sorted.
 
 
 class TemporalCheckpointState(CoreasonBaseModel):
@@ -1665,7 +1665,7 @@ class DocumentLayoutManifest(CoreasonBaseModel):
         default_factory=list,
         description="Directed edges defining the topological sort (chronological flow) of the document.",
     )
-    # Note: reading_order_edges is a structurally ordered sequence (Topological Sort) and MUST NOT be sorted.
+    # Topological invariant: Structurally ordered sequence. MUST NOT be sorted.
 
     @model_validator(mode="after")
     def verify_dag_and_integrity(self) -> Self:
@@ -3338,7 +3338,7 @@ class ExecutionSpanReceipt(CoreasonBaseModel):
     events: list[SpanEvent] = Field(
         default_factory=list, max_length=10000, description="Structured log records emitted during the span."
     )
-    # Note: events is a structurally ordered sequence (Temporal execution) and MUST NOT be sorted.
+    # Topological invariant: Structurally ordered sequence. MUST NOT be sorted.
 
     @model_validator(mode="after")
     def validate_temporal_bounds(self) -> Any:
@@ -3367,7 +3367,7 @@ class SpatialKinematicActionIntent(CoreasonBaseModel):
     bezier_control_points: list[SpatialCoordinateProfile] = Field(
         default_factory=list, description="Waypoints for constructing non-linear, bot-evasive movement curves."
     )
-    # Note: bezier_control_points is a structurally ordered sequence (Geometry/Time) and MUST NOT be sorted.
+    # Topological invariant: Structurally ordered sequence. MUST NOT be sorted.
     expected_visual_concept: str | None = Field(
         default=None,
         description="The visual anchor (e.g., 'Submit Button'). The orchestrator must verify this semantic concept exists at the target_coordinate before executing the macro, preventing blind clicks.",  # noqa: E501

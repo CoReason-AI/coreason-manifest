@@ -24,7 +24,6 @@ def main() -> None:
 
     for name in sorted(set(coreason_manifest.__all__)):
         obj = getattr(coreason_manifest, name, None)
-        # Strictly filter for BaseModel classes only to avoid crashing models_json_schema
         if isinstance(obj, type) and issubclass(obj, CoreasonBaseModel) and obj is not CoreasonBaseModel:
             models_to_export.append(obj)
 
