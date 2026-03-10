@@ -2713,7 +2713,10 @@ class MCPResourceManifest(CoreasonBaseModel):
     """A collection of Semantic Memory resource URIs provided by a specific MCP server."""
 
     server_id: str = Field(..., description="The ID of the MCP server providing these resources.")
-    uris: list[str] = Field(default_factory=list, description="The explicit array of resource URIs mathematically bound to the agent.")
+    uris: list[str] = Field(
+        default_factory=list,
+        description="The explicit array of resource URIs mathematically bound to the agent.",
+    )
 
     @model_validator(mode="after")
     def sort_arrays(self) -> Self:
@@ -2750,7 +2753,9 @@ class MacroGridProfile(CoreasonBaseModel):
     """A layout matrix containing a list of panels."""
 
     layout_matrix: list[list[str]] = Field(description="A matrix defining the layout structure, using panel IDs.")
-    panels: list[AnyPanel] = Field(description="The ordered array of topological UI panels physically rendered in the grid.")
+    panels: list[AnyPanel] = Field(
+        description="The ordered array of topological UI panels physically rendered in the grid.",
+    )
 
     @model_validator(mode="after")
     def verify_referential_integrity(self) -> Self:

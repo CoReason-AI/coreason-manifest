@@ -6737,7 +6737,7 @@
           "type": "string"
         },
         "uris": {
-          "description": "List of resource URIs available to the agent.",
+          "description": "The explicit array of resource URIs mathematically bound to the agent.",
           "items": {
             "type": "string"
           },
@@ -6778,7 +6778,7 @@
           "title": "Transport"
         },
         "required_capabilities": {
-          "description": "A list of capabilities required from the MCP server.",
+          "description": "The structurally bounded array of capabilities mandated for this server connection.",
           "items": {
             "type": "string"
           },
@@ -6875,7 +6875,7 @@
           "type": "array"
         },
         "panels": {
-          "description": "A list of panels included in the grid.",
+          "description": "The ordered array of topological UI panels physically rendered in the grid.",
           "items": {
             "$ref": "#/$defs/AnyPanel"
           },
