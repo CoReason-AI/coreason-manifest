@@ -1969,6 +1969,11 @@ class ExecutionNodeReceipt(CoreasonBaseModel):
             raise ValueError("Orphaned Lineage: parent_request_id is set but root_request_id is None")
         return self
 
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "parent_hashes", sorted(self.parent_hashes))
+        return self
+
     def generate_node_hash(self) -> str:
         """
         Generate a strictly deterministic SHA-256 hash for the node via RFC 8785 canonicalization.
@@ -2221,6 +2226,13 @@ class DynamicRoutingManifest(CoreasonBaseModel):
                 raise ValueError(
                     "Merkle Violation: BypassReceipt artifact_event_id does not match the root artifact_profile."
                 )
+        return self
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        sorted_subgraphs = {k: sorted(v) for k, v in self.active_subgraphs.items()}
+        object.__setattr__(self, "active_subgraphs", sorted_subgraphs)
+        object.__setattr__(self, "bypassed_steps", sorted(self.bypassed_steps, key=lambda x: x.bypassed_node_id))
         return self
 
 
@@ -2737,6 +2749,11 @@ class MacroGridProfile(CoreasonBaseModel):
             for panel_id in row:
                 if panel_id not in panel_ids:
                     raise ValueError(f"Ghost Panel referenced in layout_matrix: {panel_id}")
+        return self
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "panels", sorted(self.panels, key=lambda x: x.panel_id))
         return self
 
 
@@ -3384,6 +3401,11 @@ class StatisticalChartExtractionState(CoreasonBaseModel):
                 missing = axis_keys - point_keys
                 if missing:
                     raise ValueError(f"Data point missing required axis dimensions: {missing}")
+        return self
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "data_series", sorted(self.data_series, key=lambda x: json.dumps(x, sort_keys=True)))
         return self
 
 
