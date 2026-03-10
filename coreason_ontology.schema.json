@@ -1045,71 +1045,6 @@
         }
       ]
     },
-    "ArgumentClaim": {
-      "additionalProperties": false,
-      "properties": {
-        "claim_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this specific logical proposition.",
-          "title": "Claim Id",
-          "type": "string"
-        },
-        "proponent_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the agent or system that advanced this claim.",
-          "title": "Proponent Id",
-          "type": "string"
-        },
-        "text_chunk": {
-          "description": "The natural language representation of the proposition.",
-          "maxLength": 50000,
-          "title": "Text Chunk",
-          "type": "string"
-        },
-        "warrants": {
-          "description": "The foundational premises supporting this claim.",
-          "items": {
-            "$ref": "#/$defs/EvidentiaryWarrant"
-          },
-          "title": "Warrants",
-          "type": "array"
-        }
-      },
-      "required": [
-        "claim_id",
-        "proponent_id",
-        "text_chunk"
-      ],
-      "title": "ArgumentClaim",
-      "type": "object"
-    },
-    "ArgumentGraph": {
-      "additionalProperties": false,
-      "description": "A Truth Maintenance System (TMS) calculating dialectical justification for non-monotonic belief retraction.",
-      "properties": {
-        "claims": {
-          "additionalProperties": {
-            "$ref": "#/$defs/ArgumentClaim"
-          },
-          "description": "Components of an Abstract Argumentation Framework.",
-          "maxProperties": 10000,
-          "title": "Claims",
-          "type": "object"
-        },
-        "attacks": {
-          "additionalProperties": {
-            "$ref": "#/$defs/DefeasibleAttack"
-          },
-          "description": "Geometric matrices of undercutting defeaters.",
-          "maxProperties": 10000,
-          "title": "Attacks",
-          "type": "object"
-        }
-      },
-      "required": [
-        "claims"
-      ],
-      "title": "ArgumentGraph",
-      "type": "object"
-    },
     "AttackVector": {
       "enum": [
         "rebuttal",
@@ -1852,48 +1787,6 @@
       "title": "BoundedJSONRPCIntent",
       "type": "object"
     },
-    "BoundingBox": {
-      "additionalProperties": false,
-      "description": "A resolution-independent spatial region.",
-      "properties": {
-        "x_min": {
-          "description": "The left boundary.",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "X Min",
-          "type": "number"
-        },
-        "y_min": {
-          "description": "The top boundary.",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "Y Min",
-          "type": "number"
-        },
-        "x_max": {
-          "description": "The right boundary.",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "X Max",
-          "type": "number"
-        },
-        "y_max": {
-          "description": "The bottom boundary.",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "Y Max",
-          "type": "number"
-        }
-      },
-      "required": [
-        "x_min",
-        "y_min",
-        "x_max",
-        "y_max"
-      ],
-      "title": "BoundingBox",
-      "type": "object"
-    },
     "BrowserDOMState": {
       "additionalProperties": false,
       "properties": {
@@ -2064,49 +1957,6 @@
         "mitigates"
       ],
       "type": "string"
-    },
-    "ChannelEncoding": {
-      "additionalProperties": false,
-      "description": "The visual property being manipulated.",
-      "properties": {
-        "channel": {
-          "description": "The visual channel the data is mapped to.",
-          "enum": [
-            "x",
-            "y",
-            "color",
-            "size",
-            "opacity",
-            "shape",
-            "text"
-          ],
-          "title": "Channel",
-          "type": "string"
-        },
-        "field": {
-          "description": "The exact column or field name from the dataset.",
-          "title": "Field",
-          "type": "string"
-        },
-        "scale": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/ScalePolicy"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Optional scale override for this specific channel."
-        }
-      },
-      "required": [
-        "channel",
-        "field"
-      ],
-      "title": "ChannelEncoding",
-      "type": "object"
     },
     "ChaosExperimentTask": {
       "additionalProperties": false,
@@ -2446,6 +2296,34 @@
         "required_capabilities"
       ],
       "title": "ComputeProvisioningIntent",
+      "type": "object"
+    },
+    "ComputeRateContract": {
+      "additionalProperties": false,
+      "description": "Economic constraints for liquid compute operations.",
+      "properties": {
+        "cost_per_million_input_tokens": {
+          "description": "The cost per 1 million input tokens provided to the model.",
+          "title": "Cost Per Million Input Tokens",
+          "type": "number"
+        },
+        "cost_per_million_output_tokens": {
+          "description": "The cost per 1 million output tokens generated by the model.",
+          "title": "Cost Per Million Output Tokens",
+          "type": "number"
+        },
+        "magnitude_unit": {
+          "description": "The magnitude unit of the associated costs.",
+          "title": "Magnitude Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "cost_per_million_input_tokens",
+        "cost_per_million_output_tokens",
+        "magnitude_unit"
+      ],
+      "title": "ComputeRateContract",
       "type": "object"
     },
     "ConsensusFederationTopology": {
@@ -3910,6 +3788,71 @@
       "title": "EphemeralNamespacePartition",
       "type": "object"
     },
+    "EpistemicArgumentClaimState": {
+      "additionalProperties": false,
+      "properties": {
+        "claim_id": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this specific logical proposition.",
+          "title": "Claim Id",
+          "type": "string"
+        },
+        "proponent_id": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the agent or system that advanced this claim.",
+          "title": "Proponent Id",
+          "type": "string"
+        },
+        "text_chunk": {
+          "description": "The natural language representation of the proposition.",
+          "maxLength": 50000,
+          "title": "Text Chunk",
+          "type": "string"
+        },
+        "warrants": {
+          "description": "The foundational premises supporting this claim.",
+          "items": {
+            "$ref": "#/$defs/EvidentiaryWarrant"
+          },
+          "title": "Warrants",
+          "type": "array"
+        }
+      },
+      "required": [
+        "claim_id",
+        "proponent_id",
+        "text_chunk"
+      ],
+      "title": "EpistemicArgumentClaimState",
+      "type": "object"
+    },
+    "EpistemicArgumentGraphState": {
+      "additionalProperties": false,
+      "description": "A Truth Maintenance System (TMS) calculating dialectical justification for non-monotonic belief retraction.",
+      "properties": {
+        "claims": {
+          "additionalProperties": {
+            "$ref": "#/$defs/EpistemicArgumentClaimState"
+          },
+          "description": "Components of an Abstract Argumentation Framework.",
+          "maxProperties": 10000,
+          "title": "Claims",
+          "type": "object"
+        },
+        "attacks": {
+          "additionalProperties": {
+            "$ref": "#/$defs/DefeasibleAttack"
+          },
+          "description": "Geometric matrices of undercutting defeaters.",
+          "maxProperties": 10000,
+          "title": "Attacks",
+          "type": "object"
+        }
+      },
+      "required": [
+        "claims"
+      ],
+      "title": "EpistemicArgumentGraphState",
+      "type": "object"
+    },
     "EpistemicCompressionSLA": {
       "additionalProperties": false,
       "properties": {
@@ -4158,7 +4101,7 @@
         "argumentation": {
           "anyOf": [
             {
-              "$ref": "#/$defs/ArgumentGraph"
+              "$ref": "#/$defs/EpistemicArgumentGraphState"
             },
             {
               "type": "null"
@@ -4726,7 +4669,7 @@
       "title": "EvolutionaryTopology",
       "type": "object"
     },
-    "ExecutionNode": {
+    "ExecutionNodeReceipt": {
       "additionalProperties": false,
       "description": "Cryptographic state of an execution node in a Merkle DAG trace.",
       "properties": {
@@ -4796,7 +4739,7 @@
         "inputs",
         "outputs"
       ],
-      "title": "ExecutionNode",
+      "title": "ExecutionNodeReceipt",
       "type": "object"
     },
     "ExecutionSLA": {
@@ -5522,7 +5465,7 @@
         "encodings": {
           "description": "The mapping of data fields to visual channels.",
           "items": {
-            "$ref": "#/$defs/ChannelEncoding"
+            "$ref": "#/$defs/VisualEncodingProfile"
           },
           "title": "Encodings",
           "type": "array"
@@ -6543,7 +6486,7 @@
           "type": "string"
         },
         "metadata": {
-          "$ref": "#/$defs/MetadataDict",
+          "$ref": "#/$defs/TelemetryMetadataProfile",
           "description": "Contextual key-value metadata associated with the event."
         }
       },
@@ -7183,22 +7126,6 @@
       "title": "MemoizedNode",
       "type": "object"
     },
-    "MetadataDict": {
-      "additionalProperties": {
-        "anyOf": [
-          {
-            "$ref": "#/$defs/TelemetryScalar"
-          },
-          {
-            "items": {
-              "$ref": "#/$defs/TelemetryScalar"
-            },
-            "type": "array"
-          }
-        ]
-      },
-      "type": "object"
-    },
     "MigrationContract": {
       "additionalProperties": false,
       "properties": {
@@ -7270,7 +7197,7 @@
           "type": "array"
         },
         "rate_card": {
-          "$ref": "#/$defs/RateCard",
+          "$ref": "#/$defs/ComputeRateContract",
           "description": "The economic cost definition associated with the model."
         },
         "supported_functional_experts": {
@@ -7588,32 +7515,6 @@
       "minLength": 7,
       "pattern": "^did:[a-z0-9]+:[a-zA-Z0-9.\\-_:]+$",
       "type": "string"
-    },
-    "NormalizedCoordinate": {
-      "additionalProperties": false,
-      "description": "A resolution-independent 2D spatial vector.",
-      "properties": {
-        "x": {
-          "description": "The normalized X-axis coordinate (0.0 = left, 1.0 = right).",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "X",
-          "type": "number"
-        },
-        "y": {
-          "description": "The normalized Y-axis coordinate (0.0 = top, 1.0 = bottom).",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "Y",
-          "type": "number"
-        }
-      },
-      "required": [
-        "x",
-        "y"
-      ],
-      "title": "NormalizedCoordinate",
-      "type": "object"
     },
     "NormativeDriftEvent": {
       "additionalProperties": false,
@@ -8467,34 +8368,6 @@
         "byzantine_action"
       ],
       "title": "QuorumPolicy",
-      "type": "object"
-    },
-    "RateCard": {
-      "additionalProperties": false,
-      "description": "Economic constraints for liquid compute operations.",
-      "properties": {
-        "cost_per_million_input_tokens": {
-          "description": "The cost per 1 million input tokens provided to the model.",
-          "title": "Cost Per Million Input Tokens",
-          "type": "number"
-        },
-        "cost_per_million_output_tokens": {
-          "description": "The cost per 1 million output tokens generated by the model.",
-          "title": "Cost Per Million Output Tokens",
-          "type": "number"
-        },
-        "magnitude_unit": {
-          "description": "The magnitude unit of the associated costs.",
-          "title": "Magnitude Unit",
-          "type": "string"
-        }
-      },
-      "required": [
-        "cost_per_million_input_tokens",
-        "cost_per_million_output_tokens",
-        "magnitude_unit"
-      ],
-      "title": "RateCard",
       "type": "object"
     },
     "RedactionPolicy": {
@@ -9496,7 +9369,7 @@
           "type": "string"
         },
         "metadata": {
-          "$ref": "#/$defs/MetadataDict",
+          "$ref": "#/$defs/TelemetryMetadataProfile",
           "description": "Contextual key-value metadata associated with the span execution."
         }
       },
@@ -9506,6 +9379,74 @@
         "status"
       ],
       "title": "SpanTrace",
+      "type": "object"
+    },
+    "SpatialBoundingBoxProfile": {
+      "additionalProperties": false,
+      "description": "A resolution-independent spatial region.",
+      "properties": {
+        "x_min": {
+          "description": "The left boundary.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "X Min",
+          "type": "number"
+        },
+        "y_min": {
+          "description": "The top boundary.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Y Min",
+          "type": "number"
+        },
+        "x_max": {
+          "description": "The right boundary.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "X Max",
+          "type": "number"
+        },
+        "y_max": {
+          "description": "The bottom boundary.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Y Max",
+          "type": "number"
+        }
+      },
+      "required": [
+        "x_min",
+        "y_min",
+        "x_max",
+        "y_max"
+      ],
+      "title": "SpatialBoundingBoxProfile",
+      "type": "object"
+    },
+    "SpatialCoordinateProfile": {
+      "additionalProperties": false,
+      "description": "A resolution-independent 2D spatial vector.",
+      "properties": {
+        "x": {
+          "description": "The normalized X-axis coordinate (0.0 = left, 1.0 = right).",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "X",
+          "type": "number"
+        },
+        "y": {
+          "description": "The normalized Y-axis coordinate (0.0 = top, 1.0 = bottom).",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Y",
+          "type": "number"
+        }
+      },
+      "required": [
+        "x",
+        "y"
+      ],
+      "title": "SpatialCoordinateProfile",
       "type": "object"
     },
     "SpatialKinematicAction": {
@@ -9528,7 +9469,7 @@
         "target_coordinate": {
           "anyOf": [
             {
-              "$ref": "#/$defs/NormalizedCoordinate"
+              "$ref": "#/$defs/SpatialCoordinateProfile"
             },
             {
               "type": "null"
@@ -9554,7 +9495,7 @@
         "bezier_control_points": {
           "description": "Waypoints for constructing non-linear, bot-evasive movement curves.",
           "items": {
-            "$ref": "#/$defs/NormalizedCoordinate"
+            "$ref": "#/$defs/SpatialCoordinateProfile"
           },
           "title": "Bezier Control Points",
           "type": "array"
@@ -10313,6 +10254,22 @@
       "title": "TaskAwardReceipt",
       "type": "object"
     },
+    "TelemetryMetadataProfile": {
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/TelemetryScalar"
+          },
+          {
+            "items": {
+              "$ref": "#/$defs/TelemetryScalar"
+            },
+            "type": "array"
+          }
+        ]
+      },
+      "type": "object"
+    },
     "TelemetryScalar": {
       "anyOf": [
         {
@@ -10889,6 +10846,49 @@
         "seed_hash"
       ],
       "title": "VerifiableEntropy",
+      "type": "object"
+    },
+    "VisualEncodingProfile": {
+      "additionalProperties": false,
+      "description": "The visual property being manipulated.",
+      "properties": {
+        "channel": {
+          "description": "The visual channel the data is mapped to.",
+          "enum": [
+            "x",
+            "y",
+            "color",
+            "size",
+            "opacity",
+            "shape",
+            "text"
+          ],
+          "title": "Channel",
+          "type": "string"
+        },
+        "field": {
+          "description": "The exact column or field name from the dataset.",
+          "title": "Field",
+          "type": "string"
+        },
+        "scale": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ScalePolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional scale override for this specific channel."
+        }
+      },
+      "required": [
+        "channel",
+        "field"
+      ],
+      "title": "VisualEncodingProfile",
       "type": "object"
     },
     "WetwareAttestationContract": {

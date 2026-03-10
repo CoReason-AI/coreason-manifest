@@ -7,7 +7,7 @@ from ..spec.ontology import (
     AnyTopology,
     EpistemicCompressionSLA,
     EpistemicTransmutationTask,
-    ExecutionNode,
+    ExecutionNodeReceipt,
     System2RemediationPrompt,
 )
 
@@ -74,7 +74,7 @@ def compute_topology_hash(topology: "AnyTopology") -> str:
     return hashlib.sha256(topology.model_dump_canonical()).hexdigest()
 
 
-def verify_merkle_proof(trace: list[ExecutionNode]) -> bool:
+def verify_merkle_proof(trace: list[ExecutionNodeReceipt]) -> bool:
     """
     Verifies a Merkle DAG trace of execution nodes.
     Ensures that every node's hash is computationally valid and mathematically
@@ -83,7 +83,7 @@ def verify_merkle_proof(trace: list[ExecutionNode]) -> bool:
 
     Returns True if validation succeeds, False otherwise.
     """
-    node_map: dict[str, ExecutionNode] = {}
+    node_map: dict[str, ExecutionNodeReceipt] = {}
     for node in trace:
         if node.node_hash is None:
             return False

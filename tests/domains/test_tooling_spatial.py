@@ -12,7 +12,7 @@ from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import TypeAdapter, ValidationError
 
-from coreason_manifest.spec.ontology import BoundingBox, SpatialKinematicAction
+from coreason_manifest.spec.ontology import SpatialBoundingBoxProfile, SpatialKinematicAction
 
 
 @st.composite
@@ -53,17 +53,17 @@ def draw_spatial_kinematic_action(draw: Any) -> dict[str, Any]:
 
 @given(draw_bounding_box())
 def test_bounding_box_valid(payload: dict[str, Any]) -> None:
-    TypeAdapter(BoundingBox).validate_python(payload)
+    TypeAdapter(SpatialBoundingBoxProfile).validate_python(payload)
 
 
 def test_bounding_box_invalid_geometry() -> None:
     with pytest.raises(ValidationError):
-        TypeAdapter(BoundingBox).validate_python({"x_min": 0.8, "x_max": 0.2, "y_min": 0.0, "y_max": 1.0})
+        TypeAdapter(SpatialBoundingBoxProfile).validate_python({"x_min": 0.8, "x_max": 0.2, "y_min": 0.0, "y_max": 1.0})
 
 
 def test_bounding_box_invalid_geometry_y() -> None:
     with pytest.raises(ValidationError):
-        TypeAdapter(BoundingBox).validate_python({"x_min": 0.0, "x_max": 1.0, "y_min": 0.8, "y_max": 0.2})
+        TypeAdapter(SpatialBoundingBoxProfile).validate_python({"x_min": 0.0, "x_max": 1.0, "y_min": 0.8, "y_max": 0.2})
 
 
 @given(draw_spatial_kinematic_action())

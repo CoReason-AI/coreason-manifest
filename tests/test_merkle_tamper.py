@@ -7,17 +7,17 @@
 
 import random
 
-from coreason_manifest.spec.ontology import ExecutionNode
+from coreason_manifest.spec.ontology import ExecutionNodeReceipt
 from coreason_manifest.utils.algebra import verify_merkle_proof
 
 
-def _generate_valid_chain(size: int) -> list[ExecutionNode]:
-    """Generates a valid chain of ExecutionNode objects for testing."""
-    chain: list[ExecutionNode] = []
+def _generate_valid_chain(size: int) -> list[ExecutionNodeReceipt]:
+    """Generates a valid chain of ExecutionNodeReceipt objects for testing."""
+    chain: list[ExecutionNodeReceipt] = []
     parent_hash: str | None = None
 
     for i in range(size):
-        node = ExecutionNode(
+        node = ExecutionNodeReceipt(
             request_id=f"req_{i}",
             inputs={"input_data": f"data_{i}"},
             outputs={"output_data": f"data_{i}"},

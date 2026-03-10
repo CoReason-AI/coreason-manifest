@@ -248,7 +248,7 @@ class CoreasonBaseModel(BaseModel):
         return json.dumps(canonical_dict, ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode("utf-8")
 
 
-class BoundingBox(CoreasonBaseModel):
+class SpatialBoundingBoxProfile(CoreasonBaseModel):
     """A resolution-independent spatial region."""
 
     x_min: float = Field(ge=0.0, le=1.0, description="The left boundary.")
@@ -313,14 +313,14 @@ class FacetMatrix(CoreasonBaseModel):
     )
 
 
-class NormalizedCoordinate(CoreasonBaseModel):
+class SpatialCoordinateProfile(CoreasonBaseModel):
     """A resolution-independent 2D spatial vector."""
 
     x: float = Field(ge=0.0, le=1.0, description="The normalized X-axis coordinate (0.0 = left, 1.0 = right).")
     y: float = Field(ge=0.0, le=1.0, description="The normalized Y-axis coordinate (0.0 = top, 1.0 = bottom).")
 
 
-class RateCard(CoreasonBaseModel):
+class ComputeRateContract(CoreasonBaseModel):
     """
     Economic constraints for liquid compute operations.
     """
@@ -344,7 +344,7 @@ class ScalePolicy(CoreasonBaseModel):
     domain_max: float | None = Field(default=None, description="The optional maximum bound of the scale domain.")
 
 
-class ChannelEncoding(CoreasonBaseModel):
+class VisualEncodingProfile(CoreasonBaseModel):
     """The visual property being manipulated."""
 
     channel: Literal["x", "y", "color", "size", "opacity", "shape", "text"] = Field(
@@ -438,7 +438,7 @@ class ModelProfile(CoreasonBaseModel):
     provider: str = Field(description="The name of the provider hosting the model.")
     context_window_size: int = Field(description="The maximum context window size in tokens.")
     capabilities: list[str] = Field(description="A list of supported capabilities by the model.")
-    rate_card: RateCard = Field(description="The economic cost definition associated with the model.")
+    rate_card: ComputeRateContract = Field(description="The economic cost definition associated with the model.")
     supported_functional_experts: list[str] = Field(
         default_factory=list,
         description="A declarative list of specialized functional expert clusters (e.g., 'falsifier', 'synthesizer') physically present in this model's architecture.",  # noqa: E501
@@ -1903,7 +1903,7 @@ class EvidentiaryWarrant(CoreasonBaseModel):
     justification: str = Field(description="The logical premise explaining why this evidence supports the claim.")
 
 
-class ArgumentClaim(CoreasonBaseModel):
+class EpistemicArgumentClaimState(CoreasonBaseModel):
     claim_id: str = Field(
         description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this specific logical proposition."  # noqa: E501
     )
@@ -1921,10 +1921,10 @@ class ArgumentClaim(CoreasonBaseModel):
         return self
 
 
-class ArgumentGraph(CoreasonBaseModel):
+class EpistemicArgumentGraphState(CoreasonBaseModel):
     """A Truth Maintenance System (TMS) calculating dialectical justification for non-monotonic belief retraction."""
 
-    claims: dict[str, ArgumentClaim] = Field(
+    claims: dict[str, EpistemicArgumentClaimState] = Field(
         max_length=10000, description="Components of an Abstract Argumentation Framework."
     )
     attacks: dict[str, DefeasibleAttack] = Field(
@@ -1932,7 +1932,7 @@ class ArgumentGraph(CoreasonBaseModel):
     )
 
 
-class ExecutionNode(CoreasonBaseModel):
+class ExecutionNodeReceipt(CoreasonBaseModel):
     """
     Cryptographic state of an execution node in a Merkle DAG trace.
     """
@@ -2229,7 +2229,7 @@ class GrammarPanel(CoreasonBaseModel):
     mark: Literal["point", "line", "area", "bar", "rect", "arc"] = Field(
         description="The geometric shape used to represent the data."
     )
-    encodings: list[ChannelEncoding] = Field(description="The mapping of data fields to visual channels.")
+    encodings: list[VisualEncodingProfile] = Field(description="The mapping of data fields to visual channels.")
     facet: FacetMatrix | None = Field(default=None, description="Optional faceting matrix for small multiples.")
 
     @model_validator(mode="after")
@@ -3289,13 +3289,13 @@ class SpatialKinematicAction(CoreasonBaseModel):
     action_type: Literal["click", "double_click", "drag_and_drop", "scroll", "hover", "keystroke"] = Field(
         description="The specific kinematic interaction paradigm."
     )
-    target_coordinate: NormalizedCoordinate | None = Field(
+    target_coordinate: SpatialCoordinateProfile | None = Field(
         default=None, description="The primary spatial terminus for clicks or hovers."
     )
     trajectory_duration_ms: int | None = Field(
         default=None, gt=0, description="The exact temporal duration of the movement, simulating human kinematics."
     )
-    bezier_control_points: list[NormalizedCoordinate] = Field(
+    bezier_control_points: list[SpatialCoordinateProfile] = Field(
         default_factory=list, description="Waypoints for constructing non-linear, bot-evasive movement curves."
     )
     # Note: bezier_control_points is a structurally ordered sequence (Geometry/Time) and MUST NOT be sorted.
@@ -3610,7 +3610,7 @@ class AuctionState(CoreasonBaseModel):
 
 type TelemetryScalar = str | int | float | bool | None
 
-type MetadataDict = dict[str, TelemetryScalar | list[TelemetryScalar]]
+type TelemetryMetadataProfile = dict[str, TelemetryScalar | list[TelemetryScalar]]
 
 
 class LogEvent(CoreasonBaseModel):
@@ -3623,7 +3623,7 @@ class LogEvent(CoreasonBaseModel):
         description="The severity level of the log event."
     )
     message: str = Field(description="The primary log message.")
-    metadata: MetadataDict = Field(
+    metadata: TelemetryMetadataProfile = Field(
         default_factory=dict, description="Contextual key-value metadata associated with the event."
     )
 
@@ -3638,7 +3638,7 @@ class SpanTrace(CoreasonBaseModel):
     start_time: float = Field(description="The UNIX timestamp when the span started.")
     end_time: float | None = Field(default=None, description="The UNIX timestamp when the span ended.")
     status: Literal["OK", "ERROR", "PENDING"] = Field(description="The completion status of the span.")
-    metadata: MetadataDict = Field(
+    metadata: TelemetryMetadataProfile = Field(
         default_factory=dict, description="Contextual key-value metadata associated with the span execution."
     )
 
@@ -4415,7 +4415,7 @@ class EpistemicQuarantineSnapshot(CoreasonBaseModel):
     active_context: dict[str, str] = Field(
         description="The ephemeral latent variables and environmental bindings currently active in Epistemic Quarantine."  # noqa: E501
     )
-    argumentation: ArgumentGraph | None = Field(
+    argumentation: EpistemicArgumentGraphState | None = Field(
         default=None,
         description="The formal graph of non-monotonic claims and defeasible attacks currently active in the swarm's working memory.",  # noqa: E501
     )

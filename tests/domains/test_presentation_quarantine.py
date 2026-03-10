@@ -14,11 +14,11 @@ from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
     AnyPanel,
-    ChannelEncoding,
     DynamicLayoutManifest,
     GrammarPanel,
     InsightCard,
     MacroGrid,
+    VisualEncodingProfile,
 )
 
 
@@ -158,14 +158,17 @@ def test_safe_rendering_test(title: str, safe_text: str, x_label: str, y_label: 
             title=x_label,
             data_source_id="d2",
             mark="point",
-            encodings=[ChannelEncoding(channel="x", field="x"), ChannelEncoding(channel="y", field="y")],
+            encodings=[VisualEncodingProfile(channel="x", field="x"), VisualEncodingProfile(channel="y", field="y")],
         ),
         GrammarPanel(
             panel_id="panel_3",
             title=y_label,
             data_source_id="d3",
             mark="bar",
-            encodings=[ChannelEncoding(channel="x", field="step"), ChannelEncoding(channel="y", field="count")],
+            encodings=[
+                VisualEncodingProfile(channel="x", field="step"),
+                VisualEncodingProfile(channel="y", field="count"),
+            ],
         ),
     ]
 
