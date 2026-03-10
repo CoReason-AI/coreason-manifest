@@ -2247,7 +2247,7 @@
         "input_mappings": {
           "description": "Explicit state projection inputs.",
           "items": {
-            "$ref": "#/$defs/InputMapping"
+            "$ref": "#/$defs/InputMappingContract"
           },
           "title": "Input Mappings",
           "type": "array"
@@ -2255,7 +2255,7 @@
         "output_mappings": {
           "description": "Explicit state projection outputs.",
           "items": {
-            "$ref": "#/$defs/OutputMapping"
+            "$ref": "#/$defs/OutputMappingContract"
           },
           "title": "Output Mappings",
           "type": "array"
@@ -3444,7 +3444,7 @@
       "properties": {
         "blocks": {
           "additionalProperties": {
-            "$ref": "#/$defs/DocumentLayoutRegion"
+            "$ref": "#/$defs/DocumentLayoutRegionState"
           },
           "description": "Dictionary mapping block_ids to their strict spatial definitions.",
           "title": "Blocks",
@@ -3475,7 +3475,7 @@
       "title": "DocumentLayoutManifest",
       "type": "object"
     },
-    "DocumentLayoutRegion": {
+    "DocumentLayoutRegionState": {
       "additionalProperties": false,
       "properties": {
         "block_id": {
@@ -3508,7 +3508,7 @@
         "block_type",
         "anchor"
       ],
-      "title": "DocumentLayoutRegion",
+      "title": "DocumentLayoutRegionState",
       "type": "object"
     },
     "DraftingIntent": {
@@ -4046,7 +4046,7 @@
             }
           ],
           "default": null,
-          "description": "The CID of the Genesis MultimodalArtifact this memory was transmutated from.",
+          "description": "The CID of the Genesis MultimodalArtifactReceipt this memory was transmutated from.",
           "title": "Source Artifact Id"
         },
         "multimodal_anchor": {
@@ -4191,7 +4191,7 @@
           "type": "string"
         },
         "artifact_event_id": {
-          "description": "The CID of the MultimodalArtifact being processed.",
+          "description": "The CID of the MultimodalArtifactReceipt being processed.",
           "title": "Artifact Event Id",
           "type": "string"
         },
@@ -5928,7 +5928,7 @@
       "title": "InformationalIntent",
       "type": "object"
     },
-    "InputMapping": {
+    "InputMappingContract": {
       "additionalProperties": false,
       "description": "Dictates how keys from a parent's shared_state_contract map to a nested topology's state.",
       "properties": {
@@ -5947,7 +5947,7 @@
         "parent_key",
         "child_key"
       ],
-      "title": "InputMapping",
+      "title": "InputMappingContract",
       "type": "object"
     },
     "InsightCard": {
@@ -6859,7 +6859,7 @@
       ],
       "type": "string"
     },
-    "MacroGrid": {
+    "MacroGridProfile": {
       "additionalProperties": false,
       "description": "A layout matrix containing a list of panels.",
       "properties": {
@@ -6887,7 +6887,7 @@
         "layout_matrix",
         "panels"
       ],
-      "title": "MacroGrid",
+      "title": "MacroGridProfile",
       "type": "object"
     },
     "MarketContract": {
@@ -6954,7 +6954,7 @@
       "title": "MarketResolutionState",
       "type": "object"
     },
-    "MathematicalNotationExtraction": {
+    "MathematicalNotationExtractionState": {
       "additionalProperties": false,
       "properties": {
         "math_type": {
@@ -6992,7 +6992,7 @@
         "expression",
         "anchor"
       ],
-      "title": "MathematicalNotationExtraction",
+      "title": "MathematicalNotationExtractionState",
       "type": "object"
     },
     "MechanisticAuditContract": {
@@ -7219,7 +7219,7 @@
       "title": "ModelProfile",
       "type": "object"
     },
-    "MultimodalArtifact": {
+    "MultimodalArtifactReceipt": {
       "additionalProperties": false,
       "description": "AGENT INSTRUCTION: The root Genesis Block for an unstructured document entering the Merkle-DAG.",
       "properties": {
@@ -7251,7 +7251,7 @@
         "byte_stream_hash",
         "temporal_ingest_timestamp"
       ],
-      "title": "MultimodalArtifact",
+      "title": "MultimodalArtifactReceipt",
       "type": "object"
     },
     "MultimodalTokenAnchor": {
@@ -7835,7 +7835,7 @@
       ],
       "type": "string"
     },
-    "OutputMapping": {
+    "OutputMappingContract": {
       "additionalProperties": false,
       "description": "Dictates how keys from a nested topology's state map back to a parent's shared_state_contract.",
       "properties": {
@@ -7854,7 +7854,7 @@
         "child_key",
         "parent_key"
       ],
-      "title": "OutputMapping",
+      "title": "OutputMappingContract",
       "type": "object"
     },
     "OverrideIntent": {
@@ -8216,7 +8216,7 @@
           "description": "The reason an agent is presenting this data to a human."
         },
         "grid": {
-          "$ref": "#/$defs/MacroGrid",
+          "$ref": "#/$defs/MacroGridProfile",
           "description": "The grid of panels being presented."
         }
       },
@@ -9619,7 +9619,7 @@
       "title": "StateMutation",
       "type": "object"
     },
-    "StatisticalChartExtraction": {
+    "StatisticalChartExtractionState": {
       "additionalProperties": false,
       "properties": {
         "axes": {
@@ -9653,7 +9653,7 @@
         "axes",
         "data_series"
       ],
-      "title": "StatisticalChartExtraction",
+      "title": "StatisticalChartExtractionState",
       "type": "object"
     },
     "StdioTransportConfig": {
@@ -10112,7 +10112,7 @@
       "title": "SystemNode",
       "type": "object"
     },
-    "TableCell": {
+    "TabularCellState": {
       "additionalProperties": false,
       "properties": {
         "row_index": {
@@ -10157,16 +10157,16 @@
         "content",
         "anchor"
       ],
-      "title": "TableCell",
+      "title": "TabularCellState",
       "type": "object"
     },
-    "TabularMatrixExtraction": {
+    "TabularMatrixExtractionState": {
       "additionalProperties": false,
       "properties": {
         "cells": {
           "description": "The sparse tensor representing all populated cells.",
           "items": {
-            "$ref": "#/$defs/TableCell"
+            "$ref": "#/$defs/TabularCellState"
           },
           "title": "Cells",
           "type": "array"
@@ -10175,7 +10175,7 @@
       "required": [
         "cells"
       ],
-      "title": "TabularMatrixExtraction",
+      "title": "TabularMatrixExtractionState",
       "type": "object"
     },
     "TaskAnnouncementIntent": {

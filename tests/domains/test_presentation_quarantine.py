@@ -17,7 +17,7 @@ from coreason_manifest.spec.ontology import (
     DynamicLayoutManifest,
     GrammarPanel,
     InsightCard,
-    MacroGrid,
+    MacroGridProfile,
     VisualEncodingProfile,
 )
 
@@ -122,7 +122,7 @@ def test_polymorphic_event_handler_proof(payload: str) -> None:
 def test_visual_ghost_node_test(ghost_id: str) -> None:
     """
     3. The Visual Ghost Node Test (Adversarial):
-    Generate a MacroGrid payload where the layout_matrix contains a string ID
+    Generate a MacroGridProfile payload where the layout_matrix contains a string ID
     that is absent from the panels list. Prove the model_validator catches this
     and raises a ValidationError.
     """
@@ -133,7 +133,7 @@ def test_visual_ghost_node_test(ghost_id: str) -> None:
 
     escaped_ghost_id = re.escape(ghost_id)
     with pytest.raises(ValidationError, match=f"Ghost Panel referenced in layout_matrix: {escaped_ghost_id}"):
-        MacroGrid(layout_matrix=[["panel_1", "panel_2"], [ghost_id, "panel_1"]], panels=panels)
+        MacroGridProfile(layout_matrix=[["panel_1", "panel_2"], [ghost_id, "panel_1"]], panels=panels)
 
 
 @given(
@@ -147,7 +147,7 @@ def test_visual_ghost_node_test(ghost_id: str) -> None:
 def test_safe_rendering_test(title: str, safe_text: str, x_label: str, y_label: str) -> None:
     """
     4. The Safe Rendering Test (Success):
-    Generate a structurally perfect MacroGrid with a valid layout_matrix
+    Generate a structurally perfect MacroGridProfile with a valid layout_matrix
     that perfectly maps to the generated panel_ids, featuring clean text.
     Prove it instantiates successfully.
     """
@@ -173,7 +173,7 @@ def test_safe_rendering_test(title: str, safe_text: str, x_label: str, y_label: 
     ]
 
     # Instantiate without error
-    grid = MacroGrid(layout_matrix=[["panel_1", "panel_2"], ["panel_3", "panel_1"]], panels=panels)
+    grid = MacroGridProfile(layout_matrix=[["panel_1", "panel_2"], ["panel_3", "panel_1"]], panels=panels)
     assert grid.layout_matrix == [["panel_1", "panel_2"], ["panel_3", "panel_1"]]
     assert len(grid.panels) == 3
 
