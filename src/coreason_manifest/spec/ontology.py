@@ -307,11 +307,13 @@ class ExecutionSLA(CoreasonBaseModel):
         description="The maximum allowed execution time in milliseconds before the orchestrator kills the process.",
     )
     max_compute_footprint_mb: int | None = Field(
-        default=None, gt=0, description="The maximum memory footprint allowed for the tool's execution sandbox."
+        default=None,
+        gt=0,
+        description="The maximum physical compute footprint allowed for the tool's execution sandbox.",
     )
 
 
-class FacetMatrix(CoreasonBaseModel):
+class FacetMatrixProfile(CoreasonBaseModel):
     """Optional small-multiple faceting layout."""
 
     row_field: str | None = Field(default=None, description="The dataset field used to split the chart into rows.")
@@ -1133,7 +1135,8 @@ class ActiveInferenceContract(CoreasonBaseModel):
 
 class AdjudicationIntent(CoreasonBaseModel):
     type: Literal["forced_adjudication"] = Field(
-        default="forced_adjudication", description="Discriminator for breaking deadlocks within a CouncilTopology."
+        default="forced_adjudication",
+        description="Discriminator for breaking deadlocks within a CouncilTopologyManifest.",
     )
     deadlocked_claims: list[str] = Field(
         min_length=2, description="The conflicting claim IDs or proposals the human must choose between."
@@ -1446,7 +1449,7 @@ class CausalDirectedEdgeState(CoreasonBaseModel):
 type ChartAxisScale = Literal["linear", "log", "categorical", "datetime"]
 
 
-class AffineTransformMatrix(CoreasonBaseModel):
+class AffineTransformMatrixProfile(CoreasonBaseModel):
     pixel_min: float = Field(description="The absolute minimal visual coordinate on this axis.")
     pixel_max: float = Field(description="The absolute maximal visual coordinate on this axis.")
     domain_min: float = Field(description="The semantic/data value corresponding to pixel_min.")
@@ -1763,7 +1766,7 @@ class BargeInInterruptEvent(BaseStateEvent):
         description="The 'stutter' state: the incomplete fragment of thought or text appended before the kill signal.",
     )
     epistemic_disposition: Literal["discard", "retain_as_context", "mark_as_falsified"] = Field(
-        description="Explicit instruction to the orchestrator on how to patch the shared memory blackboard with the partial payload."  # noqa: E501
+        description="Explicit instruction to the orchestrator on how to patch the shared state blackboard with the partial payload."  # noqa: E501
     )
 
 
@@ -2269,7 +2272,7 @@ class GrammarPanelProfile(CoreasonBaseModel):
         description="The geometric shape used to represent the data."
     )
     encodings: list[VisualEncodingProfile] = Field(description="The mapping of data fields to visual channels.")
-    facet: FacetMatrix | None = Field(default=None, description="Optional faceting matrix for small multiples.")
+    facet: FacetMatrixProfile | None = Field(default=None, description="Optional faceting matrix for small multiples.")
 
     @model_validator(mode="after")
     def sort_encodings(self) -> Self:
@@ -2435,7 +2438,7 @@ class InterventionalCausalTask(CoreasonBaseModel):
     )
 
 
-class JSONRPCError(CoreasonBaseModel):
+class JSONRPCErrorProfile(CoreasonBaseModel):
     """JSON-RPC 2.0 Error object."""
 
     code: int = Field(..., description="A Number that indicates the error type that occurred.")
@@ -2446,11 +2449,11 @@ class JSONRPCError(CoreasonBaseModel):
     )
 
 
-class JSONRPCErrorResponse(CoreasonBaseModel):
+class JSONRPCErrorResponseProfile(CoreasonBaseModel):
     """JSON-RPC 2.0 Error Response object."""
 
     jsonrpc: Literal["2.0"] = Field(..., description="JSON-RPC version.")
-    error: JSONRPCError = Field(..., description="The error object.")
+    error: JSONRPCErrorProfile = Field(..., description="The error object.")
     id: str | int | None = Field(default=None, description="The request ID that this error corresponds to.")
 
 
@@ -2490,7 +2493,7 @@ class InterventionPolicy(CoreasonBaseModel):
     )
 
 
-class BaseNode(CoreasonBaseModel):
+class BaseNodeManifest(CoreasonBaseModel):
     """
     Base configuration for any execution node in a topology.
     """
@@ -2544,7 +2547,7 @@ class BaseNode(CoreasonBaseModel):
         return v
 
 
-class HumanNode(BaseNode):
+class HumanNodeManifest(BaseNodeManifest):
     """
     A node representing a human participant in the workflow.
     """
@@ -2556,7 +2559,7 @@ class HumanNode(BaseNode):
     )
 
 
-class MemoizedNode(BaseNode):
+class MemoizedNodeManifest(BaseNodeManifest):
     """
     A passive structural interlock representing a historically executed graph branch.
     """
@@ -2568,7 +2571,7 @@ class MemoizedNode(BaseNode):
     )
 
 
-class SystemNode(BaseNode):
+class SystemNodeManifest(BaseNodeManifest):
     """
     A node representing a deterministic system capability.
     """
@@ -2693,7 +2696,7 @@ class OntologicalSurfaceProjection(CoreasonBaseModel):
         return self
 
 
-class MCPClientMessage(BoundedJSONRPCIntent):
+class MCPClientIntent(BoundedJSONRPCIntent):
     """Strict JSON-RPC 2.0 structure for MCP client messages."""
 
     method: Literal["mcp.ui.emit_intent"] = Field(..., description="Method for intent bubbling.")
@@ -3019,13 +3022,13 @@ class OutputMappingContract(CoreasonBaseModel):
     parent_key: str = Field(description="The mapped key in the parent's shared state contract.")
 
 
-class CompositeNode(BaseNode):
+class CompositeNodeManifest(BaseNodeManifest):
     """
     A node that encapsulates a nested workflow topology.
     """
 
     type: Literal["composite"] = Field(default="composite", description="Discriminator for a Composite node.")
-    topology: "AnyTopology" = Field(description="The encapsulated subgraph to execute.")
+    topology: "AnyTopologyManifest" = Field(description="The encapsulated subgraph to execute.")
     input_mappings: list[InputMappingContract] = Field(
         default_factory=list, description="Explicit state projection inputs."
     )
@@ -3331,7 +3334,7 @@ class SpanEvent(CoreasonBaseModel):
 class ExecutionSpanReceipt(CoreasonBaseModel):
     trace_id: str = Field(description="The global identifier for the entire execution causal tree.")
     span_id: str = Field(description="The unique identifier for this specific operation.")
-    parent_span_id: str | None = Field(default=None, description="The causal link to the invoking node.")
+    parent_span_id: str | None = Field(default=None, description="The causal edge to the invoking node.")
     name: str = Field(description="The semantic identifier for the operation.")
     kind: SpanKind = Field(default="internal", description="The role of the span.")
     start_time_unix_nano: int = Field(ge=0, description="Temporal start bound.")
@@ -3382,7 +3385,7 @@ class StateContract(CoreasonBaseModel):
     """
 
     schema_definition: dict[str, Any] = Field(
-        description="A strict JSON Schema dictionary defining the required shape of the shared memory blackboard."
+        description="A strict JSON Schema dictionary defining the required shape of the shared state blackboard."
     )
     strict_validation: bool = Field(
         default=True,
@@ -3410,17 +3413,17 @@ class OntologicalAlignmentPolicy(CoreasonBaseModel):
 
 
 class StatisticalChartExtractionState(CoreasonBaseModel):
-    axes: dict[str, AffineTransformMatrix] = Field(
+    axes: dict[str, AffineTransformMatrixProfile] = Field(
         description="Named axes (e.g., 'x', 'y') defining the affine transformation boundaries."
     )
-    data_series: list[dict[str, float | str]] = Field(
+    metric_matrix: list[dict[str, float | str]] = Field(
         description="The discrete semantic tuples extracted from the chart markers."
     )
 
     @model_validator(mode="after")
     def verify_dimensional_isometry(self) -> Self:
         axis_keys = set(self.axes.keys())
-        for point in self.data_series:
+        for point in self.metric_matrix:
             point_keys = set(point.keys())
             if not point_keys.issubset(axis_keys) and (not axis_keys.issubset(point_keys)):
                 missing = axis_keys - point_keys
@@ -3430,7 +3433,7 @@ class StatisticalChartExtractionState(CoreasonBaseModel):
 
     @model_validator(mode="after")
     def sort_arrays(self) -> Self:
-        object.__setattr__(self, "data_series", sorted(self.data_series, key=lambda d: json.dumps(d, sort_keys=True)))
+        object.__setattr__(self, "data_series", sorted(self.metric_matrix, key=lambda d: json.dumps(d, sort_keys=True)))
         return self
 
 
@@ -3620,7 +3623,7 @@ class TabularMatrixExtractionState(CoreasonBaseModel):
     cells: list[TabularCellState] = Field(description="The sparse tensor representing all populated cells.")
 
     @model_validator(mode="after")
-    def sort_tabular_data_arrays(self) -> Self:
+    def sort_tabular_matrix_arrays(self) -> Self:
         object.__setattr__(self, "cells", sorted(self.cells, key=lambda x: (x.row_index, x.col_index)))
         return self
 
@@ -3912,13 +3915,15 @@ class SemanticNodeState(CoreasonBaseModel):
         default=None,
         description="Topologically Bounded Latent Spaces used to calculate exact geometric distance and preserve structural Isometry.",  # noqa: E501
     )
-    provenance: EpistemicProvenanceReceipt = Field(description="The cryptographic chain of custody for this memory.")
+    provenance: EpistemicProvenanceReceipt = Field(
+        description="The cryptographic chain of custody for this semantic state."
+    )
     tier: CognitiveTier = Field(default="semantic", description="The cognitive tier this memory resides in.")
     temporal_bounds: TemporalBounds | None = Field(
         default=None, description="The time window during which this node is considered valid."
     )
     salience: SalienceProfile | None = Field(
-        default=None, description="The importance profile used for memory pruning."
+        default=None, description="The importance profile used for epistemic state pruning."
     )
     fhe_profile: HomomorphicEncryptionProfile | None = Field(
         default=None,
@@ -3968,7 +3973,7 @@ class AgentAttestationReceipt(CoreasonBaseModel):
         return self
 
 
-class AgentNode(BaseNode):
+class AgentNodeManifest(BaseNodeManifest):
     """
     A node representing an autonomous agent.
     """
@@ -4045,13 +4050,13 @@ class AgentNode(BaseNode):
         return self
 
 
-type AnyNode = Annotated[
-    AgentNode | HumanNode | SystemNode | CompositeNode | MemoizedNode,
+type AnyNodeManifest = Annotated[
+    AgentNodeManifest | HumanNodeManifest | SystemNodeManifest | CompositeNodeManifest | MemoizedNodeManifest,
     Field(discriminator="type", description="A discriminated union of all valid workflow nodes."),
 ]
 
 
-class BaseTopology(CoreasonBaseModel):
+class BaseTopologyManifest(CoreasonBaseModel):
     """
     Base configuration for any workflow topology.
     """
@@ -4065,7 +4070,7 @@ class BaseTopology(CoreasonBaseModel):
     justification: str | None = Field(
         default=None, description="Cryptographic/audit justification for this topology's configuration."
     )
-    nodes: dict[NodeID, AnyNode] = Field(description="Flat registry of all nodes in this topology.")
+    nodes: dict[NodeID, AnyNodeManifest] = Field(description="Flat registry of all nodes in this topology.")
     shared_state_contract: StateContract | None = Field(
         default=None, description="The schema-on-write contract governing the internal state of this topology."
     )
@@ -4078,7 +4083,7 @@ class BaseTopology(CoreasonBaseModel):
     )
 
 
-class CouncilTopology(BaseTopology):
+class CouncilTopologyManifest(BaseTopologyManifest):
     """
     A Council workflow topology involving multiple voting members and an adjudicator.
     """
@@ -4118,7 +4123,7 @@ class CouncilTopology(BaseTopology):
         return self
 
 
-class DAGTopology(BaseTopology):
+class DAGTopologyManifest(BaseTopologyManifest):
     """
     A Directed Acyclic Graph workflow topology.
     """
@@ -4180,7 +4185,7 @@ class DAGTopology(BaseTopology):
         return self
 
 
-class DigitalTwinTopology(BaseTopology):
+class DigitalTwinTopologyManifest(BaseTopologyManifest):
     """
     An isolated sandbox graph representing a Digital Twin.
     """
@@ -4200,7 +4205,7 @@ class DigitalTwinTopology(BaseTopology):
     )
 
 
-class EvaluatorOptimizerTopology(BaseTopology):
+class EvaluatorOptimizerTopologyManifest(BaseTopologyManifest):
     """
     A formalized Actor-Critic micro-topology enforcing strict, finite generation-evaluation-revision cycles.
     """
@@ -4230,7 +4235,7 @@ class EvaluatorOptimizerTopology(BaseTopology):
         return self
 
 
-class EvolutionaryTopology(BaseTopology):
+class EvolutionaryTopologyManifest(BaseTopologyManifest):
     """
     An Evolutionary workflow topology that mutates and breeds agents over generations.
     """
@@ -4254,7 +4259,7 @@ class EvolutionaryTopology(BaseTopology):
         return self
 
 
-class SMPCTopology(BaseTopology):
+class SMPCTopologyManifest(BaseTopologyManifest):
     """
     A Secure Multi-Party Computation topology.
     """
@@ -4281,7 +4286,7 @@ class SMPCTopology(BaseTopology):
         return self
 
 
-class SwarmTopology(BaseTopology):
+class SwarmTopologyManifest(BaseTopologyManifest):
     """
     A dynamic Swarm workflow topology.
     """
@@ -4309,9 +4314,9 @@ class SwarmTopology(BaseTopology):
         return self
 
 
-class AdversarialMarketTopology(CoreasonBaseModel):
+class AdversarialMarketTopologyManifest(CoreasonBaseModel):
     """
-    A Zero-Cost Macro abstraction that deterministically compiles into a Red/Blue team CouncilTopology.
+    A Zero-Cost Macro abstraction that deterministically compiles into a Red/Blue team CouncilTopologyManifest.
     """
 
     type: Literal["macro_adversarial"] = Field(
@@ -4338,20 +4343,22 @@ class AdversarialMarketTopology(CoreasonBaseModel):
         object.__setattr__(self, "red_team_ids", sorted(self.red_team_ids))
         return self
 
-    def compile_to_base_topology(self) -> CouncilTopology:
-        """Deterministically unwraps the macro into a rigid CouncilTopology."""
-        nodes: dict[NodeID, AnyNode] = {self.adjudicator_id: SystemNode(description="Synthesizing Adjudicator")}
+    def compile_to_base_topology(self) -> CouncilTopologyManifest:
+        """Deterministically unwraps the macro into a rigid CouncilTopologyManifest."""
+        nodes: dict[NodeID, AnyNodeManifest] = {
+            self.adjudicator_id: SystemNodeManifest(description="Synthesizing Adjudicator")
+        }
         for node_id in self.blue_team_ids:
-            nodes[node_id] = SystemNode(description="Blue Team Member")
+            nodes[node_id] = SystemNodeManifest(description="Blue Team Member")
         for node_id in self.red_team_ids:
-            nodes[node_id] = SystemNode(description="Red Team Member")
+            nodes[node_id] = SystemNodeManifest(description="Red Team Member")
         consensus = ConsensusPolicy(strategy="prediction_market", prediction_market_rules=self.market_rules)
-        return CouncilTopology(nodes=nodes, adjudicator_id=self.adjudicator_id, consensus_policy=consensus)
+        return CouncilTopologyManifest(nodes=nodes, adjudicator_id=self.adjudicator_id, consensus_policy=consensus)
 
 
-class ConsensusFederationTopology(CoreasonBaseModel):
+class ConsensusFederationTopologyManifest(CoreasonBaseModel):
     """
-    A Zero-Cost Macro abstraction compiling into a standard PBFT CouncilTopology.
+    A Zero-Cost Macro abstraction compiling into a standard PBFT CouncilTopologyManifest.
     """
 
     type: Literal["macro_federation"] = Field(
@@ -4372,27 +4379,27 @@ class ConsensusFederationTopology(CoreasonBaseModel):
         object.__setattr__(self, "participant_ids", sorted(self.participant_ids))
         return self
 
-    def compile_to_base_topology(self) -> CouncilTopology:
-        nodes: dict[NodeID, AnyNode] = {self.adjudicator_id: SystemNode(description="PBFT Sequencer")}
+    def compile_to_base_topology(self) -> CouncilTopologyManifest:
+        nodes: dict[NodeID, AnyNodeManifest] = {self.adjudicator_id: SystemNodeManifest(description="PBFT Sequencer")}
         for node_id in self.participant_ids:
-            nodes[node_id] = SystemNode(description="PBFT Participant")
-        return CouncilTopology(
+            nodes[node_id] = SystemNodeManifest(description="PBFT Participant")
+        return CouncilTopologyManifest(
             nodes=nodes,
             adjudicator_id=self.adjudicator_id,
             consensus_policy=ConsensusPolicy(strategy="pbft", quorum_rules=self.quorum_rules),
         )
 
 
-type AnyTopology = Annotated[
-    DAGTopology
-    | CouncilTopology
-    | SwarmTopology
-    | EvolutionaryTopology
-    | SMPCTopology
-    | EvaluatorOptimizerTopology
-    | DigitalTwinTopology
-    | AdversarialMarketTopology
-    | ConsensusFederationTopology,
+type AnyTopologyManifest = Annotated[
+    DAGTopologyManifest
+    | CouncilTopologyManifest
+    | SwarmTopologyManifest
+    | EvolutionaryTopologyManifest
+    | SMPCTopologyManifest
+    | EvaluatorOptimizerTopologyManifest
+    | DigitalTwinTopologyManifest
+    | AdversarialMarketTopologyManifest
+    | ConsensusFederationTopologyManifest,
     Field(discriminator="type", description="A discriminated union of workflow topologies."),
 ]
 
@@ -4403,7 +4410,7 @@ class WorkflowManifest(CoreasonBaseModel):
     """
 
     manifest_version: SemanticVersion = Field(description="The semantic version of this workflow manifestation schema.")
-    topology: AnyTopology = Field(description="The underlying topology governing execution routing.")
+    topology: AnyTopologyManifest = Field(description="The underlying topology governing execution routing.")
     governance: GlobalGovernancePolicy | None = Field(
         default=None, description="Macro-economic circuit breakers and TTL limits for the swarm."
     )
@@ -4701,17 +4708,17 @@ class EpistemicLedgerState(CoreasonBaseModel):
 # STRATUM 9: TOPOLOGICAL RESOLUTION (FORWARD REF EVALUATION)
 # =========================================================================
 
-CompositeNode.model_rebuild()
+CompositeNodeManifest.model_rebuild()
 WorkflowManifest.model_rebuild()
 MCPServerBindingProfile.model_rebuild()
 
-BaseTopology.model_rebuild()
-DAGTopology.model_rebuild()
-CouncilTopology.model_rebuild()
-SwarmTopology.model_rebuild()
-EvolutionaryTopology.model_rebuild()
-SMPCTopology.model_rebuild()
-EvaluatorOptimizerTopology.model_rebuild()
-DigitalTwinTopology.model_rebuild()
-AdversarialMarketTopology.model_rebuild()
-ConsensusFederationTopology.model_rebuild()
+BaseTopologyManifest.model_rebuild()
+DAGTopologyManifest.model_rebuild()
+CouncilTopologyManifest.model_rebuild()
+SwarmTopologyManifest.model_rebuild()
+EvolutionaryTopologyManifest.model_rebuild()
+SMPCTopologyManifest.model_rebuild()
+EvaluatorOptimizerTopologyManifest.model_rebuild()
+DigitalTwinTopologyManifest.model_rebuild()
+AdversarialMarketTopologyManifest.model_rebuild()
+ConsensusFederationTopologyManifest.model_rebuild()

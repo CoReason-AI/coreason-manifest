@@ -139,7 +139,7 @@
         "type": {
           "const": "forced_adjudication",
           "default": "forced_adjudication",
-          "description": "Discriminator for breaking deadlocks within a CouncilTopology.",
+          "description": "Discriminator for breaking deadlocks within a CouncilTopologyManifest.",
           "title": "Type",
           "type": "string"
         },
@@ -251,9 +251,9 @@
       "title": "AdjudicationRubricProfile",
       "type": "object"
     },
-    "AdversarialMarketTopology": {
+    "AdversarialMarketTopologyManifest": {
       "additionalProperties": false,
-      "description": "A Zero-Cost Macro abstraction that deterministically compiles into a Red/Blue team CouncilTopology.",
+      "description": "A Zero-Cost Macro abstraction that deterministically compiles into a Red/Blue team CouncilTopologyManifest.",
       "properties": {
         "type": {
           "const": "macro_adversarial",
@@ -295,7 +295,7 @@
         "adjudicator_id",
         "market_rules"
       ],
-      "title": "AdversarialMarketTopology",
+      "title": "AdversarialMarketTopologyManifest",
       "type": "object"
     },
     "AdversarialSimulationProfile": {
@@ -359,7 +359,7 @@
       "title": "AdversarialSimulationProfile",
       "type": "object"
     },
-    "AffineTransformMatrix": {
+    "AffineTransformMatrixProfile": {
       "additionalProperties": false,
       "properties": {
         "pixel_min": {
@@ -394,7 +394,7 @@
         "domain_max",
         "scale_type"
       ],
-      "title": "AffineTransformMatrix",
+      "title": "AffineTransformMatrixProfile",
       "type": "object"
     },
     "AgentAttestationReceipt": {
@@ -478,7 +478,7 @@
       "title": "AgentBidIntent",
       "type": "object"
     },
-    "AgentNode": {
+    "AgentNodeManifest": {
       "additionalProperties": false,
       "description": "A node representing an autonomous agent.",
       "properties": {
@@ -759,7 +759,7 @@
       "required": [
         "description"
       ],
-      "title": "AgentNode",
+      "title": "AgentNodeManifest",
       "type": "object"
     },
     "AmbientState": {
@@ -858,33 +858,33 @@
       "title": "AnchoringPolicy",
       "type": "object"
     },
-    "AnyNode": {
+    "AnyNodeManifest": {
       "description": "A discriminated union of all valid workflow nodes.",
       "discriminator": {
         "mapping": {
-          "agent": "#/$defs/AgentNode",
-          "composite": "#/$defs/CompositeNode",
-          "human": "#/$defs/HumanNode",
-          "memoized": "#/$defs/MemoizedNode",
-          "system": "#/$defs/SystemNode"
+          "agent": "#/$defs/AgentNodeManifest",
+          "composite": "#/$defs/CompositeNodeManifest",
+          "human": "#/$defs/HumanNodeManifest",
+          "memoized": "#/$defs/MemoizedNodeManifest",
+          "system": "#/$defs/SystemNodeManifest"
         },
         "propertyName": "type"
       },
       "oneOf": [
         {
-          "$ref": "#/$defs/AgentNode"
+          "$ref": "#/$defs/AgentNodeManifest"
         },
         {
-          "$ref": "#/$defs/HumanNode"
+          "$ref": "#/$defs/HumanNodeManifest"
         },
         {
-          "$ref": "#/$defs/SystemNode"
+          "$ref": "#/$defs/SystemNodeManifest"
         },
         {
-          "$ref": "#/$defs/CompositeNode"
+          "$ref": "#/$defs/CompositeNodeManifest"
         },
         {
-          "$ref": "#/$defs/MemoizedNode"
+          "$ref": "#/$defs/MemoizedNodeManifest"
         }
       ]
     },
@@ -999,49 +999,49 @@
         }
       ]
     },
-    "AnyTopology": {
+    "AnyTopologyManifest": {
       "description": "A discriminated union of workflow topologies.",
       "discriminator": {
         "mapping": {
-          "council": "#/$defs/CouncilTopology",
-          "dag": "#/$defs/DAGTopology",
-          "digital_twin": "#/$defs/DigitalTwinTopology",
-          "evaluator_optimizer": "#/$defs/EvaluatorOptimizerTopology",
-          "evolutionary": "#/$defs/EvolutionaryTopology",
-          "macro_adversarial": "#/$defs/AdversarialMarketTopology",
-          "macro_federation": "#/$defs/ConsensusFederationTopology",
-          "smpc": "#/$defs/SMPCTopology",
-          "swarm": "#/$defs/SwarmTopology"
+          "council": "#/$defs/CouncilTopologyManifest",
+          "dag": "#/$defs/DAGTopologyManifest",
+          "digital_twin": "#/$defs/DigitalTwinTopologyManifest",
+          "evaluator_optimizer": "#/$defs/EvaluatorOptimizerTopologyManifest",
+          "evolutionary": "#/$defs/EvolutionaryTopologyManifest",
+          "macro_adversarial": "#/$defs/AdversarialMarketTopologyManifest",
+          "macro_federation": "#/$defs/ConsensusFederationTopologyManifest",
+          "smpc": "#/$defs/SMPCTopologyManifest",
+          "swarm": "#/$defs/SwarmTopologyManifest"
         },
         "propertyName": "type"
       },
       "oneOf": [
         {
-          "$ref": "#/$defs/DAGTopology"
+          "$ref": "#/$defs/DAGTopologyManifest"
         },
         {
-          "$ref": "#/$defs/CouncilTopology"
+          "$ref": "#/$defs/CouncilTopologyManifest"
         },
         {
-          "$ref": "#/$defs/SwarmTopology"
+          "$ref": "#/$defs/SwarmTopologyManifest"
         },
         {
-          "$ref": "#/$defs/EvolutionaryTopology"
+          "$ref": "#/$defs/EvolutionaryTopologyManifest"
         },
         {
-          "$ref": "#/$defs/SMPCTopology"
+          "$ref": "#/$defs/SMPCTopologyManifest"
         },
         {
-          "$ref": "#/$defs/EvaluatorOptimizerTopology"
+          "$ref": "#/$defs/EvaluatorOptimizerTopologyManifest"
         },
         {
-          "$ref": "#/$defs/DigitalTwinTopology"
+          "$ref": "#/$defs/DigitalTwinTopologyManifest"
         },
         {
-          "$ref": "#/$defs/AdversarialMarketTopology"
+          "$ref": "#/$defs/AdversarialMarketTopologyManifest"
         },
         {
-          "$ref": "#/$defs/ConsensusFederationTopology"
+          "$ref": "#/$defs/ConsensusFederationTopologyManifest"
         }
       ]
     },
@@ -1283,7 +1283,7 @@
           "title": "Retained Partial Payload"
         },
         "epistemic_disposition": {
-          "description": "Explicit instruction to the orchestrator on how to patch the shared memory blackboard with the partial payload.",
+          "description": "Explicit instruction to the orchestrator on how to patch the shared state blackboard with the partial payload.",
           "enum": [
             "discard",
             "retain_as_context",
@@ -1309,7 +1309,7 @@
       "title": "BaseIntent",
       "type": "object"
     },
-    "BaseNode": {
+    "BaseNodeManifest": {
       "additionalProperties": false,
       "description": "Base configuration for any execution node in a topology.",
       "properties": {
@@ -1370,7 +1370,7 @@
       "required": [
         "description"
       ],
-      "title": "BaseNode",
+      "title": "BaseNodeManifest",
       "type": "object"
     },
     "BasePanel": {
@@ -1410,7 +1410,7 @@
       "title": "BaseStateEvent",
       "type": "object"
     },
-    "BaseTopology": {
+    "BaseTopologyManifest": {
       "additionalProperties": false,
       "description": "Base configuration for any workflow topology.",
       "properties": {
@@ -1452,7 +1452,7 @@
         },
         "nodes": {
           "additionalProperties": {
-            "$ref": "#/$defs/AnyNode"
+            "$ref": "#/$defs/AnyNodeManifest"
           },
           "description": "Flat registry of all nodes in this topology.",
           "propertyNames": {
@@ -1501,7 +1501,7 @@
       "required": [
         "nodes"
       ],
-      "title": "BaseTopology",
+      "title": "BaseTopologyManifest",
       "type": "object"
     },
     "BeliefMutationEvent": {
@@ -2176,7 +2176,7 @@
       "title": "CognitiveUncertaintyProfile",
       "type": "object"
     },
-    "CompositeNode": {
+    "CompositeNodeManifest": {
       "additionalProperties": false,
       "description": "A node that encapsulates a nested workflow topology.",
       "properties": {
@@ -2241,7 +2241,7 @@
           "type": "string"
         },
         "topology": {
-          "$ref": "#/$defs/AnyTopology",
+          "$ref": "#/$defs/AnyTopologyManifest",
           "description": "The encapsulated subgraph to execute."
         },
         "input_mappings": {
@@ -2265,7 +2265,7 @@
         "description",
         "topology"
       ],
-      "title": "CompositeNode",
+      "title": "CompositeNodeManifest",
       "type": "object"
     },
     "ComputeProvisioningIntent": {
@@ -2326,9 +2326,9 @@
       "title": "ComputeRateContract",
       "type": "object"
     },
-    "ConsensusFederationTopology": {
+    "ConsensusFederationTopologyManifest": {
       "additionalProperties": false,
-      "description": "A Zero-Cost Macro abstraction compiling into a standard PBFT CouncilTopology.",
+      "description": "A Zero-Cost Macro abstraction compiling into a standard PBFT CouncilTopologyManifest.",
       "properties": {
         "type": {
           "const": "macro_federation",
@@ -2360,7 +2360,7 @@
         "adjudicator_id",
         "quorum_rules"
       ],
-      "title": "ConsensusFederationTopology",
+      "title": "ConsensusFederationTopologyManifest",
       "type": "object"
     },
     "ConsensusPolicy": {
@@ -2549,7 +2549,7 @@
       "title": "ContinuousMutationPolicy",
       "type": "object"
     },
-    "CouncilTopology": {
+    "CouncilTopologyManifest": {
       "additionalProperties": false,
       "description": "A Council workflow topology involving multiple voting members and an adjudicator.",
       "properties": {
@@ -2591,7 +2591,7 @@
         },
         "nodes": {
           "additionalProperties": {
-            "$ref": "#/$defs/AnyNode"
+            "$ref": "#/$defs/AnyNodeManifest"
           },
           "description": "Flat registry of all nodes in this topology.",
           "propertyNames": {
@@ -2700,7 +2700,7 @@
         "nodes",
         "adjudicator_id"
       ],
-      "title": "CouncilTopology",
+      "title": "CouncilTopologyManifest",
       "type": "object"
     },
     "CounterfactualRegretEvent": {
@@ -2948,7 +2948,7 @@
       "title": "CustodyReceipt",
       "type": "object"
     },
-    "DAGTopology": {
+    "DAGTopologyManifest": {
       "additionalProperties": false,
       "description": "A Directed Acyclic Graph workflow topology.",
       "properties": {
@@ -2990,7 +2990,7 @@
         },
         "nodes": {
           "additionalProperties": {
-            "$ref": "#/$defs/AnyNode"
+            "$ref": "#/$defs/AnyNodeManifest"
           },
           "description": "Flat registry of all nodes in this topology.",
           "propertyNames": {
@@ -3098,7 +3098,7 @@
         "max_depth",
         "max_fan_out"
       ],
-      "title": "DAGTopology",
+      "title": "DAGTopologyManifest",
       "type": "object"
     },
     "DefeasibleAttackEvent": {
@@ -3179,7 +3179,7 @@
       "title": "DefeasibleCascadeEvent",
       "type": "object"
     },
-    "DigitalTwinTopology": {
+    "DigitalTwinTopologyManifest": {
       "additionalProperties": false,
       "description": "An isolated sandbox graph representing a Digital Twin.",
       "properties": {
@@ -3221,7 +3221,7 @@
         },
         "nodes": {
           "additionalProperties": {
-            "$ref": "#/$defs/AnyNode"
+            "$ref": "#/$defs/AnyNodeManifest"
           },
           "description": "Flat registry of all nodes in this topology.",
           "propertyNames": {
@@ -3294,7 +3294,7 @@
         "target_topology_id",
         "convergence_sla"
       ],
-      "title": "DigitalTwinTopology",
+      "title": "DigitalTwinTopologyManifest",
       "type": "object"
     },
     "DimensionalProjectionContract": {
@@ -4338,7 +4338,7 @@
       "title": "EscrowPolicy",
       "type": "object"
     },
-    "EvaluatorOptimizerTopology": {
+    "EvaluatorOptimizerTopologyManifest": {
       "additionalProperties": false,
       "description": "A formalized Actor-Critic micro-topology enforcing strict, finite generation-evaluation-revision cycles.",
       "properties": {
@@ -4380,7 +4380,7 @@
         },
         "nodes": {
           "additionalProperties": {
-            "$ref": "#/$defs/AnyNode"
+            "$ref": "#/$defs/AnyNodeManifest"
           },
           "description": "Flat registry of all nodes in this topology.",
           "propertyNames": {
@@ -4459,7 +4459,7 @@
         "evaluator_node_id",
         "max_revision_loops"
       ],
-      "title": "EvaluatorOptimizerTopology",
+      "title": "EvaluatorOptimizerTopologyManifest",
       "type": "object"
     },
     "EvictionPolicy": {
@@ -4538,7 +4538,7 @@
       "title": "EvidentiaryWarrantState",
       "type": "object"
     },
-    "EvolutionaryTopology": {
+    "EvolutionaryTopologyManifest": {
       "additionalProperties": false,
       "description": "An Evolutionary workflow topology that mutates and breeds agents over generations.",
       "properties": {
@@ -4580,7 +4580,7 @@
         },
         "nodes": {
           "additionalProperties": {
-            "$ref": "#/$defs/AnyNode"
+            "$ref": "#/$defs/AnyNodeManifest"
           },
           "description": "Flat registry of all nodes in this topology.",
           "propertyNames": {
@@ -4666,7 +4666,7 @@
         "crossover",
         "fitness_objectives"
       ],
-      "title": "EvolutionaryTopology",
+      "title": "EvolutionaryTopologyManifest",
       "type": "object"
     },
     "ExecutionNodeReceipt": {
@@ -4763,7 +4763,7 @@
             }
           ],
           "default": null,
-          "description": "The maximum memory footprint allowed for the tool's execution sandbox.",
+          "description": "The maximum physical compute footprint allowed for the tool's execution sandbox.",
           "title": "Max Compute Footprint Mb"
         }
       },
@@ -4796,7 +4796,7 @@
             }
           ],
           "default": null,
-          "description": "The causal link to the invoking node.",
+          "description": "The causal edge to the invoking node.",
           "title": "Parent Span Id"
         },
         "name": {
@@ -4910,7 +4910,7 @@
       "title": "FYIIntent",
       "type": "object"
     },
-    "FacetMatrix": {
+    "FacetMatrixProfile": {
       "additionalProperties": false,
       "description": "Optional small-multiple faceting layout.",
       "properties": {
@@ -4941,7 +4941,7 @@
           "title": "Column Field"
         }
       },
-      "title": "FacetMatrix",
+      "title": "FacetMatrixProfile",
       "type": "object"
     },
     "FallbackIntent": {
@@ -5473,7 +5473,7 @@
         "facet": {
           "anyOf": [
             {
-              "$ref": "#/$defs/FacetMatrix"
+              "$ref": "#/$defs/FacetMatrixProfile"
             },
             {
               "type": "null"
@@ -5630,7 +5630,7 @@
       "title": "HomomorphicEncryptionProfile",
       "type": "object"
     },
-    "HumanNode": {
+    "HumanNodeManifest": {
       "additionalProperties": false,
       "description": "A node representing a human participant in the workflow.",
       "properties": {
@@ -5710,7 +5710,7 @@
       "required": [
         "description"
       ],
-      "title": "HumanNode",
+      "title": "HumanNodeManifest",
       "type": "object"
     },
     "HypothesisGenerationEvent": {
@@ -6210,7 +6210,7 @@
       "title": "InterventionalCausalTask",
       "type": "object"
     },
-    "JSONRPCError": {
+    "JSONRPCErrorProfile": {
       "additionalProperties": false,
       "description": "JSON-RPC 2.0 Error object.",
       "properties": {
@@ -6240,10 +6240,10 @@
         "code",
         "message"
       ],
-      "title": "JSONRPCError",
+      "title": "JSONRPCErrorProfile",
       "type": "object"
     },
-    "JSONRPCErrorResponse": {
+    "JSONRPCErrorResponseProfile": {
       "additionalProperties": false,
       "description": "JSON-RPC 2.0 Error Response object.",
       "properties": {
@@ -6254,7 +6254,7 @@
           "type": "string"
         },
         "error": {
-          "$ref": "#/$defs/JSONRPCError",
+          "$ref": "#/$defs/JSONRPCErrorProfile",
           "description": "The error object."
         },
         "id": {
@@ -6278,7 +6278,7 @@
         "jsonrpc",
         "error"
       ],
-      "title": "JSONRPCErrorResponse",
+      "title": "JSONRPCErrorResponseProfile",
       "type": "object"
     },
     "LakehouseMountProfile": {
@@ -6619,7 +6619,7 @@
       "title": "MCPClientBinding",
       "type": "object"
     },
-    "MCPClientMessage": {
+    "MCPClientIntent": {
       "additionalProperties": false,
       "description": "Strict JSON-RPC 2.0 structure for MCP client messages.",
       "properties": {
@@ -6670,7 +6670,7 @@
         "jsonrpc",
         "method"
       ],
-      "title": "MCPClientMessage",
+      "title": "MCPClientIntent",
       "type": "object"
     },
     "MCPPromptRef": {
@@ -7043,7 +7043,7 @@
       "title": "MechanisticAuditContract",
       "type": "object"
     },
-    "MemoizedNode": {
+    "MemoizedNodeManifest": {
       "additionalProperties": false,
       "description": "A passive structural interlock representing a historically executed graph branch.",
       "properties": {
@@ -7123,7 +7123,7 @@
         "target_topology_hash",
         "expected_output_schema"
       ],
-      "title": "MemoizedNode",
+      "title": "MemoizedNodeManifest",
       "type": "object"
     },
     "MigrationContract": {
@@ -8537,7 +8537,7 @@
       "title": "RoutingFrontierPolicy",
       "type": "object"
     },
-    "SMPCTopology": {
+    "SMPCTopologyManifest": {
       "additionalProperties": false,
       "description": "A Secure Multi-Party Computation topology.",
       "properties": {
@@ -8579,7 +8579,7 @@
         },
         "nodes": {
           "additionalProperties": {
-            "$ref": "#/$defs/AnyNode"
+            "$ref": "#/$defs/AnyNodeManifest"
           },
           "description": "Flat registry of all nodes in this topology.",
           "propertyNames": {
@@ -8674,7 +8674,7 @@
         "joint_function_uri",
         "participant_node_ids"
       ],
-      "title": "SMPCTopology",
+      "title": "SMPCTopologyManifest",
       "type": "object"
     },
     "SSETransportProfile": {
@@ -9147,7 +9147,7 @@
         },
         "provenance": {
           "$ref": "#/$defs/EpistemicProvenanceReceipt",
-          "description": "The cryptographic chain of custody for this memory."
+          "description": "The cryptographic chain of custody for this semantic state."
         },
         "tier": {
           "$ref": "#/$defs/CognitiveTier",
@@ -9176,7 +9176,7 @@
             }
           ],
           "default": null,
-          "description": "The importance profile used for memory pruning."
+          "description": "The importance profile used for epistemic state pruning."
         },
         "fhe_profile": {
           "anyOf": [
@@ -9526,7 +9526,7 @@
       "properties": {
         "schema_definition": {
           "additionalProperties": true,
-          "description": "A strict JSON Schema dictionary defining the required shape of the shared memory blackboard.",
+          "description": "A strict JSON Schema dictionary defining the required shape of the shared state blackboard.",
           "title": "Schema Definition",
           "type": "object"
         },
@@ -9624,13 +9624,13 @@
       "properties": {
         "axes": {
           "additionalProperties": {
-            "$ref": "#/$defs/AffineTransformMatrix"
+            "$ref": "#/$defs/AffineTransformMatrixProfile"
           },
           "description": "Named axes (e.g., 'x', 'y') defining the affine transformation boundaries.",
           "title": "Axes",
           "type": "object"
         },
-        "data_series": {
+        "metric_matrix": {
           "description": "The discrete semantic tuples extracted from the chart markers.",
           "items": {
             "additionalProperties": {
@@ -9645,13 +9645,13 @@
             },
             "type": "object"
           },
-          "title": "Data Series",
+          "title": "Metric Matrix",
           "type": "array"
         }
       },
       "required": [
         "axes",
-        "data_series"
+        "metric_matrix"
       ],
       "title": "StatisticalChartExtractionState",
       "type": "object"
@@ -9776,7 +9776,7 @@
       "title": "SuspenseState",
       "type": "object"
     },
-    "SwarmTopology": {
+    "SwarmTopologyManifest": {
       "additionalProperties": false,
       "description": "A dynamic Swarm workflow topology.",
       "properties": {
@@ -9818,7 +9818,7 @@
         },
         "nodes": {
           "additionalProperties": {
-            "$ref": "#/$defs/AnyNode"
+            "$ref": "#/$defs/AnyNodeManifest"
           },
           "description": "Flat registry of all nodes in this topology.",
           "propertyNames": {
@@ -9915,7 +9915,7 @@
       "required": [
         "nodes"
       ],
-      "title": "SwarmTopology",
+      "title": "SwarmTopologyManifest",
       "type": "object"
     },
     "SyntheticGenerationProfile": {
@@ -10041,7 +10041,7 @@
       "title": "SystemFaultEvent",
       "type": "object"
     },
-    "SystemNode": {
+    "SystemNodeManifest": {
       "additionalProperties": false,
       "description": "A node representing a deterministic system capability.",
       "properties": {
@@ -10109,7 +10109,7 @@
       "required": [
         "description"
       ],
-      "title": "SystemNode",
+      "title": "SystemNodeManifest",
       "type": "object"
     },
     "TabularCellState": {
@@ -10936,7 +10936,7 @@
           "description": "The semantic version of this workflow manifestation schema."
         },
         "topology": {
-          "$ref": "#/$defs/AnyTopology",
+          "$ref": "#/$defs/AnyTopologyManifest",
           "description": "The underlying topology governing execution routing."
         },
         "governance": {
