@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, ValidationError
 
-from coreason_manifest.spec.ontology import DAGTopology
+from coreason_manifest.spec.ontology import DAGTopologyManifest
 from coreason_manifest.utils.algebra import align_semantic_manifolds, compute_topology_hash, generate_correction_prompt
 
 
@@ -11,7 +11,7 @@ def test_align_semantic_manifolds_dense() -> None:
 
 
 def test_compute_topology_hash() -> None:
-    topology = DAGTopology(
+    topology = DAGTopologyManifest(
         nodes={}, edges=[], max_depth=10, max_fan_out=10, allow_cycles=False, architectural_intent="test"
     )
     hash_val = compute_topology_hash(topology)
