@@ -478,7 +478,7 @@
       "title": "AgentBidIntent",
       "type": "object"
     },
-    "AgentNodeManifest": {
+    "AgentNodeProfile": {
       "additionalProperties": false,
       "description": "A node representing an autonomous agent.",
       "properties": {
@@ -759,7 +759,7 @@
       "required": [
         "description"
       ],
-      "title": "AgentNodeManifest",
+      "title": "AgentNodeProfile",
       "type": "object"
     },
     "AmbientState": {
@@ -858,33 +858,33 @@
       "title": "AnchoringPolicy",
       "type": "object"
     },
-    "AnyNodeManifest": {
+    "AnyNodeProfile": {
       "description": "A discriminated union of all valid workflow nodes.",
       "discriminator": {
         "mapping": {
-          "agent": "#/$defs/AgentNodeManifest",
-          "composite": "#/$defs/CompositeNodeManifest",
-          "human": "#/$defs/HumanNodeManifest",
-          "memoized": "#/$defs/MemoizedNodeManifest",
-          "system": "#/$defs/SystemNodeManifest"
+          "agent": "#/$defs/AgentNodeProfile",
+          "composite": "#/$defs/CompositeNodeProfile",
+          "human": "#/$defs/HumanNodeProfile",
+          "memoized": "#/$defs/MemoizedNodeProfile",
+          "system": "#/$defs/SystemNodeProfile"
         },
         "propertyName": "type"
       },
       "oneOf": [
         {
-          "$ref": "#/$defs/AgentNodeManifest"
+          "$ref": "#/$defs/AgentNodeProfile"
         },
         {
-          "$ref": "#/$defs/HumanNodeManifest"
+          "$ref": "#/$defs/HumanNodeProfile"
         },
         {
-          "$ref": "#/$defs/SystemNodeManifest"
+          "$ref": "#/$defs/SystemNodeProfile"
         },
         {
-          "$ref": "#/$defs/CompositeNodeManifest"
+          "$ref": "#/$defs/CompositeNodeProfile"
         },
         {
-          "$ref": "#/$defs/MemoizedNodeManifest"
+          "$ref": "#/$defs/MemoizedNodeProfile"
         }
       ]
     },
@@ -1309,7 +1309,7 @@
       "title": "BaseIntent",
       "type": "object"
     },
-    "BaseNodeManifest": {
+    "BaseNodeProfile": {
       "additionalProperties": false,
       "description": "Base configuration for any execution node in a topology.",
       "properties": {
@@ -1370,7 +1370,7 @@
       "required": [
         "description"
       ],
-      "title": "BaseNodeManifest",
+      "title": "BaseNodeProfile",
       "type": "object"
     },
     "BasePanel": {
@@ -1452,7 +1452,7 @@
         },
         "nodes": {
           "additionalProperties": {
-            "$ref": "#/$defs/AnyNodeManifest"
+            "$ref": "#/$defs/AnyNodeProfile"
           },
           "description": "Flat registry of all nodes in this topology.",
           "propertyNames": {
@@ -2176,7 +2176,7 @@
       "title": "CognitiveUncertaintyProfile",
       "type": "object"
     },
-    "CompositeNodeManifest": {
+    "CompositeNodeProfile": {
       "additionalProperties": false,
       "description": "A node that encapsulates a nested workflow topology.",
       "properties": {
@@ -2265,7 +2265,7 @@
         "description",
         "topology"
       ],
-      "title": "CompositeNodeManifest",
+      "title": "CompositeNodeProfile",
       "type": "object"
     },
     "ComputeProvisioningIntent": {
@@ -2591,7 +2591,7 @@
         },
         "nodes": {
           "additionalProperties": {
-            "$ref": "#/$defs/AnyNodeManifest"
+            "$ref": "#/$defs/AnyNodeProfile"
           },
           "description": "Flat registry of all nodes in this topology.",
           "propertyNames": {
@@ -2990,7 +2990,7 @@
         },
         "nodes": {
           "additionalProperties": {
-            "$ref": "#/$defs/AnyNodeManifest"
+            "$ref": "#/$defs/AnyNodeProfile"
           },
           "description": "Flat registry of all nodes in this topology.",
           "propertyNames": {
@@ -3221,7 +3221,7 @@
         },
         "nodes": {
           "additionalProperties": {
-            "$ref": "#/$defs/AnyNodeManifest"
+            "$ref": "#/$defs/AnyNodeProfile"
           },
           "description": "Flat registry of all nodes in this topology.",
           "propertyNames": {
@@ -4029,7 +4029,7 @@
       "properties": {
         "extracted_by": {
           "$ref": "#/$defs/NodeID",
-          "description": "The Content Identifier (CID) of the agent node that extracted this memory."
+          "description": "The Content Identifier (CID) of the agent node that extracted this payload."
         },
         "source_event_id": {
           "description": "The exact event Content Identifier (CID) in the EpistemicLedgerState that generated this fact.",
@@ -4380,7 +4380,7 @@
         },
         "nodes": {
           "additionalProperties": {
-            "$ref": "#/$defs/AnyNodeManifest"
+            "$ref": "#/$defs/AnyNodeProfile"
           },
           "description": "Flat registry of all nodes in this topology.",
           "propertyNames": {
@@ -4580,7 +4580,7 @@
         },
         "nodes": {
           "additionalProperties": {
-            "$ref": "#/$defs/AnyNodeManifest"
+            "$ref": "#/$defs/AnyNodeProfile"
           },
           "description": "Flat registry of all nodes in this topology.",
           "propertyNames": {
@@ -5444,9 +5444,9 @@
           "title": "Title",
           "type": "string"
         },
-        "data_source_id": {
+        "ledger_source_id": {
           "description": "The cryptographic pointer to the dataset in the EpistemicLedgerState.",
-          "title": "Data Source Id",
+          "title": "Ledger Source Id",
           "type": "string"
         },
         "mark": {
@@ -5486,7 +5486,7 @@
       "required": [
         "panel_id",
         "title",
-        "data_source_id",
+        "ledger_source_id",
         "mark",
         "encodings"
       ],
@@ -5630,7 +5630,7 @@
       "title": "HomomorphicEncryptionProfile",
       "type": "object"
     },
-    "HumanNodeManifest": {
+    "HumanNodeProfile": {
       "additionalProperties": false,
       "description": "A node representing a human participant in the workflow.",
       "properties": {
@@ -5710,7 +5710,7 @@
       "required": [
         "description"
       ],
-      "title": "HumanNodeManifest",
+      "title": "HumanNodeProfile",
       "type": "object"
     },
     "HypothesisGenerationEvent": {
@@ -6210,7 +6210,45 @@
       "title": "InterventionalCausalTask",
       "type": "object"
     },
-    "JSONRPCErrorProfile": {
+    "JSONRPCErrorResponseState": {
+      "additionalProperties": false,
+      "description": "JSON-RPC 2.0 Error Response object.",
+      "properties": {
+        "jsonrpc": {
+          "const": "2.0",
+          "description": "JSON-RPC version.",
+          "title": "Jsonrpc",
+          "type": "string"
+        },
+        "error": {
+          "$ref": "#/$defs/JSONRPCErrorState",
+          "description": "The error object."
+        },
+        "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The request ID that this error corresponds to.",
+          "title": "Id"
+        }
+      },
+      "required": [
+        "jsonrpc",
+        "error"
+      ],
+      "title": "JSONRPCErrorResponseState",
+      "type": "object"
+    },
+    "JSONRPCErrorState": {
       "additionalProperties": false,
       "description": "JSON-RPC 2.0 Error object.",
       "properties": {
@@ -6240,45 +6278,7 @@
         "code",
         "message"
       ],
-      "title": "JSONRPCErrorProfile",
-      "type": "object"
-    },
-    "JSONRPCErrorResponseProfile": {
-      "additionalProperties": false,
-      "description": "JSON-RPC 2.0 Error Response object.",
-      "properties": {
-        "jsonrpc": {
-          "const": "2.0",
-          "description": "JSON-RPC version.",
-          "title": "Jsonrpc",
-          "type": "string"
-        },
-        "error": {
-          "$ref": "#/$defs/JSONRPCErrorProfile",
-          "description": "The error object."
-        },
-        "id": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "integer"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The request ID that this error corresponds to.",
-          "title": "Id"
-        }
-      },
-      "required": [
-        "jsonrpc",
-        "error"
-      ],
-      "title": "JSONRPCErrorResponseProfile",
+      "title": "JSONRPCErrorState",
       "type": "object"
     },
     "LakehouseMountProfile": {
@@ -6673,7 +6673,7 @@
       "title": "MCPClientIntent",
       "type": "object"
     },
-    "MCPPromptRef": {
+    "MCPPromptReferenceState": {
       "additionalProperties": false,
       "description": "A dynamic reference to an MCP-provided prompt template.",
       "properties": {
@@ -6724,7 +6724,7 @@
         "server_id",
         "prompt_name"
       ],
-      "title": "MCPPromptRef",
+      "title": "MCPPromptReferenceState",
       "type": "object"
     },
     "MCPResourceManifest": {
@@ -7043,7 +7043,7 @@
       "title": "MechanisticAuditContract",
       "type": "object"
     },
-    "MemoizedNodeManifest": {
+    "MemoizedNodeProfile": {
       "additionalProperties": false,
       "description": "A passive structural interlock representing a historically executed graph branch.",
       "properties": {
@@ -7123,7 +7123,7 @@
         "target_topology_hash",
         "expected_output_schema"
       ],
-      "title": "MemoizedNodeManifest",
+      "title": "MemoizedNodeProfile",
       "type": "object"
     },
     "MigrationContract": {
@@ -7737,7 +7737,7 @@
       "title": "OntologicalAlignmentPolicy",
       "type": "object"
     },
-    "OntologicalHandshake": {
+    "OntologicalHandshakeReceipt": {
       "additionalProperties": false,
       "properties": {
         "handshake_id": {
@@ -7792,7 +7792,7 @@
         "measured_cosine_similarity",
         "alignment_status"
       ],
-      "title": "OntologicalHandshake",
+      "title": "OntologicalHandshakeReceipt",
       "type": "object"
     },
     "OntologicalSurfaceProjection": {
@@ -8579,7 +8579,7 @@
         },
         "nodes": {
           "additionalProperties": {
-            "$ref": "#/$defs/AnyNodeManifest"
+            "$ref": "#/$defs/AnyNodeProfile"
           },
           "description": "Flat registry of all nodes in this topology.",
           "propertyNames": {
@@ -8976,7 +8976,7 @@
       "additionalProperties": false,
       "properties": {
         "edge_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this semantic edge to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this semantic edge to the Merkle-DAG.",
           "title": "Edge Id",
           "type": "string"
         },
@@ -9152,7 +9152,7 @@
         "tier": {
           "$ref": "#/$defs/CognitiveTier",
           "default": "semantic",
-          "description": "The cognitive tier this memory resides in."
+          "description": "The cognitive tier this latent state resides in."
         },
         "temporal_bounds": {
           "anyOf": [
@@ -9176,7 +9176,7 @@
             }
           ],
           "default": null,
-          "description": "The importance profile used for epistemic state pruning."
+          "description": "The importance profile used for structural pruning."
         },
         "fhe_profile": {
           "anyOf": [
@@ -9318,7 +9318,7 @@
       ],
       "type": "string"
     },
-    "SpanTrace": {
+    "SpanTraceReceipt": {
       "additionalProperties": false,
       "description": "An execution window span trace.",
       "properties": {
@@ -9378,7 +9378,7 @@
         "start_time",
         "status"
       ],
-      "title": "SpanTrace",
+      "title": "SpanTraceReceipt",
       "type": "object"
     },
     "SpatialBoundingBoxProfile": {
@@ -9818,7 +9818,7 @@
         },
         "nodes": {
           "additionalProperties": {
-            "$ref": "#/$defs/AnyNodeManifest"
+            "$ref": "#/$defs/AnyNodeProfile"
           },
           "description": "Flat registry of all nodes in this topology.",
           "propertyNames": {
@@ -10041,7 +10041,7 @@
       "title": "SystemFaultEvent",
       "type": "object"
     },
-    "SystemNodeManifest": {
+    "SystemNodeProfile": {
       "additionalProperties": false,
       "description": "A node representing a deterministic system capability.",
       "properties": {
@@ -10109,7 +10109,7 @@
       "required": [
         "description"
       ],
-      "title": "SystemNodeManifest",
+      "title": "SystemNodeProfile",
       "type": "object"
     },
     "TabularCellState": {
@@ -10303,7 +10303,7 @@
             }
           ],
           "default": null,
-          "description": "The UNIX timestamp when this memory became true.",
+          "description": "The UNIX timestamp when this coordinate became true.",
           "title": "Valid From"
         },
         "valid_to": {
