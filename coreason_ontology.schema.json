@@ -602,7 +602,7 @@
         "secure_sub_session": {
           "anyOf": [
             {
-              "$ref": "#/$defs/SecureSubSession"
+              "$ref": "#/$defs/SecureSubSessionState"
             },
             {
               "type": "null"
@@ -762,7 +762,7 @@
       "title": "AgentNode",
       "type": "object"
     },
-    "AmbientSignal": {
+    "AmbientState": {
       "additionalProperties": false,
       "description": "Lightweight UX signal for UI rendering of progress.",
       "properties": {
@@ -788,7 +788,7 @@
       "required": [
         "status_message"
       ],
-      "title": "AmbientSignal",
+      "title": "AmbientState",
       "type": "object"
     },
     "AnalogicalMappingTask": {
@@ -1654,7 +1654,7 @@
         "scratchpad_trace": {
           "anyOf": [
             {
-              "$ref": "#/$defs/LatentScratchpadTrace"
+              "$ref": "#/$defs/LatentScratchpadReceipt"
             },
             {
               "type": "null"
@@ -2091,7 +2091,7 @@
         "scale": {
           "anyOf": [
             {
-              "$ref": "#/$defs/ScaleDefinition"
+              "$ref": "#/$defs/ScalePolicy"
             },
             {
               "type": "null"
@@ -3561,12 +3561,12 @@
       "title": "DiversityConstraint",
       "type": "object"
     },
-    "DocumentLayoutAnalysis": {
+    "DocumentLayoutManifest": {
       "additionalProperties": false,
       "properties": {
         "blocks": {
           "additionalProperties": {
-            "$ref": "#/$defs/DocumentLayoutBlock"
+            "$ref": "#/$defs/DocumentLayoutRegion"
           },
           "description": "Dictionary mapping block_ids to their strict spatial definitions.",
           "title": "Blocks",
@@ -3594,10 +3594,10 @@
       "required": [
         "blocks"
       ],
-      "title": "DocumentLayoutAnalysis",
+      "title": "DocumentLayoutManifest",
       "type": "object"
     },
-    "DocumentLayoutBlock": {
+    "DocumentLayoutRegion": {
       "additionalProperties": false,
       "properties": {
         "block_id": {
@@ -3630,7 +3630,7 @@
         "block_type",
         "anchor"
       ],
-      "title": "DocumentLayoutBlock",
+      "title": "DocumentLayoutRegion",
       "type": "object"
     },
     "DraftingIntent": {
@@ -3704,7 +3704,7 @@
       "title": "DynamicConvergenceSLA",
       "type": "object"
     },
-    "DynamicLayoutTemplate": {
+    "DynamicLayoutManifest": {
       "additionalProperties": false,
       "description": "Schema representing a template for dynamic grid layouts.",
       "properties": {
@@ -3717,7 +3717,7 @@
       "required": [
         "layout_tstring"
       ],
-      "title": "DynamicLayoutTemplate",
+      "title": "DynamicLayoutManifest",
       "type": "object"
     },
     "DynamicRoutingManifest": {
@@ -3960,7 +3960,7 @@
         "checkpoints": {
           "description": "Hard temporal anchors allowing state restoration.",
           "items": {
-            "$ref": "#/$defs/TemporalCheckpoint"
+            "$ref": "#/$defs/TemporalCheckpointState"
           },
           "title": "Checkpoints",
           "type": "array"
@@ -4121,7 +4121,7 @@
         "lineage_watermark": {
           "anyOf": [
             {
-              "$ref": "#/$defs/LineageWatermark"
+              "$ref": "#/$defs/LineageWatermarkReceipt"
             },
             {
               "type": "null"
@@ -5001,6 +5001,33 @@
       "title": "FacetMatrix",
       "type": "object"
     },
+    "FallbackIntent": {
+      "additionalProperties": false,
+      "description": "Indicates that fallback procedures should be triggered for a target node.",
+      "properties": {
+        "type": {
+          "const": "fallback_intent",
+          "default": "fallback_intent",
+          "description": "The type of the resilience payload.",
+          "title": "Type",
+          "type": "string"
+        },
+        "target_node_id": {
+          "$ref": "#/$defs/NodeID",
+          "description": "The ID of the failing node."
+        },
+        "fallback_node_id": {
+          "$ref": "#/$defs/NodeID",
+          "description": "The ID of the node to use as a fallback."
+        }
+      },
+      "required": [
+        "target_node_id",
+        "fallback_node_id"
+      ],
+      "title": "FallbackIntent",
+      "type": "object"
+    },
     "FallbackSLA": {
       "additionalProperties": false,
       "description": "SLA defining bounds on human intervention delays.",
@@ -5039,33 +5066,6 @@
         "timeout_action"
       ],
       "title": "FallbackSLA",
-      "type": "object"
-    },
-    "FallbackTrigger": {
-      "additionalProperties": false,
-      "description": "Indicates that fallback procedures should be triggered for a target node.",
-      "properties": {
-        "type": {
-          "const": "fallback",
-          "default": "fallback",
-          "description": "The type of the resilience payload.",
-          "title": "Type",
-          "type": "string"
-        },
-        "target_node_id": {
-          "$ref": "#/$defs/NodeID",
-          "description": "The ID of the failing node."
-        },
-        "fallback_node_id": {
-          "$ref": "#/$defs/NodeID",
-          "description": "The ID of the node to use as a fallback."
-        }
-      },
-      "required": [
-        "target_node_id",
-        "fallback_node_id"
-      ],
-      "title": "FallbackTrigger",
       "type": "object"
     },
     "FalsificationCondition": {
@@ -5170,7 +5170,7 @@
           "description": "The DID of the discovered external data lake/VPC."
         },
         "authorized_session": {
-          "$ref": "#/$defs/SecureSubSession",
+          "$ref": "#/$defs/SecureSubSessionState",
           "description": "The isolated memory partition granted to the agent for this connection."
         },
         "governing_sla": {
@@ -5328,7 +5328,7 @@
     },
     "GlobalGovernance": {
       "additionalProperties": false,
-      "description": "Global governance bounds for a swarm executing a workflow envelope.",
+      "description": "Global governance bounds for a swarm executing a workflow manifest.",
       "properties": {
         "max_budget_magnitude": {
           "description": "The absolute maximum economic cost allowed for the entire swarm lifecycle.",
@@ -5940,7 +5940,7 @@
         "latent_firewalls": {
           "description": "The list of tensor-level mechanistic firewalls monitoring the forward pass for adversarial intent.",
           "items": {
-            "$ref": "#/$defs/SaeLatentFirewall"
+            "$ref": "#/$defs/SaeLatentPolicy"
           },
           "title": "Latent Firewalls",
           "type": "array"
@@ -6375,7 +6375,7 @@
       "title": "LakehouseMountConfig",
       "type": "object"
     },
-    "LatentScratchpadTrace": {
+    "LatentScratchpadReceipt": {
       "additionalProperties": false,
       "properties": {
         "trace_id": {
@@ -6426,7 +6426,7 @@
         "discarded_branches",
         "total_latent_tokens"
       ],
-      "title": "LatentScratchpadTrace",
+      "title": "LatentScratchpadReceipt",
       "type": "object"
     },
     "LatentSmoothingProfile": {
@@ -6481,7 +6481,7 @@
       ],
       "type": "string"
     },
-    "LineageWatermark": {
+    "LineageWatermarkReceipt": {
       "additionalProperties": false,
       "properties": {
         "watermark_protocol": {
@@ -6513,12 +6513,12 @@
         "hop_signatures",
         "tamper_evident_root"
       ],
-      "title": "LineageWatermark",
+      "title": "LineageWatermarkReceipt",
       "type": "object"
     },
     "LogEvent": {
       "additionalProperties": false,
-      "description": "An out-of-band telemetry log envelope.",
+      "description": "An out-of-band telemetry log manifest.",
       "properties": {
         "timestamp": {
           "description": "The UNIX timestamp of the log event.",
@@ -7473,9 +7473,9 @@
           "title": "Shape",
           "type": "array"
         },
-        "memory_footprint_bytes": {
+        "vram_footprint_bytes": {
           "description": "Exact byte size of the uncompressed tensor.",
-          "title": "Memory Footprint Bytes",
+          "title": "Vram Footprint Bytes",
           "type": "integer"
         },
         "merkle_root": {
@@ -7493,7 +7493,7 @@
       "required": [
         "dtype",
         "shape",
-        "memory_footprint_bytes",
+        "vram_footprint_bytes",
         "merkle_root",
         "storage_uri"
       ],
@@ -8168,7 +8168,7 @@
           "type": "string"
         },
         "committed_state_diff_id": {
-          "description": "The internal StateDiff CID that was flushed.",
+          "description": "The internal StateDifferential CID that was flushed.",
           "minLength": 1,
           "title": "Committed State Diff Id",
           "type": "string"
@@ -8873,7 +8873,7 @@
       "title": "SaeFeatureActivation",
       "type": "object"
     },
-    "SaeLatentFirewall": {
+    "SaeLatentPolicy": {
       "additionalProperties": false,
       "description": "A real-time mechanistic interpretability boundary that monitors and controls specific neural circuits.",
       "properties": {
@@ -8948,7 +8948,7 @@
         "violation_action",
         "sae_dictionary_hash"
       ],
-      "title": "SaeLatentFirewall",
+      "title": "SaeLatentPolicy",
       "type": "object"
     },
     "SalienceProfile": {
@@ -8984,7 +8984,7 @@
       ],
       "type": "string"
     },
-    "ScaleDefinition": {
+    "ScalePolicy": {
       "additionalProperties": false,
       "description": "The mathematical mapping constraint for a channel.",
       "properties": {
@@ -9030,10 +9030,10 @@
       "required": [
         "type"
       ],
-      "title": "ScaleDefinition",
+      "title": "ScalePolicy",
       "type": "object"
     },
-    "SecureSubSession": {
+    "SecureSubSessionState": {
       "additionalProperties": false,
       "description": "Declarative boundary for handling unredacted secrets within a temporarily isolated memory partition.",
       "properties": {
@@ -9072,7 +9072,7 @@
         "max_ttl_seconds",
         "description"
       ],
-      "title": "SecureSubSession",
+      "title": "SecureSubSessionState",
       "type": "object"
     },
     "SelfCorrectionPolicy": {
@@ -9602,7 +9602,7 @@
       "title": "StateContract",
       "type": "object"
     },
-    "StateDiff": {
+    "StateDifferential": {
       "additionalProperties": false,
       "properties": {
         "diff_id": {
@@ -9632,7 +9632,7 @@
         "patches": {
           "description": "The exact, ordered sequence of deterministic state vector mutations.",
           "items": {
-            "$ref": "#/$defs/StatePatch"
+            "$ref": "#/$defs/StateMutation"
           },
           "title": "Patches",
           "type": "array"
@@ -9644,10 +9644,10 @@
         "lamport_timestamp",
         "vector_clock"
       ],
-      "title": "StateDiff",
+      "title": "StateDifferential",
       "type": "object"
     },
-    "StatePatch": {
+    "StateMutation": {
       "additionalProperties": false,
       "properties": {
         "op": {
@@ -9675,7 +9675,7 @@
         "op",
         "path"
       ],
-      "title": "StatePatch",
+      "title": "StateMutation",
       "type": "object"
     },
     "StatisticalChartExtraction": {
@@ -10378,7 +10378,7 @@
       "title": "TemporalBounds",
       "type": "object"
     },
-    "TemporalCheckpoint": {
+    "TemporalCheckpointState": {
       "additionalProperties": false,
       "properties": {
         "checkpoint_id": {
@@ -10402,7 +10402,7 @@
         "ledger_index",
         "state_hash"
       ],
-      "title": "TemporalCheckpoint",
+      "title": "TemporalCheckpointState",
       "type": "object"
     },
     "TensorDType": {
@@ -10678,7 +10678,7 @@
       "pattern": "^[a-f0-9]{64}$",
       "type": "string"
     },
-    "TraceExportBatch": {
+    "TraceExportManifest": {
       "additionalProperties": false,
       "properties": {
         "batch_id": {
@@ -10698,7 +10698,7 @@
       "required": [
         "batch_id"
       ],
-      "title": "TraceExportBatch",
+      "title": "TraceExportManifest",
       "type": "object"
     },
     "TruthMaintenancePolicy": {

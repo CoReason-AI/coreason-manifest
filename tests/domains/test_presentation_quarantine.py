@@ -15,7 +15,7 @@ from pydantic import ValidationError
 from coreason_manifest.spec.ontology import (
     AnyPanel,
     ChannelEncoding,
-    DynamicLayoutTemplate,
+    DynamicLayoutManifest,
     GrammarPanel,
     InsightCard,
     MacroGrid,
@@ -36,7 +36,7 @@ def test_dynamic_layout_template_rejects_obfuscated_rce(payload: str) -> None:
     polymorphic string concatenation attacks prior to instantiation.
     """
     with pytest.raises(ValidationError, match="Kinetic execution bleed detected"):
-        DynamicLayoutTemplate(layout_tstring=payload)
+        DynamicLayoutManifest(layout_tstring=payload)
 
 
 @pytest.mark.parametrize(
@@ -52,7 +52,7 @@ def test_dynamic_layout_template_allows_valid_strings(payload: str) -> None:
     Verify that strings not containing function calls, or strings that
     are syntactically invalid Python, are allowed to pass the AST boundary.
     """
-    template = DynamicLayoutTemplate(layout_tstring=payload)
+    template = DynamicLayoutManifest(layout_tstring=payload)
     assert template.layout_tstring == payload
 
 
@@ -69,11 +69,11 @@ def test_dynamic_layout_template_allows_valid_strings(payload: str) -> None:
 def test_tstring_rce_fuzzer(payload: str) -> None:
     """
     1. The T-String RCE Fuzzer:
-    Generate adversarial payload strings and prove that DynamicLayoutTemplate
+    Generate adversarial payload strings and prove that DynamicLayoutManifest
     definitively raises a ValidationError when instantiated with them.
     """
     with pytest.raises(ValidationError, match="Kinetic execution bleed detected"):
-        DynamicLayoutTemplate(layout_tstring=payload)
+        DynamicLayoutManifest(layout_tstring=payload)
 
 
 @given(

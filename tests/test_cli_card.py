@@ -15,7 +15,7 @@ from coreason_manifest.cli.card import main as card_main
 
 
 def test_card_valid_envelope(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
-    payload_path = tmp_path / "valid_envelope.json"
+    payload_path = tmp_path / "valid_manifest.json"
     envelope_data = {
         "manifest_version": "1.0.0",
         "topology": {
@@ -60,7 +60,7 @@ def test_card_valid_envelope(tmp_path: Path, capsys: pytest.CaptureFixture[str])
 
 
 def test_card_invalid_envelope(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
-    payload_path = tmp_path / "invalid_envelope.json"
+    payload_path = tmp_path / "invalid_manifest.json"
     payload_path.write_text('{"invalid": "data"}')
 
     with (

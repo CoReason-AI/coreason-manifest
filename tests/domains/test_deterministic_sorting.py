@@ -2,16 +2,16 @@
 
 from coreason_manifest.spec.ontology import (
     AdversarialMarketTopology,
-    LatentScratchpadTrace,
+    LatentScratchpadReceipt,
     PredictionMarketPolicy,
-    SecureSubSession,
+    SecureSubSessionState,
     ThoughtBranch,
 )
 
 
 def test_secure_sub_session_sorting_determinism() -> None:
     """Prove that injecting chaotic arrays yields a mathematically pristine, sorted hash state."""
-    session = SecureSubSession(
+    session = SecureSubSessionState(
         session_id="sess_1",
         allowed_vault_keys=["vault:zeta", "vault:alpha", "vault:gamma"],
         max_ttl_seconds=300,
@@ -25,7 +25,7 @@ def test_latent_scratchpad_trace_sorting_determinism() -> None:
     b1 = ThoughtBranch(branch_id="branch_Z", latent_content_hash="a" * 64)
     b2 = ThoughtBranch(branch_id="branch_A", latent_content_hash="b" * 64)
 
-    trace = LatentScratchpadTrace(
+    trace = LatentScratchpadReceipt(
         trace_id="trace_1",
         explored_branches=[b1, b2],
         discarded_branches=["branch_Z", "branch_A"],

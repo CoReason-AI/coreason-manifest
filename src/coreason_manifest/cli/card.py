@@ -18,30 +18,30 @@ from pydantic import TypeAdapter
 from coreason_manifest.spec.ontology import WorkflowManifest
 
 
-def project_envelope_to_markdown(envelope: WorkflowManifest) -> str:
+def project_manifest_to_markdown(manifest: WorkflowManifest) -> str:
     """Deterministically compile the envelope into an Agent Card Markdown string."""
     lines: list[str] = [
         "# CoReason Agent Card",
         "",
         "## Workflow Identification",
-        f"- **Manifest Version:** {envelope.manifest_version}",
-        f"- **Tenant ID:** {envelope.tenant_id or 'Unbound'}",
-        f"- **Session ID:** {envelope.session_id or 'Unbound'}",
+        f"- **Manifest Version:** {manifest.manifest_version}",
+        f"- **Tenant ID:** {manifest.tenant_id or 'Unbound'}",
+        f"- **Session ID:** {manifest.session_id or 'Unbound'}",
         "",
         "## Root Topology",
-        f"- **Type:** `{envelope.topology.type}`",
+        f"- **Type:** `{manifest.topology.type}`",
     ]
 
-    if getattr(envelope.topology, "architectural_intent", None):
-        lines.append(f"- **Intent:** {envelope.topology.architectural_intent}")  # type: ignore[union-attr]
-    if getattr(envelope.topology, "justification", None):
-        lines.append(f"- **Justification:** *{envelope.topology.justification}*")  # type: ignore[union-attr]
+    if getattr(manifest.topology, "architectural_intent", None):
+        lines.append(f"- **Intent:** {manifest.topology.architectural_intent}")  # type: ignore[union-attr]
+    if getattr(manifest.topology, "justification", None):
+        lines.append(f"- **Justification:** *{manifest.topology.justification}*")  # type: ignore[union-attr]
 
     lines.append("")
     lines.append("## Node Ledger & Personas")
 
-    if hasattr(envelope.topology, "nodes"):
-        for node_id, node in getattr(envelope.topology, "nodes", {}).items():
+    if hasattr(manifest.topology, "nodes"):
+        for node_id, node in getattr(manifest.topology, "nodes", {}).items():
             lines.append(f"### Node: `{node_id}`")
             lines.append(f"- **Type:** `{node.type}`")
             lines.append(f"- **Description:** {node.description}")
@@ -62,7 +62,7 @@ def project_envelope_to_markdown(envelope: WorkflowManifest) -> str:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Deterministic Markdown visualizer for Workflow Envelopes.")
-    parser.add_argument("payload", type=Path, help="Path to the JSON workflow envelope.")
+    parser.add_argument("payload", type=Path, help="Path to the JSON workflow manifest.")
     args = parser.parse_args()
 
     if not args.payload.exists():
@@ -74,7 +74,7 @@ def main() -> None:
         adapter = TypeAdapter(WorkflowManifest)
         manifest = adapter.validate_json(payload_bytes)
 
-        markdown_string = project_envelope_to_markdown(manifest)
+        markdown_string = project_manifest_to_markdown(manifest)
         sys.stdout.write(markdown_string + "\n")
         sys.exit(0)
     except Exception as e:

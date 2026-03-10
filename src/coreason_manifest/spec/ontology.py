@@ -265,7 +265,7 @@ class BoundingBox(CoreasonBaseModel):
         return self
 
 
-class DynamicLayoutTemplate(CoreasonBaseModel):
+class DynamicLayoutManifest(CoreasonBaseModel):
     """Schema representing a template for dynamic grid layouts."""
 
     layout_tstring: str = Field(
@@ -334,7 +334,7 @@ class RateCard(CoreasonBaseModel):
     magnitude_unit: str = Field(description="The magnitude unit of the associated costs.")
 
 
-class ScaleDefinition(CoreasonBaseModel):
+class ScalePolicy(CoreasonBaseModel):
     """The mathematical mapping constraint for a channel."""
 
     type: Literal["linear", "log", "time", "ordinal", "nominal"] = Field(
@@ -351,9 +351,7 @@ class ChannelEncoding(CoreasonBaseModel):
         description="The visual channel the data is mapped to."
     )
     field: str = Field(description="The exact column or field name from the dataset.")
-    scale: ScaleDefinition | None = Field(
-        default=None, description="Optional scale override for this specific channel."
-    )
+    scale: ScalePolicy | None = Field(default=None, description="Optional scale override for this specific channel.")
 
 
 class SideEffectProfile(CoreasonBaseModel):
@@ -745,7 +743,7 @@ class RedactionPolicy(CoreasonBaseModel):
         return self
 
 
-class SaeLatentFirewall(CoreasonBaseModel):
+class SaeLatentPolicy(CoreasonBaseModel):
     """A real-time mechanistic interpretability boundary that monitors and controls specific neural circuits."""
 
     target_feature_index: int = Field(
@@ -788,7 +786,7 @@ class SaeLatentFirewall(CoreasonBaseModel):
         return self
 
 
-class SecureSubSession(CoreasonBaseModel):
+class SecureSubSessionState(CoreasonBaseModel):
     """
     Declarative boundary for handling unredacted secrets within a temporarily isolated memory partition.
     """
@@ -900,7 +898,7 @@ class RollbackIntent(CoreasonBaseModel):
         return self
 
 
-class StatePatch(CoreasonBaseModel):
+class StateMutation(CoreasonBaseModel):
     op: PatchOperation = Field(
         description="The strict RFC 6902 JSON Patch operation, acting as a deterministic state vector mutation."
     )
@@ -911,7 +909,7 @@ class StatePatch(CoreasonBaseModel):
     )
 
 
-class StateDiff(CoreasonBaseModel):
+class StateDifferential(CoreasonBaseModel):
     diff_id: str = Field(
         description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this state differential."  # noqa: E501
     )
@@ -925,13 +923,13 @@ class StateDiff(CoreasonBaseModel):
     vector_clock: dict[str, int] = Field(
         description="Causal history mapping of all known Lineage Watermarks to their latest logical mutation count at the time of authoring."  # noqa: E501
     )
-    patches: list[StatePatch] = Field(
+    patches: list[StateMutation] = Field(
         default_factory=list, description="The exact, ordered sequence of deterministic state vector mutations."
     )
     # Note: patches is a structurally ordered sequence (Chronological Mutations) and MUST NOT be sorted.
 
 
-class TemporalCheckpoint(CoreasonBaseModel):
+class TemporalCheckpointState(CoreasonBaseModel):
     checkpoint_id: str = Field(
         description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the temporal anchor."
     )
@@ -962,7 +960,7 @@ class ThoughtBranch(CoreasonBaseModel):
     )
 
 
-class LatentScratchpadTrace(CoreasonBaseModel):
+class LatentScratchpadReceipt(CoreasonBaseModel):
     trace_id: str = Field(
         min_length=1, description="A Content Identifier (CID) bounding this ephemeral test-time execution tree."
     )
@@ -1176,7 +1174,7 @@ class AgentBid(CoreasonBaseModel):
     confidence_score: float = Field(ge=0.0, le=1.0, description="The node's epistemic certainty of success.")
 
 
-class AmbientSignal(CoreasonBaseModel):
+class AmbientState(CoreasonBaseModel):
     """
     Lightweight UX signal for UI rendering of progress.
     """
@@ -1622,7 +1620,7 @@ class DiversityConstraint(CoreasonBaseModel):
     )
 
 
-class DocumentLayoutBlock(CoreasonBaseModel):
+class DocumentLayoutRegion(CoreasonBaseModel):
     block_id: str = Field(min_length=1, description="Unique structural identifier for this geometric region.")
     block_type: Literal["header", "paragraph", "figure", "table", "footnote", "caption", "equation"] = Field(
         description="The taxonomic classification of the layout region."
@@ -1630,8 +1628,8 @@ class DocumentLayoutBlock(CoreasonBaseModel):
     anchor: MultimodalTokenAnchor = Field(description="The strict visual and token coordinate bindings for this block.")
 
 
-class DocumentLayoutAnalysis(CoreasonBaseModel):
-    blocks: dict[str, DocumentLayoutBlock] = Field(
+class DocumentLayoutManifest(CoreasonBaseModel):
+    blocks: dict[str, DocumentLayoutRegion] = Field(
         description="Dictionary mapping block_ids to their strict spatial definitions."
     )
     reading_order_edges: list[tuple[str, str]] = Field(
@@ -2017,12 +2015,14 @@ class FallbackSLA(CoreasonBaseModel):
     )
 
 
-class FallbackTrigger(CoreasonBaseModel):
+class FallbackIntent(CoreasonBaseModel):
     """
     Indicates that fallback procedures should be triggered for a target node.
     """
 
-    type: Literal["fallback"] = Field(default="fallback", description="The type of the resilience payload.")
+    type: Literal["fallback_intent"] = Field(
+        default="fallback_intent", description="The type of the resilience payload."
+    )
     target_node_id: NodeID = Field(description="The ID of the failing node.")
     fallback_node_id: NodeID = Field(description="The ID of the node to use as a fallback.")
 
@@ -2058,7 +2058,7 @@ class FederatedCapabilityAttestation(CoreasonBaseModel):
 
     attestation_id: str = Field(min_length=1, description="Cryptographic Lineage Watermark for the attestation.")
     target_topology_id: NodeID = Field(description="The DID of the discovered external data lake/VPC.")
-    authorized_session: SecureSubSession = Field(
+    authorized_session: SecureSubSessionState = Field(
         description="The isolated memory partition granted to the agent for this connection."
     )
     governing_sla: BilateralSLA = Field(
@@ -2070,7 +2070,9 @@ class FederatedCapabilityAttestation(CoreasonBaseModel):
         if self.governing_sla.max_permitted_classification == "restricted" and (
             not self.authorized_session.allowed_vault_keys
         ):
-            raise ValueError("RESTRICTED federated connections MUST define allowed_vault_keys in the SecureSubSession.")
+            raise ValueError(
+                "RESTRICTED federated connections MUST define allowed_vault_keys in the SecureSubSessionState."
+            )
         return self
 
 
@@ -2113,7 +2115,7 @@ class FormalVerificationContract(CoreasonBaseModel):
 
 class GlobalGovernance(CoreasonBaseModel):
     """
-    Global governance bounds for a swarm executing a workflow envelope.
+    Global governance bounds for a swarm executing a workflow manifest.
     """
 
     max_budget_magnitude: int = Field(
@@ -2531,7 +2533,7 @@ class SystemNode(BaseNode):
     type: Literal["system"] = Field(default="system", description="Discriminator for a System node.")
 
 
-class LineageWatermark(CoreasonBaseModel):
+class LineageWatermarkReceipt(CoreasonBaseModel):
     watermark_protocol: Literal["merkle_dag", "statistical_token", "homomorphic_mac"] = Field(
         description="The mathematical methodology used to embed the chain of custody."
     )
@@ -2797,7 +2799,7 @@ class EpistemicProvenance(CoreasonBaseModel):
     multimodal_anchor: MultimodalTokenAnchor | None = Field(
         default=None, description="The unified VLM spatial and temporal token matrix where this data was extracted."
     )
-    lineage_watermark: LineageWatermark | None = Field(
+    lineage_watermark: LineageWatermarkReceipt | None = Field(
         default=None,
         description="The cryptographic, tamper-evident chain of custody tracing this memory across multiple swarm hops.",  # noqa: E501
     )
@@ -2853,7 +2855,7 @@ class NDimensionalTensorManifest(CoreasonBaseModel):
 
     dtype: TensorDType = Field(..., description="Data type of the tensor elements.")
     shape: tuple[int, ...] = Field(..., description="N-Dimensional shape tuple.")
-    memory_footprint_bytes: int = Field(..., description="Exact byte size of the uncompressed tensor.")
+    vram_footprint_bytes: int = Field(..., description="Exact byte size of the uncompressed tensor.")
     merkle_root: str = Field(..., pattern="^[a-fA-F0-9]{64}$", description="SHA-256 Merkle root of the payload chunks.")
     storage_uri: str = Field(..., description="Strict URI pointer to the physical bytes.")
 
@@ -2871,9 +2873,9 @@ class NDimensionalTensorManifest(CoreasonBaseModel):
             else TensorDType(self.dtype).bytes_per_element
         )
         calculated_bytes = math.prod(self.shape) * bytes_per_element
-        if calculated_bytes != self.memory_footprint_bytes:
+        if calculated_bytes != self.vram_footprint_bytes:
             raise ValueError(
-                f"Topological mismatch: Shape {self.shape} of {self.dtype.value} requires {calculated_bytes} bytes, but manifest declares {self.memory_footprint_bytes} bytes."  # noqa: E501
+                f"Topological mismatch: Shape {self.shape} of {self.dtype.value} requires {calculated_bytes} bytes, but manifest declares {self.vram_footprint_bytes} bytes."  # noqa: E501
             )
         return self
 
@@ -3023,7 +3025,9 @@ class PersistenceCommitReceipt(BaseStateEvent):
     lakehouse_snapshot_id: str = Field(
         min_length=1, description="The external cryptographic receipt generated by Iceberg/Delta."
     )
-    committed_state_diff_id: str = Field(min_length=1, description="The internal StateDiff CID that was flushed.")
+    committed_state_diff_id: str = Field(
+        min_length=1, description="The internal StateDifferential CID that was flushed."
+    )
     target_table_uri: str = Field(min_length=1, description="The specific table mutated.")
 
 
@@ -3114,7 +3118,7 @@ class QuarantineIntent(CoreasonBaseModel):
 
 
 type AnyResiliencePayload = Annotated[
-    QuarantineIntent | CircuitBreakerEvent | FallbackTrigger, Field(discriminator="type")
+    QuarantineIntent | CircuitBreakerEvent | FallbackIntent, Field(discriminator="type")
 ]
 
 
@@ -3185,7 +3189,7 @@ class InformationFlowPolicy(CoreasonBaseModel):
     semantic_firewall: SemanticFirewallPolicy | None = Field(
         default=None, description="The active cognitive defense perimeter against adversarial control-flow overrides."
     )
-    latent_firewalls: list[SaeLatentFirewall] = Field(
+    latent_firewalls: list[SaeLatentPolicy] = Field(
         default_factory=list,
         description="The list of tensor-level mechanistic firewalls monitoring the forward pass for adversarial intent.",  # noqa: E501
     )
@@ -3611,7 +3615,7 @@ type MetadataDict = dict[str, TelemetryScalar | list[TelemetryScalar]]
 
 class LogEvent(CoreasonBaseModel):
     """
-    An out-of-band telemetry log envelope.
+    An out-of-band telemetry log manifest.
     """
 
     timestamp: float = Field(description="The UNIX timestamp of the log event.")
@@ -3712,7 +3716,7 @@ class ToolInvocationEvent(BaseStateEvent):
     )
 
 
-class TraceExportBatch(CoreasonBaseModel):
+class TraceExportManifest(CoreasonBaseModel):
     batch_id: str = Field(description="Unique identifier for this telemetry snapshot.")
     spans: list[ExecutionSpan] = Field(
         default_factory=list, description="A collection of execution spans to be serialized."
@@ -3907,7 +3911,7 @@ class AgentNode(BaseNode):
         default=None,
         description="The ID of the specific ActionSpaceManifest (curated tool environment) bound to this agent.",
     )
-    secure_sub_session: SecureSubSession | None = Field(
+    secure_sub_session: SecureSubSessionState | None = Field(
         default=None,
         description="Declarative boundary for handling unredacted secrets within a temporarily isolated memory partition.",  # noqa: E501
     )
@@ -4483,7 +4487,7 @@ class BeliefMutationEvent(BaseStateEvent):
     uncertainty_profile: CognitiveUncertaintyProfile | None = Field(
         default=None, description="The mathematical quantification of doubt associated with this synthesized belief."
     )
-    scratchpad_trace: LatentScratchpadTrace | None = Field(
+    scratchpad_trace: LatentScratchpadReceipt | None = Field(
         default=None,
         description="The cryptographic record of the non-monotonic internal monologue that justifies this belief.",
     )
@@ -4566,7 +4570,7 @@ class EpistemicLedgerState(CoreasonBaseModel):
     history: list[AnyStateEvent] = Field(
         max_length=10000, description="An append-only, cryptographic ledger of state events."
     )
-    checkpoints: list[TemporalCheckpoint] = Field(
+    checkpoints: list[TemporalCheckpointState] = Field(
         default_factory=list, description="Hard temporal anchors allowing state restoration."
     )
     active_rollbacks: list[RollbackIntent] = Field(
