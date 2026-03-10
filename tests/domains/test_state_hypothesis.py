@@ -11,14 +11,14 @@ from pydantic import ValidationError
 from coreason_manifest.spec.ontology import (
     ActiveInferenceContract,
     CausalDirectedEdge,
-    FalsificationCondition,
+    FalsificationContract,
     HypothesisGenerationEvent,
     StructuralCausalModel,
 )
 
 
 def test_hypothesis_generation_event_valid() -> None:
-    condition = FalsificationCondition(
+    condition = FalsificationContract(
         condition_id="cond-1",
         description="Must observe HTTP 404.",
         required_tool_name="http_client",
@@ -60,7 +60,7 @@ def test_hypothesis_causal_model() -> None:
         premise_text="Smoking causes cancer.",
         bayesian_prior=0.9,
         falsification_conditions=[
-            FalsificationCondition(
+            FalsificationContract(
                 condition_id="cond-2",
                 description="Must not observe correlation.",
                 falsifying_observation_signature="No correlation",
@@ -76,7 +76,7 @@ def test_hypothesis_causal_model() -> None:
 
 
 def test_hypothesis_bayesian_prior_bounds() -> None:
-    condition = FalsificationCondition(
+    condition = FalsificationContract(
         condition_id="cond-1",
         description="test",
         falsifying_observation_signature="test",

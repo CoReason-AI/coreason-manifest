@@ -544,7 +544,7 @@ class ActivationSteeringContract(CoreasonBaseModel):
     )
 
 
-class CognitiveRoutingDirective(CoreasonBaseModel):
+class CognitiveRoutingContract(CoreasonBaseModel):
     """
     Hardware-level contract overriding MoE routing to enforce functional/specialist paths.
     """
@@ -585,7 +585,7 @@ class CognitiveStateProfile(CoreasonBaseModel):
         default=None,
         description="The precise mathematical contract for altering the residual stream to enforce this constraint.",
     )
-    moe_routing_directive: CognitiveRoutingDirective | None = Field(
+    moe_routing_directive: CognitiveRoutingContract | None = Field(
         default=None,
         description="The structural mandate overriding default token routing to enforce this cognitive state.",
     )
@@ -623,7 +623,7 @@ class ConstitutionalPolicy(CoreasonBaseModel):
     )
 
 
-class GradingCriteria(CoreasonBaseModel):
+class GradingCriterionProfile(CoreasonBaseModel):
     """
     Defines criteria used for grading LLM behavior or output.
     """
@@ -633,13 +633,13 @@ class GradingCriteria(CoreasonBaseModel):
     weight: float = Field(ge=0.0, description="Weight or significance of this criterion.")
 
 
-class AdjudicationRubric(CoreasonBaseModel):
+class AdjudicationRubricProfile(CoreasonBaseModel):
     """
     Rubric defining multiple criteria and passing threshold for algorithmic adjudication.
     """
 
     rubric_id: str = Field(description="Unique identifier for the rubric.")
-    criteria: list[GradingCriteria] = Field(description="List of criteria used in the rubric.")
+    criteria: list[GradingCriterionProfile] = Field(description="List of criteria used in the rubric.")
     passing_threshold: float = Field(ge=0.0, le=100.0, description="The minimum score required to pass.")
 
     @model_validator(mode="after")
@@ -1097,7 +1097,7 @@ class FederatedDiscoveryManifest(CoreasonBaseModel):
 class ActiveInferenceContract(CoreasonBaseModel):
     task_id: str = Field(min_length=1, description="Unique identifier for this active inference execution.")
     target_hypothesis_id: str = Field(description="The HypothesisGenerationEvent this task is attempting to falsify.")
-    target_condition_id: str = Field(description="The specific FalsificationCondition being tested.")
+    target_condition_id: str = Field(description="The specific FalsificationContract being tested.")
     selected_tool_name: str = Field(
         description="The exact tool from the ActionSpaceManifest allocated for this experiment."
     )
@@ -1163,7 +1163,7 @@ class AdversarialSimulationProfile(CoreasonBaseModel):
     )
 
 
-class AgentBid(CoreasonBaseModel):
+class AgentBidIntent(CoreasonBaseModel):
     agent_id: str = Field(description="The NodeID of the bidder.")
     estimated_cost_magnitude: int = Field(description="The node's calculated cost to fulfill the task.")
     estimated_latency_ms: int = Field(ge=0, description="The node's estimated time to completion.")
@@ -1891,7 +1891,7 @@ class EvictionPolicy(CoreasonBaseModel):
     )
 
 
-class EvidentiaryWarrant(CoreasonBaseModel):
+class EvidentiaryWarrantState(CoreasonBaseModel):
     source_event_id: str | None = Field(
         default=None,
         description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for a specific observation in the EpistemicLedgerState.",  # noqa: E501
@@ -1911,7 +1911,7 @@ class EpistemicArgumentClaimState(CoreasonBaseModel):
         description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the agent or system that advanced this claim."  # noqa: E501
     )
     text_chunk: str = Field(max_length=50000, description="The natural language representation of the proposition.")
-    warrants: list[EvidentiaryWarrant] = Field(
+    warrants: list[EvidentiaryWarrantState] = Field(
         default_factory=list, description="The foundational premises supporting this claim."
     )
 
@@ -2027,7 +2027,7 @@ class FallbackIntent(CoreasonBaseModel):
     fallback_node_id: NodeID = Field(description="The ID of the node to use as a fallback.")
 
 
-class FalsificationCondition(CoreasonBaseModel):
+class FalsificationContract(CoreasonBaseModel):
     condition_id: str = Field(
         min_length=1,
         description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this falsification test to the Merkle-DAG.",  # noqa: E501
@@ -2239,7 +2239,7 @@ class GrammarPanel(CoreasonBaseModel):
         return self
 
 
-class GraphFlatteningDirective(CoreasonBaseModel):
+class GraphFlatteningPolicy(CoreasonBaseModel):
     node_projection_mode: Literal["wide_columnar", "struct_array"] = Field(description="How to flatten SemanticNode.")
     edge_projection_mode: Literal["adjacency_list", "map_array"] = Field(description="How to flatten SemanticEdge.")
     preserve_cryptographic_lineage: bool = Field(
@@ -2247,7 +2247,7 @@ class GraphFlatteningDirective(CoreasonBaseModel):
     )
 
 
-class HTTPTransportConfig(CoreasonBaseModel):
+class HTTPTransportProfile(CoreasonBaseModel):
     """Configuration for stateless HTTP-based MCP transport."""
 
     type: Literal["http"] = Field(default="http", description="Type of transport.")
@@ -2411,7 +2411,7 @@ class JSONRPCErrorResponse(CoreasonBaseModel):
     id: str | int | None = Field(default=None, description="The request ID that this error corresponds to.")
 
 
-class LakehouseMountConfig(CoreasonBaseModel):
+class LakehouseMountProfile(CoreasonBaseModel):
     catalog_uri: str = Field(min_length=1, description="The stateless endpoint of the catalog (e.g., Polaris, Nessie).")
     table_format: Literal["iceberg", "delta", "hudi"] = Field(description="Strict boundary for the destination format.")
     schema_evolution_mode: Literal["strict", "additive_only"] = Field(
@@ -3043,7 +3043,7 @@ class PredictionMarketState(CoreasonBaseModel):
 
     market_id: Annotated[str, StringConstraints(min_length=1)] = Field(description="The ID of the prediction market.")
     resolution_oracle_condition_id: str = Field(
-        description="The specific FalsificationCondition ID whose execution will trigger the market payout."
+        description="The specific FalsificationContract ID whose execution will trigger the market payout."
     )
     lmsr_b_parameter: str = Field(
         pattern="^\\d+\\.\\d+$",
@@ -3126,7 +3126,7 @@ type AnyResiliencePayload = Annotated[
 ]
 
 
-class SSETransportConfig(CoreasonBaseModel):
+class SSETransportProfile(CoreasonBaseModel):
     """Configuration for remote SSE-based MCP transport."""
 
     type: Literal["sse"] = Field(default="sse", description="Type of transport.")
@@ -3362,7 +3362,7 @@ class StatisticalChartExtractionState(CoreasonBaseModel):
         return self
 
 
-class StdioTransportConfig(CoreasonBaseModel):
+class StdioTransportProfile(CoreasonBaseModel):
     """Configuration for local Stdio-based MCP transport."""
 
     type: Literal["stdio"] = Field(default="stdio", description="Type of transport.")
@@ -3373,10 +3373,10 @@ class StdioTransportConfig(CoreasonBaseModel):
     )
 
 
-type MCPTransport = StdioTransportConfig | SSETransportConfig | HTTPTransportConfig
+type MCPTransport = StdioTransportProfile | SSETransportProfile | HTTPTransportProfile
 
 
-class MCPServerConfig(CoreasonBaseModel):
+class MCPServerBindingProfile(CoreasonBaseModel):
     """Configuration definition for connecting to an MCP Server."""
 
     server_id: str = Field(..., description="A unique identifier for this server instance.")
@@ -3452,7 +3452,7 @@ class HypothesisGenerationEvent(BaseStateEvent):
     bayesian_prior: float = Field(
         ge=0.0, le=1.0, description="The agent's initial probabilistic belief in this hypothesis before testing."
     )
-    falsification_conditions: list[FalsificationCondition] = Field(
+    falsification_conditions: list[FalsificationContract] = Field(
         min_length=1,
         description="The list of strict conditions that the orchestrator must test to attempt to disprove this premise.",  # noqa: E501
     )
@@ -3596,7 +3596,7 @@ class TaskAwardReceipt(CoreasonBaseModel):
 
 class AuctionState(CoreasonBaseModel):
     announcement: TaskAnnouncementIntent = Field(description="The original call for proposals.")
-    bids: list[AgentBid] = Field(default_factory=list, description="The array of received bids.")
+    bids: list[AgentBidIntent] = Field(default_factory=list, description="The array of received bids.")
     award: TaskAwardReceipt | None = Field(
         default=None, description="The final cryptographic receipt of the auction, if resolved."
     )
@@ -4616,7 +4616,7 @@ class EpistemicLedgerState(CoreasonBaseModel):
 
 CompositeNode.model_rebuild()
 WorkflowManifest.model_rebuild()
-MCPServerConfig.model_rebuild()
+MCPServerBindingProfile.model_rebuild()
 
 BaseTopology.model_rebuild()
 DAGTopology.model_rebuild()
