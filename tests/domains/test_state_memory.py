@@ -12,13 +12,13 @@ from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
     AnyStateEvent,
-    BeliefUpdateEvent,
+    BeliefMutationEvent,
     CrystallizationPolicy,
-    EpistemicLedger,
+    EpistemicLedgerState,
+    EpistemicQuarantineSnapshot,
     ObservationEvent,
     SystemFaultEvent,
     TheoryOfMindSnapshot,
-    WorkingMemorySnapshot,
 )
 
 
@@ -27,7 +27,7 @@ def test_crystallization_policy_min_observations() -> None:
     CrystallizationPolicy(
         min_observations_required=10,
         aleatoric_entropy_threshold=0.1,
-        target_memory_tier="semantic",
+        target_cognitive_tier="semantic",
     )
 
     # Invalid
@@ -35,7 +35,7 @@ def test_crystallization_policy_min_observations() -> None:
         CrystallizationPolicy(
             min_observations_required=9,
             aleatoric_entropy_threshold=0.1,
-            target_memory_tier="semantic",
+            target_cognitive_tier="semantic",
         )
 
 
@@ -44,7 +44,7 @@ def test_crystallization_policy_entropy_threshold() -> None:
     CrystallizationPolicy(
         min_observations_required=10,
         aleatoric_entropy_threshold=0.05,
-        target_memory_tier="semantic",
+        target_cognitive_tier="semantic",
     )
 
     # Invalid
@@ -52,13 +52,13 @@ def test_crystallization_policy_entropy_threshold() -> None:
         CrystallizationPolicy(
             min_observations_required=10,
             aleatoric_entropy_threshold=0.11,
-            target_memory_tier="semantic",
+            target_cognitive_tier="semantic",
         )
 
 
 @st.composite
 def state_event_strategy(draw: st.DrawFn) -> AnyStateEvent:
-    event_type = draw(st.sampled_from(["observation", "belief_update", "system_fault"]))
+    event_type = draw(st.sampled_from(["observation", "belief_mutation", "system_fault"]))
     event_id = draw(st.text(min_size=1, max_size=50))
     timestamp = draw(st.floats(min_value=0.0, max_value=1e10, allow_nan=False, allow_infinity=False))
     payload = draw(
@@ -71,15 +71,15 @@ def state_event_strategy(draw: st.DrawFn) -> AnyStateEvent:
 
     if event_type == "observation":
         return ObservationEvent(event_id=event_id, timestamp=timestamp, type="observation", payload=payload)
-    if event_type == "belief_update":
-        return BeliefUpdateEvent(event_id=event_id, timestamp=timestamp, type="belief_update", payload=payload)
+    if event_type == "belief_mutation":
+        return BeliefMutationEvent(event_id=event_id, timestamp=timestamp, type="belief_mutation", payload=payload)
     return SystemFaultEvent(event_id=event_id, timestamp=timestamp, type="system_fault")
 
 
 @given(st.lists(state_event_strategy(), min_size=1, max_size=100))
 def test_temporal_chaos_proof(events: list[AnyStateEvent]) -> None:
     # 1. The Temporal Chaos Proof
-    ledger = EpistemicLedger(history=events)
+    ledger = EpistemicLedgerState(history=events)
 
     # Assert sorted by timestamp
     for i in range(len(ledger.history) - 1):
@@ -100,7 +100,7 @@ def draw_theory_of_mind_snapshot(draw: st.DrawFn) -> TheoryOfMindSnapshot:
 def test_working_memory_theory_of_mind(
     system_prompt: str, active_context: dict[str, str], theory_of_mind_models: list[TheoryOfMindSnapshot]
 ) -> None:
-    snapshot = WorkingMemorySnapshot(
+    snapshot = EpistemicQuarantineSnapshot(
         system_prompt=system_prompt,
         active_context=active_context,
         theory_of_mind_models=theory_of_mind_models,

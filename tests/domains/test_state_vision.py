@@ -9,22 +9,22 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
-    DocumentLayoutAnalysis,
-    DocumentLayoutBlock,
+    DocumentLayoutManifest,
+    DocumentLayoutRegion,
     MathematicalNotationExtraction,
     MultimodalTokenAnchor,
     TableCell,
-    TabularDataExtraction,
+    TabularMatrixExtraction,
 )
 
 
 def test_layout_cycle_prevention() -> None:
     anchor = MultimodalTokenAnchor(token_span_start=0, token_span_end=10)
-    block1 = DocumentLayoutBlock(block_id="b1", block_type="paragraph", anchor=anchor)
-    block2 = DocumentLayoutBlock(block_id="b2", block_type="paragraph", anchor=anchor)
+    block1 = DocumentLayoutRegion(block_id="b1", block_type="paragraph", anchor=anchor)
+    block2 = DocumentLayoutRegion(block_id="b2", block_type="paragraph", anchor=anchor)
 
     with pytest.raises(ValidationError, match="cyclical contradiction"):
-        DocumentLayoutAnalysis(blocks={"b1": block1, "b2": block2}, reading_order_edges=[("b1", "b2"), ("b2", "b1")])
+        DocumentLayoutManifest(blocks={"b1": block1, "b2": block2}, reading_order_edges=[("b1", "b2"), ("b2", "b1")])
 
 
 def test_tabular_collision_prevention() -> None:
@@ -35,7 +35,7 @@ def test_tabular_collision_prevention() -> None:
     cell2 = TableCell(row_index=1, col_index=1, row_span=1, col_span=1, content="B", anchor=anchor)
 
     with pytest.raises(ValidationError, match="Geometric Collision Detected"):
-        TabularDataExtraction(cells=[cell1, cell2])
+        TabularMatrixExtraction(cells=[cell1, cell2])
 
 
 def test_mathematical_ungrounded_prevention() -> None:

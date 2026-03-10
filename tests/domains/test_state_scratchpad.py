@@ -8,7 +8,7 @@
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.spec.ontology import LatentScratchpadTrace, ThoughtBranch
+from coreason_manifest.spec.ontology import LatentScratchpadReceipt, ThoughtBranch
 
 
 def test_latent_scratchpad_trace_valid() -> None:
@@ -24,7 +24,7 @@ def test_latent_scratchpad_trace_valid() -> None:
         prm_score=0.4,
     )
 
-    trace = LatentScratchpadTrace(
+    trace = LatentScratchpadReceipt(
         trace_id="t1",
         explored_branches=[branch1, branch2],
         discarded_branches=["b2"],
@@ -43,7 +43,7 @@ def test_latent_scratchpad_trace_invalid_resolution_branch() -> None:
     )
 
     with pytest.raises(ValidationError) as exc:
-        LatentScratchpadTrace(
+        LatentScratchpadReceipt(
             trace_id="t1",
             explored_branches=[branch1],
             discarded_branches=[],
@@ -61,7 +61,7 @@ def test_latent_scratchpad_trace_invalid_discarded_branch() -> None:
     )
 
     with pytest.raises(ValidationError) as exc:
-        LatentScratchpadTrace(
+        LatentScratchpadReceipt(
             trace_id="t1",
             explored_branches=[branch1],
             discarded_branches=["ghost_b"],

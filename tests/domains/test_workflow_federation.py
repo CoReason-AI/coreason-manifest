@@ -11,14 +11,14 @@ from pydantic import ValidationError
 from coreason_manifest.spec.ontology import (
     BilateralSLA,
     CrossSwarmHandshake,
-    DataClassification,
-    FederatedDiscoveryProtocol,
+    FederatedDiscoveryManifest,
+    InformationClassification,
 )
 
 
 def test_federated_discovery_protocol_valid() -> None:
-    """Test valid instantiation of FederatedDiscoveryProtocol."""
-    protocol = FederatedDiscoveryProtocol(
+    """Test valid instantiation of FederatedDiscoveryManifest."""
+    protocol = FederatedDiscoveryManifest(
         broadcast_endpoints=["mcp://swarm.tenant-a.com/bidding", "mcp://backup.tenant-a.com/bidding"],
         supported_ontologies=["sha256:1234567890abcdef", "sha256:0987654321fedcba"],
     )
@@ -29,7 +29,7 @@ def test_federated_discovery_protocol_valid() -> None:
 def test_federated_discovery_protocol_missing_fields() -> None:
     """Test that missing required fields raise ValidationError."""
     with pytest.raises(ValidationError) as exc_info:
-        FederatedDiscoveryProtocol()  # type: ignore
+        FederatedDiscoveryManifest()  # type: ignore
 
     errors = exc_info.value.errors()
     missing_fields = [err["loc"][0] for err in errors if err["type"] == "missing"]
@@ -41,7 +41,7 @@ def test_cross_swarm_handshake_valid() -> None:
     """Test valid instantiation of CrossSwarmHandshake."""
     sla = BilateralSLA(
         receiving_tenant_id="did:example:tenant-b",
-        max_permitted_classification=DataClassification.RESTRICTED,
+        max_permitted_classification=InformationClassification.RESTRICTED,
         liability_limit_magnitude=1000000,
         permitted_geographic_regions=["us-east-1", "eu-west-1"],
     )
@@ -64,7 +64,7 @@ def test_cross_swarm_handshake_default_status() -> None:
     """Test that the default status is 'proposed'."""
     sla = BilateralSLA(
         receiving_tenant_id="did:example:tenant-b",
-        max_permitted_classification=DataClassification.PUBLIC,
+        max_permitted_classification=InformationClassification.PUBLIC,
         liability_limit_magnitude=0,
     )
 
@@ -82,7 +82,7 @@ def test_cross_swarm_handshake_invalid_status() -> None:
     """Test that an invalid status raises ValidationError."""
     sla = BilateralSLA(
         receiving_tenant_id="did:example:tenant-b",
-        max_permitted_classification=DataClassification.PUBLIC,
+        max_permitted_classification=InformationClassification.PUBLIC,
         liability_limit_magnitude=0,
     )
 

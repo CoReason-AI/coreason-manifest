@@ -1,6 +1,6 @@
 {
   "$defs": {
-    "ActionSpace": {
+    "ActionSpaceManifest": {
       "additionalProperties": false,
       "description": "A curated environment of tools accessible to an agent or node.",
       "properties": {
@@ -12,7 +12,7 @@
         "native_tools": {
           "description": "The list of discrete, natively defined tools available in this space.",
           "items": {
-            "$ref": "#/$defs/ToolDefinition"
+            "$ref": "#/$defs/ToolManifest"
           },
           "title": "Native Tools",
           "type": "array"
@@ -37,7 +37,7 @@
       "required": [
         "action_space_id"
       ],
-      "title": "ActionSpace",
+      "title": "ActionSpaceManifest",
       "type": "object"
     },
     "ActivationSteeringContract": {
@@ -104,7 +104,7 @@
           "type": "string"
         },
         "selected_tool_name": {
-          "description": "The exact tool from the ActionSpace allocated for this experiment.",
+          "description": "The exact tool from the ActionSpaceManifest allocated for this experiment.",
           "title": "Selected Tool Name",
           "type": "string"
         },
@@ -177,40 +177,7 @@
       "title": "AdjudicationIntent",
       "type": "object"
     },
-    "AdjudicationRubric": {
-      "additionalProperties": false,
-      "description": "Rubric defining multiple criteria and passing threshold for algorithmic adjudication.",
-      "properties": {
-        "rubric_id": {
-          "description": "Unique identifier for the rubric.",
-          "title": "Rubric Id",
-          "type": "string"
-        },
-        "criteria": {
-          "description": "List of criteria used in the rubric.",
-          "items": {
-            "$ref": "#/$defs/GradingCriteria"
-          },
-          "title": "Criteria",
-          "type": "array"
-        },
-        "passing_threshold": {
-          "description": "The minimum score required to pass.",
-          "maximum": 100.0,
-          "minimum": 0.0,
-          "title": "Passing Threshold",
-          "type": "number"
-        }
-      },
-      "required": [
-        "rubric_id",
-        "criteria",
-        "passing_threshold"
-      ],
-      "title": "AdjudicationRubric",
-      "type": "object"
-    },
-    "AdjudicationVerdict": {
+    "AdjudicationReceipt": {
       "additionalProperties": false,
       "description": "Verdict resulting from grading an LLM behavior or output against a rubric.",
       "properties": {
@@ -248,7 +215,40 @@
         "passed",
         "reasoning"
       ],
-      "title": "AdjudicationVerdict",
+      "title": "AdjudicationReceipt",
+      "type": "object"
+    },
+    "AdjudicationRubric": {
+      "additionalProperties": false,
+      "description": "Rubric defining multiple criteria and passing threshold for algorithmic adjudication.",
+      "properties": {
+        "rubric_id": {
+          "description": "Unique identifier for the rubric.",
+          "title": "Rubric Id",
+          "type": "string"
+        },
+        "criteria": {
+          "description": "List of criteria used in the rubric.",
+          "items": {
+            "$ref": "#/$defs/GradingCriteria"
+          },
+          "title": "Criteria",
+          "type": "array"
+        },
+        "passing_threshold": {
+          "description": "The minimum score required to pass.",
+          "maximum": 100.0,
+          "minimum": 0.0,
+          "title": "Passing Threshold",
+          "type": "number"
+        }
+      },
+      "required": [
+        "rubric_id",
+        "criteria",
+        "passing_threshold"
+      ],
+      "title": "AdjudicationRubric",
       "type": "object"
     },
     "AdversarialMarketTopology": {
@@ -397,7 +397,7 @@
       "title": "AffineTransformMatrix",
       "type": "object"
     },
-    "AgentAttestation": {
+    "AgentAttestationReceipt": {
       "additionalProperties": false,
       "description": "Cryptographic identity passport and AI-BOM for the agent.",
       "properties": {
@@ -432,7 +432,7 @@
         "developer_signature",
         "capability_merkle_root"
       ],
-      "title": "AgentAttestation",
+      "title": "AgentAttestationReceipt",
       "type": "object"
     },
     "AgentBid": {
@@ -577,7 +577,7 @@
         "agent_attestation": {
           "anyOf": [
             {
-              "$ref": "#/$defs/AgentAttestation"
+              "$ref": "#/$defs/AgentAttestationReceipt"
             },
             {
               "type": "null"
@@ -596,13 +596,13 @@
             }
           ],
           "default": null,
-          "description": "The ID of the specific ActionSpace (curated tool environment) bound to this agent.",
+          "description": "The ID of the specific ActionSpaceManifest (curated tool environment) bound to this agent.",
           "title": "Action Space Id"
         },
         "secure_sub_session": {
           "anyOf": [
             {
-              "$ref": "#/$defs/SecureSubSession"
+              "$ref": "#/$defs/SecureSubSessionState"
             },
             {
               "type": "null"
@@ -626,7 +626,7 @@
         "reflex_policy": {
           "anyOf": [
             {
-              "$ref": "#/$defs/System1Reflex"
+              "$ref": "#/$defs/System1ReflexPolicy"
             },
             {
               "type": "null"
@@ -638,7 +638,7 @@
         "epistemic_policy": {
           "anyOf": [
             {
-              "$ref": "#/$defs/EpistemicScanner"
+              "$ref": "#/$defs/EpistemicScanningPolicy"
             },
             {
               "type": "null"
@@ -762,7 +762,7 @@
       "title": "AgentNode",
       "type": "object"
     },
-    "AmbientSignal": {
+    "AmbientState": {
       "additionalProperties": false,
       "description": "Lightweight UX signal for UI rendering of progress.",
       "properties": {
@@ -788,7 +788,7 @@
       "required": [
         "status_message"
       ],
-      "title": "AmbientSignal",
+      "title": "AmbientState",
       "type": "object"
     },
     "AnalogicalMappingTask": {
@@ -936,7 +936,7 @@
       "discriminator": {
         "mapping": {
           "barge_in": "#/$defs/BargeInInterruptEvent",
-          "belief_update": "#/$defs/BeliefUpdateEvent",
+          "belief_mutation": "#/$defs/BeliefMutationEvent",
           "counterfactual_regret": "#/$defs/CounterfactualRegretEvent",
           "epistemic_promotion": "#/$defs/EpistemicPromotionEvent",
           "hypothesis": "#/$defs/HypothesisGenerationEvent",
@@ -953,7 +953,7 @@
           "$ref": "#/$defs/ObservationEvent"
         },
         {
-          "$ref": "#/$defs/BeliefUpdateEvent"
+          "$ref": "#/$defs/BeliefMutationEvent"
         },
         {
           "$ref": "#/$defs/SystemFaultEvent"
@@ -1155,7 +1155,7 @@
       "additionalProperties": false,
       "properties": {
         "announcement": {
-          "$ref": "#/$defs/TaskAnnouncement",
+          "$ref": "#/$defs/TaskAnnouncementIntent",
           "description": "The original call for proposals."
         },
         "bids": {
@@ -1169,7 +1169,7 @@
         "award": {
           "anyOf": [
             {
-              "$ref": "#/$defs/TaskAward"
+              "$ref": "#/$defs/TaskAwardReceipt"
             },
             {
               "type": "null"
@@ -1282,7 +1282,7 @@
             }
           ],
           "default": null,
-          "description": "The mathematical integer ceiling to prevent Sybil-like parallel mutations against the ActionSpace.",
+          "description": "The mathematical integer ceiling to prevent Sybil-like parallel mutations against the ActionSpaceManifest.",
           "title": "Max Concurrent Tool Invocations"
         }
       },
@@ -1569,7 +1569,7 @@
       "title": "BaseTopology",
       "type": "object"
     },
-    "BeliefUpdateEvent": {
+    "BeliefMutationEvent": {
       "additionalProperties": false,
       "properties": {
         "event_id": {
@@ -1583,8 +1583,8 @@
           "type": "number"
         },
         "type": {
-          "const": "belief_update",
-          "default": "belief_update",
+          "const": "belief_mutation",
+          "default": "belief_mutation",
           "description": "Discriminator type for a Belief Assertion event.",
           "title": "Type",
           "type": "string"
@@ -1618,7 +1618,7 @@
         "hardware_attestation": {
           "anyOf": [
             {
-              "$ref": "#/$defs/HardwareEnclaveAttestation"
+              "$ref": "#/$defs/HardwareEnclaveReceipt"
             },
             {
               "type": "null"
@@ -1630,7 +1630,7 @@
         "zk_proof": {
           "anyOf": [
             {
-              "$ref": "#/$defs/ZeroKnowledgeProof"
+              "$ref": "#/$defs/ZeroKnowledgeReceipt"
             },
             {
               "type": "null"
@@ -1654,7 +1654,7 @@
         "scratchpad_trace": {
           "anyOf": [
             {
-              "$ref": "#/$defs/LatentScratchpadTrace"
+              "$ref": "#/$defs/LatentScratchpadReceipt"
             },
             {
               "type": "null"
@@ -1681,7 +1681,7 @@
         "timestamp",
         "payload"
       ],
-      "title": "BeliefUpdateEvent",
+      "title": "BeliefMutationEvent",
       "type": "object"
     },
     "BilateralSLA": {
@@ -1694,7 +1694,7 @@
           "type": "string"
         },
         "max_permitted_classification": {
-          "$ref": "#/$defs/DataClassification",
+          "$ref": "#/$defs/InformationClassification",
           "description": "The absolute highest data sensitivity allowed to cross this federated boundary."
         },
         "liability_limit_magnitude": {
@@ -1798,7 +1798,7 @@
       "title": "BoundedInterventionScope",
       "type": "object"
     },
-    "BoundedJSONRPCRequest": {
+    "BoundedJSONRPCIntent": {
       "additionalProperties": false,
       "description": "Base schema enforcing rigorous JSON-RPC 2.0 boundaries to prevent DoS attacks.",
       "properties": {
@@ -1849,7 +1849,7 @@
         "jsonrpc",
         "method"
       ],
-      "title": "BoundedJSONRPCRequest",
+      "title": "BoundedJSONRPCIntent",
       "type": "object"
     },
     "BoundingBox": {
@@ -2091,7 +2091,7 @@
         "scale": {
           "anyOf": [
             {
-              "$ref": "#/$defs/ScaleDefinition"
+              "$ref": "#/$defs/ScalePolicy"
             },
             {
               "type": "null"
@@ -2108,7 +2108,7 @@
       "title": "ChannelEncoding",
       "type": "object"
     },
-    "ChaosExperiment": {
+    "ChaosExperimentTask": {
       "additionalProperties": false,
       "properties": {
         "experiment_id": {
@@ -2131,7 +2131,7 @@
         "shocks": {
           "description": "The declarative list of exogenous Black Swan events injected into the topology.",
           "items": {
-            "$ref": "#/$defs/ExogenousEpistemicShock"
+            "$ref": "#/$defs/ExogenousEpistemicEvent"
           },
           "title": "Shocks",
           "type": "array"
@@ -2142,7 +2142,7 @@
         "hypothesis",
         "faults"
       ],
-      "title": "ChaosExperiment",
+      "title": "ChaosExperimentTask",
       "type": "object"
     },
     "ChartAxisScale": {
@@ -2154,13 +2154,13 @@
       ],
       "type": "string"
     },
-    "CircuitBreakerTrip": {
+    "CircuitBreakerEvent": {
       "additionalProperties": false,
       "description": "Indicates that a circuit breaker has been tripped for a target node.",
       "properties": {
         "type": {
-          "const": "circuit_breaker",
-          "default": "circuit_breaker",
+          "const": "circuit_breaker_event",
+          "default": "circuit_breaker_event",
           "description": "The type of the resilience payload.",
           "title": "Type",
           "type": "string"
@@ -2179,7 +2179,7 @@
         "target_node_id",
         "error_signature"
       ],
-      "title": "CircuitBreakerTrip",
+      "title": "CircuitBreakerEvent",
       "type": "object"
     },
     "CognitiveRoutingDirective": {
@@ -2277,6 +2277,14 @@
       ],
       "title": "CognitiveStateProfile",
       "type": "object"
+    },
+    "CognitiveTier": {
+      "enum": [
+        "working",
+        "episodic",
+        "semantic"
+      ],
+      "type": "string"
     },
     "CognitiveUncertaintyProfile": {
       "additionalProperties": false,
@@ -2410,7 +2418,7 @@
       "title": "CompositeNode",
       "type": "object"
     },
-    "ComputeProvisioningRequest": {
+    "ComputeProvisioningIntent": {
       "additionalProperties": false,
       "description": "A request by a swarm to provision resources based on requirements.",
       "properties": {
@@ -2437,7 +2445,7 @@
         "max_budget",
         "required_capabilities"
       ],
-      "title": "ComputeProvisioningRequest",
+      "title": "ComputeProvisioningIntent",
       "type": "object"
     },
     "ConsensusFederationTopology": {
@@ -2585,7 +2593,7 @@
       "title": "ConstitutionalAmendmentProposal",
       "type": "object"
     },
-    "ConstitutionalRule": {
+    "ConstitutionalPolicy": {
       "additionalProperties": false,
       "description": "Defines a constitutional rule for AI governance.",
       "properties": {
@@ -2627,7 +2635,7 @@
         "severity",
         "forbidden_intents"
       ],
-      "title": "ConstitutionalRule",
+      "title": "ConstitutionalPolicy",
       "type": "object"
     },
     "ContinuousMutationPolicy": {
@@ -2863,12 +2871,12 @@
           "title": "Epistemic Regret",
           "type": "number"
         },
-        "policy_update_gradients": {
+        "policy_mutation_gradients": {
           "additionalProperties": {
             "type": "number"
           },
           "description": "The stateless routing gradient adjustments derived from the calculated regret, used to self-correct future routing.",
-          "title": "Policy Update Gradients",
+          "title": "Policy Mutation Gradients",
           "type": "object"
         }
       },
@@ -2928,7 +2936,7 @@
       "title": "CrossSwarmHandshake",
       "type": "object"
     },
-    "CrossoverStrategy": {
+    "CrossoverPolicy": {
       "additionalProperties": false,
       "description": "The mathematical rules for combining elite agents.",
       "properties": {
@@ -2960,7 +2968,7 @@
         "strategy_type",
         "blending_factor"
       ],
-      "title": "CrossoverStrategy",
+      "title": "CrossoverPolicy",
       "type": "object"
     },
     "CrossoverType": {
@@ -2986,25 +2994,25 @@
           "title": "Aleatoric Entropy Threshold",
           "type": "number"
         },
-        "target_memory_tier": {
+        "target_cognitive_tier": {
           "description": "The destination tier where the compressed rule will be stored.",
           "enum": [
             "semantic",
             "working"
           ],
-          "title": "Target Memory Tier",
+          "title": "Target Cognitive Tier",
           "type": "string"
         }
       },
       "required": [
         "min_observations_required",
         "aleatoric_entropy_threshold",
-        "target_memory_tier"
+        "target_cognitive_tier"
       ],
       "title": "CrystallizationPolicy",
       "type": "object"
     },
-    "CustodyRecord": {
+    "CustodyReceipt": {
       "additionalProperties": false,
       "description": "Cryptographic state of an agent to ensure full traceability and provenance.",
       "properties": {
@@ -3059,7 +3067,7 @@
         "post_redaction_hash",
         "redaction_timestamp_unix_nano"
       ],
-      "title": "CustodyRecord",
+      "title": "CustodyReceipt",
       "type": "object"
     },
     "DAGTopology": {
@@ -3215,17 +3223,6 @@
       "title": "DAGTopology",
       "type": "object"
     },
-    "DataClassification": {
-      "description": "Standardized Information Flow Control (IFC) lattice boundaries.",
-      "enum": [
-        "public",
-        "internal",
-        "confidential",
-        "restricted"
-      ],
-      "title": "DataClassification",
-      "type": "string"
-    },
     "DefeasibleAttack": {
       "additionalProperties": false,
       "properties": {
@@ -3268,7 +3265,7 @@
           "type": "string"
         },
         "root_falsified_event_id": {
-          "description": "The source BeliefUpdateEvent or HypothesisGenerationEvent Content Identifier (CID) that collapsed and triggered this cascade.",
+          "description": "The source BeliefMutationEvent or HypothesisGenerationEvent Content Identifier (CID) that collapsed and triggered this cascade.",
           "title": "Root Falsified Event Id",
           "type": "string"
         },
@@ -3564,12 +3561,12 @@
       "title": "DiversityConstraint",
       "type": "object"
     },
-    "DocumentLayoutAnalysis": {
+    "DocumentLayoutManifest": {
       "additionalProperties": false,
       "properties": {
         "blocks": {
           "additionalProperties": {
-            "$ref": "#/$defs/DocumentLayoutBlock"
+            "$ref": "#/$defs/DocumentLayoutRegion"
           },
           "description": "Dictionary mapping block_ids to their strict spatial definitions.",
           "title": "Blocks",
@@ -3597,10 +3594,10 @@
       "required": [
         "blocks"
       ],
-      "title": "DocumentLayoutAnalysis",
+      "title": "DocumentLayoutManifest",
       "type": "object"
     },
-    "DocumentLayoutBlock": {
+    "DocumentLayoutRegion": {
       "additionalProperties": false,
       "properties": {
         "block_id": {
@@ -3633,7 +3630,7 @@
         "block_type",
         "anchor"
       ],
-      "title": "DocumentLayoutBlock",
+      "title": "DocumentLayoutRegion",
       "type": "object"
     },
     "DraftingIntent": {
@@ -3707,7 +3704,7 @@
       "title": "DynamicConvergenceSLA",
       "type": "object"
     },
-    "DynamicLayoutTemplate": {
+    "DynamicLayoutManifest": {
       "additionalProperties": false,
       "description": "Schema representing a template for dynamic grid layouts.",
       "properties": {
@@ -3720,7 +3717,7 @@
       "required": [
         "layout_tstring"
       ],
-      "title": "DynamicLayoutTemplate",
+      "title": "DynamicLayoutManifest",
       "type": "object"
     },
     "DynamicRoutingManifest": {
@@ -3947,7 +3944,7 @@
       "title": "EpistemicCompressionSLA",
       "type": "object"
     },
-    "EpistemicLedger": {
+    "EpistemicLedgerState": {
       "additionalProperties": false,
       "description": "The Committed Epistemic Ledger (crystallized truth), completely partitioned from volatile working memory\nor Epistemic Quarantine.",
       "properties": {
@@ -3963,7 +3960,7 @@
         "checkpoints": {
           "description": "Hard temporal anchors allowing state restoration.",
           "items": {
-            "$ref": "#/$defs/TemporalCheckpoint"
+            "$ref": "#/$defs/TemporalCheckpointState"
           },
           "title": "Checkpoints",
           "type": "array"
@@ -3971,7 +3968,7 @@
         "active_rollbacks": {
           "description": "Causal invalidations actively enforced on the execution tree.",
           "items": {
-            "$ref": "#/$defs/RollbackRequest"
+            "$ref": "#/$defs/RollbackIntent"
           },
           "title": "Active Rollbacks",
           "type": "array"
@@ -4032,7 +4029,7 @@
       "required": [
         "history"
       ],
-      "title": "EpistemicLedger",
+      "title": "EpistemicLedgerState",
       "type": "object"
     },
     "EpistemicPromotionEvent": {
@@ -4084,7 +4081,129 @@
       "title": "EpistemicPromotionEvent",
       "type": "object"
     },
-    "EpistemicScanner": {
+    "EpistemicProvenance": {
+      "additionalProperties": false,
+      "properties": {
+        "extracted_by": {
+          "$ref": "#/$defs/NodeID",
+          "description": "The Content Identifier (CID) of the agent node that extracted this memory."
+        },
+        "source_event_id": {
+          "description": "The exact event Content Identifier (CID) in the EpistemicLedgerState that generated this fact.",
+          "title": "Source Event Id",
+          "type": "string"
+        },
+        "source_artifact_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The CID of the Genesis MultimodalArtifact this memory was transmutated from.",
+          "title": "Source Artifact Id"
+        },
+        "multimodal_anchor": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MultimodalTokenAnchor"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The unified VLM spatial and temporal token matrix where this data was extracted."
+        },
+        "lineage_watermark": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LineageWatermarkReceipt"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The cryptographic, tamper-evident chain of custody tracing this memory across multiple swarm hops."
+        }
+      },
+      "required": [
+        "extracted_by",
+        "source_event_id"
+      ],
+      "title": "EpistemicProvenance",
+      "type": "object"
+    },
+    "EpistemicQuarantineSnapshot": {
+      "additionalProperties": false,
+      "description": "Represents the Epistemic Quarantine, partitioned from the Committed Epistemic Ledger.",
+      "properties": {
+        "system_prompt": {
+          "description": "The basal non-monotonic instruction set currently held in Epistemic Quarantine.",
+          "title": "System Prompt",
+          "type": "string"
+        },
+        "active_context": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "The ephemeral latent variables and environmental bindings currently active in Epistemic Quarantine.",
+          "title": "Active Context",
+          "type": "object"
+        },
+        "argumentation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ArgumentGraph"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The formal graph of non-monotonic claims and defeasible attacks currently active in the swarm's working memory."
+        },
+        "theory_of_mind_models": {
+          "description": "Empathetic models of other agents to compress and target outgoing communications.",
+          "items": {
+            "$ref": "#/$defs/TheoryOfMindSnapshot"
+          },
+          "title": "Theory Of Mind Models",
+          "type": "array"
+        },
+        "affordance_projection": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OntologicalSurfaceProjection"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematically bounded subgraph of capabilities currently available to the agent."
+        },
+        "capability_attestations": {
+          "description": "Immutable cryptographic receipts of dynamically discovered external enterprise connectors.",
+          "items": {
+            "$ref": "#/$defs/FederatedCapabilityAttestation"
+          },
+          "title": "Capability Attestations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "system_prompt",
+        "active_context"
+      ],
+      "title": "EpistemicQuarantineSnapshot",
+      "type": "object"
+    },
+    "EpistemicScanningPolicy": {
       "additionalProperties": false,
       "description": "Policy for epistemic scanning and gap detection.",
       "properties": {
@@ -4116,7 +4235,7 @@
         "dissonance_threshold",
         "action_on_gap"
       ],
-      "title": "EpistemicScanner",
+      "title": "EpistemicScanningPolicy",
       "type": "object"
     },
     "EpistemicTransmutationTask": {
@@ -4448,7 +4567,7 @@
             }
           ],
           "default": null,
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for a specific observation in the EpistemicLedger.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for a specific observation in the EpistemicLedgerState.",
           "title": "Source Event Id"
         },
         "source_semantic_node_id": {
@@ -4585,7 +4704,7 @@
           "description": "The constraints governing random heuristic mutations."
         },
         "crossover": {
-          "$ref": "#/$defs/CrossoverStrategy"
+          "$ref": "#/$defs/CrossoverPolicy"
         },
         "fitness_objectives": {
           "description": "The multi-dimensional criteria used to score and cull the population.",
@@ -4690,7 +4809,7 @@
           "title": "Max Execution Time Ms",
           "type": "integer"
         },
-        "max_memory_mb": {
+        "max_compute_footprint_mb": {
           "anyOf": [
             {
               "exclusiveMinimum": 0,
@@ -4702,7 +4821,7 @@
           ],
           "default": null,
           "description": "The maximum memory footprint allowed for the tool's execution sandbox.",
-          "title": "Max Memory Mb"
+          "title": "Max Compute Footprint Mb"
         }
       },
       "required": [
@@ -4791,7 +4910,7 @@
       "title": "ExecutionSpan",
       "type": "object"
     },
-    "ExogenousEpistemicShock": {
+    "ExogenousEpistemicEvent": {
       "additionalProperties": false,
       "properties": {
         "shock_id": {
@@ -4830,7 +4949,7 @@
         "synthetic_payload",
         "escrow"
       ],
-      "title": "ExogenousEpistemicShock",
+      "title": "ExogenousEpistemicEvent",
       "type": "object"
     },
     "FYIIntent": {
@@ -4882,6 +5001,33 @@
       "title": "FacetMatrix",
       "type": "object"
     },
+    "FallbackIntent": {
+      "additionalProperties": false,
+      "description": "Indicates that fallback procedures should be triggered for a target node.",
+      "properties": {
+        "type": {
+          "const": "fallback_intent",
+          "default": "fallback_intent",
+          "description": "The type of the resilience payload.",
+          "title": "Type",
+          "type": "string"
+        },
+        "target_node_id": {
+          "$ref": "#/$defs/NodeID",
+          "description": "The ID of the failing node."
+        },
+        "fallback_node_id": {
+          "$ref": "#/$defs/NodeID",
+          "description": "The ID of the node to use as a fallback."
+        }
+      },
+      "required": [
+        "target_node_id",
+        "fallback_node_id"
+      ],
+      "title": "FallbackIntent",
+      "type": "object"
+    },
     "FallbackSLA": {
       "additionalProperties": false,
       "description": "SLA defining bounds on human intervention delays.",
@@ -4922,33 +5068,6 @@
       "title": "FallbackSLA",
       "type": "object"
     },
-    "FallbackTrigger": {
-      "additionalProperties": false,
-      "description": "Indicates that fallback procedures should be triggered for a target node.",
-      "properties": {
-        "type": {
-          "const": "fallback",
-          "default": "fallback",
-          "description": "The type of the resilience payload.",
-          "title": "Type",
-          "type": "string"
-        },
-        "target_node_id": {
-          "$ref": "#/$defs/NodeID",
-          "description": "The ID of the failing node."
-        },
-        "fallback_node_id": {
-          "$ref": "#/$defs/NodeID",
-          "description": "The ID of the node to use as a fallback."
-        }
-      },
-      "required": [
-        "target_node_id",
-        "fallback_node_id"
-      ],
-      "title": "FallbackTrigger",
-      "type": "object"
-    },
     "FalsificationCondition": {
       "additionalProperties": false,
       "properties": {
@@ -4973,7 +5092,7 @@
             }
           ],
           "default": null,
-          "description": "The specific ActionSpace tool required to test this condition (e.g., 'sql_query_db').",
+          "description": "The specific ActionSpaceManifest tool required to test this condition (e.g., 'sql_query_db').",
           "title": "Required Tool Name"
         },
         "falsifying_observation_signature": {
@@ -5051,7 +5170,7 @@
           "description": "The DID of the discovered external data lake/VPC."
         },
         "authorized_session": {
-          "$ref": "#/$defs/SecureSubSession",
+          "$ref": "#/$defs/SecureSubSessionState",
           "description": "The isolated memory partition granted to the agent for this connection."
         },
         "governing_sla": {
@@ -5068,7 +5187,7 @@
       "title": "FederatedCapabilityAttestation",
       "type": "object"
     },
-    "FederatedDiscoveryProtocol": {
+    "FederatedDiscoveryManifest": {
       "additionalProperties": false,
       "properties": {
         "broadcast_endpoints": {
@@ -5092,7 +5211,7 @@
         "broadcast_endpoints",
         "supported_ontologies"
       ],
-      "title": "FederatedDiscoveryProtocol",
+      "title": "FederatedDiscoveryManifest",
       "type": "object"
     },
     "FederatedStateSnapshot": {
@@ -5209,7 +5328,7 @@
     },
     "GlobalGovernance": {
       "additionalProperties": false,
-      "description": "Global governance bounds for a swarm executing a workflow envelope.",
+      "description": "Global governance bounds for a swarm executing a workflow manifest.",
       "properties": {
         "max_budget_magnitude": {
           "description": "The absolute maximum economic cost allowed for the entire swarm lifecycle.",
@@ -5318,7 +5437,7 @@
         "rules": {
           "description": "List of constitutional rules included in this policy.",
           "items": {
-            "$ref": "#/$defs/ConstitutionalRule"
+            "$ref": "#/$defs/ConstitutionalPolicy"
           },
           "title": "Rules",
           "type": "array"
@@ -5383,7 +5502,7 @@
           "type": "string"
         },
         "data_source_id": {
-          "description": "The cryptographic pointer to the dataset in the EpistemicLedger.",
+          "description": "The cryptographic pointer to the dataset in the EpistemicLedgerState.",
           "title": "Data Source Id",
           "type": "string"
         },
@@ -5500,7 +5619,7 @@
       "title": "HTTPTransportConfig",
       "type": "object"
     },
-    "HardwareEnclaveAttestation": {
+    "HardwareEnclaveReceipt": {
       "additionalProperties": false,
       "properties": {
         "enclave_type": {
@@ -5531,7 +5650,7 @@
         "platform_measurement_hash",
         "hardware_signature_blob"
       ],
-      "title": "HardwareEnclaveAttestation",
+      "title": "HardwareEnclaveReceipt",
       "type": "object"
     },
     "HomomorphicEncryptionProfile": {
@@ -5642,7 +5761,7 @@
             }
           ],
           "default": null,
-          "description": "AGENT INSTRUCTION: If set, the orchestrator MUST NOT resolve\n        this node without a cryptographically matching WetwareAttestationContract\n        supplied in the InterventionVerdict."
+          "description": "AGENT INSTRUCTION: If set, the orchestrator MUST NOT resolve\n        this node without a cryptographically matching WetwareAttestationContract\n        supplied in the InterventionReceipt."
         }
       },
       "required": [
@@ -5700,7 +5819,7 @@
         },
         "status": {
           "default": "active",
-          "description": "The current validity state of this hypothesis in the EpistemicLedger.",
+          "description": "The current validity state of this hypothesis in the EpistemicLedgerState.",
           "enum": [
             "active",
             "falsified",
@@ -5772,6 +5891,17 @@
       "title": "HypothesisStake",
       "type": "object"
     },
+    "InformationClassification": {
+      "description": "Standardized Information Flow Control (IFC) lattice boundaries.",
+      "enum": [
+        "public",
+        "internal",
+        "confidential",
+        "restricted"
+      ],
+      "title": "InformationClassification",
+      "type": "string"
+    },
     "InformationFlowPolicy": {
       "additionalProperties": false,
       "description": "Mathematical Data Loss Prevention (DLP) contract that bounds the graph.",
@@ -5790,7 +5920,7 @@
         "rules": {
           "description": "The array of sanitization rules to enforce.",
           "items": {
-            "$ref": "#/$defs/RedactionRule"
+            "$ref": "#/$defs/RedactionPolicy"
           },
           "title": "Rules",
           "type": "array"
@@ -5810,7 +5940,7 @@
         "latent_firewalls": {
           "description": "The list of tensor-level mechanistic firewalls monitoring the forward pass for adversarial intent.",
           "items": {
-            "$ref": "#/$defs/SaeLatentFirewall"
+            "$ref": "#/$defs/SaeLatentPolicy"
           },
           "title": "Latent Firewalls",
           "type": "array"
@@ -5912,40 +6042,7 @@
       "title": "InsightCard",
       "type": "object"
     },
-    "InterventionPolicy": {
-      "additionalProperties": false,
-      "description": "Proactive oversight hook bound to a specific lifecycle event.",
-      "properties": {
-        "trigger": {
-          "$ref": "#/$defs/LifecycleTrigger",
-          "description": "The exact topological lifecycle event that triggers this intervention."
-        },
-        "scope": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/BoundedInterventionScope"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The strictly typed boundaries for what the human/oversight system is allowed to mutate during this pause."
-        },
-        "blocking": {
-          "default": true,
-          "description": "If True, the graph execution halts until a verdict is rendered. If False, it is an async observation.",
-          "title": "Blocking",
-          "type": "boolean"
-        }
-      },
-      "required": [
-        "trigger"
-      ],
-      "title": "InterventionPolicy",
-      "type": "object"
-    },
-    "InterventionRequest": {
+    "InterventionIntent": {
       "additionalProperties": false,
       "description": "Emitted when an agent needs human approval or further intervention.",
       "properties": {
@@ -6025,10 +6122,43 @@
         "proposed_action",
         "adjudication_deadline"
       ],
-      "title": "InterventionRequest",
+      "title": "InterventionIntent",
       "type": "object"
     },
-    "InterventionVerdict": {
+    "InterventionPolicy": {
+      "additionalProperties": false,
+      "description": "Proactive oversight hook bound to a specific lifecycle event.",
+      "properties": {
+        "trigger": {
+          "$ref": "#/$defs/LifecycleTrigger",
+          "description": "The exact topological lifecycle event that triggers this intervention."
+        },
+        "scope": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BoundedInterventionScope"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The strictly typed boundaries for what the human/oversight system is allowed to mutate during this pause."
+        },
+        "blocking": {
+          "default": true,
+          "description": "If True, the graph execution halts until a verdict is rendered. If False, it is an async observation.",
+          "title": "Blocking",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "trigger"
+      ],
+      "title": "InterventionPolicy",
+      "type": "object"
+    },
+    "InterventionReceipt": {
       "additionalProperties": false,
       "description": "Emitted by a human or oversight AI to resume the swarm.",
       "properties": {
@@ -6085,7 +6215,7 @@
         "approved",
         "feedback"
       ],
-      "title": "InterventionVerdict",
+      "title": "InterventionReceipt",
       "type": "object"
     },
     "InterventionalCausalTask": {
@@ -6245,7 +6375,7 @@
       "title": "LakehouseMountConfig",
       "type": "object"
     },
-    "LatentScratchpadTrace": {
+    "LatentScratchpadReceipt": {
       "additionalProperties": false,
       "properties": {
         "trace_id": {
@@ -6296,7 +6426,7 @@
         "discarded_branches",
         "total_latent_tokens"
       ],
-      "title": "LatentScratchpadTrace",
+      "title": "LatentScratchpadReceipt",
       "type": "object"
     },
     "LatentSmoothingProfile": {
@@ -6351,7 +6481,7 @@
       ],
       "type": "string"
     },
-    "LineageWatermark": {
+    "LineageWatermarkReceipt": {
       "additionalProperties": false,
       "properties": {
         "watermark_protocol": {
@@ -6383,12 +6513,12 @@
         "hop_signatures",
         "tamper_evident_root"
       ],
-      "title": "LineageWatermark",
+      "title": "LineageWatermarkReceipt",
       "type": "object"
     },
-    "LogEnvelope": {
+    "LogEvent": {
       "additionalProperties": false,
-      "description": "An out-of-band telemetry log envelope.",
+      "description": "An out-of-band telemetry log manifest.",
       "properties": {
         "timestamp": {
           "description": "The UNIX timestamp of the log event.",
@@ -6422,7 +6552,7 @@
         "level",
         "message"
       ],
-      "title": "LogEnvelope",
+      "title": "LogEvent",
       "type": "object"
     },
     "LogitSteganographyContract": {
@@ -6654,7 +6784,7 @@
       "title": "MCPPromptRef",
       "type": "object"
     },
-    "MCPResourceList": {
+    "MCPResourceManifest": {
       "additionalProperties": false,
       "description": "A collection of Semantic Memory resource URIs provided by a specific MCP server.",
       "properties": {
@@ -6675,7 +6805,7 @@
       "required": [
         "server_id"
       ],
-      "title": "MCPResourceList",
+      "title": "MCPResourceManifest",
       "type": "object"
     },
     "MCPServerConfig": {
@@ -6840,7 +6970,7 @@
       "title": "MarketContract",
       "type": "object"
     },
-    "MarketResolution": {
+    "MarketResolutionState": {
       "additionalProperties": false,
       "description": "The resolution state of an algorithmic prediction market.",
       "properties": {
@@ -6878,7 +7008,7 @@
         "falsified_hypothesis_ids",
         "payout_distribution"
       ],
-      "title": "MarketResolution",
+      "title": "MarketResolutionState",
       "type": "object"
     },
     "MathematicalNotationExtraction": {
@@ -7052,71 +7182,6 @@
       ],
       "title": "MemoizedNode",
       "type": "object"
-    },
-    "MemoryProvenance": {
-      "additionalProperties": false,
-      "properties": {
-        "extracted_by": {
-          "$ref": "#/$defs/NodeID",
-          "description": "The Content Identifier (CID) of the agent node that extracted this memory."
-        },
-        "source_event_id": {
-          "description": "The exact event Content Identifier (CID) in the EpistemicLedger that generated this fact.",
-          "title": "Source Event Id",
-          "type": "string"
-        },
-        "source_artifact_id": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The CID of the Genesis MultimodalArtifact this memory was transmutated from.",
-          "title": "Source Artifact Id"
-        },
-        "multimodal_anchor": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/MultimodalTokenAnchor"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The unified VLM spatial and temporal token matrix where this data was extracted."
-        },
-        "lineage_watermark": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/LineageWatermark"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The cryptographic, tamper-evident chain of custody tracing this memory across multiple swarm hops."
-        }
-      },
-      "required": [
-        "extracted_by",
-        "source_event_id"
-      ],
-      "title": "MemoryProvenance",
-      "type": "object"
-    },
-    "MemoryTier": {
-      "enum": [
-        "working",
-        "episodic",
-        "semantic"
-      ],
-      "type": "string"
     },
     "MetadataDict": {
       "additionalProperties": {
@@ -7408,9 +7473,9 @@
           "title": "Shape",
           "type": "array"
         },
-        "memory_footprint_bytes": {
+        "vram_footprint_bytes": {
           "description": "Exact byte size of the uncompressed tensor.",
-          "title": "Memory Footprint Bytes",
+          "title": "Vram Footprint Bytes",
           "type": "integer"
         },
         "merkle_root": {
@@ -7428,7 +7493,7 @@
       "required": [
         "dtype",
         "shape",
-        "memory_footprint_bytes",
+        "vram_footprint_bytes",
         "merkle_root",
         "storage_uri"
       ],
@@ -7571,7 +7636,7 @@
           "type": "string"
         },
         "tripped_rule_id": {
-          "description": "The Content Identifier (CID) of the specific ConstitutionalRule causing logical friction.",
+          "description": "The Content Identifier (CID) of the specific ConstitutionalPolicy causing logical friction.",
           "title": "Tripped Rule Id",
           "type": "string"
         },
@@ -7656,7 +7721,7 @@
         "hardware_attestation": {
           "anyOf": [
             {
-              "$ref": "#/$defs/HardwareEnclaveAttestation"
+              "$ref": "#/$defs/HardwareEnclaveReceipt"
             },
             {
               "type": "null"
@@ -7668,7 +7733,7 @@
         "zk_proof": {
           "anyOf": [
             {
-              "$ref": "#/$defs/ZeroKnowledgeProof"
+              "$ref": "#/$defs/ZeroKnowledgeReceipt"
             },
             {
               "type": "null"
@@ -7831,7 +7896,7 @@
     },
     "OntologicalSurfaceProjection": {
       "additionalProperties": false,
-      "description": "A mathematically bounded, declarative subgraph of all ToolDefinitions and\nMCPServerManifests currently valid for the agent's ProfileID.",
+      "description": "A mathematically bounded, declarative subgraph of all ToolManifests and\nMCPServerManifests currently valid for the agent's ProfileID.",
       "properties": {
         "projection_id": {
           "description": "A cryptographic Lineage Watermark bounding this specific capability set.",
@@ -7842,7 +7907,7 @@
         "action_spaces": {
           "description": "The full, machine-readable declaration of accessible tools and MCP servers.",
           "items": {
-            "$ref": "#/$defs/ActionSpace"
+            "$ref": "#/$defs/ActionSpaceManifest"
           },
           "title": "Action Spaces",
           "type": "array"
@@ -8103,7 +8168,7 @@
           "type": "string"
         },
         "committed_state_diff_id": {
-          "description": "The internal StateDiff CID that was flushed.",
+          "description": "The internal StateDifferential CID that was flushed.",
           "minLength": 1,
           "title": "Committed State Diff Id",
           "type": "string"
@@ -8241,7 +8306,7 @@
       "title": "PredictionMarketState",
       "type": "object"
     },
-    "PresentationEnvelope": {
+    "PresentationManifest": {
       "additionalProperties": false,
       "description": "An envelope wrapping a grid presentation and its intent.",
       "properties": {
@@ -8258,7 +8323,7 @@
         "intent",
         "grid"
       ],
-      "title": "PresentationEnvelope",
+      "title": "PresentationManifest",
       "type": "object"
     },
     "ProcessRewardContract": {
@@ -8330,13 +8395,13 @@
       ],
       "type": "string"
     },
-    "QuarantineOrder": {
+    "QuarantineIntent": {
       "additionalProperties": false,
       "description": "Indicates that a target node should be quarantined.",
       "properties": {
         "type": {
-          "const": "quarantine",
-          "default": "quarantine",
+          "const": "quarantine_intent",
+          "default": "quarantine_intent",
           "description": "The type of the resilience payload.",
           "title": "Type",
           "type": "string"
@@ -8355,7 +8420,7 @@
         "target_node_id",
         "reason"
       ],
-      "title": "QuarantineOrder",
+      "title": "QuarantineIntent",
       "type": "object"
     },
     "QuorumPolicy": {
@@ -8432,7 +8497,7 @@
       "title": "RateCard",
       "type": "object"
     },
-    "RedactionRule": {
+    "RedactionPolicy": {
       "additionalProperties": false,
       "description": "A specific rule for algorithmic data sanitization.",
       "properties": {
@@ -8442,7 +8507,7 @@
           "type": "string"
         },
         "classification": {
-          "$ref": "#/$defs/DataClassification",
+          "$ref": "#/$defs/InformationClassification",
           "description": "The category of sensitive data this rule targets."
         },
         "target_pattern": {
@@ -8498,7 +8563,7 @@
         "target_regex_pattern",
         "action"
       ],
-      "title": "RedactionRule",
+      "title": "RedactionPolicy",
       "type": "object"
     },
     "RiskLevel": {
@@ -8511,7 +8576,7 @@
       "title": "RiskLevel",
       "type": "string"
     },
-    "RollbackRequest": {
+    "RollbackIntent": {
       "additionalProperties": false,
       "properties": {
         "request_id": {
@@ -8520,7 +8585,7 @@
           "type": "string"
         },
         "target_event_id": {
-          "description": "The Content Identifier (CID) of the corrupted event in the EpistemicLedger to revert to.",
+          "description": "The Content Identifier (CID) of the corrupted event in the EpistemicLedgerState to revert to.",
           "title": "Target Event Id",
           "type": "string"
         },
@@ -8537,7 +8602,7 @@
         "request_id",
         "target_event_id"
       ],
-      "title": "RollbackRequest",
+      "title": "RollbackIntent",
       "type": "object"
     },
     "RoutingFrontier": {
@@ -8808,7 +8873,7 @@
       "title": "SaeFeatureActivation",
       "type": "object"
     },
-    "SaeLatentFirewall": {
+    "SaeLatentPolicy": {
       "additionalProperties": false,
       "description": "A real-time mechanistic interpretability boundary that monitors and controls specific neural circuits.",
       "properties": {
@@ -8883,7 +8948,7 @@
         "violation_action",
         "sae_dictionary_hash"
       ],
-      "title": "SaeLatentFirewall",
+      "title": "SaeLatentPolicy",
       "type": "object"
     },
     "SalienceProfile": {
@@ -8919,7 +8984,7 @@
       ],
       "type": "string"
     },
-    "ScaleDefinition": {
+    "ScalePolicy": {
       "additionalProperties": false,
       "description": "The mathematical mapping constraint for a channel.",
       "properties": {
@@ -8965,10 +9030,10 @@
       "required": [
         "type"
       ],
-      "title": "ScaleDefinition",
+      "title": "ScalePolicy",
       "type": "object"
     },
-    "SecureSubSession": {
+    "SecureSubSessionState": {
       "additionalProperties": false,
       "description": "Declarative boundary for handling unredacted secrets within a temporarily isolated memory partition.",
       "properties": {
@@ -9007,7 +9072,7 @@
         "max_ttl_seconds",
         "description"
       ],
-      "title": "SecureSubSession",
+      "title": "SecureSubSessionState",
       "type": "object"
     },
     "SelfCorrectionPolicy": {
@@ -9087,7 +9152,7 @@
         "provenance": {
           "anyOf": [
             {
-              "$ref": "#/$defs/MemoryProvenance"
+              "$ref": "#/$defs/EpistemicProvenance"
             },
             {
               "type": "null"
@@ -9208,11 +9273,11 @@
           "description": "Topologically Bounded Latent Spaces used to calculate exact geometric distance and preserve structural Isometry."
         },
         "provenance": {
-          "$ref": "#/$defs/MemoryProvenance",
+          "$ref": "#/$defs/EpistemicProvenance",
           "description": "The cryptographic chain of custody for this memory."
         },
         "tier": {
-          "$ref": "#/$defs/MemoryTier",
+          "$ref": "#/$defs/CognitiveTier",
           "default": "semantic",
           "description": "The cognitive tier this memory resides in."
         },
@@ -9537,7 +9602,7 @@
       "title": "StateContract",
       "type": "object"
     },
-    "StateDiff": {
+    "StateDifferential": {
       "additionalProperties": false,
       "properties": {
         "diff_id": {
@@ -9567,7 +9632,7 @@
         "patches": {
           "description": "The exact, ordered sequence of deterministic state vector mutations.",
           "items": {
-            "$ref": "#/$defs/StatePatch"
+            "$ref": "#/$defs/StateMutation"
           },
           "title": "Patches",
           "type": "array"
@@ -9579,10 +9644,10 @@
         "lamport_timestamp",
         "vector_clock"
       ],
-      "title": "StateDiff",
+      "title": "StateDifferential",
       "type": "object"
     },
-    "StatePatch": {
+    "StateMutation": {
       "additionalProperties": false,
       "properties": {
         "op": {
@@ -9610,7 +9675,7 @@
         "op",
         "path"
       ],
-      "title": "StatePatch",
+      "title": "StateMutation",
       "type": "object"
     },
     "StatisticalChartExtraction": {
@@ -9763,11 +9828,11 @@
       "title": "StructuralCausalModel",
       "type": "object"
     },
-    "SuspenseEnvelope": {
+    "SuspenseState": {
       "additionalProperties": false,
       "description": "Indicates that the swarm is waiting on a long-running process or human input.",
       "properties": {},
-      "title": "SuspenseEnvelope",
+      "title": "SuspenseState",
       "type": "object"
     },
     "SwarmTopology": {
@@ -9900,7 +9965,7 @@
         "resolved_markets": {
           "description": "The immutable records of finalized markets and reputation capital distributions.",
           "items": {
-            "$ref": "#/$defs/MarketResolution"
+            "$ref": "#/$defs/MarketResolutionState"
           },
           "title": "Resolved Markets",
           "type": "array"
@@ -9941,7 +10006,7 @@
       "title": "SyntheticGenerationProfile",
       "type": "object"
     },
-    "System1Reflex": {
+    "System1ReflexPolicy": {
       "additionalProperties": false,
       "description": "Policy for fast, intuitive system 1 thinking.",
       "properties": {
@@ -9965,7 +10030,7 @@
         "confidence_threshold",
         "allowed_read_only_tools"
       ],
-      "title": "System1Reflex",
+      "title": "System1ReflexPolicy",
       "type": "object"
     },
     "System2RemediationPrompt": {
@@ -10154,7 +10219,7 @@
       "title": "TableCell",
       "type": "object"
     },
-    "TabularDataExtraction": {
+    "TabularMatrixExtraction": {
       "additionalProperties": false,
       "properties": {
         "cells": {
@@ -10169,10 +10234,10 @@
       "required": [
         "cells"
       ],
-      "title": "TabularDataExtraction",
+      "title": "TabularMatrixExtraction",
       "type": "object"
     },
-    "TaskAnnouncement": {
+    "TaskAnnouncementIntent": {
       "additionalProperties": false,
       "properties": {
         "task_id": {
@@ -10203,10 +10268,10 @@
         "task_id",
         "max_budget_magnitude"
       ],
-      "title": "TaskAnnouncement",
+      "title": "TaskAnnouncementIntent",
       "type": "object"
     },
-    "TaskAward": {
+    "TaskAwardReceipt": {
       "additionalProperties": false,
       "properties": {
         "task_id": {
@@ -10245,7 +10310,7 @@
         "awarded_syndicate",
         "cleared_price_magnitude"
       ],
-      "title": "TaskAward",
+      "title": "TaskAwardReceipt",
       "type": "object"
     },
     "TelemetryScalar": {
@@ -10313,7 +10378,7 @@
       "title": "TemporalBounds",
       "type": "object"
     },
-    "TemporalCheckpoint": {
+    "TemporalCheckpointState": {
       "additionalProperties": false,
       "properties": {
         "checkpoint_id": {
@@ -10322,7 +10387,7 @@
           "type": "string"
         },
         "ledger_index": {
-          "description": "The exact array index in the EpistemicLedger this checkpoint represents.",
+          "description": "The exact array index in the EpistemicLedgerState this checkpoint represents.",
           "title": "Ledger Index",
           "type": "integer"
         },
@@ -10337,7 +10402,7 @@
         "ledger_index",
         "state_hash"
       ],
-      "title": "TemporalCheckpoint",
+      "title": "TemporalCheckpointState",
       "type": "object"
     },
     "TensorDType": {
@@ -10495,7 +10560,63 @@
       ],
       "type": "string"
     },
-    "ToolDefinition": {
+    "ToolInvocationEvent": {
+      "additionalProperties": false,
+      "description": "A Priori Kinetic Commitment representing the Pearlian Do-Operator prior to network execution.",
+      "properties": {
+        "event_id": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "type": {
+          "const": "tool_invocation",
+          "default": "tool_invocation",
+          "description": "Discriminator type for a tool invocation event.",
+          "title": "Type",
+          "type": "string"
+        },
+        "tool_name": {
+          "description": "The exact tool targeted in the ActionSpaceManifest.",
+          "title": "Tool Name",
+          "type": "string"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "description": "The intended JSON-RPC payload.",
+          "title": "Parameters",
+          "type": "object"
+        },
+        "authorized_budget_magnitude": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The maximum escrow unlocked for this specific run.",
+          "title": "Authorized Budget Magnitude"
+        }
+      },
+      "required": [
+        "event_id",
+        "timestamp",
+        "tool_name",
+        "parameters"
+      ],
+      "title": "ToolInvocationEvent",
+      "type": "object"
+    },
+    "ToolManifest": {
       "additionalProperties": false,
       "description": "Declarative mathematical definition of a tool.",
       "properties": {
@@ -10549,63 +10670,7 @@
         "side_effects",
         "permissions"
       ],
-      "title": "ToolDefinition",
-      "type": "object"
-    },
-    "ToolInvocationEvent": {
-      "additionalProperties": false,
-      "description": "A Priori Kinetic Commitment representing the Pearlian Do-Operator prior to network execution.",
-      "properties": {
-        "event_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",
-          "title": "Event Id",
-          "type": "string"
-        },
-        "timestamp": {
-          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
-          "title": "Timestamp",
-          "type": "number"
-        },
-        "type": {
-          "const": "tool_invocation",
-          "default": "tool_invocation",
-          "description": "Discriminator type for a tool invocation event.",
-          "title": "Type",
-          "type": "string"
-        },
-        "tool_name": {
-          "description": "The exact tool targeted in the ActionSpace.",
-          "title": "Tool Name",
-          "type": "string"
-        },
-        "parameters": {
-          "additionalProperties": true,
-          "description": "The intended JSON-RPC payload.",
-          "title": "Parameters",
-          "type": "object"
-        },
-        "authorized_budget_magnitude": {
-          "anyOf": [
-            {
-              "minimum": 0,
-              "type": "integer"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The maximum escrow unlocked for this specific run.",
-          "title": "Authorized Budget Magnitude"
-        }
-      },
-      "required": [
-        "event_id",
-        "timestamp",
-        "tool_name",
-        "parameters"
-      ],
-      "title": "ToolInvocationEvent",
+      "title": "ToolManifest",
       "type": "object"
     },
     "TopologyHash": {
@@ -10613,7 +10678,7 @@
       "pattern": "^[a-f0-9]{64}$",
       "type": "string"
     },
-    "TraceExportBatch": {
+    "TraceExportManifest": {
       "additionalProperties": false,
       "properties": {
         "batch_id": {
@@ -10633,7 +10698,7 @@
       "required": [
         "batch_id"
       ],
-      "title": "TraceExportBatch",
+      "title": "TraceExportManifest",
       "type": "object"
     },
     "TruthMaintenancePolicy": {
@@ -10655,7 +10720,7 @@
         },
         "enforce_cross_agent_quarantine": {
           "default": false,
-          "description": "If True, the orchestrator must automatically emit global QuarantineOrders to sever infected SemanticEdges across the swarm to prevent epistemic contagion.",
+          "description": "If True, the orchestrator must automatically emit global QuarantineIntents to sever infected SemanticEdges across the swarm to prevent epistemic contagion.",
           "title": "Enforce Cross Agent Quarantine",
           "type": "boolean"
         },
@@ -10862,7 +10927,7 @@
       "title": "WetwareAttestationContract",
       "type": "object"
     },
-    "WorkflowEnvelope": {
+    "WorkflowManifest": {
       "additionalProperties": false,
       "description": "The root envelope for an orchestrated workflow payload.",
       "properties": {
@@ -10926,11 +10991,11 @@
           "default": null,
           "description": "The absolute maximum enterprise risk threshold permitted for this topology."
         },
-        "allowed_data_classifications": {
+        "allowed_information_classifications": {
           "anyOf": [
             {
               "items": {
-                "$ref": "#/$defs/DataClassification"
+                "$ref": "#/$defs/InformationClassification"
               },
               "type": "array"
             },
@@ -10940,12 +11005,12 @@
           ],
           "default": null,
           "description": "The declarative whitelist of data classifications permitted to flow through this graph.",
-          "title": "Allowed Data Classifications"
+          "title": "Allowed Information Classifications"
         },
         "federated_discovery": {
           "anyOf": [
             {
-              "$ref": "#/$defs/FederatedDiscoveryProtocol"
+              "$ref": "#/$defs/FederatedDiscoveryManifest"
             },
             {
               "type": "null"
@@ -10983,75 +11048,10 @@
         "manifest_version",
         "topology"
       ],
-      "title": "WorkflowEnvelope",
+      "title": "WorkflowManifest",
       "type": "object"
     },
-    "WorkingMemorySnapshot": {
-      "additionalProperties": false,
-      "description": "Represents the Epistemic Quarantine, partitioned from the Committed Epistemic Ledger.",
-      "properties": {
-        "system_prompt": {
-          "description": "The basal non-monotonic instruction set currently held in Epistemic Quarantine.",
-          "title": "System Prompt",
-          "type": "string"
-        },
-        "active_context": {
-          "additionalProperties": {
-            "type": "string"
-          },
-          "description": "The ephemeral latent variables and environmental bindings currently active in Epistemic Quarantine.",
-          "title": "Active Context",
-          "type": "object"
-        },
-        "argumentation": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/ArgumentGraph"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The formal graph of non-monotonic claims and defeasible attacks currently active in the swarm's working memory."
-        },
-        "theory_of_mind_models": {
-          "description": "Empathetic models of other agents to compress and target outgoing communications.",
-          "items": {
-            "$ref": "#/$defs/TheoryOfMindSnapshot"
-          },
-          "title": "Theory Of Mind Models",
-          "type": "array"
-        },
-        "affordance_projection": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/OntologicalSurfaceProjection"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The mathematically bounded subgraph of capabilities currently available to the agent."
-        },
-        "capability_attestations": {
-          "description": "Immutable cryptographic receipts of dynamically discovered external enterprise connectors.",
-          "items": {
-            "$ref": "#/$defs/FederatedCapabilityAttestation"
-          },
-          "title": "Capability Attestations",
-          "type": "array"
-        }
-      },
-      "required": [
-        "system_prompt",
-        "active_context"
-      ],
-      "title": "WorkingMemorySnapshot",
-      "type": "object"
-    },
-    "ZeroKnowledgeProof": {
+    "ZeroKnowledgeReceipt": {
       "additionalProperties": false,
       "properties": {
         "proof_protocol": {
@@ -11097,7 +11097,7 @@
         "verifier_key_id",
         "cryptographic_blob"
       ],
-      "title": "ZeroKnowledgeProof",
+      "title": "ZeroKnowledgeReceipt",
       "type": "object"
     }
   },

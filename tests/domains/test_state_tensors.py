@@ -16,7 +16,7 @@ def test_valid_tensor_manifest() -> None:
     manifest = NDimensionalTensorManifest(
         dtype=TensorDType.FLOAT32,
         shape=(512, 512, 3),
-        memory_footprint_bytes=512 * 512 * 3 * 4,
+        vram_footprint_bytes=512 * 512 * 3 * 4,
         merkle_root="a" * 64,
         storage_uri="s3://secure-bucket/scan.raw",
     )
@@ -29,7 +29,7 @@ def test_invalid_tensor_memory_mismatch() -> None:
         NDimensionalTensorManifest(
             dtype=TensorDType.FLOAT32,
             shape=(100, 100),
-            memory_footprint_bytes=999999999,  # Intentional mismatch
+            vram_footprint_bytes=999999999,  # Intentional mismatch
             merkle_root="a" * 64,
             storage_uri="ipfs://data",
         )
@@ -41,7 +41,7 @@ def test_invalid_tensor_negative_dimension() -> None:
         NDimensionalTensorManifest(
             dtype=TensorDType.INT8,
             shape=(100, -5, 10),
-            memory_footprint_bytes=100 * -5 * 10 * 1,
+            vram_footprint_bytes=100 * -5 * 10 * 1,
             merkle_root="a" * 64,
             storage_uri="ipfs://data",
         )

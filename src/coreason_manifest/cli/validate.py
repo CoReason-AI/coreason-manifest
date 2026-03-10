@@ -19,14 +19,14 @@ from pydantic import BaseModel, ValidationError
 # Statically bound God-Context imports
 from coreason_manifest.spec.ontology import (
     CognitiveStateProfile,  # Representative schema
-    DocumentLayoutAnalysis,
-    StatePatch,  # Representative schema
+    DocumentLayoutManifest,
+    StateMutation,  # Representative schema
 )
 
 # Immutable AOT Schema Registry
 SCHEMA_REGISTRY: Final[dict[str, type[BaseModel]]] = {
-    "step8_vision": DocumentLayoutAnalysis,
-    "delta_update": StatePatch,
+    "step8_vision": DocumentLayoutManifest,
+    "state_differential": StateMutation,
     "cognitive_sync": CognitiveStateProfile,
 }
 

@@ -12,13 +12,13 @@ from coreason_manifest.spec.ontology import (
     ActivationSteeringContract,
     CognitiveRoutingDirective,
     LatentSmoothingProfile,
-    SaeLatentFirewall,
+    SaeLatentPolicy,
 )
 
 
 def test_sae_latent_firewall_smooth_decay_missing_profile() -> None:
     with pytest.raises(ValidationError, match="smoothing_profile must be provided"):
-        SaeLatentFirewall(
+        SaeLatentPolicy(
             target_feature_index=1,
             monitored_layers=[1, 2],
             max_activation_threshold=1.5,
@@ -32,7 +32,7 @@ def test_sae_latent_firewall_smooth_decay_missing_profile() -> None:
 def test_sae_latent_firewall_smooth_decay_missing_clamp() -> None:
     prof = LatentSmoothingProfile(decay_function="linear", transition_window_tokens=5)
     with pytest.raises(ValidationError, match="clamp_value must be provided"):
-        SaeLatentFirewall(
+        SaeLatentPolicy(
             target_feature_index=1,
             monitored_layers=[1, 2],
             max_activation_threshold=1.5,
@@ -45,7 +45,7 @@ def test_sae_latent_firewall_smooth_decay_missing_clamp() -> None:
 
 def test_sae_latent_firewall_smooth_decay_valid() -> None:
     prof = LatentSmoothingProfile(decay_function="linear", transition_window_tokens=5)
-    fw = SaeLatentFirewall(
+    fw = SaeLatentPolicy(
         target_feature_index=1,
         monitored_layers=[1, 2],
         max_activation_threshold=1.5,

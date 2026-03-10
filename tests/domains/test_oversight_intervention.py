@@ -13,7 +13,7 @@ from pydantic import TypeAdapter, ValidationError
 from coreason_manifest.spec.ontology import (
     AnyInterventionPayload,
     ConstitutionalAmendmentProposal,
-    InterventionVerdict,
+    InterventionReceipt,
     WetwareAttestationContract,
 )
 
@@ -42,7 +42,7 @@ def test_intervention_verdict_matching_nonce() -> None:
     attestation = WetwareAttestationContract(
         mechanism="fido2_webauthn", did_subject="did:example:123", cryptographic_payload="abcd", dag_node_nonce=nonce
     )
-    verdict = InterventionVerdict(
+    verdict = InterventionReceipt(
         type="verdict",
         intervention_request_id=nonce,
         target_node_id="did:node:test",
@@ -60,7 +60,7 @@ def test_intervention_verdict_mismatched_nonce() -> None:
         mechanism="fido2_webauthn", did_subject="did:example:123", cryptographic_payload="abcd", dag_node_nonce=nonce1
     )
     with pytest.raises(ValidationError, match="Anti-Replay Lock Triggered"):
-        InterventionVerdict(
+        InterventionReceipt(
             type="verdict",
             intervention_request_id=nonce2,
             target_node_id="did:node:test",
