@@ -7003,7 +7003,7 @@
           "items": {
             "enum": [
               "on_tool_call",
-              "on_belief_update",
+              "on_belief_mutation",
               "on_quarantine",
               "on_falsification"
             ],

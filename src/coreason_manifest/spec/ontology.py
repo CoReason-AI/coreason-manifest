@@ -1997,6 +1997,7 @@ class ExecutionNodeReceipt(CoreasonBaseModel):
     parent_hashes: list[str] = Field(
         default_factory=list, description="A list of cryptographic hashes of parent execution nodes."
     )
+    # Note: parent_hashes is a structurally ordered sequence (Causal Ancestry) and MUST NOT be sorted.
     node_hash: str | None = Field(default=None, description="The cryptographic SHA-256 hash of this node.")
 
     @model_validator(mode="after")
@@ -2847,9 +2848,11 @@ class MathematicalNotationExtractionState(CoreasonBaseModel):
 
 
 class MechanisticAuditContract(CoreasonBaseModel):
-    trigger_conditions: list[Literal["on_tool_call", "on_belief_update", "on_quarantine", "on_falsification"]] = Field(
-        min_length=1,
-        description="The specific architectural events that authorize the orchestrator to halt generation and extract internal activations.",  # noqa: E501
+    trigger_conditions: list[Literal["on_tool_call", "on_belief_mutation", "on_quarantine", "on_falsification"]] = (
+        Field(
+            min_length=1,
+            description="The specific architectural events that authorize the orchestrator to halt generation and extract internal activations.",  # noqa: E501
+        )
     )
     target_layers: list[int] = Field(
         min_length=1, description="The specific transformer block indices the execution engine must extract from."
