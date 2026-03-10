@@ -2464,8 +2464,9 @@ class JSONRPCErrorState(CoreasonBaseModel):
 
     code: int = Field(..., description="A Number that indicates the error type that occurred.")
     message: str = Field(..., description="A String providing a short description of the error.")
-    data: Any | None = Field(
+    error_payload: Any | None = Field(
         default=None,
+        alias="data",
         description="A Primitive or Structured value that contains additional information about the error.",
     )
 
@@ -3219,7 +3220,7 @@ class QuarantineIntent(CoreasonBaseModel):
     reason: str = Field(description="The reason for the quarantine order.")
 
 
-type AnyResiliencePayload = Annotated[
+type AnyResilienceIntent = Annotated[
     QuarantineIntent | CircuitBreakerEvent | FallbackIntent, Field(discriminator="type")
 ]
 
@@ -3478,14 +3479,16 @@ class StdioTransportProfile(CoreasonBaseModel):
     )
 
 
-type MCPTransport = StdioTransportProfile | SSETransportProfile | HTTPTransportProfile
+type MCPTransportProfile = StdioTransportProfile | SSETransportProfile | HTTPTransportProfile
 
 
 class MCPServerBindingProfile(CoreasonBaseModel):
     """Configuration definition for connecting to an MCP Server."""
 
     server_id: str = Field(..., description="A unique identifier for this server instance.")
-    transport: MCPTransport = Field(..., discriminator="type", description="Polymorphic transport configuration.")
+    transport: MCPTransportProfile = Field(
+        ..., discriminator="type", description="Polymorphic transport configuration."
+    )
     required_capabilities: list[str] = Field(
         default_factory=lambda: ["tools", "resources", "prompts"],
         description="The structurally bounded array of capabilities mandated for this server connection.",
