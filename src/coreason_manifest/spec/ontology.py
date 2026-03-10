@@ -462,6 +462,14 @@ class PermissionBoundary(CoreasonBaseModel):
         description="An explicit list of authentication protocol identifiers (e.g., 'oauth2:github', 'mtls:internal') the orchestrator must negotiate before allocating compute.",  # noqa: E501
     )
 
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        if self.allowed_domains is not None:
+            object.__setattr__(self, "allowed_domains", sorted(self.allowed_domains))
+        if self.auth_requirements is not None:
+            object.__setattr__(self, "auth_requirements", sorted(self.auth_requirements))
+        return self
+
 
 class PostQuantumSignature(CoreasonBaseModel):
     pq_algorithm: Literal["ml-dsa", "slh-dsa", "falcon"] = Field(
@@ -630,6 +638,11 @@ class AdjudicationRubric(CoreasonBaseModel):
     criteria: list[GradingCriteria] = Field(description="List of criteria used in the rubric.")
     passing_threshold: float = Field(ge=0.0, le=100.0, description="The minimum score required to pass.")
 
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "criteria", sorted(self.criteria, key=lambda x: x.criterion_id))
+        return self
+
 
 class PredictionMarketPolicy(CoreasonBaseModel):
     """
@@ -719,6 +732,12 @@ class RedactionRule(CoreasonBaseModel):
         default=None, description="The strictly typed string to insert if the action is 'redact'."
     )
 
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        if self.context_exclusion_zones is not None:
+            object.__setattr__(self, "context_exclusion_zones", sorted(self.context_exclusion_zones))
+        return self
+
 
 class SaeLatentFirewall(CoreasonBaseModel):
     """A real-time mechanistic interpretability boundary that monitors and controls specific neural circuits."""
@@ -775,6 +794,11 @@ class SecureSubSession(CoreasonBaseModel):
     max_ttl_seconds: int = Field(ge=1, le=3600, description="Maximum time-to-live for the unredacted memory partition.")
     description: str = Field(max_length=2000, description="Audit justification for this temporary secure session.")
 
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "allowed_vault_keys", sorted(self.allowed_vault_keys))
+        return self
+
 
 class DefeasibleCascade(CoreasonBaseModel):
     cascade_id: str = Field(
@@ -795,6 +819,11 @@ class DefeasibleCascade(CoreasonBaseModel):
         default=False,
         description="Cryptographic proof that this cascade was broadcast to the Swarm to halt epistemic contagion.",
     )
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "quarantined_event_ids", sorted(self.quarantined_event_ids))
+        return self
 
 
 class MultimodalTokenAnchor(CoreasonBaseModel):
@@ -839,6 +868,11 @@ class MultimodalTokenAnchor(CoreasonBaseModel):
                 raise ValueError(
                     f"Spatial invariant violated: min bounds (x:{x_min}, y:{y_min}) exceed max bounds (x:{x_max}, y:{y_max})"  # noqa: E501
                 )
+        return self
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "visual_patch_hashes", sorted(self.visual_patch_hashes))
         return self
 
 
@@ -947,6 +981,12 @@ class LatentScratchpadTrace(CoreasonBaseModel):
                 raise ValueError(f"discarded branch '{discarded_id}' not found in explored_branches.")
         return self
 
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "explored_branches", sorted(self.explored_branches, key=lambda x: x.branch_id))
+        object.__setattr__(self, "discarded_branches", sorted(self.discarded_branches))
+        return self
+
 
 class EphemeralNamespacePartition(CoreasonBaseModel):
     """
@@ -976,6 +1016,11 @@ class EphemeralNamespacePartition(CoreasonBaseModel):
         for h in self.authorized_bytecode_hashes:
             if not re.match("^[a-f0-9]{64}$", h):
                 raise ValueError(f"Invalid SHA-256 hash in whitelist: {h}")
+        return self
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "authorized_bytecode_hashes", sorted(self.authorized_bytecode_hashes))
         return self
 
 
@@ -1023,6 +1068,11 @@ class BilateralSLA(CoreasonBaseModel):
         default=None, description="The quantum-resistant signature securing the multi-tenant structural boundary."
     )
 
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "permitted_geographic_regions", sorted(self.permitted_geographic_regions))
+        return self
+
 
 class FederatedDiscoveryProtocol(CoreasonBaseModel):
     broadcast_endpoints: list[str] = Field(description="A list of MCP URI endpoints open for B2B task bidding.")
@@ -1065,6 +1115,11 @@ class AdjudicationIntent(CoreasonBaseModel):
     timeout_action: Literal["rollback", "proceed_default", "terminate"] = Field(
         description="The action to take if the oracle is unresponsive."
     )
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "deadlocked_claims", sorted(self.deadlocked_claims))
+        return self
 
 
 class AdjudicationVerdict(CoreasonBaseModel):
@@ -4035,6 +4090,11 @@ class SMPCTopology(BaseTopology):
         description="The pre-flight execution gate forcing agents to mathematically align their latent semantics before participating in the topology.",  # noqa: E501
     )
 
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "participant_node_ids", sorted(self.participant_node_ids))
+        return self
+
 
 class SwarmTopology(BaseTopology):
     """
@@ -4087,6 +4147,12 @@ class AdversarialMarketTopology(CoreasonBaseModel):
             raise ValueError("Topological Contradiction: The adjudicator cannot be a member of a competing team.")
         return self
 
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "blue_team_ids", sorted(self.blue_team_ids))
+        object.__setattr__(self, "red_team_ids", sorted(self.red_team_ids))
+        return self
+
     def compile_to_base_topology(self) -> CouncilTopology:
         """Deterministically unwraps the macro into a rigid CouncilTopology."""
         nodes: dict[NodeID, AnyNode] = {self.adjudicator_id: SystemNode(description="Synthesizing Adjudicator")}
@@ -4114,6 +4180,11 @@ class ConsensusFederationTopology(CoreasonBaseModel):
     def verify_adjudicator_isolation(self) -> Self:
         if self.adjudicator_id in self.participant_ids:
             raise ValueError("Topological Contradiction: Adjudicator cannot act as a voting participant.")
+        return self
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "participant_ids", sorted(self.participant_ids))
         return self
 
     def compile_to_base_topology(self) -> CouncilTopology:
