@@ -64,7 +64,7 @@ def test_dag_topology_referential_integrity_success(nodes: dict[str, Any], data:
     edges = data.draw(st.lists(st.tuples(st.sampled_from(keys), st.sampled_from(keys)), min_size=0, max_size=20))
 
     topology = DAGTopology(nodes=nodes, edges=edges, allow_cycles=True, max_depth=10, max_fan_out=10)
-    assert topology.edges == edges
+    assert topology.edges == sorted(edges)
 
 
 @given(nodes=nodes_dict_st(), data=st.data())
@@ -91,7 +91,7 @@ def test_dag_topology_cycle_success(nodes: dict[str, Any], data: DataObject) -> 
     topology = DAGTopology(
         nodes=nodes, edges=[(node_a, node_b), (node_b, node_a)], allow_cycles=True, max_depth=10, max_fan_out=10
     )
-    assert topology.edges == [(node_a, node_b), (node_b, node_a)]
+    assert topology.edges == sorted([(node_a, node_b), (node_b, node_a)])
 
 
 @given(nodes=nodes_dict_st(), data=st.data())
