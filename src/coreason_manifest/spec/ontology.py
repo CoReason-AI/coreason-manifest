@@ -173,7 +173,7 @@ class SystemRole(StrEnum):
 
 
 class TensorDType(StrEnum):
-    """Mathematical data types for tensor payloads."""
+    """Mathematical tensor types for tensor payloads."""
 
     FLOAT32 = "float32"
     FLOAT64 = "float64"
@@ -1091,7 +1091,7 @@ class BilateralSLA(CoreasonBaseModel):
     )
     permitted_geographic_regions: list[str] = Field(
         default_factory=list,
-        description="Explicit whitelist of geographic regions or cloud enclaves where execution is structurally permitted (Data Residency Pinning).",  # noqa: E501
+        description="Explicit whitelist of geographic regions or cloud enclaves where execution is structurally permitted (Payload Residency Pinning).",  # noqa: E501
     )
     max_permitted_grid_carbon_intensity: float | None = Field(
         default=None,
@@ -1496,14 +1496,14 @@ class ConstitutionalAmendmentIntent(CoreasonBaseModel):
 
 
 class ContinuousMutationPolicy(CoreasonBaseModel):
-    mutation_paradigm: Literal["append_only", "merge_on_read"] = Field(
+    mutation_paradigm: Literal["append_only", "merge_on_resolve"] = Field(
         description="Forces non-destructive graph mutations."
     )
     max_uncommitted_rows: int = Field(gt=0, description="Backpressure threshold before forcing a commit.")
     micro_batch_interval_ms: int = Field(gt=0, description="Temporal bound for flushing the stream.")
 
     @model_validator(mode="after")
-    def enforce_append_only_memory_bound(self) -> Self:
+    def enforce_append_only_vram_bound(self) -> Self:
         """Mathematically prevent Out-Of-Memory (OOM) crashes by strictly bounding the buffer."""
         if self.mutation_paradigm == "append_only" and self.max_uncommitted_rows > 10000:
             raise ValueError("max_uncommitted_rows must be <= 10000 for append_only paradigm to prevent OOM crashes.")
@@ -1900,7 +1900,7 @@ class EscalationIntent(CoreasonBaseModel):
         default="escalation", description="Discriminator for security or economic boundary overrides."
     )
     tripped_rule_id: str = Field(
-        description="The ID of the Data Loss Prevention (DLP) or Governance rule that blocked execution."
+        description="The ID of the Payload Loss Prevention (PLP) or Governance rule that blocked execution."
     )
     resolution_schema: dict[str, Any] = Field(
         description="The strict JSON Schema requiring an explicit cryptographic sign-off or justification string to bypass the breaker."  # noqa: E501
@@ -2284,11 +2284,13 @@ class GrammarPanelProfile(CoreasonBaseModel):
     panel_id: str = Field(description="The unique identifier for this UI panel.")
     type: Literal["grammar"] = Field(default="grammar", description="Discriminator for Grammar of Graphics charts.")
     title: str = Field(description="The human-readable title of the chart.")
-    ledger_source_id: str = Field(description="The cryptographic pointer to the dataset in the EpistemicLedgerState.")
-    mark: Literal["point", "line", "area", "bar", "rect", "arc"] = Field(
-        description="The geometric shape used to represent the data."
+    ledger_source_id: str = Field(
+        description="The cryptographic pointer to the semantic series in the EpistemicLedgerState."
     )
-    encodings: list[VisualEncodingProfile] = Field(description="The mapping of data fields to visual channels.")
+    mark: Literal["point", "line", "area", "bar", "rect", "arc"] = Field(
+        description="The geometric shape used to represent the matrix."
+    )
+    encodings: list[VisualEncodingProfile] = Field(description="The mapping of structural fields to visual channels.")
     facet: FacetMatrixProfile | None = Field(default=None, description="Optional faceting matrix for small multiples.")
 
     @model_validator(mode="after")
@@ -2618,7 +2620,8 @@ class MCPCapabilityWhitelistPolicy(CoreasonBaseModel):
         default_factory=list, description="The explicit whitelist of function names the node is allowed to call."
     )
     allowed_resources: list[str] = Field(
-        default_factory=list, description="The explicit whitelist of resource URIs the node is allowed to read."
+        default_factory=list,
+        description="The explicit whitelist of resource URIs the node is allowed to passively perceive.",
     )
     allowed_prompts: list[str] = Field(
         default_factory=list, description="The explicit whitelist of workflow templates the node is allowed to trigger."
@@ -2846,12 +2849,12 @@ class MechanisticAuditContract(CoreasonBaseModel):
         description="The specific architectural events that authorize the orchestrator to halt generation and extract internal activations.",  # noqa: E501
     )
     target_layers: list[int] = Field(
-        min_length=1, description="The specific transformer block indices the execution engine must read from."
+        min_length=1, description="The specific transformer block indices the execution engine must extract from."
     )
-    max_features_per_layer: int = Field(gt=0, description="The top-k features to extract, preventing memory overflow.")
+    max_features_per_layer: int = Field(gt=0, description="The top-k features to extract, preventing VRAM exhaustion.")
     require_zk_commitments: bool = Field(
         default=True,
-        description="If True, the orchestrator MUST generate cryptographic latent state proofs alongside the activation reads.",  # noqa: E501
+        description="If True, the orchestrator MUST generate cryptographic latent state proofs alongside the activation extractions.",  # noqa: E501
     )
 
     @model_validator(mode="after")
@@ -2934,7 +2937,7 @@ class NDimensionalTensorManifest(CoreasonBaseModel):
     Used for routing multi-dimensional compute without passing raw bytes.
     """
 
-    dtype: TensorDType = Field(..., description="Data type of the tensor elements.")
+    dtype: TensorDType = Field(..., description="Structural type of the tensor elements.")
     shape: tuple[int, ...] = Field(..., description="N-Dimensional shape tuple.")
     vram_footprint_bytes: int = Field(..., description="Exact byte size of the uncompressed tensor.")
     merkle_root: str = Field(..., pattern="^[a-fA-F0-9]{64}$", description="SHA-256 Merkle root of the payload chunks.")
@@ -2942,7 +2945,7 @@ class NDimensionalTensorManifest(CoreasonBaseModel):
 
     @model_validator(mode="after")
     def _enforce_physics_engine(self) -> "NDimensionalTensorManifest":
-        """Mathematically prove the topology matches the declared memory footprint."""
+        """Mathematically prove the topology matches the declared VRAM footprint."""
         if len(self.shape) < 1:
             raise ValueError("Tensor shape must have at least 1 dimension.")
         for dim in self.shape:
@@ -3275,7 +3278,7 @@ class SemanticFirewallPolicy(CoreasonBaseModel):
 
 class InformationFlowPolicy(CoreasonBaseModel):
     """
-    Mathematical Data Loss Prevention (DLP) contract that bounds the graph.
+    Mathematical Payload Loss Prevention (PLP) contract that bounds the graph.
     """
 
     policy_id: str = Field(description="Unique identifier for this macroscopic flow control policy.")
@@ -3594,19 +3597,19 @@ class System1ReflexPolicy(CoreasonBaseModel):
     confidence_threshold: float = Field(
         ge=0.0, le=1.0, description="The confidence threshold required to execute a reflex action."
     )
-    allowed_read_only_tools: list[str] = Field(
-        description="The explicit, bounded array of strictly read-only tool capabilities."
+    allowed_passive_tools: list[str] = Field(
+        description="The explicit, bounded array of strictly non-mutating tool capabilities."
     )
 
     @model_validator(mode="after")
     def sort_arrays(self) -> Self:
-        object.__setattr__(self, "allowed_read_only_tools", sorted(self.allowed_read_only_tools))
+        object.__setattr__(self, "allowed_passive_tools", sorted(self.allowed_passive_tools))
         return self
 
 
 class System2RemediationIntent(CoreasonBaseModel):
     """
-    A passive data envelope that deterministically maps a kinetic execution error
+    A passive structural envelope that deterministically maps a kinetic execution error
     (e.g., a Pydantic ValidationError) into a structurally rigid System 2 correction directive.
     """
 
@@ -4102,7 +4105,7 @@ class BaseTopologyManifest(CoreasonBaseModel):
     )
     information_flow: InformationFlowPolicy | None = Field(
         default=None,
-        description="The structural Data Loss Prevention (DLP) contract governing all state mutations in this topology.",  # noqa: E501
+        description="The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology.",  # noqa: E501
     )
     observability: ObservabilityPolicy | None = Field(
         default=None, description="The distributed tracing rules bound to this specific execution graph."

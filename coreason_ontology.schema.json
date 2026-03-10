@@ -1483,7 +1483,7 @@
             }
           ],
           "default": null,
-          "description": "The structural Data Loss Prevention (DLP) contract governing all state mutations in this topology."
+          "description": "The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology."
         },
         "observability": {
           "anyOf": [
@@ -1639,7 +1639,7 @@
           "type": "integer"
         },
         "permitted_geographic_regions": {
-          "description": "Explicit whitelist of geographic regions or cloud enclaves where execution is structurally permitted (Data Residency Pinning).",
+          "description": "Explicit whitelist of geographic regions or cloud enclaves where execution is structurally permitted (Payload Residency Pinning).",
           "items": {
             "type": "string"
           },
@@ -2523,7 +2523,7 @@
           "description": "Forces non-destructive graph mutations.",
           "enum": [
             "append_only",
-            "merge_on_read"
+            "merge_on_resolve"
           ],
           "title": "Mutation Paradigm",
           "type": "string"
@@ -2622,7 +2622,7 @@
             }
           ],
           "default": null,
-          "description": "The structural Data Loss Prevention (DLP) contract governing all state mutations in this topology."
+          "description": "The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology."
         },
         "observability": {
           "anyOf": [
@@ -3021,7 +3021,7 @@
             }
           ],
           "default": null,
-          "description": "The structural Data Loss Prevention (DLP) contract governing all state mutations in this topology."
+          "description": "The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology."
         },
         "observability": {
           "anyOf": [
@@ -3252,7 +3252,7 @@
             }
           ],
           "default": null,
-          "description": "The structural Data Loss Prevention (DLP) contract governing all state mutations in this topology."
+          "description": "The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology."
         },
         "observability": {
           "anyOf": [
@@ -4281,7 +4281,7 @@
           "type": "string"
         },
         "tripped_rule_id": {
-          "description": "The ID of the Data Loss Prevention (DLP) or Governance rule that blocked execution.",
+          "description": "The ID of the Payload Loss Prevention (PLP) or Governance rule that blocked execution.",
           "title": "Tripped Rule Id",
           "type": "string"
         },
@@ -4411,7 +4411,7 @@
             }
           ],
           "default": null,
-          "description": "The structural Data Loss Prevention (DLP) contract governing all state mutations in this topology."
+          "description": "The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology."
         },
         "observability": {
           "anyOf": [
@@ -4611,7 +4611,7 @@
             }
           ],
           "default": null,
-          "description": "The structural Data Loss Prevention (DLP) contract governing all state mutations in this topology."
+          "description": "The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology."
         },
         "observability": {
           "anyOf": [
@@ -5445,12 +5445,12 @@
           "type": "string"
         },
         "ledger_source_id": {
-          "description": "The cryptographic pointer to the dataset in the EpistemicLedgerState.",
+          "description": "The cryptographic pointer to the semantic series in the EpistemicLedgerState.",
           "title": "Ledger Source Id",
           "type": "string"
         },
         "mark": {
-          "description": "The geometric shape used to represent the data.",
+          "description": "The geometric shape used to represent the matrix.",
           "enum": [
             "point",
             "line",
@@ -5463,7 +5463,7 @@
           "type": "string"
         },
         "encodings": {
-          "description": "The mapping of data fields to visual channels.",
+          "description": "The mapping of structural fields to visual channels.",
           "items": {
             "$ref": "#/$defs/VisualEncodingProfile"
           },
@@ -5847,7 +5847,7 @@
     },
     "InformationFlowPolicy": {
       "additionalProperties": false,
-      "description": "Mathematical Data Loss Prevention (DLP) contract that bounds the graph.",
+      "description": "Mathematical Payload Loss Prevention (PLP) contract that bounds the graph.",
       "properties": {
         "policy_id": {
           "description": "Unique identifier for this macroscopic flow control policy.",
@@ -6555,7 +6555,7 @@
           "type": "array"
         },
         "allowed_resources": {
-          "description": "The explicit whitelist of resource URIs the node is allowed to read.",
+          "description": "The explicit whitelist of resource URIs the node is allowed to passively perceive.",
           "items": {
             "type": "string"
           },
@@ -7014,7 +7014,7 @@
           "type": "array"
         },
         "target_layers": {
-          "description": "The specific transformer block indices the execution engine must read from.",
+          "description": "The specific transformer block indices the execution engine must extract from.",
           "items": {
             "type": "integer"
           },
@@ -7023,14 +7023,14 @@
           "type": "array"
         },
         "max_features_per_layer": {
-          "description": "The top-k features to extract, preventing memory overflow.",
+          "description": "The top-k features to extract, preventing VRAM exhaustion.",
           "exclusiveMinimum": 0,
           "title": "Max Features Per Layer",
           "type": "integer"
         },
         "require_zk_commitments": {
           "default": true,
-          "description": "If True, the orchestrator MUST generate cryptographic latent state proofs alongside the activation reads.",
+          "description": "If True, the orchestrator MUST generate cryptographic latent state proofs alongside the activation extractions.",
           "title": "Require Zk Commitments",
           "type": "boolean"
         }
@@ -7390,7 +7390,7 @@
       "properties": {
         "dtype": {
           "$ref": "#/$defs/TensorDType",
-          "description": "Data type of the tensor elements."
+          "description": "Structural type of the tensor elements."
         },
         "shape": {
           "description": "N-Dimensional shape tuple.",
@@ -8610,7 +8610,7 @@
             }
           ],
           "default": null,
-          "description": "The structural Data Loss Prevention (DLP) contract governing all state mutations in this topology."
+          "description": "The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology."
         },
         "observability": {
           "anyOf": [
@@ -9849,7 +9849,7 @@
             }
           ],
           "default": null,
-          "description": "The structural Data Loss Prevention (DLP) contract governing all state mutations in this topology."
+          "description": "The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology."
         },
         "observability": {
           "anyOf": [
@@ -9958,25 +9958,25 @@
           "title": "Confidence Threshold",
           "type": "number"
         },
-        "allowed_read_only_tools": {
-          "description": "The explicit, bounded array of strictly read-only tool capabilities.",
+        "allowed_passive_tools": {
+          "description": "The explicit, bounded array of strictly non-mutating tool capabilities.",
           "items": {
             "type": "string"
           },
-          "title": "Allowed Read Only Tools",
+          "title": "Allowed Passive Tools",
           "type": "array"
         }
       },
       "required": [
         "confidence_threshold",
-        "allowed_read_only_tools"
+        "allowed_passive_tools"
       ],
       "title": "System1ReflexPolicy",
       "type": "object"
     },
     "System2RemediationIntent": {
       "additionalProperties": false,
-      "description": "A passive data envelope that deterministically maps a kinetic execution error\n(e.g., a Pydantic ValidationError) into a structurally rigid System 2 correction directive.",
+      "description": "A passive structural envelope that deterministically maps a kinetic execution error\n(e.g., a Pydantic ValidationError) into a structurally rigid System 2 correction directive.",
       "properties": {
         "fault_id": {
           "description": "A cryptographic Lineage Watermark (CID) tracking this specific dimensional collapse.",
@@ -10363,7 +10363,7 @@
       "type": "object"
     },
     "TensorDType": {
-      "description": "Mathematical data types for tensor payloads.",
+      "description": "Mathematical tensor types for tensor payloads.",
       "enum": [
         "float32",
         "float64",
