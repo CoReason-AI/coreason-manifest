@@ -7,7 +7,7 @@
 
 import random
 
-from coreason_manifest.telemetry.custody import ExecutionNode, verify_merkle_proof
+from coreason_manifest import ExecutionNode, verify_merkle_proof
 
 
 def _generate_valid_chain(size: int) -> list[ExecutionNode]:

@@ -10,11 +10,11 @@ from uuid import uuid4
 import pytest
 from pydantic import TypeAdapter, ValidationError
 
-from coreason_manifest.core.identity import WetwareAttestationContract
-from coreason_manifest.oversight.intervention import (
+from coreason_manifest import (
     AnyInterventionPayload,
     ConstitutionalAmendmentProposal,
     InterventionVerdict,
+    WetwareAttestationContract,
 )
 
 

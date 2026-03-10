@@ -7,9 +7,7 @@
 
 from typing import Any
 
-from coreason_manifest.state import EpistemicLedger
-from coreason_manifest.state.events import ObservationEvent
-from coreason_manifest.telemetry.schemas import ExecutionSpan, SpanEvent
+from coreason_manifest import EpistemicLedger, ExecutionSpan, ObservationEvent, SpanEvent
 
 
 def test_epistemic_ledger_hash_o1_tripwire(benchmark: Any) -> None:

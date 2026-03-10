@@ -10,7 +10,7 @@ from typing import Any
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.compute.symbolic import NeuroSymbolicHandoff
+from coreason_manifest import NeuroSymbolicHandoff
 
 
 def test_neuro_symbolic_handoff_valid() -> None:

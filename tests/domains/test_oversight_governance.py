@@ -10,14 +10,17 @@ from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import ValidationError
 
-from coreason_manifest.oversight.adjudication import AdjudicationRubric, GradingCriteria
-from coreason_manifest.oversight.governance import (
+from coreason_manifest import (
+    AdjudicationRubric,
+    BoundedInterventionScope,
     ConsensusPolicy,
     ConstitutionalRule,
+    FallbackSLA,
+    GradingCriteria,
+    InterventionRequest,
     PredictionMarketPolicy,
     QuorumPolicy,
 )
-from coreason_manifest.oversight.intervention import BoundedInterventionScope, FallbackSLA, InterventionRequest
 
 
 @given(

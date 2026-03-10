@@ -8,9 +8,7 @@
 from pydantic import TypeAdapter
 from syrupy.assertion import SnapshotAssertion
 
-from coreason_manifest.state import EpistemicLedger
-from coreason_manifest.telemetry import CustodyRecord
-from coreason_manifest.workflow import WorkflowEnvelope
+from coreason_manifest import CustodyRecord, EpistemicLedger, WorkflowEnvelope
 
 
 def test_epistemic_ledger_snapshot(snapshot: SnapshotAssertion) -> None:

@@ -8,7 +8,7 @@
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.workflow.routing import BypassReceipt, DynamicRoutingManifest, GlobalSemanticProfile
+from coreason_manifest import BypassReceipt, DynamicRoutingManifest, GlobalSemanticProfile
 
 
 def test_modality_alignment_raises_error() -> None:

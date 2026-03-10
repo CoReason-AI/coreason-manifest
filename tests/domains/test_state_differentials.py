@@ -8,7 +8,7 @@
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.state.differentials import DefeasibleCascade, TruthMaintenancePolicy
+from coreason_manifest import DefeasibleCascade, TruthMaintenancePolicy
 
 
 def test_truth_maintenance_policy_valid() -> None:

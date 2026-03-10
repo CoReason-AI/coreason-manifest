@@ -8,7 +8,7 @@
 import pytest
 from pydantic import TypeAdapter, ValidationError
 
-from coreason_manifest.workflow.auctions import TaskAward
+from coreason_manifest import TaskAward
 
 
 def test_task_award_escrow_invalid() -> None:

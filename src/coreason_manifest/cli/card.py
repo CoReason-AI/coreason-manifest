@@ -15,7 +15,7 @@ from pathlib import Path
 
 from pydantic import TypeAdapter
 
-from coreason_manifest.workflow.envelope import WorkflowEnvelope
+from coreason_manifest import WorkflowEnvelope
 
 
 def project_envelope_to_markdown(envelope: WorkflowEnvelope) -> str:

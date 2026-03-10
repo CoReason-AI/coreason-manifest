@@ -10,7 +10,7 @@ from typing import Any
 import pytest
 from pydantic import TypeAdapter, ValidationError
 
-from coreason_manifest.state.events import (
+from coreason_manifest import (
     AnyStateEvent,
     BeliefUpdateEvent,
     EpistemicPromotionEvent,

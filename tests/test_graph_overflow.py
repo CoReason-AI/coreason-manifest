@@ -8,7 +8,7 @@
 import pytest
 from pydantic import TypeAdapter, ValidationError
 
-from coreason_manifest.workflow.topologies import AnyTopology
+from coreason_manifest import AnyTopology
 
 topology_adapter: TypeAdapter[AnyTopology] = TypeAdapter(AnyTopology)
 

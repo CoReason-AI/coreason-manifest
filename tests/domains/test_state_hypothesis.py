@@ -8,8 +8,8 @@
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.compute.inference import ActiveInferenceContract
-from coreason_manifest.state.events import (
+from coreason_manifest import (
+    ActiveInferenceContract,
     CausalDirectedEdge,
     FalsificationCondition,
     HypothesisGenerationEvent,

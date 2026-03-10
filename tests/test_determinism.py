@@ -5,33 +5,53 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
-from coreason_manifest.compute.stochastic import CrossoverStrategy, FitnessObjective, MutationPolicy
-from coreason_manifest.oversight.dlp import InformationFlowPolicy, RedactionRule
-from coreason_manifest.presentation.intents import DraftingIntent, PresentationEnvelope
-from coreason_manifest.presentation.scivis import ChannelEncoding, GrammarPanel, InsightCard, MacroGrid
-from coreason_manifest.state.argumentation import ArgumentClaim, ArgumentGraph, DefeasibleAttack
-from coreason_manifest.state.differentials import RollbackRequest
-from coreason_manifest.state.events import ObservationEvent
-from coreason_manifest.state.memory import EpistemicLedger
-from coreason_manifest.state.semantic import (
+from coreason_manifest import (
+    ActionSpace,
+    AgentBid,
+    AgentNode,
+    ArgumentClaim,
+    ArgumentGraph,
+    AuctionState,
+    ChannelEncoding,
+    ChaosExperiment,
+    CompositeNode,
+    CrossoverStrategy,
+    DAGTopology,
+    DefeasibleAttack,
+    DraftingIntent,
+    EpistemicLedger,
+    EvolutionaryTopology,
+    ExecutionSpan,
+    FaultInjectionProfile,
+    FitnessObjective,
+    GrammarPanel,
+    InformationFlowPolicy,
+    InsightCard,
+    MacroGrid,
     MemoryProvenance,
+    MutationPolicy,
+    ObservationEvent,
+    PermissionBoundary,
+    PresentationEnvelope,
+    RedactionRule,
+    RollbackRequest,
     SalienceProfile,
     SemanticNode,
+    SideEffectProfile,
+    SpanEvent,
+    SteadyStateHypothesis,
+    SwarmTopology,
+    TaskAnnouncement,
     TemporalBounds,
+    ToolDefinition,
+    TraceExportBatch,
     VectorEmbedding,
+    WorkflowEnvelope,
 )
-from coreason_manifest.telemetry.schemas import ExecutionSpan, SpanEvent, TraceExportBatch
-from coreason_manifest.testing.chaos import ChaosExperiment, FaultInjectionProfile, SteadyStateHypothesis
-from coreason_manifest.tooling import ActionSpace, PermissionBoundary, SideEffectProfile, ToolDefinition
-from coreason_manifest.workflow.auctions import AgentBid, AuctionState, TaskAnnouncement
-from coreason_manifest.workflow.envelope import WorkflowEnvelope
-from coreason_manifest.workflow.nodes import AgentNode, CompositeNode
-from coreason_manifest.workflow.topologies import DAGTopology, EvolutionaryTopology, SwarmTopology
 
 
 def test_compute_topology_hash_determinism() -> None:
-    from coreason_manifest.workflow.nodes import SystemNode
-    from coreason_manifest.workflow.topologies import DAGTopology, compute_topology_hash
+    from coreason_manifest import DAGTopology, SystemNode, compute_topology_hash
 
     node1 = SystemNode(description="Determinism Test")
     topology_a = DAGTopology(nodes={"did:web:node_1": node1}, allow_cycles=False, max_depth=10, max_fan_out=10)
@@ -105,7 +125,7 @@ def test_workflow_envelope_determinism() -> None:
 
 
 def test_system2_remediation_determinism() -> None:
-    from coreason_manifest.presentation.remediation import System2RemediationPrompt
+    from coreason_manifest import System2RemediationPrompt
 
     # Prove that out-of-order failing_pointers are sorted mathematically
     prompt1 = System2RemediationPrompt(
@@ -126,7 +146,7 @@ def test_system2_remediation_determinism() -> None:
 
 
 def test_affordance_projection_determinism() -> None:
-    from coreason_manifest.tooling.environments import ActionSpace, OntologicalSurfaceProjection
+    from coreason_manifest import ActionSpace, OntologicalSurfaceProjection
 
     space1 = ActionSpace(action_space_id="s1")
     space2 = ActionSpace(action_space_id="s2")
@@ -143,10 +163,7 @@ def test_affordance_projection_determinism() -> None:
 
 
 def test_federated_attestation_determinism() -> None:
-    from coreason_manifest.core.primitives import DataClassification
-    from coreason_manifest.oversight.dlp import SecureSubSession
-    from coreason_manifest.workflow.envelope import BilateralSLA
-    from coreason_manifest.workflow.federation import FederatedCapabilityAttestation
+    from coreason_manifest import BilateralSLA, DataClassification, FederatedCapabilityAttestation, SecureSubSession
 
     sla = BilateralSLA(
         receiving_tenant_id="tenant_a",
@@ -172,7 +189,7 @@ def test_lazy_hashing_performance_and_coverage() -> None:
     It should not have a _cached_hash upon instantiation, but should compute
     and store it when hash() is explicitly called, hitting the AttributeError fallback.
     """
-    from coreason_manifest.workflow.nodes import SystemNode
+    from coreason_manifest import SystemNode
 
     # Instantiate a frozen model
     node = SystemNode(description="Test lazy hash")
@@ -265,7 +282,7 @@ def test_rollback_determinism() -> None:
 
 
 def test_dlp_determinism() -> None:
-    from coreason_manifest.core.primitives import DataClassification
+    from coreason_manifest import DataClassification
 
     rule_a = RedactionRule(
         rule_id="a_phi_redact",

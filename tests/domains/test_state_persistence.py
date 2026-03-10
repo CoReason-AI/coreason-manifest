@@ -8,7 +8,7 @@
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.state.persistence import ContinuousMutationPolicy
+from coreason_manifest import ContinuousMutationPolicy
 
 
 def test_continuous_mutation_policy_valid() -> None:

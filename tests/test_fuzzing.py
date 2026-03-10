@@ -13,61 +13,65 @@ from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 from pydantic import TypeAdapter, ValidationError
 
-from coreason_manifest.adapters.mcp.schemas import HTTPTransportConfig, MCPServerConfig
-from coreason_manifest.core.primitives import DataClassification, RiskLevel
-from coreason_manifest.oversight.dlp import InformationFlowPolicy
-from coreason_manifest.oversight.governance import GlobalGovernance
-from coreason_manifest.oversight.intervention import (
+from coreason_manifest import (
+    ActionSpace,
+    AdjudicationIntent,
+    AdversarialSimulationProfile,
+    AgentNode,
     AnyInterventionPayload,
+    AnyNode,
+    AnyPanel,
+    AnyPresentationIntent,
+    AnyResiliencePayload,
+    AnyStateEvent,
+    AnyTopology,
+    ArgumentGraph,
+    AuctionState,
+    BeliefUpdateEvent,
+    ChaosExperiment,
+    CircuitBreakerTrip,
+    CompositeNode,
+    CustodyRecord,
+    DataClassification,
+    DocumentLayoutAnalysis,
+    DraftingIntent,
+    DynamicRoutingManifest,
+    EpistemicLedger,
+    EscalationIntent,
+    FallbackTrigger,
+    GlobalGovernance,
+    GrammarPanel,
+    HTTPTransportConfig,
+    HumanNode,
+    HypothesisGenerationEvent,
+    InformationalIntent,
+    InformationFlowPolicy,
+    InsightCard,
+    InterventionalCausalTask,
     InterventionPolicy,
     InterventionRequest,
     InterventionVerdict,
-    OverrideIntent,
-)
-from coreason_manifest.oversight.resilience import (
-    AnyResiliencePayload,
-    CircuitBreakerTrip,
-    FallbackTrigger,
-    QuarantineOrder,
-)
-from coreason_manifest.presentation.intents import (
-    AdjudicationIntent,
-    AnyPresentationIntent,
-    DraftingIntent,
-    EscalationIntent,
-    InformationalIntent,
-)
-from coreason_manifest.presentation.scivis import AnyPanel, GrammarPanel, InsightCard
-from coreason_manifest.state.argumentation import ArgumentGraph, UtilityJustificationGraph
-from coreason_manifest.state.events import (
-    AnyStateEvent,
-    BeliefUpdateEvent,
-    HypothesisGenerationEvent,
-    InterventionalCausalTask,
+    MarketContract,
+    MCPServerConfig,
+    NDimensionalTensorManifest,
     ObservationEvent,
-    SystemFaultEvent,
-)
-from coreason_manifest.state.memory import EpistemicLedger
-from coreason_manifest.state.semantic import (
+    OntologicalHandshake,
+    OverrideIntent,
+    QuarantineOrder,
+    RiskLevel,
     SemanticEdge,
     SemanticNode,
-)
-from coreason_manifest.state.tensors import NDimensionalTensorManifest, TensorDType
-from coreason_manifest.state.vision import (
-    DocumentLayoutAnalysis,
+    StateContract,
+    SystemFaultEvent,
+    SystemNode,
     TabularDataExtraction,
+    TaskAward,
+    TensorDType,
+    ToolDefinition,
+    TraceExportBatch,
+    UtilityJustificationGraph,
+    WorkflowEnvelope,
 )
-from coreason_manifest.telemetry.custody import CustodyRecord
-from coreason_manifest.telemetry.schemas import TraceExportBatch
-from coreason_manifest.testing.chaos import ChaosExperiment
-from coreason_manifest.testing.red_team import AdversarialSimulationProfile
-from coreason_manifest.tooling import ActionSpace, ToolDefinition
-from coreason_manifest.workflow.auctions import AuctionState, TaskAward
-from coreason_manifest.workflow.envelope import WorkflowEnvelope
-from coreason_manifest.workflow.markets import MarketContract
-from coreason_manifest.workflow.nodes import AgentNode, AnyNode, CompositeNode, HumanNode, SystemNode
-from coreason_manifest.workflow.routing import DynamicRoutingManifest
-from coreason_manifest.workflow.topologies import AnyTopology, OntologicalHandshake, StateContract
 
 
 @st.composite
@@ -271,11 +275,13 @@ def draw_interventional_causal_task(draw: Any) -> dict[str, Any]:
         st.fixed_dictionaries(
             {
                 "task_id": st.text(min_size=1),
-                "target_variable": st.text(min_size=1),
-                "do_operator_interventions": st.dictionaries(st.text(), st.one_of(st.text(), st.integers())),
-                "expected_information_gain": st.floats(
+                "target_hypothesis_id": st.text(min_size=1),
+                "intervention_variable": st.text(min_size=1),
+                "do_operator_state": st.text(min_size=1),
+                "expected_causal_information_gain": st.floats(
                     min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False
                 ),
+                "execution_cost_budget_magnitude": st.integers(min_value=0),
             }
         )
     )
@@ -653,12 +659,10 @@ def draw_dimensional_projection_contract(draw: Any) -> dict[str, Any]:
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
-                "source_dimensionality": st.integers(min_value=1),
-                "target_dimensionality": st.integers(min_value=1),
-                "isometry_preservation_score": st.floats(
-                    min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False
-                ),
-                "projection_matrix_hash": st.text(min_size=10),
+                "source_model_name": st.text(min_size=1),
+                "target_model_name": st.text(min_size=1),
+                "isometry_preservation_score": st.floats(min_value=0.0, max_value=1.0),
+                "projection_matrix_hash": st.text(min_size=10, max_size=10),
             }
         )
     )
@@ -670,12 +674,13 @@ def draw_ontological_handshake(draw: Any) -> dict[str, Any]:
     res: dict[str, Any] = draw(
         st.fixed_dictionaries(
             {
-                "initiating_node_id": draw_did_string(),
-                "receiving_node_id": draw_did_string(),
-                "latent_vector_similarity": st.floats(
+                "handshake_id": st.text(min_size=1),
+                "participant_node_ids": st.lists(st.text(min_size=1), min_size=2),
+                "measured_cosine_similarity": st.floats(
                     min_value=-1.0, max_value=1.0, allow_nan=False, allow_infinity=False
                 ),
-                "projection_contract": st.one_of(st.none(), draw_dimensional_projection_contract()),
+                "alignment_status": st.sampled_from(["aligned", "projected", "fallback_triggered", "incommensurable"]),
+                "applied_projection": st.one_of(st.none(), draw_dimensional_projection_contract()),
             }
         )
     )
@@ -1097,7 +1102,7 @@ def test_anynode_routing(payload: dict[str, Any]) -> None:
     elif node_type == "composite":
         assert isinstance(parsed, CompositeNode)
     elif node_type == "memoized":
-        from coreason_manifest.workflow.nodes import MemoizedNode
+        from coreason_manifest import MemoizedNode
 
         assert isinstance(parsed, MemoizedNode)
 
@@ -1247,7 +1252,7 @@ def test_anytopology_routing(payload: dict[str, Any]) -> None:
 def test_topology_routing(payload: dict[str, Any]) -> None:
     parsed = topology_adapter.validate_python(payload)
     if parsed.type == "evaluator_optimizer":
-        from coreason_manifest.workflow.topologies import EvaluatorOptimizerTopology
+        from coreason_manifest import EvaluatorOptimizerTopology
 
         assert isinstance(parsed, EvaluatorOptimizerTopology)
 
@@ -1608,27 +1613,27 @@ def test_anystateevent_routing(payload: dict[str, Any]) -> None:
     elif event_type == "hypothesis":
         assert isinstance(parsed, HypothesisGenerationEvent)
     elif event_type == "barge_in":
-        from coreason_manifest.state.events import BargeInInterruptEvent
+        from coreason_manifest import BargeInInterruptEvent
 
         assert isinstance(parsed, BargeInInterruptEvent)
     elif event_type == "counterfactual_regret":
-        from coreason_manifest.state.events import CounterfactualRegretEvent
+        from coreason_manifest import CounterfactualRegretEvent
 
         assert isinstance(parsed, CounterfactualRegretEvent)
     elif event_type == "tool_invocation":
-        from coreason_manifest.state.events import ToolInvocationEvent
+        from coreason_manifest import ToolInvocationEvent
 
         assert isinstance(parsed, ToolInvocationEvent)
     elif event_type == "epistemic_promotion":
-        from coreason_manifest.state.events import EpistemicPromotionEvent
+        from coreason_manifest import EpistemicPromotionEvent
 
         assert isinstance(parsed, EpistemicPromotionEvent)
     elif event_type == "normative_drift":
-        from coreason_manifest.state.events import NormativeDriftEvent
+        from coreason_manifest import NormativeDriftEvent
 
         assert isinstance(parsed, NormativeDriftEvent)
     elif event_type == "persistence_commit":
-        from coreason_manifest.state.events import PersistenceCommitReceipt
+        from coreason_manifest import PersistenceCommitReceipt
 
         assert isinstance(parsed, PersistenceCommitReceipt)
 
@@ -1779,7 +1784,7 @@ def draw_exogenous_epistemic_shock(draw: Any) -> dict[str, Any]:
 def test_epistemic_shock_escrow_interlock() -> None:
     from pydantic import ValidationError
 
-    from coreason_manifest.testing.chaos import ExogenousEpistemicShock, SimulationEscrow
+    from coreason_manifest import ExogenousEpistemicShock, SimulationEscrow
 
     with pytest.raises(ValidationError, match="greater than 0"):
         SimulationEscrow(locked_magnitude=0)
@@ -1995,7 +2000,7 @@ def test_actionspace_fuzzing(payload: dict[str, Any]) -> None:
 
 
 def test_ontological_surface_projection_invalid_action_spaces() -> None:
-    from coreason_manifest.tooling.environments import OntologicalSurfaceProjection
+    from coreason_manifest import OntologicalSurfaceProjection
 
     with pytest.raises(ValueError, match=r"Action spaces within a projection must have .*"):
         OntologicalSurfaceProjection(
@@ -2006,10 +2011,7 @@ def test_ontological_surface_projection_invalid_action_spaces() -> None:
 
 
 def test_federated_capability_attestation_invalid_vault_keys() -> None:
-    from coreason_manifest.core.primitives import DataClassification
-    from coreason_manifest.oversight.dlp import SecureSubSession
-    from coreason_manifest.workflow.envelope import BilateralSLA
-    from coreason_manifest.workflow.federation import FederatedCapabilityAttestation
+    from coreason_manifest import BilateralSLA, DataClassification, FederatedCapabilityAttestation, SecureSubSession
 
     sla = BilateralSLA(
         receiving_tenant_id="tenant_a",
@@ -2756,7 +2758,7 @@ def test_differentials_routing(payload: dict[str, Any]) -> None:
 
 @given(draw_crystallization_policy())
 def test_crystallization_policy_fuzzing(payload: dict[str, Any]) -> None:
-    from coreason_manifest.state.memory import CrystallizationPolicy
+    from coreason_manifest import CrystallizationPolicy
 
     TypeAdapter(CrystallizationPolicy).validate_python(payload)
 
@@ -2873,7 +2875,7 @@ def draw_cross_swarm_handshake_payload(draw: Any) -> dict[str, Any]:
 
 @given(draw_cross_swarm_handshake_payload())
 def test_cross_swarm_handshake_fuzzing(payload: dict[str, Any]) -> None:
-    from coreason_manifest.workflow.federation import CrossSwarmHandshake
+    from coreason_manifest import CrossSwarmHandshake
 
     TypeAdapter(CrossSwarmHandshake).validate_python(payload)
 
@@ -2893,7 +2895,7 @@ def draw_federated_discovery_protocol_payload(draw: Any) -> dict[str, Any]:
 
 @given(draw_federated_discovery_protocol_payload())
 def test_federated_discovery_protocol_fuzzing(payload: dict[str, Any]) -> None:
-    from coreason_manifest.workflow.federation import FederatedDiscoveryProtocol
+    from coreason_manifest import FederatedDiscoveryProtocol
 
     TypeAdapter(FederatedDiscoveryProtocol).validate_python(payload)
 
@@ -2920,7 +2922,7 @@ def draw_simulation_convergence_sla_payload(draw: Any) -> dict[str, Any]:
 
 @given(draw_simulation_convergence_sla_payload())
 def test_simulation_convergence_sla_standalone(payload: dict[str, Any]) -> None:
-    from coreason_manifest.workflow.topologies import SimulationConvergenceSLA
+    from coreason_manifest import SimulationConvergenceSLA
 
     TypeAdapter(SimulationConvergenceSLA).validate_python(payload)
 
@@ -3017,7 +3019,7 @@ def test_anyinterventionpayload_routing(payload: dict[str, Any]) -> None:
     elif payload_type == "override":
         assert isinstance(parsed, OverrideIntent)
     elif payload_type == "constitutional_amendment":
-        from coreason_manifest.oversight.intervention import ConstitutionalAmendmentProposal
+        from coreason_manifest import ConstitutionalAmendmentProposal
 
         assert isinstance(parsed, ConstitutionalAmendmentProposal)
 
@@ -3535,7 +3537,7 @@ def draw_synthetic_generation_profile(draw: Any) -> dict[str, Any]:
 
 
 def test_synthetic_generation_profile_routing() -> None:
-    from coreason_manifest.testing.simulation import SyntheticGenerationProfile
+    from coreason_manifest import SyntheticGenerationProfile
 
     adapter = TypeAdapter(SyntheticGenerationProfile)
 
@@ -3560,7 +3562,7 @@ def draw_system2_remediation_prompt(draw: Any) -> dict[str, Any]:
 
 
 def test_system2_remediation_prompt_fuzzing() -> None:
-    from coreason_manifest.presentation.remediation import System2RemediationPrompt
+    from coreason_manifest import System2RemediationPrompt
 
     adapter = TypeAdapter(System2RemediationPrompt)
 
@@ -3589,7 +3591,7 @@ def test_system2_remediation_prompt_fuzzing() -> None:
 )
 def test_adversarial_ssrf_rejection(adversarial_url: str) -> None:
     """Mathematically prove adversarial spatial coordinates cause immediate epistemic collapse."""
-    from coreason_manifest.state.toolchains import BrowserDOMState
+    from coreason_manifest import BrowserDOMState
 
     with pytest.raises(ValidationError, match="SSRF"):
         # We must supply other required fields for initialization to only fail on current_url

@@ -8,7 +8,7 @@
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.tooling.environments import EphemeralNamespacePartition
+from coreason_manifest import EphemeralNamespacePartition
 
 
 def test_ephemeral_partition_temporal_override_proof() -> None:

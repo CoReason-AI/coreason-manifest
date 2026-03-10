@@ -8,9 +8,7 @@
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.core.primitives import DataClassification
-from coreason_manifest.workflow.envelope import BilateralSLA
-from coreason_manifest.workflow.federation import CrossSwarmHandshake, FederatedDiscoveryProtocol
+from coreason_manifest import BilateralSLA, CrossSwarmHandshake, DataClassification, FederatedDiscoveryProtocol
 
 
 def test_federated_discovery_protocol_valid() -> None:

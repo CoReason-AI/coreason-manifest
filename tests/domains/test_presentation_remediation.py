@@ -8,7 +8,7 @@
 import pytest
 from pydantic import BaseModel, Field, ValidationError
 
-from coreason_manifest.presentation.remediation import generate_correction_prompt
+from coreason_manifest import generate_correction_prompt
 
 
 class MockStrictSchema(BaseModel):

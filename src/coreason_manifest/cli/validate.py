@@ -16,11 +16,12 @@ from typing import Final
 
 from pydantic import BaseModel, ValidationError
 
-from coreason_manifest.state.cognition import CognitiveStateProfile  # Representative schema
-from coreason_manifest.state.differentials import StatePatch  # Representative schema
-
 # Statically bound God-Context imports
-from coreason_manifest.state.vision import DocumentLayoutAnalysis
+from coreason_manifest import (
+    CognitiveStateProfile,  # Representative schema
+    DocumentLayoutAnalysis,
+    StatePatch,  # Representative schema
+)
 
 # Immutable AOT Schema Registry
 SCHEMA_REGISTRY: Final[dict[str, type[BaseModel]]] = {
