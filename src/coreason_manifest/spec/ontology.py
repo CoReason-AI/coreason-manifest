@@ -743,7 +743,9 @@ class RedactionPolicy(CoreasonBaseModel):
     """
 
     rule_id: str = Field(description="Unique identifier for the sanitization rule.")
-    classification: InformationClassification = Field(description="The category of sensitive payload this rule targets.")
+    classification: InformationClassification = Field(
+        description="The category of sensitive payload this rule targets."
+    )
     target_pattern: str = Field(description="The semantic entity type or declarative regex pattern to identify.")
     target_regex_pattern: str = Field(max_length=200, description="The dynamic regex pattern to target.")
     context_exclusion_zones: list[str] | None = Field(
@@ -2867,7 +2869,8 @@ class EpistemicProvenanceReceipt(CoreasonBaseModel):
         description="The exact event Content Identifier (CID) in the EpistemicLedgerState that generated this fact."
     )
     source_artifact_id: str | None = Field(
-        default=None, description="The CID of the Genesis MultimodalArtifactReceipt this semantic state was transmutated from."
+        default=None,
+        description="The CID of the Genesis MultimodalArtifactReceipt this semantic state was transmutated from.",
     )
     multimodal_anchor: MultimodalTokenAnchorState | None = Field(
         default=None, description="The unified VLM spatial and temporal token matrix where this data was extracted."
@@ -3931,7 +3934,9 @@ class SemanticNodeState(CoreasonBaseModel):
         default="session",
         description="The cryptographic namespace partitioning boundary. Global is public, Tenant is corporate, Session is ephemeral.",  # noqa: E501
     )
-    text_chunk: str = Field(max_length=50000, description="The raw natural language representation of the semantic node.")
+    text_chunk: str = Field(
+        max_length=50000, description="The raw natural language representation of the semantic node."
+    )
     embedding: VectorEmbeddingState | None = Field(
         default=None,
         description="Topologically Bounded Latent Spaces used to calculate exact geometric distance and preserve structural Isometry.",  # noqa: E501
@@ -4336,8 +4341,12 @@ class SwarmTopologyManifest(BaseTopologyManifest):
 
     @model_validator(mode="after")
     def sort_arrays(self) -> Self:
-        object.__setattr__(self, "active_prediction_markets", sorted(self.active_prediction_markets, key=lambda x: x.market_id))
-        object.__setattr__(self, "resolved_markets", sorted(self.resolved_markets, key=lambda x: x.market_id))
+        object.__setattr__(
+            self, "active_prediction_markets", sorted(self.active_prediction_markets, key=lambda x: x.market_id)
+        )
+        object.__setattr__(
+            self, "resolved_markets", sorted(self.resolved_markets, key=lambda x: x.market_id)
+        )
         return self
 
 
