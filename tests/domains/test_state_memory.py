@@ -12,13 +12,13 @@ from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
     AnyStateEvent,
-    BeliefUpdateEvent,
+    BeliefMutationEvent,
     CrystallizationPolicy,
     EpistemicLedger,
+    EpistemicQuarantineSnapshot,
     ObservationEvent,
     SystemFaultEvent,
     TheoryOfMindSnapshot,
-    WorkingMemorySnapshot,
 )
 
 
@@ -72,7 +72,7 @@ def state_event_strategy(draw: st.DrawFn) -> AnyStateEvent:
     if event_type == "observation":
         return ObservationEvent(event_id=event_id, timestamp=timestamp, type="observation", payload=payload)
     if event_type == "belief_update":
-        return BeliefUpdateEvent(event_id=event_id, timestamp=timestamp, type="belief_update", payload=payload)
+        return BeliefMutationEvent(event_id=event_id, timestamp=timestamp, type="belief_mutation", payload=payload)
     return SystemFaultEvent(event_id=event_id, timestamp=timestamp, type="system_fault")
 
 
@@ -100,7 +100,7 @@ def draw_theory_of_mind_snapshot(draw: st.DrawFn) -> TheoryOfMindSnapshot:
 def test_working_memory_theory_of_mind(
     system_prompt: str, active_context: dict[str, str], theory_of_mind_models: list[TheoryOfMindSnapshot]
 ) -> None:
-    snapshot = WorkingMemorySnapshot(
+    snapshot = EpistemicQuarantineSnapshot(
         system_prompt=system_prompt,
         active_context=active_context,
         theory_of_mind_models=theory_of_mind_models,

@@ -14,7 +14,7 @@ from coreason_manifest.spec.ontology import (
     MathematicalNotationExtraction,
     MultimodalTokenAnchor,
     TableCell,
-    TabularDataExtraction,
+    TabularMatrixExtraction,
 )
 
 
@@ -35,7 +35,7 @@ def test_tabular_collision_prevention() -> None:
     cell2 = TableCell(row_index=1, col_index=1, row_span=1, col_span=1, content="B", anchor=anchor)
 
     with pytest.raises(ValidationError, match="Geometric Collision Detected"):
-        TabularDataExtraction(cells=[cell1, cell2])
+        TabularMatrixExtraction(cells=[cell1, cell2])
 
 
 def test_mathematical_ungrounded_prevention() -> None:

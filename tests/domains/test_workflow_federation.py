@@ -11,8 +11,8 @@ from pydantic import ValidationError
 from coreason_manifest.spec.ontology import (
     BilateralSLA,
     CrossSwarmHandshake,
-    DataClassification,
     FederatedDiscoveryProtocol,
+    InformationClassification,
 )
 
 
@@ -41,7 +41,7 @@ def test_cross_swarm_handshake_valid() -> None:
     """Test valid instantiation of CrossSwarmHandshake."""
     sla = BilateralSLA(
         receiving_tenant_id="did:example:tenant-b",
-        max_permitted_classification=DataClassification.RESTRICTED,
+        max_permitted_classification=InformationClassification.RESTRICTED,
         liability_limit_magnitude=1000000,
         permitted_geographic_regions=["us-east-1", "eu-west-1"],
     )
@@ -64,7 +64,7 @@ def test_cross_swarm_handshake_default_status() -> None:
     """Test that the default status is 'proposed'."""
     sla = BilateralSLA(
         receiving_tenant_id="did:example:tenant-b",
-        max_permitted_classification=DataClassification.PUBLIC,
+        max_permitted_classification=InformationClassification.PUBLIC,
         liability_limit_magnitude=0,
     )
 
@@ -82,7 +82,7 @@ def test_cross_swarm_handshake_invalid_status() -> None:
     """Test that an invalid status raises ValidationError."""
     sla = BilateralSLA(
         receiving_tenant_id="did:example:tenant-b",
-        max_permitted_classification=DataClassification.PUBLIC,
+        max_permitted_classification=InformationClassification.PUBLIC,
         liability_limit_magnitude=0,
     )
 

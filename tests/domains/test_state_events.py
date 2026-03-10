@@ -12,7 +12,7 @@ from pydantic import TypeAdapter, ValidationError
 
 from coreason_manifest.spec.ontology import (
     AnyStateEvent,
-    BeliefUpdateEvent,
+    BeliefMutationEvent,
     EpistemicPromotionEvent,
     NeuralAuditAttestation,
     NormativeDriftEvent,
@@ -35,7 +35,7 @@ def test_event_payload_rejects_max_depth() -> None:
 def test_event_payload_rejects_max_keys() -> None:
     wide_payload = {f"key_{i}": "val" for i in range(105)}
     with pytest.raises(ValueError, match="maximum key count"):
-        BeliefUpdateEvent(
+        BeliefMutationEvent(
             event_id="bel-123",
             timestamp=1234567890.0,
             payload=wide_payload,

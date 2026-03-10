@@ -55,7 +55,7 @@ type CausalInterval = Literal["strictly_precedes", "overlaps", "contains", "caus
 type CrossoverType = Literal["uniform_blend", "single_point", "heuristic"]
 
 
-class DataClassification(StrEnum):
+class InformationClassification(StrEnum):
     """
     Standardized Information Flow Control (IFC) lattice boundaries.
     """
@@ -88,7 +88,7 @@ type GitSHA = Annotated[
     ),
 ]
 
-type MemoryTier = Literal["working", "episodic", "semantic"]
+type CognitiveTier = Literal["working", "episodic", "semantic"]
 
 type NodeID = Annotated[
     str,
@@ -727,7 +727,7 @@ class RedactionRule(CoreasonBaseModel):
     """
 
     rule_id: str = Field(description="Unique identifier for the sanitization rule.")
-    classification: DataClassification = Field(description="The category of sensitive data this rule targets.")
+    classification: InformationClassification = Field(description="The category of sensitive data this rule targets.")
     target_pattern: str = Field(description="The semantic entity type or declarative regex pattern to identify.")
     target_regex_pattern: str = Field(max_length=200, description="The dynamic regex pattern to target.")
     context_exclusion_zones: list[str] | None = Field(
@@ -812,7 +812,7 @@ class DefeasibleCascade(CoreasonBaseModel):
         description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this automated truth maintenance operation.",  # noqa: E501
     )
     root_falsified_event_id: str = Field(
-        description="The source BeliefUpdateEvent or HypothesisGenerationEvent Content Identifier (CID) that collapsed and triggered this cascade."  # noqa: E501
+        description="The source BeliefMutationEvent or HypothesisGenerationEvent Content Identifier (CID) that collapsed and triggered this cascade."  # noqa: E501
     )
     propagated_decay_factor: float = Field(
         ge=0.0, le=1.0, description="The calculated Entropy Penalty applied to this specific subgraph."
@@ -1031,7 +1031,7 @@ class EphemeralNamespacePartition(CoreasonBaseModel):
         return self
 
 
-class ToolDefinition(CoreasonBaseModel):
+class ToolManifest(CoreasonBaseModel):
     """
     Declarative mathematical definition of a tool.
     """
@@ -1056,7 +1056,7 @@ class BilateralSLA(CoreasonBaseModel):
     receiving_tenant_id: str = Field(
         max_length=255, description="The strict enterprise identifier of the foreign B2B tenant receiving this payload."
     )
-    max_permitted_classification: DataClassification = Field(
+    max_permitted_classification: InformationClassification = Field(
         description="The absolute highest data sensitivity allowed to cross this federated boundary."
     )
     liability_limit_magnitude: int = Field(
@@ -1098,7 +1098,9 @@ class ActiveInferenceContract(CoreasonBaseModel):
     task_id: str = Field(min_length=1, description="Unique identifier for this active inference execution.")
     target_hypothesis_id: str = Field(description="The HypothesisGenerationEvent this task is attempting to falsify.")
     target_condition_id: str = Field(description="The specific FalsificationCondition being tested.")
-    selected_tool_name: str = Field(description="The exact tool from the ActionSpace allocated for this experiment.")
+    selected_tool_name: str = Field(
+        description="The exact tool from the ActionSpaceManifest allocated for this experiment."
+    )
     expected_information_gain: float = Field(
         ge=0.0,
         le=1.0,
@@ -1253,7 +1255,7 @@ class BackpressurePolicy(CoreasonBaseModel):
     max_concurrent_tool_invocations: int | None = Field(
         default=None,
         gt=0,
-        description="The mathematical integer ceiling to prevent Sybil-like parallel mutations against the ActionSpace.",  # noqa: E501
+        description="The mathematical integer ceiling to prevent Sybil-like parallel mutations against the ActionSpaceManifest.",  # noqa: E501
     )
 
 
@@ -1425,13 +1427,13 @@ class AffineTransformMatrix(CoreasonBaseModel):
     scale_type: ChartAxisScale = Field(description="The mathematical progression between min and max.")
 
 
-class CircuitBreakerTrip(CoreasonBaseModel):
+class CircuitBreakerEvent(CoreasonBaseModel):
     """
     Indicates that a circuit breaker has been tripped for a target node.
     """
 
-    type: Literal["circuit_breaker"] = Field(
-        default="circuit_breaker", description="The type of the resilience payload."
+    type: Literal["circuit_breaker_event"] = Field(
+        default="circuit_breaker_event", description="The type of the resilience payload."
     )
     target_node_id: NodeID = Field(description="The ID of the node for which the circuit breaker was tripped.")
     error_signature: str = Field(description="Signature or summary of the error causing the trip.")
@@ -1534,7 +1536,7 @@ class CrystallizationPolicy(CoreasonBaseModel):
     )
 
 
-class CustodyRecord(CoreasonBaseModel):
+class CustodyReceipt(CoreasonBaseModel):
     """
     Cryptographic state of an agent to ensure full traceability and provenance.
     """
@@ -2033,7 +2035,7 @@ class FalsificationCondition(CoreasonBaseModel):
     )
     required_tool_name: str | None = Field(
         default=None,
-        description="The specific ActionSpace tool required to test this condition (e.g., 'sql_query_db').",
+        description="The specific ActionSpaceManifest tool required to test this condition (e.g., 'sql_query_db').",
     )
     falsifying_observation_signature: str = Field(
         description="The expected data schema or regex pattern that, if returned by the tool, kills the hypothesis."
@@ -2586,13 +2588,13 @@ class MCPServerManifest(CoreasonBaseModel):
     )
 
 
-class ActionSpace(CoreasonBaseModel):
+class ActionSpaceManifest(CoreasonBaseModel):
     """
     A curated environment of tools accessible to an agent or node.
     """
 
     action_space_id: str = Field(description="The unique identifier for this curated environment of tools.")
-    native_tools: list[ToolDefinition] = Field(
+    native_tools: list[ToolManifest] = Field(
         default_factory=list, description="The list of discrete, natively defined tools available in this space."
     )
     mcp_servers: list[MCPServerManifest] = Field(
@@ -2608,7 +2610,7 @@ class ActionSpace(CoreasonBaseModel):
     def verify_unique_tool_namespaces_and_sort(self) -> Self:
         tool_names = {t.tool_name for t in self.native_tools}
         if len(tool_names) < len(self.native_tools):
-            raise ValueError("Tool names within an ActionSpace must be strictly unique.")
+            raise ValueError("Tool names within an ActionSpaceManifest must be strictly unique.")
 
         object.__setattr__(self, "native_tools", sorted(self.native_tools, key=lambda x: x.tool_name))
         object.__setattr__(self, "mcp_servers", sorted(self.mcp_servers, key=lambda x: x.server_uri))
@@ -2620,14 +2622,14 @@ class ActionSpace(CoreasonBaseModel):
 
 class OntologicalSurfaceProjection(CoreasonBaseModel):
     """
-    A mathematically bounded, declarative subgraph of all ToolDefinitions and
+    A mathematically bounded, declarative subgraph of all ToolManifests and
     MCPServerManifests currently valid for the agent's ProfileID.
     """
 
     projection_id: str = Field(
         min_length=1, description="A cryptographic Lineage Watermark bounding this specific capability set."
     )
-    action_spaces: list[ActionSpace] = Field(
+    action_spaces: list[ActionSpaceManifest] = Field(
         default_factory=list, description="The full, machine-readable declaration of accessible tools and MCP servers."
     )
     supported_personas: list[ProfileID] = Field(
@@ -2660,7 +2662,7 @@ class MCPPromptRef(CoreasonBaseModel):
     prompt_hash: str | None = Field(default=None, description="Cryptographic hash for prompt integrity verification.")
 
 
-class MCPResourceList(CoreasonBaseModel):
+class MCPResourceManifest(CoreasonBaseModel):
     """A collection of Semantic Memory resource URIs provided by a specific MCP server."""
 
     server_id: str = Field(..., description="The ID of the MCP server providing these resources.")
@@ -2731,7 +2733,7 @@ class MarketContract(CoreasonBaseModel):
         return self
 
 
-class MarketResolution(CoreasonBaseModel):
+class MarketResolutionState(CoreasonBaseModel):
     """
     The resolution state of an algorithmic prediction market.
     """
@@ -2780,7 +2782,7 @@ class MechanisticAuditContract(CoreasonBaseModel):
         return self
 
 
-class MemoryProvenance(CoreasonBaseModel):
+class EpistemicProvenance(CoreasonBaseModel):
     extracted_by: NodeID = Field(
         description="The Content Identifier (CID) of the agent node that extracted this memory."
     )
@@ -3097,18 +3099,20 @@ class ComputeProvisioningRequest(CoreasonBaseModel):
         return self
 
 
-class QuarantineOrder(CoreasonBaseModel):
+class QuarantineIntent(CoreasonBaseModel):
     """
     Indicates that a target node should be quarantined.
     """
 
-    type: Literal["quarantine"] = Field(default="quarantine", description="The type of the resilience payload.")
+    type: Literal["quarantine_intent"] = Field(
+        default="quarantine_intent", description="The type of the resilience payload."
+    )
     target_node_id: NodeID = Field(description="The ID of the node to be quarantined.")
     reason: str = Field(description="The reason for the quarantine order.")
 
 
 type AnyResiliencePayload = Annotated[
-    QuarantineOrder | CircuitBreakerTrip | FallbackTrigger, Field(discriminator="type")
+    QuarantineIntent | CircuitBreakerEvent | FallbackTrigger, Field(discriminator="type")
 ]
 
 
@@ -3216,7 +3220,7 @@ class SimulationEscrow(CoreasonBaseModel):
     )
 
 
-class ExogenousEpistemicShock(CoreasonBaseModel):
+class ExogenousEpistemicEvent(CoreasonBaseModel):
     shock_id: str = Field(min_length=1, description="Cryptographic identifier for the Black Swan event.")
     target_node_hash: str = Field(
         pattern="^[a-f0-9]{64}$",
@@ -3235,7 +3239,7 @@ class ExogenousEpistemicShock(CoreasonBaseModel):
     @model_validator(mode="after")
     def enforce_economic_escrow(self) -> Self:
         if self.escrow.locked_magnitude <= 0:
-            raise ValueError("ExogenousEpistemicShock requires a strictly positive escrow to execute.")
+            raise ValueError("ExogenousEpistemicEvent requires a strictly positive escrow to execute.")
         return self
 
 
@@ -3396,7 +3400,7 @@ class ChaosExperiment(CoreasonBaseModel):
     faults: list[FaultInjectionProfile] = Field(
         description="The list of fault injection profiles defining the chaotic elements."
     )
-    shocks: list[ExogenousEpistemicShock] = Field(
+    shocks: list[ExogenousEpistemicEvent] = Field(
         default_factory=list,
         description="The declarative list of exogenous Black Swan events injected into the topology.",
     )
@@ -3523,7 +3527,7 @@ class TableCell(CoreasonBaseModel):
     anchor: MultimodalTokenAnchor = Field(description="The physical location of the cell within the image or document.")
 
 
-class TabularDataExtraction(CoreasonBaseModel):
+class TabularMatrixExtraction(CoreasonBaseModel):
     cells: list[TableCell] = Field(description="The sparse tensor representing all populated cells.")
 
     @model_validator(mode="after")
@@ -3697,7 +3701,7 @@ class ToolInvocationEvent(BaseStateEvent):
     type: Literal["tool_invocation"] = Field(
         default="tool_invocation", description="Discriminator type for a tool invocation event."
     )
-    tool_name: str = Field(description="The exact tool targeted in the ActionSpace.")
+    tool_name: str = Field(description="The exact tool targeted in the ActionSpaceManifest.")
     parameters: dict[str, Any] = Field(description="The intended JSON-RPC payload.")
     authorized_budget_magnitude: int | None = Field(
         default=None, ge=0, description="The maximum escrow unlocked for this specific run."
@@ -3727,7 +3731,7 @@ class TruthMaintenancePolicy(CoreasonBaseModel):
     )
     enforce_cross_agent_quarantine: bool = Field(
         default=False,
-        description="If True, the orchestrator must automatically emit global QuarantineOrders to sever infected SemanticEdges across the swarm to prevent epistemic contagion.",  # noqa: E501
+        description="If True, the orchestrator must automatically emit global QuarantineIntents to sever infected SemanticEdges across the swarm to prevent epistemic contagion.",  # noqa: E501
     )
     max_cascade_depth: int = Field(gt=0, description="The absolute recursion depth limit for state retractions.")
     max_quarantine_blast_radius: int = Field(
@@ -3793,7 +3797,7 @@ class SemanticEdge(CoreasonBaseModel):
         default=None,
         description="Topologically Bounded Latent Spaces used to calculate exact geometric distance and preserve structural Isometry.",  # noqa: E501
     )
-    provenance: MemoryProvenance | None = Field(
+    provenance: EpistemicProvenance | None = Field(
         default=None,
         description="Optional distinct provenance if the relationship was inferred separately from the nodes.",
     )
@@ -3819,8 +3823,8 @@ class SemanticNode(CoreasonBaseModel):
         default=None,
         description="Topologically Bounded Latent Spaces used to calculate exact geometric distance and preserve structural Isometry.",  # noqa: E501
     )
-    provenance: MemoryProvenance = Field(description="The cryptographic chain of custody for this memory.")
-    tier: MemoryTier = Field(default="semantic", description="The cognitive tier this memory resides in.")
+    provenance: EpistemicProvenance = Field(description="The cryptographic chain of custody for this memory.")
+    tier: CognitiveTier = Field(default="semantic", description="The cognitive tier this memory resides in.")
     temporal_bounds: TemporalBounds | None = Field(
         default=None, description="The time window during which this node is considered valid."
     )
@@ -3896,7 +3900,8 @@ class AgentNode(BaseNode):
         default=None, description="The cryptographic identity passport and AI-BOM for the agent."
     )
     action_space_id: str | None = Field(
-        default=None, description="The ID of the specific ActionSpace (curated tool environment) bound to this agent."
+        default=None,
+        description="The ID of the specific ActionSpaceManifest (curated tool environment) bound to this agent.",
     )
     secure_sub_session: SecureSubSession | None = Field(
         default=None,
@@ -4201,7 +4206,7 @@ class SwarmTopology(BaseTopology):
     active_prediction_markets: list[PredictionMarketState] = Field(
         default_factory=list, description="The live algorithmic betting markets resolving swarm consensus."
     )
-    resolved_markets: list[MarketResolution] = Field(
+    resolved_markets: list[MarketResolutionState] = Field(
         default_factory=list,
         description="The immutable records of finalized markets and reputation capital distributions.",
     )
@@ -4320,7 +4325,7 @@ class WorkflowEnvelope(CoreasonBaseModel):
     max_risk_tolerance: RiskLevel | None = Field(
         default=None, description="The absolute maximum enterprise risk threshold permitted for this topology."
     )
-    allowed_data_classifications: list[DataClassification] | None = Field(
+    allowed_data_classifications: list[InformationClassification] | None = Field(
         default=None,
         description="The declarative whitelist of data classifications permitted to flow through this graph.",
     )
@@ -4393,7 +4398,7 @@ type AnyInterventionPayload = Annotated[
 ]
 
 
-class WorkingMemorySnapshot(CoreasonBaseModel):
+class EpistemicQuarantineSnapshot(CoreasonBaseModel):
     """Represents the Epistemic Quarantine, partitioned from the Committed Epistemic Ledger."""
 
     system_prompt: str = Field(
@@ -4449,9 +4454,9 @@ class ZeroKnowledgeProof(CoreasonBaseModel):
     )
 
 
-class BeliefUpdateEvent(BaseStateEvent):
-    type: Literal["belief_update"] = Field(
-        default="belief_update", description="Discriminator type for a Belief Assertion event."
+class BeliefMutationEvent(BaseStateEvent):
+    type: Literal["belief_mutation"] = Field(
+        default="belief_mutation", description="Discriminator type for a Belief Assertion event."
     )
     payload: dict[str, Any] = Field(
         description="Topologically Bounded Latent Spaces capturing the semantic representation of the agent's internal cognitive shift or synthesis that anchor statistical probability to a definitive causal event hash."  # noqa: E501
@@ -4537,7 +4542,7 @@ class ObservationEvent(BaseStateEvent):
 
 type AnyStateEvent = Annotated[
     ObservationEvent
-    | BeliefUpdateEvent
+    | BeliefMutationEvent
     | SystemFaultEvent
     | HypothesisGenerationEvent
     | BargeInInterruptEvent
