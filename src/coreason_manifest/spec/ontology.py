@@ -471,7 +471,9 @@ class PermissionBoundaryPolicy(CoreasonBaseModel):
     allowed_domains: list[str] | None = Field(
         default=None, description="Whitelist of allowed network domains if network access is true."
     )
-    file_system_read_only: bool = Field(description="True if the tool is strictly forbidden from writing to the disk.")
+    file_system_mutation_forbidden: bool = Field(
+        description="True if the tool is strictly forbidden from writing to the disk."
+    )
     auth_requirements: list[str] | None = Field(
         default=None,
         description="An explicit list of authentication protocol identifiers (e.g., 'oauth2:github', 'mtls:internal') the orchestrator must negotiate before allocating compute.",  # noqa: E501
@@ -739,7 +741,7 @@ class ConsensusPolicy(CoreasonBaseModel):
 
 class RedactionPolicy(CoreasonBaseModel):
     """
-    A specific rule for algorithmic data sanitization.
+    A specific rule for algorithmic payload sanitization.
     """
 
     rule_id: str = Field(description="Unique identifier for the sanitization rule.")
@@ -1301,7 +1303,7 @@ class BasePanelProfile(CoreasonBaseModel):
 
 class BaseStateEvent(CoreasonBaseModel):
     event_id: str = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG."  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG."  # noqa: E501
     )
     timestamp: float = Field(description="Causal Ancestry markers required to resolve decentralized event ordering.")
 
@@ -1436,7 +1438,7 @@ class BypassReceipt(CoreasonBaseModel):
 
 class CausalAttributionState(CoreasonBaseModel):
     source_event_id: str = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the source event in the Merkle-DAG."  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the source event in the Merkle-DAG."  # noqa: E501
     )
     influence_weight: float = Field(
         ge=0.0,
@@ -1518,7 +1520,7 @@ class CounterfactualRegretEvent(BaseStateEvent):
         default="counterfactual_regret", description="Discriminator type for a counterfactual regret event."
     )
     historical_event_id: str = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the specific historical state node where the agent mathematically diverged to simulate an alternative path."  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the specific historical state node where the agent mathematically diverged to simulate an alternative path."  # noqa: E501
     )
     counterfactual_intervention: str = Field(
         description="The specific alternative action or do-calculus intervention applied in the simulation."
@@ -1671,16 +1673,16 @@ class DocumentLayoutManifest(CoreasonBaseModel):
     blocks: dict[str, DocumentLayoutRegionState] = Field(
         description="Dictionary mapping block_ids to their strict spatial definitions."
     )
-    reading_order_edges: list[tuple[str, str]] = Field(
+    chronological_flow_edges: list[tuple[str, str]] = Field(
         default_factory=list,
         description="Directed edges defining the topological sort (chronological flow) of the document.",
     )
-    # Note: reading_order_edges is a structurally ordered sequence (Topological Flow) and MUST NOT be sorted.
+    # Note: chronological_flow_edges is a structurally ordered sequence (Topological Flow) and MUST NOT be sorted.
 
     @model_validator(mode="after")
     def verify_dag_and_integrity(self) -> Self:
         adj: dict[str, list[str]] = {node_id: [] for node_id in self.blocks}
-        for source, target in self.reading_order_edges:
+        for source, target in self.chronological_flow_edges:
             if source not in self.blocks:
                 raise ValueError(f"Source block '{source}' does not exist.")
             if target not in self.blocks:
@@ -1762,7 +1764,7 @@ class BargeInInterruptEvent(BaseStateEvent):
         default="barge_in", description="Discriminator type for a barge-in interruption event."
     )
     target_event_id: str = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the active node generation cycle that was killed in the Merkle-DAG."  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the active node generation cycle that was killed in the Merkle-DAG."  # noqa: E501
     )
     sensory_trigger: EmbodiedSensoryVectorProfile | None = Field(
         default=None,
@@ -2079,7 +2081,7 @@ class FallbackIntent(CoreasonBaseModel):
 class FalsificationContract(CoreasonBaseModel):
     condition_id: str = Field(
         min_length=1,
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this falsification test to the Merkle-DAG.",  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this falsification test to the Merkle-DAG.",  # noqa: E501
     )
     description: str = Field(
         description="Semantic description of what observation would prove the parent hypothesis is false."
@@ -2128,7 +2130,7 @@ class FederatedCapabilityAttestationReceipt(CoreasonBaseModel):
 class FederatedStateSnapshot(CoreasonBaseModel):
     topology_id: str | None = Field(
         default=None,
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the federated topology, if applicable.",  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the federated topology, if applicable.",  # noqa: E501
     )
 
 
@@ -2967,7 +2969,7 @@ class NDimensionalTensorManifest(CoreasonBaseModel):
 class NeuralAuditAttestationReceipt(CoreasonBaseModel):
     audit_id: str = Field(
         min_length=1,
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",  # noqa: E501
     )
     layer_activations: dict[int, list[SaeFeatureActivationState]] = Field(
         description="A mapping of specific transformer layer indices to their top-k activated SAE features."
@@ -3019,7 +3021,7 @@ class ObservabilityPolicy(CoreasonBaseModel):
 class OntologicalHandshakeReceipt(CoreasonBaseModel):
     handshake_id: str = Field(
         min_length=1,
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this protocol handshake to the Merkle-DAG.",  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this protocol handshake to the Merkle-DAG.",  # noqa: E501
     )
     participant_node_ids: list[str] = Field(min_length=2, description="The agents establishing semantic alignment.")
     measured_cosine_similarity: float = Field(
@@ -3549,7 +3551,7 @@ class HypothesisGenerationEvent(BaseStateEvent):
 
     hypothesis_id: str = Field(
         min_length=1,
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this abductive leap to the Merkle-DAG.",  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this abductive leap to the Merkle-DAG.",  # noqa: E501
     )
     premise_text: str = Field(description="The natural language explanation of the abductive theory.")
     bayesian_prior: float = Field(
@@ -3618,7 +3620,7 @@ class System2RemediationIntent(CoreasonBaseModel):
     )
 
     target_node_id: NodeID = Field(
-        description="The strict W3C DID of the agent that authored the invalid state, ensuring the fault is routed back to the exact memory partition."  # noqa: E501
+        description="The strict W3C DID of the agent that authored the invalid state, ensuring the fault is routed back to the exact state partition."  # noqa: E501
     )
     failing_pointers: list[str] = Field(
         min_length=1,
@@ -3792,7 +3794,7 @@ type AnyToolchainState = Annotated[
 class TheoryOfMindSnapshot(CoreasonBaseModel):
     target_agent_id: str = Field(
         min_length=1,
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the agent whose mind is being modeled.",  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the agent whose mind is being modeled.",  # noqa: E501
     )
     assumed_shared_beliefs: list[str] = Field(
         description="The explicit array of Content Identifiers (CIDs) acting as cryptographic Lineage Watermarks that the modeling agent assumes the target already possesses."  # noqa: E501
@@ -3930,7 +3932,7 @@ class SemanticEdgeState(CoreasonBaseModel):
 
 class SemanticNodeState(CoreasonBaseModel):
     node_id: str = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this semantic node to the Merkle-DAG."  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this semantic node to the Merkle-DAG."  # noqa: E501
     )
     label: str = Field(description="The categorical label of the node (e.g., 'Person', 'Concept').")
     scope: Literal["global", "tenant", "session"] = Field(
@@ -4586,7 +4588,7 @@ class ZeroKnowledgeReceipt(CoreasonBaseModel):
         description="The SHA-256 hash of the public inputs (e.g., prompt, Lamport clock) anchoring this proof to the specific state index."  # noqa: E501
     )
     verifier_key_id: str = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the public evaluation key."  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the public evaluation key."  # noqa: E501
     )
     cryptographic_blob: str = Field(
         max_length=5000000, description="The base64-encoded succinct cryptographic proof payload."

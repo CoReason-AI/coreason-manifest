@@ -1232,7 +1232,7 @@
       "description": "A cryptographic receipt of a continuous multimodal sequence being prematurely severed by an external stimulus.",
       "properties": {
         "event_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
           "title": "Event Id",
           "type": "string"
         },
@@ -1249,7 +1249,7 @@
           "type": "string"
         },
         "target_event_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the active node generation cycle that was killed in the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the active node generation cycle that was killed in the Merkle-DAG.",
           "title": "Target Event Id",
           "type": "string"
         },
@@ -1393,7 +1393,7 @@
       "additionalProperties": false,
       "properties": {
         "event_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
           "title": "Event Id",
           "type": "string"
         },
@@ -1508,7 +1508,7 @@
       "additionalProperties": false,
       "properties": {
         "event_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
           "title": "Event Id",
           "type": "string"
         },
@@ -1894,7 +1894,7 @@
       "additionalProperties": false,
       "properties": {
         "source_event_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the source event in the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the source event in the Merkle-DAG.",
           "title": "Source Event Id",
           "type": "string"
         },
@@ -2708,7 +2708,7 @@
       "description": "A cryptographic record of an agent simulating an alternative timeline to calculate epistemic regret\nand update its policy.",
       "properties": {
         "event_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
           "title": "Event Id",
           "type": "string"
         },
@@ -2725,7 +2725,7 @@
           "type": "string"
         },
         "historical_event_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the specific historical state node where the agent mathematically diverged to simulate an alternative path.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the specific historical state node where the agent mathematically diverged to simulate an alternative path.",
           "title": "Historical Event Id",
           "type": "string"
         },
@@ -3450,7 +3450,7 @@
           "title": "Blocks",
           "type": "object"
         },
-        "reading_order_edges": {
+        "chronological_flow_edges": {
           "description": "Directed edges defining the topological sort (chronological flow) of the document.",
           "items": {
             "maxItems": 2,
@@ -3465,7 +3465,7 @@
             ],
             "type": "array"
           },
-          "title": "Reading Order Edges",
+          "title": "Chronological Flow Edges",
           "type": "array"
         }
       },
@@ -3979,7 +3979,7 @@
       "additionalProperties": false,
       "properties": {
         "event_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
           "title": "Event Id",
           "type": "string"
         },
@@ -5015,7 +5015,7 @@
       "additionalProperties": false,
       "properties": {
         "condition_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this falsification test to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this falsification test to the Merkle-DAG.",
           "minLength": 1,
           "title": "Condition Id",
           "type": "string"
@@ -5170,7 +5170,7 @@
             }
           ],
           "default": null,
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the federated topology, if applicable.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the federated topology, if applicable.",
           "title": "Topology Id"
         }
       },
@@ -5717,7 +5717,7 @@
       "additionalProperties": false,
       "properties": {
         "event_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
           "title": "Event Id",
           "type": "string"
         },
@@ -5734,7 +5734,7 @@
           "type": "string"
         },
         "hypothesis_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this abductive leap to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this abductive leap to the Merkle-DAG.",
           "minLength": 1,
           "title": "Hypothesis Id",
           "type": "string"
@@ -7431,7 +7431,7 @@
       "additionalProperties": false,
       "properties": {
         "audit_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
           "minLength": 1,
           "title": "Audit Id",
           "type": "string"
@@ -7520,7 +7520,7 @@
       "additionalProperties": false,
       "properties": {
         "event_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
           "title": "Event Id",
           "type": "string"
         },
@@ -7585,7 +7585,7 @@
       "additionalProperties": false,
       "properties": {
         "event_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
           "title": "Event Id",
           "type": "string"
         },
@@ -7741,7 +7741,7 @@
       "additionalProperties": false,
       "properties": {
         "handshake_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this protocol handshake to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this protocol handshake to the Merkle-DAG.",
           "minLength": 1,
           "title": "Handshake Id",
           "type": "string"
@@ -8013,9 +8013,9 @@
           "description": "Whitelist of allowed network domains if network access is true.",
           "title": "Allowed Domains"
         },
-        "file_system_read_only": {
+        "file_system_mutation_forbidden": {
           "description": "True if the tool is strictly forbidden from writing to the disk.",
-          "title": "File System Read Only",
+          "title": "File System Mutation Forbidden",
           "type": "boolean"
         },
         "auth_requirements": {
@@ -8037,7 +8037,7 @@
       },
       "required": [
         "network_access",
-        "file_system_read_only"
+        "file_system_mutation_forbidden"
       ],
       "title": "PermissionBoundaryPolicy",
       "type": "object"
@@ -8046,7 +8046,7 @@
       "additionalProperties": false,
       "properties": {
         "event_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
           "title": "Event Id",
           "type": "string"
         },
@@ -8372,7 +8372,7 @@
     },
     "RedactionPolicy": {
       "additionalProperties": false,
-      "description": "A specific rule for algorithmic data sanitization.",
+      "description": "A specific rule for algorithmic payload sanitization.",
       "properties": {
         "rule_id": {
           "description": "Unique identifier for the sanitization rule.",
@@ -9107,7 +9107,7 @@
       "additionalProperties": false,
       "properties": {
         "node_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this semantic node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this semantic node to the Merkle-DAG.",
           "title": "Node Id",
           "type": "string"
         },
@@ -9986,7 +9986,7 @@
         },
         "target_node_id": {
           "$ref": "#/$defs/NodeID",
-          "description": "The strict W3C DID of the agent that authored the invalid state, ensuring the fault is routed back to the exact memory partition."
+          "description": "The strict W3C DID of the agent that authored the invalid state, ensuring the fault is routed back to the exact state partition."
         },
         "failing_pointers": {
           "description": "A strictly typed array of RFC 6902 JSON Pointers isolating the exact topological coordinate of the hallucination.",
@@ -10017,7 +10017,7 @@
       "additionalProperties": false,
       "properties": {
         "event_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
           "title": "Event Id",
           "type": "string"
         },
@@ -10419,7 +10419,7 @@
       "additionalProperties": false,
       "properties": {
         "target_agent_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the agent whose mind is being modeled.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the agent whose mind is being modeled.",
           "minLength": 1,
           "title": "Target Agent Id",
           "type": "string"
@@ -10522,7 +10522,7 @@
       "description": "A Priori Kinetic Commitment representing the Pearlian Do-Operator prior to network execution.",
       "properties": {
         "event_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
           "title": "Event Id",
           "type": "string"
         },
@@ -11071,7 +11071,7 @@
           "type": "string"
         },
         "verifier_key_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the public evaluation key.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the public evaluation key.",
           "title": "Verifier Key Id",
           "type": "string"
         },
