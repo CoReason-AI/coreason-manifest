@@ -1,4 +1,3 @@
-
 # Copyright (c) 2026 CoReason, Inc.. All Rights Reserved
 import hashlib
 from typing import Literal
@@ -19,6 +18,7 @@ def compute_topology_hash(topology: "AnyTopology") -> str:
     Deterministically computes the SOTA Merkle-DAG SHA-256 fingerprint of a given topology.
     """
     return hashlib.sha256(topology.model_dump_canonical()).hexdigest()
+
 
 def align_semantic_manifolds(
     task_id: str,
@@ -46,6 +46,7 @@ def align_semantic_manifolds(
     return EpistemicTransmutationTask(
         task_id=task_id, artifact_event_id=artifact_event_id, target_modalities=target_modalities, compression_sla=sla
     )
+
 
 def verify_merkle_proof(trace: list[ExecutionNode]) -> bool:
     """
@@ -75,6 +76,7 @@ def verify_merkle_proof(trace: list[ExecutionNode]) -> bool:
                 return False
 
     return True
+
 
 def generate_correction_prompt(error: ValidationError, target_node_id: str, fault_id: str) -> System2RemediationPrompt:
     """
