@@ -1949,6 +1949,11 @@ class ExecutionNodeReceipt(CoreasonBaseModel):
     node_hash: str | None = Field(default=None, description="The cryptographic SHA-256 hash of this node.")
 
     @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "parent_hashes", sorted(self.parent_hashes))
+        return self
+
+    @model_validator(mode="after")
     def validate_lineage(self) -> Self:
         if self.parent_request_id is not None and self.root_request_id is None:
             raise ValueError("Orphaned Lineage: parent_request_id is set but root_request_id is None")
@@ -2187,6 +2192,13 @@ class DynamicRoutingManifest(CoreasonBaseModel):
     branch_budgets_magnitude: dict[NodeID, int] = Field(
         description="The strict allocation of compute budget bound to specific nodes."
     )
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        sorted_subgraphs = {k: sorted(v) for k, v in self.active_subgraphs.items()}
+        object.__setattr__(self, "active_subgraphs", sorted_subgraphs)
+        object.__setattr__(self, "bypassed_steps", sorted(self.bypassed_steps, key=lambda x: x.bypassed_node_id))
+        return self
 
     @model_validator(mode="after")
     def validate_modality_alignment(self) -> Self:
@@ -2708,6 +2720,11 @@ class MacroGridProfile(CoreasonBaseModel):
 
     layout_matrix: list[list[str]] = Field(description="A matrix defining the layout structure, using panel IDs.")
     panels: list[AnyPanel] = Field(description="A list of panels included in the grid.")
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "panels", sorted(self.panels, key=lambda x: x.panel_id))
+        return self
 
     @model_validator(mode="after")
     def verify_referential_integrity(self) -> Self:
@@ -3349,6 +3366,11 @@ class StatisticalChartExtractionState(CoreasonBaseModel):
     data_series: list[dict[str, float | str]] = Field(
         description="The discrete semantic tuples extracted from the chart markers."
     )
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "data_series", sorted(self.data_series, key=lambda x: json.dumps(x, sort_keys=True)))
+        return self
 
     @model_validator(mode="after")
     def verify_dimensional_isometry(self) -> Self:
