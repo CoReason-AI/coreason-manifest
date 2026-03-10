@@ -1574,6 +1574,11 @@ class DocumentLayoutAnalysis(CoreasonBaseModel):
     )
 
     @model_validator(mode="after")
+    def sort_document_layout_arrays(self) -> Self:
+        object.__setattr__(self, "reading_order_edges", sorted(self.reading_order_edges))
+        return self
+
+    @model_validator(mode="after")
     def verify_dag_and_integrity(self) -> Self:
         adj: dict[str, list[str]] = {node_id: [] for node_id in self.blocks}
         for source, target in self.reading_order_edges:
@@ -1839,6 +1844,11 @@ class ArgumentClaim(CoreasonBaseModel):
     warrants: list[EvidentiaryWarrant] = Field(
         default_factory=list, description="The foundational premises supporting this claim."
     )
+
+    @model_validator(mode="after")
+    def sort_argument_claim_arrays(self) -> Self:
+        object.__setattr__(self, "warrants", sorted(self.warrants, key=lambda x: x.justification))
+        return self
 
 
 class ArgumentGraph(CoreasonBaseModel):
@@ -2379,6 +2389,11 @@ class BaseNode(CoreasonBaseModel):
         description="Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks.",  # noqa: E501
     )
 
+    @model_validator(mode="after")
+    def sort_agent_attestation_arrays(self) -> Self:
+        object.__setattr__(self, "intervention_policies", sorted(self.intervention_policies, key=lambda x: x.trigger))
+        return self
+
     @field_validator("domain_extensions", mode="before")
     @classmethod
     def validate_domain_extensions_depth(cls, v: Any) -> Any:
@@ -2849,6 +2864,12 @@ class CompositeNode(BaseNode):
     input_mappings: list[InputMapping] = Field(default_factory=list, description="Explicit state projection inputs.")
     output_mappings: list[OutputMapping] = Field(default_factory=list, description="Explicit state projection outputs.")
 
+    @model_validator(mode="after")
+    def sort_composite_arrays(self) -> Self:
+        object.__setattr__(self, "input_mappings", sorted(self.input_mappings, key=lambda x: x.parent_key))
+        object.__setattr__(self, "output_mappings", sorted(self.output_mappings, key=lambda x: x.child_key))
+        return self
+
 
 class OverrideIntent(CoreasonBaseModel):
     """
@@ -2921,6 +2942,11 @@ class PredictionMarketState(CoreasonBaseModel):
     current_market_probabilities: dict[str, str] = Field(
         description="Mapping of hypothesis IDs to their current LMSR-calculated market price (probability) as stringified decimals."  # noqa: E501
     )
+
+    @model_validator(mode="after")
+    def sort_prediction_market_state_arrays(self) -> Self:
+        object.__setattr__(self, "order_book", sorted(self.order_book, key=lambda x: x.agent_id))
+        return self
 
 
 class PresentationEnvelope(CoreasonBaseModel):
@@ -3053,6 +3079,9 @@ class InformationFlowPolicy(CoreasonBaseModel):
         Mathematically sorts rules by rule_id to guarantee deterministic hashing.
         """
         object.__setattr__(self, "rules", sorted(self.rules, key=lambda r: r.rule_id))
+        object.__setattr__(
+            self, "latent_firewalls", sorted(self.latent_firewalls, key=lambda x: x.target_feature_index)
+        )
         return self
 
 
@@ -3281,6 +3310,13 @@ class HypothesisGenerationEvent(BaseStateEvent):
         description="The formal DAG representing the agent's structural assumptions about the environment.",
     )
 
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(
+            self, "falsification_conditions", sorted(self.falsification_conditions, key=lambda x: x.condition_id)
+        )
+        return self
+
 
 class SuspenseEnvelope(CoreasonBaseModel):
     """
@@ -3345,6 +3381,11 @@ class TableCell(CoreasonBaseModel):
 
 class TabularDataExtraction(CoreasonBaseModel):
     cells: list[TableCell] = Field(description="The sparse tensor representing all populated cells.")
+
+    @model_validator(mode="after")
+    def sort_tabular_data_arrays(self) -> Self:
+        object.__setattr__(self, "cells", sorted(self.cells, key=lambda x: (x.row_index, x.col_index)))
+        return self
 
     @model_validator(mode="after")
     def detect_geometric_collisions(self) -> Self:
@@ -3682,6 +3723,13 @@ class AgentAttestation(CoreasonBaseModel):
         description="The wallet of selective disclosure credentials proving the agent's identity, clearance, and budget authorization.",  # noqa: E501
     )
 
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(
+            self, "credential_presentations", sorted(self.credential_presentations, key=lambda x: x.issuer_did)
+        )
+        return self
+
 
 class AgentNode(BaseNode):
     """
@@ -3754,7 +3802,7 @@ class AgentNode(BaseNode):
     )
 
     @model_validator(mode="after")
-    def sort_adapters(self) -> Self:
+    def sort_agent_node_arrays(self) -> Self:
         object.__setattr__(self, "peft_adapters", sorted(self.peft_adapters, key=lambda x: x.adapter_id))
         return self
 
@@ -3849,6 +3897,11 @@ class DAGTopology(BaseTopology):
     "\n    TOPOLOGICAL BOUNDARY: Must be >= 1 and <= 256. Prevents runaway agentic cyclic recursion.\n    "
     max_fan_out: int = Field(ge=1, le=1024, description="The maximum number of parallel child nodes.")
     "\n    TOPOLOGICAL BOUNDARY: Must be >= 1 and <= 1024. Limits horizontal compute explosion.\n    "
+
+    @model_validator(mode="after")
+    def sort_dag_topology_arrays(self) -> Self:
+        object.__setattr__(self, "edges", sorted(self.edges))
+        return self
 
     @model_validator(mode="after")
     def verify_edges_exist(self) -> Self:
@@ -4270,6 +4323,13 @@ class BeliefUpdateEvent(BaseStateEvent):
         description="The mathematical brain-scan proving exactly which neural circuits fired to append this event.",
     )
 
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(
+            self, "causal_attributions", sorted(self.causal_attributions, key=lambda x: x.source_event_id)
+        )
+        return self
+
     @field_validator("payload", mode="before")
     @classmethod
     def enforce_payload_topology(cls, v: Any) -> Any:
@@ -4366,6 +4426,10 @@ class EpistemicLedger(CoreasonBaseModel):
     @model_validator(mode="after")
     def sort_history(self) -> Self:
         object.__setattr__(self, "history", sorted(self.history, key=lambda event: event.timestamp))
+        object.__setattr__(self, "checkpoints", sorted(self.checkpoints, key=lambda x: x.checkpoint_id))
+        object.__setattr__(self, "active_rollbacks", sorted(self.active_rollbacks, key=lambda x: x.request_id))
+        object.__setattr__(self, "migration_contracts", sorted(self.migration_contracts, key=lambda x: x.contract_id))
+        object.__setattr__(self, "active_cascades", sorted(self.active_cascades, key=lambda x: x.cascade_id))
         return self
 
 
