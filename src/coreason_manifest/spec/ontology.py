@@ -543,6 +543,11 @@ class ActivationSteeringContract(CoreasonBaseModel):
         description="The tensor operation to perform: add the vector, subtract it, or clamp activations to its bounds."
     )
 
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "injection_layers", sorted(self.injection_layers))
+        return self
+
 
 class CognitiveRoutingContract(CoreasonBaseModel):
     """
@@ -1292,6 +1297,11 @@ class BoundedInterventionScope(CoreasonBaseModel):
         description="Strict JSON Schema constraints for the human's input."
     )
 
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "allowed_fields", sorted(self.allowed_fields))
+        return self
+
 
 class BoundedJSONRPCIntent(CoreasonBaseModel):
     """Base schema enforcing rigorous JSON-RPC 2.0 boundaries to prevent DoS attacks."""
@@ -1637,11 +1647,6 @@ class DocumentLayoutManifest(CoreasonBaseModel):
         description="Directed edges defining the topological sort (chronological flow) of the document.",
     )
     # Note: reading_order_edges is a structurally ordered sequence (Topological Sort) and MUST NOT be sorted.
-
-    @model_validator(mode="after")
-    def sort_document_layout_arrays(self) -> Self:
-        object.__setattr__(self, "reading_order_edges", sorted(self.reading_order_edges))
-        return self
 
     @model_validator(mode="after")
     def verify_dag_and_integrity(self) -> Self:
@@ -2217,6 +2222,11 @@ class GovernancePolicy(CoreasonBaseModel):
     policy_name: str = Field(description="Name of the governance policy.")
     version: SemanticVersion = Field(description="Semantic version of the governance policy.")
     rules: list[ConstitutionalPolicy] = Field(description="List of constitutional rules included in this policy.")
+
+    @model_validator(mode="after")
+    def sort_rules(self) -> Self:
+        object.__setattr__(self, "rules", sorted(self.rules, key=lambda r: r.rule_id))
+        return self
 
 
 class GrammarPanel(CoreasonBaseModel):
