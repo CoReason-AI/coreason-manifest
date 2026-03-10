@@ -148,7 +148,7 @@ When an MCP server projects a resource manifest, orchestrating nodes route to it
 
 ### 2. The Integrated Ecosystem Coordinator
 * **The "God Context" Absolute Rule:** This repository is the definitive Epistemic Ledger of Truth. If a capability, state vector, or workflow topology is not mathematically mapped within this repository, **it does not exist in the swarm's reality**.
-* Any agent attempting to pass unmapped JSON payloads or hallucinated tool names will immediately trigger a `System2RemediationPrompt` to enforce compliance.
+* Any agent attempting to pass unmapped JSON payloads or hallucinated tool names will immediately trigger a `System2RemediationIntent` to enforce compliance.
 
 ### 3. The Anti-Obsolete Mandate
 To maintain ecosystem purity, legacy 2010s-era software engineering paradigms are formally deprecated.

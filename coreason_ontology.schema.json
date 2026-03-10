@@ -421,7 +421,7 @@
         "credential_presentations": {
           "description": "The wallet of selective disclosure credentials proving the agent's identity, clearance, and budget authorization.",
           "items": {
-            "$ref": "#/$defs/VerifiableCredentialPresentation"
+            "$ref": "#/$defs/VerifiableCredentialPresentationReceipt"
           },
           "title": "Credential Presentations",
           "type": "array"
@@ -892,17 +892,17 @@
       "description": "A discriminated union of presentation UI panels.",
       "discriminator": {
         "mapping": {
-          "grammar": "#/$defs/GrammarPanel",
-          "insight_card": "#/$defs/InsightCard"
+          "grammar": "#/$defs/GrammarPanelProfile",
+          "insight_card": "#/$defs/InsightCardProfile"
         },
         "propertyName": "type"
       },
       "oneOf": [
         {
-          "$ref": "#/$defs/GrammarPanel"
+          "$ref": "#/$defs/GrammarPanelProfile"
         },
         {
-          "$ref": "#/$defs/InsightCard"
+          "$ref": "#/$defs/InsightCardProfile"
         }
       ]
     },
@@ -1256,7 +1256,7 @@
         "sensory_trigger": {
           "anyOf": [
             {
-              "$ref": "#/$defs/EmbodiedSensoryVector"
+              "$ref": "#/$defs/EmbodiedSensoryVectorProfile"
             },
             {
               "type": "null"
@@ -1967,7 +1967,7 @@
           "type": "string"
         },
         "hypothesis": {
-          "$ref": "#/$defs/SteadyStateHypothesis",
+          "$ref": "#/$defs/SteadyStateHypothesisState",
           "description": "The baseline steady state hypothesis being tested."
         },
         "faults": {
@@ -2435,7 +2435,7 @@
       "title": "ConsensusPolicy",
       "type": "object"
     },
-    "ConstitutionalAmendmentProposal": {
+    "ConstitutionalAmendmentIntent": {
       "additionalProperties": false,
       "description": "Proposed amendment generated in response to normative drift detection.",
       "properties": {
@@ -2468,7 +2468,7 @@
         "proposed_patch",
         "justification"
       ],
-      "title": "ConstitutionalAmendmentProposal",
+      "title": "ConstitutionalAmendmentIntent",
       "type": "object"
     },
     "ConstitutionalPolicy": {
@@ -2650,7 +2650,7 @@
         "diversity_policy": {
           "anyOf": [
             {
-              "$ref": "#/$defs/DiversityConstraint"
+              "$ref": "#/$defs/DiversityPolicy"
             },
             {
               "type": "null"
@@ -2770,7 +2770,7 @@
       "title": "CounterfactualRegretEvent",
       "type": "object"
     },
-    "CrossSwarmHandshake": {
+    "CrossSwarmHandshakeState": {
       "additionalProperties": false,
       "properties": {
         "handshake_id": {
@@ -2811,7 +2811,7 @@
         "receiving_tenant_id",
         "offered_sla"
       ],
-      "title": "CrossSwarmHandshake",
+      "title": "CrossSwarmHandshakeState",
       "type": "object"
     },
     "CrossoverPolicy": {
@@ -3404,7 +3404,7 @@
       ],
       "type": "string"
     },
-    "DiversityConstraint": {
+    "DiversityPolicy": {
       "additionalProperties": false,
       "description": "Constraints enforcing cognitive heterogeneity.",
       "properties": {
@@ -3436,7 +3436,7 @@
         "min_adversaries",
         "model_variance_required"
       ],
-      "title": "DiversityConstraint",
+      "title": "DiversityPolicy",
       "type": "object"
     },
     "DocumentLayoutManifest": {
@@ -3652,7 +3652,7 @@
       "title": "DynamicRoutingManifest",
       "type": "object"
     },
-    "EmbodiedSensoryVector": {
+    "EmbodiedSensoryVectorProfile": {
       "additionalProperties": false,
       "properties": {
         "sensory_modality": {
@@ -3690,10 +3690,10 @@
         "bayesian_surprise_score",
         "temporal_duration_ms"
       ],
-      "title": "EmbodiedSensoryVector",
+      "title": "EmbodiedSensoryVectorProfile",
       "type": "object"
     },
-    "EnsembleTopologySpec": {
+    "EnsembleTopologyProfile": {
       "additionalProperties": false,
       "description": "AGENT INSTRUCTION: Declarative mapping of concurrent topology branches for test-time superposition.\nMust map to strict W3C DIDs (NodeIDs) and provide an explicit wave-collapse opcode.",
       "properties": {
@@ -3721,7 +3721,7 @@
         "concurrent_branch_ids",
         "fusion_function"
       ],
-      "title": "EnsembleTopologySpec",
+      "title": "EnsembleTopologyProfile",
       "type": "object"
     },
     "EphemeralNamespacePartitionState": {
@@ -4652,7 +4652,7 @@
         "fitness_objectives": {
           "description": "The multi-dimensional criteria used to score and cull the population.",
           "items": {
-            "$ref": "#/$defs/FitnessObjective"
+            "$ref": "#/$defs/FitnessObjectiveProfile"
           },
           "title": "Fitness Objectives",
           "type": "array"
@@ -4773,7 +4773,7 @@
       "title": "ExecutionSLA",
       "type": "object"
     },
-    "ExecutionSpan": {
+    "ExecutionSpanReceipt": {
       "additionalProperties": false,
       "properties": {
         "trace_id": {
@@ -4850,7 +4850,7 @@
         "name",
         "start_time_unix_nano"
       ],
-      "title": "ExecutionSpan",
+      "title": "ExecutionSpanReceipt",
       "type": "object"
     },
     "ExogenousEpistemicEvent": {
@@ -4881,7 +4881,7 @@
           "type": "object"
         },
         "escrow": {
-          "$ref": "#/$defs/SimulationEscrow",
+          "$ref": "#/$defs/SimulationEscrowContract",
           "description": "The cryptographic Proof-of-Stake funding the shock."
         }
       },
@@ -5177,7 +5177,7 @@
       "title": "FederatedStateSnapshot",
       "type": "object"
     },
-    "FitnessObjective": {
+    "FitnessObjectiveProfile": {
       "additionalProperties": false,
       "description": "A specific objective function to optimize within a generation.",
       "properties": {
@@ -5201,7 +5201,7 @@
         "target_metric",
         "direction"
       ],
-      "title": "FitnessObjective",
+      "title": "FitnessObjectiveProfile",
       "type": "object"
     },
     "FormalVerificationContract": {
@@ -5269,7 +5269,7 @@
       "title": "GenerativeManifoldSLA",
       "type": "object"
     },
-    "GlobalGovernance": {
+    "GlobalGovernancePolicy": {
       "additionalProperties": false,
       "description": "Global governance bounds for a swarm executing a workflow manifest.",
       "properties": {
@@ -5321,7 +5321,7 @@
         "max_global_tokens",
         "global_timeout_seconds"
       ],
-      "title": "GlobalGovernance",
+      "title": "GlobalGovernancePolicy",
       "type": "object"
     },
     "GlobalSemanticProfile": {
@@ -5423,7 +5423,7 @@
       "title": "GradingCriterionProfile",
       "type": "object"
     },
-    "GrammarPanel": {
+    "GrammarPanelProfile": {
       "additionalProperties": false,
       "description": "Panel representing a deterministic, declarative visual grammar.",
       "properties": {
@@ -5490,7 +5490,7 @@
         "mark",
         "encodings"
       ],
-      "title": "GrammarPanel",
+      "title": "GrammarPanelProfile",
       "type": "object"
     },
     "GraphFlatteningPolicy": {
@@ -5795,7 +5795,7 @@
       "title": "HypothesisGenerationEvent",
       "type": "object"
     },
-    "HypothesisStake": {
+    "HypothesisStakeReceipt": {
       "additionalProperties": false,
       "description": "The mathematical record of an agent taking a magnitude/compute position on a specific causal hypothesis.",
       "properties": {
@@ -5831,7 +5831,7 @@
         "staked_magnitude",
         "implied_probability"
       ],
-      "title": "HypothesisStake",
+      "title": "HypothesisStakeReceipt",
       "type": "object"
     },
     "InformationClassification": {
@@ -5950,7 +5950,7 @@
       "title": "InputMappingContract",
       "type": "object"
     },
-    "InsightCard": {
+    "InsightCardProfile": {
       "additionalProperties": false,
       "description": "Panel displaying a semantic text summary.",
       "properties": {
@@ -5982,7 +5982,7 @@
         "title",
         "markdown_content"
       ],
-      "title": "InsightCard",
+      "title": "InsightCardProfile",
       "type": "object"
     },
     "InterventionIntent": {
@@ -6330,7 +6330,7 @@
         "explored_branches": {
           "description": "All logical paths the agent attempted within this Ephemeral Epistemic Quarantine—a volatile workspace where probability waves collapse before being committed to the immutable ledger.",
           "items": {
-            "$ref": "#/$defs/ThoughtBranch"
+            "$ref": "#/$defs/ThoughtBranchState"
           },
           "title": "Explored Branches",
           "type": "array"
@@ -6542,7 +6542,7 @@
       "title": "LogitSteganographyContract",
       "type": "object"
     },
-    "MCPCapabilityWhitelist": {
+    "MCPCapabilityWhitelistPolicy": {
       "additionalProperties": false,
       "description": "A zero-trust boundary defining exactly which JSON-RPC capabilities\nthe execution node is authorized to mount from the remote server.",
       "properties": {
@@ -6579,7 +6579,7 @@
           "type": "array"
         }
       },
-      "title": "MCPCapabilityWhitelist",
+      "title": "MCPCapabilityWhitelistPolicy",
       "type": "object"
     },
     "MCPClientBinding": {
@@ -6826,7 +6826,7 @@
           "title": "Binary Hash"
         },
         "capability_whitelist": {
-          "$ref": "#/$defs/MCPCapabilityWhitelist",
+          "$ref": "#/$defs/MCPCapabilityWhitelistPolicy",
           "description": "The strict capability bounds enforced by the orchestrator prior to connection."
         }
       },
@@ -7547,7 +7547,7 @@
           "type": "number"
         },
         "contradiction_proof_hash": {
-          "description": "A cryptographic pointer to the internal scratchpad trace (ThoughtBranch) definitively proving the rule is obsolete or causing a loop.",
+          "description": "A cryptographic pointer to the internal scratchpad trace (ThoughtBranchState) definitively proving the rule is obsolete or causing a loop.",
           "title": "Contradiction Proof Hash",
           "type": "string"
         }
@@ -7658,7 +7658,7 @@
         "sensory_trigger": {
           "anyOf": [
             {
-              "$ref": "#/$defs/EmbodiedSensoryVector"
+              "$ref": "#/$defs/EmbodiedSensoryVectorProfile"
             },
             {
               "type": "null"
@@ -8183,7 +8183,7 @@
         "order_book": {
           "description": "The immutable ledger of all stakes placed by the swarm.",
           "items": {
-            "$ref": "#/$defs/HypothesisStake"
+            "$ref": "#/$defs/HypothesisStakeReceipt"
           },
           "title": "Order Book",
           "type": "array"
@@ -8243,7 +8243,7 @@
           "description": "The dynamic circuit breaker that halts the search when PRM variance converges, preventing VRAM waste."
         },
         "pruning_threshold": {
-          "description": "If a ThoughtBranch's prm_score falls below this threshold, the orchestrator MUST halt its generation.",
+          "description": "If a ThoughtBranchState's prm_score falls below this threshold, the orchestrator MUST halt its generation.",
           "maximum": 1.0,
           "minimum": 0.0,
           "title": "Pruning Threshold",
@@ -9257,7 +9257,7 @@
       "title": "SimulationConvergenceSLA",
       "type": "object"
     },
-    "SimulationEscrow": {
+    "SimulationEscrowContract": {
       "additionalProperties": false,
       "properties": {
         "locked_magnitude": {
@@ -9270,7 +9270,7 @@
       "required": [
         "locked_magnitude"
       ],
-      "title": "SimulationEscrow",
+      "title": "SimulationEscrowContract",
       "type": "object"
     },
     "SpanEvent": {
@@ -9449,7 +9449,7 @@
       "title": "SpatialCoordinateProfile",
       "type": "object"
     },
-    "SpatialKinematicAction": {
+    "SpatialKinematicActionIntent": {
       "additionalProperties": false,
       "description": "A mathematical declaration of an OS-level pointer or interaction trajectory.",
       "properties": {
@@ -9517,7 +9517,7 @@
       "required": [
         "action_type"
       ],
-      "title": "SpatialKinematicAction",
+      "title": "SpatialKinematicActionIntent",
       "type": "object"
     },
     "StateContract": {
@@ -9695,7 +9695,7 @@
       "title": "StdioTransportProfile",
       "type": "object"
     },
-    "SteadyStateHypothesis": {
+    "SteadyStateHypothesisState": {
       "additionalProperties": false,
       "properties": {
         "expected_max_latency": {
@@ -9730,7 +9730,7 @@
         "expected_max_latency",
         "max_loops_allowed"
       ],
-      "title": "SteadyStateHypothesis",
+      "title": "SteadyStateHypothesisState",
       "type": "object"
     },
     "StructuralCausalModelProfile": {
@@ -9974,7 +9974,7 @@
       "title": "System1ReflexPolicy",
       "type": "object"
     },
-    "System2RemediationPrompt": {
+    "System2RemediationIntent": {
       "additionalProperties": false,
       "description": "A passive data envelope that deterministically maps a kinetic execution error\n(e.g., a Pydantic ValidationError) into a structurally rigid System 2 correction directive.",
       "properties": {
@@ -10010,7 +10010,7 @@
         "failing_pointers",
         "remediation_prompt"
       ],
-      "title": "System2RemediationPrompt",
+      "title": "System2RemediationIntent",
       "type": "object"
     },
     "SystemFaultEvent": {
@@ -10457,7 +10457,7 @@
       "title": "TheoryOfMindSnapshot",
       "type": "object"
     },
-    "ThoughtBranch": {
+    "ThoughtBranchState": {
       "additionalProperties": false,
       "properties": {
         "branch_id": {
@@ -10505,7 +10505,7 @@
         "branch_id",
         "latent_content_hash"
       ],
-      "title": "ThoughtBranch",
+      "title": "ThoughtBranchState",
       "type": "object"
     },
     "TieBreaker": {
@@ -10646,7 +10646,7 @@
         "spans": {
           "description": "A collection of execution spans to be serialized.",
           "items": {
-            "$ref": "#/$defs/ExecutionSpan"
+            "$ref": "#/$defs/ExecutionSpanReceipt"
           },
           "title": "Spans",
           "type": "array"
@@ -10703,7 +10703,7 @@
       "title": "TruthMaintenancePolicy",
       "type": "object"
     },
-    "UtilityJustificationGraph": {
+    "UtilityJustificationGraphReceipt": {
       "additionalProperties": false,
       "description": "AGENT INSTRUCTION: Immutable cryptographic receipt of multi-dimensional utility routing.\nIf variance threshold falls below delta, fallback to deterministic ensemble superposition.",
       "properties": {
@@ -10732,7 +10732,7 @@
         "ensemble_spec": {
           "anyOf": [
             {
-              "$ref": "#/$defs/EnsembleTopologySpec"
+              "$ref": "#/$defs/EnsembleTopologyProfile"
             },
             {
               "type": "null"
@@ -10745,7 +10745,7 @@
       "required": [
         "superposition_variance_threshold"
       ],
-      "title": "UtilityJustificationGraph",
+      "title": "UtilityJustificationGraphReceipt",
       "type": "object"
     },
     "VectorEmbeddingState": {
@@ -10777,7 +10777,7 @@
       "title": "VectorEmbeddingState",
       "type": "object"
     },
-    "VerifiableCredentialPresentation": {
+    "VerifiableCredentialPresentationReceipt": {
       "additionalProperties": false,
       "description": "A cryptographic proof of clearance or capability presented to a zero-trust orchestrator.",
       "properties": {
@@ -10814,7 +10814,7 @@
         "cryptographic_proof_blob",
         "authorization_claims"
       ],
-      "title": "VerifiableCredentialPresentation",
+      "title": "VerifiableCredentialPresentationReceipt",
       "type": "object"
     },
     "VerifiableEntropyReceipt": {
@@ -10942,7 +10942,7 @@
         "governance": {
           "anyOf": [
             {
-              "$ref": "#/$defs/GlobalGovernance"
+              "$ref": "#/$defs/GlobalGovernancePolicy"
             },
             {
               "type": "null"

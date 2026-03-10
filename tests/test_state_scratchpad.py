@@ -8,16 +8,16 @@
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.spec.ontology import LatentScratchpadReceipt, ThoughtBranch
+from coreason_manifest.spec.ontology import LatentScratchpadReceipt, ThoughtBranchState
 
 
 def test_latent_scratchpad_trace_valid() -> None:
-    branch1 = ThoughtBranch(
+    branch1 = ThoughtBranchState(
         branch_id="b1",
         latent_content_hash="a" * 64,
         prm_score=0.9,
     )
-    branch2 = ThoughtBranch(
+    branch2 = ThoughtBranchState(
         branch_id="b2",
         parent_branch_id="b1",
         latent_content_hash="b" * 64,
@@ -37,7 +37,7 @@ def test_latent_scratchpad_trace_valid() -> None:
 
 
 def test_latent_scratchpad_trace_invalid_resolution_branch() -> None:
-    branch1 = ThoughtBranch(
+    branch1 = ThoughtBranchState(
         branch_id="b1",
         latent_content_hash="a" * 64,
     )
@@ -55,7 +55,7 @@ def test_latent_scratchpad_trace_invalid_resolution_branch() -> None:
 
 
 def test_latent_scratchpad_trace_invalid_discarded_branch() -> None:
-    branch1 = ThoughtBranch(
+    branch1 = ThoughtBranchState(
         branch_id="b1",
         latent_content_hash="a" * 64,
     )

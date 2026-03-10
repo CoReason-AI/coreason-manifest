@@ -12,7 +12,7 @@ from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import TypeAdapter, ValidationError
 
-from coreason_manifest.spec.ontology import SpatialBoundingBoxProfile, SpatialKinematicAction
+from coreason_manifest.spec.ontology import SpatialBoundingBoxProfile, SpatialKinematicActionIntent
 
 
 @st.composite
@@ -68,4 +68,4 @@ def test_bounding_box_invalid_geometry_y() -> None:
 
 @given(draw_spatial_kinematic_action())
 def test_spatial_kinematic_action_routing(payload: dict[str, Any]) -> None:
-    TypeAdapter(SpatialKinematicAction).validate_python(payload)
+    TypeAdapter(SpatialKinematicActionIntent).validate_python(payload)

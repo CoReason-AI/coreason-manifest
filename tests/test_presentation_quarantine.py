@@ -15,8 +15,8 @@ from pydantic import ValidationError
 from coreason_manifest.spec.ontology import (
     AnyPanel,
     DynamicLayoutManifest,
-    GrammarPanel,
-    InsightCard,
+    GrammarPanelProfile,
+    InsightCardProfile,
     MacroGridProfile,
     VisualEncodingProfile,
 )
@@ -92,10 +92,10 @@ def test_polymorphic_xss_proof(payload: str) -> None:
     """
     2. The Polymorphic XSS Proof:
     Generate adversarial Markdown strings containing malicious tags
-    and prove that InsightCard definitively rejects them via a ValidationError.
+    and prove that InsightCardProfile definitively rejects them via a ValidationError.
     """
     with pytest.raises(ValidationError, match="HTML tags are prohibited"):
-        InsightCard(panel_id="panel_1", title="Insight Title", markdown_content=payload)
+        InsightCardProfile(panel_id="panel_1", title="Insight Title", markdown_content=payload)
 
 
 @given(
@@ -113,7 +113,7 @@ def test_polymorphic_event_handler_proof(payload: str) -> None:
     Generate adversarial strings with inline HTML event handlers and prove they are rejected.
     """
     with pytest.raises(ValidationError, match="Forbidden HTML event handler detected"):
-        InsightCard(panel_id="panel_1", title="Insight Title", markdown_content=payload)
+        InsightCardProfile(panel_id="panel_1", title="Insight Title", markdown_content=payload)
 
 
 @given(
@@ -127,8 +127,8 @@ def test_visual_ghost_node_test(ghost_id: str) -> None:
     and raises a ValidationError.
     """
     panels: list[AnyPanel] = [
-        InsightCard(panel_id="panel_1", title="A", markdown_content="Safe text"),
-        GrammarPanel(panel_id="panel_2", title="B", data_source_id="d1", mark="point", encodings=[]),
+        InsightCardProfile(panel_id="panel_1", title="A", markdown_content="Safe text"),
+        GrammarPanelProfile(panel_id="panel_2", title="B", data_source_id="d1", mark="point", encodings=[]),
     ]
 
     escaped_ghost_id = re.escape(ghost_id)
@@ -152,15 +152,15 @@ def test_safe_rendering_test(title: str, safe_text: str, x_label: str, y_label: 
     Prove it instantiates successfully.
     """
     panels: list[AnyPanel] = [
-        InsightCard(panel_id="panel_1", title=title, markdown_content=safe_text),
-        GrammarPanel(
+        InsightCardProfile(panel_id="panel_1", title=title, markdown_content=safe_text),
+        GrammarPanelProfile(
             panel_id="panel_2",
             title=x_label,
             data_source_id="d2",
             mark="point",
             encodings=[VisualEncodingProfile(channel="x", field="x"), VisualEncodingProfile(channel="y", field="y")],
         ),
-        GrammarPanel(
+        GrammarPanelProfile(
             panel_id="panel_3",
             title=y_label,
             data_source_id="d3",
@@ -184,4 +184,4 @@ def test_insight_card_rejects_xss_links(scheme: str, payload: str) -> None:
     payload = payload.replace("<", "").replace("on", "")
     malicious_markdown = f"Look at this: [click me]({scheme}:{payload})"
     with pytest.raises(ValidationError, match="Malicious executable link scheme detected"):
-        InsightCard(panel_id="test_xss", title="XSS Test", markdown_content=malicious_markdown)
+        InsightCardProfile(panel_id="test_xss", title="XSS Test", markdown_content=malicious_markdown)

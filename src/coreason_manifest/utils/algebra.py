@@ -8,14 +8,14 @@ from ..spec.ontology import (
     EpistemicCompressionSLA,
     EpistemicTransmutationTask,
     ExecutionNodeReceipt,
-    System2RemediationPrompt,
+    System2RemediationIntent,
 )
 
 
-def generate_correction_prompt(error: ValidationError, target_node_id: str, fault_id: str) -> System2RemediationPrompt:
+def generate_correction_prompt(error: ValidationError, target_node_id: str, fault_id: str) -> System2RemediationIntent:
     """
     Pure functional adapter. Maps a raw Pythonic pydantic.ValidationError into a
-    language-model-legible System2RemediationPrompt without triggering runtime side effects.
+    language-model-legible System2RemediationIntent without triggering runtime side effects.
     """
     failing_pointers: list[str] = []
     error_messages: list[str] = []
@@ -35,7 +35,7 @@ def generate_correction_prompt(error: ValidationError, target_node_id: str, faul
         "CRITICAL CONTRACT BREACH: Your generated state representation violates the formal ontological boundaries of the Shared Kernel. Review the following strict topological failures and correct your JSON projection:\n"  # noqa: E501
         + "\n".join(f"- {msg}" for msg in error_messages)
     )
-    return System2RemediationPrompt(
+    return System2RemediationIntent(
         fault_id=fault_id,
         target_node_id=target_node_id,
         failing_pointers=failing_pointers,
