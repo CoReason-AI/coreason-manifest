@@ -42,6 +42,7 @@ def main() -> None:
     if not target_schema:
         sys.stderr.write(f"FATAL: Unknown step '{args.step}'. Valid steps: {list(SCHEMA_REGISTRY.keys())}\n")
         sys.exit(1)
+        return
 
     try:
         with open(args.payload_path, "rb") as f:
@@ -49,6 +50,7 @@ def main() -> None:
     except OSError as e:
         sys.stderr.write(f"FATAL: IO Error reading payload: {e}\n")
         sys.exit(1)
+        return
 
     try:
         # Pure functional evaluation
