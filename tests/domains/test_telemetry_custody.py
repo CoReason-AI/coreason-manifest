@@ -13,7 +13,8 @@ from hypothesis import assume, given
 from hypothesis import strategies as st
 from pydantic import ValidationError
 
-from coreason_manifest.utils.algebra import ExecutionNode, verify_merkle_proof
+from coreason_manifest.spec.ontology import ExecutionNode
+from coreason_manifest.utils.algebra import verify_merkle_proof
 
 # Strategy to generate scalar JSON-like values
 scalar_st = st.one_of(
