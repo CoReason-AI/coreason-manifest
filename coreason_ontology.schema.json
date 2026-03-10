@@ -228,7 +228,7 @@
           "type": "string"
         },
         "criteria": {
-          "description": "List of criteria used in the rubric.",
+          "description": "The explicit array of strict evaluation criteria defining the rubric.",
           "items": {
             "$ref": "#/$defs/GradingCriterionProfile"
           },
@@ -1686,7 +1686,7 @@
       "description": "Constraints bounding human interaction for interventions.",
       "properties": {
         "allowed_fields": {
-          "description": "List of specific fields the human is permitted to mutate.",
+          "description": "The explicit whitelist of top-level JSON pointers mathematically open to mutation.",
           "items": {
             "type": "string"
           },
@@ -2497,7 +2497,7 @@
           "type": "string"
         },
         "forbidden_intents": {
-          "description": "List of intents that are forbidden by this rule.",
+          "description": "The explicit, structurally bounded set of forbidden semantic intents.",
           "items": {
             "minLength": 1,
             "type": "string"
@@ -3043,7 +3043,7 @@
           "type": "string"
         },
         "edges": {
-          "description": "List of edges between nodes.",
+          "description": "The strict, topologically bounded matrix of directed causal edges.",
           "items": {
             "maxItems": 2,
             "minItems": 2,
@@ -5134,7 +5134,7 @@
       "additionalProperties": false,
       "properties": {
         "broadcast_endpoints": {
-          "description": "A list of MCP URI endpoints open for B2B task bidding.",
+          "description": "The explicit array of strictly bounded MCP URI broadcast endpoints.",
           "items": {
             "type": "string"
           },
@@ -5142,7 +5142,7 @@
           "type": "array"
         },
         "supported_ontologies": {
-          "description": "A list of cryptographic hashes of domain ontologies this swarm is capable of processing.",
+          "description": "The explicit array of cryptographic hashes defining acceptable domain ontologies.",
           "items": {
             "type": "string"
           },
@@ -7189,7 +7189,7 @@
           "type": "integer"
         },
         "capabilities": {
-          "description": "A list of supported capabilities by the model.",
+          "description": "The explicit, structurally bounded array of capabilities authorized for this model.",
           "items": {
             "type": "string"
           },
@@ -9959,7 +9959,7 @@
           "type": "number"
         },
         "allowed_read_only_tools": {
-          "description": "List of read-only tools allowed during a reflex action.",
+          "description": "The explicit, bounded array of strictly read-only tool capabilities.",
           "items": {
             "type": "string"
           },
@@ -10425,7 +10425,7 @@
           "type": "string"
         },
         "assumed_shared_beliefs": {
-          "description": "A list of Content Identifiers (CIDs) acting as cryptographic Lineage Watermarks that the modeling agent assumes the target already possesses.",
+          "description": "The explicit array of Content Identifiers (CIDs) acting as cryptographic Lineage Watermarks that the modeling agent assumes the target already possesses.",
           "items": {
             "type": "string"
           },

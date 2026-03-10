@@ -444,7 +444,9 @@ class ModelProfile(CoreasonBaseModel):
     model_name: str = Field(description="The identifier of the underlying model.")
     provider: str = Field(description="The name of the provider hosting the model.")
     context_window_size: int = Field(description="The maximum context window size in tokens.")
-    capabilities: list[str] = Field(description="A list of supported capabilities by the model.")
+    capabilities: list[str] = Field(
+        description="The explicit, structurally bounded array of capabilities authorized for this model."
+    )
     rate_card: ComputeRateContract = Field(description="The economic cost definition associated with the model.")
     supported_functional_experts: list[str] = Field(
         default_factory=list,
@@ -631,7 +633,7 @@ class ConstitutionalPolicy(CoreasonBaseModel):
         description="Severity level if the rule is violated."
     )
     forbidden_intents: set[Annotated[str, StringConstraints(min_length=1)]] = Field(
-        description="List of intents that are forbidden by this rule."
+        description="The explicit, structurally bounded set of forbidden semantic intents."
     )
 
 
@@ -651,7 +653,9 @@ class AdjudicationRubricProfile(CoreasonBaseModel):
     """
 
     rubric_id: str = Field(description="Unique identifier for the rubric.")
-    criteria: list[GradingCriterionProfile] = Field(description="List of criteria used in the rubric.")
+    criteria: list[GradingCriterionProfile] = Field(
+        description="The explicit array of strict evaluation criteria defining the rubric."
+    )
     passing_threshold: float = Field(ge=0.0, le=100.0, description="The minimum score required to pass.")
 
     @model_validator(mode="after")
@@ -1096,9 +1100,11 @@ class BilateralSLA(CoreasonBaseModel):
 
 
 class FederatedDiscoveryManifest(CoreasonBaseModel):
-    broadcast_endpoints: list[str] = Field(description="A list of MCP URI endpoints open for B2B task bidding.")
+    broadcast_endpoints: list[str] = Field(
+        description="The explicit array of strictly bounded MCP URI broadcast endpoints."
+    )
     supported_ontologies: list[str] = Field(
-        description="A list of cryptographic hashes of domain ontologies this swarm is capable of processing."
+        description="The explicit array of cryptographic hashes defining acceptable domain ontologies."
     )
 
     @model_validator(mode="after")
@@ -1301,7 +1307,9 @@ class BoundedInterventionScopePolicy(CoreasonBaseModel):
     Constraints bounding human interaction for interventions.
     """
 
-    allowed_fields: list[str] = Field(description="List of specific fields the human is permitted to mutate.")
+    allowed_fields: list[str] = Field(
+        description="The explicit whitelist of top-level JSON pointers mathematically open to mutation."
+    )
     json_schema_whitelist: dict[str, str | int | float | bool | None | list[Any] | dict[str, Any]] = Field(
         description="Strict JSON Schema constraints for the human's input."
     )
@@ -3541,7 +3549,9 @@ class System1ReflexPolicy(CoreasonBaseModel):
     confidence_threshold: float = Field(
         ge=0.0, le=1.0, description="The confidence threshold required to execute a reflex action."
     )
-    allowed_read_only_tools: list[str] = Field(description="List of read-only tools allowed during a reflex action.")
+    allowed_read_only_tools: list[str] = Field(
+        description="The explicit, bounded array of strictly read-only tool capabilities."
+    )
 
     @model_validator(mode="after")
     def sort_arrays(self) -> Self:
@@ -3737,7 +3747,7 @@ class TheoryOfMindSnapshot(CoreasonBaseModel):
         description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the agent whose mind is being modeled.",  # noqa: E501
     )
     assumed_shared_beliefs: list[str] = Field(
-        description="A list of Content Identifiers (CIDs) acting as cryptographic Lineage Watermarks that the modeling agent assumes the target already possesses."  # noqa: E501
+        description="The explicit array of Content Identifiers (CIDs) acting as cryptographic Lineage Watermarks that the modeling agent assumes the target already possesses."  # noqa: E501
     )
     identified_knowledge_gaps: list[str] = Field(
         description="Specific topics or logical premises the target agent is assumed to be missing."
@@ -4096,7 +4106,9 @@ class DAGTopology(BaseTopology):
     """
 
     type: Literal["dag"] = Field(default="dag", description="Discriminator for a DAG topology.")
-    edges: list[tuple[NodeID, NodeID]] = Field(default_factory=list, description="List of edges between nodes.")
+    edges: list[tuple[NodeID, NodeID]] = Field(
+        default_factory=list, description="The strict, topologically bounded matrix of directed causal edges."
+    )
     allow_cycles: bool = Field(
         default=False, description="Configuration indicating if cycles are allowed during validation."
     )
