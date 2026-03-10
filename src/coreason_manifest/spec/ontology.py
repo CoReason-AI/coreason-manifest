@@ -3753,6 +3753,11 @@ class AgentNode(BaseNode):
         description="The declarative contract mathematically binding this agent to a core altruistic objective.",
     )
 
+    @model_validator(mode="after")
+    def sort_adapters(self) -> Self:
+        object.__setattr__(self, "peft_adapters", sorted(self.peft_adapters, key=lambda x: x.adapter_id))
+        return self
+
 
 type AnyNode = Annotated[
     AgentNode | HumanNode | SystemNode | CompositeNode | MemoizedNode,
