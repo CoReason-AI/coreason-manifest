@@ -16,15 +16,13 @@ from typing import Final
 
 from pydantic import BaseModel, ValidationError
 
-# Statically bound God-Context imports
 from coreason_manifest.spec.ontology import (
-    CognitiveStateProfile,  # Representative schema
+    CognitiveStateProfile,
     DocumentLayoutManifest,
-    StateMutationIntent,  # Representative schema
+    StateMutationIntent,
     System2RemediationIntent,
 )
 
-# Immutable AOT Schema Registry
 SCHEMA_REGISTRY: Final[dict[str, type[BaseModel]]] = {
     "step8_vision": DocumentLayoutManifest,
     "state_differential": StateMutationIntent,
@@ -55,11 +53,9 @@ def main() -> None:
         return
 
     try:
-        # Pure functional evaluation
         target_schema.model_validate_json(payload_bytes)
         sys.exit(0)
     except ValidationError as e:
-        # AST-Compliant Error Projection (RFC 6902 parsable)
         sys.stderr.write(e.json())
         sys.stderr.write("\n")
         sys.exit(1)

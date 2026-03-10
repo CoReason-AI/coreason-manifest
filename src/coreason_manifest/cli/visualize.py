@@ -29,11 +29,9 @@ def project_manifest_to_mermaid(manifest: DynamicRoutingManifest) -> str:
     safe_root_id = manifest.manifest_id.replace(":", "_").replace("-", "_").replace(".", "_")
     lines.append(f"    {safe_root_id}[{manifest.manifest_id}]")
 
-    # 1. Map Structural Modalities
     for modality in manifest.artifact_profile.detected_modalities:
         lines.append(f"    subgraph {modality}")
 
-        # 2. Map Active Nodes
         if modality in manifest.active_subgraphs:
             for node_id in manifest.active_subgraphs[modality]:
                 safe_id = node_id.replace(":", "_").replace("-", "_").replace(".", "_")
@@ -42,7 +40,6 @@ def project_manifest_to_mermaid(manifest: DynamicRoutingManifest) -> str:
 
         lines.append("    end")
 
-    # 3. Map Bypassed Steps
     if manifest.bypassed_steps:
         lines.append("    subgraph Quarantined_Bypass")
         for bypass in manifest.bypassed_steps:
