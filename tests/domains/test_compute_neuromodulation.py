@@ -10,7 +10,7 @@ from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
     ActivationSteeringContract,
-    CognitiveRoutingDirective,
+    CognitiveRoutingContract,
     LatentSmoothingProfile,
     SaeLatentPolicy,
 )
@@ -101,7 +101,7 @@ def test_activation_steering_contract_invalid_modality() -> None:
 
 
 def test_cognitive_routing_directive_valid() -> None:
-    directive = CognitiveRoutingDirective(
+    directive = CognitiveRoutingContract(
         dynamic_top_k=2,
         routing_temperature=0.5,
         expert_logit_biases={"falsifier": 2.0},
@@ -112,7 +112,7 @@ def test_cognitive_routing_directive_valid() -> None:
 
 def test_cognitive_routing_directive_invalid_top_k() -> None:
     with pytest.raises(ValidationError):
-        CognitiveRoutingDirective(
+        CognitiveRoutingContract(
             dynamic_top_k=0,
             routing_temperature=0.5,
             expert_logit_biases={"falsifier": 2.0},
@@ -122,7 +122,7 @@ def test_cognitive_routing_directive_invalid_top_k() -> None:
 
 def test_cognitive_routing_directive_invalid_temperature() -> None:
     with pytest.raises(ValidationError):
-        CognitiveRoutingDirective(
+        CognitiveRoutingContract(
             dynamic_top_k=2,
             routing_temperature=-0.1,
             expert_logit_biases={"falsifier": 2.0},
