@@ -139,13 +139,15 @@ You are strictly forbidden from introducing "Active" or "Runtime" logic into thi
 
 ## **4. File Structure Constraints**
 
+You are strictly bound to the **"God Context" Monolith Directive**. You are EXPLICITLY FORBIDDEN from creating domain-specific subdirectories (e.g., `state/`, `compute/`, `workflow/`) or fragmenting schemas across multiple files to satisfy human-centric "Separation of Concerns".
+
 * **`src/coreason_manifest/`**:
-    * **`spec/`**: Pure Pydantic models (The "Blueprint").
-    * **`policies/`**: OPA Rego files (if applicable, treated as data).
-    * **`utils/`**: Pure utility functions (no side effects).
+    * **`spec/ontology.py`**: The SINGLE, monolithic file containing ALL Pydantic models, TypeAliases, and Enums. This file must remain strictly topologically sorted (Stratum 0 -> Stratum 9) to prevent `ForwardRef` collapse. **Do not split this file.**
+    * **`utils/algebra.py`**: The SINGLE file containing all pure algebraic functors, passive adapters, and detached validation logic.
+    * **`policies/`**: OPA Rego files (if applicable, treated as pure data).
 * **Root**:
-    * **NO** `Dockerfile`.
-    * **NO** `app.py` or `server.py`.
+    * **NO** `Dockerfile` or `Containerfile`.
+    * **NO** `app.py`, `server.py`, or any runtime entry point.
 
 ## **5. Testing Guidelines**
 
