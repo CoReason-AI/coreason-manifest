@@ -3436,7 +3436,6 @@ class StatisticalChartExtractionState(CoreasonBaseModel):
         object.__setattr__(
             self, "metric_matrix", sorted(self.metric_matrix, key=lambda d: json.dumps(d, sort_keys=True))
         )
-        object.__setattr__(self, "data_series", sorted(self.data_series, key=lambda d: json.dumps(d, sort_keys=True)))
         return self
 
 
