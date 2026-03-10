@@ -8,11 +8,11 @@
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.state.semantic import MultimodalTokenAnchor
-from coreason_manifest.state.vision import (
+from coreason_manifest.spec.ontology import (
     DocumentLayoutAnalysis,
     DocumentLayoutBlock,
     MathematicalNotationExtraction,
+    MultimodalTokenAnchor,
     TableCell,
     TabularDataExtraction,
 )

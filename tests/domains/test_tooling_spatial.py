@@ -12,7 +12,7 @@ from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import TypeAdapter, ValidationError
 
-from coreason_manifest.tooling.spatial import BoundingBox, SpatialKinematicAction
+from coreason_manifest.spec.ontology import BoundingBox, SpatialKinematicAction
 
 
 @st.composite

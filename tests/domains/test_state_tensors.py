@@ -8,7 +8,7 @@
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.state.tensors import NDimensionalTensorManifest, TensorDType
+from coreason_manifest.spec.ontology import NDimensionalTensorManifest, TensorDType
 
 
 def test_valid_tensor_manifest() -> None:

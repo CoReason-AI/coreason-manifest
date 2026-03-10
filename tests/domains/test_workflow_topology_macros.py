@@ -8,8 +8,12 @@
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.oversight.governance import PredictionMarketPolicy, QuorumPolicy
-from coreason_manifest.workflow.topologies import AdversarialMarketTopology, ConsensusFederationTopology
+from coreason_manifest.spec.ontology import (
+    AdversarialMarketTopology,
+    ConsensusFederationTopology,
+    PredictionMarketPolicy,
+    QuorumPolicy,
+)
 
 
 def test_adversarial_market_topology_compilation() -> None:

@@ -10,15 +10,13 @@ from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import ValidationError
 
-from coreason_manifest.state.events import (
+from coreason_manifest.spec.ontology import (
     AnyStateEvent,
     BeliefUpdateEvent,
-    ObservationEvent,
-    SystemFaultEvent,
-)
-from coreason_manifest.state.memory import (
     CrystallizationPolicy,
     EpistemicLedger,
+    ObservationEvent,
+    SystemFaultEvent,
     TheoryOfMindSnapshot,
     WorkingMemorySnapshot,
 )

@@ -14,24 +14,23 @@ from hypothesis import strategies as st
 from hypothesis.strategies import DataObject
 from pydantic import TypeAdapter, ValidationError
 
-from coreason_manifest.oversight.governance import ConsensusPolicy, QuorumPolicy
-from coreason_manifest.workflow.auctions import EscrowPolicy
-from coreason_manifest.workflow.nodes import (
+from coreason_manifest.spec.ontology import (
     AgentNode,
-    EpistemicScanner,
-    HumanNode,
-    SelfCorrectionPolicy,
-    System1Reflex,
-    SystemNode,
-)
-from coreason_manifest.workflow.topologies import (
     AnyTopology,
+    ConsensusPolicy,
     CouncilTopology,
     DAGTopology,
     DigitalTwinTopology,
+    EpistemicScanner,
+    EscrowPolicy,
     EvaluatorOptimizerTopology,
+    HumanNode,
     OntologicalAlignmentPolicy,
+    QuorumPolicy,
+    SelfCorrectionPolicy,
     SimulationConvergenceSLA,
+    System1Reflex,
+    SystemNode,
 )
 
 # Strategy for valid NodeIDs (alphanumeric, underscores, hyphens)

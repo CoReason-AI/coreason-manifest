@@ -10,7 +10,7 @@ from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import ValidationError
 
-from coreason_manifest.state.semantic import DimensionalProjectionContract, MultimodalTokenAnchor
+from coreason_manifest.spec.ontology import DimensionalProjectionContract, MultimodalTokenAnchor
 
 
 @given(isometry_preservation_score=st.floats(max_value=-0.000001) | st.floats(min_value=1.000001))
@@ -37,7 +37,7 @@ def test_multimodal_token_anchor_bounds() -> None:
 
 def test_multimodal_token_anchor_spatial_invariant() -> None:
     """Verify that inverted bounding boxes raise strict struct-legible ValueErrors."""
-    from coreason_manifest.state.semantic import MultimodalTokenAnchor
+    from coreason_manifest.spec.ontology import MultimodalTokenAnchor
 
     # Valid geometry
     anchor = MultimodalTokenAnchor(bounding_box=(0.0, 0.0, 10.0, 10.0))

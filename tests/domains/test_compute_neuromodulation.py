@@ -8,7 +8,7 @@
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.compute.neuromodulation import (
+from coreason_manifest.spec.ontology import (
     ActivationSteeringContract,
     CognitiveRoutingDirective,
     LatentSmoothingProfile,

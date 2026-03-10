@@ -15,7 +15,7 @@ from pathlib import Path
 
 from pydantic import TypeAdapter
 
-from coreason_manifest.workflow.routing import DynamicRoutingManifest
+from coreason_manifest.spec.ontology import DynamicRoutingManifest
 
 
 def project_manifest_to_mermaid(manifest: DynamicRoutingManifest) -> str:
