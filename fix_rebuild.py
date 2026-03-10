@@ -1,6 +1,4 @@
-import re
-
-with open('src/coreason_manifest/spec/ontology.py', 'r') as f:
+with open("src/coreason_manifest/spec/ontology.py") as f:
     c = f.read()
 
 # Add the rebuilds at the end.
@@ -19,5 +17,5 @@ ConsensusFederationTopology.model_rebuild()
 """
 
 if "BaseTopology.model_rebuild()" not in c:
-    with open('src/coreason_manifest/spec/ontology.py', 'a') as f:
+    with open("src/coreason_manifest/spec/ontology.py", "a") as f:
         f.write("\n" + rebuild_code)

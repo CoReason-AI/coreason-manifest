@@ -2503,10 +2503,16 @@ class ActionSpace(CoreasonBaseModel):
     )
 
     @model_validator(mode="after")
-    def verify_unique_tool_namespaces(self) -> Any:
+    def verify_unique_tool_namespaces_and_sort(self) -> Self:
         tool_names = {t.tool_name for t in self.native_tools}
         if len(tool_names) < len(self.native_tools):
             raise ValueError("Tool names within an ActionSpace must be strictly unique.")
+
+        object.__setattr__(self, "native_tools", sorted(self.native_tools, key=lambda x: x.tool_name))
+        object.__setattr__(self, "mcp_servers", sorted(self.mcp_servers, key=lambda x: x.server_uri))
+        object.__setattr__(
+            self, "ephemeral_partitions", sorted(self.ephemeral_partitions, key=lambda x: x.partition_id)
+        )
         return self
 
 
@@ -3480,11 +3486,19 @@ class TheoryOfMindSnapshot(CoreasonBaseModel):
     identified_knowledge_gaps: list[str] = Field(
         description="Specific topics or logical premises the target agent is assumed to be missing."
     )
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "assumed_shared_beliefs", sorted(self.assumed_shared_beliefs))
+        object.__setattr__(self, "identified_knowledge_gaps", sorted(self.identified_knowledge_gaps))
+        return self
+
     empathy_confidence_score: float = Field(
         ge=0.0,
         le=1.0,
         description="The mathematical confidence (0.0 to 1.0) the agent has in its model of the target's mind.",
     )
+
 
 
 class ToolInvocationEvent(BaseStateEvent):
@@ -4173,11 +4187,11 @@ class WorkingMemorySnapshot(CoreasonBaseModel):
         default_factory=list,
         description="Empathetic models of other agents to compress and target outgoing communications.",
     )
-    affordance_projection: "OntologicalSurfaceProjection | None" = Field(
+    affordance_projection: OntologicalSurfaceProjection | None = Field(
         default=None,
         description="The mathematically bounded subgraph of capabilities currently available to the agent.",
     )
-    capability_attestations: list["FederatedCapabilityAttestation"] = Field(
+    capability_attestations: list[FederatedCapabilityAttestation] = Field(
         default_factory=list,
         description="Immutable cryptographic receipts of dynamically discovered external enterprise connectors.",
     )
@@ -4335,12 +4349,14 @@ class EpistemicLedger(CoreasonBaseModel):
         return self
 
 
+# =========================================================================
+# STRATUM 9: TOPOLOGICAL RESOLUTION (FORWARD REF EVALUATION)
+# =========================================================================
+
 CompositeNode.model_rebuild()
 WorkflowEnvelope.model_rebuild()
 MCPServerConfig.model_rebuild()
 
-
-# Stratum 9 Resolvers
 BaseTopology.model_rebuild()
 DAGTopology.model_rebuild()
 CouncilTopology.model_rebuild()

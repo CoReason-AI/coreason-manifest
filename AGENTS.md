@@ -126,6 +126,16 @@ You are strictly forbidden from introducing "Active" or "Runtime" logic into thi
 * **Formatting:** `ruff format`.
 * **Typing:** Strict `mypy`. Use `Pydantic` models for all data structures. Avoid `dict` or `Any` where a schema can be defined.
 
+### **Cryptographic Determinism (The Merkle Rule)**
+* **Array Sorting:** Because `CoreasonBaseModel` enforces strict RFC 8785 canonical hashing and `frozen=True` immutability, dictionary keys are sorted automatically, but **array ordering is preserved**. To prevent Byzantine hash fractures (`TamperError`) across distributed nodes, you MUST deterministically sort all list/array fields (e.g., alphabetically or by a unique ID) inside the schemas.
+* **Implementation:** You must bypass the frozen lock by using `object.__setattr__` within a post-init validator.
+    ```python
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "my_array", sorted(self.my_array, key=lambda x: x.id))
+        return self
+    ```
+
 ### **Logging (Passive Pattern)**
 * **Library Responsibility:** Expose a logger object (`loguru.logger`) but **DO NOT** configure it.
 * **Consumer Responsibility:** The consuming application (Builder/Engine) will configure sinks, formats, and levels.
