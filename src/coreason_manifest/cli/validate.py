@@ -20,13 +20,13 @@ from pydantic import BaseModel, ValidationError
 from coreason_manifest.spec.ontology import (
     CognitiveStateProfile,  # Representative schema
     DocumentLayoutManifest,
-    StateMutation,  # Representative schema
+    StateMutationIntent,  # Representative schema
 )
 
 # Immutable AOT Schema Registry
 SCHEMA_REGISTRY: Final[dict[str, type[BaseModel]]] = {
     "step8_vision": DocumentLayoutManifest,
-    "state_differential": StateMutation,
+    "state_differential": StateMutationIntent,
     "cognitive_sync": CognitiveStateProfile,
 }
 
