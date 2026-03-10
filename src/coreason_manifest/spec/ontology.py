@@ -793,6 +793,11 @@ class SaeLatentPolicy(CoreasonBaseModel):
     )
 
     @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "monitored_layers", sorted(self.monitored_layers))
+        return self
+
+    @model_validator(mode="after")
     def validate_smooth_decay(self) -> Self:
         if self.violation_action == "smooth_decay":
             if self.smoothing_profile is None:
@@ -944,7 +949,7 @@ class StateDifferentialManifest(CoreasonBaseModel):
     patches: list[StateMutationIntent] = Field(
         default_factory=list, description="The exact, ordered sequence of deterministic state vector mutations."
     )
-    # Topological invariant: Structurally ordered sequence. MUST NOT be sorted.
+    # Note: patches is a structurally ordered sequence (Chronological Mutations) and MUST NOT be sorted.
 
 
 class TemporalCheckpointState(CoreasonBaseModel):
@@ -1668,7 +1673,7 @@ class DocumentLayoutManifest(CoreasonBaseModel):
         default_factory=list,
         description="Directed edges defining the topological sort (chronological flow) of the document.",
     )
-    # Topological invariant: Structurally ordered sequence. MUST NOT be sorted.
+    # Note: reading_order_edges is a structurally ordered sequence (Topological Flow) and MUST NOT be sorted.
 
     @model_validator(mode="after")
     def verify_dag_and_integrity(self) -> Self:
@@ -1819,6 +1824,11 @@ class EpistemicPromotionEvent(BaseStateEvent):
     compression_ratio: float = Field(
         description="A mathematical proof of the token savings achieved (e.g., old_token_count / new_token_count)."
     )
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "source_episodic_event_ids", sorted(self.source_episodic_event_ids))
+        return self
 
 
 class EpistemicScanningPolicy(CoreasonBaseModel):
@@ -2226,6 +2236,11 @@ class DynamicRoutingManifest(CoreasonBaseModel):
     )
 
     @model_validator(mode="after")
+    def sort_bypassed_steps(self) -> Self:
+        object.__setattr__(self, "bypassed_steps", sorted(self.bypassed_steps, key=lambda x: x.bypassed_node_id))
+        return self
+
+    @model_validator(mode="after")
     def validate_modality_alignment(self) -> Self:
         """Mathematically proves that the router is not hallucinating graphs for non-existent modalities."""
         for modality in self.active_subgraphs:
@@ -2267,7 +2282,7 @@ class GrammarPanelProfile(CoreasonBaseModel):
     panel_id: str = Field(description="The unique identifier for this UI panel.")
     type: Literal["grammar"] = Field(default="grammar", description="Discriminator for Grammar of Graphics charts.")
     title: str = Field(description="The human-readable title of the chart.")
-    data_source_id: str = Field(description="The cryptographic pointer to the dataset in the EpistemicLedgerState.")
+    ledger_source_id: str = Field(description="The cryptographic pointer to the dataset in the EpistemicLedgerState.")
     mark: Literal["point", "line", "area", "bar", "rect", "arc"] = Field(
         description="The geometric shape used to represent the data."
     )
@@ -2438,7 +2453,7 @@ class InterventionalCausalTask(CoreasonBaseModel):
     )
 
 
-class JSONRPCErrorProfile(CoreasonBaseModel):
+class JSONRPCErrorState(CoreasonBaseModel):
     """JSON-RPC 2.0 Error object."""
 
     code: int = Field(..., description="A Number that indicates the error type that occurred.")
@@ -2449,11 +2464,11 @@ class JSONRPCErrorProfile(CoreasonBaseModel):
     )
 
 
-class JSONRPCErrorResponseProfile(CoreasonBaseModel):
+class JSONRPCErrorResponseState(CoreasonBaseModel):
     """JSON-RPC 2.0 Error Response object."""
 
     jsonrpc: Literal["2.0"] = Field(..., description="JSON-RPC version.")
-    error: JSONRPCErrorProfile = Field(..., description="The error object.")
+    error: JSONRPCErrorState = Field(..., description="The error object.")
     id: str | int | None = Field(default=None, description="The request ID that this error corresponds to.")
 
 
@@ -2493,7 +2508,7 @@ class InterventionPolicy(CoreasonBaseModel):
     )
 
 
-class BaseNodeManifest(CoreasonBaseModel):
+class BaseNodeProfile(CoreasonBaseModel):
     """
     Base configuration for any execution node in a topology.
     """
@@ -2547,7 +2562,7 @@ class BaseNodeManifest(CoreasonBaseModel):
         return v
 
 
-class HumanNodeManifest(BaseNodeManifest):
+class HumanNodeProfile(BaseNodeProfile):
     """
     A node representing a human participant in the workflow.
     """
@@ -2559,7 +2574,7 @@ class HumanNodeManifest(BaseNodeManifest):
     )
 
 
-class MemoizedNodeManifest(BaseNodeManifest):
+class MemoizedNodeProfile(BaseNodeProfile):
     """
     A passive structural interlock representing a historically executed graph branch.
     """
@@ -2571,7 +2586,7 @@ class MemoizedNodeManifest(BaseNodeManifest):
     )
 
 
-class SystemNodeManifest(BaseNodeManifest):
+class SystemNodeProfile(BaseNodeProfile):
     """
     A node representing a deterministic system capability.
     """
@@ -2702,7 +2717,7 @@ class MCPClientIntent(BoundedJSONRPCIntent):
     method: Literal["mcp.ui.emit_intent"] = Field(..., description="Method for intent bubbling.")
 
 
-class MCPPromptRef(CoreasonBaseModel):
+class MCPPromptReferenceState(CoreasonBaseModel):
     """A dynamic reference to an MCP-provided prompt template."""
 
     server_id: str = Field(..., description="The ID of the MCP server providing this prompt.")
@@ -2846,7 +2861,7 @@ class MechanisticAuditContract(CoreasonBaseModel):
 
 class EpistemicProvenanceReceipt(CoreasonBaseModel):
     extracted_by: NodeID = Field(
-        description="The Content Identifier (CID) of the agent node that extracted this memory."
+        description="The Content Identifier (CID) of the agent node that extracted this payload."
     )
     source_event_id: str = Field(
         description="The exact event Content Identifier (CID) in the EpistemicLedgerState that generated this fact."
@@ -2995,7 +3010,7 @@ class ObservabilityPolicy(CoreasonBaseModel):
     detailed_events: bool = Field(default=False, description="Whether to include granular intra-tool loop events.")
 
 
-class OntologicalHandshake(CoreasonBaseModel):
+class OntologicalHandshakeReceipt(CoreasonBaseModel):
     handshake_id: str = Field(
         min_length=1,
         description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this protocol handshake to the Merkle-DAG.",  # noqa: E501
@@ -3012,6 +3027,11 @@ class OntologicalHandshake(CoreasonBaseModel):
         description="The projection applied if the agents natively used different embedding dimensionalities.",
     )
 
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "participant_node_ids", sorted(self.participant_node_ids))
+        return self
+
 
 class OutputMappingContract(CoreasonBaseModel):
     """
@@ -3022,7 +3042,7 @@ class OutputMappingContract(CoreasonBaseModel):
     parent_key: str = Field(description="The mapped key in the parent's shared state contract.")
 
 
-class CompositeNodeManifest(BaseNodeManifest):
+class CompositeNodeProfile(BaseNodeProfile):
     """
     A node that encapsulates a nested workflow topology.
     """
@@ -3343,7 +3363,6 @@ class ExecutionSpanReceipt(CoreasonBaseModel):
     events: list[SpanEvent] = Field(
         default_factory=list, max_length=10000, description="Structured log records emitted during the span."
     )
-    # Topological invariant: Structurally ordered sequence. MUST NOT be sorted.
 
     @model_validator(mode="after")
     def validate_temporal_bounds(self) -> Any:
@@ -3372,7 +3391,7 @@ class SpatialKinematicActionIntent(CoreasonBaseModel):
     bezier_control_points: list[SpatialCoordinateProfile] = Field(
         default_factory=list, description="Waypoints for constructing non-linear, bot-evasive movement curves."
     )
-    # Topological invariant: Structurally ordered sequence. MUST NOT be sorted.
+    # Note: bezier_control_points is a structurally ordered sequence (Spatial Kinematics) and MUST NOT be sorted.
     expected_visual_concept: str | None = Field(
         default=None,
         description="The visual anchor (e.g., 'Submit Button'). The orchestrator must verify this semantic concept exists at the target_coordinate before executing the macro, preventing blind clicks.",  # noqa: E501
@@ -3433,7 +3452,9 @@ class StatisticalChartExtractionState(CoreasonBaseModel):
 
     @model_validator(mode="after")
     def sort_arrays(self) -> Self:
-        object.__setattr__(self, "data_series", sorted(self.metric_matrix, key=lambda d: json.dumps(d, sort_keys=True)))
+        object.__setattr__(
+            self, "semantic_series", sorted(self.metric_matrix, key=lambda d: json.dumps(d, sort_keys=True))
+        )
         return self
 
 
@@ -3712,7 +3733,7 @@ class LogEvent(CoreasonBaseModel):
     )
 
 
-class SpanTrace(CoreasonBaseModel):
+class SpanTraceReceipt(CoreasonBaseModel):
     """
     An execution window span trace.
     """
@@ -3729,7 +3750,7 @@ class SpanTrace(CoreasonBaseModel):
 
 class TemporalBounds(CoreasonBaseModel):
     valid_from: float | None = Field(
-        default=None, ge=0.0, description="The UNIX timestamp when this memory became true."
+        default=None, ge=0.0, description="The UNIX timestamp when this coordinate became true."
     )
     valid_to: float | None = Field(default=None, description="The UNIX timestamp when this memory was invalidated.")
     interval_type: CausalInterval | None = Field(
@@ -3877,7 +3898,7 @@ class VectorEmbeddingState(CoreasonBaseModel):
 
 class SemanticEdgeState(CoreasonBaseModel):
     edge_id: str = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this semantic edge to the Merkle-DAG."  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this semantic edge to the Merkle-DAG."  # noqa: E501
     )
     subject_node_id: str = Field(description="The origin SemanticNodeState Content Identifier (CID).")
     object_node_id: str = Field(description="The destination SemanticNodeState Content Identifier (CID).")
@@ -3918,12 +3939,12 @@ class SemanticNodeState(CoreasonBaseModel):
     provenance: EpistemicProvenanceReceipt = Field(
         description="The cryptographic chain of custody for this semantic state."
     )
-    tier: CognitiveTier = Field(default="semantic", description="The cognitive tier this memory resides in.")
+    tier: CognitiveTier = Field(default="semantic", description="The cognitive tier this latent state resides in.")
     temporal_bounds: TemporalBounds | None = Field(
         default=None, description="The time window during which this node is considered valid."
     )
     salience: SalienceProfile | None = Field(
-        default=None, description="The importance profile used for epistemic state pruning."
+        default=None, description="The importance profile used for structural pruning."
     )
     fhe_profile: HomomorphicEncryptionProfile | None = Field(
         default=None,
@@ -3973,7 +3994,7 @@ class AgentAttestationReceipt(CoreasonBaseModel):
         return self
 
 
-class AgentNodeManifest(BaseNodeManifest):
+class AgentNodeProfile(BaseNodeProfile):
     """
     A node representing an autonomous agent.
     """
@@ -4050,8 +4071,8 @@ class AgentNodeManifest(BaseNodeManifest):
         return self
 
 
-type AnyNodeManifest = Annotated[
-    AgentNodeManifest | HumanNodeManifest | SystemNodeManifest | CompositeNodeManifest | MemoizedNodeManifest,
+type AnyNodeProfile = Annotated[
+    AgentNodeProfile | HumanNodeProfile | SystemNodeProfile | CompositeNodeProfile | MemoizedNodeProfile,
     Field(discriminator="type", description="A discriminated union of all valid workflow nodes."),
 ]
 
@@ -4070,7 +4091,7 @@ class BaseTopologyManifest(CoreasonBaseModel):
     justification: str | None = Field(
         default=None, description="Cryptographic/audit justification for this topology's configuration."
     )
-    nodes: dict[NodeID, AnyNodeManifest] = Field(description="Flat registry of all nodes in this topology.")
+    nodes: dict[NodeID, AnyNodeProfile] = Field(description="Flat registry of all nodes in this topology.")
     shared_state_contract: StateContract | None = Field(
         default=None, description="The schema-on-write contract governing the internal state of this topology."
     )
@@ -4345,13 +4366,13 @@ class AdversarialMarketTopologyManifest(CoreasonBaseModel):
 
     def compile_to_base_topology(self) -> CouncilTopologyManifest:
         """Deterministically unwraps the macro into a rigid CouncilTopologyManifest."""
-        nodes: dict[NodeID, AnyNodeManifest] = {
-            self.adjudicator_id: SystemNodeManifest(description="Synthesizing Adjudicator")
+        nodes: dict[NodeID, AnyNodeProfile] = {
+            self.adjudicator_id: SystemNodeProfile(description="Synthesizing Adjudicator")
         }
         for node_id in self.blue_team_ids:
-            nodes[node_id] = SystemNodeManifest(description="Blue Team Member")
+            nodes[node_id] = SystemNodeProfile(description="Blue Team Member")
         for node_id in self.red_team_ids:
-            nodes[node_id] = SystemNodeManifest(description="Red Team Member")
+            nodes[node_id] = SystemNodeProfile(description="Red Team Member")
         consensus = ConsensusPolicy(strategy="prediction_market", prediction_market_rules=self.market_rules)
         return CouncilTopologyManifest(nodes=nodes, adjudicator_id=self.adjudicator_id, consensus_policy=consensus)
 
@@ -4380,9 +4401,9 @@ class ConsensusFederationTopologyManifest(CoreasonBaseModel):
         return self
 
     def compile_to_base_topology(self) -> CouncilTopologyManifest:
-        nodes: dict[NodeID, AnyNodeManifest] = {self.adjudicator_id: SystemNodeManifest(description="PBFT Sequencer")}
+        nodes: dict[NodeID, AnyNodeProfile] = {self.adjudicator_id: SystemNodeProfile(description="PBFT Sequencer")}
         for node_id in self.participant_ids:
-            nodes[node_id] = SystemNodeManifest(description="PBFT Participant")
+            nodes[node_id] = SystemNodeProfile(description="PBFT Participant")
         return CouncilTopologyManifest(
             nodes=nodes,
             adjudicator_id=self.adjudicator_id,
@@ -4708,7 +4729,7 @@ class EpistemicLedgerState(CoreasonBaseModel):
 # STRATUM 9: TOPOLOGICAL RESOLUTION (FORWARD REF EVALUATION)
 # =========================================================================
 
-CompositeNodeManifest.model_rebuild()
+CompositeNodeProfile.model_rebuild()
 WorkflowManifest.model_rebuild()
 MCPServerBindingProfile.model_rebuild()
 
