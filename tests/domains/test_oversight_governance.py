@@ -14,10 +14,10 @@ from coreason_manifest.spec.ontology import (
     AdjudicationRubric,
     BoundedInterventionScope,
     ConsensusPolicy,
-    ConstitutionalRule,
+    ConstitutionalPolicy,
     FallbackSLA,
     GradingCriteria,
-    InterventionRequest,
+    InterventionIntent,
     PredictionMarketPolicy,
     QuorumPolicy,
 )
@@ -57,7 +57,7 @@ def test_fallback_sla_rejects_non_positive_timeout(timeout_seconds: int) -> None
 @given(forbidden_intents=st.lists(st.just(""), min_size=1))
 def test_constitutional_rule_rejects_empty_strings(forbidden_intents: list[str]) -> None:
     with pytest.raises(ValidationError):
-        ConstitutionalRule.model_validate(
+        ConstitutionalPolicy.model_validate(
             {
                 "rule_id": "rule-1",
                 "description": "desc",
@@ -72,7 +72,7 @@ def test_constitutional_rule_deduplicates_or_rejects_duplicate_strings(forbidden
     # If using set, Pydantic should deduplicate or raise error if list has duplicates.
     # We test that it's structurally impossible to have duplicates in the model.
     try:
-        rule = ConstitutionalRule.model_validate(
+        rule = ConstitutionalPolicy.model_validate(
             {
                 "rule_id": "rule-2",
                 "description": "desc",
@@ -181,7 +181,7 @@ def test_sandbox_success_massive_configs(
         timeout_action="fail_safe",
         escalation_target_node_id=escalation_target_node_id,
     )
-    req = InterventionRequest(
+    req = InterventionIntent(
         intervention_scope=scope,
         fallback_sla=sla,
         target_node_id="did:web:node-1",

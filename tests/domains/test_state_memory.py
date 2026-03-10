@@ -14,7 +14,7 @@ from coreason_manifest.spec.ontology import (
     AnyStateEvent,
     BeliefMutationEvent,
     CrystallizationPolicy,
-    EpistemicLedger,
+    EpistemicLedgerState,
     EpistemicQuarantineSnapshot,
     ObservationEvent,
     SystemFaultEvent,
@@ -27,7 +27,7 @@ def test_crystallization_policy_min_observations() -> None:
     CrystallizationPolicy(
         min_observations_required=10,
         aleatoric_entropy_threshold=0.1,
-        target_memory_tier="semantic",
+        target_cognitive_tier="semantic",
     )
 
     # Invalid
@@ -35,7 +35,7 @@ def test_crystallization_policy_min_observations() -> None:
         CrystallizationPolicy(
             min_observations_required=9,
             aleatoric_entropy_threshold=0.1,
-            target_memory_tier="semantic",
+            target_cognitive_tier="semantic",
         )
 
 
@@ -44,7 +44,7 @@ def test_crystallization_policy_entropy_threshold() -> None:
     CrystallizationPolicy(
         min_observations_required=10,
         aleatoric_entropy_threshold=0.05,
-        target_memory_tier="semantic",
+        target_cognitive_tier="semantic",
     )
 
     # Invalid
@@ -52,7 +52,7 @@ def test_crystallization_policy_entropy_threshold() -> None:
         CrystallizationPolicy(
             min_observations_required=10,
             aleatoric_entropy_threshold=0.11,
-            target_memory_tier="semantic",
+            target_cognitive_tier="semantic",
         )
 
 
@@ -79,7 +79,7 @@ def state_event_strategy(draw: st.DrawFn) -> AnyStateEvent:
 @given(st.lists(state_event_strategy(), min_size=1, max_size=100))
 def test_temporal_chaos_proof(events: list[AnyStateEvent]) -> None:
     # 1. The Temporal Chaos Proof
-    ledger = EpistemicLedger(history=events)
+    ledger = EpistemicLedgerState(history=events)
 
     # Assert sorted by timestamp
     for i in range(len(ledger.history) - 1):

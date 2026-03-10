@@ -11,14 +11,14 @@ from pydantic import ValidationError
 from coreason_manifest.spec.ontology import (
     BilateralSLA,
     CrossSwarmHandshake,
-    FederatedDiscoveryProtocol,
+    FederatedDiscoveryManifest,
     InformationClassification,
 )
 
 
 def test_federated_discovery_protocol_valid() -> None:
-    """Test valid instantiation of FederatedDiscoveryProtocol."""
-    protocol = FederatedDiscoveryProtocol(
+    """Test valid instantiation of FederatedDiscoveryManifest."""
+    protocol = FederatedDiscoveryManifest(
         broadcast_endpoints=["mcp://swarm.tenant-a.com/bidding", "mcp://backup.tenant-a.com/bidding"],
         supported_ontologies=["sha256:1234567890abcdef", "sha256:0987654321fedcba"],
     )
@@ -29,7 +29,7 @@ def test_federated_discovery_protocol_valid() -> None:
 def test_federated_discovery_protocol_missing_fields() -> None:
     """Test that missing required fields raise ValidationError."""
     with pytest.raises(ValidationError) as exc_info:
-        FederatedDiscoveryProtocol()  # type: ignore
+        FederatedDiscoveryManifest()  # type: ignore
 
     errors = exc_info.value.errors()
     missing_fields = [err["loc"][0] for err in errors if err["type"] == "missing"]

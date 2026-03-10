@@ -21,7 +21,7 @@ from coreason_manifest.spec.ontology import (
     CouncilTopology,
     DAGTopology,
     DigitalTwinTopology,
-    EpistemicScanner,
+    EpistemicScanningPolicy,
     EscrowPolicy,
     EvaluatorOptimizerTopology,
     HumanNode,
@@ -29,7 +29,7 @@ from coreason_manifest.spec.ontology import (
     QuorumPolicy,
     SelfCorrectionPolicy,
     SimulationConvergenceSLA,
-    System1Reflex,
+    System1ReflexPolicy,
     SystemNode,
 )
 
@@ -139,9 +139,9 @@ def test_council_topology_referential_integrity_adversarial(nodes: dict[str, Any
 
 @given(confidence_threshold=st.floats(max_value=-0.000001) | st.floats(min_value=1.000001))
 def test_system1_reflex_mathematical_bounds(confidence_threshold: float) -> None:
-    """Test 3: Prove System1Reflex decisively rejects values outside [0.0, 1.0]."""
+    """Test 3: Prove System1ReflexPolicy decisively rejects values outside [0.0, 1.0]."""
     with pytest.raises(ValidationError):
-        System1Reflex(confidence_threshold=confidence_threshold, allowed_read_only_tools=["tool_a"])
+        System1ReflexPolicy(confidence_threshold=confidence_threshold, allowed_read_only_tools=["tool_a"])
 
 
 def test_evaluator_optimizer_rejects_missing_nodes() -> None:
@@ -189,9 +189,9 @@ def test_ontological_alignment_policy_mathematical_bounds(min_cosine_similarity:
 
 @given(dissonance_threshold=st.floats(max_value=-0.000001) | st.floats(min_value=1.000001))
 def test_epistemic_scanner_mathematical_bounds(dissonance_threshold: float) -> None:
-    """Test 4: Prove EpistemicScanner decisively rejects values outside [0.0, 1.0]."""
+    """Test 4: Prove EpistemicScanningPolicy decisively rejects values outside [0.0, 1.0]."""
     with pytest.raises(ValidationError):
-        EpistemicScanner(active=True, dissonance_threshold=dissonance_threshold, action_on_gap="probe")
+        EpistemicScanningPolicy(active=True, dissonance_threshold=dissonance_threshold, action_on_gap="probe")
 
 
 @given(max_loops=st.integers(max_value=-1) | st.integers(min_value=51))
@@ -203,9 +203,9 @@ def test_self_correction_policy_extreme_bounds(max_loops: int) -> None:
 
 @given(confidence_threshold=st.sampled_from([math.nan, math.inf, -math.inf]))
 def test_system1_reflex_toxic_floats(confidence_threshold: float) -> None:
-    """Prove System1Reflex decisively rejects toxic floats (NaN, Inf, -Inf)."""
+    """Prove System1ReflexPolicy decisively rejects toxic floats (NaN, Inf, -Inf)."""
     with pytest.raises(ValidationError):
-        System1Reflex(confidence_threshold=confidence_threshold, allowed_read_only_tools=["tool_a"])
+        System1ReflexPolicy(confidence_threshold=confidence_threshold, allowed_read_only_tools=["tool_a"])
 
 
 @given(max_monte_carlo_rollouts=st.integers(max_value=0))

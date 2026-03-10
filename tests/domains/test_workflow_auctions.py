@@ -8,7 +8,7 @@
 import pytest
 from pydantic import TypeAdapter, ValidationError
 
-from coreason_manifest.spec.ontology import TaskAward
+from coreason_manifest.spec.ontology import TaskAwardReceipt
 
 
 def test_task_award_escrow_invalid() -> None:
@@ -23,4 +23,4 @@ def test_task_award_escrow_invalid() -> None:
         },
     }
     with pytest.raises(ValidationError, match=r"Escrow locked amount cannot exceed the total cleared price"):
-        TypeAdapter(TaskAward).validate_python(payload)
+        TypeAdapter(TaskAwardReceipt).validate_python(payload)

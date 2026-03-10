@@ -6,7 +6,7 @@
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
 """AGENT INSTRUCTION: This module is a purely stateless compiler.
-It translates a mathematically bounded WorkflowEnvelope into a 1D Markdown projection.
+It translates a mathematically bounded WorkflowManifest into a 1D Markdown projection.
 It must not execute any agent logic, connect to remote sockets, or utilize Jinja2."""
 
 import argparse
@@ -15,10 +15,10 @@ from pathlib import Path
 
 from pydantic import TypeAdapter
 
-from coreason_manifest.spec.ontology import WorkflowEnvelope
+from coreason_manifest.spec.ontology import WorkflowManifest
 
 
-def project_envelope_to_markdown(envelope: WorkflowEnvelope) -> str:
+def project_envelope_to_markdown(envelope: WorkflowManifest) -> str:
     """Deterministically compile the envelope into an Agent Card Markdown string."""
     lines: list[str] = [
         "# CoReason Agent Card",
@@ -71,7 +71,7 @@ def main() -> None:
 
     try:
         payload_bytes = args.payload.read_bytes()
-        adapter = TypeAdapter(WorkflowEnvelope)
+        adapter = TypeAdapter(WorkflowManifest)
         manifest = adapter.validate_json(payload_bytes)
 
         markdown_string = project_envelope_to_markdown(manifest)
