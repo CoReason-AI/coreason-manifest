@@ -2777,6 +2777,11 @@ class MarketResolutionState(CoreasonBaseModel):
         description="The deterministic mapping of agent IDs to their earned compute budget/magnitude based on Brier scoring."  # noqa: E501
     )
 
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "falsified_hypothesis_ids", sorted(self.falsified_hypothesis_ids))
+        return self
+
 
 class MathematicalNotationExtractionState(CoreasonBaseModel):
     math_type: Literal["inline", "display"] = Field(description="The structural context of the equation.")

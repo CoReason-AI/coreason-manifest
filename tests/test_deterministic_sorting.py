@@ -5,6 +5,7 @@ from coreason_manifest.spec.ontology import (
     EnsembleTopologyProfile,
     EvictionPolicy,
     LatentScratchpadReceipt,
+    MarketResolutionState,
     MigrationContract,
     PeftAdapterContract,
     PredictionMarketPolicy,
@@ -92,3 +93,14 @@ def test_migration_contract_sorting_determinism() -> None:
         dropped_paths=["/z_path", "/a_path", "/m_path"],
     )
     assert contract.dropped_paths == ["/a_path", "/m_path", "/z_path"]
+
+
+def test_market_resolution_sorting_determinism() -> None:
+    """Prove that injecting chaotic arrays yields a mathematically pristine, sorted hash state."""
+    state = MarketResolutionState(
+        market_id="mkt_1",
+        winning_hypothesis_id="hyp_Z",
+        falsified_hypothesis_ids=["hyp_M", "hyp_A", "hyp_X"],
+        payout_distribution={"did:web:agent_1": 100},
+    )
+    assert state.falsified_hypothesis_ids == ["hyp_A", "hyp_M", "hyp_X"]
