@@ -136,6 +136,25 @@ When an MCP server projects a resource manifest, orchestrating nodes route to it
 
 **Note on CI/CD:** Modifying existing `Field` descriptions alters the cryptographic hash footprint of the exported `coreason_ontology.schema.json`. "Fixing" descriptions to be friendlier will break the `Semantic Diff Check` in the CI pipeline and result in immediate rejection.
 
+## 0.5 The F.A.I.R. Ecosystem Coordinator Doctrine
+
+**CRITICAL CONTEXT:** `coreason_manifest` is the absolute Central Nervous System of the swarm. To guarantee mathematical alignment, it adheres strictly to a 2026+ AI-Native interpretation of the scientific F.A.I.R. principles.
+
+### 1. F.A.I.R. as a Neurosymbolic Constraint
+* **Findable (The MCP Projection Law):** Capabilities are not "searched"; they are structurally projected. All tools and states MUST be exposed via the Model Context Protocol (MCP) using highly bounded Pydantic JSON Schemas, allowing semantic routers to discover them via dense vector embeddings.
+* **Accessible (The Stateless Substrate):** The manifest is distributed exclusively as a pure, inert data library (Wheel). It MUST remain completely decoupled from kinetic runtime execution, ensuring it can be safely mounted by any architecture (Rust, C++, WASM) over standard zero-trust protocols (stdio, SSE, HTTP).
+* **Interoperable (The W3C DID Mandate):** Vertical-specific enterprise jargon (e.g., FHIR, FIX) is strictly forbidden. All cross-agent state MUST be flattened into universal `SemanticNode` and `SemanticEdge` geometries, cryptographically linked via W3C Decentralized Identifiers (DIDs).
+* **Reusable / Future-Proof (The Merkle DAG Law):** In-place mutations are mathematically banned. The ontology evolves purely via append-only `MigrationContract` structures and backward-compatible schema differentials, gated rigorously by the CI/CD `semantic_diff.py` pipeline.
+
+### 2. The Integrated Ecosystem Coordinator
+* **The "God Context" Absolute Rule:** This repository is the definitive Epistemic Ledger of Truth. If a capability, state vector, or workflow topology is not mathematically mapped within this repository, **it does not exist in the swarm's reality**.
+* Any agent attempting to pass unmapped JSON payloads or hallucinated tool names will immediately trigger a `System2RemediationPrompt` to enforce compliance.
+
+### 3. The Anti-Obsolete Mandate
+To maintain ecosystem purity, legacy 2010s-era software engineering paradigms are formally deprecated.
+* **BANNED:** CRUD (Create, Read, Update, Delete) mentalities, RESTful in-place state mutations, and microservice-fragmented database tables.
+* **REQUIRED:** Causal DAGs, non-monotonic truth maintenance (`DefeasibleCascade`), immutable event sourcing (`BeliefUpdateEvent`), and `StateDiff` ledgers.
+
 ---
 
 ## **1. The "No Execution" Directives**
@@ -209,6 +228,7 @@ You are strictly forbidden from introducing "Active" or "Runtime" logic into thi
 * **Pattern:**
     ```python
     from coreason_manifest.telemetry.logger import logger
+
     # usage is fine
     logger.debug("Validating manifest...")
     # configuration (logger.add) is FORBIDDEN in library code
