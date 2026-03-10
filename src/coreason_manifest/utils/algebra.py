@@ -11,7 +11,7 @@ from typing import Literal
 from pydantic import ValidationError
 
 from ..spec.ontology import (
-    AnyTopology,
+    AnyTopologyManifest,
     EpistemicCompressionSLA,
     EpistemicTransmutationTask,
     ExecutionNodeReceipt,
@@ -74,7 +74,7 @@ def align_semantic_manifolds(
     )
 
 
-def compute_topology_hash(topology: "AnyTopology") -> str:
+def compute_topology_hash(topology: "AnyTopologyManifest") -> str:
     """
     Deterministically computes the SOTA Merkle-DAG SHA-256 fingerprint of a given topology.
     """
