@@ -4338,3 +4338,16 @@ class EpistemicLedger(CoreasonBaseModel):
 CompositeNode.model_rebuild()
 WorkflowEnvelope.model_rebuild()
 MCPServerConfig.model_rebuild()
+
+
+# Stratum 9 Resolvers
+BaseTopology.model_rebuild()
+DAGTopology.model_rebuild()
+CouncilTopology.model_rebuild()
+SwarmTopology.model_rebuild()
+EvolutionaryTopology.model_rebuild()
+SMPCTopology.model_rebuild()
+EvaluatorOptimizerTopology.model_rebuild()
+DigitalTwinTopology.model_rebuild()
+AdversarialMarketTopology.model_rebuild()
+ConsensusFederationTopology.model_rebuild()
