@@ -5329,7 +5329,7 @@
       "description": "The immutable receipt of Step 1 ingestion acting as a static structural index of the artifact.",
       "properties": {
         "artifact_event_id": {
-          "description": "The exact genesis CID of the document entering the routing tier.",
+          "description": "The exact genesis CID of the MultimodalArtifactReceipt entering the routing tier.",
           "minLength": 1,
           "title": "Artifact Event Id",
           "type": "string"
