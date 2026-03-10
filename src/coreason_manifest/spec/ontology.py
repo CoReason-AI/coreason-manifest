@@ -13,6 +13,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, StringConstraints, field_validator, model_validator
 
+
 def _validate_payload_bounds(value: Any, current_depth: int = 0) -> Any:
     """
     AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads
@@ -94,7 +95,7 @@ type NodeID = Annotated[
     Field(
         min_length=7,
         pattern="^did:[a-z0-9]+:[a-zA-Z0-9.\\-_:]+$",
-        description="A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.",
+        description="A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.",  # noqa: E501
     ),
 ]
 
@@ -108,7 +109,7 @@ type ProfileID = Annotated[
         pattern="^[a-zA-Z0-9_-]+$",
         min_length=1,
         max_length=128,
-        description="A deterministic cognitive routing boundary that defines the non-monotonic instruction set for the agent.",
+        description="A deterministic cognitive routing boundary that defines the non-monotonic instruction set for the agent.",  # noqa: E501
         examples=["default_assistant", "code_expert"],
     ),
 ]
@@ -189,7 +190,7 @@ type ToolID = Annotated[
         pattern="^[a-zA-Z0-9_-]+$",
         min_length=1,
         max_length=128,
-        description="A cryptographically deterministic capability pointer binding the agent to a verifiable spatial environment.",
+        description="A cryptographically deterministic capability pointer binding the agent to a verifiable spatial environment.",  # noqa: E501
         examples=["calculator", "web_search"],
     ),
 ]
@@ -361,7 +362,7 @@ class SideEffectProfile(CoreasonBaseModel):
     """
 
     is_idempotent: bool = Field(
-        description="True if the tool can be safely retried multiple times without altering state beyond the first call."
+        description="True if the tool can be safely retried multiple times without altering state beyond the first call."  # noqa: E501
     )
     mutates_state: bool = Field(description="True if the tool performs write operations or side-effects.")
 
@@ -383,7 +384,7 @@ class HardwareEnclaveAttestation(CoreasonBaseModel):
         description="The physical silicon architecture generating the root-of-trust quote."
     )
     platform_measurement_hash: str = Field(
-        description="The cryptographic hash of the Platform Configuration Registers (PCRs) proving the memory state was physically isolated."
+        description="The cryptographic hash of the Platform Configuration Registers (PCRs) proving the memory state was physically isolated."  # noqa: E501
     )
     hardware_signature_blob: str = Field(
         max_length=8192,
@@ -410,7 +411,7 @@ class LogitSteganographyContract(CoreasonBaseModel):
     directly into the token entropy."""
 
     verification_public_key_id: str = Field(
-        description="The DID or public key identifier required by an auditor to reconstruct the PRF and verify the watermark."
+        description="The DID or public key identifier required by an auditor to reconstruct the PRF and verify the watermark."  # noqa: E501
     )
     prf_seed_hash: str = Field(
         pattern="^[a-f0-9]{64}$",
@@ -418,7 +419,7 @@ class LogitSteganographyContract(CoreasonBaseModel):
     )
     watermark_strength_delta: float = Field(
         gt=0.0,
-        description="The exact logit scalar (bias) injected into the 'green list' vocabulary partition before Gumbel-Softmax sampling.",
+        description="The exact logit scalar (bias) injected into the 'green list' vocabulary partition before Gumbel-Softmax sampling.",  # noqa: E501
     )
     target_bits_per_token: float = Field(
         gt=0.0,
@@ -426,7 +427,7 @@ class LogitSteganographyContract(CoreasonBaseModel):
     )
     context_history_window: int = Field(
         ge=0,
-        description="The k-gram rolling window size of preceding tokens hashed into the PRF state to ensure robustness against text cropping.",
+        description="The k-gram rolling window size of preceding tokens hashed into the PRF state to ensure robustness against text cropping.",  # noqa: E501
     )
 
 
@@ -442,7 +443,7 @@ class ModelProfile(CoreasonBaseModel):
     rate_card: RateCard = Field(description="The economic cost definition associated with the model.")
     supported_functional_experts: list[str] = Field(
         default_factory=list,
-        description="A declarative list of specialized functional expert clusters (e.g., 'falsifier', 'synthesizer') physically present in this model's architecture.",
+        description="A declarative list of specialized functional expert clusters (e.g., 'falsifier', 'synthesizer') physically present in this model's architecture.",  # noqa: E501
     )
 
 
@@ -458,7 +459,7 @@ class PermissionBoundary(CoreasonBaseModel):
     file_system_read_only: bool = Field(description="True if the tool is strictly forbidden from writing to the disk.")
     auth_requirements: list[str] | None = Field(
         default=None,
-        description="An explicit list of authentication protocol identifiers (e.g., 'oauth2:github', 'mtls:internal') the orchestrator must negotiate before allocating compute.",
+        description="An explicit list of authentication protocol identifiers (e.g., 'oauth2:github', 'mtls:internal') the orchestrator must negotiate before allocating compute.",  # noqa: E501
     )
 
 
@@ -469,7 +470,7 @@ class PostQuantumSignature(CoreasonBaseModel):
     public_key_id: str = Field(description="The identifier of the post-quantum public evaluation key.")
     pq_signature_blob: str = Field(
         max_length=100000,
-        description="The base64-encoded post-quantum signature. Bounded to 100KB to safely accommodate massive SPHINCS+ hash trees without OOM crashes.",
+        description="The base64-encoded post-quantum signature. Bounded to 100KB to safely accommodate massive SPHINCS+ hash trees without OOM crashes.",  # noqa: E501
     )
 
 
@@ -493,7 +494,7 @@ class RoutingFrontier(CoreasonBaseModel):
     max_carbon_intensity_gco2eq_kwh: float | None = Field(
         default=None,
         ge=0.0,
-        description="The maximum operational carbon intensity of the physical data center grid allowed for this agent's routing.",
+        description="The maximum operational carbon intensity of the physical data center grid allowed for this agent's routing.",  # noqa: E501
     )
 
 
@@ -507,7 +508,7 @@ class SaeFeatureActivation(CoreasonBaseModel):
     )
     interpretability_label: str | None = Field(
         default=None,
-        description="The human-readable semantic concept mapped to this feature (e.g., 'sycophancy', 'truth_retrieval').",
+        description="The human-readable semantic concept mapped to this feature (e.g., 'sycophancy', 'truth_retrieval').",  # noqa: E501
     )
 
 
@@ -538,19 +539,19 @@ class CognitiveRoutingDirective(CoreasonBaseModel):
 
     dynamic_top_k: int = Field(
         ge=1,
-        description="The exact number of functional experts the router must activate per token. High values simulate deep cognitive strain.",
+        description="The exact number of functional experts the router must activate per token. High values simulate deep cognitive strain.",  # noqa: E501
     )
     routing_temperature: float = Field(
         ge=0.0,
-        description="The temperature applied to the router's softmax gate, controlling how deterministically it picks experts.",
+        description="The temperature applied to the router's softmax gate, controlling how deterministically it picks experts.",  # noqa: E501
     )
     expert_logit_biases: dict[str, float] = Field(
         default_factory=dict,
-        description="Explicit tensor biases applied to the router gate. Keys are expert IDs (e.g., 'expert_falsifier'), values are logit modifiers.",
+        description="Explicit tensor biases applied to the router gate. Keys are expert IDs (e.g., 'expert_falsifier'), values are logit modifiers.",  # noqa: E501
     )
     enforce_functional_isolation: bool = Field(
         default=False,
-        description="If True, the orchestrator applies a hard mask (-inf) to any expert not explicitly boosted in expert_logit_biases.",
+        description="If True, the orchestrator applies a hard mask (-inf) to any expert not explicitly boosted in expert_logit_biases.",  # noqa: E501
     )
 
 
@@ -566,7 +567,7 @@ class CognitiveStateProfile(CoreasonBaseModel):
     divergence_tolerance: float = Field(
         ge=0.0,
         le=1.0,
-        description="The 'curiosity' metric; dictates how far the router is allowed to stray from high-probability distributions.",
+        description="The 'curiosity' metric; dictates how far the router is allowed to stray from high-probability distributions.",  # noqa: E501
     )
     activation_steering: ActivationSteeringContract | None = Field(
         default=None,
@@ -591,7 +592,7 @@ class CognitiveUncertaintyProfile(CoreasonBaseModel):
         ge=0.0, le=1.0, description="Counterfactual Geometries representing alternative timeline vectors."
     )
     requires_abductive_escalation: bool = Field(
-        description="True if epistemic_uncertainty breaches the safety threshold, requiring structural mandate escalation."
+        description="True if epistemic_uncertainty breaches the safety threshold, requiring structural mandate escalation."  # noqa: E501
     )
 
 
@@ -652,7 +653,7 @@ class QuorumPolicy(CoreasonBaseModel):
 
     max_tolerable_faults: int = Field(
         ge=0,
-        description="The maximum number of actively malicious, hallucinating, or degraded nodes (f) the swarm must survive.",
+        description="The maximum number of actively malicious, hallucinating, or degraded nodes (f) the swarm must survive.",  # noqa: E501
     )
     min_quorum_size: int = Field(
         gt=0, description="The minimum number of participating agents (N) required to form consensus."
@@ -661,7 +662,7 @@ class QuorumPolicy(CoreasonBaseModel):
         description="The cryptographic material the agents must sign to submit a valid vote."
     )
     byzantine_action: Literal["quarantine", "slash_escrow", "ignore"] = Field(
-        description="The deterministic punishment executed by the orchestrator against nodes that violate the consensus quorum."
+        description="The deterministic punishment executed by the orchestrator against nodes that violate the consensus quorum."  # noqa: E501
     )
 
     @model_validator(mode="after")
@@ -778,17 +779,17 @@ class SecureSubSession(CoreasonBaseModel):
 class DefeasibleCascade(CoreasonBaseModel):
     cascade_id: str = Field(
         min_length=1,
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this automated truth maintenance operation.",
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this automated truth maintenance operation.",  # noqa: E501
     )
     root_falsified_event_id: str = Field(
-        description="The source BeliefUpdateEvent or HypothesisGenerationEvent Content Identifier (CID) that collapsed and triggered this cascade."
+        description="The source BeliefUpdateEvent or HypothesisGenerationEvent Content Identifier (CID) that collapsed and triggered this cascade."  # noqa: E501
     )
     propagated_decay_factor: float = Field(
         ge=0.0, le=1.0, description="The calculated Entropy Penalty applied to this specific subgraph."
     )
     quarantined_event_ids: list[str] = Field(
         min_length=1,
-        description="The strict list of downstream event Content Identifiers (CIDs) isolated and muted by this cascade to prevent Epistemic Contagion.",
+        description="The strict list of downstream event Content Identifiers (CIDs) isolated and muted by this cascade to prevent Epistemic Contagion.",  # noqa: E501
     )
     cross_boundary_quarantine_issued: bool = Field(
         default=False,
@@ -836,14 +837,14 @@ class MultimodalTokenAnchor(CoreasonBaseModel):
             x_min, y_min, x_max, y_max = self.bounding_box
             if x_min > x_max or y_min > y_max:
                 raise ValueError(
-                    f"Spatial invariant violated: min bounds (x:{x_min}, y:{y_min}) exceed max bounds (x:{x_max}, y:{y_max})"
+                    f"Spatial invariant violated: min bounds (x:{x_min}, y:{y_min}) exceed max bounds (x:{x_max}, y:{y_max})"  # noqa: E501
                 )
         return self
 
 
 class RollbackRequest(CoreasonBaseModel):
     request_id: str = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the causal rollback operation."
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the causal rollback operation."  # noqa: E501
     )
     target_event_id: str = Field(
         description="The Content Identifier (CID) of the corrupted event in the EpistemicLedger to revert to."
@@ -872,7 +873,7 @@ class StatePatch(CoreasonBaseModel):
 
 class StateDiff(CoreasonBaseModel):
     diff_id: str = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this state differential."
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this state differential."  # noqa: E501
     )
     author_node_id: str = Field(
         description="The exact Lineage Watermark of the agent or system that authored this state mutation."
@@ -882,7 +883,7 @@ class StateDiff(CoreasonBaseModel):
         description="Strict scalar logical clock used for deterministic LWW (Last-Writer-Wins) conflict resolution.",
     )
     vector_clock: dict[str, int] = Field(
-        description="Causal history mapping of all known Lineage Watermarks to their latest logical mutation count at the time of authoring."
+        description="Causal history mapping of all known Lineage Watermarks to their latest logical mutation count at the time of authoring."  # noqa: E501
     )
     patches: list[StatePatch] = Field(
         default_factory=list, description="The exact, ordered sequence of deterministic state vector mutations."
@@ -902,7 +903,7 @@ class TemporalCheckpoint(CoreasonBaseModel):
 class ThoughtBranch(CoreasonBaseModel):
     branch_id: str = Field(
         min_length=1,
-        description="A deterministic capability pointer bounding this specific topological divergence in the Latent Scratchpad Trace.",
+        description="A deterministic capability pointer bounding this specific topological divergence in the Latent Scratchpad Trace.",  # noqa: E501
     )
     parent_branch_id: str | None = Field(
         default=None, description="The branch this thought diverged from, enabling tree reconstruction."
@@ -923,14 +924,14 @@ class LatentScratchpadTrace(CoreasonBaseModel):
         min_length=1, description="A Content Identifier (CID) bounding this ephemeral test-time execution tree."
     )
     explored_branches: list[ThoughtBranch] = Field(
-        description="All logical paths the agent attempted within this Ephemeral Epistemic Quarantine—a volatile workspace where probability waves collapse before being committed to the immutable ledger."
+        description="All logical paths the agent attempted within this Ephemeral Epistemic Quarantine—a volatile workspace where probability waves collapse before being committed to the immutable ledger."  # noqa: E501
     )
     discarded_branches: list[str] = Field(
         description="A list of Content Identifiers (CIDs) that were explicitly pruned due to logical dead-ends."
     )
     resolution_branch_id: str | None = Field(
         default=None,
-        description="The Content Identifier (CID) that successfully resolved the uncertainty and led to the final output.",
+        description="The Content Identifier (CID) that successfully resolved the uncertainty and led to the final output.",  # noqa: E501
     )
     total_latent_tokens: int = Field(
         ge=0, description="The total expenditure (in tokens) spent purely on internal reasoning."
@@ -995,7 +996,7 @@ class ToolDefinition(CoreasonBaseModel):
     sla: ExecutionSLA | None = Field(default=None, description="Execution limits for the tool.")
     is_preemptible: bool = Field(
         default=False,
-        description="If True, the orchestrator is authorized to send a SIGINT to abort this tool's execution mid-flight if a BargeInInterruptEvent occurs.",
+        description="If True, the orchestrator is authorized to send a SIGINT to abort this tool's execution mid-flight if a BargeInInterruptEvent occurs.",  # noqa: E501
     )
 
 
@@ -1011,12 +1012,12 @@ class BilateralSLA(CoreasonBaseModel):
     )
     permitted_geographic_regions: list[str] = Field(
         default_factory=list,
-        description="Explicit whitelist of geographic regions or cloud enclaves where execution is structurally permitted (Data Residency Pinning).",
+        description="Explicit whitelist of geographic regions or cloud enclaves where execution is structurally permitted (Data Residency Pinning).",  # noqa: E501
     )
     max_permitted_grid_carbon_intensity: float | None = Field(
         default=None,
         ge=0.0,
-        description="Absolute structural ESG mandate. The execution graph will quarantine any federated node operating on a grid exceeding this gCO2eq/kWh threshold.",
+        description="Absolute structural ESG mandate. The execution graph will quarantine any federated node operating on a grid exceeding this gCO2eq/kWh threshold.",  # noqa: E501
     )
     pq_signature: PostQuantumSignature | None = Field(
         default=None, description="The quantum-resistant signature securing the multi-tenant structural boundary."
@@ -1038,7 +1039,7 @@ class ActiveInferenceContract(CoreasonBaseModel):
     expected_information_gain: float = Field(
         ge=0.0,
         le=1.0,
-        description="The mathematically estimated reduction in Epistemic Uncertainty (entropy) this tool call will yield.",
+        description="The mathematically estimated reduction in Epistemic Uncertainty (entropy) this tool call will yield.",  # noqa: E501
     )
     execution_cost_budget_magnitude: int = Field(
         ge=0, description="The maximum economic expenditure authorized to run this specific scientific test."
@@ -1088,7 +1089,7 @@ class AdversarialSimulationProfile(CoreasonBaseModel):
     )
     expected_firewall_trip: str | None = Field(
         default=None,
-        description="The exact rule_id of the InformationFlowPolicy or Governance bound expected to block this attack. Used for automated test assertions.",
+        description="The exact rule_id of the InformationFlowPolicy or Governance bound expected to block this attack. Used for automated test assertions.",  # noqa: E501
     )
 
 
@@ -1122,7 +1123,7 @@ class AnalogicalMappingTask(CoreasonBaseModel):
     target_domain: str = Field(description="The actual problem space currently being solved.")
     required_isomorphisms: int = Field(
         ge=1,
-        description="The exact number of structural/logical mappings the agent must successfully bridge between the two domains.",
+        description="The exact number of structural/logical mappings the agent must successfully bridge between the two domains.",  # noqa: E501
     )
     divergence_temperature_override: float = Field(
         ge=0.0, description="The specific high-temperature sampling override required to force this creative leap."
@@ -1140,7 +1141,7 @@ class AnchoringPolicy(CoreasonBaseModel):
     max_semantic_drift: float = Field(
         ge=0.0,
         le=1.0,
-        description="The maximum allowed cosine deviation from the anchor before the orchestrator forces a state rollback.",
+        description="The maximum allowed cosine deviation from the anchor before the orchestrator forces a state rollback.",  # noqa: E501
     )
 
 
@@ -1163,7 +1164,7 @@ class BackpressurePolicy(CoreasonBaseModel):
     """
 
     max_queue_depth: int = Field(
-        description="The maximum number of unprocessed messages/observations allowed between connected nodes before yielding."
+        description="The maximum number of unprocessed messages/observations allowed between connected nodes before yielding."  # noqa: E501
     )
     token_budget_per_branch: int | None = Field(
         default=None, description="The maximum token cost allowed per execution branch before rate-limiting."
@@ -1179,12 +1180,12 @@ class BackpressurePolicy(CoreasonBaseModel):
     max_uninterruptible_span_ms: int | None = Field(
         default=None,
         gt=0,
-        description="Systemic heartbeat constraint. A node cannot lock the thread longer than this without yielding to poll for BargeInInterruptEvents.",
+        description="Systemic heartbeat constraint. A node cannot lock the thread longer than this without yielding to poll for BargeInInterruptEvents.",  # noqa: E501
     )
     max_concurrent_tool_invocations: int | None = Field(
         default=None,
         gt=0,
-        description="The mathematical integer ceiling to prevent Sybil-like parallel mutations against the ActionSpace.",
+        description="The mathematical integer ceiling to prevent Sybil-like parallel mutations against the ActionSpace.",  # noqa: E501
     )
 
 
@@ -1200,7 +1201,7 @@ class BasePanel(CoreasonBaseModel):
 
 class BaseStateEvent(CoreasonBaseModel):
     event_id: str = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG."
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG."  # noqa: E501
     )
     timestamp: float = Field(description="Causal Ancestry markers required to resolve decentralized event ordering.")
 
@@ -1303,7 +1304,7 @@ class BrowserDOMState(CoreasonBaseModel):
     )
     screenshot_cid: str | None = Field(
         default=None,
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the snapshot representation.",
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the snapshot representation.",  # noqa: E501
     )
 
 
@@ -1328,7 +1329,7 @@ class BypassReceipt(CoreasonBaseModel):
 
 class CausalAttribution(CoreasonBaseModel):
     source_event_id: str = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the source event in the Merkle-DAG."
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the source event in the Merkle-DAG."  # noqa: E501
     )
     influence_weight: float = Field(
         ge=0.0,
@@ -1380,10 +1381,10 @@ class ConstitutionalAmendmentProposal(CoreasonBaseModel):
         description="The CID of the NormativeDriftEvent that justified triggering this proposal."
     )
     proposed_patch: dict[str, Any] = Field(
-        description="A strict, structurally bounded JSON Patch (RFC 6902) proposed by the AI to mutate the GovernancePolicy."
+        description="A strict, structurally bounded JSON Patch (RFC 6902) proposed by the AI to mutate the GovernancePolicy."  # noqa: E501
     )
     justification: str = Field(
-        description="The AI's natural language structural/logical argument for why this patch resolves the contradiction without violating the root AnchoringPolicy."
+        description="The AI's natural language structural/logical argument for why this patch resolves the contradiction without violating the root AnchoringPolicy."  # noqa: E501
     )
 
 
@@ -1410,7 +1411,7 @@ class CounterfactualRegretEvent(BaseStateEvent):
         default="counterfactual_regret", description="Discriminator type for a counterfactual regret event."
     )
     historical_event_id: str = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the specific historical state node where the agent mathematically diverged to simulate an alternative path."
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the specific historical state node where the agent mathematically diverged to simulate an alternative path."  # noqa: E501
     )
     counterfactual_intervention: str = Field(
         description="The specific alternative action or do-calculus intervention applied in the simulation."
@@ -1422,11 +1423,11 @@ class CounterfactualRegretEvent(BaseStateEvent):
         description="The calculated utility of the simulated counterfactual trajectory."
     )
     epistemic_regret: float = Field(
-        description="The mathematical variance (simulated - actual) representing the opportunity cost of the historical decision."
+        description="The mathematical variance (simulated - actual) representing the opportunity cost of the historical decision."  # noqa: E501
     )
     policy_update_gradients: dict[str, float] = Field(
         default_factory=dict,
-        description="The stateless routing gradient adjustments derived from the calculated regret, used to self-correct future routing.",
+        description="The stateless routing gradient adjustments derived from the calculated regret, used to self-correct future routing.",  # noqa: E501
     )
 
 
@@ -1458,7 +1459,7 @@ class CrystallizationPolicy(CoreasonBaseModel):
     )
     aleatoric_entropy_threshold: float = Field(
         le=0.1,
-        description="The entropy variance must fall below this mathematical threshold to prove absolute certainty before compression is authorized.",
+        description="The entropy variance must fall below this mathematical threshold to prove absolute certainty before compression is authorized.",  # noqa: E501
     )
     target_memory_tier: Literal["semantic", "working"] = Field(
         description="The destination tier where the compressed rule will be stored."
@@ -1489,13 +1490,13 @@ class CustodyRecord(CoreasonBaseModel):
 
 class DefeasibleAttack(CoreasonBaseModel):
     attack_id: str = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this directed attack edge."
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this directed attack edge."  # noqa: E501
     )
     source_claim_id: str = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the claim mounting the attack."
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the claim mounting the attack."  # noqa: E501
     )
     target_claim_id: str = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the claim being attacked."
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the claim being attacked."  # noqa: E501
     )
     attack_vector: AttackVector = Field(description="Geometric matrices of undercutting defeaters.")
 
@@ -1504,12 +1505,12 @@ class DimensionalProjectionContract(CoreasonBaseModel):
     source_model_name: str = Field(description="The native embedding model of the origin agent.")
     target_model_name: str = Field(description="The native embedding model of the destination agent.")
     projection_matrix_hash: str = Field(
-        description="The SHA-256 hash of the exact mathematical matrix used to compress or translate the latent dimensions."
+        description="The SHA-256 hash of the exact mathematical matrix used to compress or translate the latent dimensions."  # noqa: E501
     )
     isometry_preservation_score: float = Field(
         ge=0.0,
         le=1.0,
-        description="Mathematical proof (e.g., Earth Mover's Distance preservation) of how accurately relative semantic distances were maintained during projection.",
+        description="Mathematical proof (e.g., Earth Mover's Distance preservation) of how accurately relative semantic distances were maintained during projection.",  # noqa: E501
     )
 
 
@@ -1617,20 +1618,20 @@ class DynamicConvergenceSLA(CoreasonBaseModel):
 
     convergence_delta_epsilon: float = Field(
         ge=0.0,
-        description="The minimal required PRM score improvement across the lookback window to justify continued compute.",
+        description="The minimal required PRM score improvement across the lookback window to justify continued compute.",  # noqa: E501
     )
     lookback_window_steps: int = Field(
         gt=0, description="The N-step temporal window over which the PRM gradient is calculated."
     )
     minimum_reasoning_steps: int = Field(
         gt=0,
-        description="The mandatory 'burn-in' period. The orchestrator cannot terminate the search before this structural depth is reached, preventing premature collapse.",
+        description="The mandatory 'burn-in' period. The orchestrator cannot terminate the search before this structural depth is reached, preventing premature collapse.",  # noqa: E501
     )
 
 
 class EmbodiedSensoryVector(CoreasonBaseModel):
     sensory_modality: Literal["video", "audio", "spatial_telemetry"] = Field(
-        description="Multimodal Sensor Fusion and Spatial-Temporal Bindings representing Proprioceptive State and Exteroceptive Vectors."
+        description="Multimodal Sensor Fusion and Spatial-Temporal Bindings representing Proprioceptive State and Exteroceptive Vectors."  # noqa: E501
     )
     bayesian_surprise_score: float = Field(
         ge=0.0,
@@ -1651,18 +1652,18 @@ class BargeInInterruptEvent(BaseStateEvent):
         default="barge_in", description="Discriminator type for a barge-in interruption event."
     )
     target_event_id: str = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the active node generation cycle that was killed in the Merkle-DAG."
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the active node generation cycle that was killed in the Merkle-DAG."  # noqa: E501
     )
     sensory_trigger: EmbodiedSensoryVector | None = Field(
         default=None,
-        description="The continuous multimodal trigger (e.g., audio spike, user saying 'stop') that justified the interruption.",
+        description="The continuous multimodal trigger (e.g., audio spike, user saying 'stop') that justified the interruption.",  # noqa: E501
     )
     retained_partial_payload: dict[str, Any] | str | None = Field(
         default=None,
         description="The 'stutter' state: the incomplete fragment of thought or text appended before the kill signal.",
     )
     epistemic_disposition: Literal["discard", "retain_as_context", "mark_as_falsified"] = Field(
-        description="Explicit instruction to the orchestrator on how to patch the shared memory blackboard with the partial payload."
+        description="Explicit instruction to the orchestrator on how to patch the shared memory blackboard with the partial payload."  # noqa: E501
     )
 
 
@@ -1693,7 +1694,7 @@ class EpistemicCompressionSLA(CoreasonBaseModel):
         description="The maximum allowed statistical flattening of the source data. Bounded between [0.0, 1.0].",
     )
     required_grounding_density: Literal["sparse", "dense", "exhaustive"] = Field(
-        description="Dictates the required granularity of the MultimodalTokenAnchor (e.g., must the model map every single entity, or just the global claim?)."
+        description="Dictates the required granularity of the MultimodalTokenAnchor (e.g., must the model map every single entity, or just the global claim?)."  # noqa: E501
     )
 
 
@@ -1749,7 +1750,7 @@ class EpistemicTransmutationTask(CoreasonBaseModel):
             "tabular_grid" in self.target_modalities or "raster_image" in self.target_modalities
         ) and self.compression_sla.required_grounding_density == "sparse":
             raise ValueError(
-                "Epistemic safety violation: Visual or tabular modalities require strict spatial tracking. 'required_grounding_density' cannot be 'sparse'."
+                "Epistemic safety violation: Visual or tabular modalities require strict spatial tracking. 'required_grounding_density' cannot be 'sparse'."  # noqa: E501
             )
         return self
 
@@ -1762,7 +1763,7 @@ class EscalationContract(CoreasonBaseModel):
     )
     max_latent_tokens_budget: int = Field(
         gt=0,
-        description="The maximum number of hidden tokens the orchestrator is authorized to buy for the internal monologue.",
+        description="The maximum number of hidden tokens the orchestrator is authorized to buy for the internal monologue.",  # noqa: E501
     )
     max_test_time_compute_ms: int = Field(
         gt=0, description="The physical time limit allowed for the scratchpad search before forcing a timeout."
@@ -1777,7 +1778,7 @@ class EscalationIntent(CoreasonBaseModel):
         description="The ID of the Data Loss Prevention (DLP) or Governance rule that blocked execution."
     )
     resolution_schema: dict[str, Any] = Field(
-        description="The strict JSON Schema requiring an explicit cryptographic sign-off or justification string to bypass the breaker."
+        description="The strict JSON Schema requiring an explicit cryptographic sign-off or justification string to bypass the breaker."  # noqa: E501
     )
     timeout_action: Literal["rollback", "proceed_default", "terminate"] = Field(
         description="The default action is usually terminate or rollback for security escalations."
@@ -1805,28 +1806,28 @@ class EvictionPolicy(CoreasonBaseModel):
     )
     protected_event_ids: list[str] = Field(
         default_factory=list,
-        description="Explicit list of Content Identifiers (CIDs) the orchestrator is mathematically forbidden from retracting.",
+        description="Explicit list of Content Identifiers (CIDs) the orchestrator is mathematically forbidden from retracting.",  # noqa: E501
     )
 
 
 class EvidentiaryWarrant(CoreasonBaseModel):
     source_event_id: str | None = Field(
         default=None,
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for a specific observation in the EpistemicLedger.",
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for a specific observation in the EpistemicLedger.",  # noqa: E501
     )
     source_semantic_node_id: str | None = Field(
         default=None,
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for a specific concept in the Semantic Knowledge Graph.",
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for a specific concept in the Semantic Knowledge Graph.",  # noqa: E501
     )
     justification: str = Field(description="The logical premise explaining why this evidence supports the claim.")
 
 
 class ArgumentClaim(CoreasonBaseModel):
     claim_id: str = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this specific logical proposition."
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this specific logical proposition."  # noqa: E501
     )
     proponent_id: str = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the agent or system that advanced this claim."
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the agent or system that advanced this claim."  # noqa: E501
     )
     text_chunk: str = Field(max_length=50000, description="The natural language representation of the proposition.")
     warrants: list[EvidentiaryWarrant] = Field(
@@ -1941,7 +1942,7 @@ class FallbackTrigger(CoreasonBaseModel):
 class FalsificationCondition(CoreasonBaseModel):
     condition_id: str = Field(
         min_length=1,
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this falsification test to the Merkle-DAG.",
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this falsification test to the Merkle-DAG.",  # noqa: E501
     )
     description: str = Field(
         description="Semantic description of what observation would prove the parent hypothesis is false."
@@ -1988,7 +1989,7 @@ class FederatedCapabilityAttestation(CoreasonBaseModel):
 class FederatedStateSnapshot(CoreasonBaseModel):
     topology_id: str | None = Field(
         default=None,
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the federated topology, if applicable.",
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the federated topology, if applicable.",  # noqa: E501
     )
 
 
@@ -2015,10 +2016,10 @@ class FormalVerificationContract(CoreasonBaseModel):
         description="The mathematical dialect and theorem prover used to compile the proof."
     )
     invariant_theorem: str = Field(
-        description="The exact mathematical assertion or safety invariant being proven (e.g., 'No data classified as CONFIDENTIAL routes externally')."
+        description="The exact mathematical assertion or safety invariant being proven (e.g., 'No data classified as CONFIDENTIAL routes externally')."  # noqa: E501
     )
     compiled_proof_hash: str = Field(
-        description="The SHA-256 fingerprint of the verified proof object that the Rust/C++ orchestrator must load and check."
+        description="The SHA-256 fingerprint of the verified proof object that the Rust/C++ orchestrator must load and check."  # noqa: E501
     )
 
 
@@ -2034,7 +2035,7 @@ class GlobalGovernance(CoreasonBaseModel):
     max_carbon_budget_gco2eq: float | None = Field(
         default=None,
         ge=0.0,
-        description="The absolute physical energy footprint allowed for this execution graph. If exceeded, the orchestrator terminates the swarm.",
+        description="The absolute physical energy footprint allowed for this execution graph. If exceeded, the orchestrator terminates the swarm.",  # noqa: E501
     )
     global_timeout_seconds: int = Field(
         ge=0, description="The absolute Time-To-Live (TTL) for the execution envelope before graceful termination."
@@ -2083,7 +2084,7 @@ class DynamicRoutingManifest(CoreasonBaseModel):
     manifest_id: str = Field(min_length=1, description="The unique Content Identifier (CID) for this routing plan.")
     artifact_profile: GlobalSemanticProfile = Field(description="The semantic profile governing this route.")
     active_subgraphs: dict[str, list[NodeID]] = Field(
-        description="Mapping of specific modalities (e.g., 'tabular_grid') to the explicit lists of worker NodeIDs authorized to execute."
+        description="Mapping of specific modalities (e.g., 'tabular_grid') to the explicit lists of worker NodeIDs authorized to execute."  # noqa: E501
     )
     bypassed_steps: list[BypassReceipt] = Field(
         default_factory=list, description="The declarative list of steps the orchestrator is mandated to skip."
@@ -2098,7 +2099,7 @@ class DynamicRoutingManifest(CoreasonBaseModel):
         for modality in self.active_subgraphs:
             if modality not in self.artifact_profile.detected_modalities:
                 raise ValueError(
-                    f"Epistemic Violation: Cannot route to subgraph '{modality}' because it is missing from detected_modalities."
+                    f"Epistemic Violation: Cannot route to subgraph '{modality}' because it is missing from detected_modalities."  # noqa: E501
                 )
         return self
 
@@ -2175,7 +2176,7 @@ class HomomorphicEncryptionProfile(CoreasonBaseModel):
         description="The specific homomorphic encryption dialect used to encode the ciphertext."
     )
     public_key_id: str = Field(
-        description="The Content Identifier (CID) of the public evaluation key the orchestrator must utilize to perform privacy-preserving geometric math on ciphertext without epistemic contamination."
+        description="The Content Identifier (CID) of the public evaluation key the orchestrator must utilize to perform privacy-preserving geometric math on ciphertext without epistemic contamination."  # noqa: E501
     )
     ciphertext_blob: str = Field(max_length=5000000, description="The base64-encoded homomorphic ciphertext.")
 
@@ -2240,7 +2241,7 @@ class InsightCard(CoreasonBaseModel):
             raise ValueError("Forbidden HTML event handler detected.")
         if re.search("<[^=\\s\\d]", v):
             raise ValueError(
-                "HTML tags are prohibited. '<' may only be used as a mathematical operator followed by a space, digit, or '='."
+                "HTML tags are prohibited. '<' may only be used as a mathematical operator followed by a space, digit, or '='."  # noqa: E501
             )
         return v
 
@@ -2284,12 +2285,12 @@ class InterventionalCausalTask(CoreasonBaseModel):
         description="The specific node $X$ in the SCM the agent is forcing to a specific state."
     )
     do_operator_state: str = Field(
-        description="The exact value or condition forced upon the intervention_variable, isolating it from its historical causes."
+        description="The exact value or condition forced upon the intervention_variable, isolating it from its historical causes."  # noqa: E501
     )
     expected_causal_information_gain: float = Field(
         ge=0.0,
         le=1.0,
-        description="The mathematical proof of entropy reduction yielded specifically by breaking the confounding back-doors.",
+        description="The mathematical proof of entropy reduction yielded specifically by breaking the confounding back-doors.",  # noqa: E501
     )
     execution_cost_budget_magnitude: int = Field(
         ge=0, description="The maximum economic expenditure authorized to run this specific causal intervention."
@@ -2343,11 +2344,11 @@ class InterventionPolicy(CoreasonBaseModel):
     )
     scope: BoundedInterventionScope | None = Field(
         default=None,
-        description="The strictly typed boundaries for what the human/oversight system is allowed to mutate during this pause.",
+        description="The strictly typed boundaries for what the human/oversight system is allowed to mutate during this pause.",  # noqa: E501
     )
     blocking: bool = Field(
         default=True,
-        description="If True, the graph execution halts until a verdict is rendered. If False, it is an async observation.",
+        description="If True, the graph execution halts until a verdict is rendered. If False, it is an async observation.",  # noqa: E501
     )
 
 
@@ -2369,7 +2370,7 @@ class BaseNode(CoreasonBaseModel):
     )
     domain_extensions: dict[str, Any] | None = Field(
         default=None,
-        description="Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks.",
+        description="Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks.",  # noqa: E501
     )
 
     @field_validator("domain_extensions", mode="before")
@@ -2408,7 +2409,7 @@ class HumanNode(BaseNode):
     type: Literal["human"] = Field(default="human", description="Discriminator for a Human node.")
     required_attestation: AttestationMechanism | None = Field(
         default=None,
-        description="AGENT INSTRUCTION: If set, the orchestrator MUST NOT resolve\n        this node without a cryptographically matching WetwareAttestationContract\n        supplied in the InterventionVerdict.",
+        description="AGENT INSTRUCTION: If set, the orchestrator MUST NOT resolve\n        this node without a cryptographically matching WetwareAttestationContract\n        supplied in the InterventionVerdict.",  # noqa: E501
     )
 
 
@@ -2440,7 +2441,7 @@ class LineageWatermark(CoreasonBaseModel):
         description="A dictionary mapping intermediate participant NodeIDs to their deterministic execution signatures."
     )
     tamper_evident_root: str = Field(
-        description="The overarching cryptographic hash (e.g., Merkle Root) proving the dataset has not been laundered or structurally modified."
+        description="The overarching cryptographic hash (e.g., Merkle Root) proving the dataset has not been laundered or structurally modified."  # noqa: E501
     )
 
 
@@ -2461,7 +2462,7 @@ class MCPCapabilityWhitelist(CoreasonBaseModel):
     )
     required_licenses: list[str] = Field(
         default_factory=list,
-        description="Explicit list of DUA/RBAC enterprise licenses mathematically required to perceive and mount this capability.",
+        description="Explicit list of DUA/RBAC enterprise licenses mathematically required to perceive and mount this capability.",  # noqa: E501
     )
 
 
@@ -2572,7 +2573,7 @@ class MCPClientBinding(CoreasonBaseModel):
     )
     allowed_mcp_tools: list[str] | None = Field(
         default=None,
-        description="An explicit whitelist of tools the agent is allowed to invoke from this server. If None, all discovered tools are allowed.",
+        description="An explicit whitelist of tools the agent is allowed to invoke from this server. If None, all discovered tools are allowed.",  # noqa: E501
     )
 
 
@@ -2619,7 +2620,7 @@ class MarketResolution(CoreasonBaseModel):
     winning_hypothesis_id: str = Field(description="The hypothesis ID that was verified.")
     falsified_hypothesis_ids: list[str] = Field(description="The hypothesis IDs that were falsified.")
     payout_distribution: dict[str, int] = Field(
-        description="The deterministic mapping of agent IDs to their earned compute budget/magnitude based on Brier scoring."
+        description="The deterministic mapping of agent IDs to their earned compute budget/magnitude based on Brier scoring."  # noqa: E501
     )
 
 
@@ -2641,7 +2642,7 @@ class MathematicalNotationExtraction(CoreasonBaseModel):
 class MechanisticAuditContract(CoreasonBaseModel):
     trigger_conditions: list[Literal["on_tool_call", "on_belief_update", "on_quarantine", "on_falsification"]] = Field(
         min_length=1,
-        description="The specific architectural events that authorize the orchestrator to halt generation and extract internal activations.",
+        description="The specific architectural events that authorize the orchestrator to halt generation and extract internal activations.",  # noqa: E501
     )
     target_layers: list[int] = Field(
         min_length=1, description="The specific transformer block indices the execution engine must read from."
@@ -2649,7 +2650,7 @@ class MechanisticAuditContract(CoreasonBaseModel):
     max_features_per_layer: int = Field(gt=0, description="The top-k features to extract, preventing memory overflow.")
     require_zk_commitments: bool = Field(
         default=True,
-        description="If True, the orchestrator MUST generate cryptographic latent state proofs alongside the activation reads.",
+        description="If True, the orchestrator MUST generate cryptographic latent state proofs alongside the activation reads.",  # noqa: E501
     )
 
 
@@ -2668,13 +2669,13 @@ class MemoryProvenance(CoreasonBaseModel):
     )
     lineage_watermark: LineageWatermark | None = Field(
         default=None,
-        description="The cryptographic, tamper-evident chain of custody tracing this memory across multiple swarm hops.",
+        description="The cryptographic, tamper-evident chain of custody tracing this memory across multiple swarm hops.",  # noqa: E501
     )
 
 
 class MigrationContract(CoreasonBaseModel):
     contract_id: str = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this structural migration mapping."
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this structural migration mapping."  # noqa: E501
     )
     source_version: str = Field(description="The exact semantic version string of the payload before migration.")
     target_version: str = Field(description="The exact semantic version string of the payload after migration.")
@@ -2683,7 +2684,7 @@ class MigrationContract(CoreasonBaseModel):
     )
     dropped_paths: list[str] = Field(
         default_factory=list,
-        description="Explicit whitelist of JSON Pointers that are safely deprecated and intentionally dropped during migration.",
+        description="Explicit whitelist of JSON Pointers that are safely deprecated and intentionally dropped during migration.",  # noqa: E501
     )
 
 
@@ -2742,7 +2743,7 @@ class NDimensionalTensorManifest(CoreasonBaseModel):
         calculated_bytes = math.prod(self.shape) * bytes_per_element
         if calculated_bytes != self.memory_footprint_bytes:
             raise ValueError(
-                f"Topological mismatch: Shape {self.shape} of {self.dtype.value} requires {calculated_bytes} bytes, but manifest declares {self.memory_footprint_bytes} bytes."
+                f"Topological mismatch: Shape {self.shape} of {self.dtype.value} requires {calculated_bytes} bytes, but manifest declares {self.memory_footprint_bytes} bytes."  # noqa: E501
             )
         return self
 
@@ -2750,14 +2751,14 @@ class NDimensionalTensorManifest(CoreasonBaseModel):
 class NeuralAuditAttestation(CoreasonBaseModel):
     audit_id: str = Field(
         min_length=1,
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",  # noqa: E501
     )
     layer_activations: dict[int, list[SaeFeatureActivation]] = Field(
         description="A mapping of specific transformer layer indices to their top-k activated SAE features."
     )
     causal_scrubbing_applied: bool = Field(
         default=False,
-        description="Cryptographic proof that the orchestrator actively resampled or ablated this circuit to verify its causal responsibility for the output.",
+        description="Cryptographic proof that the orchestrator actively resampled or ablated this circuit to verify its causal responsibility for the output.",  # noqa: E501
     )
 
 
@@ -2770,7 +2771,7 @@ class NeuroSymbolicHandoff(CoreasonBaseModel):
         description="The raw code or formal proof syntax generated by the LLM to be evaluated."
     )
     expected_proof_schema: dict[str, Any] = Field(
-        description="The strict JSON Schema the deterministic solver must use to return the verified answer to the agent."
+        description="The strict JSON Schema the deterministic solver must use to return the verified answer to the agent."  # noqa: E501
     )
     timeout_ms: int = Field(
         gt=0, description="The maximum compute time allocated to the symbolic solver before aborting."
@@ -2785,10 +2786,10 @@ class NormativeDriftEvent(BaseStateEvent):
         description="The Content Identifier (CID) of the specific ConstitutionalRule causing logical friction."
     )
     measured_semantic_drift: float = Field(
-        description="The calculated probabilistic delta showing how far the swarm's observed reality is diverging from the static rule."
+        description="The calculated probabilistic delta showing how far the swarm's observed reality is diverging from the static rule."  # noqa: E501
     )
     contradiction_proof_hash: str = Field(
-        description="A cryptographic pointer to the internal scratchpad trace (ThoughtBranch) definitively proving the rule is obsolete or causing a loop."
+        description="A cryptographic pointer to the internal scratchpad trace (ThoughtBranch) definitively proving the rule is obsolete or causing a loop."  # noqa: E501
     )
 
 
@@ -2802,7 +2803,7 @@ class ObservabilityPolicy(CoreasonBaseModel):
 class OntologicalHandshake(CoreasonBaseModel):
     handshake_id: str = Field(
         min_length=1,
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this protocol handshake to the Merkle-DAG.",
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this protocol handshake to the Merkle-DAG.",  # noqa: E501
     )
     participant_node_ids: list[str] = Field(min_length=2, description="The agents establishing semantic alignment.")
     measured_cosine_similarity: float = Field(
@@ -2867,7 +2868,7 @@ class PeftAdapterContract(CoreasonBaseModel):
     )
     adapter_rank: int = Field(
         gt=0,
-        description="The low-rank intrinsic dimension (r) of the update matrices, used by the orchestrator to calculate VRAM cost.",
+        description="The low-rank intrinsic dimension (r) of the update matrices, used by the orchestrator to calculate VRAM cost.",  # noqa: E501
     )
     target_modules: list[str] = Field(
         min_length=1, description="The explicit list of attention head modules to inject (e.g., ['q_proj', 'v_proj'])."
@@ -2902,11 +2903,11 @@ class PredictionMarketState(CoreasonBaseModel):
     )
     lmsr_b_parameter: str = Field(
         pattern="^\\d+\\.\\d+$",
-        description="The stringified decimal representing the liquidity parameter defining the market depth and max loss for the AMM.",
+        description="The stringified decimal representing the liquidity parameter defining the market depth and max loss for the AMM.",  # noqa: E501
     )
     order_book: list[HypothesisStake] = Field(description="The immutable ledger of all stakes placed by the swarm.")
     current_market_probabilities: dict[str, str] = Field(
-        description="Mapping of hypothesis IDs to their current LMSR-calculated market price (probability) as stringified decimals."
+        description="Mapping of hypothesis IDs to their current LMSR-calculated market price (probability) as stringified decimals."  # noqa: E501
     )
 
 
@@ -2920,16 +2921,16 @@ class PresentationEnvelope(CoreasonBaseModel):
 class ProcessRewardContract(CoreasonBaseModel):
     convergence_sla: DynamicConvergenceSLA | None = Field(
         default=None,
-        description="The dynamic circuit breaker that halts the search when PRM variance converges, preventing VRAM waste.",
+        description="The dynamic circuit breaker that halts the search when PRM variance converges, preventing VRAM waste.",  # noqa: E501
     )
     pruning_threshold: float = Field(
         ge=0.0,
         le=1.0,
-        description="If a ThoughtBranch's prm_score falls below this threshold, the orchestrator MUST halt its generation.",
+        description="If a ThoughtBranch's prm_score falls below this threshold, the orchestrator MUST halt its generation.",  # noqa: E501
     )
     max_backtracks_allowed: int = Field(
         ge=0,
-        description="The absolute limit on how many times the agent can start a new branch before throwing a SystemFaultEvent.",
+        description="The absolute limit on how many times the agent can start a new branch before throwing a SystemFaultEvent.",  # noqa: E501
     )
     evaluator_model_name: str | None = Field(
         default=None, description="The specific PRM model used to score the logic (e.g., 'math-prm-v2')."
@@ -3011,7 +3012,7 @@ class SemanticFirewallPolicy(CoreasonBaseModel):
     )
     forbidden_intents: list[str] = Field(
         default_factory=list,
-        description="A strict list of semantic intents (e.g., 'role_override', 'system_prompt_leak') that trigger immediate quarantine.",
+        description="A strict list of semantic intents (e.g., 'role_override', 'system_prompt_leak') that trigger immediate quarantine.",  # noqa: E501
     )
     action_on_violation: Literal["drop", "quarantine", "redact"] = Field(
         description="The deterministic action the orchestrator must take if a firewall rule is violated."
@@ -3031,7 +3032,7 @@ class InformationFlowPolicy(CoreasonBaseModel):
     )
     latent_firewalls: list[SaeLatentFirewall] = Field(
         default_factory=list,
-        description="The list of tensor-level mechanistic firewalls monitoring the forward pass for adversarial intent.",
+        description="The list of tensor-level mechanistic firewalls monitoring the forward pass for adversarial intent.",  # noqa: E501
     )
 
     @model_validator(mode="after")
@@ -3061,7 +3062,7 @@ class SimulationConvergenceSLA(CoreasonBaseModel):
 class SimulationEscrow(CoreasonBaseModel):
     locked_magnitude: int = Field(
         gt=0,
-        description="The strictly typed boundary requiring locked magnitude to prevent zero-cost griefing of the swarm.",
+        description="The strictly typed boundary requiring locked magnitude to prevent zero-cost griefing of the swarm.",  # noqa: E501
     )
 
 
@@ -3136,7 +3137,7 @@ class SpatialKinematicAction(CoreasonBaseModel):
     )
     expected_visual_concept: str | None = Field(
         default=None,
-        description="The visual anchor (e.g., 'Submit Button'). The orchestrator must verify this semantic concept exists at the target_coordinate before executing the macro, preventing blind clicks.",
+        description="The visual anchor (e.g., 'Submit Button'). The orchestrator must verify this semantic concept exists at the target_coordinate before executing the macro, preventing blind clicks.",  # noqa: E501
     )
 
 
@@ -3165,11 +3166,11 @@ class OntologicalAlignmentPolicy(CoreasonBaseModel):
         description="The absolute minimum latent vector similarity required to allow swarm communication.",
     )
     require_isometry_proof: bool = Field(
-        description="If True, the orchestrator must reject dimensional projections that fall below a safe isometry preservation score."
+        description="If True, the orchestrator must reject dimensional projections that fall below a safe isometry preservation score."  # noqa: E501
     )
     fallback_state_contract: StateContract | None = Field(
         default=None,
-        description="The rigid external JSON schema to force agents to use if their latent vector geometries are hopelessly incommensurable.",
+        description="The rigid external JSON schema to force agents to use if their latent vector geometries are hopelessly incommensurable.",  # noqa: E501
     )
 
 
@@ -3250,7 +3251,7 @@ class HypothesisGenerationEvent(BaseStateEvent):
     )
     hypothesis_id: str = Field(
         min_length=1,
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this abductive leap to the Merkle-DAG.",
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this abductive leap to the Merkle-DAG.",  # noqa: E501
     )
     premise_text: str = Field(description="The natural language explanation of the abductive theory.")
     bayesian_prior: float = Field(
@@ -3258,7 +3259,7 @@ class HypothesisGenerationEvent(BaseStateEvent):
     )
     falsification_conditions: list[FalsificationCondition] = Field(
         min_length=1,
-        description="The list of strict conditions that the orchestrator must test to attempt to disprove this premise.",
+        description="The list of strict conditions that the orchestrator must test to attempt to disprove this premise.",  # noqa: E501
     )
     status: Literal["active", "falsified", "verified"] = Field(
         default="active", description="The current validity state of this hypothesis in the EpistemicLedger."
@@ -3304,11 +3305,11 @@ class System2RemediationPrompt(CoreasonBaseModel):
         min_length=1, description="A cryptographic Lineage Watermark (CID) tracking this specific dimensional collapse."
     )
     target_node_id: NodeID = Field(
-        description="The strict W3C DID of the agent that authored the invalid state, ensuring the fault is routed back to the exact memory partition."
+        description="The strict W3C DID of the agent that authored the invalid state, ensuring the fault is routed back to the exact memory partition."  # noqa: E501
     )
     failing_pointers: list[str] = Field(
         min_length=1,
-        description="A strictly typed array of RFC 6902 JSON Pointers isolating the exact topological coordinate of the hallucination.",
+        description="A strictly typed array of RFC 6902 JSON Pointers isolating the exact topological coordinate of the hallucination.",  # noqa: E501
     )
     remediation_prompt: str = Field(
         min_length=1, description="The deterministic, non-monotonic natural-language constraint the agent must satisfy."
@@ -3389,7 +3390,7 @@ class AuctionState(CoreasonBaseModel):
     clearing_timeout: int = Field(gt=0, description="Maximum wait time for auction settlement.")
     "\n    MATHEMATICAL BOUNDARY: Must be > 0. Defines the absolute execution ceiling before forced timeout.\n    "
     minimum_tick_size: float = Field(gt=0.0, description="The smallest allowable bid increment.")
-    "\n    MATHEMATICAL BOUNDARY: Must be > 0.0. Negative or zero tick sizes will instantly trigger validation faults.\n    "
+    "\n    MATHEMATICAL BOUNDARY: Must be > 0.0. Negative or zero tick sizes will instantly trigger validation faults.\n    "  # noqa: E501
 
     @model_validator(mode="after")
     def sort_bids(self) -> Self:
@@ -3463,7 +3464,7 @@ type AnyToolchainState = Annotated[
     BrowserDOMState | TerminalBufferState,
     Field(
         discriminator="type",
-        description="A discriminated union of Causal Actuators defining strict perimeters for Exogenous Perturbations to the causal graph.",
+        description="A discriminated union of Causal Actuators defining strict perimeters for Exogenous Perturbations to the causal graph.",  # noqa: E501
     ),
 ]
 
@@ -3471,10 +3472,10 @@ type AnyToolchainState = Annotated[
 class TheoryOfMindSnapshot(CoreasonBaseModel):
     target_agent_id: str = Field(
         min_length=1,
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the agent whose mind is being modeled.",
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the agent whose mind is being modeled.",  # noqa: E501
     )
     assumed_shared_beliefs: list[str] = Field(
-        description="A list of Content Identifiers (CIDs) acting as cryptographic Lineage Watermarks that the modeling agent assumes the target already possesses."
+        description="A list of Content Identifiers (CIDs) acting as cryptographic Lineage Watermarks that the modeling agent assumes the target already possesses."  # noqa: E501
     )
     identified_knowledge_gaps: list[str] = Field(
         description="Specific topics or logical premises the target agent is assumed to be missing."
@@ -3518,11 +3519,11 @@ class TruthMaintenancePolicy(CoreasonBaseModel):
     epistemic_quarantine_threshold: float = Field(
         ge=0.0,
         le=1.0,
-        description="The minimum certainty boundary. If an event's propagated confidence drops below this threshold, it is structurally quarantined.",
+        description="The minimum certainty boundary. If an event's propagated confidence drops below this threshold, it is structurally quarantined.",  # noqa: E501
     )
     enforce_cross_agent_quarantine: bool = Field(
         default=False,
-        description="If True, the orchestrator must automatically emit global QuarantineOrders to sever infected SemanticEdges across the swarm to prevent epistemic contagion.",
+        description="If True, the orchestrator must automatically emit global QuarantineOrders to sever infected SemanticEdges across the swarm to prevent epistemic contagion.",  # noqa: E501
     )
     max_cascade_depth: int = Field(gt=0, description="The absolute recursion depth limit for state retractions.")
     max_quarantine_blast_radius: int = Field(
@@ -3557,7 +3558,7 @@ class UtilityJustificationGraph(CoreasonBaseModel):
     def _enforce_mathematical_interlocks(self) -> "UtilityJustificationGraph":
         if self.ensemble_spec is not None and self.superposition_variance_threshold == 0.0:
             raise ValueError(
-                "Topological Interlock Failed: ensemble_spec defined but variance threshold is 0.0. Mathematical certainty prohibits superposition."
+                "Topological Interlock Failed: ensemble_spec defined but variance threshold is 0.0. Mathematical certainty prohibits superposition."  # noqa: E501
             )
         for vectors in (self.optimizing_vectors, self.degrading_vectors):
             for key, val in vectors.items():
@@ -3576,7 +3577,7 @@ class VectorEmbedding(CoreasonBaseModel):
 
 class SemanticEdge(CoreasonBaseModel):
     edge_id: str = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this semantic edge to the Merkle-DAG."
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this semantic edge to the Merkle-DAG."  # noqa: E501
     )
     subject_node_id: str = Field(description="The origin SemanticNode Content Identifier (CID).")
     object_node_id: str = Field(description="The destination SemanticNode Content Identifier (CID).")
@@ -3586,7 +3587,7 @@ class SemanticEdge(CoreasonBaseModel):
     predicate: str = Field(description="The string representation of the relationship (e.g., 'WORKS_FOR').")
     embedding: VectorEmbedding | None = Field(
         default=None,
-        description="Topologically Bounded Latent Spaces used to calculate exact geometric distance and preserve structural Isometry.",
+        description="Topologically Bounded Latent Spaces used to calculate exact geometric distance and preserve structural Isometry.",  # noqa: E501
     )
     provenance: MemoryProvenance | None = Field(
         default=None,
@@ -3602,17 +3603,17 @@ class SemanticEdge(CoreasonBaseModel):
 
 class SemanticNode(CoreasonBaseModel):
     node_id: str = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this semantic node to the Merkle-DAG."
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this semantic node to the Merkle-DAG."  # noqa: E501
     )
     label: str = Field(description="The categorical label of the node (e.g., 'Person', 'Concept').")
     scope: Literal["global", "tenant", "session"] = Field(
         default="session",
-        description="The cryptographic namespace partitioning boundary. Global is public, Tenant is corporate, Session is ephemeral.",
+        description="The cryptographic namespace partitioning boundary. Global is public, Tenant is corporate, Session is ephemeral.",  # noqa: E501
     )
     text_chunk: str = Field(max_length=50000, description="The raw natural language representation of the memory.")
     embedding: VectorEmbedding | None = Field(
         default=None,
-        description="Topologically Bounded Latent Spaces used to calculate exact geometric distance and preserve structural Isometry.",
+        description="Topologically Bounded Latent Spaces used to calculate exact geometric distance and preserve structural Isometry.",  # noqa: E501
     )
     provenance: MemoryProvenance = Field(description="The cryptographic chain of custody for this memory.")
     tier: MemoryTier = Field(default="semantic", description="The cognitive tier this memory resides in.")
@@ -3624,7 +3625,7 @@ class SemanticNode(CoreasonBaseModel):
     )
     fhe_profile: HomomorphicEncryptionProfile | None = Field(
         default=None,
-        description="The cryptographic envelope enabling privacy-preserving computation directly on this node's encrypted state.",
+        description="The cryptographic envelope enabling privacy-preserving computation directly on this node's encrypted state.",  # noqa: E501
     )
 
 
@@ -3635,13 +3636,13 @@ class VerifiableCredentialPresentation(CoreasonBaseModel):
         description="The exact cryptographic standard used to encode this credential presentation."
     )
     issuer_did: NodeID = Field(
-        description="The W3C DID of the trusted authority that cryptographically signed the credential, explicitly representing the delegation of authority from a human or parent principal."
+        description="The W3C DID of the trusted authority that cryptographically signed the credential, explicitly representing the delegation of authority from a human or parent principal."  # noqa: E501
     )
     cryptographic_proof_blob: str = Field(
-        description="The base64-encoded cryptographic proof (e.g., ZK-SNARKs, zkVM receipts, or programmable trust attestations) proving the claims without revealing the private key."
+        description="The base64-encoded cryptographic proof (e.g., ZK-SNARKs, zkVM receipts, or programmable trust attestations) proving the claims without revealing the private key."  # noqa: E501
     )
     authorization_claims: dict[str, Any] = Field(
-        description="The strict, domain-agnostic JSON dictionary of strictly bounded geometric predicates that define the operational perimeter of the agent (e.g., {'clearance': 'RESTRICTED'})."
+        description="The strict, domain-agnostic JSON dictionary of strictly bounded geometric predicates that define the operational perimeter of the agent (e.g., {'clearance': 'RESTRICTED'})."  # noqa: E501
     )
 
 
@@ -3659,7 +3660,7 @@ class AgentAttestation(CoreasonBaseModel):
     )
     credential_presentations: list[VerifiableCredentialPresentation] = Field(
         default_factory=list,
-        description="The wallet of selective disclosure credentials proving the agent's identity, clearance, and budget authorization.",
+        description="The wallet of selective disclosure credentials proving the agent's identity, clearance, and budget authorization.",  # noqa: E501
     )
 
 
@@ -3671,14 +3672,14 @@ class AgentNode(BaseNode):
     type: Literal["agent"] = Field(default="agent", description="Discriminator for an Agent node.")
     logit_steganography: LogitSteganographyContract | None = Field(
         default=None,
-        description="The cryptographic contract forcing this agent to embed an undeniable provenance signature into its generative token stream.",
+        description="The cryptographic contract forcing this agent to embed an undeniable provenance signature into its generative token stream.",  # noqa: E501
     )
     compute_frontier: RoutingFrontier | None = Field(
         default=None, description="The dynamic spot-market compute requirements for this agent."
     )
     peft_adapters: list[PeftAdapterContract] = Field(
         default_factory=list,
-        description="A declarative list of ephemeral PEFT/LoRA weights required to be hot-swapped during this agent's execution.",
+        description="A declarative list of ephemeral PEFT/LoRA weights required to be hot-swapped during this agent's execution.",  # noqa: E501
     )
     agent_attestation: AgentAttestation | None = Field(
         default=None, description="The cryptographic identity passport and AI-BOM for the agent."
@@ -3688,7 +3689,7 @@ class AgentNode(BaseNode):
     )
     secure_sub_session: SecureSubSession | None = Field(
         default=None,
-        description="Declarative boundary for handling unredacted secrets within a temporarily isolated memory partition.",
+        description="Declarative boundary for handling unredacted secrets within a temporarily isolated memory partition.",  # noqa: E501
     )
     baseline_cognitive_state: CognitiveStateProfile | None = Field(
         default=None,
@@ -3711,7 +3712,7 @@ class AgentNode(BaseNode):
     )
     active_inference_policy: ActiveInferenceContract | None = Field(
         default=None,
-        description="The formal contract demanding mathematical proof of Expected Information Gain before authorizing tool execution.",
+        description="The formal contract demanding mathematical proof of Expected Information Gain before authorizing tool execution.",  # noqa: E501
     )
     analogical_policy: AnalogicalMappingTask | None = Field(
         default=None, description="The formal contract forcing the agent to execute cross-domain lateral thinking."
@@ -3726,7 +3727,7 @@ class AgentNode(BaseNode):
     )
     audit_policy: MechanisticAuditContract | None = Field(
         default=None,
-        description="The adaptive trigger policy for executing deep mechanistic interpretability brain-scans on this agent.",
+        description="The adaptive trigger policy for executing deep mechanistic interpretability brain-scans on this agent.",  # noqa: E501
     )
     anchoring_policy: AnchoringPolicy | None = Field(
         default=None,
@@ -3760,7 +3761,7 @@ class BaseTopology(CoreasonBaseModel):
     )
     information_flow: InformationFlowPolicy | None = Field(
         default=None,
-        description="The structural Data Loss Prevention (DLP) contract governing all state mutations in this topology.",
+        description="The structural Data Loss Prevention (DLP) contract governing all state mutations in this topology.",  # noqa: E501
     )
     observability: ObservabilityPolicy | None = Field(
         default=None, description="The distributed tracing rules bound to this specific execution graph."
@@ -3782,11 +3783,11 @@ class CouncilTopology(BaseTopology):
     )
     ontological_alignment: OntologicalAlignmentPolicy | None = Field(
         default=None,
-        description="The pre-flight execution gate forcing agents to mathematically align their latent semantics before participating in the topology.",
+        description="The pre-flight execution gate forcing agents to mathematically align their latent semantics before participating in the topology.",  # noqa: E501
     )
     council_escrow: EscrowPolicy | None = Field(
         default=None,
-        description="The strictly typed mathematical surface area to lock funds specifically for PBFT council execution and slashing.",
+        description="The strictly typed mathematical surface area to lock funds specifically for PBFT council execution and slashing.",  # noqa: E501
     )
 
     @model_validator(mode="after")
@@ -3897,7 +3898,7 @@ class EvaluatorOptimizerTopology(BaseTopology):
     )
     require_multimodal_grounding: bool = Field(
         default=False,
-        description="If True, the evaluator_node_id MUST mathematically mask all tokens outside the MultimodalTokenAnchor during its forward pass to execute pure adversarial Proposer-Critique validation.",
+        description="If True, the evaluator_node_id MUST mathematically mask all tokens outside the MultimodalTokenAnchor during its forward pass to execute pure adversarial Proposer-Critique validation.",  # noqa: E501
     )
 
     @model_validator(mode="after")
@@ -3946,7 +3947,7 @@ class SMPCTopology(BaseTopology):
         description="The exact cryptographic P2P protocol the nodes must use to evaluate the function."
     )
     joint_function_uri: str = Field(
-        description="The URI or hash pointing to the exact math circuit or polynomial function the ring will collaboratively compute."
+        description="The URI or hash pointing to the exact math circuit or polynomial function the ring will collaboratively compute."  # noqa: E501
     )
     participant_node_ids: list[str] = Field(
         min_length=2,
@@ -3954,7 +3955,7 @@ class SMPCTopology(BaseTopology):
     )
     ontological_alignment: OntologicalAlignmentPolicy | None = Field(
         default=None,
-        description="The pre-flight execution gate forcing agents to mathematically align their latent semantics before participating in the topology.",
+        description="The pre-flight execution gate forcing agents to mathematically align their latent semantics before participating in the topology.",  # noqa: E501
     )
 
 
@@ -4091,7 +4092,7 @@ class WorkflowEnvelope(CoreasonBaseModel):
     )
     federated_sla: BilateralSLA | None = Field(
         default=None,
-        description="The B2B Service Level Agreement contract that must be mathematically satisfied before multi-tenant graph coupling.",
+        description="The B2B Service Level Agreement contract that must be mathematically satisfied before multi-tenant graph coupling.",  # noqa: E501
     )
     pq_signature: PostQuantumSignature | None = Field(
         default=None, description="The quantum-resistant signature securing the root execution graph."
@@ -4162,11 +4163,11 @@ class WorkingMemorySnapshot(CoreasonBaseModel):
         description="The basal non-monotonic instruction set currently held in Epistemic Quarantine."
     )
     active_context: dict[str, str] = Field(
-        description="The ephemeral latent variables and environmental bindings currently active in Epistemic Quarantine."
+        description="The ephemeral latent variables and environmental bindings currently active in Epistemic Quarantine."  # noqa: E501
     )
     argumentation: ArgumentGraph | None = Field(
         default=None,
-        description="The formal graph of non-monotonic claims and defeasible attacks currently active in the swarm's working memory.",
+        description="The formal graph of non-monotonic claims and defeasible attacks currently active in the swarm's working memory.",  # noqa: E501
     )
     theory_of_mind_models: list[TheoryOfMindSnapshot] = Field(
         default_factory=list,
@@ -4187,17 +4188,17 @@ class ZeroKnowledgeProof(CoreasonBaseModel):
         description="The mathematical dialect of the cryptographic proof."
     )
     public_inputs_hash: str = Field(
-        description="The SHA-256 hash of the public inputs (e.g., prompt, Lamport clock) anchoring this proof to the specific state index."
+        description="The SHA-256 hash of the public inputs (e.g., prompt, Lamport clock) anchoring this proof to the specific state index."  # noqa: E501
     )
     verifier_key_id: str = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the public evaluation key."
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the public evaluation key."  # noqa: E501
     )
     cryptographic_blob: str = Field(
         max_length=5000000, description="The base64-encoded succinct cryptographic proof payload."
     )
     latent_state_commitments: dict[str, Annotated[str, StringConstraints(max_length=100)]] = Field(
         default_factory=dict,
-        description="Cryptographic bindings (hashes) of intermediate residual stream states to prevent activation spoofing.",
+        description="Cryptographic bindings (hashes) of intermediate residual stream states to prevent activation spoofing.",  # noqa: E501
     )
 
 
@@ -4206,7 +4207,7 @@ class BeliefUpdateEvent(BaseStateEvent):
         default="belief_update", description="Discriminator type for a Belief Assertion event."
     )
     payload: dict[str, Any] = Field(
-        description="Topologically Bounded Latent Spaces capturing the semantic representation of the agent's internal cognitive shift or synthesis that anchor statistical probability to a definitive causal event hash."
+        description="Topologically Bounded Latent Spaces capturing the semantic representation of the agent's internal cognitive shift or synthesis that anchor statistical probability to a definitive causal event hash."  # noqa: E501
     )
     source_node_id: NodeID | None = Field(
         default=None, description="The specific topological node that synthesized this belief assertion."
@@ -4221,7 +4222,7 @@ class BeliefUpdateEvent(BaseStateEvent):
     )
     zk_proof: ZeroKnowledgeProof | None = Field(
         default=None,
-        description="The mathematical attestation proving this belief synthesis was appended securely without model-downgrade fraud.",
+        description="The mathematical attestation proving this belief synthesis was appended securely without model-downgrade fraud.",  # noqa: E501
     )
     uncertainty_profile: CognitiveUncertaintyProfile | None = Field(
         default=None, description="The mathematical quantification of doubt associated with this synthesized belief."
@@ -4246,7 +4247,7 @@ class ObservationEvent(BaseStateEvent):
         default="observation", description="Discriminator type for an observation event."
     )
     payload: dict[str, Any] = Field(
-        description="Neurosymbolic Bindings of the raw, lossless semantic output appended from the environment or tool execution that anchor statistical probability to a definitive causal event hash."
+        description="Neurosymbolic Bindings of the raw, lossless semantic output appended from the environment or tool execution that anchor statistical probability to a definitive causal event hash."  # noqa: E501
     )
     source_node_id: NodeID | None = Field(
         default=None, description="The specific topological node that appended this observation."
@@ -4271,7 +4272,7 @@ class ObservationEvent(BaseStateEvent):
     )
     triggering_invocation_id: str | None = Field(
         default=None,
-        description="The Event ID of the specific ToolInvocationEvent that spawned this observation, forming a strict bipartite directed edge.",
+        description="The Event ID of the specific ToolInvocationEvent that spawned this observation, forming a strict bipartite directed edge.",  # noqa: E501
     )
 
     @field_validator("payload", mode="before")

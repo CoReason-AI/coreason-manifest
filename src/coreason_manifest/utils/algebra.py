@@ -1,7 +1,15 @@
 import hashlib
+from typing import Literal
+
 from pydantic import ValidationError
 
-from ..spec.ontology import *
+from ..spec.ontology import (
+    AnyTopology,
+    EpistemicCompressionSLA,
+    EpistemicTransmutationTask,
+    ExecutionNode,
+    System2RemediationPrompt,
+)
 
 
 def generate_correction_prompt(error: ValidationError, target_node_id: str, fault_id: str) -> System2RemediationPrompt:
@@ -17,14 +25,14 @@ def generate_correction_prompt(error: ValidationError, target_node_id: str, faul
         err_type = err.get("type", "unknown")
         if err_type == "missing":
             error_messages.append(
-                f"The required semantic boundary at '{loc_path}' is completely missing. You must project this missing dimension to satisfy the StateContract."
+                f"The required semantic boundary at '{loc_path}' is completely missing. You must project this missing dimension to satisfy the StateContract."  # noqa: E501
             )
         else:
             msg = err.get("msg", "Invalid structural payload.")
             error_messages.append(f"A structural boundary violation occurred at '{loc_path}': {msg}")
     failing_pointers = list(set(failing_pointers))
     remediation_prompt = (
-        "CRITICAL CONTRACT BREACH: Your generated state representation violates the formal ontological boundaries of the Shared Kernel. Review the following strict topological failures and correct your JSON projection:\n"
+        "CRITICAL CONTRACT BREACH: Your generated state representation violates the formal ontological boundaries of the Shared Kernel. Review the following strict topological failures and correct your JSON projection:\n"  # noqa: E501
         + "\n".join(f"- {msg}" for msg in error_messages)
     )
     return System2RemediationPrompt(

@@ -1,6 +1,7 @@
+# ruff: noqa: F405
 # Copyright (c) 2026 CoReason, Inc.. All Rights Reserved
 
-from coreason_manifest.spec.ontology import *
+from coreason_manifest.spec.ontology import *  # noqa: F403
 from coreason_manifest.utils.algebra import (
     align_semantic_manifolds,
     compute_topology_hash,
