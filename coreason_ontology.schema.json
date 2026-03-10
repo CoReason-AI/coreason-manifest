@@ -99,7 +99,7 @@
           "type": "string"
         },
         "target_condition_id": {
-          "description": "The specific FalsificationCondition being tested.",
+          "description": "The specific FalsificationContract being tested.",
           "title": "Target Condition Id",
           "type": "string"
         },
@@ -218,7 +218,7 @@
       "title": "AdjudicationReceipt",
       "type": "object"
     },
-    "AdjudicationRubric": {
+    "AdjudicationRubricProfile": {
       "additionalProperties": false,
       "description": "Rubric defining multiple criteria and passing threshold for algorithmic adjudication.",
       "properties": {
@@ -230,7 +230,7 @@
         "criteria": {
           "description": "List of criteria used in the rubric.",
           "items": {
-            "$ref": "#/$defs/GradingCriteria"
+            "$ref": "#/$defs/GradingCriterionProfile"
           },
           "title": "Criteria",
           "type": "array"
@@ -248,7 +248,7 @@
         "criteria",
         "passing_threshold"
       ],
-      "title": "AdjudicationRubric",
+      "title": "AdjudicationRubricProfile",
       "type": "object"
     },
     "AdversarialMarketTopology": {
@@ -435,7 +435,7 @@
       "title": "AgentAttestationReceipt",
       "type": "object"
     },
-    "AgentBid": {
+    "AgentBidIntent": {
       "additionalProperties": false,
       "properties": {
         "agent_id": {
@@ -475,7 +475,7 @@
         "estimated_carbon_gco2eq",
         "confidence_score"
       ],
-      "title": "AgentBid",
+      "title": "AgentBidIntent",
       "type": "object"
     },
     "AgentNode": {
@@ -1096,7 +1096,7 @@
         "bids": {
           "description": "The array of received bids.",
           "items": {
-            "$ref": "#/$defs/AgentBid"
+            "$ref": "#/$defs/AgentBidIntent"
           },
           "title": "Bids",
           "type": "array"
@@ -2032,7 +2032,7 @@
       "title": "CircuitBreakerEvent",
       "type": "object"
     },
-    "CognitiveRoutingDirective": {
+    "CognitiveRoutingContract": {
       "additionalProperties": false,
       "description": "Hardware-level contract overriding MoE routing to enforce functional/specialist paths.",
       "properties": {
@@ -2067,7 +2067,7 @@
         "dynamic_top_k",
         "routing_temperature"
       ],
-      "title": "CognitiveRoutingDirective",
+      "title": "CognitiveRoutingContract",
       "type": "object"
     },
     "CognitiveStateProfile": {
@@ -2110,7 +2110,7 @@
         "moe_routing_directive": {
           "anyOf": [
             {
-              "$ref": "#/$defs/CognitiveRoutingDirective"
+              "$ref": "#/$defs/CognitiveRoutingContract"
             },
             {
               "type": "null"
@@ -3810,7 +3810,7 @@
         "warrants": {
           "description": "The foundational premises supporting this claim.",
           "items": {
-            "$ref": "#/$defs/EvidentiaryWarrant"
+            "$ref": "#/$defs/EvidentiaryWarrantState"
           },
           "title": "Warrants",
           "type": "array"
@@ -4497,7 +4497,7 @@
       "title": "EvictionPolicy",
       "type": "object"
     },
-    "EvidentiaryWarrant": {
+    "EvidentiaryWarrantState": {
       "additionalProperties": false,
       "properties": {
         "source_event_id": {
@@ -4535,7 +4535,7 @@
       "required": [
         "justification"
       ],
-      "title": "EvidentiaryWarrant",
+      "title": "EvidentiaryWarrantState",
       "type": "object"
     },
     "EvolutionaryTopology": {
@@ -5011,7 +5011,7 @@
       "title": "FallbackSLA",
       "type": "object"
     },
-    "FalsificationCondition": {
+    "FalsificationContract": {
       "additionalProperties": false,
       "properties": {
         "condition_id": {
@@ -5049,7 +5049,7 @@
         "description",
         "falsifying_observation_signature"
       ],
-      "title": "FalsificationCondition",
+      "title": "FalsificationContract",
       "type": "object"
     },
     "FaultInjectionProfile": {
@@ -5394,7 +5394,7 @@
       "title": "GovernancePolicy",
       "type": "object"
     },
-    "GradingCriteria": {
+    "GradingCriterionProfile": {
       "additionalProperties": false,
       "description": "Defines criteria used for grading LLM behavior or output.",
       "properties": {
@@ -5420,7 +5420,7 @@
         "description",
         "weight"
       ],
-      "title": "GradingCriteria",
+      "title": "GradingCriterionProfile",
       "type": "object"
     },
     "GrammarPanel": {
@@ -5493,7 +5493,7 @@
       "title": "GrammarPanel",
       "type": "object"
     },
-    "GraphFlatteningDirective": {
+    "GraphFlatteningPolicy": {
       "additionalProperties": false,
       "properties": {
         "node_projection_mode": {
@@ -5525,10 +5525,10 @@
         "node_projection_mode",
         "edge_projection_mode"
       ],
-      "title": "GraphFlatteningDirective",
+      "title": "GraphFlatteningPolicy",
       "type": "object"
     },
-    "HTTPTransportConfig": {
+    "HTTPTransportProfile": {
       "additionalProperties": false,
       "description": "Configuration for stateless HTTP-based MCP transport.",
       "properties": {
@@ -5559,7 +5559,7 @@
       "required": [
         "uri"
       ],
-      "title": "HTTPTransportConfig",
+      "title": "HTTPTransportProfile",
       "type": "object"
     },
     "HardwareEnclaveReceipt": {
@@ -5754,7 +5754,7 @@
         "falsification_conditions": {
           "description": "The list of strict conditions that the orchestrator must test to attempt to disprove this premise.",
           "items": {
-            "$ref": "#/$defs/FalsificationCondition"
+            "$ref": "#/$defs/FalsificationContract"
           },
           "minItems": 1,
           "title": "Falsification Conditions",
@@ -6281,7 +6281,7 @@
       "title": "JSONRPCErrorResponse",
       "type": "object"
     },
-    "LakehouseMountConfig": {
+    "LakehouseMountProfile": {
       "additionalProperties": false,
       "properties": {
         "catalog_uri": {
@@ -6315,7 +6315,7 @@
         "table_format",
         "schema_evolution_mode"
       ],
-      "title": "LakehouseMountConfig",
+      "title": "LakehouseMountProfile",
       "type": "object"
     },
     "LatentScratchpadReceipt": {
@@ -6751,7 +6751,7 @@
       "title": "MCPResourceManifest",
       "type": "object"
     },
-    "MCPServerConfig": {
+    "MCPServerBindingProfile": {
       "additionalProperties": false,
       "description": "Configuration definition for connecting to an MCP Server.",
       "properties": {
@@ -6790,7 +6790,7 @@
         "server_id",
         "transport"
       ],
-      "title": "MCPServerConfig",
+      "title": "MCPServerBindingProfile",
       "type": "object"
     },
     "MCPServerManifest": {
@@ -6841,13 +6841,13 @@
     "MCPTransport": {
       "anyOf": [
         {
-          "$ref": "#/$defs/StdioTransportConfig"
+          "$ref": "#/$defs/StdioTransportProfile"
         },
         {
-          "$ref": "#/$defs/SSETransportConfig"
+          "$ref": "#/$defs/SSETransportProfile"
         },
         {
-          "$ref": "#/$defs/HTTPTransportConfig"
+          "$ref": "#/$defs/HTTPTransportProfile"
         }
       ]
     },
@@ -8170,7 +8170,7 @@
           "type": "string"
         },
         "resolution_oracle_condition_id": {
-          "description": "The specific FalsificationCondition ID whose execution will trigger the market payout.",
+          "description": "The specific FalsificationContract ID whose execution will trigger the market payout.",
           "title": "Resolution Oracle Condition Id",
           "type": "string"
         },
@@ -8677,7 +8677,7 @@
       "title": "SMPCTopology",
       "type": "object"
     },
-    "SSETransportConfig": {
+    "SSETransportProfile": {
       "additionalProperties": false,
       "description": "Configuration for remote SSE-based MCP transport.",
       "properties": {
@@ -8708,7 +8708,7 @@
       "required": [
         "uri"
       ],
-      "title": "SSETransportConfig",
+      "title": "SSETransportProfile",
       "type": "object"
     },
     "SaeFeatureActivation": {
@@ -9656,7 +9656,7 @@
       "title": "StatisticalChartExtractionState",
       "type": "object"
     },
-    "StdioTransportConfig": {
+    "StdioTransportProfile": {
       "additionalProperties": false,
       "description": "Configuration for local Stdio-based MCP transport.",
       "properties": {
@@ -9692,7 +9692,7 @@
       "required": [
         "command"
       ],
-      "title": "StdioTransportConfig",
+      "title": "StdioTransportProfile",
       "type": "object"
     },
     "SteadyStateHypothesis": {
