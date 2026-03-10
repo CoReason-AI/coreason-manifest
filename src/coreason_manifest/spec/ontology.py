@@ -2753,9 +2753,11 @@ class MacroGridProfile(CoreasonBaseModel):
     """A layout matrix containing a list of panels."""
 
     layout_matrix: list[list[str]] = Field(description="A matrix defining the layout structure, using panel IDs.")
+    # Note: layout_matrix is a structurally ordered sequence (2D Visual Grammar) and MUST NOT be sorted.
     panels: list[AnyPanel] = Field(
         description="The ordered array of topological UI panels physically rendered in the grid.",
     )
+    # Note: panels is a structurally ordered sequence (2D Visual Grammar) and MUST NOT be sorted.
 
     @model_validator(mode="after")
     def verify_referential_integrity(self) -> Self:
@@ -3426,6 +3428,11 @@ class StatisticalChartExtractionState(CoreasonBaseModel):
                     raise ValueError(f"Data point missing required axis dimensions: {missing}")
         return self
 
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "data_series", sorted(self.data_series, key=lambda d: json.dumps(d, sort_keys=True)))
+        return self
+
 
 class StdioTransportProfile(CoreasonBaseModel):
     """Configuration for local Stdio-based MCP transport."""
@@ -3433,6 +3440,7 @@ class StdioTransportProfile(CoreasonBaseModel):
     type: Literal["stdio"] = Field(default="stdio", description="Type of transport.")
     command: str = Field(..., description="The command executable to run (e.g., 'node', 'python').")
     args: list[str] = Field(default_factory=list, description="List of arguments to pass to the command.")
+    # Note: args is a structurally ordered sequence (Execution Command Sequence) and MUST NOT be sorted.
     env_vars: dict[str, str] = Field(
         default_factory=dict, description="Environment variables required by the transport."
     )
@@ -4422,6 +4430,14 @@ class WorkflowManifest(CoreasonBaseModel):
     pq_signature: PostQuantumSignatureReceipt | None = Field(
         default=None, description="The quantum-resistant signature securing the root execution graph."
     )
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        if self.allowed_information_classifications is not None:
+            object.__setattr__(
+                self, "allowed_information_classifications", sorted(self.allowed_information_classifications)
+            )
+        return self
 
 
 class WetwareAttestationContract(CoreasonBaseModel):
