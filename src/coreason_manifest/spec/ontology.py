@@ -944,7 +944,7 @@ class StateDifferentialManifest(CoreasonBaseModel):
     patches: list[StateMutationIntent] = Field(
         default_factory=list, description="The exact, ordered sequence of deterministic state vector mutations."
     )
-    # Note: patches is a structurally ordered sequence (Chronological Mutations) and MUST NOT be sorted.
+    # Topological invariant: Structurally ordered sequence. MUST NOT be sorted.
 
 
 class TemporalCheckpointState(CoreasonBaseModel):
@@ -1668,7 +1668,7 @@ class DocumentLayoutManifest(CoreasonBaseModel):
         default_factory=list,
         description="Directed edges defining the topological sort (chronological flow) of the document.",
     )
-    # Note: reading_order_edges is a structurally ordered sequence (Topological Sort) and MUST NOT be sorted.
+    # Topological invariant: Structurally ordered sequence. MUST NOT be sorted.
 
     @model_validator(mode="after")
     def verify_dag_and_integrity(self) -> Self:
@@ -2756,9 +2756,11 @@ class MacroGridProfile(CoreasonBaseModel):
     """A layout matrix containing a list of panels."""
 
     layout_matrix: list[list[str]] = Field(description="A matrix defining the layout structure, using panel IDs.")
+    # Note: layout_matrix is a structurally ordered sequence (2D Visual Grammar) and MUST NOT be sorted.
     panels: list[AnyPanel] = Field(
         description="The ordered array of topological UI panels physically rendered in the grid.",
     )
+    # Note: panels is a structurally ordered sequence (2D Visual Grammar) and MUST NOT be sorted.
 
     @model_validator(mode="after")
     def verify_referential_integrity(self) -> Self:
@@ -3341,7 +3343,7 @@ class ExecutionSpanReceipt(CoreasonBaseModel):
     events: list[SpanEvent] = Field(
         default_factory=list, max_length=10000, description="Structured log records emitted during the span."
     )
-    # Note: events is a structurally ordered sequence (Temporal execution) and MUST NOT be sorted.
+    # Topological invariant: Structurally ordered sequence. MUST NOT be sorted.
 
     @model_validator(mode="after")
     def validate_temporal_bounds(self) -> Any:
@@ -3370,7 +3372,7 @@ class SpatialKinematicActionIntent(CoreasonBaseModel):
     bezier_control_points: list[SpatialCoordinateProfile] = Field(
         default_factory=list, description="Waypoints for constructing non-linear, bot-evasive movement curves."
     )
-    # Note: bezier_control_points is a structurally ordered sequence (Geometry/Time) and MUST NOT be sorted.
+    # Topological invariant: Structurally ordered sequence. MUST NOT be sorted.
     expected_visual_concept: str | None = Field(
         default=None,
         description="The visual anchor (e.g., 'Submit Button'). The orchestrator must verify this semantic concept exists at the target_coordinate before executing the macro, preventing blind clicks.",  # noqa: E501
@@ -3429,6 +3431,13 @@ class StatisticalChartExtractionState(CoreasonBaseModel):
                     raise ValueError(f"Data point missing required axis dimensions: {missing}")
         return self
 
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(
+            self, "metric_matrix", sorted(self.metric_matrix, key=lambda d: json.dumps(d, sort_keys=True))
+        )
+        return self
+
 
 class StdioTransportProfile(CoreasonBaseModel):
     """Configuration for local Stdio-based MCP transport."""
@@ -3436,6 +3445,7 @@ class StdioTransportProfile(CoreasonBaseModel):
     type: Literal["stdio"] = Field(default="stdio", description="Type of transport.")
     command: str = Field(..., description="The command executable to run (e.g., 'node', 'python').")
     args: list[str] = Field(default_factory=list, description="List of arguments to pass to the command.")
+    # Note: args is a structurally ordered sequence (Execution Command Sequence) and MUST NOT be sorted.
     env_vars: dict[str, str] = Field(
         default_factory=dict, description="Environment variables required by the transport."
     )
@@ -4457,6 +4467,14 @@ class WorkflowManifest(CoreasonBaseModel):
     pq_signature: PostQuantumSignatureReceipt | None = Field(
         default=None, description="The quantum-resistant signature securing the root execution graph."
     )
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        if self.allowed_information_classifications is not None:
+            object.__setattr__(
+                self, "allowed_information_classifications", sorted(self.allowed_information_classifications)
+            )
+        return self
 
 
 class WetwareAttestationContract(CoreasonBaseModel):

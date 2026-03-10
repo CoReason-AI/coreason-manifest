@@ -213,14 +213,18 @@ You are strictly forbidden from introducing "Active" or "Runtime" logic into thi
 * **Typing:** Strict `mypy`. Use `Pydantic` models for all data structures. Avoid `dict` or `Any` where a schema can be defined.
 
 ### **Cryptographic Determinism (The Merkle Rule)**
-* **Array Sorting:** Because `CoreasonBaseModel` enforces strict RFC 8785 canonical hashing and `frozen=True` immutability, dictionary keys are sorted automatically, but **array ordering is preserved**. To prevent Byzantine hash fractures (`TamperError`) across distributed nodes, you MUST deterministically sort all list/array fields (e.g., alphabetically or by a unique ID) inside the schemas.
-* **Implementation:** You must bypass the frozen lock by using `object.__setattr__` within a post-init validator.
-    ```python
-    @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
-        object.__setattr__(self, "my_array", sorted(self.my_array, key=lambda x: x.id))
-        return self
-    ```
+* **The Physics of RFC 8785:** Because `CoreasonBaseModel` enforces strict canonical hashing and `frozen=True` immutability, dictionary keys are sorted automatically, but **array ordering is mathematically preserved**. To prevent Byzantine hash fractures (`TamperError`) across distributed nodes, you must strictly categorize all arrays into one of two paradigms:
+* **Paradigm 1: Unordered Sets (Must Be Sorted):** If the array represents a set of capabilities, IDs, or enums, you MUST deterministically sort it (e.g., alphabetically or by a unique ID) via a post-init validator.
+    * *Implementation:* Bypass the frozen lock using `object.__setattr__`.
+      ```python
+      @model_validator(mode="after")
+      def sort_arrays(self) -> Self:
+          object.__setattr__(self, "my_array", sorted(self.my_array, key=lambda x: x.id))
+          return self
+      ```
+* **Paradigm 2: Structural Sequences (The Topological Exemption):** If the array encodes physical, temporal, or causal reality (e.g., chronological Last-Writer-Wins patches, topological DAG edges, or spatial kinematics), sorting it destroys its epistemic value. You are strictly forbidden from sorting these arrays.
+    * *Implementation:* To invoke this exemption, you MUST physically anchor the structural reality into the AST using an inline comment immediately below the field definition:
+      `# Note: <field_name> is a structurally ordered sequence (<Reason>) and MUST NOT be sorted.`
 
 ### **Logging (Passive Pattern)**
 * **Library Responsibility:** Expose a logger object (`loguru.logger`) but **DO NOT** configure it.

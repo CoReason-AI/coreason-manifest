@@ -1,0 +1,6 @@
+# The God Context
+src/coreason_manifest/spec/ontology.py @CoReason-AI/core-architects
+
+# Architectural CI Gates
+scripts/evaluate_architecture.py @CoReason-AI/core-architects
+scripts/semantic_diff.py @CoReason-AI/core-architects

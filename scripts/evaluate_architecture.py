@@ -23,7 +23,6 @@ def main() -> None:
     for line in diff_content.splitlines():
         if line.startswith("+++ "):
             filename = line[4:].strip()
-            # If it's not /dev/null, standard git diff prefix b/
             filename = filename.removeprefix("b/")
             in_py_file = filename.endswith(".py")
             continue

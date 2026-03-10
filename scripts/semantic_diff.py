@@ -40,14 +40,12 @@ def main() -> None:
 
     if "iterable_item_added" in diff:
         for path in diff["iterable_item_added"]:
-            # e.g. root['$defs']['AgentNode']['required'][1]
             if "['required']" in path:
                 print(f"Error: Backward-breaking schema change detected! A new required field was added: {path}")
                 sys.exit(1)
 
     if "dictionary_item_added" in diff:
         for path in diff["dictionary_item_added"]:
-            # e.g. root['$defs']['AgentNode']['required']
             if "['required']" in path:
                 print(f"Error: Backward-breaking schema change detected! A new required field was added: {path}")
                 sys.exit(1)
