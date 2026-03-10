@@ -26,7 +26,7 @@
           "type": "array"
         },
         "ephemeral_partitions": {
-          "description": "Hermetically sealed memory boundaries for dynamically resolved scripts and PEFT adapters.",
+          "description": "Hermetically sealed context boundaries for dynamically resolved scripts and PEFT adapters.",
           "items": {
             "$ref": "#/$defs/EphemeralNamespacePartitionState"
           },
@@ -609,7 +609,7 @@
             }
           ],
           "default": null,
-          "description": "Declarative boundary for handling unredacted secrets within a temporarily isolated memory partition."
+          "description": "Declarative boundary for handling unredacted secrets within a temporarily isolated state partition."
         },
         "baseline_cognitive_state": {
           "anyOf": [
@@ -722,7 +722,7 @@
         "symbolic_handoff_policy": {
           "anyOf": [
             {
-              "$ref": "#/$defs/NeuroSymbolicHandoff"
+              "$ref": "#/$defs/NeuroSymbolicHandoffContract"
             },
             {
               "type": "null"
@@ -888,7 +888,7 @@
         }
       ]
     },
-    "AnyPanel": {
+    "AnyPanelProfile": {
       "description": "A discriminated union of presentation UI panels.",
       "discriminator": {
         "mapping": {
@@ -1373,7 +1373,7 @@
       "title": "BaseNodeProfile",
       "type": "object"
     },
-    "BasePanel": {
+    "BasePanelProfile": {
       "additionalProperties": false,
       "description": "Base class for Scientific Visualization panels.",
       "properties": {
@@ -1386,7 +1386,7 @@
       "required": [
         "panel_id"
       ],
-      "title": "BasePanel",
+      "title": "BasePanelProfile",
       "type": "object"
     },
     "BaseStateEvent": {
@@ -1630,7 +1630,7 @@
         },
         "max_permitted_classification": {
           "$ref": "#/$defs/InformationClassification",
-          "description": "The absolute highest data sensitivity allowed to cross this federated boundary."
+          "description": "The absolute highest semantic sensitivity allowed to cross this federated boundary."
         },
         "liability_limit_magnitude": {
           "description": "The strict magnitude cap on cross-tenant economic liability.",
@@ -2901,7 +2901,7 @@
           "type": "string"
         },
         "source_node_id": {
-          "description": "The execution node that emitted the original data.",
+          "description": "The execution node that emitted the original payload.",
           "maxLength": 255,
           "title": "Source Node Id",
           "type": "string"
@@ -4046,7 +4046,7 @@
             }
           ],
           "default": null,
-          "description": "The CID of the Genesis MultimodalArtifactReceipt this memory was transmutated from.",
+          "description": "The CID of the Genesis MultimodalArtifactReceipt this semantic state was transmutated from.",
           "title": "Source Artifact Id"
         },
         "multimodal_anchor": {
@@ -4121,7 +4121,7 @@
         "affordance_projection": {
           "anyOf": [
             {
-              "$ref": "#/$defs/OntologicalSurfaceProjection"
+              "$ref": "#/$defs/OntologicalSurfaceProjectionManifest"
             },
             {
               "type": "null"
@@ -5110,7 +5110,7 @@
         },
         "target_topology_id": {
           "$ref": "#/$defs/NodeID",
-          "description": "The DID of the discovered external data lake/VPC."
+          "description": "The DID of the discovered external state matrix/VPC."
         },
         "authorized_session": {
           "$ref": "#/$defs/SecureSubSessionState",
@@ -6446,7 +6446,7 @@
           "type": "object"
         },
         "tamper_evident_root": {
-          "description": "The overarching cryptographic hash (e.g., Merkle Root) proving the dataset has not been laundered or structurally modified.",
+          "description": "The overarching cryptographic hash (e.g., Merkle Root) proving the structural payload has not been laundered or structurally modified.",
           "title": "Tamper Evident Root",
           "type": "string"
         }
@@ -6582,7 +6582,7 @@
       "title": "MCPCapabilityWhitelistPolicy",
       "type": "object"
     },
-    "MCPClientBinding": {
+    "MCPClientBindingProfile": {
       "additionalProperties": false,
       "description": "Binding configuration for a Model Context Protocol (MCP) server.",
       "properties": {
@@ -6616,7 +6616,7 @@
         "server_uri",
         "transport_type"
       ],
-      "title": "MCPClientBinding",
+      "title": "MCPClientBindingProfile",
       "type": "object"
     },
     "MCPClientIntent": {
@@ -6877,7 +6877,7 @@
         "panels": {
           "description": "The ordered array of topological UI panels physically rendered in the grid.",
           "items": {
-            "$ref": "#/$defs/AnyPanel"
+            "$ref": "#/$defs/AnyPanelProfile"
           },
           "title": "Panels",
           "type": "array"
@@ -7461,7 +7461,7 @@
       "title": "NeuralAuditAttestationReceipt",
       "type": "object"
     },
-    "NeuroSymbolicHandoff": {
+    "NeuroSymbolicHandoffContract": {
       "additionalProperties": false,
       "properties": {
         "handoff_id": {
@@ -7507,7 +7507,7 @@
         "expected_proof_schema",
         "timeout_ms"
       ],
-      "title": "NeuroSymbolicHandoff",
+      "title": "NeuroSymbolicHandoffContract",
       "type": "object"
     },
     "NodeID": {
@@ -7795,7 +7795,7 @@
       "title": "OntologicalHandshakeReceipt",
       "type": "object"
     },
-    "OntologicalSurfaceProjection": {
+    "OntologicalSurfaceProjectionManifest": {
       "additionalProperties": false,
       "description": "A mathematically bounded, declarative subgraph of all ToolManifests and\nMCPServerManifests currently valid for the agent's ProfileID.",
       "properties": {
@@ -7825,7 +7825,7 @@
       "required": [
         "projection_id"
       ],
-      "title": "OntologicalSurfaceProjection",
+      "title": "OntologicalSurfaceProjectionManifest",
       "type": "object"
     },
     "OptimizationDirection": {
@@ -8381,7 +8381,7 @@
         },
         "classification": {
           "$ref": "#/$defs/InformationClassification",
-          "description": "The category of sensitive data this rule targets."
+          "description": "The category of sensitive payload this rule targets."
         },
         "target_pattern": {
           "description": "The semantic entity type or declarative regex pattern to identify.",
@@ -8862,7 +8862,7 @@
       "description": "The mathematical mapping constraint for a channel.",
       "properties": {
         "type": {
-          "description": "The mathematical scale mapping data to pixels.",
+          "description": "The mathematical scale mapping metrics to pixels.",
           "enum": [
             "linear",
             "log",
@@ -8908,7 +8908,7 @@
     },
     "SecureSubSessionState": {
       "additionalProperties": false,
-      "description": "Declarative boundary for handling unredacted secrets within a temporarily isolated memory partition.",
+      "description": "Declarative boundary for handling unredacted secrets within a temporarily isolated state partition.",
       "properties": {
         "session_id": {
           "description": "Unique identifier for the secure session.",
@@ -9037,7 +9037,7 @@
         "temporal_bounds": {
           "anyOf": [
             {
-              "$ref": "#/$defs/TemporalBounds"
+              "$ref": "#/$defs/TemporalBoundsProfile"
             },
             {
               "type": "null"
@@ -9128,7 +9128,7 @@
           "type": "string"
         },
         "text_chunk": {
-          "description": "The raw natural language representation of the memory.",
+          "description": "The raw natural language representation of the semantic node.",
           "maxLength": 50000,
           "title": "Text Chunk",
           "type": "string"
@@ -9157,7 +9157,7 @@
         "temporal_bounds": {
           "anyOf": [
             {
-              "$ref": "#/$defs/TemporalBounds"
+              "$ref": "#/$defs/TemporalBoundsProfile"
             },
             {
               "type": "null"
@@ -9522,7 +9522,7 @@
     },
     "StateContract": {
       "additionalProperties": false,
-      "description": "A strict Cryptographic State Contract (Typed Blackboard) for multi-agent memory sharing.",
+      "description": "A strict Cryptographic State Contract (Typed Blackboard) for multi-agent state sharing.",
       "properties": {
         "schema_definition": {
           "additionalProperties": true,
@@ -10289,7 +10289,7 @@
         }
       ]
     },
-    "TemporalBounds": {
+    "TemporalBoundsProfile": {
       "additionalProperties": false,
       "properties": {
         "valid_from": {
@@ -10332,7 +10332,7 @@
           "description": "The Allen's interval algebra or causal relationship classification."
         }
       },
-      "title": "TemporalBounds",
+      "title": "TemporalBoundsProfile",
       "type": "object"
     },
     "TemporalCheckpointState": {
@@ -10853,7 +10853,7 @@
       "description": "The visual property being manipulated.",
       "properties": {
         "channel": {
-          "description": "The visual channel the data is mapped to.",
+          "description": "The visual channel the metric is mapped to.",
           "enum": [
             "x",
             "y",
@@ -10867,7 +10867,7 @@
           "type": "string"
         },
         "field": {
-          "description": "The exact column or field name from the dataset.",
+          "description": "The exact column or field name from the semantic series.",
           "title": "Field",
           "type": "string"
         },
