@@ -11,12 +11,12 @@ from hypothesis import strategies as st
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
-    AdjudicationRubric,
+    AdjudicationRubricProfile,
     BoundedInterventionScope,
     ConsensusPolicy,
     ConstitutionalPolicy,
     FallbackSLA,
-    GradingCriteria,
+    GradingCriterionProfile,
     InterventionIntent,
     PredictionMarketPolicy,
     QuorumPolicy,
@@ -29,14 +29,14 @@ from coreason_manifest.spec.ontology import (
 )
 def test_adjudication_rubric_rejects_negative_bounds(weight: float, threshold: float) -> None:
     with pytest.raises(ValidationError):
-        GradingCriteria(
+        GradingCriterionProfile(
             criterion_id="test-criterion",
             description="test description",
             weight=weight,
         )
 
     with pytest.raises(ValidationError):
-        AdjudicationRubric(
+        AdjudicationRubricProfile(
             rubric_id="test-rubric",
             criteria=[],
             passing_threshold=threshold,

@@ -12,7 +12,7 @@ from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
     ActivationSteeringContract,
-    CognitiveRoutingDirective,
+    CognitiveRoutingContract,
     CognitiveStateProfile,
     CognitiveUncertaintyProfile,
 )
@@ -51,8 +51,8 @@ def draw_activation_steering_contract(draw: st.DrawFn) -> ActivationSteeringCont
 
 
 @st.composite
-def draw_cognitive_routing_directive(draw: st.DrawFn) -> CognitiveRoutingDirective:
-    return CognitiveRoutingDirective(
+def draw_cognitive_routing_directive(draw: st.DrawFn) -> CognitiveRoutingContract:
+    return CognitiveRoutingContract(
         dynamic_top_k=draw(st.integers(min_value=1)),
         routing_temperature=draw(st.floats(min_value=0.0, allow_nan=False, allow_infinity=False)),
         expert_logit_biases=draw(st.dictionaries(st.text(), st.floats(allow_nan=False, allow_infinity=False))),
@@ -72,7 +72,7 @@ def test_cognitive_state_profile_fuzzing(
     caution_index: float,
     divergence_tolerance: float,
     activation_steering: ActivationSteeringContract | None,
-    moe_routing_directive: CognitiveRoutingDirective | None,
+    moe_routing_directive: CognitiveRoutingContract | None,
 ) -> None:
     profile = CognitiveStateProfile(
         urgency_index=urgency_index,
