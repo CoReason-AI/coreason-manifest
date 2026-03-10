@@ -2666,6 +2666,11 @@ class MCPResourceList(CoreasonBaseModel):
     server_id: str = Field(..., description="The ID of the MCP server providing these resources.")
     uris: list[str] = Field(default_factory=list, description="List of resource URIs available to the agent.")
 
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "uris", sorted(self.uris))
+        return self
+
 
 type MCPTransportType = Literal["stdio", "sse", "http"]
 
@@ -3474,6 +3479,11 @@ class System1Reflex(CoreasonBaseModel):
         ge=0.0, le=1.0, description="The confidence threshold required to execute a reflex action."
     )
     allowed_read_only_tools: list[str] = Field(description="List of read-only tools allowed during a reflex action.")
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "allowed_read_only_tools", sorted(self.allowed_read_only_tools))
+        return self
 
 
 class System2RemediationPrompt(CoreasonBaseModel):
