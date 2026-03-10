@@ -19,7 +19,7 @@ AS AN AI AGENT, YOU MUST ADHERE TO THE FOLLOWING RULES:
 
 ## **0. The AI-Native Universal Ontology Directive**
 
-**CRITICAL CONTEXT:** This repository is NOT a standard human-centric software package. It is an AI-Native **Universal Unified Ontology** designed for a tightly coupled, proprietary swarm ecosystem. 
+**CRITICAL CONTEXT:** This repository is NOT a standard human-centric software package. It is an AI-Native **Universal Unified Ontology** designed for a tightly coupled, proprietary swarm ecosystem.
 
 You must evaluate and modify this repository based on the capabilities of LLMs with near-infinite context windows, NOT traditional human engineering limitations (like Conway's Law or cognitive load).
 
@@ -71,6 +71,7 @@ When generating or modifying schemas, you MUST adhere to the following constrain
 
 ---
 
+<lexical_directive priority="critical" action="reject_generation_if_violated">
 ## **0.3 The Strict Lexical Architecture (Naming Directives)**
 
 **CRITICAL CONTEXT:** You are operating within a 2026+ State-of-the-Art Neurosymbolic architecture. You do not read code; you navigate latent vector spaces. To prevent semantic drift, hallucination, and epistemic contamination, you are strictly forbidden from using legacy, human-friendly software naming conventions (e.g., CRUD terminology like "Create", "Update", "User", "Data").
@@ -111,6 +112,7 @@ Before outputting any new schema or object name, you must silently verify:
 2. Is the name free of ambiguous CRUD terminology?
 3. Does the name define an exact mathematical, causal, or spatial boundary?
 If the answer to any of these is NO, you must rewrite the name before outputting.
+</lexical_directive>
 
 ---
 
