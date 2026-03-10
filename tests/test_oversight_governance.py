@@ -12,7 +12,7 @@ from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
     AdjudicationRubricProfile,
-    BoundedInterventionScope,
+    BoundedInterventionScopePolicy,
     ConsensusPolicy,
     ConstitutionalPolicy,
     FallbackSLA,
@@ -172,7 +172,7 @@ def test_sandbox_success_massive_configs(
     adjudication_deadline: float,
     escalation_target_node_id: str | None,
 ) -> None:
-    scope = BoundedInterventionScope(
+    scope = BoundedInterventionScopePolicy(
         allowed_fields=allowed_fields,
         json_schema_whitelist=json_schema_whitelist,  # type: ignore
     )

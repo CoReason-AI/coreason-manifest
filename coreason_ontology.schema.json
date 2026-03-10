@@ -28,7 +28,7 @@
         "ephemeral_partitions": {
           "description": "Hermetically sealed memory boundaries for dynamically resolved scripts and PEFT adapters.",
           "items": {
-            "$ref": "#/$defs/EphemeralNamespacePartition"
+            "$ref": "#/$defs/EphemeralNamespacePartitionState"
           },
           "title": "Ephemeral Partitions",
           "type": "array"
@@ -557,7 +557,7 @@
         "compute_frontier": {
           "anyOf": [
             {
-              "$ref": "#/$defs/RoutingFrontier"
+              "$ref": "#/$defs/RoutingFrontierPolicy"
             },
             {
               "type": "null"
@@ -1545,7 +1545,7 @@
         "causal_attributions": {
           "description": "Immutable audit trail of prior states that forced this specific cognitive synthesis.",
           "items": {
-            "$ref": "#/$defs/CausalAttribution"
+            "$ref": "#/$defs/CausalAttributionState"
           },
           "title": "Causal Attributions",
           "type": "array"
@@ -1601,7 +1601,7 @@
         "neural_audit": {
           "anyOf": [
             {
-              "$ref": "#/$defs/NeuralAuditAttestation"
+              "$ref": "#/$defs/NeuralAuditAttestationReceipt"
             },
             {
               "type": "null"
@@ -1663,7 +1663,7 @@
         "pq_signature": {
           "anyOf": [
             {
-              "$ref": "#/$defs/PostQuantumSignature"
+              "$ref": "#/$defs/PostQuantumSignatureReceipt"
             },
             {
               "type": "null"
@@ -1681,7 +1681,7 @@
       "title": "BilateralSLA",
       "type": "object"
     },
-    "BoundedInterventionScope": {
+    "BoundedInterventionScopePolicy": {
       "additionalProperties": false,
       "description": "Constraints bounding human interaction for interventions.",
       "properties": {
@@ -1730,7 +1730,7 @@
         "allowed_fields",
         "json_schema_whitelist"
       ],
-      "title": "BoundedInterventionScope",
+      "title": "BoundedInterventionScopePolicy",
       "type": "object"
     },
     "BoundedJSONRPCIntent": {
@@ -1890,7 +1890,7 @@
       "title": "BypassReceipt",
       "type": "object"
     },
-    "CausalAttribution": {
+    "CausalAttributionState": {
       "additionalProperties": false,
       "properties": {
         "source_event_id": {
@@ -1910,10 +1910,10 @@
         "source_event_id",
         "influence_weight"
       ],
-      "title": "CausalAttribution",
+      "title": "CausalAttributionState",
       "type": "object"
     },
-    "CausalDirectedEdge": {
+    "CausalDirectedEdgeState": {
       "additionalProperties": false,
       "properties": {
         "source_variable": {
@@ -1945,7 +1945,7 @@
         "target_variable",
         "edge_type"
       ],
-      "title": "CausalDirectedEdge",
+      "title": "CausalDirectedEdgeState",
       "type": "object"
     },
     "CausalInterval": {
@@ -2832,7 +2832,7 @@
         "verifiable_entropy": {
           "anyOf": [
             {
-              "$ref": "#/$defs/VerifiableEntropy"
+              "$ref": "#/$defs/VerifiableEntropyReceipt"
             },
             {
               "type": "null"
@@ -3101,7 +3101,7 @@
       "title": "DAGTopology",
       "type": "object"
     },
-    "DefeasibleAttack": {
+    "DefeasibleAttackEvent": {
       "additionalProperties": false,
       "properties": {
         "attack_id": {
@@ -3130,10 +3130,10 @@
         "target_claim_id",
         "attack_vector"
       ],
-      "title": "DefeasibleAttack",
+      "title": "DefeasibleAttackEvent",
       "type": "object"
     },
-    "DefeasibleCascade": {
+    "DefeasibleCascadeEvent": {
       "additionalProperties": false,
       "properties": {
         "cascade_id": {
@@ -3176,7 +3176,7 @@
         "propagated_decay_factor",
         "quarantined_event_ids"
       ],
-      "title": "DefeasibleCascade",
+      "title": "DefeasibleCascadeEvent",
       "type": "object"
     },
     "DigitalTwinTopology": {
@@ -3499,7 +3499,7 @@
           "type": "string"
         },
         "anchor": {
-          "$ref": "#/$defs/MultimodalTokenAnchor",
+          "$ref": "#/$defs/MultimodalTokenAnchorState",
           "description": "The strict visual and token coordinate bindings for this block."
         }
       },
@@ -3724,7 +3724,7 @@
       "title": "EnsembleTopologySpec",
       "type": "object"
     },
-    "EphemeralNamespacePartition": {
+    "EphemeralNamespacePartitionState": {
       "additionalProperties": false,
       "description": "A hermetically sealed, ephemeral execution partition for dynamic dependency resolution.",
       "properties": {
@@ -3785,7 +3785,7 @@
         "max_ttl_seconds",
         "max_vram_mb"
       ],
-      "title": "EphemeralNamespacePartition",
+      "title": "EphemeralNamespacePartitionState",
       "type": "object"
     },
     "EpistemicArgumentClaimState": {
@@ -3839,7 +3839,7 @@
         },
         "attacks": {
           "additionalProperties": {
-            "$ref": "#/$defs/DefeasibleAttack"
+            "$ref": "#/$defs/DefeasibleAttackEvent"
           },
           "description": "Geometric matrices of undercutting defeaters.",
           "maxProperties": 10000,
@@ -3858,7 +3858,7 @@
       "properties": {
         "strict_probability_retention": {
           "default": true,
-          "description": "If True, forces the resulting SemanticNode to populate its uncertainty_profile.",
+          "description": "If True, forces the resulting SemanticNodeState to populate its uncertainty_profile.",
           "title": "Strict Probability Retention",
           "type": "boolean"
         },
@@ -3870,7 +3870,7 @@
           "type": "number"
         },
         "required_grounding_density": {
-          "description": "Dictates the required granularity of the MultimodalTokenAnchor (e.g., must the model map every single entity, or just the global claim?).",
+          "description": "Dictates the required granularity of the MultimodalTokenAnchorState (e.g., must the model map every single entity, or just the global claim?).",
           "enum": [
             "sparse",
             "dense",
@@ -3951,7 +3951,7 @@
         "active_cascades": {
           "description": "The active state-differential payload muting specific causal subgraphs due to falsification.",
           "items": {
-            "$ref": "#/$defs/DefeasibleCascade"
+            "$ref": "#/$defs/DefeasibleCascadeEvent"
           },
           "title": "Active Cascades",
           "type": "array"
@@ -4024,7 +4024,7 @@
       "title": "EpistemicPromotionEvent",
       "type": "object"
     },
-    "EpistemicProvenance": {
+    "EpistemicProvenanceReceipt": {
       "additionalProperties": false,
       "properties": {
         "extracted_by": {
@@ -4052,7 +4052,7 @@
         "multimodal_anchor": {
           "anyOf": [
             {
-              "$ref": "#/$defs/MultimodalTokenAnchor"
+              "$ref": "#/$defs/MultimodalTokenAnchorState"
             },
             {
               "type": "null"
@@ -4078,7 +4078,7 @@
         "extracted_by",
         "source_event_id"
       ],
-      "title": "EpistemicProvenance",
+      "title": "EpistemicProvenanceReceipt",
       "type": "object"
     },
     "EpistemicQuarantineSnapshot": {
@@ -4133,7 +4133,7 @@
         "capability_attestations": {
           "description": "Immutable cryptographic receipts of dynamically discovered external enterprise connectors.",
           "items": {
-            "$ref": "#/$defs/FederatedCapabilityAttestation"
+            "$ref": "#/$defs/FederatedCapabilityAttestationReceipt"
           },
           "title": "Capability Attestations",
           "type": "array"
@@ -4448,7 +4448,7 @@
         },
         "require_multimodal_grounding": {
           "default": false,
-          "description": "If True, the evaluator_node_id MUST mathematically mask all tokens outside the MultimodalTokenAnchor during its forward pass to execute pure adversarial Proposer-Critique validation.",
+          "description": "If True, the evaluator_node_id MUST mathematically mask all tokens outside the MultimodalTokenAnchorState during its forward pass to execute pure adversarial Proposer-Critique validation.",
           "title": "Require Multimodal Grounding",
           "type": "boolean"
         }
@@ -5098,7 +5098,7 @@
       ],
       "type": "string"
     },
-    "FederatedCapabilityAttestation": {
+    "FederatedCapabilityAttestationReceipt": {
       "additionalProperties": false,
       "description": "An immutable cryptographic receipt proving an agent has the structural authority\nto query a remote resource.",
       "properties": {
@@ -5127,7 +5127,7 @@
         "authorized_session",
         "governing_sla"
       ],
-      "title": "FederatedCapabilityAttestation",
+      "title": "FederatedCapabilityAttestationReceipt",
       "type": "object"
     },
     "FederatedDiscoveryManifest": {
@@ -5497,7 +5497,7 @@
       "additionalProperties": false,
       "properties": {
         "node_projection_mode": {
-          "description": "How to flatten SemanticNode.",
+          "description": "How to flatten SemanticNodeState.",
           "enum": [
             "wide_columnar",
             "struct_array"
@@ -5506,7 +5506,7 @@
           "type": "string"
         },
         "edge_projection_mode": {
-          "description": "How to flatten SemanticEdge.",
+          "description": "How to flatten SemanticEdgeState.",
           "enum": [
             "adjacency_list",
             "map_array"
@@ -5516,7 +5516,7 @@
         },
         "preserve_cryptographic_lineage": {
           "default": true,
-          "description": "Forces the inclusion of MultimodalTokenAnchor hashes in the flattened row.",
+          "description": "Forces the inclusion of MultimodalTokenAnchorState hashes in the flattened row.",
           "title": "Preserve Cryptographic Lineage",
           "type": "boolean"
         }
@@ -5774,7 +5774,7 @@
         "causal_model": {
           "anyOf": [
             {
-              "$ref": "#/$defs/StructuralCausalModel"
+              "$ref": "#/$defs/StructuralCausalModelProfile"
             },
             {
               "type": "null"
@@ -5999,7 +5999,7 @@
         "intervention_scope": {
           "anyOf": [
             {
-              "$ref": "#/$defs/BoundedInterventionScope"
+              "$ref": "#/$defs/BoundedInterventionScopePolicy"
             },
             {
               "type": "null"
@@ -6079,7 +6079,7 @@
         "scope": {
           "anyOf": [
             {
-              "$ref": "#/$defs/BoundedInterventionScope"
+              "$ref": "#/$defs/BoundedInterventionScopePolicy"
             },
             {
               "type": "null"
@@ -6982,7 +6982,7 @@
           "type": "string"
         },
         "anchor": {
-          "$ref": "#/$defs/MultimodalTokenAnchor",
+          "$ref": "#/$defs/MultimodalTokenAnchorState",
           "description": "The strict visual and token coordinate bindings. Cannot be None."
         }
       },
@@ -7254,7 +7254,7 @@
       "title": "MultimodalArtifactReceipt",
       "type": "object"
     },
-    "MultimodalTokenAnchor": {
+    "MultimodalTokenAnchorState": {
       "additionalProperties": false,
       "description": "AGENT INSTRUCTION: Unified multimodal grounding mapping extracted facts to strict 1D token spans and 2D visual\npatches.",
       "properties": {
@@ -7345,7 +7345,7 @@
           "title": "Block Type"
         }
       },
-      "title": "MultimodalTokenAnchor",
+      "title": "MultimodalTokenAnchorState",
       "type": "object"
     },
     "MutationPolicy": {
@@ -7367,7 +7367,7 @@
         "verifiable_entropy": {
           "anyOf": [
             {
-              "$ref": "#/$defs/VerifiableEntropy"
+              "$ref": "#/$defs/VerifiableEntropyReceipt"
             },
             {
               "type": "null"
@@ -7427,7 +7427,7 @@
       "title": "NDimensionalTensorManifest",
       "type": "object"
     },
-    "NeuralAuditAttestation": {
+    "NeuralAuditAttestationReceipt": {
       "additionalProperties": false,
       "properties": {
         "audit_id": {
@@ -7439,7 +7439,7 @@
         "layer_activations": {
           "additionalProperties": {
             "items": {
-              "$ref": "#/$defs/SaeFeatureActivation"
+              "$ref": "#/$defs/SaeFeatureActivationState"
             },
             "type": "array"
           },
@@ -7458,7 +7458,7 @@
         "audit_id",
         "layer_activations"
       ],
-      "title": "NeuralAuditAttestation",
+      "title": "NeuralAuditAttestationReceipt",
       "type": "object"
     },
     "NeuroSymbolicHandoff": {
@@ -7670,7 +7670,7 @@
         "neural_audit": {
           "anyOf": [
             {
-              "$ref": "#/$defs/NeuralAuditAttestation"
+              "$ref": "#/$defs/NeuralAuditAttestationReceipt"
             },
             {
               "type": "null"
@@ -7988,7 +7988,7 @@
       "title": "PeftAdapterContract",
       "type": "object"
     },
-    "PermissionBoundary": {
+    "PermissionBoundaryPolicy": {
       "additionalProperties": false,
       "description": "Zero-trust security boundaries for tool execution.",
       "properties": {
@@ -8039,7 +8039,7 @@
         "network_access",
         "file_system_read_only"
       ],
-      "title": "PermissionBoundary",
+      "title": "PermissionBoundaryPolicy",
       "type": "object"
     },
     "PersistenceCommitReceipt": {
@@ -8069,7 +8069,7 @@
           "type": "string"
         },
         "committed_state_diff_id": {
-          "description": "The internal StateDifferential CID that was flushed.",
+          "description": "The internal StateDifferentialManifest CID that was flushed.",
           "minLength": 1,
           "title": "Committed State Diff Id",
           "type": "string"
@@ -8091,7 +8091,7 @@
       "title": "PersistenceCommitReceipt",
       "type": "object"
     },
-    "PostQuantumSignature": {
+    "PostQuantumSignatureReceipt": {
       "additionalProperties": false,
       "properties": {
         "pq_algorithm": {
@@ -8121,7 +8121,7 @@
         "public_key_id",
         "pq_signature_blob"
       ],
-      "title": "PostQuantumSignature",
+      "title": "PostQuantumSignatureReceipt",
       "type": "object"
     },
     "PredictionMarketPolicy": {
@@ -8478,7 +8478,7 @@
       "title": "RollbackIntent",
       "type": "object"
     },
-    "RoutingFrontier": {
+    "RoutingFrontierPolicy": {
       "additionalProperties": false,
       "description": "Mathematical Pareto boundaries for dynamic spot-market liquid compute.",
       "properties": {
@@ -8534,7 +8534,7 @@
         "min_capability_score",
         "tradeoff_preference"
       ],
-      "title": "RoutingFrontier",
+      "title": "RoutingFrontierPolicy",
       "type": "object"
     },
     "SMPCTopology": {
@@ -8711,7 +8711,7 @@
       "title": "SSETransportProfile",
       "type": "object"
     },
-    "SaeFeatureActivation": {
+    "SaeFeatureActivationState": {
       "additionalProperties": false,
       "properties": {
         "feature_index": {
@@ -8743,7 +8743,7 @@
         "feature_index",
         "activation_magnitude"
       ],
-      "title": "SaeFeatureActivation",
+      "title": "SaeFeatureActivationState",
       "type": "object"
     },
     "SaeLatentPolicy": {
@@ -8972,7 +8972,7 @@
       "title": "SelfCorrectionPolicy",
       "type": "object"
     },
-    "SemanticEdge": {
+    "SemanticEdgeState": {
       "additionalProperties": false,
       "properties": {
         "edge_id": {
@@ -8981,12 +8981,12 @@
           "type": "string"
         },
         "subject_node_id": {
-          "description": "The origin SemanticNode Content Identifier (CID).",
+          "description": "The origin SemanticNodeState Content Identifier (CID).",
           "title": "Subject Node Id",
           "type": "string"
         },
         "object_node_id": {
-          "description": "The destination SemanticNode Content Identifier (CID).",
+          "description": "The destination SemanticNodeState Content Identifier (CID).",
           "title": "Object Node Id",
           "type": "string"
         },
@@ -9013,7 +9013,7 @@
         "embedding": {
           "anyOf": [
             {
-              "$ref": "#/$defs/VectorEmbedding"
+              "$ref": "#/$defs/VectorEmbeddingState"
             },
             {
               "type": "null"
@@ -9025,7 +9025,7 @@
         "provenance": {
           "anyOf": [
             {
-              "$ref": "#/$defs/EpistemicProvenance"
+              "$ref": "#/$defs/EpistemicProvenanceReceipt"
             },
             {
               "type": "null"
@@ -9065,7 +9065,7 @@
         "object_node_id",
         "predicate"
       ],
-      "title": "SemanticEdge",
+      "title": "SemanticEdgeState",
       "type": "object"
     },
     "SemanticFirewallPolicy": {
@@ -9103,7 +9103,7 @@
       "title": "SemanticFirewallPolicy",
       "type": "object"
     },
-    "SemanticNode": {
+    "SemanticNodeState": {
       "additionalProperties": false,
       "properties": {
         "node_id": {
@@ -9136,7 +9136,7 @@
         "embedding": {
           "anyOf": [
             {
-              "$ref": "#/$defs/VectorEmbedding"
+              "$ref": "#/$defs/VectorEmbeddingState"
             },
             {
               "type": "null"
@@ -9146,7 +9146,7 @@
           "description": "Topologically Bounded Latent Spaces used to calculate exact geometric distance and preserve structural Isometry."
         },
         "provenance": {
-          "$ref": "#/$defs/EpistemicProvenance",
+          "$ref": "#/$defs/EpistemicProvenanceReceipt",
           "description": "The cryptographic chain of custody for this memory."
         },
         "tier": {
@@ -9197,7 +9197,7 @@
         "text_chunk",
         "provenance"
       ],
-      "title": "SemanticNode",
+      "title": "SemanticNodeState",
       "type": "object"
     },
     "SemanticVersion": {
@@ -9543,7 +9543,7 @@
       "title": "StateContract",
       "type": "object"
     },
-    "StateDifferential": {
+    "StateDifferentialManifest": {
       "additionalProperties": false,
       "properties": {
         "diff_id": {
@@ -9573,7 +9573,7 @@
         "patches": {
           "description": "The exact, ordered sequence of deterministic state vector mutations.",
           "items": {
-            "$ref": "#/$defs/StateMutation"
+            "$ref": "#/$defs/StateMutationIntent"
           },
           "title": "Patches",
           "type": "array"
@@ -9585,10 +9585,10 @@
         "lamport_timestamp",
         "vector_clock"
       ],
-      "title": "StateDifferential",
+      "title": "StateDifferentialManifest",
       "type": "object"
     },
-    "StateMutation": {
+    "StateMutationIntent": {
       "additionalProperties": false,
       "properties": {
         "op": {
@@ -9616,7 +9616,7 @@
         "op",
         "path"
       ],
-      "title": "StateMutation",
+      "title": "StateMutationIntent",
       "type": "object"
     },
     "StatisticalChartExtractionState": {
@@ -9733,7 +9733,7 @@
       "title": "SteadyStateHypothesis",
       "type": "object"
     },
-    "StructuralCausalModel": {
+    "StructuralCausalModelProfile": {
       "additionalProperties": false,
       "properties": {
         "observed_variables": {
@@ -9755,7 +9755,7 @@
         "causal_edges": {
           "description": "The declared topological mapping of causality.",
           "items": {
-            "$ref": "#/$defs/CausalDirectedEdge"
+            "$ref": "#/$defs/CausalDirectedEdgeState"
           },
           "title": "Causal Edges",
           "type": "array"
@@ -9766,7 +9766,7 @@
         "latent_variables",
         "causal_edges"
       ],
-      "title": "StructuralCausalModel",
+      "title": "StructuralCausalModelProfile",
       "type": "object"
     },
     "SuspenseState": {
@@ -10147,7 +10147,7 @@
           "type": "string"
         },
         "anchor": {
-          "$ref": "#/$defs/MultimodalTokenAnchor",
+          "$ref": "#/$defs/MultimodalTokenAnchorState",
           "description": "The physical location of the cell within the image or document."
         }
       },
@@ -10598,7 +10598,7 @@
           "description": "The declarative side-effect and idempotency profile of the tool."
         },
         "permissions": {
-          "$ref": "#/$defs/PermissionBoundary",
+          "$ref": "#/$defs/PermissionBoundaryPolicy",
           "description": "The zero-trust security boundaries for the tool's execution."
         },
         "sla": {
@@ -10748,7 +10748,7 @@
       "title": "UtilityJustificationGraph",
       "type": "object"
     },
-    "VectorEmbedding": {
+    "VectorEmbeddingState": {
       "additionalProperties": false,
       "properties": {
         "vector_base64": {
@@ -10774,7 +10774,7 @@
         "dimensionality",
         "model_name"
       ],
-      "title": "VectorEmbedding",
+      "title": "VectorEmbeddingState",
       "type": "object"
     },
     "VerifiableCredentialPresentation": {
@@ -10817,7 +10817,7 @@
       "title": "VerifiableCredentialPresentation",
       "type": "object"
     },
-    "VerifiableEntropy": {
+    "VerifiableEntropyReceipt": {
       "additionalProperties": false,
       "description": "Passive cryptographic envelope for verifiable random functions.",
       "properties": {
@@ -10845,7 +10845,7 @@
         "public_key",
         "seed_hash"
       ],
-      "title": "VerifiableEntropy",
+      "title": "VerifiableEntropyReceipt",
       "type": "object"
     },
     "VisualEncodingProfile": {
@@ -11034,7 +11034,7 @@
         "pq_signature": {
           "anyOf": [
             {
-              "$ref": "#/$defs/PostQuantumSignature"
+              "$ref": "#/$defs/PostQuantumSignatureReceipt"
             },
             {
               "type": "null"

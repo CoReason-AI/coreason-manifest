@@ -8,12 +8,12 @@
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.spec.ontology import EphemeralNamespacePartition
+from coreason_manifest.spec.ontology import EphemeralNamespacePartitionState
 
 
 def test_ephemeral_partition_temporal_override_proof() -> None:
     with pytest.raises(ValidationError, match="Input should be greater than 0"):
-        EphemeralNamespacePartition(
+        EphemeralNamespacePartitionState(
             partition_id="part-1",
             execution_runtime="wasm32-wasi",
             authorized_bytecode_hashes=["a" * 64],
@@ -24,7 +24,7 @@ def test_ephemeral_partition_temporal_override_proof() -> None:
 
 def test_ephemeral_partition_supply_chain_proof() -> None:
     with pytest.raises(ValidationError, match="Invalid SHA-256 hash in whitelist"):
-        EphemeralNamespacePartition(
+        EphemeralNamespacePartitionState(
             partition_id="part-1",
             execution_runtime="wasm32-wasi",
             authorized_bytecode_hashes=["a" * 64, "invalid-hash-string"],  # INVALID

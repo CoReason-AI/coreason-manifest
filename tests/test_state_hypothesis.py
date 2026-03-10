@@ -10,10 +10,10 @@ from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
     ActiveInferenceContract,
-    CausalDirectedEdge,
+    CausalDirectedEdgeState,
     FalsificationContract,
     HypothesisGenerationEvent,
-    StructuralCausalModel,
+    StructuralCausalModelProfile,
 )
 
 
@@ -43,12 +43,12 @@ def test_hypothesis_generation_event_valid() -> None:
 
 
 def test_hypothesis_causal_model() -> None:
-    causal_edge = CausalDirectedEdge(
+    causal_edge = CausalDirectedEdgeState(
         source_variable="smoking",
         target_variable="cancer",
         edge_type="direct_cause",
     )
-    scm = StructuralCausalModel(
+    scm = StructuralCausalModelProfile(
         observed_variables=["smoking", "cancer"],
         latent_variables=["genetics"],
         causal_edges=[causal_edge],

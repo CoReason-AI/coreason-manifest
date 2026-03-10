@@ -12,14 +12,14 @@ from coreason_manifest.spec.ontology import (
     DocumentLayoutManifest,
     DocumentLayoutRegionState,
     MathematicalNotationExtractionState,
-    MultimodalTokenAnchor,
+    MultimodalTokenAnchorState,
     TabularCellState,
     TabularMatrixExtractionState,
 )
 
 
 def test_layout_cycle_prevention() -> None:
-    anchor = MultimodalTokenAnchor(token_span_start=0, token_span_end=10)
+    anchor = MultimodalTokenAnchorState(token_span_start=0, token_span_end=10)
     block1 = DocumentLayoutRegionState(block_id="b1", block_type="paragraph", anchor=anchor)
     block2 = DocumentLayoutRegionState(block_id="b2", block_type="paragraph", anchor=anchor)
 
@@ -28,7 +28,7 @@ def test_layout_cycle_prevention() -> None:
 
 
 def test_tabular_collision_prevention() -> None:
-    anchor = MultimodalTokenAnchor(token_span_start=0, token_span_end=10)
+    anchor = MultimodalTokenAnchorState(token_span_start=0, token_span_end=10)
     # Cell 1 spans (0,0), (0,1), (1,0), (1,1)
     cell1 = TabularCellState(row_index=0, col_index=0, row_span=2, col_span=2, content="A", anchor=anchor)
     # Cell 2 tries to occupy (1,1)
@@ -39,7 +39,7 @@ def test_tabular_collision_prevention() -> None:
 
 
 def test_mathematical_ungrounded_prevention() -> None:
-    empty_anchor = MultimodalTokenAnchor()  # Neither bounding_box nor token_span
+    empty_anchor = MultimodalTokenAnchorState()  # Neither bounding_box nor token_span
     with pytest.raises(ValidationError, match="definitive visual or token bounding box"):
         MathematicalNotationExtractionState(
             math_type="inline", syntax="latex", expression="E=mc^2", anchor=empty_anchor

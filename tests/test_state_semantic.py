@@ -10,7 +10,7 @@ from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import ValidationError
 
-from coreason_manifest.spec.ontology import DimensionalProjectionContract, MultimodalTokenAnchor
+from coreason_manifest.spec.ontology import DimensionalProjectionContract, MultimodalTokenAnchorState
 
 
 @given(isometry_preservation_score=st.floats(max_value=-0.000001) | st.floats(min_value=1.000001))
@@ -26,27 +26,27 @@ def test_dimensional_projection_contract_mathematical_bounds(isometry_preservati
 
 
 def test_multimodal_token_anchor_bounds() -> None:
-    MultimodalTokenAnchor(token_span_start=5, token_span_end=10)
+    MultimodalTokenAnchorState(token_span_start=5, token_span_end=10)
     with pytest.raises(ValidationError, match="token_span_end cannot be defined without a token_span_start"):
-        MultimodalTokenAnchor(token_span_end=10)
+        MultimodalTokenAnchorState(token_span_end=10)
     with pytest.raises(ValidationError, match="token_span_end MUST be strictly greater than token_span_start"):
-        MultimodalTokenAnchor(token_span_start=5, token_span_end=5)
+        MultimodalTokenAnchorState(token_span_start=5, token_span_end=5)
     with pytest.raises(ValidationError, match="If token_span_start is defined, token_span_end MUST be defined"):
-        MultimodalTokenAnchor(token_span_start=5)
+        MultimodalTokenAnchorState(token_span_start=5)
 
 
 def test_multimodal_token_anchor_spatial_invariant() -> None:
     """Verify that inverted bounding boxes raise strict struct-legible ValueErrors."""
-    from coreason_manifest.spec.ontology import MultimodalTokenAnchor
+    from coreason_manifest.spec.ontology import MultimodalTokenAnchorState
 
     # Valid geometry
-    anchor = MultimodalTokenAnchor(bounding_box=(0.0, 0.0, 10.0, 10.0))
+    anchor = MultimodalTokenAnchorState(bounding_box=(0.0, 0.0, 10.0, 10.0))
     assert anchor.bounding_box == (0.0, 0.0, 10.0, 10.0)
 
     # Invalid geometry (x_min > x_max)
     with pytest.raises(ValidationError, match="Spatial invariant violated"):
-        MultimodalTokenAnchor(bounding_box=(15.0, 0.0, 10.0, 10.0))
+        MultimodalTokenAnchorState(bounding_box=(15.0, 0.0, 10.0, 10.0))
 
     # Invalid geometry (y_min > y_max)
     with pytest.raises(ValidationError, match="Spatial invariant violated"):
-        MultimodalTokenAnchor(bounding_box=(0.0, 20.0, 10.0, 10.0))
+        MultimodalTokenAnchorState(bounding_box=(0.0, 20.0, 10.0, 10.0))

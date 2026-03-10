@@ -14,10 +14,10 @@ from coreason_manifest.spec.ontology import (
     AnyStateEvent,
     BeliefMutationEvent,
     EpistemicPromotionEvent,
-    NeuralAuditAttestation,
+    NeuralAuditAttestationReceipt,
     NormativeDriftEvent,
     ObservationEvent,
-    SaeFeatureActivation,
+    SaeFeatureActivationState,
 )
 
 
@@ -43,7 +43,7 @@ def test_event_payload_rejects_max_keys() -> None:
 
 
 def test_sae_feature_activation_valid() -> None:
-    activation = SaeFeatureActivation(
+    activation = SaeFeatureActivationState(
         feature_index=1024,
         activation_magnitude=5.7,
         interpretability_label="sycophancy",
@@ -55,19 +55,19 @@ def test_sae_feature_activation_valid() -> None:
 
 def test_sae_feature_activation_invalid_negative_index() -> None:
     with pytest.raises(ValidationError, match="Input should be greater than or equal to 0"):
-        SaeFeatureActivation(
+        SaeFeatureActivationState(
             feature_index=-1,
             activation_magnitude=5.7,
         )
 
 
 def test_neural_audit_attestation_valid() -> None:
-    attestation = NeuralAuditAttestation(
+    attestation = NeuralAuditAttestationReceipt(
         audit_id="audit_42",
         layer_activations={
             12: [
-                SaeFeatureActivation(feature_index=1, activation_magnitude=1.0),
-                SaeFeatureActivation(feature_index=2, activation_magnitude=0.5),
+                SaeFeatureActivationState(feature_index=1, activation_magnitude=1.0),
+                SaeFeatureActivationState(feature_index=2, activation_magnitude=0.5),
             ]
         },
         causal_scrubbing_applied=True,
@@ -80,7 +80,7 @@ def test_neural_audit_attestation_valid() -> None:
 
 def test_neural_audit_attestation_invalid_empty_id() -> None:
     with pytest.raises(ValidationError, match="String should have at least 1 character"):
-        NeuralAuditAttestation(
+        NeuralAuditAttestationReceipt(
             audit_id="",
             layer_activations={},
         )

@@ -8,7 +8,7 @@
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.spec.ontology import DefeasibleCascade, TruthMaintenancePolicy
+from coreason_manifest.spec.ontology import DefeasibleCascadeEvent, TruthMaintenancePolicy
 
 
 def test_truth_maintenance_policy_valid() -> None:
@@ -60,7 +60,7 @@ def test_truth_maintenance_policy_invalid_quarantine_threshold() -> None:
 
 
 def test_defeasible_cascade_valid() -> None:
-    cascade = DefeasibleCascade(
+    cascade = DefeasibleCascadeEvent(
         cascade_id="cas-1",
         root_falsified_event_id="evt-1",
         propagated_decay_factor=0.5,
@@ -75,7 +75,7 @@ def test_defeasible_cascade_valid() -> None:
 
 def test_defeasible_cascade_invalid_cascade_id() -> None:
     with pytest.raises(ValidationError):
-        DefeasibleCascade(
+        DefeasibleCascadeEvent(
             cascade_id="",
             root_falsified_event_id="evt-1",
             propagated_decay_factor=0.5,
@@ -85,7 +85,7 @@ def test_defeasible_cascade_invalid_cascade_id() -> None:
 
 def test_defeasible_cascade_invalid_decay_factor() -> None:
     with pytest.raises(ValidationError):
-        DefeasibleCascade(
+        DefeasibleCascadeEvent(
             cascade_id="cas-1",
             root_falsified_event_id="evt-1",
             propagated_decay_factor=-0.1,
@@ -93,7 +93,7 @@ def test_defeasible_cascade_invalid_decay_factor() -> None:
         )
 
     with pytest.raises(ValidationError):
-        DefeasibleCascade(
+        DefeasibleCascadeEvent(
             cascade_id="cas-1",
             root_falsified_event_id="evt-1",
             propagated_decay_factor=1.1,
@@ -103,7 +103,7 @@ def test_defeasible_cascade_invalid_decay_factor() -> None:
 
 def test_defeasible_cascade_invalid_quarantine_ids() -> None:
     with pytest.raises(ValidationError):
-        DefeasibleCascade(
+        DefeasibleCascadeEvent(
             cascade_id="cas-1",
             root_falsified_event_id="evt-1",
             propagated_decay_factor=0.5,
