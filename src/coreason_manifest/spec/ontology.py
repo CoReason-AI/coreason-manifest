@@ -446,6 +446,12 @@ class ModelProfile(CoreasonBaseModel):
         description="A declarative list of specialized functional expert clusters (e.g., 'falsifier', 'synthesizer') physically present in this model's architecture.",  # noqa: E501
     )
 
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "capabilities", sorted(self.capabilities))
+        object.__setattr__(self, "supported_functional_experts", sorted(self.supported_functional_experts))
+        return self
+
 
 class PermissionBoundary(CoreasonBaseModel):
     """
@@ -922,6 +928,7 @@ class StateDiff(CoreasonBaseModel):
     patches: list[StatePatch] = Field(
         default_factory=list, description="The exact, ordered sequence of deterministic state vector mutations."
     )
+    # Note: patches is a structurally ordered sequence (Chronological Mutations) and MUST NOT be sorted.
 
 
 class TemporalCheckpoint(CoreasonBaseModel):
@@ -1627,6 +1634,7 @@ class DocumentLayoutAnalysis(CoreasonBaseModel):
         default_factory=list,
         description="Directed edges defining the topological sort (chronological flow) of the document.",
     )
+    # Note: reading_order_edges is a structurally ordered sequence (Topological Sort) and MUST NOT be sorted.
 
     @model_validator(mode="after")
     def sort_document_layout_arrays(self) -> Self:
@@ -1818,6 +1826,11 @@ class EpistemicTransmutationTask(CoreasonBaseModel):
             raise ValueError(
                 "Epistemic safety violation: Visual or tabular modalities require strict spatial tracking. 'required_grounding_density' cannot be 'sparse'."  # noqa: E501
             )
+        return self
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "target_modalities", sorted(self.target_modalities))
         return self
 
 
@@ -2147,6 +2160,11 @@ class GlobalSemanticProfile(CoreasonBaseModel):
     token_density: int = Field(
         ge=0, description="The mathematical token density used for downstream compute budget allocation."
     )
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "detected_modalities", sorted(self.detected_modalities))
+        return self
 
 
 class DynamicRoutingManifest(CoreasonBaseModel):
@@ -2541,6 +2559,14 @@ class MCPCapabilityWhitelist(CoreasonBaseModel):
         description="Explicit list of DUA/RBAC enterprise licenses mathematically required to perceive and mount this capability.",  # noqa: E501
     )
 
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "allowed_tools", sorted(self.allowed_tools))
+        object.__setattr__(self, "allowed_resources", sorted(self.allowed_resources))
+        object.__setattr__(self, "allowed_prompts", sorted(self.allowed_prompts))
+        object.__setattr__(self, "required_licenses", sorted(self.required_licenses))
+        return self
+
 
 class MCPServerManifest(CoreasonBaseModel):
     """
@@ -2653,10 +2679,17 @@ class MCPClientBinding(CoreasonBaseModel):
     transport_type: MCPTransportType = Field(
         description="The transport protocol used to communicate with the MCP server."
     )
+
     allowed_mcp_tools: list[str] | None = Field(
         default=None,
         description="An explicit whitelist of tools the agent is allowed to invoke from this server. If None, all discovered tools are allowed.",  # noqa: E501
     )
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        if self.allowed_mcp_tools is not None:
+            object.__setattr__(self, "allowed_mcp_tools", sorted(self.allowed_mcp_tools))
+        return self
 
 
 class MacroGrid(CoreasonBaseModel):
@@ -2734,6 +2767,12 @@ class MechanisticAuditContract(CoreasonBaseModel):
         default=True,
         description="If True, the orchestrator MUST generate cryptographic latent state proofs alongside the activation reads.",  # noqa: E501
     )
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "trigger_conditions", sorted(self.trigger_conditions))
+        object.__setattr__(self, "target_layers", sorted(self.target_layers))
+        return self
 
 
 class MemoryProvenance(CoreasonBaseModel):
@@ -3047,6 +3086,11 @@ class ComputeProvisioningRequest(CoreasonBaseModel):
         description="The Quality of Service priority, used by the compute spot market for semantic load shedding.",
     )
 
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "required_capabilities", sorted(self.required_capabilities))
+        return self
+
 
 class QuarantineOrder(CoreasonBaseModel):
     """
@@ -3110,6 +3154,11 @@ class SemanticFirewallPolicy(CoreasonBaseModel):
     action_on_violation: Literal["drop", "quarantine", "redact"] = Field(
         description="The deterministic action the orchestrator must take if a firewall rule is violated."
     )
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "forbidden_intents", sorted(self.forbidden_intents))
+        return self
 
 
 class InformationFlowPolicy(CoreasonBaseModel):
@@ -3203,6 +3252,7 @@ class ExecutionSpan(CoreasonBaseModel):
     events: list[SpanEvent] = Field(
         default_factory=list, max_length=10000, description="Structured log records emitted during the span."
     )
+    # Note: events is a structurally ordered sequence (Temporal execution) and MUST NOT be sorted.
 
     @model_validator(mode="after")
     def validate_temporal_bounds(self) -> Any:
@@ -3231,6 +3281,7 @@ class SpatialKinematicAction(CoreasonBaseModel):
     bezier_control_points: list[NormalizedCoordinate] = Field(
         default_factory=list, description="Waypoints for constructing non-linear, bot-evasive movement curves."
     )
+    # Note: bezier_control_points is a structurally ordered sequence (Geometry/Time) and MUST NOT be sorted.
     expected_visual_concept: str | None = Field(
         default=None,
         description="The visual anchor (e.g., 'Submit Button'). The orchestrator must verify this semantic concept exists at the target_coordinate before executing the macro, preventing blind clicks.",  # noqa: E501
@@ -3314,6 +3365,11 @@ class MCPServerConfig(CoreasonBaseModel):
         description="A list of capabilities required from the MCP server.",
     )
 
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "required_capabilities", sorted(self.required_capabilities))
+        return self
+
 
 class SteadyStateHypothesis(CoreasonBaseModel):
     expected_max_latency: float = Field(ge=0.0, description="The expected maximum latency under normal conditions.")
@@ -3321,6 +3377,12 @@ class SteadyStateHypothesis(CoreasonBaseModel):
     required_tool_usage: list[str] | None = Field(
         default=None, description="A list of required tools that must be utilized."
     )
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        if self.required_tool_usage is not None:
+            object.__setattr__(self, "required_tool_usage", sorted(self.required_tool_usage))
+        return self
 
 
 class ChaosExperiment(CoreasonBaseModel):
@@ -3334,17 +3396,33 @@ class ChaosExperiment(CoreasonBaseModel):
         description="The declarative list of exogenous Black Swan events injected into the topology.",
     )
 
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "faults", sorted(self.faults, key=lambda x: (x.fault_type, x.target_node_id)))
+        object.__setattr__(self, "shocks", sorted(self.shocks, key=lambda x: x.shock_id))
+        return self
+
 
 class StructuralCausalModel(CoreasonBaseModel):
     observed_variables: list[str] = Field(description="The nodes in the DAG that the agent can passively measure.")
     latent_variables: list[str] = Field(description="The unobserved confounders the agent suspects exist.")
     causal_edges: list[CausalDirectedEdge] = Field(description="The declared topological mapping of causality.")
 
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "observed_variables", sorted(self.observed_variables))
+        object.__setattr__(self, "latent_variables", sorted(self.latent_variables))
+        object.__setattr__(
+            self, "causal_edges", sorted(self.causal_edges, key=lambda x: (x.source_variable, x.target_variable))
+        )
+        return self
+
 
 class HypothesisGenerationEvent(BaseStateEvent):
     type: Literal["hypothesis"] = Field(
         default="hypothesis", description="Discriminator for a hypothesis generation event."
     )
+
     hypothesis_id: str = Field(
         min_length=1,
         description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this abductive leap to the Merkle-DAG.",  # noqa: E501
@@ -3407,6 +3485,7 @@ class System2RemediationPrompt(CoreasonBaseModel):
     fault_id: str = Field(
         min_length=1, description="A cryptographic Lineage Watermark (CID) tracking this specific dimensional collapse."
     )
+
     target_node_id: NodeID = Field(
         description="The strict W3C DID of the agent that authored the invalid state, ensuring the fault is routed back to the exact memory partition."  # noqa: E501
     )
