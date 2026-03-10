@@ -58,7 +58,7 @@ def test_crystallization_policy_entropy_threshold() -> None:
 
 @st.composite
 def state_event_strategy(draw: st.DrawFn) -> AnyStateEvent:
-    event_type = draw(st.sampled_from(["observation", "belief_update", "system_fault"]))
+    event_type = draw(st.sampled_from(["observation", "belief_mutation", "system_fault"]))
     event_id = draw(st.text(min_size=1, max_size=50))
     timestamp = draw(st.floats(min_value=0.0, max_value=1e10, allow_nan=False, allow_infinity=False))
     payload = draw(
@@ -71,7 +71,7 @@ def state_event_strategy(draw: st.DrawFn) -> AnyStateEvent:
 
     if event_type == "observation":
         return ObservationEvent(event_id=event_id, timestamp=timestamp, type="observation", payload=payload)
-    if event_type == "belief_update":
+    if event_type == "belief_mutation":
         return BeliefMutationEvent(event_id=event_id, timestamp=timestamp, type="belief_mutation", payload=payload)
     return SystemFaultEvent(event_id=event_id, timestamp=timestamp, type="system_fault")
 
