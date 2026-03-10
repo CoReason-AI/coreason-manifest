@@ -114,6 +114,28 @@ Before outputting any new schema or object name, you must silently verify:
 If the answer to any of these is NO, you must rewrite the name before outputting.
 </lexical_directive>
 
+## 0.4 AST-Native Semantic Anchoring (The Docstring Protocol)
+
+**CRITICAL CONTEXT:** In a zero-trust swarm, documentation is not an optional human-centric amenity; it is the mathematical boundary condition and the primary routing heuristic for downstream LLMs. All documentation must survive the Abstract Syntax Tree (AST) compilation and be exportable via JSON Schema for MCP discovery.
+
+You must adhere to the following documentation laws without exception:
+
+### 1. The Anti-Conversational Mandate
+You are explicitly forbidden from using conversational, human-centric `# comments` to explain the *intent* of code (e.g., `# This function updates the user`).
+* All capability definitions and mathematical constraints must live inside Python `"""docstrings"""` or Pydantic `Field(description="...")` parameters.
+* Inline `# comments` may only be used as formal metadata tags (e.g., `# Topological boundary: Ensures cycle prevention`).
+
+### 2. The `AGENT INSTRUCTION:` Directive
+When a docstring must break the fourth wall to give a parsing LLM a strict behavioral command or boundary condition, it MUST be prefixed with exactly: `AGENT INSTRUCTION:`.
+* *Example:* `"""AGENT INSTRUCTION: Mathematically prove the absence of kinetic execution bleed before instantiating this class."""`
+
+### 3. Latent Space Typing for MCP Discovery
+When an MCP server projects a resource manifest, orchestrating nodes route to it via dense vector embeddings of its JSON Schema. To prevent embedding drift, all `Field` descriptions must be written as rigid mathematical bounds or exact capability definitions.
+* **FORBIDDEN (Human-centric):** `description="This is a list of tools the agent can use."`
+* **REQUIRED (Agent-centric):** `description="The mathematically bounded subgraph of capabilities currently available to the agent."`
+
+**Note on CI/CD:** Modifying existing `Field` descriptions alters the cryptographic hash footprint of the exported `coreason_ontology.schema.json`. "Fixing" descriptions to be friendlier will break the `Semantic Diff Check` in the CI pipeline and result in immediate rejection.
+
 ---
 
 ## **1. The "No Execution" Directives**
