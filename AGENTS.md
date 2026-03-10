@@ -71,6 +71,49 @@ When generating or modifying schemas, you MUST adhere to the following constrain
 
 ---
 
+## **0.3 The Strict Lexical Architecture (Naming Directives)**
+
+**CRITICAL CONTEXT:** You are operating within a 2026+ State-of-the-Art Neurosymbolic architecture. You do not read code; you navigate latent vector spaces. To prevent semantic drift, hallucination, and epistemic contamination, you are strictly forbidden from using legacy, human-friendly software naming conventions (e.g., CRUD terminology like "Create", "Update", "User", "Data").
+
+Every object, class, and schema name you generate MUST be **mathematically precise, unambiguous, and structurally bounded**. You must adhere to the following Lexical Architecture without exception:
+
+### **1. Categorical Suffixing (The Bounding Suffix)**
+Every object name MUST terminate with a strictly typed suffix that defines its physical behavior and immutability within the system:
+* **`...Event` / `...Receipt`**: Use for immutable, cryptographic records of the past. These are append-only.
+  * *Examples:* `BeliefUpdateEvent`, `BypassReceipt`, `SystemFaultEvent`.
+* **`...Policy` / `...Contract` / `...SLA`**: Use for mathematical boundaries, execution limits, and enforceable constraints.
+  * *Examples:* `TruthMaintenancePolicy`, `ActivationSteeringContract`, `GenerativeManifoldSLA`.
+* **`...Task` / `...Intent`**: Use for non-monotonic execution triggers, active capability routing, or formal requests.
+  * *Examples:* `EpistemicTransmutationTask`, `AdjudicationIntent`.
+* **`...State` / `...Snapshot` / `...Manifest` / `...Profile`**: Use for ephemeral, frozen, or declarative data structures representing a specific coordinate in time or space.
+  * *Examples:* `WorkingMemorySnapshot`, `DynamicRoutingManifest`, `CognitiveStateProfile`.
+
+### **2. Epistemic Prefixing (The Context Anchor)**
+To ensure optimal clustering in high-dimensional embedding spaces, prepend objects with a rigid domain identifier:
+* **`Cognitive...`**: For internal LLM reasoning, steering, or routing logic.
+* **`Epistemic...`**: For truth-maintenance, certainty, knowledge boundaries, or entropy management.
+* **`Spatial...` / `Kinematic...`**: For 2D/3D physical boundaries, UI interactions, or coordinate mapping.
+* **`Federated...`**: For operations crossing zero-trust or multi-tenant network boundaries.
+
+### **3. Geometric and Causal Descriptors (Anti-CRUD Mandate)**
+You must reject flat, tabular terminology in favor of topological and causal semantics.
+* **FORBIDDEN (Do not use):** `Update`, `Delete`, `Remove`, `Group`, `List`, `Data`, `Memory`, `Link`.
+* **REQUIRED (Use instead):** `Mutation`, `Transmutation`, `Differential`, `Ablation`, `Quarantine`, `Cascade`, `Topology`, `Manifold`, `Matrix`, `Edge`.
+  * *Mapping Examples:*
+    * `DataUpdate` ➔ `StateDiff`
+    * `DeleteRecord` ➔ `DefeasibleCascade` or `QuarantineOrder`
+    * `UserAction` ➔ `InterventionRequest`
+    * `ErrorLog` ➔ `NormativeDriftEvent`
+
+### **4. Generation Checklist (Internal Pre-Flight)**
+Before outputting any new schema or object name, you must silently verify:
+1. Does the name end with a valid structural suffix?
+2. Is the name free of ambiguous CRUD terminology?
+3. Does the name define an exact mathematical, causal, or spatial boundary?
+If the answer to any of these is NO, you must rewrite the name before outputting.
+
+---
+
 ## **1. The "No Execution" Directives**
 
 You are strictly forbidden from introducing "Active" or "Runtime" logic into this repository. Adhere to the following architectural laws without exception:
