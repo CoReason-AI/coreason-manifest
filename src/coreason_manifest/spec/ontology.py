@@ -775,6 +775,11 @@ class SaeLatentPolicy(CoreasonBaseModel):
     )
 
     @model_validator(mode="after")
+    def sort_sae_arrays(self) -> Self:
+        object.__setattr__(self, "monitored_layers", sorted(self.monitored_layers))
+        return self
+
+    @model_validator(mode="after")
     def validate_smooth_decay(self) -> Self:
         if self.violation_action == "smooth_decay":
             if self.smoothing_profile is None:
@@ -1787,6 +1792,11 @@ class EpistemicPromotionEvent(BaseStateEvent):
     compression_ratio: float = Field(
         description="A mathematical proof of the token savings achieved (e.g., old_token_count / new_token_count)."
     )
+
+    @model_validator(mode="after")
+    def sort_promotion_arrays(self) -> Self:
+        object.__setattr__(self, "source_episodic_event_ids", sorted(self.source_episodic_event_ids))
+        return self
 
 
 class EpistemicScanningPolicy(CoreasonBaseModel):
@@ -2948,6 +2958,11 @@ class OntologicalHandshake(CoreasonBaseModel):
         default=None,
         description="The projection applied if the agents natively used different embedding dimensionalities.",
     )
+
+    @model_validator(mode="after")
+    def sort_handshake_arrays(self) -> Self:
+        object.__setattr__(self, "participant_node_ids", sorted(self.participant_node_ids))
+        return self
 
 
 class OutputMappingContract(CoreasonBaseModel):
@@ -4224,6 +4239,14 @@ class SwarmTopology(BaseTopology):
     )
 
     @model_validator(mode="after")
+    def sort_swarm_arrays(self) -> Self:
+        object.__setattr__(
+            self, "active_prediction_markets", sorted(self.active_prediction_markets, key=lambda x: x.market_id)
+        )
+        object.__setattr__(self, "resolved_markets", sorted(self.resolved_markets, key=lambda x: x.market_id))
+        return self
+
+    @model_validator(mode="after")
     def enforce_concurrency_ceiling(self) -> Self:
         if self.spawning_threshold > self.max_concurrent_agents:
             raise ValueError("spawning_threshold cannot exceed max_concurrent_agents")
@@ -4351,6 +4374,14 @@ class WorkflowManifest(CoreasonBaseModel):
     pq_signature: PostQuantumSignature | None = Field(
         default=None, description="The quantum-resistant signature securing the root execution graph."
     )
+
+    @model_validator(mode="after")
+    def sort_workflow_arrays(self) -> Self:
+        if self.allowed_information_classifications is not None:
+            object.__setattr__(
+                self, "allowed_information_classifications", sorted(self.allowed_information_classifications)
+            )
+        return self
 
 
 class WetwareAttestationContract(CoreasonBaseModel):
