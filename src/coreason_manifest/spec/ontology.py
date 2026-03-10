@@ -173,7 +173,7 @@ class SystemRole(StrEnum):
 
 
 class TensorDType(StrEnum):
-    """Mathematical data types for tensor payloads."""
+    """Mathematical tensor types for tensor payloads."""
 
     FLOAT32 = "float32"
     FLOAT64 = "float64"
@@ -347,7 +347,7 @@ class ScalePolicy(CoreasonBaseModel):
     """The mathematical mapping constraint for a channel."""
 
     type: Literal["linear", "log", "time", "ordinal", "nominal"] = Field(
-        description="The mathematical scale mapping data to pixels."
+        description="The mathematical scale mapping metrics to pixels."
     )
     domain_min: float | None = Field(default=None, description="The optional minimum bound of the scale domain.")
     domain_max: float | None = Field(default=None, description="The optional maximum bound of the scale domain.")
@@ -357,9 +357,9 @@ class VisualEncodingProfile(CoreasonBaseModel):
     """The visual property being manipulated."""
 
     channel: Literal["x", "y", "color", "size", "opacity", "shape", "text"] = Field(
-        description="The visual channel the data is mapped to."
+        description="The visual channel the metric is mapped to."
     )
-    field: str = Field(description="The exact column or field name from the dataset.")
+    field: str = Field(description="The exact column or field name from the semantic series.")
     scale: ScalePolicy | None = Field(default=None, description="Optional scale override for this specific channel.")
 
 
@@ -471,7 +471,9 @@ class PermissionBoundaryPolicy(CoreasonBaseModel):
     allowed_domains: list[str] | None = Field(
         default=None, description="Whitelist of allowed network domains if network access is true."
     )
-    file_system_read_only: bool = Field(description="True if the tool is strictly forbidden from writing to the disk.")
+    file_system_mutation_forbidden: bool = Field(
+        description="True if the tool is strictly forbidden from writing to the disk."
+    )
     auth_requirements: list[str] | None = Field(
         default=None,
         description="An explicit list of authentication protocol identifiers (e.g., 'oauth2:github', 'mtls:internal') the orchestrator must negotiate before allocating compute.",  # noqa: E501
@@ -739,11 +741,13 @@ class ConsensusPolicy(CoreasonBaseModel):
 
 class RedactionPolicy(CoreasonBaseModel):
     """
-    A specific rule for algorithmic data sanitization.
+    A specific rule for algorithmic payload sanitization.
     """
 
     rule_id: str = Field(description="Unique identifier for the sanitization rule.")
-    classification: InformationClassification = Field(description="The category of sensitive data this rule targets.")
+    classification: InformationClassification = Field(
+        description="The category of sensitive payload this rule targets."
+    )
     target_pattern: str = Field(description="The semantic entity type or declarative regex pattern to identify.")
     target_regex_pattern: str = Field(max_length=200, description="The dynamic regex pattern to target.")
     context_exclusion_zones: list[str] | None = Field(
@@ -793,6 +797,11 @@ class SaeLatentPolicy(CoreasonBaseModel):
     )
 
     @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "monitored_layers", sorted(self.monitored_layers))
+        return self
+
+    @model_validator(mode="after")
     def validate_smooth_decay(self) -> Self:
         if self.violation_action == "smooth_decay":
             if self.smoothing_profile is None:
@@ -806,14 +815,14 @@ class SaeLatentPolicy(CoreasonBaseModel):
 
 class SecureSubSessionState(CoreasonBaseModel):
     """
-    Declarative boundary for handling unredacted secrets within a temporarily isolated memory partition.
+    Declarative boundary for handling unredacted secrets within a temporarily isolated state partition.
     """
 
     session_id: str = Field(max_length=255, description="Unique identifier for the secure session.")
     allowed_vault_keys: list[str] = Field(
         max_length=100, description="List of enterprise vault keys the agent is temporarily allowed to access."
     )
-    max_ttl_seconds: int = Field(ge=1, le=3600, description="Maximum time-to-live for the unredacted memory partition.")
+    max_ttl_seconds: int = Field(ge=1, le=3600, description="Maximum time-to-live for the unredacted state partition.")
     description: str = Field(max_length=2000, description="Audit justification for this temporary secure session.")
 
     @model_validator(mode="after")
@@ -944,7 +953,7 @@ class StateDifferentialManifest(CoreasonBaseModel):
     patches: list[StateMutationIntent] = Field(
         default_factory=list, description="The exact, ordered sequence of deterministic state vector mutations."
     )
-    # Topological invariant: Structurally ordered sequence. MUST NOT be sorted.
+    # Note: patches is a structurally ordered sequence (Chronological Mutations) and MUST NOT be sorted.
 
 
 class TemporalCheckpointState(CoreasonBaseModel):
@@ -1077,14 +1086,14 @@ class BilateralSLA(CoreasonBaseModel):
         max_length=255, description="The strict enterprise identifier of the foreign B2B tenant receiving this payload."
     )
     max_permitted_classification: InformationClassification = Field(
-        description="The absolute highest data sensitivity allowed to cross this federated boundary."
+        description="The absolute highest semantic sensitivity allowed to cross this federated boundary."
     )
     liability_limit_magnitude: int = Field(
         ge=0, description="The strict magnitude cap on cross-tenant economic liability."
     )
     permitted_geographic_regions: list[str] = Field(
         default_factory=list,
-        description="Explicit whitelist of geographic regions or cloud enclaves where execution is structurally permitted (Data Residency Pinning).",  # noqa: E501
+        description="Explicit whitelist of geographic regions or cloud enclaves where execution is structurally permitted (Payload Residency Pinning).",  # noqa: E501
     )
     max_permitted_grid_carbon_intensity: float | None = Field(
         default=None,
@@ -1286,7 +1295,7 @@ class BaseIntent(CoreasonBaseModel):
     """Base class for presentation intents."""
 
 
-class BasePanel(CoreasonBaseModel):
+class BasePanelProfile(CoreasonBaseModel):
     """Base class for Scientific Visualization panels."""
 
     panel_id: str = Field(description="Unique identifier for the panel.")
@@ -1294,7 +1303,7 @@ class BasePanel(CoreasonBaseModel):
 
 class BaseStateEvent(CoreasonBaseModel):
     event_id: str = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG."  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG."  # noqa: E501
     )
     timestamp: float = Field(description="Causal Ancestry markers required to resolve decentralized event ordering.")
 
@@ -1429,7 +1438,7 @@ class BypassReceipt(CoreasonBaseModel):
 
 class CausalAttributionState(CoreasonBaseModel):
     source_event_id: str = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the source event in the Merkle-DAG."  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the source event in the Merkle-DAG."  # noqa: E501
     )
     influence_weight: float = Field(
         ge=0.0,
@@ -1489,14 +1498,14 @@ class ConstitutionalAmendmentIntent(CoreasonBaseModel):
 
 
 class ContinuousMutationPolicy(CoreasonBaseModel):
-    mutation_paradigm: Literal["append_only", "merge_on_read"] = Field(
+    mutation_paradigm: Literal["append_only", "merge_on_resolve"] = Field(
         description="Forces non-destructive graph mutations."
     )
     max_uncommitted_rows: int = Field(gt=0, description="Backpressure threshold before forcing a commit.")
     micro_batch_interval_ms: int = Field(gt=0, description="Temporal bound for flushing the stream.")
 
     @model_validator(mode="after")
-    def enforce_append_only_memory_bound(self) -> Self:
+    def enforce_append_only_vram_bound(self) -> Self:
         """Mathematically prevent Out-Of-Memory (OOM) crashes by strictly bounding the buffer."""
         if self.mutation_paradigm == "append_only" and self.max_uncommitted_rows > 10000:
             raise ValueError("max_uncommitted_rows must be <= 10000 for append_only paradigm to prevent OOM crashes.")
@@ -1511,7 +1520,7 @@ class CounterfactualRegretEvent(BaseStateEvent):
         default="counterfactual_regret", description="Discriminator type for a counterfactual regret event."
     )
     historical_event_id: str = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the specific historical state node where the agent mathematically diverged to simulate an alternative path."  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the specific historical state node where the agent mathematically diverged to simulate an alternative path."  # noqa: E501
     )
     counterfactual_intervention: str = Field(
         description="The specific alternative action or do-calculus intervention applied in the simulation."
@@ -1573,7 +1582,7 @@ class CustodyReceipt(CoreasonBaseModel):
 
     model_config = ConfigDict(frozen=True)
     record_id: str = Field(max_length=255, description="Unique identifier for this chain-of-custody entry.")
-    source_node_id: str = Field(max_length=255, description="The execution node that emitted the original data.")
+    source_node_id: str = Field(max_length=255, description="The execution node that emitted the original payload.")
     applied_policy_id: str = Field(
         max_length=255, description="The ID of the InformationFlowPolicy successfully applied."
     )
@@ -1664,16 +1673,16 @@ class DocumentLayoutManifest(CoreasonBaseModel):
     blocks: dict[str, DocumentLayoutRegionState] = Field(
         description="Dictionary mapping block_ids to their strict spatial definitions."
     )
-    reading_order_edges: list[tuple[str, str]] = Field(
+    chronological_flow_edges: list[tuple[str, str]] = Field(
         default_factory=list,
         description="Directed edges defining the topological sort (chronological flow) of the document.",
     )
-    # Topological invariant: Structurally ordered sequence. MUST NOT be sorted.
+    # Note: chronological_flow_edges is a structurally ordered sequence (Topological Flow) and MUST NOT be sorted.
 
     @model_validator(mode="after")
     def verify_dag_and_integrity(self) -> Self:
         adj: dict[str, list[str]] = {node_id: [] for node_id in self.blocks}
-        for source, target in self.reading_order_edges:
+        for source, target in self.chronological_flow_edges:
             if source not in self.blocks:
                 raise ValueError(f"Source block '{source}' does not exist.")
             if target not in self.blocks:
@@ -1755,7 +1764,7 @@ class BargeInInterruptEvent(BaseStateEvent):
         default="barge_in", description="Discriminator type for a barge-in interruption event."
     )
     target_event_id: str = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the active node generation cycle that was killed in the Merkle-DAG."  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the active node generation cycle that was killed in the Merkle-DAG."  # noqa: E501
     )
     sensory_trigger: EmbodiedSensoryVectorProfile | None = Field(
         default=None,
@@ -1819,6 +1828,11 @@ class EpistemicPromotionEvent(BaseStateEvent):
     compression_ratio: float = Field(
         description="A mathematical proof of the token savings achieved (e.g., old_token_count / new_token_count)."
     )
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "source_episodic_event_ids", sorted(self.source_episodic_event_ids))
+        return self
 
 
 class EpistemicScanningPolicy(CoreasonBaseModel):
@@ -1888,7 +1902,7 @@ class EscalationIntent(CoreasonBaseModel):
         default="escalation", description="Discriminator for security or economic boundary overrides."
     )
     tripped_rule_id: str = Field(
-        description="The ID of the Data Loss Prevention (DLP) or Governance rule that blocked execution."
+        description="The ID of the Payload Loss Prevention (PLP) or Governance rule that blocked execution."
     )
     resolution_schema: dict[str, Any] = Field(
         description="The strict JSON Schema requiring an explicit cryptographic sign-off or justification string to bypass the breaker."  # noqa: E501
@@ -2067,7 +2081,7 @@ class FallbackIntent(CoreasonBaseModel):
 class FalsificationContract(CoreasonBaseModel):
     condition_id: str = Field(
         min_length=1,
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this falsification test to the Merkle-DAG.",  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this falsification test to the Merkle-DAG.",  # noqa: E501
     )
     description: str = Field(
         description="Semantic description of what observation would prove the parent hypothesis is false."
@@ -2094,9 +2108,9 @@ class FederatedCapabilityAttestationReceipt(CoreasonBaseModel):
     """
 
     attestation_id: str = Field(min_length=1, description="Cryptographic Lineage Watermark for the attestation.")
-    target_topology_id: NodeID = Field(description="The DID of the discovered external data lake/VPC.")
+    target_topology_id: NodeID = Field(description="The DID of the discovered external state matrix/VPC.")
     authorized_session: SecureSubSessionState = Field(
-        description="The isolated memory partition granted to the agent for this connection."
+        description="The isolated state partition granted to the agent for this connection."
     )
     governing_sla: BilateralSLA = Field(
         description="The structural and physical boundary constraints for querying this target."
@@ -2116,7 +2130,7 @@ class FederatedCapabilityAttestationReceipt(CoreasonBaseModel):
 class FederatedStateSnapshot(CoreasonBaseModel):
     topology_id: str | None = Field(
         default=None,
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the federated topology, if applicable.",  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the federated topology, if applicable.",  # noqa: E501
     )
 
 
@@ -2226,6 +2240,11 @@ class DynamicRoutingManifest(CoreasonBaseModel):
     )
 
     @model_validator(mode="after")
+    def sort_bypassed_steps(self) -> Self:
+        object.__setattr__(self, "bypassed_steps", sorted(self.bypassed_steps, key=lambda x: x.bypassed_node_id))
+        return self
+
+    @model_validator(mode="after")
     def validate_modality_alignment(self) -> Self:
         """Mathematically proves that the router is not hallucinating graphs for non-existent modalities."""
         for modality in self.active_subgraphs:
@@ -2267,11 +2286,13 @@ class GrammarPanelProfile(CoreasonBaseModel):
     panel_id: str = Field(description="The unique identifier for this UI panel.")
     type: Literal["grammar"] = Field(default="grammar", description="Discriminator for Grammar of Graphics charts.")
     title: str = Field(description="The human-readable title of the chart.")
-    data_source_id: str = Field(description="The cryptographic pointer to the dataset in the EpistemicLedgerState.")
-    mark: Literal["point", "line", "area", "bar", "rect", "arc"] = Field(
-        description="The geometric shape used to represent the data."
+    ledger_source_id: str = Field(
+        description="The cryptographic pointer to the semantic series in the EpistemicLedgerState."
     )
-    encodings: list[VisualEncodingProfile] = Field(description="The mapping of data fields to visual channels.")
+    mark: Literal["point", "line", "area", "bar", "rect", "arc"] = Field(
+        description="The geometric shape used to represent the matrix."
+    )
+    encodings: list[VisualEncodingProfile] = Field(description="The mapping of structural fields to visual channels.")
     facet: FacetMatrixProfile | None = Field(default=None, description="Optional faceting matrix for small multiples.")
 
     @model_validator(mode="after")
@@ -2395,7 +2416,7 @@ class InsightCardProfile(CoreasonBaseModel):
         return v
 
 
-type AnyPanel = Annotated[
+type AnyPanelProfile = Annotated[
     GrammarPanelProfile | InsightCardProfile,
     Field(discriminator="type", description="A discriminated union of presentation UI panels."),
 ]
@@ -2438,7 +2459,7 @@ class InterventionalCausalTask(CoreasonBaseModel):
     )
 
 
-class JSONRPCErrorProfile(CoreasonBaseModel):
+class JSONRPCErrorState(CoreasonBaseModel):
     """JSON-RPC 2.0 Error object."""
 
     code: int = Field(..., description="A Number that indicates the error type that occurred.")
@@ -2449,11 +2470,11 @@ class JSONRPCErrorProfile(CoreasonBaseModel):
     )
 
 
-class JSONRPCErrorResponseProfile(CoreasonBaseModel):
+class JSONRPCErrorResponseState(CoreasonBaseModel):
     """JSON-RPC 2.0 Error Response object."""
 
     jsonrpc: Literal["2.0"] = Field(..., description="JSON-RPC version.")
-    error: JSONRPCErrorProfile = Field(..., description="The error object.")
+    error: JSONRPCErrorState = Field(..., description="The error object.")
     id: str | int | None = Field(default=None, description="The request ID that this error corresponds to.")
 
 
@@ -2493,7 +2514,7 @@ class InterventionPolicy(CoreasonBaseModel):
     )
 
 
-class BaseNodeManifest(CoreasonBaseModel):
+class BaseNodeProfile(CoreasonBaseModel):
     """
     Base configuration for any execution node in a topology.
     """
@@ -2547,7 +2568,7 @@ class BaseNodeManifest(CoreasonBaseModel):
         return v
 
 
-class HumanNodeManifest(BaseNodeManifest):
+class HumanNodeProfile(BaseNodeProfile):
     """
     A node representing a human participant in the workflow.
     """
@@ -2559,7 +2580,7 @@ class HumanNodeManifest(BaseNodeManifest):
     )
 
 
-class MemoizedNodeManifest(BaseNodeManifest):
+class MemoizedNodeProfile(BaseNodeProfile):
     """
     A passive structural interlock representing a historically executed graph branch.
     """
@@ -2571,7 +2592,7 @@ class MemoizedNodeManifest(BaseNodeManifest):
     )
 
 
-class SystemNodeManifest(BaseNodeManifest):
+class SystemNodeProfile(BaseNodeProfile):
     """
     A node representing a deterministic system capability.
     """
@@ -2587,7 +2608,7 @@ class LineageWatermarkReceipt(CoreasonBaseModel):
         description="A dictionary mapping intermediate participant NodeIDs to their deterministic execution signatures."
     )
     tamper_evident_root: str = Field(
-        description="The overarching cryptographic hash (e.g., Merkle Root) proving the dataset has not been laundered or structurally modified."  # noqa: E501
+        description="The overarching cryptographic hash (e.g., Merkle Root) proving the structural payload has not been laundered or structurally modified."  # noqa: E501
     )
 
 
@@ -2601,7 +2622,8 @@ class MCPCapabilityWhitelistPolicy(CoreasonBaseModel):
         default_factory=list, description="The explicit whitelist of function names the node is allowed to call."
     )
     allowed_resources: list[str] = Field(
-        default_factory=list, description="The explicit whitelist of resource URIs the node is allowed to read."
+        default_factory=list,
+        description="The explicit whitelist of resource URIs the node is allowed to passively perceive.",
     )
     allowed_prompts: list[str] = Field(
         default_factory=list, description="The explicit whitelist of workflow templates the node is allowed to trigger."
@@ -2653,7 +2675,7 @@ class ActionSpaceManifest(CoreasonBaseModel):
     )
     ephemeral_partitions: list[EphemeralNamespacePartitionState] = Field(
         default_factory=list,
-        description="Hermetically sealed memory boundaries for dynamically resolved scripts and PEFT adapters.",
+        description="Hermetically sealed context boundaries for dynamically resolved scripts and PEFT adapters.",
     )
 
     @model_validator(mode="after")
@@ -2670,7 +2692,7 @@ class ActionSpaceManifest(CoreasonBaseModel):
         return self
 
 
-class OntologicalSurfaceProjection(CoreasonBaseModel):
+class OntologicalSurfaceProjectionManifest(CoreasonBaseModel):
     """
     A mathematically bounded, declarative subgraph of all ToolManifests and
     MCPServerManifests currently valid for the agent's ProfileID.
@@ -2702,7 +2724,7 @@ class MCPClientIntent(BoundedJSONRPCIntent):
     method: Literal["mcp.ui.emit_intent"] = Field(..., description="Method for intent bubbling.")
 
 
-class MCPPromptRef(CoreasonBaseModel):
+class MCPPromptReferenceState(CoreasonBaseModel):
     """A dynamic reference to an MCP-provided prompt template."""
 
     server_id: str = Field(..., description="The ID of the MCP server providing this prompt.")
@@ -2730,7 +2752,7 @@ class MCPResourceManifest(CoreasonBaseModel):
 type MCPTransportType = Literal["stdio", "sse", "http"]
 
 
-class MCPClientBinding(CoreasonBaseModel):
+class MCPClientBindingProfile(CoreasonBaseModel):
     """
     Binding configuration for a Model Context Protocol (MCP) server.
     """
@@ -2757,7 +2779,7 @@ class MacroGridProfile(CoreasonBaseModel):
 
     layout_matrix: list[list[str]] = Field(description="A matrix defining the layout structure, using panel IDs.")
     # Note: layout_matrix is a structurally ordered sequence (2D Visual Grammar) and MUST NOT be sorted.
-    panels: list[AnyPanel] = Field(
+    panels: list[AnyPanelProfile] = Field(
         description="The ordered array of topological UI panels physically rendered in the grid.",
     )
     # Note: panels is a structurally ordered sequence (2D Visual Grammar) and MUST NOT be sorted.
@@ -2829,12 +2851,12 @@ class MechanisticAuditContract(CoreasonBaseModel):
         description="The specific architectural events that authorize the orchestrator to halt generation and extract internal activations.",  # noqa: E501
     )
     target_layers: list[int] = Field(
-        min_length=1, description="The specific transformer block indices the execution engine must read from."
+        min_length=1, description="The specific transformer block indices the execution engine must extract from."
     )
-    max_features_per_layer: int = Field(gt=0, description="The top-k features to extract, preventing memory overflow.")
+    max_features_per_layer: int = Field(gt=0, description="The top-k features to extract, preventing VRAM exhaustion.")
     require_zk_commitments: bool = Field(
         default=True,
-        description="If True, the orchestrator MUST generate cryptographic latent state proofs alongside the activation reads.",  # noqa: E501
+        description="If True, the orchestrator MUST generate cryptographic latent state proofs alongside the activation extractions.",  # noqa: E501
     )
 
     @model_validator(mode="after")
@@ -2846,13 +2868,14 @@ class MechanisticAuditContract(CoreasonBaseModel):
 
 class EpistemicProvenanceReceipt(CoreasonBaseModel):
     extracted_by: NodeID = Field(
-        description="The Content Identifier (CID) of the agent node that extracted this memory."
+        description="The Content Identifier (CID) of the agent node that extracted this payload."
     )
     source_event_id: str = Field(
         description="The exact event Content Identifier (CID) in the EpistemicLedgerState that generated this fact."
     )
     source_artifact_id: str | None = Field(
-        default=None, description="The CID of the Genesis MultimodalArtifactReceipt this memory was transmutated from."
+        default=None,
+        description="The CID of the Genesis MultimodalArtifactReceipt this semantic state was transmutated from.",
     )
     multimodal_anchor: MultimodalTokenAnchorState | None = Field(
         default=None, description="The unified VLM spatial and temporal token matrix where this data was extracted."
@@ -2916,7 +2939,7 @@ class NDimensionalTensorManifest(CoreasonBaseModel):
     Used for routing multi-dimensional compute without passing raw bytes.
     """
 
-    dtype: TensorDType = Field(..., description="Data type of the tensor elements.")
+    dtype: TensorDType = Field(..., description="Structural type of the tensor elements.")
     shape: tuple[int, ...] = Field(..., description="N-Dimensional shape tuple.")
     vram_footprint_bytes: int = Field(..., description="Exact byte size of the uncompressed tensor.")
     merkle_root: str = Field(..., pattern="^[a-fA-F0-9]{64}$", description="SHA-256 Merkle root of the payload chunks.")
@@ -2924,7 +2947,7 @@ class NDimensionalTensorManifest(CoreasonBaseModel):
 
     @model_validator(mode="after")
     def _enforce_physics_engine(self) -> "NDimensionalTensorManifest":
-        """Mathematically prove the topology matches the declared memory footprint."""
+        """Mathematically prove the topology matches the declared VRAM footprint."""
         if len(self.shape) < 1:
             raise ValueError("Tensor shape must have at least 1 dimension.")
         for dim in self.shape:
@@ -2946,7 +2969,7 @@ class NDimensionalTensorManifest(CoreasonBaseModel):
 class NeuralAuditAttestationReceipt(CoreasonBaseModel):
     audit_id: str = Field(
         min_length=1,
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",  # noqa: E501
     )
     layer_activations: dict[int, list[SaeFeatureActivationState]] = Field(
         description="A mapping of specific transformer layer indices to their top-k activated SAE features."
@@ -2957,7 +2980,7 @@ class NeuralAuditAttestationReceipt(CoreasonBaseModel):
     )
 
 
-class NeuroSymbolicHandoff(CoreasonBaseModel):
+class NeuroSymbolicHandoffContract(CoreasonBaseModel):
     handoff_id: str = Field(min_length=1, description="Unique identifier for this symbolic delegation.")
     solver_protocol: Literal["z3", "lean4", "coq", "tla_plus", "sympy"] = Field(
         description="The target deterministic math/logic engine."
@@ -2995,10 +3018,10 @@ class ObservabilityPolicy(CoreasonBaseModel):
     detailed_events: bool = Field(default=False, description="Whether to include granular intra-tool loop events.")
 
 
-class OntologicalHandshake(CoreasonBaseModel):
+class OntologicalHandshakeReceipt(CoreasonBaseModel):
     handshake_id: str = Field(
         min_length=1,
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this protocol handshake to the Merkle-DAG.",  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this protocol handshake to the Merkle-DAG.",  # noqa: E501
     )
     participant_node_ids: list[str] = Field(min_length=2, description="The agents establishing semantic alignment.")
     measured_cosine_similarity: float = Field(
@@ -3012,6 +3035,11 @@ class OntologicalHandshake(CoreasonBaseModel):
         description="The projection applied if the agents natively used different embedding dimensionalities.",
     )
 
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "participant_node_ids", sorted(self.participant_node_ids))
+        return self
+
 
 class OutputMappingContract(CoreasonBaseModel):
     """
@@ -3022,7 +3050,7 @@ class OutputMappingContract(CoreasonBaseModel):
     parent_key: str = Field(description="The mapped key in the parent's shared state contract.")
 
 
-class CompositeNodeManifest(BaseNodeManifest):
+class CompositeNodeProfile(BaseNodeProfile):
     """
     A node that encapsulates a nested workflow topology.
     """
@@ -3252,7 +3280,7 @@ class SemanticFirewallPolicy(CoreasonBaseModel):
 
 class InformationFlowPolicy(CoreasonBaseModel):
     """
-    Mathematical Data Loss Prevention (DLP) contract that bounds the graph.
+    Mathematical Payload Loss Prevention (PLP) contract that bounds the graph.
     """
 
     policy_id: str = Field(description="Unique identifier for this macroscopic flow control policy.")
@@ -3343,7 +3371,6 @@ class ExecutionSpanReceipt(CoreasonBaseModel):
     events: list[SpanEvent] = Field(
         default_factory=list, max_length=10000, description="Structured log records emitted during the span."
     )
-    # Topological invariant: Structurally ordered sequence. MUST NOT be sorted.
 
     @model_validator(mode="after")
     def validate_temporal_bounds(self) -> Any:
@@ -3372,7 +3399,7 @@ class SpatialKinematicActionIntent(CoreasonBaseModel):
     bezier_control_points: list[SpatialCoordinateProfile] = Field(
         default_factory=list, description="Waypoints for constructing non-linear, bot-evasive movement curves."
     )
-    # Topological invariant: Structurally ordered sequence. MUST NOT be sorted.
+    # Note: bezier_control_points is a structurally ordered sequence (Spatial Kinematics) and MUST NOT be sorted.
     expected_visual_concept: str | None = Field(
         default=None,
         description="The visual anchor (e.g., 'Submit Button'). The orchestrator must verify this semantic concept exists at the target_coordinate before executing the macro, preventing blind clicks.",  # noqa: E501
@@ -3381,11 +3408,11 @@ class SpatialKinematicActionIntent(CoreasonBaseModel):
 
 class StateContract(CoreasonBaseModel):
     """
-    A strict Cryptographic State Contract (Typed Blackboard) for multi-agent memory sharing.
+    A strict Cryptographic State Contract (Typed Blackboard) for multi-agent state sharing.
     """
 
     schema_definition: dict[str, Any] = Field(
-        description="A strict JSON Schema dictionary defining the required shape of the shared state blackboard."
+        description="A strict JSON Schema dictionary defining the required shape of the shared epistemic blackboard."
     )
     strict_validation: bool = Field(
         default=True,
@@ -3416,24 +3443,26 @@ class StatisticalChartExtractionState(CoreasonBaseModel):
     axes: dict[str, AffineTransformMatrixProfile] = Field(
         description="Named axes (e.g., 'x', 'y') defining the affine transformation boundaries."
     )
-    metric_matrix: list[dict[str, float | str]] = Field(
+    semantic_series: list[dict[str, float | str]] = Field(
         description="The discrete semantic tuples extracted from the chart markers."
     )
 
     @model_validator(mode="after")
     def verify_dimensional_isometry(self) -> Self:
         axis_keys = set(self.axes.keys())
-        for point in self.metric_matrix:
+        for point in self.semantic_series:
             point_keys = set(point.keys())
             if not point_keys.issubset(axis_keys) and (not axis_keys.issubset(point_keys)):
                 missing = axis_keys - point_keys
                 if missing:
-                    raise ValueError(f"Data point missing required axis dimensions: {missing}")
+                    raise ValueError(f"Coordinate missing required axis dimensions: {missing}")
         return self
 
     @model_validator(mode="after")
     def sort_arrays(self) -> Self:
-        object.__setattr__(self, "data_series", sorted(self.metric_matrix, key=lambda d: json.dumps(d, sort_keys=True)))
+        object.__setattr__(
+            self, "semantic_series", sorted(self.semantic_series, key=lambda d: json.dumps(d, sort_keys=True))
+        )
         return self
 
 
@@ -3522,7 +3551,7 @@ class HypothesisGenerationEvent(BaseStateEvent):
 
     hypothesis_id: str = Field(
         min_length=1,
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this abductive leap to the Merkle-DAG.",  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this abductive leap to the Merkle-DAG.",  # noqa: E501
     )
     premise_text: str = Field(description="The natural language explanation of the abductive theory.")
     bayesian_prior: float = Field(
@@ -3570,19 +3599,19 @@ class System1ReflexPolicy(CoreasonBaseModel):
     confidence_threshold: float = Field(
         ge=0.0, le=1.0, description="The confidence threshold required to execute a reflex action."
     )
-    allowed_read_only_tools: list[str] = Field(
-        description="The explicit, bounded array of strictly read-only tool capabilities."
+    allowed_passive_tools: list[str] = Field(
+        description="The explicit, bounded array of strictly non-mutating tool capabilities."
     )
 
     @model_validator(mode="after")
     def sort_arrays(self) -> Self:
-        object.__setattr__(self, "allowed_read_only_tools", sorted(self.allowed_read_only_tools))
+        object.__setattr__(self, "allowed_passive_tools", sorted(self.allowed_passive_tools))
         return self
 
 
 class System2RemediationIntent(CoreasonBaseModel):
     """
-    A passive data envelope that deterministically maps a kinetic execution error
+    A passive structural envelope that deterministically maps a kinetic execution error
     (e.g., a Pydantic ValidationError) into a structurally rigid System 2 correction directive.
     """
 
@@ -3591,7 +3620,7 @@ class System2RemediationIntent(CoreasonBaseModel):
     )
 
     target_node_id: NodeID = Field(
-        description="The strict W3C DID of the agent that authored the invalid state, ensuring the fault is routed back to the exact memory partition."  # noqa: E501
+        description="The strict W3C DID of the agent that authored the invalid state, ensuring the fault is routed back to the exact state partition."  # noqa: E501
     )
     failing_pointers: list[str] = Field(
         min_length=1,
@@ -3712,7 +3741,7 @@ class LogEvent(CoreasonBaseModel):
     )
 
 
-class SpanTrace(CoreasonBaseModel):
+class SpanTraceReceipt(CoreasonBaseModel):
     """
     An execution window span trace.
     """
@@ -3727,11 +3756,11 @@ class SpanTrace(CoreasonBaseModel):
     )
 
 
-class TemporalBounds(CoreasonBaseModel):
+class TemporalBoundsProfile(CoreasonBaseModel):
     valid_from: float | None = Field(
-        default=None, ge=0.0, description="The UNIX timestamp when this memory became true."
+        default=None, ge=0.0, description="The UNIX timestamp when this coordinate became true."
     )
-    valid_to: float | None = Field(default=None, description="The UNIX timestamp when this memory was invalidated.")
+    valid_to: float | None = Field(default=None, description="The UNIX timestamp when this coordinate was invalidated.")
     interval_type: CausalInterval | None = Field(
         default=None, description="The Allen's interval algebra or causal relationship classification."
     )
@@ -3765,7 +3794,7 @@ type AnyToolchainState = Annotated[
 class TheoryOfMindSnapshot(CoreasonBaseModel):
     target_agent_id: str = Field(
         min_length=1,
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the agent whose mind is being modeled.",  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the agent whose mind is being modeled.",  # noqa: E501
     )
     assumed_shared_beliefs: list[str] = Field(
         description="The explicit array of Content Identifiers (CIDs) acting as cryptographic Lineage Watermarks that the modeling agent assumes the target already possesses."  # noqa: E501
@@ -3877,7 +3906,7 @@ class VectorEmbeddingState(CoreasonBaseModel):
 
 class SemanticEdgeState(CoreasonBaseModel):
     edge_id: str = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this semantic edge to the Merkle-DAG."  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this semantic edge to the Merkle-DAG."  # noqa: E501
     )
     subject_node_id: str = Field(description="The origin SemanticNodeState Content Identifier (CID).")
     object_node_id: str = Field(description="The destination SemanticNodeState Content Identifier (CID).")
@@ -3893,7 +3922,7 @@ class SemanticEdgeState(CoreasonBaseModel):
         default=None,
         description="Optional distinct provenance if the relationship was inferred separately from the nodes.",
     )
-    temporal_bounds: TemporalBounds | None = Field(
+    temporal_bounds: TemporalBoundsProfile | None = Field(
         default=None, description="The time window during which this relationship holds true."
     )
     causal_relationship: Literal["causes", "confounds", "correlates_with", "undirected"] = Field(
@@ -3903,14 +3932,16 @@ class SemanticEdgeState(CoreasonBaseModel):
 
 class SemanticNodeState(CoreasonBaseModel):
     node_id: str = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this semantic node to the Merkle-DAG."  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this semantic node to the Merkle-DAG."  # noqa: E501
     )
     label: str = Field(description="The categorical label of the node (e.g., 'Person', 'Concept').")
     scope: Literal["global", "tenant", "session"] = Field(
         default="session",
         description="The cryptographic namespace partitioning boundary. Global is public, Tenant is corporate, Session is ephemeral.",  # noqa: E501
     )
-    text_chunk: str = Field(max_length=50000, description="The raw natural language representation of the memory.")
+    text_chunk: str = Field(
+        max_length=50000, description="The raw natural language representation of the semantic node."
+    )
     embedding: VectorEmbeddingState | None = Field(
         default=None,
         description="Topologically Bounded Latent Spaces used to calculate exact geometric distance and preserve structural Isometry.",  # noqa: E501
@@ -3918,12 +3949,12 @@ class SemanticNodeState(CoreasonBaseModel):
     provenance: EpistemicProvenanceReceipt = Field(
         description="The cryptographic chain of custody for this semantic state."
     )
-    tier: CognitiveTier = Field(default="semantic", description="The cognitive tier this memory resides in.")
-    temporal_bounds: TemporalBounds | None = Field(
+    tier: CognitiveTier = Field(default="semantic", description="The cognitive tier this latent state resides in.")
+    temporal_bounds: TemporalBoundsProfile | None = Field(
         default=None, description="The time window during which this node is considered valid."
     )
     salience: SalienceProfile | None = Field(
-        default=None, description="The importance profile used for epistemic state pruning."
+        default=None, description="The importance profile used for structural pruning."
     )
     fhe_profile: HomomorphicEncryptionProfile | None = Field(
         default=None,
@@ -3973,7 +4004,7 @@ class AgentAttestationReceipt(CoreasonBaseModel):
         return self
 
 
-class AgentNodeManifest(BaseNodeManifest):
+class AgentNodeProfile(BaseNodeProfile):
     """
     A node representing an autonomous agent.
     """
@@ -3999,7 +4030,7 @@ class AgentNodeManifest(BaseNodeManifest):
     )
     secure_sub_session: SecureSubSessionState | None = Field(
         default=None,
-        description="Declarative boundary for handling unredacted secrets within a temporarily isolated memory partition.",  # noqa: E501
+        description="Declarative boundary for handling unredacted secrets within a temporarily isolated state partition.",  # noqa: E501
     )
     baseline_cognitive_state: CognitiveStateProfile | None = Field(
         default=None,
@@ -4031,7 +4062,7 @@ class AgentNodeManifest(BaseNodeManifest):
         default=None,
         description="The formal contract authorizing the agent to mutate variables to prove Pearlian causation.",
     )
-    symbolic_handoff_policy: NeuroSymbolicHandoff | None = Field(
+    symbolic_handoff_policy: NeuroSymbolicHandoffContract | None = Field(
         default=None,
         description="The API-like contract allowing the agent to offload rigid logic to deterministic CPU solvers.",
     )
@@ -4050,8 +4081,8 @@ class AgentNodeManifest(BaseNodeManifest):
         return self
 
 
-type AnyNodeManifest = Annotated[
-    AgentNodeManifest | HumanNodeManifest | SystemNodeManifest | CompositeNodeManifest | MemoizedNodeManifest,
+type AnyNodeProfile = Annotated[
+    AgentNodeProfile | HumanNodeProfile | SystemNodeProfile | CompositeNodeProfile | MemoizedNodeProfile,
     Field(discriminator="type", description="A discriminated union of all valid workflow nodes."),
 ]
 
@@ -4070,13 +4101,13 @@ class BaseTopologyManifest(CoreasonBaseModel):
     justification: str | None = Field(
         default=None, description="Cryptographic/audit justification for this topology's configuration."
     )
-    nodes: dict[NodeID, AnyNodeManifest] = Field(description="Flat registry of all nodes in this topology.")
+    nodes: dict[NodeID, AnyNodeProfile] = Field(description="Flat registry of all nodes in this topology.")
     shared_state_contract: StateContract | None = Field(
         default=None, description="The schema-on-write contract governing the internal state of this topology."
     )
     information_flow: InformationFlowPolicy | None = Field(
         default=None,
-        description="The structural Data Loss Prevention (DLP) contract governing all state mutations in this topology.",  # noqa: E501
+        description="The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology.",  # noqa: E501
     )
     observability: ObservabilityPolicy | None = Field(
         default=None, description="The distributed tracing rules bound to this specific execution graph."
@@ -4313,6 +4344,14 @@ class SwarmTopologyManifest(BaseTopologyManifest):
             raise ValueError("spawning_threshold cannot exceed max_concurrent_agents")
         return self
 
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(
+            self, "active_prediction_markets", sorted(self.active_prediction_markets, key=lambda x: x.market_id)
+        )
+        object.__setattr__(self, "resolved_markets", sorted(self.resolved_markets, key=lambda x: x.market_id))
+        return self
+
 
 class AdversarialMarketTopologyManifest(CoreasonBaseModel):
     """
@@ -4345,13 +4384,13 @@ class AdversarialMarketTopologyManifest(CoreasonBaseModel):
 
     def compile_to_base_topology(self) -> CouncilTopologyManifest:
         """Deterministically unwraps the macro into a rigid CouncilTopologyManifest."""
-        nodes: dict[NodeID, AnyNodeManifest] = {
-            self.adjudicator_id: SystemNodeManifest(description="Synthesizing Adjudicator")
+        nodes: dict[NodeID, AnyNodeProfile] = {
+            self.adjudicator_id: SystemNodeProfile(description="Synthesizing Adjudicator")
         }
         for node_id in self.blue_team_ids:
-            nodes[node_id] = SystemNodeManifest(description="Blue Team Member")
+            nodes[node_id] = SystemNodeProfile(description="Blue Team Member")
         for node_id in self.red_team_ids:
-            nodes[node_id] = SystemNodeManifest(description="Red Team Member")
+            nodes[node_id] = SystemNodeProfile(description="Red Team Member")
         consensus = ConsensusPolicy(strategy="prediction_market", prediction_market_rules=self.market_rules)
         return CouncilTopologyManifest(nodes=nodes, adjudicator_id=self.adjudicator_id, consensus_policy=consensus)
 
@@ -4380,9 +4419,9 @@ class ConsensusFederationTopologyManifest(CoreasonBaseModel):
         return self
 
     def compile_to_base_topology(self) -> CouncilTopologyManifest:
-        nodes: dict[NodeID, AnyNodeManifest] = {self.adjudicator_id: SystemNodeManifest(description="PBFT Sequencer")}
+        nodes: dict[NodeID, AnyNodeProfile] = {self.adjudicator_id: SystemNodeProfile(description="PBFT Sequencer")}
         for node_id in self.participant_ids:
-            nodes[node_id] = SystemNodeManifest(description="PBFT Participant")
+            nodes[node_id] = SystemNodeProfile(description="PBFT Participant")
         return CouncilTopologyManifest(
             nodes=nodes,
             adjudicator_id=self.adjudicator_id,
@@ -4498,7 +4537,7 @@ class InterventionReceipt(CoreasonBaseModel):
         return self
 
 
-type AnyInterventionPayload = Annotated[
+type AnyInterventionState = Annotated[
     InterventionIntent | InterventionReceipt | OverrideIntent | ConstitutionalAmendmentIntent,
     Field(discriminator="type"),
 ]
@@ -4515,13 +4554,13 @@ class EpistemicQuarantineSnapshot(CoreasonBaseModel):
     )
     argumentation: EpistemicArgumentGraphState | None = Field(
         default=None,
-        description="The formal graph of non-monotonic claims and defeasible attacks currently active in the swarm's working memory.",  # noqa: E501
+        description="The formal graph of non-monotonic claims and defeasible attacks currently active in the swarm's working state.",  # noqa: E501
     )
     theory_of_mind_models: list[TheoryOfMindSnapshot] = Field(
         default_factory=list,
         description="Empathetic models of other agents to compress and target outgoing communications.",
     )
-    affordance_projection: OntologicalSurfaceProjection | None = Field(
+    affordance_projection: OntologicalSurfaceProjectionManifest | None = Field(
         default=None,
         description="The mathematically bounded subgraph of capabilities currently available to the agent.",
     )
@@ -4549,7 +4588,7 @@ class ZeroKnowledgeReceipt(CoreasonBaseModel):
         description="The SHA-256 hash of the public inputs (e.g., prompt, Lamport clock) anchoring this proof to the specific state index."  # noqa: E501
     )
     verifier_key_id: str = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the public evaluation key."  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the public evaluation key."  # noqa: E501
     )
     cryptographic_blob: str = Field(
         max_length=5000000, description="The base64-encoded succinct cryptographic proof payload."
@@ -4708,7 +4747,7 @@ class EpistemicLedgerState(CoreasonBaseModel):
 # STRATUM 9: TOPOLOGICAL RESOLUTION (FORWARD REF EVALUATION)
 # =========================================================================
 
-CompositeNodeManifest.model_rebuild()
+CompositeNodeProfile.model_rebuild()
 WorkflowManifest.model_rebuild()
 MCPServerBindingProfile.model_rebuild()
 

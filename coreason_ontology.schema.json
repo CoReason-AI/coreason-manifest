@@ -26,7 +26,7 @@
           "type": "array"
         },
         "ephemeral_partitions": {
-          "description": "Hermetically sealed memory boundaries for dynamically resolved scripts and PEFT adapters.",
+          "description": "Hermetically sealed context boundaries for dynamically resolved scripts and PEFT adapters.",
           "items": {
             "$ref": "#/$defs/EphemeralNamespacePartitionState"
           },
@@ -478,7 +478,7 @@
       "title": "AgentBidIntent",
       "type": "object"
     },
-    "AgentNodeManifest": {
+    "AgentNodeProfile": {
       "additionalProperties": false,
       "description": "A node representing an autonomous agent.",
       "properties": {
@@ -609,7 +609,7 @@
             }
           ],
           "default": null,
-          "description": "Declarative boundary for handling unredacted secrets within a temporarily isolated memory partition."
+          "description": "Declarative boundary for handling unredacted secrets within a temporarily isolated state partition."
         },
         "baseline_cognitive_state": {
           "anyOf": [
@@ -722,7 +722,7 @@
         "symbolic_handoff_policy": {
           "anyOf": [
             {
-              "$ref": "#/$defs/NeuroSymbolicHandoff"
+              "$ref": "#/$defs/NeuroSymbolicHandoffContract"
             },
             {
               "type": "null"
@@ -759,7 +759,7 @@
       "required": [
         "description"
       ],
-      "title": "AgentNodeManifest",
+      "title": "AgentNodeProfile",
       "type": "object"
     },
     "AmbientState": {
@@ -858,37 +858,37 @@
       "title": "AnchoringPolicy",
       "type": "object"
     },
-    "AnyNodeManifest": {
+    "AnyNodeProfile": {
       "description": "A discriminated union of all valid workflow nodes.",
       "discriminator": {
         "mapping": {
-          "agent": "#/$defs/AgentNodeManifest",
-          "composite": "#/$defs/CompositeNodeManifest",
-          "human": "#/$defs/HumanNodeManifest",
-          "memoized": "#/$defs/MemoizedNodeManifest",
-          "system": "#/$defs/SystemNodeManifest"
+          "agent": "#/$defs/AgentNodeProfile",
+          "composite": "#/$defs/CompositeNodeProfile",
+          "human": "#/$defs/HumanNodeProfile",
+          "memoized": "#/$defs/MemoizedNodeProfile",
+          "system": "#/$defs/SystemNodeProfile"
         },
         "propertyName": "type"
       },
       "oneOf": [
         {
-          "$ref": "#/$defs/AgentNodeManifest"
+          "$ref": "#/$defs/AgentNodeProfile"
         },
         {
-          "$ref": "#/$defs/HumanNodeManifest"
+          "$ref": "#/$defs/HumanNodeProfile"
         },
         {
-          "$ref": "#/$defs/SystemNodeManifest"
+          "$ref": "#/$defs/SystemNodeProfile"
         },
         {
-          "$ref": "#/$defs/CompositeNodeManifest"
+          "$ref": "#/$defs/CompositeNodeProfile"
         },
         {
-          "$ref": "#/$defs/MemoizedNodeManifest"
+          "$ref": "#/$defs/MemoizedNodeProfile"
         }
       ]
     },
-    "AnyPanel": {
+    "AnyPanelProfile": {
       "description": "A discriminated union of presentation UI panels.",
       "discriminator": {
         "mapping": {
@@ -1232,7 +1232,7 @@
       "description": "A cryptographic receipt of a continuous multimodal sequence being prematurely severed by an external stimulus.",
       "properties": {
         "event_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
           "title": "Event Id",
           "type": "string"
         },
@@ -1249,7 +1249,7 @@
           "type": "string"
         },
         "target_event_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the active node generation cycle that was killed in the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the active node generation cycle that was killed in the Merkle-DAG.",
           "title": "Target Event Id",
           "type": "string"
         },
@@ -1309,7 +1309,7 @@
       "title": "BaseIntent",
       "type": "object"
     },
-    "BaseNodeManifest": {
+    "BaseNodeProfile": {
       "additionalProperties": false,
       "description": "Base configuration for any execution node in a topology.",
       "properties": {
@@ -1370,10 +1370,10 @@
       "required": [
         "description"
       ],
-      "title": "BaseNodeManifest",
+      "title": "BaseNodeProfile",
       "type": "object"
     },
-    "BasePanel": {
+    "BasePanelProfile": {
       "additionalProperties": false,
       "description": "Base class for Scientific Visualization panels.",
       "properties": {
@@ -1386,14 +1386,14 @@
       "required": [
         "panel_id"
       ],
-      "title": "BasePanel",
+      "title": "BasePanelProfile",
       "type": "object"
     },
     "BaseStateEvent": {
       "additionalProperties": false,
       "properties": {
         "event_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
           "title": "Event Id",
           "type": "string"
         },
@@ -1452,7 +1452,7 @@
         },
         "nodes": {
           "additionalProperties": {
-            "$ref": "#/$defs/AnyNodeManifest"
+            "$ref": "#/$defs/AnyNodeProfile"
           },
           "description": "Flat registry of all nodes in this topology.",
           "propertyNames": {
@@ -1483,7 +1483,7 @@
             }
           ],
           "default": null,
-          "description": "The structural Data Loss Prevention (DLP) contract governing all state mutations in this topology."
+          "description": "The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology."
         },
         "observability": {
           "anyOf": [
@@ -1508,7 +1508,7 @@
       "additionalProperties": false,
       "properties": {
         "event_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
           "title": "Event Id",
           "type": "string"
         },
@@ -1630,7 +1630,7 @@
         },
         "max_permitted_classification": {
           "$ref": "#/$defs/InformationClassification",
-          "description": "The absolute highest data sensitivity allowed to cross this federated boundary."
+          "description": "The absolute highest semantic sensitivity allowed to cross this federated boundary."
         },
         "liability_limit_magnitude": {
           "description": "The strict magnitude cap on cross-tenant economic liability.",
@@ -1639,7 +1639,7 @@
           "type": "integer"
         },
         "permitted_geographic_regions": {
-          "description": "Explicit whitelist of geographic regions or cloud enclaves where execution is structurally permitted (Data Residency Pinning).",
+          "description": "Explicit whitelist of geographic regions or cloud enclaves where execution is structurally permitted (Payload Residency Pinning).",
           "items": {
             "type": "string"
           },
@@ -1894,7 +1894,7 @@
       "additionalProperties": false,
       "properties": {
         "source_event_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the source event in the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the source event in the Merkle-DAG.",
           "title": "Source Event Id",
           "type": "string"
         },
@@ -2176,7 +2176,7 @@
       "title": "CognitiveUncertaintyProfile",
       "type": "object"
     },
-    "CompositeNodeManifest": {
+    "CompositeNodeProfile": {
       "additionalProperties": false,
       "description": "A node that encapsulates a nested workflow topology.",
       "properties": {
@@ -2265,7 +2265,7 @@
         "description",
         "topology"
       ],
-      "title": "CompositeNodeManifest",
+      "title": "CompositeNodeProfile",
       "type": "object"
     },
     "ComputeProvisioningIntent": {
@@ -2523,7 +2523,7 @@
           "description": "Forces non-destructive graph mutations.",
           "enum": [
             "append_only",
-            "merge_on_read"
+            "merge_on_resolve"
           ],
           "title": "Mutation Paradigm",
           "type": "string"
@@ -2591,7 +2591,7 @@
         },
         "nodes": {
           "additionalProperties": {
-            "$ref": "#/$defs/AnyNodeManifest"
+            "$ref": "#/$defs/AnyNodeProfile"
           },
           "description": "Flat registry of all nodes in this topology.",
           "propertyNames": {
@@ -2622,7 +2622,7 @@
             }
           ],
           "default": null,
-          "description": "The structural Data Loss Prevention (DLP) contract governing all state mutations in this topology."
+          "description": "The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology."
         },
         "observability": {
           "anyOf": [
@@ -2708,7 +2708,7 @@
       "description": "A cryptographic record of an agent simulating an alternative timeline to calculate epistemic regret\nand update its policy.",
       "properties": {
         "event_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
           "title": "Event Id",
           "type": "string"
         },
@@ -2725,7 +2725,7 @@
           "type": "string"
         },
         "historical_event_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the specific historical state node where the agent mathematically diverged to simulate an alternative path.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the specific historical state node where the agent mathematically diverged to simulate an alternative path.",
           "title": "Historical Event Id",
           "type": "string"
         },
@@ -2901,7 +2901,7 @@
           "type": "string"
         },
         "source_node_id": {
-          "description": "The execution node that emitted the original data.",
+          "description": "The execution node that emitted the original payload.",
           "maxLength": 255,
           "title": "Source Node Id",
           "type": "string"
@@ -2990,7 +2990,7 @@
         },
         "nodes": {
           "additionalProperties": {
-            "$ref": "#/$defs/AnyNodeManifest"
+            "$ref": "#/$defs/AnyNodeProfile"
           },
           "description": "Flat registry of all nodes in this topology.",
           "propertyNames": {
@@ -3021,7 +3021,7 @@
             }
           ],
           "default": null,
-          "description": "The structural Data Loss Prevention (DLP) contract governing all state mutations in this topology."
+          "description": "The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology."
         },
         "observability": {
           "anyOf": [
@@ -3221,7 +3221,7 @@
         },
         "nodes": {
           "additionalProperties": {
-            "$ref": "#/$defs/AnyNodeManifest"
+            "$ref": "#/$defs/AnyNodeProfile"
           },
           "description": "Flat registry of all nodes in this topology.",
           "propertyNames": {
@@ -3252,7 +3252,7 @@
             }
           ],
           "default": null,
-          "description": "The structural Data Loss Prevention (DLP) contract governing all state mutations in this topology."
+          "description": "The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology."
         },
         "observability": {
           "anyOf": [
@@ -3450,7 +3450,7 @@
           "title": "Blocks",
           "type": "object"
         },
-        "reading_order_edges": {
+        "chronological_flow_edges": {
           "description": "Directed edges defining the topological sort (chronological flow) of the document.",
           "items": {
             "maxItems": 2,
@@ -3465,7 +3465,7 @@
             ],
             "type": "array"
           },
-          "title": "Reading Order Edges",
+          "title": "Chronological Flow Edges",
           "type": "array"
         }
       },
@@ -3979,7 +3979,7 @@
       "additionalProperties": false,
       "properties": {
         "event_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
           "title": "Event Id",
           "type": "string"
         },
@@ -4029,7 +4029,7 @@
       "properties": {
         "extracted_by": {
           "$ref": "#/$defs/NodeID",
-          "description": "The Content Identifier (CID) of the agent node that extracted this memory."
+          "description": "The Content Identifier (CID) of the agent node that extracted this payload."
         },
         "source_event_id": {
           "description": "The exact event Content Identifier (CID) in the EpistemicLedgerState that generated this fact.",
@@ -4046,7 +4046,7 @@
             }
           ],
           "default": null,
-          "description": "The CID of the Genesis MultimodalArtifactReceipt this memory was transmutated from.",
+          "description": "The CID of the Genesis MultimodalArtifactReceipt this semantic state was transmutated from.",
           "title": "Source Artifact Id"
         },
         "multimodal_anchor": {
@@ -4108,7 +4108,7 @@
             }
           ],
           "default": null,
-          "description": "The formal graph of non-monotonic claims and defeasible attacks currently active in the swarm's working memory."
+          "description": "The formal graph of non-monotonic claims and defeasible attacks currently active in the swarm's working state."
         },
         "theory_of_mind_models": {
           "description": "Empathetic models of other agents to compress and target outgoing communications.",
@@ -4121,7 +4121,7 @@
         "affordance_projection": {
           "anyOf": [
             {
-              "$ref": "#/$defs/OntologicalSurfaceProjection"
+              "$ref": "#/$defs/OntologicalSurfaceProjectionManifest"
             },
             {
               "type": "null"
@@ -4281,7 +4281,7 @@
           "type": "string"
         },
         "tripped_rule_id": {
-          "description": "The ID of the Data Loss Prevention (DLP) or Governance rule that blocked execution.",
+          "description": "The ID of the Payload Loss Prevention (PLP) or Governance rule that blocked execution.",
           "title": "Tripped Rule Id",
           "type": "string"
         },
@@ -4380,7 +4380,7 @@
         },
         "nodes": {
           "additionalProperties": {
-            "$ref": "#/$defs/AnyNodeManifest"
+            "$ref": "#/$defs/AnyNodeProfile"
           },
           "description": "Flat registry of all nodes in this topology.",
           "propertyNames": {
@@ -4411,7 +4411,7 @@
             }
           ],
           "default": null,
-          "description": "The structural Data Loss Prevention (DLP) contract governing all state mutations in this topology."
+          "description": "The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology."
         },
         "observability": {
           "anyOf": [
@@ -4580,7 +4580,7 @@
         },
         "nodes": {
           "additionalProperties": {
-            "$ref": "#/$defs/AnyNodeManifest"
+            "$ref": "#/$defs/AnyNodeProfile"
           },
           "description": "Flat registry of all nodes in this topology.",
           "propertyNames": {
@@ -4611,7 +4611,7 @@
             }
           ],
           "default": null,
-          "description": "The structural Data Loss Prevention (DLP) contract governing all state mutations in this topology."
+          "description": "The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology."
         },
         "observability": {
           "anyOf": [
@@ -5015,7 +5015,7 @@
       "additionalProperties": false,
       "properties": {
         "condition_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this falsification test to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this falsification test to the Merkle-DAG.",
           "minLength": 1,
           "title": "Condition Id",
           "type": "string"
@@ -5110,11 +5110,11 @@
         },
         "target_topology_id": {
           "$ref": "#/$defs/NodeID",
-          "description": "The DID of the discovered external data lake/VPC."
+          "description": "The DID of the discovered external state matrix/VPC."
         },
         "authorized_session": {
           "$ref": "#/$defs/SecureSubSessionState",
-          "description": "The isolated memory partition granted to the agent for this connection."
+          "description": "The isolated state partition granted to the agent for this connection."
         },
         "governing_sla": {
           "$ref": "#/$defs/BilateralSLA",
@@ -5170,7 +5170,7 @@
             }
           ],
           "default": null,
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the federated topology, if applicable.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the federated topology, if applicable.",
           "title": "Topology Id"
         }
       },
@@ -5444,13 +5444,13 @@
           "title": "Title",
           "type": "string"
         },
-        "data_source_id": {
-          "description": "The cryptographic pointer to the dataset in the EpistemicLedgerState.",
-          "title": "Data Source Id",
+        "ledger_source_id": {
+          "description": "The cryptographic pointer to the semantic series in the EpistemicLedgerState.",
+          "title": "Ledger Source Id",
           "type": "string"
         },
         "mark": {
-          "description": "The geometric shape used to represent the data.",
+          "description": "The geometric shape used to represent the matrix.",
           "enum": [
             "point",
             "line",
@@ -5463,7 +5463,7 @@
           "type": "string"
         },
         "encodings": {
-          "description": "The mapping of data fields to visual channels.",
+          "description": "The mapping of structural fields to visual channels.",
           "items": {
             "$ref": "#/$defs/VisualEncodingProfile"
           },
@@ -5486,7 +5486,7 @@
       "required": [
         "panel_id",
         "title",
-        "data_source_id",
+        "ledger_source_id",
         "mark",
         "encodings"
       ],
@@ -5630,7 +5630,7 @@
       "title": "HomomorphicEncryptionProfile",
       "type": "object"
     },
-    "HumanNodeManifest": {
+    "HumanNodeProfile": {
       "additionalProperties": false,
       "description": "A node representing a human participant in the workflow.",
       "properties": {
@@ -5710,14 +5710,14 @@
       "required": [
         "description"
       ],
-      "title": "HumanNodeManifest",
+      "title": "HumanNodeProfile",
       "type": "object"
     },
     "HypothesisGenerationEvent": {
       "additionalProperties": false,
       "properties": {
         "event_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
           "title": "Event Id",
           "type": "string"
         },
@@ -5734,7 +5734,7 @@
           "type": "string"
         },
         "hypothesis_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this abductive leap to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this abductive leap to the Merkle-DAG.",
           "minLength": 1,
           "title": "Hypothesis Id",
           "type": "string"
@@ -5847,7 +5847,7 @@
     },
     "InformationFlowPolicy": {
       "additionalProperties": false,
-      "description": "Mathematical Data Loss Prevention (DLP) contract that bounds the graph.",
+      "description": "Mathematical Payload Loss Prevention (PLP) contract that bounds the graph.",
       "properties": {
         "policy_id": {
           "description": "Unique identifier for this macroscopic flow control policy.",
@@ -6210,7 +6210,45 @@
       "title": "InterventionalCausalTask",
       "type": "object"
     },
-    "JSONRPCErrorProfile": {
+    "JSONRPCErrorResponseState": {
+      "additionalProperties": false,
+      "description": "JSON-RPC 2.0 Error Response object.",
+      "properties": {
+        "jsonrpc": {
+          "const": "2.0",
+          "description": "JSON-RPC version.",
+          "title": "Jsonrpc",
+          "type": "string"
+        },
+        "error": {
+          "$ref": "#/$defs/JSONRPCErrorState",
+          "description": "The error object."
+        },
+        "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The request ID that this error corresponds to.",
+          "title": "Id"
+        }
+      },
+      "required": [
+        "jsonrpc",
+        "error"
+      ],
+      "title": "JSONRPCErrorResponseState",
+      "type": "object"
+    },
+    "JSONRPCErrorState": {
       "additionalProperties": false,
       "description": "JSON-RPC 2.0 Error object.",
       "properties": {
@@ -6240,45 +6278,7 @@
         "code",
         "message"
       ],
-      "title": "JSONRPCErrorProfile",
-      "type": "object"
-    },
-    "JSONRPCErrorResponseProfile": {
-      "additionalProperties": false,
-      "description": "JSON-RPC 2.0 Error Response object.",
-      "properties": {
-        "jsonrpc": {
-          "const": "2.0",
-          "description": "JSON-RPC version.",
-          "title": "Jsonrpc",
-          "type": "string"
-        },
-        "error": {
-          "$ref": "#/$defs/JSONRPCErrorProfile",
-          "description": "The error object."
-        },
-        "id": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "integer"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The request ID that this error corresponds to.",
-          "title": "Id"
-        }
-      },
-      "required": [
-        "jsonrpc",
-        "error"
-      ],
-      "title": "JSONRPCErrorResponseProfile",
+      "title": "JSONRPCErrorState",
       "type": "object"
     },
     "LakehouseMountProfile": {
@@ -6446,7 +6446,7 @@
           "type": "object"
         },
         "tamper_evident_root": {
-          "description": "The overarching cryptographic hash (e.g., Merkle Root) proving the dataset has not been laundered or structurally modified.",
+          "description": "The overarching cryptographic hash (e.g., Merkle Root) proving the structural payload has not been laundered or structurally modified.",
           "title": "Tamper Evident Root",
           "type": "string"
         }
@@ -6555,7 +6555,7 @@
           "type": "array"
         },
         "allowed_resources": {
-          "description": "The explicit whitelist of resource URIs the node is allowed to read.",
+          "description": "The explicit whitelist of resource URIs the node is allowed to passively perceive.",
           "items": {
             "type": "string"
           },
@@ -6582,7 +6582,7 @@
       "title": "MCPCapabilityWhitelistPolicy",
       "type": "object"
     },
-    "MCPClientBinding": {
+    "MCPClientBindingProfile": {
       "additionalProperties": false,
       "description": "Binding configuration for a Model Context Protocol (MCP) server.",
       "properties": {
@@ -6616,7 +6616,7 @@
         "server_uri",
         "transport_type"
       ],
-      "title": "MCPClientBinding",
+      "title": "MCPClientBindingProfile",
       "type": "object"
     },
     "MCPClientIntent": {
@@ -6673,7 +6673,7 @@
       "title": "MCPClientIntent",
       "type": "object"
     },
-    "MCPPromptRef": {
+    "MCPPromptReferenceState": {
       "additionalProperties": false,
       "description": "A dynamic reference to an MCP-provided prompt template.",
       "properties": {
@@ -6724,7 +6724,7 @@
         "server_id",
         "prompt_name"
       ],
-      "title": "MCPPromptRef",
+      "title": "MCPPromptReferenceState",
       "type": "object"
     },
     "MCPResourceManifest": {
@@ -6877,7 +6877,7 @@
         "panels": {
           "description": "The ordered array of topological UI panels physically rendered in the grid.",
           "items": {
-            "$ref": "#/$defs/AnyPanel"
+            "$ref": "#/$defs/AnyPanelProfile"
           },
           "title": "Panels",
           "type": "array"
@@ -7014,7 +7014,7 @@
           "type": "array"
         },
         "target_layers": {
-          "description": "The specific transformer block indices the execution engine must read from.",
+          "description": "The specific transformer block indices the execution engine must extract from.",
           "items": {
             "type": "integer"
           },
@@ -7023,14 +7023,14 @@
           "type": "array"
         },
         "max_features_per_layer": {
-          "description": "The top-k features to extract, preventing memory overflow.",
+          "description": "The top-k features to extract, preventing VRAM exhaustion.",
           "exclusiveMinimum": 0,
           "title": "Max Features Per Layer",
           "type": "integer"
         },
         "require_zk_commitments": {
           "default": true,
-          "description": "If True, the orchestrator MUST generate cryptographic latent state proofs alongside the activation reads.",
+          "description": "If True, the orchestrator MUST generate cryptographic latent state proofs alongside the activation extractions.",
           "title": "Require Zk Commitments",
           "type": "boolean"
         }
@@ -7043,7 +7043,7 @@
       "title": "MechanisticAuditContract",
       "type": "object"
     },
-    "MemoizedNodeManifest": {
+    "MemoizedNodeProfile": {
       "additionalProperties": false,
       "description": "A passive structural interlock representing a historically executed graph branch.",
       "properties": {
@@ -7123,7 +7123,7 @@
         "target_topology_hash",
         "expected_output_schema"
       ],
-      "title": "MemoizedNodeManifest",
+      "title": "MemoizedNodeProfile",
       "type": "object"
     },
     "MigrationContract": {
@@ -7390,7 +7390,7 @@
       "properties": {
         "dtype": {
           "$ref": "#/$defs/TensorDType",
-          "description": "Data type of the tensor elements."
+          "description": "Structural type of the tensor elements."
         },
         "shape": {
           "description": "N-Dimensional shape tuple.",
@@ -7431,7 +7431,7 @@
       "additionalProperties": false,
       "properties": {
         "audit_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
           "minLength": 1,
           "title": "Audit Id",
           "type": "string"
@@ -7461,7 +7461,7 @@
       "title": "NeuralAuditAttestationReceipt",
       "type": "object"
     },
-    "NeuroSymbolicHandoff": {
+    "NeuroSymbolicHandoffContract": {
       "additionalProperties": false,
       "properties": {
         "handoff_id": {
@@ -7507,7 +7507,7 @@
         "expected_proof_schema",
         "timeout_ms"
       ],
-      "title": "NeuroSymbolicHandoff",
+      "title": "NeuroSymbolicHandoffContract",
       "type": "object"
     },
     "NodeID": {
@@ -7520,7 +7520,7 @@
       "additionalProperties": false,
       "properties": {
         "event_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
           "title": "Event Id",
           "type": "string"
         },
@@ -7585,7 +7585,7 @@
       "additionalProperties": false,
       "properties": {
         "event_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
           "title": "Event Id",
           "type": "string"
         },
@@ -7737,11 +7737,11 @@
       "title": "OntologicalAlignmentPolicy",
       "type": "object"
     },
-    "OntologicalHandshake": {
+    "OntologicalHandshakeReceipt": {
       "additionalProperties": false,
       "properties": {
         "handshake_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this protocol handshake to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this protocol handshake to the Merkle-DAG.",
           "minLength": 1,
           "title": "Handshake Id",
           "type": "string"
@@ -7792,10 +7792,10 @@
         "measured_cosine_similarity",
         "alignment_status"
       ],
-      "title": "OntologicalHandshake",
+      "title": "OntologicalHandshakeReceipt",
       "type": "object"
     },
-    "OntologicalSurfaceProjection": {
+    "OntologicalSurfaceProjectionManifest": {
       "additionalProperties": false,
       "description": "A mathematically bounded, declarative subgraph of all ToolManifests and\nMCPServerManifests currently valid for the agent's ProfileID.",
       "properties": {
@@ -7825,7 +7825,7 @@
       "required": [
         "projection_id"
       ],
-      "title": "OntologicalSurfaceProjection",
+      "title": "OntologicalSurfaceProjectionManifest",
       "type": "object"
     },
     "OptimizationDirection": {
@@ -8013,9 +8013,9 @@
           "description": "Whitelist of allowed network domains if network access is true.",
           "title": "Allowed Domains"
         },
-        "file_system_read_only": {
+        "file_system_mutation_forbidden": {
           "description": "True if the tool is strictly forbidden from writing to the disk.",
-          "title": "File System Read Only",
+          "title": "File System Mutation Forbidden",
           "type": "boolean"
         },
         "auth_requirements": {
@@ -8037,7 +8037,7 @@
       },
       "required": [
         "network_access",
-        "file_system_read_only"
+        "file_system_mutation_forbidden"
       ],
       "title": "PermissionBoundaryPolicy",
       "type": "object"
@@ -8046,7 +8046,7 @@
       "additionalProperties": false,
       "properties": {
         "event_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
           "title": "Event Id",
           "type": "string"
         },
@@ -8372,7 +8372,7 @@
     },
     "RedactionPolicy": {
       "additionalProperties": false,
-      "description": "A specific rule for algorithmic data sanitization.",
+      "description": "A specific rule for algorithmic payload sanitization.",
       "properties": {
         "rule_id": {
           "description": "Unique identifier for the sanitization rule.",
@@ -8381,7 +8381,7 @@
         },
         "classification": {
           "$ref": "#/$defs/InformationClassification",
-          "description": "The category of sensitive data this rule targets."
+          "description": "The category of sensitive payload this rule targets."
         },
         "target_pattern": {
           "description": "The semantic entity type or declarative regex pattern to identify.",
@@ -8579,7 +8579,7 @@
         },
         "nodes": {
           "additionalProperties": {
-            "$ref": "#/$defs/AnyNodeManifest"
+            "$ref": "#/$defs/AnyNodeProfile"
           },
           "description": "Flat registry of all nodes in this topology.",
           "propertyNames": {
@@ -8610,7 +8610,7 @@
             }
           ],
           "default": null,
-          "description": "The structural Data Loss Prevention (DLP) contract governing all state mutations in this topology."
+          "description": "The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology."
         },
         "observability": {
           "anyOf": [
@@ -8862,7 +8862,7 @@
       "description": "The mathematical mapping constraint for a channel.",
       "properties": {
         "type": {
-          "description": "The mathematical scale mapping data to pixels.",
+          "description": "The mathematical scale mapping metrics to pixels.",
           "enum": [
             "linear",
             "log",
@@ -8908,7 +8908,7 @@
     },
     "SecureSubSessionState": {
       "additionalProperties": false,
-      "description": "Declarative boundary for handling unredacted secrets within a temporarily isolated memory partition.",
+      "description": "Declarative boundary for handling unredacted secrets within a temporarily isolated state partition.",
       "properties": {
         "session_id": {
           "description": "Unique identifier for the secure session.",
@@ -8926,7 +8926,7 @@
           "type": "array"
         },
         "max_ttl_seconds": {
-          "description": "Maximum time-to-live for the unredacted memory partition.",
+          "description": "Maximum time-to-live for the unredacted state partition.",
           "maximum": 3600,
           "minimum": 1,
           "title": "Max Ttl Seconds",
@@ -8976,7 +8976,7 @@
       "additionalProperties": false,
       "properties": {
         "edge_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this semantic edge to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this semantic edge to the Merkle-DAG.",
           "title": "Edge Id",
           "type": "string"
         },
@@ -9037,7 +9037,7 @@
         "temporal_bounds": {
           "anyOf": [
             {
-              "$ref": "#/$defs/TemporalBounds"
+              "$ref": "#/$defs/TemporalBoundsProfile"
             },
             {
               "type": "null"
@@ -9107,7 +9107,7 @@
       "additionalProperties": false,
       "properties": {
         "node_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this semantic node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this semantic node to the Merkle-DAG.",
           "title": "Node Id",
           "type": "string"
         },
@@ -9128,7 +9128,7 @@
           "type": "string"
         },
         "text_chunk": {
-          "description": "The raw natural language representation of the memory.",
+          "description": "The raw natural language representation of the semantic node.",
           "maxLength": 50000,
           "title": "Text Chunk",
           "type": "string"
@@ -9152,12 +9152,12 @@
         "tier": {
           "$ref": "#/$defs/CognitiveTier",
           "default": "semantic",
-          "description": "The cognitive tier this memory resides in."
+          "description": "The cognitive tier this latent state resides in."
         },
         "temporal_bounds": {
           "anyOf": [
             {
-              "$ref": "#/$defs/TemporalBounds"
+              "$ref": "#/$defs/TemporalBoundsProfile"
             },
             {
               "type": "null"
@@ -9176,7 +9176,7 @@
             }
           ],
           "default": null,
-          "description": "The importance profile used for epistemic state pruning."
+          "description": "The importance profile used for structural pruning."
         },
         "fhe_profile": {
           "anyOf": [
@@ -9318,7 +9318,7 @@
       ],
       "type": "string"
     },
-    "SpanTrace": {
+    "SpanTraceReceipt": {
       "additionalProperties": false,
       "description": "An execution window span trace.",
       "properties": {
@@ -9378,7 +9378,7 @@
         "start_time",
         "status"
       ],
-      "title": "SpanTrace",
+      "title": "SpanTraceReceipt",
       "type": "object"
     },
     "SpatialBoundingBoxProfile": {
@@ -9522,11 +9522,11 @@
     },
     "StateContract": {
       "additionalProperties": false,
-      "description": "A strict Cryptographic State Contract (Typed Blackboard) for multi-agent memory sharing.",
+      "description": "A strict Cryptographic State Contract (Typed Blackboard) for multi-agent state sharing.",
       "properties": {
         "schema_definition": {
           "additionalProperties": true,
-          "description": "A strict JSON Schema dictionary defining the required shape of the shared state blackboard.",
+          "description": "A strict JSON Schema dictionary defining the required shape of the shared epistemic blackboard.",
           "title": "Schema Definition",
           "type": "object"
         },
@@ -9630,7 +9630,7 @@
           "title": "Axes",
           "type": "object"
         },
-        "metric_matrix": {
+        "semantic_series": {
           "description": "The discrete semantic tuples extracted from the chart markers.",
           "items": {
             "additionalProperties": {
@@ -9645,13 +9645,13 @@
             },
             "type": "object"
           },
-          "title": "Metric Matrix",
+          "title": "Semantic Series",
           "type": "array"
         }
       },
       "required": [
         "axes",
-        "metric_matrix"
+        "semantic_series"
       ],
       "title": "StatisticalChartExtractionState",
       "type": "object"
@@ -9818,7 +9818,7 @@
         },
         "nodes": {
           "additionalProperties": {
-            "$ref": "#/$defs/AnyNodeManifest"
+            "$ref": "#/$defs/AnyNodeProfile"
           },
           "description": "Flat registry of all nodes in this topology.",
           "propertyNames": {
@@ -9849,7 +9849,7 @@
             }
           ],
           "default": null,
-          "description": "The structural Data Loss Prevention (DLP) contract governing all state mutations in this topology."
+          "description": "The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology."
         },
         "observability": {
           "anyOf": [
@@ -9958,25 +9958,25 @@
           "title": "Confidence Threshold",
           "type": "number"
         },
-        "allowed_read_only_tools": {
-          "description": "The explicit, bounded array of strictly read-only tool capabilities.",
+        "allowed_passive_tools": {
+          "description": "The explicit, bounded array of strictly non-mutating tool capabilities.",
           "items": {
             "type": "string"
           },
-          "title": "Allowed Read Only Tools",
+          "title": "Allowed Passive Tools",
           "type": "array"
         }
       },
       "required": [
         "confidence_threshold",
-        "allowed_read_only_tools"
+        "allowed_passive_tools"
       ],
       "title": "System1ReflexPolicy",
       "type": "object"
     },
     "System2RemediationIntent": {
       "additionalProperties": false,
-      "description": "A passive data envelope that deterministically maps a kinetic execution error\n(e.g., a Pydantic ValidationError) into a structurally rigid System 2 correction directive.",
+      "description": "A passive structural envelope that deterministically maps a kinetic execution error\n(e.g., a Pydantic ValidationError) into a structurally rigid System 2 correction directive.",
       "properties": {
         "fault_id": {
           "description": "A cryptographic Lineage Watermark (CID) tracking this specific dimensional collapse.",
@@ -9986,7 +9986,7 @@
         },
         "target_node_id": {
           "$ref": "#/$defs/NodeID",
-          "description": "The strict W3C DID of the agent that authored the invalid state, ensuring the fault is routed back to the exact memory partition."
+          "description": "The strict W3C DID of the agent that authored the invalid state, ensuring the fault is routed back to the exact state partition."
         },
         "failing_pointers": {
           "description": "A strictly typed array of RFC 6902 JSON Pointers isolating the exact topological coordinate of the hallucination.",
@@ -10017,7 +10017,7 @@
       "additionalProperties": false,
       "properties": {
         "event_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
           "title": "Event Id",
           "type": "string"
         },
@@ -10041,7 +10041,7 @@
       "title": "SystemFaultEvent",
       "type": "object"
     },
-    "SystemNodeManifest": {
+    "SystemNodeProfile": {
       "additionalProperties": false,
       "description": "A node representing a deterministic system capability.",
       "properties": {
@@ -10109,7 +10109,7 @@
       "required": [
         "description"
       ],
-      "title": "SystemNodeManifest",
+      "title": "SystemNodeProfile",
       "type": "object"
     },
     "TabularCellState": {
@@ -10289,7 +10289,7 @@
         }
       ]
     },
-    "TemporalBounds": {
+    "TemporalBoundsProfile": {
       "additionalProperties": false,
       "properties": {
         "valid_from": {
@@ -10303,7 +10303,7 @@
             }
           ],
           "default": null,
-          "description": "The UNIX timestamp when this memory became true.",
+          "description": "The UNIX timestamp when this coordinate became true.",
           "title": "Valid From"
         },
         "valid_to": {
@@ -10316,7 +10316,7 @@
             }
           ],
           "default": null,
-          "description": "The UNIX timestamp when this memory was invalidated.",
+          "description": "The UNIX timestamp when this coordinate was invalidated.",
           "title": "Valid To"
         },
         "interval_type": {
@@ -10332,7 +10332,7 @@
           "description": "The Allen's interval algebra or causal relationship classification."
         }
       },
-      "title": "TemporalBounds",
+      "title": "TemporalBoundsProfile",
       "type": "object"
     },
     "TemporalCheckpointState": {
@@ -10363,7 +10363,7 @@
       "type": "object"
     },
     "TensorDType": {
-      "description": "Mathematical data types for tensor payloads.",
+      "description": "Mathematical tensor types for tensor payloads.",
       "enum": [
         "float32",
         "float64",
@@ -10419,7 +10419,7 @@
       "additionalProperties": false,
       "properties": {
         "target_agent_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the agent whose mind is being modeled.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the agent whose mind is being modeled.",
           "minLength": 1,
           "title": "Target Agent Id",
           "type": "string"
@@ -10522,7 +10522,7 @@
       "description": "A Priori Kinetic Commitment representing the Pearlian Do-Operator prior to network execution.",
       "properties": {
         "event_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
           "title": "Event Id",
           "type": "string"
         },
@@ -10853,7 +10853,7 @@
       "description": "The visual property being manipulated.",
       "properties": {
         "channel": {
-          "description": "The visual channel the data is mapped to.",
+          "description": "The visual channel the metric is mapped to.",
           "enum": [
             "x",
             "y",
@@ -10867,7 +10867,7 @@
           "type": "string"
         },
         "field": {
-          "description": "The exact column or field name from the dataset.",
+          "description": "The exact column or field name from the semantic series.",
           "title": "Field",
           "type": "string"
         },
@@ -11071,7 +11071,7 @@
           "type": "string"
         },
         "verifier_key_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark linking this node to the public evaluation key.",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the public evaluation key.",
           "title": "Verifier Key Id",
           "type": "string"
         },
