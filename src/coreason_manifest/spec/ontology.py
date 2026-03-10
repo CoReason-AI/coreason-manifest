@@ -780,11 +780,6 @@ class SaeLatentPolicy(CoreasonBaseModel):
     )
 
     @model_validator(mode="after")
-    def sort_sae_arrays(self) -> Self:
-        object.__setattr__(self, "monitored_layers", sorted(self.monitored_layers))
-        return self
-
-    @model_validator(mode="after")
     def validate_smooth_decay(self) -> Self:
         if self.violation_action == "smooth_decay":
             if self.smoothing_profile is None:
@@ -1803,11 +1798,6 @@ class EpistemicPromotionEvent(BaseStateEvent):
         description="A mathematical proof of the token savings achieved (e.g., old_token_count / new_token_count)."
     )
 
-    @model_validator(mode="after")
-    def sort_promotion_arrays(self) -> Self:
-        object.__setattr__(self, "source_episodic_event_ids", sorted(self.source_episodic_event_ids))
-        return self
-
 
 class EpistemicScanningPolicy(CoreasonBaseModel):
     """
@@ -1977,11 +1967,6 @@ class ExecutionNodeReceipt(CoreasonBaseModel):
     def validate_lineage(self) -> Self:
         if self.parent_request_id is not None and self.root_request_id is None:
             raise ValueError("Orphaned Lineage: parent_request_id is set but root_request_id is None")
-        return self
-
-    @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
-        object.__setattr__(self, "parent_hashes", sorted(self.parent_hashes))
         return self
 
     def generate_node_hash(self) -> str:
@@ -2236,13 +2221,6 @@ class DynamicRoutingManifest(CoreasonBaseModel):
                 raise ValueError(
                     "Merkle Violation: BypassReceipt artifact_event_id does not match the root artifact_profile."
                 )
-        return self
-
-    @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
-        sorted_subgraphs = {k: sorted(v) for k, v in self.active_subgraphs.items()}
-        object.__setattr__(self, "active_subgraphs", sorted_subgraphs)
-        object.__setattr__(self, "bypassed_steps", sorted(self.bypassed_steps, key=lambda x: x.bypassed_node_id))
         return self
 
 
@@ -2761,11 +2739,6 @@ class MacroGridProfile(CoreasonBaseModel):
                     raise ValueError(f"Ghost Panel referenced in layout_matrix: {panel_id}")
         return self
 
-    @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
-        object.__setattr__(self, "panels", sorted(self.panels, key=lambda x: x.panel_id))
-        return self
-
 
 type MarkType = Literal["point", "line", "area", "bar", "rect", "arc"]
 
@@ -3000,11 +2973,6 @@ class OntologicalHandshake(CoreasonBaseModel):
         default=None,
         description="The projection applied if the agents natively used different embedding dimensionalities.",
     )
-
-    @model_validator(mode="after")
-    def sort_handshake_arrays(self) -> Self:
-        object.__setattr__(self, "participant_node_ids", sorted(self.participant_node_ids))
-        return self
 
 
 class OutputMappingContract(CoreasonBaseModel):
@@ -3421,11 +3389,6 @@ class StatisticalChartExtractionState(CoreasonBaseModel):
                 missing = axis_keys - point_keys
                 if missing:
                     raise ValueError(f"Data point missing required axis dimensions: {missing}")
-        return self
-
-    @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
-        object.__setattr__(self, "data_series", sorted(self.data_series, key=lambda x: json.dumps(x, sort_keys=True)))
         return self
 
 
@@ -4291,14 +4254,6 @@ class SwarmTopology(BaseTopology):
     )
 
     @model_validator(mode="after")
-    def sort_swarm_arrays(self) -> Self:
-        object.__setattr__(
-            self, "active_prediction_markets", sorted(self.active_prediction_markets, key=lambda x: x.market_id)
-        )
-        object.__setattr__(self, "resolved_markets", sorted(self.resolved_markets, key=lambda x: x.market_id))
-        return self
-
-    @model_validator(mode="after")
     def enforce_concurrency_ceiling(self) -> Self:
         if self.spawning_threshold > self.max_concurrent_agents:
             raise ValueError("spawning_threshold cannot exceed max_concurrent_agents")
@@ -4426,14 +4381,6 @@ class WorkflowManifest(CoreasonBaseModel):
     pq_signature: PostQuantumSignature | None = Field(
         default=None, description="The quantum-resistant signature securing the root execution graph."
     )
-
-    @model_validator(mode="after")
-    def sort_workflow_arrays(self) -> Self:
-        if self.allowed_information_classifications is not None:
-            object.__setattr__(
-                self, "allowed_information_classifications", sorted(self.allowed_information_classifications)
-            )
-        return self
 
 
 class WetwareAttestationContract(CoreasonBaseModel):
