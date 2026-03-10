@@ -4108,7 +4108,7 @@
             }
           ],
           "default": null,
-          "description": "The formal graph of non-monotonic claims and defeasible attacks currently active in the swarm's working memory."
+          "description": "The formal graph of non-monotonic claims and defeasible attacks currently active in the swarm's working state."
         },
         "theory_of_mind_models": {
           "description": "Empathetic models of other agents to compress and target outgoing communications.",
@@ -5114,7 +5114,7 @@
         },
         "authorized_session": {
           "$ref": "#/$defs/SecureSubSessionState",
-          "description": "The isolated memory partition granted to the agent for this connection."
+          "description": "The isolated state partition granted to the agent for this connection."
         },
         "governing_sla": {
           "$ref": "#/$defs/BilateralSLA",
@@ -8926,7 +8926,7 @@
           "type": "array"
         },
         "max_ttl_seconds": {
-          "description": "Maximum time-to-live for the unredacted memory partition.",
+          "description": "Maximum time-to-live for the unredacted state partition.",
           "maximum": 3600,
           "minimum": 1,
           "title": "Max Ttl Seconds",
@@ -10316,7 +10316,7 @@
             }
           ],
           "default": null,
-          "description": "The UNIX timestamp when this memory was invalidated.",
+          "description": "The UNIX timestamp when this coordinate was invalidated.",
           "title": "Valid To"
         },
         "interval_type": {

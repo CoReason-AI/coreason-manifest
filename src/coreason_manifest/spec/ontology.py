@@ -820,7 +820,7 @@ class SecureSubSessionState(CoreasonBaseModel):
     allowed_vault_keys: list[str] = Field(
         max_length=100, description="List of enterprise vault keys the agent is temporarily allowed to access."
     )
-    max_ttl_seconds: int = Field(ge=1, le=3600, description="Maximum time-to-live for the unredacted memory partition.")
+    max_ttl_seconds: int = Field(ge=1, le=3600, description="Maximum time-to-live for the unredacted state partition.")
     description: str = Field(max_length=2000, description="Audit justification for this temporary secure session.")
 
     @model_validator(mode="after")
@@ -2108,7 +2108,7 @@ class FederatedCapabilityAttestationReceipt(CoreasonBaseModel):
     attestation_id: str = Field(min_length=1, description="Cryptographic Lineage Watermark for the attestation.")
     target_topology_id: NodeID = Field(description="The DID of the discovered external state matrix/VPC.")
     authorized_session: SecureSubSessionState = Field(
-        description="The isolated memory partition granted to the agent for this connection."
+        description="The isolated state partition granted to the agent for this connection."
     )
     governing_sla: BilateralSLA = Field(
         description="The structural and physical boundary constraints for querying this target."
@@ -3755,7 +3755,7 @@ class TemporalBoundsProfile(CoreasonBaseModel):
     valid_from: float | None = Field(
         default=None, ge=0.0, description="The UNIX timestamp when this coordinate became true."
     )
-    valid_to: float | None = Field(default=None, description="The UNIX timestamp when this memory was invalidated.")
+    valid_to: float | None = Field(default=None, description="The UNIX timestamp when this coordinate was invalidated.")
     interval_type: CausalInterval | None = Field(
         default=None, description="The Allen's interval algebra or causal relationship classification."
     )
@@ -4344,9 +4344,7 @@ class SwarmTopologyManifest(BaseTopologyManifest):
         object.__setattr__(
             self, "active_prediction_markets", sorted(self.active_prediction_markets, key=lambda x: x.market_id)
         )
-        object.__setattr__(
-            self, "resolved_markets", sorted(self.resolved_markets, key=lambda x: x.market_id)
-        )
+        object.__setattr__(self, "resolved_markets", sorted(self.resolved_markets, key=lambda x: x.market_id))
         return self
 
 
@@ -4551,7 +4549,7 @@ class EpistemicQuarantineSnapshot(CoreasonBaseModel):
     )
     argumentation: EpistemicArgumentGraphState | None = Field(
         default=None,
-        description="The formal graph of non-monotonic claims and defeasible attacks currently active in the swarm's working memory.",  # noqa: E501
+        description="The formal graph of non-monotonic claims and defeasible attacks currently active in the swarm's working state.",  # noqa: E501
     )
     theory_of_mind_models: list[TheoryOfMindSnapshot] = Field(
         default_factory=list,
