@@ -1030,12 +1030,12 @@ class FederatedDiscoveryProtocol(CoreasonBaseModel):
         description="A list of cryptographic hashes of domain ontologies this swarm is capable of processing."
     )
 
-
     @model_validator(mode="after")
     def sort_arrays(self) -> Self:
         object.__setattr__(self, "broadcast_endpoints", sorted(self.broadcast_endpoints, key=str))
         object.__setattr__(self, "supported_ontologies", sorted(self.supported_ontologies))
         return self
+
 
 class ActiveInferenceContract(CoreasonBaseModel):
     task_id: str = Field(min_length=1, description="Unique identifier for this active inference execution.")
@@ -3506,7 +3506,6 @@ class TheoryOfMindSnapshot(CoreasonBaseModel):
     )
 
 
-
 class ToolInvocationEvent(BaseStateEvent):
     """A Priori Kinetic Commitment representing the Pearlian Do-Operator prior to network execution."""
 
@@ -3759,6 +3758,7 @@ type AnyNode = Annotated[
     AgentNode | HumanNode | SystemNode | CompositeNode | MemoizedNode,
     Field(discriminator="type", description="A discriminated union of all valid workflow nodes."),
 ]
+
 
 class BaseTopology(CoreasonBaseModel):
     """
@@ -4201,12 +4201,16 @@ class WorkingMemorySnapshot(CoreasonBaseModel):
         description="Immutable cryptographic receipts of dynamically discovered external enterprise connectors.",
     )
 
-
     @model_validator(mode="after")
     def sort_arrays(self) -> Self:
-        object.__setattr__(self, "theory_of_mind_models", sorted(self.theory_of_mind_models, key=lambda x: x.target_agent_id))  # noqa: E501
-        object.__setattr__(self, "capability_attestations", sorted(self.capability_attestations, key=lambda x: x.attestation_id))  # noqa: E501
+        object.__setattr__(
+            self, "theory_of_mind_models", sorted(self.theory_of_mind_models, key=lambda x: x.target_agent_id)
+        )
+        object.__setattr__(
+            self, "capability_attestations", sorted(self.capability_attestations, key=lambda x: x.attestation_id)
+        )
         return self
+
 
 class ZeroKnowledgeProof(CoreasonBaseModel):
     proof_protocol: Literal["zk-SNARK", "zk-STARK", "plonk", "bulletproofs"] = Field(

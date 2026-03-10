@@ -1,10 +1,11 @@
-with open("src/coreason_manifest/spec/ontology.py") as f:
+import re
+
+with open("src/coreason_manifest/spec/ontology.py", "r") as f:
     c = f.read()
 
-# Fix the stray method at the end of AnyNode type definition (line 3764 approx)
+# Replace the rogue `sort_adapters` before `BaseTopology`
 c = c.replace(
-    """    Field(discriminator="type", description="A discriminated union of all valid workflow nodes."),
-]
+    """]
 
 
     @model_validator(mode="after")
@@ -13,8 +14,7 @@ c = c.replace(
         return self
 
 class BaseTopology(CoreasonBaseModel):""",
-    """    Field(discriminator="type", description="A discriminated union of all valid workflow nodes."),
-]
+    """]
 
 class BaseTopology(CoreasonBaseModel):""",
 )
