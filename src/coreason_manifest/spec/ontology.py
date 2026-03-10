@@ -1031,6 +1031,12 @@ class FederatedDiscoveryProtocol(CoreasonBaseModel):
     )
 
 
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "broadcast_endpoints", sorted(self.broadcast_endpoints, key=str))
+        object.__setattr__(self, "supported_ontologies", sorted(self.supported_ontologies))
+        return self
+
 class ActiveInferenceContract(CoreasonBaseModel):
     task_id: str = Field(min_length=1, description="Unique identifier for this active inference execution.")
     target_hypothesis_id: str = Field(description="The HypothesisGenerationEvent this task is attempting to falsify.")
@@ -3754,7 +3760,6 @@ type AnyNode = Annotated[
     Field(discriminator="type", description="A discriminated union of all valid workflow nodes."),
 ]
 
-
 class BaseTopology(CoreasonBaseModel):
     """
     Base configuration for any workflow topology.
@@ -4196,6 +4201,12 @@ class WorkingMemorySnapshot(CoreasonBaseModel):
         description="Immutable cryptographic receipts of dynamically discovered external enterprise connectors.",
     )
 
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "theory_of_mind_models", sorted(self.theory_of_mind_models, key=lambda x: x.target_agent_id))  # noqa: E501
+        object.__setattr__(self, "capability_attestations", sorted(self.capability_attestations, key=lambda x: x.attestation_id))  # noqa: E501
+        return self
 
 class ZeroKnowledgeProof(CoreasonBaseModel):
     proof_protocol: Literal["zk-SNARK", "zk-STARK", "plonk", "bulletproofs"] = Field(

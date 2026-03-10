@@ -107,4 +107,4 @@ def test_working_memory_theory_of_mind(
     )
     assert snapshot.system_prompt == system_prompt
     assert snapshot.active_context == active_context
-    assert snapshot.theory_of_mind_models == theory_of_mind_models
+    assert snapshot.theory_of_mind_models == sorted(theory_of_mind_models, key=lambda x: x.target_agent_id)
