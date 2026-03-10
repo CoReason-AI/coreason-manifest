@@ -1,9 +1,9 @@
+from typing import Any
+
 import hypothesis.strategies as st
 import pytest
 from hypothesis import given
 from pydantic import ValidationError
-
-from typing import Any
 
 from coreason_manifest.spec.ontology import (
     AdversarialMarketTopology,
@@ -63,5 +63,7 @@ def test_council_topology_byzantine_slash_requires_escrow() -> None:
 
     with pytest.raises(ValidationError, match="PBFT with slash_escrow requires a funded council_escrow"):
         CouncilTopology(
-            nodes=nodes, adjudicator_id="did:web:node_1", consensus_policy=ConsensusPolicy(strategy="pbft", quorum_rules=quorum)
+            nodes=nodes,
+            adjudicator_id="did:web:node_1",
+            consensus_policy=ConsensusPolicy(strategy="pbft", quorum_rules=quorum),
         )

@@ -23,7 +23,8 @@ def test_tamper_evident_shatter_protocol(inputs: Any, outputs: Any) -> None:
 
     n1 = ExecutionNodeReceipt(request_id="req_1", inputs=inputs, outputs=outputs, parent_hashes=[])
 
-    # We must explicitly cast node_hash as str for the parent_hashes parameter, if they might be None, but ExecutionNodeReceipt sets node_hash to a string
+    # Explicitly assert node_hash is not None for the parent_hashes parameter,
+    # because mypy thinks it could be None, but ExecutionNodeReceipt sets it to a string.
     assert n1.node_hash is not None
     n2 = ExecutionNodeReceipt(request_id="req_2", inputs="hop2", outputs="hop2", parent_hashes=[n1.node_hash])
 

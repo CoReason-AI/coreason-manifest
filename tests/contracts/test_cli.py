@@ -22,7 +22,7 @@ def test_cli_validate_success(tmp_path: Path) -> None:
         mock_exit.assert_called_with(0)
 
 
-def test_cli_visualize_missing_file(capsys: pytest.CaptureFixture[str]) -> None:
+def test_cli_visualize_missing_file() -> None:
     with (
         patch("sys.argv", ["coreason-visualize", "ghost_file.json"]),
         patch("sys.exit", side_effect=SystemExit) as mock_exit,
