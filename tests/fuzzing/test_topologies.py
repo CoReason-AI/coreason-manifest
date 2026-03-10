@@ -10,6 +10,7 @@ from coreason_manifest.spec.ontology import (
     ConsensusPolicy,
     CouncilTopology,
     DAGTopology,
+    GenerativeManifoldSLA,
     PredictionMarketPolicy,
     QuorumPolicy,
     SystemNode,
@@ -67,3 +68,14 @@ def test_council_topology_byzantine_slash_requires_escrow() -> None:
             adjudicator_id="did:web:node_1",
             consensus_policy=ConsensusPolicy(strategy="pbft", quorum_rules=quorum),
         )
+
+
+@given(depth=st.integers(min_value=1, max_value=10000), fanout=st.integers(min_value=1, max_value=10000))
+def test_generative_manifold_geometric_explosion(depth: int, fanout: int) -> None:
+    """Prove that GenerativeManifoldSLA mathematically rejects configurations that cause geometric explosion."""
+    from hypothesis import assume
+
+    assume(depth * fanout > 1000)
+
+    with pytest.raises(ValidationError, match="Geometric explosion risk"):
+        GenerativeManifoldSLA(max_topological_depth=depth, max_node_fanout=fanout, max_synthetic_tokens=1000)
