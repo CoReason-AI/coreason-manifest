@@ -6764,15 +6764,15 @@
           "description": "Polymorphic transport configuration.",
           "discriminator": {
             "mapping": {
-              "http": "#/$defs/MCPTransport",
-              "sse": "#/$defs/MCPTransport",
-              "stdio": "#/$defs/MCPTransport"
+              "http": "#/$defs/MCPTransportProfile",
+              "sse": "#/$defs/MCPTransportProfile",
+              "stdio": "#/$defs/MCPTransportProfile"
             },
             "propertyName": "type"
           },
           "oneOf": [
             {
-              "$ref": "#/$defs/MCPTransport"
+              "$ref": "#/$defs/MCPTransportProfile"
             }
           ],
           "title": "Transport"
@@ -6838,7 +6838,7 @@
       "title": "MCPServerManifest",
       "type": "object"
     },
-    "MCPTransport": {
+    "MCPTransportProfile": {
       "anyOf": [
         {
           "$ref": "#/$defs/StdioTransportProfile"
@@ -7003,7 +7003,7 @@
           "items": {
             "enum": [
               "on_tool_call",
-              "on_belief_update",
+              "on_belief_mutation",
               "on_quarantine",
               "on_falsification"
             ],

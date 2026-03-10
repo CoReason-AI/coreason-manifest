@@ -1997,6 +1997,7 @@ class ExecutionNodeReceipt(CoreasonBaseModel):
     parent_hashes: list[str] = Field(
         default_factory=list, description="A list of cryptographic hashes of parent execution nodes."
     )
+    # Note: parent_hashes is a structurally ordered sequence (Causal Ancestry) and MUST NOT be sorted.
     node_hash: str | None = Field(default=None, description="The cryptographic SHA-256 hash of this node.")
 
     @model_validator(mode="after")
@@ -2464,8 +2465,9 @@ class JSONRPCErrorState(CoreasonBaseModel):
 
     code: int = Field(..., description="A Number that indicates the error type that occurred.")
     message: str = Field(..., description="A String providing a short description of the error.")
-    data: Any | None = Field(
+    error_payload: Any | None = Field(
         default=None,
+        alias="data",
         description="A Primitive or Structured value that contains additional information about the error.",
     )
 
@@ -2846,9 +2848,11 @@ class MathematicalNotationExtractionState(CoreasonBaseModel):
 
 
 class MechanisticAuditContract(CoreasonBaseModel):
-    trigger_conditions: list[Literal["on_tool_call", "on_belief_update", "on_quarantine", "on_falsification"]] = Field(
-        min_length=1,
-        description="The specific architectural events that authorize the orchestrator to halt generation and extract internal activations.",  # noqa: E501
+    trigger_conditions: list[Literal["on_tool_call", "on_belief_mutation", "on_quarantine", "on_falsification"]] = (
+        Field(
+            min_length=1,
+            description="The specific architectural events that authorize the orchestrator to halt generation and extract internal activations.",  # noqa: E501
+        )
     )
     target_layers: list[int] = Field(
         min_length=1, description="The specific transformer block indices the execution engine must extract from."
@@ -3219,7 +3223,7 @@ class QuarantineIntent(CoreasonBaseModel):
     reason: str = Field(description="The reason for the quarantine order.")
 
 
-type AnyResiliencePayload = Annotated[
+type AnyResilienceIntent = Annotated[
     QuarantineIntent | CircuitBreakerEvent | FallbackIntent, Field(discriminator="type")
 ]
 
@@ -3478,14 +3482,16 @@ class StdioTransportProfile(CoreasonBaseModel):
     )
 
 
-type MCPTransport = StdioTransportProfile | SSETransportProfile | HTTPTransportProfile
+type MCPTransportProfile = StdioTransportProfile | SSETransportProfile | HTTPTransportProfile
 
 
 class MCPServerBindingProfile(CoreasonBaseModel):
     """Configuration definition for connecting to an MCP Server."""
 
     server_id: str = Field(..., description="A unique identifier for this server instance.")
-    transport: MCPTransport = Field(..., discriminator="type", description="Polymorphic transport configuration.")
+    transport: MCPTransportProfile = Field(
+        ..., discriminator="type", description="Polymorphic transport configuration."
+    )
     required_capabilities: list[str] = Field(
         default_factory=lambda: ["tools", "resources", "prompts"],
         description="The structurally bounded array of capabilities mandated for this server connection.",
