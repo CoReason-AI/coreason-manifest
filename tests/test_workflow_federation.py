@@ -10,7 +10,7 @@ from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
     BilateralSLA,
-    CrossSwarmHandshake,
+    CrossSwarmHandshakeState,
     FederatedDiscoveryManifest,
     InformationClassification,
 )
@@ -38,7 +38,7 @@ def test_federated_discovery_protocol_missing_fields() -> None:
 
 
 def test_cross_swarm_handshake_valid() -> None:
-    """Test valid instantiation of CrossSwarmHandshake."""
+    """Test valid instantiation of CrossSwarmHandshakeState."""
     sla = BilateralSLA(
         receiving_tenant_id="did:example:tenant-b",
         max_permitted_classification=InformationClassification.RESTRICTED,
@@ -46,7 +46,7 @@ def test_cross_swarm_handshake_valid() -> None:
         permitted_geographic_regions=["us-east-1", "eu-west-1"],
     )
 
-    handshake = CrossSwarmHandshake(
+    handshake = CrossSwarmHandshakeState(
         handshake_id="handshake-001",
         initiating_tenant_id="did:example:tenant-a",
         receiving_tenant_id="did:example:tenant-b",
@@ -68,7 +68,7 @@ def test_cross_swarm_handshake_default_status() -> None:
         liability_limit_magnitude=0,
     )
 
-    handshake = CrossSwarmHandshake(
+    handshake = CrossSwarmHandshakeState(
         handshake_id="handshake-002",
         initiating_tenant_id="did:example:tenant-a",
         receiving_tenant_id="did:example:tenant-b",
@@ -87,7 +87,7 @@ def test_cross_swarm_handshake_invalid_status() -> None:
     )
 
     with pytest.raises(ValidationError) as exc_info:
-        CrossSwarmHandshake(
+        CrossSwarmHandshakeState(
             handshake_id="handshake-003",
             initiating_tenant_id="did:example:tenant-a",
             receiving_tenant_id="did:example:tenant-b",
@@ -103,7 +103,7 @@ def test_cross_swarm_handshake_invalid_status() -> None:
 def test_cross_swarm_handshake_missing_fields() -> None:
     """Test that missing required fields raise ValidationError."""
     with pytest.raises(ValidationError) as exc_info:
-        CrossSwarmHandshake()  # type: ignore
+        CrossSwarmHandshakeState()  # type: ignore
 
     errors = exc_info.value.errors()
     missing_fields = [err["loc"][0] for err in errors if err["type"] == "missing"]

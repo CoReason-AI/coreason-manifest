@@ -2,14 +2,14 @@
 
 from coreason_manifest.spec.ontology import (
     AdversarialMarketTopology,
-    EnsembleTopologySpec,
+    EnsembleTopologyProfile,
     EvictionPolicy,
     LatentScratchpadReceipt,
     MigrationContract,
     PeftAdapterContract,
     PredictionMarketPolicy,
     SecureSubSessionState,
-    ThoughtBranch,
+    ThoughtBranchState,
 )
 
 
@@ -26,8 +26,8 @@ def test_secure_sub_session_sorting_determinism() -> None:
 
 def test_latent_scratchpad_trace_sorting_determinism() -> None:
     """Prove that object arrays are deterministically sorted by their specific lambda key."""
-    b1 = ThoughtBranch(branch_id="branch_Z", latent_content_hash="a" * 64)
-    b2 = ThoughtBranch(branch_id="branch_A", latent_content_hash="b" * 64)
+    b1 = ThoughtBranchState(branch_id="branch_Z", latent_content_hash="a" * 64)
+    b2 = ThoughtBranchState(branch_id="branch_A", latent_content_hash="b" * 64)
 
     trace = LatentScratchpadReceipt(
         trace_id="trace_1",
@@ -67,7 +67,7 @@ def test_peft_adapter_contract_sorting_determinism() -> None:
 
 
 def test_ensemble_topology_spec_sorting_determinism() -> None:
-    spec = EnsembleTopologySpec(
+    spec = EnsembleTopologyProfile(
         concurrent_branch_ids=["did:web:node_Z", "did:web:node_A", "did:web:node_M"],
         fusion_function="weighted_consensus",
     )

@@ -8,12 +8,12 @@
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.spec.ontology import EnsembleTopologySpec, UtilityJustificationGraph
+from coreason_manifest.spec.ontology import EnsembleTopologyProfile, UtilityJustificationGraphReceipt
 
 
 def test_ensemble_topology_literal_constraint() -> None:
     with pytest.raises(ValidationError):
-        EnsembleTopologySpec(
+        EnsembleTopologyProfile(
             concurrent_branch_ids=["did:coreason:1", "did:coreason:2"],
             fusion_function="arbitrary_unsupported_string",  # type: ignore
         )
@@ -21,9 +21,9 @@ def test_ensemble_topology_literal_constraint() -> None:
 
 def test_utility_graph_interlocks() -> None:
     # Test valid
-    valid_graph = UtilityJustificationGraph(
+    valid_graph = UtilityJustificationGraphReceipt(
         superposition_variance_threshold=0.05,
-        ensemble_spec=EnsembleTopologySpec(
+        ensemble_spec=EnsembleTopologyProfile(
             concurrent_branch_ids=["did:coreason:1", "did:coreason:2"],
             fusion_function="weighted_consensus",
         ),
@@ -32,9 +32,9 @@ def test_utility_graph_interlocks() -> None:
 
     # Test threshold zero with ensemble fallback (Escrow Failure)
     with pytest.raises(ValidationError, match="Topological Interlock Failed"):
-        UtilityJustificationGraph(
+        UtilityJustificationGraphReceipt(
             superposition_variance_threshold=0.0,
-            ensemble_spec=EnsembleTopologySpec(
+            ensemble_spec=EnsembleTopologyProfile(
                 concurrent_branch_ids=["did:coreason:1", "did:coreason:2"],
                 fusion_function="highest_confidence",
             ),
@@ -42,6 +42,6 @@ def test_utility_graph_interlocks() -> None:
 
     # Test tensor poisoning rejection
     with pytest.raises(ValidationError, match="Tensor Poisoning Detected"):
-        UtilityJustificationGraph(
+        UtilityJustificationGraphReceipt(
             optimizing_vectors={"epistemic_gain": float("nan")}, superposition_variance_threshold=0.1
         )

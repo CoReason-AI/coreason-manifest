@@ -21,6 +21,7 @@ from coreason_manifest.spec.ontology import (
     CognitiveStateProfile,  # Representative schema
     DocumentLayoutManifest,
     StateMutationIntent,  # Representative schema
+    System2RemediationIntent,
 )
 
 # Immutable AOT Schema Registry
@@ -28,6 +29,7 @@ SCHEMA_REGISTRY: Final[dict[str, type[BaseModel]]] = {
     "step8_vision": DocumentLayoutManifest,
     "state_differential": StateMutationIntent,
     "cognitive_sync": CognitiveStateProfile,
+    "system2_remediation": System2RemediationIntent,
 }
 
 

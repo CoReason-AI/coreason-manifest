@@ -12,7 +12,7 @@ from pydantic import TypeAdapter, ValidationError
 
 from coreason_manifest.spec.ontology import (
     AnyInterventionPayload,
-    ConstitutionalAmendmentProposal,
+    ConstitutionalAmendmentIntent,
     InterventionReceipt,
     WetwareAttestationContract,
 )
@@ -29,7 +29,7 @@ def test_constitutional_amendment_proposal_routing() -> None:
     adapter: TypeAdapter[AnyInterventionPayload] = TypeAdapter(AnyInterventionPayload)
     parsed_payload = adapter.validate_python(payload_data)
 
-    assert isinstance(parsed_payload, ConstitutionalAmendmentProposal)
+    assert isinstance(parsed_payload, ConstitutionalAmendmentIntent)
     assert parsed_payload.drift_event_id == "drift_123"
     assert parsed_payload.proposed_patch == {"op": "replace", "path": "/rules/3/threshold", "value": 0.8}
     assert (
