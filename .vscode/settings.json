@@ -4,5 +4,14 @@
     "source.fixAll.ruff": "explicit",
     "source.organizeImports.ruff": "explicit"
   },
-  "python.analysis.typeCheckingMode": "strict"
+  "python.analysis.typeCheckingMode": "strict",
+  "json.schemas": [
+    {
+      "fileMatch": [
+        "*manifest*.json",
+        "*payload*.json"
+      ],
+      "url": "./coreason_ontology.schema.json"
+    }
+  ]
 }
