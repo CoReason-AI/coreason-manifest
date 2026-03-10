@@ -63,17 +63,12 @@ def test_adversarial_market_sorting_determinism() -> None:
 def test_workflow_manifest_sorting_determinism() -> None:
     manifest = WorkflowManifest(
         manifest_version="1.0.0",
-        topology=DAGTopology(
-            nodes={},
-            edges=[],
-            max_depth=10,
-            max_fan_out=10
-        ),
+        topology=DAGTopology(nodes={}, edges=[], max_depth=10, max_fan_out=10),
         allowed_information_classifications=[
             InformationClassification.RESTRICTED,
             InformationClassification.PUBLIC,
             InformationClassification.INTERNAL,
-        ]
+        ],
     )
     assert manifest.allowed_information_classifications == ["internal", "public", "restricted"]
 
