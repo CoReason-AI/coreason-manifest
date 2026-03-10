@@ -19,7 +19,6 @@ classifiers = [
 ]
 dependencies = [
     "pydantic>=2.12.5",
-    "loguru>=0.7.2",
 ]
 
 [project.scripts]
