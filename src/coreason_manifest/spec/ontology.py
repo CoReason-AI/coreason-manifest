@@ -3404,7 +3404,7 @@ class StateContract(CoreasonBaseModel):
     """
 
     schema_definition: dict[str, Any] = Field(
-        description="A strict JSON Schema dictionary defining the required shape of the shared state blackboard."
+        description="A strict JSON Schema dictionary defining the required shape of the shared epistemic blackboard."
     )
     strict_validation: bool = Field(
         default=True,
@@ -3435,14 +3435,14 @@ class StatisticalChartExtractionState(CoreasonBaseModel):
     axes: dict[str, AffineTransformMatrixProfile] = Field(
         description="Named axes (e.g., 'x', 'y') defining the affine transformation boundaries."
     )
-    metric_matrix: list[dict[str, float | str]] = Field(
+    semantic_series: list[dict[str, float | str]] = Field(
         description="The discrete semantic tuples extracted from the chart markers."
     )
 
     @model_validator(mode="after")
     def verify_dimensional_isometry(self) -> Self:
         axis_keys = set(self.axes.keys())
-        for point in self.metric_matrix:
+        for point in self.semantic_series:
             point_keys = set(point.keys())
             if not point_keys.issubset(axis_keys) and (not axis_keys.issubset(point_keys)):
                 missing = axis_keys - point_keys
@@ -3453,7 +3453,7 @@ class StatisticalChartExtractionState(CoreasonBaseModel):
     @model_validator(mode="after")
     def sort_arrays(self) -> Self:
         object.__setattr__(
-            self, "semantic_series", sorted(self.metric_matrix, key=lambda d: json.dumps(d, sort_keys=True))
+            self, "semantic_series", sorted(self.semantic_series, key=lambda d: json.dumps(d, sort_keys=True))
         )
         return self
 

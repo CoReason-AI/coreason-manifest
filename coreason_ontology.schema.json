@@ -9526,7 +9526,7 @@
       "properties": {
         "schema_definition": {
           "additionalProperties": true,
-          "description": "A strict JSON Schema dictionary defining the required shape of the shared state blackboard.",
+          "description": "A strict JSON Schema dictionary defining the required shape of the shared epistemic blackboard.",
           "title": "Schema Definition",
           "type": "object"
         },
@@ -9630,7 +9630,7 @@
           "title": "Axes",
           "type": "object"
         },
-        "metric_matrix": {
+        "semantic_series": {
           "description": "The discrete semantic tuples extracted from the chart markers.",
           "items": {
             "additionalProperties": {
@@ -9645,13 +9645,13 @@
             },
             "type": "object"
           },
-          "title": "Metric Matrix",
+          "title": "Semantic Series",
           "type": "array"
         }
       },
       "required": [
         "axes",
-        "metric_matrix"
+        "semantic_series"
       ],
       "title": "StatisticalChartExtractionState",
       "type": "object"
