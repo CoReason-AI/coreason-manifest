@@ -1764,6 +1764,11 @@ class EnsembleTopologySpec(CoreasonBaseModel):
         ..., description="The explicit wave-collapse opcode used for resolving concurrent branches."
     )
 
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "concurrent_branch_ids", sorted(self.concurrent_branch_ids))
+        return self
+
 
 class EpistemicCompressionSLA(CoreasonBaseModel):
     strict_probability_retention: bool = Field(
@@ -1894,6 +1899,11 @@ class EvictionPolicy(CoreasonBaseModel):
         default_factory=list,
         description="Explicit list of Content Identifiers (CIDs) the orchestrator is mathematically forbidden from retracting.",  # noqa: E501
     )
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "protected_event_ids", sorted(self.protected_event_ids))
+        return self
 
 
 class EvidentiaryWarrantState(CoreasonBaseModel):
@@ -2829,6 +2839,11 @@ class MigrationContract(CoreasonBaseModel):
         description="Explicit whitelist of JSON Pointers that are safely deprecated and intentionally dropped during migration.",  # noqa: E501
     )
 
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "dropped_paths", sorted(self.dropped_paths))
+        return self
+
 
 class MultimodalArtifactReceipt(CoreasonBaseModel):
     """AGENT INSTRUCTION: The root Genesis Block for an unstructured document entering the Merkle-DAG."""
@@ -3030,6 +3045,11 @@ class PeftAdapterContract(CoreasonBaseModel):
         gt=0,
         description="The time-to-live before the inference engine forcefully evicts this adapter from the LRU cache.",
     )
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "target_modules", sorted(self.target_modules))
+        return self
 
 
 class PersistenceCommitReceipt(BaseStateEvent):

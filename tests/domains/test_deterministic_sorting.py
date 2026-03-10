@@ -2,7 +2,11 @@
 
 from coreason_manifest.spec.ontology import (
     AdversarialMarketTopology,
+    EnsembleTopologySpec,
+    EvictionPolicy,
     LatentScratchpadReceipt,
+    MigrationContract,
+    PeftAdapterContract,
     PredictionMarketPolicy,
     SecureSubSessionState,
     ThoughtBranch,
@@ -49,3 +53,42 @@ def test_adversarial_market_sorting_determinism() -> None:
     )
     assert macro.blue_team_ids == ["did:web:node_A", "did:web:node_Z"]
     assert macro.red_team_ids == ["did:web:node_B", "did:web:node_X"]
+
+
+def test_peft_adapter_contract_sorting_determinism() -> None:
+    contract = PeftAdapterContract(
+        adapter_id="adapter_1",
+        safetensors_hash="a" * 64,
+        base_model_hash="b" * 64,
+        adapter_rank=16,
+        target_modules=["v_proj", "q_proj", "k_proj"],
+    )
+    assert contract.target_modules == ["k_proj", "q_proj", "v_proj"]
+
+
+def test_ensemble_topology_spec_sorting_determinism() -> None:
+    spec = EnsembleTopologySpec(
+        concurrent_branch_ids=["did:web:node_Z", "did:web:node_A", "did:web:node_M"],
+        fusion_function="weighted_consensus",
+    )
+    assert spec.concurrent_branch_ids == ["did:web:node_A", "did:web:node_M", "did:web:node_Z"]
+
+
+def test_eviction_policy_sorting_determinism() -> None:
+    policy = EvictionPolicy(
+        strategy="fifo",
+        max_retained_tokens=1000,
+        protected_event_ids=["event_Z", "event_A", "event_M"],
+    )
+    assert policy.protected_event_ids == ["event_A", "event_M", "event_Z"]
+
+
+def test_migration_contract_sorting_determinism() -> None:
+    contract = MigrationContract(
+        contract_id="contract_1",
+        source_version="1.0.0",
+        target_version="1.1.0",
+        path_transformations={},
+        dropped_paths=["/z_path", "/a_path", "/m_path"],
+    )
+    assert contract.dropped_paths == ["/a_path", "/m_path", "/z_path"]
