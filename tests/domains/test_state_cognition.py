@@ -10,8 +10,12 @@ from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import ValidationError
 
-from coreason_manifest.compute.neuromodulation import ActivationSteeringContract, CognitiveRoutingDirective
-from coreason_manifest.state.cognition import CognitiveStateProfile, CognitiveUncertaintyProfile
+from coreason_manifest.spec.ontology import (
+    ActivationSteeringContract,
+    CognitiveRoutingDirective,
+    CognitiveStateProfile,
+    CognitiveUncertaintyProfile,
+)
 
 
 @given(

@@ -8,7 +8,7 @@
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.state.argumentation import EnsembleTopologySpec, UtilityJustificationGraph
+from coreason_manifest.spec.ontology import EnsembleTopologySpec, UtilityJustificationGraph
 
 
 def test_ensemble_topology_literal_constraint() -> None:

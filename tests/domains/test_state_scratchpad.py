@@ -8,7 +8,7 @@
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.state.scratchpad import LatentScratchpadTrace, ThoughtBranch
+from coreason_manifest.spec.ontology import LatentScratchpadTrace, ThoughtBranch
 
 
 def test_latent_scratchpad_trace_valid() -> None:

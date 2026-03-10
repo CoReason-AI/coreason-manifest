@@ -8,7 +8,7 @@
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.testing.simulation import GenerativeManifoldSLA, SyntheticGenerationProfile
+from coreason_manifest.spec.ontology import GenerativeManifoldSLA, SyntheticGenerationProfile
 
 
 def test_generative_manifold_sla_valid() -> None:

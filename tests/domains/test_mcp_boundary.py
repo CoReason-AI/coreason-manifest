@@ -12,7 +12,7 @@ import pytest
 from hypothesis import HealthCheck, given, settings
 from pydantic import ValidationError
 
-from coreason_manifest.adapters.mcp.schemas import BoundedJSONRPCRequest
+from coreason_manifest.spec.ontology import BoundedJSONRPCRequest
 
 
 def test_jsonrpc_fuzzer_missing_jsonrpc() -> None:

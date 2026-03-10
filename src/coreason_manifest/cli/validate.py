@@ -16,11 +16,12 @@ from typing import Final
 
 from pydantic import BaseModel, ValidationError
 
-from coreason_manifest.state.cognition import CognitiveStateProfile  # Representative schema
-from coreason_manifest.state.differentials import StatePatch  # Representative schema
-
 # Statically bound God-Context imports
-from coreason_manifest.state.vision import DocumentLayoutAnalysis
+from coreason_manifest.spec.ontology import (
+    CognitiveStateProfile,  # Representative schema
+    DocumentLayoutAnalysis,
+    StatePatch,  # Representative schema
+)
 
 # Immutable AOT Schema Registry
 SCHEMA_REGISTRY: Final[dict[str, type[BaseModel]]] = {
@@ -41,6 +42,7 @@ def main() -> None:
     if not target_schema:
         sys.stderr.write(f"FATAL: Unknown step '{args.step}'. Valid steps: {list(SCHEMA_REGISTRY.keys())}\n")
         sys.exit(1)
+        return
 
     try:
         with open(args.payload_path, "rb") as f:
@@ -48,6 +50,7 @@ def main() -> None:
     except OSError as e:
         sys.stderr.write(f"FATAL: IO Error reading payload: {e}\n")
         sys.exit(1)
+        return
 
     try:
         # Pure functional evaluation

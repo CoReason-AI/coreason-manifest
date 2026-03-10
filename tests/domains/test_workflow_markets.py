@@ -8,7 +8,7 @@
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.workflow.markets import HypothesisStake, PredictionMarketState
+from coreason_manifest.spec.ontology import HypothesisStake, PredictionMarketState
 
 
 def test_hypothesis_stake_rejects_zero_or_negative_magnitude() -> None:

@@ -8,7 +8,7 @@
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.oversight.audit import MechanisticAuditContract
+from coreason_manifest.spec.ontology import MechanisticAuditContract
 
 
 def test_mechanistic_audit_contract_valid() -> None:

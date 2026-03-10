@@ -8,7 +8,7 @@
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.state.toolchains import BrowserDOMState
+from coreason_manifest.spec.ontology import BrowserDOMState
 
 
 def test_browser_dom_ssrf_rejects_cloud_metadata() -> None:

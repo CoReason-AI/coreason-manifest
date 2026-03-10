@@ -10,7 +10,7 @@ from typing import Any
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.workflow.nodes import SystemNode
+from coreason_manifest.spec.ontology import SystemNode
 
 
 def test_domain_extensions_rejects_deep_nesting() -> None:

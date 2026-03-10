@@ -12,8 +12,14 @@ from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import ValidationError
 
-from coreason_manifest.presentation.scivis import AnyPanel, ChannelEncoding, GrammarPanel, InsightCard, MacroGrid
-from coreason_manifest.presentation.templates import DynamicLayoutTemplate
+from coreason_manifest.spec.ontology import (
+    AnyPanel,
+    ChannelEncoding,
+    DynamicLayoutTemplate,
+    GrammarPanel,
+    InsightCard,
+    MacroGrid,
+)
 
 
 @pytest.mark.parametrize(

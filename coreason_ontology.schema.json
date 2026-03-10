@@ -1118,6 +1118,14 @@
       ],
       "type": "string"
     },
+    "AttestationMechanism": {
+      "enum": [
+        "fido2_webauthn",
+        "zk_snark_groth16",
+        "pqc_ml_dsa"
+      ],
+      "type": "string"
+    },
     "AuctionPolicy": {
       "additionalProperties": false,
       "properties": {
@@ -3810,6 +3818,37 @@
       "title": "EmbodiedSensoryVector",
       "type": "object"
     },
+    "EnsembleTopologySpec": {
+      "additionalProperties": false,
+      "description": "AGENT INSTRUCTION: Declarative mapping of concurrent topology branches for test-time superposition.\nMust map to strict W3C DIDs (NodeIDs) and provide an explicit wave-collapse opcode.",
+      "properties": {
+        "concurrent_branch_ids": {
+          "description": "A list of strict W3C DIDs (NodeIDs) representing concurrent topology branches.",
+          "items": {
+            "$ref": "#/$defs/NodeID"
+          },
+          "minItems": 2,
+          "title": "Concurrent Branch Ids",
+          "type": "array"
+        },
+        "fusion_function": {
+          "description": "The explicit wave-collapse opcode used for resolving concurrent branches.",
+          "enum": [
+            "weighted_consensus",
+            "highest_confidence",
+            "brier_score_collapse"
+          ],
+          "title": "Fusion Function",
+          "type": "string"
+        }
+      },
+      "required": [
+        "concurrent_branch_ids",
+        "fusion_function"
+      ],
+      "title": "EnsembleTopologySpec",
+      "type": "object"
+    },
     "EphemeralNamespacePartition": {
       "additionalProperties": false,
       "description": "A hermetically sealed, ephemeral execution partition for dynamic dependency resolution.",
@@ -5596,20 +5635,14 @@
         "required_attestation": {
           "anyOf": [
             {
-              "enum": [
-                "fido2_webauthn",
-                "zk_snark_groth16",
-                "pqc_ml_dsa"
-              ],
-              "type": "string"
+              "$ref": "#/$defs/AttestationMechanism"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "AGENT INSTRUCTION: If set, the orchestrator MUST NOT resolve\n        this node without a cryptographically matching WetwareAttestationContract\n        supplied in the InterventionVerdict.",
-          "title": "Required Attestation"
+          "description": "AGENT INSTRUCTION: If set, the orchestrator MUST NOT resolve\n        this node without a cryptographically matching WetwareAttestationContract\n        supplied in the InterventionVerdict."
         }
       },
       "required": [
@@ -6486,7 +6519,7 @@
           "type": "string"
         },
         "transport_type": {
-          "$ref": "#/$defs/coreason_manifest__tooling__environments__MCPTransport",
+          "$ref": "#/$defs/MCPTransportType",
           "description": "The transport protocol used to communicate with the MCP server."
         },
         "allowed_mcp_tools": {
@@ -6658,15 +6691,15 @@
           "description": "Polymorphic transport configuration.",
           "discriminator": {
             "mapping": {
-              "http": "#/$defs/coreason_manifest__adapters__mcp__schemas__MCPTransport",
-              "sse": "#/$defs/coreason_manifest__adapters__mcp__schemas__MCPTransport",
-              "stdio": "#/$defs/coreason_manifest__adapters__mcp__schemas__MCPTransport"
+              "http": "#/$defs/MCPTransport",
+              "sse": "#/$defs/MCPTransport",
+              "stdio": "#/$defs/MCPTransport"
             },
             "propertyName": "type"
           },
           "oneOf": [
             {
-              "$ref": "#/$defs/coreason_manifest__adapters__mcp__schemas__MCPTransport"
+              "$ref": "#/$defs/MCPTransport"
             }
           ],
           "title": "Transport"
@@ -6732,6 +6765,27 @@
       "title": "MCPServerManifest",
       "type": "object"
     },
+    "MCPTransport": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/StdioTransportConfig"
+        },
+        {
+          "$ref": "#/$defs/SSETransportConfig"
+        },
+        {
+          "$ref": "#/$defs/HTTPTransportConfig"
+        }
+      ]
+    },
+    "MCPTransportType": {
+      "enum": [
+        "stdio",
+        "sse",
+        "http"
+      ],
+      "type": "string"
+    },
     "MacroGrid": {
       "additionalProperties": false,
       "description": "A layout matrix containing a list of panels.",
@@ -6761,6 +6815,29 @@
         "panels"
       ],
       "title": "MacroGrid",
+      "type": "object"
+    },
+    "MarketContract": {
+      "additionalProperties": false,
+      "properties": {
+        "minimum_collateral": {
+          "description": "The minimum amount of token collateral held in escrow.",
+          "minimum": 0.0,
+          "title": "Minimum Collateral",
+          "type": "number"
+        },
+        "slashing_penalty": {
+          "description": "The exact token amount slashed for Byzantine faults.",
+          "minimum": 0.0,
+          "title": "Slashing Penalty",
+          "type": "number"
+        }
+      },
+      "required": [
+        "minimum_collateral",
+        "slashing_penalty"
+      ],
+      "title": "MarketContract",
       "type": "object"
     },
     "MarketResolution": {
@@ -7313,6 +7390,49 @@
         "temperature_shift_variance"
       ],
       "title": "MutationPolicy",
+      "type": "object"
+    },
+    "NDimensionalTensorManifest": {
+      "additionalProperties": false,
+      "description": "Cryptographic shadow of an N-Dimensional spatial or mathematical array.\nUsed for routing multi-dimensional compute without passing raw bytes.",
+      "properties": {
+        "dtype": {
+          "$ref": "#/$defs/TensorDType",
+          "description": "Data type of the tensor elements."
+        },
+        "shape": {
+          "description": "N-Dimensional shape tuple.",
+          "items": {
+            "type": "integer"
+          },
+          "title": "Shape",
+          "type": "array"
+        },
+        "memory_footprint_bytes": {
+          "description": "Exact byte size of the uncompressed tensor.",
+          "title": "Memory Footprint Bytes",
+          "type": "integer"
+        },
+        "merkle_root": {
+          "description": "SHA-256 Merkle root of the payload chunks.",
+          "pattern": "^[a-fA-F0-9]{64}$",
+          "title": "Merkle Root",
+          "type": "string"
+        },
+        "storage_uri": {
+          "description": "Strict URI pointer to the physical bytes.",
+          "title": "Storage Uri",
+          "type": "string"
+        }
+      },
+      "required": [
+        "dtype",
+        "shape",
+        "memory_footprint_bytes",
+        "merkle_root",
+        "storage_uri"
+      ],
+      "title": "NDimensionalTensorManifest",
       "type": "object"
     },
     "NeuralAuditAttestation": {
@@ -10220,6 +10340,19 @@
       "title": "TemporalCheckpoint",
       "type": "object"
     },
+    "TensorDType": {
+      "description": "Mathematical data types for tensor payloads.",
+      "enum": [
+        "float32",
+        "float64",
+        "int8",
+        "uint8",
+        "int32",
+        "int64"
+      ],
+      "title": "TensorDType",
+      "type": "string"
+    },
     "TerminalBufferState": {
       "additionalProperties": false,
       "properties": {
@@ -10548,6 +10681,51 @@
       "title": "TruthMaintenancePolicy",
       "type": "object"
     },
+    "UtilityJustificationGraph": {
+      "additionalProperties": false,
+      "description": "AGENT INSTRUCTION: Immutable cryptographic receipt of multi-dimensional utility routing.\nIf variance threshold falls below delta, fallback to deterministic ensemble superposition.",
+      "properties": {
+        "optimizing_vectors": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "description": "Multi-dimensional continuous values representing optimizations.",
+          "title": "Optimizing Vectors",
+          "type": "object"
+        },
+        "degrading_vectors": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "description": "Multi-dimensional continuous values representing degradations.",
+          "title": "Degrading Vectors",
+          "type": "object"
+        },
+        "superposition_variance_threshold": {
+          "description": "The statistical variance threshold below which deterministic fallback is enforced.",
+          "minimum": 0.0,
+          "title": "Superposition Variance Threshold",
+          "type": "number"
+        },
+        "ensemble_spec": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EnsembleTopologySpec"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The deterministic ensemble specification to fall back on when threshold falls below delta."
+        }
+      },
+      "required": [
+        "superposition_variance_threshold"
+      ],
+      "title": "UtilityJustificationGraph",
+      "type": "object"
+    },
     "VectorEmbedding": {
       "additionalProperties": false,
       "properties": {
@@ -10653,14 +10831,8 @@
       "description": "AGENT INSTRUCTION: This model represents a SOTA cryptographic receipt\nproving a human in the loop physically authorized a state transition.",
       "properties": {
         "mechanism": {
-          "description": "The SOTA cryptographic mechanism used to generate the proof.",
-          "enum": [
-            "fido2_webauthn",
-            "zk_snark_groth16",
-            "pqc_ml_dsa"
-          ],
-          "title": "Mechanism",
-          "type": "string"
+          "$ref": "#/$defs/AttestationMechanism",
+          "description": "The SOTA cryptographic mechanism used to generate the proof."
         },
         "did_subject": {
           "description": "The Decentralized Identifier (DID) of the human operator.",
@@ -10927,27 +11099,6 @@
       ],
       "title": "ZeroKnowledgeProof",
       "type": "object"
-    },
-    "coreason_manifest__adapters__mcp__schemas__MCPTransport": {
-      "anyOf": [
-        {
-          "$ref": "#/$defs/StdioTransportConfig"
-        },
-        {
-          "$ref": "#/$defs/SSETransportConfig"
-        },
-        {
-          "$ref": "#/$defs/HTTPTransportConfig"
-        }
-      ]
-    },
-    "coreason_manifest__tooling__environments__MCPTransport": {
-      "enum": [
-        "stdio",
-        "sse",
-        "http"
-      ],
-      "type": "string"
     }
   },
   "title": "CoReason Shared Kernel Ontology",

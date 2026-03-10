@@ -16,7 +16,7 @@ from pydantic import BaseModel
 from pydantic.json_schema import models_json_schema
 
 import coreason_manifest
-from coreason_manifest.core.base import CoreasonBaseModel
+from coreason_manifest.spec.ontology import CoreasonBaseModel
 
 
 def main() -> None:
