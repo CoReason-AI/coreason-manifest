@@ -6,13 +6,11 @@ from coreason_manifest.utils.algebra import (
     align_semantic_manifolds,
     compute_topology_hash,
     generate_correction_prompt,
-    verify_merkle_proof,
-)
-from coreason_manifest.utils.projections import (
     get_ontology_schema,
     project_manifest_to_markdown,
     project_manifest_to_mermaid,
     validate_payload,
+    verify_merkle_proof,
 )
 
 __all__ = [

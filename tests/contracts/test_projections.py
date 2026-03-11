@@ -2,7 +2,7 @@ import pytest
 from pydantic import TypeAdapter, ValidationError
 
 from coreason_manifest.spec.ontology import DynamicRoutingManifest, WorkflowManifest
-from coreason_manifest.utils.projections import (
+from coreason_manifest.utils.algebra import (
     get_ontology_schema,
     project_manifest_to_markdown,
     project_manifest_to_mermaid,
