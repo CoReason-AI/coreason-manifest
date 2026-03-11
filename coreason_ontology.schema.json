@@ -2503,8 +2503,7 @@
             "type": "string"
           },
           "title": "Forbidden Intents",
-          "type": "array",
-          "uniqueItems": true
+          "type": "array"
         }
       },
       "required": [
@@ -2528,10 +2527,10 @@
           "title": "Mutation Paradigm",
           "type": "string"
         },
-        "max_uncommitted_rows": {
+        "max_uncommitted_edges": {
           "description": "Backpressure threshold before forcing a commit.",
           "exclusiveMinimum": 0,
-          "title": "Max Uncommitted Rows",
+          "title": "Max Uncommitted Edges",
           "type": "integer"
         },
         "micro_batch_interval_ms": {
@@ -2543,7 +2542,7 @@
       },
       "required": [
         "mutation_paradigm",
-        "max_uncommitted_rows",
+        "max_uncommitted_edges",
         "micro_batch_interval_ms"
       ],
       "title": "ContinuousMutationPolicy",
@@ -5508,7 +5507,7 @@
         "edge_projection_mode": {
           "description": "How to flatten SemanticEdgeState.",
           "enum": [
-            "adjacency_list",
+            "adjacency_matrix",
             "map_array"
           ],
           "title": "Edge Projection Mode",
@@ -6262,7 +6261,7 @@
           "title": "Message",
           "type": "string"
         },
-        "data": {
+        "error_payload": {
           "anyOf": [
             {},
             {
@@ -6271,7 +6270,7 @@
           ],
           "default": null,
           "description": "A Primitive or Structured value that contains additional information about the error.",
-          "title": "Data"
+          "title": "Error Payload"
         }
       },
       "required": [
@@ -7919,7 +7918,7 @@
     "PatchOperation": {
       "enum": [
         "add",
-        "remove",
+        "ablation",
         "replace",
         "copy",
         "move",
