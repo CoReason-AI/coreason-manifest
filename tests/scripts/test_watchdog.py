@@ -1,3 +1,9 @@
+import os
+import sys
+
+# Ensure the root directory is on the path so 'scripts' can be imported in CI
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
+
 import json
 from unittest.mock import MagicMock, patch
 
