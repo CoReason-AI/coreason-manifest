@@ -2721,7 +2721,7 @@ type AnyIntent = Annotated[
     | AdjudicationIntent
     | EscalationIntent
     | SemanticDiscoveryIntent
-    | TaxonomicRestructureIntent,
+    | TaxonomicRestructureIntent
     | LatentProjectionIntent,
     Field(discriminator="type"),
 ]
