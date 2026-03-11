@@ -4188,7 +4188,9 @@ class AgentNodeProfile(BaseNodeProfile):
     A node representing an autonomous agent.
     """
 
-    description: str = Field(description="The semantic boundary defining the objective function of the execution node.")
+    description: str = Field(
+        description="The semantic boundary defining the objective function of the execution node. [SITD-Gamma: Neurosymbolic Substrate Alignment]"
+    )
     type: Literal["agent"] = Field(default="agent", description="Discriminator for an Agent node.")
     logit_steganography: LogitSteganographyContract | None = Field(
         default=None,
@@ -4644,7 +4646,9 @@ class WorkflowManifest(CoreasonBaseState):
     manifest_version: SemanticVersionState = Field(
         description="The semantic version of this workflow manifestation schema."
     )
-    topology: AnyTopologyManifest = Field(description="The underlying topology governing execution routing.")
+    topology: AnyTopologyManifest = Field(
+        description="The underlying topology governing execution routing. [SITD-Beta: Defeasible Merkle-DAG Causal Bounding]"
+    )
     governance: GlobalGovernancePolicy | None = Field(
         default=None, description="Macro-economic circuit breakers and TTL limits for the swarm."
     )
@@ -4900,7 +4904,8 @@ class EpistemicLedgerState(CoreasonBaseState):
     or Epistemic Quarantine."""
 
     history: list[AnyStateEvent] = Field(
-        max_length=10000, description="An append-only, cryptographic ledger of state events."
+        max_length=10000,
+        description="An append-only, cryptographic ledger of state events. [SITD-Alpha: Non-Monotonic Epistemic Quarantine Isometry]",
     )
     checkpoints: list[TemporalCheckpointState] = Field(
         default_factory=list, description="Hard temporal anchors allowing state restoration."

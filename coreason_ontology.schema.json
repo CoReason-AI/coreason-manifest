@@ -483,7 +483,7 @@
       "description": "A node representing an autonomous agent.",
       "properties": {
         "description": {
-          "description": "The semantic boundary defining the objective function of the execution node.",
+          "description": "The semantic boundary defining the objective function of the execution node. [SITD-Gamma: Neurosymbolic Substrate Alignment]",
           "title": "Description",
           "type": "string"
         },
@@ -3939,7 +3939,7 @@
       "description": "The Committed Epistemic Ledger (crystallized truth), completely partitioned from volatile working memory\nor Epistemic Quarantine.",
       "properties": {
         "history": {
-          "description": "An append-only, cryptographic ledger of state events.",
+          "description": "An append-only, cryptographic ledger of state events. [SITD-Alpha: Non-Monotonic Epistemic Quarantine Isometry]",
           "items": {
             "$ref": "#/$defs/AnyStateEvent"
           },
@@ -11196,7 +11196,7 @@
         },
         "topology": {
           "$ref": "#/$defs/AnyTopologyManifest",
-          "description": "The underlying topology governing execution routing."
+          "description": "The underlying topology governing execution routing. [SITD-Beta: Defeasible Merkle-DAG Causal Bounding]"
         },
         "governance": {
           "anyOf": [
