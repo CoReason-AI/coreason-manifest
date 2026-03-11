@@ -335,6 +335,6 @@ def test_state_hydration_manifest_long_string_quarantine() -> None:
         StateHydrationManifest(
             epistemic_coordinate="test_session",
             crystallized_ledger_cids=["a" * 64],
-            working_memory_variables={"large_payload": long_string},
+            working_context_variables={"large_payload": long_string},
             max_retained_tokens=4096,
         )
