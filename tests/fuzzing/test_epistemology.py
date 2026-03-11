@@ -36,7 +36,13 @@ def test_tamper_evident_shatter_protocol(inputs: Any, outputs: Any) -> None:
 
     """AGENT INSTRUCTION: Force bypass of frozen model to simulate physical memory corruption."""
     object.__setattr__(n1, "outputs", "tampered_data")
-    assert verify_merkle_proof(trace) is False
+
+    import pytest
+
+    from coreason_manifest.spec.ontology import TamperFaultEvent
+
+    with pytest.raises(TamperFaultEvent):
+        verify_merkle_proof(trace)
 
 
 def test_latent_scratchpad_trace_sorting_determinism() -> None:

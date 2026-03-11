@@ -57,9 +57,9 @@ def test_dynamic_layout_ast_execution_bleed(payload: str) -> None:
 @given(rows=st.integers(min_value=10001, max_value=100000))
 def test_continuous_mutation_oom_buffer_limit(rows: int) -> None:
     """Prove that ContinuousMutationPolicy rejects uncommitted rows > 10000 when append_only is True."""
-    with pytest.raises(ValidationError, match="max_uncommitted_rows must be <= 10000 for append_only paradigm"):
+    with pytest.raises(ValidationError, match="max_uncommitted_edges must be <= 10000 for append_only paradigm"):
         ContinuousMutationPolicy(
-            mutation_paradigm="append_only", max_uncommitted_rows=rows, micro_batch_interval_ms=1000
+            mutation_paradigm="append_only", max_uncommitted_edges=rows, micro_batch_interval_ms=1000
         )
 
 

@@ -252,7 +252,7 @@ __all__ = [
     "SystemRole",
     "TabularCellState",
     "TabularMatrixExtractionState",
-    "TamperError",
+    "TamperFaultEvent",
     "TaskAnnouncementIntent",
     "TaskAwardReceipt",
     "TelemetryMetadataProfile",
