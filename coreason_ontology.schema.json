@@ -2121,6 +2121,43 @@
       "title": "CircuitBreakerEvent",
       "type": "object"
     },
+    "CognitiveCritiqueProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative, dense supervision vector generated\nby a Process Reward Model (PRM) to steer intermediate test-time reasoning.",
+      "properties": {
+        "reasoning_trace_hash": {
+          "description": "CoReason Shared Kernel Ontology: The cryptographic Merkle root of the specific ThoughtBranch being evaluated.",
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Reasoning Trace Hash",
+          "type": "string"
+        },
+        "logical_flaw_embedding": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/VectorEmbeddingState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "CoReason Shared Kernel Ontology: A dense latent space representation of the specific logical fallacy identified, used to mathematically repel future generation trajectories."
+        },
+        "epistemic_penalty_scalar": {
+          "description": "CoReason Shared Kernel Ontology: A continuous penalty applied to the branch's probability mass if normative drift or hallucination is detected.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Epistemic Penalty Scalar",
+          "type": "number"
+        }
+      },
+      "required": [
+        "reasoning_trace_hash",
+        "epistemic_penalty_scalar"
+      ],
+      "title": "CognitiveCritiqueProfile",
+      "type": "object"
+    },
     "CognitiveRoutingContract": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nHardware-level contract overriding MoE routing to enforce functional/specialist paths.",
@@ -4083,6 +4120,37 @@
       "title": "EpistemicCompressionSLA",
       "type": "object"
     },
+    "EpistemicEscalationContract": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The strict mathematical agreement governing when\nan agent is authorized to expand its test-time compute allocation based on measured doubt.",
+      "properties": {
+        "baseline_entropy_threshold": {
+          "description": "CoReason Shared Kernel Ontology: The mathematical measure of uncertainty (e.g., variance in generated hypotheses) required to trigger escalation.",
+          "minimum": 0.0,
+          "title": "Baseline Entropy Threshold",
+          "type": "number"
+        },
+        "test_time_multiplier": {
+          "description": "CoReason Shared Kernel Ontology: The continuous scalar applied to the agent's baseline max_latent_tokens_budget when the entropy threshold is breached.",
+          "exclusiveMinimum": 1.0,
+          "title": "Test Time Multiplier",
+          "type": "number"
+        },
+        "max_escalation_tiers": {
+          "description": "CoReason Shared Kernel Ontology: The absolute integer limit on how many times the orchestrator can recursively multiply the compute budget before forcing a SystemFaultEvent.",
+          "minimum": 1,
+          "title": "Max Escalation Tiers",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "baseline_entropy_threshold",
+        "test_time_multiplier",
+        "max_escalation_tiers"
+      ],
+      "title": "EpistemicEscalationContract",
+      "type": "object"
+    },
     "EpistemicLedgerState": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nThe Committed Epistemic Ledger (crystallized truth), completely partitioned from volatile working memory\nor Epistemic Quarantine.",
@@ -5458,6 +5526,45 @@
       "title": "FederatedDiscoveryManifest",
       "type": "object"
     },
+    "FederatedPeftContract": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The physical and temporal bounding constraints\nfor hot-swapping low-rank adapter tensors into GPU memory.",
+      "properties": {
+        "adapter_merkle_root": {
+          "description": "CoReason Shared Kernel Ontology: The tamper-evident SHA-256 hash of the exact safetensors weight matrix.",
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Adapter Merkle Root",
+          "type": "string"
+        },
+        "vram_footprint_bytes": {
+          "description": "CoReason Shared Kernel Ontology: The exact spatial geometry required in VRAM to mount this adapter.",
+          "exclusiveMinimum": 0,
+          "title": "Vram Footprint Bytes",
+          "type": "integer"
+        },
+        "ephemeral_ttl_ms": {
+          "description": "CoReason Shared Kernel Ontology: The absolute Time-To-Live for the adapter to exist in the kinetic execution plane before forced eviction.",
+          "exclusiveMinimum": 0,
+          "title": "Ephemeral Ttl Ms",
+          "type": "integer"
+        },
+        "cache_priority_weight": {
+          "description": "CoReason Shared Kernel Ontology: The relative importance scalar used by the orchestrator's LRU eviction algorithm when VRAM limits are saturated.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Cache Priority Weight",
+          "type": "number"
+        }
+      },
+      "required": [
+        "adapter_merkle_root",
+        "vram_footprint_bytes",
+        "ephemeral_ttl_ms",
+        "cache_priority_weight"
+      ],
+      "title": "FederatedPeftContract",
+      "type": "object"
+    },
     "FederatedStateSnapshot": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology",
@@ -6623,6 +6730,41 @@
           "type": "null"
         }
       ]
+    },
+    "KineticBudgetPolicy": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The mathematical boundary forcing the collapse of\nprobability waves and wide-search trees as physical compute resources deplete.",
+      "properties": {
+        "exploration_decay_curve": {
+          "description": "CoReason Shared Kernel Ontology: The mathematical function dictating how rapidly lateral ThoughtBranches are restricted over time.",
+          "enum": [
+            "linear",
+            "exponential",
+            "step"
+          ],
+          "title": "Exploration Decay Curve",
+          "type": "string"
+        },
+        "forced_exploitation_threshold_ms": {
+          "description": "CoReason Shared Kernel Ontology: The physical wall-clock time remaining at which the orchestrator is mathematically forbidden from opening new lateral branches.",
+          "exclusiveMinimum": 0,
+          "title": "Forced Exploitation Threshold Ms",
+          "type": "integer"
+        },
+        "dynamic_temperature_asymptote": {
+          "description": "CoReason Shared Kernel Ontology: The absolute minimum sampling temperature the system must converge to during the final exploitation phase.",
+          "minimum": 0.0,
+          "title": "Dynamic Temperature Asymptote",
+          "type": "number"
+        }
+      },
+      "required": [
+        "exploration_decay_curve",
+        "forced_exploitation_threshold_ms",
+        "dynamic_temperature_asymptote"
+      ],
+      "title": "KineticBudgetPolicy",
+      "type": "object"
     },
     "KineticSeparationPolicy": {
       "additionalProperties": false,
