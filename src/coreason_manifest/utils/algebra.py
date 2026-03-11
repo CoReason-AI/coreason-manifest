@@ -463,6 +463,8 @@ def apply_state_differential(
             # The prompt requires extracting from_path to evaluate another pointer.
             # StateMutationIntent doesn't define from_path, so we assume it's stored in patch.value
             from_path = patch.value
+            if not isinstance(from_path, str):
+                raise ValueError(f"Invalid from_path: {from_path}")
             try:
                 from_target, from_last = resolve_from_path(from_path)
                 val = read_from_target(from_target, from_last)
