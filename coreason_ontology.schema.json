@@ -6327,7 +6327,7 @@
           "type": "string"
         },
         "explored_branches": {
-          "description": "All logical paths the agent attempted within this Ephemeral Epistemic Quarantine—a volatile workspace where probability waves collapse before being committed to the immutable ledger.",
+          "description": "All logical paths the agent attempted within this Ephemeral Epistemic Quarantine\u2014a volatile workspace where probability waves collapse before being committed to the immutable ledger.",
           "items": {
             "$ref": "#/$defs/ThoughtBranchState"
           },
