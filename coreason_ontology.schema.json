@@ -8220,6 +8220,14 @@
           },
           "title": "Supported Personas",
           "type": "array"
+        },
+        "available_procedural_manifolds": {
+          "description": "The lightweight progressive disclosure tier for procedural skills.",
+          "items": {
+            "$ref": "#/$defs/ProceduralMetadataManifest"
+          },
+          "title": "Available Procedural Manifolds",
+          "type": "array"
         }
       },
       "required": [
@@ -8627,6 +8635,48 @@
         "grid"
       ],
       "title": "PresentationManifest",
+      "type": "object"
+    },
+    "ProceduralMetadataManifest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A Level-1 Epistemic Discovery Surface acting as a\nprogressive disclosure pointer to a massive EpistemicSOPManifest in cold storage.\nPrevents context window token exhaustion.",
+      "properties": {
+        "metadata_id": {
+          "description": "A strict cryptographic string identifier for this L1 procedural pointer.",
+          "minLength": 1,
+          "title": "Metadata Id",
+          "type": "string"
+        },
+        "target_sop_id": {
+          "description": "The Content Identifier (CID) of the heavy EpistemicSOPManifest resting in cold storage.",
+          "minLength": 1,
+          "title": "Target Sop Id",
+          "type": "string"
+        },
+        "trigger_description": {
+          "description": "The mathematically bounded semantic projection defining when the router must trigger this SOP.",
+          "title": "Trigger Description",
+          "type": "string"
+        },
+        "latent_vector_coordinate": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/VectorEmbeddingState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional dense-vector geometry for zero-shot semantic routing without LLM forward-pass evaluation."
+        }
+      },
+      "required": [
+        "metadata_id",
+        "target_sop_id",
+        "trigger_description"
+      ],
+      "title": "ProceduralMetadataManifest",
       "type": "object"
     },
     "ProcessRewardContract": {

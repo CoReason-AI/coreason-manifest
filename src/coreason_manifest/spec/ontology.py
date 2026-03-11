@@ -2976,7 +2976,9 @@ class ProceduralMetadataManifest(CoreasonBaseState):
     )
     latent_vector_coordinate: VectorEmbeddingState | None = Field(
         default=None,
-        description="Optional dense-vector geometry for zero-shot semantic routing without LLM forward-pass evaluation.",
+        description=(
+            "Optional dense-vector geometry for zero-shot semantic routing without LLM forward-pass evaluation."
+        ),
     )
 
 
