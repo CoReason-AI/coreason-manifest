@@ -135,3 +135,31 @@ def test_tool_invocation_cryptographic_starvation() -> None:
             agent_attestation=None,  # type: ignore
             zk_proof=None,  # type: ignore
         )
+
+
+def test_mcp_quarantine_gateway_authorized_mount() -> None:
+    """Prove the 'Happy Path' for the MCP Gateway, achieving 100% branch coverage."""
+    from coreason_manifest.spec.ontology import (
+        MCPCapabilityWhitelistPolicy,
+        MCPServerManifest,
+        VerifiableCredentialPresentationReceipt,
+    )
+
+    valid_receipt = VerifiableCredentialPresentationReceipt(
+        presentation_format="jwt_vc",
+        issuer_did="did:coreason:core-engine:v1",
+        cryptographic_proof_blob="secure_proof_hash_12345",
+        authorization_claims={"clearance": "RESTRICTED"},
+    )
+
+    # This must instantiate cleanly without raising a ValidationError
+    manifest = MCPServerManifest(
+        server_uri="stdio://coreason-mcp",
+        transport_type="stdio",
+        capability_whitelist=MCPCapabilityWhitelistPolicy(
+            allowed_tools=["fetch"], allowed_resources=[], allowed_prompts=[]
+        ),
+        attestation_receipt=valid_receipt,
+    )
+
+    assert manifest.attestation_receipt.issuer_did.startswith("did:coreason:")
