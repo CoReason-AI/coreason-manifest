@@ -271,4 +271,4 @@ def test_apply_state_differential() -> None:
 
     # 4. Asserts
     assert new_state == {"user": {"name": "Bob", "age": 30, "tags": []}}
-    assert base_state == {"user": {"name": "Alice", "tags": ["admin"]}} # Original is COMPLETELY unmodified
+    assert base_state == {"user": {"name": "Alice", "tags": ["admin"]}}  # Original is COMPLETELY unmodified
