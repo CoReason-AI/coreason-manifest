@@ -19,7 +19,7 @@ import coreason_manifest.spec.ontology as ontology
 from coreason_manifest.spec.ontology import (
     AnyTopologyManifest,
     CognitiveStateProfile,
-    CoreasonBaseModel,
+    CoreasonBaseState,
     DocumentLayoutManifest,
     DynamicRoutingManifest,
     EpistemicCompressionSLA,
@@ -116,11 +116,11 @@ def project_manifest_to_markdown(manifest: WorkflowManifest) -> str:
 
 def get_ontology_schema() -> dict[str, Any]:
     """Dynamically generate the CoReason ontology JSON schema."""
-    models_to_export: list[type[CoreasonBaseModel]] = []
+    models_to_export: list[type[CoreasonBaseState]] = []
 
     for name in sorted(dir(ontology)):
         obj = getattr(ontology, name)
-        if isinstance(obj, type) and issubclass(obj, CoreasonBaseModel) and obj is not CoreasonBaseModel:
+        if isinstance(obj, type) and issubclass(obj, CoreasonBaseState) and obj is not CoreasonBaseState:
             models_to_export.append(obj)
 
     if not models_to_export:
