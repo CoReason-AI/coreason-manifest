@@ -2433,7 +2433,8 @@ class InformationalIntent(CoreasonBaseState):
 
 
 type AnyPresentationIntent = Annotated[
-    InformationalIntent | DraftingIntent | AdjudicationIntent | EscalationIntent | SemanticDiscoveryIntent, Field(discriminator="type")
+    InformationalIntent | DraftingIntent | AdjudicationIntent | EscalationIntent | SemanticDiscoveryIntent,
+    Field(discriminator="type"),
 ]
 
 type AnyIntent = AnyPresentationIntent

@@ -112,7 +112,7 @@ def test_epistemic_sop_ghost_node_rejection(
     ghost_source: str,
     ghost_target: str
 ) -> None:
-    """Prove that EpistemicSOPManifest throws a ValidationError if chronological_flow_edges points to a step not defined in cognitive_steps."""
+    """Prove that EpistemicSOPManifest throws a ValidationError if an edge points to an undefined step."""
     # Build an empty cognitive_steps dictionary to easily test ghost nodes
 
     with pytest.raises(ValidationError, match="Ghost node referenced"):
