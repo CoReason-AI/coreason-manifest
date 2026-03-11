@@ -6969,12 +6969,16 @@
         "capability_whitelist": {
           "$ref": "#/$defs/MCPCapabilityWhitelistPolicy",
           "description": "The strict capability bounds enforced by the orchestrator prior to connection."
+        },
+        "attestation_receipt": {
+          "$ref": "#/$defs/VerifiableCredentialPresentationReceipt"
         }
       },
       "required": [
         "server_uri",
         "transport_type",
-        "capability_whitelist"
+        "capability_whitelist",
+        "attestation_receipt"
       ],
       "title": "MCPServerManifest",
       "type": "object"
@@ -10765,13 +10769,22 @@
           "default": null,
           "description": "The maximum escrow unlocked for this specific run.",
           "title": "Authorized Budget Magnitude"
+        },
+        "agent_attestation": {
+          "$ref": "#/$defs/AgentAttestationReceipt"
+        },
+        "zk_proof": {
+          "$ref": "#/$defs/ZeroKnowledgeReceipt",
+          "description": "AGENT INSTRUCTION: The strict mathematical proof that the agent was authorized by the CoReason execution engine to evaluate this tool. Stripping this field violates the Zero-Trust execution boundary."
         }
       },
       "required": [
         "event_id",
         "timestamp",
         "tool_name",
-        "parameters"
+        "parameters",
+        "agent_attestation",
+        "zk_proof"
       ],
       "title": "ToolInvocationEvent",
       "type": "object"

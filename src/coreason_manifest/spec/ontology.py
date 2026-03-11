@@ -3985,7 +3985,6 @@ class ToolInvocationEvent(BaseStateEvent):
     )
 
 
-
 class TraceExportManifest(CoreasonBaseState):
     batch_id: str = Field(description="Unique identifier for this telemetry snapshot.")
     spans: list[ExecutionSpanReceipt] = Field(
