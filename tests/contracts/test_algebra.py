@@ -9,12 +9,15 @@ from coreason_manifest.spec.ontology import (
     DynamicRoutingManifest,
     EpistemicLedgerState,
     OntologicalAlignmentPolicy,
+    StateDifferentialManifest,
+    StateMutationIntent,
     TokenBurnReceipt,
     VectorEmbeddingState,
     WorkflowManifest,
 )
 from coreason_manifest.utils.algebra import (
     align_semantic_manifolds,
+    apply_state_differential,
     calculate_latent_alignment,
     calculate_remaining_compute,
     compute_topology_hash,
@@ -23,6 +26,7 @@ from coreason_manifest.utils.algebra import (
     project_manifest_to_markdown,
     project_manifest_to_mermaid,
     validate_payload,
+    verify_ast_safety,
 )
 
 
@@ -230,3 +234,41 @@ def test_calculate_latent_alignment_cosine_math() -> None:
     policy_strict = OntologicalAlignmentPolicy(min_cosine_similarity=0.9, require_isometry_proof=False)
     with pytest.raises(ValueError, match=r"TamperFaultEvent: Latent alignment failed\."):
         calculate_latent_alignment(v1, v2, policy_strict)
+
+
+def test_verify_ast_safety() -> None:
+    # Task 1. Assert pure deterministic expression evaluation works
+    assert verify_ast_safety("{'x': 1, 'y': 2 + 2}") is True
+
+    # Task 2. Prevent arbitrary module execution explicitly via SyntaxError or ValueError
+    with pytest.raises((SyntaxError, ValueError)):
+        verify_ast_safety("import os; os.system('ls')")
+
+    # Task 3. Block malicious multi-layer call graphs mimicking Builtins
+    with pytest.raises(ValueError, match="Kinetic execution bleed detected"):
+        verify_ast_safety("__builtins__['eval']('1')")
+
+
+def test_apply_state_differential() -> None:
+    # 1. Base state
+    base_state = {"user": {"name": "Alice", "tags": ["admin"]}}
+
+    # 2. Manifest with 3 patches
+    patch1 = StateMutationIntent(op="add", path="/user/age", value=30)
+    patch2 = StateMutationIntent(op="replace", path="/user/name", value="Bob")
+    patch3 = StateMutationIntent(op="remove", path="/user/tags/0")
+
+    manifest = StateDifferentialManifest(
+        diff_id="did:web:patch-1",
+        author_node_id="did:web:node-1",
+        lamport_timestamp=1,
+        vector_clock={"did:web:node-1": 1},
+        patches=[patch1, patch2, patch3],
+    )
+
+    # 3. Apply state differential
+    new_state = apply_state_differential(base_state, manifest)
+
+    # 4. Asserts
+    assert new_state == {"user": {"name": "Bob", "age": 30, "tags": []}}
+    assert base_state == {"user": {"name": "Alice", "tags": ["admin"]}} # Original is COMPLETELY unmodified

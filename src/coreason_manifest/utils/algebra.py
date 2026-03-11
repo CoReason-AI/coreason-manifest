@@ -7,7 +7,9 @@
 
 """AGENT INSTRUCTION: This module contains pure data transformations of the Hollow Data Plane."""
 
+import ast
 import base64
+import copy
 import hashlib
 import math
 import struct
@@ -285,3 +287,218 @@ def verify_merkle_proof(trace: list[ExecutionNodeReceipt]) -> bool:
             if parent_hash not in node_map:
                 raise TamperFaultEvent(f"Missing parent hash {parent_hash} in trace")
     return True
+
+
+def verify_ast_safety(payload: str) -> bool:
+    """
+    Mechanistically sandboxes dynamically generated strings by compiling them into an AST
+    and rigorously walking the graph to ensure no kinetic execution bleed occurs.
+    """
+    try:
+        tree = ast.parse(payload, mode="eval")
+    except SyntaxError as e:
+        raise ValueError("Payload is not valid syntax.") from e
+
+    # Default-Deny node allowlist
+    base_allowlist = [
+        ast.Expression,
+        ast.Constant,
+        ast.Name,
+        ast.Load,
+        ast.Dict,
+        ast.List,
+        ast.Tuple,
+        ast.Set,
+        ast.BinOp,
+        ast.UnaryOp,
+        ast.operator,
+        ast.unaryop,
+        ast.Subscript,
+    ]
+
+    if hasattr(ast, "Index"):
+        base_allowlist.append(getattr(ast, "Index"))
+    if hasattr(ast, "Slice"):
+        base_allowlist.append(getattr(ast, "Slice"))
+
+    allowlist: tuple[type, ...] = tuple(base_allowlist)
+
+    for node in ast.walk(tree):
+        if not isinstance(node, allowlist):
+            raise ValueError(f"Kinetic execution bleed detected. Forbidden AST node: {type(node).__name__}")
+
+    return True
+
+
+def apply_state_differential(
+    current_state: dict[str, Any], manifest: ontology.StateDifferentialManifest
+) -> dict[str, Any]:
+    """
+    A pure mathematical functor to apply an RFC 6902 JSON patch without mutating the input dictionary.
+    """
+    new_state = copy.deepcopy(current_state)
+
+    for patch in manifest.patches:
+        path = patch.path
+        if not path.startswith("/"):
+            if path == "":
+                # Root level operations
+                if patch.op == "test":
+                    if new_state != patch.value:
+                        raise ValueError("Patch test operation failed.")
+                    continue
+                else:
+                    raise ValueError(f"Invalid path or root operation not supported: {path}")
+            else:
+                raise ValueError(f"Invalid JSON pointer: {path}")
+
+        # Split and decode
+        parts = [p.replace("~1", "/").replace("~0", "~") for p in path.split("/")[1:]]
+
+        # Traverse to parent
+        target: Any = new_state
+        for part in parts[:-1]:
+            if isinstance(target, dict):
+                if part not in target:
+                    raise ValueError(f"Invalid path: {path}")
+                target = target[part]
+            elif isinstance(target, list):
+                try:
+                    idx = int(part)
+                    target = target[idx]
+                except (ValueError, IndexError) as e:
+                    raise ValueError(f"Invalid path: {path}") from e
+            else:
+                raise ValueError(f"Invalid path: {path}")
+
+        last_part = parts[-1]
+
+        def resolve_from_path(from_path: str) -> tuple[Any, Any]:
+            if not isinstance(from_path, str) or not from_path.startswith("/"):
+                raise ValueError(f"Invalid from_path: {from_path}")
+
+            from_parts = [p.replace("~1", "/").replace("~0", "~") for p in from_path.split("/")[1:]]
+            from_target: Any = new_state
+            for part in from_parts[:-1]:
+                if isinstance(from_target, dict):
+                    if part not in from_target:
+                        raise ValueError(f"Invalid from_path: {from_path}")
+                    from_target = from_target[part]
+                elif isinstance(from_target, list):
+                    try:
+                        idx = int(part)
+                        from_target = from_target[idx]
+                    except (ValueError, IndexError) as e:
+                        raise ValueError(f"Invalid from_path: {from_path}") from e
+                else:
+                    raise ValueError(f"Invalid from_path: {from_path}")
+
+            from_last = from_parts[-1]
+            return from_target, from_last
+
+        def read_from_target(t: Any, key: str) -> Any:
+            if isinstance(t, dict):
+                if key not in t:
+                    raise ValueError("Key not found")
+                return t[key]
+            elif isinstance(t, list):
+                try:
+                    idx = int(key)
+                    if idx < 0 or idx >= len(t):
+                        raise ValueError("Index out of bounds")
+                    return t[idx]
+                except ValueError as e:
+                    raise ValueError("Invalid index") from e
+            raise ValueError("Target is not dict or list")
+
+        def delete_from_target(t: Any, key: str) -> None:
+            if isinstance(t, dict):
+                if key not in t:
+                    raise ValueError("Key not found")
+                del t[key]
+            elif isinstance(t, list):
+                try:
+                    idx = int(key)
+                    if idx < 0 or idx >= len(t):
+                        raise ValueError("Index out of bounds")
+                    t.pop(idx)
+                except ValueError as e:
+                    raise ValueError("Invalid index") from e
+
+        if patch.op == "add":
+            if isinstance(target, dict):
+                target[last_part] = patch.value
+            elif isinstance(target, list):
+                if last_part == "-":
+                    target.append(patch.value)
+                else:
+                    try:
+                        idx = int(last_part)
+                        if idx < 0 or idx > len(target):
+                            raise ValueError(f"Index out of bounds: {path}")
+                        target.insert(idx, patch.value)
+                    except ValueError as e:
+                        raise ValueError(f"Invalid index: {last_part}") from e
+            else:
+                raise ValueError(f"Cannot add to path: {path}")
+
+        elif patch.op == "remove":
+            try:
+                delete_from_target(target, last_part)
+            except ValueError as e:
+                raise ValueError(f"Cannot remove from path {path}: {e}") from e
+
+        elif patch.op == "replace":
+            try:
+                # Ensure it exists first before replacing
+                read_from_target(target, last_part)
+
+                if isinstance(target, dict):
+                    target[last_part] = patch.value
+                elif isinstance(target, list):
+                    idx = int(last_part)
+                    target[idx] = patch.value
+            except ValueError as e:
+                raise ValueError(f"Cannot replace at path {path}: {e}") from e
+
+        elif patch.op in ("copy", "move"):
+            # The prompt requires extracting from_path to evaluate another pointer.
+            # StateMutationIntent doesn't define from_path, so we assume it's stored in patch.value
+            from_path = patch.value
+            try:
+                from_target, from_last = resolve_from_path(from_path)
+                val = read_from_target(from_target, from_last)
+                if patch.op == "move":
+                    delete_from_target(from_target, from_last)
+                if patch.op == "copy":
+                    val = copy.deepcopy(val)
+            except ValueError as e:
+                raise ValueError(f"Invalid from_path operation: {e}") from e
+
+            if isinstance(target, dict):
+                target[last_part] = val
+            elif isinstance(target, list):
+                if last_part == "-":
+                    target.append(val)
+                else:
+                    try:
+                        idx = int(last_part)
+                        if idx < 0 or idx > len(target):
+                            raise ValueError(f"Index out of bounds: {path}")
+                        target.insert(idx, val)
+                    except ValueError as e:
+                        raise ValueError(f"Invalid index: {last_part}") from e
+            else:
+                raise ValueError(f"Cannot copy/move to path: {path}")
+
+        elif patch.op == "test":
+            try:
+                current_val = read_from_target(target, last_part)
+                if current_val != patch.value:
+                    raise ValueError("Patch test operation failed.")
+            except ValueError as e:
+                if "Patch test operation failed" in str(e):
+                    raise
+                raise ValueError("Patch test operation failed.") from e
+
+    return new_state

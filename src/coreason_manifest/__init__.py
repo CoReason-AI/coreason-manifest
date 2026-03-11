@@ -4,6 +4,7 @@
 from coreason_manifest.spec.ontology import *  # noqa: F403
 from coreason_manifest.utils.algebra import (
     align_semantic_manifolds,
+    apply_state_differential,
     calculate_latent_alignment,
     calculate_remaining_compute,
     compute_topology_hash,
@@ -12,6 +13,7 @@ from coreason_manifest.utils.algebra import (
     project_manifest_to_markdown,
     project_manifest_to_mermaid,
     validate_payload,
+    verify_ast_safety,
     verify_merkle_proof,
 )
 
@@ -291,6 +293,7 @@ __all__ = [
     "WorkflowManifest",
     "ZeroKnowledgeReceipt",
     "align_semantic_manifolds",
+    "apply_state_differential",
     "calculate_latent_alignment",
     "calculate_remaining_compute",
     "compute_topology_hash",
@@ -299,5 +302,6 @@ __all__ = [
     "project_manifest_to_markdown",
     "project_manifest_to_mermaid",
     "validate_payload",
+    "verify_ast_safety",
     "verify_merkle_proof",
 ]
