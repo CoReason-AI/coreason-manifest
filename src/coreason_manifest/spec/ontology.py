@@ -151,7 +151,7 @@ type SpanKindProfile = Literal["client", "server", "producer", "consumer", "inte
 type SpanStatusCodeProfile = Literal["unset", "ok", "error"]
 
 
-class TensorStructuralTypeProfile(StrEnum):
+class TensorStructuralFormatProfile(StrEnum):
     """Mathematical tensor types for tensor payloads."""
 
     FLOAT32 = "float32"
@@ -435,7 +435,7 @@ class LogitSteganographyContract(CoreasonBaseState):
     )
 
 
-class ModelProfile(CoreasonBaseState):
+class ComputeEngineProfile(CoreasonBaseState):
     """
     Abstraction for an underlying LLM provider in liquid compute.
     """
@@ -1007,12 +1007,11 @@ class StateHydrationManifest(CoreasonBaseState):
     crystallized_ledger_cids: list[Annotated[str, StringConstraints(pattern="^[a-f0-9]{64}$")]] = Field(
         description="A list of cryptographic pointers to past immutable EpistemicLedgerState blocks."
     )
-    working_memory_variables: dict[str, JsonPrimitiveState] = Field(
-        description="A strictly typed dictionary for ephemeral context variables injected at runtime."
+    working_context_variables: dict[str, Any] = Field(
+        description="A strictly typed dictionary for ephemeral context variables injected at runtime. AGENT INSTRUCTION: This matrix is deterministically sorted by CoreasonBaseState natively."  # noqa: E501
     )
-    # Note: working_memory_variables is deterministically sorted by CoreasonBaseState natively.
 
-    @field_validator("working_memory_variables", mode="before")
+    @field_validator("working_context_variables", mode="before")
     @classmethod
     def enforce_payload_topology(cls, v: Any) -> Any:
         """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""  # noqa: E501
@@ -1697,13 +1696,13 @@ class DimensionalProjectionContract(CoreasonBaseState):
     )
 
 
-type DistributionTypeProfile = Literal["gaussian", "uniform", "beta"]
+type DistributionShapeProfile = Literal["gaussian", "uniform", "beta"]
 
 
 class DistributionProfile(CoreasonBaseState):
     """Profile defining a probability density function."""
 
-    distribution_type: DistributionTypeProfile = Field(
+    distribution_type: DistributionShapeProfile = Field(
         description="The mathematical shape of the probability density function."
     )
     mean: float | None = Field(default=None, description="The expected value (mu) of the distribution.")
@@ -3156,7 +3155,7 @@ class MCPResourceManifest(CoreasonBaseState):
         return self
 
 
-type MCPTransportTypeProfile = Literal["stdio", "sse", "http"]
+type MCPTransportProtocolProfile = Literal["stdio", "sse", "http"]
 
 
 class MCPClientBindingProfile(CoreasonBaseState):
@@ -3165,7 +3164,7 @@ class MCPClientBindingProfile(CoreasonBaseState):
     """
 
     server_uri: str = Field(description="The URI or command path to the MCP server.")
-    transport_type: MCPTransportTypeProfile = Field(
+    transport_type: MCPTransportProtocolProfile = Field(
         description="The transport protocol used to communicate with the MCP server."
     )
 
@@ -3202,7 +3201,7 @@ class MacroGridProfile(CoreasonBaseState):
         return self
 
 
-type MarkTypeProfile = Literal["point", "line", "area", "bar", "rect", "arc"]
+type GeometricMarkProfile = Literal["point", "line", "area", "bar", "rect", "arc"]
 
 
 class MarketContract(CoreasonBaseState):
@@ -3333,7 +3332,7 @@ class NDimensionalTensorManifest(CoreasonBaseState):
     Facilitating the routing of multi-dimensional compute without passing raw bytes.
     """
 
-    structural_type: TensorStructuralTypeProfile = Field(..., description="Structural type of the tensor elements.")
+    structural_type: TensorStructuralFormatProfile = Field(..., description="Structural type of the tensor elements.")
     shape: tuple[int, ...] = Field(..., description="N-Dimensional shape tuple.")
     # Note: shape is a structurally ordered sequence (Tensor Dimensions) and MUST NOT be sorted.
     vram_footprint_bytes: int = Field(..., description="Exact byte size of the uncompressed tensor.")
@@ -3350,8 +3349,8 @@ class NDimensionalTensorManifest(CoreasonBaseState):
                 raise ValueError(f"Tensor dimensions must be strictly positive integers. Got: {self.shape}")
         bytes_per_element = (
             self.structural_type.bytes_per_element
-            if isinstance(self.structural_type, TensorStructuralTypeProfile)
-            else TensorStructuralTypeProfile(self.structural_type).bytes_per_element
+            if isinstance(self.structural_type, TensorStructuralFormatProfile)
+            else TensorStructuralFormatProfile(self.structural_type).bytes_per_element
         )
         calculated_bytes = math.prod(self.shape) * bytes_per_element
         if calculated_bytes != self.vram_footprint_bytes:
@@ -3943,7 +3942,7 @@ class ChaosExperimentTask(CoreasonBaseState):
         return self
 
 
-class StructuralCausalModelProfile(CoreasonBaseState):
+class StructuralCausalGraphProfile(CoreasonBaseState):
     observed_variables: list[str] = Field(description="The nodes in the DAG that the agent can passively measure.")
     latent_variables: list[str] = Field(description="The unobserved confounders the agent suspects exist.")
     causal_edges: list[CausalDirectedEdgeState] = Field(description="The declared topological mapping of causality.")
@@ -3978,7 +3977,7 @@ class HypothesisGenerationEvent(BaseStateEvent):
     status: Literal["active", "falsified", "verified"] = Field(
         default="active", description="The current validity state of this hypothesis in the EpistemicLedgerState."
     )
-    causal_model: StructuralCausalModelProfile | None = Field(
+    causal_model: StructuralCausalGraphProfile | None = Field(
         default=None,
         description="The formal DAG representing the agent's structural assumptions about the environment.",
     )

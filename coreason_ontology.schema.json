@@ -2362,6 +2362,56 @@
       "title": "CompositeNodeProfile",
       "type": "object"
     },
+    "ComputeEngineProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAbstraction for an underlying LLM provider in liquid compute.",
+      "properties": {
+        "model_name": {
+          "description": "The identifier of the underlying model.",
+          "title": "Model Name",
+          "type": "string"
+        },
+        "provider": {
+          "description": "The name of the provider hosting the model.",
+          "title": "Provider",
+          "type": "string"
+        },
+        "context_window_size": {
+          "description": "The maximum context window size in tokens.",
+          "title": "Context Window Size",
+          "type": "integer"
+        },
+        "capabilities": {
+          "description": "The explicit, structurally bounded array of capabilities authorized for this model.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Capabilities",
+          "type": "array"
+        },
+        "rate_card": {
+          "$ref": "#/$defs/ComputeRateContract",
+          "description": "The economic cost definition associated with the model."
+        },
+        "supported_functional_experts": {
+          "description": "The declarative array of specialized functional expert clusters (e.g., 'falsifier', 'synthesizer') physically present in this model's architecture.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Supported Functional Experts",
+          "type": "array"
+        }
+      },
+      "required": [
+        "model_name",
+        "provider",
+        "context_window_size",
+        "capabilities",
+        "rate_card"
+      ],
+      "title": "ComputeEngineProfile",
+      "type": "object"
+    },
     "ComputeProvisioningIntent": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nA request by a swarm to provision resources based on requirements.",
@@ -3577,7 +3627,7 @@
       "description": "CoReason Shared Kernel Ontology\n\nProfile defining a probability density function.",
       "properties": {
         "distribution_type": {
-          "$ref": "#/$defs/DistributionTypeProfile",
+          "$ref": "#/$defs/DistributionShapeProfile",
           "description": "The mathematical shape of the probability density function."
         },
         "mean": {
@@ -3636,7 +3686,7 @@
       "title": "DistributionProfile",
       "type": "object"
     },
-    "DistributionTypeProfile": {
+    "DistributionShapeProfile": {
       "enum": [
         "gaussian",
         "uniform",
@@ -6309,7 +6359,7 @@
         "causal_model": {
           "anyOf": [
             {
-              "$ref": "#/$defs/StructuralCausalModelProfile"
+              "$ref": "#/$defs/StructuralCausalGraphProfile"
             },
             {
               "type": "null"
@@ -7259,7 +7309,7 @@
           "type": "string"
         },
         "transport_type": {
-          "$ref": "#/$defs/MCPTransportTypeProfile",
+          "$ref": "#/$defs/MCPTransportProtocolProfile",
           "description": "The transport protocol used to communicate with the MCP server."
         },
         "allowed_mcp_tools": {
@@ -7522,7 +7572,7 @@
         }
       ]
     },
-    "MCPTransportTypeProfile": {
+    "MCPTransportProtocolProfile": {
       "enum": [
         "stdio",
         "sse",
@@ -7802,56 +7852,6 @@
       "title": "MigrationContract",
       "type": "object"
     },
-    "ModelProfile": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAbstraction for an underlying LLM provider in liquid compute.",
-      "properties": {
-        "model_name": {
-          "description": "The identifier of the underlying model.",
-          "title": "Model Name",
-          "type": "string"
-        },
-        "provider": {
-          "description": "The name of the provider hosting the model.",
-          "title": "Provider",
-          "type": "string"
-        },
-        "context_window_size": {
-          "description": "The maximum context window size in tokens.",
-          "title": "Context Window Size",
-          "type": "integer"
-        },
-        "capabilities": {
-          "description": "The explicit, structurally bounded array of capabilities authorized for this model.",
-          "items": {
-            "type": "string"
-          },
-          "title": "Capabilities",
-          "type": "array"
-        },
-        "rate_card": {
-          "$ref": "#/$defs/ComputeRateContract",
-          "description": "The economic cost definition associated with the model."
-        },
-        "supported_functional_experts": {
-          "description": "The declarative array of specialized functional expert clusters (e.g., 'falsifier', 'synthesizer') physically present in this model's architecture.",
-          "items": {
-            "type": "string"
-          },
-          "title": "Supported Functional Experts",
-          "type": "array"
-        }
-      },
-      "required": [
-        "model_name",
-        "provider",
-        "context_window_size",
-        "capabilities",
-        "rate_card"
-      ],
-      "title": "ModelProfile",
-      "type": "object"
-    },
     "MultimodalArtifactReceipt": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The root Genesis Block for an unstructured document entering the Merkle-DAG.",
@@ -8022,7 +8022,7 @@
       "description": "CoReason Shared Kernel Ontology\n\nCryptographic shadow of an N-Dimensional spatial or mathematical array.\nFacilitating the routing of multi-dimensional compute without passing raw bytes.",
       "properties": {
         "structural_type": {
-          "$ref": "#/$defs/TensorStructuralTypeProfile",
+          "$ref": "#/$defs/TensorStructuralFormatProfile",
           "description": "Structural type of the tensor elements."
         },
         "shape": {
@@ -10403,12 +10403,10 @@
           "title": "Crystallized Ledger Cids",
           "type": "array"
         },
-        "working_memory_variables": {
-          "additionalProperties": {
-            "$ref": "#/$defs/JsonPrimitiveState"
-          },
-          "description": "A strictly typed dictionary for ephemeral context variables injected at runtime.",
-          "title": "Working Memory Variables",
+        "working_context_variables": {
+          "additionalProperties": true,
+          "description": "A strictly typed dictionary for ephemeral context variables injected at runtime. AGENT INSTRUCTION: This matrix is deterministically sorted by CoreasonBaseState natively.",
+          "title": "Working Context Variables",
           "type": "object"
         },
         "max_retained_tokens": {
@@ -10421,7 +10419,7 @@
       "required": [
         "epistemic_coordinate",
         "crystallized_ledger_cids",
-        "working_memory_variables",
+        "working_context_variables",
         "max_retained_tokens"
       ],
       "title": "StateHydrationManifest",
@@ -10531,7 +10529,7 @@
       "title": "SteadyStateHypothesisState",
       "type": "object"
     },
-    "StructuralCausalModelProfile": {
+    "StructuralCausalGraphProfile": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology",
       "properties": {
@@ -10565,7 +10563,7 @@
         "latent_variables",
         "causal_edges"
       ],
-      "title": "StructuralCausalModelProfile",
+      "title": "StructuralCausalGraphProfile",
       "type": "object"
     },
     "SwarmTopologyManifest": {
@@ -11222,7 +11220,7 @@
       "title": "TemporalCheckpointState",
       "type": "object"
     },
-    "TensorStructuralTypeProfile": {
+    "TensorStructuralFormatProfile": {
       "description": "Mathematical tensor types for tensor payloads.",
       "enum": [
         "float32",
@@ -11232,7 +11230,7 @@
         "int32",
         "int64"
       ],
-      "title": "TensorStructuralTypeProfile",
+      "title": "TensorStructuralFormatProfile",
       "type": "string"
     },
     "TerminalBufferState": {
