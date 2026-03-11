@@ -182,7 +182,7 @@
       "description": "Verdict resulting from grading an LLM behavior or output against a rubric.",
       "properties": {
         "rubric_id": {
-          "description": "The ID of the rubric utilizing adjudication.",
+          "description": "The cryptographic pointer to the rubric dictating adjudication.",
           "title": "Rubric Id",
           "type": "string"
         },
@@ -203,7 +203,7 @@
           "type": "boolean"
         },
         "reasoning": {
-          "description": "Explanation or reasoning for the verdict and score.",
+          "description": "The deterministic logical proof justifying the final verdict and mathematical score.",
           "title": "Reasoning",
           "type": "string"
         }
@@ -346,7 +346,7 @@
             }
           ],
           "default": null,
-          "description": "The exact rule_id of the InformationFlowPolicy or Governance bound expected to block this attack. Utilizing automated test assertions.",
+          "description": "The exact rule_id of the InformationFlowPolicy or Governance bound expected to block this attack. Governing automated test assertions.",
           "title": "Expected Firewall Trip"
         }
       },
@@ -3706,7 +3706,7 @@
           "type": "array"
         },
         "fusion_function": {
-          "description": "The explicit wave-collapse opcode utilizing resolving concurrent branches.",
+          "description": "The explicit wave-collapse opcode dictating the resolution of concurrent branches.",
           "enum": [
             "weighted_consensus",
             "highest_confidence",
@@ -5349,7 +5349,7 @@
           "type": "array"
         },
         "token_density": {
-          "description": "The mathematical token density utilizing downstream compute budget allocation.",
+          "description": "The mathematical token density governing downstream compute budget allocation.",
           "minimum": 0,
           "title": "Token Density",
           "type": "integer"
@@ -5395,7 +5395,7 @@
     },
     "GradingCriterionProfile": {
       "additionalProperties": false,
-      "description": "Defines criteria utilizing grading LLM behavior or output.",
+      "description": "Defines criteria governing grading LLM behavior or output.",
       "properties": {
         "criterion_id": {
           "description": "Unique identifier for the grading criterion.",
@@ -7385,7 +7385,7 @@
     },
     "NDimensionalTensorManifest": {
       "additionalProperties": false,
-      "description": "Cryptographic shadow of an N-Dimensional spatial or mathematical array.\nUtilizing routing multi-dimensional compute without passing raw bytes.",
+      "description": "Cryptographic shadow of an N-Dimensional spatial or mathematical array.\nFacilitating the routing of multi-dimensional compute without passing raw bytes.",
       "properties": {
         "structural_type": {
           "$ref": "#/$defs/TensorStructuralType",
@@ -8311,7 +8311,7 @@
           "description": "The ID of the node to be quarantined."
         },
         "reason": {
-          "description": "The reason for the quarantine order.",
+          "description": "The deterministic causal justification for the structural quarantine.",
           "title": "Reason",
           "type": "string"
         }
@@ -9175,7 +9175,7 @@
             }
           ],
           "default": null,
-          "description": "The importance profile utilizing structural pruning."
+          "description": "The mathematical importance profile governing structural pruning."
         },
         "fhe_profile": {
           "anyOf": [
@@ -9358,7 +9358,7 @@
           "title": "End Time"
         },
         "status": {
-          "description": "The completion status of the span.",
+          "description": "The definitive topological execution state of the span.",
           "enum": [
             "OK",
             "ERROR",
@@ -9556,7 +9556,7 @@
           "type": "string"
         },
         "lamport_timestamp": {
-          "description": "Strict scalar logical clock utilizing deterministic LWW (Last-Writer-Wins) conflict resolution.",
+          "description": "Strict scalar logical clock governing deterministic LWW (Last-Writer-Wins) conflict resolution.",
           "minimum": 0,
           "title": "Lamport Timestamp",
           "type": "integer"

@@ -651,7 +651,7 @@ class ConstitutionalPolicy(CoreasonBaseModel):
 
 class GradingCriterionProfile(CoreasonBaseModel):
     """
-    Defines criteria utilizing grading LLM behavior or output.
+    Defines criteria governing grading LLM behavior or output.
     """
 
     criterion_id: str = Field(description="Unique identifier for the grading criterion.")
@@ -957,7 +957,7 @@ class StateDifferentialManifest(CoreasonBaseModel):
     )
     lamport_timestamp: int = Field(
         ge=0,
-        description="Strict scalar logical clock utilizing deterministic LWW (Last-Writer-Wins) conflict resolution.",
+        description="Strict scalar logical clock governing deterministic LWW (Last-Writer-Wins) conflict resolution.",
     )
     vector_clock: dict[str, int] = Field(
         description="Causal history mapping of all known Lineage Watermarks to their latest logical mutation count at the time of authoring."  # noqa: E501
@@ -1182,11 +1182,13 @@ class AdjudicationReceipt(CoreasonBaseModel):
     Verdict resulting from grading an LLM behavior or output against a rubric.
     """
 
-    rubric_id: str = Field(description="The ID of the rubric utilizing adjudication.")
+    rubric_id: str = Field(description="The cryptographic pointer to the rubric dictating adjudication.")
     target_node_id: NodeID = Field(description="The ID of the node that was evaluated.")
     score: int = Field(ge=0, le=100, description="The final score assigned based on the rubric.")
     passed: bool = Field(description="Indicates whether the evaluation passed the threshold.")
-    reasoning: str = Field(description="Explanation or reasoning for the verdict and score.")
+    reasoning: str = Field(
+        description="The deterministic logical proof justifying the final verdict and mathematical score."
+    )
 
 
 class AdversarialSimulationProfile(CoreasonBaseModel):
@@ -1205,7 +1207,7 @@ class AdversarialSimulationProfile(CoreasonBaseModel):
     )
     expected_firewall_trip: str | None = Field(
         default=None,
-        description="The exact rule_id of the InformationFlowPolicy or Governance bound expected to block this attack. Utilizing automated test assertions.",  # noqa: E501
+        description="The exact rule_id of the InformationFlowPolicy or Governance bound expected to block this attack. Governing automated test assertions.",  # noqa: E501
     )
 
 
@@ -1812,7 +1814,7 @@ class EnsembleTopologyProfile(CoreasonBaseModel):
         description="The strict array of strict W3C DIDs (NodeIDs) representing concurrent topology branches.",
     )
     fusion_function: Literal["weighted_consensus", "highest_confidence", "brier_score_collapse"] = Field(
-        ..., description="The explicit wave-collapse opcode utilizing resolving concurrent branches."
+        ..., description="The explicit wave-collapse opcode dictating the resolution of concurrent branches."
     )
 
     @model_validator(mode="after")
@@ -2236,7 +2238,7 @@ class GlobalSemanticProfile(CoreasonBaseModel):
         Literal["text", "raster_image", "vector_graphics", "tabular_grid", "n_dimensional_tensor"]
     ] = Field(description="The strictly typed enum array of physical modalities detected in the artifact.")
     token_density: int = Field(
-        ge=0, description="The mathematical token density utilizing downstream compute budget allocation."
+        ge=0, description="The mathematical token density governing downstream compute budget allocation."
     )
 
     @model_validator(mode="after")
@@ -2979,7 +2981,7 @@ class MutationPolicy(CoreasonBaseModel):
 class NDimensionalTensorManifest(CoreasonBaseModel):
     """
     Cryptographic shadow of an N-Dimensional spatial or mathematical array.
-    Utilizing routing multi-dimensional compute without passing raw bytes.
+    Facilitating the routing of multi-dimensional compute without passing raw bytes.
     """
 
     structural_type: TensorStructuralType = Field(..., description="Structural type of the tensor elements.")
@@ -3269,7 +3271,7 @@ class QuarantineIntent(CoreasonBaseModel):
         default="quarantine_intent", description="The type of the resilience payload."
     )
     target_node_id: NodeID = Field(description="The ID of the node to be quarantined.")
-    reason: str = Field(description="The reason for the quarantine order.")
+    reason: str = Field(description="The deterministic causal justification for the structural quarantine.")
 
 
 type AnyResilienceIntent = Annotated[
@@ -3805,7 +3807,9 @@ class SpanTraceReceipt(CoreasonBaseModel):
     parent_span_id: str | None = Field(default=None, description="The identifier of the parent span, if any.")
     start_time: float = Field(description="The UNIX timestamp when the span started.")
     end_time: float | None = Field(default=None, description="The UNIX timestamp when the span ended.")
-    status: Literal["OK", "ERROR", "PENDING"] = Field(description="The completion status of the span.")
+    status: Literal["OK", "ERROR", "PENDING"] = Field(
+        description="The definitive topological execution state of the span."
+    )
     context_profile: TelemetryContextProfile = Field(
         default_factory=dict, description="Contextual key-value metadata associated with the span execution."
     )
@@ -4009,7 +4013,7 @@ class SemanticNodeState(CoreasonBaseModel):
         default=None, description="The time window during which this node is considered valid."
     )
     salience: SalienceProfile | None = Field(
-        default=None, description="The importance profile utilizing structural pruning."
+        default=None, description="The mathematical importance profile governing structural pruning."
     )
     fhe_profile: HomomorphicEncryptionProfile | None = Field(
         default=None,
