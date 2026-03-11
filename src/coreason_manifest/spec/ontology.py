@@ -4255,6 +4255,91 @@ class VectorEmbeddingState(CoreasonBaseState):
     model_name: str = Field(description="The provenance of the embedding model used (e.g., 'text-embedding-3-large').")
 
 
+class CognitiveCritiqueProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A declarative, dense supervision vector generated
+    by a Process Reward Model (PRM) to steer intermediate test-time reasoning.
+    """
+
+    reasoning_trace_hash: str = Field(
+        pattern="^[a-f0-9]{64}$",
+        description="CoReason Shared Kernel Ontology: The cryptographic Merkle root of the specific ThoughtBranch being evaluated.",  # noqa: E501
+    )
+    logical_flaw_embedding: VectorEmbeddingState | None = Field(
+        default=None,
+        description="CoReason Shared Kernel Ontology: A dense latent space representation of the specific logical fallacy identified, used to mathematically repel future generation trajectories.",  # noqa: E501
+    )
+    epistemic_penalty_scalar: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="CoReason Shared Kernel Ontology: A continuous penalty applied to the branch's probability mass if normative drift or hallucination is detected.",  # noqa: E501
+    )
+
+
+class KineticBudgetPolicy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: The mathematical boundary forcing the collapse of
+    probability waves and wide-search trees as physical compute resources deplete.
+    """
+
+    exploration_decay_curve: Literal["linear", "exponential", "step"] = Field(
+        description="CoReason Shared Kernel Ontology: The mathematical function dictating how rapidly lateral ThoughtBranches are restricted over time."  # noqa: E501
+    )
+    forced_exploitation_threshold_ms: int = Field(
+        gt=0,
+        description="CoReason Shared Kernel Ontology: The physical wall-clock time remaining at which the orchestrator is mathematically forbidden from opening new lateral branches.",  # noqa: E501
+    )
+    dynamic_temperature_asymptote: float = Field(
+        ge=0.0,
+        description="CoReason Shared Kernel Ontology: The absolute minimum sampling temperature the system must converge to during the final exploitation phase.",  # noqa: E501
+    )
+
+
+class EpistemicEscalationContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: The strict mathematical agreement governing when
+    an agent is authorized to expand its test-time compute allocation based on measured doubt.
+    """
+
+    baseline_entropy_threshold: float = Field(
+        ge=0.0,
+        description="CoReason Shared Kernel Ontology: The mathematical measure of uncertainty (e.g., variance in generated hypotheses) required to trigger escalation.",  # noqa: E501
+    )
+    test_time_multiplier: float = Field(
+        gt=1.0,
+        description="CoReason Shared Kernel Ontology: The continuous scalar applied to the agent's baseline max_latent_tokens_budget when the entropy threshold is breached.",  # noqa: E501
+    )
+    max_escalation_tiers: int = Field(
+        ge=1,
+        description="CoReason Shared Kernel Ontology: The absolute integer limit on how many times the orchestrator can recursively multiply the compute budget before forcing a SystemFaultEvent.",  # noqa: E501
+    )
+
+
+class FederatedPeftContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: The physical and temporal bounding constraints
+    for hot-swapping low-rank adapter tensors into GPU memory.
+    """
+
+    adapter_merkle_root: str = Field(
+        pattern="^[a-f0-9]{64}$",
+        description="CoReason Shared Kernel Ontology: The tamper-evident SHA-256 hash of the exact safetensors weight matrix.",  # noqa: E501
+    )
+    vram_footprint_bytes: int = Field(
+        gt=0,
+        description="CoReason Shared Kernel Ontology: The exact spatial geometry required in VRAM to mount this adapter.",  # noqa: E501
+    )
+    ephemeral_ttl_ms: int = Field(
+        gt=0,
+        description="CoReason Shared Kernel Ontology: The absolute Time-To-Live for the adapter to exist in the kinetic execution plane before forced eviction.",  # noqa: E501
+    )
+    cache_priority_weight: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="CoReason Shared Kernel Ontology: The relative importance scalar used by the orchestrator's LRU eviction algorithm when VRAM limits are saturated.",  # noqa: E501
+    )
+
+
 class SemanticEdgeState(CoreasonBaseState):
     edge_id: str = Field(
         description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this semantic edge to the Merkle-DAG."  # noqa: E501

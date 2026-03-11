@@ -223,3 +223,88 @@ def test_procedural_manifold_deterministic_sort() -> None:
     # Assert the array was mathematically sorted by metadata_id
     assert projection.available_procedural_manifolds[0].metadata_id == "alpha_02"
     assert projection.available_procedural_manifolds[1].metadata_id == "zeta_01"
+
+
+@given(
+    trace_hash=st.text().filter(lambda x: not __import__("re").match("^[a-f0-9]{64}$", x)),
+    penalty=st.floats(min_value=-10.0, max_value=10.0).filter(lambda x: x < 0.0 or x > 1.0),
+)
+def test_cognitive_critique_profile_bounds(trace_hash: str, penalty: float) -> None:
+    from coreason_manifest.spec.ontology import CognitiveCritiqueProfile
+
+    with pytest.raises(ValidationError):
+        CognitiveCritiqueProfile(reasoning_trace_hash=trace_hash, epistemic_penalty_scalar=0.5)
+    with pytest.raises(ValidationError):
+        CognitiveCritiqueProfile(reasoning_trace_hash="a" * 64, epistemic_penalty_scalar=penalty)
+
+
+@given(threshold=st.integers(max_value=0), asymptote=st.floats(max_value=-0.0001))
+def test_kinetic_budget_policy_bounds(threshold: int, asymptote: float) -> None:
+    from coreason_manifest.spec.ontology import KineticBudgetPolicy
+
+    with pytest.raises(ValidationError):
+        KineticBudgetPolicy(
+            exploration_decay_curve="linear",
+            forced_exploitation_threshold_ms=threshold,
+            dynamic_temperature_asymptote=0.5,
+        )
+    with pytest.raises(ValidationError):
+        KineticBudgetPolicy(
+            exploration_decay_curve="linear",
+            forced_exploitation_threshold_ms=10,
+            dynamic_temperature_asymptote=asymptote,
+        )
+    with pytest.raises(ValidationError):
+        KineticBudgetPolicy(
+            exploration_decay_curve="invalid_curve",  # type: ignore
+            forced_exploitation_threshold_ms=10,
+            dynamic_temperature_asymptote=0.5,
+        )
+
+
+@given(entropy=st.floats(max_value=-0.0001), multiplier=st.floats(max_value=1.0), tiers=st.integers(max_value=0))
+def test_epistemic_escalation_contract_bounds(entropy: float, multiplier: float, tiers: int) -> None:
+    from coreason_manifest.spec.ontology import EpistemicEscalationContract
+
+    with pytest.raises(ValidationError):
+        EpistemicEscalationContract(
+            baseline_entropy_threshold=entropy, test_time_multiplier=2.0, max_escalation_tiers=5
+        )
+    with pytest.raises(ValidationError):
+        EpistemicEscalationContract(
+            baseline_entropy_threshold=0.5, test_time_multiplier=multiplier, max_escalation_tiers=5
+        )
+    with pytest.raises(ValidationError):
+        EpistemicEscalationContract(
+            baseline_entropy_threshold=0.5, test_time_multiplier=2.0, max_escalation_tiers=tiers
+        )
+
+
+@given(
+    merkle_root=st.text().filter(lambda x: not __import__("re").match("^[a-f0-9]{64}$", x)),
+    vram=st.integers(max_value=0),
+    ttl=st.integers(max_value=0),
+    priority=st.floats().filter(lambda x: x < 0.0 or x > 1.0),
+)
+def test_federated_peft_contract_bounds(merkle_root: str, vram: int, ttl: int, priority: float) -> None:
+    from coreason_manifest.spec.ontology import FederatedPeftContract
+
+    with pytest.raises(ValidationError):
+        FederatedPeftContract(
+            adapter_merkle_root=merkle_root, vram_footprint_bytes=1000, ephemeral_ttl_ms=1000, cache_priority_weight=0.5
+        )
+    with pytest.raises(ValidationError):
+        FederatedPeftContract(
+            adapter_merkle_root="a" * 64, vram_footprint_bytes=vram, ephemeral_ttl_ms=1000, cache_priority_weight=0.5
+        )
+    with pytest.raises(ValidationError):
+        FederatedPeftContract(
+            adapter_merkle_root="a" * 64, vram_footprint_bytes=1000, ephemeral_ttl_ms=ttl, cache_priority_weight=0.5
+        )
+    with pytest.raises(ValidationError):
+        FederatedPeftContract(
+            adapter_merkle_root="a" * 64,
+            vram_footprint_bytes=1000,
+            ephemeral_ttl_ms=1000,
+            cache_priority_weight=priority,
+        )
