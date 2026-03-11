@@ -483,7 +483,7 @@
       "description": "A node representing an autonomous agent.",
       "properties": {
         "description": {
-          "description": "A description of the node's function.",
+          "description": "The semantic boundary defining the objective function of the execution node.",
           "title": "Description",
           "type": "string"
         },
@@ -2481,7 +2481,7 @@
           "type": "string"
         },
         "description": {
-          "description": "Detailed description of the rule.",
+          "description": "The definitive causal constraint or heuristic boundary enforced by this rule.",
           "title": "Description",
           "type": "string"
         },
@@ -6484,8 +6484,8 @@
           "title": "Message",
           "type": "string"
         },
-        "metadata": {
-          "$ref": "#/$defs/TelemetryMetadataProfile",
+        "context_profile": {
+          "$ref": "#/$defs/TelemetryContextProfile",
           "description": "Contextual key-value metadata associated with the event."
         }
       },
@@ -7387,8 +7387,8 @@
       "additionalProperties": false,
       "description": "Cryptographic shadow of an N-Dimensional spatial or mathematical array.\nUsed for routing multi-dimensional compute without passing raw bytes.",
       "properties": {
-        "dtype": {
-          "$ref": "#/$defs/TensorDType",
+        "structural_type": {
+          "$ref": "#/$defs/TensorStructuralType",
           "description": "Structural type of the tensor elements."
         },
         "shape": {
@@ -7417,7 +7417,7 @@
         }
       },
       "required": [
-        "dtype",
+        "structural_type",
         "shape",
         "vram_footprint_bytes",
         "merkle_root",
@@ -9367,8 +9367,8 @@
           "title": "Status",
           "type": "string"
         },
-        "metadata": {
-          "$ref": "#/$defs/TelemetryMetadataProfile",
+        "context_profile": {
+          "$ref": "#/$defs/TelemetryContextProfile",
           "description": "Contextual key-value metadata associated with the span execution."
         }
       },
@@ -10253,7 +10253,7 @@
       "title": "TaskAwardReceipt",
       "type": "object"
     },
-    "TelemetryMetadataProfile": {
+    "TelemetryContextProfile": {
       "additionalProperties": {
         "anyOf": [
           {
@@ -10361,7 +10361,7 @@
       "title": "TemporalCheckpointState",
       "type": "object"
     },
-    "TensorDType": {
+    "TensorStructuralType": {
       "description": "Mathematical tensor types for tensor payloads.",
       "enum": [
         "float32",
@@ -10371,7 +10371,7 @@
         "int32",
         "int64"
       ],
-      "title": "TensorDType",
+      "title": "TensorStructuralType",
       "type": "string"
     },
     "TerminalBufferState": {
@@ -10582,7 +10582,7 @@
           "type": "string"
         },
         "description": {
-          "description": "Semantic description of what the tool does, used by the LLM for selection.",
+          "description": "The mathematically bounded semantic projection defining the tool's causal affordances.",
           "title": "Description",
           "type": "string"
         },
