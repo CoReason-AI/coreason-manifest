@@ -45,14 +45,14 @@ def test_compute_topology_hash() -> None:
     assert len(hash_val) == 64
 
 
-class MockStrictSchema(BaseModel):
+class MockStrictProfile(BaseModel):
     name: str = Field(min_length=5)
     age: int
 
 
 def test_generate_correction_prompt_translation() -> None:
     try:
-        MockStrictSchema(name="Bob", age="not_an_int")
+        MockStrictProfile(name="Bob", age="not_an_int")
     except ValidationError as e:
         prompt = generate_correction_prompt(error=e, target_node_id="did:web:node-1", fault_id="fault-001")
         assert prompt.fault_id == "fault-001"
@@ -250,10 +250,8 @@ def test_verify_ast_safety() -> None:
 
 
 def test_apply_state_differential() -> None:
-    # 1. Base state
     base_state = {"user": {"name": "Alice", "tags": ["admin"]}}
 
-    # 2. Manifest with 3 patches
     patch1 = StateMutationIntent(op="add", path="/user/age", value=30)
     patch2 = StateMutationIntent(op="replace", path="/user/name", value="Bob")
     patch3 = StateMutationIntent(op="remove", path="/user/tags/0")
@@ -266,9 +264,7 @@ def test_apply_state_differential() -> None:
         patches=[patch1, patch2, patch3],
     )
 
-    # 3. Apply state differential
     new_state = apply_state_differential(base_state, manifest)
 
-    # 4. Asserts
     assert new_state == {"user": {"name": "Bob", "age": 30, "tags": []}}
-    assert base_state == {"user": {"name": "Alice", "tags": ["admin"]}}  # Original is COMPLETELY unmodified
+    assert base_state == {"user": {"name": "Alice", "tags": ["admin"]}}

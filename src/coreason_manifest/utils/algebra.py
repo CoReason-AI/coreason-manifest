@@ -141,7 +141,7 @@ def get_ontology_schema() -> dict[str, Any]:
     _, top_level_schema = models_json_schema(
         pydantic_models,
         title="CoReason Shared Kernel Ontology",
-        description="Unified JSON Schema for the Coreason Manifest",
+        description="CoReason Shared Kernel Ontology\n\nUnified JSON Schema for the Coreason Manifest",
     )
 
     return top_level_schema

@@ -1,10 +1,12 @@
+"""
+AGENT INSTRUCTION: Pure Python SITD Semantic Scanner
+Enforcing the 3.0 PPL No-Execution / Pure Data bounds.
+"""
+
 import json
 import sys
 import urllib.request
 from typing import Any
-
-# The Swarm Watchdog - Pure Python SITD Semantic Scanner
-# Enforcing the 3.0 PPL No-Execution / Pure Data bounds.
 
 REGISTRY = [
     "SITD-Alpha: Non-Monotonic Epistemic Quarantine Isometry",
