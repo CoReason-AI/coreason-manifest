@@ -20,8 +20,10 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, StringConstraints, field_validator, model_validator
 
+type JsonPrimitive = str | int | float | bool | None | list["JsonPrimitive"] | dict[str, "JsonPrimitive"]
 
-def _validate_payload_bounds(value: Any, current_depth: int = 0) -> Any:
+
+def _validate_payload_bounds(value: JsonPrimitive, current_depth: int = 0) -> JsonPrimitive:
     """
     AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads
     to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing.
@@ -212,6 +214,13 @@ type TopologyHashReceipt = Annotated[
 ]
 
 
+def _inject_topological_lock(schema: dict[str, Any]) -> None:
+    current_desc = schema.get("description", "")
+    lock_string = "CoReason Shared Kernel Ontology"
+    if lock_string not in current_desc:
+        schema["description"] = f"{lock_string}\n\n{current_desc}".strip()
+
+
 class CoreasonBaseState(BaseModel):
     """
     Base class for all domain models in the Coreason Manifest.
@@ -226,7 +235,9 @@ class CoreasonBaseState(BaseModel):
     4. Deterministic serialization - Keys are sorted for hash consistency.
     """
 
-    model_config = ConfigDict(frozen=True, extra="forbid", validate_assignment=True, strict=True)
+    model_config = ConfigDict(
+        frozen=True, extra="forbid", validate_assignment=True, strict=True, json_schema_extra=_inject_topological_lock
+    )
 
     def __hash__(self) -> int:
         try:
@@ -292,9 +303,18 @@ class DynamicLayoutManifest(CoreasonBaseState):
         except SyntaxError:
             pass
         else:
+            allowed_nodes = (
+                ast.Module,
+                ast.Expr,
+                ast.Constant,
+                ast.Name,
+                ast.Load,
+                ast.FormattedValue,
+                ast.JoinedStr,
+            )
             for node in ast.walk(tree):
-                if isinstance(node, ast.Call):
-                    raise ValueError("Kinetic execution bleed detected: AST contains function calls.")
+                if not isinstance(node, allowed_nodes):
+                    raise ValueError(f"Kinetic execution bleed detected: Forbidden AST node {type(node).__name__}")
         return v
 
 
@@ -944,7 +964,7 @@ class StateMutationIntent(CoreasonBaseState):
         description="The strict RFC 6902 JSON Patch operation, acting as a deterministic state vector mutation."
     )
     path: str = Field(description="The JSON pointer indicating the exact state vector to mutate deterministically.")
-    value: Any | None = Field(
+    value: JsonPrimitive = Field(
         default=None,
         description="The payload to insert or test, if applicable, for this deterministic state vector mutation.",
     )
@@ -4866,7 +4886,7 @@ class BeliefMutationEvent(BaseStateEvent):
     type: Literal["belief_mutation"] = Field(
         default="belief_mutation", description="Discriminator type for a Belief Assertion event."
     )
-    payload: dict[str, Any] = Field(
+    payload: dict[str, JsonPrimitive] = Field(
         description="Topologically Bounded Latent Spaces capturing the semantic representation of the agent's internal cognitive shift or synthesis that anchor statistical probability to a definitive causal event hash."  # noqa: E501
     )
     source_node_id: NodeIdentifierState | None = Field(
@@ -4913,7 +4933,7 @@ class ObservationEvent(BaseStateEvent):
     type: Literal["observation"] = Field(
         default="observation", description="Discriminator type for an observation event."
     )
-    payload: dict[str, Any] = Field(
+    payload: dict[str, JsonPrimitive] = Field(
         description="Neurosymbolic Bindings of the raw, lossless semantic output appended from the environment or tool execution that anchor statistical probability to a definitive causal event hash."  # noqa: E501
     )
     source_node_id: NodeIdentifierState | None = Field(

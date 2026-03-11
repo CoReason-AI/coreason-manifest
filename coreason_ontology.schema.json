@@ -2,7 +2,7 @@
   "$defs": {
     "ActionSpaceManifest": {
       "additionalProperties": false,
-      "description": "A curated environment of tools accessible to an agent or node.",
+      "description": "CoReason Shared Kernel Ontology\n\nA curated environment of tools accessible to an agent or node.",
       "properties": {
         "action_space_id": {
           "description": "The unique identifier for this curated environment of tools.",
@@ -42,7 +42,7 @@
     },
     "ActivationSteeringContract": {
       "additionalProperties": false,
-      "description": "Hardware-level contract for Representation Engineering via activation injection/ablation.",
+      "description": "CoReason Shared Kernel Ontology\n\nHardware-level contract for Representation Engineering via activation injection/ablation.",
       "properties": {
         "steering_vector_hash": {
           "description": "The SHA-256 hash of the extracted RepE control tensor (e.g., the 'caution' vector).",
@@ -86,6 +86,7 @@
     },
     "ActiveInferenceContract": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "task_id": {
           "description": "Unique identifier for this active inference execution.",
@@ -135,6 +136,7 @@
     },
     "AdjudicationIntent": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "type": {
           "const": "forced_adjudication",
@@ -179,7 +181,7 @@
     },
     "AdjudicationReceipt": {
       "additionalProperties": false,
-      "description": "Verdict resulting from grading an LLM behavior or output against a rubric.",
+      "description": "CoReason Shared Kernel Ontology\n\nVerdict resulting from grading an LLM behavior or output against a rubric.",
       "properties": {
         "rubric_id": {
           "description": "The cryptographic pointer to the rubric dictating adjudication.",
@@ -220,7 +222,7 @@
     },
     "AdjudicationRubricProfile": {
       "additionalProperties": false,
-      "description": "Rubric defining multiple criteria and passing threshold for algorithmic adjudication.",
+      "description": "CoReason Shared Kernel Ontology\n\nRubric defining multiple criteria and passing threshold for algorithmic adjudication.",
       "properties": {
         "rubric_id": {
           "description": "Unique identifier for the rubric.",
@@ -253,7 +255,7 @@
     },
     "AdversarialMarketTopologyManifest": {
       "additionalProperties": false,
-      "description": "A Zero-Cost Macro abstraction that deterministically compiles into a Red/Blue team CouncilTopologyManifest.",
+      "description": "CoReason Shared Kernel Ontology\n\nA Zero-Cost Macro abstraction that deterministically compiles into a Red/Blue team CouncilTopologyManifest.",
       "properties": {
         "type": {
           "const": "macro_adversarial",
@@ -300,7 +302,7 @@
     },
     "AdversarialSimulationProfile": {
       "additionalProperties": false,
-      "description": "A deterministic red-team configuration defining a structural attack vector\nto continuously validate semantic firewalls and execution bounds.",
+      "description": "CoReason Shared Kernel Ontology\n\nA deterministic red-team configuration defining a structural attack vector\nto continuously validate semantic firewalls and execution bounds.",
       "properties": {
         "simulation_id": {
           "description": "The unique identifier for this red-team experiment.",
@@ -361,6 +363,7 @@
     },
     "AffineTransformMatrixProfile": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "pixel_min": {
           "description": "The absolute minimal visual coordinate on this axis.",
@@ -399,7 +402,7 @@
     },
     "AgentAttestationReceipt": {
       "additionalProperties": false,
-      "description": "Cryptographic identity passport and AI-BOM for the agent.",
+      "description": "CoReason Shared Kernel Ontology\n\nCryptographic identity passport and AI-BOM for the agent.",
       "properties": {
         "training_lineage_hash": {
           "description": "The exact SHA-256 Merkle root of the agent's training lineage.",
@@ -437,6 +440,7 @@
     },
     "AgentBidIntent": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "agent_id": {
           "description": "The NodeIdentifierState of the bidder.",
@@ -480,7 +484,7 @@
     },
     "AgentNodeProfile": {
       "additionalProperties": false,
-      "description": "A node representing an autonomous agent.",
+      "description": "CoReason Shared Kernel Ontology\n\nA node representing an autonomous agent.",
       "properties": {
         "description": {
           "description": "The semantic boundary defining the objective function of the execution node. [SITD-Gamma: Neurosymbolic Substrate Alignment]",
@@ -764,7 +768,7 @@
     },
     "AmbientState": {
       "additionalProperties": false,
-      "description": "Lightweight UX signal for UI rendering of progress.",
+      "description": "CoReason Shared Kernel Ontology\n\nLightweight UX signal for UI rendering of progress.",
       "properties": {
         "status_message": {
           "description": "The semantic 1D string projection representing the active kinetic execution state.",
@@ -793,6 +797,7 @@
     },
     "AnalogicalMappingTask": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "task_id": {
           "description": "Unique identifier for this lateral thinking task.",
@@ -835,7 +840,7 @@
     },
     "AnchoringPolicy": {
       "additionalProperties": false,
-      "description": "The mathematical center of gravity preventing epistemic drift and sycophancy in the swarm.",
+      "description": "CoReason Shared Kernel Ontology\n\nThe mathematical center of gravity preventing epistemic drift and sycophancy in the swarm.",
       "properties": {
         "anchor_prompt_hash": {
           "description": "The undeniable SHA-256 hash of the core objective.",
@@ -1079,6 +1084,7 @@
     },
     "AuctionPolicy": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "auction_type": {
           "$ref": "#/$defs/AuctionMechanismProfile",
@@ -1104,6 +1110,7 @@
     },
     "AuctionState": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "announcement": {
           "$ref": "#/$defs/TaskAnnouncementIntent",
@@ -1152,7 +1159,7 @@
     },
     "BackpressurePolicy": {
       "additionalProperties": false,
-      "description": "Declarative backpressure constraints.",
+      "description": "CoReason Shared Kernel Ontology\n\nDeclarative backpressure constraints.",
       "properties": {
         "max_queue_depth": {
           "description": "The maximum number of unprocessed messages/observations allowed between connected nodes before yielding.",
@@ -1237,7 +1244,7 @@
     },
     "BargeInInterruptEvent": {
       "additionalProperties": false,
-      "description": "A cryptographic receipt of a continuous multimodal sequence being prematurely severed by an external stimulus.",
+      "description": "CoReason Shared Kernel Ontology\n\nA cryptographic receipt of a continuous multimodal sequence being prematurely severed by an external stimulus.",
       "properties": {
         "event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
@@ -1312,14 +1319,14 @@
     },
     "BaseIntent": {
       "additionalProperties": false,
-      "description": "Base class for presentation intents.",
+      "description": "CoReason Shared Kernel Ontology\n\nBase class for presentation intents.",
       "properties": {},
       "title": "BaseIntent",
       "type": "object"
     },
     "BaseNodeProfile": {
       "additionalProperties": false,
-      "description": "Base configuration for any execution node in a topology.",
+      "description": "CoReason Shared Kernel Ontology\n\nBase configuration for any execution node in a topology.",
       "properties": {
         "description": {
           "description": "The semantic boundary defining the objective function or computational perimeter of the execution node.",
@@ -1383,7 +1390,7 @@
     },
     "BasePanelProfile": {
       "additionalProperties": false,
-      "description": "Base class for Scientific Visualization panels.",
+      "description": "CoReason Shared Kernel Ontology\n\nBase class for Scientific Visualization panels.",
       "properties": {
         "panel_id": {
           "description": "Unique identifier for the panel.",
@@ -1399,6 +1406,7 @@
     },
     "BaseStateEvent": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
@@ -1420,7 +1428,7 @@
     },
     "BaseTopologyManifest": {
       "additionalProperties": false,
-      "description": "Base configuration for any workflow topology.",
+      "description": "CoReason Shared Kernel Ontology\n\nBase configuration for any workflow topology.",
       "properties": {
         "epistemic_enforcement": {
           "anyOf": [
@@ -1526,6 +1534,7 @@
     },
     "BeliefMutationEvent": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
@@ -1545,7 +1554,9 @@
           "type": "string"
         },
         "payload": {
-          "additionalProperties": true,
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonPrimitive"
+          },
           "description": "Topologically Bounded Latent Spaces capturing the semantic representation of the agent's internal cognitive shift or synthesis that anchor statistical probability to a definitive causal event hash.",
           "title": "Payload",
           "type": "object"
@@ -1641,6 +1652,7 @@
     },
     "BilateralSLA": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "receiving_tenant_id": {
           "description": "The strict enterprise identifier of the foreign B2B tenant receiving this payload.",
@@ -1703,7 +1715,7 @@
     },
     "BoundedInterventionScopePolicy": {
       "additionalProperties": false,
-      "description": "Constraints bounding human interaction for interventions.",
+      "description": "CoReason Shared Kernel Ontology\n\nConstraints bounding human interaction for interventions.",
       "properties": {
         "allowed_fields": {
           "description": "The explicit whitelist of top-level JSON pointers mathematically open to mutation.",
@@ -1755,7 +1767,7 @@
     },
     "BoundedJSONRPCIntent": {
       "additionalProperties": false,
-      "description": "Base schema enforcing rigorous JSON-RPC 2.0 boundaries to prevent DoS attacks.",
+      "description": "CoReason Shared Kernel Ontology\n\nBase schema enforcing rigorous JSON-RPC 2.0 boundaries to prevent DoS attacks.",
       "properties": {
         "jsonrpc": {
           "const": "2.0",
@@ -1809,6 +1821,7 @@
     },
     "BrowserDOMState": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "type": {
           "const": "browser",
@@ -1872,7 +1885,7 @@
     },
     "BudgetExhaustionEvent": {
       "additionalProperties": false,
-      "description": "Mathematical boundary condition representing economic exhaustion.",
+      "description": "CoReason Shared Kernel Ontology\n\nMathematical boundary condition representing economic exhaustion.",
       "properties": {
         "event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
@@ -1913,7 +1926,7 @@
     },
     "BypassReceipt": {
       "additionalProperties": false,
-      "description": "The Merkle Null-Op preserving the topological chain of custody when an extraction node is intentionally\nskipped.",
+      "description": "CoReason Shared Kernel Ontology\n\nThe Merkle Null-Op preserving the topological chain of custody when an extraction node is intentionally\nskipped.",
       "properties": {
         "artifact_event_id": {
           "description": "The exact genesis CID of the document, ensuring continuity.",
@@ -1953,6 +1966,7 @@
     },
     "CausalAttributionState": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "source_event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the source event in the Merkle-DAG.",
@@ -1976,6 +1990,7 @@
     },
     "CausalDirectedEdgeState": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "source_variable": {
           "description": "The independent variable $X$.",
@@ -2021,6 +2036,7 @@
     },
     "ChaosExperimentTask": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "experiment_id": {
           "description": "The unique identifier for the chaos experiment.",
@@ -2067,7 +2083,7 @@
     },
     "CircuitBreakerEvent": {
       "additionalProperties": false,
-      "description": "Indicates that a circuit breaker has been tripped for a target node.",
+      "description": "CoReason Shared Kernel Ontology\n\nIndicates that a circuit breaker has been tripped for a target node.",
       "properties": {
         "type": {
           "const": "circuit_breaker_event",
@@ -2095,7 +2111,7 @@
     },
     "CognitiveRoutingContract": {
       "additionalProperties": false,
-      "description": "Hardware-level contract overriding MoE routing to enforce functional/specialist paths.",
+      "description": "CoReason Shared Kernel Ontology\n\nHardware-level contract overriding MoE routing to enforce functional/specialist paths.",
       "properties": {
         "dynamic_top_k": {
           "description": "The exact number of functional experts the router must activate per token. High values simulate deep cognitive strain.",
@@ -2133,7 +2149,7 @@
     },
     "CognitiveStateProfile": {
       "additionalProperties": false,
-      "description": "Causal Directed Acyclic Graphs (cDAGs) and constraints for state progression.",
+      "description": "CoReason Shared Kernel Ontology\n\nCausal Directed Acyclic Graphs (cDAGs) and constraints for state progression.",
       "properties": {
         "urgency_index": {
           "description": "Drives structural constraints; high urgency forces fast heuristic routing.",
@@ -2199,7 +2215,7 @@
     },
     "CognitiveUncertaintyProfile": {
       "additionalProperties": false,
-      "description": "Structural Causal Models (SCMs) for active epistemic bounding.",
+      "description": "CoReason Shared Kernel Ontology\n\nStructural Causal Models (SCMs) for active epistemic bounding.",
       "properties": {
         "aleatoric_entropy": {
           "description": "Irreducible ambiguity detected in the observational fields (P(y|x)).",
@@ -2239,7 +2255,7 @@
     },
     "CompositeNodeProfile": {
       "additionalProperties": false,
-      "description": "A node that encapsulates a nested workflow topology.",
+      "description": "CoReason Shared Kernel Ontology\n\nA node that encapsulates a nested workflow topology.",
       "properties": {
         "description": {
           "description": "The semantic boundary defining the objective function or computational perimeter of the execution node.",
@@ -2331,7 +2347,7 @@
     },
     "ComputeProvisioningIntent": {
       "additionalProperties": false,
-      "description": "A request by a swarm to provision resources based on requirements.",
+      "description": "CoReason Shared Kernel Ontology\n\nA request by a swarm to provision resources based on requirements.",
       "properties": {
         "max_budget": {
           "description": "The maximum cost budget allowable for the provisioned compute.",
@@ -2361,7 +2377,7 @@
     },
     "ComputeRateContract": {
       "additionalProperties": false,
-      "description": "Economic constraints for liquid compute operations.",
+      "description": "CoReason Shared Kernel Ontology\n\nEconomic constraints for liquid compute operations.",
       "properties": {
         "cost_per_million_input_tokens": {
           "description": "The cost per 1 million input tokens provided to the model.",
@@ -2389,7 +2405,7 @@
     },
     "ConsensusFederationTopologyManifest": {
       "additionalProperties": false,
-      "description": "A Zero-Cost Macro abstraction compiling into a standard PBFT CouncilTopologyManifest.",
+      "description": "CoReason Shared Kernel Ontology\n\nA Zero-Cost Macro abstraction compiling into a standard PBFT CouncilTopologyManifest.",
       "properties": {
         "type": {
           "const": "macro_federation",
@@ -2426,7 +2442,7 @@
     },
     "ConsensusPolicy": {
       "additionalProperties": false,
-      "description": "Explicit ruleset governing how a council resolves disagreements.",
+      "description": "CoReason Shared Kernel Ontology\n\nExplicit ruleset governing how a council resolves disagreements.",
       "properties": {
         "strategy": {
           "description": "The mathematical rule for reaching agreement.",
@@ -2498,7 +2514,7 @@
     },
     "ConstitutionalAmendmentIntent": {
       "additionalProperties": false,
-      "description": "Proposed amendment generated in response to normative drift detection.",
+      "description": "CoReason Shared Kernel Ontology\n\nProposed amendment generated in response to normative drift detection.",
       "properties": {
         "type": {
           "const": "constitutional_amendment",
@@ -2534,7 +2550,7 @@
     },
     "ConstitutionalPolicy": {
       "additionalProperties": false,
-      "description": "Defines a constitutional rule for AI governance.",
+      "description": "CoReason Shared Kernel Ontology\n\nDefines a constitutional rule for AI governance.",
       "properties": {
         "rule_id": {
           "description": "Unique identifier for the constitutional rule.",
@@ -2578,6 +2594,7 @@
     },
     "ContinuousMutationPolicy": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "mutation_paradigm": {
           "description": "Forces non-destructive graph mutations.",
@@ -2611,7 +2628,7 @@
     },
     "CouncilTopologyManifest": {
       "additionalProperties": false,
-      "description": "A Council workflow topology involving multiple voting members and an adjudicator.",
+      "description": "CoReason Shared Kernel Ontology\n\nA Council workflow topology involving multiple voting members and an adjudicator.",
       "properties": {
         "epistemic_enforcement": {
           "anyOf": [
@@ -2777,7 +2794,7 @@
     },
     "CounterfactualRegretEvent": {
       "additionalProperties": false,
-      "description": "A cryptographic record of an agent simulating an alternative timeline to calculate epistemic regret\nand update its policy.",
+      "description": "CoReason Shared Kernel Ontology\n\nA cryptographic record of an agent simulating an alternative timeline to calculate epistemic regret\nand update its policy.",
       "properties": {
         "event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
@@ -2844,6 +2861,7 @@
     },
     "CrossSwarmHandshakeState": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "handshake_id": {
           "description": "Unique identifier for this B2B negotiation.",
@@ -2896,7 +2914,7 @@
     },
     "CrossoverPolicy": {
       "additionalProperties": false,
-      "description": "The mathematical rules for combining elite agents.",
+      "description": "CoReason Shared Kernel Ontology\n\nThe mathematical rules for combining elite agents.",
       "properties": {
         "strategy_type": {
           "$ref": "#/$defs/CrossoverMechanismProfile",
@@ -2931,6 +2949,7 @@
     },
     "CrystallizationPolicy": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "min_observations_required": {
           "description": "The minimum number of episodic logs needed to statistically prove a crystallized rule.",
@@ -2964,7 +2983,7 @@
     },
     "CustodyReceipt": {
       "additionalProperties": false,
-      "description": "Cryptographic state of an agent to ensure full traceability and provenance.",
+      "description": "CoReason Shared Kernel Ontology\n\nCryptographic state of an agent to ensure full traceability and provenance.",
       "properties": {
         "record_id": {
           "description": "Unique identifier for this chain-of-custody entry.",
@@ -3022,7 +3041,7 @@
     },
     "DAGTopologyManifest": {
       "additionalProperties": false,
-      "description": "A Directed Acyclic Graph workflow topology.",
+      "description": "CoReason Shared Kernel Ontology\n\nA Directed Acyclic Graph workflow topology.",
       "properties": {
         "epistemic_enforcement": {
           "anyOf": [
@@ -3187,6 +3206,7 @@
     },
     "DefeasibleAttackEvent": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "attack_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this directed attack edge.",
@@ -3219,6 +3239,7 @@
     },
     "DefeasibleCascadeEvent": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "cascade_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this automated truth maintenance operation.",
@@ -3265,7 +3286,7 @@
     },
     "DelegatedCapabilityManifest": {
       "additionalProperties": false,
-      "description": "Decentralized capability tickets representing authority delegation.",
+      "description": "CoReason Shared Kernel Ontology\n\nDecentralized capability tickets representing authority delegation.",
       "properties": {
         "capability_id": {
           "description": "A string CID for the delegated capability.",
@@ -3313,7 +3334,7 @@
     },
     "DigitalTwinTopologyManifest": {
       "additionalProperties": false,
-      "description": "An isolated sandbox graph representing a Digital Twin.",
+      "description": "CoReason Shared Kernel Ontology\n\nAn isolated sandbox graph representing a Digital Twin.",
       "properties": {
         "epistemic_enforcement": {
           "anyOf": [
@@ -3443,6 +3464,7 @@
     },
     "DimensionalProjectionContract": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "source_model_name": {
           "description": "The native embedding model of the origin agent.",
@@ -3478,7 +3500,7 @@
     },
     "DistributionProfile": {
       "additionalProperties": false,
-      "description": "Profile defining a probability density function.",
+      "description": "CoReason Shared Kernel Ontology\n\nProfile defining a probability density function.",
       "properties": {
         "distribution_type": {
           "$ref": "#/$defs/DistributionTypeProfile",
@@ -3550,7 +3572,7 @@
     },
     "DiversityPolicy": {
       "additionalProperties": false,
-      "description": "Constraints enforcing cognitive heterogeneity.",
+      "description": "CoReason Shared Kernel Ontology\n\nConstraints enforcing cognitive heterogeneity.",
       "properties": {
         "min_adversaries": {
           "description": "The minimum number of adversarial or 'Devil's Advocate' roles required to prevent groupthink.",
@@ -3585,6 +3607,7 @@
     },
     "DocumentLayoutManifest": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "blocks": {
           "additionalProperties": {
@@ -3621,6 +3644,7 @@
     },
     "DocumentLayoutRegionState": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "block_id": {
           "description": "Unique structural identifier for this geometric region.",
@@ -3657,6 +3681,7 @@
     },
     "DraftingIntent": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "type": {
           "const": "drafting",
@@ -3697,7 +3722,7 @@
     },
     "DynamicConvergenceSLA": {
       "additionalProperties": false,
-      "description": "Service Level Agreement defining the mathematical conditions for early termination of a reasoning search.",
+      "description": "CoReason Shared Kernel Ontology\n\nService Level Agreement defining the mathematical conditions for early termination of a reasoning search.",
       "properties": {
         "convergence_delta_epsilon": {
           "description": "The minimal required PRM score improvement across the lookback window to justify continued compute.",
@@ -3728,7 +3753,7 @@
     },
     "DynamicLayoutManifest": {
       "additionalProperties": false,
-      "description": "Schema representing a template for dynamic grid layouts.",
+      "description": "CoReason Shared Kernel Ontology\n\nSchema representing a template for dynamic grid layouts.",
       "properties": {
         "layout_tstring": {
           "description": "A Python 3.14 t-string template definition for dynamic UI grid evaluation.",
@@ -3744,7 +3769,7 @@
     },
     "DynamicRoutingManifest": {
       "additionalProperties": false,
-      "description": "The Softmax Router Gate dictating the active execution topology and spot compute allocation.",
+      "description": "CoReason Shared Kernel Ontology\n\nThe Softmax Router Gate dictating the active execution topology and spot compute allocation.",
       "properties": {
         "manifest_id": {
           "description": "The unique Content Identifier (CID) for this routing plan.",
@@ -3798,6 +3823,7 @@
     },
     "EmbodiedSensoryVectorProfile": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "sensory_modality": {
           "description": "Multimodal Sensor Fusion and Spatial-Temporal Bindings representing Proprioceptive State and Exteroceptive Vectors.",
@@ -3839,7 +3865,7 @@
     },
     "EnsembleTopologyProfile": {
       "additionalProperties": false,
-      "description": "AGENT INSTRUCTION: Declarative mapping of concurrent topology branches for test-time superposition.\nMust map to strict W3C DIDs (NodeIdentifierStates) and provide an explicit wave-collapse opcode.",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Declarative mapping of concurrent topology branches for test-time superposition.\nMust map to strict W3C DIDs (NodeIdentifierStates) and provide an explicit wave-collapse opcode.",
       "properties": {
         "concurrent_branch_ids": {
           "description": "The strict array of strict W3C DIDs (NodeIdentifierStates) representing concurrent topology branches.",
@@ -3870,7 +3896,7 @@
     },
     "EphemeralNamespacePartitionState": {
       "additionalProperties": false,
-      "description": "A hermetically sealed, ephemeral execution partition for dynamic dependency resolution.",
+      "description": "CoReason Shared Kernel Ontology\n\nA hermetically sealed, ephemeral execution partition for dynamic dependency resolution.",
       "properties": {
         "partition_id": {
           "description": "Unique identifier for this ephemeral partition.",
@@ -3934,6 +3960,7 @@
     },
     "EpistemicArgumentClaimState": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "claim_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this specific logical proposition.",
@@ -3970,7 +3997,7 @@
     },
     "EpistemicArgumentGraphState": {
       "additionalProperties": false,
-      "description": "A Truth Maintenance System (TMS) calculating dialectical justification for non-monotonic belief retraction.",
+      "description": "CoReason Shared Kernel Ontology\n\nA Truth Maintenance System (TMS) calculating dialectical justification for non-monotonic belief retraction.",
       "properties": {
         "claims": {
           "additionalProperties": {
@@ -3999,6 +4026,7 @@
     },
     "EpistemicCompressionSLA": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "strict_probability_retention": {
           "default": true,
@@ -4033,7 +4061,7 @@
     },
     "EpistemicLedgerState": {
       "additionalProperties": false,
-      "description": "The Committed Epistemic Ledger (crystallized truth), completely partitioned from volatile working memory\nor Epistemic Quarantine.",
+      "description": "CoReason Shared Kernel Ontology\n\nThe Committed Epistemic Ledger (crystallized truth), completely partitioned from volatile working memory\nor Epistemic Quarantine.",
       "properties": {
         "history": {
           "description": "An append-only, cryptographic ledger of state events. [SITD-Alpha: Non-Monotonic Epistemic Quarantine Isometry]",
@@ -4121,6 +4149,7 @@
     },
     "EpistemicPromotionEvent": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
@@ -4170,6 +4199,7 @@
     },
     "EpistemicProvenanceReceipt": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "extracted_by": {
           "$ref": "#/$defs/NodeIdentifierState",
@@ -4227,7 +4257,7 @@
     },
     "EpistemicQuarantineSnapshot": {
       "additionalProperties": false,
-      "description": "Represents the Epistemic Quarantine, partitioned from the Committed Epistemic Ledger.",
+      "description": "CoReason Shared Kernel Ontology\n\nRepresents the Epistemic Quarantine, partitioned from the Committed Epistemic Ledger.",
       "properties": {
         "system_prompt": {
           "description": "The basal non-monotonic instruction set currently held in Epistemic Quarantine.",
@@ -4292,6 +4322,7 @@
     },
     "EpistemicSOPManifest": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "sop_id": {
           "description": "A Content Identifier (CID) for the Standard Operating Procedure.",
@@ -4358,7 +4389,7 @@
     },
     "EpistemicScanningPolicy": {
       "additionalProperties": false,
-      "description": "Policy for epistemic scanning and gap detection.",
+      "description": "CoReason Shared Kernel Ontology\n\nPolicy for epistemic scanning and gap detection.",
       "properties": {
         "active": {
           "description": "Whether the epistemic scanner is active.",
@@ -4393,6 +4424,7 @@
     },
     "EpistemicTransmutationTask": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "task_id": {
           "description": "Unique identifier for this specific multimodal extraction intervention.",
@@ -4451,6 +4483,7 @@
     },
     "EscalationContract": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "uncertainty_escalation_threshold": {
           "description": "The exact Epistemic Uncertainty score that triggers the opening of the Latent Scratchpad.",
@@ -4482,6 +4515,7 @@
     },
     "EscalationIntent": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "type": {
           "const": "escalation",
@@ -4522,6 +4556,7 @@
     },
     "EscrowPolicy": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "escrow_locked_magnitude": {
           "description": "The strictly typed integer amount cryptographically locked prior to execution.",
@@ -4550,7 +4585,7 @@
     },
     "EvaluatorOptimizerTopologyManifest": {
       "additionalProperties": false,
-      "description": "A formalized Actor-Critic micro-topology enforcing strict, finite generation-evaluation-revision cycles.",
+      "description": "CoReason Shared Kernel Ontology\n\nA formalized Actor-Critic micro-topology enforcing strict, finite generation-evaluation-revision cycles.",
       "properties": {
         "epistemic_enforcement": {
           "anyOf": [
@@ -4686,6 +4721,7 @@
     },
     "EvictionPolicy": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "strategy": {
           "description": "The mathematical heuristic used to select which semantic memories are retracted or compressed.",
@@ -4721,6 +4757,7 @@
     },
     "EvidentiaryWarrantState": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "source_event_id": {
           "anyOf": [
@@ -4762,7 +4799,7 @@
     },
     "EvolutionaryTopologyManifest": {
       "additionalProperties": false,
-      "description": "An Evolutionary workflow topology that mutates and breeds agents over generations.",
+      "description": "CoReason Shared Kernel Ontology\n\nAn Evolutionary workflow topology that mutates and breeds agents over generations.",
       "properties": {
         "epistemic_enforcement": {
           "anyOf": [
@@ -4881,7 +4918,8 @@
           "description": "The constraints governing random heuristic mutations."
         },
         "crossover": {
-          "$ref": "#/$defs/CrossoverPolicy"
+          "$ref": "#/$defs/CrossoverPolicy",
+          "description": "The mathematical rules for combining elite agents."
         },
         "fitness_objectives": {
           "description": "The multi-dimensional criteria used to score and cull the population.",
@@ -4905,7 +4943,7 @@
     },
     "ExecutionNodeReceipt": {
       "additionalProperties": false,
-      "description": "Cryptographic state of an execution node in a Merkle DAG trace.",
+      "description": "CoReason Shared Kernel Ontology\n\nCryptographic state of an execution node in a Merkle DAG trace.",
       "properties": {
         "request_id": {
           "description": "The unique ID for this specific execution.",
@@ -4978,7 +5016,7 @@
     },
     "ExecutionSLA": {
       "additionalProperties": false,
-      "description": "Service Level Agreement (limits) for executing a tool.",
+      "description": "CoReason Shared Kernel Ontology\n\nService Level Agreement (limits) for executing a tool.",
       "properties": {
         "max_execution_time_ms": {
           "description": "The maximum allowed execution time in milliseconds before the orchestrator kills the process.",
@@ -5009,6 +5047,7 @@
     },
     "ExecutionSpanReceipt": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "trace_id": {
           "description": "The global identifier for the entire execution causal tree.",
@@ -5089,6 +5128,7 @@
     },
     "ExogenousEpistemicEvent": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "shock_id": {
           "description": "Cryptographic identifier for the Black Swan event.",
@@ -5131,7 +5171,7 @@
     },
     "FYIIntent": {
       "additionalProperties": false,
-      "description": "Intent indicating the presentation is informational only.",
+      "description": "CoReason Shared Kernel Ontology\n\nIntent indicating the presentation is informational only.",
       "properties": {
         "type": {
           "const": "fyi",
@@ -5146,7 +5186,7 @@
     },
     "FacetMatrixProfile": {
       "additionalProperties": false,
-      "description": "Optional small-multiple faceting layout.",
+      "description": "CoReason Shared Kernel Ontology\n\nOptional small-multiple faceting layout.",
       "properties": {
         "row_field": {
           "anyOf": [
@@ -5180,7 +5220,7 @@
     },
     "FallbackIntent": {
       "additionalProperties": false,
-      "description": "Indicates that fallback procedures should be triggered for a target node.",
+      "description": "CoReason Shared Kernel Ontology\n\nIndicates that fallback procedures should be triggered for a target node.",
       "properties": {
         "type": {
           "const": "fallback_intent",
@@ -5207,7 +5247,7 @@
     },
     "FallbackSLA": {
       "additionalProperties": false,
-      "description": "SLA defining bounds on human intervention delays.",
+      "description": "CoReason Shared Kernel Ontology\n\nSLA defining bounds on human intervention delays.",
       "properties": {
         "timeout_seconds": {
           "description": "The maximum allowed delay for a human intervention.",
@@ -5247,6 +5287,7 @@
     },
     "FalsificationContract": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "condition_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this falsification test to the Merkle-DAG.",
@@ -5301,6 +5342,7 @@
     },
     "FaultInjectionProfile": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "fault_type": {
           "$ref": "#/$defs/FaultCategoryProfile",
@@ -5334,7 +5376,7 @@
     },
     "FederatedCapabilityAttestationReceipt": {
       "additionalProperties": false,
-      "description": "An immutable cryptographic receipt proving an agent has the structural authority\nto query a remote resource.",
+      "description": "CoReason Shared Kernel Ontology\n\nAn immutable cryptographic receipt proving an agent has the structural authority\nto query a remote resource.",
       "properties": {
         "attestation_id": {
           "description": "Cryptographic Lineage Watermark for the attestation.",
@@ -5366,6 +5408,7 @@
     },
     "FederatedDiscoveryManifest": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "broadcast_endpoints": {
           "description": "The explicit array of strictly bounded MCP URI broadcast endpoints.",
@@ -5393,6 +5436,7 @@
     },
     "FederatedStateSnapshot": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "topology_id": {
           "anyOf": [
@@ -5413,7 +5457,7 @@
     },
     "FitnessObjectiveProfile": {
       "additionalProperties": false,
-      "description": "A specific objective function to optimize within a generation.",
+      "description": "CoReason Shared Kernel Ontology\n\nA specific objective function to optimize within a generation.",
       "properties": {
         "target_metric": {
           "description": "The specific telemetry or execution metric to evaluate (e.g., 'latency', 'accuracy').",
@@ -5440,7 +5484,7 @@
     },
     "FormalVerificationContract": {
       "additionalProperties": false,
-      "description": "Passive schema defining a mathematical proof of safety invariants.",
+      "description": "CoReason Shared Kernel Ontology\n\nPassive schema defining a mathematical proof of safety invariants.",
       "properties": {
         "proof_system": {
           "description": "The mathematical dialect and theorem prover used to compile the proof.",
@@ -5474,7 +5518,7 @@
     },
     "GenerativeManifoldSLA": {
       "additionalProperties": false,
-      "description": "Mathematical governor for fractal/cyclic graph synthesis.",
+      "description": "CoReason Shared Kernel Ontology\n\nMathematical governor for fractal/cyclic graph synthesis.",
       "properties": {
         "max_topological_depth": {
           "description": "The absolute physical depth limit for recursive encapsulation.",
@@ -5505,7 +5549,7 @@
     },
     "GlobalGovernancePolicy": {
       "additionalProperties": false,
-      "description": "Global governance bounds for a swarm executing a workflow manifest.",
+      "description": "CoReason Shared Kernel Ontology\n\nGlobal governance bounds for a swarm executing a workflow manifest.",
       "properties": {
         "mandatory_license_rule": {
           "$ref": "#/$defs/ConstitutionalPolicy"
@@ -5564,7 +5608,7 @@
     },
     "GlobalSemanticProfile": {
       "additionalProperties": false,
-      "description": "The immutable receipt of Step 1 ingestion acting as a static structural index of the artifact.",
+      "description": "CoReason Shared Kernel Ontology\n\nThe immutable receipt of Step 1 ingestion acting as a static structural index of the artifact.",
       "properties": {
         "artifact_event_id": {
           "description": "The exact genesis CID of the MultimodalArtifactReceipt entering the routing tier.",
@@ -5604,7 +5648,7 @@
     },
     "GovernancePolicy": {
       "additionalProperties": false,
-      "description": "Defines a governance policy comprising multiple constitutional rules.",
+      "description": "CoReason Shared Kernel Ontology\n\nDefines a governance policy comprising multiple constitutional rules.",
       "properties": {
         "policy_name": {
           "description": "Name of the governance policy.",
@@ -5634,7 +5678,7 @@
     },
     "GradingCriterionProfile": {
       "additionalProperties": false,
-      "description": "Defines criteria governing grading LLM behavior or output.",
+      "description": "CoReason Shared Kernel Ontology\n\nDefines criteria governing grading LLM behavior or output.",
       "properties": {
         "criterion_id": {
           "description": "Unique identifier for the grading criterion.",
@@ -5663,7 +5707,7 @@
     },
     "GrammarPanelProfile": {
       "additionalProperties": false,
-      "description": "Panel representing a deterministic, declarative visual grammar.",
+      "description": "CoReason Shared Kernel Ontology\n\nPanel representing a deterministic, declarative visual grammar.",
       "properties": {
         "panel_id": {
           "description": "The unique identifier for this UI panel.",
@@ -5733,6 +5777,7 @@
     },
     "GraphFlatteningPolicy": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "node_projection_mode": {
           "description": "How to flatten SemanticNodeState.",
@@ -5768,7 +5813,7 @@
     },
     "HTTPTransportProfile": {
       "additionalProperties": false,
-      "description": "Configuration for stateless HTTP-based MCP transport.",
+      "description": "CoReason Shared Kernel Ontology\n\nConfiguration for stateless HTTP-based MCP transport.",
       "properties": {
         "type": {
           "const": "http",
@@ -5802,6 +5847,7 @@
     },
     "HardwareEnclaveReceipt": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "enclave_type": {
           "description": "The physical silicon architecture generating the root-of-trust quote.",
@@ -5836,6 +5882,7 @@
     },
     "HomomorphicEncryptionProfile": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "fhe_scheme": {
           "description": "The specific homomorphic encryption dialect used to encode the ciphertext.",
@@ -5870,7 +5917,7 @@
     },
     "HumanNodeProfile": {
       "additionalProperties": false,
-      "description": "A node representing a human participant in the workflow.",
+      "description": "CoReason Shared Kernel Ontology\n\nA node representing a human participant in the workflow.",
       "properties": {
         "description": {
           "description": "The semantic boundary defining the objective function or computational perimeter of the execution node.",
@@ -5953,6 +6000,7 @@
     },
     "HypothesisGenerationEvent": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
@@ -6035,7 +6083,7 @@
     },
     "HypothesisStakeReceipt": {
       "additionalProperties": false,
-      "description": "The mathematical record of an agent taking a magnitude/compute position on a specific causal hypothesis.",
+      "description": "CoReason Shared Kernel Ontology\n\nThe mathematical record of an agent taking a magnitude/compute position on a specific causal hypothesis.",
       "properties": {
         "agent_id": {
           "description": "The ID of the agent placing the stake.",
@@ -6085,7 +6133,7 @@
     },
     "InformationFlowPolicy": {
       "additionalProperties": false,
-      "description": "Mathematical Payload Loss Prevention (PLP) contract that bounds the graph.",
+      "description": "CoReason Shared Kernel Ontology\n\nMathematical Payload Loss Prevention (PLP) contract that bounds the graph.",
       "properties": {
         "policy_id": {
           "description": "Unique identifier for this macroscopic flow control policy.",
@@ -6135,6 +6183,7 @@
     },
     "InformationalIntent": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "type": {
           "const": "informational",
@@ -6168,7 +6217,7 @@
     },
     "InputMappingContract": {
       "additionalProperties": false,
-      "description": "Dictates how keys from a parent's shared_state_contract map to a nested topology's state.",
+      "description": "CoReason Shared Kernel Ontology\n\nDictates how keys from a parent's shared_state_contract map to a nested topology's state.",
       "properties": {
         "parent_key": {
           "description": "The key in the parent's shared state contract.",
@@ -6190,7 +6239,7 @@
     },
     "InsightCardProfile": {
       "additionalProperties": false,
-      "description": "Panel displaying a semantic text summary.",
+      "description": "CoReason Shared Kernel Ontology\n\nPanel displaying a semantic text summary.",
       "properties": {
         "panel_id": {
           "description": "The unique identifier for this UI panel.",
@@ -6225,7 +6274,7 @@
     },
     "InterventionIntent": {
       "additionalProperties": false,
-      "description": "Emitted when an agent needs human approval or further intervention.",
+      "description": "CoReason Shared Kernel Ontology\n\nEmitted when an agent needs human approval or further intervention.",
       "properties": {
         "type": {
           "const": "request",
@@ -6308,7 +6357,7 @@
     },
     "InterventionPolicy": {
       "additionalProperties": false,
-      "description": "Proactive oversight hook bound to a specific lifecycle event.",
+      "description": "CoReason Shared Kernel Ontology\n\nProactive oversight hook bound to a specific lifecycle event.",
       "properties": {
         "trigger": {
           "$ref": "#/$defs/LifecycleTriggerEvent",
@@ -6341,7 +6390,7 @@
     },
     "InterventionReceipt": {
       "additionalProperties": false,
-      "description": "Emitted by a human or oversight AI to resume the swarm.",
+      "description": "CoReason Shared Kernel Ontology\n\nEmitted by a human or oversight AI to resume the swarm.",
       "properties": {
         "type": {
           "const": "verdict",
@@ -6401,6 +6450,7 @@
     },
     "InterventionalCausalTask": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "task_id": {
           "description": "Unique identifier for this causal intervention.",
@@ -6450,7 +6500,7 @@
     },
     "JSONRPCErrorResponseState": {
       "additionalProperties": false,
-      "description": "JSON-RPC 2.0 Error Response object.",
+      "description": "CoReason Shared Kernel Ontology\n\nJSON-RPC 2.0 Error Response object.",
       "properties": {
         "jsonrpc": {
           "const": "2.0",
@@ -6488,7 +6538,7 @@
     },
     "JSONRPCErrorState": {
       "additionalProperties": false,
-      "description": "JSON-RPC 2.0 Error object.",
+      "description": "CoReason Shared Kernel Ontology\n\nJSON-RPC 2.0 Error object.",
       "properties": {
         "code": {
           "description": "A Number that indicates the error type that occurred.",
@@ -6519,8 +6569,40 @@
       "title": "JSONRPCErrorState",
       "type": "object"
     },
+    "JsonPrimitive": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "integer"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "items": {
+            "$ref": "#/$defs/JsonPrimitive"
+          },
+          "type": "array"
+        },
+        {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonPrimitive"
+          },
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
     "LakehouseMountProfile": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "catalog_uri": {
           "description": "The stateless endpoint of the catalog (e.g., Polaris, Nessie).",
@@ -6558,6 +6640,7 @@
     },
     "LatentScratchpadReceipt": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "trace_id": {
           "description": "A Content Identifier (CID) bounding this ephemeral test-time execution tree.",
@@ -6612,7 +6695,7 @@
     },
     "LatentSmoothingProfile": {
       "additionalProperties": false,
-      "description": "The mathematical curve used to gently taper an adversarial activation to prevent logit collapse.",
+      "description": "CoReason Shared Kernel Ontology\n\nThe mathematical curve used to gently taper an adversarial activation to prevent logit collapse.",
       "properties": {
         "decay_function": {
           "description": "The trigonometric or algebraic function governing the attenuation curve.",
@@ -6664,6 +6747,7 @@
     },
     "LineageWatermarkReceipt": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "watermark_protocol": {
           "description": "The mathematical methodology used to embed the chain of custody.",
@@ -6699,7 +6783,7 @@
     },
     "LogEvent": {
       "additionalProperties": false,
-      "description": "An out-of-band telemetry log manifest.",
+      "description": "CoReason Shared Kernel Ontology\n\nAn out-of-band telemetry log manifest.",
       "properties": {
         "timestamp": {
           "description": "The UNIX timestamp of the log event.",
@@ -6738,7 +6822,7 @@
     },
     "LogitSteganographyContract": {
       "additionalProperties": false,
-      "description": "Cryptographic contract for embedding undeniable, un-strippable provenance signatures\ndirectly into the token entropy.",
+      "description": "CoReason Shared Kernel Ontology\n\nCryptographic contract for embedding undeniable, un-strippable provenance signatures\ndirectly into the token entropy.",
       "properties": {
         "verification_public_key_id": {
           "description": "The DID or public key identifier required by an auditor to reconstruct the PRF and verify the watermark.",
@@ -6782,7 +6866,7 @@
     },
     "MCPCapabilityWhitelistPolicy": {
       "additionalProperties": false,
-      "description": "A zero-trust boundary defining exactly which JSON-RPC capabilities\nthe execution node is authorized to mount from the remote server.",
+      "description": "CoReason Shared Kernel Ontology\n\nA zero-trust boundary defining exactly which JSON-RPC capabilities\nthe execution node is authorized to mount from the remote server.",
       "properties": {
         "allowed_tools": {
           "description": "The explicit whitelist of function names the node is allowed to call.",
@@ -6822,7 +6906,7 @@
     },
     "MCPClientBindingProfile": {
       "additionalProperties": false,
-      "description": "Binding configuration for a Model Context Protocol (MCP) server.",
+      "description": "CoReason Shared Kernel Ontology\n\nBinding configuration for a Model Context Protocol (MCP) server.",
       "properties": {
         "server_uri": {
           "description": "The URI or command path to the MCP server.",
@@ -6859,7 +6943,7 @@
     },
     "MCPClientIntent": {
       "additionalProperties": false,
-      "description": "Strict JSON-RPC 2.0 structure for MCP client messages.",
+      "description": "CoReason Shared Kernel Ontology\n\nStrict JSON-RPC 2.0 structure for MCP client messages.",
       "properties": {
         "jsonrpc": {
           "const": "2.0",
@@ -6913,7 +6997,7 @@
     },
     "MCPPromptReferenceState": {
       "additionalProperties": false,
-      "description": "A dynamic reference to an MCP-provided prompt template.",
+      "description": "CoReason Shared Kernel Ontology\n\nA dynamic reference to an MCP-provided prompt template.",
       "properties": {
         "server_id": {
           "description": "The ID of the MCP server providing this prompt.",
@@ -6967,7 +7051,7 @@
     },
     "MCPResourceManifest": {
       "additionalProperties": false,
-      "description": "A collection of Semantic Memory resource URIs provided by a specific MCP server.",
+      "description": "CoReason Shared Kernel Ontology\n\nA collection of Semantic Memory resource URIs provided by a specific MCP server.",
       "properties": {
         "server_id": {
           "description": "The ID of the MCP server providing these resources.",
@@ -6991,7 +7075,7 @@
     },
     "MCPServerBindingProfile": {
       "additionalProperties": false,
-      "description": "Configuration definition for connecting to an MCP Server.",
+      "description": "CoReason Shared Kernel Ontology\n\nConfiguration definition for connecting to an MCP Server.",
       "properties": {
         "server_id": {
           "description": "A unique identifier for this server instance.",
@@ -7033,7 +7117,7 @@
     },
     "MCPServerManifest": {
       "additionalProperties": false,
-      "description": "The structural contract for mounting an external Model Context Protocol server.",
+      "description": "CoReason Shared Kernel Ontology\n\nThe structural contract for mounting an external Model Context Protocol server.",
       "properties": {
         "server_uri": {
           "description": "The network URI for SSE/HTTP, or the command execution string for stdio.",
@@ -7103,7 +7187,7 @@
     },
     "MacroGridProfile": {
       "additionalProperties": false,
-      "description": "A layout matrix containing a strict array of panels.",
+      "description": "CoReason Shared Kernel Ontology\n\nA layout matrix containing a strict array of panels.",
       "properties": {
         "layout_matrix": {
           "description": "A matrix defining the layout structure, using panel IDs.",
@@ -7134,6 +7218,7 @@
     },
     "MarketContract": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "minimum_collateral": {
           "description": "The minimum amount of token collateral held in escrow.",
@@ -7157,7 +7242,7 @@
     },
     "MarketResolutionState": {
       "additionalProperties": false,
-      "description": "The resolution state of an algorithmic prediction market.",
+      "description": "CoReason Shared Kernel Ontology\n\nThe resolution state of an algorithmic prediction market.",
       "properties": {
         "market_id": {
           "description": "The ID of the prediction market.",
@@ -7198,6 +7283,7 @@
     },
     "MathematicalNotationExtractionState": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "math_type": {
           "description": "The structural context of the equation.",
@@ -7239,6 +7325,7 @@
     },
     "MechanisticAuditContract": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "trigger_conditions": {
           "description": "The specific architectural events that authorize the orchestrator to halt generation and extract internal activations.",
@@ -7287,7 +7374,7 @@
     },
     "MemoizedNodeProfile": {
       "additionalProperties": false,
-      "description": "A passive structural interlock representing a historically executed graph branch.",
+      "description": "CoReason Shared Kernel Ontology\n\nA passive structural interlock representing a historically executed graph branch.",
       "properties": {
         "description": {
           "description": "The semantic boundary defining the objective function or computational perimeter of the execution node.",
@@ -7370,6 +7457,7 @@
     },
     "MigrationContract": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "contract_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this structural migration mapping.",
@@ -7413,7 +7501,7 @@
     },
     "ModelProfile": {
       "additionalProperties": false,
-      "description": "Abstraction for an underlying LLM provider in liquid compute.",
+      "description": "CoReason Shared Kernel Ontology\n\nAbstraction for an underlying LLM provider in liquid compute.",
       "properties": {
         "model_name": {
           "description": "The identifier of the underlying model.",
@@ -7463,7 +7551,7 @@
     },
     "MultimodalArtifactReceipt": {
       "additionalProperties": false,
-      "description": "AGENT INSTRUCTION: The root Genesis Block for an unstructured document entering the Merkle-DAG.",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The root Genesis Block for an unstructured document entering the Merkle-DAG.",
       "properties": {
         "artifact_id": {
           "description": "The definitive Content Identifier (CID) bounding the raw file.",
@@ -7498,7 +7586,7 @@
     },
     "MultimodalTokenAnchorState": {
       "additionalProperties": false,
-      "description": "AGENT INSTRUCTION: Unified multimodal grounding mapping extracted facts to strict 1D token spans and 2D visual\npatches.",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Unified multimodal grounding mapping extracted facts to strict 1D token spans and 2D visual\npatches.",
       "properties": {
         "token_span_start": {
           "anyOf": [
@@ -7592,7 +7680,7 @@
     },
     "MutationPolicy": {
       "additionalProperties": false,
-      "description": "Constraints governing random heuristic mutations.",
+      "description": "CoReason Shared Kernel Ontology\n\nConstraints governing random heuristic mutations.",
       "properties": {
         "mutation_rate": {
           "description": "The probability that a given agent parameter will randomly mutate between generations.",
@@ -7628,7 +7716,7 @@
     },
     "NDimensionalTensorManifest": {
       "additionalProperties": false,
-      "description": "Cryptographic shadow of an N-Dimensional spatial or mathematical array.\nFacilitating the routing of multi-dimensional compute without passing raw bytes.",
+      "description": "CoReason Shared Kernel Ontology\n\nCryptographic shadow of an N-Dimensional spatial or mathematical array.\nFacilitating the routing of multi-dimensional compute without passing raw bytes.",
       "properties": {
         "structural_type": {
           "$ref": "#/$defs/TensorStructuralTypeProfile",
@@ -7671,6 +7759,7 @@
     },
     "NeuralAuditAttestationReceipt": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "audit_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
@@ -7705,6 +7794,7 @@
     },
     "NeuroSymbolicHandoffContract": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "handoff_id": {
           "description": "Unique identifier for this symbolic delegation.",
@@ -7760,6 +7850,7 @@
     },
     "NormativeDriftEvent": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
@@ -7806,6 +7897,7 @@
     },
     "ObservabilityPolicy": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "traces_sampled": {
           "default": true,
@@ -7825,6 +7917,7 @@
     },
     "ObservationEvent": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
@@ -7844,7 +7937,9 @@
           "type": "string"
         },
         "payload": {
-          "additionalProperties": true,
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonPrimitive"
+          },
           "description": "Neurosymbolic Bindings of the raw, lossless semantic output appended from the environment or tool execution that anchor statistical probability to a definitive causal event hash.",
           "title": "Payload",
           "type": "object"
@@ -7945,7 +8040,7 @@
     },
     "OntologicalAlignmentPolicy": {
       "additionalProperties": false,
-      "description": "The pre-flight execution gate forcing agents to mathematically align their latent semantics.",
+      "description": "CoReason Shared Kernel Ontology\n\nThe pre-flight execution gate forcing agents to mathematically align their latent semantics.",
       "properties": {
         "min_cosine_similarity": {
           "description": "The absolute minimum latent vector similarity required to allow swarm communication.",
@@ -7981,6 +8076,7 @@
     },
     "OntologicalHandshakeReceipt": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "handshake_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this protocol handshake to the Merkle-DAG.",
@@ -8039,7 +8135,7 @@
     },
     "OntologicalSurfaceProjectionManifest": {
       "additionalProperties": false,
-      "description": "A mathematically bounded, declarative subgraph of all ToolManifests and\nMCPServerManifests currently valid for the agent's ProfileIdentifierState.",
+      "description": "CoReason Shared Kernel Ontology\n\nA mathematically bounded, declarative subgraph of all ToolManifests and\nMCPServerManifests currently valid for the agent's ProfileIdentifierState.",
       "properties": {
         "projection_id": {
           "description": "A cryptographic Lineage Watermark bounding this specific capability set.",
@@ -8079,7 +8175,7 @@
     },
     "OutputMappingContract": {
       "additionalProperties": false,
-      "description": "Dictates how keys from a nested topology's state map back to a parent's shared_state_contract.",
+      "description": "CoReason Shared Kernel Ontology\n\nDictates how keys from a nested topology's state map back to a parent's shared_state_contract.",
       "properties": {
         "child_key": {
           "description": "The key in the nested topology's state contract.",
@@ -8101,7 +8197,7 @@
     },
     "OverrideIntent": {
       "additionalProperties": false,
-      "description": "Dictatorial oversight override payload.",
+      "description": "CoReason Shared Kernel Ontology\n\nDictatorial oversight override payload.",
       "properties": {
         "type": {
           "const": "override",
@@ -8171,7 +8267,7 @@
     },
     "PeftAdapterContract": {
       "additionalProperties": false,
-      "description": "Declarative contract for dynamically mounting a Parameter-Efficient Fine-Tuning (PEFT) adapter.",
+      "description": "CoReason Shared Kernel Ontology\n\nDeclarative contract for dynamically mounting a Parameter-Efficient Fine-Tuning (PEFT) adapter.",
       "properties": {
         "adapter_id": {
           "description": "Unique identifier for the requested LoRA adapter.",
@@ -8232,7 +8328,7 @@
     },
     "PermissionBoundaryPolicy": {
       "additionalProperties": false,
-      "description": "Zero-trust security boundaries for tool execution.",
+      "description": "CoReason Shared Kernel Ontology\n\nZero-trust security boundaries for tool execution.",
       "properties": {
         "network_access": {
           "description": "Whether the tool is permitted to make external network requests.",
@@ -8286,6 +8382,7 @@
     },
     "PersistenceCommitReceipt": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
@@ -8335,6 +8432,7 @@
     },
     "PostQuantumSignatureReceipt": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "pq_algorithm": {
           "description": "The NIST FIPS post-quantum cryptographic algorithm used.",
@@ -8368,7 +8466,7 @@
     },
     "PredictionMarketPolicy": {
       "additionalProperties": false,
-      "description": "The ruleset governing the market. It enforces Sybil resistance\n(via quadratic staking) and dictates when the market stops trading.",
+      "description": "CoReason Shared Kernel Ontology\n\nThe ruleset governing the market. It enforces Sybil resistance\n(via quadratic staking) and dictates when the market stops trading.",
       "properties": {
         "staking_function": {
           "description": "The mathematical curve applied to stakes. Quadratic enforces Sybil resistance.",
@@ -8403,7 +8501,7 @@
     },
     "PredictionMarketState": {
       "additionalProperties": false,
-      "description": "The state of the Automated Market Maker (AMM) using Robin Hanson's\nLogarithmic Market Scoring Rule (LMSR) to ensure infinite liquidity.",
+      "description": "CoReason Shared Kernel Ontology\n\nThe state of the Automated Market Maker (AMM) using Robin Hanson's\nLogarithmic Market Scoring Rule (LMSR) to ensure infinite liquidity.",
       "properties": {
         "market_id": {
           "description": "The ID of the prediction market.",
@@ -8451,7 +8549,7 @@
     },
     "PresentationManifest": {
       "additionalProperties": false,
-      "description": "An envelope wrapping a grid presentation and its intent.",
+      "description": "CoReason Shared Kernel Ontology\n\nAn envelope wrapping a grid presentation and its intent.",
       "properties": {
         "intent": {
           "$ref": "#/$defs/AnyPresentationIntent",
@@ -8471,6 +8569,7 @@
     },
     "ProcessRewardContract": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "convergence_sla": {
           "anyOf": [
@@ -8540,7 +8639,7 @@
     },
     "QuarantineIntent": {
       "additionalProperties": false,
-      "description": "Indicates that a target node should be quarantined.",
+      "description": "CoReason Shared Kernel Ontology\n\nIndicates that a target node should be quarantined.",
       "properties": {
         "type": {
           "const": "quarantine_intent",
@@ -8568,7 +8667,7 @@
     },
     "QuorumPolicy": {
       "additionalProperties": false,
-      "description": "The mathematical boundaries required to survive Byzantine failures in a decentralized swarm.",
+      "description": "CoReason Shared Kernel Ontology\n\nThe mathematical boundaries required to survive Byzantine failures in a decentralized swarm.",
       "properties": {
         "max_tolerable_faults": {
           "description": "The maximum number of actively malicious, hallucinating, or degraded nodes (f) the swarm must survive.",
@@ -8614,7 +8713,7 @@
     },
     "RedactionPolicy": {
       "additionalProperties": false,
-      "description": "A specific rule for algorithmic payload sanitization.",
+      "description": "CoReason Shared Kernel Ontology\n\nA specific rule for algorithmic payload sanitization.",
       "properties": {
         "rule_id": {
           "description": "Unique identifier for the sanitization rule.",
@@ -8693,6 +8792,7 @@
     },
     "RollbackIntent": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "request_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the causal rollback operation.",
@@ -8722,7 +8822,7 @@
     },
     "RoutingFrontierPolicy": {
       "additionalProperties": false,
-      "description": "Mathematical Pareto boundaries for dynamic spot-market liquid compute.",
+      "description": "CoReason Shared Kernel Ontology\n\nMathematical Pareto boundaries for dynamic spot-market liquid compute.",
       "properties": {
         "max_latency_ms": {
           "description": "The absolute physical speed limit acceptable for time-to-first-token or total generation.",
@@ -8781,7 +8881,7 @@
     },
     "SMPCTopologyManifest": {
       "additionalProperties": false,
-      "description": "A Secure Multi-Party Computation topology.",
+      "description": "CoReason Shared Kernel Ontology\n\nA Secure Multi-Party Computation topology.",
       "properties": {
         "epistemic_enforcement": {
           "anyOf": [
@@ -8933,7 +9033,7 @@
     },
     "SSETransportProfile": {
       "additionalProperties": false,
-      "description": "Configuration for remote SSE-based MCP transport.",
+      "description": "CoReason Shared Kernel Ontology\n\nConfiguration for remote SSE-based MCP transport.",
       "properties": {
         "type": {
           "const": "sse",
@@ -8967,6 +9067,7 @@
     },
     "SaeFeatureActivationState": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "feature_index": {
           "description": "The exact dimensional index of the monosemantic feature in the Sparse Autoencoder dictionary.",
@@ -9002,7 +9103,7 @@
     },
     "SaeLatentPolicy": {
       "additionalProperties": false,
-      "description": "A real-time mechanistic interpretability boundary that monitors and controls specific neural circuits.",
+      "description": "CoReason Shared Kernel Ontology\n\nA real-time mechanistic interpretability boundary that monitors and controls specific neural circuits.",
       "properties": {
         "target_feature_index": {
           "description": "The exact dimensional index of the monosemantic feature in the Sparse Autoencoder dictionary.",
@@ -9080,6 +9181,7 @@
     },
     "SalienceProfile": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "baseline_importance": {
           "description": "The starting importance score of this memory from 0.0 to 1.0.",
@@ -9113,7 +9215,7 @@
     },
     "ScalePolicy": {
       "additionalProperties": false,
-      "description": "The mathematical mapping constraint for a channel.",
+      "description": "CoReason Shared Kernel Ontology\n\nThe mathematical mapping constraint for a channel.",
       "properties": {
         "type": {
           "description": "The mathematical scale mapping metrics to pixels.",
@@ -9162,7 +9264,7 @@
     },
     "SecureSubSessionState": {
       "additionalProperties": false,
-      "description": "Declarative boundary for handling unredacted secrets within a temporarily isolated state partition.",
+      "description": "CoReason Shared Kernel Ontology\n\nDeclarative boundary for handling unredacted secrets within a temporarily isolated state partition.",
       "properties": {
         "session_id": {
           "description": "Unique identifier for the secure session.",
@@ -9204,7 +9306,7 @@
     },
     "SelfCorrectionPolicy": {
       "additionalProperties": false,
-      "description": "Policy for self-correction and iterative refinement.",
+      "description": "CoReason Shared Kernel Ontology\n\nPolicy for self-correction and iterative refinement.",
       "properties": {
         "max_loops": {
           "description": "The maximum number of self-correction loops allowed.",
@@ -9228,6 +9330,7 @@
     },
     "SemanticDiscoveryIntent": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "type": {
           "const": "semantic_discovery",
@@ -9266,6 +9369,7 @@
     },
     "SemanticEdgeState": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "edge_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this semantic edge to the Merkle-DAG.",
@@ -9362,6 +9466,7 @@
     },
     "SemanticFirewallPolicy": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "max_input_tokens": {
           "description": "The absolute physical ceiling of tokens allowed in a single ingress payload.",
@@ -9397,6 +9502,7 @@
     },
     "SemanticNodeState": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "node_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this semantic node to the Merkle-DAG.",
@@ -9504,7 +9610,7 @@
     },
     "SideEffectProfile": {
       "additionalProperties": false,
-      "description": "Profile for describing the side effects and idempotency of a tool.",
+      "description": "CoReason Shared Kernel Ontology\n\nProfile for describing the side effects and idempotency of a tool.",
       "properties": {
         "is_idempotent": {
           "description": "True if the tool can be safely retried multiple times without altering state beyond the first call.",
@@ -9526,7 +9632,7 @@
     },
     "SimulationConvergenceSLA": {
       "additionalProperties": false,
-      "description": "The statistical limits of the sandbox simulation.",
+      "description": "CoReason Shared Kernel Ontology\n\nThe statistical limits of the sandbox simulation.",
       "properties": {
         "max_monte_carlo_rollouts": {
           "description": "The absolute physical limit on how many alternate futures the system is allowed to render.",
@@ -9551,6 +9657,7 @@
     },
     "SimulationEscrowContract": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "locked_magnitude": {
           "description": "The strictly typed boundary requiring locked magnitude to prevent zero-cost griefing of the swarm.",
@@ -9567,6 +9674,7 @@
     },
     "SpanEvent": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "name": {
           "description": "The semantic name of the event.",
@@ -9612,7 +9720,7 @@
     },
     "SpanTraceReceipt": {
       "additionalProperties": false,
-      "description": "An execution window span trace.",
+      "description": "CoReason Shared Kernel Ontology\n\nAn execution window span trace.",
       "properties": {
         "span_id": {
           "description": "The unique identifier for this execution span.",
@@ -9675,7 +9783,7 @@
     },
     "SpatialBoundingBoxProfile": {
       "additionalProperties": false,
-      "description": "A resolution-independent spatial region.",
+      "description": "CoReason Shared Kernel Ontology\n\nA resolution-independent spatial region.",
       "properties": {
         "x_min": {
           "description": "The left boundary.",
@@ -9717,7 +9825,7 @@
     },
     "SpatialCoordinateProfile": {
       "additionalProperties": false,
-      "description": "A resolution-independent 2D spatial vector.",
+      "description": "CoReason Shared Kernel Ontology\n\nA resolution-independent 2D spatial vector.",
       "properties": {
         "x": {
           "description": "The normalized X-axis coordinate (0.0 = left, 1.0 = right).",
@@ -9743,7 +9851,7 @@
     },
     "SpatialKinematicActionIntent": {
       "additionalProperties": false,
-      "description": "A mathematical declaration of an OS-level pointer or interaction trajectory.",
+      "description": "CoReason Shared Kernel Ontology\n\nA mathematical declaration of an OS-level pointer or interaction trajectory.",
       "properties": {
         "action_type": {
           "description": "The specific kinematic interaction paradigm.",
@@ -9814,7 +9922,7 @@
     },
     "StateContract": {
       "additionalProperties": false,
-      "description": "A strict Cryptographic State Contract (Typed Blackboard) for multi-agent state sharing.",
+      "description": "CoReason Shared Kernel Ontology\n\nA strict Cryptographic State Contract (Typed Blackboard) for multi-agent state sharing.",
       "properties": {
         "schema_definition": {
           "additionalProperties": true,
@@ -9837,6 +9945,7 @@
     },
     "StateDifferentialManifest": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "diff_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this state differential.",
@@ -9882,6 +9991,7 @@
     },
     "StateHydrationManifest": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "epistemic_coordinate": {
           "description": "A string ID representing the session or specific spatial trace binding.",
@@ -9921,6 +10031,7 @@
     },
     "StateMutationIntent": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "op": {
           "$ref": "#/$defs/PatchOperationProfile",
@@ -9932,15 +10043,9 @@
           "type": "string"
         },
         "value": {
-          "anyOf": [
-            {},
-            {
-              "type": "null"
-            }
-          ],
+          "$ref": "#/$defs/JsonPrimitive",
           "default": null,
-          "description": "The payload to insert or test, if applicable, for this deterministic state vector mutation.",
-          "title": "Value"
+          "description": "The payload to insert or test, if applicable, for this deterministic state vector mutation."
         }
       },
       "required": [
@@ -9952,6 +10057,7 @@
     },
     "StatisticalChartExtractionState": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "axes": {
           "additionalProperties": {
@@ -9989,7 +10095,7 @@
     },
     "StdioTransportProfile": {
       "additionalProperties": false,
-      "description": "Configuration for local Stdio-based MCP transport.",
+      "description": "CoReason Shared Kernel Ontology\n\nConfiguration for local Stdio-based MCP transport.",
       "properties": {
         "type": {
           "const": "stdio",
@@ -10028,6 +10134,7 @@
     },
     "SteadyStateHypothesisState": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "expected_max_latency": {
           "description": "The expected maximum latency under normal conditions.",
@@ -10066,6 +10173,7 @@
     },
     "StructuralCausalModelProfile": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "observed_variables": {
           "description": "The nodes in the DAG that the agent can passively measure.",
@@ -10102,14 +10210,14 @@
     },
     "SuspenseState": {
       "additionalProperties": false,
-      "description": "Indicates that the swarm is waiting on a long-running process or human input.",
+      "description": "CoReason Shared Kernel Ontology\n\nIndicates that the swarm is waiting on a long-running process or human input.",
       "properties": {},
       "title": "SuspenseState",
       "type": "object"
     },
     "SwarmTopologyManifest": {
       "additionalProperties": false,
-      "description": "A dynamic Swarm workflow topology.",
+      "description": "CoReason Shared Kernel Ontology\n\nA dynamic Swarm workflow topology.",
       "properties": {
         "epistemic_enforcement": {
           "anyOf": [
@@ -10263,7 +10371,7 @@
     },
     "SyntheticGenerationProfile": {
       "additionalProperties": false,
-      "description": "Authoritative blueprint for external fuzzing and simulation engines.",
+      "description": "CoReason Shared Kernel Ontology\n\nAuthoritative blueprint for external fuzzing and simulation engines.",
       "properties": {
         "profile_id": {
           "description": "Unique identifier for this simulation profile.",
@@ -10292,7 +10400,7 @@
     },
     "System1ReflexPolicy": {
       "additionalProperties": false,
-      "description": "Policy for fast, intuitive system 1 thinking.",
+      "description": "CoReason Shared Kernel Ontology\n\nPolicy for fast, intuitive system 1 thinking.",
       "properties": {
         "confidence_threshold": {
           "description": "The confidence threshold required to execute a reflex action.",
@@ -10319,7 +10427,7 @@
     },
     "System2RemediationIntent": {
       "additionalProperties": false,
-      "description": "A passive structural envelope that deterministically maps a kinetic execution error\n(e.g., a Pydantic ValidationError) into a structurally rigid System 2 correction directive.",
+      "description": "CoReason Shared Kernel Ontology\n\nA passive structural envelope that deterministically maps a kinetic execution error\n(e.g., a Pydantic ValidationError) into a structurally rigid System 2 correction directive.",
       "properties": {
         "fault_id": {
           "description": "A cryptographic Lineage Watermark (CID) tracking this specific dimensional collapse.",
@@ -10358,6 +10466,7 @@
     },
     "SystemFaultEvent": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
@@ -10386,7 +10495,7 @@
     },
     "SystemNodeProfile": {
       "additionalProperties": false,
-      "description": "A node representing a deterministic system capability.",
+      "description": "CoReason Shared Kernel Ontology\n\nA node representing a deterministic system capability.",
       "properties": {
         "description": {
           "description": "The semantic boundary defining the objective function or computational perimeter of the execution node.",
@@ -10457,6 +10566,7 @@
     },
     "TabularCellState": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "row_index": {
           "description": "The zero-indexed absolute matrix row.",
@@ -10505,6 +10615,7 @@
     },
     "TabularMatrixExtractionState": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "cells": {
           "description": "The sparse tensor representing all populated cells.",
@@ -10523,6 +10634,7 @@
     },
     "TaskAnnouncementIntent": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "task_id": {
           "description": "Unique identifier for the required task.",
@@ -10557,6 +10669,7 @@
     },
     "TaskAwardReceipt": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "task_id": {
           "description": "The identifier of the resolved task.",
@@ -10634,6 +10747,7 @@
     },
     "TemporalBoundsProfile": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "valid_from": {
           "anyOf": [
@@ -10680,6 +10794,7 @@
     },
     "TemporalCheckpointState": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "checkpoint_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the temporal anchor.",
@@ -10720,6 +10835,7 @@
     },
     "TerminalBufferState": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "type": {
           "const": "terminal",
@@ -10760,6 +10876,7 @@
     },
     "TheoryOfMindSnapshot": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "target_agent_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the agent whose mind is being modeled.",
@@ -10802,6 +10919,7 @@
     },
     "ThoughtBranchState": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "branch_id": {
           "description": "A deterministic capability pointer bounding this specific topological divergence in the Latent Scratchpad Trace.",
@@ -10862,7 +10980,7 @@
     },
     "TokenBurnReceipt": {
       "additionalProperties": false,
-      "description": "Lock-free thermodynamic compute tracking receipt.",
+      "description": "CoReason Shared Kernel Ontology\n\nLock-free thermodynamic compute tracking receipt.",
       "properties": {
         "event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
@@ -10929,7 +11047,7 @@
     },
     "ToolInvocationEvent": {
       "additionalProperties": false,
-      "description": "A Priori Kinetic Commitment representing the Pearlian Do-Operator prior to network execution.",
+      "description": "CoReason Shared Kernel Ontology\n\nA Priori Kinetic Commitment representing the Pearlian Do-Operator prior to network execution.",
       "properties": {
         "event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
@@ -10994,7 +11112,7 @@
     },
     "ToolManifest": {
       "additionalProperties": false,
-      "description": "Declarative mathematical definition of a tool.",
+      "description": "CoReason Shared Kernel Ontology\n\nDeclarative mathematical definition of a tool.",
       "properties": {
         "tool_name": {
           "description": "The exact identifier of the tool.",
@@ -11056,6 +11174,7 @@
     },
     "TraceExportManifest": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "batch_id": {
           "description": "Unique identifier for this telemetry snapshot.",
@@ -11079,6 +11198,7 @@
     },
     "TruthMaintenancePolicy": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "decay_propagation_rate": {
           "description": "Entropy Penalty applied per edge traversal during a defeasible cascade.",
@@ -11124,7 +11244,7 @@
     },
     "UtilityJustificationGraphReceipt": {
       "additionalProperties": false,
-      "description": "AGENT INSTRUCTION: Immutable cryptographic receipt of multi-dimensional utility routing.\nIf variance threshold falls below delta, fallback to deterministic ensemble superposition.",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Immutable cryptographic receipt of multi-dimensional utility routing.\nIf variance threshold falls below delta, fallback to deterministic ensemble superposition.",
       "properties": {
         "optimizing_vectors": {
           "additionalProperties": {
@@ -11169,6 +11289,7 @@
     },
     "VectorEmbeddingState": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "vector_base64": {
           "description": "The base64-encoded dense vector array.",
@@ -11198,7 +11319,7 @@
     },
     "VerifiableCredentialPresentationReceipt": {
       "additionalProperties": false,
-      "description": "A cryptographic proof of clearance or capability presented to a zero-trust orchestrator.",
+      "description": "CoReason Shared Kernel Ontology\n\nA cryptographic proof of clearance or capability presented to a zero-trust orchestrator.",
       "properties": {
         "presentation_format": {
           "description": "The exact cryptographic standard used to encode this credential presentation.",
@@ -11238,7 +11359,7 @@
     },
     "VerifiableEntropyReceipt": {
       "additionalProperties": false,
-      "description": "Passive cryptographic envelope for verifiable random functions.",
+      "description": "CoReason Shared Kernel Ontology\n\nPassive cryptographic envelope for verifiable random functions.",
       "properties": {
         "vrf_proof": {
           "description": "The zero-knowledge cryptographic proof of fair random generation.",
@@ -11269,7 +11390,7 @@
     },
     "VisualEncodingProfile": {
       "additionalProperties": false,
-      "description": "The visual property being manipulated.",
+      "description": "CoReason Shared Kernel Ontology\n\nThe visual property being manipulated.",
       "properties": {
         "channel": {
           "description": "The visual channel the metric is mapped to.",
@@ -11312,7 +11433,7 @@
     },
     "WetwareAttestationContract": {
       "additionalProperties": false,
-      "description": "AGENT INSTRUCTION: This model represents a SOTA cryptographic receipt\nproving a human in the loop physically authorized a state transition.",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: This model represents a SOTA cryptographic receipt\nproving a human in the loop physically authorized a state transition.",
       "properties": {
         "mechanism": {
           "$ref": "#/$defs/AttestationMechanismProfile",
@@ -11348,7 +11469,7 @@
     },
     "WorkflowManifest": {
       "additionalProperties": false,
-      "description": "The root envelope for an orchestrated workflow payload.",
+      "description": "CoReason Shared Kernel Ontology\n\nThe root envelope for an orchestrated workflow payload.",
       "properties": {
         "genesis_provenance": {
           "$ref": "#/$defs/EpistemicProvenanceReceipt",
@@ -11477,6 +11598,7 @@
     },
     "ZeroKnowledgeReceipt": {
       "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "proof_protocol": {
           "description": "The mathematical dialect of the cryptographic proof.",
