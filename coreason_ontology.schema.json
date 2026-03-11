@@ -10,7 +10,7 @@
           "type": "string"
         },
         "native_tools": {
-          "description": "The list of discrete, natively defined tools available in this space.",
+          "description": "The strict array of discrete, natively defined tools available in this space.",
           "items": {
             "$ref": "#/$defs/ToolManifest"
           },
@@ -182,7 +182,7 @@
       "description": "Verdict resulting from grading an LLM behavior or output against a rubric.",
       "properties": {
         "rubric_id": {
-          "description": "The ID of the rubric used for adjudication.",
+          "description": "The ID of the rubric utilizing adjudication.",
           "title": "Rubric Id",
           "type": "string"
         },
@@ -346,7 +346,7 @@
             }
           ],
           "default": null,
-          "description": "The exact rule_id of the InformationFlowPolicy or Governance bound expected to block this attack. Used for automated test assertions.",
+          "description": "The exact rule_id of the InformationFlowPolicy or Governance bound expected to block this attack. Utilizing automated test assertions.",
           "title": "Expected Firewall Trip"
         }
       },
@@ -514,7 +514,7 @@
           "title": "Justification"
         },
         "intervention_policies": {
-          "description": "A declarative list of proactive oversight hooks bound to this node's lifecycle.",
+          "description": "The declarative array of proactive oversight hooks bound to this node's lifecycle.",
           "items": {
             "$ref": "#/$defs/InterventionPolicy"
           },
@@ -567,7 +567,7 @@
           "description": "The dynamic spot-market compute requirements for this agent."
         },
         "peft_adapters": {
-          "description": "A declarative list of ephemeral PEFT/LoRA weights required to be hot-swapped during this agent's execution.",
+          "description": "The declarative array of ephemeral PEFT/LoRA weights required to be hot-swapped during this agent's execution.",
           "items": {
             "$ref": "#/$defs/PeftAdapterContract"
           },
@@ -767,7 +767,7 @@
       "description": "Lightweight UX signal for UI rendering of progress.",
       "properties": {
         "status_message": {
-          "description": "A human-readable status message for the current task.",
+          "description": "The semantic 1D string projection representing the active kinetic execution state.",
           "title": "Status Message",
           "type": "string"
         },
@@ -1314,7 +1314,7 @@
       "description": "Base configuration for any execution node in a topology.",
       "properties": {
         "description": {
-          "description": "A description of the node's function.",
+          "description": "The semantic boundary defining the objective function or computational perimeter of the execution node.",
           "title": "Description",
           "type": "string"
         },
@@ -1345,7 +1345,7 @@
           "title": "Justification"
         },
         "intervention_policies": {
-          "description": "A declarative list of proactive oversight hooks bound to this node's lifecycle.",
+          "description": "The declarative array of proactive oversight hooks bound to this node's lifecycle.",
           "items": {
             "$ref": "#/$defs/InterventionPolicy"
           },
@@ -1971,7 +1971,7 @@
           "description": "The baseline steady state hypothesis being tested."
         },
         "faults": {
-          "description": "The list of fault injection profiles defining the chaotic elements.",
+          "description": "The strict array of fault injection profiles defining the chaotic elements.",
           "items": {
             "$ref": "#/$defs/FaultInjectionProfile"
           },
@@ -1979,7 +1979,7 @@
           "type": "array"
         },
         "shocks": {
-          "description": "The declarative list of exogenous Black Swan events injected into the topology.",
+          "description": "The declarative array of exogenous Black Swan events injected into the topology.",
           "items": {
             "$ref": "#/$defs/ExogenousEpistemicEvent"
           },
@@ -2181,7 +2181,7 @@
       "description": "A node that encapsulates a nested workflow topology.",
       "properties": {
         "description": {
-          "description": "A description of the node's function.",
+          "description": "The semantic boundary defining the objective function or computational perimeter of the execution node.",
           "title": "Description",
           "type": "string"
         },
@@ -2212,7 +2212,7 @@
           "title": "Justification"
         },
         "intervention_policies": {
-          "description": "A declarative list of proactive oversight hooks bound to this node's lifecycle.",
+          "description": "The declarative array of proactive oversight hooks bound to this node's lifecycle.",
           "items": {
             "$ref": "#/$defs/InterventionPolicy"
           },
@@ -3154,7 +3154,7 @@
           "type": "number"
         },
         "quarantined_event_ids": {
-          "description": "The strict list of downstream event Content Identifiers (CIDs) isolated and muted by this cascade to prevent Epistemic Contagion.",
+          "description": "The strict array of downstream event Content Identifiers (CIDs) isolated and muted by this cascade to prevent Epistemic Contagion.",
           "items": {
             "type": "string"
           },
@@ -3623,7 +3623,7 @@
           "type": "object"
         },
         "bypassed_steps": {
-          "description": "The declarative list of steps the orchestrator is mandated to skip.",
+          "description": "The declarative array of steps the orchestrator is mandated to skip.",
           "items": {
             "$ref": "#/$defs/BypassReceipt"
           },
@@ -3697,7 +3697,7 @@
       "description": "AGENT INSTRUCTION: Declarative mapping of concurrent topology branches for test-time superposition.\nMust map to strict W3C DIDs (NodeIDs) and provide an explicit wave-collapse opcode.",
       "properties": {
         "concurrent_branch_ids": {
-          "description": "A list of strict W3C DIDs (NodeIDs) representing concurrent topology branches.",
+          "description": "The strict array of strict W3C DIDs (NodeIDs) representing concurrent topology branches.",
           "items": {
             "$ref": "#/$defs/NodeID"
           },
@@ -3706,7 +3706,7 @@
           "type": "array"
         },
         "fusion_function": {
-          "description": "The explicit wave-collapse opcode used for resolving concurrent branches.",
+          "description": "The explicit wave-collapse opcode utilizing resolving concurrent branches.",
           "enum": [
             "weighted_consensus",
             "highest_confidence",
@@ -3995,7 +3995,7 @@
           "type": "string"
         },
         "source_episodic_event_ids": {
-          "description": "A list of CIDs (Content Identifiers) representing the raw logs being compressed and archived.",
+          "description": "The strict array of CIDs (Content Identifiers) representing the raw logs being compressed and archived.",
           "items": {
             "type": "string"
           },
@@ -4481,7 +4481,7 @@
           "type": "integer"
         },
         "protected_event_ids": {
-          "description": "Explicit list of Content Identifiers (CIDs) the orchestrator is mathematically forbidden from retracting.",
+          "description": "Explicit array of Content Identifiers (CIDs) the orchestrator is mathematically forbidden from retracting.",
           "items": {
             "type": "string"
           },
@@ -4712,7 +4712,7 @@
           "title": "Outputs"
         },
         "parent_hashes": {
-          "description": "A list of cryptographic hashes of parent execution nodes.",
+          "description": "The strict array of cryptographic hashes of parent execution nodes.",
           "items": {
             "type": "string"
           },
@@ -5334,7 +5334,7 @@
           "type": "string"
         },
         "detected_modalities": {
-          "description": "The strictly typed enum list of physical modalities detected in the artifact.",
+          "description": "The strictly typed enum array of physical modalities detected in the artifact.",
           "items": {
             "enum": [
               "text",
@@ -5349,7 +5349,7 @@
           "type": "array"
         },
         "token_density": {
-          "description": "The mathematical token density used for downstream compute budget allocation.",
+          "description": "The mathematical token density utilizing downstream compute budget allocation.",
           "minimum": 0,
           "title": "Token Density",
           "type": "integer"
@@ -5377,7 +5377,7 @@
           "description": "Semantic version of the governance policy."
         },
         "rules": {
-          "description": "List of constitutional rules included in this policy.",
+          "description": "The explicit array of constitutional rules included in this policy.",
           "items": {
             "$ref": "#/$defs/ConstitutionalPolicy"
           },
@@ -5395,7 +5395,7 @@
     },
     "GradingCriterionProfile": {
       "additionalProperties": false,
-      "description": "Defines criteria used for grading LLM behavior or output.",
+      "description": "Defines criteria utilizing grading LLM behavior or output.",
       "properties": {
         "criterion_id": {
           "description": "Unique identifier for the grading criterion.",
@@ -5403,7 +5403,7 @@
           "type": "string"
         },
         "description": {
-          "description": "Detailed description of what is being graded.",
+          "description": "The exact mathematical or logical boundary the target must satisfy to pass this dimensional check.",
           "title": "Description",
           "type": "string"
         },
@@ -5439,7 +5439,7 @@
           "type": "string"
         },
         "title": {
-          "description": "The human-readable title of the chart.",
+          "description": "The declarative semantic anchor summarizing the underlying visual grammar.",
           "title": "Title",
           "type": "string"
         },
@@ -5634,7 +5634,7 @@
       "description": "A node representing a human participant in the workflow.",
       "properties": {
         "description": {
-          "description": "A description of the node's function.",
+          "description": "The semantic boundary defining the objective function or computational perimeter of the execution node.",
           "title": "Description",
           "type": "string"
         },
@@ -5665,7 +5665,7 @@
           "title": "Justification"
         },
         "intervention_policies": {
-          "description": "A declarative list of proactive oversight hooks bound to this node's lifecycle.",
+          "description": "The declarative array of proactive oversight hooks bound to this node's lifecycle.",
           "items": {
             "$ref": "#/$defs/InterventionPolicy"
           },
@@ -5751,7 +5751,7 @@
           "type": "number"
         },
         "falsification_conditions": {
-          "description": "The list of strict conditions that the orchestrator must test to attempt to disprove this premise.",
+          "description": "The strict array of strict conditions that the orchestrator must test to attempt to disprove this premise.",
           "items": {
             "$ref": "#/$defs/FalsificationContract"
           },
@@ -5880,7 +5880,7 @@
           "description": "The active cognitive defense perimeter against adversarial control-flow overrides."
         },
         "latent_firewalls": {
-          "description": "The list of tensor-level mechanistic firewalls monitoring the forward pass for adversarial intent.",
+          "description": "The strict array of tensor-level mechanistic firewalls monitoring the forward pass for adversarial intent.",
           "items": {
             "$ref": "#/$defs/SaeLatentPolicy"
           },
@@ -5966,7 +5966,7 @@
           "type": "string"
         },
         "title": {
-          "description": "The human-readable title of the insight.",
+          "description": "The declarative semantic anchor summarizing the underlying matrix or markdown projection.",
           "title": "Title",
           "type": "string"
         },
@@ -6257,7 +6257,7 @@
           "type": "integer"
         },
         "message": {
-          "description": "A String providing a short description of the error.",
+          "description": "The strict semantic fault boundary explaining the structural or execution collapse.",
           "title": "Message",
           "type": "string"
         },
@@ -6335,7 +6335,7 @@
           "type": "array"
         },
         "discarded_branches": {
-          "description": "A list of Content Identifiers (CIDs) that were explicitly pruned due to logical dead-ends.",
+          "description": "The strict array of Content Identifiers (CIDs) that were explicitly pruned due to logical dead-ends.",
           "items": {
             "type": "string"
           },
@@ -6570,7 +6570,7 @@
           "type": "array"
         },
         "required_licenses": {
-          "description": "Explicit list of DUA/RBAC enterprise licenses mathematically required to perceive and mount this capability.",
+          "description": "Explicit array of DUA/RBAC enterprise licenses mathematically required to perceive and mount this capability.",
           "items": {
             "type": "string"
           },
@@ -6860,7 +6860,7 @@
     },
     "MacroGridProfile": {
       "additionalProperties": false,
-      "description": "A layout matrix containing a list of panels.",
+      "description": "A layout matrix containing a strict array of panels.",
       "properties": {
         "layout_matrix": {
           "description": "A matrix defining the layout structure, using panel IDs.",
@@ -7047,7 +7047,7 @@
       "description": "A passive structural interlock representing a historically executed graph branch.",
       "properties": {
         "description": {
-          "description": "A description of the node's function.",
+          "description": "The semantic boundary defining the objective function or computational perimeter of the execution node.",
           "title": "Description",
           "type": "string"
         },
@@ -7078,7 +7078,7 @@
           "title": "Justification"
         },
         "intervention_policies": {
-          "description": "A declarative list of proactive oversight hooks bound to this node's lifecycle.",
+          "description": "The declarative array of proactive oversight hooks bound to this node's lifecycle.",
           "items": {
             "$ref": "#/$defs/InterventionPolicy"
           },
@@ -7200,7 +7200,7 @@
           "description": "The economic cost definition associated with the model."
         },
         "supported_functional_experts": {
-          "description": "A declarative list of specialized functional expert clusters (e.g., 'falsifier', 'synthesizer') physically present in this model's architecture.",
+          "description": "The declarative array of specialized functional expert clusters (e.g., 'falsifier', 'synthesizer') physically present in this model's architecture.",
           "items": {
             "type": "string"
           },
@@ -7286,7 +7286,7 @@
           "title": "Token Span End"
         },
         "visual_patch_hashes": {
-          "description": "List of SHA-256 hashes corresponding to specific VQ-VAE visual patches attended to.",
+          "description": "The explicit array of SHA-256 hashes corresponding to specific VQ-VAE visual patches attended to.",
           "items": {
             "type": "string"
           },
@@ -7385,7 +7385,7 @@
     },
     "NDimensionalTensorManifest": {
       "additionalProperties": false,
-      "description": "Cryptographic shadow of an N-Dimensional spatial or mathematical array.\nUsed for routing multi-dimensional compute without passing raw bytes.",
+      "description": "Cryptographic shadow of an N-Dimensional spatial or mathematical array.\nUtilizing routing multi-dimensional compute without passing raw bytes.",
       "properties": {
         "structural_type": {
           "$ref": "#/$defs/TensorStructuralType",
@@ -7813,7 +7813,7 @@
           "type": "array"
         },
         "supported_personas": {
-          "description": "The strict list of foundational model personas available.",
+          "description": "The strict array of foundational model personas available.",
           "items": {
             "$ref": "#/$defs/ProfileID"
           },
@@ -7954,7 +7954,7 @@
           "type": "integer"
         },
         "target_modules": {
-          "description": "The explicit list of attention head modules to inject (e.g., ['q_proj', 'v_proj']).",
+          "description": "The explicit array of attention head modules to inject (e.g., ['q_proj', 'v_proj']).",
           "items": {
             "type": "string"
           },
@@ -8009,7 +8009,7 @@
             }
           ],
           "default": null,
-          "description": "Whitelist of allowed network domains if network access is true.",
+          "description": "The explicit whitelist of allowed network domains if network access is true.",
           "title": "Allowed Domains"
         },
         "file_system_mutation_forbidden": {
@@ -8030,7 +8030,7 @@
             }
           ],
           "default": null,
-          "description": "An explicit list of authentication protocol identifiers (e.g., 'oauth2:github', 'mtls:internal') the orchestrator must negotiate before allocating compute.",
+          "description": "An explicit array of authentication protocol identifiers (e.g., 'oauth2:github', 'mtls:internal') the orchestrator must negotiate before allocating compute.",
           "title": "Auth Requirements"
         }
       },
@@ -8462,7 +8462,7 @@
           "type": "string"
         },
         "invalidated_node_ids": {
-          "description": "A list of nodes whose operational histories are causally tainted and must be flushed.",
+          "description": "The strict array of nodes whose operational histories are causally tainted and must be flushed.",
           "items": {
             "type": "string"
           },
@@ -8646,7 +8646,7 @@
           "type": "string"
         },
         "participant_node_ids": {
-          "description": "The strict ordered list of NodeIDs participating in the Secure Multi-Party Computation ring.",
+          "description": "The strict ordered array of NodeIDs participating in the Secure Multi-Party Computation ring.",
           "items": {
             "type": "string"
           },
@@ -8734,7 +8734,7 @@
             }
           ],
           "default": null,
-          "description": "The human-readable semantic concept mapped to this feature (e.g., 'sycophancy', 'truth_retrieval').",
+          "description": "The strictly typed semantic concept mapped to this feature (e.g., 'sycophancy', 'truth_retrieval').",
           "title": "Interpretability Label"
         }
       },
@@ -8916,7 +8916,7 @@
           "type": "string"
         },
         "allowed_vault_keys": {
-          "description": "List of enterprise vault keys the agent is temporarily allowed to access.",
+          "description": "The explicit array of enterprise vault keys the agent is temporarily allowed to access.",
           "items": {
             "type": "string"
           },
@@ -9077,7 +9077,7 @@
           "type": "integer"
         },
         "forbidden_intents": {
-          "description": "A strict list of semantic intents (e.g., 'role_override', 'system_prompt_leak') that trigger immediate quarantine.",
+          "description": "A strict array of semantic intents (e.g., 'role_override', 'system_prompt_leak') that trigger immediate quarantine.",
           "items": {
             "type": "string"
           },
@@ -9175,7 +9175,7 @@
             }
           ],
           "default": null,
-          "description": "The importance profile used for structural pruning."
+          "description": "The importance profile utilizing structural pruning."
         },
         "fhe_profile": {
           "anyOf": [
@@ -9556,7 +9556,7 @@
           "type": "string"
         },
         "lamport_timestamp": {
-          "description": "Strict scalar logical clock used for deterministic LWW (Last-Writer-Wins) conflict resolution.",
+          "description": "Strict scalar logical clock utilizing deterministic LWW (Last-Writer-Wins) conflict resolution.",
           "minimum": 0,
           "title": "Lamport Timestamp",
           "type": "integer"
@@ -9672,7 +9672,7 @@
           "type": "string"
         },
         "args": {
-          "description": "List of arguments to pass to the command.",
+          "description": "The explicit array of arguments to pass to the command.",
           "items": {
             "type": "string"
           },
@@ -9721,7 +9721,7 @@
             }
           ],
           "default": null,
-          "description": "A list of required tools that must be utilized.",
+          "description": "The strict array of required tools that must be utilized.",
           "title": "Required Tool Usage"
         }
       },
@@ -10045,7 +10045,7 @@
       "description": "A node representing a deterministic system capability.",
       "properties": {
         "description": {
-          "description": "A description of the node's function.",
+          "description": "The semantic boundary defining the objective function or computational perimeter of the execution node.",
           "title": "Description",
           "type": "string"
         },
@@ -10076,7 +10076,7 @@
           "title": "Justification"
         },
         "intervention_policies": {
-          "description": "A declarative list of proactive oversight hooks bound to this node's lifecycle.",
+          "description": "The declarative array of proactive oversight hooks bound to this node's lifecycle.",
           "items": {
             "$ref": "#/$defs/InterventionPolicy"
           },
