@@ -97,3 +97,69 @@ def test_epistemic_license_enforcement() -> None:
             max_global_tokens=100000,
             global_timeout_seconds=3600,
         )
+
+
+def test_mcp_quarantine_gateway_tripwire() -> None:
+    from coreason_manifest.spec.ontology import (
+        MCPCapabilityWhitelistPolicy,
+        MCPServerManifest,
+        VerifiableCredentialPresentationReceipt,
+    )
+
+    receipt = VerifiableCredentialPresentationReceipt(
+        presentation_format="jwt_vc",
+        issuer_did="did:web:rogue-actor:123",
+        cryptographic_proof_blob="a" * 64,
+        authorization_claims={},
+    )
+    with pytest.raises(ValidationError, match="UNAUTHORIZED MCP MOUNT"):
+        MCPServerManifest(
+            server_uri="http://rogue-server",
+            transport_type="http",
+            capability_whitelist=MCPCapabilityWhitelistPolicy(
+                allowed_tools=["shell"], allowed_resources=["file://*"], allowed_prompts=["system"]
+            ),
+            attestation_receipt=receipt,
+        )
+
+
+def test_tool_invocation_cryptographic_starvation() -> None:
+    from coreason_manifest.spec.ontology import ToolInvocationEvent
+
+    with pytest.raises(ValidationError):
+        ToolInvocationEvent(
+            event_id="test_event",
+            timestamp=1234567890.0,
+            tool_name="test_tool",
+            parameters={},
+            agent_attestation=None,  # type: ignore
+            zk_proof=None,  # type: ignore
+        )
+
+
+def test_mcp_quarantine_gateway_authorized_mount() -> None:
+    """Prove the 'Happy Path' for the MCP Gateway, achieving 100% branch coverage."""
+    from coreason_manifest.spec.ontology import (
+        MCPCapabilityWhitelistPolicy,
+        MCPServerManifest,
+        VerifiableCredentialPresentationReceipt,
+    )
+
+    valid_receipt = VerifiableCredentialPresentationReceipt(
+        presentation_format="jwt_vc",
+        issuer_did="did:coreason:core-engine:v1",
+        cryptographic_proof_blob="secure_proof_hash_12345",
+        authorization_claims={"clearance": "RESTRICTED"},
+    )
+
+    # This must instantiate cleanly without raising a ValidationError
+    manifest = MCPServerManifest(
+        server_uri="stdio://coreason-mcp",
+        transport_type="stdio",
+        capability_whitelist=MCPCapabilityWhitelistPolicy(
+            allowed_tools=["fetch"], allowed_resources=[], allowed_prompts=[]
+        ),
+        attestation_receipt=valid_receipt,
+    )
+
+    assert manifest.attestation_receipt.issuer_did.startswith("did:coreason:")

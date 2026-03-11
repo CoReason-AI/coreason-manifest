@@ -2770,6 +2770,17 @@ class MCPServerManifest(CoreasonBaseState):
     capability_whitelist: MCPCapabilityWhitelistPolicy = Field(
         description="The strict capability bounds enforced by the orchestrator prior to connection."
     )
+    attestation_receipt: VerifiableCredentialPresentationReceipt
+
+    @model_validator(mode="after")
+    def enforce_coreason_did_authority(self) -> Self:
+        if not self.attestation_receipt.issuer_did.startswith("did:coreason:"):
+            raise ValueError(
+                "UNAUTHORIZED MCP MOUNT: The presented Verifiable Credential is not signed by a valid "
+                "CoReason issuer DID. The orchestrator MUST immediately emit a QuarantineIntent and "
+                "terminate the handshake."
+            )
+        return self
 
 
 class ActionSpaceManifest(CoreasonBaseState):
@@ -3988,6 +3999,10 @@ class ToolInvocationEvent(BaseStateEvent):
     parameters: dict[str, Any] = Field(description="The intended JSON-RPC payload.")
     authorized_budget_magnitude: int | None = Field(
         default=None, ge=0, description="The maximum escrow unlocked for this specific run."
+    )
+    agent_attestation: AgentAttestationReceipt
+    zk_proof: ZeroKnowledgeReceipt = Field(
+        description="""AGENT INSTRUCTION: The strict mathematical proof that the agent was authorized by the CoReason execution engine to evaluate this tool. Stripping this field violates the Zero-Trust execution boundary."""  # noqa: E501
     )
 
 
