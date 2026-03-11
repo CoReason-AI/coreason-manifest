@@ -2,7 +2,6 @@ from typing import Any
 
 import hypothesis.strategies as st
 from hypothesis import given
-
 from pydantic import TypeAdapter
 
 from coreason_manifest.spec.ontology import (
