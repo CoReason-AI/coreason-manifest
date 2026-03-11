@@ -912,8 +912,7 @@
           "drafting": "#/$defs/DraftingIntent",
           "escalation": "#/$defs/EscalationIntent",
           "forced_adjudication": "#/$defs/AdjudicationIntent",
-          "informational": "#/$defs/InformationalIntent",
-          "semantic_discovery": "#/$defs/SemanticDiscoveryIntent"
+          "informational": "#/$defs/InformationalIntent"
         },
         "propertyName": "type"
       },
@@ -929,9 +928,6 @@
         },
         {
           "$ref": "#/$defs/EscalationIntent"
-        },
-        {
-          "$ref": "#/$defs/SemanticDiscoveryIntent"
         }
       ]
     },

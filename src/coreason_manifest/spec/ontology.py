@@ -2433,11 +2433,10 @@ class InformationalIntent(CoreasonBaseState):
 
 
 type AnyPresentationIntent = Annotated[
-    InformationalIntent | DraftingIntent | AdjudicationIntent | EscalationIntent | SemanticDiscoveryIntent,
-    Field(discriminator="type"),
+    InformationalIntent | DraftingIntent | AdjudicationIntent | EscalationIntent, Field(discriminator="type")
 ]
 
-type AnyIntent = AnyPresentationIntent
+type AnyIntent = AnyPresentationIntent | SemanticDiscoveryIntent
 
 
 class InputMappingContract(CoreasonBaseState):
@@ -3267,13 +3266,12 @@ class EpistemicSOPManifest(CoreasonBaseState):
     structural_grammar_hashes: dict[str, str] = Field(
         description="Dictionary mapping step_ids to SHA-256 hashes of strict Context-Free Grammars or JSON Schemas."
     )
-    chronological_flow_edges: list[tuple[str, str]] = Field(
-        description="The exact topological flow between step_ids."
-    )
+    chronological_flow_edges: list[tuple[str, str]] = Field(description="The exact topological flow between step_ids.")
     # Note: chronological_flow_edges is a structurally ordered sequence (Topological Flow) and MUST NOT be sorted.
     prm_evaluations: list["ProcessRewardContract"] = Field(
         description="The strict array of Process Reward Contracts evaluating the logic."
     )
+    # Note: prm_evaluations is a structurally ordered sequence (Evaluation Sequence) and MUST NOT be sorted.
 
     @model_validator(mode="after")
     def reject_ghost_nodes(self) -> Self:
@@ -4898,3 +4896,4 @@ EvaluatorOptimizerTopologyManifest.model_rebuild()
 DigitalTwinTopologyManifest.model_rebuild()
 AdversarialMarketTopologyManifest.model_rebuild()
 ConsensusFederationTopologyManifest.model_rebuild()
+EpistemicSOPManifest.model_rebuild()
