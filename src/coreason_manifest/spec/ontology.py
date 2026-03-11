@@ -2957,6 +2957,31 @@ class ActionSpaceManifest(CoreasonBaseState):
         return self
 
 
+class ProceduralMetadataManifest(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A Level-1 Epistemic Discovery Surface acting as a
+    progressive disclosure pointer to a massive EpistemicSOPManifest in cold storage.
+    Prevents context window token exhaustion.
+    """
+
+    metadata_id: str = Field(
+        min_length=1, description="A strict cryptographic string identifier for this L1 procedural pointer."
+    )
+    target_sop_id: str = Field(
+        min_length=1,
+        description="The Content Identifier (CID) of the heavy EpistemicSOPManifest resting in cold storage.",
+    )
+    trigger_description: str = Field(
+        description="The mathematically bounded semantic projection defining when the router must trigger this SOP."
+    )
+    latent_vector_coordinate: VectorEmbeddingState | None = Field(
+        default=None,
+        description=(
+            "Optional dense-vector geometry for zero-shot semantic routing without LLM forward-pass evaluation."
+        ),
+    )
+
+
 class OntologicalSurfaceProjectionManifest(CoreasonBaseState):
     """
     A mathematically bounded, declarative subgraph of all ToolManifests and
@@ -2972,6 +2997,9 @@ class OntologicalSurfaceProjectionManifest(CoreasonBaseState):
     supported_personas: list[ProfileIdentifierState] = Field(
         default_factory=list, description="The strict array of foundational model personas available."
     )
+    available_procedural_manifolds: list[ProceduralMetadataManifest] = Field(
+        default_factory=list, description="The lightweight progressive disclosure tier for procedural skills."
+    )
 
     @model_validator(mode="after")
     def verify_unique_action_spaces(self) -> Self:
@@ -2980,6 +3008,11 @@ class OntologicalSurfaceProjectionManifest(CoreasonBaseState):
             raise ValueError("Action spaces within a projection must have strictly unique action_space_ids.")
         object.__setattr__(self, "action_spaces", sorted(self.action_spaces, key=lambda x: x.action_space_id))
         object.__setattr__(self, "supported_personas", sorted(self.supported_personas))
+        object.__setattr__(
+            self,
+            "available_procedural_manifolds",
+            sorted(self.available_procedural_manifolds, key=lambda x: x.metadata_id),
+        )
         return self
 
 

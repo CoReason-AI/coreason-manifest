@@ -209,3 +209,17 @@ def test_semantic_slicing_epistemic_bounds() -> None:
         InformationClassificationProfile.PUBLIC,
         InformationClassificationProfile.RESTRICTED,
     ]
+
+
+def test_procedural_manifold_deterministic_sort() -> None:
+    """Prove that OntologicalSurfaceProjectionManifest deterministically sorts available_procedural_manifolds."""
+    from coreason_manifest.spec.ontology import OntologicalSurfaceProjectionManifest, ProceduralMetadataManifest
+
+    m1 = ProceduralMetadataManifest(metadata_id="zeta_01", target_sop_id="sop_1", trigger_description="Zeta SOP")
+    m2 = ProceduralMetadataManifest(metadata_id="alpha_02", target_sop_id="sop_2", trigger_description="Alpha SOP")
+
+    projection = OntologicalSurfaceProjectionManifest(projection_id="proj_1", available_procedural_manifolds=[m1, m2])
+
+    # Assert the array was mathematically sorted by metadata_id
+    assert projection.available_procedural_manifolds[0].metadata_id == "alpha_02"
+    assert projection.available_procedural_manifolds[1].metadata_id == "zeta_01"

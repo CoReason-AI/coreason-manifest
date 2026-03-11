@@ -213,6 +213,7 @@ __all__ = [
     "PredictionMarketPolicy",
     "PredictionMarketState",
     "PresentationManifest",
+    "ProceduralMetadataManifest",
     "ProcessRewardContract",
     "ProfileIdentifierState",
     "QoSClassificationProfile",
