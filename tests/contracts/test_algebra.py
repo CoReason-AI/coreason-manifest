@@ -130,17 +130,17 @@ def test_calculate_latent_alignment_mismatch_rejection() -> None:
     v1 = VectorEmbeddingState(
         vector_base64=base64.b64encode(struct.pack("<2f", 1.0, 0.0)).decode("utf-8"),
         dimensionality=2,
-        model_name="model-a"
+        model_name="model-a",
     )
     v2 = VectorEmbeddingState(
         vector_base64=base64.b64encode(struct.pack("<2f", 0.0, 1.0)).decode("utf-8"),
         dimensionality=2,
-        model_name="model-b"
+        model_name="model-b",
     )
     v3 = VectorEmbeddingState(
         vector_base64=base64.b64encode(struct.pack("<3f", 1.0, 0.0, 0.0)).decode("utf-8"),
         dimensionality=3,
-        model_name="model-a"
+        model_name="model-a",
     )
 
     policy = OntologicalAlignmentPolicy(min_cosine_similarity=0.0, require_isometry_proof=False)
@@ -156,12 +156,12 @@ def test_calculate_latent_alignment_cosine_math() -> None:
     v1 = VectorEmbeddingState(
         vector_base64=base64.b64encode(struct.pack("<2f", 1.0, 0.0)).decode("utf-8"),
         dimensionality=2,
-        model_name="model-a"
+        model_name="model-a",
     )
     v2 = VectorEmbeddingState(
         vector_base64=base64.b64encode(struct.pack("<2f", 0.0, 1.0)).decode("utf-8"),
         dimensionality=2,
-        model_name="model-a"
+        model_name="model-a",
     )
 
     policy = OntologicalAlignmentPolicy(min_cosine_similarity=0.0, require_isometry_proof=False)
