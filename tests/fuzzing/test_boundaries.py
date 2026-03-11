@@ -13,10 +13,12 @@ from coreason_manifest.spec.ontology import (
     DynamicLayoutManifest,
     EpistemicCompressionSLA,
     EpistemicTransmutationTask,
+    ExecutionNodeReceipt,
     GlobalGovernancePolicy,
     InformationClassificationProfile,
     InsightCardProfile,
     SemanticSlicingPolicy,
+    StateHydrationManifest,
 )
 
 
@@ -307,4 +309,32 @@ def test_federated_peft_contract_bounds(merkle_root: str, vram: int, ttl: int, p
             vram_footprint_bytes=1000,
             ephemeral_ttl_ms=1000,
             cache_priority_weight=priority,
+        )
+
+
+@given(st.recursive(st.dictionaries(st.text(), st.text()), lambda c: st.dictionaries(st.text(), c), max_leaves=1))
+@settings(max_examples=50, suppress_health_check=[HealthCheck.too_slow])
+def test_execution_node_receipt_recursive_payload(params: dict[str, Any]) -> None:  # noqa: ARG001
+    """Prove that ExecutionNodeReceipt rejects deeply nested payloads on inputs > 10 depth."""
+
+    def build_deep_dict(depth: int) -> dict[str, Any]:
+        d: dict[str, Any] = {"base": "val"}
+        for _ in range(depth):
+            d = {"nested": d}
+        return d
+
+    deep_payload = build_deep_dict(11)
+    with pytest.raises(ValidationError):
+        ExecutionNodeReceipt(request_id="test_id", inputs=deep_payload, outputs={"valid": "output"})
+
+
+def test_state_hydration_manifest_long_string_quarantine() -> None:
+    """Prove that StateHydrationManifest immediately collapses instantiation and raises ValidationError for > 10k strings."""  # noqa: E501
+    long_string = "a" * 10001
+    with pytest.raises(ValidationError):
+        StateHydrationManifest(
+            epistemic_coordinate="test_session",
+            crystallized_ledger_cids=["a" * 64],
+            working_memory_variables={"large_payload": long_string},
+            max_retained_tokens=4096,
         )
