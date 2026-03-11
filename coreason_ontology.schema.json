@@ -2616,6 +2616,63 @@
       "title": "ConstitutionalPolicy",
       "type": "object"
     },
+    "ContextExpansionPolicy": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "expansion_paradigm": {
+          "description": "The mathematical paradigm governing how context is expanded.",
+          "enum": [
+            "sliding_window",
+            "hierarchical_merge",
+            "document_summary"
+          ],
+          "title": "Expansion Paradigm",
+          "type": "string"
+        },
+        "max_token_budget": {
+          "description": "The maximum physical token allowance for expansion.",
+          "exclusiveMinimum": 0,
+          "title": "Max Token Budget",
+          "type": "integer"
+        },
+        "surrounding_sentences_k": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The strict temporal window of surrounding sentences.",
+          "title": "Surrounding Sentences K"
+        },
+        "parent_merge_threshold": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The geometric cosine similarity threshold required to merge parent nodes.",
+          "title": "Parent Merge Threshold"
+        }
+      },
+      "required": [
+        "expansion_paradigm",
+        "max_token_budget"
+      ],
+      "title": "ContextExpansionPolicy",
+      "type": "object"
+    },
     "ContinuousMutationPolicy": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology",
@@ -6698,6 +6755,67 @@
         "schema_evolution_mode"
       ],
       "title": "LakehouseMountProfile",
+      "type": "object"
+    },
+    "LatentProjectionIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "type": {
+          "const": "latent_projection",
+          "default": "latent_projection",
+          "description": "Discriminator for RAG projection intent.",
+          "title": "Type",
+          "type": "string"
+        },
+        "synthetic_target_vector": {
+          "$ref": "#/$defs/VectorEmbeddingState",
+          "description": "The strictly typed embedding tensor directing the query."
+        },
+        "top_k_candidates": {
+          "description": "The maximum number of nodes to extract from the index.",
+          "exclusiveMinimum": 0,
+          "title": "Top K Candidates",
+          "type": "integer"
+        },
+        "min_isometry_score": {
+          "description": "The minimum cosine similarity bounds for accepting a vector match.",
+          "maximum": 1.0,
+          "minimum": -1.0,
+          "title": "Min Isometry Score",
+          "type": "number"
+        },
+        "topological_bounds": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TopologicalRetrievalContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The explicit graph traversal contract."
+        },
+        "context_expansion": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ContextExpansionPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The structural rules governing context hydration."
+        }
+      },
+      "required": [
+        "synthetic_target_vector",
+        "top_k_candidates",
+        "min_isometry_score"
+      ],
+      "title": "LatentProjectionIntent",
       "type": "object"
     },
     "LatentScratchpadReceipt": {
@@ -11320,6 +11438,45 @@
         "permissions"
       ],
       "title": "ToolManifest",
+      "type": "object"
+    },
+    "TopologicalRetrievalContract": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "max_hop_depth": {
+          "description": "The strictly typed search depth bound for the cDAG.",
+          "minimum": 1,
+          "title": "Max Hop Depth",
+          "type": "integer"
+        },
+        "allowed_causal_relationships": {
+          "description": "The explicit whitelist of permissible causal edges to traverse.",
+          "items": {
+            "enum": [
+              "causes",
+              "confounds",
+              "correlates_with",
+              "undirected"
+            ],
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Allowed Causal Relationships",
+          "type": "array"
+        },
+        "enforce_isometry": {
+          "default": true,
+          "description": "Enforces preservation of geometric distances.",
+          "title": "Enforce Isometry",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "max_hop_depth",
+        "allowed_causal_relationships"
+      ],
+      "title": "TopologicalRetrievalContract",
       "type": "object"
     },
     "TopologyHashReceipt": {
