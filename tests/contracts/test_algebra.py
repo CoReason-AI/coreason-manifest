@@ -103,6 +103,17 @@ def test_project_manifest_to_markdown() -> None:
             "extracted_by": "did:web:agent-1",
             "source_event_id": "bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi",
         },
+        "governance": {
+            "mandatory_license_rule": {
+                "rule_id": "PPL_3_0_COMPLIANCE",
+                "severity": "critical",
+                "description": "Ensure Prosperity Public License 3.0 Compliance.",
+                "forbidden_intents": [],
+            },
+            "max_budget_magnitude": 1000,
+            "max_global_tokens": 100000,
+            "global_timeout_seconds": 3600,
+        },
         "topology": {
             "type": "dag",
             "max_depth": 10,
