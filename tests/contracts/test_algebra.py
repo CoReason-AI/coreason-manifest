@@ -7,13 +7,16 @@ from pydantic import BaseModel, Field, TypeAdapter, ValidationError
 from coreason_manifest.spec.ontology import (
     DAGTopologyManifest,
     DynamicRoutingManifest,
+    EpistemicLedgerState,
     OntologicalAlignmentPolicy,
+    TokenBurnReceipt,
     VectorEmbeddingState,
     WorkflowManifest,
 )
 from coreason_manifest.utils.algebra import (
     align_semantic_manifolds,
     calculate_latent_alignment,
+    calculate_remaining_compute,
     compute_topology_hash,
     generate_correction_prompt,
     get_ontology_schema,
@@ -161,6 +164,50 @@ def test_calculate_latent_alignment_mismatch_rejection() -> None:
 
     with pytest.raises(ValueError, match=r"Topological Contradiction: Vector geometries are incommensurable\."):
         calculate_latent_alignment(v1, v3, policy)
+
+
+def test_calculate_remaining_compute_valid() -> None:
+    receipt1 = TokenBurnReceipt(
+        event_id="burn-1",
+        timestamp=100.0,
+        tool_invocation_id="tool-1",
+        input_tokens=5,
+        output_tokens=5,
+        burn_magnitude=10,
+    )
+    receipt2 = TokenBurnReceipt(
+        event_id="burn-2",
+        timestamp=101.0,
+        tool_invocation_id="tool-2",
+        input_tokens=10,
+        output_tokens=10,
+        burn_magnitude=20,
+    )
+    ledger = EpistemicLedgerState(history=[receipt1, receipt2])
+    remaining = calculate_remaining_compute(ledger, initial_escrow_magnitude=50)
+    assert remaining == 20
+
+
+def test_calculate_remaining_compute_exhaustion() -> None:
+    receipt1 = TokenBurnReceipt(
+        event_id="burn-1",
+        timestamp=100.0,
+        tool_invocation_id="tool-1",
+        input_tokens=5,
+        output_tokens=5,
+        burn_magnitude=10,
+    )
+    receipt2 = TokenBurnReceipt(
+        event_id="burn-2",
+        timestamp=101.0,
+        tool_invocation_id="tool-2",
+        input_tokens=10,
+        output_tokens=10,
+        burn_magnitude=20,
+    )
+    ledger = EpistemicLedgerState(history=[receipt1, receipt2])
+    with pytest.raises(ValueError, match="Mathematical Boundary Breached"):
+        calculate_remaining_compute(ledger, initial_escrow_magnitude=25)
 
 
 def test_calculate_latent_alignment_cosine_math() -> None:
