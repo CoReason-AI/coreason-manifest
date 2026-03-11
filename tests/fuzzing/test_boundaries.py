@@ -13,11 +13,30 @@ from coreason_manifest.spec.ontology import (
     DynamicLayoutManifest,
     EpistemicCompressionSLA,
     EpistemicTransmutationTask,
+    ExecutionNodeReceipt,
     GlobalGovernancePolicy,
     InformationClassificationProfile,
     InsightCardProfile,
     SemanticSlicingPolicy,
+    StateHydrationManifest,
 )
+
+
+@given(st.recursive(st.dictionaries(st.text(), st.text()), lambda c: st.dictionaries(st.text(), c), max_leaves=25))
+@settings(max_examples=50, suppress_health_check=[HealthCheck.too_slow])
+def test_execution_node_receipt_depth_attack_proof(params: dict[str, Any]) -> None:
+    """Prove the schema definitively rejects deeply recursive JSON payloads out of bounds."""
+    """AGENT INSTRUCTION: Build a payload that exceeds the maximum depth of 10."""
+    deep_payload = params
+    for _ in range(12):
+        deep_payload = {"key": deep_payload}
+
+    with pytest.raises(ValidationError, match="Payload exceeds maximum recursion depth"):
+        ExecutionNodeReceipt(
+            request_id="req_123",
+            inputs=deep_payload,
+            outputs="ok",
+        )
 
 
 @given(st.recursive(st.dictionaries(st.text(), st.text()), lambda c: st.dictionaries(st.text(), c)))
@@ -29,6 +48,18 @@ def test_jsonrpc_depth_attack_proof(params: dict[str, Any]) -> None:
     payload = {"jsonrpc": "2.0", "method": "test_method", "params": params, "id": 1}
     with contextlib.suppress(ValidationError):
         BoundedJSONRPCIntent.model_validate(payload)
+
+
+def test_state_hydration_manifest_string_length_bound() -> None:
+    """Prove that working_memory_variables with excessively long strings raises a ValidationError."""
+    large_string = "a" * 10001
+    with pytest.raises(ValidationError, match="String exceeds max length"):
+        StateHydrationManifest(
+            epistemic_coordinate="coord_1",
+            crystallized_memory_cids=["a" * 64],
+            working_memory_variables={"key1": large_string},
+            max_retained_tokens=1000,
+        )
 
 
 @pytest.mark.parametrize(
