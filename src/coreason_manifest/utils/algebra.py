@@ -16,6 +16,7 @@ from ..spec.ontology import (
     EpistemicTransmutationTask,
     ExecutionNodeReceipt,
     System2RemediationIntent,
+    TamperFaultEvent,
 )
 
 
@@ -97,8 +98,8 @@ def verify_merkle_proof(trace: list[ExecutionNodeReceipt]) -> bool:
         node_map[node.node_hash] = node
     for node in trace:
         if node.generate_node_hash() != node.node_hash:
-            return False
+            raise TamperFaultEvent(f"Node hash mismatch for request {node.request_id}")
         for parent_hash in node.parent_hashes:
             if parent_hash not in node_map:
-                return False
+                raise TamperFaultEvent(f"Missing parent hash {parent_hash} in trace")
     return True

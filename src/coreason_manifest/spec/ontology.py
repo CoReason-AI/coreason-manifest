@@ -108,6 +108,7 @@ type NodeID = Annotated[
 
 type OptimizationDirection = Literal["maximize", "minimize"]
 
+# Note: External Protocol Exemption. "remove" is permitted here to satisfy RFC 6902 JSON Patch.
 type PatchOperation = Literal["add", "remove", "replace", "copy", "move", "test"]
 
 type ProfileID = Annotated[
@@ -636,9 +637,14 @@ class ConstitutionalPolicy(CoreasonBaseModel):
     severity: Literal["low", "medium", "high", "critical"] = Field(
         description="Severity level if the rule is violated."
     )
-    forbidden_intents: set[Annotated[str, StringConstraints(min_length=1)]] = Field(
+    forbidden_intents: list[Annotated[str, StringConstraints(min_length=1)]] = Field(
         description="The explicit, structurally bounded set of forbidden semantic intents."
     )
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "forbidden_intents", sorted(self.forbidden_intents))
+        return self
 
 
 class GradingCriterionProfile(CoreasonBaseModel):
@@ -874,6 +880,7 @@ class MultimodalTokenAnchorState(CoreasonBaseModel):
     bounding_box: tuple[float, float, float, float] | None = Field(
         default=None, description="The strictly typed [x_min, y_min, x_max, y_max] normalized coordinate matrix."
     )
+    # Note: bounding_box is a structurally ordered sequence (Bounding Box Coordinates) and MUST NOT be sorted.
     block_type: Literal["paragraph", "table", "figure", "footnote", "header", "equation"] | None = Field(
         default=None, description="The structural classification of the source region."
     )
@@ -1501,14 +1508,14 @@ class ContinuousMutationPolicy(CoreasonBaseModel):
     mutation_paradigm: Literal["append_only", "merge_on_resolve"] = Field(
         description="Forces non-destructive graph mutations."
     )
-    max_uncommitted_rows: int = Field(gt=0, description="Backpressure threshold before forcing a commit.")
+    max_uncommitted_edges: int = Field(gt=0, description="Backpressure threshold before forcing a commit.")
     micro_batch_interval_ms: int = Field(gt=0, description="Temporal bound for flushing the stream.")
 
     @model_validator(mode="after")
     def enforce_append_only_vram_bound(self) -> Self:
         """Mathematically prevent Out-Of-Memory (OOM) crashes by strictly bounding the buffer."""
-        if self.mutation_paradigm == "append_only" and self.max_uncommitted_rows > 10000:
-            raise ValueError("max_uncommitted_rows must be <= 10000 for append_only paradigm to prevent OOM crashes.")
+        if self.mutation_paradigm == "append_only" and self.max_uncommitted_edges > 10000:
+            raise ValueError("max_uncommitted_edges must be <= 10000 for append_only paradigm to prevent OOM crashes.")
         return self
 
 
@@ -1635,6 +1642,7 @@ class DistributionProfile(CoreasonBaseModel):
     mean: float | None = Field(default=None, description="The expected value (mu) of the distribution.")
     variance: float | None = Field(default=None, description="The mathematical variance (sigma squared).")
     confidence_interval_95: tuple[float, float] | None = Field(default=None, description="The 95% probability bounds.")
+    # Note: confidence_interval_95 is a structurally ordered sequence (Confidence Interval) and MUST NOT be sorted.
 
     @model_validator(mode="after")
     def validate_confidence_interval(self) -> Any:
@@ -2307,7 +2315,7 @@ class GraphFlatteningPolicy(CoreasonBaseModel):
     node_projection_mode: Literal["wide_columnar", "struct_array"] = Field(
         description="How to flatten SemanticNodeState."
     )
-    edge_projection_mode: Literal["adjacency_list", "map_array"] = Field(
+    edge_projection_mode: Literal["adjacency_matrix", "map_array"] = Field(
         description="How to flatten SemanticEdgeState."
     )
     preserve_cryptographic_lineage: bool = Field(
@@ -2467,7 +2475,7 @@ class JSONRPCErrorState(CoreasonBaseModel):
     message: str = Field(..., description="A String providing a short description of the error.")
     error_payload: Any | None = Field(
         default=None,
-        alias="data",
+        alias="data",  # Note: External Protocol Exemption. Required by JSON-RPC 2.0 spec.
         description="A Primitive or Structured value that contains additional information about the error.",
     )
 
@@ -2945,6 +2953,7 @@ class NDimensionalTensorManifest(CoreasonBaseModel):
 
     dtype: TensorDType = Field(..., description="Structural type of the tensor elements.")
     shape: tuple[int, ...] = Field(..., description="N-Dimensional shape tuple.")
+    # Note: shape is a structurally ordered sequence (Tensor Dimensions) and MUST NOT be sorted.
     vram_footprint_bytes: int = Field(..., description="Exact byte size of the uncompressed tensor.")
     merkle_root: str = Field(..., pattern="^[a-fA-F0-9]{64}$", description="SHA-256 Merkle root of the payload chunks.")
     storage_uri: str = Field(..., description="Strict URI pointer to the physical bytes.")
@@ -3675,7 +3684,7 @@ class TabularMatrixExtractionState(CoreasonBaseModel):
         return self
 
 
-class TamperError(ValueError):
+class TamperFaultEvent(ValueError):  # noqa: N818
     """Raised when an execution trace has been tampered with or is topologically invalid."""
 
 
