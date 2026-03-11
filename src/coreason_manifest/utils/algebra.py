@@ -293,13 +293,15 @@ def verify_ast_safety(payload: str) -> bool:
     """
     Mechanistically sandboxes dynamically generated strings by compiling them into an AST
     and rigorously walking the graph to ensure no kinetic execution bleed occurs.
+
+    AGENT INSTRUCTION: The `base_allowlist` mathematically defines a strict Default-Deny
+    node perimeter. Any AST node not explicitly projected within this matrix is quarantined.
     """
     try:
         tree = ast.parse(payload, mode="eval")
     except SyntaxError as e:
         raise ValueError("Payload is not valid syntax.") from e
 
-    # Default-Deny node allowlist
     base_allowlist = [
         ast.Expression,
         ast.Constant,
