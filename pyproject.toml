@@ -21,12 +21,6 @@ dependencies = [
     "pydantic>=2.12.5",
 ]
 
-[project.scripts]
-coreason-validate = "coreason_manifest.cli.validate:main"
-coreason-export = "coreason_manifest.cli.export:main"
-coreason-visualize = "coreason_manifest.cli.visualize:main"
-coreason-card = "coreason_manifest.cli.card:main"
-
 [project.urls]
 Homepage = "https://github.com/CoReason-AI/coreason_manifest"
 Repository = "https://github.com/CoReason-AI/coreason_manifest"
