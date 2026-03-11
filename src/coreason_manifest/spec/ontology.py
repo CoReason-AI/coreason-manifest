@@ -2436,7 +2436,10 @@ type AnyPresentationIntent = Annotated[
     InformationalIntent | DraftingIntent | AdjudicationIntent | EscalationIntent, Field(discriminator="type")
 ]
 
-type AnyIntent = AnyPresentationIntent | SemanticDiscoveryIntent
+type AnyIntent = Annotated[
+    InformationalIntent | DraftingIntent | AdjudicationIntent | EscalationIntent | SemanticDiscoveryIntent,
+    Field(discriminator="type"),
+]
 
 
 class InputMappingContract(CoreasonBaseState):
