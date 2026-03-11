@@ -2294,7 +2294,9 @@ class TokenBurnReceipt(BaseStateEvent):
     )
     input_tokens: int = Field(ge=0, description="The mathematical measure of input tokens consumed.")
     output_tokens: int = Field(ge=0, description="The mathematical measure of output tokens generated.")
-    burn_magnitude: int = Field(ge=0, description="The normalized economic cost magnitude representing thermodynamic burn.")
+    burn_magnitude: int = Field(
+        ge=0, description="The normalized economic cost magnitude representing thermodynamic burn."
+    )
 
 
 class GlobalGovernancePolicy(CoreasonBaseState):

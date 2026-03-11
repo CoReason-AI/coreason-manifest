@@ -937,6 +937,7 @@
         "mapping": {
           "barge_in": "#/$defs/BargeInInterruptEvent",
           "belief_mutation": "#/$defs/BeliefMutationEvent",
+          "budget_exhaustion": "#/$defs/BudgetExhaustionEvent",
           "counterfactual_regret": "#/$defs/CounterfactualRegretEvent",
           "epistemic_promotion": "#/$defs/EpistemicPromotionEvent",
           "hypothesis": "#/$defs/HypothesisGenerationEvent",
@@ -944,6 +945,7 @@
           "observation": "#/$defs/ObservationEvent",
           "persistence_commit": "#/$defs/PersistenceCommitReceipt",
           "system_fault": "#/$defs/SystemFaultEvent",
+          "token_burn": "#/$defs/TokenBurnReceipt",
           "tool_invocation": "#/$defs/ToolInvocationEvent"
         },
         "propertyName": "type"
@@ -978,6 +980,12 @@
         },
         {
           "$ref": "#/$defs/PersistenceCommitReceipt"
+        },
+        {
+          "$ref": "#/$defs/TokenBurnReceipt"
+        },
+        {
+          "$ref": "#/$defs/BudgetExhaustionEvent"
         }
       ]
     },
@@ -1860,6 +1868,47 @@
         "accessibility_tree_hash"
       ],
       "title": "BrowserDOMState",
+      "type": "object"
+    },
+    "BudgetExhaustionEvent": {
+      "additionalProperties": false,
+      "description": "Mathematical boundary condition representing economic exhaustion.",
+      "properties": {
+        "event_id": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "type": {
+          "const": "budget_exhaustion",
+          "default": "budget_exhaustion",
+          "description": "Discriminator type for a budget exhaustion event.",
+          "title": "Type",
+          "type": "string"
+        },
+        "exhausted_escrow_id": {
+          "description": "A string representing the original escrow boundary breached.",
+          "title": "Exhausted Escrow Id",
+          "type": "string"
+        },
+        "final_burn_receipt_id": {
+          "description": "A string pointing to the exact TokenBurnReceipt CID that pushed the state over the limit.",
+          "title": "Final Burn Receipt Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "event_id",
+        "timestamp",
+        "exhausted_escrow_id",
+        "final_burn_receipt_id"
+      ],
+      "title": "BudgetExhaustionEvent",
       "type": "object"
     },
     "BypassReceipt": {
@@ -3212,6 +3261,54 @@
         "quarantined_event_ids"
       ],
       "title": "DefeasibleCascadeEvent",
+      "type": "object"
+    },
+    "DelegatedCapabilityManifest": {
+      "additionalProperties": false,
+      "description": "Decentralized capability tickets representing authority delegation.",
+      "properties": {
+        "capability_id": {
+          "description": "A string CID for the delegated capability.",
+          "title": "Capability Id",
+          "type": "string"
+        },
+        "principal_did": {
+          "$ref": "#/$defs/NodeIdentifierState",
+          "description": "The DID representing the human or parent delegating authority."
+        },
+        "delegate_agent_did": {
+          "$ref": "#/$defs/NodeIdentifierState",
+          "description": "The DID representing the autonomous actor receiving authority."
+        },
+        "allowed_tool_ids": {
+          "description": "The strictly bounded set of ToolIdentifiers this delegation permits.",
+          "items": {
+            "$ref": "#/$defs/ToolIdentifierState"
+          },
+          "title": "Allowed Tool Ids",
+          "type": "array"
+        },
+        "expiration_timestamp": {
+          "description": "A float bounding the temporal lifecycle.",
+          "title": "Expiration Timestamp",
+          "type": "number"
+        },
+        "cryptographic_signature": {
+          "description": "A base64 string proving the cryptographic delegation.",
+          "maxLength": 10000,
+          "title": "Cryptographic Signature",
+          "type": "string"
+        }
+      },
+      "required": [
+        "capability_id",
+        "principal_did",
+        "delegate_agent_did",
+        "allowed_tool_ids",
+        "expiration_timestamp",
+        "cryptographic_signature"
+      ],
+      "title": "DelegatedCapabilityManifest",
       "type": "object"
     },
     "DigitalTwinTopologyManifest": {
@@ -10761,6 +10858,73 @@
         "highest_confidence",
         "random"
       ],
+      "type": "string"
+    },
+    "TokenBurnReceipt": {
+      "additionalProperties": false,
+      "description": "Lock-free thermodynamic compute tracking receipt.",
+      "properties": {
+        "event_id": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "type": {
+          "const": "token_burn",
+          "default": "token_burn",
+          "description": "Discriminator type for a token burn receipt.",
+          "title": "Type",
+          "type": "string"
+        },
+        "tool_invocation_id": {
+          "description": "A string linking this burn back to the specific ToolInvocationEvent CID.",
+          "title": "Tool Invocation Id",
+          "type": "string"
+        },
+        "input_tokens": {
+          "description": "The mathematical measure of input tokens consumed.",
+          "minimum": 0,
+          "title": "Input Tokens",
+          "type": "integer"
+        },
+        "output_tokens": {
+          "description": "The mathematical measure of output tokens generated.",
+          "minimum": 0,
+          "title": "Output Tokens",
+          "type": "integer"
+        },
+        "burn_magnitude": {
+          "description": "The normalized economic cost magnitude representing thermodynamic burn.",
+          "minimum": 0,
+          "title": "Burn Magnitude",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "event_id",
+        "timestamp",
+        "tool_invocation_id",
+        "input_tokens",
+        "output_tokens",
+        "burn_magnitude"
+      ],
+      "title": "TokenBurnReceipt",
+      "type": "object"
+    },
+    "ToolIdentifierState": {
+      "description": "A cryptographically deterministic capability pointer binding the agent to a verifiable spatial environment.",
+      "examples": [
+        "calculator",
+        "web_search"
+      ],
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[a-zA-Z0-9_-]+$",
       "type": "string"
     },
     "ToolInvocationEvent": {
