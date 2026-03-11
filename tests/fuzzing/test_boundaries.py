@@ -163,3 +163,19 @@ def test_mcp_quarantine_gateway_authorized_mount() -> None:
     )
 
     assert manifest.attestation_receipt.issuer_did.startswith("did:coreason:")
+
+
+def test_kinetic_separation_canonical_sort() -> None:
+    """Prove that the 2D cluster matrix deterministically collapses to a stable hash state."""
+    from coreason_manifest.spec.ontology import KineticSeparationPolicy
+
+    chaotic_clusters = [["mcp://server-b", "mcp://server-a"], ["tool-z", "tool-x", "tool-y"]]
+
+    policy = KineticSeparationPolicy(
+        policy_id="test_bipartite_01",
+        mutually_exclusive_clusters=chaotic_clusters,
+        enforcement_action="halt_and_quarantine",
+    )
+
+    # Assert inner lists are sorted, then outer list is sorted by the first element of inner lists
+    assert policy.mutually_exclusive_clusters == [["mcp://server-a", "mcp://server-b"], ["tool-x", "tool-y", "tool-z"]]
