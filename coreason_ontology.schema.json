@@ -373,45 +373,6 @@
       "title": "AdversarialSimulationProfile",
       "type": "object"
     },
-    "AffineTransformMatrixProfile": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology",
-      "properties": {
-        "pixel_min": {
-          "description": "The absolute minimal visual coordinate on this axis.",
-          "title": "Pixel Min",
-          "type": "number"
-        },
-        "pixel_max": {
-          "description": "The absolute maximal visual coordinate on this axis.",
-          "title": "Pixel Max",
-          "type": "number"
-        },
-        "domain_min": {
-          "description": "The semantic/data value corresponding to pixel_min.",
-          "title": "Domain Min",
-          "type": "number"
-        },
-        "domain_max": {
-          "description": "The semantic/data value corresponding to pixel_max.",
-          "title": "Domain Max",
-          "type": "number"
-        },
-        "scale_type": {
-          "$ref": "#/$defs/ChartAxisScaleProfile",
-          "description": "The mathematical progression between min and max."
-        }
-      },
-      "required": [
-        "pixel_min",
-        "pixel_max",
-        "domain_min",
-        "domain_max",
-        "scale_type"
-      ],
-      "title": "AffineTransformMatrixProfile",
-      "type": "object"
-    },
     "AgentAttestationReceipt": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nCryptographic identity passport and AI-BOM for the agent.",
@@ -2087,15 +2048,6 @@
       ],
       "title": "ChaosExperimentTask",
       "type": "object"
-    },
-    "ChartAxisScaleProfile": {
-      "enum": [
-        "linear",
-        "log",
-        "categorical",
-        "datetime"
-      ],
-      "type": "string"
     },
     "CircuitBreakerEvent": {
       "additionalProperties": false,
@@ -6970,44 +6922,6 @@
       "title": "KineticSeparationPolicy",
       "type": "object"
     },
-    "LakehouseMountProfile": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology",
-      "properties": {
-        "catalog_uri": {
-          "description": "The stateless endpoint of the catalog (e.g., Polaris, Nessie).",
-          "minLength": 1,
-          "title": "Catalog Uri",
-          "type": "string"
-        },
-        "table_format": {
-          "description": "Strict boundary for the destination format.",
-          "enum": [
-            "iceberg",
-            "delta",
-            "hudi"
-          ],
-          "title": "Table Format",
-          "type": "string"
-        },
-        "schema_evolution_mode": {
-          "description": "Dictates if the agent can evolve the schema.",
-          "enum": [
-            "strict",
-            "additive_only"
-          ],
-          "title": "Schema Evolution Mode",
-          "type": "string"
-        }
-      },
-      "required": [
-        "catalog_uri",
-        "table_format",
-        "schema_evolution_mode"
-      ],
-      "title": "LakehouseMountProfile",
-      "type": "object"
-    },
     "LatentProjectionIntent": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology",
@@ -7710,48 +7624,6 @@
         "payout_distribution"
       ],
       "title": "MarketResolutionState",
-      "type": "object"
-    },
-    "MathematicalNotationExtractionState": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology",
-      "properties": {
-        "math_type": {
-          "description": "The structural context of the equation.",
-          "enum": [
-            "inline",
-            "display"
-          ],
-          "title": "Math Type",
-          "type": "string"
-        },
-        "syntax": {
-          "description": "The strict symbolic compilation language.",
-          "enum": [
-            "latex",
-            "mathml"
-          ],
-          "title": "Syntax",
-          "type": "string"
-        },
-        "expression": {
-          "description": "The raw, unescaped mathematical syntax string.",
-          "minLength": 1,
-          "title": "Expression",
-          "type": "string"
-        },
-        "anchor": {
-          "$ref": "#/$defs/MultimodalTokenAnchorState",
-          "description": "The strict visual and token coordinate bindings. Cannot be None."
-        }
-      },
-      "required": [
-        "math_type",
-        "syntax",
-        "expression",
-        "anchor"
-      ],
-      "title": "MathematicalNotationExtractionState",
       "type": "object"
     },
     "MechanisticAuditContract": {
@@ -10579,44 +10451,6 @@
       "title": "StateMutationIntent",
       "type": "object"
     },
-    "StatisticalChartExtractionState": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology",
-      "properties": {
-        "axes": {
-          "additionalProperties": {
-            "$ref": "#/$defs/AffineTransformMatrixProfile"
-          },
-          "description": "Named axes (e.g., 'x', 'y') defining the affine transformation boundaries.",
-          "title": "Axes",
-          "type": "object"
-        },
-        "semantic_series": {
-          "description": "The discrete semantic tuples extracted from the chart markers.",
-          "items": {
-            "additionalProperties": {
-              "anyOf": [
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "string"
-                }
-              ]
-            },
-            "type": "object"
-          },
-          "title": "Semantic Series",
-          "type": "array"
-        }
-      },
-      "required": [
-        "axes",
-        "semantic_series"
-      ],
-      "title": "StatisticalChartExtractionState",
-      "type": "object"
-    },
     "StdioTransportProfile": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nConfiguration for local Stdio-based MCP transport.",
@@ -10730,13 +10564,6 @@
         "causal_edges"
       ],
       "title": "StructuralCausalModelProfile",
-      "type": "object"
-    },
-    "SuspenseState": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nIndicates that the swarm is waiting on a long-running process or human input.",
-      "properties": {},
-      "title": "SuspenseState",
       "type": "object"
     },
     "SwarmTopologyManifest": {
@@ -11086,74 +10913,6 @@
         "description"
       ],
       "title": "SystemNodeProfile",
-      "type": "object"
-    },
-    "TabularCellState": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology",
-      "properties": {
-        "row_index": {
-          "description": "The zero-indexed absolute matrix row.",
-          "minimum": 0,
-          "title": "Row Index",
-          "type": "integer"
-        },
-        "col_index": {
-          "description": "The zero-indexed absolute matrix column.",
-          "minimum": 0,
-          "title": "Col Index",
-          "type": "integer"
-        },
-        "row_span": {
-          "default": 1,
-          "description": "The vertical height of the cell.",
-          "minimum": 1,
-          "title": "Row Span",
-          "type": "integer"
-        },
-        "col_span": {
-          "default": 1,
-          "description": "The horizontal width of the cell.",
-          "minimum": 1,
-          "title": "Col Span",
-          "type": "integer"
-        },
-        "content": {
-          "description": "The normalized text value.",
-          "title": "Content",
-          "type": "string"
-        },
-        "anchor": {
-          "$ref": "#/$defs/MultimodalTokenAnchorState",
-          "description": "The physical location of the cell within the image or document."
-        }
-      },
-      "required": [
-        "row_index",
-        "col_index",
-        "content",
-        "anchor"
-      ],
-      "title": "TabularCellState",
-      "type": "object"
-    },
-    "TabularMatrixExtractionState": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology",
-      "properties": {
-        "cells": {
-          "description": "The sparse tensor representing all populated cells.",
-          "items": {
-            "$ref": "#/$defs/TabularCellState"
-          },
-          "title": "Cells",
-          "type": "array"
-        }
-      },
-      "required": [
-        "cells"
-      ],
-      "title": "TabularMatrixExtractionState",
       "type": "object"
     },
     "TaskAnnouncementIntent": {
