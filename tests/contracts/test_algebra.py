@@ -99,6 +99,10 @@ def test_project_manifest_to_mermaid() -> None:
 def test_project_manifest_to_markdown() -> None:
     envelope_data = {
         "manifest_version": "1.0.0",
+        "genesis_provenance": {
+            "extracted_by": "did:web:agent-1",
+            "source_event_id": "bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi",
+        },
         "topology": {
             "type": "dag",
             "max_depth": 10,
