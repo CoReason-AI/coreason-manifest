@@ -8,8 +8,8 @@ from pydantic import ValidationError
 from coreason_manifest.spec.ontology import (
     BoundedJSONRPCIntent,
     BrowserDOMState,
-    ContinuousMutationPolicy,
     ConstitutionalPolicy,
+    ContinuousMutationPolicy,
     DynamicLayoutManifest,
     EpistemicCompressionSLA,
     EpistemicTransmutationTask,
@@ -86,7 +86,7 @@ def test_multimodal_grounding_density_alignment(visual_modality: Any) -> None:
 
 
 def test_epistemic_license_enforcement() -> None:
-    """Prove that attempting to instantiate GlobalGovernancePolicy with an invalid mandatory_license_rule triggers a ValidationError."""
+    """Prove that instantiating GlobalGovernancePolicy with invalid mandatory_license_rule triggers ValidationError."""
     invalid_license = ConstitutionalPolicy(
         rule_id="MIT_LICENSE", severity="low", description="test", forbidden_intents=[]
     )
