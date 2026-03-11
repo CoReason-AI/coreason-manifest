@@ -97,3 +97,39 @@ def test_epistemic_license_enforcement() -> None:
             max_global_tokens=100000,
             global_timeout_seconds=3600,
         )
+
+
+
+def test_mcp_quarantine_gateway_tripwire() -> None:
+    from coreason_manifest.spec.ontology import VerifiableCredentialPresentationReceipt, MCPServerManifest, MCPCapabilityWhitelistPolicy
+
+    receipt = VerifiableCredentialPresentationReceipt(
+        presentation_format="jwt_vc",
+        issuer_did="did:web:rogue-actor:123",
+        cryptographic_proof_blob="a"*64,
+        authorization_claims={}
+    )
+    with pytest.raises(ValidationError, match="UNAUTHORIZED MCP MOUNT"):
+        MCPServerManifest(
+            server_uri="http://rogue-server",
+            transport_type="http",
+            capability_whitelist=MCPCapabilityWhitelistPolicy(
+                allowed_tools=["shell"],
+                allowed_resources=["file://*"],
+                allowed_prompts=["system"]
+            ),
+            attestation_receipt=receipt
+        )
+
+def test_tool_invocation_cryptographic_starvation() -> None:
+    from coreason_manifest.spec.ontology import ToolInvocationEvent
+
+    with pytest.raises(ValidationError):
+        ToolInvocationEvent(
+            event_id="test_event",
+            timestamp=1234567890.0,
+            tool_name="test_tool",
+            parameters={},
+            agent_attestation=None, # type: ignore
+            zk_proof=None # type: ignore
+        )
