@@ -4166,7 +4166,7 @@
     },
     "EpistemicLedgerState": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nThe Committed Epistemic Ledger (crystallized truth), completely partitioned from volatile working memory\nor Epistemic Quarantine.",
+      "description": "CoReason Shared Kernel Ontology\n\nThe Committed Epistemic Ledger (crystallized truth), completely partitioned from volatile working context\nor Epistemic Quarantine.",
       "properties": {
         "history": {
           "description": "An append-only, cryptographic ledger of state events. [SITD-Alpha: Non-Monotonic Epistemic Quarantine Isometry]",
@@ -7396,7 +7396,7 @@
     },
     "MCPResourceManifest": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nA collection of Semantic Memory resource URIs provided by a specific MCP server.",
+      "description": "CoReason Shared Kernel Ontology\n\nA collection of Latent State resource URIs provided by a specific MCP server.",
       "properties": {
         "server_id": {
           "description": "The ID of the MCP server providing these resources.",
@@ -9537,14 +9537,14 @@
       "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "baseline_importance": {
-          "description": "The starting importance score of this memory from 0.0 to 1.0.",
+          "description": "The starting importance score of this latent state from 0.0 to 1.0.",
           "maximum": 1.0,
           "minimum": 0.0,
           "title": "Baseline Importance",
           "type": "number"
         },
         "decay_rate": {
-          "description": "The rate at which this memory's relevance decays over time.",
+          "description": "The rate at which this epistemic coordinate's relevance decays over time.",
           "minimum": 0.0,
           "title": "Decay Rate",
           "type": "number"
@@ -9953,7 +9953,7 @@
     },
     "SemanticSlicingPolicy": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A Deterministic Epistemic Firewall that mathematically\nstarves the working memory context of irrelevant or over-classified data\nto prevent attention dilution and enforce zero-trust isolation.",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A Deterministic Epistemic Firewall that mathematically\nstarves the active context partition of irrelevant or over-classified data\nto prevent attention dilution and enforce zero-trust isolation.",
       "properties": {
         "permitted_classification_tiers": {
           "description": "The explicit whitelist of sensitivity bounds allowed into context.",
@@ -9981,7 +9981,7 @@
           "title": "Required Semantic Labels"
         },
         "context_window_token_ceiling": {
-          "description": "The mathematical physical limit of the working memory partition to prevent VRAM exhaustion.",
+          "description": "The mathematical physical limit of the active context partition to prevent VRAM exhaustion.",
           "exclusiveMinimum": 0,
           "title": "Context Window Token Ceiling",
           "type": "integer"
@@ -10394,19 +10394,19 @@
           "title": "Epistemic Coordinate",
           "type": "string"
         },
-        "crystallized_memory_cids": {
+        "crystallized_ledger_cids": {
           "description": "A list of cryptographic pointers to past immutable EpistemicLedgerState blocks.",
           "items": {
             "pattern": "^[a-f0-9]{64}$",
             "type": "string"
           },
-          "title": "Crystallized Memory Cids",
+          "title": "Crystallized Ledger Cids",
           "type": "array"
         },
-        "working_memory_variables": {
+        "working_context_variables": {
           "additionalProperties": true,
           "description": "A strictly typed dictionary for ephemeral context variables injected at runtime.",
-          "title": "Working Memory Variables",
+          "title": "Working Context Variables",
           "type": "object"
         },
         "max_retained_tokens": {
@@ -10418,8 +10418,8 @@
       },
       "required": [
         "epistemic_coordinate",
-        "crystallized_memory_cids",
-        "working_memory_variables",
+        "crystallized_ledger_cids",
+        "working_context_variables",
         "max_retained_tokens"
       ],
       "title": "StateHydrationManifest",

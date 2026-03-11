@@ -562,7 +562,7 @@ class ActivationSteeringContract(CoreasonBaseState):
 class SemanticSlicingPolicy(CoreasonBaseState):
     """
     AGENT INSTRUCTION: A Deterministic Epistemic Firewall that mathematically
-    starves the working memory context of irrelevant or over-classified data
+    starves the active context partition of irrelevant or over-classified data
     to prevent attention dilution and enforce zero-trust isolation.
     """
 
@@ -574,7 +574,7 @@ class SemanticSlicingPolicy(CoreasonBaseState):
         description="The declarative whitelist of strictly typed ontological node labels authorized for context projection.",  # noqa: E501
     )
     context_window_token_ceiling: int = Field(
-        gt=0, description="The mathematical physical limit of the working memory partition to prevent VRAM exhaustion."
+        gt=0, description="The mathematical physical limit of the active context partition to prevent VRAM exhaustion."
     )
 
     @model_validator(mode="after")
@@ -1004,20 +1004,20 @@ class StateHydrationManifest(CoreasonBaseState):
     epistemic_coordinate: str = Field(
         description="A string ID representing the session or specific spatial trace binding."
     )
-    crystallized_memory_cids: list[Annotated[str, StringConstraints(pattern="^[a-f0-9]{64}$")]] = Field(
+    crystallized_ledger_cids: list[Annotated[str, StringConstraints(pattern="^[a-f0-9]{64}$")]] = Field(
         description="A list of cryptographic pointers to past immutable EpistemicLedgerState blocks."
     )
-    working_memory_variables: dict[str, Any] = Field(
+    working_context_variables: dict[str, Any] = Field(
         description="A strictly typed dictionary for ephemeral context variables injected at runtime."
     )
-    # Note: working_memory_variables is deterministically sorted by CoreasonBaseState natively.
+    # Note: working_context_variables is deterministically sorted by CoreasonBaseState natively.
     max_retained_tokens: int = Field(
         gt=0, description="An integer representing the physical limit of the context window."
     )
 
     @model_validator(mode="after")
     def sort_arrays(self) -> Self:
-        object.__setattr__(self, "crystallized_memory_cids", sorted(self.crystallized_memory_cids))
+        object.__setattr__(self, "crystallized_ledger_cids", sorted(self.crystallized_ledger_cids))
         return self
 
 
@@ -3128,7 +3128,7 @@ class MCPPromptReferenceState(CoreasonBaseState):
 
 
 class MCPResourceManifest(CoreasonBaseState):
-    """A collection of Semantic Memory resource URIs provided by a specific MCP server."""
+    """A collection of Latent State resource URIs provided by a specific MCP server."""
 
     server_id: str = Field(..., description="The ID of the MCP server providing these resources.")
     uris: list[str] = Field(
@@ -3666,9 +3666,11 @@ class SSETransportProfile(CoreasonBaseState):
 
 class SalienceProfile(CoreasonBaseState):
     baseline_importance: float = Field(
-        ge=0.0, le=1.0, description="The starting importance score of this memory from 0.0 to 1.0."
+        ge=0.0, le=1.0, description="The starting importance score of this latent state from 0.0 to 1.0."
     )
-    decay_rate: float = Field(ge=0.0, description="The rate at which this memory's relevance decays over time.")
+    decay_rate: float = Field(
+        ge=0.0, description="The rate at which this epistemic coordinate's relevance decays over time."
+    )
 
 
 type ScaleTypeProfile = Literal["linear", "log", "time", "ordinal", "nominal"]
@@ -5203,7 +5205,7 @@ type AnyStateEvent = Annotated[
 
 
 class EpistemicLedgerState(CoreasonBaseState):
-    """The Committed Epistemic Ledger (crystallized truth), completely partitioned from volatile working memory
+    """The Committed Epistemic Ledger (crystallized truth), completely partitioned from volatile working context
     or Epistemic Quarantine."""
 
     history: list[AnyStateEvent] = Field(
