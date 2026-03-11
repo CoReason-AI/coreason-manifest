@@ -1,8 +1,8 @@
 import json
-import sys
 from unittest.mock import MagicMock, patch
 
 import pytest
+
 from scripts.swarm_watchdog import extract_descriptions, main, scan_schema
 
 
@@ -81,22 +81,24 @@ def test_main_file_stolen(mock_open: MagicMock, capsys: pytest.CaptureFixture[st
     stolen_schema = {
         "description": "[SITD-Alpha: Non-Monotonic Epistemic Quarantine Isometry]",
         "prop": {"description": "Topologically Bounded Latent Spaces"},
-        "prop2": {"description": "[SITD-Gamma: Neurosymbolic Substrate Alignment]"}
+        "prop2": {"description": "[SITD-Gamma: Neurosymbolic Substrate Alignment]"},
     }
     mock_file.read.return_value = json.dumps(stolen_schema)
     mock_file.__enter__.return_value = mock_file
     mock_open.return_value = mock_file
 
-    with patch("json.load", return_value=stolen_schema):
-        with pytest.raises(SystemExit) as exc:
-            main()
+    with patch("json.load", return_value=stolen_schema), pytest.raises(SystemExit) as exc:
+        main()
 
     assert exc.value.code == 1
     assert "CRITICAL: PPL 3.0 VIOLATION DETECTED" in capsys.readouterr().out
 
+
 @patch("sys.argv", ["swarm_watchdog.py", "nonexistent.json"])
 @patch("builtins.open", side_effect=FileNotFoundError("No file"))
 def test_main_file_error(mock_open: MagicMock, capsys: pytest.CaptureFixture[str]) -> None:
+    _ = mock_open
+
     with pytest.raises(SystemExit) as exc:
         main()
     assert exc.value.code == 1
