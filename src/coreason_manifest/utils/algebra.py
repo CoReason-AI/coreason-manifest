@@ -214,6 +214,19 @@ def align_semantic_manifolds(
     )
 
 
+def calculate_remaining_compute(ledger: ontology.EpistemicLedgerState, initial_escrow_magnitude: int) -> int:
+    """
+    A pure algebraic functor to reduce the ledger state without global variable locks.
+    """
+    remaining = initial_escrow_magnitude
+    for event in ledger.history:
+        if isinstance(event, ontology.TokenBurnReceipt) or getattr(event, "type", None) == "token_burn":
+            remaining -= getattr(event, "burn_magnitude", 0)
+            if remaining < 0:
+                raise ValueError("Mathematical Boundary Breached: Compute escrow exhausted.")
+    return remaining
+
+
 def calculate_latent_alignment(
     v1: VectorEmbeddingState, v2: VectorEmbeddingState, policy: OntologicalAlignmentPolicy
 ) -> float:

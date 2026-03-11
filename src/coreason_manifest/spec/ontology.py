@@ -2238,6 +2238,65 @@ class FormalVerificationContract(CoreasonBaseState):
     )
 
 
+class DelegatedCapabilityManifest(CoreasonBaseState):
+    """
+    Decentralized capability tickets representing authority delegation.
+    """
+
+    capability_id: str = Field(description="A string CID for the delegated capability.")
+    principal_did: NodeIdentifierState = Field(
+        description="The DID representing the human or parent delegating authority."
+    )
+    delegate_agent_did: NodeIdentifierState = Field(
+        description="The DID representing the autonomous actor receiving authority."
+    )
+    allowed_tool_ids: list[ToolIdentifierState] = Field(
+        description="The strictly bounded set of ToolIdentifiers this delegation permits."
+    )
+    expiration_timestamp: float = Field(description="A float bounding the temporal lifecycle.")
+    cryptographic_signature: str = Field(
+        max_length=10000,
+        description="A base64 string proving the cryptographic delegation.",
+    )
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "allowed_tool_ids", sorted(self.allowed_tool_ids))
+        return self
+
+
+class BudgetExhaustionEvent(BaseStateEvent):
+    """
+    Mathematical boundary condition representing economic exhaustion.
+    """
+
+    type: Literal["budget_exhaustion"] = Field(
+        default="budget_exhaustion", description="Discriminator type for a budget exhaustion event."
+    )
+    exhausted_escrow_id: str = Field(description="A string representing the original escrow boundary breached.")
+    final_burn_receipt_id: str = Field(
+        description="A string pointing to the exact TokenBurnReceipt CID that pushed the state over the limit."
+    )
+
+
+class TokenBurnReceipt(BaseStateEvent):
+    """
+    Lock-free thermodynamic compute tracking receipt.
+    """
+
+    type: Literal["token_burn"] = Field(
+        default="token_burn", description="Discriminator type for a token burn receipt."
+    )
+    tool_invocation_id: str = Field(
+        description="A string linking this burn back to the specific ToolInvocationEvent CID."
+    )
+    input_tokens: int = Field(ge=0, description="The mathematical measure of input tokens consumed.")
+    output_tokens: int = Field(ge=0, description="The mathematical measure of output tokens generated.")
+    burn_magnitude: int = Field(
+        ge=0, description="The normalized economic cost magnitude representing thermodynamic burn."
+    )
+
+
 class GlobalGovernancePolicy(CoreasonBaseState):
     """
     Global governance bounds for a swarm executing a workflow manifest.
@@ -4890,7 +4949,9 @@ type AnyStateEvent = Annotated[
     | ToolInvocationEvent
     | EpistemicPromotionEvent
     | NormativeDriftEvent
-    | PersistenceCommitReceipt,
+    | PersistenceCommitReceipt
+    | TokenBurnReceipt
+    | BudgetExhaustionEvent,
     Field(discriminator="type", description="A discriminated union of state events."),
 ]
 
@@ -4956,3 +5017,7 @@ DigitalTwinTopologyManifest.model_rebuild()
 AdversarialMarketTopologyManifest.model_rebuild()
 ConsensusFederationTopologyManifest.model_rebuild()
 EpistemicSOPManifest.model_rebuild()
+
+DelegatedCapabilityManifest.model_rebuild()
+TokenBurnReceipt.model_rebuild()
+BudgetExhaustionEvent.model_rebuild()
