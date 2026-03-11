@@ -14,7 +14,7 @@ from typing import Any, cast
 from pydantic import BaseModel
 from pydantic.json_schema import models_json_schema
 
-import coreason_manifest
+import coreason_manifest.spec.ontology as ontology
 from coreason_manifest.spec.ontology import (
     CognitiveStateProfile,
     CoreasonBaseModel,
@@ -112,8 +112,8 @@ def get_ontology_schema() -> dict[str, Any]:
     """Dynamically generate the CoReason ontology JSON schema."""
     models_to_export: list[type[CoreasonBaseModel]] = []
 
-    for name in sorted(set(coreason_manifest.__all__)):
-        obj = getattr(coreason_manifest, name, None)
+    for name in sorted(dir(ontology)):
+        obj = getattr(ontology, name)
         if isinstance(obj, type) and issubclass(obj, CoreasonBaseModel) and obj is not CoreasonBaseModel:
             models_to_export.append(obj)
 

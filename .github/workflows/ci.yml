@@ -53,7 +53,7 @@ jobs:
         run: uv sync
 
       - name: Generate Schema
-        run: uv run coreason-export
+        run: uv run python -c "import json; from coreason_manifest.utils.projections import get_ontology_schema; schema = get_ontology_schema(); open('coreason_ontology.schema.json', 'w', encoding='utf-8').write(json.dumps(schema, indent=2, ensure_ascii=False) + '\n')"
 
       - name: Diff Check
         run: git diff --exit-code coreason_ontology.schema.json
