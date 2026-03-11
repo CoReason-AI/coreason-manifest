@@ -9779,6 +9779,45 @@
       "title": "StateDifferentialManifest",
       "type": "object"
     },
+    "StateHydrationManifest": {
+      "additionalProperties": false,
+      "properties": {
+        "epistemic_coordinate": {
+          "description": "A string ID representing the session or specific spatial trace binding.",
+          "title": "Epistemic Coordinate",
+          "type": "string"
+        },
+        "crystallized_memory_cids": {
+          "description": "A list of cryptographic pointers to past immutable EpistemicLedgerState blocks.",
+          "items": {
+            "pattern": "^[a-f0-9]{64}$",
+            "type": "string"
+          },
+          "title": "Crystallized Memory Cids",
+          "type": "array"
+        },
+        "working_memory_variables": {
+          "additionalProperties": true,
+          "description": "A strictly typed dictionary for ephemeral context variables injected at runtime.",
+          "title": "Working Memory Variables",
+          "type": "object"
+        },
+        "max_retained_tokens": {
+          "description": "An integer representing the physical limit of the context window.",
+          "exclusiveMinimum": 0,
+          "title": "Max Retained Tokens",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "epistemic_coordinate",
+        "crystallized_memory_cids",
+        "working_memory_variables",
+        "max_retained_tokens"
+      ],
+      "title": "StateHydrationManifest",
+      "type": "object"
+    },
     "StateMutationIntent": {
       "additionalProperties": false,
       "properties": {

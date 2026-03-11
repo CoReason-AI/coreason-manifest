@@ -232,14 +232,11 @@ def calculate_latent_alignment(
     except struct.error as e:
         raise ValueError("Byte length does not match declared dimensionality.") from e
 
-    dot_product = math.fsum(a * b for a, b in zip(vec1, vec2))
+    dot_product = math.fsum(a * b for a, b in zip(vec1, vec2, strict=True))
     mag1 = math.sqrt(math.fsum(x * x for x in vec1))
     mag2 = math.sqrt(math.fsum(x * x for x in vec2))
 
-    if mag1 == 0 or mag2 == 0:
-        similarity = 0.0
-    else:
-        similarity = dot_product / (mag1 * mag2)
+    similarity = 0.0 if mag1 == 0 or mag2 == 0 else dot_product / (mag1 * mag2)
 
     if similarity < policy.min_cosine_similarity:
         raise ValueError("TamperFaultEvent: Latent alignment failed.")

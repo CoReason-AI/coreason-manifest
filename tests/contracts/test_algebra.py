@@ -145,10 +145,10 @@ def test_calculate_latent_alignment_mismatch_rejection() -> None:
 
     policy = OntologicalAlignmentPolicy(min_cosine_similarity=0.0, require_isometry_proof=False)
 
-    with pytest.raises(ValueError, match="Topological Contradiction: Vector geometries are incommensurable."):
+    with pytest.raises(ValueError, match=r"Topological Contradiction: Vector geometries are incommensurable\."):
         calculate_latent_alignment(v1, v2, policy)
 
-    with pytest.raises(ValueError, match="Topological Contradiction: Vector geometries are incommensurable."):
+    with pytest.raises(ValueError, match=r"Topological Contradiction: Vector geometries are incommensurable\."):
         calculate_latent_alignment(v1, v3, policy)
 
 
@@ -170,5 +170,5 @@ def test_calculate_latent_alignment_cosine_math() -> None:
     assert res == 0.0
 
     policy_strict = OntologicalAlignmentPolicy(min_cosine_similarity=0.9, require_isometry_proof=False)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=r"TamperFaultEvent: Latent alignment failed\."):
         calculate_latent_alignment(v1, v2, policy_strict)
