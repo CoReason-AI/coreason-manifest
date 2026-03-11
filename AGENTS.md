@@ -78,7 +78,7 @@ When generating or modifying schemas, you MUST adhere to the following constrain
 
 Every object, class, and schema name you generate MUST be **mathematically precise, unambiguous, and structurally bounded**. You must adhere to the following Lexical Architecture without exception:
 
-* **The External Protocol Exemption:** If a schema explicitly models an immutable external W3C, IETF, or standard protocol (e.g., JSON-RPC 2.0, RFC 6902), you MUST preserve the exact standardized string literals (e.g., "data", "remove", "update") to prevent serialization collapse. You must annotate the field with `# Note: External Protocol Exemption.`
+* **The External Protocol Exemption:** If a schema explicitly models an immutable external W3C, IETF, or standard protocol (e.g., JSON-RPC 2.0, RFC 6902), you MUST preserve the exact standardized string literals (e.g., "data", "remove", "update") to prevent serialization collapse. You must physically anchor this into the AST using the comment `# Note: External Protocol Exemption.`
 
 ### **1. Categorical Suffixing (The Bounding Suffix)**
 Every object name MUST terminate with a strictly typed suffix that defines its physical behavior and immutability within the system:
