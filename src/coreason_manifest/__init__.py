@@ -236,6 +236,7 @@ __all__ = [
     "SemanticEdgeState",
     "SemanticFirewallPolicy",
     "SemanticNodeState",
+    "SemanticSlicingPolicy",
     "SemanticVersionState",
     "SideEffectProfile",
     "SimulationConvergenceSLA",
