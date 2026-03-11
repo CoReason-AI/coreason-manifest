@@ -970,6 +970,27 @@ class StateDifferentialManifest(CoreasonBaseState):
     # Note: patches is a structurally ordered sequence (Chronological Mutations) and MUST NOT be sorted.
 
 
+class StateHydrationManifest(CoreasonBaseState):
+    epistemic_coordinate: str = Field(
+        description="A string ID representing the session or specific spatial trace binding."
+    )
+    crystallized_memory_cids: list[Annotated[str, StringConstraints(pattern="^[a-f0-9]{64}$")]] = Field(
+        description="A list of cryptographic pointers to past immutable EpistemicLedgerState blocks."
+    )
+    working_memory_variables: dict[str, Any] = Field(
+        description="A strictly typed dictionary for ephemeral context variables injected at runtime."
+    )
+    # Note: working_memory_variables is deterministically sorted by CoreasonBaseState natively.
+    max_retained_tokens: int = Field(
+        gt=0, description="An integer representing the physical limit of the context window."
+    )
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "crystallized_memory_cids", sorted(self.crystallized_memory_cids))
+        return self
+
+
 class TemporalCheckpointState(CoreasonBaseState):
     checkpoint_id: str = Field(
         description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the temporal anchor."
@@ -4907,6 +4928,7 @@ class EpistemicLedgerState(CoreasonBaseState):
 CompositeNodeProfile.model_rebuild()
 WorkflowManifest.model_rebuild()
 MCPServerBindingProfile.model_rebuild()
+StateHydrationManifest.model_rebuild()
 
 BaseTopologyManifest.model_rebuild()
 DAGTopologyManifest.model_rebuild()

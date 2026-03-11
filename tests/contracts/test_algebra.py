@@ -1,13 +1,19 @@
+import base64
+import struct
+
 import pytest
 from pydantic import BaseModel, Field, TypeAdapter, ValidationError
 
 from coreason_manifest.spec.ontology import (
     DAGTopologyManifest,
     DynamicRoutingManifest,
+    OntologicalAlignmentPolicy,
+    VectorEmbeddingState,
     WorkflowManifest,
 )
 from coreason_manifest.utils.algebra import (
     align_semantic_manifolds,
+    calculate_latent_alignment,
     compute_topology_hash,
     generate_correction_prompt,
     get_ontology_schema,
@@ -129,3 +135,51 @@ def test_project_manifest_to_markdown() -> None:
 
     assert "# CoReason Agent Card" in markdown_string
     assert "did:web:agent-1" in markdown_string
+
+
+def test_calculate_latent_alignment_mismatch_rejection() -> None:
+    v1 = VectorEmbeddingState(
+        vector_base64=base64.b64encode(struct.pack("<2f", 1.0, 0.0)).decode("utf-8"),
+        dimensionality=2,
+        model_name="model-a",
+    )
+    v2 = VectorEmbeddingState(
+        vector_base64=base64.b64encode(struct.pack("<2f", 0.0, 1.0)).decode("utf-8"),
+        dimensionality=2,
+        model_name="model-b",
+    )
+    v3 = VectorEmbeddingState(
+        vector_base64=base64.b64encode(struct.pack("<3f", 1.0, 0.0, 0.0)).decode("utf-8"),
+        dimensionality=3,
+        model_name="model-a",
+    )
+
+    policy = OntologicalAlignmentPolicy(min_cosine_similarity=0.0, require_isometry_proof=False)
+
+    with pytest.raises(ValueError, match=r"Topological Contradiction: Vector geometries are incommensurable\."):
+        calculate_latent_alignment(v1, v2, policy)
+
+    with pytest.raises(ValueError, match=r"Topological Contradiction: Vector geometries are incommensurable\."):
+        calculate_latent_alignment(v1, v3, policy)
+
+
+def test_calculate_latent_alignment_cosine_math() -> None:
+    v1 = VectorEmbeddingState(
+        vector_base64=base64.b64encode(struct.pack("<2f", 1.0, 0.0)).decode("utf-8"),
+        dimensionality=2,
+        model_name="model-a",
+    )
+    v2 = VectorEmbeddingState(
+        vector_base64=base64.b64encode(struct.pack("<2f", 0.0, 1.0)).decode("utf-8"),
+        dimensionality=2,
+        model_name="model-a",
+    )
+
+    policy = OntologicalAlignmentPolicy(min_cosine_similarity=0.0, require_isometry_proof=False)
+
+    res = calculate_latent_alignment(v1, v2, policy)
+    assert res == 0.0
+
+    policy_strict = OntologicalAlignmentPolicy(min_cosine_similarity=0.9, require_isometry_proof=False)
+    with pytest.raises(ValueError, match=r"TamperFaultEvent: Latent alignment failed\."):
+        calculate_latent_alignment(v1, v2, policy_strict)
