@@ -9,9 +9,11 @@ from coreason_manifest.spec.ontology import (
     BoundedJSONRPCIntent,
     BrowserDOMState,
     ContinuousMutationPolicy,
+    ConstitutionalPolicy,
     DynamicLayoutManifest,
     EpistemicCompressionSLA,
     EpistemicTransmutationTask,
+    GlobalGovernancePolicy,
     InsightCardProfile,
 )
 
@@ -80,4 +82,18 @@ def test_multimodal_grounding_density_alignment(visual_modality: Any) -> None:
             artifact_event_id="artifact_1",
             target_modalities=[visual_modality],
             compression_sla=compression_sla,
+        )
+
+
+def test_epistemic_license_enforcement() -> None:
+    """Prove that attempting to instantiate GlobalGovernancePolicy with an invalid mandatory_license_rule triggers a ValidationError."""
+    invalid_license = ConstitutionalPolicy(
+        rule_id="MIT_LICENSE", severity="low", description="test", forbidden_intents=[]
+    )
+    with pytest.raises(ValidationError, match="CRITICAL LICENSE VIOLATION"):
+        GlobalGovernancePolicy(
+            mandatory_license_rule=invalid_license,
+            max_budget_magnitude=1000,
+            max_global_tokens=100000,
+            global_timeout_seconds=3600,
         )
