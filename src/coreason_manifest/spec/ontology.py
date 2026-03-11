@@ -108,7 +108,8 @@ type NodeID = Annotated[
 
 type OptimizationDirection = Literal["maximize", "minimize"]
 
-type PatchOperation = Literal["add", "ablation", "replace", "copy", "move", "test"]
+# Note: External Protocol Exemption. "remove" is permitted here to satisfy RFC 6902 JSON Patch.
+type PatchOperation = Literal["add", "remove", "replace", "copy", "move", "test"]
 
 type ProfileID = Annotated[
     str,
@@ -2474,7 +2475,7 @@ class JSONRPCErrorState(CoreasonBaseModel):
     message: str = Field(..., description="A String providing a short description of the error.")
     error_payload: Any | None = Field(
         default=None,
-        alias="error_payload",
+        alias="data",  # Note: External Protocol Exemption. Required by JSON-RPC 2.0 spec.
         description="A Primitive or Structured value that contains additional information about the error.",
     )
 
