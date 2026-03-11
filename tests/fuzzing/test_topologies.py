@@ -10,10 +10,13 @@ from coreason_manifest.spec.ontology import (
     ConsensusPolicy,
     CouncilTopologyManifest,
     DAGTopologyManifest,
+    EpistemicSOPManifest,
     GenerativeManifoldSLA,
     PredictionMarketPolicy,
     QuorumPolicy,
+    SemanticDiscoveryIntent,
     SystemNodeProfile,
+    VectorEmbeddingState,
 )
 
 valid_node_id_st = st.from_regex(r"^did:[a-z0-9]+:[a-zA-Z0-9.\-_:]+$", fullmatch=True)
@@ -79,3 +82,45 @@ def test_generative_manifold_geometric_explosion(depth: int, fanout: int) -> Non
 
     with pytest.raises(ValidationError, match="Geometric explosion risk"):
         GenerativeManifoldSLA(max_topological_depth=depth, max_node_fanout=fanout, max_synthetic_tokens=1000)
+
+
+@given(min_isometry_score=st.sampled_from([1.5, -2.0]))
+def test_semantic_discovery_isometry_bounds(min_isometry_score: float) -> None:
+    """Prove that SemanticDiscoveryIntent rejects out-of-bounds isometry scores."""
+    vector = VectorEmbeddingState(
+        vector_base64="aGVsbG8=",
+        dimensionality=10,
+        model_name="test-model"
+    )
+    with pytest.raises(ValidationError):
+        SemanticDiscoveryIntent(
+            query_vector=vector,
+            min_isometry_score=min_isometry_score,
+            required_structural_types=["read_only"]
+        )
+
+
+@given(
+    sop_id=st.text(min_size=1),
+    target_persona=st.from_regex(r"^[a-zA-Z0-9_-]+$", fullmatch=True),
+    ghost_source=st.text(min_size=1),
+    ghost_target=st.text(min_size=1)
+)
+def test_epistemic_sop_ghost_node_rejection(
+    sop_id: str,
+    target_persona: str,
+    ghost_source: str,
+    ghost_target: str
+) -> None:
+    """Prove that EpistemicSOPManifest throws a ValidationError if chronological_flow_edges points to a step not defined in cognitive_steps."""
+    # Build an empty cognitive_steps dictionary to easily test ghost nodes
+
+    with pytest.raises(ValidationError, match="Ghost node referenced"):
+        EpistemicSOPManifest(
+            sop_id=sop_id,
+            target_persona=target_persona,
+            cognitive_steps={},
+            structural_grammar_hashes={},
+            chronological_flow_edges=[(ghost_source, ghost_target)],
+            prm_evaluations=[]
+        )
