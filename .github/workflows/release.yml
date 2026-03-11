@@ -27,7 +27,7 @@ jobs:
         run: uv sync --all-extras --dev
 
       - name: Export JSON Schema
-        run: uv run coreason-export
+        run: uv run python -c "from coreason_manifest.spec.ontology import WorkflowManifest; import json; open('coreason_ontology.schema.json', 'w').write(json.dumps(WorkflowManifest.model_json_schema(), indent=2))"
 
       - name: Build Artifacts
         run: uv build

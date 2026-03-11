@@ -53,7 +53,7 @@ jobs:
         run: uv sync
 
       - name: Generate Schema
-        run: uv run coreason-export
+        run: uv run python -c "from coreason_manifest.spec.ontology import WorkflowManifest; import json; open('coreason_ontology.schema.json', 'w').write(json.dumps(WorkflowManifest.model_json_schema(), indent=2))"
 
       - name: Diff Check
         run: git diff --exit-code coreason_ontology.schema.json
