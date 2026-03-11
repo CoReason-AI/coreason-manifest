@@ -32,6 +32,18 @@
           },
           "title": "Ephemeral Partitions",
           "type": "array"
+        },
+        "kinetic_separation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/KineticSeparationPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The bipartite graph constraint preventing toxic tool combinations."
         }
       },
       "required": [
@@ -6599,6 +6611,44 @@
           "type": "null"
         }
       ]
+    },
+    "KineticSeparationPolicy": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nA strict bipartite graph constraint mathematically preventing toxic tool combinations\nfrom existing in the same causal execution chain.",
+      "properties": {
+        "policy_id": {
+          "description": "Unique identifier for this specific separation boundary.",
+          "title": "Policy Id",
+          "type": "string"
+        },
+        "mutually_exclusive_clusters": {
+          "description": "A topological matrix of tool names or MCP URIs. If an agent mounts one capability in a cluster, all other capabilities in that cluster are mathematically quarantined.",
+          "items": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "title": "Mutually Exclusive Clusters",
+          "type": "array"
+        },
+        "enforcement_action": {
+          "description": "The deterministic action the orchestrator must take if a bipartite cycle is detected.",
+          "enum": [
+            "halt_and_quarantine",
+            "sever_causal_chain"
+          ],
+          "title": "Enforcement Action",
+          "type": "string"
+        }
+      },
+      "required": [
+        "policy_id",
+        "mutually_exclusive_clusters",
+        "enforcement_action"
+      ],
+      "title": "KineticSeparationPolicy",
+      "type": "object"
     },
     "LakehouseMountProfile": {
       "additionalProperties": false,
