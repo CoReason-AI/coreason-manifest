@@ -317,9 +317,9 @@ def verify_ast_safety(payload: str) -> bool:
     ]
 
     if hasattr(ast, "Index"):
-        base_allowlist.append(getattr(ast, "Index"))
+        base_allowlist.append(ast.Index)
     if hasattr(ast, "Slice"):
-        base_allowlist.append(getattr(ast, "Slice"))
+        base_allowlist.append(ast.Slice)
 
     allowlist: tuple[type, ...] = tuple(base_allowlist)
 
@@ -347,10 +347,8 @@ def apply_state_differential(
                     if new_state != patch.value:
                         raise ValueError("Patch test operation failed.")
                     continue
-                else:
-                    raise ValueError(f"Invalid path or root operation not supported: {path}")
-            else:
-                raise ValueError(f"Invalid JSON pointer: {path}")
+                raise ValueError(f"Invalid path or root operation not supported: {path}")
+            raise ValueError(f"Invalid JSON pointer: {path}")
 
         # Split and decode
         parts = [p.replace("~1", "/").replace("~0", "~") for p in path.split("/")[1:]]
@@ -401,7 +399,7 @@ def apply_state_differential(
                 if key not in t:
                     raise ValueError("Key not found")
                 return t[key]
-            elif isinstance(t, list):
+            if isinstance(t, list):
                 try:
                     idx = int(key)
                     if idx < 0 or idx >= len(t):
