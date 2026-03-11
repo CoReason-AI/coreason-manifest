@@ -2273,9 +2273,7 @@ class BudgetExhaustionEvent(BaseStateEvent):
     type: Literal["budget_exhaustion"] = Field(
         default="budget_exhaustion", description="Discriminator type for a budget exhaustion event."
     )
-    exhausted_escrow_id: str = Field(
-        description="A string representing the original escrow boundary breached."
-    )
+    exhausted_escrow_id: str = Field(description="A string representing the original escrow boundary breached.")
     final_burn_receipt_id: str = Field(
         description="A string pointing to the exact TokenBurnReceipt CID that pushed the state over the limit."
     )
