@@ -32,7 +32,6 @@ from coreason_manifest.spec.ontology import (
 )
 
 SCHEMA_REGISTRY: dict[str, type[BaseModel]] = {
-
     "step8_vision": DocumentLayoutManifest,
     "state_differential": StateMutationIntent,
     "cognitive_sync": CognitiveStateProfile,
