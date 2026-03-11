@@ -4193,6 +4193,72 @@
       "title": "EpistemicQuarantineSnapshot",
       "type": "object"
     },
+    "EpistemicSOPManifest": {
+      "additionalProperties": false,
+      "properties": {
+        "sop_id": {
+          "description": "A Content Identifier (CID) for the Standard Operating Procedure.",
+          "title": "Sop Id",
+          "type": "string"
+        },
+        "target_persona": {
+          "$ref": "#/$defs/ProfileIdentifierState",
+          "description": "The deterministic cognitive routing boundary for the persona executing the SOP."
+        },
+        "cognitive_steps": {
+          "additionalProperties": {
+            "$ref": "#/$defs/CognitiveStateProfile"
+          },
+          "description": "Dictionary mapping step_ids to strict causal DAG constraints.",
+          "title": "Cognitive Steps",
+          "type": "object"
+        },
+        "structural_grammar_hashes": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Dictionary mapping step_ids to SHA-256 hashes of strict Context-Free Grammars or JSON Schemas.",
+          "title": "Structural Grammar Hashes",
+          "type": "object"
+        },
+        "chronological_flow_edges": {
+          "description": "The exact topological flow between step_ids.",
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "type": "array"
+          },
+          "title": "Chronological Flow Edges",
+          "type": "array"
+        },
+        "prm_evaluations": {
+          "description": "The strict array of Process Reward Contracts evaluating the logic.",
+          "items": {
+            "$ref": "#/$defs/ProcessRewardContract"
+          },
+          "title": "Prm Evaluations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "sop_id",
+        "target_persona",
+        "cognitive_steps",
+        "structural_grammar_hashes",
+        "chronological_flow_edges",
+        "prm_evaluations"
+      ],
+      "title": "EpistemicSOPManifest",
+      "type": "object"
+    },
     "EpistemicScanningPolicy": {
       "additionalProperties": false,
       "description": "Policy for epistemic scanning and gap detection.",
@@ -9057,6 +9123,44 @@
         "rollback_on_failure"
       ],
       "title": "SelfCorrectionPolicy",
+      "type": "object"
+    },
+    "SemanticDiscoveryIntent": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "semantic_discovery",
+          "default": "semantic_discovery",
+          "description": "Discriminator for geometric boundary of latent tool discovery.",
+          "title": "Type",
+          "type": "string"
+        },
+        "query_vector": {
+          "$ref": "#/$defs/VectorEmbeddingState",
+          "description": "The latent vector representation of the epistemic deficit the agent is trying to solve."
+        },
+        "min_isometry_score": {
+          "description": "The minimum cosine similarity required to authorize a capability mount.",
+          "maximum": 1.0,
+          "minimum": -1.0,
+          "title": "Min Isometry Score",
+          "type": "number"
+        },
+        "required_structural_types": {
+          "description": "The strict array of strings defining topological limits on the discovered tools.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Required Structural Types",
+          "type": "array"
+        }
+      },
+      "required": [
+        "query_vector",
+        "min_isometry_score",
+        "required_structural_types"
+      ],
+      "title": "SemanticDiscoveryIntent",
       "type": "object"
     },
     "SemanticEdgeState": {

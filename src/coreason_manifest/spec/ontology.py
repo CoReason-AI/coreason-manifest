@@ -1006,7 +1006,7 @@ class LatentScratchpadReceipt(CoreasonBaseState):
         min_length=1, description="A Content Identifier (CID) bounding this ephemeral test-time execution tree."
     )
     explored_branches: list[ThoughtBranchState] = Field(
-        description="All logical paths the agent attempted within this Ephemeral Epistemic Quarantine—a volatile workspace where probability waves collapse before being committed to the immutable ledger."  # noqa: E501
+        description="All logical paths the agent attempted within this Ephemeral Epistemic Quarantine\u2014a volatile workspace where probability waves collapse before being committed to the immutable ledger."  # noqa: E501
     )
     discarded_branches: list[str] = Field(
         description="The strict array of Content Identifiers (CIDs) that were explicitly pruned due to logical dead-ends.",  # noqa: E501
@@ -1740,6 +1740,26 @@ class DocumentLayoutManifest(CoreasonBaseState):
         return self
 
 
+class SemanticDiscoveryIntent(CoreasonBaseState):
+    type: Literal["semantic_discovery"] = Field(
+        default="semantic_discovery", description="Discriminator for geometric boundary of latent tool discovery."
+    )
+    query_vector: VectorEmbeddingState = Field(
+        description="The latent vector representation of the epistemic deficit the agent is trying to solve."
+    )
+    min_isometry_score: float = Field(
+        ge=-1.0, le=1.0, description="The minimum cosine similarity required to authorize a capability mount."
+    )
+    required_structural_types: list[str] = Field(
+        description="The strict array of strings defining topological limits on the discovered tools."
+    )
+
+    @model_validator(mode="after")
+    def sort_required_structural_types(self) -> Self:
+        object.__setattr__(self, "required_structural_types", sorted(self.required_structural_types))
+        return self
+
+
 class DraftingIntent(CoreasonBaseState):
     type: Literal["drafting"] = Field(
         default="drafting", description="Discriminator for requesting specific missing context from a human."
@@ -2429,7 +2449,10 @@ type AnyPresentationIntent = Annotated[
     InformationalIntent | DraftingIntent | AdjudicationIntent | EscalationIntent, Field(discriminator="type")
 ]
 
-type AnyIntent = AnyPresentationIntent
+type AnyIntent = Annotated[
+    InformationalIntent | DraftingIntent | AdjudicationIntent | EscalationIntent | SemanticDiscoveryIntent,
+    Field(discriminator="type"),
+]
 
 
 class InputMappingContract(CoreasonBaseState):
@@ -3246,6 +3269,37 @@ class PresentationManifest(CoreasonBaseState):
 
     intent: AnyPresentationIntent = Field(description="The reason an agent is presenting this data to a human.")
     grid: MacroGridProfile = Field(description="The grid of panels being presented.")
+
+
+class EpistemicSOPManifest(CoreasonBaseState):
+    sop_id: str = Field(description="A Content Identifier (CID) for the Standard Operating Procedure.")
+    target_persona: ProfileIdentifierState = Field(
+        description="The deterministic cognitive routing boundary for the persona executing the SOP."
+    )
+    cognitive_steps: dict[str, CognitiveStateProfile] = Field(
+        description="Dictionary mapping step_ids to strict causal DAG constraints."
+    )
+    structural_grammar_hashes: dict[str, str] = Field(
+        description="Dictionary mapping step_ids to SHA-256 hashes of strict Context-Free Grammars or JSON Schemas."
+    )
+    chronological_flow_edges: list[tuple[str, str]] = Field(description="The exact topological flow between step_ids.")
+    # Note: chronological_flow_edges is a structurally ordered sequence (Topological Flow) and MUST NOT be sorted.
+    prm_evaluations: list["ProcessRewardContract"] = Field(
+        description="The strict array of Process Reward Contracts evaluating the logic."
+    )
+    # Note: prm_evaluations is a structurally ordered sequence (Evaluation Sequence) and MUST NOT be sorted.
+
+    @model_validator(mode="after")
+    def reject_ghost_nodes(self) -> Self:
+        for source, target in self.chronological_flow_edges:
+            if source not in self.cognitive_steps:
+                raise ValueError(f"Ghost node referenced in chronological_flow_edges source: {source}")
+            if target not in self.cognitive_steps:
+                raise ValueError(f"Ghost node referenced in chronological_flow_edges target: {target}")
+        for step_id in self.structural_grammar_hashes:
+            if step_id not in self.cognitive_steps:
+                raise ValueError(f"Ghost node referenced in structural_grammar_hashes: {step_id}")
+        return self
 
 
 class ProcessRewardContract(CoreasonBaseState):
@@ -4864,3 +4918,4 @@ EvaluatorOptimizerTopologyManifest.model_rebuild()
 DigitalTwinTopologyManifest.model_rebuild()
 AdversarialMarketTopologyManifest.model_rebuild()
 ConsensusFederationTopologyManifest.model_rebuild()
+EpistemicSOPManifest.model_rebuild()
