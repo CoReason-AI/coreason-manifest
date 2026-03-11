@@ -2207,6 +2207,18 @@
           ],
           "default": null,
           "description": "The structural mandate overriding default token routing to enforce this cognitive state."
+        },
+        "semantic_slicing": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SemanticSlicingPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematical data starvation mechanism bounding the working memory context."
         }
       },
       "required": [
@@ -9646,6 +9658,49 @@
         "provenance"
       ],
       "title": "SemanticNodeState",
+      "type": "object"
+    },
+    "SemanticSlicingPolicy": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A Deterministic Epistemic Firewall that mathematically\nstarves the working memory context of irrelevant or over-classified data\nto prevent attention dilution and enforce zero-trust isolation.",
+      "properties": {
+        "permitted_classification_tiers": {
+          "description": "The explicit whitelist of sensitivity bounds allowed into context.",
+          "items": {
+            "$ref": "#/$defs/InformationClassificationProfile"
+          },
+          "minItems": 1,
+          "title": "Permitted Classification Tiers",
+          "type": "array"
+        },
+        "required_semantic_labels": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The declarative whitelist of strictly typed ontological node labels authorized for context projection.",
+          "title": "Required Semantic Labels"
+        },
+        "context_window_token_ceiling": {
+          "description": "The mathematical physical limit of the working memory partition to prevent VRAM exhaustion.",
+          "exclusiveMinimum": 0,
+          "title": "Context Window Token Ceiling",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "permitted_classification_tiers",
+        "context_window_token_ceiling"
+      ],
+      "title": "SemanticSlicingPolicy",
       "type": "object"
     },
     "SemanticVersionState": {

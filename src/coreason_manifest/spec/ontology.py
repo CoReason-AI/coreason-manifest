@@ -583,6 +583,37 @@ class ActivationSteeringContract(CoreasonBaseState):
         return self
 
 
+class SemanticSlicingPolicy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A Deterministic Epistemic Firewall that mathematically
+    starves the working memory context of irrelevant or over-classified data
+    to prevent attention dilution and enforce zero-trust isolation.
+    """
+
+    permitted_classification_tiers: list[InformationClassificationProfile] = Field(
+        min_length=1, description="The explicit whitelist of sensitivity bounds allowed into context."
+    )
+    required_semantic_labels: list[str] | None = Field(
+        default=None,
+        description="The declarative whitelist of strictly typed ontological node labels authorized for context projection.",  # noqa: E501
+    )
+    context_window_token_ceiling: int = Field(
+        gt=0, description="The mathematical physical limit of the working memory partition to prevent VRAM exhaustion."
+    )
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        """Mathematically sort arrays to guarantee deterministic canonical hashing."""
+        object.__setattr__(
+            self,
+            "permitted_classification_tiers",
+            sorted(self.permitted_classification_tiers, key=lambda x: str(x.value)),
+        )
+        if self.required_semantic_labels is not None:
+            object.__setattr__(self, "required_semantic_labels", sorted(self.required_semantic_labels))
+        return self
+
+
 class CognitiveRoutingContract(CoreasonBaseState):
     """
     Hardware-level contract overriding MoE routing to enforce functional/specialist paths.
@@ -627,6 +658,9 @@ class CognitiveStateProfile(CoreasonBaseState):
     moe_routing_directive: CognitiveRoutingContract | None = Field(
         default=None,
         description="The structural mandate overriding default token routing to enforce this cognitive state.",
+    )
+    semantic_slicing: SemanticSlicingPolicy | None = Field(
+        default=None, description="The mathematical data starvation mechanism bounding the working memory context."
     )
 
 

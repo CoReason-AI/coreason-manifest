@@ -14,7 +14,9 @@ from coreason_manifest.spec.ontology import (
     EpistemicCompressionSLA,
     EpistemicTransmutationTask,
     GlobalGovernancePolicy,
+    InformationClassificationProfile,
     InsightCardProfile,
+    SemanticSlicingPolicy,
 )
 
 
@@ -179,3 +181,31 @@ def test_kinetic_separation_canonical_sort() -> None:
 
     # Assert inner lists are sorted, then outer list is sorted by the first element of inner lists
     assert policy.mutually_exclusive_clusters == [["mcp://server-a", "mcp://server-b"], ["tool-x", "tool-y", "tool-z"]]
+
+
+def test_semantic_slicing_epistemic_bounds() -> None:
+    """Prove the deterministic epistemic firewall rejects negative ceilings and perfectly sorts its canonical arrays."""
+
+    # 1. Prove OOM/Zero-Token starvation rejection
+    with pytest.raises(ValidationError, match="greater_than"):
+        SemanticSlicingPolicy(
+            permitted_classification_tiers=[InformationClassificationProfile.PUBLIC], context_window_token_ceiling=0
+        )
+
+    # 2. Prove Cryptographic Determinism (Sorting)
+    policy = SemanticSlicingPolicy(
+        permitted_classification_tiers=[
+            InformationClassificationProfile.RESTRICTED,
+            InformationClassificationProfile.INTERNAL,
+            InformationClassificationProfile.PUBLIC,
+        ],
+        required_semantic_labels=["Zeta", "Alpha", "Gamma"],
+        context_window_token_ceiling=4096,
+    )
+
+    assert policy.required_semantic_labels == ["Alpha", "Gamma", "Zeta"]
+    assert policy.permitted_classification_tiers == [
+        InformationClassificationProfile.INTERNAL,
+        InformationClassificationProfile.PUBLIC,
+        InformationClassificationProfile.RESTRICTED,
+    ]
