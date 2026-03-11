@@ -1815,6 +1815,54 @@ class DocumentLayoutManifest(CoreasonBaseState):
         return self
 
 
+class ContextExpansionPolicy(CoreasonBaseState):
+    expansion_paradigm: Literal["sliding_window", "hierarchical_merge", "document_summary"] = Field(
+        description="The mathematical paradigm governing how context is expanded."
+    )
+    max_token_budget: int = Field(gt=0, description="The maximum physical token allowance for expansion.")
+    surrounding_sentences_k: int | None = Field(
+        default=None, ge=1, description="The strict temporal window of surrounding sentences."
+    )
+    parent_merge_threshold: float | None = Field(
+        default=None,
+        ge=0.0,
+        le=1.0,
+        description="The geometric cosine similarity threshold required to merge parent nodes.",
+    )
+
+
+class TopologicalRetrievalContract(CoreasonBaseState):
+    max_hop_depth: int = Field(ge=1, description="The strictly typed search depth bound for the cDAG.")
+    allowed_causal_relationships: list[Literal["causes", "confounds", "correlates_with", "undirected"]] = Field(
+        min_length=1, description="The explicit whitelist of permissible causal edges to traverse."
+    )
+    enforce_isometry: bool = Field(default=True, description="Enforces preservation of geometric distances.")
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "allowed_causal_relationships", sorted(self.allowed_causal_relationships))
+        return self
+
+
+class LatentProjectionIntent(CoreasonBaseState):
+    type: Literal["latent_projection"] = Field(
+        default="latent_projection", description="Discriminator for RAG projection intent."
+    )
+    synthetic_target_vector: VectorEmbeddingState = Field(
+        description="The strictly typed embedding tensor directing the query."
+    )
+    top_k_candidates: int = Field(gt=0, description="The maximum number of nodes to extract from the index.")
+    min_isometry_score: float = Field(
+        ge=-1.0, le=1.0, description="The minimum cosine similarity bounds for accepting a vector match."
+    )
+    topological_bounds: TopologicalRetrievalContract | None = Field(
+        default=None, description="The explicit graph traversal contract."
+    )
+    context_expansion: ContextExpansionPolicy | None = Field(
+        default=None, description="The structural rules governing context hydration."
+    )
+
+
 class SemanticDiscoveryIntent(CoreasonBaseState):
     type: Literal["semantic_discovery"] = Field(
         default="semantic_discovery", description="Discriminator for geometric boundary of latent tool discovery."
@@ -2584,7 +2632,12 @@ type AnyPresentationIntent = Annotated[
 ]
 
 type AnyIntent = Annotated[
-    InformationalIntent | DraftingIntent | AdjudicationIntent | EscalationIntent | SemanticDiscoveryIntent,
+    InformationalIntent
+    | DraftingIntent
+    | AdjudicationIntent
+    | EscalationIntent
+    | SemanticDiscoveryIntent
+    | LatentProjectionIntent,
     Field(discriminator="type"),
 ]
 
@@ -5234,3 +5287,5 @@ EpistemicSOPManifest.model_rebuild()
 DelegatedCapabilityManifest.model_rebuild()
 TokenBurnReceipt.model_rebuild()
 BudgetExhaustionEvent.model_rebuild()
+
+LatentProjectionIntent.model_rebuild()
