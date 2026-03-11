@@ -101,7 +101,11 @@ def test_epistemic_license_enforcement() -> None:
 
 
 def test_mcp_quarantine_gateway_tripwire() -> None:
-    from coreason_manifest.spec.ontology import VerifiableCredentialPresentationReceipt, MCPServerManifest, MCPCapabilityWhitelistPolicy
+    from coreason_manifest.spec.ontology import (
+        MCPCapabilityWhitelistPolicy,
+        MCPServerManifest,
+        VerifiableCredentialPresentationReceipt,
+    )
 
     receipt = VerifiableCredentialPresentationReceipt(
         presentation_format="jwt_vc",
