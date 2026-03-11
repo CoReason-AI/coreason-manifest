@@ -268,6 +268,33 @@ You are strictly bound to the **"God Context" Monolith Directive**. You are EXPL
 * You are tempted to add a "helper script" that runs a server.
 * You encounter a requirement that seems to violate the "Shared Kernel" philosophy.
 
+## **7. The Machine-FAIR Lexical Architecture**
+
+**SYSTEM DIRECTIVE:** Code in this repository acts as a Hollow Data Plane. Object names are not designed for human readability; they are strict mathematical coordinates engineered to restrict the activation footprint in the LLM's latent space. You MUST strictly adhere to the following Lexical Invariants:
+
+**1. The Anti-CRUD Mandate (Zero Polysemy)**
+You are forbidden from using highly polysemantic, tabular, or legacy human-centric terms that cause semantic drift.
+* **BANNED TERMS:** `Data`, `Model`, `Type`, `Info`, `ID`, `Record`, `Create`, `Read`, `Update`, `Delete`.
+* **RATIONALE:** These terms flatten softmax distributions and cause probabilistic hallucinations.
+
+**2. Categorical Suffixing (Topological Contracts)**
+Every class, schema, and type alias MUST terminate with one of the following exact bounding suffixes. This dictates how the system's Q-K matrices process the object's physics:
+* **`...Receipt` / `...Event`:** Cryptographically frozen historical facts. *Action: The LLM must never hallucinate a mutation to this object.*
+* **`...Intent` / `...Task`:** Authorized kinetic execution triggers or test-time compute branches. *Action: The LLM may execute non-monotonic reasoning here.*
+* **`...Policy` / `...Contract`:** Rigid mathematical boundaries (e.g., token limits, VRAM allocations, truth maintenance). *Action: The LLM must enforce this constraint globally.*
+* **`...State` / `...Manifest` / `...Profile`:** A declarative, frozen snapshot of an N-dimensional coordinate. *Action: The LLM must read this as descriptive geometry.*
+
+**3. Causal Vocabulary over Tabular Logic**
+You must map state transitions using Judea Pearl’s Structural Causal Models. Do not use flat database nomenclature.
+* **INCORRECT:** `DeleteUser`, `UpdateRouting`
+* **CORRECT:** `DefeasibleCascadeEvent`, `StateMutationIntent`, `QuarantineOrder`
+
+**4. Epistemic Prefixing (Vector Gravity Wells)**
+Schemas must naturally cluster in dense-vector Retrieval-Augmented Generation (RAG). Use strict domain prefixes to create semantic gravity wells so that the Model Context Protocol (MCP) router retrieves the entire causal chain in a zero-shot inference.
+* **REQUIRED PREFIXES:** `Cognitive...`, `Epistemic...`, `Spatial...`, `Temporal...`, `Federated...`
+
+**VIOLATION CONSEQUENCE:** Any PR or generated code failing to adhere to this Lexical Architecture will trigger an immediate `SystemFaultEvent` during the CI/CD semantic diff phase.
+
 ## 🛡️ Mandatory Local Verification Workflow
 
 This package enforces a zero-tolerance policy for type errors, linting violations, and coverage drops. To ensure the Shared Kernel remains completely stable and immutable, **the following checks must be run locally before opening a Pull Request or finalizing an AI-generated refactor.** Failure to comply will result in an immediate rejection by the CI/CD pipeline.
