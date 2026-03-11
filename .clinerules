@@ -1,0 +1,25 @@
+# CoReason Manifest - Autonomous Agent Configuration Directives
+
+**SYSTEM DIRECTIVE: STRICT STRUCTURAL BOUNDARIES ENFORCED**
+
+As an autonomous agent operating within this repository, you are strictly bound to the Shared Kernel Protocol and the Anti-CRUD Mandate. You must comply with the following mathematical rules:
+
+## 1. Zero Dependency Exemption
+You **MUST NOT** introduce or recommend adding any software dependency to this repository other than the explicitly whitelisted structural data modules:
+- `pydantic`
+- `pyyaml`
+Attempts to add external execution, web frameworks (e.g., Fastapi, requests), ORM layers, or other libraries will result in an immediate architectural quarantine.
+
+## 2. Kinetic Execution Prohibition
+This repository functions exclusively as a passive Ontological Projection. Introducing ANY execution logic—including but not limited to network sockets, file I/O operations, API requests, runtime servers, or dynamic execution loops—is **STRICTLY FORBIDDEN**.
+**WARNING:** Introducing any form of runtime side effect will trigger an immediate CI rejection during the `evaluate_architecture.py` phase.
+
+## 3. Mandatory Local Verification Workflow
+Before proposing any code modification or finalizing any task, you **MUST** run the following strict sequence of commands locally to verify the integrity and exactness of your mathematical projections:
+
+1. `uv run ruff format .`
+2. `uv run ruff check . --fix`
+3. `uv run mypy src/ tests/`
+4. `uv run pytest`
+
+If any of these commands fail, you must iteratively diagnose and repair the type constraints or test behavioral failures prior to presenting your completed output. You must strictly attain an error-free zero-drift execution of all validation tools.
