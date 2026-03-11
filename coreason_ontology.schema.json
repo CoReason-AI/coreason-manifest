@@ -1571,7 +1571,7 @@
         },
         "payload": {
           "additionalProperties": {
-            "$ref": "#/$defs/JsonPrimitive"
+            "$ref": "#/$defs/JsonPrimitiveState"
           },
           "description": "Topologically Bounded Latent Spaces capturing the semantic representation of the agent's internal cognitive shift or synthesis that anchor statistical probability to a definitive causal event hash.",
           "title": "Payload",
@@ -6866,7 +6866,7 @@
       "title": "JSONRPCErrorState",
       "type": "object"
     },
-    "JsonPrimitive": {
+    "JsonPrimitiveState": {
       "anyOf": [
         {
           "type": "string"
@@ -6882,13 +6882,13 @@
         },
         {
           "items": {
-            "$ref": "#/$defs/JsonPrimitive"
+            "$ref": "#/$defs/JsonPrimitiveState"
           },
           "type": "array"
         },
         {
           "additionalProperties": {
-            "$ref": "#/$defs/JsonPrimitive"
+            "$ref": "#/$defs/JsonPrimitiveState"
           },
           "type": "object"
         },
@@ -8369,7 +8369,7 @@
         },
         "payload": {
           "additionalProperties": {
-            "$ref": "#/$defs/JsonPrimitive"
+            "$ref": "#/$defs/JsonPrimitiveState"
           },
           "description": "Neurosymbolic Bindings of the raw, lossless semantic output appended from the environment or tool execution that anchor statistical probability to a definitive causal event hash.",
           "title": "Payload",
@@ -10567,7 +10567,7 @@
           "type": "string"
         },
         "value": {
-          "$ref": "#/$defs/JsonPrimitive",
+          "$ref": "#/$defs/JsonPrimitiveState",
           "default": null,
           "description": "The payload to insert or test, if applicable, for this deterministic state vector mutation."
         }
