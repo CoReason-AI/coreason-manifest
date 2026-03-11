@@ -20,10 +20,10 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, StringConstraints, field_validator, model_validator
 
-type JsonPrimitive = str | int | float | bool | None | list["JsonPrimitive"] | dict[str, "JsonPrimitive"]
+type JsonPrimitiveState = str | int | float | bool | None | list["JsonPrimitiveState"] | dict[str, "JsonPrimitiveState"]
 
 
-def _validate_payload_bounds(value: JsonPrimitive, current_depth: int = 0) -> JsonPrimitive:
+def _validate_payload_bounds(value: JsonPrimitiveState, current_depth: int = 0) -> JsonPrimitiveState:
     """
     AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads
     to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing.
@@ -998,7 +998,7 @@ class StateMutationIntent(CoreasonBaseState):
         description="The strict RFC 6902 JSON Patch operation, acting as a deterministic state vector mutation."
     )
     path: str = Field(description="The JSON pointer indicating the exact state vector to mutate deterministically.")
-    value: JsonPrimitive = Field(
+    value: JsonPrimitiveState = Field(
         default=None,
         description="The payload to insert or test, if applicable, for this deterministic state vector mutation.",
     )
@@ -5204,7 +5204,7 @@ class BeliefMutationEvent(BaseStateEvent):
     type: Literal["belief_mutation"] = Field(
         default="belief_mutation", description="Discriminator type for a Belief Assertion event."
     )
-    payload: dict[str, JsonPrimitive] = Field(
+    payload: dict[str, JsonPrimitiveState] = Field(
         description="Topologically Bounded Latent Spaces capturing the semantic representation of the agent's internal cognitive shift or synthesis that anchor statistical probability to a definitive causal event hash."  # noqa: E501
     )
     source_node_id: NodeIdentifierState | None = Field(
@@ -5251,7 +5251,7 @@ class ObservationEvent(BaseStateEvent):
     type: Literal["observation"] = Field(
         default="observation", description="Discriminator type for an observation event."
     )
-    payload: dict[str, JsonPrimitive] = Field(
+    payload: dict[str, JsonPrimitiveState] = Field(
         description="Neurosymbolic Bindings of the raw, lossless semantic output appended from the environment or tool execution that anchor statistical probability to a definitive causal event hash."  # noqa: E501
     )
     source_node_id: NodeIdentifierState | None = Field(

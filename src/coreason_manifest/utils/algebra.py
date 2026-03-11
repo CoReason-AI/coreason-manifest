@@ -342,7 +342,6 @@ def apply_state_differential(
         path = patch.path
         if not path.startswith("/"):
             if path == "":
-                # Root level operations
                 if patch.op == "test":
                     if new_state != patch.value:
                         raise ValueError("Patch test operation failed.")
@@ -350,10 +349,8 @@ def apply_state_differential(
                 raise ValueError(f"Invalid path or root operation not supported: {path}")
             raise ValueError(f"Invalid JSON pointer: {path}")
 
-        # Split and decode
         parts = [p.replace("~1", "/").replace("~0", "~") for p in path.split("/")[1:]]
 
-        # Traverse to parent
         target: Any = new_state
         for part in parts[:-1]:
             if isinstance(target, dict):
@@ -394,7 +391,7 @@ def apply_state_differential(
             from_last = from_parts[-1]
             return from_target, from_last
 
-        def read_from_target(t: Any, key: str) -> Any:
+        def extract_from_target(t: Any, key: str) -> Any:
             if isinstance(t, dict):
                 if key not in t:
                     raise ValueError("Key not found")
@@ -409,7 +406,7 @@ def apply_state_differential(
                     raise ValueError("Invalid index") from e
             raise ValueError("Target is not dict or list")
 
-        def delete_from_target(t: Any, key: str) -> None:
+        def ablate_from_target(t: Any, key: str) -> None:
             if isinstance(t, dict):
                 if key not in t:
                     raise ValueError("Key not found")
@@ -442,14 +439,13 @@ def apply_state_differential(
 
         elif patch.op == "remove":
             try:
-                delete_from_target(target, last_part)
+                ablate_from_target(target, last_part)
             except ValueError as e:
                 raise ValueError(f"Cannot remove from path {path}: {e}") from e
 
         elif patch.op == "replace":
             try:
-                # Ensure it exists first before replacing
-                read_from_target(target, last_part)
+                extract_from_target(target, last_part)
 
                 if isinstance(target, dict):
                     target[last_part] = patch.value
@@ -460,16 +456,14 @@ def apply_state_differential(
                 raise ValueError(f"Cannot replace at path {path}: {e}") from e
 
         elif patch.op in ("copy", "move"):
-            # The prompt requires extracting from_path to evaluate another pointer.
-            # StateMutationIntent doesn't define from_path, so we assume it's stored in patch.value
             from_path = patch.value
             if not isinstance(from_path, str):
                 raise ValueError(f"Invalid from_path: {from_path}")
             try:
                 from_target, from_last = resolve_from_path(from_path)
-                val = read_from_target(from_target, from_last)
+                val = extract_from_target(from_target, from_last)
                 if patch.op == "move":
-                    delete_from_target(from_target, from_last)
+                    ablate_from_target(from_target, from_last)
                 if patch.op == "copy":
                     val = copy.deepcopy(val)
             except ValueError as e:
@@ -493,7 +487,7 @@ def apply_state_differential(
 
         elif patch.op == "test":
             try:
-                current_val = read_from_target(target, last_part)
+                current_val = extract_from_target(target, last_part)
                 if current_val != patch.value:
                     raise ValueError("Patch test operation failed.")
             except ValueError as e:
