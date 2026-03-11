@@ -1006,7 +1006,7 @@ class LatentScratchpadReceipt(CoreasonBaseState):
         min_length=1, description="A Content Identifier (CID) bounding this ephemeral test-time execution tree."
     )
     explored_branches: list[ThoughtBranchState] = Field(
-        description="All logical paths the agent attempted within this Ephemeral Epistemic Quarantine—a volatile workspace where probability waves collapse before being committed to the immutable ledger."  # noqa: E501
+        description="All logical paths the agent attempted within this Ephemeral Epistemic Quarantine\u2014a volatile workspace where probability waves collapse before being committed to the immutable ledger."  # noqa: E501
     )
     discarded_branches: list[str] = Field(
         description="The strict array of Content Identifiers (CIDs) that were explicitly pruned due to logical dead-ends.",  # noqa: E501
