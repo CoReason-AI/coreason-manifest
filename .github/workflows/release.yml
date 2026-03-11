@@ -27,7 +27,7 @@ jobs:
         run: uv sync --all-extras --dev
 
       - name: Export JSON Schema
-        run: uv run python -c "import json; from coreason_manifest.utils.projections import get_ontology_schema; schema = get_ontology_schema(); open('coreason_ontology.schema.json', 'w', encoding='utf-8').write(json.dumps(schema, indent=2, ensure_ascii=False) + '\n')"
+        run: uv run python -c "import json; from coreason_manifest.utils.algebra import get_ontology_schema; schema = get_ontology_schema(); open('coreason_ontology.schema.json', 'w', encoding='utf-8').write(json.dumps(schema, indent=2, ensure_ascii=False) + '\n')"
 
       - name: Build Artifacts
         run: uv build
