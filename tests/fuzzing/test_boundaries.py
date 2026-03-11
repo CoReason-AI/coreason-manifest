@@ -1,34 +1,14 @@
-from typing import Any
-
-import hypothesis.strategies as st
 import pytest
-from hypothesis import HealthCheck, given, settings
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
-    BoundedJSONRPCIntent,
     BrowserDOMState,
     ConstitutionalPolicy,
-    ContinuousMutationPolicy,
-    DynamicLayoutManifest,
-    EpistemicCompressionSLA,
-    EpistemicTransmutationTask,
     GlobalGovernancePolicy,
     InformationClassificationProfile,
     InsightCardProfile,
     SemanticSlicingPolicy,
 )
-
-
-@given(st.recursive(st.dictionaries(st.text(), st.text()), lambda c: st.dictionaries(st.text(), c)))
-@settings(max_examples=50, suppress_health_check=[HealthCheck.too_slow])
-def test_jsonrpc_depth_attack_proof(params: dict[str, Any]) -> None:
-    """Prove the schema definitively rejects deeply recursive JSON payloads out of bounds."""
-    import contextlib
-
-    payload = {"jsonrpc": "2.0", "method": "test_method", "params": params, "id": 1}
-    with contextlib.suppress(ValidationError):
-        BoundedJSONRPCIntent.model_validate(payload)
 
 
 @pytest.mark.parametrize(
@@ -47,44 +27,6 @@ def test_polymorphic_xss_proof(payload: str) -> None:
     """Prove InsightCardProfile definitively rejects malicious Markdown tags and schemas."""
     with pytest.raises(ValidationError):
         InsightCardProfile(panel_id="panel_1", title="Insight Title", markdown_content=payload)
-
-
-@pytest.mark.parametrize(
-    "payload", ["getattr(__builtins__, 'ev' + 'al')('print(1)')", "__import__('os').system('echo 1')"]
-)
-def test_dynamic_layout_ast_execution_bleed(payload: str) -> None:
-    """Verify the AST boundary deterministically severs polymorphic string concatenation attacks."""
-    with pytest.raises(ValidationError, match="Kinetic execution bleed detected"):
-        DynamicLayoutManifest(layout_tstring=payload)
-
-
-@given(rows=st.integers(min_value=10001, max_value=100000))
-def test_continuous_mutation_oom_buffer_limit(rows: int) -> None:
-    """Prove that ContinuousMutationPolicy rejects uncommitted rows > 10000 when append_only is True."""
-    with pytest.raises(ValidationError, match="max_uncommitted_edges must be <= 10000 for append_only paradigm"):
-        ContinuousMutationPolicy(
-            mutation_paradigm="append_only", max_uncommitted_edges=rows, micro_batch_interval_ms=1000
-        )
-
-
-@pytest.mark.parametrize("visual_modality", ["tabular_grid", "raster_image"])
-def test_multimodal_grounding_density_alignment(visual_modality: Any) -> None:
-    """Prove that EpistemicTransmutationTask rejects visual modalities combined with sparse grounding density."""
-    compression_sla = EpistemicCompressionSLA(
-        strict_probability_retention=True,
-        max_allowed_entropy_loss=0.5,
-        required_grounding_density="sparse",
-    )
-    with pytest.raises(
-        ValidationError,
-        match=r"Epistemic safety violation: Visual or tabular modalities require strict spatial tracking\.",
-    ):
-        EpistemicTransmutationTask(
-            task_id="task_visual_test",
-            artifact_event_id="artifact_1",
-            target_modalities=[visual_modality],
-            compression_sla=compression_sla,
-        )
 
 
 def test_epistemic_license_enforcement() -> None:
@@ -223,88 +165,3 @@ def test_procedural_manifold_deterministic_sort() -> None:
     # Assert the array was mathematically sorted by metadata_id
     assert projection.available_procedural_manifolds[0].metadata_id == "alpha_02"
     assert projection.available_procedural_manifolds[1].metadata_id == "zeta_01"
-
-
-@given(
-    trace_hash=st.text().filter(lambda x: not __import__("re").match("^[a-f0-9]{64}$", x)),
-    penalty=st.floats(min_value=-10.0, max_value=10.0).filter(lambda x: x < 0.0 or x > 1.0),
-)
-def test_cognitive_critique_profile_bounds(trace_hash: str, penalty: float) -> None:
-    from coreason_manifest.spec.ontology import CognitiveCritiqueProfile
-
-    with pytest.raises(ValidationError):
-        CognitiveCritiqueProfile(reasoning_trace_hash=trace_hash, epistemic_penalty_scalar=0.5)
-    with pytest.raises(ValidationError):
-        CognitiveCritiqueProfile(reasoning_trace_hash="a" * 64, epistemic_penalty_scalar=penalty)
-
-
-@given(threshold=st.integers(max_value=0), asymptote=st.floats(max_value=-0.0001))
-def test_kinetic_budget_policy_bounds(threshold: int, asymptote: float) -> None:
-    from coreason_manifest.spec.ontology import KineticBudgetPolicy
-
-    with pytest.raises(ValidationError):
-        KineticBudgetPolicy(
-            exploration_decay_curve="linear",
-            forced_exploitation_threshold_ms=threshold,
-            dynamic_temperature_asymptote=0.5,
-        )
-    with pytest.raises(ValidationError):
-        KineticBudgetPolicy(
-            exploration_decay_curve="linear",
-            forced_exploitation_threshold_ms=10,
-            dynamic_temperature_asymptote=asymptote,
-        )
-    with pytest.raises(ValidationError):
-        KineticBudgetPolicy(
-            exploration_decay_curve="invalid_curve",  # type: ignore
-            forced_exploitation_threshold_ms=10,
-            dynamic_temperature_asymptote=0.5,
-        )
-
-
-@given(entropy=st.floats(max_value=-0.0001), multiplier=st.floats(max_value=1.0), tiers=st.integers(max_value=0))
-def test_epistemic_escalation_contract_bounds(entropy: float, multiplier: float, tiers: int) -> None:
-    from coreason_manifest.spec.ontology import EpistemicEscalationContract
-
-    with pytest.raises(ValidationError):
-        EpistemicEscalationContract(
-            baseline_entropy_threshold=entropy, test_time_multiplier=2.0, max_escalation_tiers=5
-        )
-    with pytest.raises(ValidationError):
-        EpistemicEscalationContract(
-            baseline_entropy_threshold=0.5, test_time_multiplier=multiplier, max_escalation_tiers=5
-        )
-    with pytest.raises(ValidationError):
-        EpistemicEscalationContract(
-            baseline_entropy_threshold=0.5, test_time_multiplier=2.0, max_escalation_tiers=tiers
-        )
-
-
-@given(
-    merkle_root=st.text().filter(lambda x: not __import__("re").match("^[a-f0-9]{64}$", x)),
-    vram=st.integers(max_value=0),
-    ttl=st.integers(max_value=0),
-    priority=st.floats().filter(lambda x: x < 0.0 or x > 1.0),
-)
-def test_federated_peft_contract_bounds(merkle_root: str, vram: int, ttl: int, priority: float) -> None:
-    from coreason_manifest.spec.ontology import FederatedPeftContract
-
-    with pytest.raises(ValidationError):
-        FederatedPeftContract(
-            adapter_merkle_root=merkle_root, vram_footprint_bytes=1000, ephemeral_ttl_ms=1000, cache_priority_weight=0.5
-        )
-    with pytest.raises(ValidationError):
-        FederatedPeftContract(
-            adapter_merkle_root="a" * 64, vram_footprint_bytes=vram, ephemeral_ttl_ms=1000, cache_priority_weight=0.5
-        )
-    with pytest.raises(ValidationError):
-        FederatedPeftContract(
-            adapter_merkle_root="a" * 64, vram_footprint_bytes=1000, ephemeral_ttl_ms=ttl, cache_priority_weight=0.5
-        )
-    with pytest.raises(ValidationError):
-        FederatedPeftContract(
-            adapter_merkle_root="a" * 64,
-            vram_footprint_bytes=1000,
-            ephemeral_ttl_ms=1000,
-            cache_priority_weight=priority,
-        )

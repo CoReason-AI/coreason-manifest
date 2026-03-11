@@ -16,24 +16,16 @@ from coreason_manifest.spec.ontology import (
     WorkflowManifest,
 )
 from coreason_manifest.utils.algebra import (
-    align_semantic_manifolds,
     apply_state_differential,
     calculate_latent_alignment,
     calculate_remaining_compute,
     compute_topology_hash,
-    generate_correction_prompt,
     get_ontology_schema,
     project_manifest_to_markdown,
     project_manifest_to_mermaid,
     validate_payload,
     verify_ast_safety,
 )
-
-
-def test_align_semantic_manifolds_dense() -> None:
-    res = align_semantic_manifolds("task1", ["text"], ["text", "raster_image"], "ev1")
-    assert res is not None
-    assert res.compression_sla.required_grounding_density == "dense"
 
 
 def test_compute_topology_hash() -> None:
@@ -48,18 +40,6 @@ def test_compute_topology_hash() -> None:
 class MockStrictSchema(BaseModel):
     name: str = Field(min_length=5)
     age: int
-
-
-def test_generate_correction_prompt_translation() -> None:
-    try:
-        MockStrictSchema(name="Bob", age="not_an_int")
-    except ValidationError as e:
-        prompt = generate_correction_prompt(error=e, target_node_id="did:web:node-1", fault_id="fault-001")
-        assert prompt.fault_id == "fault-001"
-        assert prompt.target_node_id == "did:web:node-1"
-        assert "/name" in prompt.failing_pointers
-        assert "/age" in prompt.failing_pointers
-        assert "CRITICAL CONTRACT BREACH" in prompt.remediation_prompt
 
 
 def test_get_ontology_schema() -> None:
@@ -212,28 +192,6 @@ def test_calculate_remaining_compute_exhaustion() -> None:
     ledger = EpistemicLedgerState(history=[receipt1, receipt2])
     with pytest.raises(ValueError, match="Mathematical Boundary Breached"):
         calculate_remaining_compute(ledger, initial_escrow_magnitude=25)
-
-
-def test_calculate_latent_alignment_cosine_math() -> None:
-    v1 = VectorEmbeddingState(
-        vector_base64=base64.b64encode(struct.pack("<2f", 1.0, 0.0)).decode("utf-8"),
-        dimensionality=2,
-        model_name="model-a",
-    )
-    v2 = VectorEmbeddingState(
-        vector_base64=base64.b64encode(struct.pack("<2f", 0.0, 1.0)).decode("utf-8"),
-        dimensionality=2,
-        model_name="model-a",
-    )
-
-    policy = OntologicalAlignmentPolicy(min_cosine_similarity=0.0, require_isometry_proof=False)
-
-    res = calculate_latent_alignment(v1, v2, policy)
-    assert res == 0.0
-
-    policy_strict = OntologicalAlignmentPolicy(min_cosine_similarity=0.9, require_isometry_proof=False)
-    with pytest.raises(ValueError, match=r"TamperFaultEvent: Latent alignment failed\."):
-        calculate_latent_alignment(v1, v2, policy_strict)
 
 
 def test_verify_ast_safety() -> None:
