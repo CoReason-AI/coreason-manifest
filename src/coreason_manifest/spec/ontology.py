@@ -2862,6 +2862,31 @@ class MCPServerManifest(CoreasonBaseState):
         return self
 
 
+class KineticSeparationPolicy(CoreasonBaseState):
+    """
+    A strict bipartite graph constraint mathematically preventing toxic tool combinations
+    from existing in the same causal execution chain.
+    """
+
+    policy_id: str = Field(description="Unique identifier for this specific separation boundary.")
+    mutually_exclusive_clusters: list[list[str]] = Field(
+        description="A topological matrix of tool names or MCP URIs. If an agent mounts one capability in a cluster, all other capabilities in that cluster are mathematically quarantined."  # noqa: E501
+    )
+    enforcement_action: Literal["halt_and_quarantine", "sever_causal_chain"] = Field(
+        description="The deterministic action the orchestrator must take if a bipartite cycle is detected."
+    )
+
+    @model_validator(mode="after")
+    def sort_clusters(self) -> Self:
+        """
+        AGENT INSTRUCTION: Mathematically stabilize the 2D array to guarantee
+        deterministic RFC 8785 canonical hashing across distributed nodes.
+        """
+        sorted_inner = [sorted(cluster) for cluster in self.mutually_exclusive_clusters]
+        object.__setattr__(self, "mutually_exclusive_clusters", sorted(sorted_inner))
+        return self
+
+
 class ActionSpaceManifest(CoreasonBaseState):
     """
     A curated environment of tools accessible to an agent or node.
@@ -2879,6 +2904,9 @@ class ActionSpaceManifest(CoreasonBaseState):
     ephemeral_partitions: list[EphemeralNamespacePartitionState] = Field(
         default_factory=list,
         description="Hermetically sealed context boundaries for dynamically resolved scripts and PEFT adapters.",
+    )
+    kinetic_separation: KineticSeparationPolicy | None = Field(
+        default=None, description="The bipartite graph constraint preventing toxic tool combinations."
     )
 
     @model_validator(mode="after")
