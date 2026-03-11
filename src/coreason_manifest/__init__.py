@@ -4,6 +4,7 @@
 from coreason_manifest.spec.ontology import *  # noqa: F403
 from coreason_manifest.utils.algebra import (
     align_semantic_manifolds,
+    calculate_latent_alignment,
     compute_topology_hash,
     generate_correction_prompt,
     get_ontology_schema,
@@ -243,6 +244,7 @@ __all__ = [
     "SpatialKinematicActionIntent",
     "StateContract",
     "StateDifferentialManifest",
+    "StateHydrationManifest",
     "StateMutationIntent",
     "StatisticalChartExtractionState",
     "StdioTransportProfile",
@@ -285,6 +287,7 @@ __all__ = [
     "WorkflowManifest",
     "ZeroKnowledgeReceipt",
     "align_semantic_manifolds",
+    "calculate_latent_alignment",
     "compute_topology_hash",
     "generate_correction_prompt",
     "get_ontology_schema",

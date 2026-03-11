@@ -7,7 +7,10 @@
 
 """AGENT INSTRUCTION: This module contains pure data transformations of the Hollow Data Plane."""
 
+import base64
 import hashlib
+import math
+import struct
 import typing
 from collections.abc import Sequence
 from typing import Any, Literal, cast
@@ -25,9 +28,11 @@ from coreason_manifest.spec.ontology import (
     EpistemicCompressionSLA,
     EpistemicTransmutationTask,
     ExecutionNodeReceipt,
+    OntologicalAlignmentPolicy,
     StateMutationIntent,
     System2RemediationIntent,
     TamperFaultEvent,
+    VectorEmbeddingState,
     WorkflowManifest,
 )
 
@@ -207,6 +212,39 @@ def align_semantic_manifolds(
     return EpistemicTransmutationTask(
         task_id=task_id, artifact_event_id=artifact_event_id, target_modalities=target_modalities, compression_sla=sla
     )
+
+
+def calculate_latent_alignment(
+    v1: VectorEmbeddingState, v2: VectorEmbeddingState, policy: OntologicalAlignmentPolicy
+) -> float:
+    """
+    A pure algebraic functor to calculate cosine similarity of two vectors.
+    """
+    if v1.model_name != v2.model_name or v1.dimensionality != v2.dimensionality:
+        raise ValueError("Topological Contradiction: Vector geometries are incommensurable.")
+
+    b1 = base64.b64decode(v1.vector_base64)
+    b2 = base64.b64decode(v2.vector_base64)
+
+    try:
+        vec1 = struct.unpack(f"<{v1.dimensionality}f", b1)
+        vec2 = struct.unpack(f"<{v2.dimensionality}f", b2)
+    except struct.error as e:
+        raise ValueError("Byte length does not match declared dimensionality.") from e
+
+    dot_product = math.fsum(a * b for a, b in zip(vec1, vec2))
+    mag1 = math.sqrt(math.fsum(x * x for x in vec1))
+    mag2 = math.sqrt(math.fsum(x * x for x in vec2))
+
+    if mag1 == 0 or mag2 == 0:
+        similarity = 0.0
+    else:
+        similarity = dot_product / (mag1 * mag2)
+
+    if similarity < policy.min_cosine_similarity:
+        raise ValueError("TamperFaultEvent: Latent alignment failed.")
+
+    return similarity
 
 
 def compute_topology_hash(topology: "AnyTopologyManifest") -> str:
