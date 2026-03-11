@@ -86,16 +86,6 @@ type FaultCategoryProfile = Literal[
     "dependency_blackout",
 ]
 
-type GitSHAReceipt = Annotated[
-    str,
-    Field(
-        pattern="^[a-f0-9]{40}$",
-        description="A Tamper-evident provenance marker.",
-        examples=["a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0"],
-        min_length=40,
-        max_length=40,
-    ),
-]
 
 type CognitiveTierProfile = Literal["working", "episodic", "semantic"]
 
@@ -159,20 +149,6 @@ type SemanticVersionState = Annotated[
 type SpanKindProfile = Literal["client", "server", "producer", "consumer", "internal"]
 
 type SpanStatusCodeProfile = Literal["unset", "ok", "error"]
-
-
-class SystemRoleProfile(StrEnum):
-    """
-    Standardized Persona-Based Access Control (PBAC) authority delegation perimeters.
-    """
-
-    SYSTEM_ADMIN = "system_admin"
-    TENANT_ADMIN = "tenant_admin"
-    AGENT_BUILDER = "agent_builder"
-    OPERATOR = "operator"
-    AUDITOR = "auditor"
-    VIEWER = "viewer"
-    MACHINE_SERVICE = "machine_service"
 
 
 class TensorStructuralTypeProfile(StrEnum):
@@ -1553,17 +1529,6 @@ class CausalDirectedEdgeState(CoreasonBaseState):
     )
 
 
-type ChartAxisScaleProfile = Literal["linear", "log", "categorical", "datetime"]
-
-
-class AffineTransformMatrixProfile(CoreasonBaseState):
-    pixel_min: float = Field(description="The absolute minimal visual coordinate on this axis.")
-    pixel_max: float = Field(description="The absolute maximal visual coordinate on this axis.")
-    domain_min: float = Field(description="The semantic/data value corresponding to pixel_min.")
-    domain_max: float = Field(description="The semantic/data value corresponding to pixel_max.")
-    scale_type: ChartAxisScaleProfile = Field(description="The mathematical progression between min and max.")
-
-
 class CircuitBreakerEvent(CoreasonBaseState):
     """
     Indicates that a circuit breaker has been tripped for a target node.
@@ -2835,14 +2800,6 @@ class JSONRPCErrorResponseState(CoreasonBaseState):
     id: str | int | None = Field(default=None, description="The request ID that this error corresponds to.")
 
 
-class LakehouseMountProfile(CoreasonBaseState):
-    catalog_uri: str = Field(min_length=1, description="The stateless endpoint of the catalog (e.g., Polaris, Nessie).")
-    table_format: Literal["iceberg", "delta", "hudi"] = Field(description="Strict boundary for the destination format.")
-    schema_evolution_mode: Literal["strict", "additive_only"] = Field(
-        description="Dictates if the agent can evolve the schema."
-    )
-
-
 type LifecycleTriggerEvent = Literal[
     "on_start",
     "on_node_transition",
@@ -3263,21 +3220,6 @@ class MarketResolutionState(CoreasonBaseState):
     @model_validator(mode="after")
     def sort_arrays(self) -> Self:
         object.__setattr__(self, "falsified_hypothesis_ids", sorted(self.falsified_hypothesis_ids))
-        return self
-
-
-class MathematicalNotationExtractionState(CoreasonBaseState):
-    math_type: Literal["inline", "display"] = Field(description="The structural context of the equation.")
-    syntax: Literal["latex", "mathml"] = Field(description="The strict symbolic compilation language.")
-    expression: str = Field(min_length=1, description="The raw, unescaped mathematical syntax string.")
-    anchor: MultimodalTokenAnchorState = Field(
-        description="The strict visual and token coordinate bindings. Cannot be None."
-    )
-
-    @model_validator(mode="after")
-    def verify_grounding(self) -> Self:
-        if self.anchor.token_span_start is None and self.anchor.bounding_box is None:
-            raise ValueError("Mathematical extractions must have a definitive visual or token bounding box.")
         return self
 
 
@@ -3920,33 +3862,6 @@ class OntologicalAlignmentPolicy(CoreasonBaseState):
     )
 
 
-class StatisticalChartExtractionState(CoreasonBaseState):
-    axes: dict[str, AffineTransformMatrixProfile] = Field(
-        description="Named axes (e.g., 'x', 'y') defining the affine transformation boundaries."
-    )
-    semantic_series: list[dict[str, float | str]] = Field(
-        description="The discrete semantic tuples extracted from the chart markers."
-    )
-
-    @model_validator(mode="after")
-    def verify_dimensional_isometry(self) -> Self:
-        axis_keys = set(self.axes.keys())
-        for point in self.semantic_series:
-            point_keys = set(point.keys())
-            if not point_keys.issubset(axis_keys) and (not axis_keys.issubset(point_keys)):
-                missing = axis_keys - point_keys
-                if missing:
-                    raise ValueError(f"Coordinate missing required axis dimensions: {missing}")
-        return self
-
-    @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
-        object.__setattr__(
-            self, "semantic_series", sorted(self.semantic_series, key=lambda d: json.dumps(d, sort_keys=True))
-        )
-        return self
-
-
 class StdioTransportProfile(CoreasonBaseState):
     """Configuration for local Stdio-based MCP transport."""
 
@@ -4060,12 +3975,6 @@ class HypothesisGenerationEvent(BaseStateEvent):
         return self
 
 
-class SuspenseState(CoreasonBaseState):
-    """
-    Indicates that the swarm is waiting on a long-running process or human input.
-    """
-
-
 class SyntheticGenerationProfile(CoreasonBaseState):
     """Authoritative blueprint for external fuzzing and simulation engines."""
 
@@ -4117,38 +4026,6 @@ class System2RemediationIntent(CoreasonBaseState):
     def _sort_failing_pointers(self) -> Self:
         """Mathematically sort pointers to guarantee deterministic canonical hashing."""
         object.__setattr__(self, "failing_pointers", sorted(self.failing_pointers))
-        return self
-
-
-class TabularCellState(CoreasonBaseState):
-    row_index: int = Field(ge=0, description="The zero-indexed absolute matrix row.")
-    col_index: int = Field(ge=0, description="The zero-indexed absolute matrix column.")
-    row_span: int = Field(default=1, ge=1, description="The vertical height of the cell.")
-    col_span: int = Field(default=1, ge=1, description="The horizontal width of the cell.")
-    content: str = Field(description="The normalized text value.")
-    anchor: MultimodalTokenAnchorState = Field(
-        description="The physical location of the cell within the image or document."
-    )
-
-
-class TabularMatrixExtractionState(CoreasonBaseState):
-    cells: list[TabularCellState] = Field(description="The sparse tensor representing all populated cells.")
-
-    @model_validator(mode="after")
-    def sort_tabular_matrix_arrays(self) -> Self:
-        object.__setattr__(self, "cells", sorted(self.cells, key=lambda x: (x.row_index, x.col_index)))
-        return self
-
-    @model_validator(mode="after")
-    def detect_geometric_collisions(self) -> Self:
-        occupied_coordinates: set[tuple[int, int]] = set()
-        for cell in self.cells:
-            for r in range(cell.row_index, cell.row_index + cell.row_span):
-                for c in range(cell.col_index, cell.col_index + cell.col_span):
-                    coord = (r, c)
-                    if coord in occupied_coordinates:
-                        raise ValueError(f"Geometric Collision Detected: Cell overlapping at coordinate {coord}.")
-                    occupied_coordinates.add(coord)
         return self
 
 
