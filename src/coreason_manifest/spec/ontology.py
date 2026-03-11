@@ -173,7 +173,7 @@ class SystemRole(StrEnum):
     MACHINE_SERVICE = "machine_service"
 
 
-class TensorDType(StrEnum):
+class TensorStructuralType(StrEnum):
     """Mathematical tensor types for tensor payloads."""
 
     FLOAT32 = "float32"
@@ -633,7 +633,9 @@ class ConstitutionalPolicy(CoreasonBaseModel):
     """
 
     rule_id: str = Field(description="Unique identifier for the constitutional rule.")
-    description: str = Field(description="Detailed description of the rule.")
+    description: str = Field(
+        description="The definitive causal constraint or heuristic boundary enforced by this rule."
+    )
     severity: Literal["low", "medium", "high", "critical"] = Field(
         description="Severity level if the rule is violated."
     )
@@ -1071,7 +1073,9 @@ class ToolManifest(CoreasonBaseModel):
     """
 
     tool_name: str = Field(description="The exact identifier of the tool.")
-    description: str = Field(description="Semantic description of what the tool does, used by the LLM for selection.")
+    description: str = Field(
+        description="The mathematically bounded semantic projection defining the tool's causal affordances."
+    )
     input_schema: dict[str, Any] = Field(
         description="The strict JSON Schema dictionary defining the required arguments."
     )
@@ -1414,6 +1418,7 @@ class BrowserDOMState(CoreasonBaseModel):
         return url
 
     viewport_size: tuple[int, int] = Field(description="Capability Perimeters detailing bounding coordinates.")
+    # Note: viewport_size is a structurally ordered sequence (Spatial Coordinates) and MUST NOT be sorted.
     dom_hash: str = Field(description="The SHA-256 hash acting as the structural manifestation vector.")
     accessibility_tree_hash: str = Field(
         description="The SHA-256 hash of the accessibility tree defining Exogenous Perturbations to the state space."
@@ -2249,6 +2254,15 @@ class DynamicRoutingManifest(CoreasonBaseModel):
     )
 
     @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(
+            self,
+            "active_subgraphs",
+            {k: sorted(v) for k, v in self.active_subgraphs.items()},
+        )
+        return self
+
+    @model_validator(mode="after")
     def sort_bypassed_steps(self) -> Self:
         object.__setattr__(self, "bypassed_steps", sorted(self.bypassed_steps, key=lambda x: x.bypassed_node_id))
         return self
@@ -2951,7 +2965,7 @@ class NDimensionalTensorManifest(CoreasonBaseModel):
     Used for routing multi-dimensional compute without passing raw bytes.
     """
 
-    dtype: TensorDType = Field(..., description="Structural type of the tensor elements.")
+    structural_type: TensorStructuralType = Field(..., description="Structural type of the tensor elements.")
     shape: tuple[int, ...] = Field(..., description="N-Dimensional shape tuple.")
     # Note: shape is a structurally ordered sequence (Tensor Dimensions) and MUST NOT be sorted.
     vram_footprint_bytes: int = Field(..., description="Exact byte size of the uncompressed tensor.")
@@ -2967,14 +2981,14 @@ class NDimensionalTensorManifest(CoreasonBaseModel):
             if dim <= 0:
                 raise ValueError(f"Tensor dimensions must be strictly positive integers. Got: {self.shape}")
         bytes_per_element = (
-            self.dtype.bytes_per_element
-            if isinstance(self.dtype, TensorDType)
-            else TensorDType(self.dtype).bytes_per_element
+            self.structural_type.bytes_per_element
+            if isinstance(self.structural_type, TensorStructuralType)
+            else TensorStructuralType(self.structural_type).bytes_per_element
         )
         calculated_bytes = math.prod(self.shape) * bytes_per_element
         if calculated_bytes != self.vram_footprint_bytes:
             raise ValueError(
-                f"Topological mismatch: Shape {self.shape} of {self.dtype.value} requires {calculated_bytes} bytes, but manifest declares {self.vram_footprint_bytes} bytes."  # noqa: E501
+                f"Topological mismatch: Shape {self.shape} of {self.structural_type.value} requires {calculated_bytes} bytes, but manifest declares {self.vram_footprint_bytes} bytes."  # noqa: E501
             )
         return self
 
@@ -2991,6 +3005,15 @@ class NeuralAuditAttestationReceipt(CoreasonBaseModel):
         default=False,
         description="Cryptographic proof that the orchestrator actively resampled or ablated this circuit to verify its causal responsibility for the output.",  # noqa: E501
     )
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(
+            self,
+            "layer_activations",
+            {k: sorted(v, key=lambda x: x.feature_index) for k, v in self.layer_activations.items()},
+        )
+        return self
 
 
 class NeuroSymbolicHandoffContract(CoreasonBaseModel):
@@ -3738,7 +3761,7 @@ class AuctionState(CoreasonBaseModel):
 
 type TelemetryScalar = str | int | float | bool | None
 
-type TelemetryMetadataProfile = dict[str, TelemetryScalar | list[TelemetryScalar]]
+type TelemetryContextProfile = dict[str, TelemetryScalar | list[TelemetryScalar]]
 
 
 class LogEvent(CoreasonBaseModel):
@@ -3751,7 +3774,7 @@ class LogEvent(CoreasonBaseModel):
         description="The severity level of the log event."
     )
     message: str = Field(description="The primary log message.")
-    metadata: TelemetryMetadataProfile = Field(
+    context_profile: TelemetryContextProfile = Field(
         default_factory=dict, description="Contextual key-value metadata associated with the event."
     )
 
@@ -3766,7 +3789,7 @@ class SpanTraceReceipt(CoreasonBaseModel):
     start_time: float = Field(description="The UNIX timestamp when the span started.")
     end_time: float | None = Field(default=None, description="The UNIX timestamp when the span ended.")
     status: Literal["OK", "ERROR", "PENDING"] = Field(description="The completion status of the span.")
-    metadata: TelemetryMetadataProfile = Field(
+    context_profile: TelemetryContextProfile = Field(
         default_factory=dict, description="Contextual key-value metadata associated with the span execution."
     )
 
@@ -4024,6 +4047,7 @@ class AgentNodeProfile(BaseNodeProfile):
     A node representing an autonomous agent.
     """
 
+    description: str = Field(description="The semantic boundary defining the objective function of the execution node.")
     type: Literal["agent"] = Field(default="agent", description="Discriminator for an Agent node.")
     logit_steganography: LogitSteganographyContract | None = Field(
         default=None,
@@ -4758,9 +4782,7 @@ class EpistemicLedgerState(CoreasonBaseModel):
         return self
 
 
-# =========================================================================
-# STRATUM 9: TOPOLOGICAL RESOLUTION (FORWARD REF EVALUATION)
-# =========================================================================
+# Topological boundary: ForwardRef resolution
 
 CompositeNodeProfile.model_rebuild()
 WorkflowManifest.model_rebuild()
