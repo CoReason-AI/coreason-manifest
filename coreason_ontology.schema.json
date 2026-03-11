@@ -957,6 +957,7 @@
           "budget_exhaustion": "#/$defs/BudgetExhaustionEvent",
           "counterfactual_regret": "#/$defs/CounterfactualRegretEvent",
           "epistemic_promotion": "#/$defs/EpistemicPromotionEvent",
+          "epistemic_telemetry": "#/$defs/EpistemicTelemetryEvent",
           "hypothesis": "#/$defs/HypothesisGenerationEvent",
           "normative_drift": "#/$defs/NormativeDriftEvent",
           "observation": "#/$defs/ObservationEvent",
@@ -1003,6 +1004,9 @@
         },
         {
           "$ref": "#/$defs/BudgetExhaustionEvent"
+        },
+        {
+          "$ref": "#/$defs/EpistemicTelemetryEvent"
         }
       ]
     },
@@ -4446,6 +4450,79 @@
       "title": "EpistemicScanningPolicy",
       "type": "object"
     },
+    "EpistemicTelemetryEvent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nThe cryptographic receipt of human-in-the-loop interaction tracking used to calculate\nEpistemic Regret and iteratively tune retrieval gradients without explicit human grading.",
+      "properties": {
+        "event_id": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "type": {
+          "const": "epistemic_telemetry",
+          "default": "epistemic_telemetry",
+          "description": "Discriminator type for telemetry events.",
+          "title": "Type",
+          "type": "string"
+        },
+        "interaction_modality": {
+          "description": "The exact topological action the human operator performed on the projected manifold.",
+          "enum": [
+            "expansion",
+            "collapse",
+            "dwell_focus",
+            "heuristic_rejection"
+          ],
+          "title": "Interaction Modality",
+          "type": "string"
+        },
+        "target_node_id": {
+          "description": "The specific TaxonomicNodeState CID that was manipulated.",
+          "title": "Target Node Id",
+          "type": "string"
+        },
+        "dwell_duration_ms": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The strictly typed temporal bound measuring human attention focus.",
+          "title": "Dwell Duration Ms"
+        },
+        "spatial_coordinates": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SpatialCoordinateProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional 2D trajectory of the human pointer event mapped to the visual grid."
+        }
+      },
+      "required": [
+        "event_id",
+        "timestamp",
+        "interaction_modality",
+        "target_node_id"
+      ],
+      "title": "EpistemicTelemetryEvent",
+      "type": "object"
+    },
     "EpistemicTransmutationTask": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology",
@@ -5569,6 +5646,38 @@
         "max_synthetic_tokens"
       ],
       "title": "GenerativeManifoldSLA",
+      "type": "object"
+    },
+    "GenerativeTaxonomyManifest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nThe structural schema representing a synthesized manifold (Virtual File System)\nthat projects high-dimensional dense vectors into a navigable N-ary tree.",
+      "properties": {
+        "manifest_id": {
+          "description": "Unique Content Identifier (CID) for this generated taxonomy.",
+          "minLength": 1,
+          "title": "Manifest Id",
+          "type": "string"
+        },
+        "root_node_id": {
+          "description": "The CID of the top-level TaxonomicNodeState initiating the tree.",
+          "title": "Root Node Id",
+          "type": "string"
+        },
+        "nodes": {
+          "additionalProperties": {
+            "$ref": "#/$defs/TaxonomicNodeState"
+          },
+          "description": "Flat dictionary matrix containing all nodes within the manifold.",
+          "title": "Nodes",
+          "type": "object"
+        }
+      },
+      "required": [
+        "manifest_id",
+        "root_node_id",
+        "nodes"
+      ],
+      "title": "GenerativeTaxonomyManifest",
       "type": "object"
     },
     "GlobalGovernancePolicy": {
@@ -10863,6 +10972,123 @@
         "cleared_price_magnitude"
       ],
       "title": "TaskAwardReceipt",
+      "type": "object"
+    },
+    "TaxonomicNodeState": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nA strictly bounded dimensional reduction coordinate representing a single cluster or leaf\nin the synthesized generative taxonomy (Virtual File System).",
+      "properties": {
+        "node_id": {
+          "description": "A Content Identifier (CID) bounding this specific taxonomic coordinate.",
+          "minLength": 1,
+          "title": "Node Id",
+          "type": "string"
+        },
+        "semantic_label": {
+          "description": "The human-legible, dynamically synthesized categorical label (e.g., 'High Risk Policies').",
+          "title": "Semantic Label",
+          "type": "string"
+        },
+        "children_node_ids": {
+          "description": "Explicit array of child node CIDs to enforce the Directed Acyclic Graph.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Children Node Ids",
+          "type": "array"
+        },
+        "leaf_provenance": {
+          "description": "The mathematical chain of custody binding this virtual coordinate back to physical vectors.",
+          "items": {
+            "$ref": "#/$defs/EpistemicProvenanceReceipt"
+          },
+          "title": "Leaf Provenance",
+          "type": "array"
+        }
+      },
+      "required": [
+        "node_id",
+        "semantic_label"
+      ],
+      "title": "TaxonomicNodeState",
+      "type": "object"
+    },
+    "TaxonomicRestructureIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nThe active UI-mutation payload for dynamic regrouping across the Hollow Data Plane.",
+      "properties": {
+        "type": {
+          "const": "taxonomic_restructure",
+          "default": "taxonomic_restructure",
+          "description": "Strict discriminator for dynamic UI regrouping.",
+          "title": "Type",
+          "type": "string"
+        },
+        "restructure_heuristic": {
+          "description": "The SOTA mathematical heuristic used to project the new manifold.",
+          "enum": [
+            "chronological",
+            "entity_centric",
+            "semantic_cluster",
+            "confidence_decay"
+          ],
+          "title": "Restructure Heuristic",
+          "type": "string"
+        },
+        "target_taxonomy": {
+          "$ref": "#/$defs/GenerativeTaxonomyManifest",
+          "description": "The newly synthesized topology projected to the frontend."
+        }
+      },
+      "required": [
+        "restructure_heuristic",
+        "target_taxonomy"
+      ],
+      "title": "TaxonomicRestructureIntent",
+      "type": "object"
+    },
+    "TaxonomicRoutingPolicy": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nThe deterministic Softmax gate mapping classified operational intents to pre-defined\nspatial organizing frameworks to prevent token exhaustion.",
+      "properties": {
+        "policy_id": {
+          "description": "Unique identifier for this pre-flight routing policy.",
+          "minLength": 1,
+          "title": "Policy Id",
+          "type": "string"
+        },
+        "intent_to_heuristic_matrix": {
+          "additionalProperties": {
+            "enum": [
+              "chronological",
+              "entity_centric",
+              "semantic_cluster",
+              "confidence_decay"
+            ],
+            "type": "string"
+          },
+          "description": "Strict dictionary binding classified natural language intents to bounded spatial heuristics.",
+          "title": "Intent To Heuristic Matrix",
+          "type": "object"
+        },
+        "fallback_heuristic": {
+          "description": "The deterministic default applied if intent classification falls below the safety threshold.",
+          "enum": [
+            "chronological",
+            "entity_centric",
+            "semantic_cluster",
+            "confidence_decay"
+          ],
+          "title": "Fallback Heuristic",
+          "type": "string"
+        }
+      },
+      "required": [
+        "policy_id",
+        "intent_to_heuristic_matrix",
+        "fallback_heuristic"
+      ],
+      "title": "TaxonomicRoutingPolicy",
       "type": "object"
     },
     "TelemetryContextProfile": {

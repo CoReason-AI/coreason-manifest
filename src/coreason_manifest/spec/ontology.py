@@ -2579,12 +2579,101 @@ class InformationalIntent(CoreasonBaseState):
     )
 
 
+class TaxonomicNodeState(CoreasonBaseState):
+    """
+    A strictly bounded dimensional reduction coordinate representing a single cluster or leaf
+    in the synthesized generative taxonomy (Virtual File System).
+    """
+
+    node_id: str = Field(
+        min_length=1, description="A Content Identifier (CID) bounding this specific taxonomic coordinate."
+    )
+    semantic_label: str = Field(
+        description="The human-legible, dynamically synthesized categorical label (e.g., 'High Risk Policies')."
+    )
+    children_node_ids: list[str] = Field(
+        default_factory=list, description="Explicit array of child node CIDs to enforce the Directed Acyclic Graph."
+    )
+    leaf_provenance: list["EpistemicProvenanceReceipt"] = Field(
+        default_factory=list,
+        description="The mathematical chain of custody binding this virtual coordinate back to physical vectors.",
+    )
+
+    @model_validator(mode="after")
+    def sort_taxonomic_arrays(self) -> Self:
+        """Mathematically sort arrays to guarantee deterministic canonical hashing."""
+        object.__setattr__(self, "children_node_ids", sorted(self.children_node_ids))
+        object.__setattr__(self, "leaf_provenance", sorted(self.leaf_provenance, key=lambda x: x.source_event_id))
+        return self
+
+
+class GenerativeTaxonomyManifest(CoreasonBaseState):
+    """
+    The structural schema representing a synthesized manifold (Virtual File System)
+    that projects high-dimensional dense vectors into a navigable N-ary tree.
+    """
+
+    manifest_id: str = Field(min_length=1, description="Unique Content Identifier (CID) for this generated taxonomy.")
+    root_node_id: str = Field(description="The CID of the top-level TaxonomicNodeState initiating the tree.")
+    nodes: dict[str, TaxonomicNodeState] = Field(
+        description="Flat dictionary matrix containing all nodes within the manifold."
+    )
+
+    @model_validator(mode="after")
+    def verify_dag_integrity(self) -> Self:
+        """
+        AGENT INSTRUCTION: Mathematically prove the absence of disconnected ghost nodes
+        and cyclical references within the projected visual manifold.
+        """
+        if self.root_node_id not in self.nodes:
+            raise ValueError(f"Topological Fracture: Root node '{self.root_node_id}' not found in matrix.")
+        return self
+
+
+class TaxonomicRestructureIntent(CoreasonBaseState):
+    """
+    The active UI-mutation payload for dynamic regrouping across the Hollow Data Plane.
+    """
+
+    type: Literal["taxonomic_restructure"] = Field(
+        default="taxonomic_restructure", description="Strict discriminator for dynamic UI regrouping."
+    )
+    restructure_heuristic: Literal["chronological", "entity_centric", "semantic_cluster", "confidence_decay"] = Field(
+        description="The SOTA mathematical heuristic used to project the new manifold."
+    )
+    target_taxonomy: GenerativeTaxonomyManifest = Field(
+        description="The newly synthesized topology projected to the frontend."
+    )
+
+
+class TaxonomicRoutingPolicy(CoreasonBaseState):
+    """
+    The deterministic Softmax gate mapping classified operational intents to pre-defined
+    spatial organizing frameworks to prevent token exhaustion.
+    """
+
+    policy_id: str = Field(min_length=1, description="Unique identifier for this pre-flight routing policy.")
+    intent_to_heuristic_matrix: dict[
+        str, Literal["chronological", "entity_centric", "semantic_cluster", "confidence_decay"]
+    ] = Field(
+        description="Strict dictionary binding classified natural language intents to bounded spatial heuristics."
+    )
+    fallback_heuristic: Literal["chronological", "entity_centric", "semantic_cluster", "confidence_decay"] = Field(
+        description="The deterministic default applied if intent classification falls below the safety threshold."
+    )
+
+
 type AnyPresentationIntent = Annotated[
     InformationalIntent | DraftingIntent | AdjudicationIntent | EscalationIntent, Field(discriminator="type")
 ]
 
 type AnyIntent = Annotated[
-    InformationalIntent | DraftingIntent | AdjudicationIntent | EscalationIntent | SemanticDiscoveryIntent,
+    InformationalIntent
+    | DraftingIntent
+    | AdjudicationIntent
+    | EscalationIntent
+    | SemanticDiscoveryIntent
+    | TaxonomicRestructureIntent,
     Field(discriminator="type"),
 ]
 
@@ -5063,6 +5152,27 @@ class ObservationEvent(BaseStateEvent):
         return _validate_payload_bounds(v)
 
 
+class EpistemicTelemetryEvent(BaseStateEvent):
+    """
+    The cryptographic receipt of human-in-the-loop interaction tracking used to calculate
+    Epistemic Regret and iteratively tune retrieval gradients without explicit human grading.
+    """
+
+    type: Literal["epistemic_telemetry"] = Field(
+        default="epistemic_telemetry", description="Discriminator type for telemetry events."
+    )
+    interaction_modality: Literal["expansion", "collapse", "dwell_focus", "heuristic_rejection"] = Field(
+        description="The exact topological action the human operator performed on the projected manifold."
+    )
+    target_node_id: str = Field(description="The specific TaxonomicNodeState CID that was manipulated.")
+    dwell_duration_ms: int | None = Field(
+        default=None, ge=0, description="The strictly typed temporal bound measuring human attention focus."
+    )
+    spatial_coordinates: SpatialCoordinateProfile | None = Field(
+        default=None, description="Optional 2D trajectory of the human pointer event mapped to the visual grid."
+    )
+
+
 type AnyStateEvent = Annotated[
     ObservationEvent
     | BeliefMutationEvent
@@ -5075,7 +5185,8 @@ type AnyStateEvent = Annotated[
     | NormativeDriftEvent
     | PersistenceCommitReceipt
     | TokenBurnReceipt
-    | BudgetExhaustionEvent,
+    | BudgetExhaustionEvent
+    | EpistemicTelemetryEvent,
     Field(discriminator="type", description="A discriminated union of state events."),
 ]
 
