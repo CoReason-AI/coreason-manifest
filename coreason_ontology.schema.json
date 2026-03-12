@@ -1638,22 +1638,8 @@
           "type": "string"
         },
         "max_permitted_classification": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/InformationClassificationProfile"
-            },
-            {
-              "enum": [
-                "public",
-                "internal",
-                "confidential",
-                "restricted"
-              ],
-              "type": "string"
-            }
-          ],
-          "description": "The absolute highest semantic sensitivity allowed to cross this federated boundary.",
-          "title": "Max Permitted Classification"
+          "$ref": "#/$defs/InformationClassificationProfile",
+          "description": "The absolute highest semantic sensitivity allowed to cross this federated boundary."
         },
         "liability_limit_magnitude": {
           "description": "The strict magnitude cap on cross-tenant economic liability.",
