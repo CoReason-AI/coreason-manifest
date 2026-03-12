@@ -40,14 +40,14 @@ def test_browser_dom_state_spatial_safety() -> None:
 
     # 3. Standard Private IPs and SSRF bypass variants (hex, integer, octal, IPv6)
     invalid_ips = [
-        "http://127.0.0.1/",         # Standard private
-        "http://192.168.1.1/",       # Standard private
-        "http://169.254.169.254/",   # Cloud metadata
-        "http://0x7f000001/",        # 127.0.0.1 in Hex
-        "http://2130706433/",        # 127.0.0.1 in Integer
-        "http://0177.0.0.1/",        # 127.0.0.1 in Octal format
-        "http://0x7f.0.0.1/",        # 127.0.0.1 in mixed Hex/Decimal
-        "http://[::1]/",             # IPv6 loopback
+        "http://127.0.0.1/",  # Standard private
+        "http://192.168.1.1/",  # Standard private
+        "http://169.254.169.254/",  # Cloud metadata
+        "http://0x7f000001/",  # 127.0.0.1 in Hex
+        "http://2130706433/",  # 127.0.0.1 in Integer
+        "http://0177.0.0.1/",  # 127.0.0.1 in Octal format
+        "http://0x7f.0.0.1/",  # 127.0.0.1 in mixed Hex/Decimal
+        "http://[::1]/",  # IPv6 loopback
     ]
 
     for url in invalid_ips:
