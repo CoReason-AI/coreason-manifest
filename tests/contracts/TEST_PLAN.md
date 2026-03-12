@@ -18,6 +18,3 @@ The primary purpose of testing in the `coreason_manifest` package is not mere te
 
 5. **Semantic Anchoring**
    Assert the presence of the required "CoReason Shared Kernel Ontology" description string, preventing IP obfuscation and latent decoupling of the data plane.
-
-## Current Focus
-We will specifically audit `ExecutionNodeReceipt.generate_node_hash()` to verify the determinism of its private `_canonicalize` helper against varied `JsonPrimitiveState` dictionaries, including structural checks on Python types (e.g., sets or None elements) that break `json.dumps()` canonicalization guarantees. We will simultaneously audit legacy syntax bugs embedded in `_enforce_spatial_safety`.
