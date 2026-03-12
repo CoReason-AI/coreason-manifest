@@ -6,6 +6,7 @@ from coreason_manifest.spec.ontology import (
     MultimodalTokenAnchorState,
 )
 
+
 def test_document_layout_manifest_dag_cycles() -> None:
     # 1. Create dummy valid anchor to reuse
     anchor = MultimodalTokenAnchorState(
@@ -44,28 +45,28 @@ def test_document_layout_manifest_dag_cycles() -> None:
     assert valid_manifest.chronological_flow_edges == [("A", "B"), ("B", "C")]
 
     # 4. Test missing source block
-    with pytest.raises(ValueError, match="Source block 'D' does not exist."):
+    with pytest.raises(ValueError, match=r"Source block 'D' does not exist\."):
         DocumentLayoutManifest(
             blocks={"A": block_a, "B": block_b, "C": block_c},
             chronological_flow_edges=[("D", "B"), ("B", "C")]
         )
 
     # 5. Test missing target block
-    with pytest.raises(ValueError, match="Target block 'D' does not exist."):
+    with pytest.raises(ValueError, match=r"Target block 'D' does not exist\."):
         DocumentLayoutManifest(
             blocks={"A": block_a, "B": block_b, "C": block_c},
             chronological_flow_edges=[("A", "B"), ("B", "D")]
         )
 
     # 6. Test a cyclic DAG (A -> B -> C -> A)
-    with pytest.raises(ValueError, match="Reading order contains a cyclical contradiction."):
+    with pytest.raises(ValueError, match=r"Reading order contains a cyclical contradiction\."):
         DocumentLayoutManifest(
             blocks={"A": block_a, "B": block_b, "C": block_c},
             chronological_flow_edges=[("A", "B"), ("B", "C"), ("C", "A")]
         )
 
     # 7. Test self cycle (A -> A)
-    with pytest.raises(ValueError, match="Reading order contains a cyclical contradiction."):
+    with pytest.raises(ValueError, match=r"Reading order contains a cyclical contradiction\."):
         DocumentLayoutManifest(
             blocks={"A": block_a},
             chronological_flow_edges=[("A", "A")]
@@ -81,3 +82,4 @@ def test_document_layout_manifest_dag_cycles() -> None:
         blocks={"A": block_a, "B": block_b, "C": block_c, "D": block_d},
         chronological_flow_edges=[("A", "B"), ("A", "C"), ("B", "D"), ("C", "D")]
     )
+    assert diamond_manifest is not None
