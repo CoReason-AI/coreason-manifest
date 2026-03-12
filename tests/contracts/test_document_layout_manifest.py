@@ -1,4 +1,8 @@
+from typing import Any
+
+import hypothesis.strategies as st
 import pytest
+from hypothesis import HealthCheck, given, settings
 
 from coreason_manifest.spec.ontology import (
     DocumentLayoutManifest,
@@ -7,9 +11,9 @@ from coreason_manifest.spec.ontology import (
 )
 
 
-def test_document_layout_manifest_dag_cycles() -> None:
-    # 1. Create dummy valid anchor to reuse
-    anchor = MultimodalTokenAnchorState(
+# 1. Base Factory for DRY Context Generation
+def build_anchor() -> MultimodalTokenAnchorState:
+    return MultimodalTokenAnchorState(
         token_span_start=0,
         token_span_end=10,
         visual_patch_hashes=[],
@@ -17,47 +21,59 @@ def test_document_layout_manifest_dag_cycles() -> None:
         block_type="paragraph",
     )
 
-    # 2. Create some blocks
-    block_a = DocumentLayoutRegionState(block_id="A", block_type="paragraph", anchor=anchor)
-    block_b = DocumentLayoutRegionState(block_id="B", block_type="paragraph", anchor=anchor)
-    block_c = DocumentLayoutRegionState(block_id="C", block_type="paragraph", anchor=anchor)
 
-    # 3. Test a valid DAG (A -> B -> C)
-    valid_manifest = DocumentLayoutManifest(
-        blocks={"A": block_a, "B": block_b, "C": block_c}, chronological_flow_edges=[("A", "B"), ("B", "C")]
-    )
-    assert valid_manifest.blocks["A"] == block_a
-    assert valid_manifest.blocks["B"] == block_b
-    assert valid_manifest.blocks["C"] == block_c
-    assert valid_manifest.chronological_flow_edges == [("A", "B"), ("B", "C")]
+def build_block(block_id: str) -> DocumentLayoutRegionState:
+    return DocumentLayoutRegionState(block_id=block_id, block_type="paragraph", anchor=build_anchor())
 
-    # 4. Test missing source block
-    with pytest.raises(ValueError, match=r"Source block 'D' does not exist\."):
-        DocumentLayoutManifest(
-            blocks={"A": block_a, "B": block_b, "C": block_c}, chronological_flow_edges=[("D", "B"), ("B", "C")]
-        )
 
-    # 5. Test missing target block
-    with pytest.raises(ValueError, match=r"Target block 'D' does not exist\."):
-        DocumentLayoutManifest(
-            blocks={"A": block_a, "B": block_b, "C": block_c}, chronological_flow_edges=[("A", "B"), ("B", "D")]
-        )
+# 2. Atomic Parameterized Tests for Referential Integrity (Ghost Nodes)
+@pytest.mark.parametrize(
+    ("edges", "match_string"),
+    [([("D", "B")], r"Source block 'D' does not exist"), ([("A", "D")], r"Target block 'D' does not exist")],
+)
+def test_document_layout_manifest_ghost_nodes(edges: list[tuple[str, str]], match_string: str) -> None:
+    """Prove the topological boundary strictly severs missing coordinate references."""
+    blocks = {"A": build_block("A"), "B": build_block("B"), "C": build_block("C")}
+    with pytest.raises(ValueError, match=match_string):
+        DocumentLayoutManifest(blocks=blocks, chronological_flow_edges=edges)
 
-    # 6. Test a cyclic DAG (A -> B -> C -> A)
-    with pytest.raises(ValueError, match=r"Reading order contains a cyclical contradiction\."):
-        DocumentLayoutManifest(
-            blocks={"A": block_a, "B": block_b, "C": block_c},
-            chronological_flow_edges=[("A", "B"), ("B", "C"), ("C", "A")],
-        )
 
-    # 7. Test self cycle (A -> A)
-    with pytest.raises(ValueError, match=r"Reading order contains a cyclical contradiction\."):
-        DocumentLayoutManifest(blocks={"A": block_a}, chronological_flow_edges=[("A", "A")])
+# 3. Atomic Parameterized Tests for Static Cycles
+@pytest.mark.parametrize(
+    "edges",
+    [
+        [("A", "A")],  # Self-cycle
+        [("A", "B"), ("B", "C"), ("C", "A")],  # 3-node cycle
+        [("A", "B"), ("B", "A")],  # 2-node cycle
+    ],
+)
+def test_document_layout_manifest_static_cycles(edges: list[tuple[str, str]]) -> None:
+    """Prove the manifest deterministically collapses when chronological paradoxes are injected."""
+    blocks = {"A": build_block("A"), "B": build_block("B"), "C": build_block("C")}
+    with pytest.raises(ValueError, match=r"Reading order contains a cyclical contradiction"):
+        DocumentLayoutManifest(blocks=blocks, chronological_flow_edges=edges)
 
-    # 8. Test diamond DAG (A -> B -> D, A -> C -> D)
-    block_d = DocumentLayoutRegionState(block_id="D", block_type="paragraph", anchor=anchor)
-    diamond_manifest = DocumentLayoutManifest(
-        blocks={"A": block_a, "B": block_b, "C": block_c, "D": block_d},
-        chronological_flow_edges=[("A", "B"), ("A", "C"), ("B", "D"), ("C", "D")],
-    )
-    assert diamond_manifest is not None
+
+# 4. Fuzzing Valid DAG Topologies
+@st.composite
+def valid_dag_strategy(draw: st.DrawFn) -> dict[str, Any]:
+    """Generates mathematically guaranteed DAGs by strictly pointing edges from lower to higher array indices."""
+    node_ids = draw(st.lists(st.text(min_size=1, max_size=10), min_size=2, max_size=15, unique=True))
+    edges = []
+    for i in range(len(node_ids)):
+        edges.extend((node_ids[i], node_ids[j]) for j in range(i + 1, len(node_ids)) if draw(st.booleans()))
+    return {"nodes": node_ids, "edges": edges}
+
+
+@given(dag_data=valid_dag_strategy())
+@settings(max_examples=50, suppress_health_check=[HealthCheck.too_slow])
+def test_document_layout_manifest_fuzz_valid_dag(dag_data: dict[str, Any]) -> None:
+    """
+    AGENT INSTRUCTION: Fuzz the topological engine. Prove that any mathematically
+    sound DAG is strictly accepted without hallucinating false-positive cycle rejections.
+    """
+    blocks = {n_id: build_block(n_id) for n_id in dag_data["nodes"]}
+    manifest = DocumentLayoutManifest(blocks=blocks, chronological_flow_edges=dag_data["edges"])
+
+    assert len(manifest.blocks) == len(dag_data["nodes"])
+    assert manifest.chronological_flow_edges == dag_data["edges"]
