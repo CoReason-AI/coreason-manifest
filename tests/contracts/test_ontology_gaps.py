@@ -6,11 +6,11 @@ from pydantic import ValidationError
 from coreason_manifest.spec.ontology import (
     ConsensusPolicy,
     CoreasonBaseState,
+    LatentSmoothingProfile,
     QuorumPolicy,
     RiskLevelPolicy,
     SaeLatentPolicy,
     SpatialBoundingBoxProfile,
-    LatentSmoothingProfile,
 )
 
 
@@ -32,7 +32,7 @@ def test_coreason_base_state_hash() -> None:
     assert h1 == h2
     # Verify cached hash attribute was set
     assert hasattr(state, "_cached_hash")
-    assert getattr(state, "_cached_hash") == h1
+    assert state._cached_hash == h1
 
 
 # --- 2. Spatial Bounding Box Fuzzing ---
