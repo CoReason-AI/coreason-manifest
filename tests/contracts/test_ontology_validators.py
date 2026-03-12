@@ -1,4 +1,6 @@
 import pytest
+from pydantic import ValidationError
+
 from coreason_manifest.spec.ontology import (
     ConsensusPolicy,
     CoreasonBaseState,
@@ -8,7 +10,6 @@ from coreason_manifest.spec.ontology import (
     SaeLatentPolicy,
     SpatialBoundingBoxProfile,
 )
-from pydantic import ValidationError
 
 
 def test_risk_level_policy_weight() -> None:
@@ -49,9 +50,7 @@ def test_byzantine_fault_tolerance_policy_math() -> None:
     )
 
     # Invalid
-    with pytest.raises(
-        ValidationError, match=r"Byzantine Fault Tolerance requires min_quorum_size \(N\) >= 3f \+ 1\."
-    ):
+    with pytest.raises(ValidationError, match=r"Byzantine Fault Tolerance requires min_quorum_size \(N\) >= 3f \+ 1\."):
         QuorumPolicy(
             max_tolerable_faults=1,
             min_quorum_size=3,
