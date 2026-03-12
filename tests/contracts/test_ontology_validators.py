@@ -411,9 +411,9 @@ def test_execution_node_receipt_hash_generation() -> None:
     receipt2 = ExecutionNodeReceipt(
         request_id="req1",
         root_request_id="req0",
-        inputs=[], # Valid primitive state
+        inputs=[],  # Valid primitive state
         outputs={},
-        parent_hashes=[]
+        parent_hashes=[],
     )
     assert isinstance(receipt2.node_hash, str)
     assert len(receipt2.node_hash) == 64
