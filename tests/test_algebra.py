@@ -30,11 +30,12 @@ def test_apply_state_differential_add() -> None:
         patches=[
             StateMutationIntent(op="add", path="/b/d", value=3),
             StateMutationIntent(op="add", path="/d/-", value=4),
-            StateMutationIntent(op="add", path="/d/0", value=0)
-        ]
+            StateMutationIntent(op="add", path="/d/0", value=0),
+        ],
     )
     new_state = apply_state_differential(initial_state, manifest)
     assert new_state == {"a": 1, "b": {"c": 2, "d": 3}, "d": [0, 1, 2, 3, 4]}
+
 
 def test_apply_state_differential_remove() -> None:
     initial_state = {"a": 1, "b": {"c": 2}, "d": [1, 2, 3]}
@@ -43,13 +44,11 @@ def test_apply_state_differential_remove() -> None:
         author_node_id="test-node-1",
         lamport_timestamp=1,
         vector_clock={"test-node-1": 1},
-        patches=[
-            StateMutationIntent(op="remove", path="/b/c"),
-            StateMutationIntent(op="remove", path="/d/1")
-        ]
+        patches=[StateMutationIntent(op="remove", path="/b/c"), StateMutationIntent(op="remove", path="/d/1")],
     )
     new_state = apply_state_differential(initial_state, manifest)
     assert new_state == {"a": 1, "b": {}, "d": [1, 3]}
+
 
 def test_apply_state_differential_replace() -> None:
     initial_state = {"a": 1, "b": {"c": 2}, "d": [1, 2, 3]}
@@ -61,14 +60,16 @@ def test_apply_state_differential_replace() -> None:
         patches=[
             StateMutationIntent(op="replace", path="/a", value=10),
             StateMutationIntent(op="replace", path="/b/c", value=20),
-            StateMutationIntent(op="replace", path="/d/1", value=20)
-        ]
+            StateMutationIntent(op="replace", path="/d/1", value=20),
+        ],
     )
     new_state = apply_state_differential(initial_state, manifest)
     assert new_state == {"a": 10, "b": {"c": 20}, "d": [1, 20, 3]}
 
+
 def test_apply_state_differential_move() -> None:
     initial_state = {"a": 1, "b": {"c": 2}, "d": [1, 2, 3]}
+
     class MockPatch:
         op: str = "move"
         path: str = "/a"
@@ -76,11 +77,14 @@ def test_apply_state_differential_move() -> None:
 
     class MockManifest:
         patches: ClassVar[list[Any]] = [MockPatch()]
-    new_state = apply_state_differential(initial_state, MockManifest()) # type: ignore[arg-type]
+
+    new_state = apply_state_differential(initial_state, MockManifest())  # type: ignore[arg-type]
     assert new_state == {"a": 2, "b": {}, "d": [1, 2, 3]}
+
 
 def test_apply_state_differential_copy() -> None:
     initial_state = {"a": 1, "b": {"c": 2}, "d": [1, 2, 3]}
+
     class MockPatch:
         op: str = "copy"
         path: str = "/a"
@@ -88,8 +92,10 @@ def test_apply_state_differential_copy() -> None:
 
     class MockManifest:
         patches: ClassVar[list[Any]] = [MockPatch()]
-    new_state = apply_state_differential(initial_state, MockManifest()) # type: ignore[arg-type]
+
+    new_state = apply_state_differential(initial_state, MockManifest())  # type: ignore[arg-type]
     assert new_state == {"a": 2, "b": {"c": 2}, "d": [1, 2, 3]}
+
 
 def test_apply_state_differential_test() -> None:
     initial_state = {"a": 1, "b": {"c": 2}, "d": [1, 2, 3]}
@@ -98,9 +104,7 @@ def test_apply_state_differential_test() -> None:
         author_node_id="test-node-1",
         lamport_timestamp=1,
         vector_clock={"test-node-1": 1},
-        patches=[
-            StateMutationIntent(op="test", path="/b/c", value=2)
-        ]
+        patches=[StateMutationIntent(op="test", path="/b/c", value=2)],
     )
     new_state = apply_state_differential(initial_state, manifest)
     assert new_state == initial_state
@@ -110,12 +114,11 @@ def test_apply_state_differential_test() -> None:
         author_node_id="test-node-1",
         lamport_timestamp=1,
         vector_clock={"test-node-1": 1},
-        patches=[
-            StateMutationIntent(op="test", path="/b/c", value=3)
-        ]
+        patches=[StateMutationIntent(op="test", path="/b/c", value=3)],
     )
     with pytest.raises(ValueError, match="Patch test operation failed"):
         apply_state_differential(initial_state, manifest_fail)
+
 
 def test_apply_state_differential_invalid_paths() -> None:
     initial_state = {"a": 1, "b": {"c": 2}, "d": [1, 2, 3]}
@@ -131,16 +134,17 @@ def test_apply_state_differential_invalid_paths() -> None:
             self.patches = patches
 
     with pytest.raises(ValueError, match="Invalid JSON pointer"):
-        apply_state_differential(initial_state, MockManifest([MockPatch("add", "invalid", 3)])) # type: ignore[arg-type]
+        apply_state_differential(initial_state, MockManifest([MockPatch("add", "invalid", 3)]))  # type: ignore[arg-type]
 
     with pytest.raises(ValueError, match="Invalid path"):
-        apply_state_differential(initial_state, MockManifest([MockPatch("add", "/invalid/path", 3)])) # type: ignore[arg-type]
+        apply_state_differential(initial_state, MockManifest([MockPatch("add", "/invalid/path", 3)]))  # type: ignore[arg-type]
 
     with pytest.raises(ValueError, match="Cannot remove from path"):
-        apply_state_differential(initial_state, MockManifest([MockPatch("remove", "/b/missing")])) # type: ignore[arg-type]
+        apply_state_differential(initial_state, MockManifest([MockPatch("remove", "/b/missing")]))  # type: ignore[arg-type]
 
     with pytest.raises(ValueError, match="Cannot remove from path"):
-        apply_state_differential(initial_state, MockManifest([MockPatch("remove", "/d/10")])) # type: ignore[arg-type]
+        apply_state_differential(initial_state, MockManifest([MockPatch("remove", "/d/10")]))  # type: ignore[arg-type]
+
 
 def test_verify_ast_safety() -> None:
     # Allowed nodes
@@ -160,24 +164,19 @@ def test_verify_ast_safety() -> None:
     with pytest.raises(ValueError, match="Kinetic execution bleed detected"):
         verify_ast_safety("exec('print(1)')")
 
+
 def test_project_manifest_to_markdown() -> None:
     manifest = WorkflowManifest(
         manifest_version="1.0.0",
         genesis_provenance=EpistemicProvenanceReceipt(
-            extracted_by="did:coreason:orchestrator",
-            source_event_id="test_trigger"
+            extracted_by="did:coreason:orchestrator", source_event_id="test_trigger"
         ),
-        topology=DAGTopologyManifest(
-            type="dag",
-            architectural_intent="test",
-            max_depth=10,
-            max_fan_out=5,
-            nodes={}
-        )
+        topology=DAGTopologyManifest(type="dag", architectural_intent="test", max_depth=10, max_fan_out=5, nodes={}),
     )
     md = project_manifest_to_markdown(manifest)
     assert "# CoReason Agent Card" in md
     assert "- **Type:** `dag`" in md
+
 
 def test_project_manifest_to_mermaid() -> None:
     class MockProfile:
@@ -190,28 +189,21 @@ def test_project_manifest_to_mermaid() -> None:
     class MockManifest:
         manifest_id: str = "test-router"
         artifact_profile: Any = MockProfile()
-        active_subgraphs: ClassVar[dict[str, list[str]]] = {
-            "vector_graphics": ["did:node:1"],
-            "text": ["did:node:2"]
-        }
+        active_subgraphs: ClassVar[dict[str, list[str]]] = {"vector_graphics": ["did:node:1"], "text": ["did:node:2"]}
         bypassed_steps: ClassVar[list[Any]] = [MockBypass()]
 
-    mermaid = project_manifest_to_mermaid(MockManifest()) # type: ignore[arg-type]
+    mermaid = project_manifest_to_mermaid(MockManifest())  # type: ignore[arg-type]
     assert "graph TD" in mermaid
     assert "test_router[test-router]" in mermaid
     assert "did_node_1" in mermaid
 
+
 def test_compute_topology_hash() -> None:
-    topo = DAGTopologyManifest(
-        type="dag",
-        architectural_intent="test",
-        max_depth=10,
-        max_fan_out=5,
-        nodes={}
-    )
+    topo = DAGTopologyManifest(type="dag", architectural_intent="test", max_depth=10, max_fan_out=5, nodes={})
     h = compute_topology_hash(topo)
     assert isinstance(h, str)
     assert len(h) == 64
+
 
 def test_verify_merkle_proof() -> None:
     receipt1 = ExecutionNodeReceipt(
@@ -223,10 +215,7 @@ def test_verify_merkle_proof() -> None:
 
     if receipt1.node_hash is not None:
         receipt2 = ExecutionNodeReceipt(
-            request_id="req2",
-            inputs={"i": 2},
-            outputs={"o": 2},
-            parent_hashes=[receipt1.node_hash]
+            request_id="req2", inputs={"i": 2}, outputs={"o": 2}, parent_hashes=[receipt1.node_hash]
         )
         object.__setattr__(receipt2, "node_hash", receipt2.generate_node_hash())
 
