@@ -77,7 +77,7 @@ def test_bounded_json_rpc_intent_exceeds_dict_key_length() -> None:
 
 def test_bounded_json_rpc_intent_exceeds_list_length() -> None:
     # Create a list with 1001 elements
-    large_list = [i for i in range(1001)]
+    large_list = list(range(1001))
 
     with pytest.raises(ValidationError, match="List exceeds maximum of 1000 elements"):
         BoundedJSONRPCIntent(
