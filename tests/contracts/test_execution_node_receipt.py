@@ -1,5 +1,5 @@
-import pytest
 from coreason_manifest.spec.ontology import ExecutionNodeReceipt
+
 
 def test_execution_node_receipt_canonical_hashing_determinism() -> None:
     """
@@ -80,4 +80,6 @@ def test_execution_node_receipt_canonical_hashing_determinism() -> None:
     })
 
     hash_e = receipt_e.generate_node_hash()
-    assert hash_c and hash_d and hash_e
+    assert hash_c
+    assert hash_d
+    assert hash_e
