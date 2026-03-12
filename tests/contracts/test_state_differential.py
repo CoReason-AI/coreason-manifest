@@ -4,7 +4,7 @@ from coreason_manifest.spec.ontology import StateDifferentialManifest, StateMuta
 from coreason_manifest.utils.algebra import apply_state_differential
 
 
-def test_apply_state_differential_add_dict():
+def test_apply_state_differential_add_dict() -> None:
     current_state = {"a": 1}
     manifest = StateDifferentialManifest(
         diff_id="id",
@@ -18,7 +18,7 @@ def test_apply_state_differential_add_dict():
     assert current_state == {"a": 1}
 
 
-def test_apply_state_differential_add_list_append():
+def test_apply_state_differential_add_list_append() -> None:
     current_state = {"a": [1, 2]}
     manifest = StateDifferentialManifest(
         diff_id="id",
@@ -31,7 +31,7 @@ def test_apply_state_differential_add_list_append():
     assert new_state == {"a": [1, 2, 3]}
 
 
-def test_apply_state_differential_add_list_insert():
+def test_apply_state_differential_add_list_insert() -> None:
     current_state = {"a": [1, 2]}
     manifest = StateDifferentialManifest(
         diff_id="id",
@@ -44,7 +44,7 @@ def test_apply_state_differential_add_list_insert():
     assert new_state == {"a": [0, 1, 2]}
 
 
-def test_apply_state_differential_remove_dict():
+def test_apply_state_differential_remove_dict() -> None:
     current_state = {"a": 1, "b": 2}
     manifest = StateDifferentialManifest(
         diff_id="id",
@@ -57,7 +57,7 @@ def test_apply_state_differential_remove_dict():
     assert new_state == {"a": 1}
 
 
-def test_apply_state_differential_remove_list():
+def test_apply_state_differential_remove_list() -> None:
     current_state = {"a": [1, 2, 3]}
     manifest = StateDifferentialManifest(
         diff_id="id",
@@ -70,7 +70,7 @@ def test_apply_state_differential_remove_list():
     assert new_state == {"a": [1, 3]}
 
 
-def test_apply_state_differential_replace_dict():
+def test_apply_state_differential_replace_dict() -> None:
     current_state = {"a": 1}
     manifest = StateDifferentialManifest(
         diff_id="id",
@@ -83,7 +83,7 @@ def test_apply_state_differential_replace_dict():
     assert new_state == {"a": 2}
 
 
-def test_apply_state_differential_replace_list():
+def test_apply_state_differential_replace_list() -> None:
     current_state = {"a": [1, 2, 3]}
     manifest = StateDifferentialManifest(
         diff_id="id",
@@ -96,7 +96,7 @@ def test_apply_state_differential_replace_list():
     assert new_state == {"a": [1, 4, 3]}
 
 
-def test_apply_state_differential_move():
+def test_apply_state_differential_move() -> None:
     current_state = {"a": {"b": 1}, "c": {}}
     manifest = StateDifferentialManifest(
         diff_id="id",
@@ -109,7 +109,7 @@ def test_apply_state_differential_move():
     assert new_state == {"a": {}, "c": {"b": 1}}
 
 
-def test_apply_state_differential_copy():
+def test_apply_state_differential_copy() -> None:
     current_state = {"a": {"b": 1}, "c": {}}
     manifest = StateDifferentialManifest(
         diff_id="id",
@@ -122,7 +122,7 @@ def test_apply_state_differential_copy():
     assert new_state == {"a": {"b": 1}, "c": {"b": 1}}
 
 
-def test_apply_state_differential_test_success():
+def test_apply_state_differential_test_success() -> None:
     current_state = {"a": 1}
     manifest = StateDifferentialManifest(
         diff_id="id",
@@ -135,7 +135,7 @@ def test_apply_state_differential_test_success():
     assert new_state == {"a": 1}
 
 
-def test_apply_state_differential_test_fail():
+def test_apply_state_differential_test_fail() -> None:
     current_state = {"a": 1}
     manifest = StateDifferentialManifest(
         diff_id="id",
@@ -148,7 +148,7 @@ def test_apply_state_differential_test_fail():
         apply_state_differential(current_state, manifest)
 
 
-def test_apply_state_differential_test_fail_root():
+def test_apply_state_differential_test_fail_root() -> None:
     current_state = {"a": 1}
     manifest = StateDifferentialManifest(
         diff_id="id",
@@ -161,7 +161,7 @@ def test_apply_state_differential_test_fail_root():
         apply_state_differential(current_state, manifest)
 
 
-def test_apply_state_differential_test_success_root():
+def test_apply_state_differential_test_success_root() -> None:
     current_state = {"a": 1}
     manifest = StateDifferentialManifest(
         diff_id="id",
@@ -174,7 +174,7 @@ def test_apply_state_differential_test_success_root():
     assert new_state == {"a": 1}
 
 
-def test_apply_state_differential_invalid_op_root():
+def test_apply_state_differential_invalid_op_root() -> None:
     current_state = {"a": 1}
     manifest = StateDifferentialManifest(
         diff_id="id",
@@ -187,7 +187,7 @@ def test_apply_state_differential_invalid_op_root():
         apply_state_differential(current_state, manifest)
 
 
-def test_apply_state_differential_invalid_pointer():
+def test_apply_state_differential_invalid_pointer() -> None:
     current_state = {"a": 1}
     manifest = StateDifferentialManifest(
         diff_id="id",
