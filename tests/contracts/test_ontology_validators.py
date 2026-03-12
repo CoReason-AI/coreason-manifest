@@ -854,16 +854,20 @@ def test_compute_provisioning_intent_sort_arrays() -> None:
 def test_sse_transport_profile_crlf_injection() -> None:
     from coreason_manifest.spec.ontology import SSETransportProfile
 
+    from pydantic import TypeAdapter, HttpUrl
+
+    url = TypeAdapter(HttpUrl).validate_python("http://ex.com/")
+
     # Valid
-    SSETransportProfile(uri="http://ex.com/", headers={"key": "val"})
+    SSETransportProfile(uri=url, headers={"key": "val"})
 
     # CRLF in key
     with pytest.raises(ValidationError, match=r"CRLF injection detected in headers"):
-        SSETransportProfile(uri="http://ex.com/", headers={"key\r\n": "val"})
+        SSETransportProfile(uri=url, headers={"key\r\n": "val"})
 
     # CRLF in value
     with pytest.raises(ValidationError, match=r"CRLF injection detected in headers"):
-        SSETransportProfile(uri="http://ex.com/", headers={"key": "val\r\n"})
+        SSETransportProfile(uri=url, headers={"key": "val\r\n"})
 
 
 def test_semantic_firewall_policy_sort_arrays() -> None:
