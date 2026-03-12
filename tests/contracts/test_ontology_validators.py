@@ -6,13 +6,24 @@ from pydantic import ValidationError
 from coreason_manifest.spec.ontology import (
     ActivationSteeringContract,
     AdjudicationRubricProfile,
+    BaseNodeProfile,
+    BoundedJSONRPCIntent,
+    BypassReceipt,
     ComputeEngineProfile,
     ComputeRateContract,
     ConsensusPolicy,
     CoreasonBaseState,
     DefeasibleCascadeEvent,
+    DistributionProfile,
     DynamicLayoutManifest,
+    DynamicRoutingManifest,
     EphemeralNamespacePartitionState,
+    EpistemicCompressionSLA,
+    EpistemicTransmutationTask,
+    EscrowPolicy,
+    ExecutionNodeReceipt,
+    ExecutionSpanReceipt,
+    GlobalSemanticProfile,
     GradingCriterionProfile,
     InformationClassificationProfile,
     LatentSmoothingProfile,
@@ -25,6 +36,8 @@ from coreason_manifest.spec.ontology import (
     SaeLatentPolicy,
     SecureSubSessionState,
     SpatialBoundingBoxProfile,
+    TaskAwardReceipt,
+    TemporalBoundsProfile,
 )
 
 
@@ -271,6 +284,250 @@ def test_rollback_intent_sorting() -> None:
 def test_multimodal_token_anchor_state_sorting() -> None:
     anchor = MultimodalTokenAnchorState(visual_patch_hashes=["hash_c", "hash_a", "hash_b"])
     assert anchor.visual_patch_hashes == ["hash_a", "hash_b", "hash_c"]
+
+
+def test_multimodal_token_anchor_state_validate_token_spans() -> None:
+    with pytest.raises(ValidationError, match="If token_span_start is defined, token_span_end MUST be defined."):
+        MultimodalTokenAnchorState(token_span_start=10)
+
+    with pytest.raises(ValidationError, match="token_span_end MUST be strictly greater than token_span_start."):
+        MultimodalTokenAnchorState(token_span_start=10, token_span_end=10)
+
+    with pytest.raises(ValidationError, match="token_span_end cannot be defined without a token_span_start."):
+        MultimodalTokenAnchorState(token_span_end=20)
+
+
+def test_multimodal_token_anchor_state_validate_spatial_geometry() -> None:
+    with pytest.raises(ValidationError, match="Spatial invariant violated"):
+        MultimodalTokenAnchorState(bounding_box=(0.5, 0.5, 0.4, 0.6))
+
+    with pytest.raises(ValidationError, match="Spatial invariant violated"):
+        MultimodalTokenAnchorState(bounding_box=(0.5, 0.5, 0.6, 0.4))
+
+
+def test_distribution_profile_validate_confidence_interval() -> None:
+    with pytest.raises(ValidationError, match=r"confidence_interval_95 must have interval\[0\] < interval\[1\]"):
+        DistributionProfile(distribution_type="gaussian", confidence_interval_95=(0.8, 0.5))
+
+    with pytest.raises(ValidationError, match=r"confidence_interval_95 must have interval\[0\] < interval\[1\]"):
+        DistributionProfile(distribution_type="gaussian", confidence_interval_95=(0.5, 0.5))
+
+    # Valid
+    DistributionProfile(distribution_type="gaussian", confidence_interval_95=(0.1, 0.9))
+
+
+def test_epistemic_transmutation_task_validate_grounding_density_for_visuals() -> None:
+    sla_sparse = EpistemicCompressionSLA(
+        max_allowed_entropy_loss=0.1, required_grounding_density="sparse"
+    )
+
+    with pytest.raises(ValidationError, match="'required_grounding_density' cannot be 'sparse'"):
+        EpistemicTransmutationTask(
+            task_id="t1",
+            artifact_event_id="a1",
+            target_modalities=["tabular_grid"],
+            compression_sla=sla_sparse
+        )
+
+    with pytest.raises(ValidationError, match="'required_grounding_density' cannot be 'sparse'"):
+        EpistemicTransmutationTask(
+            task_id="t1",
+            artifact_event_id="a1",
+            target_modalities=["raster_image"],
+            compression_sla=sla_sparse
+        )
+
+    sla_dense = EpistemicCompressionSLA(
+        max_allowed_entropy_loss=0.1, required_grounding_density="dense"
+    )
+
+    # Valid
+    EpistemicTransmutationTask(
+        task_id="t1",
+        artifact_event_id="a1",
+        target_modalities=["raster_image"],
+        compression_sla=sla_dense
+    )
+
+
+def test_dynamic_routing_manifest_validate_modality_alignment() -> None:
+    artifact = GlobalSemanticProfile(
+        artifact_event_id="a1", detected_modalities=["text"], token_density=100
+    )
+    with pytest.raises(ValidationError, match="Epistemic Violation: Cannot route to subgraph 'tabular_grid' because it is missing from detected_modalities."):
+        DynamicRoutingManifest(
+            manifest_id="m1",
+            artifact_profile=artifact,
+            active_subgraphs={"tabular_grid": ["did:coreason:node1"]},
+            branch_budgets_magnitude={"did:coreason:node1": 10},
+        )
+
+    # Valid
+    DynamicRoutingManifest(
+        manifest_id="m1",
+        artifact_profile=artifact,
+        active_subgraphs={"text": ["did:coreason:node1"]},
+        branch_budgets_magnitude={"did:coreason:node1": 10},
+    )
+
+
+def test_dynamic_routing_manifest_validate_conservation_of_custody() -> None:
+    artifact = GlobalSemanticProfile(
+        artifact_event_id="a1", detected_modalities=["text"], token_density=100
+    )
+
+    bypass = BypassReceipt(
+        artifact_event_id="a2",
+        bypassed_node_id="did:coreason:node2",
+        justification="modality_mismatch",
+        cryptographic_null_hash="a" * 64
+    )
+
+    with pytest.raises(ValidationError, match="Merkle Violation: BypassReceipt artifact_event_id does not match the root artifact_profile."):
+        DynamicRoutingManifest(
+            manifest_id="m1",
+            artifact_profile=artifact,
+            active_subgraphs={"text": ["did:coreason:node1"]},
+            branch_budgets_magnitude={"did:coreason:node1": 10},
+            bypassed_steps=[bypass]
+        )
+
+
+def test_execution_span_receipt_validate_temporal_bounds() -> None:
+    with pytest.raises(ValidationError, match="end_time_unix_nano cannot be before start_time_unix_nano"):
+        ExecutionSpanReceipt(
+            trace_id="trace1",
+            span_id="span1",
+            name="test",
+            start_time_unix_nano=1000,
+            end_time_unix_nano=999
+        )
+
+    # Valid
+    ExecutionSpanReceipt(
+        trace_id="trace1",
+        span_id="span1",
+        name="test",
+        start_time_unix_nano=1000,
+        end_time_unix_nano=1000
+    )
+
+
+def test_task_award_receipt_validate_escrow_bounds() -> None:
+    escrow = EscrowPolicy(
+        escrow_locked_magnitude=20,
+        release_condition_metric="metric",
+        refund_target_node_id="node1"
+    )
+    with pytest.raises(ValidationError, match="Escrow locked amount cannot exceed the total cleared price."):
+        TaskAwardReceipt(
+            task_id="task1",
+            awarded_syndicate={"node1": 10},
+            cleared_price_magnitude=10,
+            escrow=escrow
+        )
+
+    valid_escrow = EscrowPolicy(
+        escrow_locked_magnitude=10,
+        release_condition_metric="metric",
+        refund_target_node_id="node1"
+    )
+    # Valid
+    TaskAwardReceipt(
+        task_id="task1",
+        awarded_syndicate={"node1": 10},
+        cleared_price_magnitude=10,
+        escrow=valid_escrow
+    )
+
+
+def test_temporal_bounds_profile_validate_temporal_bounds() -> None:
+    with pytest.raises(ValidationError, match="valid_to cannot be before valid_from"):
+        TemporalBoundsProfile(valid_from=10.0, valid_to=9.9)
+
+    # Valid
+    TemporalBoundsProfile(valid_from=10.0, valid_to=10.0)
+
+
+def test_base_node_profile_validate_domain_extensions_depth() -> None:
+    with pytest.raises(ValidationError, match="domain_extensions must be a dictionary"):
+        BaseNodeProfile(description="test", domain_extensions=[1, 2, 3])
+
+    deep_dict: dict[str, Any] = {}
+    current = deep_dict
+    for _ in range(6):
+        current["a"] = {}
+        current = current["a"]
+    with pytest.raises(ValidationError, match="domain_extensions exceeds maximum allowed depth of 5"):
+        BaseNodeProfile(description="test", domain_extensions=deep_dict)
+
+    with pytest.raises(ValidationError, match="domain_extensions keys must be strings"):
+        BaseNodeProfile(description="test", domain_extensions={1: "a"})
+
+    long_key_dict = {"k" * 256: 1}
+    with pytest.raises(ValidationError, match="domain_extensions key exceeds maximum length of 255 characters"):
+        BaseNodeProfile(description="test", domain_extensions=long_key_dict)
+
+    with pytest.raises(ValidationError, match="domain_extensions leaf values must be JSON primitives"):
+        class Obj:
+            pass
+        BaseNodeProfile(description="test", domain_extensions={"a": Obj()})
+
+    # Valid
+    BaseNodeProfile(description="test", domain_extensions={"a": 1, "b": {"c": 2}, "d": [3, 4]})
+
+
+def test_execution_node_receipt_validate_lineage() -> None:
+    with pytest.raises(ValidationError, match="Orphaned Lineage: parent_request_id is set but root_request_id is None"):
+        ExecutionNodeReceipt(
+            request_id="req1",
+            parent_request_id="parent1",
+            root_request_id=None,
+            inputs={"in": 1},
+            outputs={"out": 2},
+        )
+
+    # Valid
+    ExecutionNodeReceipt(
+        request_id="req1",
+        parent_request_id="parent1",
+        root_request_id="root1",
+        inputs={"in": 1},
+        outputs={"out": 2},
+    )
+
+
+def test_bounded_jsonrpc_intent_validate_params_depth_and_size() -> None:
+    with pytest.raises(ValidationError, match="params must be a dictionary"):
+        BoundedJSONRPCIntent(jsonrpc="2.0", method="test", params=[1, 2, 3])
+
+    deep_dict: dict[str, Any] = {}
+    current = deep_dict
+    for _ in range(11):
+        current["a"] = {}
+        current = current["a"]
+    with pytest.raises(ValidationError, match="JSON payload exceeds maximum depth of 10"):
+        BoundedJSONRPCIntent(jsonrpc="2.0", method="test", params=deep_dict)
+
+    wide_dict = {f"k{i}": i for i in range(101)}
+    with pytest.raises(ValidationError, match="Dictionary exceeds maximum of 100 keys"):
+        BoundedJSONRPCIntent(jsonrpc="2.0", method="test", params=wide_dict)
+
+    long_key_dict = {"k" * 1001: 1}
+    with pytest.raises(ValidationError, match="Dictionary key exceeds maximum length of 1000"):
+        BoundedJSONRPCIntent(jsonrpc="2.0", method="test", params=long_key_dict)
+
+    long_list_dict = {"list": [1] * 1001}
+    with pytest.raises(ValidationError, match="List exceeds maximum of 1000 elements"):
+        BoundedJSONRPCIntent(jsonrpc="2.0", method="test", params=long_list_dict)
+
+    long_str_dict = {"str": "s" * 10001}
+    with pytest.raises(ValidationError, match="String exceeds maximum length of 10000 characters"):
+        BoundedJSONRPCIntent(jsonrpc="2.0", method="test", params=long_str_dict)
+
+    # Valid
+    BoundedJSONRPCIntent(jsonrpc="2.0", method="test", params={"a": 1})
+    BoundedJSONRPCIntent(jsonrpc="2.0", method="test")
 
 
 def test_secure_sub_session_state_sorting() -> None:
