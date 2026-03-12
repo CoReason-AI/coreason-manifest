@@ -27,7 +27,14 @@ def test_coreason_base_state_hash() -> None:
         name: str
 
     state = TestState(name="test")
-    assert hash(state) == hash(state)
+    # First call generates and caches the canonical hash
+    h1 = hash(state)
+    # Second call pulls from cache
+    h2 = hash(state)
+
+    assert h1 == h2
+    assert hasattr(state, "_cached_hash")
+    assert state._cached_hash == h1
 
 
 # --- 2. Spatial Bounding Box Fuzzing ---
