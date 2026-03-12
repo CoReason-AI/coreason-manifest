@@ -1,4 +1,3 @@
-
 import hypothesis.strategies as st
 import pytest
 from hypothesis import given
@@ -42,9 +41,7 @@ def test_multimodal_token_anchor_state_bounding_box(x_min: float, y_min: float, 
     else:
         # Invalid bounding box
         with pytest.raises(ValidationError):
-            MultimodalTokenAnchorState(
-                token_span_start=0, token_span_end=1, bounding_box=(x_min, y_min, x_max, y_max)
-            )
+            MultimodalTokenAnchorState(token_span_start=0, token_span_end=1, bounding_box=(x_min, y_min, x_max, y_max))
 
 
 @given(
