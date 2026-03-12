@@ -2204,17 +2204,6 @@ class ExecutionNodeReceipt(CoreasonBaseState):
                 return {k: _canonicalize(v) for k, v in sorted(obj.items()) if v is not None}
             if isinstance(obj, list):
                 return [_canonicalize(v) for v in obj]
-            if isinstance(obj, tuple):
-                return [_canonicalize(v) for v in obj]
-            if isinstance(obj, set):
-
-                def set_sort_key(x: Any) -> str:
-                    try:
-                        return json.dumps(x, sort_keys=True)
-                    except TypeError:
-                        return str(x)
-
-                return sorted([_canonicalize(v) for v in obj if v is not None], key=set_sort_key)
             return obj
 
         canonical_payload = _canonicalize(payload)
