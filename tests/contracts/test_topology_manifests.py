@@ -33,14 +33,20 @@ def test_council_topology_enforce_funded_byzantine_slashing():
         "did:web:n4": SystemNodeProfile(description="Worker 4"),
     }
 
-    with pytest.raises(ValidationError, match=r"Topological Interlock Failed: PBFT with slash_escrow requires a funded council_escrow\."):
+    with pytest.raises(
+        ValidationError,
+        match=r"Topological Interlock Failed: PBFT with slash_escrow requires a funded council_escrow\.",
+    ):
         CouncilTopologyManifest(
             adjudicator_id="did:web:adj",
             nodes=nodes,
             consensus_policy=consensus_policy
         )
 
-    with pytest.raises(ValidationError, match=r"Topological Interlock Failed: PBFT with slash_escrow requires a funded council_escrow\."):
+    with pytest.raises(
+        ValidationError,
+        match=r"Topological Interlock Failed: PBFT with slash_escrow requires a funded council_escrow\.",
+    ):
         CouncilTopologyManifest(
             adjudicator_id="did:web:adj",
             nodes=nodes,
@@ -172,7 +178,10 @@ def test_task_award_receipt():
     assert valid_receipt.cleared_price_magnitude == 100
 
 def test_market_contract():
-    with pytest.raises(ValidationError, match=r"ECONOMIC INVARIANT VIOLATION: slashing_penalty cannot exceed minimum_collateral\."):
+    with pytest.raises(
+        ValidationError,
+        match=r"ECONOMIC INVARIANT VIOLATION: slashing_penalty cannot exceed minimum_collateral\.",
+    ):
         MarketContract(
             minimum_collateral=100.0,
             slashing_penalty=150.0
