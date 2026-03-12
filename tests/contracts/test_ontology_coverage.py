@@ -6,31 +6,33 @@ from coreason_manifest.spec.ontology import BoundedJSONRPCIntent
 
 def test_bounded_json_rpc_intent_valid() -> None:
     intent = BoundedJSONRPCIntent(
-        jsonrpc="2.0",
-        method="test.method",
-        params={"key": "value", "nested": [1, 2, 3]},
-        id=1
+        jsonrpc="2.0", method="test.method", params={"key": "value", "nested": [1, 2, 3]}, id=1
     )
     assert intent.method == "test.method"
     assert intent.params == {"key": "value", "nested": [1, 2, 3]}
 
 
 def test_bounded_json_rpc_intent_none_params() -> None:
-    intent = BoundedJSONRPCIntent(
-        jsonrpc="2.0",
-        method="test.method",
-        params=None,
-        id="abc"
-    )
+    intent = BoundedJSONRPCIntent(jsonrpc="2.0", method="test.method", params=None, id="abc")
     assert intent.params == {}
 
 
+def test_bounded_json_rpc_intent_valid_list_params() -> None:
+    intent = BoundedJSONRPCIntent(
+        jsonrpc="2.0",
+        method="test.method",
+        params=["a", "list", "is", "fine"],
+        id=2
+    )
+    assert intent.params == ["a", "list", "is", "fine"]
+
+
 def test_bounded_json_rpc_intent_invalid_params_type() -> None:
-    with pytest.raises(ValidationError, match="params must be a dictionary"):
+    with pytest.raises(ValidationError, match="params must be a dictionary or a list"):
         BoundedJSONRPCIntent(
             jsonrpc="2.0",
             method="test.method",
-            params=["not", "a", "dict"],  # type: ignore
+            params="this is neither a dict nor a list",  # type: ignore
         )
 
 
@@ -43,11 +45,7 @@ def test_bounded_json_rpc_intent_exceeds_depth() -> None:
         current = current["child"]
 
     with pytest.raises(ValidationError, match="JSON payload exceeds maximum depth of 10"):
-        BoundedJSONRPCIntent(
-            jsonrpc="2.0",
-            method="test.method",
-            params=nested_dict
-        )
+        BoundedJSONRPCIntent(jsonrpc="2.0", method="test.method", params=nested_dict)
 
 
 def test_bounded_json_rpc_intent_exceeds_dict_keys() -> None:
@@ -55,11 +53,7 @@ def test_bounded_json_rpc_intent_exceeds_dict_keys() -> None:
     large_dict = {f"key_{i}": i for i in range(101)}
 
     with pytest.raises(ValidationError, match="Dictionary exceeds maximum of 100 keys"):
-        BoundedJSONRPCIntent(
-            jsonrpc="2.0",
-            method="test.method",
-            params=large_dict
-        )
+        BoundedJSONRPCIntent(jsonrpc="2.0", method="test.method", params=large_dict)
 
 
 def test_bounded_json_rpc_intent_exceeds_dict_key_length() -> None:
@@ -68,11 +62,7 @@ def test_bounded_json_rpc_intent_exceeds_dict_key_length() -> None:
     bad_dict = {long_key: "value"}
 
     with pytest.raises(ValidationError, match="Dictionary key exceeds maximum length of 1000"):
-        BoundedJSONRPCIntent(
-            jsonrpc="2.0",
-            method="test.method",
-            params=bad_dict
-        )
+        BoundedJSONRPCIntent(jsonrpc="2.0", method="test.method", params=bad_dict)
 
 
 def test_bounded_json_rpc_intent_exceeds_list_length() -> None:
@@ -80,11 +70,7 @@ def test_bounded_json_rpc_intent_exceeds_list_length() -> None:
     large_list = list(range(1001))
 
     with pytest.raises(ValidationError, match="List exceeds maximum of 1000 elements"):
-        BoundedJSONRPCIntent(
-            jsonrpc="2.0",
-            method="test.method",
-            params={"data": large_list}
-        )
+        BoundedJSONRPCIntent(jsonrpc="2.0", method="test.method", params={"data": large_list})
 
 
 def test_bounded_json_rpc_intent_exceeds_string_length() -> None:
@@ -92,8 +78,4 @@ def test_bounded_json_rpc_intent_exceeds_string_length() -> None:
     long_string = "a" * 10001
 
     with pytest.raises(ValidationError, match="String exceeds maximum length of 10000 characters"):
-        BoundedJSONRPCIntent(
-            jsonrpc="2.0",
-            method="test.method",
-            params={"data": long_string}
-        )
+        BoundedJSONRPCIntent(jsonrpc="2.0", method="test.method", params={"data": long_string})
