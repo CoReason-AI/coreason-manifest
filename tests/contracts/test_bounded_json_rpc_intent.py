@@ -87,5 +87,5 @@ def test_json_rpc_intent_max_string_length() -> None:
 
 
 def test_json_rpc_intent_params_not_dict() -> None:
-    with pytest.raises(ValidationError, match="params must be a dictionary"):
-        BoundedJSONRPCIntent(jsonrpc="2.0", method="test_method", params=[1, 2, 3], id=1)  # type: ignore[arg-type]
+    with pytest.raises(ValidationError, match="params must be a dictionary or a list"):
+        BoundedJSONRPCIntent(jsonrpc="2.0", method="test_method", params="not_a_dict_or_list", id=1)  # type: ignore[arg-type]
