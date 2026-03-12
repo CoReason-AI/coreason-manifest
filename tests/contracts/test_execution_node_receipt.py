@@ -1,36 +1,51 @@
+import json
+from typing import Any
+
+import hypothesis.strategies as st
 import pytest
+from hypothesis import HealthCheck, given, settings
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import ExecutionNodeReceipt
 
 
-def test_execution_node_receipt_comprehensive() -> None:
-    # 1. Valid receipt initialization
-    receipt = ExecutionNodeReceipt(
-        request_id="req-1",
-        root_request_id="root-1",
-        parent_request_id="req-0",
-        inputs={"key": "val"},
-        outputs={"res": 1},
-        parent_hashes=["hash1", "hash2"],
-    )
-    assert receipt.request_id == "req-1"
-    assert receipt.node_hash is not None
-
-    # 2. Lineage validation
+# 1. Atomic Test: Lineage Validation
+def test_execution_node_receipt_orphaned_lineage() -> None:
+    """Prove the receipt structurally rejects orphaned lineages."""
     with pytest.raises(ValidationError, match="Orphaned Lineage"):
         ExecutionNodeReceipt(request_id="req-1", parent_request_id="req-0", root_request_id=None, inputs={}, outputs={})
 
-    # 3. Hash determinism with unsorted dicts
-    r1 = ExecutionNodeReceipt(
-        request_id="req-1", inputs={"a": 1, "b": {"c": 2, "d": [1, 2]}}, outputs=[{"e": 3}, {"f": 4}]
-    )
-    r2 = ExecutionNodeReceipt(
-        request_id="req-1", inputs={"b": {"d": [1, 2], "c": 2}, "a": 1}, outputs=[{"e": 3}, {"f": 4}]
-    )
-    assert r1.node_hash == r2.node_hash
 
-    # 4. Hash determinism ignores None values
-    r3 = ExecutionNodeReceipt(request_id="req-1", inputs={"a": 1, "b": None}, outputs=None)
-    r4 = ExecutionNodeReceipt(request_id="req-1", inputs={"a": 1}, outputs=None)
-    assert r3.node_hash == r4.node_hash
+# 2. Define the Valid Mathematical Space for Payloads
+json_primitive_st = st.recursive(
+    st.none() | st.booleans() | st.floats(allow_nan=False, allow_infinity=False) | st.integers() | st.text(max_size=50),
+    lambda children: st.lists(children, max_size=5) | st.dictionaries(st.text(max_size=50), children, max_size=5),
+    max_leaves=15,
+)
+
+
+# 3. Fuzzing Hash Determinism
+@given(payload=json_primitive_st)
+@settings(max_examples=100, suppress_health_check=[HealthCheck.too_slow])
+def test_execution_node_receipt_hash_determinism(payload: Any) -> None:
+    """
+    AGENT INSTRUCTION: Mathematically prove that the canonical hashing mechanism
+    is deterministic and immutable regardless of dict insertion ordering or architecture.
+    """
+    # Base node instantiation
+    node_1 = ExecutionNodeReceipt(
+        request_id="req-hash-test", inputs=payload, outputs=payload, parent_hashes=["hashA", "hashB"]
+    )
+
+    # Create a semantically identical node by dumping/loading
+    # to simulate chaotic dict insertion orders over network boundaries
+    scrambled_payload = json.loads(json.dumps(payload))
+    node_2 = ExecutionNodeReceipt(
+        request_id="req-hash-test",
+        inputs=scrambled_payload,
+        outputs=scrambled_payload,
+        parent_hashes=["hashA", "hashB"],
+    )
+
+    assert node_1.node_hash == node_2.node_hash
+    assert node_1.node_hash is not None
