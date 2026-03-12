@@ -18,12 +18,7 @@ def test_bounded_json_rpc_intent_none_params() -> None:
 
 
 def test_bounded_json_rpc_intent_valid_list_params() -> None:
-    intent = BoundedJSONRPCIntent(
-        jsonrpc="2.0",
-        method="test.method",
-        params=["a", "list", "is", "fine"],
-        id=2
-    )
+    intent = BoundedJSONRPCIntent(jsonrpc="2.0", method="test.method", params=["a", "list", "is", "fine"], id=2)
     assert intent.params == ["a", "list", "is", "fine"]
 
 
