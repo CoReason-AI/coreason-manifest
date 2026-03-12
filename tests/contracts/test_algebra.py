@@ -3,9 +3,9 @@ import struct
 from copy import deepcopy
 from typing import Any
 
-import hypothesis.strategies as st
 import pytest
 from hypothesis import given
+from hypothesis import strategies as st
 from pydantic import BaseModel, Field, TypeAdapter, ValidationError
 
 from coreason_manifest.spec.ontology import (
@@ -288,9 +288,9 @@ def test_apply_state_differential_comprehensive() -> None:
     # 1. Test existing value
     patch_test = StateMutationIntent(op="test", path="/user/profile/role", value="admin")
     # 2. Copy a nested object
-    patch_copy = StateMutationIntent(op="copy", path="/user/copied_profile", value="/user/profile")
+    patch_copy = StateMutationIntent(op="copy", path="/user/copied_profile", **{"from": "/user/profile"})
     # 3. Move an array element
-    patch_move = StateMutationIntent(op="move", path="/metrics/1", value="/user/tags/1")
+    patch_move = StateMutationIntent(op="move", path="/metrics/1", **{"from": "/user/tags/1"})
     # 4. Add to an array using the "-" operator (append)
     patch_add_array = StateMutationIntent(op="add", path="/metrics/-", value=40)
     # 5. Remove an object key
@@ -337,11 +337,11 @@ json_primitive = st.recursive(
     max_leaves=10,
 )
 
+# Generate a list of StateMutationIntent
+
 
 @st.composite
 def random_mutations(draw: Any) -> StateDifferentialManifest:
-    import contextlib
-
     ops = draw(st.lists(st.sampled_from(["add", "remove", "replace", "copy", "move", "test"]), min_size=1, max_size=10))
 
     patches = []
@@ -352,6 +352,8 @@ def random_mutations(draw: Any) -> StateDifferentialManifest:
             kwargs["value"] = draw(json_primitive)
         elif op in ("copy", "move"):
             kwargs["from"] = "/" + "/".join(draw(st.lists(st.text(min_size=1, max_size=10), min_size=1, max_size=3)))
+
+        import contextlib
 
         with contextlib.suppress(ValidationError):
             patches.append(StateMutationIntent(**kwargs))
@@ -371,8 +373,13 @@ def test_apply_state_differential_property(
 ) -> None:
     """Property test to ensure apply_state_differential never crashes unexpectedly."""
     original_state = deepcopy(initial_state)
+
     try:
         _ = apply_state_differential(initial_state, manifest)  # type: ignore
+
+        # If it succeeds, initial state should remain unchanged
         assert initial_state == original_state
+
     except ValueError:
+        # ValueErrors (e.g., path not found, invalid operation) are expected for random invalid patches
         pass

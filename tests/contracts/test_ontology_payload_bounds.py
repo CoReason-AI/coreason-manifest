@@ -1,29 +1,45 @@
 from typing import Any, cast
 
+import hypothesis.strategies as st
 import pytest
+from hypothesis import HealthCheck, given, settings
 
 from coreason_manifest.spec.ontology import JsonPrimitiveState, StateHydrationManifest, _validate_payload_bounds
 
+# 1. Define the Valid Mathematical Space
+valid_json_st = st.recursive(
+    st.none()
+    | st.booleans()
+    | st.floats(allow_nan=False, allow_infinity=False)
+    | st.integers()
+    | st.text(max_size=9999),
+    lambda children: (
+        st.lists(children, max_size=999) | st.dictionaries(st.text(min_size=1, max_size=9999), children, max_size=99)
+    ),
+    max_leaves=50,
+)
 
-def test_payload_bounds_happy_path() -> None:
-    # A standard dictionary payload should pass easily
-    payload: dict[str, Any] = {
-        "string_key": "short string",
-        "int_key": 42,
-        "nested_dict": {"inner_list": [1, 2, 3]},
-    }
-    # Direct function test
-    result = _validate_payload_bounds(cast("JsonPrimitiveState", payload))
+
+@given(payload=valid_json_st)
+@settings(max_examples=100, suppress_health_check=[HealthCheck.too_slow])
+def test_payload_bounds_fuzz_valid_space(payload: Any) -> None:
+    """
+    AGENT INSTRUCTION: Fuzz the valid structural space using hypothesis.
+    Mathematically prove that any permutation falling UNDER the tripwires is strictly accepted.
+    """
+    # 1. Direct Function Fuzzing
+    result = _validate_payload_bounds(payload)
     assert result == payload
 
-    # Test through a Pydantic model that uses it as a before validator
-    manifest = StateHydrationManifest(
-        epistemic_coordinate="session-123",
-        crystallized_ledger_cids=["a" * 64],
-        working_context_variables=payload,
-        max_retained_tokens=4000,
-    )
-    assert manifest.working_context_variables == payload
+    # 2. Pydantic Manifest Projection
+    if isinstance(payload, dict):
+        manifest = StateHydrationManifest(
+            epistemic_coordinate="session-123",
+            crystallized_ledger_cids=["a" * 64],
+            working_context_variables=payload,
+            max_retained_tokens=4000,
+        )
+        assert manifest.working_context_variables == payload
 
 
 def test_payload_bounds_recursion_depth_exceeded() -> None:
