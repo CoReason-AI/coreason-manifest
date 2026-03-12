@@ -399,6 +399,8 @@ def apply_state_differential(
                     raise ValueError("Key not found")
                 return t[key]
             if isinstance(t, list):
+                if key == "-":
+                    raise ValueError("Cannot extract from end of array")
                 try:
                     idx = int(key)
                     if idx < 0 or idx >= len(t):
@@ -414,6 +416,8 @@ def apply_state_differential(
                     raise ValueError("Key not found")
                 del t[key]
             elif isinstance(t, list):
+                if key == "-":
+                    raise ValueError("Cannot remove from end of array")
                 try:
                     idx = int(key)
                     if idx < 0 or idx >= len(t):
@@ -452,6 +456,8 @@ def apply_state_differential(
                 if isinstance(target, dict):
                     target[last_part] = patch.value
                 elif isinstance(target, list):
+                    if last_part == "-":
+                        raise ValueError("Cannot replace at end of array")
                     idx = int(last_part)
                     target[idx] = patch.value
             except ValueError as e:
