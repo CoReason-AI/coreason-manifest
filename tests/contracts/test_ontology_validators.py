@@ -251,14 +251,6 @@ def test_redaction_policy_sorting() -> None:
 
 
 # --- 8. Missing specific validators coverage ---
-def test_secure_sub_session_state_sorting() -> None:
-    state = SecureSubSessionState(
-        session_id="session1",
-        allowed_vault_keys=["vault_z", "vault_a", "vault_m"],
-        max_ttl_seconds=3600,
-        description="test session",
-    )
-    assert state.allowed_vault_keys == ["vault_a", "vault_m", "vault_z"]
 
 
 def test_defeasible_cascade_event_sorting() -> None:
@@ -289,21 +281,6 @@ def test_secure_sub_session_state_sorting() -> None:
         description="test session",
     )
     assert state.allowed_vault_keys == ["vault_a", "vault_m", "vault_z"]
-        cascade_id="cascade1",
-        root_falsified_event_id="root1",
-        propagated_decay_factor=0.5,
-        quarantined_event_ids=["event_z", "event_a", "event_m"],
-    )
-    assert event.quarantined_event_ids == ["event_a", "event_m", "event_z"]
-
-
-def test_rollback_intent_sorting() -> None:
-    intent = RollbackIntent(
-        request_id="req1",
-        target_event_id="target1",
-        invalidated_node_ids=["node_z", "node_a", "node_m"],
-    )
-    assert intent.invalidated_node_ids == ["node_a", "node_m", "node_z"]
 
 
 def test_ephemeral_namespace_partition_state_sorting() -> None:
