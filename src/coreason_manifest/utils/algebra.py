@@ -351,7 +351,11 @@ def apply_state_differential(
                 raise ValueError(f"Invalid path or root operation not supported: {path}")
             raise ValueError(f"Invalid JSON pointer: {path}")
 
-        parts = [p.replace("~1", "/").replace("~0", "~") for p in path.split("/")[1:]]
+        parts = []
+        for p in path.split("/")[1:]:
+            if "~" in p and not (p.endswith(("~0", "~1")) or "~0" in p or "~1" in p):
+                raise ValueError(f"Invalid JSON pointer: {path}")
+            parts.append(p.replace("~1", "/").replace("~0", "~"))
 
         target: Any = new_state
         for part in parts[:-1]:
