@@ -4672,11 +4672,7 @@ class DAGTopologyManifest(BaseTopologyManifest):
     "\n    TOPOLOGICAL BOUNDARY: Must be >= 1 and <= 256. Prevents runaway agentic cyclic recursion.\n    "
     max_fan_out: int = Field(ge=1, le=1024, description="The maximum number of parallel child nodes.")
     "\n    TOPOLOGICAL BOUNDARY: Must be >= 1 and <= 1024. Limits horizontal compute explosion.\n    "
-
-    @model_validator(mode="after")
-    def sort_dag_topology_arrays(self) -> Self:
-        object.__setattr__(self, "edges", sorted(self.edges))
-        return self
+    # Note: edges is a structurally ordered sequence (Topological DAG edges) and MUST NOT be sorted.
 
     @model_validator(mode="after")
     def verify_edges_exist(self) -> Self:
