@@ -1473,7 +1473,7 @@ class BrowserDOMState(CoreasonBaseState):
             return url
         hostname_lower = hostname.lower()
         if hostname_lower in {"localhost", "broadcasthost"} or hostname_lower.endswith(
-            (".local", ".internal", ".arpa")
+            (".local", ".internal", ".arpa", ".nip.io", ".sslip.io")
         ):
             raise ValueError(f"SSRF topological violation detected: {hostname}")
         clean_hostname = hostname.strip("[]")
@@ -1499,7 +1499,7 @@ class BrowserDOMState(CoreasonBaseState):
                     ip = ipaddress.ip_address(int(clean_hostname))
                 else:
                     raise ValueError("Cannot parse IP")
-            except ValueError, OverflowError:
+            except (ValueError, OverflowError):
                 return url
         if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast:
             raise ValueError(f"SSRF mathematical bound violation detected: {ip}")
