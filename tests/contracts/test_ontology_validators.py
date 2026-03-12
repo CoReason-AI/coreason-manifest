@@ -258,7 +258,9 @@ def test_federated_discovery_manifest_sorting():
     )
 
     # It sorts endpoints by string representation. But note we provided strings.
-    # Because of default pydantic HttpUrl casting it returns HttpUrl but they are defined as strings in the model right now (list[str]).
-    # Since they are defined as list[str] in model, pydantic doesn't cast to HttpUrl if we just give it list[str].
+    # Because of default pydantic HttpUrl casting it returns HttpUrl but they are defined
+    # as strings in the model right now (list[str]).
+    # Since they are defined as list[str] in model, pydantic doesn't cast to HttpUrl
+    # if we just give it list[str].
     assert manifest.broadcast_endpoints == ["http://a.com", "http://b.com", "http://c.com"]
     assert manifest.supported_ontologies == ["hash-a", "hash-b", "hash-c"]
