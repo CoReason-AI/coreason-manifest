@@ -54,78 +54,44 @@
     },
     "ActivationSteeringContract": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nA real-time mechanistic interpretability boundary that monitors and controls specific neural circuits.",
+      "description": "CoReason Shared Kernel Ontology\n\nHardware-level contract for Representation Engineering via activation injection/ablation.",
       "properties": {
-        "target_feature_index": {
-          "description": "The exact dimensional index of the monosemantic feature in the Sparse Autoencoder dictionary.",
-          "minimum": 0,
-          "title": "Target Feature Index",
-          "type": "integer"
+        "steering_vector_hash": {
+          "description": "The SHA-256 hash of the extracted RepE control tensor (e.g., the 'caution' vector).",
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Steering Vector Hash",
+          "type": "string"
         },
-        "monitored_layers": {
-          "description": "The specific transformer layer indices where this feature activation must be monitored.",
+        "injection_layers": {
+          "description": "The specific transformer layer indices where this vector must be applied.",
           "items": {
             "type": "integer"
           },
           "minItems": 1,
-          "title": "Monitored Layers",
+          "title": "Injection Layers",
           "type": "array"
         },
-        "max_activation_threshold": {
-          "description": "The mathematical magnitude limit. If the feature activates beyond this, the firewall trips.",
-          "minimum": 0.0,
-          "title": "Max Activation Threshold",
+        "scaling_factor": {
+          "description": "The mathematical magnitude/strength of the injection (can be negative for ablation).",
+          "title": "Scaling Factor",
           "type": "number"
         },
-        "violation_action": {
-          "description": "The tensor-level remediation applied when the threshold is breached.",
+        "vector_modality": {
+          "description": "The tensor operation to perform: add the vector, subtract it, or clamp activations to its bounds.",
           "enum": [
-            "clamp",
-            "halt",
-            "quarantine",
-            "smooth_decay"
+            "additive",
+            "ablation",
+            "clamping"
           ],
-          "title": "Violation Action",
+          "title": "Vector Modality",
           "type": "string"
-        },
-        "clamp_value": {
-          "anyOf": [
-            {
-              "type": "number"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "If violation_action is 'clamp', the physical value to which the activation tensor is forced.",
-          "title": "Clamp Value"
-        },
-        "sae_dictionary_hash": {
-          "description": "The SHA-256 hash of the exact SAE projection matrix required to decode this feature.",
-          "pattern": "^[a-f0-9]{64}$",
-          "title": "Sae Dictionary Hash",
-          "type": "string"
-        },
-        "smoothing_profile": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/GeometricDecayProfileState"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The geometric parameters for continuous attenuation if violation_action is 'smooth_decay'."
         }
       },
       "required": [
-        "target_feature_index",
-        "monitored_layers",
-        "max_activation_threshold",
-        "violation_action",
-        "sae_dictionary_hash"
+        "steering_vector_hash",
+        "injection_layers",
+        "scaling_factor",
+        "vector_modality"
       ],
       "title": "ActivationSteeringContract",
       "type": "object"
@@ -1975,52 +1941,6 @@
       "title": "BypassReceipt",
       "type": "object"
     },
-    "ByzantineFaultTolerancePolicy": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nThe mathematical boundaries required to survive Byzantine failures in a decentralized swarm.",
-      "properties": {
-        "max_tolerable_faults": {
-          "description": "The maximum number of actively malicious, hallucinating, or degraded nodes (f) the swarm must survive.",
-          "minimum": 0,
-          "title": "Max Tolerable Faults",
-          "type": "integer"
-        },
-        "min_quorum_size": {
-          "description": "The minimum number of participating agents (N) required to form consensus.",
-          "exclusiveMinimum": 0,
-          "title": "Min Quorum Size",
-          "type": "integer"
-        },
-        "state_validation_metric": {
-          "description": "The cryptographic material the agents must sign to submit a valid vote.",
-          "enum": [
-            "ledger_hash",
-            "zk_proof",
-            "semantic_embedding"
-          ],
-          "title": "State Validation Metric",
-          "type": "string"
-        },
-        "byzantine_action": {
-          "description": "The deterministic punishment executed by the orchestrator against nodes that violate the consensus quorum.",
-          "enum": [
-            "quarantine",
-            "slash_escrow",
-            "ignore"
-          ],
-          "title": "Byzantine Action",
-          "type": "string"
-        }
-      },
-      "required": [
-        "max_tolerable_faults",
-        "min_quorum_size",
-        "state_validation_metric",
-        "byzantine_action"
-      ],
-      "title": "ByzantineFaultTolerancePolicy",
-      "type": "object"
-    },
     "CausalAttributionState": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology",
@@ -2256,6 +2176,18 @@
           "minimum": 0.0,
           "title": "Divergence Tolerance",
           "type": "number"
+        },
+        "activation_steering": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ActivationSteeringContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The precise mathematical contract for altering the residual stream to enforce this constraint."
         },
         "moe_routing_directive": {
           "anyOf": [
@@ -2563,7 +2495,7 @@
           "description": "The orchestrating sequencer for the PBFT consensus."
         },
         "quorum_rules": {
-          "$ref": "#/$defs/ByzantineFaultTolerancePolicy",
+          "$ref": "#/$defs/QuorumPolicy",
           "description": "The strict BFT tolerance bounds."
         }
       },
@@ -2631,7 +2563,7 @@
         "quorum_rules": {
           "anyOf": [
             {
-              "$ref": "#/$defs/ByzantineFaultTolerancePolicy"
+              "$ref": "#/$defs/QuorumPolicy"
             },
             {
               "type": "null"
@@ -5914,47 +5846,6 @@
       "title": "GenerativeTaxonomyManifest",
       "type": "object"
     },
-    "GeometricDecayProfileState": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nThe mathematical curve used to gently taper an adversarial activation to prevent logit collapse.",
-      "properties": {
-        "decay_function": {
-          "description": "The trigonometric or algebraic function governing the attenuation curve.",
-          "enum": [
-            "linear",
-            "exponential",
-            "cosine_annealing"
-          ],
-          "title": "Decay Function",
-          "type": "string"
-        },
-        "transition_window_tokens": {
-          "description": "The exact number of forward-pass generation steps over which the decay is applied.",
-          "exclusiveMinimum": 0,
-          "title": "Transition Window Tokens",
-          "type": "integer"
-        },
-        "decay_rate_param": {
-          "anyOf": [
-            {
-              "type": "number"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The optional tuning parameter (e.g., half-life lambda for exponential decay).",
-          "title": "Decay Rate Param"
-        }
-      },
-      "required": [
-        "decay_function",
-        "transition_window_tokens"
-      ],
-      "title": "GeometricDecayProfileState",
-      "type": "object"
-    },
     "GlobalGovernancePolicy": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nGlobal governance bounds for a swarm executing a workflow manifest.",
@@ -6577,7 +6468,7 @@
         "latent_firewalls": {
           "description": "The strict array of tensor-level mechanistic firewalls monitoring the forward pass for adversarial intent.",
           "items": {
-            "$ref": "#/$defs/ActivationSteeringContract"
+            "$ref": "#/$defs/SaeLatentPolicy"
           },
           "title": "Latent Firewalls",
           "type": "array"
@@ -7195,6 +7086,47 @@
         "total_latent_tokens"
       ],
       "title": "LatentScratchpadReceipt",
+      "type": "object"
+    },
+    "LatentSmoothingProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nThe mathematical curve used to gently taper an adversarial activation to prevent logit collapse.",
+      "properties": {
+        "decay_function": {
+          "description": "The trigonometric or algebraic function governing the attenuation curve.",
+          "enum": [
+            "linear",
+            "exponential",
+            "cosine_annealing"
+          ],
+          "title": "Decay Function",
+          "type": "string"
+        },
+        "transition_window_tokens": {
+          "description": "The exact number of forward-pass generation steps over which the decay is applied.",
+          "exclusiveMinimum": 0,
+          "title": "Transition Window Tokens",
+          "type": "integer"
+        },
+        "decay_rate_param": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The optional tuning parameter (e.g., half-life lambda for exponential decay).",
+          "title": "Decay Rate Param"
+        }
+      },
+      "required": [
+        "decay_function",
+        "transition_window_tokens"
+      ],
+      "title": "LatentSmoothingProfile",
       "type": "object"
     },
     "LifecycleTriggerEvent": {
@@ -9086,6 +9018,52 @@
       "title": "QuarantineIntent",
       "type": "object"
     },
+    "QuorumPolicy": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nThe mathematical boundaries required to survive Byzantine failures in a decentralized swarm.",
+      "properties": {
+        "max_tolerable_faults": {
+          "description": "The maximum number of actively malicious, hallucinating, or degraded nodes (f) the swarm must survive.",
+          "minimum": 0,
+          "title": "Max Tolerable Faults",
+          "type": "integer"
+        },
+        "min_quorum_size": {
+          "description": "The minimum number of participating agents (N) required to form consensus.",
+          "exclusiveMinimum": 0,
+          "title": "Min Quorum Size",
+          "type": "integer"
+        },
+        "state_validation_metric": {
+          "description": "The cryptographic material the agents must sign to submit a valid vote.",
+          "enum": [
+            "ledger_hash",
+            "zk_proof",
+            "semantic_embedding"
+          ],
+          "title": "State Validation Metric",
+          "type": "string"
+        },
+        "byzantine_action": {
+          "description": "The deterministic punishment executed by the orchestrator against nodes that violate the consensus quorum.",
+          "enum": [
+            "quarantine",
+            "slash_escrow",
+            "ignore"
+          ],
+          "title": "Byzantine Action",
+          "type": "string"
+        }
+      },
+      "required": [
+        "max_tolerable_faults",
+        "min_quorum_size",
+        "state_validation_metric",
+        "byzantine_action"
+      ],
+      "title": "QuorumPolicy",
+      "type": "object"
+    },
     "RedactionPolicy": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nA specific rule for algorithmic payload sanitization.",
@@ -9474,6 +9452,84 @@
         "activation_magnitude"
       ],
       "title": "SaeFeatureActivationState",
+      "type": "object"
+    },
+    "SaeLatentPolicy": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nA real-time mechanistic interpretability boundary that monitors and controls specific neural circuits.",
+      "properties": {
+        "target_feature_index": {
+          "description": "The exact dimensional index of the monosemantic feature in the Sparse Autoencoder dictionary.",
+          "minimum": 0,
+          "title": "Target Feature Index",
+          "type": "integer"
+        },
+        "monitored_layers": {
+          "description": "The specific transformer layer indices where this feature activation must be monitored.",
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 1,
+          "title": "Monitored Layers",
+          "type": "array"
+        },
+        "max_activation_threshold": {
+          "description": "The mathematical magnitude limit. If the feature activates beyond this, the firewall trips.",
+          "minimum": 0.0,
+          "title": "Max Activation Threshold",
+          "type": "number"
+        },
+        "violation_action": {
+          "description": "The tensor-level remediation applied when the threshold is breached.",
+          "enum": [
+            "clamp",
+            "halt",
+            "quarantine",
+            "smooth_decay"
+          ],
+          "title": "Violation Action",
+          "type": "string"
+        },
+        "clamp_value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "If violation_action is 'clamp', the physical value to which the activation tensor is forced.",
+          "title": "Clamp Value"
+        },
+        "sae_dictionary_hash": {
+          "description": "The SHA-256 hash of the exact SAE projection matrix required to decode this feature.",
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Sae Dictionary Hash",
+          "type": "string"
+        },
+        "smoothing_profile": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LatentSmoothingProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The geometric parameters for continuous attenuation if violation_action is 'smooth_decay'."
+        }
+      },
+      "required": [
+        "target_feature_index",
+        "monitored_layers",
+        "max_activation_threshold",
+        "violation_action",
+        "sae_dictionary_hash"
+      ],
+      "title": "SaeLatentPolicy",
       "type": "object"
     },
     "SalienceProfile": {
@@ -10121,33 +10177,7 @@
       "title": "SpanTraceReceipt",
       "type": "object"
     },
-    "SpatialCoordinateProfile": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nA resolution-independent 2D spatial vector.",
-      "properties": {
-        "x": {
-          "description": "The normalized X-axis coordinate (0.0 = left, 1.0 = right).",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "X",
-          "type": "number"
-        },
-        "y": {
-          "description": "The normalized Y-axis coordinate (0.0 = top, 1.0 = bottom).",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "Y",
-          "type": "number"
-        }
-      },
-      "required": [
-        "x",
-        "y"
-      ],
-      "title": "SpatialCoordinateProfile",
-      "type": "object"
-    },
-    "SpatialCoordinateState": {
+    "SpatialBoundingBoxProfile": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nA resolution-independent spatial region.",
       "properties": {
@@ -10186,7 +10216,33 @@
         "x_max",
         "y_max"
       ],
-      "title": "SpatialCoordinateState",
+      "title": "SpatialBoundingBoxProfile",
+      "type": "object"
+    },
+    "SpatialCoordinateProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nA resolution-independent 2D spatial vector.",
+      "properties": {
+        "x": {
+          "description": "The normalized X-axis coordinate (0.0 = left, 1.0 = right).",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "X",
+          "type": "number"
+        },
+        "y": {
+          "description": "The normalized Y-axis coordinate (0.0 = top, 1.0 = bottom).",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Y",
+          "type": "number"
+        }
+      },
+      "required": [
+        "x",
+        "y"
+      ],
+      "title": "SpatialCoordinateProfile",
       "type": "object"
     },
     "SpatialKinematicActionIntent": {

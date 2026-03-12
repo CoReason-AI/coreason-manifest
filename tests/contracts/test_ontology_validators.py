@@ -1,24 +1,23 @@
 import pytest
-from pydantic import ValidationError
-
 from coreason_manifest.spec.ontology import (
-    ActivationSteeringContract,
-    ByzantineFaultTolerancePolicy,
     ConsensusPolicy,
     CoreasonBaseState,
-    GeometricDecayProfileState,
+    LatentSmoothingProfile,
+    QuorumPolicy,
     RiskLevelPolicy,
-    SpatialCoordinateState,
+    SaeLatentPolicy,
+    SpatialBoundingBoxProfile,
 )
+from pydantic import ValidationError
 
 
-def test_risk_level_policy_weight():
+def test_risk_level_policy_weight() -> None:
     assert RiskLevelPolicy.SAFE.weight == 0
     assert RiskLevelPolicy.STANDARD.weight == 1
     assert RiskLevelPolicy.CRITICAL.weight == 2
 
 
-def test_coreason_base_state_hash():
+def test_coreason_base_state_hash() -> None:
     class TestState(CoreasonBaseState):
         name: str
 
@@ -30,28 +29,30 @@ def test_coreason_base_state_hash():
     assert h1 == h2
 
 
-def test_spatial_coordinate_state_validation():
+def test_spatial_coordinate_state_validation() -> None:
     # Valid
-    SpatialCoordinateState(x_min=0.0, x_max=1.0, y_min=0.0, y_max=1.0)
+    SpatialBoundingBoxProfile(x_min=0.0, x_max=1.0, y_min=0.0, y_max=1.0)
 
     # Invalid x
     with pytest.raises(ValidationError, match=r"x_min cannot be strictly greater than x_max\."):
-        SpatialCoordinateState(x_min=1.0, x_max=0.0, y_min=0.0, y_max=1.0)
+        SpatialBoundingBoxProfile(x_min=1.0, x_max=0.0, y_min=0.0, y_max=1.0)
 
     # Invalid y
     with pytest.raises(ValidationError, match=r"y_min cannot be strictly greater than y_max\."):
-        SpatialCoordinateState(x_min=0.0, x_max=1.0, y_min=1.0, y_max=0.0)
+        SpatialBoundingBoxProfile(x_min=0.0, x_max=1.0, y_min=1.0, y_max=0.0)
 
 
-def test_byzantine_fault_tolerance_policy_math():
+def test_byzantine_fault_tolerance_policy_math() -> None:
     # Valid: N >= 3f + 1
-    ByzantineFaultTolerancePolicy(
+    QuorumPolicy(
         max_tolerable_faults=1, min_quorum_size=4, state_validation_metric="ledger_hash", byzantine_action="quarantine"
     )
 
     # Invalid
-    with pytest.raises(ValidationError, match=r"Byzantine Fault Tolerance requires min_quorum_size \(N\) >= 3f \+ 1\."):
-        ByzantineFaultTolerancePolicy(
+    with pytest.raises(
+        ValidationError, match=r"Byzantine Fault Tolerance requires min_quorum_size \(N\) >= 3f \+ 1\."
+    ):
+        QuorumPolicy(
             max_tolerable_faults=1,
             min_quorum_size=3,
             state_validation_metric="ledger_hash",
@@ -59,14 +60,14 @@ def test_byzantine_fault_tolerance_policy_math():
         )
 
 
-def test_consensus_policy_pbft_requirements():
+def test_consensus_policy_pbft_requirements() -> None:
     # Valid non-pbft
     ConsensusPolicy(strategy="majority")
 
     # Valid pbft
     ConsensusPolicy(
         strategy="pbft",
-        quorum_rules=ByzantineFaultTolerancePolicy(
+        quorum_rules=QuorumPolicy(
             max_tolerable_faults=1,
             min_quorum_size=4,
             state_validation_metric="ledger_hash",
@@ -79,9 +80,9 @@ def test_consensus_policy_pbft_requirements():
         ConsensusPolicy(strategy="pbft")
 
 
-def test_activation_steering_contract_smooth_decay():
+def test_activation_steering_contract_smooth_decay() -> None:
     # Valid non-smooth decay
-    ActivationSteeringContract(
+    SaeLatentPolicy(
         target_feature_index=1,
         monitored_layers=[1],
         max_activation_threshold=1.0,
@@ -90,13 +91,13 @@ def test_activation_steering_contract_smooth_decay():
     )
 
     # Valid smooth decay
-    ActivationSteeringContract(
+    SaeLatentPolicy(
         target_feature_index=1,
         monitored_layers=[1],
         max_activation_threshold=1.0,
         violation_action="smooth_decay",
         sae_dictionary_hash="a" * 64,
-        smoothing_profile=GeometricDecayProfileState(decay_function="exponential", transition_window_tokens=10),
+        smoothing_profile=LatentSmoothingProfile(decay_function="exponential", transition_window_tokens=10),
         clamp_value=0.1,
     )
 
@@ -104,7 +105,7 @@ def test_activation_steering_contract_smooth_decay():
     with pytest.raises(
         ValidationError, match=r"smoothing_profile must be provided when violation_action is 'smooth_decay'\."
     ):
-        ActivationSteeringContract(
+        SaeLatentPolicy(
             target_feature_index=1,
             monitored_layers=[1],
             max_activation_threshold=1.0,
@@ -117,11 +118,11 @@ def test_activation_steering_contract_smooth_decay():
     with pytest.raises(
         ValidationError, match=r"clamp_value must be provided .* when violation_action is 'smooth_decay'\."
     ):
-        ActivationSteeringContract(
+        SaeLatentPolicy(
             target_feature_index=1,
             monitored_layers=[1],
             max_activation_threshold=1.0,
             violation_action="smooth_decay",
             sae_dictionary_hash="a" * 64,
-            smoothing_profile=GeometricDecayProfileState(decay_function="exponential", transition_window_tokens=10),
+            smoothing_profile=LatentSmoothingProfile(decay_function="exponential", transition_window_tokens=10),
         )

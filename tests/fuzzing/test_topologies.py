@@ -7,13 +7,13 @@ from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
     AdversarialMarketTopologyManifest,
-    ByzantineFaultTolerancePolicy,
     ConsensusPolicy,
     CouncilTopologyManifest,
     DAGTopologyManifest,
     EpistemicSOPManifest,
     GenerativeManifoldSLA,
     PredictionMarketPolicy,
+    QuorumPolicy,
     SemanticDiscoveryIntent,
     SystemNodeProfile,
     VectorEmbeddingState,
@@ -58,7 +58,7 @@ def test_adversarial_market_disjoint_failure() -> None:
 def test_council_topology_byzantine_slash_requires_escrow() -> None:
     """Prove that CouncilTopologyManifest strictly requires a funded escrow when PBFT slashing is enabled."""
     nodes: dict[str, Any] = {"did:web:node_1": SystemNodeProfile(description="The Oracle")}
-    quorum = ByzantineFaultTolerancePolicy(
+    quorum = QuorumPolicy(
         max_tolerable_faults=1,
         min_quorum_size=4,
         state_validation_metric="ledger_hash",

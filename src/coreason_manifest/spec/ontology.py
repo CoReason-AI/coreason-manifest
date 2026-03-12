@@ -245,7 +245,7 @@ class CoreasonBaseState(BaseModel):
         return json.dumps(canonical_dict, ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode("utf-8")
 
 
-class SpatialCoordinateState(CoreasonBaseState):
+class SpatialBoundingBoxProfile(CoreasonBaseState):
     """A resolution-independent spatial region."""
 
     x_min: float = Field(ge=0.0, le=1.0, description="The left boundary.")
@@ -398,7 +398,7 @@ class HardwareEnclaveReceipt(CoreasonBaseState):
     )
 
 
-class GeometricDecayProfileState(CoreasonBaseState):
+class LatentSmoothingProfile(CoreasonBaseState):
     """The mathematical curve used to gently taper an adversarial activation to prevent logit collapse."""
 
     decay_function: Literal["linear", "exponential", "cosine_annealing"] = Field(
@@ -536,6 +536,31 @@ class SaeFeatureActivationState(CoreasonBaseState):
     )
 
 
+class ActivationSteeringContract(CoreasonBaseState):
+    """
+    Hardware-level contract for Representation Engineering via activation injection/ablation.
+    """
+
+    steering_vector_hash: str = Field(
+        pattern="^[a-f0-9]{64}$",
+        description="The SHA-256 hash of the extracted RepE control tensor (e.g., the 'caution' vector).",
+    )
+    injection_layers: list[int] = Field(
+        min_length=1, description="The specific transformer layer indices where this vector must be applied."
+    )
+    scaling_factor: float = Field(
+        description="The mathematical magnitude/strength of the injection (can be negative for ablation)."
+    )
+    vector_modality: Literal["additive", "ablation", "clamping"] = Field(
+        description="The tensor operation to perform: add the vector, subtract it, or clamp activations to its bounds."
+    )
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "injection_layers", sorted(self.injection_layers))
+        return self
+
+
 class SemanticSlicingPolicy(CoreasonBaseState):
     """
     AGENT INSTRUCTION: A Deterministic Epistemic Firewall that mathematically
@@ -603,6 +628,10 @@ class CognitiveStateProfile(CoreasonBaseState):
         ge=0.0,
         le=1.0,
         description="The 'curiosity' metric; dictates how far the router is allowed to stray from high-probability distributions.",  # noqa: E501
+    )
+    activation_steering: ActivationSteeringContract | None = Field(
+        default=None,
+        description="The precise mathematical contract for altering the residual stream to enforce this constraint.",
     )
     moe_routing_directive: CognitiveRoutingContract | None = Field(
         default=None,
@@ -698,7 +727,7 @@ class PredictionMarketPolicy(CoreasonBaseState):
     )
 
 
-class ByzantineFaultTolerancePolicy(CoreasonBaseState):
+class QuorumPolicy(CoreasonBaseState):
     """The mathematical boundaries required to survive Byzantine failures in a decentralized swarm."""
 
     max_tolerable_faults: int = Field(
@@ -741,7 +770,7 @@ class ConsensusPolicy(CoreasonBaseState):
         default=None,
         description="The strict algorithmic mechanism rules required if the strategy is prediction_market.",
     )
-    quorum_rules: ByzantineFaultTolerancePolicy | None = Field(
+    quorum_rules: QuorumPolicy | None = Field(
         default=None, description="The strict Byzantine fault tolerance limits required if the strategy is 'pbft'."
     )
 
@@ -780,7 +809,7 @@ class RedactionPolicy(CoreasonBaseState):
         return self
 
 
-class ActivationSteeringContract(CoreasonBaseState):
+class SaeLatentPolicy(CoreasonBaseState):
     """A real-time mechanistic interpretability boundary that monitors and controls specific neural circuits."""
 
     target_feature_index: int = Field(
@@ -806,7 +835,7 @@ class ActivationSteeringContract(CoreasonBaseState):
         pattern="^[a-f0-9]{64}$",
         description="The SHA-256 hash of the exact SAE projection matrix required to decode this feature.",
     )
-    smoothing_profile: GeometricDecayProfileState | None = Field(
+    smoothing_profile: LatentSmoothingProfile | None = Field(
         default=None,
         description="The geometric parameters for continuous attenuation if violation_action is 'smooth_decay'.",
     )
@@ -3721,7 +3750,7 @@ class InformationFlowPolicy(CoreasonBaseState):
     semantic_firewall: SemanticFirewallPolicy | None = Field(
         default=None, description="The active cognitive defense perimeter against adversarial control-flow overrides."
     )
-    latent_firewalls: list[ActivationSteeringContract] = Field(
+    latent_firewalls: list[SaeLatentPolicy] = Field(
         default_factory=list,
         description="The strict array of tensor-level mechanistic firewalls monitoring the forward pass for adversarial intent.",  # noqa: E501
     )
@@ -4879,7 +4908,7 @@ class ConsensusFederationTopologyManifest(CoreasonBaseState):
     )
     participant_ids: list[NodeIdentifierState] = Field(min_length=3, description="The nodes forming the PBFT ring.")
     adjudicator_id: NodeIdentifierState = Field(description="The orchestrating sequencer for the PBFT consensus.")
-    quorum_rules: ByzantineFaultTolerancePolicy = Field(description="The strict BFT tolerance bounds.")
+    quorum_rules: QuorumPolicy = Field(description="The strict BFT tolerance bounds.")
 
     @model_validator(mode="after")
     def verify_adjudicator_isolation(self) -> Self:
