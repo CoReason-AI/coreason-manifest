@@ -306,3 +306,37 @@ def test_ephemeral_namespace_partition_state_invalid_hash() -> None:
             max_ttl_seconds=3600,
             max_vram_mb=1024,
         )
+
+
+def test_bilateral_sla_sorting() -> None:
+    from coreason_manifest.spec.ontology import BilateralSLA, InformationClassificationProfile
+
+    sla = BilateralSLA(
+        receiving_tenant_id="tenant-a",
+        max_permitted_classification=InformationClassificationProfile.PUBLIC,
+        liability_limit_magnitude=1000,
+        permitted_geographic_regions=["us-west", "eu-central", "ap-south"],
+    )
+    assert sla.permitted_geographic_regions == ["ap-south", "eu-central", "us-west"]
+
+
+def test_federated_discovery_manifest_sorting() -> None:
+    from coreason_manifest.spec.ontology import FederatedDiscoveryManifest
+
+    manifest = FederatedDiscoveryManifest(
+        broadcast_endpoints=["https://c.com", "https://a.com", "https://b.com"],
+        supported_ontologies=["hash_z", "hash_x", "hash_y"],
+    )
+    assert manifest.broadcast_endpoints == ["https://a.com", "https://b.com", "https://c.com"]
+    assert manifest.supported_ontologies == ["hash_x", "hash_y", "hash_z"]
+
+
+def test_adjudication_intent_sorting() -> None:
+    from coreason_manifest.spec.ontology import AdjudicationIntent
+
+    intent = AdjudicationIntent(
+        deadlocked_claims=["claim_3", "claim_1", "claim_2"],
+        resolution_schema={"type": "string"},
+        timeout_action="rollback",
+    )
+    assert intent.deadlocked_claims == ["claim_1", "claim_2", "claim_3"]
