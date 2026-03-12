@@ -250,6 +250,7 @@ def test_redaction_policy_sorting() -> None:
 
 # --- 8. Missing specific validators coverage ---
 
+
 def test_defeasible_cascade_event_sorting() -> None:
     event = DefeasibleCascadeEvent(
         cascade_id="c1",
@@ -261,18 +262,12 @@ def test_defeasible_cascade_event_sorting() -> None:
 
 
 def test_rollback_intent_sorting() -> None:
-    intent = RollbackIntent(
-        request_id="r1",
-        target_event_id="e1",
-        invalidated_node_ids=["node_c", "node_a", "node_b"]
-    )
+    intent = RollbackIntent(request_id="r1", target_event_id="e1", invalidated_node_ids=["node_c", "node_a", "node_b"])
     assert intent.invalidated_node_ids == ["node_a", "node_b", "node_c"]
 
 
 def test_multimodal_token_anchor_state_sorting() -> None:
-    anchor = MultimodalTokenAnchorState(
-        visual_patch_hashes=["hash_c", "hash_a", "hash_b"]
-    )
+    anchor = MultimodalTokenAnchorState(visual_patch_hashes=["hash_c", "hash_a", "hash_b"])
     assert anchor.visual_patch_hashes == ["hash_a", "hash_b", "hash_c"]
 
 
