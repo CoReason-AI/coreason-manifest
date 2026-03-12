@@ -972,6 +972,8 @@ class RollbackIntent(CoreasonBaseState):
 
 
 class StateMutationIntent(CoreasonBaseState):
+    model_config = ConfigDict(populate_by_name=True)
+
     op: PatchOperationProfile = Field(
         description="The strict RFC 6902 JSON Patch operation, acting as a deterministic state vector mutation."
     )

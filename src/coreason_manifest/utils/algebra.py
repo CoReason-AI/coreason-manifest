@@ -277,9 +277,10 @@ def verify_merkle_proof(trace: list[ExecutionNodeReceipt]) -> bool:
     """
     node_map: dict[str, ExecutionNodeReceipt] = {}
     for node in trace:
-        if node.node_hash is None:
+        h = getattr(node, "node_hash", None)
+        if h is None:
             return False
-        node_map[node.node_hash] = node
+        node_map[h] = node
     for node in trace:
         if node.generate_node_hash() != node.node_hash:
             raise TamperFaultEvent(f"Node hash mismatch for request {node.request_id}")
@@ -351,6 +352,11 @@ def apply_state_differential(
                 raise ValueError(f"Invalid path or root operation not supported: {path}")
             raise ValueError(f"Invalid JSON pointer: {path}")
 
+        if "~" in path:
+            for i, c in enumerate(path):
+                if c == "~" and (i + 1 >= len(path) or path[i + 1] not in ["0", "1"]):
+                    raise ValueError(f"Invalid JSON pointer: {path}")
+
         parts = [p.replace("~1", "/").replace("~0", "~") for p in path.split("/")[1:]]
 
         target: Any = new_state
@@ -384,6 +390,8 @@ def apply_state_differential(
                 elif isinstance(from_target, list):
                     try:
                         idx = int(part)
+                        if idx < 0 or idx >= len(from_target):
+                            raise ValueError(f"Invalid from_path: {from_path}")
                         from_target = from_target[idx]
                     except (ValueError, IndexError) as e:
                         raise ValueError(f"Invalid from_path: {from_path}") from e
@@ -436,9 +444,11 @@ def apply_state_differential(
                     try:
                         idx = int(last_part)
                         if idx < 0 or idx > len(target):
-                            raise ValueError(f"Index out of bounds: {path}")
+                            raise ValueError("Index out of bounds")
                         target.insert(idx, patch.value)
                     except ValueError as e:
+                        if "Index out of bounds" in str(e):
+                            raise
                         raise ValueError(f"Invalid index: {last_part}") from e
             else:
                 raise ValueError(f"Cannot add to path: {path}")
@@ -461,6 +471,8 @@ def apply_state_differential(
                     idx = int(last_part)
                     target[idx] = patch.value
             except ValueError as e:
+                if "Cannot extract from end of array" in str(e):
+                    raise ValueError("Cannot replace at end of array") from e
                 raise ValueError(f"Cannot replace at path {path}: {e}") from e
 
         elif patch.op in ("copy", "move"):

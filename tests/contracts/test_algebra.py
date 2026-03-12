@@ -12,9 +12,11 @@ from coreason_manifest.spec.ontology import (
     DAGTopologyManifest,
     DynamicRoutingManifest,
     EpistemicLedgerState,
+    ExecutionNodeReceipt,
     OntologicalAlignmentPolicy,
     StateDifferentialManifest,
     StateMutationIntent,
+    TamperFaultEvent,
     TokenBurnReceipt,
     VectorEmbeddingState,
     WorkflowManifest,
@@ -31,6 +33,7 @@ from coreason_manifest.utils.algebra import (
     project_manifest_to_mermaid,
     validate_payload,
     verify_ast_safety,
+    verify_merkle_proof,
 )
 
 
@@ -316,3 +319,265 @@ def test_apply_state_differential_property(
     except ValueError:
         # ValueErrors (e.g., path not found, invalid operation) are expected for random invalid patches
         pass
+
+
+def test_verify_merkle_proof_valid() -> None:
+    receipt1 = ExecutionNodeReceipt(
+        request_id="req1",
+        inputs={"in": 1},
+        outputs={"out": 1},
+        parent_hashes=[],
+        node_hash="dummy1"
+    )
+    # Use object.__setattr__ to bypass frozen=True
+    object.__setattr__(receipt1, "node_hash", receipt1.generate_node_hash())
+
+    receipt2 = ExecutionNodeReceipt(
+        request_id="req2",
+        inputs={"in": 2},
+        outputs={"out": 2},
+        parent_hashes=[receipt1.node_hash], # type: ignore[list-item]
+        node_hash="dummy2"
+    )
+    object.__setattr__(receipt2, "node_hash", receipt2.generate_node_hash())
+
+    trace = [receipt2, receipt1] # out of order but valid
+    assert verify_merkle_proof(trace) is True
+
+
+def test_verify_merkle_proof_invalid_hash() -> None:
+    receipt1 = ExecutionNodeReceipt(
+        request_id="req1",
+        inputs={"in": 1},
+        outputs={"out": 1},
+        parent_hashes=[],
+        node_hash="dummy1"
+    )
+    object.__setattr__(receipt1, "node_hash", "invalid_hash")
+    with pytest.raises(TamperFaultEvent, match="Node hash mismatch"):
+        verify_merkle_proof([receipt1])
+
+
+def test_verify_merkle_proof_missing_parent() -> None:
+    receipt1 = ExecutionNodeReceipt(
+        request_id="req1",
+        inputs={"in": 1},
+        outputs={"out": 1},
+        parent_hashes=["non_existent_parent"],
+        node_hash="dummy1"
+    )
+    object.__setattr__(receipt1, "node_hash", receipt1.generate_node_hash())
+    with pytest.raises(TamperFaultEvent, match="Missing parent hash"):
+        verify_merkle_proof([receipt1])
+
+
+def test_verify_merkle_proof_none_hash() -> None:
+    # Need to skip pydantic validation that complains if node_hash is not valid.
+    # Actually wait, `node_hash` allows `str | None` ?
+    receipt1 = ExecutionNodeReceipt(
+        request_id="req1",
+        inputs={"in": 1},
+        outputs={"out": 1},
+        parent_hashes=[],
+        node_hash="valid"
+    )
+    object.__setattr__(receipt1, "node_hash", None)
+    assert verify_merkle_proof([receipt1]) is False
+
+
+def test_apply_state_differential_edge_cases() -> None:
+    base_state = {
+        "arr": [1, 2, 3],
+        "nested": {"key": "value"}
+    }
+
+    # Test 'add' out of bounds
+    patch_add_oob = StateMutationIntent(op="add", path="/arr/10", value=4)
+    manifest = StateDifferentialManifest(
+        diff_id="did:web:patch-1",
+        author_node_id="did:web:node-1",
+        lamport_timestamp=1,
+        vector_clock={"did:web:node-1": 1},
+        patches=[patch_add_oob],
+    )
+    with pytest.raises(ValueError, match="Index out of bounds"):
+        apply_state_differential(base_state, manifest)
+
+    # Test 'add' to end of array
+    patch_add_end = StateMutationIntent(op="add", path="/arr/-", value=4)
+    manifest2 = StateDifferentialManifest(
+        diff_id="did:web:patch-2",
+        author_node_id="did:web:node-1",
+        lamport_timestamp=1,
+        vector_clock={"did:web:node-1": 1},
+        patches=[patch_add_end],
+    )
+    new_state = apply_state_differential(base_state, manifest2)
+    assert new_state["arr"] == [1, 2, 3, 4]
+
+    # Test 'add' to target not list/dict
+    patch_add_invalid = StateMutationIntent(op="add", path="/arr/0/key", value=4)
+    manifest3 = StateDifferentialManifest(
+        diff_id="did:web:patch-3",
+        author_node_id="did:web:node-1",
+        lamport_timestamp=1,
+        vector_clock={"did:web:node-1": 1},
+        patches=[patch_add_invalid],
+    )
+    with pytest.raises(ValueError, match="Cannot add to path"):
+        apply_state_differential(base_state, manifest3)
+
+    # Test 'remove' from end of array
+    patch_remove_end = StateMutationIntent(op="remove", path="/arr/-")
+    manifest4 = StateDifferentialManifest(
+        diff_id="did:web:patch-4",
+        author_node_id="did:web:node-1",
+        lamport_timestamp=1,
+        vector_clock={"did:web:node-1": 1},
+        patches=[patch_remove_end],
+    )
+    with pytest.raises(ValueError, match="Cannot remove from end of array"):
+        apply_state_differential(base_state, manifest4)
+
+    # Test 'replace' from end of array
+    patch_replace_end = StateMutationIntent(op="replace", path="/arr/-", value=9)
+    manifest5 = StateDifferentialManifest(
+        diff_id="did:web:patch-5",
+        author_node_id="did:web:node-1",
+        lamport_timestamp=1,
+        vector_clock={"did:web:node-1": 1},
+        patches=[patch_replace_end],
+    )
+    with pytest.raises(ValueError, match="Cannot replace at end of array"):
+        apply_state_differential(base_state, manifest5)
+
+    # Test 'copy' operation
+    patch_copy = StateMutationIntent(op="copy", path="/arr/1", **{"from": "/nested/key"})
+    manifest6 = StateDifferentialManifest(
+        diff_id="did:web:patch-6",
+        author_node_id="did:web:node-1",
+        lamport_timestamp=1,
+        vector_clock={"did:web:node-1": 1},
+        patches=[patch_copy],
+    )
+    new_state = apply_state_differential(base_state, manifest6)
+    assert new_state["arr"] == [1, "value", 2, 3]
+
+    # Test 'move' operation
+    patch_move = StateMutationIntent(op="move", path="/arr/1", **{"from": "/nested/key"})
+    manifest7 = StateDifferentialManifest(
+        diff_id="did:web:patch-7",
+        author_node_id="did:web:node-1",
+        lamport_timestamp=1,
+        vector_clock={"did:web:node-1": 1},
+        patches=[patch_move],
+    )
+    new_state = apply_state_differential(base_state, manifest7)
+    assert new_state["arr"] == [1, "value", 2, 3]
+    assert "key" not in new_state["nested"]
+
+    # Test invalid JSON pointers and resolution
+    patch_invalid_ptr = StateMutationIntent(op="add", path="invalid", value=1)
+    manifest8 = StateDifferentialManifest(
+        diff_id="did:web:patch-8",
+        author_node_id="did:web:node-1",
+        lamport_timestamp=1,
+        vector_clock={"did:web:node-1": 1},
+        patches=[patch_invalid_ptr],
+    )
+    with pytest.raises(ValueError, match="Invalid JSON pointer"):
+        apply_state_differential(base_state, manifest8)
+
+    patch_root = StateMutationIntent(op="add", path="", value=1)
+    manifest9 = StateDifferentialManifest(
+        diff_id="did:web:patch-9",
+        author_node_id="did:web:node-1",
+        lamport_timestamp=1,
+        vector_clock={"did:web:node-1": 1},
+        patches=[patch_root],
+    )
+    with pytest.raises(ValueError, match="Invalid path or root operation not supported"):
+        apply_state_differential(base_state, manifest9)
+
+    patch_escape = StateMutationIntent(op="add", path="/arr~20", value=1)
+    manifest10 = StateDifferentialManifest(
+        diff_id="did:web:patch-10",
+        author_node_id="did:web:node-1",
+        lamport_timestamp=1,
+        vector_clock={"did:web:node-1": 1},
+        patches=[patch_escape],
+    )
+    with pytest.raises(ValueError, match="Invalid JSON pointer"):
+        apply_state_differential(base_state, manifest10)
+
+    # Test 'test' operation root failure
+    patch_test_root = StateMutationIntent(op="test", path="", value={"different": "value"})
+    manifest11 = StateDifferentialManifest(
+        diff_id="did:web:patch-11",
+        author_node_id="did:web:node-1",
+        lamport_timestamp=1,
+        vector_clock={"did:web:node-1": 1},
+        patches=[patch_test_root],
+    )
+    with pytest.raises(ValueError, match="Patch test operation failed"):
+        apply_state_differential(base_state, manifest11)
+
+    # Test 'test' operation nested failure
+    patch_test_nested = StateMutationIntent(op="test", path="/arr/0", value=99)
+    manifest12 = StateDifferentialManifest(
+        diff_id="did:web:patch-12",
+        author_node_id="did:web:node-1",
+        lamport_timestamp=1,
+        vector_clock={"did:web:node-1": 1},
+        patches=[patch_test_nested],
+    )
+    with pytest.raises(ValueError, match="Patch test operation failed"):
+        apply_state_differential(base_state, manifest12)
+
+    # Test 'test' operation success root
+    patch_test_root_success = StateMutationIntent(op="test", path="", value=base_state) # type: ignore[arg-type]
+    manifest13 = StateDifferentialManifest(
+        diff_id="did:web:patch-13",
+        author_node_id="did:web:node-1",
+        lamport_timestamp=1,
+        vector_clock={"did:web:node-1": 1},
+        patches=[patch_test_root_success],
+    )
+    new_state = apply_state_differential(base_state, manifest13)
+    assert new_state == base_state
+
+    # Test 'copy' from an array index out of bounds
+    patch_copy_oob = StateMutationIntent(op="copy", path="/nested/new_key", **{"from": "/arr/10"})
+    manifest14 = StateDifferentialManifest(
+        diff_id="did:web:patch-14",
+        author_node_id="did:web:node-1",
+        lamport_timestamp=1,
+        vector_clock={"did:web:node-1": 1},
+        patches=[patch_copy_oob],
+    )
+    with pytest.raises(ValueError, match="Invalid from_path operation"):
+        apply_state_differential(base_state, manifest14)
+
+    # Test 'move' to end of array
+    patch_move_end = StateMutationIntent(op="move", path="/arr/-", **{"from": "/arr/0"})
+    manifest15 = StateDifferentialManifest(
+        diff_id="did:web:patch-15",
+        author_node_id="did:web:node-1",
+        lamport_timestamp=1,
+        vector_clock={"did:web:node-1": 1},
+        patches=[patch_move_end],
+    )
+    new_state = apply_state_differential(base_state, manifest15)
+    assert new_state["arr"] == [2, 3, 1]
+
+    # Test 'copy' from target not list/dict
+    patch_copy_invalid_from = StateMutationIntent(op="copy", path="/nested/new_key", **{"from": "/nested/key/invalid"})
+    manifest16 = StateDifferentialManifest(
+        diff_id="did:web:patch-16",
+        author_node_id="did:web:node-1",
+        lamport_timestamp=1,
+        vector_clock={"did:web:node-1": 1},
+        patches=[patch_copy_invalid_from],
+    )
+    with pytest.raises(ValueError, match="Invalid from_path"):
+        apply_state_differential(base_state, manifest16)
