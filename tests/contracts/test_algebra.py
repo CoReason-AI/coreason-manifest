@@ -373,196 +373,78 @@ def test_verify_merkle_proof_none_hash() -> None:
     assert verify_merkle_proof([receipt1]) is False
 
 
-def test_apply_state_differential_edge_cases() -> None:
+# --- Atomic Edge Cases for State Differential (RFC 6902) ---
+
+
+@pytest.mark.parametrize(
+    ("patch_kwargs", "match_str"),
+    [
+        ({"op": "add", "path": "/arr/10", "value": 4}, "Index out of bounds"),
+        ({"op": "add", "path": "/arr/0/key", "value": 4}, "Cannot add to path"),
+        ({"op": "remove", "path": "/arr/-"}, "Cannot remove from end of array"),
+        ({"op": "replace", "path": "/arr/-", "value": 9}, "Cannot replace at end of array"),
+        ({"op": "add", "path": "invalid", "value": 1}, "Invalid JSON pointer"),
+        ({"op": "add", "path": "", "value": 1}, "Invalid path or root operation not supported"),
+        ({"op": "add", "path": "/arr~20", "value": 1}, "Invalid JSON pointer"),
+        ({"op": "test", "path": "", "value": {"different": "value"}}, "Patch test operation failed"),
+        ({"op": "test", "path": "/arr/0", "value": 99}, "Patch test operation failed"),
+        ({"op": "copy", "path": "/nested/new_key", "from_path": "/arr/10"}, "Invalid from_path operation"),
+        ({"op": "copy", "path": "/nested/new_key", "from_path": "/nested/key/invalid"}, "Invalid from_path"),
+        ({"op": "copy", "path": "/nested/new_key", "from_path": "/arr/invalid_index"}, "Invalid from_path operation"),
+        ({"op": "copy", "path": "/nested/new_key", "from_path": "/arr/invalid_index/more"}, "Invalid from_path"),
+    ],
+)
+def test_apply_state_differential_atomic_failures(patch_kwargs: dict[str, Any], match_str: str) -> None:
+    """Mathematically prove invalid RFC 6902 patch geometries strictly trip the topological bounds."""
     base_state = {"arr": [1, 2, 3], "nested": {"key": "value"}}
 
-    # Test 'add' out of bounds
-    patch_add_oob = StateMutationIntent(op="add", path="/arr/10", value=4)
+    # In order to allow `from_path` param to be passed as `from` to StateMutationIntent which uses `from` alias
+    if "from_path" in patch_kwargs:
+        patch_kwargs["from"] = patch_kwargs.pop("from_path")
+
+    patch = StateMutationIntent(**patch_kwargs)
     manifest = StateDifferentialManifest(
-        diff_id="did:web:patch-1",
+        diff_id="did:web:patch-fail",
         author_node_id="did:web:node-1",
         lamport_timestamp=1,
         vector_clock={"did:web:node-1": 1},
-        patches=[patch_add_oob],
+        patches=[patch],
     )
-    with pytest.raises(ValueError, match="Index out of bounds"):
+    with pytest.raises(ValueError, match=match_str):
         apply_state_differential(base_state, manifest)
 
-    # Test 'add' to end of array
-    patch_add_end = StateMutationIntent(op="add", path="/arr/-", value=4)
-    manifest2 = StateDifferentialManifest(
-        diff_id="did:web:patch-2",
-        author_node_id="did:web:node-1",
-        lamport_timestamp=1,
-        vector_clock={"did:web:node-1": 1},
-        patches=[patch_add_end],
-    )
-    new_state = apply_state_differential(base_state, manifest2)
-    assert new_state["arr"] == [1, 2, 3, 4]
 
-    # Test 'add' to target not list/dict
-    patch_add_invalid = StateMutationIntent(op="add", path="/arr/0/key", value=4)
-    manifest3 = StateDifferentialManifest(
-        diff_id="did:web:patch-3",
-        author_node_id="did:web:node-1",
-        lamport_timestamp=1,
-        vector_clock={"did:web:node-1": 1},
-        patches=[patch_add_invalid],
-    )
-    with pytest.raises(ValueError, match="Cannot add to path"):
-        apply_state_differential(base_state, manifest3)
+@pytest.mark.parametrize(
+    ("patch_kwargs", "expected_state"),
+    [
+        ({"op": "add", "path": "/arr/-", "value": 4}, {"arr": [1, 2, 3, 4], "nested": {"key": "value"}}),
+        (
+            {"op": "copy", "path": "/arr/1", "from_path": "/nested/key"},
+            {"arr": [1, "value", 2, 3], "nested": {"key": "value"}},
+        ),
+        ({"op": "move", "path": "/arr/1", "from_path": "/nested/key"}, {"arr": [1, "value", 2, 3], "nested": {}}),
+        (
+            {"op": "test", "path": "", "value": {"arr": [1, 2, 3], "nested": {"key": "value"}}},
+            {"arr": [1, 2, 3], "nested": {"key": "value"}},
+        ),
+        ({"op": "move", "path": "/arr/-", "from_path": "/arr/0"}, {"arr": [2, 3, 1], "nested": {"key": "value"}}),
+    ],
+)
+def test_apply_state_differential_atomic_success(patch_kwargs: dict[str, Any], expected_state: dict[str, Any]) -> None:
+    """Mathematically prove valid RFC 6902 array operations map accurately across dimensions."""
+    base_state = {"arr": [1, 2, 3], "nested": {"key": "value"}}
 
-    # Test 'remove' from end of array
-    patch_remove_end = StateMutationIntent(op="remove", path="/arr/-")
-    manifest4 = StateDifferentialManifest(
-        diff_id="did:web:patch-4",
-        author_node_id="did:web:node-1",
-        lamport_timestamp=1,
-        vector_clock={"did:web:node-1": 1},
-        patches=[patch_remove_end],
-    )
-    with pytest.raises(ValueError, match="Cannot remove from end of array"):
-        apply_state_differential(base_state, manifest4)
+    # In order to allow `from_path` param to be passed as `from` to StateMutationIntent which uses `from` alias
+    if "from_path" in patch_kwargs:
+        patch_kwargs["from"] = patch_kwargs.pop("from_path")
 
-    # Test 'replace' from end of array
-    patch_replace_end = StateMutationIntent(op="replace", path="/arr/-", value=9)
-    manifest5 = StateDifferentialManifest(
-        diff_id="did:web:patch-5",
+    patch = StateMutationIntent(**patch_kwargs)  # type: ignore[arg-type]
+    manifest = StateDifferentialManifest(
+        diff_id="did:web:patch-success",
         author_node_id="did:web:node-1",
         lamport_timestamp=1,
         vector_clock={"did:web:node-1": 1},
-        patches=[patch_replace_end],
+        patches=[patch],
     )
-    with pytest.raises(ValueError, match="Cannot replace at end of array"):
-        apply_state_differential(base_state, manifest5)
-
-    # Test 'copy' operation
-    patch_copy = StateMutationIntent(op="copy", path="/arr/1", **{"from": "/nested/key"})
-    manifest6 = StateDifferentialManifest(
-        diff_id="did:web:patch-6",
-        author_node_id="did:web:node-1",
-        lamport_timestamp=1,
-        vector_clock={"did:web:node-1": 1},
-        patches=[patch_copy],
-    )
-    new_state = apply_state_differential(base_state, manifest6)
-    assert new_state["arr"] == [1, "value", 2, 3]
-
-    # Test 'move' operation
-    patch_move = StateMutationIntent(op="move", path="/arr/1", **{"from": "/nested/key"})
-    manifest7 = StateDifferentialManifest(
-        diff_id="did:web:patch-7",
-        author_node_id="did:web:node-1",
-        lamport_timestamp=1,
-        vector_clock={"did:web:node-1": 1},
-        patches=[patch_move],
-    )
-    new_state = apply_state_differential(base_state, manifest7)
-    assert new_state["arr"] == [1, "value", 2, 3]
-    assert "key" not in new_state["nested"]
-
-    # Test invalid JSON pointers and resolution
-    patch_invalid_ptr = StateMutationIntent(op="add", path="invalid", value=1)
-    manifest8 = StateDifferentialManifest(
-        diff_id="did:web:patch-8",
-        author_node_id="did:web:node-1",
-        lamport_timestamp=1,
-        vector_clock={"did:web:node-1": 1},
-        patches=[patch_invalid_ptr],
-    )
-    with pytest.raises(ValueError, match="Invalid JSON pointer"):
-        apply_state_differential(base_state, manifest8)
-
-    patch_root = StateMutationIntent(op="add", path="", value=1)
-    manifest9 = StateDifferentialManifest(
-        diff_id="did:web:patch-9",
-        author_node_id="did:web:node-1",
-        lamport_timestamp=1,
-        vector_clock={"did:web:node-1": 1},
-        patches=[patch_root],
-    )
-    with pytest.raises(ValueError, match="Invalid path or root operation not supported"):
-        apply_state_differential(base_state, manifest9)
-
-    patch_escape = StateMutationIntent(op="add", path="/arr~20", value=1)
-    manifest10 = StateDifferentialManifest(
-        diff_id="did:web:patch-10",
-        author_node_id="did:web:node-1",
-        lamport_timestamp=1,
-        vector_clock={"did:web:node-1": 1},
-        patches=[patch_escape],
-    )
-    with pytest.raises(ValueError, match="Invalid JSON pointer"):
-        apply_state_differential(base_state, manifest10)
-
-    # Test 'test' operation root failure
-    patch_test_root = StateMutationIntent(op="test", path="", value={"different": "value"})
-    manifest11 = StateDifferentialManifest(
-        diff_id="did:web:patch-11",
-        author_node_id="did:web:node-1",
-        lamport_timestamp=1,
-        vector_clock={"did:web:node-1": 1},
-        patches=[patch_test_root],
-    )
-    with pytest.raises(ValueError, match="Patch test operation failed"):
-        apply_state_differential(base_state, manifest11)
-
-    # Test 'test' operation nested failure
-    patch_test_nested = StateMutationIntent(op="test", path="/arr/0", value=99)
-    manifest12 = StateDifferentialManifest(
-        diff_id="did:web:patch-12",
-        author_node_id="did:web:node-1",
-        lamport_timestamp=1,
-        vector_clock={"did:web:node-1": 1},
-        patches=[patch_test_nested],
-    )
-    with pytest.raises(ValueError, match="Patch test operation failed"):
-        apply_state_differential(base_state, manifest12)
-
-    # Test 'test' operation success root
-    patch_test_root_success = StateMutationIntent(op="test", path="", value=base_state)  # type: ignore[arg-type]
-    manifest13 = StateDifferentialManifest(
-        diff_id="did:web:patch-13",
-        author_node_id="did:web:node-1",
-        lamport_timestamp=1,
-        vector_clock={"did:web:node-1": 1},
-        patches=[patch_test_root_success],
-    )
-    new_state = apply_state_differential(base_state, manifest13)
-    assert new_state == base_state
-
-    # Test 'copy' from an array index out of bounds
-    patch_copy_oob = StateMutationIntent(op="copy", path="/nested/new_key", **{"from": "/arr/10"})
-    manifest14 = StateDifferentialManifest(
-        diff_id="did:web:patch-14",
-        author_node_id="did:web:node-1",
-        lamport_timestamp=1,
-        vector_clock={"did:web:node-1": 1},
-        patches=[patch_copy_oob],
-    )
-    with pytest.raises(ValueError, match="Invalid from_path operation"):
-        apply_state_differential(base_state, manifest14)
-
-    # Test 'move' to end of array
-    patch_move_end = StateMutationIntent(op="move", path="/arr/-", **{"from": "/arr/0"})
-    manifest15 = StateDifferentialManifest(
-        diff_id="did:web:patch-15",
-        author_node_id="did:web:node-1",
-        lamport_timestamp=1,
-        vector_clock={"did:web:node-1": 1},
-        patches=[patch_move_end],
-    )
-    new_state = apply_state_differential(base_state, manifest15)
-    assert new_state["arr"] == [2, 3, 1]
-
-    # Test 'copy' from target not list/dict
-    patch_copy_invalid_from = StateMutationIntent(op="copy", path="/nested/new_key", **{"from": "/nested/key/invalid"})
-    manifest16 = StateDifferentialManifest(
-        diff_id="did:web:patch-16",
-        author_node_id="did:web:node-1",
-        lamport_timestamp=1,
-        vector_clock={"did:web:node-1": 1},
-        patches=[patch_copy_invalid_from],
-    )
-    with pytest.raises(ValueError, match="Invalid from_path"):
-        apply_state_differential(base_state, manifest16)
+    new_state = apply_state_differential(base_state, manifest)
+    assert new_state == expected_state
