@@ -1,25 +1,39 @@
+import hypothesis.strategies as st
 import pytest
+from hypothesis import assume, given
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import QuorumPolicy
 
 
-def test_quorum_policy_bft_math() -> None:
-    # Valid BFT Math: N = 4, f = 1 -> N >= 3(1) + 1 -> 4 >= 4 (Valid)
-    policy_valid = QuorumPolicy(
-        max_tolerable_faults=1,
-        min_quorum_size=4,
+# 1. Fuzz the Valid BFT Topology Space
+@given(f=st.integers(min_value=0, max_value=10000), buffer=st.integers(min_value=0, max_value=100))
+def test_quorum_policy_bft_math_valid(f: int, buffer: int) -> None:
+    """Mathematically prove that any N >= 3f + 1 succeeds."""
+    n = (3 * f) + 1 + buffer
+
+    policy = QuorumPolicy(
+        max_tolerable_faults=f,
+        min_quorum_size=n,
         state_validation_metric="ledger_hash",
         byzantine_action="quarantine",
     )
-    assert policy_valid.min_quorum_size == 4
-    assert policy_valid.max_tolerable_faults == 1
+    assert policy.min_quorum_size == n
+    assert policy.max_tolerable_faults == f
 
-    # Invalid BFT Math: N = 3, f = 1 -> N >= 3(1) + 1 -> 3 >= 4 (Invalid)
+
+# 2. Fuzz the Invalid BFT Topology Space (Quarantine)
+@given(f=st.integers(min_value=1, max_value=10000), deficit=st.integers(min_value=1, max_value=1000))
+def test_quorum_policy_bft_math_invalid(f: int, deficit: int) -> None:
+    """Mathematically prove that any N < 3f + 1 is structurally rejected."""
+    n = (3 * f) + 1 - deficit
+    # Ensure N doesn't drop below logical limits for Pydantic (e.g., min_size>0 if applicable)
+    assume(n >= 1)
+
     with pytest.raises(ValidationError, match=r"Byzantine Fault Tolerance requires min_quorum_size \(N\) >= 3f \+ 1\."):
         QuorumPolicy(
-            max_tolerable_faults=1,
-            min_quorum_size=3,
+            max_tolerable_faults=f,
+            min_quorum_size=n,
             state_validation_metric="ledger_hash",
             byzantine_action="quarantine",
         )
