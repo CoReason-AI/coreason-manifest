@@ -1,8 +1,7 @@
-from typing import Any
 
 import hypothesis.strategies as st
 import pytest
-from hypothesis import given, settings
+from hypothesis import given
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import MultimodalTokenAnchorState
