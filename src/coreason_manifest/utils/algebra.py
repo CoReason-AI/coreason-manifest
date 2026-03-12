@@ -464,7 +464,7 @@ def apply_state_differential(
                 raise ValueError(f"Cannot replace at path {path}: {e}") from e
 
         elif patch.op in ("copy", "move"):
-            from_path = patch.value
+            from_path = patch.from_path
             if not isinstance(from_path, str):
                 raise ValueError(f"Invalid from_path: {from_path}")
             try:

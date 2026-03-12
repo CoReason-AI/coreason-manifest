@@ -10442,6 +10442,19 @@
           "$ref": "#/$defs/JsonPrimitiveState",
           "default": null,
           "description": "The payload to insert or test, if applicable, for this deterministic state vector mutation."
+        },
+        "from": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The JSON pointer from which to copy or move the state vector, if applicable.",
+          "title": "From"
         }
       },
       "required": [

@@ -53,6 +53,8 @@ def _validate_payload_bounds(value: JsonPrimitiveState, current_depth: int = 0) 
     elif isinstance(value, str):
         if len(value) > max_str_len:
             raise ValueError(f"String exceeds max length of {max_str_len}")
+    elif value is not None and not isinstance(value, (int, float, bool)):
+        raise ValueError(f"Payload value must be a valid JSON primitive, got {type(value).__name__}")
 
     return value
 
@@ -977,6 +979,11 @@ class StateMutationIntent(CoreasonBaseState):
     value: JsonPrimitiveState = Field(
         default=None,
         description="The payload to insert or test, if applicable, for this deterministic state vector mutation.",
+    )
+    from_path: str | None = Field(
+        default=None,
+        alias="from",
+        description="The JSON pointer from which to copy or move the state vector, if applicable.",
     )
 
 
@@ -4672,7 +4679,11 @@ class DAGTopologyManifest(BaseTopologyManifest):
     "\n    TOPOLOGICAL BOUNDARY: Must be >= 1 and <= 256. Prevents runaway agentic cyclic recursion.\n    "
     max_fan_out: int = Field(ge=1, le=1024, description="The maximum number of parallel child nodes.")
     "\n    TOPOLOGICAL BOUNDARY: Must be >= 1 and <= 1024. Limits horizontal compute explosion.\n    "
-    # Note: edges is a structurally ordered sequence (Topological DAG edges) and MUST NOT be sorted.
+
+    @model_validator(mode="after")
+    def sort_dag_topology_arrays(self) -> Self:
+        object.__setattr__(self, "edges", sorted(self.edges))
+        return self
 
     @model_validator(mode="after")
     def verify_edges_exist(self) -> Self:
