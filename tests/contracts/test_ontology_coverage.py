@@ -1,4 +1,5 @@
 import pytest
+from typing import Any
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import BoundedJSONRPCIntent
@@ -33,7 +34,7 @@ def test_bounded_json_rpc_intent_invalid_params_type() -> None:
 
 def test_bounded_json_rpc_intent_exceeds_depth() -> None:
     # Create a dictionary nested 11 levels deep
-    nested_dict = {}
+    nested_dict: dict[str, Any] = {}
     current = nested_dict
     for _ in range(11):
         current["child"] = {}
