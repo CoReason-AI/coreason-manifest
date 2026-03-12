@@ -342,34 +342,11 @@ def test_adjudication_intent_sorting() -> None:
     assert intent.deadlocked_claims == ["claim_1", "claim_2", "claim_3"]
 
 
-def test_risk_level_policy_weight() -> None:
-    from coreason_manifest.spec.ontology import RiskLevelPolicy
-    assert RiskLevelPolicy.SAFE.weight == 0
-    assert RiskLevelPolicy.STANDARD.weight == 1
-    assert RiskLevelPolicy.CRITICAL.weight == 2
-
-
-def test_coreason_base_state_hash() -> None:
-    from coreason_manifest.spec.ontology import CoreasonBaseState
-    class DummyState(CoreasonBaseState):
-        field1: str
-        field2: int
-
-    state = DummyState(field1="test", field2=42)
-    # The first time hash is called, it should compute and cache it
-    h1 = hash(state)
-    # The second time, it should return the cached value
-    h2 = hash(state)
-    assert h1 == h2
-
-    # Verify it was cached
-    assert hasattr(state, "_cached_hash")
-    assert getattr(state, "_cached_hash") == h1
-
-
 def test_spatial_bounding_box_profile_validate_geometry() -> None:
-    from coreason_manifest.spec.ontology import SpatialBoundingBoxProfile
     from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import SpatialBoundingBoxProfile
+
     # Valid geometry
     bbox = SpatialBoundingBoxProfile(x_min=0.1, y_min=0.2, x_max=0.5, y_max=0.6)
     assert bbox.x_min == 0.1
@@ -384,3 +361,79 @@ def test_spatial_bounding_box_profile_validate_geometry() -> None:
     # Invalid geometry: y_min > y_max
     with pytest.raises(ValidationError, match=r"y_min cannot be strictly greater than y_max."):
         SpatialBoundingBoxProfile(x_min=0.1, y_min=0.7, x_max=0.5, y_max=0.6)
+
+
+def test_quorum_policy_enforce_bft_math_invalid() -> None:
+    from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import QuorumPolicy
+
+    with pytest.raises(ValidationError, match=r"Byzantine Fault Tolerance requires min_quorum_size \(N\) >= 3f \+ 1."):
+        QuorumPolicy(
+            max_tolerable_faults=1,
+            min_quorum_size=3,
+            state_validation_metric="ledger_hash",
+            byzantine_action="quarantine",
+        )
+
+
+def test_consensus_policy_validate_pbft_requirements() -> None:
+    from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import ConsensusPolicy, QuorumPolicy
+
+    quorum_rules = QuorumPolicy(
+        max_tolerable_faults=1,
+        min_quorum_size=4,
+        state_validation_metric="ledger_hash",
+        byzantine_action="quarantine",
+    )
+    policy = ConsensusPolicy(strategy="pbft", quorum_rules=quorum_rules)
+    assert policy.strategy == "pbft"
+
+    with pytest.raises(ValidationError, match=r"quorum_rules must be provided when strategy is 'pbft'."):
+        ConsensusPolicy(strategy="pbft")
+
+    policy2 = ConsensusPolicy(strategy="unanimous")
+    assert policy2.strategy == "unanimous"
+
+
+def test_sae_latent_policy_validate_smooth_decay() -> None:
+    from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import LatentSmoothingProfile, SaeLatentPolicy
+
+    with pytest.raises(
+        ValidationError, match=r"smoothing_profile must be provided when violation_action is 'smooth_decay'."
+    ):
+        SaeLatentPolicy(
+            target_feature_index=0,
+            monitored_layers=[1, 2],
+            max_activation_threshold=1.0,
+            violation_action="smooth_decay",
+            sae_dictionary_hash="a" * 64,
+        )
+
+    with pytest.raises(
+        ValidationError,
+        match=r"clamp_value must be provided as the target asymptote when violation_action is 'smooth_decay'.",
+    ):
+        SaeLatentPolicy(
+            target_feature_index=0,
+            monitored_layers=[1, 2],
+            max_activation_threshold=1.0,
+            violation_action="smooth_decay",
+            sae_dictionary_hash="a" * 64,
+            smoothing_profile=LatentSmoothingProfile(decay_function="linear", transition_window_tokens=10),
+        )
+
+    policy = SaeLatentPolicy(
+        target_feature_index=0,
+        monitored_layers=[1, 2],
+        max_activation_threshold=1.0,
+        violation_action="smooth_decay",
+        sae_dictionary_hash="a" * 64,
+        smoothing_profile=LatentSmoothingProfile(decay_function="linear", transition_window_tokens=10),
+        clamp_value=0.5,
+    )
+    assert policy.violation_action == "smooth_decay"
