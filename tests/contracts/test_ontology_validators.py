@@ -49,6 +49,17 @@ def test_coreason_base_state_hash() -> None:
     assert hasattr(state, "_cached_hash")
     assert state._cached_hash == h1
 
+def test_coreason_base_state_hash_caching() -> None:
+    class DummyState(CoreasonBaseState):
+        value: int
+
+    state = DummyState(value=42)
+    # Ensure hash works and caches
+    h1 = hash(state)
+    assert hasattr(state, "_cached_hash")
+    h2 = hash(state)
+    assert h1 == h2
+
 
 # --- 2. Spatial Bounding Box Fuzzing ---
 @given(
@@ -95,6 +106,21 @@ def test_quorum_policy_bft_math_fuzzing(f: int, n: int) -> None:
         )
         assert policy.min_quorum_size == n
 
+def test_quorum_policy_bft_math() -> None:
+    # Valid quorum
+    QuorumPolicy(
+        max_tolerable_faults=1, min_quorum_size=4, state_validation_metric="ledger_hash", byzantine_action="quarantine"
+    )
+
+    # Invalid quorum min_quorum_size < 3 * max_tolerable_faults + 1
+    with pytest.raises(ValidationError, match=r"Byzantine Fault Tolerance requires min_quorum_size \(N\) >= 3f \+ 1"):
+        QuorumPolicy(
+            max_tolerable_faults=1,
+            min_quorum_size=3,
+            state_validation_metric="ledger_hash",
+            byzantine_action="quarantine",
+        )
+
 
 # --- 4. Consensus Policy Atomicity ---
 def test_consensus_policy_pbft_valid() -> None:
@@ -122,6 +148,46 @@ def test_sae_latent_policy_valid_halt() -> None:
         violation_action="halt",
         sae_dictionary_hash="a" * 64,
     )
+
+def test_sae_latent_policy_smooth_decay() -> None:
+    # Valid smooth_decay with smoothing_profile and clamp_value
+    SaeLatentPolicy(
+        target_feature_index=1,
+        monitored_layers=[1],
+        max_activation_threshold=0.5,
+        violation_action="smooth_decay",
+        sae_dictionary_hash="a" * 64,
+        smoothing_profile=LatentSmoothingProfile(decay_function="linear", transition_window_tokens=10),
+        clamp_value=0.1,
+    )
+
+    # Invalid smooth_decay missing smoothing_profile
+    with pytest.raises(
+        ValidationError, match=r"smoothing_profile must be provided when violation_action is 'smooth_decay'."
+    ):
+        SaeLatentPolicy(
+            target_feature_index=1,
+            monitored_layers=[1],
+            max_activation_threshold=0.5,
+            violation_action="smooth_decay",
+            sae_dictionary_hash="a" * 64,
+            clamp_value=0.1,
+        )
+
+    # Invalid smooth_decay missing clamp_value
+    with pytest.raises(
+        ValidationError,
+        match=r"clamp_value must be provided as the target asymptote when violation_action is 'smooth_decay'.",
+    ):
+        SaeLatentPolicy(
+            target_feature_index=1,
+            monitored_layers=[1],
+            max_activation_threshold=0.5,
+            violation_action="smooth_decay",
+            sae_dictionary_hash="a" * 64,
+            smoothing_profile=LatentSmoothingProfile(decay_function="linear", transition_window_tokens=10),
+        )
+
 
 
 def test_sae_latent_policy_valid_smooth_decay() -> None:
