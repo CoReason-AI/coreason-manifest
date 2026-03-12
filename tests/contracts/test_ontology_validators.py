@@ -4,6 +4,7 @@ from pydantic import ValidationError
 from coreason_manifest.spec.ontology import (
     ConsensusPolicy,
     CoreasonBaseState,
+    DynamicLayoutManifest,
     LatentSmoothingProfile,
     QuorumPolicy,
     RiskLevelPolicy,
@@ -125,3 +126,17 @@ def test_activation_steering_contract_smooth_decay() -> None:
             sae_dictionary_hash="a" * 64,
             smoothing_profile=LatentSmoothingProfile(decay_function="exponential", transition_window_tokens=10),
         )
+
+
+
+
+def test_dynamic_layout_manifest_tstring() -> None:
+    # Valid allowed AST nodes
+    DynamicLayoutManifest(layout_tstring="f'{a} {b}'")
+
+    # Invalid AST nodes (kinetic execution bleed)
+    with pytest.raises(ValidationError, match=r"Kinetic execution bleed detected: Forbidden AST node Call"):
+        DynamicLayoutManifest(layout_tstring="f'{a()} {b}'")
+
+    with pytest.raises(ValidationError, match=r"Kinetic execution bleed detected: Forbidden AST node Call"):
+        DynamicLayoutManifest(layout_tstring="print('hello')")
