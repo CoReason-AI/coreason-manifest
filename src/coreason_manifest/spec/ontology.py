@@ -978,11 +978,6 @@ class StateMutationIntent(CoreasonBaseState):
         default=None,
         description="The payload to insert or test, if applicable, for this deterministic state vector mutation.",
     )
-    from_path: str | None = Field(
-        default=None,
-        alias="from",
-        description="The JSON pointer from which to copy or move the state vector, if applicable.",
-    )
 
 
 class StateDifferentialManifest(CoreasonBaseState):
@@ -4677,11 +4672,7 @@ class DAGTopologyManifest(BaseTopologyManifest):
     "\n    TOPOLOGICAL BOUNDARY: Must be >= 1 and <= 256. Prevents runaway agentic cyclic recursion.\n    "
     max_fan_out: int = Field(ge=1, le=1024, description="The maximum number of parallel child nodes.")
     "\n    TOPOLOGICAL BOUNDARY: Must be >= 1 and <= 1024. Limits horizontal compute explosion.\n    "
-
-    @model_validator(mode="after")
-    def sort_dag_topology_arrays(self) -> Self:
-        object.__setattr__(self, "edges", sorted(self.edges))
-        return self
+    # Note: edges is a structurally ordered sequence (Topological DAG edges) and MUST NOT be sorted.
 
     @model_validator(mode="after")
     def verify_edges_exist(self) -> Self:
