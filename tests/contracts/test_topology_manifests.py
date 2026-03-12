@@ -87,13 +87,14 @@ def test_dag_topology_atomic_invalid_edges(edges: list[tuple[str, str]], match_s
         "did:web:n3": SystemNodeProfile(description="W3"),
     }
     with pytest.raises(ValidationError, match=match_str):
-        DAGTopologyManifest(nodes=nodes, edges=edges, max_depth=10, max_fan_out=10)
+        DAGTopologyManifest(nodes=nodes, edges=edges, max_depth=10, max_fan_out=10)  # type: ignore[arg-type]
 
 
 # --- 4. Council Topology Atomicity ---
 def test_council_topology_missing_adjudicator() -> None:
+    nodes = {"did:web:n1": SystemNodeProfile(description="W1")}
     with pytest.raises(ValidationError, match=r"Adjudicator ID 'did:web:adj' is not in nodes registry"):
-        CouncilTopologyManifest(adjudicator_id="did:web:adj", nodes={"did:web:n1": SystemNodeProfile(description="W1")})
+        CouncilTopologyManifest(adjudicator_id="did:web:adj", nodes=nodes)  # type: ignore[arg-type]
 
 
 def test_council_topology_unfunded_slashing_none() -> None:
@@ -108,7 +109,7 @@ def test_council_topology_unfunded_slashing_none() -> None:
 
     with pytest.raises(ValidationError, match=r"PBFT with slash_escrow requires a funded council_escrow"):
         CouncilTopologyManifest(
-            adjudicator_id="did:web:adj", nodes=nodes, consensus_policy=consensus, council_escrow=None
+            adjudicator_id="did:web:adj", nodes=nodes, consensus_policy=consensus, council_escrow=None  # type: ignore[arg-type]
         )
 
 
@@ -127,7 +128,7 @@ def test_council_topology_unfunded_slashing_zero() -> None:
 
     with pytest.raises(ValidationError, match=r"PBFT with slash_escrow requires a funded council_escrow"):
         CouncilTopologyManifest(
-            adjudicator_id="did:web:adj", nodes=nodes, consensus_policy=consensus, council_escrow=escrow
+            adjudicator_id="did:web:adj", nodes=nodes, consensus_policy=consensus, council_escrow=escrow  # type: ignore[arg-type]
         )
 
 
