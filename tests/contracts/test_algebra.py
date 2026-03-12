@@ -438,7 +438,7 @@ def test_apply_state_differential_atomic_success(patch_kwargs: dict[str, Any], e
     if "from_path" in patch_kwargs:
         patch_kwargs["from"] = patch_kwargs.pop("from_path")
 
-    patch = StateMutationIntent(**patch_kwargs)  # type: ignore[arg-type]
+    patch = StateMutationIntent(**patch_kwargs)
     manifest = StateDifferentialManifest(
         diff_id="did:web:patch-success",
         author_node_id="did:web:node-1",
