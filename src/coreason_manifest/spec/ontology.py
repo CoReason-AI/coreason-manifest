@@ -1506,7 +1506,7 @@ class BrowserDOMState(CoreasonBaseState):
                     ip = ipaddress.ip_address(int(clean_hostname))
                 else:
                     raise ValueError("Cannot parse IP")
-            except (ValueError, OverflowError):
+            except ValueError, OverflowError:
                 return url
         if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast:
             raise ValueError(f"SSRF mathematical bound violation detected: {ip}")
@@ -2207,11 +2207,13 @@ class ExecutionNodeReceipt(CoreasonBaseState):
             if isinstance(obj, tuple):
                 return [_canonicalize(v) for v in obj]
             if isinstance(obj, set):
+
                 def set_sort_key(x: Any) -> str:
                     try:
                         return json.dumps(x, sort_keys=True)
                     except TypeError:
                         return str(x)
+
                 return sorted([_canonicalize(v) for v in obj if v is not None], key=set_sort_key)
             return obj
 

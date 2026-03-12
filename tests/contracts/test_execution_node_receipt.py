@@ -74,10 +74,7 @@ def test_execution_node_receipt_canonical_hashing_determinism() -> None:
         inputs=None,
         outputs=None,
     )
-    object.__setattr__(receipt_e, "inputs", {
-        ("x", 1),
-        ("y", 2)
-    })
+    object.__setattr__(receipt_e, "inputs", {("x", 1), ("y", 2)})
 
     hash_e = receipt_e.generate_node_hash()
     assert hash_c
