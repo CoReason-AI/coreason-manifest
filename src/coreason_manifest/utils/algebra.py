@@ -112,10 +112,10 @@ def project_manifest_to_markdown(manifest: WorkflowManifest) -> str:
             if getattr(node, "justification", None):
                 lines.append(f"- **Justification:** *{node.justification}*")
 
-            if getattr(node, "agent_attestation", None) is not None:
-                attest = node.agent_attestation
-                if attest:
-                    lines.append(f"- **Lineage Hash:** `{attest.training_lineage_hash}`")
+        if getattr(node, "agent_attestation", None) is not None:
+            attest = node.agent_attestation
+            if attest:
+                lines.append(f"- **Lineage Hash:** `{attest.training_lineage_hash}`")
         lines.append("")
 
     return "\n".join(lines)

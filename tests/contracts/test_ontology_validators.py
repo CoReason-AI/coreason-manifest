@@ -58,7 +58,8 @@ def test_quorum_policy_bft_math_fuzzing(f: int, n: int) -> None:
     """Mathematically prove the deterministic quarantine of impossible PBFT geometries."""
     if n < 3 * f + 1:
         with pytest.raises(
-            ValidationError, match=r"Byzantine Fault Tolerance requires min_quorum_size \(N\) >= 3f \+ 1"
+            ValidationError,
+            match=r"Byzantine Fault Tolerance requires min_quorum_size \(N\) >= 3f \+ 1",
         ):
             QuorumPolicy(
                 max_tolerable_faults=f,
@@ -79,7 +80,10 @@ def test_quorum_policy_bft_math_fuzzing(f: int, n: int) -> None:
 # --- 4. Consensus Policy Atomicity ---
 def test_consensus_policy_pbft_valid() -> None:
     quorum = QuorumPolicy(
-        max_tolerable_faults=1, min_quorum_size=4, state_validation_metric="ledger_hash", byzantine_action="quarantine"
+        max_tolerable_faults=1,
+        min_quorum_size=4,
+        state_validation_metric="ledger_hash",
+        byzantine_action="quarantine",
     )
     ConsensusPolicy(strategy="pbft", quorum_rules=quorum)
 
@@ -143,13 +147,18 @@ def test_sae_latent_policy_smooth_decay_missing_clamp() -> None:
 
 
 # --- 6. Dynamic Layout AST Atomicity ---
-@pytest.mark.parametrize("tstring", ["f'{a} {b}'", "'text'"])
+@pytest.mark.parametrize("tstring", ["f'{a} {b}'", "1 + 1", "'text'"])
 def test_dynamic_layout_manifest_valid_ast(tstring: str) -> None:
     DynamicLayoutManifest(layout_tstring=tstring)
 
 
 @pytest.mark.parametrize(
-    ("tstring", "bad_node"), [("f'{a()} {b}'", "Call"), ("print('hello')", "Call"), ("import os", "Import")]
+    ("tstring", "bad_node"),
+    [
+        ("f'{a()} {b}'", "Call"),
+        ("print('hello')", "Call"),
+        ("import os", "Import"),
+    ],
 )
 def test_dynamic_layout_manifest_kinetic_bleed(tstring: str, bad_node: str) -> None:
     with pytest.raises(ValidationError, match=rf"Kinetic execution bleed detected: Forbidden AST node {bad_node}"):
