@@ -16,6 +16,9 @@ from coreason_manifest.spec.ontology import (
     LatentSmoothingProfile,
     PermissionBoundaryPolicy,
     QuorumPolicy,
+    DefeasibleCascadeEvent,
+    MultimodalTokenAnchorState,
+    RollbackIntent,
     RedactionPolicy,
     RiskLevelPolicy,
     SaeLatentPolicy,
@@ -243,3 +246,64 @@ def test_redaction_policy_sorting() -> None:
         action="redact",
     )
     assert policy.context_exclusion_zones == ["/path/a", "/path/z"]
+
+
+# --- 8. Missing specific validators coverage ---
+
+def test_defeasible_cascade_event_sorting() -> None:
+    event = DefeasibleCascadeEvent(
+        cascade_id="c1",
+        root_falsified_event_id="e1",
+        propagated_decay_factor=0.5,
+        quarantined_event_ids=["z", "a", "x"],
+    )
+    assert event.quarantined_event_ids == ["a", "x", "z"]
+
+
+def test_rollback_intent_sorting() -> None:
+    intent = RollbackIntent(
+        request_id="r1",
+        target_event_id="e1",
+        invalidated_node_ids=["node_c", "node_a", "node_b"]
+    )
+    assert intent.invalidated_node_ids == ["node_a", "node_b", "node_c"]
+
+
+def test_multimodal_token_anchor_state_sorting() -> None:
+    anchor = MultimodalTokenAnchorState(
+        visual_patch_hashes=["hash_c", "hash_a", "hash_b"]
+    )
+    assert anchor.visual_patch_hashes == ["hash_a", "hash_b", "hash_c"]
+
+
+def test_multimodal_token_anchor_state_validate_token_spans() -> None:
+    # Valid span
+    MultimodalTokenAnchorState(token_span_start=10, token_span_end=20)
+
+    # Start defined, end not defined
+    with pytest.raises(ValidationError, match=r"If token_span_start is defined, token_span_end MUST be defined."):
+        MultimodalTokenAnchorState(token_span_start=10)
+
+    # Start >= end
+    with pytest.raises(ValidationError, match=r"token_span_end MUST be strictly greater than token_span_start."):
+        MultimodalTokenAnchorState(token_span_start=20, token_span_end=10)
+
+    with pytest.raises(ValidationError, match=r"token_span_end MUST be strictly greater than token_span_start."):
+        MultimodalTokenAnchorState(token_span_start=10, token_span_end=10)
+
+    # End defined, start not defined
+    with pytest.raises(ValidationError, match=r"token_span_end cannot be defined without a token_span_start."):
+        MultimodalTokenAnchorState(token_span_end=20)
+
+
+def test_multimodal_token_anchor_state_validate_spatial_geometry() -> None:
+    # Valid box
+    MultimodalTokenAnchorState(bounding_box=(0.1, 0.1, 0.9, 0.9))
+
+    # Invalid x bounds
+    with pytest.raises(ValidationError, match=r"Spatial invariant violated"):
+        MultimodalTokenAnchorState(bounding_box=(0.9, 0.1, 0.1, 0.9))
+
+    # Invalid y bounds
+    with pytest.raises(ValidationError, match=r"Spatial invariant violated"):
+        MultimodalTokenAnchorState(bounding_box=(0.1, 0.9, 0.9, 0.1))
