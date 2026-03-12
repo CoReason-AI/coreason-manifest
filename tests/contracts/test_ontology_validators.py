@@ -4,14 +4,22 @@ from hypothesis import HealthCheck, given, settings
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
+    AdjudicationIntent,
+    BilateralSLA,
     ConsensusPolicy,
     CoreasonBaseState,
     DynamicLayoutManifest,
+    InformationClassificationProfile,
     LatentSmoothingProfile,
+    MCPCapabilityWhitelistPolicy,
+    MCPServerManifest,
+    PermissionBoundaryPolicy,
     QuorumPolicy,
     RiskLevelPolicy,
     SaeLatentPolicy,
+    SemanticSlicingPolicy,
     SpatialBoundingBoxProfile,
+    VerifiableCredentialPresentationReceipt,
 )
 
 
@@ -154,3 +162,72 @@ def test_dynamic_layout_manifest_valid_ast(tstring: str) -> None:
 def test_dynamic_layout_manifest_kinetic_bleed(tstring: str, bad_node: str) -> None:
     with pytest.raises(ValidationError, match=rf"Kinetic execution bleed detected: Forbidden AST node {bad_node}"):
         DynamicLayoutManifest(layout_tstring=tstring)
+
+
+def test_semantic_slicing_policy_sort_arrays() -> None:
+    profile = SemanticSlicingPolicy(
+        permitted_classification_tiers=[
+            InformationClassificationProfile.CONFIDENTIAL,
+            InformationClassificationProfile.PUBLIC,
+            InformationClassificationProfile.RESTRICTED,
+        ],
+        required_semantic_labels=["b", "a", "c"],
+        context_window_token_ceiling=100,
+    )
+
+    assert profile.permitted_classification_tiers == [
+        InformationClassificationProfile.CONFIDENTIAL,
+        InformationClassificationProfile.PUBLIC,
+        InformationClassificationProfile.RESTRICTED,
+    ]
+
+    assert profile.required_semantic_labels == ["a", "b", "c"]
+
+
+def test_mcp_server_manifest_authority() -> None:
+    invalid_receipt = VerifiableCredentialPresentationReceipt(
+        presentation_format="jwt_vc",
+        issuer_did="did:example:123",
+        cryptographic_proof_blob="blob",
+        authorization_claims={"claim1": "val1"},
+    )
+
+    capability_whitelist = MCPCapabilityWhitelistPolicy(
+        allowed_tools=["tool1"], allowed_resources=["res1"], allowed_prompts=["prompt1"], required_licenses=[]
+    )
+
+    with pytest.raises(ValidationError, match=r"UNAUTHORIZED MCP MOUNT"):
+        MCPServerManifest(
+            server_uri="http://example.com",
+            transport_type="http",
+            capability_whitelist=capability_whitelist,
+            attestation_receipt=invalid_receipt,
+        )
+
+
+def test_bilateral_sla_sorts_arrays() -> None:
+    sla = BilateralSLA(
+        receiving_tenant_id="did:example:a",
+        max_permitted_classification=InformationClassificationProfile.PUBLIC,
+        liability_limit_magnitude=1000,
+        permitted_geographic_regions=["us-east-1", "eu-west-1", "ap-northeast-1"],
+    )
+    assert sla.permitted_geographic_regions == ["ap-northeast-1", "eu-west-1", "us-east-1"]
+
+
+def test_adjudication_intent_sorts_arrays() -> None:
+    intent = AdjudicationIntent(
+        deadlocked_claims=["b", "a", "c"], resolution_schema={"type": "string"}, timeout_action="rollback"
+    )
+    assert intent.deadlocked_claims == ["a", "b", "c"]
+
+
+def test_permission_boundary_policy_sorts_arrays() -> None:
+    policy = PermissionBoundaryPolicy(
+        network_access=True,
+        allowed_domains=["b.com", "a.com", "c.com"],
+        file_system_mutation_forbidden=True,
+        auth_requirements=["mtls:b", "oauth2:a"],
+    )
+    assert policy.allowed_domains == ["a.com", "b.com", "c.com"]
+    assert policy.auth_requirements == ["mtls:b", "oauth2:a"]
