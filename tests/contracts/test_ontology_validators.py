@@ -1,3 +1,6 @@
+import re
+from typing import Any
+
 import hypothesis.strategies as st
 import pytest
 from hypothesis import HealthCheck, given, settings
@@ -287,13 +290,19 @@ def test_multimodal_token_anchor_state_sorting() -> None:
 
 
 def test_multimodal_token_anchor_state_validate_token_spans() -> None:
-    with pytest.raises(ValidationError, match="If token_span_start is defined, token_span_end MUST be defined."):
+    with pytest.raises(
+        ValidationError, match=re.escape("If token_span_start is defined, token_span_end MUST be defined.")
+    ):
         MultimodalTokenAnchorState(token_span_start=10)
 
-    with pytest.raises(ValidationError, match="token_span_end MUST be strictly greater than token_span_start."):
+    with pytest.raises(
+        ValidationError, match=re.escape("token_span_end MUST be strictly greater than token_span_start.")
+    ):
         MultimodalTokenAnchorState(token_span_start=10, token_span_end=10)
 
-    with pytest.raises(ValidationError, match="token_span_end cannot be defined without a token_span_start."):
+    with pytest.raises(
+        ValidationError, match=re.escape("token_span_end cannot be defined without a token_span_start.")
+    ):
         MultimodalTokenAnchorState(token_span_end=20)
 
 
@@ -317,44 +326,35 @@ def test_distribution_profile_validate_confidence_interval() -> None:
 
 
 def test_epistemic_transmutation_task_validate_grounding_density_for_visuals() -> None:
-    sla_sparse = EpistemicCompressionSLA(
-        max_allowed_entropy_loss=0.1, required_grounding_density="sparse"
-    )
+    sla_sparse = EpistemicCompressionSLA(max_allowed_entropy_loss=0.1, required_grounding_density="sparse")
 
     with pytest.raises(ValidationError, match="'required_grounding_density' cannot be 'sparse'"):
         EpistemicTransmutationTask(
-            task_id="t1",
-            artifact_event_id="a1",
-            target_modalities=["tabular_grid"],
-            compression_sla=sla_sparse
+            task_id="t1", artifact_event_id="a1", target_modalities=["tabular_grid"], compression_sla=sla_sparse
         )
 
     with pytest.raises(ValidationError, match="'required_grounding_density' cannot be 'sparse'"):
         EpistemicTransmutationTask(
-            task_id="t1",
-            artifact_event_id="a1",
-            target_modalities=["raster_image"],
-            compression_sla=sla_sparse
+            task_id="t1", artifact_event_id="a1", target_modalities=["raster_image"], compression_sla=sla_sparse
         )
 
-    sla_dense = EpistemicCompressionSLA(
-        max_allowed_entropy_loss=0.1, required_grounding_density="dense"
-    )
+    sla_dense = EpistemicCompressionSLA(max_allowed_entropy_loss=0.1, required_grounding_density="dense")
 
     # Valid
     EpistemicTransmutationTask(
-        task_id="t1",
-        artifact_event_id="a1",
-        target_modalities=["raster_image"],
-        compression_sla=sla_dense
+        task_id="t1", artifact_event_id="a1", target_modalities=["raster_image"], compression_sla=sla_dense
     )
 
 
 def test_dynamic_routing_manifest_validate_modality_alignment() -> None:
-    artifact = GlobalSemanticProfile(
-        artifact_event_id="a1", detected_modalities=["text"], token_density=100
-    )
-    with pytest.raises(ValidationError, match="Epistemic Violation: Cannot route to subgraph 'tabular_grid' because it is missing from detected_modalities."):
+    artifact = GlobalSemanticProfile(artifact_event_id="a1", detected_modalities=["text"], token_density=100)
+    with pytest.raises(
+        ValidationError,
+        match=re.escape(
+            "Epistemic Violation: Cannot route to subgraph 'tabular_grid' "
+            "because it is missing from detected_modalities."
+        ),
+    ):
         DynamicRoutingManifest(
             manifest_id="m1",
             artifact_profile=artifact,
@@ -372,73 +372,50 @@ def test_dynamic_routing_manifest_validate_modality_alignment() -> None:
 
 
 def test_dynamic_routing_manifest_validate_conservation_of_custody() -> None:
-    artifact = GlobalSemanticProfile(
-        artifact_event_id="a1", detected_modalities=["text"], token_density=100
-    )
+    artifact = GlobalSemanticProfile(artifact_event_id="a1", detected_modalities=["text"], token_density=100)
 
     bypass = BypassReceipt(
         artifact_event_id="a2",
         bypassed_node_id="did:coreason:node2",
         justification="modality_mismatch",
-        cryptographic_null_hash="a" * 64
+        cryptographic_null_hash="a" * 64,
     )
 
-    with pytest.raises(ValidationError, match="Merkle Violation: BypassReceipt artifact_event_id does not match the root artifact_profile."):
+    with pytest.raises(
+        ValidationError,
+        match=re.escape("Merkle Violation: BypassReceipt artifact_event_id does not match the root artifact_profile."),
+    ):
         DynamicRoutingManifest(
             manifest_id="m1",
             artifact_profile=artifact,
             active_subgraphs={"text": ["did:coreason:node1"]},
             branch_budgets_magnitude={"did:coreason:node1": 10},
-            bypassed_steps=[bypass]
+            bypassed_steps=[bypass],
         )
 
 
 def test_execution_span_receipt_validate_temporal_bounds() -> None:
     with pytest.raises(ValidationError, match="end_time_unix_nano cannot be before start_time_unix_nano"):
         ExecutionSpanReceipt(
-            trace_id="trace1",
-            span_id="span1",
-            name="test",
-            start_time_unix_nano=1000,
-            end_time_unix_nano=999
+            trace_id="trace1", span_id="span1", name="test", start_time_unix_nano=1000, end_time_unix_nano=999
         )
 
     # Valid
     ExecutionSpanReceipt(
-        trace_id="trace1",
-        span_id="span1",
-        name="test",
-        start_time_unix_nano=1000,
-        end_time_unix_nano=1000
+        trace_id="trace1", span_id="span1", name="test", start_time_unix_nano=1000, end_time_unix_nano=1000
     )
 
 
 def test_task_award_receipt_validate_escrow_bounds() -> None:
-    escrow = EscrowPolicy(
-        escrow_locked_magnitude=20,
-        release_condition_metric="metric",
-        refund_target_node_id="node1"
-    )
-    with pytest.raises(ValidationError, match="Escrow locked amount cannot exceed the total cleared price."):
-        TaskAwardReceipt(
-            task_id="task1",
-            awarded_syndicate={"node1": 10},
-            cleared_price_magnitude=10,
-            escrow=escrow
-        )
+    escrow = EscrowPolicy(escrow_locked_magnitude=20, release_condition_metric="metric", refund_target_node_id="node1")
+    with pytest.raises(ValidationError, match=re.escape("Escrow locked amount cannot exceed the total cleared price.")):
+        TaskAwardReceipt(task_id="task1", awarded_syndicate={"node1": 10}, cleared_price_magnitude=10, escrow=escrow)
 
     valid_escrow = EscrowPolicy(
-        escrow_locked_magnitude=10,
-        release_condition_metric="metric",
-        refund_target_node_id="node1"
+        escrow_locked_magnitude=10, release_condition_metric="metric", refund_target_node_id="node1"
     )
     # Valid
-    TaskAwardReceipt(
-        task_id="task1",
-        awarded_syndicate={"node1": 10},
-        cleared_price_magnitude=10,
-        escrow=valid_escrow
-    )
+    TaskAwardReceipt(task_id="task1", awarded_syndicate={"node1": 10}, cleared_price_magnitude=10, escrow=valid_escrow)
 
 
 def test_temporal_bounds_profile_validate_temporal_bounds() -> None:
@@ -468,9 +445,10 @@ def test_base_node_profile_validate_domain_extensions_depth() -> None:
     with pytest.raises(ValidationError, match="domain_extensions key exceeds maximum length of 255 characters"):
         BaseNodeProfile(description="test", domain_extensions=long_key_dict)
 
+    class Obj:
+        pass
+
     with pytest.raises(ValidationError, match="domain_extensions leaf values must be JSON primitives"):
-        class Obj:
-            pass
         BaseNodeProfile(description="test", domain_extensions={"a": Obj()})
 
     # Valid
