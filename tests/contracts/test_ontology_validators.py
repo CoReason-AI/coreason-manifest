@@ -12,6 +12,7 @@ from coreason_manifest.spec.ontology import (
     CoreasonBaseState,
     DefeasibleCascadeEvent,
     DynamicLayoutManifest,
+    EphemeralNamespacePartitionState,
     GradingCriterionProfile,
     InformationClassificationProfile,
     LatentSmoothingProfile,
@@ -22,6 +23,7 @@ from coreason_manifest.spec.ontology import (
     RiskLevelPolicy,
     RollbackIntent,
     SaeLatentPolicy,
+    SecureSubSessionState,
     SpatialBoundingBoxProfile,
 )
 
@@ -269,3 +271,38 @@ def test_rollback_intent_sorting() -> None:
 def test_multimodal_token_anchor_state_sorting() -> None:
     anchor = MultimodalTokenAnchorState(visual_patch_hashes=["hash_c", "hash_a", "hash_b"])
     assert anchor.visual_patch_hashes == ["hash_a", "hash_b", "hash_c"]
+
+
+def test_secure_sub_session_state_sorting() -> None:
+    state = SecureSubSessionState(
+        session_id="session1",
+        allowed_vault_keys=["vault_z", "vault_a", "vault_m"],
+        max_ttl_seconds=3600,
+        description="test session",
+    )
+    assert state.allowed_vault_keys == ["vault_a", "vault_m", "vault_z"]
+
+
+def test_ephemeral_namespace_partition_state_sorting() -> None:
+    hash_a = "a" * 64
+    hash_b = "b" * 64
+    hash_c = "c" * 64
+    state = EphemeralNamespacePartitionState(
+        partition_id="part1",
+        execution_runtime="wasm32-wasi",
+        authorized_bytecode_hashes=[hash_c, hash_a, hash_b],
+        max_ttl_seconds=3600,
+        max_vram_mb=1024,
+    )
+    assert state.authorized_bytecode_hashes == [hash_a, hash_b, hash_c]
+
+
+def test_ephemeral_namespace_partition_state_invalid_hash() -> None:
+    with pytest.raises(ValidationError, match=r"Invalid SHA-256 hash in whitelist: invalid_hash"):
+        EphemeralNamespacePartitionState(
+            partition_id="part1",
+            execution_runtime="wasm32-wasi",
+            authorized_bytecode_hashes=["invalid_hash"],
+            max_ttl_seconds=3600,
+            max_vram_mb=1024,
+        )
