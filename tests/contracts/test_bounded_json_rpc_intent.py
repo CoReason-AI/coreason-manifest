@@ -1,15 +1,50 @@
 from typing import Any
 
+import hypothesis.strategies as st
 import pytest
+from hypothesis import HealthCheck, given, settings
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import BoundedJSONRPCIntent
 
+# 1. Define the Valid Mathematical Space for BoundedJSONRPCIntent params
+scalar_st = (
+    st.none()
+    | st.booleans()
+    | st.floats(allow_nan=False, allow_infinity=False)
+    | st.integers()
+    | st.text(max_size=9999)
+)
 
-def test_valid_json_rpc_intent() -> None:
-    intent = BoundedJSONRPCIntent(jsonrpc="2.0", method="test_method", params={"key": "value"}, id=1)
-    assert intent.method == "test_method"
-    assert intent.params == {"key": "value"}
+valid_params_st = st.dictionaries(
+    keys=st.text(min_size=1, max_size=999),
+    values=st.recursive(
+        scalar_st,
+        lambda children: (
+            st.lists(children, max_size=999) | st.dictionaries(st.text(min_size=1, max_size=999), children, max_size=99)
+        ),
+        max_leaves=10,
+    ),
+    max_size=99,
+)
+
+
+@given(params=st.one_of(st.none(), valid_params_st))
+@settings(max_examples=50, suppress_health_check=[HealthCheck.too_slow])
+def test_bounded_json_rpc_intent_fuzz_valid_space(params: dict[str, Any] | None) -> None:
+    """
+    AGENT INSTRUCTION: Fuzz the valid structural space using hypothesis.
+    Mathematically prove that any params payload falling UNDER the topological
+    tripwires is strictly accepted without false positives.
+    """
+    intent = BoundedJSONRPCIntent(jsonrpc="2.0", method="fuzzed_method", params=params, id=1)
+
+    # BoundedJSONRPCIntent normalizes None to {}
+    expected_params = {} if params is None else params
+    assert intent.params == expected_params
+
+
+# --- RETAIN ALL ATOMIC BOUNDARY TESTS BELOW THIS LINE ---
 
 
 def test_json_rpc_intent_max_depth() -> None:
