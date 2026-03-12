@@ -16,6 +16,7 @@ from coreason_manifest.spec.ontology import (
     GradingCriterionProfile,
     InformationClassificationProfile,
     LatentSmoothingProfile,
+    MultimodalTokenAnchorState,
     PermissionBoundaryPolicy,
     QuorumPolicy,
     RedactionPolicy,
@@ -249,6 +250,29 @@ def test_redaction_policy_sorting() -> None:
     assert policy.context_exclusion_zones == ["/path/a", "/path/z"]
 
 
+# --- 8. Missing specific validators coverage ---
+
+
+def test_defeasible_cascade_event_sorting() -> None:
+    event = DefeasibleCascadeEvent(
+        cascade_id="c1",
+        root_falsified_event_id="e1",
+        propagated_decay_factor=0.5,
+        quarantined_event_ids=["z", "a", "x"],
+    )
+    assert event.quarantined_event_ids == ["a", "x", "z"]
+
+
+def test_rollback_intent_sorting() -> None:
+    intent = RollbackIntent(request_id="r1", target_event_id="e1", invalidated_node_ids=["node_c", "node_a", "node_b"])
+    assert intent.invalidated_node_ids == ["node_a", "node_b", "node_c"]
+
+
+def test_multimodal_token_anchor_state_sorting() -> None:
+    anchor = MultimodalTokenAnchorState(visual_patch_hashes=["hash_c", "hash_a", "hash_b"])
+    assert anchor.visual_patch_hashes == ["hash_a", "hash_b", "hash_c"]
+
+
 def test_secure_sub_session_state_sorting() -> None:
     state = SecureSubSessionState(
         session_id="session1",
@@ -257,25 +281,6 @@ def test_secure_sub_session_state_sorting() -> None:
         description="test session",
     )
     assert state.allowed_vault_keys == ["vault_a", "vault_m", "vault_z"]
-
-
-def test_defeasible_cascade_event_sorting() -> None:
-    event = DefeasibleCascadeEvent(
-        cascade_id="cascade1",
-        root_falsified_event_id="root1",
-        propagated_decay_factor=0.5,
-        quarantined_event_ids=["event_z", "event_a", "event_m"],
-    )
-    assert event.quarantined_event_ids == ["event_a", "event_m", "event_z"]
-
-
-def test_rollback_intent_sorting() -> None:
-    intent = RollbackIntent(
-        request_id="req1",
-        target_event_id="target1",
-        invalidated_node_ids=["node_z", "node_a", "node_m"],
-    )
-    assert intent.invalidated_node_ids == ["node_a", "node_m", "node_z"]
 
 
 def test_ephemeral_namespace_partition_state_sorting() -> None:
