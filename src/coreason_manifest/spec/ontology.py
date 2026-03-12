@@ -4807,15 +4807,11 @@ class SMPCTopologyManifest(BaseTopologyManifest):
         description="The strict ordered array of NodeIdentifierStates participating "
         "in the Secure Multi-Party Computation ring.",
     )
+    # Note: participant_node_ids is a structurally ordered sequence (ordered participating ring) and MUST NOT be sorted.
     ontological_alignment: OntologicalAlignmentPolicy | None = Field(
         default=None,
         description="The pre-flight execution gate forcing agents to mathematically align their latent semantics before participating in the topology.",  # noqa: E501
     )
-
-    @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
-        object.__setattr__(self, "participant_node_ids", sorted(self.participant_node_ids))
-        return self
 
 
 class SwarmTopologyManifest(BaseTopologyManifest):
