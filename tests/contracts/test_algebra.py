@@ -323,11 +323,7 @@ def test_apply_state_differential_property(
 
 def test_verify_merkle_proof_valid() -> None:
     receipt1 = ExecutionNodeReceipt(
-        request_id="req1",
-        inputs={"in": 1},
-        outputs={"out": 1},
-        parent_hashes=[],
-        node_hash="dummy1"
+        request_id="req1", inputs={"in": 1}, outputs={"out": 1}, parent_hashes=[], node_hash="dummy1"
     )
     # Use object.__setattr__ to bypass frozen=True
     object.__setattr__(receipt1, "node_hash", receipt1.generate_node_hash())
@@ -336,22 +332,18 @@ def test_verify_merkle_proof_valid() -> None:
         request_id="req2",
         inputs={"in": 2},
         outputs={"out": 2},
-        parent_hashes=[receipt1.node_hash], # type: ignore[list-item]
-        node_hash="dummy2"
+        parent_hashes=[receipt1.node_hash],  # type: ignore[list-item]
+        node_hash="dummy2",
     )
     object.__setattr__(receipt2, "node_hash", receipt2.generate_node_hash())
 
-    trace = [receipt2, receipt1] # out of order but valid
+    trace = [receipt2, receipt1]  # out of order but valid
     assert verify_merkle_proof(trace) is True
 
 
 def test_verify_merkle_proof_invalid_hash() -> None:
     receipt1 = ExecutionNodeReceipt(
-        request_id="req1",
-        inputs={"in": 1},
-        outputs={"out": 1},
-        parent_hashes=[],
-        node_hash="dummy1"
+        request_id="req1", inputs={"in": 1}, outputs={"out": 1}, parent_hashes=[], node_hash="dummy1"
     )
     object.__setattr__(receipt1, "node_hash", "invalid_hash")
     with pytest.raises(TamperFaultEvent, match="Node hash mismatch"):
@@ -364,7 +356,7 @@ def test_verify_merkle_proof_missing_parent() -> None:
         inputs={"in": 1},
         outputs={"out": 1},
         parent_hashes=["non_existent_parent"],
-        node_hash="dummy1"
+        node_hash="dummy1",
     )
     object.__setattr__(receipt1, "node_hash", receipt1.generate_node_hash())
     with pytest.raises(TamperFaultEvent, match="Missing parent hash"):
@@ -375,21 +367,14 @@ def test_verify_merkle_proof_none_hash() -> None:
     # Need to skip pydantic validation that complains if node_hash is not valid.
     # Actually wait, `node_hash` allows `str | None` ?
     receipt1 = ExecutionNodeReceipt(
-        request_id="req1",
-        inputs={"in": 1},
-        outputs={"out": 1},
-        parent_hashes=[],
-        node_hash="valid"
+        request_id="req1", inputs={"in": 1}, outputs={"out": 1}, parent_hashes=[], node_hash="valid"
     )
     object.__setattr__(receipt1, "node_hash", None)
     assert verify_merkle_proof([receipt1]) is False
 
 
 def test_apply_state_differential_edge_cases() -> None:
-    base_state = {
-        "arr": [1, 2, 3],
-        "nested": {"key": "value"}
-    }
+    base_state = {"arr": [1, 2, 3], "nested": {"key": "value"}}
 
     # Test 'add' out of bounds
     patch_add_oob = StateMutationIntent(op="add", path="/arr/10", value=4)
@@ -535,7 +520,7 @@ def test_apply_state_differential_edge_cases() -> None:
         apply_state_differential(base_state, manifest12)
 
     # Test 'test' operation success root
-    patch_test_root_success = StateMutationIntent(op="test", path="", value=base_state) # type: ignore[arg-type]
+    patch_test_root_success = StateMutationIntent(op="test", path="", value=base_state)  # type: ignore[arg-type]
     manifest13 = StateDifferentialManifest(
         diff_id="did:web:patch-13",
         author_node_id="did:web:node-1",
