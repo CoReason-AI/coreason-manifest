@@ -3226,10 +3226,14 @@ type GeometricMarkProfile = Literal["point", "line", "area", "bar", "rect", "arc
 
 
 class MarketContract(CoreasonBaseState):
-    minimum_collateral: float = Field(ge=0.0, description="The minimum amount of token collateral held in escrow.")
-    "\n    MATHEMATICAL BOUNDARY: Must be >= 0.0. Downstream agents must secure this collateral before execution.\n    "
-    slashing_penalty: float = Field(ge=0.0, description="The exact token amount slashed for Byzantine faults.")
-    "\n    MATHEMATICAL BOUNDARY: Must be >= 0.0 AND mathematically less than or equal to minimum_collateral.\n    "
+    minimum_collateral: float = Field(
+        ge=0.0,
+        description="The minimum amount of token collateral held in escrow.\n    MATHEMATICAL BOUNDARY: Must be >= 0.0. Downstream agents must secure this collateral before execution.\n    ",  # noqa: E501
+    )
+    slashing_penalty: float = Field(
+        ge=0.0,
+        description="The exact token amount slashed for Byzantine faults.\n    MATHEMATICAL BOUNDARY: Must be >= 0.0 AND mathematically less than or equal to minimum_collateral.\n    ",  # noqa: E501
+    )
 
     @model_validator(mode="after")
     def _enforce_economic_escrow_invariant(self) -> Self:
