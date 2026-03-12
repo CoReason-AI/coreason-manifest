@@ -306,3 +306,27 @@ def test_ephemeral_namespace_partition_state_invalid_hash() -> None:
             max_ttl_seconds=3600,
             max_vram_mb=1024,
         )
+
+
+def test_risk_level_policy_weight():
+    assert RiskLevelPolicy.SAFE.weight == 0
+    assert RiskLevelPolicy.STANDARD.weight == 1
+    assert RiskLevelPolicy.CRITICAL.weight == 2
+
+
+def test_coreason_base_state_hash():
+    class DummyState(CoreasonBaseState):
+        field_a: int
+        field_b: str
+
+    state1 = DummyState(field_a=1, field_b="test")
+    state2 = DummyState(field_b="test", field_a=1)
+
+    # Hash should be computed and cached
+    h1 = hash(state1)
+    h2 = hash(state2)
+    assert h1 == h2
+    assert object.__getattribute__(state1, "_cached_hash") == h1
+
+    # Repeated access should return cached value
+    assert hash(state1) == h1
