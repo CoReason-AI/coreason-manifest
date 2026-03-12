@@ -268,3 +268,55 @@ def test_apply_state_differential() -> None:
 
     assert new_state == {"user": {"name": "Bob", "age": 30, "tags": []}}
     assert base_state == {"user": {"name": "Alice", "tags": ["admin"]}}
+
+
+def test_apply_state_differential_comprehensive() -> None:
+    """A comprehensive test for all RFC 6902 JSON Patch operations."""
+    base_state = {
+        "user": {
+            "profile": {"name": "Alice", "role": "admin"},
+            "tags": ["active", "verified"],
+            "settings": {"notifications": True},
+        },
+        "metrics": [10, 20, 30],
+    }
+
+    # 1. Test existing value
+    patch_test = StateMutationIntent(op="test", path="/user/profile/role", value="admin")
+    # 2. Copy a nested object
+    patch_copy = StateMutationIntent(op="copy", path="/user/copied_profile", value="/user/profile")
+    # 3. Move an array element
+    patch_move = StateMutationIntent(op="move", path="/metrics/1", value="/user/tags/1")
+    # 4. Add to an array using the "-" operator (append)
+    patch_add_array = StateMutationIntent(op="add", path="/metrics/-", value=40)
+    # 5. Remove an object key
+    patch_remove = StateMutationIntent(op="remove", path="/user/settings/notifications")
+    # 6. Replace a value
+    patch_replace = StateMutationIntent(op="replace", path="/metrics/0", value=15)
+
+    manifest = StateDifferentialManifest(
+        diff_id="did:web:patch-comprehensive",
+        author_node_id="did:web:node-1",
+        lamport_timestamp=2,
+        vector_clock={"did:web:node-1": 2},
+        patches=[patch_test, patch_copy, patch_move, patch_add_array, patch_remove, patch_replace],
+    )
+
+    new_state = apply_state_differential(base_state, manifest)
+
+    expected_state = {
+        "user": {
+            "profile": {"name": "Alice", "role": "admin"},
+            "copied_profile": {"name": "Alice", "role": "admin"},
+            "tags": ["active"],
+            "settings": {},
+        },
+        "metrics": [15, "verified", 20, 30, 40],
+    }
+
+    assert new_state == expected_state
+    # Ensure original state was not mutated
+    assert base_state["metrics"] == [10, 20, 30]
+    user_state = base_state["user"]
+    assert isinstance(user_state, dict)
+    assert user_state["tags"] == ["active", "verified"]
