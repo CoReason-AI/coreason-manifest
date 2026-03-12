@@ -1,4 +1,3 @@
-
 from coreason_manifest.spec.ontology import EpistemicCompressionSLA, EpistemicTransmutationTask
 
 
