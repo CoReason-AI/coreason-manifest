@@ -159,7 +159,7 @@ def test_dynamic_layout_manifest_kinetic_bleed(tstring: str, bad_node: str) -> N
 # --- 7. Missing Coverage Tests ---
 
 
-def test_dynamic_layout_manifest_syntax_error():
+def test_dynamic_layout_manifest_syntax_error() -> None:
     from coreason_manifest.spec.ontology import DynamicLayoutManifest
 
     # AST parsing exception for SyntaxError
@@ -167,7 +167,7 @@ def test_dynamic_layout_manifest_syntax_error():
         DynamicLayoutManifest(layout_tstring="f'{a")
 
 
-def test_compute_engine_profile_sorting():
+def test_compute_engine_profile_sorting() -> None:
     from coreason_manifest.spec.ontology import ComputeEngineProfile, ComputeRateContract
 
     rate_card = ComputeRateContract(
@@ -186,7 +186,7 @@ def test_compute_engine_profile_sorting():
     assert profile.supported_functional_experts == ["x", "y", "z"]
 
 
-def test_permission_boundary_policy_sorting():
+def test_permission_boundary_policy_sorting() -> None:
     from coreason_manifest.spec.ontology import PermissionBoundaryPolicy
 
     policy = PermissionBoundaryPolicy(
@@ -200,7 +200,7 @@ def test_permission_boundary_policy_sorting():
     assert policy.auth_requirements == ["mtls:internal", "oauth2:github"]
 
 
-def test_activation_steering_contract_sorting():
+def test_activation_steering_contract_sorting() -> None:
     from coreason_manifest.spec.ontology import ActivationSteeringContract
 
     contract = ActivationSteeringContract(
@@ -210,7 +210,7 @@ def test_activation_steering_contract_sorting():
     assert contract.injection_layers == [1, 3, 5]
 
 
-def test_ephemeral_namespace_partition_state_validate_hashes():
+def test_ephemeral_namespace_partition_state_validate_hashes() -> None:
     from pydantic import ValidationError
 
     from coreason_manifest.spec.ontology import EphemeralNamespacePartitionState
@@ -236,7 +236,7 @@ def test_ephemeral_namespace_partition_state_validate_hashes():
         )
 
 
-def test_bilateral_sla_sorting():
+def test_bilateral_sla_sorting() -> None:
     from coreason_manifest.spec.ontology import BilateralSLA, InformationClassificationProfile
 
     sla = BilateralSLA(
@@ -249,7 +249,7 @@ def test_bilateral_sla_sorting():
     assert sla.permitted_geographic_regions == ["ap-east", "eu-central", "us-west"]
 
 
-def test_federated_discovery_manifest_sorting():
+def test_federated_discovery_manifest_sorting() -> None:
     from coreason_manifest.spec.ontology import FederatedDiscoveryManifest
 
     manifest = FederatedDiscoveryManifest(
