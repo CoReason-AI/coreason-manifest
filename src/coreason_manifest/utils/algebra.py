@@ -278,7 +278,7 @@ def verify_merkle_proof(trace: list[ExecutionNodeReceipt]) -> bool:
     node_map: dict[str, ExecutionNodeReceipt] = {}
     for node in trace:
         if node.node_hash is None:
-            raise TamperFaultEvent(f"Missing node hash for request {node.request_id}")
+            return False
         node_map[node.node_hash] = node
     for node in trace:
         if node.generate_node_hash() != node.node_hash:
@@ -351,7 +351,11 @@ def apply_state_differential(
                 raise ValueError(f"Invalid path or root operation not supported: {path}")
             raise ValueError(f"Invalid JSON pointer: {path}")
 
-        parts = [p.replace("~1", "/").replace("~0", "~") for p in path.split("/")[1:]]
+        parts = []
+        for p in path.split("/")[1:]:
+            if "~" in p and not (p.endswith(("~0", "~1")) or "~0" in p or "~1" in p):
+                raise ValueError(f"Invalid JSON pointer: {path}")
+            parts.append(p.replace("~1", "/").replace("~0", "~"))
 
         target: Any = new_state
         for part in parts[:-1]:

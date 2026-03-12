@@ -16,6 +16,7 @@ from coreason_manifest.spec.ontology import (
     OntologicalAlignmentPolicy,
     StateDifferentialManifest,
     StateMutationIntent,
+    TamperFaultEvent,
     TokenBurnReceipt,
     VectorEmbeddingState,
     WorkflowManifest,
@@ -272,8 +273,6 @@ json_primitive = st.recursive(
     max_leaves=10,
 )
 
-# Generate a list of StateMutationIntent
-
 
 @st.composite
 def random_mutations(draw: Any) -> StateDifferentialManifest:
@@ -320,77 +319,119 @@ def test_apply_state_differential_property(
         pass
 
 
-def test_verify_merkle_proof_valid_trace() -> None:
-    # Build a valid DAG trace of ExecutionNodeReceipt objects
-    node1 = ExecutionNodeReceipt(
-        request_id="req1", inputs={"key": "val1"}, outputs={"key": "val2"}, parent_hashes=[], node_hash="temp"
+def test_verify_merkle_proof_valid() -> None:
+    receipt1 = ExecutionNodeReceipt(
+        request_id="req1", inputs={"in": 1}, outputs={"out": 1}, parent_hashes=[], node_hash="dummy1"
     )
+    # Use object.__setattr__ to bypass frozen=True
+    object.__setattr__(receipt1, "node_hash", receipt1.generate_node_hash())
 
-    # We must set the correct node_hash to bypass the TamperFaultEvent.
-    # Because the model is frozen, we have to copy and update.
-    hash1 = node1.generate_node_hash()
-    node1 = node1.model_copy(update={"node_hash": hash1})
-
-    node2 = ExecutionNodeReceipt(
+    receipt2 = ExecutionNodeReceipt(
         request_id="req2",
-        parent_request_id="req1",
-        root_request_id="req1",
-        inputs={"key": "val3"},
-        outputs={"key": "val4"},
-        parent_hashes=[hash1],
-        node_hash="temp",
+        inputs={"in": 2},
+        outputs={"out": 2},
+        parent_hashes=[receipt1.node_hash],  # type: ignore[list-item]
+        node_hash="dummy2",
     )
-    hash2 = node2.generate_node_hash()
-    node2 = node2.model_copy(update={"node_hash": hash2})
+    object.__setattr__(receipt2, "node_hash", receipt2.generate_node_hash())
 
-    trace = [node1, node2]
-
-    # Verify the proof
+    trace = [receipt2, receipt1]  # out of order but valid
     assert verify_merkle_proof(trace) is True
 
 
-def test_verify_merkle_proof_missing_node_hash() -> None:
-    node1 = ExecutionNodeReceipt(request_id="req1", inputs={"key": "val1"}, outputs={"key": "val2"}, parent_hashes=[])
-    # Simulate an invalid trace where node_hash is missing.
-    object.__setattr__(node1, "node_hash", None)
-    from coreason_manifest.spec.ontology import TamperFaultEvent
-
-    with pytest.raises(TamperFaultEvent, match="Missing node hash for request req1"):
-        verify_merkle_proof([node1])
-
-
-def test_verify_merkle_proof_tampered_hash() -> None:
-    node1 = ExecutionNodeReceipt(request_id="req1", inputs={"key": "val1"}, outputs={"key": "val2"}, parent_hashes=[])
-    # Simulate an invalid trace where node_hash is tampered.
-    object.__setattr__(node1, "node_hash", "invalid_hash")
-    from coreason_manifest.spec.ontology import TamperFaultEvent
-
-    with pytest.raises(TamperFaultEvent, match="Node hash mismatch for request req1"):
-        verify_merkle_proof([node1])
-
-
-def test_verify_merkle_proof_missing_parent_hash() -> None:
-    node1 = ExecutionNodeReceipt(
-        request_id="req1", inputs={"key": "val1"}, outputs={"key": "val2"}, parent_hashes=[], node_hash="temp"
+def test_verify_merkle_proof_invalid_hash() -> None:
+    receipt1 = ExecutionNodeReceipt(
+        request_id="req1", inputs={"in": 1}, outputs={"out": 1}, parent_hashes=[], node_hash="dummy1"
     )
-    hash1 = node1.generate_node_hash()
-    node1 = node1.model_copy(update={"node_hash": hash1})
+    object.__setattr__(receipt1, "node_hash", "invalid_hash")
+    with pytest.raises(TamperFaultEvent, match="Node hash mismatch"):
+        verify_merkle_proof([receipt1])
 
-    node2 = ExecutionNodeReceipt(
-        request_id="req2",
-        parent_request_id="req1",
-        root_request_id="req1",
-        inputs={"key": "val3"},
-        outputs={"key": "val4"},
-        parent_hashes=["nonexistent_hash"],
-        node_hash="temp",
+
+def test_verify_merkle_proof_missing_parent() -> None:
+    receipt1 = ExecutionNodeReceipt(
+        request_id="req1",
+        inputs={"in": 1},
+        outputs={"out": 1},
+        parent_hashes=["non_existent_parent"],
+        node_hash="dummy1",
     )
-    hash2 = node2.generate_node_hash()
-    node2 = node2.model_copy(update={"node_hash": hash2})
+    object.__setattr__(receipt1, "node_hash", receipt1.generate_node_hash())
+    with pytest.raises(TamperFaultEvent, match="Missing parent hash"):
+        verify_merkle_proof([receipt1])
 
-    # Trace contains node2 which has a parent_hash that is not in the trace
-    trace = [node1, node2]
-    from coreason_manifest.spec.ontology import TamperFaultEvent
 
-    with pytest.raises(TamperFaultEvent, match="Missing parent hash nonexistent_hash in trace"):
-        verify_merkle_proof(trace)
+def test_verify_merkle_proof_none_hash() -> None:
+    receipt1 = ExecutionNodeReceipt(
+        request_id="req1", inputs={"in": 1}, outputs={"out": 1}, parent_hashes=[], node_hash="valid"
+    )
+    object.__setattr__(receipt1, "node_hash", None)
+    assert verify_merkle_proof([receipt1]) is False
+
+
+# --- Atomic Edge Cases for State Differential (RFC 6902) ---
+
+
+@pytest.mark.parametrize(
+    ("patch_kwargs", "match_str"),
+    [
+        ({"op": "add", "path": "/arr/10", "value": 4}, "Invalid index: 10"),
+        ({"op": "add", "path": "/arr/0/key", "value": 4}, "Cannot add to path"),
+        ({"op": "remove", "path": "/arr/-"}, "Cannot remove from end of array"),
+        (
+            {"op": "replace", "path": "/arr/-", "value": 9},
+            "Cannot replace at path /arr/-: Cannot extract from end of array",
+        ),
+        ({"op": "add", "path": "invalid", "value": 1}, "Invalid JSON pointer: invalid"),
+        ({"op": "add", "path": "", "value": 1}, "Invalid path or root operation not supported"),
+        ({"op": "add", "path": "/arr~20", "value": 1}, "Invalid JSON pointer: /arr~20"),
+        ({"op": "test", "path": "", "value": {"different": "value"}}, "Patch test operation failed"),
+        ({"op": "test", "path": "/arr/0", "value": 99}, "Patch test operation failed"),
+        ({"op": "copy", "path": "/nested/new_key", "from": "/arr/10"}, "Invalid from_path operation"),
+        ({"op": "copy", "path": "/nested/new_key", "from": "/nested/key/invalid"}, "Invalid from_path"),
+    ],
+)
+def test_apply_state_differential_atomic_failures(patch_kwargs: dict[str, Any], match_str: str) -> None:
+    """Mathematically prove invalid RFC 6902 patch geometries strictly trip the topological bounds."""
+    base_state = {"arr": [1, 2, 3], "nested": {"key": "value"}}
+    patch = StateMutationIntent(**patch_kwargs)
+    manifest = StateDifferentialManifest(
+        diff_id="did:web:patch-fail",
+        author_node_id="did:web:node-1",
+        lamport_timestamp=1,
+        vector_clock={"did:web:node-1": 1},
+        patches=[patch],
+    )
+    with pytest.raises(ValueError, match=match_str):
+        apply_state_differential(base_state, manifest)
+
+
+@pytest.mark.parametrize(
+    ("patch_kwargs", "expected_state"),
+    [
+        ({"op": "add", "path": "/arr/-", "value": 4}, {"arr": [1, 2, 3, 4], "nested": {"key": "value"}}),
+        (
+            {"op": "copy", "path": "/arr/1", "from": "/nested/key"},
+            {"arr": [1, "value", 2, 3], "nested": {"key": "value"}},
+        ),
+        ({"op": "move", "path": "/arr/1", "from": "/nested/key"}, {"arr": [1, "value", 2, 3], "nested": {}}),
+        (
+            {"op": "test", "path": "", "value": {"arr": [1, 2, 3], "nested": {"key": "value"}}},
+            {"arr": [1, 2, 3], "nested": {"key": "value"}},
+        ),
+        ({"op": "move", "path": "/arr/-", "from": "/arr/0"}, {"arr": [2, 3, 1], "nested": {"key": "value"}}),
+    ],
+)
+def test_apply_state_differential_atomic_success(patch_kwargs: dict[str, Any], expected_state: dict[str, Any]) -> None:
+    """Mathematically prove valid RFC 6902 array operations map accurately across dimensions."""
+    base_state = {"arr": [1, 2, 3], "nested": {"key": "value"}}
+    patch = StateMutationIntent(**patch_kwargs)
+    manifest = StateDifferentialManifest(
+        diff_id="did:web:patch-success",
+        author_node_id="did:web:node-1",
+        lamport_timestamp=1,
+        vector_clock={"did:web:node-1": 1},
+        patches=[patch],
+    )
+    new_state = apply_state_differential(base_state, manifest)
+    assert new_state == expected_state
