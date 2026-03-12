@@ -341,17 +341,14 @@ def test_adjudication_intent_sorting() -> None:
     )
     assert intent.deadlocked_claims == ["claim_1", "claim_2", "claim_3"]
 
+
 # --- 9. BoundedJSONRPCIntent depth and size constraints ---
+
 
 def test_bounded_jsonrpc_intent_valid() -> None:
     from coreason_manifest.spec.ontology import BoundedJSONRPCIntent
 
-    intent = BoundedJSONRPCIntent(
-        jsonrpc="2.0",
-        method="test",
-        params={"a": 1, "b": [2, 3], "c": "str"},
-        id="req1"
-    )
+    intent = BoundedJSONRPCIntent(jsonrpc="2.0", method="test", params={"a": 1, "b": [2, 3], "c": "str"}, id="req1")
     assert intent.params == {"a": 1, "b": [2, 3], "c": "str"}
 
 
@@ -425,6 +422,7 @@ def test_bounded_jsonrpc_intent_string_length_exceeded() -> None:
 
 # --- 10. BrowserDOMState SSRF Protection ---
 
+
 def test_browser_dom_state_valid_external_url() -> None:
     from coreason_manifest.spec.ontology import BrowserDOMState
 
@@ -432,7 +430,7 @@ def test_browser_dom_state_valid_external_url() -> None:
         current_url="https://example.com/path",
         viewport_size=(1920, 1080),
         dom_hash="a" * 64,
-        accessibility_tree_hash="b" * 64
+        accessibility_tree_hash="b" * 64,
     )
     assert state.current_url == "https://example.com/path"
 
@@ -445,7 +443,7 @@ def test_browser_dom_state_file_protocol_blocked() -> None:
             current_url="file:///etc/passwd",
             viewport_size=(1920, 1080),
             dom_hash="a" * 64,
-            accessibility_tree_hash="b" * 64
+            accessibility_tree_hash="b" * 64,
         )
 
 
@@ -457,7 +455,7 @@ def test_browser_dom_state_local_hostname_blocked() -> None:
             current_url="http://localhost:8080/",
             viewport_size=(1920, 1080),
             dom_hash="a" * 64,
-            accessibility_tree_hash="b" * 64
+            accessibility_tree_hash="b" * 64,
         )
 
     with pytest.raises(ValidationError, match=r"SSRF topological violation detected: my-service.internal"):
@@ -465,7 +463,7 @@ def test_browser_dom_state_local_hostname_blocked() -> None:
             current_url="http://my-service.internal/api",
             viewport_size=(1920, 1080),
             dom_hash="a" * 64,
-            accessibility_tree_hash="b" * 64
+            accessibility_tree_hash="b" * 64,
         )
 
 
@@ -477,7 +475,7 @@ def test_browser_dom_state_private_ip_blocked() -> None:
             current_url="http://10.0.0.1/",
             viewport_size=(1920, 1080),
             dom_hash="a" * 64,
-            accessibility_tree_hash="b" * 64
+            accessibility_tree_hash="b" * 64,
         )
 
     with pytest.raises(ValidationError, match=r"SSRF mathematical bound violation detected: 192.168.1.100"):
@@ -485,7 +483,7 @@ def test_browser_dom_state_private_ip_blocked() -> None:
             current_url="http://192.168.1.100/admin",
             viewport_size=(1920, 1080),
             dom_hash="a" * 64,
-            accessibility_tree_hash="b" * 64
+            accessibility_tree_hash="b" * 64,
         )
 
 
@@ -497,7 +495,7 @@ def test_browser_dom_state_loopback_ip_blocked() -> None:
             current_url="http://127.0.0.1/",
             viewport_size=(1920, 1080),
             dom_hash="a" * 64,
-            accessibility_tree_hash="b" * 64
+            accessibility_tree_hash="b" * 64,
         )
 
 
@@ -509,7 +507,7 @@ def test_browser_dom_state_hex_ip_blocked() -> None:
             current_url="http://0x7f000001/",
             viewport_size=(1920, 1080),
             dom_hash="a" * 64,
-            accessibility_tree_hash="b" * 64
+            accessibility_tree_hash="b" * 64,
         )
 
 
@@ -521,7 +519,7 @@ def test_browser_dom_state_octal_ip_blocked() -> None:
             current_url="http://0177.0.0.1/",
             viewport_size=(1920, 1080),
             dom_hash="a" * 64,
-            accessibility_tree_hash="b" * 64
+            accessibility_tree_hash="b" * 64,
         )
 
 
@@ -533,19 +531,18 @@ def test_browser_dom_state_integer_ip_blocked() -> None:
             current_url="http://2130706433/",
             viewport_size=(1920, 1080),
             dom_hash="a" * 64,
-            accessibility_tree_hash="b" * 64
+            accessibility_tree_hash="b" * 64,
         )
+
 
 def test_browser_dom_state_ipv6_loopback_blocked() -> None:
     from coreason_manifest.spec.ontology import BrowserDOMState
 
     with pytest.raises(ValidationError, match=r"SSRF mathematical bound violation detected: ::1"):
         BrowserDOMState(
-            current_url="http://[::1]/",
-            viewport_size=(1920, 1080),
-            dom_hash="a" * 64,
-            accessibility_tree_hash="b" * 64
+            current_url="http://[::1]/", viewport_size=(1920, 1080), dom_hash="a" * 64, accessibility_tree_hash="b" * 64
         )
+
 
 def test_browser_dom_state_no_hostname() -> None:
     from coreason_manifest.spec.ontology import BrowserDOMState
@@ -555,7 +552,7 @@ def test_browser_dom_state_no_hostname() -> None:
         current_url="data:text/html,test",
         viewport_size=(1920, 1080),
         dom_hash="a" * 64,
-        accessibility_tree_hash="b" * 64
+        accessibility_tree_hash="b" * 64,
     )
     assert state.current_url == "data:text/html,test"
 
@@ -568,19 +565,19 @@ def test_browser_dom_state_invalid_ip_bypasses() -> None:
         current_url="http://256.256.256.256/",
         viewport_size=(1920, 1080),
         dom_hash="a" * 64,
-        accessibility_tree_hash="b" * 64
+        accessibility_tree_hash="b" * 64,
     )
     assert state.current_url == "http://256.256.256.256/"
 
+
 # --- 11. ContinuousMutationPolicy VRAM append-only bound ---
+
 
 def test_knowledge_graph_mutation_intent_valid() -> None:
     from coreason_manifest.spec.ontology import ContinuousMutationPolicy
 
     intent = ContinuousMutationPolicy(
-        mutation_paradigm="append_only",
-        max_uncommitted_edges=1000,
-        micro_batch_interval_ms=500
+        mutation_paradigm="append_only", max_uncommitted_edges=1000, micro_batch_interval_ms=500
     )
     assert intent.max_uncommitted_edges == 1000
 
@@ -588,11 +585,12 @@ def test_knowledge_graph_mutation_intent_valid() -> None:
 def test_knowledge_graph_mutation_intent_append_only_oom() -> None:
     from coreason_manifest.spec.ontology import ContinuousMutationPolicy
 
-    with pytest.raises(ValidationError, match=r"max_uncommitted_edges must be <= 10000 for append_only paradigm to prevent OOM crashes."):
+    with pytest.raises(
+        ValidationError,
+        match=r"max_uncommitted_edges must be <= 10000 for append_only paradigm to prevent OOM crashes.",
+    ):
         ContinuousMutationPolicy(
-            mutation_paradigm="append_only",
-            max_uncommitted_edges=10001,
-            micro_batch_interval_ms=500
+            mutation_paradigm="append_only", max_uncommitted_edges=10001, micro_batch_interval_ms=500
         )
 
 
@@ -601,8 +599,6 @@ def test_knowledge_graph_mutation_intent_non_append_only_oom() -> None:
 
     # Should not raise exception if not append_only
     intent = ContinuousMutationPolicy(
-        mutation_paradigm="merge_on_resolve",
-        max_uncommitted_edges=20000,
-        micro_batch_interval_ms=500
+        mutation_paradigm="merge_on_resolve", max_uncommitted_edges=20000, micro_batch_interval_ms=500
     )
     assert intent.max_uncommitted_edges == 20000
