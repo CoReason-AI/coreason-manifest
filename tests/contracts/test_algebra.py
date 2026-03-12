@@ -276,9 +276,9 @@ def test_apply_state_differential_comprehensive() -> None:
         "user": {
             "profile": {"name": "Alice", "role": "admin"},
             "tags": ["active", "verified"],
-            "settings": {"notifications": True}
+            "settings": {"notifications": True},
         },
-        "metrics": [10, 20, 30]
+        "metrics": [10, 20, 30],
     }
 
     # 1. Test existing value
@@ -299,14 +299,7 @@ def test_apply_state_differential_comprehensive() -> None:
         author_node_id="did:web:node-1",
         lamport_timestamp=2,
         vector_clock={"did:web:node-1": 2},
-        patches=[
-            patch_test,
-            patch_copy,
-            patch_move,
-            patch_add_array,
-            patch_remove,
-            patch_replace
-        ]
+        patches=[patch_test, patch_copy, patch_move, patch_add_array, patch_remove, patch_replace],
     )
 
     new_state = apply_state_differential(base_state, manifest)
@@ -316,9 +309,9 @@ def test_apply_state_differential_comprehensive() -> None:
             "profile": {"name": "Alice", "role": "admin"},
             "copied_profile": {"name": "Alice", "role": "admin"},
             "tags": ["active"],
-            "settings": {}
+            "settings": {},
         },
-        "metrics": [15, "verified", 20, 30, 40]
+        "metrics": [15, "verified", 20, 30, 40],
     }
 
     assert new_state == expected_state
