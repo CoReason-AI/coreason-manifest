@@ -154,3 +154,113 @@ def test_dynamic_layout_manifest_valid_ast(tstring: str) -> None:
 def test_dynamic_layout_manifest_kinetic_bleed(tstring: str, bad_node: str) -> None:
     with pytest.raises(ValidationError, match=rf"Kinetic execution bleed detected: Forbidden AST node {bad_node}"):
         DynamicLayoutManifest(layout_tstring=tstring)
+
+
+# --- 7. Missing Coverage Tests ---
+
+
+def test_dynamic_layout_manifest_syntax_error() -> None:
+    from coreason_manifest.spec.ontology import DynamicLayoutManifest
+
+    # AST parsing exception for SyntaxError
+    with pytest.raises(ValidationError):
+        DynamicLayoutManifest(layout_tstring="f'{a")
+
+
+def test_compute_engine_profile_sorting() -> None:
+    from coreason_manifest.spec.ontology import ComputeEngineProfile, ComputeRateContract
+
+    rate_card = ComputeRateContract(
+        cost_per_million_input_tokens=0.5, cost_per_million_output_tokens=1.5, magnitude_unit="USD"
+    )
+    profile = ComputeEngineProfile(
+        model_name="test-model",
+        provider="test-provider",
+        context_window_size=1024,
+        capabilities=["c", "a", "b"],
+        supported_functional_experts=["z", "x", "y"],
+        rate_card=rate_card,
+    )
+
+    assert profile.capabilities == ["a", "b", "c"]
+    assert profile.supported_functional_experts == ["x", "y", "z"]
+
+
+def test_permission_boundary_policy_sorting() -> None:
+    from coreason_manifest.spec.ontology import PermissionBoundaryPolicy
+
+    policy = PermissionBoundaryPolicy(
+        network_access=True,
+        allowed_domains=["z.com", "a.com", "b.com"],
+        file_system_mutation_forbidden=True,
+        auth_requirements=["mtls:internal", "oauth2:github"],
+    )
+
+    assert policy.allowed_domains == ["a.com", "b.com", "z.com"]
+    assert policy.auth_requirements == ["mtls:internal", "oauth2:github"]
+
+
+def test_activation_steering_contract_sorting() -> None:
+    from coreason_manifest.spec.ontology import ActivationSteeringContract
+
+    contract = ActivationSteeringContract(
+        steering_vector_hash="a" * 64, injection_layers=[5, 1, 3], scaling_factor=1.0, vector_modality="additive"
+    )
+
+    assert contract.injection_layers == [1, 3, 5]
+
+
+def test_ephemeral_namespace_partition_state_validate_hashes() -> None:
+    from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import EphemeralNamespacePartitionState
+
+    # valid
+    state = EphemeralNamespacePartitionState(
+        partition_id="test",
+        execution_runtime="wasm32-wasi",
+        authorized_bytecode_hashes=["b" * 64, "a" * 64],
+        max_ttl_seconds=60,
+        max_vram_mb=1024,
+    )
+    assert state.authorized_bytecode_hashes == ["a" * 64, "b" * 64]
+
+    # invalid
+    with pytest.raises(ValidationError):
+        EphemeralNamespacePartitionState(
+            partition_id="test",
+            execution_runtime="wasm32-wasi",
+            authorized_bytecode_hashes=["invalid-hash"],
+            max_ttl_seconds=60,
+            max_vram_mb=1024,
+        )
+
+
+def test_bilateral_sla_sorting() -> None:
+    from coreason_manifest.spec.ontology import BilateralSLA, InformationClassificationProfile
+
+    sla = BilateralSLA(
+        receiving_tenant_id="tenant-1",
+        max_permitted_classification=InformationClassificationProfile.PUBLIC,
+        liability_limit_magnitude=1000,
+        permitted_geographic_regions=["us-west", "eu-central", "ap-east"],
+    )
+
+    assert sla.permitted_geographic_regions == ["ap-east", "eu-central", "us-west"]
+
+
+def test_federated_discovery_manifest_sorting() -> None:
+    from coreason_manifest.spec.ontology import FederatedDiscoveryManifest
+
+    manifest = FederatedDiscoveryManifest(
+        broadcast_endpoints=["http://c.com", "http://a.com", "http://b.com"],
+        supported_ontologies=["hash-c", "hash-a", "hash-b"],
+    )
+
+    # It sorts endpoints by string representation. But note we provided strings.
+    # Because of default pydantic HttpUrl casting it returns HttpUrl but they are defined
+    # as strings in the model right now (list[str]).
+    # Since they are defined as list[str] in model, pydantic doesn't cast to HttpUrl
+    # if we just give it list[str].
+    assert manifest.broadcast_endpoints == ["http://a.com", "http://b.com", "http://c.com"]
+    assert manifest.supported_ontologies == ["hash-a", "hash-b", "hash-c"]
