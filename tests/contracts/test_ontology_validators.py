@@ -4,11 +4,19 @@ from hypothesis import HealthCheck, given, settings
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
+    ActivationSteeringContract,
+    AdjudicationRubricProfile,
+    ComputeEngineProfile,
+    ComputeRateContract,
     ConsensusPolicy,
     CoreasonBaseState,
     DynamicLayoutManifest,
+    GradingCriterionProfile,
+    InformationClassificationProfile,
     LatentSmoothingProfile,
+    PermissionBoundaryPolicy,
     QuorumPolicy,
+    RedactionPolicy,
     RiskLevelPolicy,
     SaeLatentPolicy,
     SpatialBoundingBoxProfile,
@@ -27,7 +35,14 @@ def test_coreason_base_state_hash() -> None:
         name: str
 
     state = TestState(name="test")
-    assert hash(state) == hash(state)
+    # First call generates and caches the canonical hash
+    h1 = hash(state)
+    # Second call pulls from cache
+    h2 = hash(state)
+
+    assert h1 == h2
+    assert hasattr(state, "_cached_hash")
+    assert state._cached_hash == h1
 
 
 # --- 2. Spatial Bounding Box Fuzzing ---
@@ -148,9 +163,83 @@ def test_dynamic_layout_manifest_valid_ast(tstring: str) -> None:
     DynamicLayoutManifest(layout_tstring=tstring)
 
 
+def test_dynamic_layout_manifest_syntax_error() -> None:
+    # A SyntaxError in parsing is silently ignored because it poses no execution bleed risk.
+    manifest = DynamicLayoutManifest(layout_tstring="f'{a")
+    assert manifest.layout_tstring == "f'{a"
+
+
 @pytest.mark.parametrize(
     ("tstring", "bad_node"), [("f'{a()} {b}'", "Call"), ("print('hello')", "Call"), ("import os", "Import")]
 )
 def test_dynamic_layout_manifest_kinetic_bleed(tstring: str, bad_node: str) -> None:
     with pytest.raises(ValidationError, match=rf"Kinetic execution bleed detected: Forbidden AST node {bad_node}"):
         DynamicLayoutManifest(layout_tstring=tstring)
+
+
+# --- 7. Deterministic Array Sorting Validation ---
+def test_compute_engine_profile_sorting() -> None:
+    rate = ComputeRateContract(
+        cost_per_million_input_tokens=1.0,
+        cost_per_million_output_tokens=2.0,
+        magnitude_unit="USD",
+    )
+    profile = ComputeEngineProfile(
+        model_name="test-model",
+        provider="test-provider",
+        context_window_size=8192,
+        capabilities=["write", "read", "execute", "analyze"],
+        supported_functional_experts=["synthesizer", "falsifier", "coder"],
+        rate_card=rate,
+    )
+    assert profile.capabilities == ["analyze", "execute", "read", "write"]
+    assert profile.supported_functional_experts == ["coder", "falsifier", "synthesizer"]
+
+
+def test_permission_boundary_policy_sorting() -> None:
+    policy = PermissionBoundaryPolicy(
+        network_access=True,
+        file_system_mutation_forbidden=True,
+        allowed_domains=["z-domain.com", "a-domain.com", "m-domain.com"],
+        auth_requirements=["oauth2:google", "mtls:internal", "basic:auth"],
+    )
+    assert policy.allowed_domains == ["a-domain.com", "m-domain.com", "z-domain.com"]
+    assert policy.auth_requirements == ["basic:auth", "mtls:internal", "oauth2:google"]
+
+
+def test_permission_boundary_policy_none() -> None:
+    policy = PermissionBoundaryPolicy(
+        network_access=False,
+        file_system_mutation_forbidden=True,
+        allowed_domains=None,
+        auth_requirements=None,
+    )
+    assert policy.allowed_domains is None
+    assert policy.auth_requirements is None
+
+
+def test_activation_steering_contract_sorting() -> None:
+    contract = ActivationSteeringContract(
+        steering_vector_hash="a" * 64, injection_layers=[10, 2, 5], scaling_factor=1.5, vector_modality="additive"
+    )
+    assert contract.injection_layers == [2, 5, 10]
+
+
+def test_adjudication_rubric_profile_sorting() -> None:
+    c1 = GradingCriterionProfile(criterion_id="c_beta", description="Beta criterion", weight=10.0)
+    c2 = GradingCriterionProfile(criterion_id="c_alpha", description="Alpha criterion", weight=5.0)
+    rubric = AdjudicationRubricProfile(rubric_id="rubric1", criteria=[c1, c2], passing_threshold=15.0)
+    assert rubric.criteria[0].criterion_id == "c_alpha"
+    assert rubric.criteria[1].criterion_id == "c_beta"
+
+
+def test_redaction_policy_sorting() -> None:
+    policy = RedactionPolicy(
+        rule_id="r1",
+        classification=InformationClassificationProfile.PUBLIC,
+        target_pattern="email",
+        target_regex_pattern=".*",
+        context_exclusion_zones=["/path/z", "/path/a"],
+        action="redact",
+    )
+    assert policy.context_exclusion_zones == ["/path/a", "/path/z"]
