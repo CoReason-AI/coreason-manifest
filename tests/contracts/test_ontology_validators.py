@@ -10,7 +10,9 @@ from coreason_manifest.spec.ontology import (
     ComputeRateContract,
     ConsensusPolicy,
     CoreasonBaseState,
+    DefeasibleCascadeEvent,
     DynamicLayoutManifest,
+    EphemeralNamespacePartitionState,
     GradingCriterionProfile,
     InformationClassificationProfile,
     LatentSmoothingProfile,
@@ -18,7 +20,9 @@ from coreason_manifest.spec.ontology import (
     QuorumPolicy,
     RedactionPolicy,
     RiskLevelPolicy,
+    RollbackIntent,
     SaeLatentPolicy,
+    SecureSubSessionState,
     SpatialBoundingBoxProfile,
 )
 
@@ -243,3 +247,57 @@ def test_redaction_policy_sorting() -> None:
         action="redact",
     )
     assert policy.context_exclusion_zones == ["/path/a", "/path/z"]
+
+
+def test_secure_sub_session_state_sorting() -> None:
+    state = SecureSubSessionState(
+        session_id="session1",
+        allowed_vault_keys=["vault_z", "vault_a", "vault_m"],
+        max_ttl_seconds=3600,
+        description="test session",
+    )
+    assert state.allowed_vault_keys == ["vault_a", "vault_m", "vault_z"]
+
+
+def test_defeasible_cascade_event_sorting() -> None:
+    event = DefeasibleCascadeEvent(
+        cascade_id="cascade1",
+        root_falsified_event_id="root1",
+        propagated_decay_factor=0.5,
+        quarantined_event_ids=["event_z", "event_a", "event_m"],
+    )
+    assert event.quarantined_event_ids == ["event_a", "event_m", "event_z"]
+
+
+def test_rollback_intent_sorting() -> None:
+    intent = RollbackIntent(
+        request_id="req1",
+        target_event_id="target1",
+        invalidated_node_ids=["node_z", "node_a", "node_m"],
+    )
+    assert intent.invalidated_node_ids == ["node_a", "node_m", "node_z"]
+
+
+def test_ephemeral_namespace_partition_state_sorting() -> None:
+    hash_a = "a" * 64
+    hash_b = "b" * 64
+    hash_c = "c" * 64
+    state = EphemeralNamespacePartitionState(
+        partition_id="part1",
+        execution_runtime="wasm32-wasi",
+        authorized_bytecode_hashes=[hash_c, hash_a, hash_b],
+        max_ttl_seconds=3600,
+        max_vram_mb=1024,
+    )
+    assert state.authorized_bytecode_hashes == [hash_a, hash_b, hash_c]
+
+
+def test_ephemeral_namespace_partition_state_invalid_hash() -> None:
+    with pytest.raises(ValidationError, match=r"Invalid SHA-256 hash in whitelist: invalid_hash"):
+        EphemeralNamespacePartitionState(
+            partition_id="part1",
+            execution_runtime="wasm32-wasi",
+            authorized_bytecode_hashes=["invalid_hash"],
+            max_ttl_seconds=3600,
+            max_vram_mb=1024,
+        )
