@@ -852,9 +852,9 @@ def test_compute_provisioning_intent_sort_arrays() -> None:
 
 
 def test_sse_transport_profile_crlf_injection() -> None:
-    from coreason_manifest.spec.ontology import SSETransportProfile
+    from pydantic import HttpUrl, TypeAdapter
 
-    from pydantic import TypeAdapter, HttpUrl
+    from coreason_manifest.spec.ontology import SSETransportProfile
 
     url = TypeAdapter(HttpUrl).validate_python("http://ex.com/")
 
