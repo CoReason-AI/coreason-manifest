@@ -12,6 +12,7 @@ from coreason_manifest.spec.ontology import (
     DAGTopologyManifest,
     DynamicRoutingManifest,
     EpistemicLedgerState,
+    ExecutionNodeReceipt,
     OntologicalAlignmentPolicy,
     StateDifferentialManifest,
     StateMutationIntent,
@@ -31,6 +32,7 @@ from coreason_manifest.utils.algebra import (
     project_manifest_to_mermaid,
     validate_payload,
     verify_ast_safety,
+    verify_merkle_proof,
 )
 
 
@@ -316,3 +318,81 @@ def test_apply_state_differential_property(
     except ValueError:
         # ValueErrors (e.g., path not found, invalid operation) are expected for random invalid patches
         pass
+
+
+
+
+def test_verify_merkle_proof_valid_trace() -> None:
+    # Build a valid DAG trace of ExecutionNodeReceipt objects
+    node1 = ExecutionNodeReceipt(
+        request_id="req1", inputs={"key": "val1"}, outputs={"key": "val2"}, parent_hashes=[], node_hash="temp"
+    )
+
+    # We must set the correct node_hash to bypass the TamperFaultEvent.
+    # Because the model is frozen, we have to copy and update.
+    hash1 = node1.generate_node_hash()
+    node1 = node1.model_copy(update={"node_hash": hash1})
+
+    node2 = ExecutionNodeReceipt(
+        request_id="req2",
+        parent_request_id="req1",
+        root_request_id="req1",
+        inputs={"key": "val3"},
+        outputs={"key": "val4"},
+        parent_hashes=[hash1],
+        node_hash="temp",
+    )
+    hash2 = node2.generate_node_hash()
+    node2 = node2.model_copy(update={"node_hash": hash2})
+
+    trace = [node1, node2]
+
+    # Verify the proof
+    assert verify_merkle_proof(trace) is True
+
+
+def test_verify_merkle_proof_missing_node_hash() -> None:
+    node1 = ExecutionNodeReceipt(request_id="req1", inputs={"key": "val1"}, outputs={"key": "val2"}, parent_hashes=[])
+    # Simulate an invalid trace where node_hash is missing.
+    object.__setattr__(node1, "node_hash", None)
+    from coreason_manifest.spec.ontology import TamperFaultEvent
+
+    with pytest.raises(TamperFaultEvent, match="Missing node hash for request req1"):
+        verify_merkle_proof([node1])
+
+
+def test_verify_merkle_proof_tampered_hash() -> None:
+    node1 = ExecutionNodeReceipt(request_id="req1", inputs={"key": "val1"}, outputs={"key": "val2"}, parent_hashes=[])
+    # Simulate an invalid trace where node_hash is tampered.
+    object.__setattr__(node1, "node_hash", "invalid_hash")
+    from coreason_manifest.spec.ontology import TamperFaultEvent
+
+    with pytest.raises(TamperFaultEvent, match="Node hash mismatch for request req1"):
+        verify_merkle_proof([node1])
+
+
+def test_verify_merkle_proof_missing_parent_hash() -> None:
+    node1 = ExecutionNodeReceipt(
+        request_id="req1", inputs={"key": "val1"}, outputs={"key": "val2"}, parent_hashes=[], node_hash="temp"
+    )
+    hash1 = node1.generate_node_hash()
+    node1 = node1.model_copy(update={"node_hash": hash1})
+
+    node2 = ExecutionNodeReceipt(
+        request_id="req2",
+        parent_request_id="req1",
+        root_request_id="req1",
+        inputs={"key": "val3"},
+        outputs={"key": "val4"},
+        parent_hashes=["nonexistent_hash"],
+        node_hash="temp",
+    )
+    hash2 = node2.generate_node_hash()
+    node2 = node2.model_copy(update={"node_hash": hash2})
+
+    # Trace contains node2 which has a parent_hash that is not in the trace
+    trace = [node1, node2]
+    from coreason_manifest.spec.ontology import TamperFaultEvent
+
+    with pytest.raises(TamperFaultEvent, match="Missing parent hash nonexistent_hash in trace"):
+        verify_merkle_proof(trace)
