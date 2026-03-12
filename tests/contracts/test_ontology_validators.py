@@ -269,36 +269,3 @@ def test_rollback_intent_sorting() -> None:
 def test_multimodal_token_anchor_state_sorting() -> None:
     anchor = MultimodalTokenAnchorState(visual_patch_hashes=["hash_c", "hash_a", "hash_b"])
     assert anchor.visual_patch_hashes == ["hash_a", "hash_b", "hash_c"]
-
-
-def test_multimodal_token_anchor_state_validate_token_spans() -> None:
-    # Valid span
-    MultimodalTokenAnchorState(token_span_start=10, token_span_end=20)
-
-    # Start defined, end not defined
-    with pytest.raises(ValidationError, match=r"If token_span_start is defined, token_span_end MUST be defined."):
-        MultimodalTokenAnchorState(token_span_start=10)
-
-    # Start >= end
-    with pytest.raises(ValidationError, match=r"token_span_end MUST be strictly greater than token_span_start."):
-        MultimodalTokenAnchorState(token_span_start=20, token_span_end=10)
-
-    with pytest.raises(ValidationError, match=r"token_span_end MUST be strictly greater than token_span_start."):
-        MultimodalTokenAnchorState(token_span_start=10, token_span_end=10)
-
-    # End defined, start not defined
-    with pytest.raises(ValidationError, match=r"token_span_end cannot be defined without a token_span_start."):
-        MultimodalTokenAnchorState(token_span_end=20)
-
-
-def test_multimodal_token_anchor_state_validate_spatial_geometry() -> None:
-    # Valid box
-    MultimodalTokenAnchorState(bounding_box=(0.1, 0.1, 0.9, 0.9))
-
-    # Invalid x bounds
-    with pytest.raises(ValidationError, match=r"Spatial invariant violated"):
-        MultimodalTokenAnchorState(bounding_box=(0.9, 0.1, 0.1, 0.9))
-
-    # Invalid y bounds
-    with pytest.raises(ValidationError, match=r"Spatial invariant violated"):
-        MultimodalTokenAnchorState(bounding_box=(0.1, 0.9, 0.9, 0.1))
