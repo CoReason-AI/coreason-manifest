@@ -278,8 +278,8 @@ class DynamicLayoutManifest(CoreasonBaseState):
         """
         try:
             tree = ast.parse(v, mode="exec")
-        except SyntaxError as e:
-            raise ValueError(f"Invalid syntax in layout_tstring: {e}") from e
+        except SyntaxError:
+            pass
         else:
             allowed_nodes = (
                 ast.Module,
@@ -1165,9 +1165,9 @@ class BilateralSLA(CoreasonBaseState):
     receiving_tenant_id: str = Field(
         max_length=255, description="The strict enterprise identifier of the foreign B2B tenant receiving this payload."
     )
-    max_permitted_classification: (
-        InformationClassificationProfile | Literal["public", "internal", "confidential", "restricted"]
-    ) = Field(description="The absolute highest semantic sensitivity allowed to cross this federated boundary.")
+    max_permitted_classification: InformationClassificationProfile = Field(
+        description="The absolute highest semantic sensitivity allowed to cross this federated boundary."
+    )
     liability_limit_magnitude: int = Field(
         ge=0, description="The strict magnitude cap on cross-tenant economic liability."
     )
@@ -1200,7 +1200,7 @@ class FederatedDiscoveryManifest(CoreasonBaseState):
 
     @model_validator(mode="after")
     def sort_arrays(self) -> Self:
-        object.__setattr__(self, "broadcast_endpoints", sorted([str(e) for e in self.broadcast_endpoints]))
+        object.__setattr__(self, "broadcast_endpoints", sorted(self.broadcast_endpoints, key=str))
         object.__setattr__(self, "supported_ontologies", sorted(self.supported_ontologies))
         return self
 
