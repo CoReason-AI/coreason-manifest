@@ -289,11 +289,6 @@ class DynamicLayoutManifest(CoreasonBaseState):
                 ast.Load,
                 ast.FormattedValue,
                 ast.JoinedStr,
-                ast.BinOp,
-                ast.Add,
-                ast.Sub,
-                ast.Mult,
-                ast.Div,
             )
             for node in ast.walk(tree):
                 if not isinstance(node, allowed_nodes):
