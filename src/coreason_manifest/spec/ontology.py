@@ -978,6 +978,11 @@ class StateMutationIntent(CoreasonBaseState):
         default=None,
         description="The payload to insert or test, if applicable, for this deterministic state vector mutation.",
     )
+    from_path: str | None = Field(
+        default=None,
+        alias="from",
+        description="The JSON pointer from which to copy or move the state vector, if applicable.",
+    )
 
 
 class StateDifferentialManifest(CoreasonBaseState):
