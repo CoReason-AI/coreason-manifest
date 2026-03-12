@@ -3,6 +3,7 @@ from typing import Any
 import hypothesis.strategies as st
 import pytest
 from hypothesis import HealthCheck, given, settings
+from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
     DocumentLayoutManifest,
@@ -34,7 +35,7 @@ def build_block(block_id: str) -> DocumentLayoutRegionState:
 def test_document_layout_manifest_ghost_nodes(edges: list[tuple[str, str]], match_string: str) -> None:
     """Prove the topological boundary strictly severs missing coordinate references."""
     blocks = {"A": build_block("A"), "B": build_block("B"), "C": build_block("C")}
-    with pytest.raises(ValueError, match=match_string):
+    with pytest.raises(ValidationError, match=match_string):
         DocumentLayoutManifest(blocks=blocks, chronological_flow_edges=edges)
 
 
@@ -50,7 +51,7 @@ def test_document_layout_manifest_ghost_nodes(edges: list[tuple[str, str]], matc
 def test_document_layout_manifest_static_cycles(edges: list[tuple[str, str]]) -> None:
     """Prove the manifest deterministically collapses when chronological paradoxes are injected."""
     blocks = {"A": build_block("A"), "B": build_block("B"), "C": build_block("C")}
-    with pytest.raises(ValueError, match=r"Reading order contains a cyclical contradiction"):
+    with pytest.raises(ValidationError, match=r"Reading order contains a cyclical contradiction"):
         DocumentLayoutManifest(blocks=blocks, chronological_flow_edges=edges)
 
 
