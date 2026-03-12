@@ -59,7 +59,7 @@ def test_document_layout_manifest_static_cycles(edges: list[tuple[str, str]]) ->
 def valid_dag_strategy(draw: st.DrawFn) -> dict[str, Any]:
     """Generates mathematically guaranteed DAGs by strictly pointing edges from lower to higher array indices."""
     node_ids = draw(st.lists(st.text(min_size=1, max_size=10), min_size=2, max_size=15, unique=True))
-    edges = []
+    edges: list[tuple[str, str]] = []
     for i in range(len(node_ids)):
         edges.extend((node_ids[i], node_ids[j]) for j in range(i + 1, len(node_ids)) if draw(st.booleans()))
     return {"nodes": node_ids, "edges": edges}
