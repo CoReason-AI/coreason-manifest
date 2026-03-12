@@ -7616,13 +7616,13 @@
       "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "minimum_collateral": {
-          "description": "The minimum amount of token collateral held in escrow.",
+          "description": "The minimum amount of token collateral held in escrow.\n    MATHEMATICAL BOUNDARY: Must be >= 0.0. Downstream agents must secure this collateral before execution.\n    ",
           "minimum": 0.0,
           "title": "Minimum Collateral",
           "type": "number"
         },
         "slashing_penalty": {
-          "description": "The exact token amount slashed for Byzantine faults.",
+          "description": "The exact token amount slashed for Byzantine faults.\n    MATHEMATICAL BOUNDARY: Must be >= 0.0 AND mathematically less than or equal to minimum_collateral.\n    ",
           "minimum": 0.0,
           "title": "Slashing Penalty",
           "type": "number"
