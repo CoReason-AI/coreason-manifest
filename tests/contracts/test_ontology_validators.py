@@ -2,14 +2,15 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
-    RiskLevelPolicy,
-    CoreasonBaseState,
-    SpatialCoordinateState,
+    ActivationSteeringContract,
     ByzantineFaultTolerancePolicy,
     ConsensusPolicy,
-    ActivationSteeringContract,
+    CoreasonBaseState,
     GeometricDecayProfileState,
+    RiskLevelPolicy,
+    SpatialCoordinateState,
 )
+
 
 def test_risk_level_policy_weight():
     assert RiskLevelPolicy.SAFE.weight == 0
@@ -32,11 +33,11 @@ def test_spatial_coordinate_state_validation():
     SpatialCoordinateState(x_min=0.0, x_max=1.0, y_min=0.0, y_max=1.0)
 
     # Invalid x
-    with pytest.raises(ValidationError, match="x_min cannot be strictly greater than x_max."):
+    with pytest.raises(ValidationError, match=r"x_min cannot be strictly greater than x_max\."):
         SpatialCoordinateState(x_min=1.0, x_max=0.0, y_min=0.0, y_max=1.0)
 
     # Invalid y
-    with pytest.raises(ValidationError, match="y_min cannot be strictly greater than y_max."):
+    with pytest.raises(ValidationError, match=r"y_min cannot be strictly greater than y_max\."):
         SpatialCoordinateState(x_min=0.0, x_max=1.0, y_min=1.0, y_max=0.0)
 
 def test_byzantine_fault_tolerance_policy_math():
@@ -75,7 +76,7 @@ def test_consensus_policy_pbft_requirements():
     )
 
     # Invalid pbft
-    with pytest.raises(ValidationError, match="quorum_rules must be provided when strategy is 'pbft'."):
+    with pytest.raises(ValidationError, match=r"quorum_rules must be provided when strategy is 'pbft'\."):
         ConsensusPolicy(
             strategy="pbft"
         )
@@ -105,7 +106,9 @@ def test_activation_steering_contract_smooth_decay():
     )
 
     # Invalid smooth decay missing smoothing_profile
-    with pytest.raises(ValidationError, match="smoothing_profile must be provided when violation_action is 'smooth_decay'."):
+    with pytest.raises(
+        ValidationError, match=r"smoothing_profile must be provided when violation_action is 'smooth_decay'\."
+    ):
         ActivationSteeringContract(
             target_feature_index=1,
             monitored_layers=[1],
@@ -116,7 +119,9 @@ def test_activation_steering_contract_smooth_decay():
         )
 
     # Invalid smooth decay missing clamp_value
-    with pytest.raises(ValidationError, match="clamp_value must be provided as the target asymptote when violation_action is 'smooth_decay'."):
+    with pytest.raises(
+        ValidationError, match=r"clamp_value must be provided .* when violation_action is 'smooth_decay'\."
+    ):
         ActivationSteeringContract(
             target_feature_index=1,
             monitored_layers=[1],
