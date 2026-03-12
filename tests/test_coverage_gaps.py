@@ -345,7 +345,7 @@ def test_evaluator_optimizer_topology_manifest() -> None:
             generator_node_id=gen_id,
             evaluator_node_id=eval_id,
             max_revision_loops=10,
-            nodes={eval_id: SystemNodeProfile(description="eval")},  # type: ignore[arg-type]
+            nodes={eval_id: SystemNodeProfile(description="eval")},
         )
 
     # Missing evaluator
@@ -354,7 +354,7 @@ def test_evaluator_optimizer_topology_manifest() -> None:
             generator_node_id=gen_id,
             evaluator_node_id=eval_id,
             max_revision_loops=10,
-            nodes={gen_id: SystemNodeProfile(description="gen")},  # type: ignore[arg-type]
+            nodes={gen_id: SystemNodeProfile(description="gen")},
         )
 
     # Same nodes
