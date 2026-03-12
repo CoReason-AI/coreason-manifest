@@ -7,13 +7,13 @@ from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
     AdversarialMarketTopologyManifest,
+    ByzantineFaultTolerancePolicy,
     ConsensusPolicy,
     CouncilTopologyManifest,
     DAGTopologyManifest,
     EpistemicSOPManifest,
     GenerativeManifoldSLA,
     PredictionMarketPolicy,
-    ByzantineFaultTolerancePolicy,
     SemanticDiscoveryIntent,
     SystemNodeProfile,
     VectorEmbeddingState,
