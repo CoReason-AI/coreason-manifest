@@ -128,8 +128,6 @@ def test_activation_steering_contract_smooth_decay() -> None:
         )
 
 
-
-
 def test_dynamic_layout_manifest_tstring() -> None:
     # Valid allowed AST nodes
     DynamicLayoutManifest(layout_tstring="f'{a} {b}'")
