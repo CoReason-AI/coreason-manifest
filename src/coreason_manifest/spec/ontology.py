@@ -1423,7 +1423,7 @@ class BoundedJSONRPCIntent(CoreasonBaseState):
 
     jsonrpc: Literal["2.0"] = Field(..., description="JSON-RPC version.")
     method: str = Field(..., max_length=1000, description="Method to be invoked.")
-    params: dict[str, Any] | None = Field(default=None, description="Payload parameters.")
+    params: dict[str, Any] | list[Any] | None = Field(default=None, description="Payload parameters.")
     id: str | int | None = Field(default=None, description="Unique request identifier.")
 
     @field_validator("params", mode="before")
@@ -1432,8 +1432,8 @@ class BoundedJSONRPCIntent(CoreasonBaseState):
         """Enforce strict depth and size constraints to prevent RAM exhaustion and DoS attacks."""
         if v is None:
             return {}
-        if not isinstance(v, dict):
-            raise ValueError("params must be a dictionary")
+        if not isinstance(v, (dict, list)):
+            raise ValueError("params must be a dictionary or a list")
 
         def _enforce_limits(obj: Any, current_depth: int) -> None:
             if current_depth > 10:

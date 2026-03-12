@@ -278,7 +278,7 @@ def verify_merkle_proof(trace: list[ExecutionNodeReceipt]) -> bool:
     node_map: dict[str, ExecutionNodeReceipt] = {}
     for node in trace:
         if node.node_hash is None:
-            return False
+            raise TamperFaultEvent(f"Missing node hash for request {node.request_id}")
         node_map[node.node_hash] = node
     for node in trace:
         if node.generate_node_hash() != node.node_hash:
