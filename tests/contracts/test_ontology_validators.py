@@ -49,6 +49,7 @@ def test_coreason_base_state_hash() -> None:
     assert hasattr(state, "_cached_hash")
     assert state._cached_hash == h1
 
+
 def test_coreason_base_state_hash_caching() -> None:
     class DummyState(CoreasonBaseState):
         value: int
@@ -106,6 +107,7 @@ def test_quorum_policy_bft_math_fuzzing(f: int, n: int) -> None:
         )
         assert policy.min_quorum_size == n
 
+
 def test_quorum_policy_bft_math() -> None:
     # Valid quorum
     QuorumPolicy(
@@ -149,6 +151,7 @@ def test_sae_latent_policy_valid_halt() -> None:
         sae_dictionary_hash="a" * 64,
     )
 
+
 def test_sae_latent_policy_smooth_decay() -> None:
     # Valid smooth_decay with smoothing_profile and clamp_value
     SaeLatentPolicy(
@@ -187,7 +190,6 @@ def test_sae_latent_policy_smooth_decay() -> None:
             sae_dictionary_hash="a" * 64,
             smoothing_profile=LatentSmoothingProfile(decay_function="linear", transition_window_tokens=10),
         )
-
 
 
 def test_sae_latent_policy_valid_smooth_decay() -> None:
