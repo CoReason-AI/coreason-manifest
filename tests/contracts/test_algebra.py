@@ -317,4 +317,6 @@ def test_apply_state_differential_comprehensive() -> None:
     assert new_state == expected_state
     # Ensure original state was not mutated
     assert base_state["metrics"] == [10, 20, 30]
-    assert base_state["user"]["tags"] == ["active", "verified"]
+    user_state = base_state["user"]
+    assert isinstance(user_state, dict)
+    assert user_state["tags"] == ["active", "verified"]
