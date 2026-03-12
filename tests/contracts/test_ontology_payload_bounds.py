@@ -76,6 +76,7 @@ def test_payload_bounds_dict_key_not_string() -> None:
     with pytest.raises(ValueError, match="Dictionary keys must be strings"):
         _validate_payload_bounds(cast("JsonPrimitiveState", bad_dict))
 
+
 def test_payload_bounds_invalid_type() -> None:
     # A non-JSON primitive object should fail validation
     class CustomObj:
@@ -83,6 +84,7 @@ def test_payload_bounds_invalid_type() -> None:
 
     with pytest.raises(ValueError, match="Payload value must be a valid JSON primitive, got CustomObj"):
         _validate_payload_bounds(CustomObj())  # type: ignore
+
 
 def test_payload_bounds_invalid_type_nested() -> None:
     # A non-JSON primitive object deeply nested should fail validation
