@@ -428,7 +428,7 @@ def test_temporal_bounds_profile_validate_temporal_bounds() -> None:
 
 def test_base_node_profile_validate_domain_extensions_depth() -> None:
     with pytest.raises(ValidationError, match="domain_extensions must be a dictionary"):
-        BaseNodeProfile(description="test", domain_extensions=[1, 2, 3])
+        BaseNodeProfile(description="test", domain_extensions=[1, 2, 3])  # type: ignore
 
     deep_dict: dict[str, Any] = {}
     current = deep_dict
@@ -439,7 +439,7 @@ def test_base_node_profile_validate_domain_extensions_depth() -> None:
         BaseNodeProfile(description="test", domain_extensions=deep_dict)
 
     with pytest.raises(ValidationError, match="domain_extensions keys must be strings"):
-        BaseNodeProfile(description="test", domain_extensions={1: "a"})
+        BaseNodeProfile(description="test", domain_extensions={1: "a"})  # type: ignore
 
     long_key_dict = {"k" * 256: 1}
     with pytest.raises(ValidationError, match="domain_extensions key exceeds maximum length of 255 characters"):
@@ -477,7 +477,7 @@ def test_execution_node_receipt_validate_lineage() -> None:
 
 def test_bounded_jsonrpc_intent_validate_params_depth_and_size() -> None:
     with pytest.raises(ValidationError, match="params must be a dictionary"):
-        BoundedJSONRPCIntent(jsonrpc="2.0", method="test", params=[1, 2, 3])
+        BoundedJSONRPCIntent(jsonrpc="2.0", method="test", params=[1, 2, 3])  # type: ignore
 
     deep_dict: dict[str, Any] = {}
     current = deep_dict
