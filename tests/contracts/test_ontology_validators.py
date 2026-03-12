@@ -340,3 +340,47 @@ def test_adjudication_intent_sorting() -> None:
         timeout_action="rollback",
     )
     assert intent.deadlocked_claims == ["claim_1", "claim_2", "claim_3"]
+
+
+def test_risk_level_policy_weight() -> None:
+    from coreason_manifest.spec.ontology import RiskLevelPolicy
+    assert RiskLevelPolicy.SAFE.weight == 0
+    assert RiskLevelPolicy.STANDARD.weight == 1
+    assert RiskLevelPolicy.CRITICAL.weight == 2
+
+
+def test_coreason_base_state_hash() -> None:
+    from coreason_manifest.spec.ontology import CoreasonBaseState
+    class DummyState(CoreasonBaseState):
+        field1: str
+        field2: int
+
+    state = DummyState(field1="test", field2=42)
+    # The first time hash is called, it should compute and cache it
+    h1 = hash(state)
+    # The second time, it should return the cached value
+    h2 = hash(state)
+    assert h1 == h2
+
+    # Verify it was cached
+    assert hasattr(state, "_cached_hash")
+    assert getattr(state, "_cached_hash") == h1
+
+
+def test_spatial_bounding_box_profile_validate_geometry() -> None:
+    from coreason_manifest.spec.ontology import SpatialBoundingBoxProfile
+    from pydantic import ValidationError
+    # Valid geometry
+    bbox = SpatialBoundingBoxProfile(x_min=0.1, y_min=0.2, x_max=0.5, y_max=0.6)
+    assert bbox.x_min == 0.1
+    assert bbox.y_min == 0.2
+    assert bbox.x_max == 0.5
+    assert bbox.y_max == 0.6
+
+    # Invalid geometry: x_min > x_max
+    with pytest.raises(ValidationError, match=r"x_min cannot be strictly greater than x_max."):
+        SpatialBoundingBoxProfile(x_min=0.6, y_min=0.2, x_max=0.5, y_max=0.6)
+
+    # Invalid geometry: y_min > y_max
+    with pytest.raises(ValidationError, match=r"y_min cannot be strictly greater than y_max."):
+        SpatialBoundingBoxProfile(x_min=0.1, y_min=0.7, x_max=0.5, y_max=0.6)
