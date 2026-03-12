@@ -320,8 +320,6 @@ def test_apply_state_differential_property(
         pass
 
 
-
-
 def test_verify_merkle_proof_valid_trace() -> None:
     # Build a valid DAG trace of ExecutionNodeReceipt objects
     node1 = ExecutionNodeReceipt(
