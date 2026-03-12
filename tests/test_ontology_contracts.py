@@ -11,7 +11,7 @@ from coreason_manifest.spec.ontology import (
 )
 
 
-def test_quorum_policy_bft_math():
+def test_quorum_policy_bft_math() -> None:
 
     # Valid: 3 * 1 + 1 = 4. 4 >= 4 (Valid)
     valid_policy = QuorumPolicy(
@@ -29,7 +29,7 @@ def test_quorum_policy_bft_math():
         )
 
 
-def test_spatial_bounding_box_geometry():
+def test_spatial_bounding_box_geometry() -> None:
 
     # Valid
     box = SpatialBoundingBoxProfile(x_min=0.1, y_min=0.1, x_max=0.9, y_max=0.9)
@@ -44,7 +44,7 @@ def test_spatial_bounding_box_geometry():
         SpatialBoundingBoxProfile(x_min=0.1, y_min=0.9, x_max=0.9, y_max=0.1)
 
 
-def test_dynamic_layout_manifest_ast_safety():
+def test_dynamic_layout_manifest_ast_safety() -> None:
 
     # Valid string
     valid_manifest = DynamicLayoutManifest(layout_tstring="f'{a} and {b}'")
@@ -59,7 +59,7 @@ def test_dynamic_layout_manifest_ast_safety():
         DynamicLayoutManifest(layout_tstring="x = 1")
 
 
-def test_document_layout_manifest_dag_integrity():
+def test_document_layout_manifest_dag_integrity() -> None:
 
     anchor1 = MultimodalTokenAnchorState(token_span_start=0, token_span_end=10)
     anchor2 = MultimodalTokenAnchorState(token_span_start=11, token_span_end=20)
@@ -88,7 +88,7 @@ def test_document_layout_manifest_dag_integrity():
         DocumentLayoutManifest(blocks=blocks, chronological_flow_edges=[("b1", "b2"), ("b2", "b3"), ("b3", "b1")])
 
 
-def test_browser_dom_state_ssrf_prevention():
+def test_browser_dom_state_ssrf_prevention() -> None:
 
     # Valid
     BrowserDOMState(
