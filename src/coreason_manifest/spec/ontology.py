@@ -53,6 +53,8 @@ def _validate_payload_bounds(value: JsonPrimitiveState, current_depth: int = 0) 
     elif isinstance(value, str):
         if len(value) > max_str_len:
             raise ValueError(f"String exceeds max length of {max_str_len}")
+    elif value is not None and not isinstance(value, (int, float, bool)):
+        raise ValueError(f"Payload value must be a valid JSON primitive, got {type(value).__name__}")
 
     return value
 
