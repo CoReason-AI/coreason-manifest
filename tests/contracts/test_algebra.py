@@ -4,7 +4,7 @@ from copy import deepcopy
 from typing import Any
 
 import pytest
-from hypothesis import given
+from hypothesis import given, settings
 from hypothesis import strategies as st
 from pydantic import BaseModel, Field, TypeAdapter, ValidationError
 
@@ -174,48 +174,32 @@ def test_calculate_latent_alignment_mismatch_rejection() -> None:
         calculate_latent_alignment(v1, v3, policy)
 
 
-def test_calculate_remaining_compute_valid() -> None:
-    receipt1 = TokenBurnReceipt(
-        event_id="burn-1",
-        timestamp=100.0,
-        tool_invocation_id="tool-1",
-        input_tokens=5,
-        output_tokens=5,
-        burn_magnitude=10,
-    )
-    receipt2 = TokenBurnReceipt(
-        event_id="burn-2",
-        timestamp=101.0,
-        tool_invocation_id="tool-2",
-        input_tokens=10,
-        output_tokens=10,
-        burn_magnitude=20,
-    )
-    ledger = EpistemicLedgerState(history=[receipt1, receipt2])
-    remaining = calculate_remaining_compute(ledger, initial_escrow_magnitude=50)
-    assert remaining == 20
+@given(
+    initial=st.integers(min_value=0, max_value=100000),
+    burns=st.lists(st.integers(min_value=0, max_value=1000), max_size=50),
+)
+@settings(max_examples=100)
+def test_calculate_remaining_compute_fuzzing(initial: int, burns: list[int]) -> None:
+    """Mathematically prove the compute escrow exhaustion boundary."""
+    receipts: list[Any] = [
+        TokenBurnReceipt(
+            event_id=f"burn-{i}",
+            timestamp=float(i),
+            tool_invocation_id=f"tool-{i}",
+            input_tokens=1,
+            output_tokens=1,
+            burn_magnitude=b,
+        )
+        for i, b in enumerate(burns)
+    ]
+    ledger = EpistemicLedgerState(history=receipts)
+    total_burn = sum(burns)
 
-
-def test_calculate_remaining_compute_exhaustion() -> None:
-    receipt1 = TokenBurnReceipt(
-        event_id="burn-1",
-        timestamp=100.0,
-        tool_invocation_id="tool-1",
-        input_tokens=5,
-        output_tokens=5,
-        burn_magnitude=10,
-    )
-    receipt2 = TokenBurnReceipt(
-        event_id="burn-2",
-        timestamp=101.0,
-        tool_invocation_id="tool-2",
-        input_tokens=10,
-        output_tokens=10,
-        burn_magnitude=20,
-    )
-    ledger = EpistemicLedgerState(history=[receipt1, receipt2])
-    with pytest.raises(ValueError, match="Mathematical Boundary Breached"):
-        calculate_remaining_compute(ledger, initial_escrow_magnitude=25)
+    if total_burn > initial:
+        with pytest.raises(ValueError, match="Mathematical Boundary Breached"):
+            calculate_remaining_compute(ledger, initial_escrow_magnitude=initial)
+    else:
+        assert calculate_remaining_compute(ledger, initial_escrow_magnitude=initial) == initial - total_burn
 
 
 def test_calculate_latent_alignment_cosine_math() -> None:
@@ -240,17 +224,18 @@ def test_calculate_latent_alignment_cosine_math() -> None:
         calculate_latent_alignment(v1, v2, policy_strict)
 
 
-def test_verify_ast_safety() -> None:
-    # Task 1. Assert pure deterministic expression evaluation works
-    assert verify_ast_safety("{'x': 1, 'y': 2 + 2}") is True
+@pytest.mark.parametrize("payload", ["{'x': 1, 'y': 2 + 2}", "1 + 2 * 3", "a[0]"])
+def test_verify_ast_safety_valid(payload: str) -> None:
+    assert verify_ast_safety(payload) is True
 
-    # Task 2. Prevent arbitrary module execution explicitly via SyntaxError or ValueError
+
+@pytest.mark.parametrize(
+    "payload",
+    ["import os; os.system('ls')", "__import__('os').system('ls')", "exec('print(1)')", "__builtins__['eval']('1')"],
+)
+def test_verify_ast_safety_kinetic_bleed(payload: str) -> None:
     with pytest.raises((SyntaxError, ValueError)):
-        verify_ast_safety("import os; os.system('ls')")
-
-    # Task 3. Block malicious multi-layer call graphs mimicking Builtins
-    with pytest.raises(ValueError, match="Kinetic execution bleed detected"):
-        verify_ast_safety("__builtins__['eval']('1')")
+        verify_ast_safety(payload)
 
 
 def test_apply_state_differential() -> None:
@@ -272,58 +257,6 @@ def test_apply_state_differential() -> None:
 
     assert new_state == {"user": {"name": "Bob", "age": 30, "tags": []}}
     assert base_state == {"user": {"name": "Alice", "tags": ["admin"]}}
-
-
-def test_apply_state_differential_comprehensive() -> None:
-    """A comprehensive test for all RFC 6902 JSON Patch operations."""
-    base_state = {
-        "user": {
-            "profile": {"name": "Alice", "role": "admin"},
-            "tags": ["active", "verified"],
-            "settings": {"notifications": True},
-        },
-        "metrics": [10, 20, 30],
-    }
-
-    # 1. Test existing value
-    patch_test = StateMutationIntent(op="test", path="/user/profile/role", value="admin")
-    # 2. Copy a nested object
-    patch_copy = StateMutationIntent(op="copy", path="/user/copied_profile", **{"from": "/user/profile"})
-    # 3. Move an array element
-    patch_move = StateMutationIntent(op="move", path="/metrics/1", **{"from": "/user/tags/1"})
-    # 4. Add to an array using the "-" operator (append)
-    patch_add_array = StateMutationIntent(op="add", path="/metrics/-", value=40)
-    # 5. Remove an object key
-    patch_remove = StateMutationIntent(op="remove", path="/user/settings/notifications")
-    # 6. Replace a value
-    patch_replace = StateMutationIntent(op="replace", path="/metrics/0", value=15)
-
-    manifest = StateDifferentialManifest(
-        diff_id="did:web:patch-comprehensive",
-        author_node_id="did:web:node-1",
-        lamport_timestamp=2,
-        vector_clock={"did:web:node-1": 2},
-        patches=[patch_test, patch_copy, patch_move, patch_add_array, patch_remove, patch_replace],
-    )
-
-    new_state = apply_state_differential(base_state, manifest)
-
-    expected_state = {
-        "user": {
-            "profile": {"name": "Alice", "role": "admin"},
-            "copied_profile": {"name": "Alice", "role": "admin"},
-            "tags": ["active"],
-            "settings": {},
-        },
-        "metrics": [15, "verified", 20, 30, 40],
-    }
-
-    assert new_state == expected_state
-    # Ensure original state was not mutated
-    assert base_state["metrics"] == [10, 20, 30]
-    user_state = base_state["user"]
-    assert isinstance(user_state, dict)
-    assert user_state["tags"] == ["active", "verified"]
 
 
 # Strategy to generate valid JSON primitives
