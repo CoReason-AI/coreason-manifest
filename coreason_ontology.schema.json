@@ -1765,10 +1765,6 @@
               "type": "object"
             },
             {
-              "items": {},
-              "type": "array"
-            },
-            {
               "type": "null"
             }
           ],
@@ -7361,10 +7357,6 @@
             {
               "additionalProperties": true,
               "type": "object"
-            },
-            {
-              "items": {},
-              "type": "array"
             },
             {
               "type": "null"
