@@ -1,27 +1,27 @@
 import pytest
+
 from coreason_manifest.spec.ontology import (
     ActionSpaceManifest,
-    ToolManifest,
-    MCPServerManifest,
-    EphemeralNamespacePartitionState,
-    SideEffectProfile,
-    PermissionBoundaryPolicy,
-    VerifiableCredentialPresentationReceipt,
-    NodeIdentifierState,
-    MacroGridProfile,
-    InsightCardProfile,
-    EpistemicSOPManifest,
-    ProfileIdentifierState,
     CognitiveStateProfile,
     CompositeNodeProfile,
-    SystemNodeProfile,
     DAGTopologyManifest,
+    EphemeralNamespacePartitionState,
+    EpistemicSOPManifest,
     InputMappingContract,
-    OutputMappingContract,
+    InsightCardProfile,
+    MacroGridProfile,
     MCPCapabilityWhitelistPolicy,
+    MCPServerManifest,
+    OutputMappingContract,
+    PermissionBoundaryPolicy,
+    SideEffectProfile,
+    SystemNodeProfile,
+    ToolManifest,
+    VerifiableCredentialPresentationReceipt,
 )
 
-def test_action_space_manifest_unique_tool_names():
+
+def test_action_space_manifest_unique_tool_names() -> None:
     tool1 = ToolManifest(
         tool_name="tool_a",
         description="description",
@@ -42,7 +42,7 @@ def test_action_space_manifest_unique_tool_names():
             native_tools=[tool1, tool2]
         )
 
-def test_macro_grid_profile_referential_integrity():
+def test_macro_grid_profile_referential_integrity() -> None:
     panel = InsightCardProfile(panel_id="panel_1", title="Title", markdown_content="Content")
     with pytest.raises(ValueError, match="Ghost Panel referenced in layout_matrix"):
         MacroGridProfile(
@@ -50,7 +50,7 @@ def test_macro_grid_profile_referential_integrity():
             panels=[panel]
         )
 
-def test_epistemic_sop_manifest_ghost_nodes():
+def test_epistemic_sop_manifest_ghost_nodes() -> None:
     cog_state = CognitiveStateProfile(
         urgency_index=0.5,
         caution_index=0.5,
@@ -66,7 +66,7 @@ def test_epistemic_sop_manifest_ghost_nodes():
             prm_evaluations=[]
         )
 
-def test_epistemic_sop_manifest_ghost_nodes_target():
+def test_epistemic_sop_manifest_ghost_nodes_target() -> None:
     cog_state = CognitiveStateProfile(
         urgency_index=0.5,
         caution_index=0.5,
@@ -82,7 +82,7 @@ def test_epistemic_sop_manifest_ghost_nodes_target():
             prm_evaluations=[]
         )
 
-def test_epistemic_sop_manifest_ghost_nodes_structural_hash():
+def test_epistemic_sop_manifest_ghost_nodes_structural_hash() -> None:
     cog_state = CognitiveStateProfile(
         urgency_index=0.5,
         caution_index=0.5,
@@ -98,7 +98,7 @@ def test_epistemic_sop_manifest_ghost_nodes_structural_hash():
             prm_evaluations=[]
         )
 
-def test_composite_node_profile_sorts_mappings():
+def test_composite_node_profile_sorts_mappings() -> None:
     topology = DAGTopologyManifest(
         nodes={"did:example:1": SystemNodeProfile(description="desc")},
         edges=[],
@@ -122,7 +122,7 @@ def test_composite_node_profile_sorts_mappings():
     assert node.output_mappings[0].child_key == "x"
     assert node.output_mappings[1].child_key == "y"
 
-def test_action_space_manifest_sort_arrays():
+def test_action_space_manifest_sort_arrays() -> None:
     tool1 = ToolManifest(
         tool_name="tool_b",
         description="description",
@@ -144,14 +144,14 @@ def test_action_space_manifest_sort_arrays():
     assert manifest.native_tools[0].tool_name == "tool_a"
     assert manifest.native_tools[1].tool_name == "tool_b"
 
-def test_mcpservermanifest_enforce_did():
+def test_mcpservermanifest_enforce_did() -> None:
     vc = VerifiableCredentialPresentationReceipt(
         presentation_format="jwt_vc",
         issuer_did="did:example:123",
         cryptographic_proof_blob="blob",
         authorization_claims={}
     )
-    with pytest.raises(ValueError, match="UNAUTHORIZED MCP MOUNT: The presented Verifiable Credential is not signed by a valid"):
+    with pytest.raises(ValueError, match="UNAUTHORIZED MCP MOUNT: The presented Verifiable Credential is not signed"):
         MCPServerManifest(
             server_uri="uri",
             transport_type="stdio",
@@ -159,7 +159,7 @@ def test_mcpservermanifest_enforce_did():
             attestation_receipt=vc
         )
 
-def test_mcpservermanifest_enforce_did_valid():
+def test_mcpservermanifest_enforce_did_valid() -> None:
     vc = VerifiableCredentialPresentationReceipt(
         presentation_format="jwt_vc",
         issuer_did="did:coreason:123",
@@ -174,7 +174,7 @@ def test_mcpservermanifest_enforce_did_valid():
     )
     assert manifest.attestation_receipt.issuer_did == "did:coreason:123"
 
-def test_browser_dom_state_safety_valid():
+def test_browser_dom_state_safety_valid() -> None:
     from coreason_manifest.spec.ontology import BrowserDOMState
 
     state = BrowserDOMState(
@@ -201,7 +201,7 @@ def test_browser_dom_state_safety_valid():
             accessibility_tree_hash="b"*64
         )
 
-def test_mcpserverbindingprofile_sort_arrays():
+def test_mcpserverbindingprofile_sort_arrays() -> None:
     from coreason_manifest.spec.ontology import MCPServerBindingProfile, StdioTransportProfile
 
     profile = MCPServerBindingProfile(
@@ -211,7 +211,7 @@ def test_mcpserverbindingprofile_sort_arrays():
     )
     assert profile.required_capabilities == ["prompts", "resources", "tools"]
 
-def test_active_inference_contract_bounds():
+def test_active_inference_contract_bounds() -> None:
     from coreason_manifest.spec.ontology import ActiveInferenceContract
 
     contract = ActiveInferenceContract(
@@ -224,7 +224,7 @@ def test_active_inference_contract_bounds():
     )
     assert contract.expected_information_gain == 0.5
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=r"Input should be less than or equal to 1"):
         ActiveInferenceContract(
             task_id="task_1",
             target_hypothesis_id="hyp_1",
@@ -234,9 +234,8 @@ def test_active_inference_contract_bounds():
             execution_cost_budget_magnitude=100
         )
 
-def test_ephemeral_namespace_partition_state():
-    from coreason_manifest.spec.ontology import EphemeralNamespacePartitionState
-    with pytest.raises(ValueError):
+def test_ephemeral_namespace_partition_state() -> None:
+    with pytest.raises(ValueError, match="Invalid SHA-256 hash in whitelist"):
         EphemeralNamespacePartitionState(
             partition_id="part1",
             execution_runtime="wasm32-wasi",
@@ -254,8 +253,13 @@ def test_ephemeral_namespace_partition_state():
     )
     assert state.authorized_bytecode_hashes == ["a"*64, "b"*64]
 
-def test_federated_capability_attestation_receipt():
-    from coreason_manifest.spec.ontology import FederatedCapabilityAttestationReceipt, InformationClassificationProfile, SecureSubSessionState, BilateralSLA
+def test_federated_capability_attestation_receipt() -> None:
+    from coreason_manifest.spec.ontology import (
+        BilateralSLA,
+        FederatedCapabilityAttestationReceipt,
+        InformationClassificationProfile,
+        SecureSubSessionState,
+    )
 
     session = SecureSubSessionState(
         session_id="session_1",
