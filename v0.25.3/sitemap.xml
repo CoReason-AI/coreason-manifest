@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+         <loc>https://coreason-ai.github.io/coreason_manifest/v0.25.3/</loc>
+         <lastmod>2026-03-13</lastmod>
+    </url>
+    <url>
+         <loc>https://coreason-ai.github.io/coreason_manifest/v0.25.3/LEXICON/</loc>
+         <lastmod>2026-03-13</lastmod>
+    </url>
+    <url>
+         <loc>https://coreason-ai.github.io/coreason_manifest/v0.25.3/MCP_PROJECTION/</loc>
+         <lastmod>2026-03-13</lastmod>
+    </url>
+    <url>
+         <loc>https://coreason-ai.github.io/coreason_manifest/v0.25.3/adr/0001-the-god-context-monolith/</loc>
+         <lastmod>2026-03-13</lastmod>
+    </url>
+    <url>
+         <loc>https://coreason-ai.github.io/coreason_manifest/v0.25.3/agent_examples/01_causal_state_mutations/</loc>
+         <lastmod>2026-03-13</lastmod>
+    </url>
+</urlset>
