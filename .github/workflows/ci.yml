@@ -33,7 +33,7 @@ jobs:
         run: uv run deptry src/
 
       - name: Docs Audit
-        run: uv run mkdocs build --strict
+        run: uv run zensical build
 
   schema-contracts:
     name: Schema Contracts (Semantic Backward-Compatibility)
