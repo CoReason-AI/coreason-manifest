@@ -916,7 +916,9 @@
           "barge_in": "#/$defs/BargeInInterruptEvent",
           "belief_mutation": "#/$defs/BeliefMutationEvent",
           "budget_exhaustion": "#/$defs/BudgetExhaustionEvent",
+          "cognitive_prediction": "#/$defs/CognitivePredictionReceipt",
           "counterfactual_regret": "#/$defs/CounterfactualRegretEvent",
+          "epistemic_axiom_verification": "#/$defs/EpistemicAxiomVerificationReceipt",
           "epistemic_promotion": "#/$defs/EpistemicPromotionEvent",
           "epistemic_telemetry": "#/$defs/EpistemicTelemetryEvent",
           "hypothesis": "#/$defs/HypothesisGenerationEvent",
@@ -968,6 +970,12 @@
         },
         {
           "$ref": "#/$defs/EpistemicTelemetryEvent"
+        },
+        {
+          "$ref": "#/$defs/CognitivePredictionReceipt"
+        },
+        {
+          "$ref": "#/$defs/EpistemicAxiomVerificationReceipt"
         }
       ]
     },
@@ -996,6 +1004,7 @@
           "council": "#/$defs/CouncilTopologyManifest",
           "dag": "#/$defs/DAGTopologyManifest",
           "digital_twin": "#/$defs/DigitalTwinTopologyManifest",
+          "epistemic_domain_graph_manifest": "#/$defs/EpistemicDomainGraphManifest",
           "evaluator_optimizer": "#/$defs/EvaluatorOptimizerTopologyManifest",
           "evolutionary": "#/$defs/EvolutionaryTopologyManifest",
           "macro_adversarial": "#/$defs/AdversarialMarketTopologyManifest",
@@ -1032,6 +1041,9 @@
         },
         {
           "$ref": "#/$defs/ConsensusFederationTopologyManifest"
+        },
+        {
+          "$ref": "#/$defs/EpistemicDomainGraphManifest"
         }
       ]
     },
@@ -2112,6 +2124,52 @@
         "epistemic_penalty_scalar"
       ],
       "title": "CognitiveCritiqueProfile",
+      "type": "object"
+    },
+    "CognitivePredictionReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology: Cognitive Prediction Receipt.",
+      "properties": {
+        "type": {
+          "const": "cognitive_prediction",
+          "default": "cognitive_prediction",
+          "description": "CoReason Shared Kernel Ontology: Discriminator type for cognitive prediction.",
+          "title": "Type",
+          "type": "string"
+        },
+        "prediction_id": {
+          "description": "CoReason Shared Kernel Ontology: prediction id.",
+          "minLength": 1,
+          "title": "Prediction Id",
+          "type": "string"
+        },
+        "source_chain_id": {
+          "description": "CoReason Shared Kernel Ontology: source chain id.",
+          "title": "Source Chain Id",
+          "type": "string"
+        },
+        "target_source_concept": {
+          "description": "CoReason Shared Kernel Ontology: target source concept.",
+          "title": "Target Source Concept",
+          "type": "string"
+        },
+        "predicted_top_k_tokens": {
+          "description": "CoReason Shared Kernel Ontology: predicted top k tokens.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Predicted Top K Tokens",
+          "type": "array"
+        }
+      },
+      "required": [
+        "prediction_id",
+        "source_chain_id",
+        "target_source_concept",
+        "predicted_top_k_tokens"
+      ],
+      "title": "CognitivePredictionReceipt",
       "type": "object"
     },
     "CognitiveRoutingContract": {
@@ -4148,6 +4206,114 @@
       "title": "EpistemicArgumentGraphState",
       "type": "object"
     },
+    "EpistemicAxiomState": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology: Epistemic Axiom State.",
+      "properties": {
+        "source_concept_id": {
+          "description": "CoReason Shared Kernel Ontology: CID of the origin node.",
+          "title": "Source Concept Id",
+          "type": "string"
+        },
+        "directed_edge_type": {
+          "description": "CoReason Shared Kernel Ontology: the topological relationship.",
+          "title": "Directed Edge Type",
+          "type": "string"
+        },
+        "target_concept_id": {
+          "description": "CoReason Shared Kernel Ontology: CID of destination node.",
+          "title": "Target Concept Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_concept_id",
+        "directed_edge_type",
+        "target_concept_id"
+      ],
+      "title": "EpistemicAxiomState",
+      "type": "object"
+    },
+    "EpistemicAxiomVerificationReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology: Epistemic Axiom Verification Receipt.",
+      "properties": {
+        "type": {
+          "const": "epistemic_axiom_verification",
+          "default": "epistemic_axiom_verification",
+          "description": "CoReason Shared Kernel Ontology: Discriminator type for epistemic axiom verification.",
+          "title": "Type",
+          "type": "string"
+        },
+        "verification_id": {
+          "description": "CoReason Shared Kernel Ontology: verification id.",
+          "minLength": 1,
+          "title": "Verification Id",
+          "type": "string"
+        },
+        "source_prediction_id": {
+          "description": "CoReason Shared Kernel Ontology: source prediction id.",
+          "title": "Source Prediction Id",
+          "type": "string"
+        },
+        "sequence_similarity_score": {
+          "description": "CoReason Shared Kernel Ontology: sequence similarity score.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Sequence Similarity Score",
+          "type": "number"
+        },
+        "fact_score_passed": {
+          "description": "CoReason Shared Kernel Ontology: fact score passed.",
+          "title": "Fact Score Passed",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "verification_id",
+        "source_prediction_id",
+        "sequence_similarity_score",
+        "fact_score_passed"
+      ],
+      "title": "EpistemicAxiomVerificationReceipt",
+      "type": "object"
+    },
+    "EpistemicChainGraphState": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology: Epistemic Chain Graph State.",
+      "properties": {
+        "chain_id": {
+          "description": "CoReason Shared Kernel Ontology: chain id.",
+          "minLength": 1,
+          "title": "Chain Id",
+          "type": "string"
+        },
+        "syntactic_roots": {
+          "description": "CoReason Shared Kernel Ontology: syntactic roots.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Syntactic Roots",
+          "type": "array"
+        },
+        "semantic_leaves": {
+          "description": "CoReason Shared Kernel Ontology: semantic leaves.",
+          "items": {
+            "$ref": "#/$defs/EpistemicAxiomState"
+          },
+          "title": "Semantic Leaves",
+          "type": "array"
+        }
+      },
+      "required": [
+        "chain_id",
+        "syntactic_roots",
+        "semantic_leaves"
+      ],
+      "title": "EpistemicChainGraphState",
+      "type": "object"
+    },
     "EpistemicCompressionSLA": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology",
@@ -4181,6 +4347,40 @@
         "required_grounding_density"
       ],
       "title": "EpistemicCompressionSLA",
+      "type": "object"
+    },
+    "EpistemicDomainGraphManifest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology: Epistemic Domain Graph Manifest.",
+      "properties": {
+        "type": {
+          "const": "epistemic_domain_graph_manifest",
+          "default": "epistemic_domain_graph_manifest",
+          "description": "CoReason Shared Kernel Ontology: Discriminator type for epistemic domain graph manifest.",
+          "title": "Type",
+          "type": "string"
+        },
+        "graph_id": {
+          "description": "CoReason Shared Kernel Ontology: graph id.",
+          "minLength": 1,
+          "title": "Graph Id",
+          "type": "string"
+        },
+        "verified_axioms": {
+          "description": "CoReason Shared Kernel Ontology: verified axioms.",
+          "items": {
+            "$ref": "#/$defs/EpistemicAxiomState"
+          },
+          "minItems": 1,
+          "title": "Verified Axioms",
+          "type": "array"
+        }
+      },
+      "required": [
+        "graph_id",
+        "verified_axioms"
+      ],
+      "title": "EpistemicDomainGraphManifest",
       "type": "object"
     },
     "EpistemicEscalationContract": {
@@ -4575,6 +4775,31 @@
         "action_on_gap"
       ],
       "title": "EpistemicScanningPolicy",
+      "type": "object"
+    },
+    "EpistemicSeedInjectionPolicy": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology: Epistemic Seed Injection Policy.",
+      "properties": {
+        "similarity_threshold_alpha": {
+          "description": "CoReason Shared Kernel Ontology: similarity threshold alpha.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Similarity Threshold Alpha",
+          "type": "number"
+        },
+        "relation_diversity_bucket_size": {
+          "description": "CoReason Shared Kernel Ontology: relation diversity bucket size.",
+          "exclusiveMinimum": 0,
+          "title": "Relation Diversity Bucket Size",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "similarity_threshold_alpha",
+        "relation_diversity_bucket_size"
+      ],
+      "title": "EpistemicSeedInjectionPolicy",
       "type": "object"
     },
     "EpistemicTelemetryEvent": {
