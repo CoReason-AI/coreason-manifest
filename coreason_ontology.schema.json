@@ -2122,6 +2122,32 @@
       "title": "CognitiveCritiqueProfile",
       "type": "object"
     },
+    "CognitiveDualVerificationReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "primary_verifier_id": {
+          "$ref": "#/$defs/NodeIdentifierState",
+          "description": "The DID of the primary evaluating agent."
+        },
+        "secondary_verifier_id": {
+          "$ref": "#/$defs/NodeIdentifierState",
+          "description": "The DID of the independent secondary evaluating agent."
+        },
+        "trace_factual_alignment": {
+          "description": "Strict Boolean indicating if BOTH agents mathematically agree on factual alignment.",
+          "title": "Trace Factual Alignment",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "primary_verifier_id",
+        "secondary_verifier_id",
+        "trace_factual_alignment"
+      ],
+      "title": "CognitiveDualVerificationReceipt",
+      "type": "object"
+    },
     "CognitivePredictionReceipt": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology",
@@ -2169,6 +2195,42 @@
       "title": "CognitivePredictionReceipt",
       "type": "object"
     },
+    "CognitiveReasoningTraceState": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "trace_id": {
+          "description": "CID of this specific non-monotonic reasoning trace.",
+          "minLength": 1,
+          "title": "Trace Id",
+          "type": "string"
+        },
+        "source_proof_id": {
+          "description": "The EpistemicTopologicalProofManifest CID this trace is mathematically anchored to.",
+          "title": "Source Proof Id",
+          "type": "string"
+        },
+        "token_length": {
+          "description": "The exact token consumption of the trace.",
+          "minimum": 0,
+          "title": "Token Length",
+          "type": "integer"
+        },
+        "trace_payload": {
+          "description": "The natural language reasoning steps bounded by structural tags.",
+          "title": "Trace Payload",
+          "type": "string"
+        }
+      },
+      "required": [
+        "trace_id",
+        "source_proof_id",
+        "token_length",
+        "trace_payload"
+      ],
+      "title": "CognitiveReasoningTraceState",
+      "type": "object"
+    },
     "CognitiveRoutingContract": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nHardware-level contract overriding MoE routing to enforce functional/specialist paths.",
@@ -2205,6 +2267,29 @@
         "routing_temperature"
       ],
       "title": "CognitiveRoutingContract",
+      "type": "object"
+    },
+    "CognitiveSamplingPolicy": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "max_complexity_hops": {
+          "description": "The absolute physical limit on path length N.",
+          "minimum": 1,
+          "title": "Max Complexity Hops",
+          "type": "integer"
+        },
+        "inverse_frequency_smoothing_epsilon": {
+          "default": 1.0,
+          "description": "The epsilon constant ensuring unsampled nodes are mathematically prioritized.",
+          "title": "Inverse Frequency Smoothing Epsilon",
+          "type": "number"
+        }
+      },
+      "required": [
+        "max_complexity_hops"
+      ],
+      "title": "CognitiveSamplingPolicy",
       "type": "object"
     },
     "CognitiveStateProfile": {
@@ -4344,6 +4429,33 @@
       "title": "EpistemicCompressionSLA",
       "type": "object"
     },
+    "EpistemicCurriculumManifest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "curriculum_id": {
+          "description": "Unique CID for this training epoch release.",
+          "minLength": 1,
+          "title": "Curriculum Id",
+          "type": "string"
+        },
+        "tasks": {
+          "description": "The array of fully verified task primitives.",
+          "items": {
+            "$ref": "#/$defs/EpistemicGroundedTaskManifest"
+          },
+          "minItems": 1,
+          "title": "Tasks",
+          "type": "array"
+        }
+      },
+      "required": [
+        "curriculum_id",
+        "tasks"
+      ],
+      "title": "EpistemicCurriculumManifest",
+      "type": "object"
+    },
     "EpistemicDomainGraphManifest": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology",
@@ -4398,6 +4510,44 @@
         "max_escalation_tiers"
       ],
       "title": "EpistemicEscalationContract",
+      "type": "object"
+    },
+    "EpistemicGroundedTaskManifest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "task_id": {
+          "description": "The cryptographic CID of the task.",
+          "minLength": 1,
+          "title": "Task Id",
+          "type": "string"
+        },
+        "topological_proof": {
+          "$ref": "#/$defs/EpistemicTopologicalProofManifest",
+          "description": "The underlying latent path."
+        },
+        "vignette_payload": {
+          "description": "The generated natural language scenario.",
+          "title": "Vignette Payload",
+          "type": "string"
+        },
+        "thinking_trace": {
+          "$ref": "#/$defs/CognitiveReasoningTraceState",
+          "description": "The verified reasoning path."
+        },
+        "verification_lock": {
+          "$ref": "#/$defs/CognitiveDualVerificationReceipt",
+          "description": "The cryptographic proof of dual-agent approval."
+        }
+      },
+      "required": [
+        "task_id",
+        "topological_proof",
+        "vignette_payload",
+        "thinking_trace",
+        "verification_lock"
+      ],
+      "title": "EpistemicGroundedTaskManifest",
       "type": "object"
     },
     "EpistemicLedgerState": {
@@ -4857,6 +5007,33 @@
         "target_node_id"
       ],
       "title": "EpistemicTelemetryEvent",
+      "type": "object"
+    },
+    "EpistemicTopologicalProofManifest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "proof_id": {
+          "description": "A Content Identifier (CID) for this specific topological proof.",
+          "minLength": 1,
+          "title": "Proof Id",
+          "type": "string"
+        },
+        "axiomatic_chain": {
+          "description": "The strictly ordered sequence of axioms forming the reasoning path.",
+          "items": {
+            "$ref": "#/$defs/EpistemicAxiomState"
+          },
+          "minItems": 1,
+          "title": "Axiomatic Chain",
+          "type": "array"
+        }
+      },
+      "required": [
+        "proof_id",
+        "axiomatic_chain"
+      ],
+      "title": "EpistemicTopologicalProofManifest",
       "type": "object"
     },
     "EpistemicTransmutationTask": {
