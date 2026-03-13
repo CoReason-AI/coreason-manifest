@@ -389,6 +389,7 @@ def test_verify_merkle_proof_none_hash() -> None:
         ({"op": "test", "path": "/arr/0", "value": 99}, "Patch test operation failed"),
         ({"op": "copy", "path": "/nested/new_key", "from": "/arr/10"}, "Invalid from_path operation"),
         ({"op": "copy", "path": "/nested/new_key", "from": "/nested/key/invalid"}, "Invalid from_path"),
+        ({"op": "copy", "path": "/nested/new_key"}, "from_path is mathematically required for copy/move operations."),
     ],
 )
 def test_apply_state_differential_atomic_failures(patch_kwargs: dict[str, Any], match_str: str) -> None:
