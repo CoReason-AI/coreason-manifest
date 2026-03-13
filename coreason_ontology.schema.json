@@ -932,6 +932,7 @@
           "cognitive_reward_evaluation": "#/$defs/CognitiveRewardEvaluationReceipt",
           "counterfactual_regret": "#/$defs/CounterfactualRegretEvent",
           "epistemic_axiom_verification": "#/$defs/EpistemicAxiomVerificationReceipt",
+          "epistemic_flow_state": "#/$defs/EpistemicFlowStateReceipt",
           "epistemic_promotion": "#/$defs/EpistemicPromotionEvent",
           "epistemic_telemetry": "#/$defs/EpistemicTelemetryEvent",
           "hypothesis": "#/$defs/HypothesisGenerationEvent",
@@ -992,6 +993,9 @@
         },
         {
           "$ref": "#/$defs/CognitiveRewardEvaluationReceipt"
+        },
+        {
+          "$ref": "#/$defs/EpistemicFlowStateReceipt"
         }
       ]
     },
@@ -2136,6 +2140,36 @@
         "epistemic_penalty_scalar"
       ],
       "title": "CognitiveCritiqueProfile",
+      "type": "object"
+    },
+    "CognitiveDetailedBalanceContract": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "target_balance_epsilon": {
+          "description": "The mathematical tolerance for the detailed balance constraint.",
+          "minimum": 0.0,
+          "title": "Target Balance Epsilon",
+          "type": "number"
+        },
+        "flow_estimation_model": {
+          "description": "The specific neural architecture used to estimate flow.",
+          "title": "Flow Estimation Model",
+          "type": "string"
+        },
+        "local_exploration_k": {
+          "description": "The number of exploratory actions taken per state to optimize flow efficiently.",
+          "exclusiveMinimum": 0,
+          "title": "Local Exploration K",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "target_balance_epsilon",
+        "flow_estimation_model",
+        "local_exploration_k"
+      ],
+      "title": "CognitiveDetailedBalanceContract",
       "type": "object"
     },
     "CognitiveDualVerificationReceipt": {
@@ -3688,6 +3722,35 @@
       "title": "DelegatedCapabilityManifest",
       "type": "object"
     },
+    "DifferentiableLogicConstraint": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "constraint_id": {
+          "minLength": 1,
+          "title": "Constraint Id",
+          "type": "string"
+        },
+        "formal_syntax_smt": {
+          "description": "The formal SMT-LIB or Lean4 language representation of the symbolic rule.",
+          "title": "Formal Syntax Smt",
+          "type": "string"
+        },
+        "relaxation_epsilon": {
+          "description": "The continuous penalty applied to the LLM probability mass for constraint violation.",
+          "minimum": 0.0,
+          "title": "Relaxation Epsilon",
+          "type": "number"
+        }
+      },
+      "required": [
+        "constraint_id",
+        "formal_syntax_smt",
+        "relaxation_epsilon"
+      ],
+      "title": "DifferentiableLogicConstraint",
+      "type": "object"
+    },
     "DigitalTwinTopologyManifest": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAn isolated sandbox graph representing a Digital Twin.",
@@ -4604,6 +4667,53 @@
       "title": "EpistemicEscalationContract",
       "type": "object"
     },
+    "EpistemicFlowStateReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "event_id": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "type": {
+          "const": "epistemic_flow_state",
+          "default": "epistemic_flow_state",
+          "title": "Type",
+          "type": "string"
+        },
+        "source_trajectory_id": {
+          "description": "The CID of the partial CognitiveReasoningTraceState.",
+          "title": "Source Trajectory Id",
+          "type": "string"
+        },
+        "estimated_flow_value": {
+          "description": "The non-negative flow value scalar representing the factorized outcome reward.",
+          "minimum": 0.0,
+          "title": "Estimated Flow Value",
+          "type": "number"
+        },
+        "terminal_reward_factorized": {
+          "description": "True if this flow successfully factorized a terminal outcome reward.",
+          "title": "Terminal Reward Factorized",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "event_id",
+        "timestamp",
+        "source_trajectory_id",
+        "estimated_flow_value",
+        "terminal_reward_factorized"
+      ],
+      "title": "EpistemicFlowStateReceipt",
+      "type": "object"
+    },
     "EpistemicGroundedTaskManifest": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology",
@@ -4927,6 +5037,18 @@
           "minimum": 0.0,
           "title": "Beta Path Weight",
           "type": "number"
+        },
+        "topological_scoring": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TopologicalRewardContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The continuous spatial/topological constraints governing path extraction validation."
         }
       },
       "required": [
@@ -12130,6 +12252,43 @@
         "allowed_causal_relationships"
       ],
       "title": "TopologicalRetrievalContract",
+      "type": "object"
+    },
+    "TopologicalRewardContract": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "min_link_criticality_score": {
+          "description": "The lower bound for Random Walk with Restart (RWR) reachability.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Min Link Criticality Score",
+          "type": "number"
+        },
+        "min_semantic_relevance_score": {
+          "description": "The lower bound for GCN/GAT cosine similarity.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Min Semantic Relevance Score",
+          "type": "number"
+        },
+        "aggregation_method": {
+          "description": "The deterministic protocol the orchestrator must use to compute these scores.",
+          "enum": [
+            "gcn_spatial",
+            "attention_gat",
+            "rwr_topological"
+          ],
+          "title": "Aggregation Method",
+          "type": "string"
+        }
+      },
+      "required": [
+        "min_link_criticality_score",
+        "min_semantic_relevance_score",
+        "aggregation_method"
+      ],
+      "title": "TopologicalRewardContract",
       "type": "object"
     },
     "TopologyHashReceipt": {
