@@ -470,6 +470,8 @@ def test_composite_node_profile_sorts_mappings() -> None:
 
 
 def test_action_space_manifest_sort_arrays() -> None:
+    from pydantic import ValidationError
+
     from coreason_manifest.spec.ontology import (
         ActionSpaceManifest,
         PermissionBoundaryPolicy,
@@ -491,9 +493,108 @@ def test_action_space_manifest_sort_arrays() -> None:
         side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
         permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
     )
+    tool3 = ToolManifest(
+        tool_name="tool_b",
+        description="description duplicate",
+        input_schema={},
+        side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
+        permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
+    )
+
+    with pytest.raises(ValidationError, match=r"Tool names within an ActionSpaceManifest must be strictly unique"):
+        ActionSpaceManifest(action_space_id="space_1", native_tools=[tool1, tool3])
+
     manifest = ActionSpaceManifest(action_space_id="space_1", native_tools=[tool1, tool2])
     assert manifest.native_tools[0].tool_name == "tool_a"
     assert manifest.native_tools[1].tool_name == "tool_b"
+
+
+def test_mcpservermanifest_enforce_did() -> None:
+    from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import (
+        MCPCapabilityWhitelistPolicy,
+        MCPServerManifest,
+        VerifiableCredentialPresentationReceipt,
+    )
+
+    vc_invalid = VerifiableCredentialPresentationReceipt(
+        presentation_format="jwt_vc",
+        issuer_did="did:example:123",
+        cryptographic_proof_blob="blob",
+        authorization_claims={},
+    )
+    with pytest.raises(
+        ValidationError, match=r"UNAUTHORIZED MCP MOUNT: The presented Verifiable Credential is not signed"
+    ):
+        MCPServerManifest(
+            server_uri="uri",
+            transport_type="stdio",
+            capability_whitelist=MCPCapabilityWhitelistPolicy(),
+            attestation_receipt=vc_invalid,
+        )
+
+    vc_valid = VerifiableCredentialPresentationReceipt(
+        presentation_format="jwt_vc",
+        issuer_did="did:coreason:123",
+        cryptographic_proof_blob="blob",
+        authorization_claims={},
+    )
+    manifest = MCPServerManifest(
+        server_uri="uri",
+        transport_type="stdio",
+        capability_whitelist=MCPCapabilityWhitelistPolicy(),
+        attestation_receipt=vc_valid,
+    )
+    assert manifest.attestation_receipt.issuer_did == "did:coreason:123"
+
+
+def test_macro_grid_profile_referential_integrity() -> None:
+    from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import InsightCardProfile, MacroGridProfile
+
+    panel = InsightCardProfile(panel_id="panel_1", title="Title", markdown_content="Content")
+    with pytest.raises(ValidationError, match=r"Ghost Panel referenced in layout_matrix"):
+        MacroGridProfile(layout_matrix=[["panel_1", "panel_2"]], panels=[panel])
+
+
+def test_epistemic_sop_manifest_ghost_nodes() -> None:
+    from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import CognitiveStateProfile, EpistemicSOPManifest
+
+    cog_state = CognitiveStateProfile(urgency_index=0.5, caution_index=0.5, divergence_tolerance=0.5)
+
+    with pytest.raises(ValidationError, match=r"Ghost node referenced in chronological_flow_edges source"):
+        EpistemicSOPManifest(
+            sop_id="sop_1",
+            target_persona="persona_1",
+            cognitive_steps={"step_1": cog_state},
+            structural_grammar_hashes={},
+            chronological_flow_edges=[("ghost_step", "step_1")],
+            prm_evaluations=[],
+        )
+
+    with pytest.raises(ValidationError, match=r"Ghost node referenced in chronological_flow_edges target"):
+        EpistemicSOPManifest(
+            sop_id="sop_1",
+            target_persona="persona_1",
+            cognitive_steps={"step_1": cog_state},
+            structural_grammar_hashes={},
+            chronological_flow_edges=[("step_1", "ghost_step")],
+            prm_evaluations=[],
+        )
+
+    with pytest.raises(ValidationError, match=r"Ghost node referenced in structural_grammar_hashes"):
+        EpistemicSOPManifest(
+            sop_id="sop_1",
+            target_persona="persona_1",
+            cognitive_steps={"step_1": cog_state},
+            structural_grammar_hashes={"ghost_step": "abcdef"},
+            chronological_flow_edges=[],
+            prm_evaluations=[],
+        )
 
 
 def test_mcpserverbindingprofile_sort_arrays() -> None:
