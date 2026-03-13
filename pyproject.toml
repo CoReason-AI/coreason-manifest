@@ -1,10 +1,10 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [project]
 name = "coreason_manifest"
-version = "0.25.3"
+dynamic = ["version"]
 description = "This package is the definitive source of truth. If it isn't in the manifest, it doesn't exist. If it violates the manifest, it doesn't run."
 readme = "README.md"
 requires-python = ">=3.14"
@@ -51,6 +51,9 @@ dev = [
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/coreason_manifest"]
+
+[tool.hatch.version]
+source = "vcs"
 
 [tool.ruff]
 line-length = 120
