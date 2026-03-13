@@ -5284,6 +5284,77 @@ class EpistemicDomainGraphManifest(CoreasonBaseState):
         return self
 
 
+class EpistemicTopologicalProofManifest(CoreasonBaseState):
+    proof_id: str = Field(min_length=1, description="A Content Identifier (CID) for this specific topological proof.")
+    axiomatic_chain: list[EpistemicAxiomState] = Field(
+        min_length=1, description="The strictly ordered sequence of axioms forming the reasoning path."
+    )
+    # Note: axiomatic_chain is a structurally ordered sequence (Causal Path) and MUST NOT be sorted.
+
+
+class CognitiveSamplingPolicy(CoreasonBaseState):
+    max_complexity_hops: int = Field(ge=1, description="The absolute physical limit on path length N.")
+    inverse_frequency_smoothing_epsilon: float = Field(
+        default=1.0, description="The epsilon constant ensuring unsampled nodes are mathematically prioritized."
+    )
+
+
+class CognitiveReasoningTraceState(CoreasonBaseState):
+    trace_id: str = Field(min_length=1, description="CID of this specific non-monotonic reasoning trace.")
+    source_proof_id: str = Field(
+        description="The EpistemicTopologicalProofManifest CID this trace is mathematically anchored to."
+    )
+    token_length: int = Field(ge=0, description="The exact token consumption of the trace.")
+    trace_payload: str = Field(description="The natural language reasoning steps bounded by structural tags.")
+
+
+class CognitiveDualVerificationReceipt(CoreasonBaseState):
+    primary_verifier_id: NodeIdentifierState = Field(description="The DID of the primary evaluating agent.")
+    secondary_verifier_id: NodeIdentifierState = Field(
+        description="The DID of the independent secondary evaluating agent."
+    )
+    trace_factual_alignment: bool = Field(
+        description="Strict Boolean indicating if BOTH agents mathematically agree on factual alignment."
+    )
+
+    @model_validator(mode="after")
+    def enforce_dual_key_lock(self) -> Self:
+        if self.primary_verifier_id == self.secondary_verifier_id:
+            raise ValueError(
+                "Topological Contradiction: Dual verification requires two distinct and independent evaluator nodes."
+            )
+        return self
+
+
+class EpistemicGroundedTaskManifest(CoreasonBaseState):
+    task_id: str = Field(min_length=1, description="The cryptographic CID of the task.")
+    topological_proof: EpistemicTopologicalProofManifest = Field(description="The underlying latent path.")
+    vignette_payload: str = Field(description="The generated natural language scenario.")
+    thinking_trace: CognitiveReasoningTraceState = Field(description="The verified reasoning path.")
+    verification_lock: CognitiveDualVerificationReceipt = Field(
+        description="The cryptographic proof of dual-agent approval."
+    )
+
+
+class EpistemicCurriculumManifest(CoreasonBaseState):
+    curriculum_id: str = Field(min_length=1, description="Unique CID for this training epoch release.")
+    tasks: list[EpistemicGroundedTaskManifest] = Field(
+        min_length=1, description="The array of fully verified task primitives."
+    )
+
+    @model_validator(mode="after")
+    def sort_tasks(self) -> Self:
+        object.__setattr__(
+            self,
+            "tasks",
+            sorted(
+                self.tasks,
+                key=lambda task: task.task_id,
+            ),
+        )
+        return self
+
+
 type AnyStateEvent = Annotated[
     ObservationEvent
     | BeliefMutationEvent
@@ -5382,3 +5453,9 @@ EpistemicChainGraphState.model_rebuild()
 CognitivePredictionReceipt.model_rebuild()
 EpistemicAxiomVerificationReceipt.model_rebuild()
 EpistemicDomainGraphManifest.model_rebuild()
+EpistemicTopologicalProofManifest.model_rebuild()
+CognitiveSamplingPolicy.model_rebuild()
+CognitiveReasoningTraceState.model_rebuild()
+CognitiveDualVerificationReceipt.model_rebuild()
+EpistemicGroundedTaskManifest.model_rebuild()
+EpistemicCurriculumManifest.model_rebuild()
