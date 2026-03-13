@@ -100,6 +100,7 @@ wheels = [
 
 [[package]]
 name = "coreason-manifest"
+version = "0.25.2"
 source = { editable = "." }
 dependencies = [
     { name = "pydantic" },
