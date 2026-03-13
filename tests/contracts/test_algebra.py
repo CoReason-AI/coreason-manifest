@@ -435,3 +435,79 @@ def test_apply_state_differential_atomic_success(patch_kwargs: dict[str, Any], e
     )
     new_state = apply_state_differential(base_state, manifest)
     assert new_state == expected_state
+
+
+def test_verify_ast_safety() -> None:
+    from coreason_manifest.utils.algebra import verify_ast_safety
+
+    assert verify_ast_safety("1 + 1")
+
+    with pytest.raises(ValueError, match=r"Payload is not valid syntax."):
+        verify_ast_safety("import os")
+
+    with pytest.raises(ValueError, match=r"Payload is not valid syntax."):
+        verify_ast_safety("1 +")
+
+
+def test_verify_merkle_proof() -> None:
+    from coreason_manifest.spec.ontology import ExecutionNodeReceipt
+    from coreason_manifest.utils.algebra import verify_merkle_proof
+
+    node1 = ExecutionNodeReceipt(request_id="1", inputs=1, outputs=2)
+    node1_hash = node1.generate_node_hash()
+
+    node2 = ExecutionNodeReceipt(
+        request_id="2", root_request_id="1", parent_request_id="1", inputs=2, outputs=3, parent_hashes=[node1_hash]
+    )
+
+    assert verify_merkle_proof([node1, node2])
+
+
+def test_apply_state_differential_array_operations() -> None:
+    manifest = StateDifferentialManifest(
+        diff_id="d1",
+        author_node_id="did:example:1",
+        lamport_timestamp=1,
+        vector_clock={},
+        patches=[
+            StateMutationIntent(op="add", path="/a/0", value=0),  # insert at 0
+            StateMutationIntent(op="remove", path="/b/1"),
+            StateMutationIntent(op="replace", path="/c/0", value=99),
+            StateMutationIntent(op="move", path="/d/0", **{"from": "/e/0"}),
+            StateMutationIntent(op="copy", path="/f/-", **{"from": "/g/0"}),
+        ],
+    )
+
+    current_state = {"a": [1, 2], "b": [1, 2, 3], "c": [1, 2], "d": [1, 2], "e": [10, 20], "f": [1, 2], "g": [100, 200]}
+
+    new_state = apply_state_differential(current_state, manifest)
+
+    assert new_state["a"] == [0, 1, 2]
+    assert new_state["b"] == [1, 3]
+    assert new_state["c"] == [99, 2]
+    assert new_state["d"] == [10, 1, 2]
+    assert new_state["e"] == [20]
+    assert new_state["f"] == [1, 2, 100]
+    assert new_state["g"] == [100, 200]
+
+
+def test_apply_state_differential_nested_errors() -> None:
+    manifest_replace_invalid = StateDifferentialManifest(
+        diff_id="d1",
+        author_node_id="did:example:1",
+        lamport_timestamp=1,
+        vector_clock={},
+        patches=[StateMutationIntent(op="replace", path="/a/-", value=2)],
+    )
+    with pytest.raises(ValueError, match="Cannot replace at path"):
+        apply_state_differential({"a": [1]}, manifest_replace_invalid)
+
+    manifest_move_invalid = StateDifferentialManifest(
+        diff_id="d1",
+        author_node_id="did:example:1",
+        lamport_timestamp=1,
+        vector_clock={},
+        patches=[StateMutationIntent(op="move", path="/a", **{"from": "/b/-"})],
+    )
+    with pytest.raises(ValueError, match="Cannot extract from end of array"):
+        apply_state_differential({"b": [1]}, manifest_move_invalid)
