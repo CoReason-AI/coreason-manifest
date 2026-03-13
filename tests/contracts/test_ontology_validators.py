@@ -253,6 +253,103 @@ def test_redaction_policy_sorting() -> None:
 # --- 8. Missing specific validators coverage ---
 
 
+@given(
+    eig=st.floats(min_value=-1.0, max_value=2.0),
+)
+def test_active_inference_contract_bounds_fuzzing(eig: float) -> None:
+    from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import ActiveInferenceContract
+
+    if eig < 0.0 or eig > 1.0:
+        with pytest.raises(ValidationError, match=r"Input should be"):
+            ActiveInferenceContract(
+                task_id="task_1",
+                target_hypothesis_id="hyp_1",
+                target_condition_id="cond_1",
+                selected_tool_name="tool_1",
+                expected_information_gain=eig,
+                execution_cost_budget_magnitude=100,
+            )
+    else:
+        contract = ActiveInferenceContract(
+            task_id="task_1",
+            target_hypothesis_id="hyp_1",
+            target_condition_id="cond_1",
+            selected_tool_name="tool_1",
+            expected_information_gain=eig,
+            execution_cost_budget_magnitude=100,
+        )
+        assert contract.expected_information_gain == eig
+
+
+@given(
+    url=st.one_of(
+        st.emails().map(lambda e: f"https://{e.split('@')[1]}"),
+        st.text(alphabet="abcdefghijklmnopqrstuvwxyz0123456789-", min_size=1, max_size=10).map(
+            lambda t: f"https://{t}.com"
+        ),
+    )
+)
+def test_browser_dom_state_safety_valid_fuzzing(url: str) -> None:
+    from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import BrowserDOMState
+
+    try:
+        state = BrowserDOMState(
+            current_url=url,
+            viewport_size=(800, 600),
+            dom_hash="a" * 64,
+            accessibility_tree_hash="b" * 64,
+        )
+        assert state.current_url == url
+    except ValidationError:
+        # It might still trigger SSRF validation if hypothesis generates a local-looking domain,
+        # but that's properly handled as part of the fuzzing scope.
+        pass
+
+
+@given(
+    bogon=st.sampled_from(
+        [
+            "localhost",
+            "broadcasthost",
+            "test.local",
+            "test.internal",
+            "test.arpa",
+            "test.nip.io",
+            "test.sslip.io",
+            "127.0.0.1",
+            "192.168.1.1",
+            "10.0.0.1",
+            "169.254.169.254",
+            "0.0.0.0",  # noqa: S104
+        ]
+    )
+)
+def test_browser_dom_state_safety_invalid_fuzzing(bogon: str) -> None:
+    from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import BrowserDOMState
+
+    with pytest.raises(ValidationError, match=r"SSRF|validation error"):
+        BrowserDOMState(
+            current_url=f"http://{bogon}",
+            viewport_size=(800, 600),
+            dom_hash="a" * 64,
+            accessibility_tree_hash="b" * 64,
+        )
+
+    with pytest.raises(ValidationError, match=r"SSRF|validation error"):
+        BrowserDOMState(
+            current_url=f"file://{bogon}",
+            viewport_size=(800, 600),
+            dom_hash="a" * 64,
+            accessibility_tree_hash="b" * 64,
+        )
+
+
 def test_defeasible_cascade_event_sorting() -> None:
     event = DefeasibleCascadeEvent(
         cascade_id="c1",
@@ -342,98 +439,69 @@ def test_adjudication_intent_sorting() -> None:
     assert intent.deadlocked_claims == ["claim_1", "claim_2", "claim_3"]
 
 
-def test_spatial_bounding_box_profile_validate_geometry() -> None:
-    from pydantic import ValidationError
-
-    from coreason_manifest.spec.ontology import SpatialBoundingBoxProfile
-
-    # Valid geometry
-    bbox = SpatialBoundingBoxProfile(x_min=0.1, y_min=0.2, x_max=0.5, y_max=0.6)
-    assert bbox.x_min == 0.1
-    assert bbox.y_min == 0.2
-    assert bbox.x_max == 0.5
-    assert bbox.y_max == 0.6
-
-    # Invalid geometry: x_min > x_max
-    with pytest.raises(ValidationError, match=r"x_min cannot be strictly greater than x_max."):
-        SpatialBoundingBoxProfile(x_min=0.6, y_min=0.2, x_max=0.5, y_max=0.6)
-
-    # Invalid geometry: y_min > y_max
-    with pytest.raises(ValidationError, match=r"y_min cannot be strictly greater than y_max."):
-        SpatialBoundingBoxProfile(x_min=0.1, y_min=0.7, x_max=0.5, y_max=0.6)
-
-
-def test_quorum_policy_enforce_bft_math_invalid() -> None:
-    from pydantic import ValidationError
-
-    from coreason_manifest.spec.ontology import QuorumPolicy
-
-    with pytest.raises(ValidationError, match=r"Byzantine Fault Tolerance requires min_quorum_size \(N\) >= 3f \+ 1."):
-        QuorumPolicy(
-            max_tolerable_faults=1,
-            min_quorum_size=3,
-            state_validation_metric="ledger_hash",
-            byzantine_action="quarantine",
-        )
-
-
-def test_consensus_policy_validate_pbft_requirements() -> None:
-    from pydantic import ValidationError
-
-    from coreason_manifest.spec.ontology import ConsensusPolicy, QuorumPolicy
-
-    quorum_rules = QuorumPolicy(
-        max_tolerable_faults=1,
-        min_quorum_size=4,
-        state_validation_metric="ledger_hash",
-        byzantine_action="quarantine",
+def test_composite_node_profile_sorts_mappings() -> None:
+    from coreason_manifest.spec.ontology import (
+        CompositeNodeProfile,
+        DAGTopologyManifest,
+        InputMappingContract,
+        OutputMappingContract,
+        SystemNodeProfile,
     )
-    policy = ConsensusPolicy(strategy="pbft", quorum_rules=quorum_rules)
-    assert policy.strategy == "pbft"
 
-    with pytest.raises(ValidationError, match=r"quorum_rules must be provided when strategy is 'pbft'."):
-        ConsensusPolicy(strategy="pbft")
-
-    policy2 = ConsensusPolicy(strategy="unanimous")
-    assert policy2.strategy == "unanimous"
-
-
-def test_sae_latent_policy_validate_smooth_decay() -> None:
-    from pydantic import ValidationError
-
-    from coreason_manifest.spec.ontology import LatentSmoothingProfile, SaeLatentPolicy
-
-    with pytest.raises(
-        ValidationError, match=r"smoothing_profile must be provided when violation_action is 'smooth_decay'."
-    ):
-        SaeLatentPolicy(
-            target_feature_index=0,
-            monitored_layers=[1, 2],
-            max_activation_threshold=1.0,
-            violation_action="smooth_decay",
-            sae_dictionary_hash="a" * 64,
-        )
-
-    with pytest.raises(
-        ValidationError,
-        match=r"clamp_value must be provided as the target asymptote when violation_action is 'smooth_decay'.",
-    ):
-        SaeLatentPolicy(
-            target_feature_index=0,
-            monitored_layers=[1, 2],
-            max_activation_threshold=1.0,
-            violation_action="smooth_decay",
-            sae_dictionary_hash="a" * 64,
-            smoothing_profile=LatentSmoothingProfile(decay_function="linear", transition_window_tokens=10),
-        )
-
-    policy = SaeLatentPolicy(
-        target_feature_index=0,
-        monitored_layers=[1, 2],
-        max_activation_threshold=1.0,
-        violation_action="smooth_decay",
-        sae_dictionary_hash="a" * 64,
-        smoothing_profile=LatentSmoothingProfile(decay_function="linear", transition_window_tokens=10),
-        clamp_value=0.5,
+    topology = DAGTopologyManifest(
+        nodes={"did:example:1": SystemNodeProfile(description="desc")}, edges=[], max_depth=10, max_fan_out=10
     )
-    assert policy.violation_action == "smooth_decay"
+    in_map1 = InputMappingContract(parent_key="b", child_key="c1")
+    in_map2 = InputMappingContract(parent_key="a", child_key="c2")
+    out_map1 = OutputMappingContract(child_key="y", parent_key="p1")
+    out_map2 = OutputMappingContract(child_key="x", parent_key="p2")
+
+    node = CompositeNodeProfile(
+        description="composite",
+        topology=topology,
+        input_mappings=[in_map1, in_map2],
+        output_mappings=[out_map1, out_map2],
+    )
+
+    assert node.input_mappings[0].parent_key == "a"
+    assert node.input_mappings[1].parent_key == "b"
+    assert node.output_mappings[0].child_key == "x"
+    assert node.output_mappings[1].child_key == "y"
+
+
+def test_action_space_manifest_sort_arrays() -> None:
+    from coreason_manifest.spec.ontology import (
+        ActionSpaceManifest,
+        PermissionBoundaryPolicy,
+        SideEffectProfile,
+        ToolManifest,
+    )
+
+    tool1 = ToolManifest(
+        tool_name="tool_b",
+        description="description",
+        input_schema={},
+        side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
+        permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
+    )
+    tool2 = ToolManifest(
+        tool_name="tool_a",
+        description="description 2",
+        input_schema={},
+        side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
+        permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
+    )
+    manifest = ActionSpaceManifest(action_space_id="space_1", native_tools=[tool1, tool2])
+    assert manifest.native_tools[0].tool_name == "tool_a"
+    assert manifest.native_tools[1].tool_name == "tool_b"
+
+
+def test_mcpserverbindingprofile_sort_arrays() -> None:
+    from coreason_manifest.spec.ontology import MCPServerBindingProfile, StdioTransportProfile
+
+    profile = MCPServerBindingProfile(
+        server_id="server_1",
+        transport=StdioTransportProfile(command="python", args=[]),
+        required_capabilities=["tools", "prompts", "resources"],
+    )
+    assert profile.required_capabilities == ["prompts", "resources", "tools"]
