@@ -47,7 +47,8 @@ def test_epistemic_axiom_verification_receipt_fact_score() -> None:
         ValueError, match=re.escape("Epistemic Contagion Prevented: Axioms failing validation cannot be verified.")
     ):
         EpistemicAxiomVerificationReceipt(
-            verification_id="verif_1",
+            event_id="verif_1",
+            timestamp=123.0,
             source_prediction_id="pred_1",
             sequence_similarity_score=0.9,
             fact_score_passed=False,
@@ -55,7 +56,8 @@ def test_epistemic_axiom_verification_receipt_fact_score() -> None:
 
     # Should pass when fact_score_passed is True
     receipt = EpistemicAxiomVerificationReceipt(
-        verification_id="verif_2",
+        event_id="verif_2",
+        timestamp=123.0,
         source_prediction_id="pred_2",
         sequence_similarity_score=0.9,
         fact_score_passed=True,

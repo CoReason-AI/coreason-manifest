@@ -1004,7 +1004,6 @@
           "council": "#/$defs/CouncilTopologyManifest",
           "dag": "#/$defs/DAGTopologyManifest",
           "digital_twin": "#/$defs/DigitalTwinTopologyManifest",
-          "epistemic_domain_graph_manifest": "#/$defs/EpistemicDomainGraphManifest",
           "evaluator_optimizer": "#/$defs/EvaluatorOptimizerTopologyManifest",
           "evolutionary": "#/$defs/EvolutionaryTopologyManifest",
           "macro_adversarial": "#/$defs/AdversarialMarketTopologyManifest",
@@ -1041,9 +1040,6 @@
         },
         {
           "$ref": "#/$defs/ConsensusFederationTopologyManifest"
-        },
-        {
-          "$ref": "#/$defs/EpistemicDomainGraphManifest"
         }
       ]
     },
@@ -2126,35 +2122,65 @@
       "title": "CognitiveCritiqueProfile",
       "type": "object"
     },
+    "CognitiveDualVerificationReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nCognitive Dual Verification Receipt.",
+      "properties": {
+        "primary_verifier_id": {
+          "$ref": "#/$defs/NodeIdentifierState",
+          "description": "primary verifier id."
+        },
+        "secondary_verifier_id": {
+          "$ref": "#/$defs/NodeIdentifierState",
+          "description": "secondary verifier id."
+        },
+        "trace_factual_alignment": {
+          "description": "trace factual alignment.",
+          "title": "Trace Factual Alignment",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "primary_verifier_id",
+        "secondary_verifier_id",
+        "trace_factual_alignment"
+      ],
+      "title": "CognitiveDualVerificationReceipt",
+      "type": "object"
+    },
     "CognitivePredictionReceipt": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology: Cognitive Prediction Receipt.",
+      "description": "CoReason Shared Kernel Ontology\n\nCognitive Prediction Receipt.",
       "properties": {
+        "event_id": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "title": "Timestamp",
+          "type": "number"
+        },
         "type": {
           "const": "cognitive_prediction",
           "default": "cognitive_prediction",
-          "description": "CoReason Shared Kernel Ontology: Discriminator type for cognitive prediction.",
+          "description": "Discriminator type for cognitive prediction.",
           "title": "Type",
           "type": "string"
         },
-        "prediction_id": {
-          "description": "CoReason Shared Kernel Ontology: prediction id.",
-          "minLength": 1,
-          "title": "Prediction Id",
-          "type": "string"
-        },
         "source_chain_id": {
-          "description": "CoReason Shared Kernel Ontology: source chain id.",
+          "description": "source chain id.",
           "title": "Source Chain Id",
           "type": "string"
         },
         "target_source_concept": {
-          "description": "CoReason Shared Kernel Ontology: target source concept.",
+          "description": "target source concept.",
           "title": "Target Source Concept",
           "type": "string"
         },
         "predicted_top_k_tokens": {
-          "description": "CoReason Shared Kernel Ontology: predicted top k tokens.",
+          "description": "predicted top k tokens.",
           "items": {
             "type": "string"
           },
@@ -2164,12 +2190,49 @@
         }
       },
       "required": [
-        "prediction_id",
+        "event_id",
+        "timestamp",
         "source_chain_id",
         "target_source_concept",
         "predicted_top_k_tokens"
       ],
       "title": "CognitivePredictionReceipt",
+      "type": "object"
+    },
+    "CognitiveReasoningTraceState": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nCognitive Reasoning Trace State.",
+      "properties": {
+        "trace_id": {
+          "description": "trace id.",
+          "minLength": 1,
+          "title": "Trace Id",
+          "type": "string"
+        },
+        "source_proof_id": {
+          "description": "source proof id.",
+          "title": "Source Proof Id",
+          "type": "string"
+        },
+        "token_length": {
+          "description": "token length.",
+          "minimum": 0,
+          "title": "Token Length",
+          "type": "integer"
+        },
+        "trace_payload": {
+          "description": "trace payload.",
+          "title": "Trace Payload",
+          "type": "string"
+        }
+      },
+      "required": [
+        "trace_id",
+        "source_proof_id",
+        "token_length",
+        "trace_payload"
+      ],
+      "title": "CognitiveReasoningTraceState",
       "type": "object"
     },
     "CognitiveRoutingContract": {
@@ -2208,6 +2271,29 @@
         "routing_temperature"
       ],
       "title": "CognitiveRoutingContract",
+      "type": "object"
+    },
+    "CognitiveSamplingPolicy": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nCognitive Sampling Policy.",
+      "properties": {
+        "max_complexity_hops": {
+          "description": "max complexity hops.",
+          "minimum": 1,
+          "title": "Max Complexity Hops",
+          "type": "integer"
+        },
+        "inverse_frequency_smoothing_epsilon": {
+          "default": 1.0,
+          "description": "inverse frequency smoothing epsilon.",
+          "title": "Inverse Frequency Smoothing Epsilon",
+          "type": "number"
+        }
+      },
+      "required": [
+        "max_complexity_hops"
+      ],
+      "title": "CognitiveSamplingPolicy",
       "type": "object"
     },
     "CognitiveStateProfile": {
@@ -4208,20 +4294,20 @@
     },
     "EpistemicAxiomState": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology: Epistemic Axiom State.",
+      "description": "CoReason Shared Kernel Ontology\n\nEpistemic Axiom State.",
       "properties": {
         "source_concept_id": {
-          "description": "CoReason Shared Kernel Ontology: CID of the origin node.",
+          "description": "CID of the origin node.",
           "title": "Source Concept Id",
           "type": "string"
         },
         "directed_edge_type": {
-          "description": "CoReason Shared Kernel Ontology: the topological relationship.",
+          "description": "the topological relationship.",
           "title": "Directed Edge Type",
           "type": "string"
         },
         "target_concept_id": {
-          "description": "CoReason Shared Kernel Ontology: CID of destination node.",
+          "description": "CID of destination node.",
           "title": "Target Concept Id",
           "type": "string"
         }
@@ -4236,41 +4322,46 @@
     },
     "EpistemicAxiomVerificationReceipt": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology: Epistemic Axiom Verification Receipt.",
+      "description": "CoReason Shared Kernel Ontology\n\nEpistemic Axiom Verification Receipt.",
       "properties": {
+        "event_id": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "title": "Timestamp",
+          "type": "number"
+        },
         "type": {
           "const": "epistemic_axiom_verification",
           "default": "epistemic_axiom_verification",
-          "description": "CoReason Shared Kernel Ontology: Discriminator type for epistemic axiom verification.",
+          "description": "Discriminator type for epistemic axiom verification.",
           "title": "Type",
           "type": "string"
         },
-        "verification_id": {
-          "description": "CoReason Shared Kernel Ontology: verification id.",
-          "minLength": 1,
-          "title": "Verification Id",
-          "type": "string"
-        },
         "source_prediction_id": {
-          "description": "CoReason Shared Kernel Ontology: source prediction id.",
+          "description": "source prediction id.",
           "title": "Source Prediction Id",
           "type": "string"
         },
         "sequence_similarity_score": {
-          "description": "CoReason Shared Kernel Ontology: sequence similarity score.",
+          "description": "sequence similarity score.",
           "maximum": 1.0,
           "minimum": 0.0,
           "title": "Sequence Similarity Score",
           "type": "number"
         },
         "fact_score_passed": {
-          "description": "CoReason Shared Kernel Ontology: fact score passed.",
+          "description": "fact score passed.",
           "title": "Fact Score Passed",
           "type": "boolean"
         }
       },
       "required": [
-        "verification_id",
+        "event_id",
+        "timestamp",
         "source_prediction_id",
         "sequence_similarity_score",
         "fact_score_passed"
@@ -4280,16 +4371,16 @@
     },
     "EpistemicChainGraphState": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology: Epistemic Chain Graph State.",
+      "description": "CoReason Shared Kernel Ontology\n\nEpistemic Chain Graph State.",
       "properties": {
         "chain_id": {
-          "description": "CoReason Shared Kernel Ontology: chain id.",
+          "description": "chain id.",
           "minLength": 1,
           "title": "Chain Id",
           "type": "string"
         },
         "syntactic_roots": {
-          "description": "CoReason Shared Kernel Ontology: syntactic roots.",
+          "description": "syntactic roots.",
           "items": {
             "type": "string"
           },
@@ -4298,7 +4389,7 @@
           "type": "array"
         },
         "semantic_leaves": {
-          "description": "CoReason Shared Kernel Ontology: semantic leaves.",
+          "description": "semantic leaves.",
           "items": {
             "$ref": "#/$defs/EpistemicAxiomState"
           },
@@ -4349,25 +4440,51 @@
       "title": "EpistemicCompressionSLA",
       "type": "object"
     },
+    "EpistemicCurriculumManifest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nEpistemic Curriculum Manifest.",
+      "properties": {
+        "curriculum_id": {
+          "description": "curriculum id.",
+          "title": "Curriculum Id",
+          "type": "string"
+        },
+        "tasks": {
+          "description": "tasks.",
+          "items": {
+            "$ref": "#/$defs/EpistemicGroundedTaskManifest"
+          },
+          "minItems": 1,
+          "title": "Tasks",
+          "type": "array"
+        }
+      },
+      "required": [
+        "curriculum_id",
+        "tasks"
+      ],
+      "title": "EpistemicCurriculumManifest",
+      "type": "object"
+    },
     "EpistemicDomainGraphManifest": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology: Epistemic Domain Graph Manifest.",
+      "description": "CoReason Shared Kernel Ontology\n\nEpistemic Domain Graph Manifest.",
       "properties": {
         "type": {
           "const": "epistemic_domain_graph_manifest",
           "default": "epistemic_domain_graph_manifest",
-          "description": "CoReason Shared Kernel Ontology: Discriminator type for epistemic domain graph manifest.",
+          "description": "Discriminator type for epistemic domain graph manifest.",
           "title": "Type",
           "type": "string"
         },
         "graph_id": {
-          "description": "CoReason Shared Kernel Ontology: graph id.",
+          "description": "graph id.",
           "minLength": 1,
           "title": "Graph Id",
           "type": "string"
         },
         "verified_axioms": {
-          "description": "CoReason Shared Kernel Ontology: verified axioms.",
+          "description": "verified axioms.",
           "items": {
             "$ref": "#/$defs/EpistemicAxiomState"
           },
@@ -4412,6 +4529,44 @@
         "max_escalation_tiers"
       ],
       "title": "EpistemicEscalationContract",
+      "type": "object"
+    },
+    "EpistemicGroundedTaskManifest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nEpistemic Grounded Task Manifest.",
+      "properties": {
+        "task_id": {
+          "description": "task id.",
+          "minLength": 1,
+          "title": "Task Id",
+          "type": "string"
+        },
+        "topological_proof": {
+          "$ref": "#/$defs/EpistemicTopologicalProofManifest",
+          "description": "topological proof."
+        },
+        "vignette_payload": {
+          "description": "vignette payload.",
+          "title": "Vignette Payload",
+          "type": "string"
+        },
+        "thinking_trace": {
+          "$ref": "#/$defs/CognitiveReasoningTraceState",
+          "description": "thinking trace."
+        },
+        "verification_lock": {
+          "$ref": "#/$defs/CognitiveDualVerificationReceipt",
+          "description": "verification lock."
+        }
+      },
+      "required": [
+        "task_id",
+        "topological_proof",
+        "vignette_payload",
+        "thinking_trace",
+        "verification_lock"
+      ],
+      "title": "EpistemicGroundedTaskManifest",
       "type": "object"
     },
     "EpistemicLedgerState": {
@@ -4779,17 +4934,17 @@
     },
     "EpistemicSeedInjectionPolicy": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology: Epistemic Seed Injection Policy.",
+      "description": "CoReason Shared Kernel Ontology\n\nEpistemic Seed Injection Policy.",
       "properties": {
         "similarity_threshold_alpha": {
-          "description": "CoReason Shared Kernel Ontology: similarity threshold alpha.",
+          "description": "similarity threshold alpha.",
           "maximum": 1.0,
           "minimum": 0.0,
           "title": "Similarity Threshold Alpha",
           "type": "number"
         },
         "relation_diversity_bucket_size": {
-          "description": "CoReason Shared Kernel Ontology: relation diversity bucket size.",
+          "description": "relation diversity bucket size.",
           "exclusiveMinimum": 0,
           "title": "Relation Diversity Bucket Size",
           "type": "integer"
@@ -4873,6 +5028,33 @@
         "target_node_id"
       ],
       "title": "EpistemicTelemetryEvent",
+      "type": "object"
+    },
+    "EpistemicTopologicalProofManifest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nEpistemic Topological Proof Manifest.",
+      "properties": {
+        "proof_id": {
+          "description": "proof id.",
+          "minLength": 1,
+          "title": "Proof Id",
+          "type": "string"
+        },
+        "axiomatic_chain": {
+          "description": "axiomatic chain.",
+          "items": {
+            "$ref": "#/$defs/EpistemicAxiomState"
+          },
+          "minItems": 1,
+          "title": "Axiomatic Chain",
+          "type": "array"
+        }
+      },
+      "required": [
+        "proof_id",
+        "axiomatic_chain"
+      ],
+      "title": "EpistemicTopologicalProofManifest",
       "type": "object"
     },
     "EpistemicTransmutationTask": {

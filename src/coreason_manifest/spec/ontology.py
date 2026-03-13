@@ -4931,31 +4931,27 @@ class ConsensusFederationTopologyManifest(CoreasonBaseState):
 
 
 class EpistemicAxiomState(CoreasonBaseState):
-    """CoReason Shared Kernel Ontology: Epistemic Axiom State."""
+    """Epistemic Axiom State."""
 
-    source_concept_id: str = Field(description="CoReason Shared Kernel Ontology: CID of the origin node.")
-    directed_edge_type: str = Field(description="CoReason Shared Kernel Ontology: the topological relationship.")
-    target_concept_id: str = Field(description="CoReason Shared Kernel Ontology: CID of destination node.")
+    source_concept_id: str = Field(description="CID of the origin node.")
+    directed_edge_type: str = Field(description="the topological relationship.")
+    target_concept_id: str = Field(description="CID of destination node.")
 
 
 class EpistemicSeedInjectionPolicy(CoreasonBaseState):
-    """CoReason Shared Kernel Ontology: Epistemic Seed Injection Policy."""
+    """Epistemic Seed Injection Policy."""
 
-    similarity_threshold_alpha: float = Field(
-        ge=0.0, le=1.0, description="CoReason Shared Kernel Ontology: similarity threshold alpha."
-    )
-    relation_diversity_bucket_size: int = Field(
-        gt=0, description="CoReason Shared Kernel Ontology: relation diversity bucket size."
-    )
+    similarity_threshold_alpha: float = Field(ge=0.0, le=1.0, description="similarity threshold alpha.")
+    relation_diversity_bucket_size: int = Field(gt=0, description="relation diversity bucket size.")
 
 
 class EpistemicChainGraphState(CoreasonBaseState):
-    """CoReason Shared Kernel Ontology: Epistemic Chain Graph State."""
+    """Epistemic Chain Graph State."""
 
-    chain_id: str = Field(min_length=1, description="CoReason Shared Kernel Ontology: chain id.")
-    syntactic_roots: list[str] = Field(min_length=1, description="CoReason Shared Kernel Ontology: syntactic roots.")
+    chain_id: str = Field(min_length=1, description="chain id.")
+    syntactic_roots: list[str] = Field(min_length=1, description="syntactic roots.")
     # Note: syntactic_roots is a structurally ordered sequence (Linguistic Syntax) and MUST NOT be sorted.
-    semantic_leaves: list[EpistemicAxiomState] = Field(description="CoReason Shared Kernel Ontology: semantic leaves.")
+    semantic_leaves: list[EpistemicAxiomState] = Field(description="semantic leaves.")
 
     @model_validator(mode="after")
     def sort_semantic_leaves(self) -> Self:
@@ -4969,35 +4965,29 @@ class EpistemicChainGraphState(CoreasonBaseState):
         return self
 
 
-class CognitivePredictionReceipt(CoreasonBaseState):
-    """CoReason Shared Kernel Ontology: Cognitive Prediction Receipt."""
+class CognitivePredictionReceipt(BaseStateEvent):
+    """Cognitive Prediction Receipt."""
 
     type: Literal["cognitive_prediction"] = Field(
         default="cognitive_prediction",
-        description="CoReason Shared Kernel Ontology: Discriminator type for cognitive prediction.",
+        description="Discriminator type for cognitive prediction.",
     )
-    prediction_id: str = Field(min_length=1, description="CoReason Shared Kernel Ontology: prediction id.")
-    source_chain_id: str = Field(description="CoReason Shared Kernel Ontology: source chain id.")
-    target_source_concept: str = Field(description="CoReason Shared Kernel Ontology: target source concept.")
-    predicted_top_k_tokens: list[str] = Field(
-        min_length=1, description="CoReason Shared Kernel Ontology: predicted top k tokens."
-    )
+    source_chain_id: str = Field(description="source chain id.")
+    target_source_concept: str = Field(description="target source concept.")
+    predicted_top_k_tokens: list[str] = Field(min_length=1, description="predicted top k tokens.")
     # Note: predicted_top_k_tokens is a structurally ordered sequence (Probability Rank) and MUST NOT be sorted.
 
 
-class EpistemicAxiomVerificationReceipt(CoreasonBaseState):
-    """CoReason Shared Kernel Ontology: Epistemic Axiom Verification Receipt."""
+class EpistemicAxiomVerificationReceipt(BaseStateEvent):
+    """Epistemic Axiom Verification Receipt."""
 
     type: Literal["epistemic_axiom_verification"] = Field(
         default="epistemic_axiom_verification",
-        description="CoReason Shared Kernel Ontology: Discriminator type for epistemic axiom verification.",
+        description="Discriminator type for epistemic axiom verification.",
     )
-    verification_id: str = Field(min_length=1, description="CoReason Shared Kernel Ontology: verification id.")
-    source_prediction_id: str = Field(description="CoReason Shared Kernel Ontology: source prediction id.")
-    sequence_similarity_score: float = Field(
-        ge=0.0, le=1.0, description="CoReason Shared Kernel Ontology: sequence similarity score."
-    )
-    fact_score_passed: bool = Field(description="CoReason Shared Kernel Ontology: fact score passed.")
+    source_prediction_id: str = Field(description="source prediction id.")
+    sequence_similarity_score: float = Field(ge=0.0, le=1.0, description="sequence similarity score.")
+    fact_score_passed: bool = Field(description="fact score passed.")
 
     @model_validator(mode="after")
     def enforce_epistemic_quarantine(self) -> Self:
@@ -5007,16 +4997,14 @@ class EpistemicAxiomVerificationReceipt(CoreasonBaseState):
 
 
 class EpistemicDomainGraphManifest(CoreasonBaseState):
-    """CoReason Shared Kernel Ontology: Epistemic Domain Graph Manifest."""
+    """Epistemic Domain Graph Manifest."""
 
     type: Literal["epistemic_domain_graph_manifest"] = Field(
         default="epistemic_domain_graph_manifest",
-        description="CoReason Shared Kernel Ontology: Discriminator type for epistemic domain graph manifest.",
+        description="Discriminator type for epistemic domain graph manifest.",
     )
-    graph_id: str = Field(min_length=1, description="CoReason Shared Kernel Ontology: graph id.")
-    verified_axioms: list[EpistemicAxiomState] = Field(
-        min_length=1, description="CoReason Shared Kernel Ontology: verified axioms."
-    )
+    graph_id: str = Field(min_length=1, description="graph id.")
+    verified_axioms: list[EpistemicAxiomState] = Field(min_length=1, description="verified axioms.")
 
     @model_validator(mode="after")
     def sort_verified_axioms(self) -> Self:
@@ -5030,6 +5018,72 @@ class EpistemicDomainGraphManifest(CoreasonBaseState):
         return self
 
 
+class EpistemicTopologicalProofManifest(CoreasonBaseState):
+    """Epistemic Topological Proof Manifest."""
+
+    proof_id: str = Field(min_length=1, description="proof id.")
+    axiomatic_chain: list[EpistemicAxiomState] = Field(min_length=1, description="axiomatic chain.")
+    # Note: axiomatic_chain is a structurally ordered sequence (Causal Path) and MUST NOT be sorted.
+
+
+class CognitiveSamplingPolicy(CoreasonBaseState):
+    """Cognitive Sampling Policy."""
+
+    max_complexity_hops: int = Field(ge=1, description="max complexity hops.")
+    inverse_frequency_smoothing_epsilon: float = Field(default=1.0, description="inverse frequency smoothing epsilon.")
+
+
+class CognitiveReasoningTraceState(CoreasonBaseState):
+    """Cognitive Reasoning Trace State."""
+
+    trace_id: str = Field(min_length=1, description="trace id.")
+    source_proof_id: str = Field(description="source proof id.")
+    token_length: int = Field(ge=0, description="token length.")
+    trace_payload: str = Field(description="trace payload.")
+
+
+class CognitiveDualVerificationReceipt(CoreasonBaseState):
+    """Cognitive Dual Verification Receipt."""
+
+    primary_verifier_id: NodeIdentifierState = Field(description="primary verifier id.")
+    secondary_verifier_id: NodeIdentifierState = Field(description="secondary verifier id.")
+    trace_factual_alignment: bool = Field(description="trace factual alignment.")
+
+    @model_validator(mode="after")
+    def enforce_dual_key_lock(self) -> Self:
+        if self.primary_verifier_id == self.secondary_verifier_id:
+            raise ValueError(
+                "Topological Contradiction: Dual verification requires two distinct and independent evaluator nodes."
+            )
+        return self
+
+
+class EpistemicGroundedTaskManifest(CoreasonBaseState):
+    """Epistemic Grounded Task Manifest."""
+
+    task_id: str = Field(min_length=1, description="task id.")
+    topological_proof: EpistemicTopologicalProofManifest = Field(description="topological proof.")
+    vignette_payload: str = Field(description="vignette payload.")
+    thinking_trace: CognitiveReasoningTraceState = Field(description="thinking trace.")
+    verification_lock: CognitiveDualVerificationReceipt = Field(description="verification lock.")
+
+
+class EpistemicCurriculumManifest(CoreasonBaseState):
+    """Epistemic Curriculum Manifest."""
+
+    curriculum_id: str = Field(description="curriculum id.")
+    tasks: list[EpistemicGroundedTaskManifest] = Field(min_length=1, description="tasks.")
+
+    @model_validator(mode="after")
+    def sort_tasks(self) -> Self:
+        object.__setattr__(
+            self,
+            "tasks",
+            sorted(self.tasks, key=lambda x: x.task_id),
+        )
+        return self
+
+
 type AnyTopologyManifest = Annotated[
     DAGTopologyManifest
     | CouncilTopologyManifest
@@ -5039,8 +5093,7 @@ type AnyTopologyManifest = Annotated[
     | EvaluatorOptimizerTopologyManifest
     | DigitalTwinTopologyManifest
     | AdversarialMarketTopologyManifest
-    | ConsensusFederationTopologyManifest
-    | EpistemicDomainGraphManifest,
+    | ConsensusFederationTopologyManifest,
     Field(discriminator="type", description="A discriminated union of workflow topologies."),
 ]
 
@@ -5413,3 +5466,10 @@ EpistemicChainGraphState.model_rebuild()
 CognitivePredictionReceipt.model_rebuild()
 EpistemicAxiomVerificationReceipt.model_rebuild()
 EpistemicDomainGraphManifest.model_rebuild()
+
+EpistemicTopologicalProofManifest.model_rebuild()
+CognitiveSamplingPolicy.model_rebuild()
+CognitiveReasoningTraceState.model_rebuild()
+CognitiveDualVerificationReceipt.model_rebuild()
+EpistemicGroundedTaskManifest.model_rebuild()
+EpistemicCurriculumManifest.model_rebuild()
