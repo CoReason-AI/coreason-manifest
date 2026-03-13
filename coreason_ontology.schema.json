@@ -731,6 +731,18 @@
           ],
           "default": null,
           "description": "The declarative contract mathematically binding this agent to a core altruistic objective."
+        },
+        "grpo_reward_policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EpistemicRewardModelPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The RL post-training contract forcing the agent to evaluate traces against an implicit graph reward."
         }
       },
       "required": [
@@ -917,6 +929,7 @@
           "belief_mutation": "#/$defs/BeliefMutationEvent",
           "budget_exhaustion": "#/$defs/BudgetExhaustionEvent",
           "cognitive_prediction": "#/$defs/CognitivePredictionReceipt",
+          "cognitive_reward_evaluation": "#/$defs/CognitiveRewardEvaluationReceipt",
           "counterfactual_regret": "#/$defs/CounterfactualRegretEvent",
           "epistemic_axiom_verification": "#/$defs/EpistemicAxiomVerificationReceipt",
           "epistemic_promotion": "#/$defs/EpistemicPromotionEvent",
@@ -976,6 +989,9 @@
         },
         {
           "$ref": "#/$defs/EpistemicAxiomVerificationReceipt"
+        },
+        {
+          "$ref": "#/$defs/CognitiveRewardEvaluationReceipt"
         }
       ]
     },
@@ -2148,6 +2164,26 @@
       "title": "CognitiveDualVerificationReceipt",
       "type": "object"
     },
+    "CognitiveFormatContract": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "require_think_tags": {
+          "default": true,
+          "description": "Forces the inclusion of structural XML tags to isolate the reasoning trace.",
+          "title": "Require Think Tags",
+          "type": "boolean"
+        },
+        "final_answer_regex": {
+          "default": "^Final Answer: .*$",
+          "description": "The strict regular expression the model must satisfy to yield a valid discrete classification.",
+          "title": "Final Answer Regex",
+          "type": "string"
+        }
+      },
+      "title": "CognitiveFormatContract",
+      "type": "object"
+    },
     "CognitivePredictionReceipt": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology",
@@ -2229,6 +2265,62 @@
         "trace_payload"
       ],
       "title": "CognitiveReasoningTraceState",
+      "type": "object"
+    },
+    "CognitiveRewardEvaluationReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "event_id": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "type": {
+          "const": "cognitive_reward_evaluation",
+          "default": "cognitive_reward_evaluation",
+          "title": "Type",
+          "type": "string"
+        },
+        "source_generation_id": {
+          "description": "The CID of the LLM's raw generated text trajectory.",
+          "title": "Source Generation Id",
+          "type": "string"
+        },
+        "extracted_axioms": {
+          "description": "The specific axiomatic claims extracted exclusively from the bounded reasoning block.",
+          "items": {
+            "$ref": "#/$defs/EpistemicAxiomState"
+          },
+          "title": "Extracted Axioms",
+          "type": "array"
+        },
+        "calculated_r_path": {
+          "description": "The dense reasoning reward signal derived from the verified axioms.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Calculated R Path",
+          "type": "number"
+        },
+        "total_advantage_score": {
+          "description": "The final computed GRPO advantage signal used to update the policy gradients.",
+          "title": "Total Advantage Score",
+          "type": "number"
+        }
+      },
+      "required": [
+        "event_id",
+        "timestamp",
+        "source_generation_id",
+        "calculated_r_path",
+        "total_advantage_score"
+      ],
+      "title": "CognitiveRewardEvaluationReceipt",
       "type": "object"
     },
     "CognitiveRoutingContract": {
@@ -4809,6 +4901,41 @@
         "active_context"
       ],
       "title": "EpistemicQuarantineSnapshot",
+      "type": "object"
+    },
+    "EpistemicRewardModelPolicy": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "policy_id": {
+          "description": "CID for this specific reward configuration.",
+          "minLength": 1,
+          "title": "Policy Id",
+          "type": "string"
+        },
+        "reference_graph_id": {
+          "description": "The CID of the EpistemicDomainGraphManifest acting as the deterministic ground truth.",
+          "title": "Reference Graph Id",
+          "type": "string"
+        },
+        "format_contract": {
+          "$ref": "#/$defs/CognitiveFormatContract",
+          "description": "The syntactic constraints the agent must follow to prevent reward zeroing."
+        },
+        "beta_path_weight": {
+          "description": "The scalar weight applied to the logical path validity (R_path) to prevent reward hacking.",
+          "minimum": 0.0,
+          "title": "Beta Path Weight",
+          "type": "number"
+        }
+      },
+      "required": [
+        "policy_id",
+        "reference_graph_id",
+        "format_contract",
+        "beta_path_weight"
+      ],
+      "title": "EpistemicRewardModelPolicy",
       "type": "object"
     },
     "EpistemicSOPManifest": {
