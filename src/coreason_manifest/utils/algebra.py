@@ -319,6 +319,8 @@ def verify_ast_safety(payload: str) -> bool:
         ast.Slice,
     ]
 
+    base_allowlist.append(ast.Slice)
+
     allowlist: tuple[type, ...] = tuple(base_allowlist)
 
     for node in ast.walk(tree):
