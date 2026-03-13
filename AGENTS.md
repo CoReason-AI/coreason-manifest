@@ -209,6 +209,10 @@ You are strictly forbidden from introducing "Active" or "Runtime" logic into thi
 
 ## **3. Technical Standards**
 
+### **Documentation**
+* **Generator:** `zensical`.
+* **Constraint:** You are strictly forbidden from reverting to, installing, or using `mkdocs` or any other legacy documentation generator. `zensical` is the mandatory tool for all documentation builds within this repository.
+
 ### **Environment & Package Management**
 * **Manager:** `uv`.
 * **Language:** Python 3.12+.

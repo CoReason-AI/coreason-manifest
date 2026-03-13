@@ -731,6 +731,18 @@
           ],
           "default": null,
           "description": "The declarative contract mathematically binding this agent to a core altruistic objective."
+        },
+        "grpo_reward_policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EpistemicRewardModelPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The RL post-training contract forcing the agent to evaluate traces against an implicit graph reward."
         }
       },
       "required": [
@@ -916,7 +928,11 @@
           "barge_in": "#/$defs/BargeInInterruptEvent",
           "belief_mutation": "#/$defs/BeliefMutationEvent",
           "budget_exhaustion": "#/$defs/BudgetExhaustionEvent",
+          "cognitive_prediction": "#/$defs/CognitivePredictionReceipt",
+          "cognitive_reward_evaluation": "#/$defs/CognitiveRewardEvaluationReceipt",
           "counterfactual_regret": "#/$defs/CounterfactualRegretEvent",
+          "epistemic_axiom_verification": "#/$defs/EpistemicAxiomVerificationReceipt",
+          "epistemic_flow_state": "#/$defs/EpistemicFlowStateReceipt",
           "epistemic_promotion": "#/$defs/EpistemicPromotionEvent",
           "epistemic_telemetry": "#/$defs/EpistemicTelemetryEvent",
           "hypothesis": "#/$defs/HypothesisGenerationEvent",
@@ -968,6 +984,18 @@
         },
         {
           "$ref": "#/$defs/EpistemicTelemetryEvent"
+        },
+        {
+          "$ref": "#/$defs/CognitivePredictionReceipt"
+        },
+        {
+          "$ref": "#/$defs/EpistemicAxiomVerificationReceipt"
+        },
+        {
+          "$ref": "#/$defs/CognitiveRewardEvaluationReceipt"
+        },
+        {
+          "$ref": "#/$defs/EpistemicFlowStateReceipt"
         }
       ]
     },
@@ -2114,6 +2142,221 @@
       "title": "CognitiveCritiqueProfile",
       "type": "object"
     },
+    "CognitiveDetailedBalanceContract": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "target_balance_epsilon": {
+          "description": "The mathematical tolerance for the detailed balance constraint.",
+          "minimum": 0.0,
+          "title": "Target Balance Epsilon",
+          "type": "number"
+        },
+        "flow_estimation_model": {
+          "description": "The specific neural architecture used to estimate flow.",
+          "title": "Flow Estimation Model",
+          "type": "string"
+        },
+        "local_exploration_k": {
+          "description": "The number of exploratory actions taken per state to optimize flow efficiently.",
+          "exclusiveMinimum": 0,
+          "title": "Local Exploration K",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "target_balance_epsilon",
+        "flow_estimation_model",
+        "local_exploration_k"
+      ],
+      "title": "CognitiveDetailedBalanceContract",
+      "type": "object"
+    },
+    "CognitiveDualVerificationReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "primary_verifier_id": {
+          "$ref": "#/$defs/NodeIdentifierState",
+          "description": "The DID of the primary evaluating agent."
+        },
+        "secondary_verifier_id": {
+          "$ref": "#/$defs/NodeIdentifierState",
+          "description": "The DID of the independent secondary evaluating agent."
+        },
+        "trace_factual_alignment": {
+          "description": "Strict Boolean indicating if BOTH agents mathematically agree on factual alignment.",
+          "title": "Trace Factual Alignment",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "primary_verifier_id",
+        "secondary_verifier_id",
+        "trace_factual_alignment"
+      ],
+      "title": "CognitiveDualVerificationReceipt",
+      "type": "object"
+    },
+    "CognitiveFormatContract": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "require_think_tags": {
+          "default": true,
+          "description": "Forces the inclusion of structural XML tags to isolate the reasoning trace.",
+          "title": "Require Think Tags",
+          "type": "boolean"
+        },
+        "final_answer_regex": {
+          "default": "^Final Answer: .*$",
+          "description": "The strict regular expression the model must satisfy to yield a valid discrete classification.",
+          "title": "Final Answer Regex",
+          "type": "string"
+        }
+      },
+      "title": "CognitiveFormatContract",
+      "type": "object"
+    },
+    "CognitivePredictionReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "event_id": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "type": {
+          "const": "cognitive_prediction",
+          "default": "cognitive_prediction",
+          "title": "Type",
+          "type": "string"
+        },
+        "source_chain_id": {
+          "title": "Source Chain Id",
+          "type": "string"
+        },
+        "target_source_concept": {
+          "title": "Target Source Concept",
+          "type": "string"
+        },
+        "predicted_top_k_tokens": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Predicted Top K Tokens",
+          "type": "array"
+        }
+      },
+      "required": [
+        "event_id",
+        "timestamp",
+        "source_chain_id",
+        "target_source_concept",
+        "predicted_top_k_tokens"
+      ],
+      "title": "CognitivePredictionReceipt",
+      "type": "object"
+    },
+    "CognitiveReasoningTraceState": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "trace_id": {
+          "description": "CID of this specific non-monotonic reasoning trace.",
+          "minLength": 1,
+          "title": "Trace Id",
+          "type": "string"
+        },
+        "source_proof_id": {
+          "description": "The EpistemicTopologicalProofManifest CID this trace is mathematically anchored to.",
+          "title": "Source Proof Id",
+          "type": "string"
+        },
+        "token_length": {
+          "description": "The exact token consumption of the trace.",
+          "minimum": 0,
+          "title": "Token Length",
+          "type": "integer"
+        },
+        "trace_payload": {
+          "description": "The natural language reasoning steps bounded by structural tags.",
+          "title": "Trace Payload",
+          "type": "string"
+        }
+      },
+      "required": [
+        "trace_id",
+        "source_proof_id",
+        "token_length",
+        "trace_payload"
+      ],
+      "title": "CognitiveReasoningTraceState",
+      "type": "object"
+    },
+    "CognitiveRewardEvaluationReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "event_id": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "type": {
+          "const": "cognitive_reward_evaluation",
+          "default": "cognitive_reward_evaluation",
+          "title": "Type",
+          "type": "string"
+        },
+        "source_generation_id": {
+          "description": "The CID of the LLM's raw generated text trajectory.",
+          "title": "Source Generation Id",
+          "type": "string"
+        },
+        "extracted_axioms": {
+          "description": "The specific axiomatic claims extracted exclusively from the bounded reasoning block.",
+          "items": {
+            "$ref": "#/$defs/EpistemicAxiomState"
+          },
+          "title": "Extracted Axioms",
+          "type": "array"
+        },
+        "calculated_r_path": {
+          "description": "The dense reasoning reward signal derived from the verified axioms.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Calculated R Path",
+          "type": "number"
+        },
+        "total_advantage_score": {
+          "description": "The final computed GRPO advantage signal used to update the policy gradients.",
+          "title": "Total Advantage Score",
+          "type": "number"
+        }
+      },
+      "required": [
+        "event_id",
+        "timestamp",
+        "source_generation_id",
+        "calculated_r_path",
+        "total_advantage_score"
+      ],
+      "title": "CognitiveRewardEvaluationReceipt",
+      "type": "object"
+    },
     "CognitiveRoutingContract": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nHardware-level contract overriding MoE routing to enforce functional/specialist paths.",
@@ -2150,6 +2393,29 @@
         "routing_temperature"
       ],
       "title": "CognitiveRoutingContract",
+      "type": "object"
+    },
+    "CognitiveSamplingPolicy": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "max_complexity_hops": {
+          "description": "The absolute physical limit on path length N.",
+          "minimum": 1,
+          "title": "Max Complexity Hops",
+          "type": "integer"
+        },
+        "inverse_frequency_smoothing_epsilon": {
+          "default": 1.0,
+          "description": "The epsilon constant ensuring unsampled nodes are mathematically prioritized.",
+          "title": "Inverse Frequency Smoothing Epsilon",
+          "type": "number"
+        }
+      },
+      "required": [
+        "max_complexity_hops"
+      ],
+      "title": "CognitiveSamplingPolicy",
       "type": "object"
     },
     "CognitiveStateProfile": {
@@ -3456,6 +3722,35 @@
       "title": "DelegatedCapabilityManifest",
       "type": "object"
     },
+    "DifferentiableLogicConstraint": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "constraint_id": {
+          "minLength": 1,
+          "title": "Constraint Id",
+          "type": "string"
+        },
+        "formal_syntax_smt": {
+          "description": "The formal SMT-LIB or Lean4 language representation of the symbolic rule.",
+          "title": "Formal Syntax Smt",
+          "type": "string"
+        },
+        "relaxation_epsilon": {
+          "description": "The continuous penalty applied to the LLM probability mass for constraint violation.",
+          "minimum": 0.0,
+          "title": "Relaxation Epsilon",
+          "type": "number"
+        }
+      },
+      "required": [
+        "constraint_id",
+        "formal_syntax_smt",
+        "relaxation_epsilon"
+      ],
+      "title": "DifferentiableLogicConstraint",
+      "type": "object"
+    },
     "DigitalTwinTopologyManifest": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAn isolated sandbox graph representing a Digital Twin.",
@@ -4148,6 +4443,112 @@
       "title": "EpistemicArgumentGraphState",
       "type": "object"
     },
+    "EpistemicAxiomState": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "source_concept_id": {
+          "description": "CID of the origin node.",
+          "title": "Source Concept Id",
+          "type": "string"
+        },
+        "directed_edge_type": {
+          "description": "The topological relationship.",
+          "title": "Directed Edge Type",
+          "type": "string"
+        },
+        "target_concept_id": {
+          "description": "CID of destination node.",
+          "title": "Target Concept Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_concept_id",
+        "directed_edge_type",
+        "target_concept_id"
+      ],
+      "title": "EpistemicAxiomState",
+      "type": "object"
+    },
+    "EpistemicAxiomVerificationReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "event_id": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "type": {
+          "const": "epistemic_axiom_verification",
+          "default": "epistemic_axiom_verification",
+          "title": "Type",
+          "type": "string"
+        },
+        "source_prediction_id": {
+          "title": "Source Prediction Id",
+          "type": "string"
+        },
+        "sequence_similarity_score": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Sequence Similarity Score",
+          "type": "number"
+        },
+        "fact_score_passed": {
+          "title": "Fact Score Passed",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "event_id",
+        "timestamp",
+        "source_prediction_id",
+        "sequence_similarity_score",
+        "fact_score_passed"
+      ],
+      "title": "EpistemicAxiomVerificationReceipt",
+      "type": "object"
+    },
+    "EpistemicChainGraphState": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "chain_id": {
+          "minLength": 1,
+          "title": "Chain Id",
+          "type": "string"
+        },
+        "syntactic_roots": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Syntactic Roots",
+          "type": "array"
+        },
+        "semantic_leaves": {
+          "items": {
+            "$ref": "#/$defs/EpistemicAxiomState"
+          },
+          "title": "Semantic Leaves",
+          "type": "array"
+        }
+      },
+      "required": [
+        "chain_id",
+        "syntactic_roots",
+        "semantic_leaves"
+      ],
+      "title": "EpistemicChainGraphState",
+      "type": "object"
+    },
     "EpistemicCompressionSLA": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology",
@@ -4183,6 +4584,58 @@
       "title": "EpistemicCompressionSLA",
       "type": "object"
     },
+    "EpistemicCurriculumManifest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "curriculum_id": {
+          "description": "Unique CID for this training epoch release.",
+          "minLength": 1,
+          "title": "Curriculum Id",
+          "type": "string"
+        },
+        "tasks": {
+          "description": "The array of fully verified task primitives.",
+          "items": {
+            "$ref": "#/$defs/EpistemicGroundedTaskManifest"
+          },
+          "minItems": 1,
+          "title": "Tasks",
+          "type": "array"
+        }
+      },
+      "required": [
+        "curriculum_id",
+        "tasks"
+      ],
+      "title": "EpistemicCurriculumManifest",
+      "type": "object"
+    },
+    "EpistemicDomainGraphManifest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "graph_id": {
+          "minLength": 1,
+          "title": "Graph Id",
+          "type": "string"
+        },
+        "verified_axioms": {
+          "items": {
+            "$ref": "#/$defs/EpistemicAxiomState"
+          },
+          "minItems": 1,
+          "title": "Verified Axioms",
+          "type": "array"
+        }
+      },
+      "required": [
+        "graph_id",
+        "verified_axioms"
+      ],
+      "title": "EpistemicDomainGraphManifest",
+      "type": "object"
+    },
     "EpistemicEscalationContract": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The strict mathematical agreement governing when\nan agent is authorized to expand its test-time compute allocation based on measured doubt.",
@@ -4212,6 +4665,91 @@
         "max_escalation_tiers"
       ],
       "title": "EpistemicEscalationContract",
+      "type": "object"
+    },
+    "EpistemicFlowStateReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "event_id": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "type": {
+          "const": "epistemic_flow_state",
+          "default": "epistemic_flow_state",
+          "title": "Type",
+          "type": "string"
+        },
+        "source_trajectory_id": {
+          "description": "The CID of the partial CognitiveReasoningTraceState.",
+          "title": "Source Trajectory Id",
+          "type": "string"
+        },
+        "estimated_flow_value": {
+          "description": "The non-negative flow value scalar representing the factorized outcome reward.",
+          "minimum": 0.0,
+          "title": "Estimated Flow Value",
+          "type": "number"
+        },
+        "terminal_reward_factorized": {
+          "description": "True if this flow successfully factorized a terminal outcome reward.",
+          "title": "Terminal Reward Factorized",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "event_id",
+        "timestamp",
+        "source_trajectory_id",
+        "estimated_flow_value",
+        "terminal_reward_factorized"
+      ],
+      "title": "EpistemicFlowStateReceipt",
+      "type": "object"
+    },
+    "EpistemicGroundedTaskManifest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "task_id": {
+          "description": "The cryptographic CID of the task.",
+          "minLength": 1,
+          "title": "Task Id",
+          "type": "string"
+        },
+        "topological_proof": {
+          "$ref": "#/$defs/EpistemicTopologicalProofManifest",
+          "description": "The underlying latent path."
+        },
+        "vignette_payload": {
+          "description": "The generated natural language scenario.",
+          "title": "Vignette Payload",
+          "type": "string"
+        },
+        "thinking_trace": {
+          "$ref": "#/$defs/CognitiveReasoningTraceState",
+          "description": "The verified reasoning path."
+        },
+        "verification_lock": {
+          "$ref": "#/$defs/CognitiveDualVerificationReceipt",
+          "description": "The cryptographic proof of dual-agent approval."
+        }
+      },
+      "required": [
+        "task_id",
+        "topological_proof",
+        "vignette_payload",
+        "thinking_trace",
+        "verification_lock"
+      ],
+      "title": "EpistemicGroundedTaskManifest",
       "type": "object"
     },
     "EpistemicLedgerState": {
@@ -4475,6 +5013,53 @@
       "title": "EpistemicQuarantineSnapshot",
       "type": "object"
     },
+    "EpistemicRewardModelPolicy": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "policy_id": {
+          "description": "CID for this specific reward configuration.",
+          "minLength": 1,
+          "title": "Policy Id",
+          "type": "string"
+        },
+        "reference_graph_id": {
+          "description": "The CID of the EpistemicDomainGraphManifest acting as the deterministic ground truth.",
+          "title": "Reference Graph Id",
+          "type": "string"
+        },
+        "format_contract": {
+          "$ref": "#/$defs/CognitiveFormatContract",
+          "description": "The syntactic constraints the agent must follow to prevent reward zeroing."
+        },
+        "beta_path_weight": {
+          "description": "The scalar weight applied to the logical path validity (R_path) to prevent reward hacking.",
+          "minimum": 0.0,
+          "title": "Beta Path Weight",
+          "type": "number"
+        },
+        "topological_scoring": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TopologicalRewardContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The continuous spatial/topological constraints governing path extraction validation."
+        }
+      },
+      "required": [
+        "policy_id",
+        "reference_graph_id",
+        "format_contract",
+        "beta_path_weight"
+      ],
+      "title": "EpistemicRewardModelPolicy",
+      "type": "object"
+    },
     "EpistemicSOPManifest": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology",
@@ -4577,6 +5162,29 @@
       "title": "EpistemicScanningPolicy",
       "type": "object"
     },
+    "EpistemicSeedInjectionPolicy": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "similarity_threshold_alpha": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Similarity Threshold Alpha",
+          "type": "number"
+        },
+        "relation_diversity_bucket_size": {
+          "exclusiveMinimum": 0,
+          "title": "Relation Diversity Bucket Size",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "similarity_threshold_alpha",
+        "relation_diversity_bucket_size"
+      ],
+      "title": "EpistemicSeedInjectionPolicy",
+      "type": "object"
+    },
     "EpistemicTelemetryEvent": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nThe cryptographic receipt of human-in-the-loop interaction tracking used to calculate\nEpistemic Regret and iteratively tune retrieval gradients without explicit human grading.",
@@ -4648,6 +5256,33 @@
         "target_node_id"
       ],
       "title": "EpistemicTelemetryEvent",
+      "type": "object"
+    },
+    "EpistemicTopologicalProofManifest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "proof_id": {
+          "description": "A Content Identifier (CID) for this specific topological proof.",
+          "minLength": 1,
+          "title": "Proof Id",
+          "type": "string"
+        },
+        "axiomatic_chain": {
+          "description": "The strictly ordered sequence of axioms forming the reasoning path.",
+          "items": {
+            "$ref": "#/$defs/EpistemicAxiomState"
+          },
+          "minItems": 1,
+          "title": "Axiomatic Chain",
+          "type": "array"
+        }
+      },
+      "required": [
+        "proof_id",
+        "axiomatic_chain"
+      ],
+      "title": "EpistemicTopologicalProofManifest",
       "type": "object"
     },
     "EpistemicTransmutationTask": {
@@ -11617,6 +12252,43 @@
         "allowed_causal_relationships"
       ],
       "title": "TopologicalRetrievalContract",
+      "type": "object"
+    },
+    "TopologicalRewardContract": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "min_link_criticality_score": {
+          "description": "The lower bound for Random Walk with Restart (RWR) reachability.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Min Link Criticality Score",
+          "type": "number"
+        },
+        "min_semantic_relevance_score": {
+          "description": "The lower bound for GCN/GAT cosine similarity.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Min Semantic Relevance Score",
+          "type": "number"
+        },
+        "aggregation_method": {
+          "description": "The deterministic protocol the orchestrator must use to compute these scores.",
+          "enum": [
+            "gcn_spatial",
+            "attention_gat",
+            "rwr_topological"
+          ],
+          "title": "Aggregation Method",
+          "type": "string"
+        }
+      },
+      "required": [
+        "min_link_criticality_score",
+        "min_semantic_relevance_score",
+        "aggregation_method"
+      ],
+      "title": "TopologicalRewardContract",
       "type": "object"
     },
     "TopologyHashReceipt": {
