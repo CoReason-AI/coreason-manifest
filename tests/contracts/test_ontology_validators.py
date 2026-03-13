@@ -1,3 +1,5 @@
+from typing import Any
+
 import hypothesis.strategies as st
 import pytest
 from hypothesis import HealthCheck, given, settings
@@ -673,7 +675,7 @@ def test_spatial_bounding_box_geometry_validation_fuzz(x_min: float, x_max: floa
     byzantine_action=st.sampled_from(["quarantine", "slash_escrow", "ignore"]),
 )
 def test_quorum_policy_enforce_bft_math_fuzz(
-    max_tolerable_faults: int, min_quorum_size: int, state_validation_metric: str, byzantine_action: str
+    max_tolerable_faults: int, min_quorum_size: int, state_validation_metric: Any, byzantine_action: Any
 ) -> None:
     if min_quorum_size < 3 * max_tolerable_faults + 1:
         with pytest.raises(ValidationError):
@@ -707,7 +709,7 @@ def test_quorum_policy_enforce_bft_math_fuzz(
     ),
 )
 def test_consensus_policy_validate_pbft_requirements_non_pbft_fuzz(
-    strategy: str, quorum_rules: QuorumPolicy | None
+    strategy: Any, quorum_rules: QuorumPolicy | None
 ) -> None:
     policy = ConsensusPolicy(strategy=strategy, quorum_rules=quorum_rules)
     assert policy.strategy == strategy
@@ -729,7 +731,7 @@ def test_consensus_policy_validate_pbft_requirements_valid_pbft_fuzz(quorum_rule
 
 
 @given(st.just("pbft"))
-def test_consensus_policy_validate_pbft_requirements_invalid_pbft_fuzz(strategy: str) -> None:
+def test_consensus_policy_validate_pbft_requirements_invalid_pbft_fuzz(strategy: Any) -> None:
     with pytest.raises(ValidationError):
         ConsensusPolicy(strategy=strategy, quorum_rules=None)
 
