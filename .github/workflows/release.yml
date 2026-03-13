@@ -56,10 +56,7 @@ jobs:
           files: |
             dist/*.whl
             dist/*.tar.gz
-            dist/*.whl.sig
-            dist/*.tar.gz.sig
-            dist/*.whl.crt
-            dist/*.tar.gz.crt
+            dist/*.sigstore.json
             coreason_ontology.schema.json
             sbom.spdx.json
 
