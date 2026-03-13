@@ -4569,6 +4569,10 @@ class AgentNodeProfile(BaseNodeProfile):
         default=None,
         description="The declarative contract mathematically binding this agent to a core altruistic objective.",
     )
+    grpo_reward_policy: EpistemicRewardModelPolicy | None = Field(
+        default=None,
+        description="The RL post-training contract forcing the agent to evaluate traces against an implicit graph reward.",  # noqa: E501
+    )
 
     @model_validator(mode="after")
     def sort_agent_node_arrays(self) -> Self:
@@ -5355,6 +5359,56 @@ class EpistemicCurriculumManifest(CoreasonBaseState):
         return self
 
 
+class CognitiveFormatContract(CoreasonBaseState):
+    require_think_tags: bool = Field(
+        default=True, description="Forces the inclusion of structural XML tags to isolate the reasoning trace."
+    )
+    final_answer_regex: str = Field(
+        default="^Final Answer: .*$",
+        description="The strict regular expression the model must satisfy to yield a valid discrete classification.",
+    )
+
+
+class EpistemicRewardModelPolicy(CoreasonBaseState):
+    policy_id: str = Field(min_length=1, description="CID for this specific reward configuration.")
+    reference_graph_id: str = Field(
+        description="The CID of the EpistemicDomainGraphManifest acting as the deterministic ground truth."
+    )
+    format_contract: CognitiveFormatContract = Field(
+        description="The syntactic constraints the agent must follow to prevent reward zeroing."
+    )
+    beta_path_weight: float = Field(
+        ge=0.0, description="The scalar weight applied to the logical path validity (R_path) to prevent reward hacking."
+    )
+
+
+class CognitiveRewardEvaluationReceipt(BaseStateEvent):
+    type: Literal["cognitive_reward_evaluation"] = Field(default="cognitive_reward_evaluation")
+    source_generation_id: str = Field(description="The CID of the LLM's raw generated text trajectory.")
+    extracted_axioms: list[EpistemicAxiomState] = Field(
+        default_factory=list,
+        description="The specific axiomatic claims extracted exclusively from the bounded reasoning block.",
+    )
+    calculated_r_path: float = Field(
+        ge=0.0, le=1.0, description="The dense reasoning reward signal derived from the verified axioms."
+    )
+    total_advantage_score: float = Field(
+        description="The final computed GRPO advantage signal used to update the policy gradients."
+    )
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(
+            self,
+            "extracted_axioms",
+            sorted(
+                self.extracted_axioms,
+                key=lambda x: (x.source_concept_id, x.directed_edge_type, x.target_concept_id),
+            ),
+        )
+        return self
+
+
 type AnyStateEvent = Annotated[
     ObservationEvent
     | BeliefMutationEvent
@@ -5370,7 +5424,8 @@ type AnyStateEvent = Annotated[
     | BudgetExhaustionEvent
     | EpistemicTelemetryEvent
     | CognitivePredictionReceipt
-    | EpistemicAxiomVerificationReceipt,
+    | EpistemicAxiomVerificationReceipt
+    | CognitiveRewardEvaluationReceipt,
     Field(discriminator="type", description="A discriminated union of state events."),
 ]
 
@@ -5459,3 +5514,6 @@ CognitiveReasoningTraceState.model_rebuild()
 CognitiveDualVerificationReceipt.model_rebuild()
 EpistemicGroundedTaskManifest.model_rebuild()
 EpistemicCurriculumManifest.model_rebuild()
+CognitiveFormatContract.model_rebuild()
+EpistemicRewardModelPolicy.model_rebuild()
+CognitiveRewardEvaluationReceipt.model_rebuild()
