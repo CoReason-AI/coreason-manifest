@@ -9,7 +9,6 @@ on:
 permissions:
   contents: write
   id-token: write # Required for PyPI OIDC Trusted Publishing and Sigstore
-  pages: write    # Required for GitHub Pages deployment
 
 jobs:
   release:
@@ -61,14 +60,10 @@ jobs:
             coreason_ontology.schema.json
             sbom.spdx.json
 
-      - name: Build Docs
-        run: uv run zensical build --clean
+      - name: Configure Git Author
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: site
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Deploy Docs (Mike Multi-Versioning)
+        run: uv run mike deploy ${{ github.ref_name }} latest --update-aliases --push
