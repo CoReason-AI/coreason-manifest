@@ -5216,6 +5216,74 @@ class EpistemicTelemetryEvent(BaseStateEvent):
     )
 
 
+class EpistemicAxiomState(CoreasonBaseState):
+    source_concept_id: str = Field(description="CID of the origin node.")
+    directed_edge_type: str = Field(description="The topological relationship.")
+    target_concept_id: str = Field(description="CID of destination node.")
+
+
+class EpistemicSeedInjectionPolicy(CoreasonBaseState):
+    similarity_threshold_alpha: float = Field(ge=0.0, le=1.0)
+    relation_diversity_bucket_size: int = Field(gt=0)
+
+
+class EpistemicChainGraphState(CoreasonBaseState):
+    chain_id: str = Field(min_length=1)
+    syntactic_roots: list[str] = Field(min_length=1)
+    # Note: syntactic_roots is a structurally ordered sequence (Linguistic Syntax) and MUST NOT be sorted.
+    semantic_leaves: list[EpistemicAxiomState]
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(
+            self,
+            "semantic_leaves",
+            sorted(
+                self.semantic_leaves,
+                key=lambda x: (x.source_concept_id, x.directed_edge_type, x.target_concept_id),
+            ),
+        )
+        return self
+
+
+class CognitivePredictionReceipt(BaseStateEvent):
+    type: Literal["cognitive_prediction"] = Field(default="cognitive_prediction")
+    source_chain_id: str
+    target_source_concept: str
+    predicted_top_k_tokens: list[str] = Field(min_length=1)
+    # Note: predicted_top_k_tokens is a structurally ordered sequence (Probability Rank) and MUST NOT be sorted.
+
+
+class EpistemicAxiomVerificationReceipt(BaseStateEvent):
+    type: Literal["epistemic_axiom_verification"] = Field(default="epistemic_axiom_verification")
+    source_prediction_id: str
+    sequence_similarity_score: float = Field(ge=0.0, le=1.0)
+    fact_score_passed: bool
+
+    @model_validator(mode="after")
+    def enforce_epistemic_quarantine(self) -> Self:
+        if not self.fact_score_passed:
+            raise ValueError("Epistemic Contagion Prevented: Axioms failing validation cannot be verified.")
+        return self
+
+
+class EpistemicDomainGraphManifest(CoreasonBaseState):
+    graph_id: str = Field(min_length=1)
+    verified_axioms: list[EpistemicAxiomState] = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(
+            self,
+            "verified_axioms",
+            sorted(
+                self.verified_axioms,
+                key=lambda x: (x.source_concept_id, x.directed_edge_type, x.target_concept_id),
+            ),
+        )
+        return self
+
+
 type AnyStateEvent = Annotated[
     ObservationEvent
     | BeliefMutationEvent
@@ -5229,7 +5297,9 @@ type AnyStateEvent = Annotated[
     | PersistenceCommitReceipt
     | TokenBurnReceipt
     | BudgetExhaustionEvent
-    | EpistemicTelemetryEvent,
+    | EpistemicTelemetryEvent
+    | CognitivePredictionReceipt
+    | EpistemicAxiomVerificationReceipt,
     Field(discriminator="type", description="A discriminated union of state events."),
 ]
 
@@ -5305,3 +5375,10 @@ TokenBurnReceipt.model_rebuild()
 BudgetExhaustionEvent.model_rebuild()
 
 LatentProjectionIntent.model_rebuild()
+
+EpistemicAxiomState.model_rebuild()
+EpistemicSeedInjectionPolicy.model_rebuild()
+EpistemicChainGraphState.model_rebuild()
+CognitivePredictionReceipt.model_rebuild()
+EpistemicAxiomVerificationReceipt.model_rebuild()
+EpistemicDomainGraphManifest.model_rebuild()
