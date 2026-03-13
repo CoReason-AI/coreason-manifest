@@ -71,6 +71,56 @@ def test_spatial_bounds_fuzzing(x_min: float, x_max: float, y_min: float, y_max:
         assert box.x_min == x_min
 
 
+@given(
+    shape=st.lists(st.integers(min_value=-5, max_value=5), min_size=0, max_size=5).map(tuple),
+    vram_bytes=st.integers(min_value=0, max_value=200),
+)
+@settings(max_examples=100)
+def test_tensor_manifest_bounds_fuzzing(shape: tuple[int, ...], vram_bytes: int) -> None:
+    import math
+
+    from coreason_manifest.spec.ontology import NDimensionalTensorManifest, TensorStructuralFormatProfile
+
+    if len(shape) < 1:
+        with pytest.raises(ValueError, match="Tensor shape must have at least 1 dimension"):
+            NDimensionalTensorManifest(
+                structural_type=TensorStructuralFormatProfile.FLOAT32,
+                shape=shape,
+                vram_footprint_bytes=vram_bytes,
+                merkle_root="0" * 64,
+                storage_uri="s3://bucket/tensor",
+            )
+    elif any(dim <= 0 for dim in shape):
+        with pytest.raises(ValueError, match="Tensor dimensions must be strictly positive integers"):
+            NDimensionalTensorManifest(
+                structural_type=TensorStructuralFormatProfile.FLOAT32,
+                shape=shape,
+                vram_footprint_bytes=vram_bytes,
+                merkle_root="0" * 64,
+                storage_uri="s3://bucket/tensor",
+            )
+    else:
+        expected_bytes = math.prod(shape) * 4  # FLOAT32 is 4 bytes
+        if expected_bytes != vram_bytes:
+            with pytest.raises(ValueError, match="Topological mismatch: Shape"):
+                NDimensionalTensorManifest(
+                    structural_type=TensorStructuralFormatProfile.FLOAT32,
+                    shape=shape,
+                    vram_footprint_bytes=vram_bytes,
+                    merkle_root="0" * 64,
+                    storage_uri="s3://bucket/tensor",
+                )
+        else:
+            manifest = NDimensionalTensorManifest(
+                structural_type=TensorStructuralFormatProfile.FLOAT32,
+                shape=shape,
+                vram_footprint_bytes=vram_bytes,
+                merkle_root="0" * 64,
+                storage_uri="s3://bucket/tensor",
+            )
+            assert manifest.vram_footprint_bytes == vram_bytes
+
+
 # --- 3. Byzantine Fault Tolerance Fuzzing ---
 @given(f=st.integers(min_value=0, max_value=1000), n=st.integers(min_value=1, max_value=4000))
 @settings(max_examples=100)
@@ -340,3 +390,74 @@ def test_adjudication_intent_sorting() -> None:
         timeout_action="rollback",
     )
     assert intent.deadlocked_claims == ["claim_1", "claim_2", "claim_3"]
+
+
+def test_neural_audit_attestation_receipt_sorting() -> None:
+    from coreason_manifest.spec.ontology import NeuralAuditAttestationReceipt, SaeFeatureActivationState
+
+    activation1 = SaeFeatureActivationState(feature_index=2, activation_magnitude=0.5)
+    activation2 = SaeFeatureActivationState(feature_index=1, activation_magnitude=0.8)
+    receipt = NeuralAuditAttestationReceipt(audit_id="audit_123", layer_activations={0: [activation1, activation2]})
+    assert receipt.layer_activations[0][0].feature_index == 1
+    assert receipt.layer_activations[0][1].feature_index == 2
+
+
+def test_peft_adapter_contract_sorting() -> None:
+    from coreason_manifest.spec.ontology import PeftAdapterContract
+
+    manifest = PeftAdapterContract(
+        adapter_id="adapter_1",
+        safetensors_hash="0" * 64,
+        base_model_hash="0" * 64,
+        adapter_rank=8,
+        target_modules=["module_b", "module_a"],
+    )
+    assert manifest.target_modules == ["module_a", "module_b"]
+
+
+def test_mcp_server_binding_profile_sorting() -> None:
+    from coreason_manifest.spec.ontology import MCPServerBindingProfile, StdioTransportProfile
+
+    profile = MCPServerBindingProfile(
+        server_id="server1",
+        transport=StdioTransportProfile(command="cmd", args=[]),
+        required_capabilities=["tools", "prompts", "resources"],
+    )
+    assert profile.required_capabilities == ["prompts", "resources", "tools"]
+
+
+def test_steady_state_hypothesis_state_sorting() -> None:
+    from coreason_manifest.spec.ontology import SteadyStateHypothesisState
+
+    state = SteadyStateHypothesisState(
+        expected_max_latency=10.0, max_loops_allowed=5, required_tool_usage=["tool_b", "tool_a"]
+    )
+    assert state.required_tool_usage == ["tool_a", "tool_b"]
+
+
+def test_execution_span_receipt_topological_exemption() -> None:
+    from coreason_manifest.spec.ontology import ExecutionSpanReceipt, SpanEvent
+
+    event1 = SpanEvent(name="event1", timestamp_unix_nano=2000, attributes={})
+    event2 = SpanEvent(name="event2", timestamp_unix_nano=1000, attributes={})
+    receipt = ExecutionSpanReceipt(
+        trace_id="trace1",
+        span_id="span1",
+        parent_span_id="parent1",
+        name="test_span",
+        start_time_unix_nano=100,
+        end_time_unix_nano=1000,
+        events=[event1, event2],
+    )
+    # The topological exemption mandates that structural sequences must NOT be sorted
+    assert receipt.events[0].name == "event1"
+    assert receipt.events[1].name == "event2"
+
+
+def test_execution_span_receipt_invalid_time() -> None:
+    from coreason_manifest.spec.ontology import ExecutionSpanReceipt
+
+    with pytest.raises(ValueError, match="end_time_unix_nano cannot be before start_time_unix_nano"):
+        ExecutionSpanReceipt(
+            trace_id="trace1", span_id="span1", name="test_span", start_time_unix_nano=1000, end_time_unix_nano=100
+        )
