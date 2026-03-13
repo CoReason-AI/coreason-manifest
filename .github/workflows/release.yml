@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - 'v*.*.*'
+      - '*.*.*'
 
 permissions:
   contents: write
@@ -12,6 +13,7 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
+    environment: pypi
     steps:
       - uses: actions/checkout@v4
         with:
@@ -38,6 +40,9 @@ jobs:
           format: spdx-json
           output-file: sbom.spdx.json
 
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+
       - name: Sign Wheel
         uses: sigstore/gh-action-sigstore-python@v3.0.0
         with:
@@ -57,9 +62,6 @@ jobs:
             dist/*.tar.gz.crt
             coreason_ontology.schema.json
             sbom.spdx.json
-
-      - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
 
       - name: Configure Git Author
         run: |
