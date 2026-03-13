@@ -916,7 +916,9 @@
           "barge_in": "#/$defs/BargeInInterruptEvent",
           "belief_mutation": "#/$defs/BeliefMutationEvent",
           "budget_exhaustion": "#/$defs/BudgetExhaustionEvent",
+          "cognitive_prediction": "#/$defs/CognitivePredictionReceipt",
           "counterfactual_regret": "#/$defs/CounterfactualRegretEvent",
+          "epistemic_axiom_verification": "#/$defs/EpistemicAxiomVerificationReceipt",
           "epistemic_promotion": "#/$defs/EpistemicPromotionEvent",
           "epistemic_telemetry": "#/$defs/EpistemicTelemetryEvent",
           "hypothesis": "#/$defs/HypothesisGenerationEvent",
@@ -968,6 +970,12 @@
         },
         {
           "$ref": "#/$defs/EpistemicTelemetryEvent"
+        },
+        {
+          "$ref": "#/$defs/CognitivePredictionReceipt"
+        },
+        {
+          "$ref": "#/$defs/EpistemicAxiomVerificationReceipt"
         }
       ]
     },
@@ -2112,6 +2120,53 @@
         "epistemic_penalty_scalar"
       ],
       "title": "CognitiveCritiqueProfile",
+      "type": "object"
+    },
+    "CognitivePredictionReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "event_id": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "type": {
+          "const": "cognitive_prediction",
+          "default": "cognitive_prediction",
+          "title": "Type",
+          "type": "string"
+        },
+        "source_chain_id": {
+          "title": "Source Chain Id",
+          "type": "string"
+        },
+        "target_source_concept": {
+          "title": "Target Source Concept",
+          "type": "string"
+        },
+        "predicted_top_k_tokens": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Predicted Top K Tokens",
+          "type": "array"
+        }
+      },
+      "required": [
+        "event_id",
+        "timestamp",
+        "source_chain_id",
+        "target_source_concept",
+        "predicted_top_k_tokens"
+      ],
+      "title": "CognitivePredictionReceipt",
       "type": "object"
     },
     "CognitiveRoutingContract": {
@@ -4148,6 +4203,112 @@
       "title": "EpistemicArgumentGraphState",
       "type": "object"
     },
+    "EpistemicAxiomState": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "source_concept_id": {
+          "description": "CID of the origin node.",
+          "title": "Source Concept Id",
+          "type": "string"
+        },
+        "directed_edge_type": {
+          "description": "The topological relationship.",
+          "title": "Directed Edge Type",
+          "type": "string"
+        },
+        "target_concept_id": {
+          "description": "CID of destination node.",
+          "title": "Target Concept Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_concept_id",
+        "directed_edge_type",
+        "target_concept_id"
+      ],
+      "title": "EpistemicAxiomState",
+      "type": "object"
+    },
+    "EpistemicAxiomVerificationReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "event_id": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "type": {
+          "const": "epistemic_axiom_verification",
+          "default": "epistemic_axiom_verification",
+          "title": "Type",
+          "type": "string"
+        },
+        "source_prediction_id": {
+          "title": "Source Prediction Id",
+          "type": "string"
+        },
+        "sequence_similarity_score": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Sequence Similarity Score",
+          "type": "number"
+        },
+        "fact_score_passed": {
+          "title": "Fact Score Passed",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "event_id",
+        "timestamp",
+        "source_prediction_id",
+        "sequence_similarity_score",
+        "fact_score_passed"
+      ],
+      "title": "EpistemicAxiomVerificationReceipt",
+      "type": "object"
+    },
+    "EpistemicChainGraphState": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "chain_id": {
+          "minLength": 1,
+          "title": "Chain Id",
+          "type": "string"
+        },
+        "syntactic_roots": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Syntactic Roots",
+          "type": "array"
+        },
+        "semantic_leaves": {
+          "items": {
+            "$ref": "#/$defs/EpistemicAxiomState"
+          },
+          "title": "Semantic Leaves",
+          "type": "array"
+        }
+      },
+      "required": [
+        "chain_id",
+        "syntactic_roots",
+        "semantic_leaves"
+      ],
+      "title": "EpistemicChainGraphState",
+      "type": "object"
+    },
     "EpistemicCompressionSLA": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology",
@@ -4181,6 +4342,31 @@
         "required_grounding_density"
       ],
       "title": "EpistemicCompressionSLA",
+      "type": "object"
+    },
+    "EpistemicDomainGraphManifest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "graph_id": {
+          "minLength": 1,
+          "title": "Graph Id",
+          "type": "string"
+        },
+        "verified_axioms": {
+          "items": {
+            "$ref": "#/$defs/EpistemicAxiomState"
+          },
+          "minItems": 1,
+          "title": "Verified Axioms",
+          "type": "array"
+        }
+      },
+      "required": [
+        "graph_id",
+        "verified_axioms"
+      ],
+      "title": "EpistemicDomainGraphManifest",
       "type": "object"
     },
     "EpistemicEscalationContract": {
@@ -4575,6 +4761,29 @@
         "action_on_gap"
       ],
       "title": "EpistemicScanningPolicy",
+      "type": "object"
+    },
+    "EpistemicSeedInjectionPolicy": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "similarity_threshold_alpha": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Similarity Threshold Alpha",
+          "type": "number"
+        },
+        "relation_diversity_bucket_size": {
+          "exclusiveMinimum": 0,
+          "title": "Relation Diversity Bucket Size",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "similarity_threshold_alpha",
+        "relation_diversity_bucket_size"
+      ],
+      "title": "EpistemicSeedInjectionPolicy",
       "type": "object"
     },
     "EpistemicTelemetryEvent": {
