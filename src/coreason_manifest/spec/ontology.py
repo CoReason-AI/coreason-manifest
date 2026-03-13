@@ -4569,6 +4569,10 @@ class AgentNodeProfile(BaseNodeProfile):
         default=None,
         description="The declarative contract mathematically binding this agent to a core altruistic objective.",
     )
+    grpo_reward_policy: EpistemicRewardModelPolicy | None = Field(
+        default=None,
+        description="The RL post-training contract forcing the agent to evaluate traces against an implicit graph reward.",  # noqa: E501
+    )
 
     @model_validator(mode="after")
     def sort_agent_node_arrays(self) -> Self:
@@ -5216,6 +5220,195 @@ class EpistemicTelemetryEvent(BaseStateEvent):
     )
 
 
+class EpistemicAxiomState(CoreasonBaseState):
+    source_concept_id: str = Field(description="CID of the origin node.")
+    directed_edge_type: str = Field(description="The topological relationship.")
+    target_concept_id: str = Field(description="CID of destination node.")
+
+
+class EpistemicSeedInjectionPolicy(CoreasonBaseState):
+    similarity_threshold_alpha: float = Field(ge=0.0, le=1.0)
+    relation_diversity_bucket_size: int = Field(gt=0)
+
+
+class EpistemicChainGraphState(CoreasonBaseState):
+    chain_id: str = Field(min_length=1)
+    syntactic_roots: list[str] = Field(min_length=1)
+    # Note: syntactic_roots is a structurally ordered sequence (Linguistic Syntax) and MUST NOT be sorted.
+    semantic_leaves: list[EpistemicAxiomState]
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(
+            self,
+            "semantic_leaves",
+            sorted(
+                self.semantic_leaves,
+                key=lambda x: (x.source_concept_id, x.directed_edge_type, x.target_concept_id),
+            ),
+        )
+        return self
+
+
+class CognitivePredictionReceipt(BaseStateEvent):
+    type: Literal["cognitive_prediction"] = Field(default="cognitive_prediction")
+    source_chain_id: str
+    target_source_concept: str
+    predicted_top_k_tokens: list[str] = Field(min_length=1)
+    # Note: predicted_top_k_tokens is a structurally ordered sequence (Probability Rank) and MUST NOT be sorted.
+
+
+class EpistemicAxiomVerificationReceipt(BaseStateEvent):
+    type: Literal["epistemic_axiom_verification"] = Field(default="epistemic_axiom_verification")
+    source_prediction_id: str
+    sequence_similarity_score: float = Field(ge=0.0, le=1.0)
+    fact_score_passed: bool
+
+    @model_validator(mode="after")
+    def enforce_epistemic_quarantine(self) -> Self:
+        if not self.fact_score_passed:
+            raise ValueError("Epistemic Contagion Prevented: Axioms failing validation cannot be verified.")
+        return self
+
+
+class EpistemicDomainGraphManifest(CoreasonBaseState):
+    graph_id: str = Field(min_length=1)
+    verified_axioms: list[EpistemicAxiomState] = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(
+            self,
+            "verified_axioms",
+            sorted(
+                self.verified_axioms,
+                key=lambda x: (x.source_concept_id, x.directed_edge_type, x.target_concept_id),
+            ),
+        )
+        return self
+
+
+class EpistemicTopologicalProofManifest(CoreasonBaseState):
+    proof_id: str = Field(min_length=1, description="A Content Identifier (CID) for this specific topological proof.")
+    axiomatic_chain: list[EpistemicAxiomState] = Field(
+        min_length=1, description="The strictly ordered sequence of axioms forming the reasoning path."
+    )
+    # Note: axiomatic_chain is a structurally ordered sequence (Causal Path) and MUST NOT be sorted.
+
+
+class CognitiveSamplingPolicy(CoreasonBaseState):
+    max_complexity_hops: int = Field(ge=1, description="The absolute physical limit on path length N.")
+    inverse_frequency_smoothing_epsilon: float = Field(
+        default=1.0, description="The epsilon constant ensuring unsampled nodes are mathematically prioritized."
+    )
+
+
+class CognitiveReasoningTraceState(CoreasonBaseState):
+    trace_id: str = Field(min_length=1, description="CID of this specific non-monotonic reasoning trace.")
+    source_proof_id: str = Field(
+        description="The EpistemicTopologicalProofManifest CID this trace is mathematically anchored to."
+    )
+    token_length: int = Field(ge=0, description="The exact token consumption of the trace.")
+    trace_payload: str = Field(description="The natural language reasoning steps bounded by structural tags.")
+
+
+class CognitiveDualVerificationReceipt(CoreasonBaseState):
+    primary_verifier_id: NodeIdentifierState = Field(description="The DID of the primary evaluating agent.")
+    secondary_verifier_id: NodeIdentifierState = Field(
+        description="The DID of the independent secondary evaluating agent."
+    )
+    trace_factual_alignment: bool = Field(
+        description="Strict Boolean indicating if BOTH agents mathematically agree on factual alignment."
+    )
+
+    @model_validator(mode="after")
+    def enforce_dual_key_lock(self) -> Self:
+        if self.primary_verifier_id == self.secondary_verifier_id:
+            raise ValueError(
+                "Topological Contradiction: Dual verification requires two distinct and independent evaluator nodes."
+            )
+        return self
+
+
+class EpistemicGroundedTaskManifest(CoreasonBaseState):
+    task_id: str = Field(min_length=1, description="The cryptographic CID of the task.")
+    topological_proof: EpistemicTopologicalProofManifest = Field(description="The underlying latent path.")
+    vignette_payload: str = Field(description="The generated natural language scenario.")
+    thinking_trace: CognitiveReasoningTraceState = Field(description="The verified reasoning path.")
+    verification_lock: CognitiveDualVerificationReceipt = Field(
+        description="The cryptographic proof of dual-agent approval."
+    )
+
+
+class EpistemicCurriculumManifest(CoreasonBaseState):
+    curriculum_id: str = Field(min_length=1, description="Unique CID for this training epoch release.")
+    tasks: list[EpistemicGroundedTaskManifest] = Field(
+        min_length=1, description="The array of fully verified task primitives."
+    )
+
+    @model_validator(mode="after")
+    def sort_tasks(self) -> Self:
+        object.__setattr__(
+            self,
+            "tasks",
+            sorted(
+                self.tasks,
+                key=lambda task: task.task_id,
+            ),
+        )
+        return self
+
+
+class CognitiveFormatContract(CoreasonBaseState):
+    require_think_tags: bool = Field(
+        default=True, description="Forces the inclusion of structural XML tags to isolate the reasoning trace."
+    )
+    final_answer_regex: str = Field(
+        default="^Final Answer: .*$",
+        description="The strict regular expression the model must satisfy to yield a valid discrete classification.",
+    )
+
+
+class EpistemicRewardModelPolicy(CoreasonBaseState):
+    policy_id: str = Field(min_length=1, description="CID for this specific reward configuration.")
+    reference_graph_id: str = Field(
+        description="The CID of the EpistemicDomainGraphManifest acting as the deterministic ground truth."
+    )
+    format_contract: CognitiveFormatContract = Field(
+        description="The syntactic constraints the agent must follow to prevent reward zeroing."
+    )
+    beta_path_weight: float = Field(
+        ge=0.0, description="The scalar weight applied to the logical path validity (R_path) to prevent reward hacking."
+    )
+
+
+class CognitiveRewardEvaluationReceipt(BaseStateEvent):
+    type: Literal["cognitive_reward_evaluation"] = Field(default="cognitive_reward_evaluation")
+    source_generation_id: str = Field(description="The CID of the LLM's raw generated text trajectory.")
+    extracted_axioms: list[EpistemicAxiomState] = Field(
+        default_factory=list,
+        description="The specific axiomatic claims extracted exclusively from the bounded reasoning block.",
+    )
+    calculated_r_path: float = Field(
+        ge=0.0, le=1.0, description="The dense reasoning reward signal derived from the verified axioms."
+    )
+    total_advantage_score: float = Field(
+        description="The final computed GRPO advantage signal used to update the policy gradients."
+    )
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(
+            self,
+            "extracted_axioms",
+            sorted(
+                self.extracted_axioms,
+                key=lambda x: (x.source_concept_id, x.directed_edge_type, x.target_concept_id),
+            ),
+        )
+        return self
+
+
 type AnyStateEvent = Annotated[
     ObservationEvent
     | BeliefMutationEvent
@@ -5229,7 +5422,10 @@ type AnyStateEvent = Annotated[
     | PersistenceCommitReceipt
     | TokenBurnReceipt
     | BudgetExhaustionEvent
-    | EpistemicTelemetryEvent,
+    | EpistemicTelemetryEvent
+    | CognitivePredictionReceipt
+    | EpistemicAxiomVerificationReceipt
+    | CognitiveRewardEvaluationReceipt,
     Field(discriminator="type", description="A discriminated union of state events."),
 ]
 
@@ -5305,3 +5501,20 @@ TokenBurnReceipt.model_rebuild()
 BudgetExhaustionEvent.model_rebuild()
 
 LatentProjectionIntent.model_rebuild()
+
+EpistemicAxiomState.model_rebuild()
+EpistemicSeedInjectionPolicy.model_rebuild()
+EpistemicChainGraphState.model_rebuild()
+CognitivePredictionReceipt.model_rebuild()
+EpistemicAxiomVerificationReceipt.model_rebuild()
+EpistemicDomainGraphManifest.model_rebuild()
+EpistemicTopologicalProofManifest.model_rebuild()
+CognitiveSamplingPolicy.model_rebuild()
+CognitiveReasoningTraceState.model_rebuild()
+CognitiveDualVerificationReceipt.model_rebuild()
+EpistemicGroundedTaskManifest.model_rebuild()
+EpistemicCurriculumManifest.model_rebuild()
+CognitiveFormatContract.model_rebuild()
+EpistemicRewardModelPolicy.model_rebuild()
+CognitiveRewardEvaluationReceipt.model_rebuild()
+AgentNodeProfile.model_rebuild()
