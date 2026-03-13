@@ -1,10 +1,10 @@
 [build-system]
-requires = ["hatchling", "hatch-vcs"]
+requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
 name = "coreason_manifest"
-dynamic = ["version"]
+version = "0.25.2"
 description = "This package is the definitive source of truth. If it isn't in the manifest, it doesn't exist. If it violates the manifest, it doesn't run."
 readme = "README.md"
 requires-python = ">=3.14"
@@ -107,6 +107,3 @@ exclude_lines = [
     "if os.name == \"posix\":",
     "\\.\\.\\.",
 ]
-
-[tool.hatch.version]
-source = "vcs"
