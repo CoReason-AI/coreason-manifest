@@ -1,41 +1,34 @@
-site_name: coreason_manifest
+site_name: CoReason Manifest
+site_url: https://coreason-ai.github.io/coreason_manifest/
+repo_name: CoReason-AI/coreason_manifest
+repo_url: https://github.com/CoReason-AI/coreason_manifest
+
 theme:
   name: material
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - toc.integrate
+    - search.suggest
+    - search.highlight
+
 plugins:
   - search
   - mkdocstrings:
       handlers:
         python:
-          paths: [src]
+          paths: [src/]
           options:
-            show_source: true
+            docstring_style: null
             show_root_heading: true
-            heading_level: 2
-            show_category_heading: true
-            docstring_style: google
-            separate_signature: true
+            show_bases: true
+            show_signature_annotations: true
+  - mike
+  - minify
+  - git-revision-date-localized
+
 markdown_extensions:
-  - pymdownx.superfences:
-      custom_fences:
-        - name: mermaid
-          class: mermaid
-          format: !!python/name:pymdownx.superfences.fence_code_format
-nav:
-  - Home: index.md
-  - Getting Started:
-      - Quick Start: usage.md
-      - CLI Reference: cli.md
-      - Tutorial: VIGNETTE.md
-  - Core Concepts:
-      - Graph Orchestration: graph_recipes.md
-      - Reasoning Patterns: episteme_reasoning.md
-  - Developer Guides:
-      - Building Agents: builder_sdk.md
-      - Flow Governance: flow_governance.md
-  - API Reference:
-      - Agents & Tools: reference/agents.md
-      - Orchestration: reference/orchestration.md
-  - Internal Architecture:
-      - Contributor Protocols: architecture/contributor_protocols.md
-      - Shared Kernel Strategy: architecture/ADR-001-shared-kernel-boundaries.md
-      - Compliance & Integrity: veritas_integrity.md
+  - pymdownx.superfences
+  - pymdownx.tabbed
+  - pymdownx.snippets

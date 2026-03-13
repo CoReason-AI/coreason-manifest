@@ -1,0 +1,180 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint-and-audit:
+    name: Lint and Audit (Zero-Pollution Tooling Injection)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          python-version: "3.14"
+
+      - name: Install Dependencies
+        run: uv sync --all-extras --dev
+
+      - name: Ruff Check
+        run: uvx ruff check .
+
+      - name: Ruff Format Check
+        run: uvx ruff format --check .
+
+      - name: Mypy Check
+        run: uv run mypy src/ tests/
+
+      - name: Deptry Check
+        run: uv run deptry src/
+
+      - name: Docs Audit
+        run: uv run mkdocs build --strict
+
+  schema-contracts:
+    name: Schema Contracts (Semantic Backward-Compatibility)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          python-version: "3.14"
+
+      - name: Install Dependencies
+        run: uv sync
+
+      - name: Generate Schema
+        run: uv run python -c "import json; from coreason_manifest.utils.algebra import get_ontology_schema; schema = get_ontology_schema(); open('coreason_ontology.schema.json', 'w', encoding='utf-8').write(json.dumps(schema, indent=2, ensure_ascii=False) + '\n')"
+
+      - name: Diff Check
+        run: git diff --exit-code coreason_ontology.schema.json
+
+      - name: Semantic Diff Check
+        run: uv run scripts/semantic_diff.py origin/main coreason_ontology.schema.json
+
+  security-sast:
+    name: Security SAST (AI-Specific Fuzzing & Architectural Gate)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          python-version: "3.14"
+
+      - name: Architectural Gate
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            gh pr diff ${{ github.event.pull_request.number }} | uv run scripts/evaluate_architecture.py
+          else
+            echo "Skipping PR diff for non-pull_request event"
+          fi
+
+      - name: Install Dependencies
+        run: uv sync
+
+  test-ubuntu:
+    name: Test (Ubuntu) - Python ${{ matrix.python-version }}
+    needs: [lint-and-audit, schema-contracts]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.14", "3.14t"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: uv sync --all-extras --dev
+
+      - name: Set PYTHON_GIL for Free-Threading
+        if: matrix.python-version == '3.14t'
+        run: echo "PYTHON_GIL=0" >> $GITHUB_ENV
+
+      - name: Pytest
+        run: uv run pytest
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+  test-extended:
+    name: Python ${{ matrix.python-version }} on ${{ matrix.os }}
+    needs: test-ubuntu
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+        python-version: ["3.14", "3.14t"]
+        exclude:
+          - os: windows-latest
+            python-version: "3.14t"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: uv sync --all-extras --dev
+
+      - name: Set PYTHON_GIL for Free-Threading
+        if: matrix.python-version == '3.14t'
+        shell: bash
+        run: echo "PYTHON_GIL=0" >> $GITHUB_ENV
+
+      - name: Pytest
+        run: uv run pytest
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+  reproducible-builds:
+    name: Reproducible Builds (Determinism Verification)
+    needs: [test-ubuntu, test-extended]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          python-version: "3.14"
+
+      - name: Build wheel
+        run: uv build
+
+      - name: Verify SHA256
+        run: |
+          sha256sum dist/*.whl

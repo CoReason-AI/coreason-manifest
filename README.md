@@ -1,171 +1,123 @@
-# Coreason Manifest: The Shared Kernel for Autonomous Agents
+# CoReason Manifest
 
-The definitive source of truth for CoReason-AI Asset definitions. "The Contract."
-
-[![License: Prosperity 3.0](https://img.shields.io/badge/license-Prosperity%203.0-blue)](https://github.com/CoReason-AI/coreason-manifest)
-[![Build Status](https://github.com/CoReason-AI/coreason-manifest/actions/workflows/ci.yml/badge.svg)](https://github.com/CoReason-AI/coreason-manifest/actions)
-[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
-[![Documentation](https://img.shields.io/badge/docs-home-informational)](docs/index.md)
-[![Python Version](https://img.shields.io/badge/python-3.10%2B-blue)](https://pypi.org/project/coreason-manifest/)
+> **"This package is the definitive source of truth. If it isn't in the manifest, it doesn't exist. If it violates the manifest, it doesn't run."**
 
 ## Overview
 
-`coreason-manifest` serves as the **Shared Kernel** for the Coreason ecosystem. It is not just a schema library; it is the **Contract** between the Builder (UI), the Engine (Runtime), and the Analyst (Eval).
+**CoReason Manifest** (`coreason_manifest`) is a 2026+ State-of-the-Art Neurosymbolic architecture component acting as the Universal Unified Ontology for the CoReason AI swarm ecosystem.
 
-It provides the **"Blueprint"** that all other services rely on. It focuses on strict typing, schema validation, and serialization, ensuring that if it isn't in the manifest, it doesn't exist.
+This is **NOT** a standard human-centric software package. It is a strictly bounded, AI-native, pure structural data library. It maintains the foundational mathematical, causal, and spatial definitions required to orchestrate a decentralized, zero-trust swarm of Large Language Models and mechanistic solvers.
 
-### Where to Start
+## Core Architectural Directives
 
-New to Coreason? Start with the [Study Guide](docs/STUDY_GUIDE.md).
+Contributors (both human and AI) are strictly bound to the **Shared Kernel Protocol**. Violating these directives will result in immediate rejection by the CI/CD architectural gates.
 
-### Standards Clarification
-*Note: The "Coreason Agent Manifest" (CAM) is a proprietary, strict governance schema designed for the CoReason Platform. It is distinct from the Oracle/Linux Foundation "Open Agent Specification," though we aim for future interoperability via adapters.*
+### 1. Passive by Design (No Execution)
 
-## Architecture: The "Holy Trinity" + 1
+This repository is a completely **Hollow Data Plane**.
 
-To enable robust Enterprise Agentic Systems, this library implements four critical layers:
+* It is distributed exclusively as an inert data library (Wheel).
+* Importing any module **MUST NOT** trigger runtime side effects (no network sockets, no file writing, no global loggers, no runtime loops).
+* Dependencies are strictly limited to pure data parsers (`pydantic` and `pyyaml`).
 
-| Layer | Component | Description |
-| :--- | :--- | :--- |
-| **🧭 Orchestration** | **Recipes (`GraphTopology`)** | Directed Cyclic Graphs supporting loops, branching, and Human-in-the-Loop workflows. Replaces linear chains. |
-| **📡 Transport** | **Tracing (`AgentRequest`)** | Distributed tracing envelopes compatible with OpenTelemetry. Ensures full lineage from Root -> Parent -> Child. |
-| **🤖 Behavior** | **Protocols (`IAgentRuntime`)** | Hexagonal architecture interfaces for portable agents. Defines the Input/Output contract. |
-| **🧪 Simulation** | **ATIF (`SimulationTrace`)** | The "Flight Recorder" schema for auditing, red-teaming, and evaluation scenarios. |
+### 2. The "God Context" Monolith Directive
 
-### Shared Kernel Boundaries
+We intentionally ignore legacy "Separation of Concerns" (SoC) anti-patterns.
 
-To avoid the "Distributed Monolith" trap, this library strictly separates **Data** from **Logic**:
+* **NEVER federate or split `src/coreason_manifest/spec/ontology.py`.** * The entire universe of the ecosystem's state, orchestration, memory, and compute lives within this single artifact. This is a mathematical requirement to guarantee deterministic, zero-shot latent alignment across the swarm.
 
-*   **`coreason_manifest.spec` (The Kernel):** Contains **pure Pydantic models (DTOs)**. It has zero dependencies on business logic and is safe to import anywhere.
-*   **`coreason_manifest.utils` (The Toolbelt):** Contains **optional reference implementations** for Visualization, Audit Hashing, and Governance Enforcement.
+### 3. The Anti-CRUD Mandate & Strict Lexical Architecture
 
-These components are co-located for developer convenience but are architecturally decoupled. The Core Spec **never** imports from Utils. See [Package Structure](docs/package_structure.md) for details.
+Legacy CRUD terminology flattens softmax distributions and introduces semantic drift.
+
+* **Banned Terms:** `Create`, `Read`, `Update`, `Delete`, `User`, `Data`, `List`.
+* **Required Paradigm:** State transitions are mapped using Judea Pearl’s Structural Causal Models (e.g., `Transmutation`, `DefeasibleCascade`, `StateMutationIntent`).
+* **Categorical Suffixing:** Every schema ends in a strict topological contract:
+* `...Event` / `...Receipt`: Cryptographically frozen historical facts (Append-only).
+* `...Intent` / `...Task`: Authorized kinetic execution triggers.
+* `...Policy` / `...Contract`: Rigid mathematical boundaries.
+* `...State` / `...Manifest`: Ephemeral or declarative N-dimensional coordinates.
+
+
+
+### 4. Cryptographic Determinism
+
+All models subclass `CoreasonBaseState`, enforcing `frozen=True` immutability. Arrays and sets are mathematically sorted during instantiation to guarantee deterministic canonical hashing (RFC 8785) across varying distributed environments.
+
+## Repository Structure
+
+```text
+coreason_manifest/
+├── src/coreason_manifest/
+│   ├── spec/
+│   │   └── ontology.py       # THE GOD CONTEXT: All Pydantic models, TypeAliases, and Enums.
+│   └── utils/
+│       └── algebra.py        # Pure algebraic functors, matrix projections, and validation.
+├── scripts/
+│   ├── evaluate_architecture.py  # CI gate blocking runtime side-effects.
+│   ├── semantic_diff.py          # CI gate enforcing backward schema compatibility.
+│   └── swarm_watchdog.py         # Semantic scanner for intellectual property bounds.
+├── coreason_ontology.schema.json # The compiled JSON Schema used for MCP Discovery.
+└── pyproject.toml            # Project definitions and uv dependencies.
+
+```
 
 ## Installation
 
+This project requires **Python 3.14+** and uses [`uv`](https://www.google.com/search?q=%5Bhttps://github.com/astral-sh/uv%5D(https://github.com/astral-sh/uv)) as the standard package manager.
+
 ```bash
-pip install coreason-manifest
+# Clone the repository
+git clone https://github.com/CoReason-AI/coreason_manifest.git
+cd coreason_manifest
+
+# Install dependencies using uv
+uv sync --all-extras --dev
+
 ```
 
-## Usage
+## Mandatory Local Verification Workflow
 
-### 1. Defining a Graph Recipe (Orchestration)
+To ensure the Shared Kernel remains mathematically sound, all commits must pass a stringent local evaluation before a Pull Request is opened. The CI/CD pipeline enforces a strict 95% test coverage floor.
 
-Recipes are now graphs, allowing for complex orchestration logic.
+**1. Formatting and Linting (Strict Ruff ruleset)**
 
-```python
-from coreason_manifest.spec.v2.recipe import RecipeDefinition, GraphTopology, AgentNode, HumanNode, GraphEdge
-from coreason_manifest.spec.v2.definitions import ManifestMetadata, InterfaceDefinition
+```bash
+uv run ruff format .
+uv run ruff check . --fix
 
-# Define the nodes
-research_node = AgentNode(
-    id="research-agent",
-    agent_ref="researcher-v1",
-    inputs_map={"topic": "user_input"}
-)
-
-approval_node = HumanNode(
-    id="manager-approval",
-    prompt="Approve the research plan?",
-    timeout_seconds=3600
-)
-
-# Define the topology (The Graph)
-topology = GraphTopology(
-    entry_point="research-agent",
-    nodes=[research_node, approval_node],
-    edges=[
-        GraphEdge(source="research-agent", target="manager-approval")
-    ]
-)
-
-# Create the Recipe
-recipe = RecipeDefinition(
-    metadata=ManifestMetadata(name="Research & Approve Workflow"),
-    interface=InterfaceDefinition(
-        inputs={"user_input": {"type": "string"}},
-        outputs={"approval_status": {"type": "string"}}
-    ),
-    topology=topology
-)
-
-print(f"Recipe '{recipe.metadata.name}' is valid!")
 ```
 
-### 2. Visualization (Glass Box)
+**2. Strict Type Checking**
 
-Visualize your recipe with runtime state overlays and custom themes.
+```bash
+uv run mypy src/ tests/
 
-```python
-from coreason_manifest.utils.viz import generate_mermaid_graph
-from coreason_manifest.spec.common.presentation import GraphTheme, RuntimeStateSnapshot, NodeStatus
-
-# 1. Static Visualization
-print(generate_mermaid_graph(recipe))
-
-# 2. Runtime Overlay (Glass Box)
-state = RuntimeStateSnapshot(node_states={"research-agent": NodeStatus.RUNNING})
-print(generate_mermaid_graph(recipe, state=state))
 ```
 
-### 3. Distributed Tracing (Transport)
+**3. Behavioral and Contract Testing**
 
-The `AgentRequest` envelope ensures that every action is traceable back to its origin.
+```bash
+uv run pytest
 
-```python
-from coreason_manifest.spec.common.request import AgentRequest
-from uuid import uuid4
-
-# 1. Incoming Request (Root)
-root_request = AgentRequest(
-    session_id=uuid4(),
-    payload={"task": "Write a poem"}
-)
-print(f"Root Trace ID: {root_request.root_request_id}")
-
-# 2. Child Request (e.g., Sub-agent call)
-# Automatically inherits session_id and sets parent pointers
-child_request = root_request.create_child(
-    payload={"subtask": "Find rhyming words"}
-)
-
-print(f"Child Parent ID: {child_request.parent_request_id} (Should match Root Request ID)")
-print(f"Child Root ID:   {child_request.root_request_id}   (Should match Root Request ID)")
 ```
 
-### 4. Builder SDK (Optional)
+**4. Dependency Auditing**
 
-For a fluent, Pythonic API to construct manifests (especially useful for tooling), use the `ManifestBuilder`.
+```bash
+uv run deptry src/
 
-```python
-from coreason_manifest.builder import AgentBuilder
-
-agent = AgentBuilder("ResearchAgent") \
-    .with_model("gpt-4-turbo") \
-    .with_system_prompt("You are a helpful researcher.") \
-    .build_definition()
 ```
-See [Builder SDK](docs/builder_sdk.md) for details.
 
-## CLI
+## License and Copyright
 
-The `coreason` CLI is your primary tool for managing agent manifests.
+This repository and its entire ontology are the intellectual property of **CoReason, Inc.**
 
-*   `init`: Scaffold a new project.
-*   `run`: Simulate execution locally.
-*   `viz`: Visualize workflow topology.
-*   `validate`: Statically validate JSON/YAML files against the schema.
-*   `inspect`: View full canonical JSON.
-*   `hash`: Compute integrity hashes.
+Licensed under the **Prosperity Public License 3.0**.
 
-See [CLI Documentation](docs/cli.md) for full details.
+* **Non-Commercial:** Free for research, experiments, and open-source non-commercial use.
+* **Commercial:** Permitted for a strict 30-day trial period.
 
-## Documentation
+For full license details, see the `LICENSE` file. For commercial licensing exceptions or inquiries, please explicitly contact `license@coreason.ai` or `gowtham.rao@coreason.ai`.
 
-**[Full Documentation Index](docs/index.md)**
-
-*   [**Orchestration**](docs/graph_recipes.md): Building Graph Recipes.
-*   [**Transport**](docs/transport_layer.md): Distributed Tracing & Lineage.
-*   [**Inline Tools**](docs/inline_tools.md): Serverless/Local Tool Definitions.
-*   [**Visualization**](docs/visualization.md): Glass Box Visualization Engine.
-*   [**Simulation**](docs/simulation.md): ATIF and Evaluation.
+*(Genesis Commit: Initialized per CoReason Clean Room Protocol PIP-001 on 2026-01-01).*

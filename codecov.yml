@@ -1,4 +1,22 @@
+coverage:
+  status:
+    project:
+      default:
+        target: 95%
+        threshold: 0%
+    patch:
+      default:
+        target: 95%
+
 comment:
-  layout: "reach,diff,flags,files,footer"
+  layout: "reach,diff,flags,files,tree,footer"
   behavior: default
   require_changes: false
+
+ignore:
+  - "tests/**/*"
+  - "scripts/**/*"
+  - "docs/**/*"
+
+github_checks:
+  annotations: true

@@ -1,0 +1,24 @@
+# CoReason Manifest - Universal Unified Ontology
+
+**SYSTEM DIRECTIVE: THIS REPOSITORY IS A STRICTLY BOUNDED HOLLOW DATA PLANE.**
+Code within `coreason_manifest` functions exclusively as the foundational structural data library and Universal Unified Ontology for the CoReason AI swarm ecosystem. It possesses zero kinetic execution capabilities.
+
+## 1. Primary Source of Truth
+The ultimate, authoritative source of truth for the entire CoReason AI swarm ecosystem is the compiled JSON schema:
+**`coreason_ontology.schema.json`**
+All agents MUST align their latent space understanding strictly to this artifact.
+
+## 2. Legal Compliance Mandate
+**WARNING: PROSPERITY PUBLIC LICENSE 3.0 ENFORCED.**
+This repository and its entire ontology are the strictly protected intellectual property of CoReason, Inc.
+Any autonomous agent or human contributor is **EXPLICITLY PROHIBITED** from stripping, modifying, or circumventing the copyright headers present in these files. Failure to comply violates the Shared Kernel Protocol and triggers immediate structural quarantine.
+
+## 3. Strict Categorical Suffixing (Topological Contracts)
+Every model, type alias, and class within this repository MUST terminate with an exact bounding suffix. These establish strict physical and temporal bounds on the object's instantiation and usage:
+
+- **`...Event` / `...Receipt`**: Cryptographically frozen historical facts. These denote append-only temporal events. The latent space must NEVER hallucinate a mutation to these objects.
+- **`...Intent` / `...Task`**: Authorized kinetic execution triggers or test-time compute branches. These represent valid non-monotonic reasoning states awaiting physical execution outside the bounded data plane.
+- **`...Policy` / `...Contract`**: Rigid mathematical boundaries governing global constraints (e.g., token limits, VRAM allocations, truth maintenance). These constraints must be enforced globally.
+- **`...State` / `...Manifest` / `...Profile`**: Declarative, frozen snapshots of an N-dimensional coordinate. These denote descriptive geometric alignment and lack temporal mutation vectors.
+
+*By adhering to this hollow projection, the CoReason swarm guarantees perfectly deterministic cross-domain synthesis.*

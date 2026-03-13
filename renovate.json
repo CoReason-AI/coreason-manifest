@@ -1,0 +1,39 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:base",
+    ":dependencyDashboard"
+  ],
+  "packageRules": [
+    {
+      "matchUpdateTypes": [
+        "patch",
+        "minor"
+      ],
+      "matchPackageNames": [
+        "ruff",
+        "pre-commit",
+        "pytest",
+        "mypy",
+        "pytest-asyncio",
+        "pytest-cov"
+      ],
+      "automerge": true,
+      "automergeType": "branch",
+      "ignoreTests": false
+    },
+    {
+      "matchPackageNames": [
+        "pydantic",
+        "pydantic-core",
+        "uv"
+      ],
+      "automerge": false
+    }
+  ],
+  "pep621": {
+    "fileMatch": [
+      "(^|/)pyproject\\.toml$"
+    ]
+  }
+}

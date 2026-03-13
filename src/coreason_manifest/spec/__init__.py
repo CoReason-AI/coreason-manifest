@@ -1,9 +1,8 @@
-# Copyright (c) 2025 CoReason, Inc.
+# Copyright (c) 2025 CoReason, Inc.. All Rights Reserved
 #
-# This software is proprietary and dual-licensed.
-# Licensed under the Prosperity Public License 3.0 (the "License").
-# A copy of the license is available at https://prosperitylicense.com/versions/3.0.0
-# For details, see the LICENSE file.
-# Commercial use beyond a 30-day trial requires a separate license.
+# This software is licensed under the Prosperity Public License 3.0.0.
+# The issuer of the Prosperity Public License for this software is CoReason, Inc..
 #
-# Source Code: https://github.com/CoReason-AI/coreason-manifest
+# For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
+
+__all__ = []
