@@ -5380,6 +5380,9 @@ class EpistemicRewardModelPolicy(CoreasonBaseState):
     beta_path_weight: float = Field(
         ge=0.0, description="The scalar weight applied to the logical path validity (R_path) to prevent reward hacking."
     )
+    topological_scoring: TopologicalRewardContract | None = Field(
+        default=None, description="The continuous spatial/topological constraints governing path extraction validation."
+    )
 
 
 class CognitiveRewardEvaluationReceipt(BaseStateEvent):
@@ -5409,6 +5412,49 @@ class CognitiveRewardEvaluationReceipt(BaseStateEvent):
         return self
 
 
+class CognitiveDetailedBalanceContract(CoreasonBaseState):
+    target_balance_epsilon: float = Field(
+        ge=0.0, description="The mathematical tolerance for the detailed balance constraint."
+    )
+    flow_estimation_model: str = Field(description="The specific neural architecture used to estimate flow.")
+    local_exploration_k: int = Field(
+        gt=0, description="The number of exploratory actions taken per state to optimize flow efficiently."
+    )
+
+
+class EpistemicFlowStateReceipt(BaseStateEvent):
+    type: Literal["epistemic_flow_state"] = Field(default="epistemic_flow_state")
+    source_trajectory_id: str = Field(description="The CID of the partial CognitiveReasoningTraceState.")
+    estimated_flow_value: float = Field(
+        ge=0.0, description="The non-negative flow value scalar representing the factorized outcome reward."
+    )
+    terminal_reward_factorized: bool = Field(
+        description="True if this flow successfully factorized a terminal outcome reward."
+    )
+
+
+class TopologicalRewardContract(CoreasonBaseState):
+    min_link_criticality_score: float = Field(
+        ge=0.0, le=1.0, description="The lower bound for Random Walk with Restart (RWR) reachability."
+    )
+    min_semantic_relevance_score: float = Field(
+        ge=0.0, le=1.0, description="The lower bound for GCN/GAT cosine similarity."
+    )
+    aggregation_method: Literal["gcn_spatial", "attention_gat", "rwr_topological"] = Field(
+        description="The deterministic protocol the orchestrator must use to compute these scores."
+    )
+
+
+class DifferentiableLogicConstraint(CoreasonBaseState):
+    constraint_id: str = Field(min_length=1)
+    formal_syntax_smt: str = Field(
+        description="The formal SMT-LIB or Lean4 language representation of the symbolic rule."
+    )
+    relaxation_epsilon: float = Field(
+        ge=0.0, description="The continuous penalty applied to the LLM probability mass for constraint violation."
+    )
+
+
 type AnyStateEvent = Annotated[
     ObservationEvent
     | BeliefMutationEvent
@@ -5425,7 +5471,8 @@ type AnyStateEvent = Annotated[
     | EpistemicTelemetryEvent
     | CognitivePredictionReceipt
     | EpistemicAxiomVerificationReceipt
-    | CognitiveRewardEvaluationReceipt,
+    | CognitiveRewardEvaluationReceipt
+    | EpistemicFlowStateReceipt,
     Field(discriminator="type", description="A discriminated union of state events."),
 ]
 
@@ -5518,3 +5565,7 @@ CognitiveFormatContract.model_rebuild()
 EpistemicRewardModelPolicy.model_rebuild()
 CognitiveRewardEvaluationReceipt.model_rebuild()
 AgentNodeProfile.model_rebuild()
+CognitiveDetailedBalanceContract.model_rebuild()
+EpistemicFlowStateReceipt.model_rebuild()
+TopologicalRewardContract.model_rebuild()
+DifferentiableLogicConstraint.model_rebuild()
