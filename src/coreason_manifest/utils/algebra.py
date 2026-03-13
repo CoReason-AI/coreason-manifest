@@ -171,7 +171,7 @@ def generate_correction_prompt(error: ValidationError, target_node_id: str, faul
     for err in error.errors():
         loc_path = "".join(f"/{item!s}" for item in err["loc"]) if err["loc"] else "/"
         failing_pointers.append(loc_path)
-        err_type = err.get("type", "unknown")
+        err_type = err["type"]
         if err_type == "missing":
             error_messages.append(
                 f"The required semantic boundary at '{loc_path}' is completely missing. You must project this missing dimension to satisfy the StateContract."  # noqa: E501
@@ -318,10 +318,7 @@ def verify_ast_safety(payload: str) -> bool:
         ast.Subscript,
     ]
 
-    if hasattr(ast, "Index"):
-        base_allowlist.append(ast.Index)
-    if hasattr(ast, "Slice"):
-        base_allowlist.append(ast.Slice)
+    base_allowlist.append(ast.Slice)
 
     allowlist: tuple[type, ...] = tuple(base_allowlist)
 
@@ -469,8 +466,8 @@ def apply_state_differential(
 
         elif patch.op in ("copy", "move"):
             from_path = patch.from_path
-            if not isinstance(from_path, str):
-                raise ValueError(f"Invalid from_path: {from_path}")
+            if from_path is None:
+                raise ValueError("from_path is mathematically required for copy/move operations.")
             try:
                 from_target, from_last = resolve_from_path(from_path)
                 val = extract_from_target(from_target, from_last)

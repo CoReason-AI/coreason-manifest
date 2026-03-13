@@ -3368,11 +3368,7 @@ class NDimensionalTensorManifest(CoreasonBaseState):
         for dim in self.shape:
             if dim <= 0:
                 raise ValueError(f"Tensor dimensions must be strictly positive integers. Got: {self.shape}")
-        bytes_per_element = (
-            self.structural_type.bytes_per_element
-            if isinstance(self.structural_type, TensorStructuralFormatProfile)
-            else TensorStructuralFormatProfile(self.structural_type).bytes_per_element
-        )
+        bytes_per_element = self.structural_type.bytes_per_element
         calculated_bytes = math.prod(self.shape) * bytes_per_element
         if calculated_bytes != self.vram_footprint_bytes:
             raise ValueError(
