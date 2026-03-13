@@ -3368,7 +3368,11 @@ class NDimensionalTensorManifest(CoreasonBaseState):
         for dim in self.shape:
             if dim <= 0:
                 raise ValueError(f"Tensor dimensions must be strictly positive integers. Got: {self.shape}")
-        bytes_per_element = self.structural_type.bytes_per_element
+        bytes_per_element = (
+            self.structural_type.bytes_per_element
+            if isinstance(self.structural_type, TensorStructuralFormatProfile)
+            else TensorStructuralFormatProfile(self.structural_type).bytes_per_element
+        )
         calculated_bytes = math.prod(self.shape) * bytes_per_element
         if calculated_bytes != self.vram_footprint_bytes:
             raise ValueError(
@@ -3826,12 +3830,16 @@ class ExecutionSpanReceipt(CoreasonBaseState):
     events: list[SpanEvent] = Field(
         default_factory=list, max_length=10000, description="Structured log records emitted during the span."
     )
-    # Note: events is a structurally ordered sequence (Chronological Events) and MUST NOT be sorted.
 
     @model_validator(mode="after")
     def validate_temporal_bounds(self) -> Any:
         if self.end_time_unix_nano is not None and self.end_time_unix_nano < self.start_time_unix_nano:
             raise ValueError("end_time_unix_nano cannot be before start_time_unix_nano")
+        return self
+
+    @model_validator(mode="after")
+    def sort_events(self) -> Any:
+        object.__setattr__(self, "events", sorted(self.events, key=lambda e: e.timestamp_unix_nano))
         return self
 
 

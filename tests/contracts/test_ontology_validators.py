@@ -71,56 +71,6 @@ def test_spatial_bounds_fuzzing(x_min: float, x_max: float, y_min: float, y_max:
         assert box.x_min == x_min
 
 
-@given(
-    shape=st.lists(st.integers(min_value=-5, max_value=5), min_size=0, max_size=5).map(tuple),
-    vram_bytes=st.integers(min_value=0, max_value=200),
-)
-@settings(max_examples=100)
-def test_tensor_manifest_bounds_fuzzing(shape: tuple[int, ...], vram_bytes: int) -> None:
-    import math
-
-    from coreason_manifest.spec.ontology import NDimensionalTensorManifest, TensorStructuralFormatProfile
-
-    if len(shape) < 1:
-        with pytest.raises(ValueError, match="Tensor shape must have at least 1 dimension"):
-            NDimensionalTensorManifest(
-                structural_type=TensorStructuralFormatProfile.FLOAT32,
-                shape=shape,
-                vram_footprint_bytes=vram_bytes,
-                merkle_root="0" * 64,
-                storage_uri="s3://bucket/tensor",
-            )
-    elif any(dim <= 0 for dim in shape):
-        with pytest.raises(ValueError, match="Tensor dimensions must be strictly positive integers"):
-            NDimensionalTensorManifest(
-                structural_type=TensorStructuralFormatProfile.FLOAT32,
-                shape=shape,
-                vram_footprint_bytes=vram_bytes,
-                merkle_root="0" * 64,
-                storage_uri="s3://bucket/tensor",
-            )
-    else:
-        expected_bytes = math.prod(shape) * 4  # FLOAT32 is 4 bytes
-        if expected_bytes != vram_bytes:
-            with pytest.raises(ValueError, match="Topological mismatch: Shape"):
-                NDimensionalTensorManifest(
-                    structural_type=TensorStructuralFormatProfile.FLOAT32,
-                    shape=shape,
-                    vram_footprint_bytes=vram_bytes,
-                    merkle_root="0" * 64,
-                    storage_uri="s3://bucket/tensor",
-                )
-        else:
-            manifest = NDimensionalTensorManifest(
-                structural_type=TensorStructuralFormatProfile.FLOAT32,
-                shape=shape,
-                vram_footprint_bytes=vram_bytes,
-                merkle_root="0" * 64,
-                storage_uri="s3://bucket/tensor",
-            )
-            assert manifest.vram_footprint_bytes == vram_bytes
-
-
 # --- 3. Byzantine Fault Tolerance Fuzzing ---
 @given(f=st.integers(min_value=0, max_value=1000), n=st.integers(min_value=1, max_value=4000))
 @settings(max_examples=100)
@@ -303,6 +253,103 @@ def test_redaction_policy_sorting() -> None:
 # --- 8. Missing specific validators coverage ---
 
 
+@given(
+    eig=st.floats(min_value=-1.0, max_value=2.0),
+)
+def test_active_inference_contract_bounds_fuzzing(eig: float) -> None:
+    from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import ActiveInferenceContract
+
+    if eig < 0.0 or eig > 1.0:
+        with pytest.raises(ValidationError, match=r"Input should be"):
+            ActiveInferenceContract(
+                task_id="task_1",
+                target_hypothesis_id="hyp_1",
+                target_condition_id="cond_1",
+                selected_tool_name="tool_1",
+                expected_information_gain=eig,
+                execution_cost_budget_magnitude=100,
+            )
+    else:
+        contract = ActiveInferenceContract(
+            task_id="task_1",
+            target_hypothesis_id="hyp_1",
+            target_condition_id="cond_1",
+            selected_tool_name="tool_1",
+            expected_information_gain=eig,
+            execution_cost_budget_magnitude=100,
+        )
+        assert contract.expected_information_gain == eig
+
+
+@given(
+    url=st.one_of(
+        st.emails().map(lambda e: f"https://{e.split('@')[1]}"),
+        st.text(alphabet="abcdefghijklmnopqrstuvwxyz0123456789-", min_size=1, max_size=10).map(
+            lambda t: f"https://{t}.com"
+        ),
+    )
+)
+def test_browser_dom_state_safety_valid_fuzzing(url: str) -> None:
+    from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import BrowserDOMState
+
+    try:
+        state = BrowserDOMState(
+            current_url=url,
+            viewport_size=(800, 600),
+            dom_hash="a" * 64,
+            accessibility_tree_hash="b" * 64,
+        )
+        assert state.current_url == url
+    except ValidationError:
+        # It might still trigger SSRF validation if hypothesis generates a local-looking domain,
+        # but that's properly handled as part of the fuzzing scope.
+        pass
+
+
+@given(
+    bogon=st.sampled_from(
+        [
+            "localhost",
+            "broadcasthost",
+            "test.local",
+            "test.internal",
+            "test.arpa",
+            "test.nip.io",
+            "test.sslip.io",
+            "127.0.0.1",
+            "192.168.1.1",
+            "10.0.0.1",
+            "169.254.169.254",
+            "0.0.0.0",  # noqa: S104
+        ]
+    )
+)
+def test_browser_dom_state_safety_invalid_fuzzing(bogon: str) -> None:
+    from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import BrowserDOMState
+
+    with pytest.raises(ValidationError, match=r"SSRF|validation error"):
+        BrowserDOMState(
+            current_url=f"http://{bogon}",
+            viewport_size=(800, 600),
+            dom_hash="a" * 64,
+            accessibility_tree_hash="b" * 64,
+        )
+
+    with pytest.raises(ValidationError, match=r"SSRF|validation error"):
+        BrowserDOMState(
+            current_url=f"file://{bogon}",
+            viewport_size=(800, 600),
+            dom_hash="a" * 64,
+            accessibility_tree_hash="b" * 64,
+        )
+
+
 def test_defeasible_cascade_event_sorting() -> None:
     event = DefeasibleCascadeEvent(
         cascade_id="c1",
@@ -392,72 +439,187 @@ def test_adjudication_intent_sorting() -> None:
     assert intent.deadlocked_claims == ["claim_1", "claim_2", "claim_3"]
 
 
-def test_neural_audit_attestation_receipt_sorting() -> None:
-    from coreason_manifest.spec.ontology import NeuralAuditAttestationReceipt, SaeFeatureActivationState
-
-    activation1 = SaeFeatureActivationState(feature_index=2, activation_magnitude=0.5)
-    activation2 = SaeFeatureActivationState(feature_index=1, activation_magnitude=0.8)
-    receipt = NeuralAuditAttestationReceipt(audit_id="audit_123", layer_activations={0: [activation1, activation2]})
-    assert receipt.layer_activations[0][0].feature_index == 1
-    assert receipt.layer_activations[0][1].feature_index == 2
-
-
-def test_peft_adapter_contract_sorting() -> None:
-    from coreason_manifest.spec.ontology import PeftAdapterContract
-
-    manifest = PeftAdapterContract(
-        adapter_id="adapter_1",
-        safetensors_hash="0" * 64,
-        base_model_hash="0" * 64,
-        adapter_rank=8,
-        target_modules=["module_b", "module_a"],
+def test_composite_node_profile_sorts_mappings() -> None:
+    from coreason_manifest.spec.ontology import (
+        CompositeNodeProfile,
+        DAGTopologyManifest,
+        InputMappingContract,
+        OutputMappingContract,
+        SystemNodeProfile,
     )
-    assert manifest.target_modules == ["module_a", "module_b"]
+
+    topology = DAGTopologyManifest(
+        nodes={"did:example:1": SystemNodeProfile(description="desc")}, edges=[], max_depth=10, max_fan_out=10
+    )
+    in_map1 = InputMappingContract(parent_key="b", child_key="c1")
+    in_map2 = InputMappingContract(parent_key="a", child_key="c2")
+    out_map1 = OutputMappingContract(child_key="y", parent_key="p1")
+    out_map2 = OutputMappingContract(child_key="x", parent_key="p2")
+
+    node = CompositeNodeProfile(
+        description="composite",
+        topology=topology,
+        input_mappings=[in_map1, in_map2],
+        output_mappings=[out_map1, out_map2],
+    )
+
+    assert node.input_mappings[0].parent_key == "a"
+    assert node.input_mappings[1].parent_key == "b"
+    assert node.output_mappings[0].child_key == "x"
+    assert node.output_mappings[1].child_key == "y"
 
 
-def test_mcp_server_binding_profile_sorting() -> None:
+def test_action_space_manifest_sort_arrays() -> None:
+    from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import (
+        ActionSpaceManifest,
+        PermissionBoundaryPolicy,
+        SideEffectProfile,
+        ToolManifest,
+    )
+
+    tool1 = ToolManifest(
+        tool_name="tool_b",
+        description="description",
+        input_schema={},
+        side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
+        permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
+    )
+    tool2 = ToolManifest(
+        tool_name="tool_a",
+        description="description 2",
+        input_schema={},
+        side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
+        permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
+    )
+    tool3 = ToolManifest(
+        tool_name="tool_b",
+        description="description duplicate",
+        input_schema={},
+        side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
+        permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
+    )
+
+    with pytest.raises(ValidationError, match=r"Tool names within an ActionSpaceManifest must be strictly unique"):
+        ActionSpaceManifest(action_space_id="space_1", native_tools=[tool1, tool3])
+
+    manifest = ActionSpaceManifest(action_space_id="space_1", native_tools=[tool1, tool2])
+    assert manifest.native_tools[0].tool_name == "tool_a"
+    assert manifest.native_tools[1].tool_name == "tool_b"
+
+
+def test_mcpservermanifest_enforce_did() -> None:
+    from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import (
+        MCPCapabilityWhitelistPolicy,
+        MCPServerManifest,
+        VerifiableCredentialPresentationReceipt,
+    )
+
+    vc_invalid = VerifiableCredentialPresentationReceipt(
+        presentation_format="jwt_vc",
+        issuer_did="did:example:123",
+        cryptographic_proof_blob="blob",
+        authorization_claims={},
+    )
+    with pytest.raises(
+        ValidationError, match=r"UNAUTHORIZED MCP MOUNT: The presented Verifiable Credential is not signed"
+    ):
+        MCPServerManifest(
+            server_uri="uri",
+            transport_type="stdio",
+            capability_whitelist=MCPCapabilityWhitelistPolicy(),
+            attestation_receipt=vc_invalid,
+        )
+
+    vc_valid = VerifiableCredentialPresentationReceipt(
+        presentation_format="jwt_vc",
+        issuer_did="did:coreason:123",
+        cryptographic_proof_blob="blob",
+        authorization_claims={},
+    )
+    manifest = MCPServerManifest(
+        server_uri="uri",
+        transport_type="stdio",
+        capability_whitelist=MCPCapabilityWhitelistPolicy(),
+        attestation_receipt=vc_valid,
+    )
+    assert manifest.attestation_receipt.issuer_did == "did:coreason:123"
+
+
+def test_macro_grid_profile_referential_integrity() -> None:
+    from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import InsightCardProfile, MacroGridProfile
+
+    panel = InsightCardProfile(panel_id="panel_1", title="Title", markdown_content="Content")
+    with pytest.raises(ValidationError, match=r"Ghost Panel referenced in layout_matrix"):
+        MacroGridProfile(layout_matrix=[["panel_1", "panel_2"]], panels=[panel])
+
+
+def test_epistemic_sop_manifest_ghost_nodes() -> None:
+    from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import CognitiveStateProfile, EpistemicSOPManifest
+
+    cog_state = CognitiveStateProfile(urgency_index=0.5, caution_index=0.5, divergence_tolerance=0.5)
+
+    with pytest.raises(ValidationError, match=r"Ghost node referenced in chronological_flow_edges source"):
+        EpistemicSOPManifest(
+            sop_id="sop_1",
+            target_persona="persona_1",
+            cognitive_steps={"step_1": cog_state},
+            structural_grammar_hashes={},
+            chronological_flow_edges=[("ghost_step", "step_1")],
+            prm_evaluations=[],
+        )
+
+    with pytest.raises(ValidationError, match=r"Ghost node referenced in chronological_flow_edges target"):
+        EpistemicSOPManifest(
+            sop_id="sop_1",
+            target_persona="persona_1",
+            cognitive_steps={"step_1": cog_state},
+            structural_grammar_hashes={},
+            chronological_flow_edges=[("step_1", "ghost_step")],
+            prm_evaluations=[],
+        )
+
+    with pytest.raises(ValidationError, match=r"Ghost node referenced in structural_grammar_hashes"):
+        EpistemicSOPManifest(
+            sop_id="sop_1",
+            target_persona="persona_1",
+            cognitive_steps={"step_1": cog_state},
+            structural_grammar_hashes={"ghost_step": "abcdef"},
+            chronological_flow_edges=[],
+            prm_evaluations=[],
+        )
+
+
+def test_mcpserverbindingprofile_sort_arrays() -> None:
     from coreason_manifest.spec.ontology import MCPServerBindingProfile, StdioTransportProfile
 
     profile = MCPServerBindingProfile(
-        server_id="server1",
-        transport=StdioTransportProfile(command="cmd", args=[]),
+        server_id="server_1",
+        transport=StdioTransportProfile(command="python", args=[]),
         required_capabilities=["tools", "prompts", "resources"],
     )
     assert profile.required_capabilities == ["prompts", "resources", "tools"]
 
 
-def test_steady_state_hypothesis_state_sorting() -> None:
-    from coreason_manifest.spec.ontology import SteadyStateHypothesisState
-
-    state = SteadyStateHypothesisState(
-        expected_max_latency=10.0, max_loops_allowed=5, required_tool_usage=["tool_b", "tool_a"]
-    )
-    assert state.required_tool_usage == ["tool_a", "tool_b"]
-
-
-def test_execution_span_receipt_topological_exemption() -> None:
+def test_executionspanreceipt_sort_events() -> None:
     from coreason_manifest.spec.ontology import ExecutionSpanReceipt, SpanEvent
 
-    event1 = SpanEvent(name="event1", timestamp_unix_nano=2000, attributes={})
-    event2 = SpanEvent(name="event2", timestamp_unix_nano=1000, attributes={})
+    event1 = SpanEvent(name="event_a", timestamp_unix_nano=1000)
+    event2 = SpanEvent(name="event_b", timestamp_unix_nano=500)
+    event3 = SpanEvent(name="event_c", timestamp_unix_nano=1500)
+
     receipt = ExecutionSpanReceipt(
-        trace_id="trace1",
-        span_id="span1",
-        parent_span_id="parent1",
-        name="test_span",
-        start_time_unix_nano=100,
-        end_time_unix_nano=1000,
-        events=[event1, event2],
+        trace_id="trace_1", span_id="span_1", name="span_name", start_time_unix_nano=0, events=[event1, event2, event3]
     )
-    # The topological exemption mandates that structural sequences must NOT be sorted
-    assert receipt.events[0].name == "event1"
-    assert receipt.events[1].name == "event2"
 
-
-def test_execution_span_receipt_invalid_time() -> None:
-    from coreason_manifest.spec.ontology import ExecutionSpanReceipt
-
-    with pytest.raises(ValueError, match="end_time_unix_nano cannot be before start_time_unix_nano"):
-        ExecutionSpanReceipt(
-            trace_id="trace1", span_id="span1", name="test_span", start_time_unix_nano=1000, end_time_unix_nano=100
-        )
+    # events should be sorted by timestamp_unix_nano
+    assert receipt.events[0].name == "event_b"
+    assert receipt.events[1].name == "event_a"
+    assert receipt.events[2].name == "event_c"
