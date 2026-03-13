@@ -4,6 +4,7 @@ site_url = "https://coreason-ai.github.io/coreason_manifest/"
 repo_name = "CoReason-AI/coreason_manifest"
 repo_url = "https://github.com/CoReason-AI/coreason_manifest"
 
+[project.theme]
 features = [
     "navigation.instant",
     "navigation.tracking",
@@ -12,9 +13,11 @@ features = [
     "search.highlight"
 ]
 
+[project.plugins.search]
+
+[project.plugins.mkdocstrings]
 [project.plugins.mkdocstrings.handlers.python]
 paths = ["src/"]
-
 [project.plugins.mkdocstrings.handlers.python.options]
 show_root_heading = true
 show_bases = true
