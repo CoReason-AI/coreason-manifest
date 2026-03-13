@@ -505,3 +505,20 @@ def test_mcpserverbindingprofile_sort_arrays() -> None:
         required_capabilities=["tools", "prompts", "resources"],
     )
     assert profile.required_capabilities == ["prompts", "resources", "tools"]
+
+
+def test_executionspanreceipt_sort_events() -> None:
+    from coreason_manifest.spec.ontology import ExecutionSpanReceipt, SpanEvent
+
+    event1 = SpanEvent(name="event_a", timestamp_unix_nano=1000)
+    event2 = SpanEvent(name="event_b", timestamp_unix_nano=500)
+    event3 = SpanEvent(name="event_c", timestamp_unix_nano=1500)
+
+    receipt = ExecutionSpanReceipt(
+        trace_id="trace_1", span_id="span_1", name="span_name", start_time_unix_nano=0, events=[event1, event2, event3]
+    )
+
+    # events should be sorted by timestamp_unix_nano
+    assert receipt.events[0].name == "event_b"
+    assert receipt.events[1].name == "event_a"
+    assert receipt.events[2].name == "event_c"
