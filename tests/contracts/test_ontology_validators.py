@@ -634,21 +634,22 @@ def test_executionspanreceipt_sort_events() -> None:
     assert receipt.events[1].name == "event_a"
     assert receipt.events[2].name == "event_c"
 
-def test_causal_explanation_event_sorts_attributions() -> None:
-    from coreason_manifest.spec.ontology import CausalExplanationEvent, CollectiveIntelligenceProfile, ShapleyAttributionReceipt
 
-    ci_profile = CollectiveIntelligenceProfile(
-        synergy_index=0.8,
-        coordination_score=0.9,
-        information_integration=0.7
+def test_causal_explanation_event_sorts_attributions() -> None:
+    from coreason_manifest.spec.ontology import (
+        CausalExplanationEvent,
+        CollectiveIntelligenceProfile,
+        ShapleyAttributionReceipt,
     )
+
+    ci_profile = CollectiveIntelligenceProfile(synergy_index=0.8, coordination_score=0.9, information_integration=0.7)
 
     receipt_b = ShapleyAttributionReceipt(
         target_node_id="did:coreason:node-b",
         causal_attribution_score=0.4,
         normalized_contribution_percentage=0.4,
         confidence_interval_lower=0.3,
-        confidence_interval_upper=0.5
+        confidence_interval_upper=0.5,
     )
 
     receipt_a = ShapleyAttributionReceipt(
@@ -656,7 +657,7 @@ def test_causal_explanation_event_sorts_attributions() -> None:
         causal_attribution_score=0.6,
         normalized_contribution_percentage=0.6,
         confidence_interval_lower=0.5,
-        confidence_interval_upper=0.7
+        confidence_interval_upper=0.7,
     )
 
     event = CausalExplanationEvent(
@@ -664,7 +665,7 @@ def test_causal_explanation_event_sorts_attributions() -> None:
         timestamp=123456.0,
         target_outcome_event_id="test_outcome_1",
         collective_intelligence=ci_profile,
-        agent_attributions=[receipt_b, receipt_a]
+        agent_attributions=[receipt_b, receipt_a],
     )
 
     assert event.agent_attributions[0].target_node_id == "did:coreason:node-a"
