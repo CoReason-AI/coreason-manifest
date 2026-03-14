@@ -2192,7 +2192,9 @@ class ComplianceRatingManifest(CoreasonBaseState):
                 f"Compliance Violation: Datasets with a claimed grade of {self.claimed_grade} are rejected."
             )
 
-        computed_score = (self.c2pa_presence_score + self.opt_out_mechanisms_score + self.licensing_score) / 3.0
+        computed_score = round(
+            (self.c2pa_presence_score + self.opt_out_mechanisms_score + self.licensing_score) / 3.0, 5
+        )
 
         # Simple mathematical threshold for grades
         if computed_score >= 0.9:
