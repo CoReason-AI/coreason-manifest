@@ -2158,6 +2158,110 @@ class EpistemicArgumentGraphState(CoreasonBaseState):
     )
 
 
+class CRSGrade(StrEnum):
+    """
+    Compliance Rating Scheme grades for datasets.
+    """
+
+    A = "A"
+    B = "B"
+    C = "C"
+    D = "D"
+    E = "E"
+    F = "F"
+    G = "G"
+
+
+class ComplianceRatingManifest(CoreasonBaseState):
+    """
+    A mathematical boundary that scores external datasets on transparency, accountability,
+    and security before they enter the swarm.
+    """
+
+    claimed_grade: CRSGrade = Field(description="The declared compliance grade.")
+    c2pa_presence_score: float = Field(ge=0.0, le=1.0, description="Score representing the extent of C2PA provenance.")
+    opt_out_mechanisms_score: float = Field(
+        ge=0.0, le=1.0, description="Score representing the availability of opt-out mechanisms."
+    )
+    licensing_score: float = Field(ge=0.0, le=1.0, description="Score representing clarity and safety of licensing.")
+
+    @model_validator(mode="after")
+    def validate_grade_and_score(self) -> Self:
+        if self.claimed_grade in (CRSGrade.F, CRSGrade.G):
+            raise ValueError(
+                f"Compliance Violation: Datasets with a claimed grade of {self.claimed_grade} are rejected."
+            )
+
+        computed_score = (self.c2pa_presence_score + self.opt_out_mechanisms_score + self.licensing_score) / 3.0
+
+        # Simple mathematical threshold for grades
+        if computed_score >= 0.9:
+            expected_grade = CRSGrade.A
+        elif computed_score >= 0.8:
+            expected_grade = CRSGrade.B
+        elif computed_score >= 0.7:
+            expected_grade = CRSGrade.C
+        elif computed_score >= 0.6:
+            expected_grade = CRSGrade.D
+        else:
+            expected_grade = CRSGrade.E
+
+        if self.claimed_grade != expected_grade:
+            raise ValueError(
+                f"Mathematical Contradiction: The computed score {computed_score:.2f} "
+                f"does not match the claimed grade {self.claimed_grade}."
+            )
+
+        return self
+
+
+class C2PAExportClaim(CoreasonBaseState):
+    """
+    A structural bridge mapping internal cryptographic receipts to industry-standard C2PA manifests.
+    """
+
+    watermark_receipt_hash: str = Field(
+        pattern="^[a-f0-9]{64}$",
+        description="The SHA-256 hash of the internal LineageWatermarkReceipt.",
+    )
+    c2pa_assertions: list[dict[str, Any]] = Field(
+        default_factory=list,
+        description="The list of standard C2PA assertion structures.",
+    )
+    # Note: c2pa_assertions is a structurally ordered sequence (C2PA standard assertions) and MUST NOT be sorted.
+    c2pa_ingredients: list[dict[str, Any]] = Field(
+        default_factory=list,
+        description="The list of standard C2PA ingredient structures.",
+    )
+    # Note: c2pa_ingredients is a structurally ordered sequence (C2PA standard ingredients) and MUST NOT be sorted.
+
+    @field_validator("c2pa_assertions", "c2pa_ingredients", mode="before")
+    @classmethod
+    def enforce_payload_topology(cls, v: Any) -> Any:
+        return _validate_payload_bounds(v)
+
+
+class EnvironmentContextManifest(CoreasonBaseState):
+    """
+    Capturing the deterministic state of the hardware/software environment at the exact moment of reasoning.
+    """
+
+    gpu_architecture: str = Field(description="The hardware GPU architecture.")
+    vram_allocated: int = Field(ge=0, description="The allocated VRAM in bytes.")
+    python_version: str = Field(description="The Python interpreter version.")
+    dependency_hashes: dict[str, str] = Field(
+        description="A strictly typed dictionary mapping dependency names to their SHA-256 hashes. AGENT INSTRUCTION: This matrix is deterministically sorted by CoreasonBaseState natively."  # noqa: E501
+    )
+    cryptographic_nonces: list[str] = Field(
+        description="The strict array of cryptographic nonces present during execution."
+    )
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "cryptographic_nonces", sorted(self.cryptographic_nonces))
+        return self
+
+
 class ExecutionNodeReceipt(CoreasonBaseState):
     """
     Cryptographic state of an execution node in a Merkle DAG trace.
@@ -3152,6 +3256,32 @@ class MCPClientIntent(BoundedJSONRPCIntent):
     """Strict JSON-RPC 2.0 structure for MCP client messages."""
 
     method: Literal["mcp.ui.emit_intent"] = Field(..., description="Method for intent bubbling.")
+
+
+class QueryEpistemicLineageRequest(BoundedJSONRPCIntent):
+    """
+    Standardized Model Context Protocol (MCP) tool schema that allows external LLMs
+    to query our cryptographic Merkle-DAGs.
+
+    This is purely a schema representing the intent to query the graph.
+    """
+
+    method: Literal["mcp.graph.query_epistemic_lineage"] = Field(
+        default="mcp.graph.query_epistemic_lineage", description="Method to query epistemic lineage."
+    )
+
+
+class QueryEpistemicLineageResponse(CoreasonBaseState):
+    """Response schema for an epistemic lineage query."""
+
+    jsonrpc: Literal["2.0"] = Field(default="2.0", description="JSON-RPC version.")
+    id: str | int | None = Field(default=None, description="Unique request identifier corresponding to the request.")
+    result: dict[str, Any] = Field(description="The strict JSON-RPC 2.0 result payload containing graph lineage data.")
+
+    @field_validator("result", mode="before")
+    @classmethod
+    def enforce_payload_topology(cls, v: Any) -> Any:
+        return _validate_payload_bounds(v)
 
 
 class MCPPromptReferenceState(CoreasonBaseState):
