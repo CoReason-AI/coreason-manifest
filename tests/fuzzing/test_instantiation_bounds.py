@@ -23,6 +23,7 @@ from coreason_manifest.spec.ontology import (
     SpatialBoundingBoxProfile,
     StateHydrationManifest,
     SystemNodeProfile,
+    TaxonomicRoutingPolicy,
 )
 
 valid_node_id_st = st.from_regex(r"^did:[a-z0-9]+:[a-zA-Z0-9.\-_:]+$", fullmatch=True)
@@ -194,4 +195,31 @@ def test_payload_exhaustion_fuzzing(payload: dict[str, Any]) -> None:
             crystallized_ledger_cids=["a" * 64],
             working_context_variables=payload,
             max_retained_tokens=1000,
+        )
+
+
+@given(
+    target_heuristic=st.text().filter(
+        lambda x: x not in ["chronological", "entity_centric", "semantic_cluster", "confidence_decay"]
+    )
+)
+def test_categorical_hallucination_fuzzing(target_heuristic: str) -> None:
+    """Categorical Hallucination Fuzzing: Fuzz TaxonomyRoutingPolicy with invalid literal categories."""
+    with pytest.raises((ValidationError, ValueError)):
+        TaxonomicRoutingPolicy(
+            policy_id="test",
+            intent_to_heuristic_matrix={},
+            fallback_heuristic=target_heuristic,  # type: ignore
+        )
+
+
+@given(massive_key=st.text(min_size=10001))
+@pytest.mark.xfail(strict=False, reason="Epic 3 will handle the refactoring of the God Context")
+def test_dictionary_bombing_fuzzing(massive_key: str) -> None:
+    """Dictionary Bombing Fuzzing: Attempt to pass a massive key to intent_to_heuristic_matrix."""
+    with pytest.raises((ValidationError, ValueError)):
+        TaxonomicRoutingPolicy(
+            policy_id="test",
+            intent_to_heuristic_matrix={massive_key: "chronological"},
+            fallback_heuristic="chronological",
         )
