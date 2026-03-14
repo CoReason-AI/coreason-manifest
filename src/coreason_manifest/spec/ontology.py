@@ -1559,6 +1559,50 @@ class CausalAttributionState(CoreasonBaseState):
     )
 
 
+class CollectiveIntelligenceProfile(CoreasonBaseState):
+    synergy_index: float = Field(
+        description="The mathematical measure of the degree of emergence. A high SI indicates strong positive emergence."  # noqa: E501
+    )
+    coordination_score: float = Field(
+        description="The temporal alignment measuring the extent to which agents coordinate their actions over time."
+    )
+    information_integration: float = Field(
+        description="The conditional mutual information quantifying the information flow and tight coupling between agents."  # noqa: E501
+    )
+
+
+class ShapleyAttributionReceipt(CoreasonBaseState):
+    target_node_id: NodeIdentifierState = Field(description="The agent whose causal influence is being measured.")
+    causal_attribution_score: float = Field(
+        description="The exact Shapley value (\\phi_i) satisfying efficiency, symmetry, and additivity axioms."
+    )
+    normalized_contribution_percentage: float = Field(
+        ge=0.0, le=1.0, description="The relative fractional contribution bounded between 0.0 and 1.0."
+    )
+    confidence_interval_lower: float = Field(
+        description="The bootstrap confidence bounds of the Monte Carlo approximation (lower bound)."
+    )
+    confidence_interval_upper: float = Field(
+        description="The bootstrap confidence bounds of the Monte Carlo approximation (upper bound)."
+    )
+
+
+class CausalExplanationEvent(BaseStateEvent):
+    type: Literal["causal_explanation"] = Field(
+        default="causal_explanation", description="Discriminator type for a causal explanation event."
+    )
+    target_outcome_event_id: str = Field(description="The CID of the collective outcome being explained.")
+    collective_intelligence: CollectiveIntelligenceProfile = Field(description="The system-level emergence metrics.")
+    agent_attributions: list[ShapleyAttributionReceipt] = Field(
+        description="The array of individual causal contributions."
+    )
+
+    @model_validator(mode="after")
+    def sort_agent_attributions(self) -> Self:
+        object.__setattr__(self, "agent_attributions", sorted(self.agent_attributions, key=lambda x: x.target_node_id))
+        return self
+
+
 class CausalDirectedEdgeState(CoreasonBaseState):
     source_variable: str = Field(min_length=1, description="The independent variable $X$.")
     target_variable: str = Field(min_length=1, description="The dependent variable $Y$.")
@@ -5473,7 +5517,8 @@ type AnyStateEvent = Annotated[
     | CognitivePredictionReceipt
     | EpistemicAxiomVerificationReceipt
     | CognitiveRewardEvaluationReceipt
-    | EpistemicFlowStateReceipt,
+    | EpistemicFlowStateReceipt
+    | CausalExplanationEvent,
     Field(discriminator="type", description="A discriminated union of state events."),
 ]
 
@@ -5570,3 +5615,4 @@ CognitiveDetailedBalanceContract.model_rebuild()
 EpistemicFlowStateReceipt.model_rebuild()
 TopologicalRewardContract.model_rebuild()
 DifferentiableLogicConstraint.model_rebuild()
+CausalExplanationEvent.model_rebuild()
