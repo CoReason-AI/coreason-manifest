@@ -83,6 +83,9 @@ jobs:
             echo "Skipping PR diff for non-pull_request event"
           fi
 
+      - name: Instantiation Bounds Gate
+        run: uv run scripts/evaluate_instantiation_bounds.py
+
       - name: Install Dependencies
         run: uv sync
 

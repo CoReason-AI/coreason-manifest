@@ -44,3 +44,10 @@ repos:
         pass_filenames: false
         types: [python]
         files: ^src/coreason_manifest/spec/.*$
+      - id: evaluate-instantiation-bounds
+        name: Evaluate Instantiation Bounds
+        entry: uv run python scripts/evaluate_instantiation_bounds.py
+        language: system
+        pass_filenames: false
+        types: [python]
+        files: ^src/coreason_manifest/spec/.*$
