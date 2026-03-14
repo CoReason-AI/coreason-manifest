@@ -471,10 +471,6 @@ def apply_state_differential(
             from_path = patch.from_path
             if from_path is None:
                 raise ValueError("from_path is mathematically required for copy/move operations.")
-
-            if path.startswith(from_path + "/"):
-                raise ValueError(f"The 'from' location MUST NOT be a proper prefix of the 'path' location: {path}")
-
             try:
                 from_target, from_last = resolve_from_path(from_path)
                 val = extract_from_target(from_target, from_last)
@@ -493,15 +489,6 @@ def apply_state_differential(
                 else:
                     try:
                         idx = int(last_part)
-
-                        if patch.op == "move" and from_target is target:
-                            try:
-                                from_idx = int(from_last)
-                                if from_idx < int(last_part):
-                                    idx -= 1
-                            except ValueError:
-                                pass
-
                         if idx < 0 or idx > len(target):
                             raise ValueError(f"Index out of bounds: {path}")
                         target.insert(idx, val)
