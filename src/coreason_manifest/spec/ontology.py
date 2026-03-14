@@ -1480,6 +1480,8 @@ class BrowserDOMState(CoreasonBaseState):
             raise ValueError("SSRF topological violation detected: file:// schema is forbidden")
         hostname = parsed.hostname
         if not hostname:
+            if parsed.scheme in ("http", "https"):
+                raise ValueError("SSRF topological violation detected: Invalid hostname in HTTP URI")
             return url
         hostname_lower = hostname.lower()
         if hostname_lower in {"localhost", "broadcasthost"} or hostname_lower.endswith(
@@ -2450,8 +2452,8 @@ class GenerativeManifoldSLA(CoreasonBaseState):
     @model_validator(mode="after")
     def enforce_geometric_bounds(self) -> Self:
         """Mathematically guarantees the configuration cannot authorize an OOM explosion."""
-        if self.max_topological_depth * self.max_node_fanout > 1000:
-            raise ValueError("Geometric explosion risk: max_topological_depth * max_node_fanout must be <= 1000.")
+        if self.max_node_fanout**self.max_topological_depth > 1000:
+            raise ValueError("Geometric explosion risk: max_node_fanout ** max_topological_depth must be <= 1000.")
         return self
 
 
