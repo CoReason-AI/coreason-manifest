@@ -3498,8 +3498,7 @@ class MultimodalArtifactReceipt(CoreasonBaseState):
     )
     temporal_ingest_timestamp: float = Field(description="The UNIX timestamp anchoring the genesis block.")
     compliance_rating: ComplianceRatingManifest | None = Field(
-        default=None,
-        description="The mathematical compliance firewall the artifact must pass before ingestion."
+        default=None, description="The mathematical compliance firewall the artifact must pass before ingestion."
     )
 
 
