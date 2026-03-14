@@ -12,6 +12,7 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
+    C2PAAssertion,
     C2PAExportClaim,
     ComplianceRatingManifest,
     CRSGrade,
@@ -99,6 +100,8 @@ def test_c2pa_export_claim_validation() -> None:
         C2PAExportClaim(watermark_receipt_hash="invalid_hash", c2pa_assertions=[], c2pa_ingredients=[])
 
     valid_claim = C2PAExportClaim(
-        watermark_receipt_hash="a" * 64, c2pa_assertions=[{"type": "stds.c2pa.action", "data": {}}], c2pa_ingredients=[]
+        watermark_receipt_hash="a" * 64,
+        c2pa_assertions=[C2PAAssertion(assertion_type="stds.c2pa.action", data={})],
+        c2pa_ingredients=[],
     )
     assert valid_claim.watermark_receipt_hash == "a" * 64

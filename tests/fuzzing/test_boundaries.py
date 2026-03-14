@@ -359,7 +359,11 @@ def test_c2pa_export_claim_recursive_payload(params: dict[str, Any]) -> None:
     # We use contextlib to suppress the expected ValidationErrors.
     import contextlib
 
-    from coreason_manifest.spec.ontology import C2PAExportClaim
+    from coreason_manifest.spec.ontology import C2PAAssertion, C2PAExportClaim
 
     with contextlib.suppress(ValidationError):
-        C2PAExportClaim(watermark_receipt_hash="a" * 64, c2pa_assertions=[params], c2pa_ingredients=[])
+        C2PAExportClaim(
+            watermark_receipt_hash="a" * 64,
+            c2pa_assertions=[C2PAAssertion(assertion_type="stds.c2pa.action", data=params)],
+            c2pa_ingredients=[],
+        )

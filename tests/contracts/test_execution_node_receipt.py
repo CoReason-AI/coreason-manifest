@@ -16,7 +16,7 @@ import pytest
 from hypothesis import HealthCheck, given, settings
 from pydantic import ValidationError
 
-from coreason_manifest.spec.ontology import ExecutionNodeReceipt
+from coreason_manifest.spec.ontology import EnvironmentContextManifest, ExecutionNodeReceipt
 
 
 # 1. Atomic Test: Lineage Validation
@@ -24,6 +24,21 @@ def test_execution_node_receipt_orphaned_lineage() -> None:
     """Prove the receipt structurally rejects orphaned lineages."""
     with pytest.raises(ValidationError, match="Orphaned Lineage"):
         ExecutionNodeReceipt(request_id="req-1", parent_request_id="req-0", root_request_id=None, inputs={}, outputs={})
+
+
+# 1.5. Atomic Test: Environment Context
+def test_execution_node_receipt_with_environment_context() -> None:
+    """Prove the receipt correctly integrates EnvironmentContextManifest."""
+    env = EnvironmentContextManifest(
+        gpu_architecture="H100",
+        vram_allocated=8192,
+        python_version="3.12.0",
+        dependency_hashes={"a": "1"},
+        cryptographic_nonces=["xyz"],
+    )
+    receipt = ExecutionNodeReceipt(request_id="req-env", inputs={}, outputs={}, environment_context=env)
+    assert receipt.environment_context is not None
+    assert receipt.environment_context.gpu_architecture == "H100"
 
 
 # 2. Define the Valid Mathematical Space for Payloads
