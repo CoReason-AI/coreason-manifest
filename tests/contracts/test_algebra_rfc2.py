@@ -17,7 +17,7 @@ def test_move_exception():
         patches=[StateMutationIntent(op="move", path="/a/2", **{"from": "/a/x"})],
     )
     current_state = {"a": [1, 2, 3]}
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Invalid from_path operation: Invalid index"):
         apply_state_differential(current_state, manifest)
 
 
