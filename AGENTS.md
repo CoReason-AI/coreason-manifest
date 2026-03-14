@@ -247,6 +247,11 @@ You are strictly forbidden from introducing "Active" or "Runtime" logic into thi
     * *Implementation:* To invoke this exemption, you MUST physically anchor the structural reality into the AST using an inline comment immediately below the field definition:
       `# Note: <field_name> is a structurally ordered sequence (<Reason>) and MUST NOT be sorted.`
 
+### **The Strict Instantiation Boundary (Anti-Lazy Validation Mandate)**
+* **The Physics of State Creation:** Because all models inherit from `CoreasonBaseState` (`frozen=True`), an object becomes a mathematically immutable N-dimensional coordinate the exact millisecond it is created. Therefore, **lazy validation or post-init bounding is mathematically impossible and strictly forbidden.**
+* **The Pre-Flight Bounding Rule:** All topological boundaries, Euclidean limits, BFT calculations, and SSRF loopback quarantines MUST be enforced strictly during initiation via Pydantic `@field_validator` and `@model_validator(mode="after")` hooks. 
+* **Preventing Epistemic Contagion:** If a structural boundary or payload size limit is not mathematically proven during the initial instantiation cycle, the payload must be aggressively rejected (System 2 Remediation) before it enters the working context or consumes compute budget. You must never allow unvalidated data to sit in memory awaiting a later validation call.
+
 ### **Logging (Passive Pattern)**
 * **Library Responsibility:** Expose a logger object (`loguru.logger`) but **DO NOT** configure it.
 * **Consumer Responsibility:** The consuming application (Builder/Engine) will configure sinks, formats, and levels.
