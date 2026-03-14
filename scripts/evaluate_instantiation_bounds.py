@@ -14,20 +14,21 @@ from pathlib import Path
 
 
 def is_forbidden_config(node: ast.expr) -> bool:
-    """Check if model_config assignment attempts to set forbidden properties to False."""
+    """Check if model_config assignment attempts to set forbidden properties to False or variable."""
     forbidden_keys = {"frozen", "strict", "validate_assignment"}
 
-    if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "ConfigDict":
+    if isinstance(node, ast.Call) and (
+        getattr(node.func, "id", None) == "ConfigDict" or getattr(node.func, "attr", None) == "ConfigDict"
+    ):
         for kw in node.keywords:
-            if kw.arg in forbidden_keys and isinstance(kw.value, ast.Constant) and kw.value.value is False:
+            if kw.arg in forbidden_keys and not (isinstance(kw.value, ast.Constant) and kw.value.value is True):
                 return True
     elif isinstance(node, ast.Dict):
         for key, value in zip(node.keys, node.values, strict=False):
             if (
                 isinstance(key, ast.Constant)
                 and key.value in forbidden_keys
-                and isinstance(value, ast.Constant)
-                and value.value is False
+                and not (isinstance(value, ast.Constant) and value.value is True)
             ):
                 return True
     return False
