@@ -1969,6 +1969,55 @@
       "title": "BypassReceipt",
       "type": "object"
     },
+    "C2PAExportClaim": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nA structural bridge mapping internal cryptographic receipts to industry-standard C2PA manifests.",
+      "properties": {
+        "watermark_receipt_hash": {
+          "description": "The SHA-256 hash of the internal LineageWatermarkReceipt.",
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Watermark Receipt Hash",
+          "type": "string"
+        },
+        "c2pa_assertions": {
+          "description": "The list of standard C2PA assertion structures.",
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "C2Pa Assertions",
+          "type": "array"
+        },
+        "c2pa_ingredients": {
+          "description": "The list of standard C2PA ingredient structures.",
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "C2Pa Ingredients",
+          "type": "array"
+        }
+      },
+      "required": [
+        "watermark_receipt_hash"
+      ],
+      "title": "C2PAExportClaim",
+      "type": "object"
+    },
+    "CRSGrade": {
+      "description": "Compliance Rating Scheme grades for datasets.",
+      "enum": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G"
+      ],
+      "title": "CRSGrade",
+      "type": "string"
+    },
     "CausalAttributionState": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology",
@@ -2534,6 +2583,45 @@
         "requires_abductive_escalation"
       ],
       "title": "CognitiveUncertaintyProfile",
+      "type": "object"
+    },
+    "ComplianceRatingManifest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nA mathematical boundary that scores external datasets on transparency, accountability,\nand security before they enter the swarm.",
+      "properties": {
+        "claimed_grade": {
+          "$ref": "#/$defs/CRSGrade",
+          "description": "The declared compliance grade."
+        },
+        "c2pa_presence_score": {
+          "description": "Score representing the extent of C2PA provenance.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "C2Pa Presence Score",
+          "type": "number"
+        },
+        "opt_out_mechanisms_score": {
+          "description": "Score representing the availability of opt-out mechanisms.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Opt Out Mechanisms Score",
+          "type": "number"
+        },
+        "licensing_score": {
+          "description": "Score representing clarity and safety of licensing.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Licensing Score",
+          "type": "number"
+        }
+      },
+      "required": [
+        "claimed_grade",
+        "c2pa_presence_score",
+        "opt_out_mechanisms_score",
+        "licensing_score"
+      ],
+      "title": "ComplianceRatingManifest",
       "type": "object"
     },
     "CompositeNodeProfile": {
@@ -4311,6 +4399,53 @@
         "fusion_function"
       ],
       "title": "EnsembleTopologyProfile",
+      "type": "object"
+    },
+    "EnvironmentContextManifest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nCapturing the deterministic state of the hardware/software environment at the exact moment of reasoning.",
+      "properties": {
+        "gpu_architecture": {
+          "description": "The hardware GPU architecture.",
+          "title": "Gpu Architecture",
+          "type": "string"
+        },
+        "vram_allocated": {
+          "description": "The allocated VRAM in bytes.",
+          "minimum": 0,
+          "title": "Vram Allocated",
+          "type": "integer"
+        },
+        "python_version": {
+          "description": "The Python interpreter version.",
+          "title": "Python Version",
+          "type": "string"
+        },
+        "dependency_hashes": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "A strictly typed dictionary mapping dependency names to their SHA-256 hashes. AGENT INSTRUCTION: This matrix is deterministically sorted by CoreasonBaseState natively.",
+          "title": "Dependency Hashes",
+          "type": "object"
+        },
+        "cryptographic_nonces": {
+          "description": "The strict array of cryptographic nonces present during execution.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Cryptographic Nonces",
+          "type": "array"
+        }
+      },
+      "required": [
+        "gpu_architecture",
+        "vram_allocated",
+        "python_version",
+        "dependency_hashes",
+        "cryptographic_nonces"
+      ],
+      "title": "EnvironmentContextManifest",
       "type": "object"
     },
     "EphemeralNamespacePartitionState": {
@@ -9651,6 +9786,100 @@
         "reason"
       ],
       "title": "QuarantineIntent",
+      "type": "object"
+    },
+    "QueryEpistemicLineageRequest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nStandardized Model Context Protocol (MCP) tool schema that allows external LLMs\nto query our cryptographic Merkle-DAGs.\n\nThis is purely a schema representing the intent to query the graph.",
+      "properties": {
+        "jsonrpc": {
+          "const": "2.0",
+          "description": "JSON-RPC version.",
+          "title": "Jsonrpc",
+          "type": "string"
+        },
+        "method": {
+          "const": "mcp.graph.query_epistemic_lineage",
+          "default": "mcp.graph.query_epistemic_lineage",
+          "description": "Method to query epistemic lineage.",
+          "title": "Method",
+          "type": "string"
+        },
+        "params": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Payload parameters.",
+          "title": "Params"
+        },
+        "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Unique request identifier.",
+          "title": "Id"
+        }
+      },
+      "required": [
+        "jsonrpc"
+      ],
+      "title": "QueryEpistemicLineageRequest",
+      "type": "object"
+    },
+    "QueryEpistemicLineageResponse": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nResponse schema for an epistemic lineage query.",
+      "properties": {
+        "jsonrpc": {
+          "const": "2.0",
+          "default": "2.0",
+          "description": "JSON-RPC version.",
+          "title": "Jsonrpc",
+          "type": "string"
+        },
+        "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Unique request identifier corresponding to the request.",
+          "title": "Id"
+        },
+        "result": {
+          "additionalProperties": true,
+          "description": "The strict JSON-RPC 2.0 result payload containing graph lineage data.",
+          "title": "Result",
+          "type": "object"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "QueryEpistemicLineageResponse",
       "type": "object"
     },
     "QuorumPolicy": {
