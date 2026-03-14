@@ -928,6 +928,7 @@
           "barge_in": "#/$defs/BargeInInterruptEvent",
           "belief_mutation": "#/$defs/BeliefMutationEvent",
           "budget_exhaustion": "#/$defs/BudgetExhaustionEvent",
+          "causal_explanation": "#/$defs/CausalExplanationEvent",
           "cognitive_prediction": "#/$defs/CognitivePredictionReceipt",
           "cognitive_reward_evaluation": "#/$defs/CognitiveRewardEvaluationReceipt",
           "counterfactual_regret": "#/$defs/CounterfactualRegretEvent",
@@ -996,6 +997,9 @@
         },
         {
           "$ref": "#/$defs/EpistemicFlowStateReceipt"
+        },
+        {
+          "$ref": "#/$defs/CausalExplanationEvent"
         }
       ]
     },
@@ -2135,6 +2139,55 @@
       "title": "CausalDirectedEdgeState",
       "type": "object"
     },
+    "CausalExplanationEvent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "event_id": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "type": {
+          "const": "causal_explanation",
+          "default": "causal_explanation",
+          "description": "Discriminator type for a causal explanation event.",
+          "title": "Type",
+          "type": "string"
+        },
+        "target_outcome_event_id": {
+          "description": "The CID of the collective outcome being explained.",
+          "title": "Target Outcome Event Id",
+          "type": "string"
+        },
+        "collective_intelligence": {
+          "$ref": "#/$defs/CollectiveIntelligenceProfile",
+          "description": "The system-level emergence metrics."
+        },
+        "agent_attributions": {
+          "description": "The array of individual causal contributions.",
+          "items": {
+            "$ref": "#/$defs/ShapleyAttributionReceipt"
+          },
+          "title": "Agent Attributions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "event_id",
+        "timestamp",
+        "target_outcome_event_id",
+        "collective_intelligence",
+        "agent_attributions"
+      ],
+      "title": "CausalExplanationEvent",
+      "type": "object"
+    },
     "CausalIntervalProfile": {
       "enum": [
         "strictly_precedes",
@@ -2669,6 +2722,23 @@
           "maximum": 1.0,
           "minimum": 0.0,
           "title": "Licensing Score",
+    "CollectiveIntelligenceProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "synergy_index": {
+          "description": "The mathematical measure of the degree of emergence. A high SI indicates strong positive emergence.",
+          "title": "Synergy Index",
+          "type": "number"
+        },
+        "coordination_score": {
+          "description": "The temporal alignment measuring the extent to which agents coordinate their actions over time.",
+          "title": "Coordination Score",
+          "type": "number"
+        },
+        "information_integration": {
+          "description": "The conditional mutual information quantifying the information flow and tight coupling between agents.",
+          "title": "Information Integration",
           "type": "number"
         }
       },
@@ -2679,6 +2749,11 @@
         "licensing_score"
       ],
       "title": "ComplianceRatingManifest",
+        "synergy_index",
+        "coordination_score",
+        "information_integration"
+      ],
+      "title": "CollectiveIntelligenceProfile",
       "type": "object"
     },
     "CompositeNodeProfile": {
@@ -10948,6 +11023,47 @@
       ],
       "pattern": "^\\d+\\.\\d+\\.\\d+$",
       "type": "string"
+    },
+    "ShapleyAttributionReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "target_node_id": {
+          "$ref": "#/$defs/NodeIdentifierState",
+          "description": "The agent whose causal influence is being measured."
+        },
+        "causal_attribution_score": {
+          "description": "The exact Shapley value (\\phi_i) satisfying efficiency, symmetry, and additivity axioms.",
+          "title": "Causal Attribution Score",
+          "type": "number"
+        },
+        "normalized_contribution_percentage": {
+          "description": "The relative fractional contribution bounded between 0.0 and 1.0.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Normalized Contribution Percentage",
+          "type": "number"
+        },
+        "confidence_interval_lower": {
+          "description": "The bootstrap confidence bounds of the Monte Carlo approximation (lower bound).",
+          "title": "Confidence Interval Lower",
+          "type": "number"
+        },
+        "confidence_interval_upper": {
+          "description": "The bootstrap confidence bounds of the Monte Carlo approximation (upper bound).",
+          "title": "Confidence Interval Upper",
+          "type": "number"
+        }
+      },
+      "required": [
+        "target_node_id",
+        "causal_attribution_score",
+        "normalized_contribution_percentage",
+        "confidence_interval_lower",
+        "confidence_interval_upper"
+      ],
+      "title": "ShapleyAttributionReceipt",
+      "type": "object"
     },
     "SideEffectProfile": {
       "additionalProperties": false,
