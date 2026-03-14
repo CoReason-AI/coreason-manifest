@@ -88,7 +88,7 @@ def test_generative_manifold_geometric_explosion(depth: int, fanout: int) -> Non
     """Prove that GenerativeManifoldSLA mathematically rejects configurations that cause geometric explosion."""
     from hypothesis import assume
 
-    assume(fanout ** depth > 1000)
+    assume(fanout**depth > 1000)
 
     with pytest.raises(ValidationError, match="Geometric explosion risk"):
         GenerativeManifoldSLA(max_topological_depth=depth, max_node_fanout=fanout, max_synthetic_tokens=1000)
