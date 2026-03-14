@@ -4,7 +4,7 @@ from pydantic import ValidationError
 from coreason_manifest.spec.ontology import BrowserDOMState
 
 
-def test_ssrf_safety_http():
+def test_ssrf_safety_http() -> None:
     with pytest.raises(ValidationError, match="Invalid hostname in HTTP URI"):
         BrowserDOMState(
             current_url="http:///169.254.169.254",
@@ -14,7 +14,7 @@ def test_ssrf_safety_http():
         )
 
 
-def test_ssrf_safety_https():
+def test_ssrf_safety_https() -> None:
     with pytest.raises(ValidationError, match="Invalid hostname in HTTP URI"):
         BrowserDOMState(
             current_url="https:///127.0.0.1",

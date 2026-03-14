@@ -8,7 +8,7 @@ from coreason_manifest.spec.ontology import StateDifferentialManifest, StateMuta
 from coreason_manifest.utils.algebra import apply_state_differential
 
 
-def test_move_down():
+def test_move_down() -> None:
     manifest = StateDifferentialManifest(
         diff_id="test",
         author_node_id="author",
@@ -21,7 +21,7 @@ def test_move_down():
     assert new_state == {"a": [3, 1, 2]}
 
 
-def test_prefix():
+def test_prefix() -> None:
     manifest = StateDifferentialManifest(
         diff_id="test",
         author_node_id="author",

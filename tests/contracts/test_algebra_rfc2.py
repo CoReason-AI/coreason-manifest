@@ -8,7 +8,7 @@ from coreason_manifest.spec.ontology import StateDifferentialManifest, StateMuta
 from coreason_manifest.utils.algebra import apply_state_differential
 
 
-def test_move_exception():
+def test_move_exception() -> None:
     manifest = StateDifferentialManifest(
         diff_id="test",
         author_node_id="author",
