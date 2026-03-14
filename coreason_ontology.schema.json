@@ -8717,7 +8717,15 @@
           "type": "number"
         },
         "compliance_rating": {
-          "$ref": "#/$defs/ComplianceRatingManifest",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ComplianceRatingManifest"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
           "description": "The mathematical compliance firewall the artifact must pass before ingestion."
         }
       },
@@ -8725,8 +8733,7 @@
         "artifact_id",
         "mime_type",
         "byte_stream_hash",
-        "temporal_ingest_timestamp",
-        "compliance_rating"
+        "temporal_ingest_timestamp"
       ],
       "title": "MultimodalArtifactReceipt",
       "type": "object"

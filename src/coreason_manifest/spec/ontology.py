@@ -3497,7 +3497,8 @@ class MultimodalArtifactReceipt(CoreasonBaseState):
         pattern="^[a-f0-9]{64}$", description="The undeniable SHA-256 hash of the pre-transmutation byte stream."
     )
     temporal_ingest_timestamp: float = Field(description="The UNIX timestamp anchoring the genesis block.")
-    compliance_rating: ComplianceRatingManifest = Field(
+    compliance_rating: ComplianceRatingManifest | None = Field(
+        default=None,
         description="The mathematical compliance firewall the artifact must pass before ingestion."
     )
 
