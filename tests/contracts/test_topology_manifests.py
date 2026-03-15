@@ -73,8 +73,9 @@ def test_multimodal_anchor_1d_atomic_invalid(start: int | None, end: int | None,
 )
 def test_multimodal_anchor_2d_atomic_invalid(box: tuple[float, float, float, float]) -> None:
     """Prove mathematically impossible 2D spatial geometries are rejected."""
-    with pytest.raises(ValidationError, match="Spatial invariant violated"):
-        MultimodalTokenAnchorState(bounding_box=box)
+    from coreason_manifest.spec.ontology import SpatialBoundingBoxProfile
+    with pytest.raises(ValidationError, match="cannot be strictly greater than"):
+        MultimodalTokenAnchorState(bounding_box=SpatialBoundingBoxProfile(x_min=box[0], y_min=box[1], x_max=box[2], y_max=box[3]))
 
 
 # --- 3. DAG Topology Atomicity ---

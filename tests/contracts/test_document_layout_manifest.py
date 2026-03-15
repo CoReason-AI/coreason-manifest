@@ -24,11 +24,12 @@ from coreason_manifest.spec.ontology import (
 
 # 1. Base Factory for DRY Context Generation
 def build_anchor() -> MultimodalTokenAnchorState:
+    from coreason_manifest.spec.ontology import SpatialBoundingBoxProfile
     return MultimodalTokenAnchorState(
         token_span_start=0,
         token_span_end=10,
         visual_patch_hashes=[],
-        bounding_box=(0.0, 0.0, 1.0, 1.0),
+        bounding_box=SpatialBoundingBoxProfile(x_min=0.0, y_min=0.0, x_max=1.0, y_max=1.0),
         block_type="paragraph",
     )
 
