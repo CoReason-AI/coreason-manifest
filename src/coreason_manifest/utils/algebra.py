@@ -549,12 +549,6 @@ class ManifestSemanticRegistry:
             description="Core EBNF syntax constructs.",
             semantics=ontology.CORE_EBNF_SEMANTICS,
         ),
-        "mcp://coreason/semantics/token_matching": SemanticResource(
-            uri="mcp://coreason/semantics/token_matching",
-            name="Core Token Matching Algorithms",
-            description="Algorithms for VRAM token fusion and bipartite matching.",
-            semantics=ontology.CORE_TOKEN_MATCHING_SEMANTICS,
-        ),
         "mcp://coreason/semantics/token_merge_metric": SemanticResource(
             uri="mcp://coreason/semantics/token_merge_metric",
             name="Core Token Merge Metrics",
@@ -614,18 +608,6 @@ class ManifestSemanticRegistry:
             name="Core SMT Solver Outcomes",
             description="Outcomes for SMT solvers.",
             semantics=ontology.CORE_SMT_SOLVER_SEMANTICS,
-        ),
-        "mcp://coreason/semantics/xai_explanation": SemanticResource(
-            uri="mcp://coreason/semantics/xai_explanation",
-            name="Core XAI Explanation Types",
-            description="Formal Explainable AI (XAI) methodologies for concept routing.",
-            semantics=ontology.CORE_XAI_EXPLANATION_SEMANTICS,
-        ),
-        "mcp://coreason/semantics/entropy_metric": SemanticResource(
-            uri="mcp://coreason/semantics/entropy_metric",
-            name="Core Entropy Metrics",
-            description="Information-theoretic algorithms for uncertainty quantification.",
-            semantics=ontology.CORE_ENTROPY_METRIC_SEMANTICS,
         ),
     }
 
