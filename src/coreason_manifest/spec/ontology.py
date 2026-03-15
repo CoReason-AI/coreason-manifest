@@ -1207,8 +1207,6 @@ class DefeasibleRebuttalContract(CoreasonBaseState):
         return self
 
 
-
-
 class MultimodalTokenAnchorState(CoreasonBaseState):
     """AGENT INSTRUCTION: Unified multimodal grounding mapping extracted facts to strict 1D token spans and 2D visual\n
     patches."""
@@ -5559,7 +5557,6 @@ class EpistemicExtractionPolicy(CoreasonBaseState):
     def sort_arrays(self) -> Self:
         object.__setattr__(self, "required_relations", sorted(self.required_relations))
         return self
-
 
 
 class FederatedPeftContract(CoreasonBaseState):
