@@ -2220,9 +2220,7 @@ class LatentProjectionIntent(CoreasonBaseState):
     synthetic_target_vector: VectorEmbeddingState = Field(
         description="The strictly typed embedding tensor directing the query."
     )
-    top_k_candidates: int = Field(
-        gt=0, description="The maximum number of nodes to extract from the index."
-    )
+    top_k_candidates: int = Field(gt=0, description="The maximum number of nodes to extract from the index.")
     min_isometry_score: float = Field(
         ge=-1.0, le=1.0, description="The minimum cosine similarity bounds for accepting a vector match."
     )
