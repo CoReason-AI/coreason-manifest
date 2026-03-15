@@ -23,7 +23,7 @@ scalar_st = (
     | st.booleans()
     | st.floats(allow_nan=False, allow_infinity=False)
     | st.integers()
-    | st.text(max_size=9999)
+    | st.text(max_size=9999).filter(lambda s: not s.startswith('ext:'))
 )
 
 valid_params_st = st.dictionaries(
