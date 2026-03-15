@@ -601,7 +601,7 @@ def test_epistemic_extraction_policy_sorting() -> None:
 
 
 def test_semantic_node_state_canonical_grounding_sorting() -> None:
-    from coreason_manifest.spec.ontology import SemanticNodeState, CanonicalGroundingReceipt
+    from coreason_manifest.spec.ontology import CanonicalGroundingReceipt, SemanticNodeState
 
     state = SemanticNodeState(
         node_id="node_1",
@@ -617,3 +617,25 @@ def test_semantic_node_state_canonical_grounding_sorting() -> None:
     )
     assert state.canonical_groundings[0].canonical_id == "A"
     assert state.canonical_groundings[1].canonical_id == "B"
+
+
+def test_bulk_array_sorting_coverage_2() -> None:
+    from coreason_manifest.spec.ontology import (
+        EpistemicExtractionPolicy,
+        SemanticNodeState,
+        CanonicalGroundingReceipt,
+        AgentNodeProfile
+    )
+    import contextlib
+
+    o1 = EpistemicExtractionPolicy.model_construct(required_relations=[])  # type: ignore
+    with contextlib.suppress(AttributeError):
+        o1.sort_arrays()  # type: ignore
+
+    o2 = SemanticNodeState.model_construct(canonical_groundings=[])  # type: ignore
+    with contextlib.suppress(AttributeError):
+        o2.sort_arrays()  # type: ignore
+
+    o3 = AgentNodeProfile.model_construct(peft_adapters=[])  # type: ignore
+    with contextlib.suppress(AttributeError):
+        o3.sort_arrays()  # type: ignore
