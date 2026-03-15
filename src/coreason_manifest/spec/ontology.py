@@ -5201,9 +5201,9 @@ class NegativeHeuristicProfile(CoreasonBaseState):
     forbidden_semantic_clusters: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
         description="Explicit array of ontological clusters the orchestrator is mathematically forbidden from traversing.",  # noqa: E501
     )
-    banned_modalities: list[
-        Literal["text", "raster_image", "vector_graphics", "tabular_grid", "n_dimensional_tensor"]
-    ] | None = Field(default=None, description="Strict exclusion of sensory inputs.")
+    banned_modalities: (
+        list[Literal["text", "raster_image", "vector_graphics", "tabular_grid", "n_dimensional_tensor"]] | None
+    ) = Field(default=None, description="Strict exclusion of sensory inputs.")
     temporal_exclusion_bounds: list[TemporalBoundsProfile] = Field(
         description="Exact temporal zones mathematically severed from the retrieval graph."
     )
@@ -5222,7 +5222,7 @@ class NegativeHeuristicProfile(CoreasonBaseState):
         object.__setattr__(
             self,
             "temporal_exclusion_bounds",
-            sorted(self.temporal_exclusion_bounds, key=lambda x: x.model_dump_json())
+            sorted(self.temporal_exclusion_bounds, key=lambda x: x.model_dump_canonical()),
         )
         return self
 
@@ -5413,11 +5413,10 @@ class LatentIntentTrajectoryState(CoreasonBaseState):
     current_intent_vector: VectorEmbeddingState = Field(
         description="High-dimensional representation of the user's active $E_{target}$."
     )
-    epistemic_entropy: float = Field(
-        ge=0.0, le=1.0, description="Shannon entropy of the intent distribution."
-    )
+    epistemic_entropy: float = Field(ge=0.0, le=1.0, description="Shannon entropy of the intent distribution.")
     trajectory_momentum_scalar: float = Field(
         le=1000000000.0,
+        ge=-1000000000.0,
         description="Mathematical velocity indicating the rate of convergence toward a terminal goal.",
     )
 
@@ -5428,15 +5427,6 @@ class EpistemicTransitionMatrixProfile(CoreasonBaseState):
     anticipated_subgoals: dict[
         Annotated[str, StringConstraints(max_length=255)], Annotated[float, Field(ge=0.0, le=1.0)]
     ] = Field(description="Matrix mapping future intent CIDs to their transition probabilities.")
-
-    @model_validator(mode="after")
-    def sort_subgoals(self) -> Self:
-        object.__setattr__(
-            self,
-            "anticipated_subgoals",
-            {k: self.anticipated_subgoals[k] for k in sorted(self.anticipated_subgoals)},
-        )
-        return self
 
 
 class CognitiveCritiqueProfile(CoreasonBaseState):
@@ -6274,6 +6264,9 @@ type AnyInterventionState = Annotated[
 class EpistemicQuarantineSnapshot(CoreasonBaseState):
     """Represents the Epistemic Quarantine, partitioned from the Committed Epistemic Ledger."""
 
+    active_information_state: "InformationStateManifest | None" = Field(
+        default=None, description="The continuous POMDP epistemic coordinate currently driving active inference."
+    )
     system_prompt: str = Field(
         max_length=2000, description="The basal non-monotonic instruction set currently held in Epistemic Quarantine."
     )
@@ -6748,18 +6741,14 @@ class InformationStateManifest(CoreasonBaseState):
         pattern="^[a-zA-Z0-9_.:-]+$",
         description="A Content Identifier (CID).",
     )
-    latent_trajectory: LatentIntentTrajectoryState = Field(
-        description="The continuous POMDP belief distribution."
-    )
-    transition_matrix: EpistemicTransitionMatrixProfile = Field(
-        description="SOTA HMM matrix."
-    )
+    latent_trajectory: LatentIntentTrajectoryState = Field(description="The continuous POMDP belief distribution.")
+    transition_matrix: EpistemicTransitionMatrixProfile = Field(description="SOTA HMM matrix.")
     negative_constraints: NegativeHeuristicProfile | None = Field(
         default=None, description="Rigid symbolic constraint ledger."
     )
-    working_context_variables: dict[
-        Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState
-    ] = Field(description="SOTA Slot-filling memory.")
+    working_context_variables: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
+        description="SOTA Slot-filling memory."
+    )
 
     @field_validator("working_context_variables", mode="before")
     @classmethod
@@ -6770,18 +6759,14 @@ class InformationStateManifest(CoreasonBaseState):
 class IntentTransitionEvent(BaseStateEvent):
     """AGENT INSTRUCTION: Cryptographic receipt of a shift in the user's underlying information state goal."""
 
-    type: Literal["intent_transition"] = Field(
-        default="intent_transition", description="Discriminator type."
-    )
+    type: Literal["intent_transition"] = Field(default="intent_transition", description="Discriminator type.")
     previous_state_hash: str | None = Field(
         default=None,
         max_length=128,
         pattern="^[a-f0-9]{64}$",
         description="Cryptographic link to the prior POMDP belief state.",
     )
-    active_information_state: InformationStateManifest = Field(
-        description="The current information state."
-    )
+    active_information_state: InformationStateManifest = Field(description="The current information state.")
 
 
 type AnyStateEvent = Annotated[
