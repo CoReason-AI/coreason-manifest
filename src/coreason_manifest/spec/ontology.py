@@ -139,6 +139,24 @@ CORE_SMT_SOLVER_SEMANTICS = {
     "unknown": "SMT-LIB Standard: The solver timed out or lacked sufficient compute to prove satisfiability.",
 }
 
+type CoreXAIExplanationType = Literal["feature_attribution", "counterfactual", "contrastive"]
+CORE_XAI_EXPLANATION_SEMANTICS = {
+    "feature_attribution": "XAI: Assigning specific causal weight to a recognized monosemantic concept.",
+    "counterfactual": (
+        "XAI: Proving the routing decision mathematically changes if a specific concept is toggled False."
+    ),
+    "contrastive": "XAI: Comparing why Route A was chosen over Route B based on strict concept activations.",
+}
+
+type CoreEntropyMetric = Literal["shannon_entropy", "semantic_entropy", "predictive_variance"]
+CORE_ENTROPY_METRIC_SEMANTICS = {
+    "shannon_entropy": "Information Theory: The strict mathematical baseline measure of unpredictability.",
+    "semantic_entropy": (
+        "Uncertainty Quantification: Entropy calculated over equivalence classes of meaning rather than raw tokens."
+    ),
+    "predictive_variance": "Statistical bounds of token probability distributions during sequence generation.",
+}
+
 type ValidRoutingIntent = CoreRoutingIntent | DomainExtensionString
 type EBNFConstruct = CoreEBNFConstruct | DomainExtensionString
 type TokenMergeMetric = CoreTokenMergeMetric | DomainExtensionString
@@ -151,6 +169,8 @@ type CacheEviction = CoreCacheEviction | DomainExtensionString
 type DefeasibleEdgeType = CoreDefeasibleEdgeType | DomainExtensionString
 type IEEEAnomalyClass = CoreIEEEAnomalyClass | DomainExtensionString
 type SMTSolverOutcome = CoreSMTSolverOutcome | DomainExtensionString
+type XAIExplanationType = CoreXAIExplanationType | DomainExtensionString
+type EntropyMetric = CoreEntropyMetric | DomainExtensionString
 
 type JsonPrimitiveState = (
     str
@@ -952,6 +972,31 @@ class QuorumPolicy(CoreasonBaseState):
         """Mathematically guarantees the network can reach Byzantine agreement."""
         if self.min_quorum_size < 3 * self.max_tolerable_faults + 1:
             raise ValueError("Byzantine Fault Tolerance requires min_quorum_size (N) >= 3f + 1.")
+        return self
+
+
+class ConceptBottleneckPolicy(CoreasonBaseState):
+    required_concept_vector: dict[Annotated[str, StringConstraints(max_length=255)], bool] = Field(
+        min_length=1,
+        description="A strictly defined dictionary of boolean dimensions representing required monosemantic concepts.",
+    )
+    bottleneck_temperature: float = Field(
+        default=0.0,
+        ge=0.0,
+        le=0.0,
+        description="Mathematically forced to 0.0 to ensure deterministic, zero-variance classification.",
+    )
+    explanation_modality: XAIExplanationType = Field(
+        description="The formal XAI methodology used to justify the resulting spatial route."
+    )
+
+    @model_validator(mode="after")
+    def sort_concept_vector(self) -> Self:
+        object.__setattr__(
+            self,
+            "required_concept_vector",
+            {k: self.required_concept_vector[k] for k in sorted(self.required_concept_vector.keys())},
+        )
         return self
 
 
@@ -1878,7 +1923,7 @@ class BrowserDOMState(CoreasonBaseState):
                     ip = ipaddress.ip_address(ip_int)
                 else:
                     raise ValueError
-            except ValueError, OverflowError, IndexError:
+            except (ValueError, OverflowError, IndexError):
                 return url
         if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast:
             raise ValueError(f"SSRF restricted IP detected: {hostname}")
@@ -2601,6 +2646,10 @@ class EpistemicTransmutationTask(CoreasonBaseState):
 
 
 class EscalationContract(CoreasonBaseState):
+    predictive_entropy_sla: PredictiveEntropySLA | None = Field(
+        default=None,
+        description="Binds the orchestrator's response to severed streams using strict Information Theory thresholds.",
+    )
     uncertainty_escalation_threshold: float = Field(
         ge=0.0,
         le=1.0,
@@ -3406,6 +3455,10 @@ class TaxonomicRoutingPolicy(CoreasonBaseState):
         pattern="^[a-zA-Z0-9_.:-]+$",
         min_length=1,
         description="Unique identifier for this pre-flight routing policy.",
+    )
+    concept_bottleneck: ConceptBottleneckPolicy | None = Field(
+        default=None,
+        description="The pre-flight execution gate forcing the agent into monosemantic space before routing.",
     )
     intent_to_heuristic_matrix: dict[
         ValidRoutingIntent,
@@ -4450,6 +4503,20 @@ class PredictionMarketState(CoreasonBaseState):
     def sort_prediction_market_state_arrays(self) -> Self:
         object.__setattr__(self, "order_book", sorted(self.order_book, key=lambda x: x.agent_id))
         return self
+
+
+class PredictiveEntropySLA(CoreasonBaseState):
+    metric: EntropyMetric = Field(
+        default="semantic_entropy",
+        description="The specific mathematical uncertainty metric used to evaluate the latent space.",
+    )
+    max_entropy_for_reflex: float = Field(
+        ge=0.0,
+        description="If the distribution's entropy falls BELOW this exact float, the orchestrator is authorized to guess the intent and execute.",  # noqa: E501
+    )
+    mandatory_fallback_intent: Literal["drafting_elicitation", "escalation_request"] = Field(
+        description="The strict routing fallback triggered if the entropy exceeds the safety boundary."
+    )
 
 
 class PresentationManifest(CoreasonBaseState):
@@ -6696,3 +6763,7 @@ EpistemicFlowStateReceipt.model_rebuild()
 TopologicalRewardContract.model_rebuild()
 DifferentiableLogicConstraint.model_rebuild()
 CausalExplanationEvent.model_rebuild()
+ConceptBottleneckPolicy.model_rebuild()
+PredictiveEntropySLA.model_rebuild()
+TaxonomicRoutingPolicy.model_rebuild()
+EscalationContract.model_rebuild()
