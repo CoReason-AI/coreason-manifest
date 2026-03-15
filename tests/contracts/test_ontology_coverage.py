@@ -503,23 +503,10 @@ def test_semantic_alignment_handshake_sorting() -> None:
     assert handshake.participant_node_ids == ["a", "b"]
 
 
-def test_token_merging_policy_sorting() -> None:
-    from coreason_manifest.spec.ontology import TokenMergingPolicy
-
-    policy = TokenMergingPolicy(
-        metric="cosine_similarity",
-        matching_algorithm="bipartite_soft_matching",
-        target_compression_ratio=0.5,
-        layer_whitelist=[5, 1, 3],
-    )
-    assert policy.layer_whitelist == [1, 3, 5]
-
-
 def test_bulk_array_sorting_coverage() -> None:
     from coreason_manifest.spec.ontology import (
         BeliefMutationEvent,
         ChaosExperimentTask,
-        ConceptBottleneckPolicy,
         EpistemicQuarantineSnapshot,
         HypothesisGenerationEvent,
         MarketResolutionState,
@@ -535,10 +522,6 @@ def test_bulk_array_sorting_coverage() -> None:
         System1ReflexPolicy,
         TheoryOfMindSnapshot,
     )
-
-    o0 = ConceptBottleneckPolicy.model_construct(required_concept_vector={"b": True, "a": False})  # type: ignore
-    with contextlib.suppress(AttributeError):
-        o0.sort_concept_vector()  # type: ignore
 
     o1 = MCPResourceManifest.model_construct(schema_dependencies=[])  # type: ignore
     with contextlib.suppress(AttributeError):
@@ -606,13 +589,12 @@ def test_bulk_array_sorting_coverage() -> None:
     with contextlib.suppress(AttributeError):
         o19.sort_arrays()  # type: ignore
 
+
 def test_epistemic_extraction_policy_sorting() -> None:
     from coreason_manifest.spec.ontology import EpistemicExtractionPolicy
 
     policy = EpistemicExtractionPolicy(
-        strategy_tier="speed_single_pass",
-        required_relations=["part_of", "is_a"],
-        grounding_confidence_threshold=0.5
+        strategy_tier="speed_single_pass", required_relations=["part_of", "is_a"], grounding_confidence_threshold=0.5
     )
     assert policy.required_relations == ["is_a", "part_of"]
 
@@ -629,8 +611,8 @@ def test_semantic_node_state_canonical_grounding_sorting() -> None:
         tier="semantic",
         canonical_groundings=[
             CanonicalGroundingReceipt(target_database="mesh", canonical_id="B", cosine_similarity=0.9),
-            CanonicalGroundingReceipt(target_database="snomed_ct", canonical_id="A", cosine_similarity=0.8)
-        ]
+            CanonicalGroundingReceipt(target_database="snomed_ct", canonical_id="A", cosine_similarity=0.8),
+        ],
     )
     assert state.canonical_groundings[0].canonical_id == "A"
     assert state.canonical_groundings[1].canonical_id == "B"
