@@ -10,6 +10,8 @@
 
 """Hypothesis property tests proving deterministic canonical sorting of model_validator paths."""
 
+from typing import Literal
+
 import hypothesis.strategies as st
 from hypothesis import HealthCheck, given, settings
 
@@ -90,7 +92,10 @@ def test_taxonomic_node_sorts_children(children: list[str]) -> None:
     target_layers=st.lists(st.integers(min_value=0, max_value=100), min_size=2, max_size=5, unique=True),
 )
 @settings(max_examples=20, suppress_health_check=[HealthCheck.too_slow])
-def test_mechanistic_audit_sorts_arrays(trigger_conditions: list[str], target_layers: list[int]) -> None:
+def test_mechanistic_audit_sorts_arrays(
+    trigger_conditions: list[Literal["on_tool_call", "on_belief_mutation", "on_quarantine", "on_falsification"]],
+    target_layers: list[int],
+) -> None:
     """Prove MechanisticAuditContract deterministically sorts trigger_conditions and target_layers."""
     contract = MechanisticAuditContract(
         trigger_conditions=trigger_conditions,
