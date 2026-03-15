@@ -118,3 +118,44 @@ def test_ephemeral_namespace_partition_state_invalid_hash() -> None:
             max_ttl_seconds=3600,
             max_vram_mb=1024,
         )
+
+def test_taxonomic_routing_policy_valid_domain_extension() -> None:
+    from coreason_manifest.spec.ontology import TaxonomicRoutingPolicy
+    from pydantic import ValidationError
+
+
+    # If no context is provided, it should fail because "ext:custom_intent" is not in allowed_ext_intents
+    # Wait, the prompt says "allowed_exts = (info.context or {}).get("allowed_ext_intents", set())"
+    # Actually, we can validate with context:
+    validated_policy = TaxonomicRoutingPolicy.model_validate(
+        {
+            "policy_id": "policy-1",
+            "intent_to_heuristic_matrix": {"ext:custom_intent": "chronological"},
+            "fallback_heuristic": "entity_centric",
+        },
+        context={"allowed_ext_intents": {"ext:custom_intent"}}
+    )
+    assert "ext:custom_intent" in validated_policy.intent_to_heuristic_matrix
+
+    with pytest.raises(ValidationError, match="Domain Extension Violation"):
+        TaxonomicRoutingPolicy.model_validate(
+            {
+                "policy_id": "policy-1",
+                "intent_to_heuristic_matrix": {"ext:custom_intent": "chronological"},
+                "fallback_heuristic": "entity_centric",
+            },
+            context={"allowed_ext_intents": {"ext:other"}}
+        )
+
+def test_intent_classification_receipt_sorting() -> None:
+    from coreason_manifest.spec.ontology import IntentClassificationReceipt
+    receipt = IntentClassificationReceipt(
+        primary_intent="informational_inform",
+        concurrent_intents={
+            "ext:z_intent": 0.5,
+            "ext:a_intent": 0.8,
+            "semantic_discovery": 0.2
+        }
+    )
+    keys = list(receipt.concurrent_intents.keys())
+    assert keys == ["ext:a_intent", "ext:z_intent", "semantic_discovery"]
