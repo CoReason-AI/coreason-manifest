@@ -124,6 +124,39 @@ def project_manifest_to_markdown(manifest: WorkflowManifest) -> str:
     return "\n".join(lines)
 
 
+def reduce_ledger_to_active_state(ledger: ontology.EpistemicLedgerState) -> list[ontology.AnyStateEvent]:
+    """
+    A pure algebraic functor that mathematically collapses the non-monotonic
+    EpistemicLedgerState into a linear array of valid historical events,
+    filtering out any events that have been causally rolled back or quarantined.
+    """
+    quarantined_events: set[str] = set()
+    quarantined_nodes: set[str] = set()
+
+    for cascade in ledger.active_cascades:
+        quarantined_events.add(cascade.root_falsified_event_id)
+        quarantined_events.update(cascade.quarantined_event_ids)
+
+    for rollback in ledger.active_rollbacks:
+        quarantined_events.add(rollback.target_event_id)
+        quarantined_nodes.update(rollback.invalidated_node_ids)
+
+    active_history: list[ontology.AnyStateEvent] = []
+    for event in ledger.history:
+        # 1. Filter out directly falsified/rolled-back events
+        if event.event_id in quarantined_events:
+            continue
+
+        # 2. Filter out events authored by nodes that were causally invalidated
+        source_node = getattr(event, "source_node_id", None)
+        if source_node is not None and source_node in quarantined_nodes:
+            continue
+
+        active_history.append(event)
+
+    return active_history
+
+
 def get_ontology_schema() -> dict[str, Any]:
     """Dynamically generate the CoReason ontology JSON schema."""
     models_to_export: list[type[CoreasonBaseState]] = []
