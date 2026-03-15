@@ -61,6 +61,26 @@ CORE_TOKEN_MERGE_SEMANTICS = {
     "manhattan_distance": "L1 norm calculating grid-based traversal distance.",
 }
 
+type CoreTokenMatchingAlgorithm = Literal["bipartite_soft_matching", "size_distinctive_matching"]
+CORE_TOKEN_MATCHING_SEMANTICS = {
+    "bipartite_soft_matching": "Algorithm partitioning tokens into two sets and merging the most similar edges.",
+    "size_distinctive_matching": "Algorithm prioritizing the merging of small token clusters into larger structural anchors.",
+}
+
+type CoreXAIExplanationType = Literal["feature_attribution", "counterfactual", "contrastive"]
+CORE_XAI_EXPLANATION_SEMANTICS = {
+    "feature_attribution": "XAI: Assigning specific causal weight to a recognized monosemantic concept.",
+    "counterfactual": "XAI: Proving the routing decision mathematically changes if a specific concept is toggled False.",
+    "contrastive": "XAI: Comparing why Route A was chosen over Route B based on strict concept activations.",
+}
+
+type CoreEntropyMetric = Literal["shannon_entropy", "semantic_entropy", "predictive_variance"]
+CORE_ENTROPY_METRIC_SEMANTICS = {
+    "shannon_entropy": "Information Theory: The strict mathematical baseline measure of unpredictability.",
+    "semantic_entropy": "Uncertainty Quantification: Entropy calculated over equivalence classes of meaning rather than raw tokens.",
+    "predictive_variance": "Statistical bounds of token probability distributions during sequence generation.",
+}
+
 type CoreComputeStrategyTier = Literal["speed_single_pass", "precision_token_class", "reasoning_ensemble"]
 CORE_COMPUTE_STRATEGY_SEMANTICS = {
     "speed_single_pass": (
@@ -150,6 +170,9 @@ CORE_SMT_SOLVER_SEMANTICS = {
 type ValidRoutingIntent = CoreRoutingIntent | DomainExtensionString
 type EBNFConstruct = CoreEBNFConstruct | DomainExtensionString
 type TokenMergeMetric = CoreTokenMergeMetric | DomainExtensionString
+type TokenMatchingAlgorithm = CoreTokenMatchingAlgorithm | DomainExtensionString
+type XAIExplanationType = CoreXAIExplanationType | DomainExtensionString
+type EntropyMetric = CoreEntropyMetric | DomainExtensionString
 type ComputeStrategyTier = CoreComputeStrategyTier | DomainExtensionString
 type ClinicalAssertionState = CoreClinicalAssertion | DomainExtensionString
 type OBORelationEdge = CoreOBORelationEdge | DomainExtensionString
@@ -236,7 +259,7 @@ type NodeIdentifierState = Annotated[
     Field(
         min_length=7,
         pattern="^did:[a-z0-9]+:[a-zA-Z0-9.\\-_:]+$",
-        description="A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.",  # noqa: E501
+        description="A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.",
     ),
 ]
 type OptimizationDirectionProfile = Literal["maximize", "minimize"]
@@ -247,7 +270,7 @@ type ProfileIdentifierState = Annotated[
         pattern="^[a-zA-Z0-9_-]+$",
         min_length=1,
         max_length=128,
-        description="A deterministic cognitive routing boundary that defines the non-monotonic instruction set for the agent.",  # noqa: E501
+        description="A deterministic cognitive routing boundary that defines the non-monotonic instruction set for the agent.",
         examples=["default_assistant", "code_expert"],
     ),
 ]
@@ -310,7 +333,7 @@ type ToolIdentifierState = Annotated[
         pattern="^[a-zA-Z0-9_-]+$",
         min_length=1,
         max_length=128,
-        description="A cryptographically deterministic capability pointer binding the agent to a verifiable spatial environment.",  # noqa: E501
+        description="A cryptographically deterministic capability pointer binding the agent to a verifiable spatial environment.",
         examples=["calculator", "web_search"],
     ),
 ]
@@ -492,6 +515,31 @@ class ComputeRateContract(CoreasonBaseState):
     magnitude_unit: str = Field(max_length=2000, description="The magnitude unit of the associated costs.")
 
 
+class ConceptBottleneckPolicy(CoreasonBaseState):
+    required_concept_vector: dict[Annotated[str, StringConstraints(max_length=255)], bool] = Field(
+        min_length=1,
+        description="A strictly defined dictionary of boolean dimensions representing required monosemantic concepts.",
+    )
+    bottleneck_temperature: float = Field(
+        default=0.0,
+        ge=0.0,
+        le=0.0,
+        description="Mathematically forced to 0.0 to ensure deterministic, zero-variance classification.",
+    )
+    explanation_modality: XAIExplanationType = Field(
+        description="The formal XAI methodology used to justify the resulting spatial route."
+    )
+
+    @model_validator(mode="after")
+    def sort_concept_vector(self) -> Self:
+        object.__setattr__(
+            self,
+            "required_concept_vector",
+            {k: self.required_concept_vector[k] for k in sorted(self.required_concept_vector.keys())},
+        )
+        return self
+
+
 class ScalePolicy(CoreasonBaseState):
     """The mathematical mapping constraint for a channel."""
 
@@ -522,7 +570,7 @@ class SideEffectProfile(CoreasonBaseState):
     """
 
     is_idempotent: bool = Field(
-        description="True if the tool can be safely retried multiple times without altering state beyond the first call."  # noqa: E501
+        description="True if the tool can be safely retried multiple times without altering state beyond the first call."
     )
     mutates_state: bool = Field(description="True if the tool performs write operations or side-effects.")
 
@@ -552,7 +600,7 @@ class HardwareEnclaveReceipt(CoreasonBaseState):
         min_length=1,
         max_length=128,
         pattern="^[a-f0-9]{64}$",
-        description="The cryptographic hash of the Platform Configuration Registers (PCRs) proving the memory state was physically isolated.",  # noqa: E501
+        description="The cryptographic hash of the Platform Configuration Registers (PCRs) proving the memory state was physically isolated.",
     )
     hardware_signature_blob: str = Field(
         max_length=8192,
@@ -586,7 +634,7 @@ class LogitSteganographyContract(CoreasonBaseState):
         min_length=1,
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
-        description="The DID or public key identifier required by an auditor to reconstruct the PRF and verify the watermark.",  # noqa: E501
+        description="The DID or public key identifier required by an auditor to reconstruct the PRF and verify the watermark.",
     )
     prf_seed_hash: str = Field(
         min_length=1,
@@ -597,7 +645,7 @@ class LogitSteganographyContract(CoreasonBaseState):
     watermark_strength_delta: float = Field(
         le=1.0,
         gt=0.0,
-        description="The exact logit scalar (bias) injected into the 'green list' vocabulary partition before Gumbel-Softmax sampling.",  # noqa: E501
+        description="The exact logit scalar (bias) injected into the 'green list' vocabulary partition before Gumbel-Softmax sampling.",
     )
     target_bits_per_token: float = Field(
         le=1000000000.0,
@@ -607,7 +655,7 @@ class LogitSteganographyContract(CoreasonBaseState):
     context_history_window: int = Field(
         le=1000000000,
         ge=0,
-        description="The k-gram rolling window size of preceding tokens hashed into the PRF state to ensure robustness against text cropping.",  # noqa: E501
+        description="The k-gram rolling window size of preceding tokens hashed into the PRF state to ensure robustness against text cropping.",
     )
 
 
@@ -626,7 +674,7 @@ class ComputeEngineProfile(CoreasonBaseState):
     rate_card: ComputeRateContract = Field(description="The economic cost definition associated with the model.")
     supported_functional_experts: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
         default_factory=list,
-        description="The declarative array of specialized functional expert clusters (e.g., 'falsifier', 'synthesizer') physically present in this model's architecture.",  # noqa: E501
+        description="The declarative array of specialized functional expert clusters (e.g., 'falsifier', 'synthesizer') physically present in this model's architecture.",
     )
 
     @model_validator(mode="after")
@@ -651,7 +699,7 @@ class PermissionBoundaryPolicy(CoreasonBaseState):
     )
     auth_requirements: list[Annotated[str, StringConstraints(max_length=2000)]] | None = Field(
         default=None,
-        description="An explicit array of authentication protocol identifiers (e.g., 'oauth2:github', 'mtls:internal') the orchestrator must negotiate before allocating compute.",  # noqa: E501
+        description="An explicit array of authentication protocol identifiers (e.g., 'oauth2:github', 'mtls:internal') the orchestrator must negotiate before allocating compute.",
     )
 
     @model_validator(mode="after")
@@ -675,7 +723,7 @@ class PostQuantumSignatureReceipt(CoreasonBaseState):
     )
     pq_signature_blob: str = Field(
         max_length=100000,
-        description="The base64-encoded post-quantum signature. Bounded to 100KB to safely accommodate massive SPHINCS+ hash trees without OOM crashes.",  # noqa: E501
+        description="The base64-encoded post-quantum signature. Bounded to 100KB to safely accommodate massive SPHINCS+ hash trees without OOM crashes.",
     )
 
 
@@ -704,7 +752,7 @@ class RoutingFrontierPolicy(CoreasonBaseState):
         le=10000.0,
         default=None,
         ge=0.0,
-        description="The maximum operational carbon intensity of the physical data center grid allowed for this agent's routing.",  # noqa: E501
+        description="The maximum operational carbon intensity of the physical data center grid allowed for this agent's routing.",
     )
 
 
@@ -720,7 +768,7 @@ class SaeFeatureActivationState(CoreasonBaseState):
     interpretability_label: str | None = Field(
         max_length=2000,
         default=None,
-        description="The strictly typed semantic concept mapped to this feature (e.g., 'sycophancy', 'truth_retrieval').",  # noqa: E501
+        description="The strictly typed semantic concept mapped to this feature (e.g., 'sycophancy', 'truth_retrieval').",
     )
 
 
@@ -764,7 +812,7 @@ class SemanticSlicingPolicy(CoreasonBaseState):
     )
     required_semantic_labels: list[Annotated[str, StringConstraints(max_length=255)]] | None = Field(
         default=None,
-        description="The declarative whitelist of strictly typed ontological node labels authorized for context projection.",  # noqa: E501
+        description="The declarative whitelist of strictly typed ontological node labels authorized for context projection.",
     )
     context_window_token_ceiling: int = Field(
         le=2000000,
@@ -793,23 +841,23 @@ class CognitiveRoutingContract(CoreasonBaseState):
     dynamic_top_k: int = Field(
         le=1000000000,
         ge=1,
-        description="The exact number of functional experts the router must activate per token. High values simulate deep cognitive strain.",  # noqa: E501
+        description="The exact number of functional experts the router must activate per token. High values simulate deep cognitive strain.",
     )
     routing_temperature: float = Field(
         le=1000000000.0,
         ge=0.0,
-        description="The temperature applied to the router's softmax gate, controlling how deterministically it picks experts.",  # noqa: E501
+        description="The temperature applied to the router's softmax gate, controlling how deterministically it picks experts.",
     )
     expert_logit_biases: dict[
         Annotated[str, StringConstraints(max_length=255)], Annotated[float, Field(ge=-1000.0, le=1000.0)]
     ] = Field(
         le=1000000000.0,
         default_factory=dict,
-        description="Explicit tensor biases applied to the router gate. Keys are expert IDs (e.g., 'expert_falsifier'), values are logit modifiers.",  # noqa: E501
+        description="Explicit tensor biases applied to the router gate. Keys are expert IDs (e.g., 'expert_falsifier'), values are logit modifiers.",
     )
     enforce_functional_isolation: bool = Field(
         default=False,
-        description="If True, the orchestrator applies a hard mask (-inf) to any expert not explicitly boosted in expert_logit_biases.",  # noqa: E501
+        description="If True, the orchestrator applies a hard mask (-inf) to any expert not explicitly boosted in expert_logit_biases.",
     )
 
 
@@ -825,7 +873,7 @@ class CognitiveStateProfile(CoreasonBaseState):
     divergence_tolerance: float = Field(
         ge=0.0,
         le=1.0,
-        description="The 'curiosity' metric; dictates how far the router is allowed to stray from high-probability distributions.",  # noqa: E501
+        description="The 'curiosity' metric; dictates how far the router is allowed to stray from high-probability distributions.",
     )
     activation_steering: ActivationSteeringContract | None = Field(
         default=None,
@@ -853,7 +901,7 @@ class CognitiveUncertaintyProfile(CoreasonBaseState):
         ge=0.0, le=1.0, description="Counterfactual Geometries representing alternative timeline vectors."
     )
     requires_abductive_escalation: bool = Field(
-        description="True if epistemic_uncertainty breaches the safety threshold, requiring structural mandate escalation."  # noqa: E501
+        description="True if epistemic_uncertainty breaches the safety threshold, requiring structural mandate escalation."
     )
 
 
@@ -897,7 +945,7 @@ class GradingCriterionProfile(CoreasonBaseState):
     )
     description: str = Field(
         max_length=2000,
-        description="The exact mathematical or logical boundary the target must satisfy to pass this dimensional check.",  # noqa: E501
+        description="The exact mathematical or logical boundary the target must satisfy to pass this dimensional check.",
     )
     weight: float = Field(le=100.0, ge=0.0, description="Weight or significance of this criterion.")
 
@@ -944,7 +992,7 @@ class QuorumPolicy(CoreasonBaseState):
     max_tolerable_faults: int = Field(
         le=1000000000,
         ge=0,
-        description="The maximum number of actively malicious, hallucinating, or degraded nodes (f) the swarm must survive.",  # noqa: E501
+        description="The maximum number of actively malicious, hallucinating, or degraded nodes (f) the swarm must survive.",
     )
     min_quorum_size: int = Field(
         le=1000000000, gt=0, description="The minimum number of participating agents (N) required to form consensus."
@@ -953,7 +1001,7 @@ class QuorumPolicy(CoreasonBaseState):
         description="The cryptographic material the agents must sign to submit a valid vote."
     )
     byzantine_action: Literal["quarantine", "slash_escrow", "ignore"] = Field(
-        description="The deterministic punishment executed by the orchestrator against nodes that violate the consensus quorum."  # noqa: E501
+        description="The deterministic punishment executed by the orchestrator against nodes that violate the consensus quorum."
     )
 
     @model_validator(mode="after")
@@ -1112,20 +1160,20 @@ class DefeasibleCascadeEvent(CoreasonBaseState):
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
         min_length=1,
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this automated truth maintenance operation.",  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this automated truth maintenance operation.",
     )
     root_falsified_event_id: str = Field(
         min_length=1,
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
-        description="The source BeliefMutationEvent or HypothesisGenerationEvent Content Identifier (CID) that collapsed and triggered this cascade.",  # noqa: E501
+        description="The source BeliefMutationEvent or HypothesisGenerationEvent Content Identifier (CID) that collapsed and triggered this cascade.",
     )
     propagated_decay_factor: float = Field(
         ge=0.0, le=1.0, description="The calculated Entropy Penalty applied to this specific subgraph."
     )
     quarantined_event_ids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
         min_length=1,
-        description="The strict array of downstream event Content Identifiers (CIDs) isolated and muted by this cascade to prevent Epistemic Contagion.",  # noqa: E501
+        description="The strict array of downstream event Content Identifiers (CIDs) isolated and muted by this cascade to prevent Epistemic Contagion.",
     )
     cross_boundary_quarantine_issued: bool = Field(
         default=False,
@@ -1140,8 +1188,7 @@ class DefeasibleCascadeEvent(CoreasonBaseState):
 
 class DefeasibleRebuttalContract(CoreasonBaseState):
     permitted_attack_edges: list[DefeasibleEdgeType] = Field(
-        min_length=1,
-        description="The formal argumentation edge types allowed to sever a prior operational intent.",
+        min_length=1, description="The formal argumentation edge types allowed to sever a prior operational intent."
     )
     required_evidence_density: float = Field(
         ge=0.0,
@@ -1151,13 +1198,15 @@ class DefeasibleRebuttalContract(CoreasonBaseState):
     max_quarantine_blast_radius: int = Field(
         gt=0,
         le=1000000000,
-        description="Limits how many downstream API calls or semantic dependencies can be automatically severed by the logical cascade.",  # noqa: E501
+        description="Limits how many downstream API calls or semantic dependencies can be automatically severed by the logical cascade.",
     )
 
     @model_validator(mode="after")
     def sort_arrays(self) -> Self:
         object.__setattr__(self, "permitted_attack_edges", sorted(self.permitted_attack_edges))
         return self
+
+
 
 
 class MultimodalTokenAnchorState(CoreasonBaseState):
@@ -1202,7 +1251,7 @@ class MultimodalTokenAnchorState(CoreasonBaseState):
             x_min, y_min, x_max, y_max = self.bounding_box
             if x_min > x_max or y_min > y_max:
                 raise ValueError(
-                    f"Spatial invariant violated: min bounds (x:{x_min}, y:{y_min}) exceed max bounds (x:{x_max}, y:{y_max})"  # noqa: E501
+                    f"Spatial invariant violated: min bounds (x:{x_min}, y:{y_min}) exceed max bounds (x:{x_max}, y:{y_max})"
                 )
         return self
 
@@ -1217,7 +1266,7 @@ class RollbackIntent(CoreasonBaseState):
         min_length=1,
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the causal rollback operation.",  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the causal rollback operation.",
     )
     target_event_id: str = Field(
         min_length=1,
@@ -1260,7 +1309,7 @@ class StateDifferentialManifest(CoreasonBaseState):
         min_length=1,
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this state differential.",  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this state differential.",
     )
     author_node_id: str = Field(
         min_length=1,
@@ -1274,7 +1323,7 @@ class StateDifferentialManifest(CoreasonBaseState):
         description="Strict scalar logical clock governing deterministic LWW (Last-Writer-Wins) conflict resolution.",
     )
     vector_clock: dict[Annotated[str, StringConstraints(max_length=255)], Annotated[int, Field(ge=0)]] = Field(
-        description="Causal history mapping of all known Lineage Watermarks to their latest logical mutation count at the time of authoring.",  # noqa: E501
+        description="Causal history mapping of all known Lineage Watermarks to their latest logical mutation count at the time of authoring.",
     )
     patches: list[StateMutationIntent] = Field(
         default_factory=list, description="The exact, ordered sequence of deterministic state vector mutations."
@@ -1289,13 +1338,13 @@ class StateHydrationManifest(CoreasonBaseState):
         description="A list of cryptographic pointers to past immutable EpistemicLedgerState blocks."
     )
     working_context_variables: dict[Annotated[str, StringConstraints(max_length=255)], Any] = Field(
-        description="A strictly typed dictionary for ephemeral context variables injected at runtime. AGENT INSTRUCTION: This matrix is deterministically sorted by CoreasonBaseState natively.",  # noqa: E501
+        description="A strictly typed dictionary for ephemeral context variables injected at runtime. AGENT INSTRUCTION: This matrix is deterministically sorted by CoreasonBaseState natively.",
     )
 
     @field_validator("working_context_variables", mode="before")
     @classmethod
     def enforce_payload_topology(cls, v: Any) -> Any:
-        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""  # noqa: E501
+        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""
         return _validate_payload_bounds(v)
 
     max_retained_tokens: int = Field(
@@ -1331,7 +1380,7 @@ class ThoughtBranchState(CoreasonBaseState):
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
         min_length=1,
-        description="A deterministic capability pointer bounding this specific topological divergence in the Latent Scratchpad Trace.",  # noqa: E501
+        description="A deterministic capability pointer bounding this specific topological divergence in the Latent Scratchpad Trace.",
     )
     parent_branch_id: str | None = Field(
         min_length=1,
@@ -1362,17 +1411,17 @@ class LatentScratchpadReceipt(CoreasonBaseState):
         description="A Content Identifier (CID) bounding this ephemeral test-time execution tree.",
     )
     explored_branches: list[ThoughtBranchState] = Field(
-        description="All logical paths the agent attempted within this Ephemeral Epistemic Quarantine—a volatile workspace where probability waves collapse before being committed to the immutable ledger."  # noqa: E501
+        description="All logical paths the agent attempted within this Ephemeral Epistemic Quarantine—a volatile workspace where probability waves collapse before being committed to the immutable ledger."
     )
     discarded_branches: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
-        description="The strict array of Content Identifiers (CIDs) that were explicitly pruned due to logical dead-ends.",  # noqa: E501
+        description="The strict array of Content Identifiers (CIDs) that were explicitly pruned due to logical dead-ends.",
     )
     resolution_branch_id: str | None = Field(
         min_length=1,
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
         default=None,
-        description="The Content Identifier (CID) that successfully resolved the uncertainty and led to the final output.",  # noqa: E501
+        description="The Content Identifier (CID) that successfully resolved the uncertainty and led to the final output.",
     )
     total_latent_tokens: int = Field(
         le=1000000000, ge=0, description="The total expenditure (in tokens) spent purely on internal reasoning."
@@ -1461,7 +1510,7 @@ class ToolManifest(CoreasonBaseState):
     sla: ExecutionSLA | None = Field(default=None, description="Execution limits for the tool.")
     is_preemptible: bool = Field(
         default=False,
-        description="If True, the orchestrator is authorized to send a SIGINT to abort this tool's execution mid-flight if a BargeInInterruptEvent occurs.",  # noqa: E501
+        description="If True, the orchestrator is authorized to send a SIGINT to abort this tool's execution mid-flight if a BargeInInterruptEvent occurs.",
     )
 
 
@@ -1480,13 +1529,13 @@ class BilateralSLA(CoreasonBaseState):
     )
     permitted_geographic_regions: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
         default_factory=list,
-        description="Explicit whitelist of geographic regions or cloud enclaves where execution is structurally permitted (Payload Residency Pinning).",  # noqa: E501
+        description="Explicit whitelist of geographic regions or cloud enclaves where execution is structurally permitted (Payload Residency Pinning).",
     )
     max_permitted_grid_carbon_intensity: float | None = Field(
         le=10000.0,
         default=None,
         ge=0.0,
-        description="Absolute structural ESG mandate. The execution graph will quarantine any federated node operating on a grid exceeding this gCO2eq/kWh threshold.",  # noqa: E501
+        description="Absolute structural ESG mandate. The execution graph will quarantine any federated node operating on a grid exceeding this gCO2eq/kWh threshold.",
     )
     pq_signature: PostQuantumSignatureReceipt | None = Field(
         default=None, description="The quantum-resistant signature securing the multi-tenant structural boundary."
@@ -1539,7 +1588,7 @@ class ActiveInferenceContract(CoreasonBaseState):
     expected_information_gain: float = Field(
         ge=0.0,
         le=1.0,
-        description="The mathematically estimated reduction in Epistemic Uncertainty (entropy) this tool call will yield.",  # noqa: E501
+        description="The mathematically estimated reduction in Epistemic Uncertainty (entropy) this tool call will yield.",
     )
     execution_cost_budget_magnitude: int = Field(
         le=1000000000,
@@ -1619,7 +1668,7 @@ class AdversarialSimulationProfile(CoreasonBaseState):
     expected_firewall_trip: str | None = Field(
         max_length=2000,
         default=None,
-        description="The exact rule_id of the InformationFlowPolicy or Governance bound expected to block this attack. Governing automated test assertions.",  # noqa: E501
+        description="The exact rule_id of the InformationFlowPolicy or Governance bound expected to block this attack. Governing automated test assertions.",
     )
 
 
@@ -1666,7 +1715,7 @@ class AnalogicalMappingTask(CoreasonBaseState):
     required_isomorphisms: int = Field(
         le=86400000,
         ge=1,
-        description="The exact number of structural/logical mappings the agent must successfully bridge between the two domains.",  # noqa: E501
+        description="The exact number of structural/logical mappings the agent must successfully bridge between the two domains.",
     )
     divergence_temperature_override: float = Field(
         le=10.0,
@@ -1689,7 +1738,7 @@ class AnchoringPolicy(CoreasonBaseState):
     max_semantic_drift: float = Field(
         ge=0.0,
         le=1.0,
-        description="The maximum allowed cosine deviation from the anchor before the orchestrator forces a state rollback.",  # noqa: E501
+        description="The maximum allowed cosine deviation from the anchor before the orchestrator forces a state rollback.",
     )
 
 
@@ -1711,7 +1760,7 @@ class BackpressurePolicy(CoreasonBaseState):
 
     max_queue_depth: int = Field(
         le=1000000000,
-        description="The maximum number of unprocessed messages/observations allowed between connected nodes before yielding.",  # noqa: E501
+        description="The maximum number of unprocessed messages/observations allowed between connected nodes before yielding.",
     )
     token_budget_per_branch: int | None = Field(
         le=1000000000,
@@ -1731,13 +1780,13 @@ class BackpressurePolicy(CoreasonBaseState):
         le=86400000,
         default=None,
         gt=0,
-        description="Systemic heartbeat constraint. A node cannot lock the thread longer than this without yielding to poll for BargeInInterruptEvents.",  # noqa: E501
+        description="Systemic heartbeat constraint. A node cannot lock the thread longer than this without yielding to poll for BargeInInterruptEvents.",
     )
     max_concurrent_tool_invocations: int | None = Field(
         le=1000000000,
         default=None,
         gt=0,
-        description="The mathematical integer ceiling to prevent Sybil-like parallel mutations against the ActionSpaceManifest.",  # noqa: E501
+        description="The mathematical integer ceiling to prevent Sybil-like parallel mutations against the ActionSpaceManifest.",
     )
 
 
@@ -1758,7 +1807,7 @@ class BaseStateEvent(CoreasonBaseState):
         min_length=1,
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
     )
     timestamp: float = Field(
         ge=0.0,
@@ -1909,7 +1958,7 @@ class BrowserDOMState(CoreasonBaseState):
                     ip = ipaddress.ip_address(ip_int)
                 else:
                     raise ValueError
-            except ValueError, OverflowError, IndexError:
+            except (ValueError, OverflowError, IndexError):
                 return url
         if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast:
             raise ValueError(f"SSRF restricted IP detected: {hostname}")
@@ -1933,7 +1982,7 @@ class BrowserDOMState(CoreasonBaseState):
     screenshot_cid: str | None = Field(
         max_length=2000,
         default=None,
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the snapshot representation.",  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the snapshot representation.",
     )
 
 
@@ -1971,7 +2020,7 @@ class CanonicalGroundingReceipt(CoreasonBaseState):
     cosine_similarity: float = Field(
         ge=-1.0,
         le=1.0,
-        description="The mathematical proof of geometric distance matching the extracted concept to the canonical database.",  # noqa: E501
+        description="The mathematical proof of geometric distance matching the extracted concept to the canonical database.",
     )
 
 
@@ -1980,7 +2029,7 @@ class CausalAttributionState(CoreasonBaseState):
         min_length=1,
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the source event in the Merkle-DAG.",  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the source event in the Merkle-DAG.",
     )
     influence_weight: float = Field(
         ge=0.0,
@@ -1992,7 +2041,7 @@ class CausalAttributionState(CoreasonBaseState):
 class CollectiveIntelligenceProfile(CoreasonBaseState):
     synergy_index: float = Field(
         le=1000000000.0,
-        description="The mathematical measure of the degree of emergence. A high SI indicates strong positive emergence.",  # noqa: E501
+        description="The mathematical measure of the degree of emergence. A high SI indicates strong positive emergence.",
     )
     coordination_score: float = Field(
         le=1.0,
@@ -2000,7 +2049,7 @@ class CollectiveIntelligenceProfile(CoreasonBaseState):
     )
     information_integration: float = Field(
         le=1.0,
-        description="The conditional mutual information quantifying the information flow and tight coupling between agents.",  # noqa: E501
+        description="The conditional mutual information quantifying the information flow and tight coupling between agents.",
     )
 
 
@@ -2078,11 +2127,11 @@ class ConstitutionalAmendmentIntent(CoreasonBaseState):
         description="The CID of the NormativeDriftEvent that justified triggering this proposal.",
     )
     proposed_patch: dict[Annotated[str, StringConstraints(max_length=255)], Any] = Field(
-        description="A strict, structurally bounded JSON Patch (RFC 6902) proposed by the AI to mutate the GovernancePolicy.",  # noqa: E501
+        description="A strict, structurally bounded JSON Patch (RFC 6902) proposed by the AI to mutate the GovernancePolicy.",
     )
     justification: str = Field(
         max_length=2000,
-        description="The AI's natural language structural/logical argument for why this patch resolves the contradiction without violating the root AnchoringPolicy.",  # noqa: E501
+        description="The AI's natural language structural/logical argument for why this patch resolves the contradiction without violating the root AnchoringPolicy.",
     )
 
 
@@ -2114,7 +2163,7 @@ class CounterfactualRegretEvent(BaseStateEvent):
         min_length=1,
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the specific historical state node where the agent mathematically diverged to simulate an alternative path.",  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the specific historical state node where the agent mathematically diverged to simulate an alternative path.",
     )
     counterfactual_intervention: str = Field(
         max_length=2000,
@@ -2128,14 +2177,14 @@ class CounterfactualRegretEvent(BaseStateEvent):
     )
     epistemic_regret: float = Field(
         le=1000000000.0,
-        description="The mathematical variance (simulated - actual) representing the opportunity cost of the historical decision.",  # noqa: E501
+        description="The mathematical variance (simulated - actual) representing the opportunity cost of the historical decision.",
     )
     policy_mutation_gradients: dict[
         Annotated[str, StringConstraints(max_length=255)], Annotated[float, Field(ge=-1000.0, le=1000.0)]
     ] = Field(
         le=1000000000.0,
         default_factory=dict,
-        description="The stateless routing gradient adjustments derived from the calculated regret, used to self-correct future routing.",  # noqa: E501
+        description="The stateless routing gradient adjustments derived from the calculated regret, used to self-correct future routing.",
     )
 
 
@@ -2186,7 +2235,7 @@ class CrystallizationPolicy(CoreasonBaseState):
     )
     aleatoric_entropy_threshold: float = Field(
         le=0.1,
-        description="The entropy variance must fall below this mathematical threshold to prove absolute certainty before compression is authorized.",  # noqa: E501
+        description="The entropy variance must fall below this mathematical threshold to prove absolute certainty before compression is authorized.",
     )
     target_cognitive_tier: Literal["semantic", "working"] = Field(
         description="The destination tier where the compressed rule will be stored."
@@ -2240,19 +2289,19 @@ class DefeasibleAttackEvent(CoreasonBaseState):
         min_length=1,
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this directed attack edge.",  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this directed attack edge.",
     )
     source_claim_id: str = Field(
         min_length=1,
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the claim mounting the attack.",  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the claim mounting the attack.",
     )
     target_claim_id: str = Field(
         min_length=1,
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the claim being attacked.",  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the claim being attacked.",
     )
     attack_vector: DefeasibleEdgeType = Field(description="Geometric matrices of undercutting defeaters.")
 
@@ -2264,12 +2313,12 @@ class DimensionalProjectionContract(CoreasonBaseState):
         min_length=1,
         max_length=128,
         pattern="^[a-f0-9]{64}$",
-        description="The SHA-256 hash of the exact mathematical matrix used to compress or translate the latent dimensions.",  # noqa: E501
+        description="The SHA-256 hash of the exact mathematical matrix used to compress or translate the latent dimensions.",
     )
     isometry_preservation_score: float = Field(
         ge=0.0,
         le=1.0,
-        description="Mathematical proof (e.g., Earth Mover's Distance preservation) of how accurately relative semantic distances were maintained during projection.",  # noqa: E501
+        description="Mathematical proof (e.g., Earth Mover's Distance preservation) of how accurately relative semantic distances were maintained during projection.",
     )
 
 
@@ -2470,7 +2519,7 @@ class DynamicConvergenceSLA(CoreasonBaseState):
     convergence_delta_epsilon: float = Field(
         le=1.0,
         ge=0.0,
-        description="The minimal required PRM score improvement across the lookback window to justify continued compute.",  # noqa: E501
+        description="The minimal required PRM score improvement across the lookback window to justify continued compute.",
     )
     lookback_window_steps: int = Field(
         le=1000000000, gt=0, description="The N-step temporal window over which the PRM gradient is calculated."
@@ -2478,13 +2527,13 @@ class DynamicConvergenceSLA(CoreasonBaseState):
     minimum_reasoning_steps: int = Field(
         le=1000000000,
         gt=0,
-        description="The mandatory 'burn-in' period. The orchestrator cannot terminate the search before this structural depth is reached, preventing premature collapse.",  # noqa: E501
+        description="The mandatory 'burn-in' period. The orchestrator cannot terminate the search before this structural depth is reached, preventing premature collapse.",
     )
 
 
 class EmbodiedSensoryVectorProfile(CoreasonBaseState):
     sensory_modality: Literal["video", "audio", "spatial_telemetry"] = Field(
-        description="Multimodal Sensor Fusion and Spatial-Temporal Bindings representing Proprioceptive State and Exteroceptive Vectors."  # noqa: E501
+        description="Multimodal Sensor Fusion and Spatial-Temporal Bindings representing Proprioceptive State and Exteroceptive Vectors."
     )
     bayesian_surprise_score: float = Field(
         le=1.0,
@@ -2509,11 +2558,11 @@ class BargeInInterruptEvent(BaseStateEvent):
         min_length=1,
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the active node generation cycle that was killed in the Merkle-DAG.",  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the active node generation cycle that was killed in the Merkle-DAG.",
     )
     sensory_trigger: EmbodiedSensoryVectorProfile | None = Field(
         default=None,
-        description="The continuous multimodal trigger (e.g., audio spike, user saying 'stop') that justified the interruption.",  # noqa: E501
+        description="The continuous multimodal trigger (e.g., audio spike, user saying 'stop') that justified the interruption.",
     )
     retained_partial_payload: dict[Annotated[str, StringConstraints(max_length=255)], Any] | str | None = Field(
         max_length=100000,
@@ -2521,7 +2570,7 @@ class BargeInInterruptEvent(BaseStateEvent):
         description="The 'stutter' state: the incomplete fragment of thought or text appended before the kill signal.",
     )
     epistemic_disposition: Literal["discard", "retain_as_context", "mark_as_falsified"] = Field(
-        description="Explicit instruction to the orchestrator on how to patch the shared state blackboard with the partial payload."  # noqa: E501
+        description="Explicit instruction to the orchestrator on how to patch the shared state blackboard with the partial payload."
     )
     disfluency_type: DisfluencyRole
     evicted_token_count: int = Field(default=0)
@@ -2539,7 +2588,7 @@ class EnsembleTopologyProfile(CoreasonBaseState):
     concurrent_branch_ids: list[NodeIdentifierState] = Field(
         ...,
         min_length=2,
-        description="The strict array of strict W3C DIDs (NodeIdentifierStates) representing concurrent topology branches.",  # noqa: E501
+        description="The strict array of strict W3C DIDs (NodeIdentifierStates) representing concurrent topology branches.",
     )
     fusion_function: Literal["weighted_consensus", "highest_confidence", "brier_score_collapse"] = Field(
         ..., description="The explicit wave-collapse opcode dictating the resolution of concurrent branches."
@@ -2561,7 +2610,7 @@ class EpistemicCompressionSLA(CoreasonBaseState):
         description="The maximum allowed statistical flattening of the source data. Bounded between [0.0, 1.0].",
     )
     required_grounding_density: Literal["sparse", "dense", "exhaustive"] = Field(
-        description="Dictates the required granularity of the MultimodalTokenAnchorState (e.g., must the model map every single entity, or just the global claim?)."  # noqa: E501
+        description="Dictates the required granularity of the MultimodalTokenAnchorState (e.g., must the model map every single entity, or just the global claim?)."
     )
 
 
@@ -2570,7 +2619,7 @@ class EpistemicPromotionEvent(BaseStateEvent):
         default="epistemic_promotion", description="Discriminator type for an epistemic promotion event."
     )
     source_episodic_event_ids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
-        description="The strict array of CIDs (Content Identifiers) representing the raw logs being compressed and archived.",  # noqa: E501
+        description="The strict array of CIDs (Content Identifiers) representing the raw logs being compressed and archived.",
     )
     crystallized_semantic_node_id: str = Field(
         min_length=1,
@@ -2635,7 +2684,7 @@ class EpistemicTransmutationTask(CoreasonBaseState):
             "tabular_grid" in self.target_modalities or "raster_image" in self.target_modalities
         ) and self.compression_sla.required_grounding_density == "sparse":
             raise ValueError(
-                "Epistemic safety violation: Visual or tabular modalities require strict spatial tracking. 'required_grounding_density' cannot be 'sparse'."  # noqa: E501
+                "Epistemic safety violation: Visual or tabular modalities require strict spatial tracking. 'required_grounding_density' cannot be 'sparse'."
             )
         return self
 
@@ -2654,13 +2703,14 @@ class EscalationContract(CoreasonBaseState):
     max_latent_tokens_budget: int = Field(
         le=1000000000,
         gt=0,
-        description="The maximum number of hidden tokens the orchestrator is authorized to buy for the internal monologue.",  # noqa: E501
+        description="The maximum number of hidden tokens the orchestrator is authorized to buy for the internal monologue.",
     )
     max_test_time_compute_ms: int = Field(
         le=86400000,
         gt=0,
         description="The physical time limit allowed for the scratchpad search before forcing a timeout.",
     )
+    predictive_entropy_sla: PredictiveEntropySLA | None = Field(default=None)
 
 
 class EscalationIntent(CoreasonBaseState):
@@ -2674,7 +2724,7 @@ class EscalationIntent(CoreasonBaseState):
         description="The ID of the Payload Loss Prevention (PLP) or Governance rule that blocked execution.",
     )
     resolution_schema: dict[Annotated[str, StringConstraints(max_length=255)], Any] = Field(
-        description="The strict JSON Schema requiring an explicit cryptographic sign-off or justification string to bypass the breaker.",  # noqa: E501
+        description="The strict JSON Schema requiring an explicit cryptographic sign-off or justification string to bypass the breaker.",
     )
     timeout_action: Literal["rollback", "proceed_default", "terminate"] = Field(
         description="The default action is usually terminate or rollback for security escalations."
@@ -2709,7 +2759,7 @@ class EvictionPolicy(CoreasonBaseState):
     )
     protected_event_ids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
         default_factory=list,
-        description="Explicit array of Content Identifiers (CIDs) the orchestrator is mathematically forbidden from retracting.",  # noqa: E501
+        description="Explicit array of Content Identifiers (CIDs) the orchestrator is mathematically forbidden from retracting.",
     )
 
     @model_validator(mode="after")
@@ -2724,14 +2774,14 @@ class EvidentiaryWarrantState(CoreasonBaseState):
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
         default=None,
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for a specific observation in the EpistemicLedgerState.",  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for a specific observation in the EpistemicLedgerState.",
     )
     source_semantic_node_id: str | None = Field(
         min_length=1,
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
         default=None,
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for a specific concept in the Semantic Knowledge Graph.",  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for a specific concept in the Semantic Knowledge Graph.",
     )
     justification: str = Field(
         max_length=2000, description="The logical premise explaining why this evidence supports the claim."
@@ -2743,13 +2793,13 @@ class EpistemicArgumentClaimState(CoreasonBaseState):
         min_length=1,
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this specific logical proposition.",  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this specific logical proposition.",
     )
     proponent_id: str = Field(
         min_length=1,
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the agent or system that advanced this claim.",  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the agent or system that advanced this claim.",
     )
     text_chunk: str = Field(max_length=50000, description="The natural language representation of the proposition.")
     warrants: list[EvidentiaryWarrantState] = Field(
@@ -2807,7 +2857,7 @@ class ExecutionNodeReceipt(CoreasonBaseState):
     @field_validator("inputs", "outputs", mode="before")
     @classmethod
     def enforce_payload_topology(cls, v: Any) -> Any:
-        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""  # noqa: E501
+        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""
         return _validate_payload_bounds(v)
 
     parent_hashes: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
@@ -2901,7 +2951,7 @@ class FalsificationContract(CoreasonBaseState):
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
         min_length=1,
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this falsification test to the Merkle-DAG.",  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this falsification test to the Merkle-DAG.",
     )
     description: str = Field(
         max_length=2000,
@@ -2967,7 +3017,7 @@ class FederatedStateSnapshot(CoreasonBaseState):
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
         default=None,
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the federated topology, if applicable.",  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the federated topology, if applicable.",
     )
 
 
@@ -2996,13 +3046,13 @@ class FormalVerificationContract(CoreasonBaseState):
     )
     invariant_theorem: str = Field(
         max_length=2000,
-        description="The exact mathematical assertion or safety invariant being proven (e.g., 'No data classified as CONFIDENTIAL routes externally').",  # noqa: E501
+        description="The exact mathematical assertion or safety invariant being proven (e.g., 'No data classified as CONFIDENTIAL routes externally').",
     )
     compiled_proof_hash: str = Field(
         min_length=1,
         max_length=128,
         pattern="^[a-f0-9]{64}$",
-        description="The SHA-256 fingerprint of the verified proof object that the Rust/C++ orchestrator must load and check.",  # noqa: E501
+        description="The SHA-256 fingerprint of the verified proof object that the Rust/C++ orchestrator must load and check.",
     )
 
 
@@ -3082,6 +3132,24 @@ class TokenBurnReceipt(BaseStateEvent):
     )
 
 
+class TokenMergingPolicy(CoreasonBaseState):
+    metric: TokenMergeMetric = Field(description="The mathematical metric used to evaluate attention entropy.")
+    matching_algorithm: TokenMatchingAlgorithm = Field(
+        description="The algorithm used to physically fuse redundant tokens."
+    )
+    target_compression_ratio: float = Field(
+        ge=0.0, le=1.0, description="The strictly typed percentage of the active context window to safely compress."
+    )
+    layer_whitelist: list[Annotated[int, Field(ge=0)]] = Field(
+        min_length=1, max_length=1000000000, description="The specific transformer blocks authorized to fuse tokens."
+    )
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "layer_whitelist", sorted(self.layer_whitelist))
+        return self
+
+
 class GlobalGovernancePolicy(CoreasonBaseState):
     """
     Global governance bounds for a swarm executing a workflow manifest.
@@ -3099,7 +3167,7 @@ class GlobalGovernancePolicy(CoreasonBaseState):
             or self.mandatory_license_rule.severity != "critical"
         ):
             raise ValueError(
-                "CRITICAL LICENSE VIOLATION: The execution graph has been stripped of its Prosperity Public License 3.0 mathematical anchor. Execution is strictly forbidden."  # noqa: E501
+                "CRITICAL LICENSE VIOLATION: The execution graph has been stripped of its Prosperity Public License 3.0 mathematical anchor. Execution is strictly forbidden."
             )
         return self
 
@@ -3110,7 +3178,7 @@ class GlobalGovernancePolicy(CoreasonBaseState):
         le=10000.0,
         default=None,
         ge=0.0,
-        description="The absolute physical energy footprint allowed for this execution graph. If exceeded, the orchestrator terminates the swarm.",  # noqa: E501
+        description="The absolute physical energy footprint allowed for this execution graph. If exceeded, the orchestrator terminates the swarm.",
     )
     global_timeout_seconds: int = Field(
         le=86400,
@@ -3178,7 +3246,7 @@ class DynamicRoutingManifest(CoreasonBaseState):
     )
     artifact_profile: GlobalSemanticProfile = Field(description="The semantic profile governing this route.")
     active_subgraphs: dict[Annotated[str, StringConstraints(max_length=255)], list[NodeIdentifierState]] = Field(
-        description="Mapping of specific modalities (e.g., 'tabular_grid') to the explicit lists of worker NodeIdentifierStates authorized to execute.",  # noqa: E501
+        description="Mapping of specific modalities (e.g., 'tabular_grid') to the explicit lists of worker NodeIdentifierStates authorized to execute.",
     )
     bypassed_steps: list[BypassReceipt] = Field(
         default_factory=list, description="The declarative array of steps the orchestrator is mandated to skip."
@@ -3203,7 +3271,7 @@ class DynamicRoutingManifest(CoreasonBaseState):
         for modality in self.active_subgraphs:
             if modality not in self.artifact_profile.detected_modalities:
                 raise ValueError(
-                    f"Epistemic Violation: Cannot route to subgraph '{modality}' because it is missing from detected_modalities."  # noqa: E501
+                    f"Epistemic Violation: Cannot route to subgraph '{modality}' because it is missing from detected_modalities."
                 )
         return self
 
@@ -3310,7 +3378,7 @@ class HomomorphicEncryptionProfile(CoreasonBaseState):
         min_length=1,
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
-        description="The Content Identifier (CID) of the public evaluation key the orchestrator must utilize to perform privacy-preserving geometric math on ciphertext without epistemic contamination.",  # noqa: E501
+        description="The Content Identifier (CID) of the public evaluation key the orchestrator must utilize to perform privacy-preserving geometric math on ciphertext without epistemic contamination.",
     )
     ciphertext_blob: str = Field(max_length=5000000, description="The base64-encoded homomorphic ciphertext.")
 
@@ -3430,7 +3498,7 @@ class IntentClassificationReceipt(CoreasonBaseState):
     primary_intent: ValidRoutingIntent = Field(description="The argmax intent with highest probability.")
     concurrent_intents: dict[ValidRoutingIntent, float] = Field(
         default_factory=dict,
-        description="Dictionary of adjacent intents and confidence scores (0.0 to 1.0). Used for superposition branching.",  # noqa: E501,
+        description="Dictionary of adjacent intents and confidence scores (0.0 to 1.0). Used for superposition branching.",
     )
 
     @model_validator(mode="after")
@@ -3517,7 +3585,7 @@ class InsightCardProfile(CoreasonBaseState):
             raise ValueError("Forbidden HTML event handler detected.")
         if re.search("<[^=\\s\\d]", v):
             raise ValueError(
-                "HTML tags are prohibited. '<' may only be used as a mathematical operator followed by a space, digit, or '='."  # noqa: E501
+                "HTML tags are prohibited. '<' may only be used as a mathematical operator followed by a space, digit, or '='."
             )
         return v
 
@@ -3574,12 +3642,12 @@ class InterventionalCausalTask(CoreasonBaseState):
     )
     do_operator_state: str = Field(
         max_length=2000,
-        description="The exact value or condition forced upon the intervention_variable, isolating it from its historical causes.",  # noqa: E501
+        description="The exact value or condition forced upon the intervention_variable, isolating it from its historical causes.",
     )
     expected_causal_information_gain: float = Field(
         ge=0.0,
         le=1.0,
-        description="The mathematical proof of entropy reduction yielded specifically by breaking the confounding back-doors.",  # noqa: E501
+        description="The mathematical proof of entropy reduction yielded specifically by breaking the confounding back-doors.",
     )
     execution_cost_budget_magnitude: int = Field(
         le=1000000000,
@@ -3634,11 +3702,11 @@ class InterventionPolicy(CoreasonBaseState):
     )
     scope: BoundedInterventionScopePolicy | None = Field(
         default=None,
-        description="The strictly typed boundaries for what the human/oversight system is allowed to mutate during this pause.",  # noqa: E501
+        description="The strictly typed boundaries for what the human/oversight system is allowed to mutate during this pause.",
     )
     blocking: bool = Field(
         default=True,
-        description="If True, the graph execution halts until a verdict is rendered. If False, it is an async observation.",  # noqa: E501
+        description="If True, the graph execution halts until a verdict is rendered. If False, it is an async observation.",
     )
 
 
@@ -3649,7 +3717,7 @@ class BaseNodeProfile(CoreasonBaseState):
 
     description: str = Field(
         max_length=2000,
-        description="The semantic boundary defining the objective function or computational perimeter of the execution node.",  # noqa: E501
+        description="The semantic boundary defining the objective function or computational perimeter of the execution node.",
     )
     architectural_intent: str | None = Field(
         max_length=2000, default=None, description="The AI's declarative rationale for selecting this node."
@@ -3665,7 +3733,7 @@ class BaseNodeProfile(CoreasonBaseState):
     )
     domain_extensions: dict[Annotated[str, StringConstraints(max_length=255)], Any] | None = Field(
         default=None,
-        description="Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks.",  # noqa: E501
+        description="Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks.",
     )
 
     @model_validator(mode="after")
@@ -3709,7 +3777,7 @@ class HumanNodeProfile(BaseNodeProfile):
     type: Literal["human"] = Field(default="human", description="Discriminator for a Human node.")
     required_attestation: AttestationMechanismProfile | None = Field(
         default=None,
-        description="AGENT INSTRUCTION: If set, the orchestrator MUST NOT resolve\n        this node without a cryptographically matching WetwareAttestationContract\n        supplied in the InterventionReceipt.",  # noqa: E501
+        description="AGENT INSTRUCTION: If set, the orchestrator MUST NOT resolve\n        this node without a cryptographically matching WetwareAttestationContract\n        supplied in the InterventionReceipt.",
     )
 
 
@@ -3743,11 +3811,11 @@ class LineageWatermarkReceipt(CoreasonBaseState):
         Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=2000)]
     ] = Field(
         max_length=1000000000,
-        description="A dictionary mapping intermediate participant NodeIdentifierStates to their deterministic execution signatures.",  # noqa: E501
+        description="A dictionary mapping intermediate participant NodeIdentifierStates to their deterministic execution signatures.",
     )
     tamper_evident_root: str = Field(
         max_length=2000,
-        description="The overarching cryptographic hash (e.g., Merkle Root) proving the structural payload has not been laundered or structurally modified.",  # noqa: E501
+        description="The overarching cryptographic hash (e.g., Merkle Root) proving the structural payload has not been laundered or structurally modified.",
     )
 
 
@@ -3771,7 +3839,7 @@ class MCPCapabilityWhitelistPolicy(CoreasonBaseState):
     )
     required_licenses: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
         default_factory=list,
-        description="Explicit array of DUA/RBAC enterprise licenses mathematically required to perceive and mount this capability.",  # noqa: E501
+        description="Explicit array of DUA/RBAC enterprise licenses mathematically required to perceive and mount this capability.",
     )
 
     @model_validator(mode="after")
@@ -3810,7 +3878,7 @@ class MCPServerManifest(CoreasonBaseState):
     def enforce_coreason_did_authority(self) -> Self:
         if not self.attestation_receipt.issuer_did.startswith("did:coreason:"):
             raise ValueError(
-                "UNAUTHORIZED MCP MOUNT: The presented Verifiable Credential is not signed by a valid CoReason issuer DID. The orchestrator MUST immediately emit a QuarantineIntent and terminate the handshake."  # noqa: E501
+                "UNAUTHORIZED MCP MOUNT: The presented Verifiable Credential is not signed by a valid CoReason issuer DID. The orchestrator MUST immediately emit a QuarantineIntent and terminate the handshake."
             )
         return self
 
@@ -3828,7 +3896,7 @@ class KineticSeparationPolicy(CoreasonBaseState):
         description="Unique identifier for this specific separation boundary.",
     )
     mutually_exclusive_clusters: list[list[Annotated[str, StringConstraints(max_length=2000)]]] = Field(
-        description="A topological matrix of tool names or MCP URIs. If an agent mounts one capability in a cluster, all other capabilities in that cluster are mathematically quarantined.",  # noqa: E501
+        description="A topological matrix of tool names or MCP URIs. If an agent mounts one capability in a cluster, all other capabilities in that cluster are mathematically quarantined.",
     )
     enforcement_action: Literal["halt_and_quarantine", "sever_causal_chain"] = Field(
         description="The deterministic action the orchestrator must take if a bipartite cycle is detected."
@@ -3910,7 +3978,7 @@ class ProceduralMetadataManifest(CoreasonBaseState):
     )
     latent_vector_coordinate: VectorEmbeddingState | None = Field(
         default=None,
-        description="Optional dense-vector geometry for zero-shot semantic routing without LLM forward-pass evaluation.",  # noqa: E501
+        description="Optional dense-vector geometry for zero-shot semantic routing without LLM forward-pass evaluation.",
     )
 
 
@@ -4018,7 +4086,7 @@ class MCPClientBindingProfile(CoreasonBaseState):
     )
     allowed_mcp_tools: list[Annotated[str, StringConstraints(max_length=2000)]] | None = Field(
         default=None,
-        description="An explicit whitelist of tools the agent is allowed to invoke from this server. If None, all discovered tools are allowed.",  # noqa: E501
+        description="An explicit whitelist of tools the agent is allowed to invoke from this server. If None, all discovered tools are allowed.",
     )
 
     @model_validator(mode="after")
@@ -4083,7 +4151,7 @@ class MarketResolutionState(CoreasonBaseState):
         max_length=1000000000, description="The hypothesis IDs that were falsified."
     )
     payout_distribution: dict[Annotated[str, StringConstraints(max_length=255)], Annotated[int, Field(ge=0)]] = Field(
-        description="The deterministic mapping of agent IDs to their earned compute budget/magnitude based on Brier scoring.",  # noqa: E501
+        description="The deterministic mapping of agent IDs to their earned compute budget/magnitude based on Brier scoring.",
     )
 
     @model_validator(mode="after")
@@ -4096,7 +4164,7 @@ class MechanisticAuditContract(CoreasonBaseState):
     trigger_conditions: list[Literal["on_tool_call", "on_belief_mutation", "on_quarantine", "on_falsification"]] = (
         Field(
             min_length=1,
-            description="The specific architectural events that authorize the orchestrator to halt generation and extract internal activations.",  # noqa: E501
+            description="The specific architectural events that authorize the orchestrator to halt generation and extract internal activations.",
         )
     )
     target_layers: list[Annotated[int, Field(ge=0)]] = Field(
@@ -4108,7 +4176,7 @@ class MechanisticAuditContract(CoreasonBaseState):
     )
     require_zk_commitments: bool = Field(
         default=True,
-        description="If True, the orchestrator MUST generate cryptographic latent state proofs alongside the activation extractions.",  # noqa: E501
+        description="If True, the orchestrator MUST generate cryptographic latent state proofs alongside the activation extractions.",
     )
 
     @model_validator(mode="after")
@@ -4140,7 +4208,7 @@ class EpistemicProvenanceReceipt(CoreasonBaseState):
     )
     lineage_watermark: LineageWatermarkReceipt | None = Field(
         default=None,
-        description="The cryptographic, tamper-evident chain of custody tracing this memory across multiple swarm hops.",  # noqa: E501
+        description="The cryptographic, tamper-evident chain of custody tracing this memory across multiple swarm hops.",
     )
 
 
@@ -4149,7 +4217,7 @@ class MigrationContract(CoreasonBaseState):
         min_length=1,
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this structural migration mapping.",  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this structural migration mapping.",
     )
     source_version: str = Field(
         max_length=2000, description="The exact semantic version string of the payload before migration."
@@ -4166,7 +4234,7 @@ class MigrationContract(CoreasonBaseState):
     )
     dropped_paths: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
         default_factory=list,
-        description="Explicit whitelist of JSON Pointers that are safely deprecated and intentionally dropped during migration.",  # noqa: E501
+        description="Explicit whitelist of JSON Pointers that are safely deprecated and intentionally dropped during migration.",
     )
 
     @model_validator(mode="after")
@@ -4244,7 +4312,7 @@ class NDimensionalTensorManifest(CoreasonBaseState):
         calculated_bytes = math.prod(self.shape) * bytes_per_element
         if calculated_bytes != self.vram_footprint_bytes:
             raise ValueError(
-                f"Topological mismatch: Shape {self.shape} of {self.structural_type.value} requires {calculated_bytes} bytes, but manifest declares {self.vram_footprint_bytes} bytes."  # noqa: E501
+                f"Topological mismatch: Shape {self.shape} of {self.structural_type.value} requires {calculated_bytes} bytes, but manifest declares {self.vram_footprint_bytes} bytes."
             )
         return self
 
@@ -4254,14 +4322,14 @@ class NeuralAuditAttestationReceipt(CoreasonBaseState):
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
         min_length=1,
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
     )
     layer_activations: dict[int, list[SaeFeatureActivationState]] = Field(
         description="A mapping of specific transformer layer indices to their top-k activated SAE features.",
     )
     causal_scrubbing_applied: bool = Field(
         default=False,
-        description="Cryptographic proof that the orchestrator actively resampled or ablated this circuit to verify its causal responsibility for the output.",  # noqa: E501
+        description="Cryptographic proof that the orchestrator actively resampled or ablated this circuit to verify its causal responsibility for the output.",
     )
 
     @model_validator(mode="after")
@@ -4288,7 +4356,7 @@ class NeuroSymbolicHandoffContract(CoreasonBaseState):
         max_length=100000, description="The raw code or formal proof syntax generated by the LLM to be evaluated."
     )
     expected_proof_schema: dict[Annotated[str, StringConstraints(max_length=255)], Any] = Field(
-        description="The strict JSON Schema the deterministic solver must use to return the verified answer to the agent.",  # noqa: E501
+        description="The strict JSON Schema the deterministic solver must use to return the verified answer to the agent.",
     )
     timeout_ms: int = Field(
         le=86400000, gt=0, description="The maximum compute time allocated to the symbolic solver before aborting."
@@ -4307,13 +4375,13 @@ class NormativeDriftEvent(BaseStateEvent):
     )
     measured_semantic_drift: float = Field(
         le=1000000000.0,
-        description="The calculated probabilistic delta showing how far the swarm's observed reality is diverging from the static rule.",  # noqa: E501
+        description="The calculated probabilistic delta showing how far the swarm's observed reality is diverging from the static rule.",
     )
     contradiction_proof_hash: str = Field(
         min_length=1,
         max_length=128,
         pattern="^[a-f0-9]{64}$",
-        description="A cryptographic pointer to the internal scratchpad trace (ThoughtBranchState) definitively proving the rule is obsolete or causing a loop.",  # noqa: E501
+        description="A cryptographic pointer to the internal scratchpad trace (ThoughtBranchState) definitively proving the rule is obsolete or causing a loop.",
     )
 
 
@@ -4329,7 +4397,7 @@ class OntologicalHandshakeReceipt(CoreasonBaseState):
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
         min_length=1,
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this protocol handshake to the Merkle-DAG.",  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this protocol handshake to the Merkle-DAG.",
     )
     participant_node_ids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
         max_length=1000000000, min_length=2, description="The agents establishing semantic alignment."
@@ -4423,7 +4491,7 @@ class PeftAdapterContract(CoreasonBaseState):
     adapter_rank: int = Field(
         le=1000000000,
         gt=0,
-        description="The low-rank intrinsic dimension (r) of the update matrices, used by the orchestrator to calculate VRAM cost.",  # noqa: E501
+        description="The low-rank intrinsic dimension (r) of the update matrices, used by the orchestrator to calculate VRAM cost.",
     )
     target_modules: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
         min_length=1,
@@ -4478,7 +4546,7 @@ class PredictionMarketState(CoreasonBaseState):
     )
     lmsr_b_parameter: str = Field(
         pattern="^\\d+\\.\\d+$",
-        description="The stringified decimal representing the liquidity parameter defining the market depth and max loss for the AMM.",  # noqa: E501
+        description="The stringified decimal representing the liquidity parameter defining the market depth and max loss for the AMM.",
         max_length=255,
     )
     order_book: list[HypothesisStakeReceipt] = Field(
@@ -4488,13 +4556,27 @@ class PredictionMarketState(CoreasonBaseState):
         Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=255)]
     ] = Field(
         le=1000000000,
-        description="Mapping of hypothesis IDs to their current LMSR-calculated market price (probability) as stringified decimals.",  # noqa: E501
+        description="Mapping of hypothesis IDs to their current LMSR-calculated market price (probability) as stringified decimals.",
     )
 
     @model_validator(mode="after")
     def sort_prediction_market_state_arrays(self) -> Self:
         object.__setattr__(self, "order_book", sorted(self.order_book, key=lambda x: x.agent_id))
         return self
+
+
+class PredictiveEntropySLA(CoreasonBaseState):
+    metric: EntropyMetric = Field(
+        default="semantic_entropy",
+        description="The specific mathematical uncertainty metric used to evaluate the latent space.",
+    )
+    max_entropy_for_reflex: float = Field(
+        ge=0.0,
+        description="If the distribution's entropy falls BELOW this exact float, the orchestrator is authorized to guess the intent and execute.",
+    )
+    mandatory_fallback_intent: Literal["drafting_elicitation", "escalation_request"] = Field(
+        description="The strict routing fallback triggered if the entropy exceeds the safety boundary."
+    )
 
 
 class PresentationManifest(CoreasonBaseState):
@@ -4541,21 +4623,21 @@ class EpistemicSOPManifest(CoreasonBaseState):
 class ProcessRewardContract(CoreasonBaseState):
     convergence_sla: DynamicConvergenceSLA | None = Field(
         default=None,
-        description="The dynamic circuit breaker that halts the search when PRM variance converges, preventing VRAM waste.",  # noqa: E501
+        description="The dynamic circuit breaker that halts the search when PRM variance converges, preventing VRAM waste.",
     )
     enforce_reasoning_trace: bool = Field(
         default=True,
-        description="Forces the LLM to output a CognitiveReasoningTraceState explaining WHY it failed before it is allowed to attempt the generation again.",  # noqa: E501
+        description="Forces the LLM to output a CognitiveReasoningTraceState before attempting generation again.",
     )
     pruning_threshold: float = Field(
         ge=0.0,
         le=1.0,
-        description="If a ThoughtBranchState's prm_score falls below this threshold, the orchestrator MUST halt its generation.",  # noqa: E501
+        description="If a ThoughtBranchState's prm_score falls below this threshold, the orchestrator MUST halt its generation.",
     )
     max_backtracks_allowed: int = Field(
         le=1000000000,
         ge=0,
-        description="The absolute limit on how many times the agent can start a new branch before throwing a SystemFaultEvent.",  # noqa: E501
+        description="The absolute limit on how many times the agent can start a new branch before throwing a SystemFaultEvent.",
     )
     evaluator_model_name: str | None = Field(
         max_length=2000,
@@ -4654,7 +4736,7 @@ class SemanticFirewallPolicy(CoreasonBaseState):
     )
     forbidden_intents: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
         default_factory=list,
-        description="A strict array of semantic intents (e.g., 'role_override', 'system_prompt_leak') that trigger immediate quarantine.",  # noqa: E501
+        description="A strict array of semantic intents (e.g., 'role_override', 'system_prompt_leak') that trigger immediate quarantine.",
     )
     action_on_violation: Literal["drop", "quarantine", "redact"] = Field(
         description="The deterministic action the orchestrator must take if a firewall rule is violated."
@@ -4686,8 +4768,9 @@ class InformationFlowPolicy(CoreasonBaseState):
     )
     latent_firewalls: list[SaeLatentPolicy] = Field(
         default_factory=list,
-        description="The strict array of tensor-level mechanistic firewalls monitoring the forward pass for adversarial intent.",  # noqa: E501
+        description="The strict array of tensor-level mechanistic firewalls monitoring the forward pass for adversarial intent.",
     )
+    stream_interruption: StreamInterruptionPolicy | None = Field(default=None)
 
     @model_validator(mode="after")
     def sort_rules(self) -> Self:
@@ -4722,7 +4805,7 @@ class SimulationEscrowContract(CoreasonBaseState):
     locked_magnitude: int = Field(
         le=1000000000,
         gt=0,
-        description="The strictly typed boundary requiring locked magnitude to prevent zero-cost griefing of the swarm.",  # noqa: E501
+        description="The strictly typed boundary requiring locked magnitude to prevent zero-cost griefing of the swarm.",
     )
 
 
@@ -4827,7 +4910,7 @@ class SpatialKinematicActionIntent(CoreasonBaseState):
     expected_visual_concept: str | None = Field(
         max_length=2000,
         default=None,
-        description="The visual anchor (e.g., 'Submit Button'). The orchestrator must verify this semantic concept exists at the target_coordinate before executing the macro, preventing blind clicks.",  # noqa: E501
+        description="The visual anchor (e.g., 'Submit Button'). The orchestrator must verify this semantic concept exists at the target_coordinate before executing the macro, preventing blind clicks.",
     )
 
 
@@ -4856,11 +4939,11 @@ class OntologicalAlignmentPolicy(CoreasonBaseState):
         description="The absolute minimum latent vector similarity required to allow swarm communication.",
     )
     require_isometry_proof: bool = Field(
-        description="If True, the orchestrator must reject dimensional projections that fall below a safe isometry preservation score."  # noqa: E501
+        description="If True, the orchestrator must reject dimensional projections that fall below a safe isometry preservation score."
     )
     fallback_state_contract: StateContract | None = Field(
         default=None,
-        description="The rigid external JSON schema to force agents to use if their latent vector geometries are hopelessly incommensurable.",  # noqa: E501
+        description="The rigid external JSON schema to force agents to use if their latent vector geometries are hopelessly incommensurable.",
     )
 
 
@@ -4924,6 +5007,23 @@ class SteadyStateHypothesisState(CoreasonBaseState):
         return self
 
 
+class StreamInterruptionPolicy(CoreasonBaseState):
+    kinematic_reversal_threshold: int = Field(
+        default=3,
+        ge=1,
+        le=1000000000,
+        description="Sequential number of backspaces/deletes required to trigger a hardware-level cache rewind.",
+    )
+    audio_spike_delta: float | None = Field(
+        default=None,
+        description="The Voice Activity Detection (VAD) decibel delta required to flag an acoustic barge-in.",
+    )
+    eviction_strategy: CacheEviction = Field(
+        default="lru",
+        description="Instructs the inference engine how to physically drop the VRAM context of the Reparandum.",
+    )
+
+
 class ChaosExperimentTask(CoreasonBaseState):
     experiment_id: str = Field(
         min_length=1,
@@ -4974,7 +5074,7 @@ class HypothesisGenerationEvent(BaseStateEvent):
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
         min_length=1,
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this abductive leap to the Merkle-DAG.",  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this abductive leap to the Merkle-DAG.",
     )
     premise_text: str = Field(max_length=2000, description="The natural language explanation of the abductive theory.")
     bayesian_prior: float = Field(
@@ -4982,7 +5082,7 @@ class HypothesisGenerationEvent(BaseStateEvent):
     )
     falsification_conditions: list[FalsificationContract] = Field(
         min_length=1,
-        description="The strict array of strict conditions that the orchestrator must test to attempt to disprove this premise.",  # noqa: E501
+        description="The strict array of strict conditions that the orchestrator must test to attempt to disprove this premise.",
     )
     status: Literal["active", "falsified", "verified"] = Field(
         default="active", description="The current validity state of this hypothesis in the EpistemicLedgerState."
@@ -5044,11 +5144,11 @@ class System2RemediationIntent(CoreasonBaseState):
         description="A cryptographic Lineage Watermark (CID) tracking this specific dimensional collapse.",
     )
     target_node_id: NodeIdentifierState = Field(
-        description="The strict W3C DID of the agent that authored the invalid state, ensuring the fault is routed back to the exact state partition."  # noqa: E501
+        description="The strict W3C DID of the agent that authored the invalid state, ensuring the fault is routed back to the exact state partition."
     )
     failing_pointers: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
         min_length=1,
-        description="A strictly typed array of RFC 6902 JSON Pointers isolating the exact topological coordinate of the hallucination.",  # noqa: E501
+        description="A strictly typed array of RFC 6902 JSON Pointers isolating the exact topological coordinate of the hallucination.",
     )
     remediation_prompt: str = Field(
         min_length=1, description="The deterministic, non-monotonic natural-language constraint the agent must satisfy."
@@ -5117,7 +5217,7 @@ class AuctionState(CoreasonBaseState):
     clearing_timeout: int = Field(le=1000000000, gt=0, description="Maximum wait time for auction settlement.")
     "\n    MATHEMATICAL BOUNDARY: Must be > 0. Defines the absolute execution ceiling before forced timeout.\n    "
     minimum_tick_size: float = Field(le=1000000000.0, gt=0.0, description="The smallest allowable bid increment.")
-    "\n    MATHEMATICAL BOUNDARY: Must be > 0.0. Negative or zero tick sizes will instantly trigger validation faults.\n    "  # noqa: E501
+    "\n    MATHEMATICAL BOUNDARY: Must be > 0.0. Negative or zero tick sizes will instantly trigger validation faults.\n    "
 
     @model_validator(mode="after")
     def sort_bids(self) -> Self:
@@ -5224,7 +5324,7 @@ type AnyToolchainState = Annotated[
     BrowserDOMState | TerminalBufferState,
     Field(
         discriminator="type",
-        description="A discriminated union of Causal Actuators defining strict perimeters for Exogenous Perturbations to the causal graph.",  # noqa: E501
+        description="A discriminated union of Causal Actuators defining strict perimeters for Exogenous Perturbations to the causal graph.",
     ),
 ]
 
@@ -5234,10 +5334,10 @@ class TheoryOfMindSnapshot(CoreasonBaseState):
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
         min_length=1,
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the agent whose mind is being modeled.",  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the agent whose mind is being modeled.",
     )
     assumed_shared_beliefs: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
-        description="The explicit array of Content Identifiers (CIDs) acting as cryptographic Lineage Watermarks that the modeling agent assumes the target already possesses.",  # noqa: E501
+        description="The explicit array of Content Identifiers (CIDs) acting as cryptographic Lineage Watermarks that the modeling agent assumes the target already possesses.",
     )
     identified_knowledge_gaps: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
         max_length=1000000000,
@@ -5272,7 +5372,7 @@ class ToolInvocationEvent(BaseStateEvent):
     )
     agent_attestation: AgentAttestationReceipt
     zk_proof: ZeroKnowledgeReceipt = Field(
-        description="AGENT INSTRUCTION: The strict mathematical proof that the agent was authorized by the CoReason execution engine to evaluate this tool. Stripping this field violates the Zero-Trust execution boundary."  # noqa: E501
+        description="AGENT INSTRUCTION: The strict mathematical proof that the agent was authorized by the CoReason execution engine to evaluate this tool. Stripping this field violates the Zero-Trust execution boundary."
     )
 
 
@@ -5296,7 +5396,7 @@ class TraceExportManifest(CoreasonBaseState):
 class TruthMaintenancePolicy(CoreasonBaseState):
     rebuttal_contract: DefeasibleRebuttalContract | None = Field(
         default=None,
-        description="Governs exactly how an incoming correction zeroes out a previous node in the Epistemic Argument Graph without destroying the historical ledger.",  # noqa: E501
+        description="Governs exactly how an incoming correction zeroes out a previous node in the Epistemic Argument Graph without destroying the historical ledger.",
     )
     decay_propagation_rate: float = Field(
         ge=0.0, le=1.0, description="Entropy Penalty applied per edge traversal during a defeasible cascade."
@@ -5304,11 +5404,11 @@ class TruthMaintenancePolicy(CoreasonBaseState):
     epistemic_quarantine_threshold: float = Field(
         ge=0.0,
         le=1.0,
-        description="The minimum certainty boundary. If an event's propagated confidence drops below this threshold, it is structurally quarantined.",  # noqa: E501
+        description="The minimum certainty boundary. If an event's propagated confidence drops below this threshold, it is structurally quarantined.",
     )
     enforce_cross_agent_quarantine: bool = Field(
         default=False,
-        description="If True, the orchestrator must automatically emit global QuarantineIntents to sever infected SemanticEdges across the swarm to prevent epistemic contagion.",  # noqa: E501
+        description="If True, the orchestrator must automatically emit global QuarantineIntents to sever infected SemanticEdges across the swarm to prevent epistemic contagion.",
     )
     max_cascade_depth: int = Field(
         le=1000000000, gt=0, description="The absolute recursion depth limit for state retractions."
@@ -5356,7 +5456,7 @@ class UtilityJustificationGraphReceipt(CoreasonBaseState):
     def _enforce_mathematical_interlocks(self) -> "UtilityJustificationGraphReceipt":
         if self.ensemble_spec is not None and self.superposition_variance_threshold == 0.0:
             raise ValueError(
-                "Topological Interlock Failed: ensemble_spec defined but variance threshold is 0.0. Mathematical certainty prohibits superposition."  # noqa: E501
+                "Topological Interlock Failed: ensemble_spec defined but variance threshold is 0.0. Mathematical certainty prohibits superposition."
             )
         for vectors in (self.optimizing_vectors, self.degrading_vectors):
             for key, val in vectors.items():
@@ -5385,16 +5485,16 @@ class CognitiveCritiqueProfile(CoreasonBaseState):
         min_length=1,
         max_length=128,
         pattern="^[a-f0-9]{64}$",
-        description="CoReason Shared Kernel Ontology: The cryptographic Merkle root of the specific ThoughtBranch being evaluated.",  # noqa: E501
+        description="CoReason Shared Kernel Ontology: The cryptographic Merkle root of the specific ThoughtBranch being evaluated.",
     )
     logical_flaw_embedding: VectorEmbeddingState | None = Field(
         default=None,
-        description="CoReason Shared Kernel Ontology: A dense latent space representation of the specific logical fallacy identified, used to mathematically repel future generation trajectories.",  # noqa: E501
+        description="CoReason Shared Kernel Ontology: A dense latent space representation of the specific logical fallacy identified, used to mathematically repel future generation trajectories.",
     )
     epistemic_penalty_scalar: float = Field(
         ge=0.0,
         le=1.0,
-        description="CoReason Shared Kernel Ontology: A continuous penalty applied to the branch's probability mass if normative drift or hallucination is detected.",  # noqa: E501
+        description="CoReason Shared Kernel Ontology: A continuous penalty applied to the branch's probability mass if normative drift or hallucination is detected.",
     )
 
 
@@ -5405,17 +5505,17 @@ class KineticBudgetPolicy(CoreasonBaseState):
     """
 
     exploration_decay_curve: Literal["linear", "exponential", "step"] = Field(
-        description="CoReason Shared Kernel Ontology: The mathematical function dictating how rapidly lateral ThoughtBranches are restricted over time."  # noqa: E501
+        description="CoReason Shared Kernel Ontology: The mathematical function dictating how rapidly lateral ThoughtBranches are restricted over time."
     )
     forced_exploitation_threshold_ms: int = Field(
         le=86400000,
         gt=0,
-        description="CoReason Shared Kernel Ontology: The physical wall-clock time remaining at which the orchestrator is mathematically forbidden from opening new lateral branches.",  # noqa: E501
+        description="CoReason Shared Kernel Ontology: The physical wall-clock time remaining at which the orchestrator is mathematically forbidden from opening new lateral branches.",
     )
     dynamic_temperature_asymptote: float = Field(
         le=1000000000.0,
         ge=0.0,
-        description="CoReason Shared Kernel Ontology: The absolute minimum sampling temperature the system must converge to during the final exploitation phase.",  # noqa: E501
+        description="CoReason Shared Kernel Ontology: The absolute minimum sampling temperature the system must converge to during the final exploitation phase.",
     )
 
 
@@ -5428,17 +5528,17 @@ class EpistemicEscalationContract(CoreasonBaseState):
     baseline_entropy_threshold: float = Field(
         le=1000000000.0,
         ge=0.0,
-        description="CoReason Shared Kernel Ontology: The mathematical measure of uncertainty (e.g., variance in generated hypotheses) required to trigger escalation.",  # noqa: E501
+        description="CoReason Shared Kernel Ontology: The mathematical measure of uncertainty (e.g., variance in generated hypotheses) required to trigger escalation.",
     )
     test_time_multiplier: float = Field(
         le=1000000000.0,
         gt=1.0,
-        description="CoReason Shared Kernel Ontology: The continuous scalar applied to the agent's baseline max_latent_tokens_budget when the entropy threshold is breached.",  # noqa: E501
+        description="CoReason Shared Kernel Ontology: The continuous scalar applied to the agent's baseline max_latent_tokens_budget when the entropy threshold is breached.",
     )
     max_escalation_tiers: int = Field(
         le=1000000000,
         ge=1,
-        description="CoReason Shared Kernel Ontology: The absolute integer limit on how many times the orchestrator can recursively multiply the compute budget before forcing a SystemFaultEvent.",  # noqa: E501
+        description="CoReason Shared Kernel Ontology: The absolute integer limit on how many times the orchestrator can recursively multiply the compute budget before forcing a SystemFaultEvent.",
     )
 
 
@@ -5461,6 +5561,7 @@ class EpistemicExtractionPolicy(CoreasonBaseState):
         return self
 
 
+
 class FederatedPeftContract(CoreasonBaseState):
     """
     AGENT INSTRUCTION: The physical and temporal bounding constraints
@@ -5469,22 +5570,22 @@ class FederatedPeftContract(CoreasonBaseState):
 
     adapter_merkle_root: str = Field(
         pattern="^[a-f0-9]{64}$",
-        description="CoReason Shared Kernel Ontology: The tamper-evident SHA-256 hash of the exact safetensors weight matrix.",  # noqa: E501
+        description="CoReason Shared Kernel Ontology: The tamper-evident SHA-256 hash of the exact safetensors weight matrix.",
     )
     vram_footprint_bytes: int = Field(
         le=100000000000,
         gt=0,
-        description="CoReason Shared Kernel Ontology: The exact spatial geometry required in VRAM to mount this adapter.",  # noqa: E501
+        description="CoReason Shared Kernel Ontology: The exact spatial geometry required in VRAM to mount this adapter.",
     )
     ephemeral_ttl_ms: int = Field(
         le=86400000,
         gt=0,
-        description="CoReason Shared Kernel Ontology: The absolute Time-To-Live for the adapter to exist in the kinetic execution plane before forced eviction.",  # noqa: E501
+        description="CoReason Shared Kernel Ontology: The absolute Time-To-Live for the adapter to exist in the kinetic execution plane before forced eviction.",
     )
     cache_priority_weight: float = Field(
         ge=0.0,
         le=1.0,
-        description="CoReason Shared Kernel Ontology: The relative importance scalar used by the orchestrator's LRU eviction algorithm when VRAM limits are saturated.",  # noqa: E501
+        description="CoReason Shared Kernel Ontology: The relative importance scalar used by the orchestrator's LRU eviction algorithm when VRAM limits are saturated.",
     )
 
 
@@ -5493,7 +5594,7 @@ class SemanticEdgeState(CoreasonBaseState):
         min_length=1,
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this semantic edge to the Merkle-DAG.",  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this semantic edge to the Merkle-DAG.",
     )
     subject_node_id: str = Field(
         min_length=1,
@@ -5515,7 +5616,7 @@ class SemanticEdgeState(CoreasonBaseState):
     )
     embedding: VectorEmbeddingState | None = Field(
         default=None,
-        description="Topologically Bounded Latent Spaces used to calculate exact geometric distance and preserve structural Isometry.",  # noqa: E501
+        description="Topologically Bounded Latent Spaces used to calculate exact geometric distance and preserve structural Isometry.",
     )
     provenance: EpistemicProvenanceReceipt | None = Field(
         default=None,
@@ -5534,19 +5635,19 @@ class SemanticNodeState(CoreasonBaseState):
         min_length=1,
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this semantic node to the Merkle-DAG.",  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this semantic node to the Merkle-DAG.",
     )
     label: str = Field(max_length=2000, description="The categorical label of the node (e.g., 'Person', 'Concept').")
     scope: Literal["global", "tenant", "session"] = Field(
         default="session",
-        description="The cryptographic namespace partitioning boundary. Global is public, Tenant is corporate, Session is ephemeral.",  # noqa: E501
+        description="The cryptographic namespace partitioning boundary. Global is public, Tenant is corporate, Session is ephemeral.",
     )
     text_chunk: str = Field(
         max_length=50000, description="The raw natural language representation of the semantic node."
     )
     embedding: VectorEmbeddingState | None = Field(
         default=None,
-        description="Topologically Bounded Latent Spaces used to calculate exact geometric distance and preserve structural Isometry.",  # noqa: E501
+        description="Topologically Bounded Latent Spaces used to calculate exact geometric distance and preserve structural Isometry.",
     )
     provenance: EpistemicProvenanceReceipt = Field(
         description="The cryptographic chain of custody for this semantic state."
@@ -5565,7 +5666,7 @@ class SemanticNodeState(CoreasonBaseState):
     )
     fhe_profile: HomomorphicEncryptionProfile | None = Field(
         default=None,
-        description="The cryptographic envelope enabling privacy-preserving computation directly on this node's encrypted state.",  # noqa: E501
+        description="The cryptographic envelope enabling privacy-preserving computation directly on this node's encrypted state.",
     )
 
     @model_validator(mode="after")
@@ -5583,15 +5684,15 @@ class VerifiableCredentialPresentationReceipt(CoreasonBaseState):
         description="The exact cryptographic standard used to encode this credential presentation."
     )
     issuer_did: NodeIdentifierState = Field(
-        description="The W3C DID of the trusted authority that cryptographically signed the credential, explicitly representing the delegation of authority from a human or parent principal."  # noqa: E501
+        description="The W3C DID of the trusted authority that cryptographically signed the credential, explicitly representing the delegation of authority from a human or parent principal."
     )
     cryptographic_proof_blob: str = Field(
         max_length=100000,
-        description="The base64-encoded cryptographic proof (e.g., ZK-SNARKs, zkVM receipts, or programmable trust attestations) proving the claims without revealing the private key.",  # noqa: E501
+        description="The base64-encoded cryptographic proof (e.g., ZK-SNARKs, zkVM receipts, or programmable trust attestations) proving the claims without revealing the private key.",
     )
     authorization_claims: dict[Annotated[str, StringConstraints(max_length=255)], Any] = Field(
         max_length=86400000,
-        description="The strict, domain-agnostic JSON dictionary of strictly bounded geometric predicates that define the operational perimeter of the agent (e.g., {'clearance': 'RESTRICTED'}).",  # noqa: E501
+        description="The strict, domain-agnostic JSON dictionary of strictly bounded geometric predicates that define the operational perimeter of the agent (e.g., {'clearance': 'RESTRICTED'}).",
     )
 
 
@@ -5614,7 +5715,7 @@ class AgentAttestationReceipt(CoreasonBaseState):
     )
     credential_presentations: list[VerifiableCredentialPresentationReceipt] = Field(
         default_factory=list,
-        description="The wallet of selective disclosure credentials proving the agent's identity, clearance, and budget authorization.",  # noqa: E501
+        description="The wallet of selective disclosure credentials proving the agent's identity, clearance, and budget authorization.",
     )
 
     @model_validator(mode="after")
@@ -5632,19 +5733,21 @@ class AgentNodeProfile(BaseNodeProfile):
 
     description: str = Field(
         max_length=2000,
-        description="The semantic boundary defining the objective function of the execution node. [SITD-Gamma: Neurosymbolic Substrate Alignment]",  # noqa: E501
+        description="The semantic boundary defining the objective function of the execution node. [SITD-Gamma: Neurosymbolic Substrate Alignment]",
     )
     type: Literal["agent"] = Field(default="agent", description="Discriminator for an Agent node.")
+    token_merging: TokenMergingPolicy | None = Field(default=None)
+    extraction_policy: EpistemicExtractionPolicy | None = Field(default=None)
     logit_steganography: LogitSteganographyContract | None = Field(
         default=None,
-        description="The cryptographic contract forcing this agent to embed an undeniable provenance signature into its generative token stream.",  # noqa: E501
+        description="The cryptographic contract forcing this agent to embed an undeniable provenance signature into its generative token stream.",
     )
     compute_frontier: RoutingFrontierPolicy | None = Field(
         default=None, description="The dynamic spot-market compute requirements for this agent."
     )
     peft_adapters: list[PeftAdapterContract] = Field(
         default_factory=list,
-        description="The declarative array of ephemeral PEFT/LoRA weights required to be hot-swapped during this agent's execution.",  # noqa: E501
+        description="The declarative array of ephemeral PEFT/LoRA weights required to be hot-swapped during this agent's execution.",
     )
     agent_attestation: AgentAttestationReceipt | None = Field(
         default=None, description="The cryptographic identity passport and AI-BOM for the agent."
@@ -5658,7 +5761,7 @@ class AgentNodeProfile(BaseNodeProfile):
     )
     secure_sub_session: SecureSubSessionState | None = Field(
         default=None,
-        description="Declarative boundary for handling unredacted secrets within a temporarily isolated state partition.",  # noqa: E501
+        description="Declarative boundary for handling unredacted secrets within a temporarily isolated state partition.",
     )
     baseline_cognitive_state: CognitiveStateProfile | None = Field(
         default=None,
@@ -5681,7 +5784,7 @@ class AgentNodeProfile(BaseNodeProfile):
     )
     active_inference_policy: ActiveInferenceContract | None = Field(
         default=None,
-        description="The formal contract demanding mathematical proof of Expected Information Gain before authorizing tool execution.",  # noqa: E501
+        description="The formal contract demanding mathematical proof of Expected Information Gain before authorizing tool execution.",
     )
     analogical_policy: AnalogicalMappingTask | None = Field(
         default=None, description="The formal contract forcing the agent to execute cross-domain lateral thinking."
@@ -5696,7 +5799,7 @@ class AgentNodeProfile(BaseNodeProfile):
     )
     audit_policy: MechanisticAuditContract | None = Field(
         default=None,
-        description="The adaptive trigger policy for executing deep mechanistic interpretability brain-scans on this agent.",  # noqa: E501
+        description="The adaptive trigger policy for executing deep mechanistic interpretability brain-scans on this agent.",
     )
     anchoring_policy: AnchoringPolicy | None = Field(
         default=None,
@@ -5704,10 +5807,7 @@ class AgentNodeProfile(BaseNodeProfile):
     )
     grpo_reward_policy: EpistemicRewardModelPolicy | None = Field(
         default=None,
-        description="The RL post-training contract forcing the agent to evaluate traces against an implicit graph reward.",  # noqa: E501
-    )
-    extraction_policy: EpistemicExtractionPolicy | None = Field(
-        default=None, description="The strictly typed ruleset governing how this agent extracts subgraph elements."
+        description="The RL post-training contract forcing the agent to evaluate traces against an implicit graph reward.",
     )
 
     @model_validator(mode="after")
@@ -5747,7 +5847,7 @@ class BaseTopologyManifest(CoreasonBaseState):
     )
     information_flow: InformationFlowPolicy | None = Field(
         default=None,
-        description="The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology.",  # noqa: E501
+        description="The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology.",
     )
     observability: ObservabilityPolicy | None = Field(
         default=None, description="The distributed tracing rules bound to this specific execution graph."
@@ -5771,11 +5871,11 @@ class CouncilTopologyManifest(BaseTopologyManifest):
     )
     ontological_alignment: OntologicalAlignmentPolicy | None = Field(
         default=None,
-        description="The pre-flight execution gate forcing agents to mathematically align their latent semantics before participating in the topology.",  # noqa: E501
+        description="The pre-flight execution gate forcing agents to mathematically align their latent semantics before participating in the topology.",
     )
     council_escrow: EscrowPolicy | None = Field(
         default=None,
-        description="The strictly typed mathematical surface area to lock funds specifically for PBFT council execution and slashing.",  # noqa: E501
+        description="The strictly typed mathematical surface area to lock funds specifically for PBFT council execution and slashing.",
     )
 
     @model_validator(mode="after")
@@ -5896,7 +5996,7 @@ class EvaluatorOptimizerTopologyManifest(BaseTopologyManifest):
     )
     require_multimodal_grounding: bool = Field(
         default=False,
-        description="If True, the evaluator_node_id MUST mathematically mask all tokens outside the MultimodalTokenAnchorState during its forward pass to execute pure adversarial Proposer-Critique validation.",  # noqa: E501
+        description="If True, the evaluator_node_id MUST mathematically mask all tokens outside the MultimodalTokenAnchorState during its forward pass to execute pure adversarial Proposer-Critique validation.",
     )
 
     @model_validator(mode="after")
@@ -5948,15 +6048,15 @@ class SMPCTopologyManifest(BaseTopologyManifest):
     )
     joint_function_uri: str = Field(
         max_length=2000,
-        description="The URI or hash pointing to the exact math circuit or polynomial function the ring will collaboratively compute.",  # noqa: E501
+        description="The URI or hash pointing to the exact math circuit or polynomial function the ring will collaboratively compute.",
     )
     participant_node_ids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
         min_length=2,
-        description="The strict ordered array of NodeIdentifierStates participating in the Secure Multi-Party Computation ring.",  # noqa: E501
+        description="The strict ordered array of NodeIdentifierStates participating in the Secure Multi-Party Computation ring.",
     )
     ontological_alignment: OntologicalAlignmentPolicy | None = Field(
         default=None,
-        description="The pre-flight execution gate forcing agents to mathematically align their latent semantics before participating in the topology.",  # noqa: E501
+        description="The pre-flight execution gate forcing agents to mathematically align their latent semantics before participating in the topology.",
     )
 
 
@@ -6098,13 +6198,13 @@ class WorkflowManifest(CoreasonBaseState):
     """
 
     genesis_provenance: EpistemicProvenanceReceipt = Field(
-        description='"""AGENT INSTRUCTION: This structural lock guarantees that any graph execution is mathematically anchored to a CoReason Genesis Block. Stripping this field violates the Topological Consistency of the Shared Kernel."""'  # noqa: E501
+        description='"""AGENT INSTRUCTION: This structural lock guarantees that any graph execution is mathematically anchored to a CoReason Genesis Block. Stripping this field violates the Topological Consistency of the Shared Kernel."""'
     )
     manifest_version: SemanticVersionState = Field(
         description="The semantic version of this workflow manifestation schema."
     )
     topology: AnyTopologyManifest = Field(
-        description="The underlying topology governing execution routing. [SITD-Beta: Defeasible Merkle-DAG Causal Bounding]"  # noqa: E501
+        description="The underlying topology governing execution routing. [SITD-Beta: Defeasible Merkle-DAG Causal Bounding]"
     )
     governance: GlobalGovernancePolicy | None = Field(
         default=None, description="Macro-economic circuit breakers and TTL limits for the swarm."
@@ -6135,7 +6235,7 @@ class WorkflowManifest(CoreasonBaseState):
     )
     federated_sla: BilateralSLA | None = Field(
         default=None,
-        description="The B2B Service Level Agreement contract that must be mathematically satisfied before multi-tenant graph coupling.",  # noqa: E501
+        description="The B2B Service Level Agreement contract that must be mathematically satisfied before multi-tenant graph coupling.",
     )
     pq_signature: PostQuantumSignatureReceipt | None = Field(
         default=None, description="The quantum-resistant signature securing the root execution graph."
@@ -6217,11 +6317,11 @@ class EpistemicQuarantineSnapshot(CoreasonBaseState):
         Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=100000)]
     ] = Field(
         le=1000000000,
-        description="The ephemeral latent variables and environmental bindings currently active in Epistemic Quarantine.",  # noqa: E501
+        description="The ephemeral latent variables and environmental bindings currently active in Epistemic Quarantine.",
     )
     argumentation: EpistemicArgumentGraphState | None = Field(
         default=None,
-        description="The formal graph of non-monotonic claims and defeasible attacks currently active in the swarm's working state.",  # noqa: E501
+        description="The formal graph of non-monotonic claims and defeasible attacks currently active in the swarm's working state.",
     )
     theory_of_mind_models: list[TheoryOfMindSnapshot] = Field(
         default_factory=list,
@@ -6255,13 +6355,13 @@ class ZeroKnowledgeReceipt(CoreasonBaseState):
         min_length=1,
         max_length=128,
         pattern="^[a-f0-9]{64}$",
-        description="The SHA-256 hash of the public inputs (e.g., prompt, Lamport clock) anchoring this proof to the specific state index.",  # noqa: E501
+        description="The SHA-256 hash of the public inputs (e.g., prompt, Lamport clock) anchoring this proof to the specific state index.",
     )
     verifier_key_id: str = Field(
         min_length=1,
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the public evaluation key.",  # noqa: E501
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the public evaluation key.",
     )
     cryptographic_blob: str = Field(
         max_length=5000000, description="The base64-encoded succinct cryptographic proof payload."
@@ -6271,7 +6371,7 @@ class ZeroKnowledgeReceipt(CoreasonBaseState):
     ] = Field(
         le=1000000000,
         default_factory=dict,
-        description="Cryptographic bindings (hashes) of intermediate residual stream states to prevent activation spoofing.",  # noqa: E501
+        description="Cryptographic bindings (hashes) of intermediate residual stream states to prevent activation spoofing.",
     )
 
 
@@ -6280,7 +6380,7 @@ class BeliefMutationEvent(BaseStateEvent):
         default="belief_mutation", description="Discriminator type for a Belief Assertion event."
     )
     payload: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
-        description="Topologically Bounded Latent Spaces capturing the semantic representation of the agent's internal cognitive shift or synthesis that anchor statistical probability to a definitive causal event hash.",  # noqa: E501
+        description="Topologically Bounded Latent Spaces capturing the semantic representation of the agent's internal cognitive shift or synthesis that anchor statistical probability to a definitive causal event hash.",
     )
     source_node_id: NodeIdentifierState | None = Field(
         default=None, description="The specific topological node that synthesized this belief assertion."
@@ -6295,7 +6395,7 @@ class BeliefMutationEvent(BaseStateEvent):
     )
     zk_proof: ZeroKnowledgeReceipt | None = Field(
         default=None,
-        description="The mathematical attestation proving this belief synthesis was appended securely without model-downgrade fraud.",  # noqa: E501
+        description="The mathematical attestation proving this belief synthesis was appended securely without model-downgrade fraud.",
     )
     uncertainty_profile: CognitiveUncertaintyProfile | None = Field(
         le=1000000000,
@@ -6329,7 +6429,7 @@ class ObservationEvent(BaseStateEvent):
         default="observation", description="Discriminator type for an observation event."
     )
     payload: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
-        description="Neurosymbolic Bindings of the raw, lossless semantic output appended from the environment or tool execution that anchor statistical probability to a definitive causal event hash.",  # noqa: E501
+        description="Neurosymbolic Bindings of the raw, lossless semantic output appended from the environment or tool execution that anchor statistical probability to a definitive causal event hash.",
     )
     source_node_id: NodeIdentifierState | None = Field(
         default=None, description="The specific topological node that appended this observation."
@@ -6357,7 +6457,7 @@ class ObservationEvent(BaseStateEvent):
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
         default=None,
-        description="The Event ID of the specific ToolInvocationEvent that spawned this observation, forming a strict bipartite directed edge.",  # noqa: E501
+        description="The Event ID of the specific ToolInvocationEvent that spawned this observation, forming a strict bipartite directed edge.",
     )
 
     @field_validator("payload", mode="before")
@@ -6701,7 +6801,7 @@ class EpistemicLedgerState(CoreasonBaseState):
 
     history: list[AnyStateEvent] = Field(
         max_length=10000,
-        description="An append-only, cryptographic ledger of state events. [SITD-Alpha: Non-Monotonic Epistemic Quarantine Isometry]",  # noqa: E501
+        description="An append-only, cryptographic ledger of state events. [SITD-Alpha: Non-Monotonic Epistemic Quarantine Isometry]",
     )
     checkpoints: list[TemporalCheckpointState] = Field(
         max_length=1000000000, default_factory=list, description="Hard temporal anchors allowing state restoration."
@@ -6788,3 +6888,8 @@ CanonicalGroundingReceipt.model_rebuild()
 EpistemicExtractionPolicy.model_rebuild()
 SemanticNodeState.model_rebuild()
 AgentNodeProfile.model_rebuild()
+ConceptBottleneckPolicy.model_rebuild()
+PredictiveEntropySLA.model_rebuild()
+StreamInterruptionPolicy.model_rebuild()
+TokenMergingPolicy.model_rebuild()
+InformationFlowPolicy.model_rebuild()

@@ -177,14 +177,14 @@ def generate_correction_prompt(error: ValidationError, target_node_id: str, faul
         err_type = err["type"]
         if err_type == "missing":
             error_messages.append(
-                f"The required semantic boundary at '{loc_path}' is completely missing. You must project this missing dimension to satisfy the StateContract."  # noqa: E501
+                f"The required semantic boundary at '{loc_path}' is completely missing. You must project this missing dimension to satisfy the StateContract."
             )
         else:
             msg = err.get("msg", "Invalid structural payload.")
             error_messages.append(f"A structural boundary violation occurred at '{loc_path}': {msg}")
     failing_pointers = list(set(failing_pointers))
     remediation_prompt = (
-        "CRITICAL CONTRACT BREACH: Your generated state representation violates the formal ontological boundaries of the Shared Kernel. Review the following strict topological failures and correct your JSON projection:\n"  # noqa: E501
+        "CRITICAL CONTRACT BREACH: Your generated state representation violates the formal ontological boundaries of the Shared Kernel. Review the following strict topological failures and correct your JSON projection:\n"
         + "\n".join(f"- {msg}" for msg in error_messages)
     )
     return System2RemediationIntent(
@@ -554,6 +554,24 @@ class ManifestSemanticRegistry:
             name="Core EBNF Constructs",
             description="Core EBNF syntax constructs.",
             semantics=ontology.CORE_EBNF_SEMANTICS,
+        ),
+        "mcp://coreason/semantics/token_matching": SemanticResource(
+            uri="mcp://coreason/semantics/token_matching",
+            name="Core Token Matching Algorithms",
+            description="Algorithms for VRAM token fusion and bipartite matching.",
+            semantics=ontology.CORE_TOKEN_MATCHING_SEMANTICS,
+        ),
+        "mcp://coreason/semantics/xai_explanation": SemanticResource(
+            uri="mcp://coreason/semantics/xai_explanation",
+            name="Core XAI Explanation Types",
+            description="Formal Explainable AI (XAI) methodologies for concept routing.",
+            semantics=ontology.CORE_XAI_EXPLANATION_SEMANTICS,
+        ),
+        "mcp://coreason/semantics/entropy_metric": SemanticResource(
+            uri="mcp://coreason/semantics/entropy_metric",
+            name="Core Entropy Metrics",
+            description="Information-theoretic algorithms for uncertainty quantification.",
+            semantics=ontology.CORE_ENTROPY_METRIC_SEMANTICS,
         ),
         "mcp://coreason/semantics/token_merge_metric": SemanticResource(
             uri="mcp://coreason/semantics/token_merge_metric",
