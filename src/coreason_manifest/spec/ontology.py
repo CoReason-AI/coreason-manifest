@@ -639,7 +639,9 @@ class CognitiveRoutingContract(CoreasonBaseState):
         ge=0.0,
         description="The temperature applied to the router's softmax gate, controlling how deterministically it picks experts.",  # noqa: E501
     )
-    expert_logit_biases: dict[Annotated[str, StringConstraints(max_length=255)], float] = Field(
+    expert_logit_biases: dict[
+        Annotated[str, StringConstraints(max_length=255)], Annotated[float, Field(ge=-1000.0, le=1000.0)]
+    ] = Field(
         default_factory=dict,
         description="Explicit tensor biases applied to the router gate. Keys are expert IDs (e.g., 'expert_falsifier'), values are logit modifiers.",  # noqa: E501
     )
@@ -1079,7 +1081,7 @@ class StateDifferentialManifest(CoreasonBaseState):
         ge=0,
         description="Strict scalar logical clock governing deterministic LWW (Last-Writer-Wins) conflict resolution.",
     )
-    vector_clock: dict[Annotated[str, StringConstraints(max_length=255)], int] = Field(
+    vector_clock: dict[Annotated[str, StringConstraints(max_length=255)], Annotated[int, Field(ge=0)]] = Field(
         description="Causal history mapping of all known Lineage Watermarks to their latest logical mutation count at the time of authoring."  # noqa: E501
     )
     patches: list[StateMutationIntent] = Field(
@@ -1705,7 +1707,7 @@ class BrowserDOMState(CoreasonBaseState):
                     ip = ipaddress.ip_address(ip_int)
                 else:
                     raise ValueError
-            except ValueError, OverflowError, IndexError:
+            except (ValueError, OverflowError, IndexError):
                 return url
         if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast:
             raise ValueError(f"SSRF restricted IP detected: {hostname}")
@@ -1905,7 +1907,9 @@ class CounterfactualRegretEvent(BaseStateEvent):
     epistemic_regret: float = Field(
         description="The mathematical variance (simulated - actual) representing the opportunity cost of the historical decision."  # noqa: E501
     )
-    policy_mutation_gradients: dict[Annotated[str, StringConstraints(max_length=255)], float] = Field(
+    policy_mutation_gradients: dict[
+        Annotated[str, StringConstraints(max_length=255)], Annotated[float, Field(ge=-1000.0, le=1000.0)]
+    ] = Field(
         default_factory=dict,
         description="The stateless routing gradient adjustments derived from the calculated regret, used to self-correct future routing.",  # noqa: E501
     )
@@ -3024,9 +3028,9 @@ class HTTPTransportProfile(CoreasonBaseState):
 
     type: Literal["http"] = Field(default="http", description="Type of transport.")
     uri: HttpUrl = Field(..., description="The HTTP URL endpoint for the stateless connection.")
-    headers: dict[Annotated[str, StringConstraints(max_length=255)], str] = Field(
-        default_factory=dict, description="HTTP headers, strictly bounded for zero-trust credentials."
-    )
+    headers: dict[
+        Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=2000)]
+    ] = Field(default_factory=dict, description="HTTP headers, strictly bounded for zero-trust credentials.")
 
     @field_validator("headers", mode="after")
     @classmethod
@@ -3455,7 +3459,9 @@ class LineageWatermarkReceipt(CoreasonBaseState):
     watermark_protocol: Literal["merkle_dag", "statistical_token", "homomorphic_mac"] = Field(
         description="The mathematical methodology used to embed the chain of custody."
     )
-    hop_signatures: dict[Annotated[str, StringConstraints(max_length=255)], str] = Field(
+    hop_signatures: dict[
+        Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=2000)]
+    ] = Field(
         description="A dictionary mapping intermediate participant NodeIdentifierStates "
         "to their deterministic execution signatures."
     )
@@ -3799,7 +3805,7 @@ class MarketResolutionState(CoreasonBaseState):
     falsified_hypothesis_ids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
         description="The hypothesis IDs that were falsified."
     )
-    payout_distribution: dict[Annotated[str, StringConstraints(max_length=255)], int] = Field(
+    payout_distribution: dict[Annotated[str, StringConstraints(max_length=255)], Annotated[int, Field(ge=0)]] = Field(
         description="The deterministic mapping of agent IDs to their earned compute budget/magnitude based on Brier scoring."  # noqa: E501
     )
 
@@ -3871,7 +3877,9 @@ class MigrationContract(CoreasonBaseState):
     target_version: str = Field(
         max_length=2000, description="The exact semantic version string of the payload after migration."
     )
-    path_transformations: dict[Annotated[str, StringConstraints(max_length=255)], str] = Field(
+    path_transformations: dict[
+        Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=2000)]
+    ] = Field(
         default_factory=dict, description="A strict mapping of old RFC 6902 JSON Pointers to new JSON Pointers."
     )
     dropped_paths: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
@@ -4188,7 +4196,9 @@ class PredictionMarketState(CoreasonBaseState):
     order_book: list[HypothesisStakeReceipt] = Field(
         description="The immutable ledger of all stakes placed by the swarm."
     )
-    current_market_probabilities: dict[Annotated[str, StringConstraints(max_length=255)], str] = Field(
+    current_market_probabilities: dict[
+        Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=255)]
+    ] = Field(
         description="Mapping of hypothesis IDs to their current LMSR-calculated market price (probability) as stringified decimals."  # noqa: E501
     )
 
@@ -4309,9 +4319,9 @@ class SSETransportProfile(CoreasonBaseState):
 
     type: Literal["sse"] = Field(default="sse", description="Type of transport.")
     uri: HttpUrl = Field(..., description="The HTTP URL endpoint for the SSE connection.")
-    headers: dict[Annotated[str, StringConstraints(max_length=255)], str] = Field(
-        default_factory=dict, description="HTTP headers, e.g., for authentication."
-    )
+    headers: dict[
+        Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=2000)]
+    ] = Field(default_factory=dict, description="HTTP headers, e.g., for authentication.")
 
     @field_validator("headers", mode="after")
     @classmethod
@@ -4567,9 +4577,9 @@ class StdioTransportProfile(CoreasonBaseState):
         default_factory=list, description="The explicit array of arguments to pass to the command."
     )
     # Note: args is a structurally ordered sequence (Execution Command Sequence) and MUST NOT be sorted.
-    env_vars: dict[Annotated[str, StringConstraints(max_length=255)], str] = Field(
-        default_factory=dict, description="Environment variables required by the transport."
-    )
+    env_vars: dict[
+        Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=2000)]
+    ] = Field(default_factory=dict, description="Environment variables required by the transport.")
 
 
 type MCPTransportProfile = StdioTransportProfile | SSETransportProfile | HTTPTransportProfile
@@ -4777,7 +4787,7 @@ class TaskAwardReceipt(CoreasonBaseState):
     task_id: str = Field(
         min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$", description="The identifier of the resolved task."
     )
-    awarded_syndicate: dict[Annotated[str, StringConstraints(max_length=255)], int] = Field(
+    awarded_syndicate: dict[Annotated[str, StringConstraints(max_length=255)], Annotated[int, Field(ge=0)]] = Field(
         description="Strict mapping of agent NodeIdentifierStates to their exact fractional payout in magnitude."
     )
     cleared_price_magnitude: int = Field(description="The final cryptographic clearing price.")
@@ -5005,12 +5015,12 @@ class UtilityJustificationGraphReceipt(CoreasonBaseState):
     If variance threshold falls below delta, fallback to deterministic ensemble superposition.
     """
 
-    optimizing_vectors: dict[Annotated[str, StringConstraints(max_length=255)], float] = Field(
-        default_factory=dict, description="Multi-dimensional continuous values representing optimizations."
-    )
-    degrading_vectors: dict[Annotated[str, StringConstraints(max_length=255)], float] = Field(
-        default_factory=dict, description="Multi-dimensional continuous values representing degradations."
-    )
+    optimizing_vectors: dict[
+        Annotated[str, StringConstraints(max_length=255)], Annotated[float, Field(ge=-1000.0, le=1000.0)]
+    ] = Field(default_factory=dict, description="Multi-dimensional continuous values representing optimizations.")
+    degrading_vectors: dict[
+        Annotated[str, StringConstraints(max_length=255)], Annotated[float, Field(ge=-1000.0, le=1000.0)]
+    ] = Field(default_factory=dict, description="Multi-dimensional continuous values representing degradations.")
     superposition_variance_threshold: float = Field(
         ...,
         ge=0.0,
@@ -5846,7 +5856,9 @@ class EpistemicQuarantineSnapshot(CoreasonBaseState):
     system_prompt: str = Field(
         max_length=2000, description="The basal non-monotonic instruction set currently held in Epistemic Quarantine."
     )
-    active_context: dict[Annotated[str, StringConstraints(max_length=255)], str] = Field(
+    active_context: dict[
+        Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=100000)]
+    ] = Field(
         description="The ephemeral latent variables and environmental bindings currently active in Epistemic Quarantine."  # noqa: E501
     )
     argumentation: EpistemicArgumentGraphState | None = Field(
