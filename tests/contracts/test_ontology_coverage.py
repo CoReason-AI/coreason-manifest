@@ -503,6 +503,18 @@ def test_semantic_alignment_handshake_sorting() -> None:
     assert handshake.participant_node_ids == ["a", "b"]
 
 
+def test_token_merging_policy_sorting() -> None:
+    from coreason_manifest.spec.ontology import TokenMergingPolicy
+
+    policy = TokenMergingPolicy(
+        metric="cosine_similarity",
+        matching_algorithm="bipartite_soft_matching",
+        target_compression_ratio=0.5,
+        layer_whitelist=[5, 1, 3],
+    )
+    assert policy.layer_whitelist == [1, 3, 5]
+
+
 def test_bulk_array_sorting_coverage() -> None:
     from coreason_manifest.spec.ontology import (
         BeliefMutationEvent,
