@@ -5273,14 +5273,14 @@ class UtilityJustificationGraphReceipt(CoreasonBaseState):
     optimizing_vectors: dict[
         Annotated[str, StringConstraints(max_length=255)], Annotated[float, Field(ge=-1000.0, le=1000.0)]
     ] = Field(
-        le=1000000000.0,
+        max_length=1000000000,
         default_factory=dict,
         description="Multi-dimensional continuous values representing optimizations.",
     )
     degrading_vectors: dict[
         Annotated[str, StringConstraints(max_length=255)], Annotated[float, Field(ge=-1000.0, le=1000.0)]
     ] = Field(
-        le=1000000000.0,
+        max_length=1000000000,
         default_factory=dict,
         description="Multi-dimensional continuous values representing degradations.",
     )
