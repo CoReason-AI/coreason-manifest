@@ -1954,7 +1954,7 @@ class BrowserDOMState(CoreasonBaseState):
                     ip = ipaddress.ip_address(ip_int)
                 else:
                     raise ValueError
-            except (ValueError, OverflowError, IndexError):
+            except ValueError, OverflowError, IndexError:
                 return url
         if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast:
             raise ValueError(f"SSRF restricted IP detected: {hostname}")
@@ -4895,8 +4895,10 @@ class SpatialKinematicActionIntent(CoreasonBaseState):
         default=None, description="The primary spatial terminus for clicks or hovers."
     )
     target_frame_cid: str = Field(
-        min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$",
-        description="Cryptographic lock tying this physical kinematic action to the exact screenshot frame it was predicted on, preventing temporal mis-clicks."  # noqa: E501
+        min_length=1,
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        description="Cryptographic lock tying this physical kinematic action to the exact screenshot frame it was predicted on, preventing temporal mis-clicks.",  # noqa: E501
     )
     trajectory_duration_ms: int | None = Field(
         le=86400000,
@@ -5513,12 +5515,8 @@ class VisualAffordancePatchState(CoreasonBaseState):
     strict spatial geometry to its latent semantic vector and interaction probability.
     """
 
-    patch_id: str = Field(
-        min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$"
-    )
-    spatial_boundary: SpatialBoundingBoxProfile = Field(
-        description="Strict Euclidean boundaries for the patch."
-    )
+    patch_id: str = Field(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
+    spatial_boundary: SpatialBoundingBoxProfile = Field(description="Strict Euclidean boundaries for the patch.")
     semantic_concept: VectorEmbeddingState = Field(
         description="The latent vector representation of what this patch means."
     )
@@ -5544,8 +5542,10 @@ class ViewportRasterState(CoreasonBaseState):
         description="The absolute (W, H) pixel coordinate space used for the affine scaling matrix."
     )
     screenshot_cid: str = Field(
-        min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$",
-        description="The cryptographic lock to the exact rasterized frame tensor."
+        min_length=1,
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        description="The cryptographic lock to the exact rasterized frame tensor.",
     )
     extracted_affordances: list[VisualAffordancePatchState] = Field(
         description="The array of identified interactive zones."
@@ -5553,11 +5553,7 @@ class ViewportRasterState(CoreasonBaseState):
 
     @model_validator(mode="after")
     def sort_arrays(self) -> Self:
-        object.__setattr__(
-            self,
-            "extracted_affordances",
-            sorted(self.extracted_affordances, key=lambda x: x.patch_id)
-        )
+        object.__setattr__(self, "extracted_affordances", sorted(self.extracted_affordances, key=lambda x: x.patch_id))
         return self
 
 
