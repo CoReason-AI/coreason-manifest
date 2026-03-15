@@ -1,5 +1,4 @@
 import pytest
-from uuid import uuid4
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
@@ -9,6 +8,7 @@ from coreason_manifest.spec.ontology import (
     SemanticDiscoveryIntent,
     VectorEmbeddingState,
 )
+
 
 def test_cognitive_uncertainty_profile():
     profile = CognitiveUncertaintyProfile(
@@ -20,10 +20,9 @@ def test_cognitive_uncertainty_profile():
     )
     assert profile.decomposition_entropy_threshold == 1.5
 
+
 def test_decomposed_sub_query_state():
-    vector = VectorEmbeddingState(
-        vector_base64="aA==", dimensionality=1, model_name="test-model"
-    )
+    vector = VectorEmbeddingState(vector_base64="aA==", dimensionality=1, model_name="test-model")
     sub_query = DecomposedSubQueryState(
         sub_query_id="query-1",
         latent_target_vector=vector,
@@ -32,10 +31,9 @@ def test_decomposed_sub_query_state():
     )
     assert sub_query.required_surface_capabilities == ["a-capability", "b-capability"]
 
+
 def test_semantic_discovery_intent():
-    vector = VectorEmbeddingState(
-        vector_base64="aA==", dimensionality=1, model_name="test-model"
-    )
+    vector = VectorEmbeddingState(vector_base64="aA==", dimensionality=1, model_name="test-model")
     intent = SemanticDiscoveryIntent(
         parent_decomposition_id="manifest-1",
         query_vector=vector,
@@ -44,10 +42,9 @@ def test_semantic_discovery_intent():
     )
     assert intent.parent_decomposition_id == "manifest-1"
 
+
 def test_query_decomposition_manifest_success():
-    vector = VectorEmbeddingState(
-        vector_base64="aA==", dimensionality=1, model_name="test-model"
-    )
+    vector = VectorEmbeddingState(vector_base64="aA==", dimensionality=1, model_name="test-model")
     sub_query_1 = DecomposedSubQueryState(
         sub_query_id="q1",
         latent_target_vector=vector,
@@ -66,14 +63,13 @@ def test_query_decomposition_manifest_success():
         root_intent_hash="0" * 64,
         surface_projection_id="proj-1",
         sub_queries={"q1": sub_query_1, "q2": sub_query_2},
-        execution_dag_edges=[("q1", "q2")]
+        execution_dag_edges=[("q1", "q2")],
     )
     assert manifest.execution_dag_edges == [("q1", "q2")]
 
+
 def test_query_decomposition_manifest_ghost_node_source():
-    vector = VectorEmbeddingState(
-        vector_base64="aA==", dimensionality=1, model_name="test-model"
-    )
+    vector = VectorEmbeddingState(vector_base64="aA==", dimensionality=1, model_name="test-model")
     sub_query_2 = DecomposedSubQueryState(
         sub_query_id="q2",
         latent_target_vector=vector,
@@ -86,13 +82,12 @@ def test_query_decomposition_manifest_ghost_node_source():
             root_intent_hash="0" * 64,
             surface_projection_id="proj-1",
             sub_queries={"q2": sub_query_2},
-            execution_dag_edges=[("q1", "q2")]
+            execution_dag_edges=[("q1", "q2")],
         )
 
+
 def test_query_decomposition_manifest_ghost_node_target():
-    vector = VectorEmbeddingState(
-        vector_base64="aA==", dimensionality=1, model_name="test-model"
-    )
+    vector = VectorEmbeddingState(vector_base64="aA==", dimensionality=1, model_name="test-model")
     sub_query_1 = DecomposedSubQueryState(
         sub_query_id="q1",
         latent_target_vector=vector,
@@ -105,13 +100,12 @@ def test_query_decomposition_manifest_ghost_node_target():
             root_intent_hash="0" * 64,
             surface_projection_id="proj-1",
             sub_queries={"q1": sub_query_1},
-            execution_dag_edges=[("q1", "q2")]
+            execution_dag_edges=[("q1", "q2")],
         )
 
+
 def test_query_decomposition_manifest_cycle():
-    vector = VectorEmbeddingState(
-        vector_base64="aA==", dimensionality=1, model_name="test-model"
-    )
+    vector = VectorEmbeddingState(vector_base64="aA==", dimensionality=1, model_name="test-model")
     sub_query_1 = DecomposedSubQueryState(
         sub_query_id="q1",
         latent_target_vector=vector,
@@ -131,5 +125,5 @@ def test_query_decomposition_manifest_cycle():
             root_intent_hash="0" * 64,
             surface_projection_id="proj-1",
             sub_queries={"q1": sub_query_1, "q2": sub_query_2},
-            execution_dag_edges=[("q1", "q2"), ("q2", "q1")]
+            execution_dag_edges=[("q1", "q2"), ("q2", "q1")],
         )
