@@ -214,6 +214,7 @@ You are strictly forbidden from introducing "Active" or "Runtime" logic into thi
 2.  **Atomic Implementation:** Break tasks into the smallest testable units.
 3.  **Regression Check:** Ensure no re-introduction of deprecated legacy artifacts (e.g., do not accidentally re-add a Dockerfile because a generic template suggested it).
 4.  **Test Coverage (The 95% Rule):** Maintain a strict `>= 95%` test coverage floor. **Do not write "filler tests" just to hit 100%.** If a branch of code is already proven impossible by strict Pydantic/mypy typing, remove the branch (Dead Code Elimination) rather than mocking Python internals to test it. Tests must verify *behavior* and *contracts*, not just line execution.
+5.  **Mathematical Correctness & Epistemic Security:** Mathematical correctness and epistemic security supersede legacy design patterns. If you discover underlying bugs, logical flaws, or missing validation logic while writing tests or scanning the codebase, you MUST propose a fix to the Python implementation (e.g., `@model_validator`, `@field_validator`, property methods) immediately.
 
 ---
 
