@@ -19,9 +19,8 @@ from hypothesis import HealthCheck, given, settings
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
-    ContinuousMutationPolicy,
     ConsensusFederationTopologyManifest,
-    ConsensusPolicy,
+    ContinuousMutationPolicy,
     CouncilTopologyManifest,
     GenerativeTaxonomyManifest,
     InterventionReceipt,

@@ -33,10 +33,8 @@ from coreason_manifest.utils.algebra import (
 
 def _make_diff(patches: list[dict[str, Any]]) -> StateDifferentialManifest:
     """Helper to build a StateDifferentialManifest with required fields."""
-    intent_patches = []
-    for p in patches:
-        # Note: StateMutationIntent uses alias="from" for from_path
-        intent_patches.append(StateMutationIntent(**p))
+    # Note: StateMutationIntent uses alias="from" for from_path
+    intent_patches = [StateMutationIntent(**p) for p in patches]
     return StateDifferentialManifest(
         diff_id="diff_01",
         author_node_id="node_01",
@@ -235,5 +233,5 @@ def test_state_differential_non_traversable_target() -> None:
     manifest = _make_diff([{"op": "add", "path": "/scalar/child", "value": "new"}])
 
     state = {"scalar": "plain_string"}
-    with pytest.raises(ValueError, match="Cannot add to path|Invalid path"):
+    with pytest.raises(ValueError, match=r"Cannot add to path|Invalid path"):
         apply_state_differential(state, manifest)
