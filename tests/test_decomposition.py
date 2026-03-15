@@ -10,7 +10,7 @@ from coreason_manifest.spec.ontology import (
 )
 
 
-def test_cognitive_uncertainty_profile():
+def test_cognitive_uncertainty_profile() -> None:
     profile = CognitiveUncertaintyProfile(
         decomposition_entropy_threshold=1.5,
         aleatoric_entropy=0.5,
@@ -21,7 +21,7 @@ def test_cognitive_uncertainty_profile():
     assert profile.decomposition_entropy_threshold == 1.5
 
 
-def test_decomposed_sub_query_state():
+def test_decomposed_sub_query_state() -> None:
     vector = VectorEmbeddingState(vector_base64="aA==", dimensionality=1, model_name="test-model")
     sub_query = DecomposedSubQueryState(
         sub_query_id="query-1",
@@ -32,7 +32,7 @@ def test_decomposed_sub_query_state():
     assert sub_query.required_surface_capabilities == ["a-capability", "b-capability"]
 
 
-def test_semantic_discovery_intent():
+def test_semantic_discovery_intent() -> None:
     vector = VectorEmbeddingState(vector_base64="aA==", dimensionality=1, model_name="test-model")
     intent = SemanticDiscoveryIntent(
         parent_decomposition_id="manifest-1",
@@ -43,7 +43,7 @@ def test_semantic_discovery_intent():
     assert intent.parent_decomposition_id == "manifest-1"
 
 
-def test_query_decomposition_manifest_success():
+def test_query_decomposition_manifest_success() -> None:
     vector = VectorEmbeddingState(vector_base64="aA==", dimensionality=1, model_name="test-model")
     sub_query_1 = DecomposedSubQueryState(
         sub_query_id="q1",
@@ -68,7 +68,7 @@ def test_query_decomposition_manifest_success():
     assert manifest.execution_dag_edges == [("q1", "q2")]
 
 
-def test_query_decomposition_manifest_ghost_node_source():
+def test_query_decomposition_manifest_ghost_node_source() -> None:
     vector = VectorEmbeddingState(vector_base64="aA==", dimensionality=1, model_name="test-model")
     sub_query_2 = DecomposedSubQueryState(
         sub_query_id="q2",
@@ -86,7 +86,7 @@ def test_query_decomposition_manifest_ghost_node_source():
         )
 
 
-def test_query_decomposition_manifest_ghost_node_target():
+def test_query_decomposition_manifest_ghost_node_target() -> None:
     vector = VectorEmbeddingState(vector_base64="aA==", dimensionality=1, model_name="test-model")
     sub_query_1 = DecomposedSubQueryState(
         sub_query_id="q1",
@@ -104,7 +104,7 @@ def test_query_decomposition_manifest_ghost_node_target():
         )
 
 
-def test_query_decomposition_manifest_cycle():
+def test_query_decomposition_manifest_cycle() -> None:
     vector = VectorEmbeddingState(vector_base64="aA==", dimensionality=1, model_name="test-model")
     sub_query_1 = DecomposedSubQueryState(
         sub_query_id="q1",
