@@ -620,13 +620,13 @@ def test_semantic_node_state_canonical_grounding_sorting() -> None:
 
 
 def test_bulk_array_sorting_coverage_2() -> None:
+    import contextlib
+
     from coreason_manifest.spec.ontology import (
+        AgentNodeProfile,
         EpistemicExtractionPolicy,
         SemanticNodeState,
-        CanonicalGroundingReceipt,
-        AgentNodeProfile
     )
-    import contextlib
 
     o1 = EpistemicExtractionPolicy.model_construct(required_relations=[])  # type: ignore
     with contextlib.suppress(AttributeError):
