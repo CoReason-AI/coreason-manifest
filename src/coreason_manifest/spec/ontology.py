@@ -3223,7 +3223,7 @@ class HTTPTransportProfile(CoreasonBaseState):
     headers: dict[
         Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=2000)]
     ] = Field(
-        le=1000000000, default_factory=dict, description="HTTP headers, strictly bounded for zero-trust credentials."
+        max_length=1000000000, default_factory=dict, description="HTTP headers, strictly bounded for zero-trust credentials."
     )
 
     @field_validator("headers", mode="after")
@@ -3690,7 +3690,7 @@ class LineageWatermarkReceipt(CoreasonBaseState):
     hop_signatures: dict[
         Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=2000)]
     ] = Field(
-        le=1000000000,
+        max_length=1000000000,
         description="A dictionary mapping intermediate participant NodeIdentifierStates to their deterministic execution signatures.",  # noqa: E501
     )
     tamper_evident_root: str = Field(
