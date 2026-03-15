@@ -7,7 +7,7 @@ from coreason_manifest.spec.ontology import (
 from coreason_manifest.utils.algebra import compile_action_space_to_openai_tools
 
 
-def test_compile_action_space_to_openai_tools():
+def test_compile_action_space_to_openai_tools() -> None:
     """Test the compilation of ActionSpaceManifest to OpenAI tool format."""
     manifest = ActionSpaceManifest(
         action_space_id="test-action-space",
@@ -36,7 +36,7 @@ def test_compile_action_space_to_openai_tools():
     }
 
 
-def test_compile_action_space_to_openai_tools_empty():
+def test_compile_action_space_to_openai_tools_empty() -> None:
     """Test the compilation of an empty ActionSpaceManifest to OpenAI tool format."""
     manifest = ActionSpaceManifest(action_space_id="test-action-space-empty", native_tools=[])
 
