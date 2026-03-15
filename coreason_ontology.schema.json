@@ -1409,13 +1409,22 @@
           ],
           "title": "Epistemic Disposition",
           "type": "string"
+        },
+        "disfluency_type": {
+          "$ref": "#/$defs/DisfluencyRole"
+        },
+        "evicted_token_count": {
+          "default": 0,
+          "title": "Evicted Token Count",
+          "type": "integer"
         }
       },
       "required": [
         "event_id",
         "timestamp",
         "target_event_id",
-        "epistemic_disposition"
+        "epistemic_disposition",
+        "disfluency_type"
       ],
       "title": "BargeInInterruptEvent",
       "type": "object"
@@ -3360,6 +3369,48 @@
       "title": "ContinuousMutationPolicy",
       "type": "object"
     },
+    "CoreDisfluencyRole": {
+      "enum": [
+        "reparandum",
+        "interregnum",
+        "repair"
+      ],
+      "type": "string"
+    },
+    "CoreIEEEAnomalyClass": {
+      "enum": [
+        "logic_flaw",
+        "data_fault",
+        "interface_defect",
+        "computation_error"
+      ],
+      "type": "string"
+    },
+    "CoreOBORelationEdge": {
+      "enum": [
+        "is_a",
+        "part_of",
+        "has_part"
+      ],
+      "type": "string"
+    },
+    "CoreRoutingIntent": {
+      "enum": [
+        "informational_inform",
+        "directive_instruct",
+        "semantic_discovery",
+        "taxonomic_restructure"
+      ],
+      "type": "string"
+    },
+    "CoreSMTSolverOutcome": {
+      "enum": [
+        "sat",
+        "unsat",
+        "unknown"
+      ],
+      "type": "string"
+    },
     "CouncilTopologyManifest": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nA Council workflow topology involving multiple voting members and an adjudicator.",
@@ -4156,12 +4207,20 @@
           "minimum": 0.0,
           "title": "Relaxation Epsilon",
           "type": "number"
+        },
+        "anomaly_classification": {
+          "$ref": "#/$defs/IEEEAnomalyClass"
+        },
+        "solver_status": {
+          "$ref": "#/$defs/SMTSolverOutcome",
+          "default": "unknown"
         }
       },
       "required": [
         "constraint_id",
         "formal_syntax_smt",
-        "relaxation_epsilon"
+        "relaxation_epsilon",
+        "anomaly_classification"
       ],
       "title": "DifferentiableLogicConstraint",
       "type": "object"
@@ -4342,6 +4401,16 @@
       ],
       "title": "DimensionalProjectionContract",
       "type": "object"
+    },
+    "DisfluencyRole": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CoreDisfluencyRole"
+        },
+        {
+          "$ref": "#/$defs/DomainExtensionString"
+        }
+      ]
     },
     "DistributionProfile": {
       "additionalProperties": false,
@@ -4533,6 +4602,11 @@
       ],
       "title": "DocumentLayoutRegionState",
       "type": "object"
+    },
+    "DomainExtensionString": {
+      "maxLength": 128,
+      "pattern": "^ext:[a-zA-Z0-9_.-]+$",
+      "type": "string"
     },
     "DraftingIntent": {
       "additionalProperties": false,
@@ -4926,10 +5000,8 @@
           "type": "string"
         },
         "directed_edge_type": {
-          "description": "The topological relationship.",
-          "maxLength": 2000,
-          "title": "Directed Edge Type",
-          "type": "string"
+          "$ref": "#/$defs/OBORelationEdge",
+          "description": "The topological relationship."
         },
         "target_concept_id": {
           "description": "CID of destination node.",
@@ -7782,6 +7854,16 @@
       "title": "HypothesisStakeReceipt",
       "type": "object"
     },
+    "IEEEAnomalyClass": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CoreIEEEAnomalyClass"
+        },
+        {
+          "$ref": "#/$defs/DomainExtensionString"
+        }
+      ]
+    },
     "InformationClassificationProfile": {
       "description": "Standardized Information Flow Control (IFC) lattice boundaries.",
       "enum": [
@@ -7943,6 +8025,32 @@
         "markdown_content"
       ],
       "title": "InsightCardProfile",
+      "type": "object"
+    },
+    "IntentClassificationReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nThe mathematical output of the routing LLM supporting superposition.",
+      "properties": {
+        "primary_intent": {
+          "$ref": "#/$defs/ValidRoutingIntent",
+          "description": "The argmax intent with highest probability."
+        },
+        "concurrent_intents": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "description": "Dictionary of adjacent intents and confidence scores (0.0 to 1.0). Used for superposition branching.",
+          "propertyNames": {
+            "$ref": "#/$defs/ValidRoutingIntent"
+          },
+          "title": "Concurrent Intents",
+          "type": "object"
+        }
+      },
+      "required": [
+        "primary_intent"
+      ],
+      "title": "IntentClassificationReceipt",
       "type": "object"
     },
     "InterventionIntent": {
@@ -9754,6 +9862,16 @@
       "title": "NormativeDriftEvent",
       "type": "object"
     },
+    "OBORelationEdge": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CoreOBORelationEdge"
+        },
+        {
+          "$ref": "#/$defs/DomainExtensionString"
+        }
+      ]
+    },
     "ObservabilityPolicy": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology",
@@ -11032,6 +11150,16 @@
       ],
       "title": "SMPCTopologyManifest",
       "type": "object"
+    },
+    "SMTSolverOutcome": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CoreSMTSolverOutcome"
+        },
+        {
+          "$ref": "#/$defs/DomainExtensionString"
+        }
+      ]
     },
     "SSETransportProfile": {
       "additionalProperties": false,
@@ -12936,10 +13064,15 @@
           "description": "Strict dictionary binding classified natural language intents to bounded spatial heuristics.",
           "maxProperties": 1000,
           "propertyNames": {
-            "maxLength": 255
+            "$ref": "#/$defs/ValidRoutingIntent"
           },
           "title": "Intent To Heuristic Matrix",
           "type": "object"
+        },
+        "superposition_branching_threshold": {
+          "default": 0.85,
+          "title": "Superposition Branching Threshold",
+          "type": "number"
         },
         "fallback_heuristic": {
           "description": "The deterministic default applied if intent classification falls below the safety threshold.",
@@ -13696,6 +13829,16 @@
       ],
       "title": "UtilityJustificationGraphReceipt",
       "type": "object"
+    },
+    "ValidRoutingIntent": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CoreRoutingIntent"
+        },
+        {
+          "$ref": "#/$defs/DomainExtensionString"
+        }
+      ]
     },
     "VectorEmbeddingState": {
       "additionalProperties": false,

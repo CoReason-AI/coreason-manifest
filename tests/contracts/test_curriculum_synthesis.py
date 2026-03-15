@@ -54,7 +54,7 @@ def test_epistemic_curriculum_manifest_sorts_tasks() -> None:
     proof = EpistemicTopologicalProofManifest(
         proof_id="cid-proof-1",
         axiomatic_chain=[
-            EpistemicAxiomState(source_concept_id="cid-1", directed_edge_type="causes", target_concept_id="cid-2")
+            EpistemicAxiomState(source_concept_id="cid-1", directed_edge_type="is_a", target_concept_id="cid-2")
         ],
     )
 
@@ -95,9 +95,9 @@ def test_epistemic_curriculum_manifest_sorts_tasks() -> None:
 def test_epistemic_topological_proof_manifest_preserves_order() -> None:
     """Prove EpistemicTopologicalProofManifest preserves the sequential order of its axiomatic_chain."""
 
-    axiom_1 = EpistemicAxiomState(source_concept_id="cid-a", directed_edge_type="causes", target_concept_id="cid-b")
-    axiom_2 = EpistemicAxiomState(source_concept_id="cid-b", directed_edge_type="causes", target_concept_id="cid-c")
-    axiom_3 = EpistemicAxiomState(source_concept_id="cid-c", directed_edge_type="causes", target_concept_id="cid-d")
+    axiom_1 = EpistemicAxiomState(source_concept_id="cid-a", directed_edge_type="is_a", target_concept_id="cid-b")
+    axiom_2 = EpistemicAxiomState(source_concept_id="cid-b", directed_edge_type="is_a", target_concept_id="cid-c")
+    axiom_3 = EpistemicAxiomState(source_concept_id="cid-c", directed_edge_type="is_a", target_concept_id="cid-d")
 
     # Pass in a specific order (not alphabetical or sorted by any standard)
     axioms = [axiom_2, axiom_1, axiom_3]

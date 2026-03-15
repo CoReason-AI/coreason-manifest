@@ -21,7 +21,124 @@ from enum import StrEnum
 from typing import Annotated, Any, Literal, Self
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl, StringConstraints, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    HttpUrl,
+    StringConstraints,
+    ValidationInfo,
+    field_validator,
+    model_validator,
+)
+
+# The Extension Namespace Boundary
+type DomainExtensionString = Annotated[str, StringConstraints(pattern="^ext:[a-zA-Z0-9_.-]+$", max_length=128)]
+
+
+type CoreRoutingIntent = Literal[
+    "informational_inform", "directive_instruct", "semantic_discovery", "taxonomic_restructure"
+]
+CORE_ROUTING_SEMANTICS = {
+    "informational_inform": "Provide information.",
+    "directive_instruct": "Issue an instruction.",
+    "semantic_discovery": "Discover semantics.",
+    "taxonomic_restructure": "Restructure taxonomy.",
+}
+
+type CoreEBNFConstruct = Literal["terminal", "non_terminal", "production_rule", "quantifier"]
+CORE_EBNF_SEMANTICS = {
+    "terminal": "Terminal symbol.",
+    "non_terminal": "Non-terminal symbol.",
+    "production_rule": "Production rule.",
+    "quantifier": "Quantifier.",
+}
+
+type CoreTokenMergeMetric = Literal["cosine_similarity", "euclidean_distance", "manhattan_distance"]
+CORE_TOKEN_MERGE_SEMANTICS = {
+    "cosine_similarity": "Cosine similarity metric.",
+    "euclidean_distance": "Euclidean distance metric.",
+    "manhattan_distance": "Manhattan distance metric.",
+}
+
+type CoreComputeStrategyTier = Literal["speed_single_pass", "precision_token_class", "reasoning_ensemble"]
+CORE_COMPUTE_STRATEGY_SEMANTICS = {
+    "speed_single_pass": "Fast single-pass strategy.",
+    "precision_token_class": "High-precision token processing.",
+    "reasoning_ensemble": "Complex reasoning ensemble.",
+}
+
+type CoreClinicalAssertion = Literal["present", "absent", "possible", "history", "family"]
+CORE_CLINICAL_ASSERTION_SEMANTICS = {
+    "present": "Assertion is present.",
+    "absent": "Assertion is absent.",
+    "possible": "Assertion is possible.",
+    "history": "Historical assertion.",
+    "family": "Family history assertion.",
+}
+
+type CoreOBORelationEdge = Literal["is_a", "part_of", "has_part"]
+CORE_OBO_RELATION_SEMANTICS = {
+    "is_a": "Is-a relationship.",
+    "part_of": "Part-of relationship.",
+    "has_part": "Has-part relationship.",
+}
+
+type CoreCognitiveMemoryDomain = Literal["working", "episodic", "semantic"]
+CORE_COGNITIVE_MEMORY_SEMANTICS = {
+    "working": "Working memory domain.",
+    "episodic": "Episodic memory domain.",
+    "semantic": "Semantic memory domain.",
+}
+
+type CoreDisfluencyRole = Literal["reparandum", "interregnum", "repair"]
+CORE_DISFLUENCY_SEMANTICS = {
+    "reparandum": "The original speech error.",
+    "interregnum": "The interruption phase.",
+    "repair": "The corrected speech.",
+}
+
+type CoreCacheEviction = Literal["lru", "lfu", "fifo"]
+CORE_CACHE_EVICTION_SEMANTICS = {
+    "lru": "Least Recently Used eviction.",
+    "lfu": "Least Frequently Used eviction.",
+    "fifo": "First In First Out eviction.",
+}
+
+type CoreDefeasibleEdgeType = Literal["rebuttal", "undercut", "undermine"]
+CORE_DEFEASIBLE_EDGE_SEMANTICS = {
+    "rebuttal": "Rebuttal edge.",
+    "undercut": "Undercutting edge.",
+    "undermine": "Undermining edge.",
+}
+
+type CoreIEEEAnomalyClass = Literal["logic_flaw", "data_fault", "interface_defect", "computation_error"]
+CORE_IEEE_ANOMALY_SEMANTICS = {
+    "logic_flaw": "Logic flaw anomaly.",
+    "data_fault": "Data fault anomaly.",
+    "interface_defect": "Interface defect anomaly.",
+    "computation_error": "Computation error anomaly.",
+}
+
+type CoreSMTSolverOutcome = Literal["sat", "unsat", "unknown"]
+CORE_SMT_SOLVER_SEMANTICS = {
+    "sat": "Satisfiable outcome.",
+    "unsat": "Unsatisfiable outcome.",
+    "unknown": "Unknown outcome.",
+}
+
+type ValidRoutingIntent = CoreRoutingIntent | DomainExtensionString
+type EBNFConstruct = CoreEBNFConstruct | DomainExtensionString
+type TokenMergeMetric = CoreTokenMergeMetric | DomainExtensionString
+type ComputeStrategyTier = CoreComputeStrategyTier | DomainExtensionString
+type ClinicalAssertionState = CoreClinicalAssertion | DomainExtensionString
+type OBORelationEdge = CoreOBORelationEdge | DomainExtensionString
+type CognitiveMemoryDomain = CoreCognitiveMemoryDomain | DomainExtensionString
+type DisfluencyRole = CoreDisfluencyRole | DomainExtensionString
+type CacheEviction = CoreCacheEviction | DomainExtensionString
+type DefeasibleEdgeType = CoreDefeasibleEdgeType | DomainExtensionString
+type IEEEAnomalyClass = CoreIEEEAnomalyClass | DomainExtensionString
+type SMTSolverOutcome = CoreSMTSolverOutcome | DomainExtensionString
 
 type JsonPrimitiveState = (
     str
@@ -2328,6 +2445,22 @@ class BargeInInterruptEvent(BaseStateEvent):
     epistemic_disposition: Literal["discard", "retain_as_context", "mark_as_falsified"] = Field(
         description="Explicit instruction to the orchestrator on how to patch the shared state blackboard with the partial payload."  # noqa: E501
     )
+    disfluency_type: DisfluencyRole
+    evicted_token_count: int = Field(default=0)
+
+    @model_validator(mode="after")
+    def validate_domain_extensions(self, info: ValidationInfo) -> Self:
+        allowed_exts = (info.context or {}).get("allowed_ext_intents", set())
+        for k, v in self.__dict__.items():
+            if isinstance(v, str) and v.startswith("ext:") and v not in allowed_exts:
+                raise ValueError(f"Unauthorized extension string in field {k}: {v}")
+            if isinstance(v, dict):
+                for dk, dv in v.items():
+                    if isinstance(dk, str) and dk.startswith("ext:") and dk not in allowed_exts:
+                        raise ValueError(f"Unauthorized extension string in dict key of {k}: {dk}")
+                    if isinstance(dv, str) and dv.startswith("ext:") and dv not in allowed_exts:
+                        raise ValueError(f"Unauthorized extension string in dict value of {k}: {dv}")
+        return self
 
 
 type EncodingChannelProfile = Literal["x", "y", "color", "size", "opacity", "shape", "text"]
@@ -3225,6 +3358,22 @@ class TaxonomicRestructureIntent(CoreasonBaseState):
     )
 
 
+class IntentClassificationReceipt(CoreasonBaseState):
+    """The mathematical output of the routing LLM supporting superposition."""
+
+    primary_intent: ValidRoutingIntent = Field(description="The argmax intent with highest probability.")
+    concurrent_intents: dict[ValidRoutingIntent, float] = Field(
+        default_factory=dict,
+        description="Dictionary of adjacent intents and confidence scores (0.0 to 1.0). Used for superposition branching.",  # noqa: E501,
+    )
+
+    @model_validator(mode="after")
+    def sort_concurrent_intents(self) -> Self:
+        if self.concurrent_intents:
+            object.__setattr__(self, "concurrent_intents", dict(sorted(self.concurrent_intents.items())))
+        return self
+
+
 class TaxonomicRoutingPolicy(CoreasonBaseState):
     """
     The deterministic Softmax gate mapping classified operational intents to pre-defined
@@ -3238,12 +3387,28 @@ class TaxonomicRoutingPolicy(CoreasonBaseState):
         description="Unique identifier for this pre-flight routing policy.",
     )
     intent_to_heuristic_matrix: dict[
-        Annotated[str, StringConstraints(max_length=255)],
+        ValidRoutingIntent,
         Literal["chronological", "entity_centric", "semantic_cluster", "confidence_decay"],
     ] = Field(
         max_length=1000,
         description="Strict dictionary binding classified natural language intents to bounded spatial heuristics.",
     )
+    superposition_branching_threshold: float = Field(default=0.85)
+
+    @model_validator(mode="after")
+    def validate_domain_extensions(self, info: ValidationInfo) -> Self:
+        allowed_exts = (info.context or {}).get("allowed_ext_intents", set())
+        for k, v in self.__dict__.items():
+            if isinstance(v, str) and v.startswith("ext:") and v not in allowed_exts:
+                raise ValueError(f"Unauthorized extension string in field {k}: {v}")
+            if isinstance(v, dict):
+                for dk, dv in v.items():
+                    if isinstance(dk, str) and dk.startswith("ext:") and dk not in allowed_exts:
+                        raise ValueError(f"Unauthorized extension string in dict key of {k}: {dk}")
+                    if isinstance(dv, str) and dv.startswith("ext:") and dv not in allowed_exts:
+                        raise ValueError(f"Unauthorized extension string in dict value of {k}: {dv}")
+        return self
+
     fallback_heuristic: Literal["chronological", "entity_centric", "semantic_cluster", "confidence_decay"] = Field(
         description="The deterministic default applied if intent classification falls below the safety threshold."
     )
@@ -6146,10 +6311,24 @@ class EpistemicAxiomState(CoreasonBaseState):
     source_concept_id: str = Field(
         min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$", description="CID of the origin node."
     )
-    directed_edge_type: str = Field(max_length=2000, description="The topological relationship.")
+    directed_edge_type: OBORelationEdge = Field(description="The topological relationship.")
     target_concept_id: str = Field(
         min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$", description="CID of destination node."
     )
+
+    @model_validator(mode="after")
+    def validate_domain_extensions(self, info: ValidationInfo) -> Self:
+        allowed_exts = (info.context or {}).get("allowed_ext_intents", set())
+        for k, v in self.__dict__.items():
+            if isinstance(v, str) and v.startswith("ext:") and v not in allowed_exts:
+                raise ValueError(f"Unauthorized extension string in field {k}: {v}")
+            if isinstance(v, dict):
+                for dk, dv in v.items():
+                    if isinstance(dk, str) and dk.startswith("ext:") and dk not in allowed_exts:
+                        raise ValueError(f"Unauthorized extension string in dict key of {k}: {dk}")
+                    if isinstance(dv, str) and dv.startswith("ext:") and dv not in allowed_exts:
+                        raise ValueError(f"Unauthorized extension string in dict value of {k}: {dv}")
+        return self
 
 
 class EpistemicSeedInjectionPolicy(CoreasonBaseState):
@@ -6415,6 +6594,22 @@ class DifferentiableLogicConstraint(CoreasonBaseState):
         ge=0.0,
         description="The continuous penalty applied to the LLM probability mass for constraint violation.",
     )
+    anomaly_classification: IEEEAnomalyClass
+    solver_status: SMTSolverOutcome = Field(default="unknown")
+
+    @model_validator(mode="after")
+    def validate_domain_extensions(self, info: ValidationInfo) -> Self:
+        allowed_exts = (info.context or {}).get("allowed_ext_intents", set())
+        for k, v in self.__dict__.items():
+            if isinstance(v, str) and v.startswith("ext:") and v not in allowed_exts:
+                raise ValueError(f"Unauthorized extension string in field {k}: {v}")
+            if isinstance(v, dict):
+                for dk, dv in v.items():
+                    if isinstance(dk, str) and dk.startswith("ext:") and dk not in allowed_exts:
+                        raise ValueError(f"Unauthorized extension string in dict key of {k}: {dk}")
+                    if isinstance(dv, str) and dv.startswith("ext:") and dv not in allowed_exts:
+                        raise ValueError(f"Unauthorized extension string in dict value of {k}: {dv}")
+        return self
 
 
 type AnyStateEvent = Annotated[
@@ -6505,6 +6700,7 @@ TokenBurnReceipt.model_rebuild()
 BudgetExhaustionEvent.model_rebuild()
 LatentProjectionIntent.model_rebuild()
 EpistemicAxiomState.model_rebuild()
+IntentClassificationReceipt.model_rebuild()
 EpistemicSeedInjectionPolicy.model_rebuild()
 EpistemicChainGraphState.model_rebuild()
 CognitivePredictionReceipt.model_rebuild()
