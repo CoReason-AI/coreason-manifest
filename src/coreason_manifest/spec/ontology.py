@@ -1151,7 +1151,10 @@ class SaeLatentPolicy(CoreasonBaseState):
 
 
 class BrowserFingerprintManifest(CoreasonBaseState):
-    """AGENT INSTRUCTION: The deterministic hardware and network identity vector. Mathematically bounds the TLS handshake and WebGL unmasked renderers to prevent fingerprinting detection."""
+    """
+    AGENT INSTRUCTION: The deterministic hardware and network identity vector. Mathematically bounds
+    the TLS handshake and WebGL unmasked renderers to prevent fingerprinting detection.
+    """
 
     user_agent_string: str = Field(
         max_length=2000,
@@ -1200,7 +1203,7 @@ class SecureSubSessionState(CoreasonBaseState):
     description: str = Field(max_length=2000, description="Audit justification for this temporary secure session.")
     device_fingerprint: BrowserFingerprintManifest | None = Field(
         default=None,
-        description="The cryptographic hardware and network stack identity bound to this authenticated session partition.",
+        description="The cryptographic hardware and network stack identity bound to this authenticated session partition.",  # noqa: E501
     )
 
     @model_validator(mode="after")
@@ -5056,17 +5059,20 @@ class SpatialKinematicActionIntent(CoreasonBaseState):
     )
     temporal_waypoints_ms: list[Annotated[int, Field(ge=0)]] = Field(
         default_factory=list,
-        description="The strictly typed array of temporal waypoints ($t$) corresponding 1:1 with bezier_control_points, completing the $(x, y, t)$ kinematic tensor.",
+        description="The strictly typed array of temporal waypoints ($t$) corresponding 1:1 with bezier_control_points, completing the $(x, y, t)$ kinematic tensor.",  # noqa: E501
     )
 
     @model_validator(mode="after")
     def enforce_tensor_symmetry(self) -> Self:
         object.__setattr__(self, "temporal_waypoints_ms", sorted(self.temporal_waypoints_ms))
-        if self.temporal_waypoints_ms and self.bezier_control_points:
-            if len(self.temporal_waypoints_ms) != len(self.bezier_control_points):
-                raise ValueError(
-                    "Kinematic Tensor Asymmetry: temporal_waypoints_ms and bezier_control_points must have the same length."
-                )
+        if (
+            self.temporal_waypoints_ms
+            and self.bezier_control_points
+            and len(self.temporal_waypoints_ms) != len(self.bezier_control_points)
+        ):
+            raise ValueError(
+                "Kinematic Tensor Asymmetry: temporal_waypoints_ms and bezier_control_points must have the same length."
+            )
         return self
 
 
@@ -5984,7 +5990,10 @@ class AgentAttestationReceipt(CoreasonBaseState):
 
 
 class AdversarialKinematicProfile(CoreasonBaseState):
-    """AGENT INSTRUCTION: The neural parameterization instructing the external physics engine how to inject stochastic biomechanical noise (Fitts's Law) into continuous trajectories to defeat anomaly classifiers."""
+    """
+    AGENT INSTRUCTION: The neural parameterization instructing the external physics engine how to
+    inject stochastic biomechanical noise (Fitts's Law) into continuous trajectories to defeat anomaly classifiers.
+    """
 
     stochastic_noise_variance: float = Field(
         ge=0.0,
@@ -6002,7 +6011,7 @@ class AdversarialKinematicProfile(CoreasonBaseState):
     error_injection_probability: float = Field(
         ge=0.0,
         le=1.0,
-        description="The probability of the neural engine intentionally generating an overshoot, transposition error, or backspace correction.",
+        description="The probability of the neural engine intentionally generating an overshoot, transposition error, or backspace correction.",  # noqa: E501
     )
 
 
