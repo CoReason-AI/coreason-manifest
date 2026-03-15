@@ -7541,7 +7541,7 @@
             "type": "string"
           },
           "description": "HTTP headers, strictly bounded for zero-trust credentials.",
-          "le": 1000000000,
+          "maxProperties": 1000000000,
           "propertyNames": {
             "maxLength": 255
           },
@@ -8687,7 +8687,7 @@
             "type": "string"
           },
           "description": "A dictionary mapping intermediate participant NodeIdentifierStates to their deterministic execution signatures.",
-          "le": 1000000000,
+          "maxProperties": 1000000000,
           "propertyNames": {
             "maxLength": 255
           },
@@ -13783,7 +13783,7 @@
             "type": "number"
           },
           "description": "Multi-dimensional continuous values representing optimizations.",
-          "le": 1000000000.0,
+          "maxProperties": 1000000000,
           "propertyNames": {
             "maxLength": 255
           },
@@ -13797,7 +13797,7 @@
             "type": "number"
           },
           "description": "Multi-dimensional continuous values representing degradations.",
-          "le": 1000000000.0,
+          "maxProperties": 1000000000,
           "propertyNames": {
             "maxLength": 255
           },
