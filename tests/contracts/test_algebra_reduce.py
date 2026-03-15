@@ -1,4 +1,5 @@
-from typing import ClassVar, Any
+from typing import Any, ClassVar
+
 from coreason_manifest.spec.ontology import (
     DefeasibleCascadeEvent,
     System2RemediationIntent,
@@ -28,7 +29,10 @@ def test_reduce_ledger_to_active_state_filters_quarantined_events() -> None:
     object.__setattr__(event2, "event_id", "e2")
 
     cascade = DefeasibleCascadeEvent(
-        cascade_id="c1", propagated_decay_factor=0.5, root_falsified_event_id="e1", quarantined_event_ids=["e2"] # type: ignore
+        cascade_id="c1",
+        propagated_decay_factor=0.5,
+        root_falsified_event_id="e1",
+        quarantined_event_ids=["e2"],  # type: ignore
     )
     object.__setattr__(cascade, "quarantined_event_ids", ["e2"])
 
