@@ -91,6 +91,14 @@ CORE_OBO_RELATION_SEMANTICS = {
     "has_part": "OBO Foundry RO: The inverse mereological relationship of part_of.",
 }
 
+type CoreExtractionOntologyTarget = Literal["obo_foundry", "rxnorm", "snomed_ct", "mesh"]
+CORE_EXTRACTION_ONTOLOGY_SEMANTICS = {
+    "obo_foundry": "Open Biological and Biomedical Ontology standard.",
+    "rxnorm": "Normalized naming system for generic and branded drugs.",
+    "snomed_ct": "Systematized Nomenclature of Medicine - Clinical Terms.",
+    "mesh": "Medical Subject Headings controlled vocabulary.",
+}
+
 type CoreCognitiveMemoryDomain = Literal["working", "episodic", "semantic"]
 CORE_COGNITIVE_MEMORY_SEMANTICS = {
     "working": "ACT-R/SOAR Architecture: Ephemeral context, active session state, and scratchpads.",
@@ -145,6 +153,7 @@ type TokenMergeMetric = CoreTokenMergeMetric | DomainExtensionString
 type ComputeStrategyTier = CoreComputeStrategyTier | DomainExtensionString
 type ClinicalAssertionState = CoreClinicalAssertion | DomainExtensionString
 type OBORelationEdge = CoreOBORelationEdge | DomainExtensionString
+type ExtractionOntologyTarget = CoreExtractionOntologyTarget | DomainExtensionString
 type CognitiveMemoryDomain = CoreCognitiveMemoryDomain | DomainExtensionString
 type DisfluencyRole = CoreDisfluencyRole | DomainExtensionString
 type CacheEviction = CoreCacheEviction | DomainExtensionString
@@ -1927,6 +1936,20 @@ class BypassReceipt(CoreasonBaseState):
         max_length=128,
         pattern="^[a-f0-9]{64}$",
         description="The SHA-256 null-hash representing the skipped state to satisfy the Epistemic Ledger.",
+    )
+
+
+class CanonicalGroundingReceipt(CoreasonBaseState):
+    target_database: ExtractionOntologyTarget = Field(
+        description="The authoritative vector database or nomenclature system."
+    )
+    canonical_id: str = Field(
+        min_length=1, max_length=2000, description="The exact canonical identifier (e.g., a SNOMED code)."
+    )
+    cosine_similarity: float = Field(
+        ge=-1.0,
+        le=1.0,
+        description="The mathematical proof of geometric distance matching the extracted concept to the canonical database.",  # noqa: E501
     )
 
 
@@ -5389,6 +5412,25 @@ class EpistemicEscalationContract(CoreasonBaseState):
     )
 
 
+class EpistemicExtractionPolicy(CoreasonBaseState):
+    strategy_tier: ComputeStrategyTier = Field(
+        description="The mandatory hardware execution mode for this extraction pass."
+    )
+    required_relations: list[OBORelationEdge] = Field(
+        min_length=1, description="The strict array of OBO Relation predicates authorized for edge generation."
+    )
+    grounding_confidence_threshold: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="The minimum cosine similarity required to authorize appending a CanonicalGroundingReceipt.",
+    )
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "required_relations", sorted(self.required_relations))
+        return self
+
+
 class FederatedPeftContract(CoreasonBaseState):
     """
     AGENT INSTRUCTION: The physical and temporal bounding constraints
@@ -5488,10 +5530,20 @@ class SemanticNodeState(CoreasonBaseState):
     salience: SalienceProfile | None = Field(
         default=None, description="The mathematical importance profile governing structural pruning."
     )
+    canonical_groundings: list[CanonicalGroundingReceipt] = Field(
+        default_factory=list, description="Cryptographic proofs of canonical vector alignment."
+    )
     fhe_profile: HomomorphicEncryptionProfile | None = Field(
         default=None,
         description="The cryptographic envelope enabling privacy-preserving computation directly on this node's encrypted state.",  # noqa: E501
     )
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(
+            self, "canonical_groundings", sorted(self.canonical_groundings, key=lambda x: x.canonical_id)
+        )
+        return self
 
 
 class VerifiableCredentialPresentationReceipt(CoreasonBaseState):
@@ -5623,6 +5675,9 @@ class AgentNodeProfile(BaseNodeProfile):
     grpo_reward_policy: EpistemicRewardModelPolicy | None = Field(
         default=None,
         description="The RL post-training contract forcing the agent to evaluate traces against an implicit graph reward.",  # noqa: E501
+    )
+    extraction_policy: EpistemicExtractionPolicy | None = Field(
+        default=None, description="The strictly typed ruleset governing how this agent extracts subgraph elements."
     )
 
     @model_validator(mode="after")
@@ -6696,3 +6751,7 @@ EpistemicFlowStateReceipt.model_rebuild()
 TopologicalRewardContract.model_rebuild()
 DifferentiableLogicConstraint.model_rebuild()
 CausalExplanationEvent.model_rebuild()
+CanonicalGroundingReceipt.model_rebuild()
+EpistemicExtractionPolicy.model_rebuild()
+SemanticNodeState.model_rebuild()
+AgentNodeProfile.model_rebuild()

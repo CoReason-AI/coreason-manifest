@@ -588,3 +588,32 @@ def test_bulk_array_sorting_coverage() -> None:
     o19 = BeliefMutationEvent.model_construct(causal_attributions=[])  # type: ignore
     with contextlib.suppress(AttributeError):
         o19.sort_arrays()  # type: ignore
+
+def test_epistemic_extraction_policy_sorting() -> None:
+    from coreason_manifest.spec.ontology import EpistemicExtractionPolicy
+
+    policy = EpistemicExtractionPolicy(
+        strategy_tier="speed_single_pass",
+        required_relations=["part_of", "is_a"],
+        grounding_confidence_threshold=0.5
+    )
+    assert policy.required_relations == ["is_a", "part_of"]
+
+
+def test_semantic_node_state_canonical_grounding_sorting() -> None:
+    from coreason_manifest.spec.ontology import SemanticNodeState, CanonicalGroundingReceipt
+
+    state = SemanticNodeState(
+        node_id="node_1",
+        label="Concept",
+        scope="global",
+        text_chunk="Some text",
+        provenance={"extracted_by": "did:example:agent1", "source_event_id": "event_1"},
+        tier="semantic",
+        canonical_groundings=[
+            CanonicalGroundingReceipt(target_database="mesh", canonical_id="B", cosine_similarity=0.9),
+            CanonicalGroundingReceipt(target_database="snomed_ct", canonical_id="A", cosine_similarity=0.8)
+        ]
+    )
+    assert state.canonical_groundings[0].canonical_id == "A"
+    assert state.canonical_groundings[1].canonical_id == "B"
