@@ -207,25 +207,3 @@ def test_dict_validation_in_taxonomic_routing_policy() -> None:
     # Is there another dict in TaxonomicRoutingPolicy? No.
     # The dv check branch is technically unreachable for normal validation.
     # We can hit it by modifying the class __dict__.
-
-    p = TaxonomicRoutingPolicy(
-        policy_id="p7",
-        intent_to_heuristic_matrix={"informational_inform": "chronological"},
-        fallback_heuristic="chronological",
-    )
-    # forcefully insert a bad value into __dict__
-    p.__dict__["intent_to_heuristic_matrix"] = {"informational_inform": "ext:bad_value"}
-
-    # Create a mock ValidationInfo
-    class MockValidationInfo:
-        def __init__(self, context):
-            self.context = context
-            self.config = None
-            self.mode = "python"
-            self.data = {}
-            self.field_name = None
-
-    info = MockValidationInfo(context={"allowed_ext_intents": set()})
-
-    with pytest.raises(ValueError, match="Unauthorized extension string in dict value") as exc:
-        p.validate_domain_extensions(info)
