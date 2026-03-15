@@ -1707,7 +1707,7 @@ class BrowserDOMState(CoreasonBaseState):
                     ip = ipaddress.ip_address(ip_int)
                 else:
                     raise ValueError
-            except (ValueError, OverflowError, IndexError):
+            except ValueError, OverflowError, IndexError:
                 return url
         if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast:
             raise ValueError(f"SSRF restricted IP detected: {hostname}")
@@ -3879,9 +3879,7 @@ class MigrationContract(CoreasonBaseState):
     )
     path_transformations: dict[
         Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=2000)]
-    ] = Field(
-        default_factory=dict, description="A strict mapping of old RFC 6902 JSON Pointers to new JSON Pointers."
-    )
+    ] = Field(default_factory=dict, description="A strict mapping of old RFC 6902 JSON Pointers to new JSON Pointers.")
     dropped_paths: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
         default_factory=list,
         description="Explicit whitelist of JSON Pointers that are safely deprecated and intentionally dropped during migration.",  # noqa: E501
