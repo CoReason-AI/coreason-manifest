@@ -507,6 +507,7 @@ def test_bulk_array_sorting_coverage() -> None:
     from coreason_manifest.spec.ontology import (
         BeliefMutationEvent,
         ChaosExperimentTask,
+        DefeasibleRebuttalContract,
         EpistemicQuarantineSnapshot,
         HypothesisGenerationEvent,
         MarketResolutionState,
@@ -588,6 +589,10 @@ def test_bulk_array_sorting_coverage() -> None:
     o19 = BeliefMutationEvent.model_construct(causal_attributions=[])  # type: ignore
     with contextlib.suppress(AttributeError):
         o19.sort_arrays()  # type: ignore
+
+    o20 = DefeasibleRebuttalContract.model_construct(permitted_attack_edges=[])  # type: ignore
+    with contextlib.suppress(AttributeError):
+        o20.sort_arrays()  # type: ignore
 
 
 def test_epistemic_extraction_policy_sorting() -> None:

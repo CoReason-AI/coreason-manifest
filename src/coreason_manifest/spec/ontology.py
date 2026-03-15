@@ -1138,6 +1138,28 @@ class DefeasibleCascadeEvent(CoreasonBaseState):
         return self
 
 
+class DefeasibleRebuttalContract(CoreasonBaseState):
+    permitted_attack_edges: list[DefeasibleEdgeType] = Field(
+        min_length=1,
+        description="The formal argumentation edge types allowed to sever a prior operational intent.",
+    )
+    required_evidence_density: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="The minimum confidence weight the new claim needs to successfully defeat the older node.",
+    )
+    max_quarantine_blast_radius: int = Field(
+        gt=0,
+        le=1000000000,
+        description="Limits how many downstream API calls or semantic dependencies can be automatically severed by the logical cascade.",  # noqa: E501
+    )
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "permitted_attack_edges", sorted(self.permitted_attack_edges))
+        return self
+
+
 class MultimodalTokenAnchorState(CoreasonBaseState):
     """AGENT INSTRUCTION: Unified multimodal grounding mapping extracted facts to strict 1D token spans and 2D visual\n
     patches."""
@@ -4521,6 +4543,10 @@ class ProcessRewardContract(CoreasonBaseState):
         default=None,
         description="The dynamic circuit breaker that halts the search when PRM variance converges, preventing VRAM waste.",  # noqa: E501
     )
+    enforce_reasoning_trace: bool = Field(
+        default=True,
+        description="Forces the LLM to output a CognitiveReasoningTraceState explaining WHY it failed before it is allowed to attempt the generation again.",  # noqa: E501
+    )
     pruning_threshold: float = Field(
         ge=0.0,
         le=1.0,
@@ -5268,6 +5294,10 @@ class TraceExportManifest(CoreasonBaseState):
 
 
 class TruthMaintenancePolicy(CoreasonBaseState):
+    rebuttal_contract: DefeasibleRebuttalContract | None = Field(
+        default=None,
+        description="Governs exactly how an incoming correction zeroes out a previous node in the Epistemic Argument Graph without destroying the historical ledger.",  # noqa: E501
+    )
     decay_propagation_rate: float = Field(
         ge=0.0, le=1.0, description="Entropy Penalty applied per edge traversal during a defeasible cascade."
     )
@@ -6751,6 +6781,9 @@ EpistemicFlowStateReceipt.model_rebuild()
 TopologicalRewardContract.model_rebuild()
 DifferentiableLogicConstraint.model_rebuild()
 CausalExplanationEvent.model_rebuild()
+DefeasibleRebuttalContract.model_rebuild()
+TruthMaintenancePolicy.model_rebuild()
+ProcessRewardContract.model_rebuild()
 CanonicalGroundingReceipt.model_rebuild()
 EpistemicExtractionPolicy.model_rebuild()
 SemanticNodeState.model_rebuild()
