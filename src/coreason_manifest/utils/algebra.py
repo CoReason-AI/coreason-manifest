@@ -332,6 +332,17 @@ def verify_ast_safety(payload: str) -> bool:
     return True
 
 
+def calculate_agent_vram_footprint(agent: ontology.AgentNodeProfile) -> int:
+    """
+    A pure algebraic functor that calculates the total VRAM footprint
+    required to mount all ephemeral PEFT adapters for a given agent.
+    """
+    total_vram_bytes = 0
+    for adapter in agent.peft_adapters:
+        total_vram_bytes += getattr(adapter, "vram_footprint_bytes", 0)
+    return total_vram_bytes
+
+
 def apply_state_differential(
     current_state: dict[str, Any], manifest: ontology.StateDifferentialManifest
 ) -> dict[str, Any]:
