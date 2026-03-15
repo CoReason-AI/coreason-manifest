@@ -4700,12 +4700,8 @@ class ExogenousEpistemicEvent(CoreasonBaseState):
         max_length=1000000000, description="Bounded dictionary representing the injected hallucination or observation."
     )
     escrow: SimulationEscrowContract = Field(description="The cryptographic Proof-of-Stake funding the shock.")
-
-    @model_validator(mode="after")
-    def enforce_economic_escrow(self) -> Self:
-        if self.escrow.locked_magnitude <= 0:
-            raise ValueError("ExogenousEpistemicEvent requires a strictly positive escrow to execute.")
-        return self
+    # Note: SimulationEscrowContract.locked_magnitude enforces gt=0 at the Field level.
+    # No additional model_validator is needed for economic escrow bounds.
 
 
 class SpanEvent(CoreasonBaseState):
