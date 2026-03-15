@@ -27,7 +27,7 @@ def test_taxonomic_routing_policy_extensions() -> None:
             intent_to_heuristic_matrix={"ext:custom_intent": "chronological"},
             fallback_heuristic="chronological",
         )
-    assert "Unauthorized extension string" in str(exc.value)
+    assert "Unauthorized domain extension string" in str(exc.value)
 
     # Test valid extension with context
     p3 = TaxonomicRoutingPolicy.model_validate(
@@ -168,7 +168,7 @@ def test_dict_validation_in_barge_in_event() -> None:
             },
             context={"allowed_ext_intents": set()},
         )
-    assert "Unauthorized extension string in dict key" in str(exc.value)
+    assert "Unauthorized domain extension string detected: 'ext:invalid_key'" in str(exc.value)
 
     # Invalid value
     with pytest.raises(ValidationError) as exc:
@@ -200,10 +200,19 @@ def test_dict_validation_in_taxonomic_routing_policy() -> None:
             },
             context={"allowed_ext_intents": set()},
         )
-    assert "Unauthorized extension string in dict key" in str(exc.value)
+    assert "Unauthorized domain extension string detected: 'ext:invalid_key'" in str(exc.value)
 
-    # To test an invalid value in dict, we'd need to bypass pydantic's typing or use a field that allows it.
-    # intent_to_heuristic_matrix values are Literal, so passing "ext:invalid" fails pydantic typing.
-    # Is there another dict in TaxonomicRoutingPolicy? No.
-    # The dv check branch is technically unreachable for normal validation.
-    # We can hit it by modifying the class __dict__.
+    # List extension tests
+    with pytest.raises(ValidationError) as exc:
+        BargeInInterruptEvent.model_validate(
+            {
+                "event_id": "e5",
+                "timestamp": 100.0,
+                "target_event_id": "t5",
+                "epistemic_disposition": "discard",
+                "disfluency_type": "repair",
+                "retained_partial_payload": {"k": ["ext:invalid_list_val"]},
+            },
+            context={"allowed_ext_intents": set()},
+        )
+    assert "Unauthorized domain extension string detected: 'ext:invalid_list_val'" in str(exc.value)

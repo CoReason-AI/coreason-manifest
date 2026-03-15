@@ -222,7 +222,6 @@ type FaultCategoryProfile = Literal[
     "temporal_dilation",
     "dependency_blackout",
 ]
-type CognitiveTierProfile = Literal["working", "episodic", "semantic"]
 type NodeIdentifierState = Annotated[
     str,
     Field(
@@ -370,23 +369,24 @@ class CoreasonBaseState(BaseModel):
     @model_validator(mode="after")
     def validate_global_domain_extensions(self, info: ValidationInfo) -> Self:
         """
-        Global mathematical boundary: Prove any 'ext:' string exists in the
-        active client's dynamically loaded vocabulary.
+        Global mathematical boundary: Recursively prove any 'ext:' string exists
+        in the active client's dynamically loaded vocabulary.
         """
         allowed_exts = (info.context or {}).get("allowed_ext_intents", set())
-        for k, v in self.__dict__.items():
-            if isinstance(v, str) and v.startswith("ext:") and v not in allowed_exts:
-                raise ValueError(f"Unauthorized extension string in field {k}: {v}")
-            if isinstance(v, dict):
-                for dk, dv in v.items():
-                    if isinstance(dk, str) and dk.startswith("ext:") and dk not in allowed_exts:
-                        raise ValueError(f"Unauthorized extension string in dict key of {k}: {dk}")
-                    if isinstance(dv, str) and dv.startswith("ext:") and dv not in allowed_exts:
-                        raise ValueError(f"Unauthorized extension string in dict value of {k}: {dv}")
-            if isinstance(v, list):
-                for item in v:
-                    if isinstance(item, str) and item.startswith("ext:") and item not in allowed_exts:
-                        raise ValueError(f"Unauthorized extension string in list of {k}: {item}")
+
+        def _walk_and_validate(obj: Any) -> None:
+            if isinstance(obj, str):
+                if obj.startswith("ext:") and obj not in allowed_exts:
+                    raise ValueError(f"Unauthorized domain extension string detected: '{obj}'")
+            elif isinstance(obj, dict):
+                for k, v in obj.items():
+                    _walk_and_validate(k)
+                    _walk_and_validate(v)
+            elif isinstance(obj, (list, tuple, set)):
+                for item in obj:
+                    _walk_and_validate(item)
+
+        _walk_and_validate(self.__dict__)
         return self
 
 
@@ -1662,7 +1662,6 @@ class AnchoringPolicy(CoreasonBaseState):
     )
 
 
-type AttackVectorProfile = Literal["rebuttal", "undercutter", "underminer"]
 type AttestationMechanismProfile = Literal["fido2_webauthn", "zk_snark_groth16", "pqc_ml_dsa"]
 
 
@@ -2210,7 +2209,7 @@ class DefeasibleAttackEvent(CoreasonBaseState):
         pattern="^[a-zA-Z0-9_.:-]+$",
         description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the claim being attacked.",  # noqa: E501
     )
-    attack_vector: AttackVectorProfile = Field(description="Geometric matrices of undercutting defeaters.")
+    attack_vector: DefeasibleEdgeType = Field(description="Geometric matrices of undercutting defeaters.")
 
 
 class DimensionalProjectionContract(CoreasonBaseState):
@@ -5484,7 +5483,7 @@ class SemanticNodeState(CoreasonBaseState):
     provenance: EpistemicProvenanceReceipt = Field(
         description="The cryptographic chain of custody for this semantic state."
     )
-    tier: CognitiveTierProfile = Field(
+    tier: CognitiveMemoryDomain = Field(
         default="semantic", description="The cognitive tier this latent state resides in."
     )
     temporal_bounds: TemporalBoundsProfile | None = Field(
