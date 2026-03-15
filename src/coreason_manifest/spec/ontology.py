@@ -54,6 +54,14 @@ CORE_EBNF_SEMANTICS = {
     "quantifier": "W3C EBNF: An operator (+, *, ?) defining the repetition variance of a token.",
 }
 
+type CoreTokenMatchingAlgorithm = Literal["bipartite_soft_matching", "size_distinctive_matching"]
+CORE_TOKEN_MATCHING_SEMANTICS = {
+    "bipartite_soft_matching": "Algorithm partitioning tokens into two sets and merging the most similar edges.",
+    "size_distinctive_matching": (
+        "Algorithm prioritizing the merging of small token clusters into larger structural anchors."
+    ),
+}
+
 type CoreTokenMergeMetric = Literal["cosine_similarity", "euclidean_distance", "manhattan_distance"]
 CORE_TOKEN_MERGE_SEMANTICS = {
     "cosine_similarity": "Information-theoretic compression comparing the geometric angle between embedding vectors.",
@@ -141,6 +149,7 @@ CORE_SMT_SOLVER_SEMANTICS = {
 
 type ValidRoutingIntent = CoreRoutingIntent | DomainExtensionString
 type EBNFConstruct = CoreEBNFConstruct | DomainExtensionString
+type TokenMatchingAlgorithm = CoreTokenMatchingAlgorithm | DomainExtensionString
 type TokenMergeMetric = CoreTokenMergeMetric | DomainExtensionString
 type ComputeStrategyTier = CoreComputeStrategyTier | DomainExtensionString
 type ClinicalAssertionState = CoreClinicalAssertion | DomainExtensionString
@@ -3016,6 +3025,24 @@ class BudgetExhaustionEvent(BaseStateEvent):
     )
 
 
+class TokenMergingPolicy(CoreasonBaseState):
+    metric: TokenMergeMetric = Field(description="The mathematical metric used to evaluate attention entropy.")
+    matching_algorithm: TokenMatchingAlgorithm = Field(
+        description="The algorithm used to physically fuse redundant tokens."
+    )
+    target_compression_ratio: float = Field(
+        ge=0.0, le=1.0, description="The strictly typed percentage of the active context window to safely compress."
+    )
+    layer_whitelist: list[Annotated[int, Field(ge=0)]] = Field(
+        min_length=1, description="The specific transformer blocks authorized to fuse tokens."
+    )
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "layer_whitelist", sorted(self.layer_whitelist))
+        return self
+
+
 class TokenBurnReceipt(BaseStateEvent):
     """
     Lock-free thermodynamic compute tracking receipt.
@@ -4632,6 +4659,9 @@ class InformationFlowPolicy(CoreasonBaseState):
     rules: list[RedactionPolicy] = Field(
         default_factory=list, description="The array of sanitization rules to enforce."
     )
+    stream_interruption: StreamInterruptionPolicy | None = Field(
+        default=None, description="The active kinematic and acoustic circuit breaker governing stream stutters."
+    )
     semantic_firewall: SemanticFirewallPolicy | None = Field(
         default=None, description="The active cognitive defense perimeter against adversarial control-flow overrides."
     )
@@ -4812,6 +4842,22 @@ class OntologicalAlignmentPolicy(CoreasonBaseState):
     fallback_state_contract: StateContract | None = Field(
         default=None,
         description="The rigid external JSON schema to force agents to use if their latent vector geometries are hopelessly incommensurable.",  # noqa: E501
+    )
+
+
+class StreamInterruptionPolicy(CoreasonBaseState):
+    kinematic_reversal_threshold: int = Field(
+        default=3,
+        ge=1,
+        description="Sequential number of backspaces/deletes required to trigger a hardware-level cache rewind.",
+    )
+    audio_spike_delta: float | None = Field(
+        default=None,
+        description="The Voice Activity Detection (VAD) decibel delta required to flag an acoustic barge-in.",
+    )
+    eviction_strategy: CacheEviction = Field(
+        default="lru",
+        description="Instructs the inference engine how to physically drop the VRAM context of the Reparandum.",
     )
 
 
@@ -5559,6 +5605,9 @@ class AgentNodeProfile(BaseNodeProfile):
     )
     compute_frontier: RoutingFrontierPolicy | None = Field(
         default=None, description="The dynamic spot-market compute requirements for this agent."
+    )
+    token_merging: TokenMergingPolicy | None = Field(
+        default=None, description="The hardware-level VRAM compression constraint for this specific agent."
     )
     peft_adapters: list[PeftAdapterContract] = Field(
         default_factory=list,
@@ -6696,3 +6745,5 @@ EpistemicFlowStateReceipt.model_rebuild()
 TopologicalRewardContract.model_rebuild()
 DifferentiableLogicConstraint.model_rebuild()
 CausalExplanationEvent.model_rebuild()
+StreamInterruptionPolicy.model_rebuild()
+TokenMergingPolicy.model_rebuild()

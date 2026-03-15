@@ -549,6 +549,12 @@ class ManifestSemanticRegistry:
             description="Core EBNF syntax constructs.",
             semantics=ontology.CORE_EBNF_SEMANTICS,
         ),
+        "mcp://coreason/semantics/token_matching": SemanticResource(
+            uri="mcp://coreason/semantics/token_matching",
+            name="Core Token Matching Algorithms",
+            description="Algorithms for VRAM token fusion and bipartite matching.",
+            semantics=ontology.CORE_TOKEN_MATCHING_SEMANTICS,
+        ),
         "mcp://coreason/semantics/token_merge_metric": SemanticResource(
             uri="mcp://coreason/semantics/token_merge_metric",
             name="Core Token Merge Metrics",
