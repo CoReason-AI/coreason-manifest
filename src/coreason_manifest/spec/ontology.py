@@ -5293,6 +5293,38 @@ class TemporalBoundsProfile(CoreasonBaseState):
         return self
 
 
+class NegativeHeuristicProfile(CoreasonBaseState):
+    """AGENT INSTRUCTION: Rigid symbolic constraint ledger for explicitly declared user exclusions."""
+
+    forbidden_semantic_clusters: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
+        description="Explicit array of ontological clusters the orchestrator is mathematically forbidden from traversing.",  # noqa: E501
+    )
+    banned_modalities: (
+        list[Literal["text", "raster_image", "vector_graphics", "tabular_grid", "n_dimensional_tensor"]] | None
+    ) = Field(default=None, description="Strict exclusion of sensory inputs.")
+    temporal_exclusion_bounds: list[TemporalBoundsProfile] = Field(
+        description="Exact temporal zones mathematically severed from the retrieval graph."
+    )
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "forbidden_semantic_clusters", sorted(self.forbidden_semantic_clusters))
+        if self.banned_modalities is not None:
+            object.__setattr__(self, "banned_modalities", sorted(self.banned_modalities))
+
+        # Sort TemporalBoundsProfile. Pydantic models need to be compared somehow.
+        # We can sort by dict representation or specific fields to be deterministic.
+        # But a simpler way for objects is to sort by string rep.
+        # However, for TemporalBoundsProfile it's deterministic to sort by dict or json strings.
+        # We'll sort by their dumped JSON strings.
+        object.__setattr__(
+            self,
+            "temporal_exclusion_bounds",
+            sorted(self.temporal_exclusion_bounds, key=lambda x: x.model_dump_canonical()),
+        )
+        return self
+
+
 class TerminalBufferState(CoreasonBaseState):
     type: Literal["terminal"] = Field(
         default="terminal", description="Discriminator for Causal Actuators on structural buffers."
@@ -5471,6 +5503,28 @@ class VectorEmbeddingState(CoreasonBaseState):
     model_name: str = Field(
         max_length=2000, description="The provenance of the embedding model used (e.g., 'text-embedding-3-large')."
     )
+
+
+class LatentIntentTrajectoryState(CoreasonBaseState):
+    """AGENT INSTRUCTION: Tracks the continuous POMDP belief distribution of the active user query."""
+
+    current_intent_vector: VectorEmbeddingState = Field(
+        description="High-dimensional representation of the user's active $E_{target}$."
+    )
+    epistemic_entropy: float = Field(ge=0.0, le=1.0, description="Shannon entropy of the intent distribution.")
+    trajectory_momentum_scalar: float = Field(
+        le=1000000000.0,
+        ge=-1000000000.0,
+        description="Mathematical velocity indicating the rate of convergence toward a terminal goal.",
+    )
+
+
+class EpistemicTransitionMatrixProfile(CoreasonBaseState):
+    """AGENT INSTRUCTION: SOTA HMM matrix mapping current context to anticipated future intent sub-goals."""
+
+    anticipated_subgoals: dict[
+        Annotated[str, StringConstraints(max_length=255)], Annotated[float, Field(ge=0.0, le=1.0)]
+    ] = Field(description="Matrix mapping future intent CIDs to their transition probabilities.")
 
 
 class CognitiveCritiqueProfile(CoreasonBaseState):
@@ -6307,6 +6361,9 @@ type AnyInterventionState = Annotated[
 class EpistemicQuarantineSnapshot(CoreasonBaseState):
     """Represents the Epistemic Quarantine, partitioned from the Committed Epistemic Ledger."""
 
+    active_information_state: "InformationStateManifest | None" = Field(
+        default=None, description="The continuous POMDP epistemic coordinate currently driving active inference."
+    )
     system_prompt: str = Field(
         max_length=2000, description="The basal non-monotonic instruction set currently held in Epistemic Quarantine."
     )
@@ -6769,6 +6826,46 @@ class DifferentiableLogicConstraint(CoreasonBaseState):
     solver_status: SMTSolverOutcome = Field(default="unknown")
 
 
+class InformationStateManifest(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: The unified epistemic coordinate merging probabilistic intent trajectories
+    with deterministic symbolic constraints.
+    """
+
+    manifest_id: str = Field(
+        min_length=1,
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        description="A Content Identifier (CID).",
+    )
+    latent_trajectory: LatentIntentTrajectoryState = Field(description="The continuous POMDP belief distribution.")
+    transition_matrix: EpistemicTransitionMatrixProfile = Field(description="SOTA HMM matrix.")
+    negative_constraints: NegativeHeuristicProfile | None = Field(
+        default=None, description="Rigid symbolic constraint ledger."
+    )
+    working_context_variables: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
+        description="SOTA Slot-filling memory."
+    )
+
+    @field_validator("working_context_variables", mode="before")
+    @classmethod
+    def validate_working_context_variables(cls, v: Any) -> Any:
+        return _validate_payload_bounds(v)
+
+
+class IntentTransitionEvent(BaseStateEvent):
+    """AGENT INSTRUCTION: Cryptographic receipt of a shift in the user's underlying information state goal."""
+
+    type: Literal["intent_transition"] = Field(default="intent_transition", description="Discriminator type.")
+    previous_state_hash: str | None = Field(
+        default=None,
+        max_length=128,
+        pattern="^[a-f0-9]{64}$",
+        description="Cryptographic link to the prior POMDP belief state.",
+    )
+    active_information_state: InformationStateManifest = Field(description="The current information state.")
+
+
 type AnyStateEvent = Annotated[
     ObservationEvent
     | BeliefMutationEvent
@@ -6787,7 +6884,8 @@ type AnyStateEvent = Annotated[
     | EpistemicAxiomVerificationReceipt
     | CognitiveRewardEvaluationReceipt
     | EpistemicFlowStateReceipt
-    | CausalExplanationEvent,
+    | CausalExplanationEvent
+    | IntentTransitionEvent,
     Field(discriminator="type", description="A discriminated union of state events."),
 ]
 
@@ -6885,6 +6983,9 @@ CanonicalGroundingReceipt.model_rebuild()
 EpistemicExtractionPolicy.model_rebuild()
 SemanticNodeState.model_rebuild()
 AgentNodeProfile.model_rebuild()
+
+IntentTransitionEvent.model_rebuild()
+InformationStateManifest.model_rebuild()
 ConceptBottleneckPolicy.model_rebuild()
 PredictiveEntropySLA.model_rebuild()
 StreamInterruptionPolicy.model_rebuild()
