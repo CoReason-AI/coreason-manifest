@@ -521,7 +521,12 @@ def test_bulk_array_sorting_coverage() -> None:
         SwarmTopologyManifest,
         System1ReflexPolicy,
         TheoryOfMindSnapshot,
+        ConceptBottleneckPolicy,
     )
+
+    o0 = ConceptBottleneckPolicy.model_construct(required_concept_vector={"b": True, "a": False}) # type: ignore
+    with contextlib.suppress(AttributeError):
+        o0.sort_concept_vector() # type: ignore
 
     o1 = MCPResourceManifest.model_construct(schema_dependencies=[])  # type: ignore
     with contextlib.suppress(AttributeError):
