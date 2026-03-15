@@ -471,11 +471,11 @@ class ComputeEngineProfile(CoreasonBaseState):
     model_name: str = Field(max_length=2000, description="The identifier of the underlying model.")
     provider: str = Field(max_length=2000, description="The name of the provider hosting the model.")
     context_window_size: int = Field(description="The maximum context window size in tokens.")
-    capabilities: list[str] = Field(
+    capabilities: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
         description="The explicit, structurally bounded array of capabilities authorized for this model."
     )
     rate_card: ComputeRateContract = Field(description="The economic cost definition associated with the model.")
-    supported_functional_experts: list[str] = Field(
+    supported_functional_experts: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
         default_factory=list,
         description="The declarative array of specialized functional expert clusters (e.g., 'falsifier', 'synthesizer') physically present in this model's architecture.",  # noqa: E501
     )
@@ -493,13 +493,13 @@ class PermissionBoundaryPolicy(CoreasonBaseState):
     """
 
     network_access: bool = Field(description="Whether the tool is permitted to make external network requests.")
-    allowed_domains: list[str] | None = Field(
+    allowed_domains: list[Annotated[str, StringConstraints(max_length=2000)]] | None = Field(
         default=None, description="The explicit whitelist of allowed network domains if network access is true."
     )
     file_system_mutation_forbidden: bool = Field(
         description="True if the tool is strictly forbidden from writing to the disk."
     )
-    auth_requirements: list[str] | None = Field(
+    auth_requirements: list[Annotated[str, StringConstraints(max_length=2000)]] | None = Field(
         default=None,
         description="An explicit array of authentication protocol identifiers (e.g., 'oauth2:github', 'mtls:internal') the orchestrator must negotiate before allocating compute.",  # noqa: E501
     )
@@ -579,7 +579,7 @@ class ActivationSteeringContract(CoreasonBaseState):
         pattern="^[a-f0-9]{64}$",
         description="The SHA-256 hash of the extracted RepE control tensor (e.g., the 'caution' vector).",
     )
-    injection_layers: list[int] = Field(
+    injection_layers: list[Annotated[int, Field(ge=0)]] = Field(
         min_length=1, description="The specific transformer layer indices where this vector must be applied."
     )
     scaling_factor: float = Field(
@@ -605,7 +605,7 @@ class SemanticSlicingPolicy(CoreasonBaseState):
     permitted_classification_tiers: list[InformationClassificationProfile] = Field(
         min_length=1, description="The explicit whitelist of sensitivity bounds allowed into context."
     )
-    required_semantic_labels: list[str] | None = Field(
+    required_semantic_labels: list[Annotated[str, StringConstraints(max_length=255)]] | None = Field(
         default=None,
         description="The declarative whitelist of strictly typed ontological node labels authorized for context projection.",  # noqa: E501
     )
@@ -846,7 +846,7 @@ class RedactionPolicy(CoreasonBaseState):
         max_length=2000, description="The semantic entity type or declarative regex pattern to identify."
     )
     target_regex_pattern: str = Field(max_length=200, description="The dynamic regex pattern to target.")
-    context_exclusion_zones: list[str] | None = Field(
+    context_exclusion_zones: list[Annotated[str, StringConstraints(max_length=2000)]] | None = Field(
         default=None, max_length=100, description="Specific JSON paths where this rule should NOT apply."
     )
     action: SanitizationActionIntent = Field(
@@ -870,7 +870,7 @@ class SaeLatentPolicy(CoreasonBaseState):
         ge=0,
         description="The exact dimensional index of the monosemantic feature in the Sparse Autoencoder dictionary.",
     )
-    monitored_layers: list[int] = Field(
+    monitored_layers: list[Annotated[int, Field(ge=0)]] = Field(
         min_length=1,
         description="The specific transformer layer indices where this feature activation must be monitored.",
     )
@@ -924,7 +924,7 @@ class SecureSubSessionState(CoreasonBaseState):
         max_length=255,
         description="Unique identifier for the secure session.",
     )
-    allowed_vault_keys: list[str] = Field(
+    allowed_vault_keys: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
         max_length=100,
         description="The explicit array of enterprise vault keys the agent is temporarily allowed to access.",
     )
@@ -953,7 +953,7 @@ class DefeasibleCascadeEvent(CoreasonBaseState):
     propagated_decay_factor: float = Field(
         ge=0.0, le=1.0, description="The calculated Entropy Penalty applied to this specific subgraph."
     )
-    quarantined_event_ids: list[str] = Field(
+    quarantined_event_ids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
         min_length=1,
         description="The strict array of downstream event Content Identifiers (CIDs) isolated and muted by this cascade to prevent Epistemic Contagion.",  # noqa: E501
     )
@@ -978,7 +978,7 @@ class MultimodalTokenAnchorState(CoreasonBaseState):
     token_span_end: int | None = Field(
         default=None, ge=0, description="The ending index in the discrete VLM context window."
     )
-    visual_patch_hashes: list[str] = Field(
+    visual_patch_hashes: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
         default_factory=list,
         description="The explicit array of SHA-256 hashes corresponding to specific VQ-VAE visual patches attended to.",
     )
@@ -1032,7 +1032,7 @@ class RollbackIntent(CoreasonBaseState):
         pattern="^[a-zA-Z0-9_.:-]+$",
         description="The Content Identifier (CID) of the corrupted event in the EpistemicLedgerState to revert to.",
     )
-    invalidated_node_ids: list[str] = Field(
+    invalidated_node_ids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
         default_factory=list,
         description="The strict array of nodes whose operational histories are causally tainted and must be flushed.",
     )
@@ -1171,7 +1171,7 @@ class LatentScratchpadReceipt(CoreasonBaseState):
     explored_branches: list[ThoughtBranchState] = Field(
         description="All logical paths the agent attempted within this Ephemeral Epistemic Quarantine\u2014a volatile workspace where probability waves collapse before being committed to the immutable ledger."  # noqa: E501
     )
-    discarded_branches: list[str] = Field(
+    discarded_branches: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
         description="The strict array of Content Identifiers (CIDs) that were explicitly pruned due to logical dead-ends.",  # noqa: E501
     )
     resolution_branch_id: str | None = Field(
@@ -1216,7 +1216,7 @@ class EphemeralNamespacePartitionState(CoreasonBaseState):
     execution_runtime: Literal["wasm32-wasi", "riscv32-zkvm", "bpf"] = Field(
         description="The strict virtual machine target mandated for dynamic execution."
     )
-    authorized_bytecode_hashes: list[str] = Field(
+    authorized_bytecode_hashes: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
         min_length=1, description="The explicit whitelist of SHA-256 hashes allowed to execute within this partition."
     )
     max_ttl_seconds: int = Field(
@@ -1282,7 +1282,7 @@ class BilateralSLA(CoreasonBaseState):
     liability_limit_magnitude: int = Field(
         ge=0, description="The strict magnitude cap on cross-tenant economic liability."
     )
-    permitted_geographic_regions: list[str] = Field(
+    permitted_geographic_regions: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
         default_factory=list,
         description="Explicit whitelist of geographic regions or cloud enclaves where execution is structurally permitted (Payload Residency Pinning).",  # noqa: E501
     )
@@ -1302,10 +1302,10 @@ class BilateralSLA(CoreasonBaseState):
 
 
 class FederatedDiscoveryManifest(CoreasonBaseState):
-    broadcast_endpoints: list[str] = Field(
+    broadcast_endpoints: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
         description="The explicit array of strictly bounded MCP URI broadcast endpoints."
     )
-    supported_ontologies: list[str] = Field(
+    supported_ontologies: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
         description="The explicit array of cryptographic hashes defining acceptable domain ontologies."
     )
 
@@ -1353,7 +1353,7 @@ class AdjudicationIntent(CoreasonBaseState):
         default="forced_adjudication",
         description="Discriminator for breaking deadlocks within a CouncilTopologyManifest.",
     )
-    deadlocked_claims: list[str] = Field(
+    deadlocked_claims: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
         min_length=2, description="The conflicting claim IDs or proposals the human must choose between."
     )
     resolution_schema: dict[Annotated[str, StringConstraints(max_length=255)], Any] = Field(
@@ -1568,7 +1568,7 @@ class BoundedInterventionScopePolicy(CoreasonBaseState):
     Constraints bounding human interaction for interventions.
     """
 
-    allowed_fields: list[str] = Field(
+    allowed_fields: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
         description="The explicit whitelist of top-level JSON pointers mathematically open to mutation."
     )
     json_schema_whitelist: dict[
@@ -2198,7 +2198,7 @@ class SemanticDiscoveryIntent(CoreasonBaseState):
     min_isometry_score: float = Field(
         ge=-1.0, le=1.0, description="The minimum cosine similarity required to authorize a capability mount."
     )
-    required_structural_types: list[str] = Field(
+    required_structural_types: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
         description="The strict array of strings defining topological limits on the discovered tools."
     )
 
@@ -2324,7 +2324,7 @@ class EpistemicPromotionEvent(BaseStateEvent):
     type: Literal["epistemic_promotion"] = Field(
         default="epistemic_promotion", description="Discriminator type for an epistemic promotion event."
     )
-    source_episodic_event_ids: list[str] = Field(
+    source_episodic_event_ids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
         description="The strict array of CIDs (Content Identifiers) representing the raw logs being compressed and archived.",  # noqa: E501
     )
     crystallized_semantic_node_id: str = Field(
@@ -2453,7 +2453,7 @@ class EvictionPolicy(CoreasonBaseState):
     max_retained_tokens: int = Field(
         gt=0, description="The strict geometric upper bound of the Epistemic Quarantine's token capacity."
     )
-    protected_event_ids: list[str] = Field(
+    protected_event_ids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
         default_factory=list,
         description="Explicit array of Content Identifiers (CIDs) the orchestrator is mathematically forbidden from retracting.",  # noqa: E501
     )
@@ -2554,7 +2554,7 @@ class ExecutionNodeReceipt(CoreasonBaseState):
         """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""  # noqa: E501
         return _validate_payload_bounds(v)
 
-    parent_hashes: list[str] = Field(
+    parent_hashes: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
         default_factory=list, description="The strict array of cryptographic hashes of parent execution nodes."
     )
     # Note: parent_hashes is a structurally ordered sequence (Causal Ancestry) and MUST NOT be sorted.
@@ -3092,7 +3092,7 @@ class TaxonomicNodeState(CoreasonBaseState):
         max_length=2000,
         description="The human-legible, dynamically synthesized categorical label (e.g., 'High Risk Policies').",
     )
-    children_node_ids: list[str] = Field(
+    children_node_ids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
         default_factory=list, description="Explicit array of child node CIDs to enforce the Directed Acyclic Graph."
     )
     leaf_provenance: list["EpistemicProvenanceReceipt"] = Field(
@@ -3471,18 +3471,18 @@ class MCPCapabilityWhitelistPolicy(CoreasonBaseState):
     the execution node is authorized to mount from the remote server.
     """
 
-    allowed_tools: list[str] = Field(
+    allowed_tools: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
         default_factory=list, description="The explicit whitelist of function names the node is allowed to call."
     )
-    allowed_resources: list[str] = Field(
+    allowed_resources: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
         default_factory=list,
         description="The explicit whitelist of resource URIs the node is allowed to passively perceive.",
     )
-    allowed_prompts: list[str] = Field(
+    allowed_prompts: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
         default_factory=list,
         description="The explicit whitelist of workflow templates the node is allowed to trigger.",
     )
-    required_licenses: list[str] = Field(
+    required_licenses: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
         default_factory=list,
         description="Explicit array of DUA/RBAC enterprise licenses mathematically required to perceive and mount this capability.",  # noqa: E501
     )
@@ -3542,7 +3542,7 @@ class KineticSeparationPolicy(CoreasonBaseState):
         pattern="^[a-zA-Z0-9_.:-]+$",
         description="Unique identifier for this specific separation boundary.",
     )
-    mutually_exclusive_clusters: list[list[str]] = Field(
+    mutually_exclusive_clusters: list[list[Annotated[str, StringConstraints(max_length=2000)]]] = Field(
         description="A topological matrix of tool names or MCP URIs. If an agent mounts one capability in a cluster, all other capabilities in that cluster are mathematically quarantined."  # noqa: E501
     )
     enforcement_action: Literal["halt_and_quarantine", "sever_causal_chain"] = Field(
@@ -3711,7 +3711,7 @@ class MCPResourceManifest(CoreasonBaseState):
         pattern="^[a-zA-Z0-9_.:-]+$",
         description="The ID of the MCP server providing these resources.",
     )
-    uris: list[str] = Field(
+    uris: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
         default_factory=list,
         description="The explicit array of resource URIs mathematically bound to the agent.",
     )
@@ -3735,7 +3735,7 @@ class MCPClientBindingProfile(CoreasonBaseState):
         description="The transport protocol used to communicate with the MCP server."
     )
 
-    allowed_mcp_tools: list[str] | None = Field(
+    allowed_mcp_tools: list[Annotated[str, StringConstraints(max_length=2000)]] | None = Field(
         default=None,
         description="An explicit whitelist of tools the agent is allowed to invoke from this server. If None, all discovered tools are allowed.",  # noqa: E501
     )
@@ -3750,7 +3750,9 @@ class MCPClientBindingProfile(CoreasonBaseState):
 class MacroGridProfile(CoreasonBaseState):
     """A layout matrix containing a strict array of panels."""
 
-    layout_matrix: list[list[str]] = Field(description="A matrix defining the layout structure, using panel IDs.")
+    layout_matrix: list[list[Annotated[str, StringConstraints(max_length=255)]]] = Field(
+        description="A matrix defining the layout structure, using panel IDs."
+    )
     # Note: layout_matrix is a structurally ordered sequence (2D Visual Grammar) and MUST NOT be sorted.
     panels: list[AnyPanelProfile] = Field(
         description="The ordered array of topological UI panels physically rendered in the grid.",
@@ -3794,7 +3796,9 @@ class MarketResolutionState(CoreasonBaseState):
     winning_hypothesis_id: str = Field(
         min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$", description="The hypothesis ID that was verified."
     )
-    falsified_hypothesis_ids: list[str] = Field(description="The hypothesis IDs that were falsified.")
+    falsified_hypothesis_ids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
+        description="The hypothesis IDs that were falsified."
+    )
     payout_distribution: dict[Annotated[str, StringConstraints(max_length=255)], int] = Field(
         description="The deterministic mapping of agent IDs to their earned compute budget/magnitude based on Brier scoring."  # noqa: E501
     )
@@ -3812,7 +3816,7 @@ class MechanisticAuditContract(CoreasonBaseState):
             description="The specific architectural events that authorize the orchestrator to halt generation and extract internal activations.",  # noqa: E501
         )
     )
-    target_layers: list[int] = Field(
+    target_layers: list[Annotated[int, Field(ge=0)]] = Field(
         min_length=1, description="The specific transformer block indices the execution engine must extract from."
     )
     max_features_per_layer: int = Field(gt=0, description="The top-k features to extract, preventing VRAM exhaustion.")
@@ -3870,7 +3874,7 @@ class MigrationContract(CoreasonBaseState):
     path_transformations: dict[Annotated[str, StringConstraints(max_length=255)], str] = Field(
         default_factory=dict, description="A strict mapping of old RFC 6902 JSON Pointers to new JSON Pointers."
     )
-    dropped_paths: list[str] = Field(
+    dropped_paths: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
         default_factory=list,
         description="Explicit whitelist of JSON Pointers that are safely deprecated and intentionally dropped during migration.",  # noqa: E501
     )
@@ -4037,7 +4041,9 @@ class OntologicalHandshakeReceipt(CoreasonBaseState):
         min_length=1,
         description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this protocol handshake to the Merkle-DAG.",  # noqa: E501
     )
-    participant_node_ids: list[str] = Field(min_length=2, description="The agents establishing semantic alignment.")
+    participant_node_ids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
+        min_length=2, description="The agents establishing semantic alignment."
+    )
     measured_cosine_similarity: float = Field(
         ge=-1.0, le=1.0, description="The calculated geometric alignment of the agents' core definitions."
     )
@@ -4128,7 +4134,7 @@ class PeftAdapterContract(CoreasonBaseState):
         gt=0,
         description="The low-rank intrinsic dimension (r) of the update matrices, used by the orchestrator to calculate VRAM cost.",  # noqa: E501
     )
-    target_modules: list[str] = Field(
+    target_modules: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
         min_length=1, description="The explicit array of attention head modules to inject (e.g., ['q_proj', 'v_proj'])."
     )
     eviction_ttl_seconds: int | None = Field(
@@ -4265,7 +4271,7 @@ class ComputeProvisioningIntent(CoreasonBaseState):
     """
 
     max_budget: float = Field(description="The maximum cost budget allowable for the provisioned compute.")
-    required_capabilities: list[str] = Field(
+    required_capabilities: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
         description="The minimal functional capabilities required by the requested compute."
     )
     qos_class: QoSClassificationProfile = Field(
@@ -4342,7 +4348,7 @@ class SemanticFirewallPolicy(CoreasonBaseState):
     max_input_tokens: int = Field(
         gt=0, description="The absolute physical ceiling of tokens allowed in a single ingress payload."
     )
-    forbidden_intents: list[str] = Field(
+    forbidden_intents: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
         default_factory=list,
         description="A strict array of semantic intents (e.g., 'role_override', 'system_prompt_leak') that trigger immediate quarantine.",  # noqa: E501
     )
@@ -4557,7 +4563,9 @@ class StdioTransportProfile(CoreasonBaseState):
 
     type: Literal["stdio"] = Field(default="stdio", description="Type of transport.")
     command: str = Field(..., max_length=2000, description="The command executable to run (e.g., 'node', 'python').")
-    args: list[str] = Field(default_factory=list, description="The explicit array of arguments to pass to the command.")
+    args: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
+        default_factory=list, description="The explicit array of arguments to pass to the command."
+    )
     # Note: args is a structurally ordered sequence (Execution Command Sequence) and MUST NOT be sorted.
     env_vars: dict[Annotated[str, StringConstraints(max_length=255)], str] = Field(
         default_factory=dict, description="Environment variables required by the transport."
@@ -4580,7 +4588,7 @@ class MCPServerBindingProfile(CoreasonBaseState):
     transport: MCPTransportProfile = Field(
         ..., discriminator="type", description="Polymorphic transport configuration."
     )
-    required_capabilities: list[str] = Field(
+    required_capabilities: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
         default_factory=lambda: ["tools", "resources", "prompts"],
         description="The structurally bounded array of capabilities mandated for this server connection.",
     )
@@ -4594,7 +4602,7 @@ class MCPServerBindingProfile(CoreasonBaseState):
 class SteadyStateHypothesisState(CoreasonBaseState):
     expected_max_latency: float = Field(ge=0.0, description="The expected maximum latency under normal conditions.")
     max_loops_allowed: int = Field(description="The maximum allowed loops for the swarm to reach a conclusion.")
-    required_tool_usage: list[str] | None = Field(
+    required_tool_usage: list[Annotated[str, StringConstraints(max_length=2000)]] | None = Field(
         default=None, description="The strict array of required tools that must be utilized."
     )
 
@@ -4629,8 +4637,12 @@ class ChaosExperimentTask(CoreasonBaseState):
 
 
 class StructuralCausalGraphProfile(CoreasonBaseState):
-    observed_variables: list[str] = Field(description="The nodes in the DAG that the agent can passively measure.")
-    latent_variables: list[str] = Field(description="The unobserved confounders the agent suspects exist.")
+    observed_variables: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
+        description="The nodes in the DAG that the agent can passively measure."
+    )
+    latent_variables: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
+        description="The unobserved confounders the agent suspects exist."
+    )
     causal_edges: list[CausalDirectedEdgeState] = Field(description="The declared topological mapping of causality.")
 
     @model_validator(mode="after")
@@ -4699,7 +4711,7 @@ class System1ReflexPolicy(CoreasonBaseState):
     confidence_threshold: float = Field(
         ge=0.0, le=1.0, description="The confidence threshold required to execute a reflex action."
     )
-    allowed_passive_tools: list[str] = Field(
+    allowed_passive_tools: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
         description="The explicit, bounded array of strictly non-mutating tool capabilities."
     )
 
@@ -4725,7 +4737,7 @@ class System2RemediationIntent(CoreasonBaseState):
     target_node_id: NodeIdentifierState = Field(
         description="The strict W3C DID of the agent that authored the invalid state, ensuring the fault is routed back to the exact state partition."  # noqa: E501
     )
-    failing_pointers: list[str] = Field(
+    failing_pointers: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
         min_length=1,
         description="A strictly typed array of RFC 6902 JSON Pointers isolating the exact topological coordinate of the hallucination.",  # noqa: E501
     )
@@ -4912,10 +4924,10 @@ class TheoryOfMindSnapshot(CoreasonBaseState):
         min_length=1,
         description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the agent whose mind is being modeled.",  # noqa: E501
     )
-    assumed_shared_beliefs: list[str] = Field(
+    assumed_shared_beliefs: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
         description="The explicit array of Content Identifiers (CIDs) acting as cryptographic Lineage Watermarks that the modeling agent assumes the target already possesses."  # noqa: E501
     )
-    identified_knowledge_gaps: list[str] = Field(
+    identified_knowledge_gaps: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
         description="Specific topics or logical premises the target agent is assumed to be missing."
     )
 
@@ -5569,7 +5581,7 @@ class SMPCTopologyManifest(BaseTopologyManifest):
         max_length=2000,
         description="The URI or hash pointing to the exact math circuit or polynomial function the ring will collaboratively compute.",  # noqa: E501
     )
-    participant_node_ids: list[str] = Field(
+    participant_node_ids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
         min_length=2,
         description="The strict ordered array of NodeIdentifierStates participating "
         "in the Secure Multi-Party Computation ring.",
@@ -6024,7 +6036,7 @@ class EpistemicSeedInjectionPolicy(CoreasonBaseState):
 
 class EpistemicChainGraphState(CoreasonBaseState):
     chain_id: str = Field(max_length=128, pattern="^[a-zA-Z0-9_.:-]+$", min_length=1)
-    syntactic_roots: list[str] = Field(min_length=1)
+    syntactic_roots: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(min_length=1)
     # Note: syntactic_roots is a structurally ordered sequence (Linguistic Syntax) and MUST NOT be sorted.
     semantic_leaves: list[EpistemicAxiomState]
 
@@ -6045,7 +6057,7 @@ class CognitivePredictionReceipt(BaseStateEvent):
     type: Literal["cognitive_prediction"] = Field(default="cognitive_prediction")
     source_chain_id: str
     target_source_concept: str
-    predicted_top_k_tokens: list[str] = Field(min_length=1)
+    predicted_top_k_tokens: list[Annotated[str, StringConstraints(max_length=255)]] = Field(min_length=1)
     # Note: predicted_top_k_tokens is a structurally ordered sequence (Probability Rank) and MUST NOT be sorted.
 
 
