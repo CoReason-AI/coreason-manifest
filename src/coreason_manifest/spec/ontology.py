@@ -4896,7 +4896,7 @@ class SpatialKinematicActionIntent(CoreasonBaseState):
     )
     target_frame_cid: str = Field(
         min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$",
-        description="Cryptographic lock tying this physical kinematic action to the exact screenshot frame it was predicted on, preventing temporal mis-clicks."
+        description="Cryptographic lock tying this physical kinematic action to the exact screenshot frame it was predicted on, preventing temporal mis-clicks."  # noqa: E501
     )
     trajectory_duration_ms: int | None = Field(
         le=86400000,
@@ -5508,7 +5508,10 @@ class VectorEmbeddingState(CoreasonBaseState):
 
 
 class VisualAffordancePatchState(CoreasonBaseState):
-    """AGENT INSTRUCTION: A continuous zero-shot interactive UI element linking a strict spatial geometry to its latent semantic vector and interaction probability."""
+    """
+    AGENT INSTRUCTION: A continuous zero-shot interactive UI element linking a
+    strict spatial geometry to its latent semantic vector and interaction probability.
+    """
 
     patch_id: str = Field(
         min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$"
@@ -5522,7 +5525,8 @@ class VisualAffordancePatchState(CoreasonBaseState):
     affordance_probability: float = Field(
         ge=0.0,
         le=1.0,
-        description="The neural track's calculated certainty that this spatial region possesses a kinetic affordance like clickability.",
+        description="The neural track's calculated certainty that this spatial region possesses a kinetic "
+        "affordance like clickability.",
     )
     expected_kinetic_action: Literal["click", "scroll", "drag", "type"] | None = Field(
         default=None, description="The predicted affordance type, if any."
@@ -5530,7 +5534,10 @@ class VisualAffordancePatchState(CoreasonBaseState):
 
 
 class ViewportRasterState(CoreasonBaseState):
-    """AGENT INSTRUCTION: A purely visual spatial execution perimeter for DOM-less environments (VDI, Canvas, Mobile Streaming)."""
+    """
+    AGENT INSTRUCTION: A purely visual spatial execution perimeter for DOM-less environments
+    (VDI, Canvas, Mobile Streaming).
+    """
 
     type: Literal["viewport_raster"] = Field(default="viewport_raster")
     viewport_size: tuple[int, int] = Field(
