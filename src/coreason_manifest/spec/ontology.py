@@ -891,6 +891,15 @@ class CognitiveStateProfile(CoreasonBaseState):
 class CognitiveUncertaintyProfile(CoreasonBaseState):
     """Structural Causal Models (SCMs) for active epistemic bounding."""
 
+    decomposition_entropy_threshold: float | None = Field(
+        default=None,
+        ge=0.0,
+        le=1000000000.0,
+        description=(
+            "The exact epistemic entropy boundary (in bits/nats) that, when breached, mathematically "
+            "mandates the orchestrator to splinter the monolithic prompt into a QueryDecompositionManifest."
+        ),
+    )
     aleatoric_entropy: float = Field(
         ge=0.0,
         le=1000000000.0,
@@ -2472,9 +2481,42 @@ class LatentProjectionIntent(CoreasonBaseState):
     )
 
 
+class DecomposedSubQueryState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A continuous latent representation of a fragmented semantic intent (a sub-goal),
+    structurally isolated from the monolithic user prompt.
+    """
+
+    sub_query_id: str = Field(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
+    latent_target_vector: VectorEmbeddingState = Field(
+        description="The dense embedding of what this specific sub-query is hunting for."
+    )
+    expected_information_gain: float = Field(
+        ge=0.0, le=1.0, description="The Bayesian EIG expected from resolving this specific branch."
+    )
+    required_surface_capabilities: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
+        description="The explicit array of capability strings expected to resolve this."
+    )
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "required_surface_capabilities", sorted(self.required_surface_capabilities))
+        return self
+
+
 class SemanticDiscoveryIntent(CoreasonBaseState):
     type: Literal["semantic_discovery"] = Field(
         default="semantic_discovery", description="Discriminator for geometric boundary of latent tool discovery."
+    )
+    parent_decomposition_id: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        description=(
+            "The cryptographic pointer linking this specific retrieval hop back to the "
+            "governing QueryDecompositionManifest DAG."
+        ),
     )
     query_vector: VectorEmbeddingState = Field(
         description="The latent vector representation of the epistemic deficit the agent is trying to solve."
@@ -2490,6 +2532,68 @@ class SemanticDiscoveryIntent(CoreasonBaseState):
     @model_validator(mode="after")
     def sort_required_structural_types(self) -> Self:
         object.__setattr__(self, "required_structural_types", sorted(self.required_structural_types))
+        return self
+
+
+class QueryDecompositionManifest(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: The strict structural Directed Acyclic Graph (DAG) ordering multi-hop
+    information retrieval, mathematically preventing execution cycles and hallucinatory capability generation.
+    """
+
+    type: Literal["query_decomposition"] = Field(default="query_decomposition")
+    manifest_id: str = Field(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
+    root_intent_hash: str = Field(
+        min_length=1, max_length=128, pattern="^[a-f0-9]{64}$", description="the monolithic intent being solved"
+    )
+    surface_projection_id: str = Field(
+        min_length=1,
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        description="The pointer to the OntologicalSurfaceProjectionManifest",
+    )
+    sub_queries: dict[Annotated[str, StringConstraints(max_length=255)], DecomposedSubQueryState] = Field(
+        description="Matrix of decomposed semantic intents"
+    )
+    execution_dag_edges: list[tuple[str, str]] = Field(
+        description="Directed edges (source_sub_query_id, target_sub_query_id)"
+    )
+
+    @model_validator(mode="after")
+    def sort_execution_dag_edges(self) -> Self:
+        object.__setattr__(self, "execution_dag_edges", sorted(self.execution_dag_edges))
+        return self
+
+    @model_validator(mode="after")
+    def verify_dag_integrity(self) -> Self:
+        adj: dict[str, list[str]] = {node_id: [] for node_id in self.sub_queries}
+        for source, target in self.execution_dag_edges:
+            if source not in self.sub_queries:
+                raise ValueError(f"Ghost node referenced in execution_dag_edges source: {source}")
+            if target not in self.sub_queries:
+                raise ValueError(f"Ghost node referenced in execution_dag_edges target: {target}")
+            adj[source].append(target)
+        visited: set[str] = set()
+        recursion_stack: set[str] = set()
+        for start_node in self.sub_queries:
+            if start_node in visited:
+                continue
+            stack = [(start_node, iter(adj[start_node]))]
+            visited.add(start_node)
+            recursion_stack.add(start_node)
+            while stack:
+                curr, neighbors = stack[-1]
+                try:
+                    neighbor = next(neighbors)
+                    if neighbor not in visited:
+                        visited.add(neighbor)
+                        recursion_stack.add(neighbor)
+                        stack.append((neighbor, iter(adj[neighbor])))
+                    elif neighbor in recursion_stack:
+                        raise ValueError("Execution DAG contains cycles")
+                except StopIteration:
+                    recursion_stack.remove(curr)
+                    stack.pop()
         return self
 
 
@@ -3540,7 +3644,8 @@ type AnyIntent = Annotated[
     | EscalationIntent
     | SemanticDiscoveryIntent
     | TaxonomicRestructureIntent
-    | LatentProjectionIntent,
+    | LatentProjectionIntent
+    | QueryDecompositionManifest,
     Field(discriminator="type"),
 ]
 
@@ -7045,3 +7150,5 @@ TokenMergingPolicy.model_rebuild()
 InformationFlowPolicy.model_rebuild()
 VisualAffordancePatchState.model_rebuild()
 ViewportRasterState.model_rebuild()
+DecomposedSubQueryState.model_rebuild()
+QueryDecompositionManifest.model_rebuild()
