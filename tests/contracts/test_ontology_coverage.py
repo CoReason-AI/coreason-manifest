@@ -510,7 +510,7 @@ def test_token_merging_policy_sorting() -> None:
         metric="cosine_similarity",
         matching_algorithm="bipartite_soft_matching",
         target_compression_ratio=0.5,
-        layer_whitelist=[5, 1, 3]
+        layer_whitelist=[5, 1, 3],
     )
     assert policy.layer_whitelist == [1, 3, 5]
 
