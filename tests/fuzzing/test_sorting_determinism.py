@@ -103,12 +103,8 @@ def test_mechanistic_audit_sorts_arrays(trigger_conditions: list[str], target_la
 
 def test_neural_audit_attestation_sorts_layer_activations() -> None:
     """Prove NeuralAuditAttestationReceipt sorts layer_activations by feature_index."""
-    feat_z = SaeFeatureActivationState(
-        feature_index=99, activation_magnitude=0.9, interpretability_label="Z-feature"
-    )
-    feat_a = SaeFeatureActivationState(
-        feature_index=1, activation_magnitude=0.5, interpretability_label="A-feature"
-    )
+    feat_z = SaeFeatureActivationState(feature_index=99, activation_magnitude=0.9, interpretability_label="Z-feature")
+    feat_a = SaeFeatureActivationState(feature_index=1, activation_magnitude=0.5, interpretability_label="A-feature")
 
     receipt = NeuralAuditAttestationReceipt(
         audit_id="audit_01",
