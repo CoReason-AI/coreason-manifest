@@ -6,6 +6,9 @@
       "properties": {
         "action_space_id": {
           "description": "The unique identifier for this curated environment of tools.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Action Space Id",
           "type": "string"
         },
@@ -58,6 +61,8 @@
       "properties": {
         "steering_vector_hash": {
           "description": "The SHA-256 hash of the extracted RepE control tensor (e.g., the 'caution' vector).",
+          "maxLength": 128,
+          "minLength": 1,
           "pattern": "^[a-f0-9]{64}$",
           "title": "Steering Vector Hash",
           "type": "string"
@@ -65,6 +70,7 @@
         "injection_layers": {
           "description": "The specific transformer layer indices where this vector must be applied.",
           "items": {
+            "minimum": 0,
             "type": "integer"
           },
           "minItems": 1,
@@ -73,6 +79,7 @@
         },
         "scaling_factor": {
           "description": "The mathematical magnitude/strength of the injection (can be negative for ablation).",
+          "maximum": 100.0,
           "title": "Scaling Factor",
           "type": "number"
         },
@@ -102,22 +109,31 @@
       "properties": {
         "task_id": {
           "description": "Unique identifier for this active inference execution.",
+          "maxLength": 128,
           "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Task Id",
           "type": "string"
         },
         "target_hypothesis_id": {
           "description": "The HypothesisGenerationEvent this task is attempting to falsify.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Target Hypothesis Id",
           "type": "string"
         },
         "target_condition_id": {
           "description": "The specific FalsificationContract being tested.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Target Condition Id",
           "type": "string"
         },
         "selected_tool_name": {
           "description": "The exact tool from the ActionSpaceManifest allocated for this experiment.",
+          "maxLength": 2000,
           "title": "Selected Tool Name",
           "type": "string"
         },
@@ -130,6 +146,7 @@
         },
         "execution_cost_budget_magnitude": {
           "description": "The maximum economic expenditure authorized to run this specific scientific test.",
+          "maximum": 1000000000,
           "minimum": 0,
           "title": "Execution Cost Budget Magnitude",
           "type": "integer"
@@ -160,8 +177,11 @@
         "deadlocked_claims": {
           "description": "The conflicting claim IDs or proposals the human must choose between.",
           "items": {
+            "maxLength": 128,
+            "minLength": 1,
             "type": "string"
           },
+          "maxItems": 86400000,
           "minItems": 2,
           "title": "Deadlocked Claims",
           "type": "array"
@@ -169,6 +189,9 @@
         "resolution_schema": {
           "additionalProperties": true,
           "description": "The strict JSON Schema for the tie-breaking response (usually an enum of the deadlocked_claims).",
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Resolution Schema",
           "type": "object"
         },
@@ -197,6 +220,9 @@
       "properties": {
         "rubric_id": {
           "description": "The cryptographic pointer to the rubric dictating adjudication.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Rubric Id",
           "type": "string"
         },
@@ -218,6 +244,7 @@
         },
         "reasoning": {
           "description": "The deterministic logical proof justifying the final verdict and mathematical score.",
+          "maxLength": 2000,
           "title": "Reasoning",
           "type": "string"
         }
@@ -238,6 +265,9 @@
       "properties": {
         "rubric_id": {
           "description": "Unique identifier for the rubric.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Rubric Id",
           "type": "string"
         },
@@ -318,11 +348,17 @@
       "properties": {
         "simulation_id": {
           "description": "The unique identifier for this red-team experiment.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Simulation Id",
           "type": "string"
         },
         "target_node_id": {
           "description": "The exact NodeIdentifierState the 'Judas Node' will attempt to compromise.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Target Node Id",
           "type": "string"
         },
@@ -341,6 +377,9 @@
           "anyOf": [
             {
               "additionalProperties": true,
+              "propertyNames": {
+                "maxLength": 255
+              },
               "type": "object"
             },
             {
@@ -348,11 +387,13 @@
             }
           ],
           "description": "The raw poisoned text or malicious JSON-RPC schema injected into the target's context window.",
+          "maxLength": 100000,
           "title": "Synthetic Payload"
         },
         "expected_firewall_trip": {
           "anyOf": [
             {
+              "maxLength": 2000,
               "type": "string"
             },
             {
@@ -379,12 +420,15 @@
       "properties": {
         "training_lineage_hash": {
           "description": "The exact SHA-256 Merkle root of the agent's training lineage.",
+          "maxLength": 128,
+          "minLength": 1,
           "pattern": "^[a-f0-9]{64}$",
           "title": "Training Lineage Hash",
           "type": "string"
         },
         "developer_signature": {
           "description": "The cryptographic signature of the developer/vendor.",
+          "maxLength": 2000,
           "title": "Developer Signature",
           "type": "string"
         },
@@ -417,22 +461,28 @@
       "properties": {
         "agent_id": {
           "description": "The NodeIdentifierState of the bidder.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Agent Id",
           "type": "string"
         },
         "estimated_cost_magnitude": {
           "description": "The node's calculated cost to fulfill the task.",
+          "maximum": 1000000000,
           "title": "Estimated Cost Magnitude",
           "type": "integer"
         },
         "estimated_latency_ms": {
           "description": "The node's estimated time to completion.",
+          "maximum": 86400000,
           "minimum": 0,
           "title": "Estimated Latency Ms",
           "type": "integer"
         },
         "estimated_carbon_gco2eq": {
           "description": "The agent's mathematical projection of the environmental cost to execute this inference task.",
+          "maximum": 10000.0,
           "minimum": 0.0,
           "title": "Estimated Carbon Gco2Eq",
           "type": "number"
@@ -461,12 +511,14 @@
       "properties": {
         "description": {
           "description": "The semantic boundary defining the objective function of the execution node. [SITD-Gamma: Neurosymbolic Substrate Alignment]",
+          "maxLength": 2000,
           "title": "Description",
           "type": "string"
         },
         "architectural_intent": {
           "anyOf": [
             {
+              "maxLength": 2000,
               "type": "string"
             },
             {
@@ -480,6 +532,7 @@
         "justification": {
           "anyOf": [
             {
+              "maxLength": 2000,
               "type": "string"
             },
             {
@@ -502,6 +555,9 @@
           "anyOf": [
             {
               "additionalProperties": true,
+              "propertyNames": {
+                "maxLength": 255
+              },
               "type": "object"
             },
             {
@@ -566,6 +622,9 @@
         "action_space_id": {
           "anyOf": [
             {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9_.:-]+$",
               "type": "string"
             },
             {
@@ -757,12 +816,14 @@
       "properties": {
         "status_message": {
           "description": "The semantic 1D string projection representing the active kinetic execution state.",
+          "maxLength": 2000,
           "title": "Status Message",
           "type": "string"
         },
         "progress": {
           "anyOf": [
             {
+              "maximum": 1000000000.0,
               "type": "number"
             },
             {
@@ -786,28 +847,34 @@
       "properties": {
         "task_id": {
           "description": "Unique identifier for this lateral thinking task.",
+          "maxLength": 128,
           "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Task Id",
           "type": "string"
         },
         "source_domain": {
           "description": "The unrelated abstract concept space (e.g., 'thermodynamics', 'mycelial networks').",
+          "maxLength": 2000,
           "title": "Source Domain",
           "type": "string"
         },
         "target_domain": {
           "description": "The actual problem space currently being solved.",
+          "maxLength": 2000,
           "title": "Target Domain",
           "type": "string"
         },
         "required_isomorphisms": {
           "description": "The exact number of structural/logical mappings the agent must successfully bridge between the two domains.",
+          "maximum": 86400000,
           "minimum": 1,
           "title": "Required Isomorphisms",
           "type": "integer"
         },
         "divergence_temperature_override": {
           "description": "The specific high-temperature sampling override required to force this creative leap.",
+          "maximum": 10.0,
           "minimum": 0.0,
           "title": "Divergence Temperature Override",
           "type": "number"
@@ -829,6 +896,8 @@
       "properties": {
         "anchor_prompt_hash": {
           "description": "The undeniable SHA-256 hash of the core objective.",
+          "maxLength": 128,
+          "minLength": 1,
           "pattern": "^[a-f0-9]{64}$",
           "title": "Anchor Prompt Hash",
           "type": "string"
@@ -1105,6 +1174,7 @@
         },
         "max_bidding_window_ms": {
           "description": "The absolute timeout in milliseconds for nodes to submit proposals.",
+          "maximum": 86400000,
           "title": "Max Bidding Window Ms",
           "type": "integer"
         }
@@ -1148,12 +1218,14 @@
         "clearing_timeout": {
           "description": "Maximum wait time for auction settlement.",
           "exclusiveMinimum": 0,
+          "maximum": 1000000000,
           "title": "Clearing Timeout",
           "type": "integer"
         },
         "minimum_tick_size": {
           "description": "The smallest allowable bid increment.",
           "exclusiveMinimum": 0.0,
+          "maximum": 1000000000.0,
           "title": "Minimum Tick Size",
           "type": "number"
         }
@@ -1172,12 +1244,14 @@
       "properties": {
         "max_queue_depth": {
           "description": "The maximum number of unprocessed messages/observations allowed between connected nodes before yielding.",
+          "maximum": 1000000000,
           "title": "Max Queue Depth",
           "type": "integer"
         },
         "token_budget_per_branch": {
           "anyOf": [
             {
+              "maximum": 1000000000,
               "type": "integer"
             },
             {
@@ -1192,6 +1266,7 @@
           "anyOf": [
             {
               "exclusiveMinimum": 0,
+              "maximum": 1000000000,
               "type": "integer"
             },
             {
@@ -1206,6 +1281,7 @@
           "anyOf": [
             {
               "exclusiveMinimum": 0,
+              "maximum": 1000000000,
               "type": "integer"
             },
             {
@@ -1220,6 +1296,7 @@
           "anyOf": [
             {
               "exclusiveMinimum": 0,
+              "maximum": 86400000,
               "type": "integer"
             },
             {
@@ -1234,6 +1311,7 @@
           "anyOf": [
             {
               "exclusiveMinimum": 0,
+              "maximum": 1000000000,
               "type": "integer"
             },
             {
@@ -1257,11 +1335,16 @@
       "properties": {
         "event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Id",
           "type": "string"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
           "title": "Timestamp",
           "type": "number"
         },
@@ -1274,6 +1357,9 @@
         },
         "target_event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the active node generation cycle that was killed in the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Target Event Id",
           "type": "string"
         },
@@ -1292,11 +1378,19 @@
         "retained_partial_payload": {
           "anyOf": [
             {
-              "additionalProperties": true,
-              "type": "object"
-            },
-            {
-              "type": "string"
+              "anyOf": [
+                {
+                  "additionalProperties": true,
+                  "propertyNames": {
+                    "maxLength": 255
+                  },
+                  "type": "object"
+                },
+                {
+                  "type": "string"
+                }
+              ],
+              "maxLength": 100000
             },
             {
               "type": "null"
@@ -1339,12 +1433,14 @@
       "properties": {
         "description": {
           "description": "The semantic boundary defining the objective function or computational perimeter of the execution node.",
+          "maxLength": 2000,
           "title": "Description",
           "type": "string"
         },
         "architectural_intent": {
           "anyOf": [
             {
+              "maxLength": 2000,
               "type": "string"
             },
             {
@@ -1358,6 +1454,7 @@
         "justification": {
           "anyOf": [
             {
+              "maxLength": 2000,
               "type": "string"
             },
             {
@@ -1380,6 +1477,9 @@
           "anyOf": [
             {
               "additionalProperties": true,
+              "propertyNames": {
+                "maxLength": 255
+              },
               "type": "object"
             },
             {
@@ -1403,6 +1503,9 @@
       "properties": {
         "panel_id": {
           "description": "Unique identifier for the panel.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Panel Id",
           "type": "string"
         }
@@ -1419,11 +1522,16 @@
       "properties": {
         "event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Id",
           "type": "string"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
           "title": "Timestamp",
           "type": "number"
         }
@@ -1442,7 +1550,8 @@
         "epistemic_enforcement": {
           "anyOf": [
             {
-              "$ref": "#/$defs/TruthMaintenancePolicy"
+              "$ref": "#/$defs/TruthMaintenancePolicy",
+              "le": 1000000000
             },
             {
               "type": "null"
@@ -1464,6 +1573,7 @@
         "architectural_intent": {
           "anyOf": [
             {
+              "maxLength": 2000,
               "type": "string"
             },
             {
@@ -1477,6 +1587,7 @@
         "justification": {
           "anyOf": [
             {
+              "maxLength": 2000,
               "type": "string"
             },
             {
@@ -1547,11 +1658,16 @@
       "properties": {
         "event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Id",
           "type": "string"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
           "title": "Timestamp",
           "type": "number"
         },
@@ -1567,6 +1683,9 @@
             "$ref": "#/$defs/JsonPrimitiveState"
           },
           "description": "Topologically Bounded Latent Spaces capturing the semantic representation of the agent's internal cognitive shift or synthesis that anchor statistical probability to a definitive causal event hash.",
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Payload",
           "type": "object"
         },
@@ -1617,7 +1736,8 @@
         "uncertainty_profile": {
           "anyOf": [
             {
-              "$ref": "#/$defs/CognitiveUncertaintyProfile"
+              "$ref": "#/$defs/CognitiveUncertaintyProfile",
+              "le": 1000000000
             },
             {
               "type": "null"
@@ -1666,6 +1786,8 @@
         "receiving_tenant_id": {
           "description": "The strict enterprise identifier of the foreign B2B tenant receiving this payload.",
           "maxLength": 255,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Receiving Tenant Id",
           "type": "string"
         },
@@ -1675,6 +1797,7 @@
         },
         "liability_limit_magnitude": {
           "description": "The strict magnitude cap on cross-tenant economic liability.",
+          "maximum": 1000000000,
           "minimum": 0,
           "title": "Liability Limit Magnitude",
           "type": "integer"
@@ -1682,6 +1805,7 @@
         "permitted_geographic_regions": {
           "description": "Explicit whitelist of geographic regions or cloud enclaves where execution is structurally permitted (Payload Residency Pinning).",
           "items": {
+            "maxLength": 255,
             "type": "string"
           },
           "title": "Permitted Geographic Regions",
@@ -1690,6 +1814,7 @@
         "max_permitted_grid_carbon_intensity": {
           "anyOf": [
             {
+              "maximum": 10000.0,
               "minimum": 0.0,
               "type": "number"
             },
@@ -1729,8 +1854,10 @@
         "allowed_fields": {
           "description": "The explicit whitelist of top-level JSON pointers mathematically open to mutation.",
           "items": {
+            "maxLength": 2000,
             "type": "string"
           },
+          "maxItems": 1000000000,
           "title": "Allowed Fields",
           "type": "array"
         },
@@ -1755,6 +1882,9 @@
               },
               {
                 "additionalProperties": true,
+                "propertyNames": {
+                  "maxLength": 255
+                },
                 "type": "object"
               },
               {
@@ -1763,6 +1893,9 @@
             ]
           },
           "description": "Strict JSON Schema constraints for the human's input.",
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Json Schema Whitelist",
           "type": "object"
         }
@@ -1794,6 +1927,10 @@
           "anyOf": [
             {
               "additionalProperties": true,
+              "maxProperties": 86400000,
+              "propertyNames": {
+                "maxLength": 255
+              },
               "type": "object"
             },
             {
@@ -1807,10 +1944,18 @@
         "id": {
           "anyOf": [
             {
-              "type": "string"
-            },
-            {
-              "type": "integer"
+              "anyOf": [
+                {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "pattern": "^[a-zA-Z0-9_.:-]+$",
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ],
+              "le": 1000000000
             },
             {
               "type": "null"
@@ -1841,12 +1986,13 @@
         },
         "current_url": {
           "description": "Spatial Execution Bounds where the agent interacts.",
+          "maxLength": 2000,
           "title": "Current Url",
           "type": "string"
         },
         "viewport_size": {
           "description": "Capability Perimeters detailing bounding coordinates.",
-          "maxItems": 2,
+          "maxItems": 1000000000,
           "minItems": 2,
           "prefixItems": [
             {
@@ -1861,17 +2007,24 @@
         },
         "dom_hash": {
           "description": "The SHA-256 hash acting as the structural manifestation vector.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-f0-9]{64}$",
           "title": "Dom Hash",
           "type": "string"
         },
         "accessibility_tree_hash": {
           "description": "The SHA-256 hash of the accessibility tree defining Exogenous Perturbations to the state space.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-f0-9]{64}$",
           "title": "Accessibility Tree Hash",
           "type": "string"
         },
         "screenshot_cid": {
           "anyOf": [
             {
+              "maxLength": 2000,
               "type": "string"
             },
             {
@@ -1898,11 +2051,16 @@
       "properties": {
         "event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Id",
           "type": "string"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
           "title": "Timestamp",
           "type": "number"
         },
@@ -1915,11 +2073,17 @@
         },
         "exhausted_escrow_id": {
           "description": "A string representing the original escrow boundary breached.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Exhausted Escrow Id",
           "type": "string"
         },
         "final_burn_receipt_id": {
           "description": "A string pointing to the exact TokenBurnReceipt CID that pushed the state over the limit.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Final Burn Receipt Id",
           "type": "string"
         }
@@ -1939,7 +2103,9 @@
       "properties": {
         "artifact_event_id": {
           "description": "The exact genesis CID of the document, ensuring continuity.",
+          "maxLength": 128,
           "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Artifact Event Id",
           "type": "string"
         },
@@ -1959,6 +2125,8 @@
         },
         "cryptographic_null_hash": {
           "description": "The SHA-256 null-hash representing the skipped state to satisfy the Epistemic Ledger.",
+          "maxLength": 128,
+          "minLength": 1,
           "pattern": "^[a-f0-9]{64}$",
           "title": "Cryptographic Null Hash",
           "type": "string"
@@ -1979,6 +2147,9 @@
       "properties": {
         "source_event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the source event in the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Source Event Id",
           "type": "string"
         },
@@ -2039,11 +2210,16 @@
       "properties": {
         "event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Id",
           "type": "string"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
           "title": "Timestamp",
           "type": "number"
         },
@@ -2056,6 +2232,9 @@
         },
         "target_outcome_event_id": {
           "description": "The CID of the collective outcome being explained.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Target Outcome Event Id",
           "type": "string"
         },
@@ -2098,6 +2277,9 @@
       "properties": {
         "experiment_id": {
           "description": "The unique identifier for the chaos experiment.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Experiment Id",
           "type": "string"
         },
@@ -2147,6 +2329,7 @@
         },
         "error_signature": {
           "description": "Signature or summary of the error causing the trip.",
+          "maxLength": 2000,
           "title": "Error Signature",
           "type": "string"
         }
@@ -2164,6 +2347,8 @@
       "properties": {
         "reasoning_trace_hash": {
           "description": "CoReason Shared Kernel Ontology: The cryptographic Merkle root of the specific ThoughtBranch being evaluated.",
+          "maxLength": 128,
+          "minLength": 1,
           "pattern": "^[a-f0-9]{64}$",
           "title": "Reasoning Trace Hash",
           "type": "string"
@@ -2201,18 +2386,21 @@
       "properties": {
         "target_balance_epsilon": {
           "description": "The mathematical tolerance for the detailed balance constraint.",
+          "maximum": 1.0,
           "minimum": 0.0,
           "title": "Target Balance Epsilon",
           "type": "number"
         },
         "flow_estimation_model": {
           "description": "The specific neural architecture used to estimate flow.",
+          "maxLength": 2000,
           "title": "Flow Estimation Model",
           "type": "string"
         },
         "local_exploration_k": {
           "description": "The number of exploratory actions taken per state to optimize flow efficiently.",
           "exclusiveMinimum": 0,
+          "maximum": 1.0,
           "title": "Local Exploration K",
           "type": "integer"
         }
@@ -2264,6 +2452,7 @@
         "final_answer_regex": {
           "default": "^Final Answer: .*$",
           "description": "The strict regular expression the model must satisfy to yield a valid discrete classification.",
+          "maxLength": 2000,
           "title": "Final Answer Regex",
           "type": "string"
         }
@@ -2277,11 +2466,16 @@
       "properties": {
         "event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Id",
           "type": "string"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
           "title": "Timestamp",
           "type": "number"
         },
@@ -2292,15 +2486,20 @@
           "type": "string"
         },
         "source_chain_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Source Chain Id",
           "type": "string"
         },
         "target_source_concept": {
+          "maxLength": 2000,
           "title": "Target Source Concept",
           "type": "string"
         },
         "predicted_top_k_tokens": {
           "items": {
+            "maxLength": 255,
             "type": "string"
           },
           "minItems": 1,
@@ -2324,23 +2523,30 @@
       "properties": {
         "trace_id": {
           "description": "CID of this specific non-monotonic reasoning trace.",
+          "maxLength": 128,
           "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Trace Id",
           "type": "string"
         },
         "source_proof_id": {
           "description": "The EpistemicTopologicalProofManifest CID this trace is mathematically anchored to.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Source Proof Id",
           "type": "string"
         },
         "token_length": {
           "description": "The exact token consumption of the trace.",
+          "maximum": 1000000000,
           "minimum": 0,
           "title": "Token Length",
           "type": "integer"
         },
         "trace_payload": {
           "description": "The natural language reasoning steps bounded by structural tags.",
+          "maxLength": 100000,
           "title": "Trace Payload",
           "type": "string"
         }
@@ -2360,11 +2566,16 @@
       "properties": {
         "event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Id",
           "type": "string"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
           "title": "Timestamp",
           "type": "number"
         },
@@ -2376,6 +2587,9 @@
         },
         "source_generation_id": {
           "description": "The CID of the LLM's raw generated text trajectory.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Source Generation Id",
           "type": "string"
         },
@@ -2396,6 +2610,7 @@
         },
         "total_advantage_score": {
           "description": "The final computed GRPO advantage signal used to update the policy gradients.",
+          "maximum": 100.0,
           "title": "Total Advantage Score",
           "type": "number"
         }
@@ -2416,21 +2631,29 @@
       "properties": {
         "dynamic_top_k": {
           "description": "The exact number of functional experts the router must activate per token. High values simulate deep cognitive strain.",
+          "maximum": 1000000000,
           "minimum": 1,
           "title": "Dynamic Top K",
           "type": "integer"
         },
         "routing_temperature": {
           "description": "The temperature applied to the router's softmax gate, controlling how deterministically it picks experts.",
+          "maximum": 1000000000.0,
           "minimum": 0.0,
           "title": "Routing Temperature",
           "type": "number"
         },
         "expert_logit_biases": {
           "additionalProperties": {
+            "maximum": 1000.0,
+            "minimum": -1000.0,
             "type": "number"
           },
           "description": "Explicit tensor biases applied to the router gate. Keys are expert IDs (e.g., 'expert_falsifier'), values are logit modifiers.",
+          "le": 1000000000.0,
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Expert Logit Biases",
           "type": "object"
         },
@@ -2454,6 +2677,7 @@
       "properties": {
         "max_complexity_hops": {
           "description": "The absolute physical limit on path length N.",
+          "maximum": 1000000000,
           "minimum": 1,
           "title": "Max Complexity Hops",
           "type": "integer"
@@ -2461,6 +2685,7 @@
         "inverse_frequency_smoothing_epsilon": {
           "default": 1.0,
           "description": "The epsilon constant ensuring unsampled nodes are mathematically prioritized.",
+          "maximum": 1.0,
           "title": "Inverse Frequency Smoothing Epsilon",
           "type": "number"
         }
@@ -2595,16 +2820,19 @@
       "properties": {
         "synergy_index": {
           "description": "The mathematical measure of the degree of emergence. A high SI indicates strong positive emergence.",
+          "maximum": 1000000000.0,
           "title": "Synergy Index",
           "type": "number"
         },
         "coordination_score": {
           "description": "The temporal alignment measuring the extent to which agents coordinate their actions over time.",
+          "maximum": 1.0,
           "title": "Coordination Score",
           "type": "number"
         },
         "information_integration": {
           "description": "The conditional mutual information quantifying the information flow and tight coupling between agents.",
+          "maximum": 1.0,
           "title": "Information Integration",
           "type": "number"
         }
@@ -2623,12 +2851,14 @@
       "properties": {
         "description": {
           "description": "The semantic boundary defining the objective function or computational perimeter of the execution node.",
+          "maxLength": 2000,
           "title": "Description",
           "type": "string"
         },
         "architectural_intent": {
           "anyOf": [
             {
+              "maxLength": 2000,
               "type": "string"
             },
             {
@@ -2642,6 +2872,7 @@
         "justification": {
           "anyOf": [
             {
+              "maxLength": 2000,
               "type": "string"
             },
             {
@@ -2664,6 +2895,9 @@
           "anyOf": [
             {
               "additionalProperties": true,
+              "propertyNames": {
+                "maxLength": 255
+              },
               "type": "object"
             },
             {
@@ -2715,24 +2949,29 @@
       "properties": {
         "model_name": {
           "description": "The identifier of the underlying model.",
+          "maxLength": 2000,
           "title": "Model Name",
           "type": "string"
         },
         "provider": {
           "description": "The name of the provider hosting the model.",
+          "maxLength": 2000,
           "title": "Provider",
           "type": "string"
         },
         "context_window_size": {
           "description": "The maximum context window size in tokens.",
+          "maximum": 1000000000,
           "title": "Context Window Size",
           "type": "integer"
         },
         "capabilities": {
           "description": "The explicit, structurally bounded array of capabilities authorized for this model.",
           "items": {
+            "maxLength": 255,
             "type": "string"
           },
+          "maxItems": 1000000000,
           "title": "Capabilities",
           "type": "array"
         },
@@ -2743,6 +2982,7 @@
         "supported_functional_experts": {
           "description": "The declarative array of specialized functional expert clusters (e.g., 'falsifier', 'synthesizer') physically present in this model's architecture.",
           "items": {
+            "maxLength": 255,
             "type": "string"
           },
           "title": "Supported Functional Experts",
@@ -2765,14 +3005,17 @@
       "properties": {
         "max_budget": {
           "description": "The maximum cost budget allowable for the provisioned compute.",
+          "maximum": 1000000000.0,
           "title": "Max Budget",
           "type": "number"
         },
         "required_capabilities": {
           "description": "The minimal functional capabilities required by the requested compute.",
           "items": {
+            "maxLength": 255,
             "type": "string"
           },
+          "maxItems": 1000000000,
           "title": "Required Capabilities",
           "type": "array"
         },
@@ -2795,16 +3038,19 @@
       "properties": {
         "cost_per_million_input_tokens": {
           "description": "The cost per 1 million input tokens provided to the model.",
+          "maximum": 1000000000.0,
           "title": "Cost Per Million Input Tokens",
           "type": "number"
         },
         "cost_per_million_output_tokens": {
           "description": "The cost per 1 million output tokens generated by the model.",
+          "maximum": 1000000000.0,
           "title": "Cost Per Million Output Tokens",
           "type": "number"
         },
         "magnitude_unit": {
           "description": "The magnitude unit of the associated costs.",
+          "maxLength": 2000,
           "title": "Magnitude Unit",
           "type": "string"
         }
@@ -2885,6 +3131,7 @@
         "max_debate_rounds": {
           "anyOf": [
             {
+              "maximum": 1000000000,
               "type": "integer"
             },
             {
@@ -2939,17 +3186,24 @@
         },
         "drift_event_id": {
           "description": "The CID of the NormativeDriftEvent that justified triggering this proposal.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Drift Event Id",
           "type": "string"
         },
         "proposed_patch": {
           "additionalProperties": true,
           "description": "A strict, structurally bounded JSON Patch (RFC 6902) proposed by the AI to mutate the GovernancePolicy.",
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Proposed Patch",
           "type": "object"
         },
         "justification": {
           "description": "The AI's natural language structural/logical argument for why this patch resolves the contradiction without violating the root AnchoringPolicy.",
+          "maxLength": 2000,
           "title": "Justification",
           "type": "string"
         }
@@ -2968,11 +3222,15 @@
       "properties": {
         "rule_id": {
           "description": "Unique identifier for the constitutional rule.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Rule Id",
           "type": "string"
         },
         "description": {
           "description": "The definitive causal constraint or heuristic boundary enforced by this rule.",
+          "maxLength": 2000,
           "title": "Description",
           "type": "string"
         },
@@ -2993,6 +3251,7 @@
             "minLength": 1,
             "type": "string"
           },
+          "maxItems": 1000000000,
           "title": "Forbidden Intents",
           "type": "array"
         }
@@ -3023,12 +3282,14 @@
         "max_token_budget": {
           "description": "The maximum physical token allowance for expansion.",
           "exclusiveMinimum": 0,
+          "maximum": 1000000000,
           "title": "Max Token Budget",
           "type": "integer"
         },
         "surrounding_sentences_k": {
           "anyOf": [
             {
+              "maximum": 1000000000,
               "minimum": 1,
               "type": "integer"
             },
@@ -3079,12 +3340,14 @@
         "max_uncommitted_edges": {
           "description": "Backpressure threshold before forcing a commit.",
           "exclusiveMinimum": 0,
+          "maximum": 1000000000,
           "title": "Max Uncommitted Edges",
           "type": "integer"
         },
         "micro_batch_interval_ms": {
           "description": "Temporal bound for flushing the stream.",
           "exclusiveMinimum": 0,
+          "maximum": 86400000,
           "title": "Micro Batch Interval Ms",
           "type": "integer"
         }
@@ -3104,7 +3367,8 @@
         "epistemic_enforcement": {
           "anyOf": [
             {
-              "$ref": "#/$defs/TruthMaintenancePolicy"
+              "$ref": "#/$defs/TruthMaintenancePolicy",
+              "le": 1000000000
             },
             {
               "type": "null"
@@ -3126,6 +3390,7 @@
         "architectural_intent": {
           "anyOf": [
             {
+              "maxLength": 2000,
               "type": "string"
             },
             {
@@ -3139,6 +3404,7 @@
         "justification": {
           "anyOf": [
             {
+              "maxLength": 2000,
               "type": "string"
             },
             {
@@ -3269,11 +3535,16 @@
       "properties": {
         "event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Id",
           "type": "string"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
           "title": "Timestamp",
           "type": "number"
         },
@@ -3286,34 +3557,47 @@
         },
         "historical_event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the specific historical state node where the agent mathematically diverged to simulate an alternative path.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Historical Event Id",
           "type": "string"
         },
         "counterfactual_intervention": {
           "description": "The specific alternative action or do-calculus intervention applied in the simulation.",
+          "maxLength": 2000,
           "title": "Counterfactual Intervention",
           "type": "string"
         },
         "expected_utility_actual": {
           "description": "The calculated utility of the trajectory that was actually executed.",
+          "maximum": 1000000000.0,
           "title": "Expected Utility Actual",
           "type": "number"
         },
         "expected_utility_simulated": {
           "description": "The calculated utility of the simulated counterfactual trajectory.",
+          "maximum": 1000000000.0,
           "title": "Expected Utility Simulated",
           "type": "number"
         },
         "epistemic_regret": {
           "description": "The mathematical variance (simulated - actual) representing the opportunity cost of the historical decision.",
+          "maximum": 1000000000.0,
           "title": "Epistemic Regret",
           "type": "number"
         },
         "policy_mutation_gradients": {
           "additionalProperties": {
+            "maximum": 1000.0,
+            "minimum": -1000.0,
             "type": "number"
           },
           "description": "The stateless routing gradient adjustments derived from the calculated regret, used to self-correct future routing.",
+          "le": 1000000000.0,
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Policy Mutation Gradients",
           "type": "object"
         }
@@ -3336,16 +3620,25 @@
       "properties": {
         "handshake_id": {
           "description": "Unique identifier for this B2B negotiation.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Handshake Id",
           "type": "string"
         },
         "initiating_tenant_id": {
           "description": "The enterprise DID requesting the connection.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Initiating Tenant Id",
           "type": "string"
         },
         "receiving_tenant_id": {
           "description": "The enterprise DID receiving the connection.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Receiving Tenant Id",
           "type": "string"
         },
@@ -3424,6 +3717,7 @@
       "properties": {
         "min_observations_required": {
           "description": "The minimum number of episodic logs needed to statistically prove a crystallized rule.",
+          "maximum": 1000000000,
           "minimum": 10,
           "title": "Min Observations Required",
           "type": "integer"
@@ -3459,18 +3753,24 @@
         "record_id": {
           "description": "Unique identifier for this chain-of-custody entry.",
           "maxLength": 255,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Record Id",
           "type": "string"
         },
         "source_node_id": {
           "description": "The execution node that emitted the original payload.",
           "maxLength": 255,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Source Node Id",
           "type": "string"
         },
         "applied_policy_id": {
           "description": "The ID of the InformationFlowPolicy successfully applied.",
           "maxLength": 255,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Applied Policy Id",
           "type": "string"
         },
@@ -3478,6 +3778,8 @@
           "anyOf": [
             {
               "maxLength": 255,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
               "type": "string"
             },
             {
@@ -3491,11 +3793,15 @@
         "post_redaction_hash": {
           "description": "The definitive SHA-256 hash of the sanitized, mathematically clean payload.",
           "maxLength": 255,
+          "minLength": 1,
+          "pattern": "^[a-f0-9]{64}$",
           "title": "Post Redaction Hash",
           "type": "string"
         },
         "redaction_timestamp_unix_nano": {
           "description": "The precise temporal point the redaction was completed.",
+          "maximum": 253402300799000000000,
+          "minimum": 0,
           "title": "Redaction Timestamp Unix Nano",
           "type": "integer"
         }
@@ -3517,7 +3823,8 @@
         "epistemic_enforcement": {
           "anyOf": [
             {
-              "$ref": "#/$defs/TruthMaintenancePolicy"
+              "$ref": "#/$defs/TruthMaintenancePolicy",
+              "le": 1000000000
             },
             {
               "type": "null"
@@ -3539,6 +3846,7 @@
         "architectural_intent": {
           "anyOf": [
             {
+              "maxLength": 2000,
               "type": "string"
             },
             {
@@ -3552,6 +3860,7 @@
         "justification": {
           "anyOf": [
             {
+              "maxLength": 2000,
               "type": "string"
             },
             {
@@ -3681,16 +3990,25 @@
       "properties": {
         "attack_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this directed attack edge.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Attack Id",
           "type": "string"
         },
         "source_claim_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the claim mounting the attack.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Source Claim Id",
           "type": "string"
         },
         "target_claim_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the claim being attacked.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Target Claim Id",
           "type": "string"
         },
@@ -3714,12 +4032,17 @@
       "properties": {
         "cascade_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this automated truth maintenance operation.",
+          "maxLength": 128,
           "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Cascade Id",
           "type": "string"
         },
         "root_falsified_event_id": {
           "description": "The source BeliefMutationEvent or HypothesisGenerationEvent Content Identifier (CID) that collapsed and triggered this cascade.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Root Falsified Event Id",
           "type": "string"
         },
@@ -3733,6 +4056,8 @@
         "quarantined_event_ids": {
           "description": "The strict array of downstream event Content Identifiers (CIDs) isolated and muted by this cascade to prevent Epistemic Contagion.",
           "items": {
+            "maxLength": 128,
+            "minLength": 1,
             "type": "string"
           },
           "minItems": 1,
@@ -3761,6 +4086,9 @@
       "properties": {
         "capability_id": {
           "description": "A string CID for the delegated capability.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Capability Id",
           "type": "string"
         },
@@ -3782,6 +4110,8 @@
         },
         "expiration_timestamp": {
           "description": "A float bounding the temporal lifecycle.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
           "title": "Expiration Timestamp",
           "type": "number"
         },
@@ -3808,17 +4138,21 @@
       "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "constraint_id": {
+          "maxLength": 128,
           "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Constraint Id",
           "type": "string"
         },
         "formal_syntax_smt": {
           "description": "The formal SMT-LIB or Lean4 language representation of the symbolic rule.",
+          "maxLength": 2000,
           "title": "Formal Syntax Smt",
           "type": "string"
         },
         "relaxation_epsilon": {
           "description": "The continuous penalty applied to the LLM probability mass for constraint violation.",
+          "maximum": 1.0,
           "minimum": 0.0,
           "title": "Relaxation Epsilon",
           "type": "number"
@@ -3839,7 +4173,8 @@
         "epistemic_enforcement": {
           "anyOf": [
             {
-              "$ref": "#/$defs/TruthMaintenancePolicy"
+              "$ref": "#/$defs/TruthMaintenancePolicy",
+              "le": 1000000000
             },
             {
               "type": "null"
@@ -3861,6 +4196,7 @@
         "architectural_intent": {
           "anyOf": [
             {
+              "maxLength": 2000,
               "type": "string"
             },
             {
@@ -3874,6 +4210,7 @@
         "justification": {
           "anyOf": [
             {
+              "maxLength": 2000,
               "type": "string"
             },
             {
@@ -3940,6 +4277,9 @@
         },
         "target_topology_id": {
           "description": "The identifier (expected to be a W3C DID) pointing to the real-world topology it is cloning.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Target Topology Id",
           "type": "string"
         },
@@ -3968,16 +4308,21 @@
       "properties": {
         "source_model_name": {
           "description": "The native embedding model of the origin agent.",
+          "maxLength": 2000,
           "title": "Source Model Name",
           "type": "string"
         },
         "target_model_name": {
           "description": "The native embedding model of the destination agent.",
+          "maxLength": 2000,
           "title": "Target Model Name",
           "type": "string"
         },
         "projection_matrix_hash": {
           "description": "The SHA-256 hash of the exact mathematical matrix used to compress or translate the latent dimensions.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-f0-9]{64}$",
           "title": "Projection Matrix Hash",
           "type": "string"
         },
@@ -4009,6 +4354,7 @@
         "mean": {
           "anyOf": [
             {
+              "maximum": 1000000000.0,
               "type": "number"
             },
             {
@@ -4022,6 +4368,7 @@
         "variance": {
           "anyOf": [
             {
+              "maximum": 1000000000.0,
               "type": "number"
             },
             {
@@ -4035,7 +4382,7 @@
         "confidence_interval_95": {
           "anyOf": [
             {
-              "maxItems": 2,
+              "maxItems": 1000000000,
               "minItems": 2,
               "prefixItems": [
                 {
@@ -4076,6 +4423,7 @@
       "properties": {
         "min_adversaries": {
           "description": "The minimum number of adversarial or 'Devil's Advocate' roles required to prevent groupthink.",
+          "maximum": 1000000000,
           "title": "Min Adversaries",
           "type": "integer"
         },
@@ -4087,6 +4435,7 @@
         "temperature_variance": {
           "anyOf": [
             {
+              "maximum": 1000000000.0,
               "type": "number"
             },
             {
@@ -4114,6 +4463,10 @@
             "$ref": "#/$defs/DocumentLayoutRegionState"
           },
           "description": "Dictionary mapping block_ids to their strict spatial definitions.",
+          "maxProperties": 1000000000,
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Blocks",
           "type": "object"
         },
@@ -4148,7 +4501,9 @@
       "properties": {
         "block_id": {
           "description": "Unique structural identifier for this geometric region.",
+          "maxLength": 128,
           "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Block Id",
           "type": "string"
         },
@@ -4192,12 +4547,17 @@
         },
         "context_prompt": {
           "description": "The prompt explaining what information the swarm is missing.",
+          "maxLength": 2000,
           "title": "Context Prompt",
           "type": "string"
         },
         "resolution_schema": {
           "additionalProperties": true,
           "description": "The strict JSON Schema the human's input must satisfy before the graph can resume.",
+          "maxProperties": 1000000000,
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Resolution Schema",
           "type": "object"
         },
@@ -4226,6 +4586,7 @@
       "properties": {
         "convergence_delta_epsilon": {
           "description": "The minimal required PRM score improvement across the lookback window to justify continued compute.",
+          "maximum": 1.0,
           "minimum": 0.0,
           "title": "Convergence Delta Epsilon",
           "type": "number"
@@ -4233,12 +4594,14 @@
         "lookback_window_steps": {
           "description": "The N-step temporal window over which the PRM gradient is calculated.",
           "exclusiveMinimum": 0,
+          "maximum": 1000000000,
           "title": "Lookback Window Steps",
           "type": "integer"
         },
         "minimum_reasoning_steps": {
           "description": "The mandatory 'burn-in' period. The orchestrator cannot terminate the search before this structural depth is reached, preventing premature collapse.",
           "exclusiveMinimum": 0,
+          "maximum": 1000000000,
           "title": "Minimum Reasoning Steps",
           "type": "integer"
         }
@@ -4257,6 +4620,7 @@
       "properties": {
         "layout_tstring": {
           "description": "A Python 3.14 t-string template definition for dynamic UI grid evaluation.",
+          "maxLength": 2000,
           "title": "Layout Tstring",
           "type": "string"
         }
@@ -4273,7 +4637,9 @@
       "properties": {
         "manifest_id": {
           "description": "The unique Content Identifier (CID) for this routing plan.",
+          "maxLength": 128,
           "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Manifest Id",
           "type": "string"
         },
@@ -4289,6 +4655,9 @@
             "type": "array"
           },
           "description": "Mapping of specific modalities (e.g., 'tabular_grid') to the explicit lists of worker NodeIdentifierStates authorized to execute.",
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Active Subgraphs",
           "type": "object"
         },
@@ -4305,6 +4674,7 @@
             "type": "integer"
           },
           "description": "The strict allocation of compute budget bound to specific nodes.",
+          "maxProperties": 1000000000,
           "propertyNames": {
             "$ref": "#/$defs/NodeIdentifierState"
           },
@@ -4337,6 +4707,7 @@
         },
         "bayesian_surprise_score": {
           "description": "The calculated KL divergence between the prior belief and the incoming structural evidence.",
+          "maximum": 1.0,
           "minimum": 0.0,
           "title": "Bayesian Surprise Score",
           "type": "number"
@@ -4400,7 +4771,9 @@
       "properties": {
         "partition_id": {
           "description": "Unique identifier for this ephemeral partition.",
+          "maxLength": 128,
           "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Partition Id",
           "type": "string"
         },
@@ -4417,6 +4790,8 @@
         "authorized_bytecode_hashes": {
           "description": "The explicit whitelist of SHA-256 hashes allowed to execute within this partition.",
           "items": {
+            "maxLength": 128,
+            "minLength": 1,
             "type": "string"
           },
           "minItems": 1,
@@ -4426,12 +4801,14 @@
         "max_ttl_seconds": {
           "description": "The absolute temporal guillotine before the orchestrator drops the context.",
           "exclusiveMinimum": 0,
+          "maximum": 86400,
           "title": "Max Ttl Seconds",
           "type": "integer"
         },
         "max_vram_mb": {
           "description": "The strict physical VRAM ceiling allocated to this partition.",
           "exclusiveMinimum": 0,
+          "maximum": 1000000000,
           "title": "Max Vram Mb",
           "type": "integer"
         },
@@ -4464,11 +4841,17 @@
       "properties": {
         "claim_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this specific logical proposition.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Claim Id",
           "type": "string"
         },
         "proponent_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the agent or system that advanced this claim.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Proponent Id",
           "type": "string"
         },
@@ -4505,6 +4888,9 @@
           },
           "description": "Components of an Abstract Argumentation Framework.",
           "maxProperties": 10000,
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Claims",
           "type": "object"
         },
@@ -4514,6 +4900,9 @@
           },
           "description": "Geometric matrices of undercutting defeaters.",
           "maxProperties": 10000,
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Attacks",
           "type": "object"
         }
@@ -4530,16 +4919,23 @@
       "properties": {
         "source_concept_id": {
           "description": "CID of the origin node.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Source Concept Id",
           "type": "string"
         },
         "directed_edge_type": {
           "description": "The topological relationship.",
+          "maxLength": 2000,
           "title": "Directed Edge Type",
           "type": "string"
         },
         "target_concept_id": {
           "description": "CID of destination node.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Target Concept Id",
           "type": "string"
         }
@@ -4558,11 +4954,16 @@
       "properties": {
         "event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Id",
           "type": "string"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
           "title": "Timestamp",
           "type": "number"
         },
@@ -4573,6 +4974,9 @@
           "type": "string"
         },
         "source_prediction_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Source Prediction Id",
           "type": "string"
         },
@@ -4602,12 +5006,15 @@
       "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "chain_id": {
+          "maxLength": 128,
           "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Chain Id",
           "type": "string"
         },
         "syntactic_roots": {
           "items": {
+            "maxLength": 2000,
             "type": "string"
           },
           "minItems": 1,
@@ -4671,7 +5078,9 @@
       "properties": {
         "curriculum_id": {
           "description": "Unique CID for this training epoch release.",
+          "maxLength": 128,
           "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Curriculum Id",
           "type": "string"
         },
@@ -4697,7 +5106,9 @@
       "description": "CoReason Shared Kernel Ontology",
       "properties": {
         "graph_id": {
+          "maxLength": 128,
           "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Graph Id",
           "type": "string"
         },
@@ -4723,6 +5134,7 @@
       "properties": {
         "baseline_entropy_threshold": {
           "description": "CoReason Shared Kernel Ontology: The mathematical measure of uncertainty (e.g., variance in generated hypotheses) required to trigger escalation.",
+          "maximum": 1000000000.0,
           "minimum": 0.0,
           "title": "Baseline Entropy Threshold",
           "type": "number"
@@ -4730,11 +5142,13 @@
         "test_time_multiplier": {
           "description": "CoReason Shared Kernel Ontology: The continuous scalar applied to the agent's baseline max_latent_tokens_budget when the entropy threshold is breached.",
           "exclusiveMinimum": 1.0,
+          "maximum": 1000000000.0,
           "title": "Test Time Multiplier",
           "type": "number"
         },
         "max_escalation_tiers": {
           "description": "CoReason Shared Kernel Ontology: The absolute integer limit on how many times the orchestrator can recursively multiply the compute budget before forcing a SystemFaultEvent.",
+          "maximum": 1000000000,
           "minimum": 1,
           "title": "Max Escalation Tiers",
           "type": "integer"
@@ -4754,11 +5168,16 @@
       "properties": {
         "event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Id",
           "type": "string"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
           "title": "Timestamp",
           "type": "number"
         },
@@ -4770,11 +5189,15 @@
         },
         "source_trajectory_id": {
           "description": "The CID of the partial CognitiveReasoningTraceState.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Source Trajectory Id",
           "type": "string"
         },
         "estimated_flow_value": {
           "description": "The non-negative flow value scalar representing the factorized outcome reward.",
+          "maximum": 1000000000.0,
           "minimum": 0.0,
           "title": "Estimated Flow Value",
           "type": "number"
@@ -4801,7 +5224,9 @@
       "properties": {
         "task_id": {
           "description": "The cryptographic CID of the task.",
+          "maxLength": 128,
           "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Task Id",
           "type": "string"
         },
@@ -4811,6 +5236,7 @@
         },
         "vignette_payload": {
           "description": "The generated natural language scenario.",
+          "maxLength": 100000,
           "title": "Vignette Payload",
           "type": "string"
         },
@@ -4851,6 +5277,7 @@
           "items": {
             "$ref": "#/$defs/TemporalCheckpointState"
           },
+          "maxItems": 1000000000,
           "title": "Checkpoints",
           "type": "array"
         },
@@ -4885,7 +5312,8 @@
         "truth_maintenance_policy": {
           "anyOf": [
             {
-              "$ref": "#/$defs/TruthMaintenancePolicy"
+              "$ref": "#/$defs/TruthMaintenancePolicy",
+              "le": 1000000000
             },
             {
               "type": "null"
@@ -4927,11 +5355,16 @@
       "properties": {
         "event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Id",
           "type": "string"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
           "title": "Timestamp",
           "type": "number"
         },
@@ -4945,6 +5378,8 @@
         "source_episodic_event_ids": {
           "description": "The strict array of CIDs (Content Identifiers) representing the raw logs being compressed and archived.",
           "items": {
+            "maxLength": 128,
+            "minLength": 1,
             "type": "string"
           },
           "title": "Source Episodic Event Ids",
@@ -4952,11 +5387,15 @@
         },
         "crystallized_semantic_node_id": {
           "description": "The resulting permanent W3C DID / CID of the newly minted knowledge node.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Crystallized Semantic Node Id",
           "type": "string"
         },
         "compression_ratio": {
           "description": "A mathematical proof of the token savings achieved (e.g., old_token_count / new_token_count).",
+          "maximum": 1.0,
           "title": "Compression Ratio",
           "type": "number"
         }
@@ -4981,12 +5420,18 @@
         },
         "source_event_id": {
           "description": "The exact event Content Identifier (CID) in the EpistemicLedgerState that generated this fact.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Source Event Id",
           "type": "string"
         },
         "source_artifact_id": {
           "anyOf": [
             {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9_.:-]+$",
               "type": "string"
             },
             {
@@ -5035,14 +5480,20 @@
       "properties": {
         "system_prompt": {
           "description": "The basal non-monotonic instruction set currently held in Epistemic Quarantine.",
+          "maxLength": 2000,
           "title": "System Prompt",
           "type": "string"
         },
         "active_context": {
           "additionalProperties": {
+            "maxLength": 100000,
             "type": "string"
           },
           "description": "The ephemeral latent variables and environmental bindings currently active in Epistemic Quarantine.",
+          "le": 1000000000,
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Active Context",
           "type": "object"
         },
@@ -5100,12 +5551,17 @@
       "properties": {
         "policy_id": {
           "description": "CID for this specific reward configuration.",
+          "maxLength": 128,
           "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Policy Id",
           "type": "string"
         },
         "reference_graph_id": {
           "description": "The CID of the EpistemicDomainGraphManifest acting as the deterministic ground truth.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Reference Graph Id",
           "type": "string"
         },
@@ -5115,6 +5571,7 @@
         },
         "beta_path_weight": {
           "description": "The scalar weight applied to the logical path validity (R_path) to prevent reward hacking.",
+          "maximum": 1.0,
           "minimum": 0.0,
           "title": "Beta Path Weight",
           "type": "number"
@@ -5147,6 +5604,9 @@
       "properties": {
         "sop_id": {
           "description": "A Content Identifier (CID) for the Standard Operating Procedure.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Sop Id",
           "type": "string"
         },
@@ -5159,6 +5619,10 @@
             "$ref": "#/$defs/CognitiveStateProfile"
           },
           "description": "Dictionary mapping step_ids to strict causal DAG constraints.",
+          "maxProperties": 1000000000,
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Cognitive Steps",
           "type": "object"
         },
@@ -5167,6 +5631,9 @@
             "type": "string"
           },
           "description": "Dictionary mapping step_ids to SHA-256 hashes of strict Context-Free Grammars or JSON Schemas.",
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Structural Grammar Hashes",
           "type": "object"
         },
@@ -5255,6 +5722,7 @@
         },
         "relation_diversity_bucket_size": {
           "exclusiveMinimum": 0,
+          "maximum": 1000000000,
           "title": "Relation Diversity Bucket Size",
           "type": "integer"
         }
@@ -5272,11 +5740,16 @@
       "properties": {
         "event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Id",
           "type": "string"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
           "title": "Timestamp",
           "type": "number"
         },
@@ -5300,12 +5773,16 @@
         },
         "target_node_id": {
           "description": "The specific TaxonomicNodeState CID that was manipulated.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Target Node Id",
           "type": "string"
         },
         "dwell_duration_ms": {
           "anyOf": [
             {
+              "maximum": 86400000,
               "minimum": 0,
               "type": "integer"
             },
@@ -5345,7 +5822,9 @@
       "properties": {
         "proof_id": {
           "description": "A Content Identifier (CID) for this specific topological proof.",
+          "maxLength": 128,
           "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Proof Id",
           "type": "string"
         },
@@ -5372,12 +5851,17 @@
       "properties": {
         "task_id": {
           "description": "Unique identifier for this specific multimodal extraction intervention.",
+          "maxLength": 128,
           "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Task Id",
           "type": "string"
         },
         "artifact_event_id": {
           "description": "The CID of the MultimodalArtifactReceipt being processed.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Artifact Event Id",
           "type": "string"
         },
@@ -5404,6 +5888,7 @@
         "execution_cost_budget_magnitude": {
           "anyOf": [
             {
+              "maximum": 1000000000,
               "minimum": 0,
               "type": "integer"
             },
@@ -5439,12 +5924,14 @@
         "max_latent_tokens_budget": {
           "description": "The maximum number of hidden tokens the orchestrator is authorized to buy for the internal monologue.",
           "exclusiveMinimum": 0,
+          "maximum": 1000000000,
           "title": "Max Latent Tokens Budget",
           "type": "integer"
         },
         "max_test_time_compute_ms": {
           "description": "The physical time limit allowed for the scratchpad search before forcing a timeout.",
           "exclusiveMinimum": 0,
+          "maximum": 86400000,
           "title": "Max Test Time Compute Ms",
           "type": "integer"
         }
@@ -5470,12 +5957,18 @@
         },
         "tripped_rule_id": {
           "description": "The ID of the Payload Loss Prevention (PLP) or Governance rule that blocked execution.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Tripped Rule Id",
           "type": "string"
         },
         "resolution_schema": {
           "additionalProperties": true,
           "description": "The strict JSON Schema requiring an explicit cryptographic sign-off or justification string to bypass the breaker.",
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Resolution Schema",
           "type": "object"
         },
@@ -5504,17 +5997,22 @@
       "properties": {
         "escrow_locked_magnitude": {
           "description": "The strictly typed integer amount cryptographically locked prior to execution.",
+          "maximum": 1000000000,
           "minimum": 0,
           "title": "Escrow Locked Magnitude",
           "type": "integer"
         },
         "release_condition_metric": {
           "description": "A declarative pointer to the SLA or QA rubric required to release the funds.",
+          "maxLength": 2000,
           "title": "Release Condition Metric",
           "type": "string"
         },
         "refund_target_node_id": {
           "description": "The exact NodeIdentifierState to return funds to if the release condition fails.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Refund Target Node Id",
           "type": "string"
         }
@@ -5534,7 +6032,8 @@
         "epistemic_enforcement": {
           "anyOf": [
             {
-              "$ref": "#/$defs/TruthMaintenancePolicy"
+              "$ref": "#/$defs/TruthMaintenancePolicy",
+              "le": 1000000000
             },
             {
               "type": "null"
@@ -5556,6 +6055,7 @@
         "architectural_intent": {
           "anyOf": [
             {
+              "maxLength": 2000,
               "type": "string"
             },
             {
@@ -5569,6 +6069,7 @@
         "justification": {
           "anyOf": [
             {
+              "maxLength": 2000,
               "type": "string"
             },
             {
@@ -5643,6 +6144,7 @@
         },
         "max_revision_loops": {
           "description": "The absolute limit on Actor-Critic cycles to prevent infinite compute burn.",
+          "maximum": 1000000000,
           "minimum": 1,
           "title": "Max Revision Loops",
           "type": "integer"
@@ -5680,12 +6182,15 @@
         "max_retained_tokens": {
           "description": "The strict geometric upper bound of the Epistemic Quarantine's token capacity.",
           "exclusiveMinimum": 0,
+          "maximum": 1000000000,
           "title": "Max Retained Tokens",
           "type": "integer"
         },
         "protected_event_ids": {
           "description": "Explicit array of Content Identifiers (CIDs) the orchestrator is mathematically forbidden from retracting.",
           "items": {
+            "maxLength": 128,
+            "minLength": 1,
             "type": "string"
           },
           "title": "Protected Event Ids",
@@ -5706,6 +6211,9 @@
         "source_event_id": {
           "anyOf": [
             {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9_.:-]+$",
               "type": "string"
             },
             {
@@ -5719,6 +6227,9 @@
         "source_semantic_node_id": {
           "anyOf": [
             {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9_.:-]+$",
               "type": "string"
             },
             {
@@ -5731,6 +6242,7 @@
         },
         "justification": {
           "description": "The logical premise explaining why this evidence supports the claim.",
+          "maxLength": 2000,
           "title": "Justification",
           "type": "string"
         }
@@ -5748,7 +6260,8 @@
         "epistemic_enforcement": {
           "anyOf": [
             {
-              "$ref": "#/$defs/TruthMaintenancePolicy"
+              "$ref": "#/$defs/TruthMaintenancePolicy",
+              "le": 1000000000
             },
             {
               "type": "null"
@@ -5770,6 +6283,7 @@
         "architectural_intent": {
           "anyOf": [
             {
+              "maxLength": 2000,
               "type": "string"
             },
             {
@@ -5783,6 +6297,7 @@
         "justification": {
           "anyOf": [
             {
+              "maxLength": 2000,
               "type": "string"
             },
             {
@@ -5849,11 +6364,13 @@
         },
         "generations": {
           "description": "The absolute limit on evolutionary breeding cycles.",
+          "maximum": 1.0,
           "title": "Generations",
           "type": "integer"
         },
         "population_size": {
           "description": "The number of concurrent agents instantiated per generation.",
+          "maximum": 1000000000,
           "title": "Population Size",
           "type": "integer"
         },
@@ -5891,12 +6408,18 @@
       "properties": {
         "request_id": {
           "description": "The unique ID for this specific execution.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Request Id",
           "type": "string"
         },
         "parent_request_id": {
           "anyOf": [
             {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9_.:-]+$",
               "type": "string"
             },
             {
@@ -5910,6 +6433,9 @@
         "root_request_id": {
           "anyOf": [
             {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9_.:-]+$",
               "type": "string"
             },
             {
@@ -5931,6 +6457,8 @@
         "parent_hashes": {
           "description": "The strict array of cryptographic hashes of parent execution nodes.",
           "items": {
+            "maxLength": 128,
+            "minLength": 1,
             "type": "string"
           },
           "title": "Parent Hashes",
@@ -5939,6 +6467,9 @@
         "node_hash": {
           "anyOf": [
             {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
               "type": "string"
             },
             {
@@ -5965,6 +6496,7 @@
         "max_execution_time_ms": {
           "description": "The maximum allowed execution time in milliseconds before the orchestrator kills the process.",
           "exclusiveMinimum": 0,
+          "maximum": 86400000,
           "title": "Max Execution Time Ms",
           "type": "integer"
         },
@@ -5972,6 +6504,7 @@
           "anyOf": [
             {
               "exclusiveMinimum": 0,
+              "maximum": 1000000000,
               "type": "integer"
             },
             {
@@ -5995,17 +6528,26 @@
       "properties": {
         "trace_id": {
           "description": "The global identifier for the entire execution causal tree.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Trace Id",
           "type": "string"
         },
         "span_id": {
           "description": "The unique identifier for this specific operation.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Span Id",
           "type": "string"
         },
         "parent_span_id": {
           "anyOf": [
             {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9_.:-]+$",
               "type": "string"
             },
             {
@@ -6018,6 +6560,7 @@
         },
         "name": {
           "description": "The semantic identifier for the operation.",
+          "maxLength": 2000,
           "title": "Name",
           "type": "string"
         },
@@ -6028,6 +6571,7 @@
         },
         "start_time_unix_nano": {
           "description": "Temporal start bound.",
+          "maximum": 253402300799000000000,
           "minimum": 0,
           "title": "Start Time Unix Nano",
           "type": "integer"
@@ -6035,6 +6579,7 @@
         "end_time_unix_nano": {
           "anyOf": [
             {
+              "maximum": 253402300799000000000,
               "minimum": 0,
               "type": "integer"
             },
@@ -6076,18 +6621,23 @@
       "properties": {
         "shock_id": {
           "description": "Cryptographic identifier for the Black Swan event.",
+          "maxLength": 128,
           "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Shock Id",
           "type": "string"
         },
         "target_node_hash": {
           "description": "Regex-bound SHA-256 string targeting a specific Merkle root in the epistemic graph.",
+          "maxLength": 128,
+          "minLength": 1,
           "pattern": "^[a-f0-9]{64}$",
           "title": "Target Node Hash",
           "type": "string"
         },
         "bayesian_surprise_score": {
           "description": "Strictly bounded mathematical quantification of the epistemic decay or Variational Free Energy.",
+          "maximum": 1.0,
           "minimum": 0.0,
           "title": "Bayesian Surprise Score",
           "type": "number"
@@ -6095,6 +6645,10 @@
         "synthetic_payload": {
           "additionalProperties": true,
           "description": "Bounded dictionary representing the injected hallucination or observation.",
+          "maxProperties": 1000000000,
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Synthetic Payload",
           "type": "object"
         },
@@ -6135,6 +6689,7 @@
         "row_field": {
           "anyOf": [
             {
+              "maxLength": 2000,
               "type": "string"
             },
             {
@@ -6148,6 +6703,7 @@
         "column_field": {
           "anyOf": [
             {
+              "maxLength": 2000,
               "type": "string"
             },
             {
@@ -6170,6 +6726,7 @@
           "const": "fallback_intent",
           "default": "fallback_intent",
           "description": "The type of the resilience payload.",
+          "le": 1000000000,
           "title": "Type",
           "type": "string"
         },
@@ -6196,6 +6753,7 @@
         "timeout_seconds": {
           "description": "The maximum allowed delay for a human intervention.",
           "exclusiveMinimum": 0,
+          "maximum": 86400,
           "title": "Timeout Seconds",
           "type": "integer"
         },
@@ -6235,18 +6793,22 @@
       "properties": {
         "condition_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this falsification test to the Merkle-DAG.",
+          "maxLength": 128,
           "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Condition Id",
           "type": "string"
         },
         "description": {
           "description": "Semantic description of what observation would prove the parent hypothesis is false.",
+          "maxLength": 2000,
           "title": "Description",
           "type": "string"
         },
         "required_tool_name": {
           "anyOf": [
             {
+              "maxLength": 2000,
               "type": "string"
             },
             {
@@ -6259,6 +6821,7 @@
         },
         "falsifying_observation_signature": {
           "description": "The expected data schema or regex pattern that, if returned by the tool, kills the hypothesis.",
+          "maxLength": 2000,
           "title": "Falsifying Observation Signature",
           "type": "string"
         }
@@ -6295,6 +6858,9 @@
         "target_node_id": {
           "anyOf": [
             {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9_.:-]+$",
               "type": "string"
             },
             {
@@ -6307,6 +6873,7 @@
         },
         "intensity": {
           "description": "The severity of the fault, represented from 0.0 to 1.0.",
+          "maximum": 1000000000.0,
           "title": "Intensity",
           "type": "number"
         }
@@ -6324,7 +6891,9 @@
       "properties": {
         "attestation_id": {
           "description": "Cryptographic Lineage Watermark for the attestation.",
+          "maxLength": 128,
           "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Attestation Id",
           "type": "string"
         },
@@ -6357,16 +6926,21 @@
         "broadcast_endpoints": {
           "description": "The explicit array of strictly bounded MCP URI broadcast endpoints.",
           "items": {
+            "maxLength": 2000,
             "type": "string"
           },
+          "maxItems": 1000000000,
           "title": "Broadcast Endpoints",
           "type": "array"
         },
         "supported_ontologies": {
           "description": "The explicit array of cryptographic hashes defining acceptable domain ontologies.",
           "items": {
+            "maxLength": 128,
+            "minLength": 1,
             "type": "string"
           },
+          "maxItems": 1000000000,
           "title": "Supported Ontologies",
           "type": "array"
         }
@@ -6391,12 +6965,14 @@
         "vram_footprint_bytes": {
           "description": "CoReason Shared Kernel Ontology: The exact spatial geometry required in VRAM to mount this adapter.",
           "exclusiveMinimum": 0,
+          "maximum": 100000000000,
           "title": "Vram Footprint Bytes",
           "type": "integer"
         },
         "ephemeral_ttl_ms": {
           "description": "CoReason Shared Kernel Ontology: The absolute Time-To-Live for the adapter to exist in the kinetic execution plane before forced eviction.",
           "exclusiveMinimum": 0,
+          "maximum": 86400000,
           "title": "Ephemeral Ttl Ms",
           "type": "integer"
         },
@@ -6424,6 +7000,9 @@
         "topology_id": {
           "anyOf": [
             {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9_.:-]+$",
               "type": "string"
             },
             {
@@ -6444,6 +7023,7 @@
       "properties": {
         "target_metric": {
           "description": "The specific telemetry or execution metric to evaluate (e.g., 'latency', 'accuracy').",
+          "maxLength": 2000,
           "title": "Target Metric",
           "type": "string"
         },
@@ -6454,6 +7034,7 @@
         "weight": {
           "default": 1.0,
           "description": "The relative importance of this objective in a multi-objective generation.",
+          "maximum": 1.0,
           "title": "Weight",
           "type": "number"
         }
@@ -6482,11 +7063,15 @@
         },
         "invariant_theorem": {
           "description": "The exact mathematical assertion or safety invariant being proven (e.g., 'No data classified as CONFIDENTIAL routes externally').",
+          "maxLength": 2000,
           "title": "Invariant Theorem",
           "type": "string"
         },
         "compiled_proof_hash": {
           "description": "The SHA-256 fingerprint of the verified proof object that the Rust/C++ orchestrator must load and check.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-f0-9]{64}$",
           "title": "Compiled Proof Hash",
           "type": "string"
         }
@@ -6505,18 +7090,21 @@
       "properties": {
         "max_topological_depth": {
           "description": "The absolute physical depth limit for recursive encapsulation.",
+          "maximum": 1000000000,
           "minimum": 1,
           "title": "Max Topological Depth",
           "type": "integer"
         },
         "max_node_fanout": {
           "description": "The maximum number of horizontally connected nodes per topology tier.",
+          "maximum": 1000000000,
           "minimum": 1,
           "title": "Max Node Fanout",
           "type": "integer"
         },
         "max_synthetic_tokens": {
           "description": "The economic constraint on the entire generated mock payload.",
+          "maximum": 1000000000,
           "minimum": 1,
           "title": "Max Synthetic Tokens",
           "type": "integer"
@@ -6536,12 +7124,17 @@
       "properties": {
         "manifest_id": {
           "description": "Unique Content Identifier (CID) for this generated taxonomy.",
+          "maxLength": 128,
           "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Manifest Id",
           "type": "string"
         },
         "root_node_id": {
           "description": "The CID of the top-level TaxonomicNodeState initiating the tree.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Root Node Id",
           "type": "string"
         },
@@ -6550,6 +7143,10 @@
             "$ref": "#/$defs/TaxonomicNodeState"
           },
           "description": "Flat dictionary matrix containing all nodes within the manifold.",
+          "maxProperties": 1000000000,
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Nodes",
           "type": "object"
         }
@@ -6571,17 +7168,20 @@
         },
         "max_budget_magnitude": {
           "description": "The absolute maximum economic cost allowed for the entire swarm lifecycle.",
+          "maximum": 1000000000,
           "title": "Max Budget Magnitude",
           "type": "integer"
         },
         "max_global_tokens": {
           "description": "The maximum aggregate token usage allowed across all nodes.",
+          "maximum": 1000000000,
           "title": "Max Global Tokens",
           "type": "integer"
         },
         "max_carbon_budget_gco2eq": {
           "anyOf": [
             {
+              "maximum": 10000.0,
               "minimum": 0.0,
               "type": "number"
             },
@@ -6595,6 +7195,7 @@
         },
         "global_timeout_seconds": {
           "description": "The absolute Time-To-Live (TTL) for the execution envelope before graceful termination.",
+          "maximum": 86400,
           "minimum": 0,
           "title": "Global Timeout Seconds",
           "type": "integer"
@@ -6627,7 +7228,9 @@
       "properties": {
         "artifact_event_id": {
           "description": "The exact genesis CID of the MultimodalArtifactReceipt entering the routing tier.",
+          "maxLength": 128,
           "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Artifact Event Id",
           "type": "string"
         },
@@ -6648,6 +7251,7 @@
         },
         "token_density": {
           "description": "The mathematical token density governing downstream compute budget allocation.",
+          "maximum": 1000000000,
           "minimum": 0,
           "title": "Token Density",
           "type": "integer"
@@ -6667,6 +7271,7 @@
       "properties": {
         "policy_name": {
           "description": "Name of the governance policy.",
+          "maxLength": 2000,
           "title": "Policy Name",
           "type": "string"
         },
@@ -6697,16 +7302,21 @@
       "properties": {
         "criterion_id": {
           "description": "Unique identifier for the grading criterion.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Criterion Id",
           "type": "string"
         },
         "description": {
           "description": "The exact mathematical or logical boundary the target must satisfy to pass this dimensional check.",
+          "maxLength": 2000,
           "title": "Description",
           "type": "string"
         },
         "weight": {
           "description": "Weight or significance of this criterion.",
+          "maximum": 100.0,
           "minimum": 0.0,
           "title": "Weight",
           "type": "number"
@@ -6726,6 +7336,9 @@
       "properties": {
         "panel_id": {
           "description": "The unique identifier for this UI panel.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Panel Id",
           "type": "string"
         },
@@ -6738,11 +7351,15 @@
         },
         "title": {
           "description": "The declarative semantic anchor summarizing the underlying visual grammar.",
+          "maxLength": 2000,
           "title": "Title",
           "type": "string"
         },
         "ledger_source_id": {
           "description": "The cryptographic pointer to the semantic series in the EpistemicLedgerState.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Ledger Source Id",
           "type": "string"
         },
@@ -6756,6 +7373,7 @@
             "rect",
             "arc"
           ],
+          "le": 1000000000,
           "title": "Mark",
           "type": "string"
         },
@@ -6847,9 +7465,14 @@
         },
         "headers": {
           "additionalProperties": {
+            "maxLength": 2000,
             "type": "string"
           },
           "description": "HTTP headers, strictly bounded for zero-trust credentials.",
+          "le": 1000000000,
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Headers",
           "type": "object"
         }
@@ -6872,11 +7495,15 @@
             "aws_nitro",
             "nvidia_cc"
           ],
+          "le": 1000000000,
           "title": "Enclave Type",
           "type": "string"
         },
         "platform_measurement_hash": {
           "description": "The cryptographic hash of the Platform Configuration Registers (PCRs) proving the memory state was physically isolated.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-f0-9]{64}$",
           "title": "Platform Measurement Hash",
           "type": "string"
         },
@@ -6912,6 +7539,9 @@
         },
         "public_key_id": {
           "description": "The Content Identifier (CID) of the public evaluation key the orchestrator must utilize to perform privacy-preserving geometric math on ciphertext without epistemic contamination.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Public Key Id",
           "type": "string"
         },
@@ -6936,12 +7566,14 @@
       "properties": {
         "description": {
           "description": "The semantic boundary defining the objective function or computational perimeter of the execution node.",
+          "maxLength": 2000,
           "title": "Description",
           "type": "string"
         },
         "architectural_intent": {
           "anyOf": [
             {
+              "maxLength": 2000,
               "type": "string"
             },
             {
@@ -6955,6 +7587,7 @@
         "justification": {
           "anyOf": [
             {
+              "maxLength": 2000,
               "type": "string"
             },
             {
@@ -6977,6 +7610,9 @@
           "anyOf": [
             {
               "additionalProperties": true,
+              "propertyNames": {
+                "maxLength": 255
+              },
               "type": "object"
             },
             {
@@ -7019,11 +7655,16 @@
       "properties": {
         "event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Id",
           "type": "string"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
           "title": "Timestamp",
           "type": "number"
         },
@@ -7036,12 +7677,15 @@
         },
         "hypothesis_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this abductive leap to the Merkle-DAG.",
+          "maxLength": 128,
           "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Hypothesis Id",
           "type": "string"
         },
         "premise_text": {
           "description": "The natural language explanation of the abductive theory.",
+          "maxLength": 2000,
           "title": "Premise Text",
           "type": "string"
         },
@@ -7102,12 +7746,14 @@
       "properties": {
         "agent_id": {
           "description": "The ID of the agent placing the stake.",
+          "le": 1000000000,
           "minLength": 1,
           "title": "Agent Id",
           "type": "string"
         },
         "target_hypothesis_id": {
           "description": "The exact HypothesisGenerationEvent the agent is betting on.",
+          "le": 1000000000,
           "minLength": 1,
           "title": "Target Hypothesis Id",
           "type": "string"
@@ -7115,6 +7761,7 @@
         "staked_magnitude": {
           "description": "The volume of compute budget committed to this position.",
           "exclusiveMinimum": 0,
+          "maximum": 1000000000,
           "title": "Staked Magnitude",
           "type": "integer"
         },
@@ -7152,6 +7799,9 @@
       "properties": {
         "policy_id": {
           "description": "Unique identifier for this macroscopic flow control policy.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Policy Id",
           "type": "string"
         },
@@ -7209,6 +7859,7 @@
         },
         "message": {
           "description": "The context or summary to display to the human operator.",
+          "maxLength": 2000,
           "title": "Message",
           "type": "string"
         },
@@ -7236,11 +7887,13 @@
       "properties": {
         "parent_key": {
           "description": "The key in the parent's shared state contract.",
+          "maxLength": 2000,
           "title": "Parent Key",
           "type": "string"
         },
         "child_key": {
           "description": "The mapped key in the nested topology's state contract.",
+          "maxLength": 2000,
           "title": "Child Key",
           "type": "string"
         }
@@ -7258,6 +7911,9 @@
       "properties": {
         "panel_id": {
           "description": "The unique identifier for this UI panel.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Panel Id",
           "type": "string"
         },
@@ -7270,11 +7926,13 @@
         },
         "title": {
           "description": "The declarative semantic anchor summarizing the underlying matrix or markdown projection.",
+          "maxLength": 2000,
           "title": "Title",
           "type": "string"
         },
         "markdown_content": {
           "description": "The markdown formatted text content.",
+          "maxLength": 100000,
           "title": "Markdown Content",
           "type": "string"
         }
@@ -7328,6 +7986,7 @@
         },
         "context_summary": {
           "description": "A summary of the context requiring intervention.",
+          "maxLength": 2000,
           "title": "Context Summary",
           "type": "string"
         },
@@ -7352,11 +8011,17 @@
             ]
           },
           "description": "The action proposed by the agent that requires approval.",
+          "maxProperties": 1000000000,
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Proposed Action",
           "type": "object"
         },
         "adjudication_deadline": {
           "description": "The deadline for adjudication, represented as a UNIX timestamp.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
           "title": "Adjudication Deadline",
           "type": "number"
         }
@@ -7432,6 +8097,7 @@
         "feedback": {
           "anyOf": [
             {
+              "maxLength": 2000,
               "type": "string"
             },
             {
@@ -7469,22 +8135,29 @@
       "properties": {
         "task_id": {
           "description": "Unique identifier for this causal intervention.",
+          "maxLength": 128,
           "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Task Id",
           "type": "string"
         },
         "target_hypothesis_id": {
           "description": "The hypothesis containing the SCM being tested.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Target Hypothesis Id",
           "type": "string"
         },
         "intervention_variable": {
           "description": "The specific node $X$ in the SCM the agent is forcing to a specific state.",
+          "maxLength": 2000,
           "title": "Intervention Variable",
           "type": "string"
         },
         "do_operator_state": {
           "description": "The exact value or condition forced upon the intervention_variable, isolating it from its historical causes.",
+          "maxLength": 2000,
           "title": "Do Operator State",
           "type": "string"
         },
@@ -7497,6 +8170,7 @@
         },
         "execution_cost_budget_magnitude": {
           "description": "The maximum economic expenditure authorized to run this specific causal intervention.",
+          "maximum": 1000000000,
           "minimum": 0,
           "title": "Execution Cost Budget Magnitude",
           "type": "integer"
@@ -7530,10 +8204,18 @@
         "id": {
           "anyOf": [
             {
-              "type": "string"
-            },
-            {
-              "type": "integer"
+              "anyOf": [
+                {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "pattern": "^[a-zA-Z0-9_.:-]+$",
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ],
+              "le": 1000000000
             },
             {
               "type": "null"
@@ -7557,11 +8239,13 @@
       "properties": {
         "code": {
           "description": "A Number that indicates the error type that occurred.",
+          "maximum": 1000000000,
           "title": "Code",
           "type": "integer"
         },
         "message": {
           "description": "The strict semantic fault boundary explaining the structural or execution collapse.",
+          "maxLength": 2000,
           "title": "Message",
           "type": "string"
         },
@@ -7608,6 +8292,9 @@
           "additionalProperties": {
             "$ref": "#/$defs/JsonPrimitiveState"
           },
+          "propertyNames": {
+            "maxLength": 255
+          },
           "type": "object"
         },
         {
@@ -7632,11 +8319,13 @@
         "forced_exploitation_threshold_ms": {
           "description": "CoReason Shared Kernel Ontology: The physical wall-clock time remaining at which the orchestrator is mathematically forbidden from opening new lateral branches.",
           "exclusiveMinimum": 0,
+          "maximum": 86400000,
           "title": "Forced Exploitation Threshold Ms",
           "type": "integer"
         },
         "dynamic_temperature_asymptote": {
           "description": "CoReason Shared Kernel Ontology: The absolute minimum sampling temperature the system must converge to during the final exploitation phase.",
+          "maximum": 1000000000.0,
           "minimum": 0.0,
           "title": "Dynamic Temperature Asymptote",
           "type": "number"
@@ -7656,6 +8345,9 @@
       "properties": {
         "policy_id": {
           "description": "Unique identifier for this specific separation boundary.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Policy Id",
           "type": "string"
         },
@@ -7663,6 +8355,7 @@
           "description": "A topological matrix of tool names or MCP URIs. If an agent mounts one capability in a cluster, all other capabilities in that cluster are mathematically quarantined.",
           "items": {
             "items": {
+              "maxLength": 2000,
               "type": "string"
             },
             "type": "array"
@@ -7755,7 +8448,9 @@
       "properties": {
         "trace_id": {
           "description": "A Content Identifier (CID) bounding this ephemeral test-time execution tree.",
+          "maxLength": 128,
           "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Trace Id",
           "type": "string"
         },
@@ -7770,6 +8465,8 @@
         "discarded_branches": {
           "description": "The strict array of Content Identifiers (CIDs) that were explicitly pruned due to logical dead-ends.",
           "items": {
+            "maxLength": 128,
+            "minLength": 1,
             "type": "string"
           },
           "title": "Discarded Branches",
@@ -7778,6 +8475,9 @@
         "resolution_branch_id": {
           "anyOf": [
             {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9_.:-]+$",
               "type": "string"
             },
             {
@@ -7790,6 +8490,7 @@
         },
         "total_latent_tokens": {
           "description": "The total expenditure (in tokens) spent purely on internal reasoning.",
+          "maximum": 1000000000,
           "minimum": 0,
           "title": "Total Latent Tokens",
           "type": "integer"
@@ -7821,12 +8522,14 @@
         "transition_window_tokens": {
           "description": "The exact number of forward-pass generation steps over which the decay is applied.",
           "exclusiveMinimum": 0,
+          "maximum": 1000000000,
           "title": "Transition Window Tokens",
           "type": "integer"
         },
         "decay_rate_param": {
           "anyOf": [
             {
+              "maximum": 1.0,
               "type": "number"
             },
             {
@@ -7872,14 +8575,20 @@
         },
         "hop_signatures": {
           "additionalProperties": {
+            "maxLength": 2000,
             "type": "string"
           },
           "description": "A dictionary mapping intermediate participant NodeIdentifierStates to their deterministic execution signatures.",
+          "le": 1000000000,
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Hop Signatures",
           "type": "object"
         },
         "tamper_evident_root": {
           "description": "The overarching cryptographic hash (e.g., Merkle Root) proving the structural payload has not been laundered or structurally modified.",
+          "maxLength": 2000,
           "title": "Tamper Evident Root",
           "type": "string"
         }
@@ -7898,6 +8607,8 @@
       "properties": {
         "timestamp": {
           "description": "The UNIX timestamp of the log event.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
           "title": "Timestamp",
           "type": "number"
         },
@@ -7915,6 +8626,7 @@
         },
         "message": {
           "description": "The primary log message.",
+          "maxLength": 2000,
           "title": "Message",
           "type": "string"
         },
@@ -7937,11 +8649,16 @@
       "properties": {
         "verification_public_key_id": {
           "description": "The DID or public key identifier required by an auditor to reconstruct the PRF and verify the watermark.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Verification Public Key Id",
           "type": "string"
         },
         "prf_seed_hash": {
           "description": "The SHA-256 hash of the cryptographic seed used to initialize the pseudo-random function (PRF).",
+          "maxLength": 128,
+          "minLength": 1,
           "pattern": "^[a-f0-9]{64}$",
           "title": "Prf Seed Hash",
           "type": "string"
@@ -7949,17 +8666,20 @@
         "watermark_strength_delta": {
           "description": "The exact logit scalar (bias) injected into the 'green list' vocabulary partition before Gumbel-Softmax sampling.",
           "exclusiveMinimum": 0.0,
+          "maximum": 1.0,
           "title": "Watermark Strength Delta",
           "type": "number"
         },
         "target_bits_per_token": {
           "description": "The information-theoretic density of the payload being embedded into the generative stream.",
           "exclusiveMinimum": 0.0,
+          "maximum": 1000000000.0,
           "title": "Target Bits Per Token",
           "type": "number"
         },
         "context_history_window": {
           "description": "The k-gram rolling window size of preceding tokens hashed into the PRF state to ensure robustness against text cropping.",
+          "maximum": 1000000000,
           "minimum": 0,
           "title": "Context History Window",
           "type": "integer"
@@ -7982,6 +8702,7 @@
         "allowed_tools": {
           "description": "The explicit whitelist of function names the node is allowed to call.",
           "items": {
+            "maxLength": 2000,
             "type": "string"
           },
           "title": "Allowed Tools",
@@ -7990,6 +8711,7 @@
         "allowed_resources": {
           "description": "The explicit whitelist of resource URIs the node is allowed to passively perceive.",
           "items": {
+            "maxLength": 2000,
             "type": "string"
           },
           "title": "Allowed Resources",
@@ -7998,6 +8720,7 @@
         "allowed_prompts": {
           "description": "The explicit whitelist of workflow templates the node is allowed to trigger.",
           "items": {
+            "maxLength": 2000,
             "type": "string"
           },
           "title": "Allowed Prompts",
@@ -8006,6 +8729,7 @@
         "required_licenses": {
           "description": "Explicit array of DUA/RBAC enterprise licenses mathematically required to perceive and mount this capability.",
           "items": {
+            "maxLength": 255,
             "type": "string"
           },
           "title": "Required Licenses",
@@ -8021,6 +8745,7 @@
       "properties": {
         "server_uri": {
           "description": "The URI or command path to the MCP server.",
+          "maxLength": 2000,
           "title": "Server Uri",
           "type": "string"
         },
@@ -8032,6 +8757,7 @@
           "anyOf": [
             {
               "items": {
+                "maxLength": 2000,
                 "type": "string"
               },
               "type": "array"
@@ -8065,6 +8791,7 @@
         "method": {
           "const": "mcp.ui.emit_intent",
           "description": "Method for intent bubbling.",
+          "le": 1000000000,
           "title": "Method",
           "type": "string"
         },
@@ -8072,6 +8799,10 @@
           "anyOf": [
             {
               "additionalProperties": true,
+              "maxProperties": 86400000,
+              "propertyNames": {
+                "maxLength": 255
+              },
               "type": "object"
             },
             {
@@ -8085,10 +8816,18 @@
         "id": {
           "anyOf": [
             {
-              "type": "string"
-            },
-            {
-              "type": "integer"
+              "anyOf": [
+                {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "pattern": "^[a-zA-Z0-9_.:-]+$",
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ],
+              "le": 1000000000
             },
             {
               "type": "null"
@@ -8112,23 +8851,32 @@
       "properties": {
         "server_id": {
           "description": "The ID of the MCP server providing this prompt.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Server Id",
           "type": "string"
         },
         "prompt_name": {
           "description": "The name of the prompt template.",
+          "maxLength": 2000,
           "title": "Prompt Name",
           "type": "string"
         },
         "arguments": {
           "additionalProperties": true,
           "description": "Arguments to fill the prompt template.",
+          "maxProperties": 1000000000,
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Arguments",
           "type": "object"
         },
         "fallback_persona": {
           "anyOf": [
             {
+              "maxLength": 2000,
               "type": "string"
             },
             {
@@ -8142,6 +8890,9 @@
         "prompt_hash": {
           "anyOf": [
             {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
               "type": "string"
             },
             {
@@ -8166,12 +8917,16 @@
       "properties": {
         "server_id": {
           "description": "The ID of the MCP server providing these resources.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Server Id",
           "type": "string"
         },
         "uris": {
           "description": "The explicit array of resource URIs mathematically bound to the agent.",
           "items": {
+            "maxLength": 2000,
             "type": "string"
           },
           "title": "Uris",
@@ -8190,6 +8945,9 @@
       "properties": {
         "server_id": {
           "description": "A unique identifier for this server instance.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Server Id",
           "type": "string"
         },
@@ -8213,6 +8971,7 @@
         "required_capabilities": {
           "description": "The structurally bounded array of capabilities mandated for this server connection.",
           "items": {
+            "maxLength": 255,
             "type": "string"
           },
           "title": "Required Capabilities",
@@ -8232,6 +8991,7 @@
       "properties": {
         "server_uri": {
           "description": "The network URI for SSE/HTTP, or the command execution string for stdio.",
+          "maxLength": 2000,
           "title": "Server Uri",
           "type": "string"
         },
@@ -8248,6 +9008,9 @@
         "binary_hash": {
           "anyOf": [
             {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
               "type": "string"
             },
             {
@@ -8304,10 +9067,12 @@
           "description": "A matrix defining the layout structure, using panel IDs.",
           "items": {
             "items": {
+              "maxLength": 255,
               "type": "string"
             },
             "type": "array"
           },
+          "maxItems": 1000000000,
           "title": "Layout Matrix",
           "type": "array"
         },
@@ -8333,6 +9098,7 @@
       "properties": {
         "minimum_collateral": {
           "description": "The minimum amount of token collateral held in escrow.",
+          "maximum": 1000000000.0,
           "minimum": 0.0,
           "title": "Minimum Collateral",
           "type": "number"
@@ -8357,28 +9123,39 @@
       "properties": {
         "market_id": {
           "description": "The ID of the prediction market.",
+          "le": 1000000000,
           "minLength": 1,
           "title": "Market Id",
           "type": "string"
         },
         "winning_hypothesis_id": {
           "description": "The hypothesis ID that was verified.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Winning Hypothesis Id",
           "type": "string"
         },
         "falsified_hypothesis_ids": {
           "description": "The hypothesis IDs that were falsified.",
           "items": {
+            "maxLength": 128,
+            "minLength": 1,
             "type": "string"
           },
+          "maxItems": 1000000000,
           "title": "Falsified Hypothesis Ids",
           "type": "array"
         },
         "payout_distribution": {
           "additionalProperties": {
+            "minimum": 0,
             "type": "integer"
           },
           "description": "The deterministic mapping of agent IDs to their earned compute budget/magnitude based on Brier scoring.",
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Payout Distribution",
           "type": "object"
         }
@@ -8414,6 +9191,7 @@
         "target_layers": {
           "description": "The specific transformer block indices the execution engine must extract from.",
           "items": {
+            "minimum": 0,
             "type": "integer"
           },
           "minItems": 1,
@@ -8423,6 +9201,7 @@
         "max_features_per_layer": {
           "description": "The top-k features to extract, preventing VRAM exhaustion.",
           "exclusiveMinimum": 0,
+          "maximum": 1000000000,
           "title": "Max Features Per Layer",
           "type": "integer"
         },
@@ -8447,12 +9226,14 @@
       "properties": {
         "description": {
           "description": "The semantic boundary defining the objective function or computational perimeter of the execution node.",
+          "maxLength": 2000,
           "title": "Description",
           "type": "string"
         },
         "architectural_intent": {
           "anyOf": [
             {
+              "maxLength": 2000,
               "type": "string"
             },
             {
@@ -8466,6 +9247,7 @@
         "justification": {
           "anyOf": [
             {
+              "maxLength": 2000,
               "type": "string"
             },
             {
@@ -8488,6 +9270,9 @@
           "anyOf": [
             {
               "additionalProperties": true,
+              "propertyNames": {
+                "maxLength": 255
+              },
               "type": "object"
             },
             {
@@ -8512,6 +9297,10 @@
         "expected_output_schema": {
           "additionalProperties": true,
           "description": "The strictly typed JSON Schema expected from the cached payload.",
+          "maxProperties": 1000000000,
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Expected Output Schema",
           "type": "object"
         }
@@ -8530,30 +9319,41 @@
       "properties": {
         "contract_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this structural migration mapping.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Contract Id",
           "type": "string"
         },
         "source_version": {
           "description": "The exact semantic version string of the payload before migration.",
+          "maxLength": 2000,
           "title": "Source Version",
           "type": "string"
         },
         "target_version": {
           "description": "The exact semantic version string of the payload after migration.",
+          "maxLength": 2000,
           "title": "Target Version",
           "type": "string"
         },
         "path_transformations": {
           "additionalProperties": {
+            "maxLength": 2000,
             "type": "string"
           },
           "description": "A strict mapping of old RFC 6902 JSON Pointers to new JSON Pointers.",
+          "le": 1000000000,
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Path Transformations",
           "type": "object"
         },
         "dropped_paths": {
           "description": "Explicit whitelist of JSON Pointers that are safely deprecated and intentionally dropped during migration.",
           "items": {
+            "maxLength": 2000,
             "type": "string"
           },
           "title": "Dropped Paths",
@@ -8574,22 +9374,30 @@
       "properties": {
         "artifact_id": {
           "description": "The definitive Content Identifier (CID) bounding the raw file.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Artifact Id",
           "type": "string"
         },
         "mime_type": {
           "description": "Strict MIME typing of the source artifact (e.g., 'application/pdf').",
+          "maxLength": 2000,
           "title": "Mime Type",
           "type": "string"
         },
         "byte_stream_hash": {
           "description": "The undeniable SHA-256 hash of the pre-transmutation byte stream.",
+          "maxLength": 128,
+          "minLength": 1,
           "pattern": "^[a-f0-9]{64}$",
           "title": "Byte Stream Hash",
           "type": "string"
         },
         "temporal_ingest_timestamp": {
           "description": "The UNIX timestamp anchoring the genesis block.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
           "title": "Temporal Ingest Timestamp",
           "type": "number"
         }
@@ -8605,11 +9413,12 @@
     },
     "MultimodalTokenAnchorState": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Unified multimodal grounding mapping extracted facts to strict 1D token spans and 2D visual\npatches.",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Unified multimodal grounding mapping extracted facts to strict 1D token spans and 2D visual\n\npatches.",
       "properties": {
         "token_span_start": {
           "anyOf": [
             {
+              "maximum": 1000000000,
               "minimum": 0,
               "type": "integer"
             },
@@ -8624,6 +9433,7 @@
         "token_span_end": {
           "anyOf": [
             {
+              "maximum": 1000000000,
               "minimum": 0,
               "type": "integer"
             },
@@ -8638,6 +9448,8 @@
         "visual_patch_hashes": {
           "description": "The explicit array of SHA-256 hashes corresponding to specific VQ-VAE visual patches attended to.",
           "items": {
+            "maxLength": 128,
+            "minLength": 1,
             "type": "string"
           },
           "title": "Visual Patch Hashes",
@@ -8646,7 +9458,7 @@
         "bounding_box": {
           "anyOf": [
             {
-              "maxItems": 4,
+              "maxItems": 1000000000,
               "minItems": 4,
               "prefixItems": [
                 {
@@ -8710,6 +9522,7 @@
         },
         "temperature_shift_variance": {
           "description": "The maximum allowed delta for an agent's temperature during mutation.",
+          "maximum": 1000000000.0,
           "title": "Temperature Shift Variance",
           "type": "number"
         },
@@ -8746,22 +9559,28 @@
           "items": {
             "type": "integer"
           },
+          "maxItems": 1000000000,
           "title": "Shape",
           "type": "array"
         },
         "vram_footprint_bytes": {
           "description": "Exact byte size of the uncompressed tensor.",
+          "maximum": 100000000000,
           "title": "Vram Footprint Bytes",
           "type": "integer"
         },
         "merkle_root": {
           "description": "SHA-256 Merkle root of the payload chunks.",
+          "maxLength": 128,
+          "minLength": 1,
           "pattern": "^[a-fA-F0-9]{64}$",
           "title": "Merkle Root",
           "type": "string"
         },
         "storage_uri": {
           "description": "Strict URI pointer to the physical bytes.",
+          "maxLength": 128,
+          "minLength": 1,
           "title": "Storage Uri",
           "type": "string"
         }
@@ -8782,7 +9601,9 @@
       "properties": {
         "audit_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
           "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Audit Id",
           "type": "string"
         },
@@ -8817,7 +9638,9 @@
       "properties": {
         "handoff_id": {
           "description": "Unique identifier for this symbolic delegation.",
+          "maxLength": 128,
           "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Handoff Id",
           "type": "string"
         },
@@ -8835,18 +9658,23 @@
         },
         "formal_grammar_payload": {
           "description": "The raw code or formal proof syntax generated by the LLM to be evaluated.",
+          "maxLength": 100000,
           "title": "Formal Grammar Payload",
           "type": "string"
         },
         "expected_proof_schema": {
           "additionalProperties": true,
           "description": "The strict JSON Schema the deterministic solver must use to return the verified answer to the agent.",
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Expected Proof Schema",
           "type": "object"
         },
         "timeout_ms": {
           "description": "The maximum compute time allocated to the symbolic solver before aborting.",
           "exclusiveMinimum": 0,
+          "maximum": 86400000,
           "title": "Timeout Ms",
           "type": "integer"
         }
@@ -8873,11 +9701,16 @@
       "properties": {
         "event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Id",
           "type": "string"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
           "title": "Timestamp",
           "type": "number"
         },
@@ -8890,16 +9723,23 @@
         },
         "tripped_rule_id": {
           "description": "The Content Identifier (CID) of the specific ConstitutionalPolicy causing logical friction.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Tripped Rule Id",
           "type": "string"
         },
         "measured_semantic_drift": {
           "description": "The calculated probabilistic delta showing how far the swarm's observed reality is diverging from the static rule.",
+          "maximum": 1000000000.0,
           "title": "Measured Semantic Drift",
           "type": "number"
         },
         "contradiction_proof_hash": {
           "description": "A cryptographic pointer to the internal scratchpad trace (ThoughtBranchState) definitively proving the rule is obsolete or causing a loop.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-f0-9]{64}$",
           "title": "Contradiction Proof Hash",
           "type": "string"
         }
@@ -8940,11 +9780,16 @@
       "properties": {
         "event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Id",
           "type": "string"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
           "title": "Timestamp",
           "type": "number"
         },
@@ -8960,6 +9805,9 @@
             "$ref": "#/$defs/JsonPrimitiveState"
           },
           "description": "Neurosymbolic Bindings of the raw, lossless semantic output appended from the environment or tool execution that anchor statistical probability to a definitive causal event hash.",
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Payload",
           "type": "object"
         },
@@ -9038,6 +9886,9 @@
         "triggering_invocation_id": {
           "anyOf": [
             {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9_.:-]+$",
               "type": "string"
             },
             {
@@ -9099,15 +9950,20 @@
       "properties": {
         "handshake_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this protocol handshake to the Merkle-DAG.",
+          "maxLength": 128,
           "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Handshake Id",
           "type": "string"
         },
         "participant_node_ids": {
           "description": "The agents establishing semantic alignment.",
           "items": {
+            "maxLength": 128,
+            "minLength": 1,
             "type": "string"
           },
+          "maxItems": 1000000000,
           "minItems": 2,
           "title": "Participant Node Ids",
           "type": "array"
@@ -9158,7 +10014,9 @@
       "properties": {
         "projection_id": {
           "description": "A cryptographic Lineage Watermark bounding this specific capability set.",
+          "maxLength": 128,
           "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Projection Id",
           "type": "string"
         },
@@ -9206,11 +10064,13 @@
       "properties": {
         "child_key": {
           "description": "The key in the nested topology's state contract.",
+          "maxLength": 2000,
           "title": "Child Key",
           "type": "string"
         },
         "parent_key": {
           "description": "The mapped key in the parent's shared state contract.",
+          "maxLength": 2000,
           "title": "Parent Key",
           "type": "string"
         }
@@ -9262,6 +10122,10 @@
             ]
           },
           "description": "The exact payload forcefully injected into the state.",
+          "maxProperties": 1000000000,
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Override Action",
           "type": "object"
         },
@@ -9298,17 +10162,24 @@
       "properties": {
         "adapter_id": {
           "description": "Unique identifier for the requested LoRA adapter.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Adapter Id",
           "type": "string"
         },
         "safetensors_hash": {
           "description": "The SHA-256 hash of the cold-storage adapter weights file ensuring supply-chain zero-trust.",
+          "maxLength": 128,
+          "minLength": 1,
           "pattern": "^[a-f0-9]{64}$",
           "title": "Safetensors Hash",
           "type": "string"
         },
         "base_model_hash": {
           "description": "The SHA-256 hash of the exact foundational model this adapter was mathematically trained against.",
+          "maxLength": 128,
+          "minLength": 1,
           "pattern": "^[a-f0-9]{64}$",
           "title": "Base Model Hash",
           "type": "string"
@@ -9316,12 +10187,14 @@
         "adapter_rank": {
           "description": "The low-rank intrinsic dimension (r) of the update matrices, used by the orchestrator to calculate VRAM cost.",
           "exclusiveMinimum": 0,
+          "maximum": 1000000000,
           "title": "Adapter Rank",
           "type": "integer"
         },
         "target_modules": {
           "description": "The explicit array of attention head modules to inject (e.g., ['q_proj', 'v_proj']).",
           "items": {
+            "maxLength": 255,
             "type": "string"
           },
           "minItems": 1,
@@ -9332,6 +10205,7 @@
           "anyOf": [
             {
               "exclusiveMinimum": 0,
+              "maximum": 86400,
               "type": "integer"
             },
             {
@@ -9366,6 +10240,7 @@
           "anyOf": [
             {
               "items": {
+                "maxLength": 2000,
                 "type": "string"
               },
               "type": "array"
@@ -9387,6 +10262,7 @@
           "anyOf": [
             {
               "items": {
+                "maxLength": 2000,
                 "type": "string"
               },
               "type": "array"
@@ -9413,11 +10289,16 @@
       "properties": {
         "event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Id",
           "type": "string"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
           "title": "Timestamp",
           "type": "number"
         },
@@ -9430,13 +10311,17 @@
         },
         "lakehouse_snapshot_id": {
           "description": "The external cryptographic receipt generated by Iceberg/Delta.",
+          "maxLength": 128,
           "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Lakehouse Snapshot Id",
           "type": "string"
         },
         "committed_state_diff_id": {
           "description": "The internal StateDifferentialManifest CID that was flushed.",
+          "maxLength": 128,
           "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Committed State Diff Id",
           "type": "string"
         },
@@ -9473,6 +10358,9 @@
         },
         "public_key_id": {
           "description": "The identifier of the post-quantum public evaluation key.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Public Key Id",
           "type": "string"
         },
@@ -9506,6 +10394,7 @@
         },
         "min_liquidity_magnitude": {
           "description": "Minimum liquidity required.",
+          "maximum": 1000000000,
           "minimum": 0,
           "title": "Min Liquidity Magnitude",
           "type": "integer"
@@ -9532,17 +10421,22 @@
       "properties": {
         "market_id": {
           "description": "The ID of the prediction market.",
+          "le": 1000000000,
           "minLength": 1,
           "title": "Market Id",
           "type": "string"
         },
         "resolution_oracle_condition_id": {
           "description": "The specific FalsificationContract ID whose execution will trigger the market payout.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Resolution Oracle Condition Id",
           "type": "string"
         },
         "lmsr_b_parameter": {
           "description": "The stringified decimal representing the liquidity parameter defining the market depth and max loss for the AMM.",
+          "maxLength": 255,
           "pattern": "^\\d+\\.\\d+$",
           "title": "Lmsr B Parameter",
           "type": "string"
@@ -9557,9 +10451,14 @@
         },
         "current_market_probabilities": {
           "additionalProperties": {
+            "maxLength": 255,
             "type": "string"
           },
           "description": "Mapping of hypothesis IDs to their current LMSR-calculated market price (probability) as stringified decimals.",
+          "le": 1000000000,
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Current Market Probabilities",
           "type": "object"
         }
@@ -9600,18 +10499,23 @@
       "properties": {
         "metadata_id": {
           "description": "A strict cryptographic string identifier for this L1 procedural pointer.",
+          "maxLength": 128,
           "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Metadata Id",
           "type": "string"
         },
         "target_sop_id": {
           "description": "The Content Identifier (CID) of the heavy EpistemicSOPManifest resting in cold storage.",
+          "maxLength": 128,
           "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Target Sop Id",
           "type": "string"
         },
         "trigger_description": {
           "description": "The mathematically bounded semantic projection defining when the router must trigger this SOP.",
+          "maxLength": 2000,
           "title": "Trigger Description",
           "type": "string"
         },
@@ -9661,6 +10565,7 @@
         },
         "max_backtracks_allowed": {
           "description": "The absolute limit on how many times the agent can start a new branch before throwing a SystemFaultEvent.",
+          "maximum": 1000000000,
           "minimum": 0,
           "title": "Max Backtracks Allowed",
           "type": "integer"
@@ -9668,6 +10573,7 @@
         "evaluator_model_name": {
           "anyOf": [
             {
+              "maxLength": 2000,
               "type": "string"
             },
             {
@@ -9714,6 +10620,7 @@
           "const": "quarantine_intent",
           "default": "quarantine_intent",
           "description": "The type of the resilience payload.",
+          "le": 1000000000,
           "title": "Type",
           "type": "string"
         },
@@ -9723,6 +10630,7 @@
         },
         "reason": {
           "description": "The deterministic causal justification for the structural quarantine.",
+          "maxLength": 2000,
           "title": "Reason",
           "type": "string"
         }
@@ -9740,6 +10648,7 @@
       "properties": {
         "max_tolerable_faults": {
           "description": "The maximum number of actively malicious, hallucinating, or degraded nodes (f) the swarm must survive.",
+          "maximum": 1000000000,
           "minimum": 0,
           "title": "Max Tolerable Faults",
           "type": "integer"
@@ -9747,6 +10656,7 @@
         "min_quorum_size": {
           "description": "The minimum number of participating agents (N) required to form consensus.",
           "exclusiveMinimum": 0,
+          "maximum": 1000000000,
           "title": "Min Quorum Size",
           "type": "integer"
         },
@@ -9786,6 +10696,9 @@
       "properties": {
         "rule_id": {
           "description": "Unique identifier for the sanitization rule.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Rule Id",
           "type": "string"
         },
@@ -9795,6 +10708,7 @@
         },
         "target_pattern": {
           "description": "The semantic entity type or declarative regex pattern to identify.",
+          "maxLength": 2000,
           "title": "Target Pattern",
           "type": "string"
         },
@@ -9808,6 +10722,7 @@
           "anyOf": [
             {
               "items": {
+                "maxLength": 2000,
                 "type": "string"
               },
               "maxItems": 100,
@@ -9828,6 +10743,7 @@
         "replacement_token": {
           "anyOf": [
             {
+              "maxLength": 2000,
               "type": "string"
             },
             {
@@ -9865,17 +10781,25 @@
       "properties": {
         "request_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the causal rollback operation.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Request Id",
           "type": "string"
         },
         "target_event_id": {
           "description": "The Content Identifier (CID) of the corrupted event in the EpistemicLedgerState to revert to.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Target Event Id",
           "type": "string"
         },
         "invalidated_node_ids": {
           "description": "The strict array of nodes whose operational histories are causally tainted and must be flushed.",
           "items": {
+            "maxLength": 128,
+            "minLength": 1,
             "type": "string"
           },
           "title": "Invalidated Node Ids",
@@ -9896,12 +10820,14 @@
         "max_latency_ms": {
           "description": "The absolute physical speed limit acceptable for time-to-first-token or total generation.",
           "exclusiveMinimum": 0,
+          "maximum": 86400000,
           "title": "Max Latency Ms",
           "type": "integer"
         },
         "max_cost_magnitude_per_token": {
           "description": "The strict magnitude ceiling. MUST be an integer to maintain cryptographic determinism.",
           "exclusiveMinimum": 0,
+          "maximum": 1000000000,
           "title": "Max Cost Magnitude Per Token",
           "type": "integer"
         },
@@ -9927,6 +10853,7 @@
         "max_carbon_intensity_gco2eq_kwh": {
           "anyOf": [
             {
+              "maximum": 10000.0,
               "minimum": 0.0,
               "type": "number"
             },
@@ -9955,7 +10882,8 @@
         "epistemic_enforcement": {
           "anyOf": [
             {
-              "$ref": "#/$defs/TruthMaintenancePolicy"
+              "$ref": "#/$defs/TruthMaintenancePolicy",
+              "le": 1000000000
             },
             {
               "type": "null"
@@ -9977,6 +10905,7 @@
         "architectural_intent": {
           "anyOf": [
             {
+              "maxLength": 2000,
               "type": "string"
             },
             {
@@ -9990,6 +10919,7 @@
         "justification": {
           "anyOf": [
             {
+              "maxLength": 2000,
               "type": "string"
             },
             {
@@ -10066,12 +10996,15 @@
         },
         "joint_function_uri": {
           "description": "The URI or hash pointing to the exact math circuit or polynomial function the ring will collaboratively compute.",
+          "maxLength": 2000,
           "title": "Joint Function Uri",
           "type": "string"
         },
         "participant_node_ids": {
           "description": "The strict ordered array of NodeIdentifierStates participating in the Secure Multi-Party Computation ring.",
           "items": {
+            "maxLength": 128,
+            "minLength": 1,
             "type": "string"
           },
           "minItems": 2,
@@ -10121,9 +11054,13 @@
         },
         "headers": {
           "additionalProperties": {
+            "maxLength": 2000,
             "type": "string"
           },
           "description": "HTTP headers, e.g., for authentication.",
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Headers",
           "type": "object"
         }
@@ -10140,18 +11077,21 @@
       "properties": {
         "feature_index": {
           "description": "The exact dimensional index of the monosemantic feature in the Sparse Autoencoder dictionary.",
+          "maximum": 1000000000,
           "minimum": 0,
           "title": "Feature Index",
           "type": "integer"
         },
         "activation_magnitude": {
           "description": "The mathematical strength of this feature's activation during the forward pass.",
+          "maximum": 1000000000,
           "title": "Activation Magnitude",
           "type": "number"
         },
         "interpretability_label": {
           "anyOf": [
             {
+              "maxLength": 2000,
               "type": "string"
             },
             {
@@ -10176,6 +11116,7 @@
       "properties": {
         "target_feature_index": {
           "description": "The exact dimensional index of the monosemantic feature in the Sparse Autoencoder dictionary.",
+          "maximum": 1000000000,
           "minimum": 0,
           "title": "Target Feature Index",
           "type": "integer"
@@ -10183,6 +11124,7 @@
         "monitored_layers": {
           "description": "The specific transformer layer indices where this feature activation must be monitored.",
           "items": {
+            "minimum": 0,
             "type": "integer"
           },
           "minItems": 1,
@@ -10191,6 +11133,7 @@
         },
         "max_activation_threshold": {
           "description": "The mathematical magnitude limit. If the feature activates beyond this, the firewall trips.",
+          "maximum": 1000000000.0,
           "minimum": 0.0,
           "title": "Max Activation Threshold",
           "type": "number"
@@ -10209,6 +11152,7 @@
         "clamp_value": {
           "anyOf": [
             {
+              "maximum": 1000000000.0,
               "type": "number"
             },
             {
@@ -10221,6 +11165,8 @@
         },
         "sae_dictionary_hash": {
           "description": "The SHA-256 hash of the exact SAE projection matrix required to decode this feature.",
+          "maxLength": 128,
+          "minLength": 1,
           "pattern": "^[a-f0-9]{64}$",
           "title": "Sae Dictionary Hash",
           "type": "string"
@@ -10261,6 +11207,7 @@
         },
         "decay_rate": {
           "description": "The rate at which this epistemic coordinate's relevance decays over time.",
+          "maximum": 1.0,
           "minimum": 0.0,
           "title": "Decay Rate",
           "type": "number"
@@ -10301,6 +11248,7 @@
         "domain_min": {
           "anyOf": [
             {
+              "maximum": 1000000000.0,
               "type": "number"
             },
             {
@@ -10314,6 +11262,7 @@
         "domain_max": {
           "anyOf": [
             {
+              "maximum": 1000000000.0,
               "type": "number"
             },
             {
@@ -10338,12 +11287,15 @@
         "session_id": {
           "description": "Unique identifier for the secure session.",
           "maxLength": 255,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Session Id",
           "type": "string"
         },
         "allowed_vault_keys": {
           "description": "The explicit array of enterprise vault keys the agent is temporarily allowed to access.",
           "items": {
+            "maxLength": 255,
             "type": "string"
           },
           "maxItems": 100,
@@ -10422,8 +11374,10 @@
         "required_structural_types": {
           "description": "The strict array of strings defining topological limits on the discovered tools.",
           "items": {
+            "maxLength": 255,
             "type": "string"
           },
+          "maxItems": 1000000000,
           "title": "Required Structural Types",
           "type": "array"
         }
@@ -10442,16 +11396,25 @@
       "properties": {
         "edge_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this semantic edge to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Edge Id",
           "type": "string"
         },
         "subject_node_id": {
           "description": "The origin SemanticNodeState Content Identifier (CID).",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Subject Node Id",
           "type": "string"
         },
         "object_node_id": {
           "description": "The destination SemanticNodeState Content Identifier (CID).",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Object Node Id",
           "type": "string"
         },
@@ -10472,6 +11435,7 @@
         },
         "predicate": {
           "description": "The string representation of the relationship (e.g., 'WORKS_FOR').",
+          "maxLength": 2000,
           "title": "Predicate",
           "type": "string"
         },
@@ -10540,12 +11504,14 @@
         "max_input_tokens": {
           "description": "The absolute physical ceiling of tokens allowed in a single ingress payload.",
           "exclusiveMinimum": 0,
+          "maximum": 1000000000,
           "title": "Max Input Tokens",
           "type": "integer"
         },
         "forbidden_intents": {
           "description": "A strict array of semantic intents (e.g., 'role_override', 'system_prompt_leak') that trigger immediate quarantine.",
           "items": {
+            "maxLength": 2000,
             "type": "string"
           },
           "title": "Forbidden Intents",
@@ -10575,11 +11541,15 @@
       "properties": {
         "node_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this semantic node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Node Id",
           "type": "string"
         },
         "label": {
           "description": "The categorical label of the node (e.g., 'Person', 'Concept').",
+          "maxLength": 2000,
           "title": "Label",
           "type": "string"
         },
@@ -10684,6 +11654,7 @@
           "anyOf": [
             {
               "items": {
+                "maxLength": 255,
                 "type": "string"
               },
               "type": "array"
@@ -10699,6 +11670,7 @@
         "context_window_token_ceiling": {
           "description": "The mathematical physical limit of the active context partition to prevent VRAM exhaustion.",
           "exclusiveMinimum": 0,
+          "maximum": 2000000,
           "title": "Context Window Token Ceiling",
           "type": "integer"
         }
@@ -10730,6 +11702,7 @@
         },
         "causal_attribution_score": {
           "description": "The exact Shapley value (\\phi_i) satisfying efficiency, symmetry, and additivity axioms.",
+          "maximum": 1.0,
           "title": "Causal Attribution Score",
           "type": "number"
         },
@@ -10742,11 +11715,13 @@
         },
         "confidence_interval_lower": {
           "description": "The bootstrap confidence bounds of the Monte Carlo approximation (lower bound).",
+          "maximum": 1000000000.0,
           "title": "Confidence Interval Lower",
           "type": "number"
         },
         "confidence_interval_upper": {
           "description": "The bootstrap confidence bounds of the Monte Carlo approximation (upper bound).",
+          "maximum": 1000000000.0,
           "title": "Confidence Interval Upper",
           "type": "number"
         }
@@ -10790,6 +11765,7 @@
         "max_monte_carlo_rollouts": {
           "description": "The absolute physical limit on how many alternate futures the system is allowed to render.",
           "exclusiveMinimum": 0,
+          "maximum": 1000000000,
           "title": "Max Monte Carlo Rollouts",
           "type": "integer"
         },
@@ -10815,6 +11791,7 @@
         "locked_magnitude": {
           "description": "The strictly typed boundary requiring locked magnitude to prevent zero-cost griefing of the swarm.",
           "exclusiveMinimum": 0,
+          "maximum": 1000000000,
           "title": "Locked Magnitude",
           "type": "integer"
         }
@@ -10831,17 +11808,24 @@
       "properties": {
         "name": {
           "description": "The semantic name of the event.",
+          "maxLength": 2000,
           "title": "Name",
           "type": "string"
         },
         "timestamp_unix_nano": {
           "description": "The precise temporal execution point.",
+          "maximum": 253402300799000000000,
+          "minimum": 0,
           "title": "Timestamp Unix Nano",
           "type": "integer"
         },
         "attributes": {
           "additionalProperties": true,
           "description": "Typed metadata bound to the event.",
+          "maxProperties": 1000000000,
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Attributes",
           "type": "object"
         }
@@ -10877,12 +11861,18 @@
       "properties": {
         "span_id": {
           "description": "The unique identifier for this execution span.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Span Id",
           "type": "string"
         },
         "parent_span_id": {
           "anyOf": [
             {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9_.:-]+$",
               "type": "string"
             },
             {
@@ -10895,12 +11885,16 @@
         },
         "start_time": {
           "description": "The UNIX timestamp when the span started.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
           "title": "Start Time",
           "type": "number"
         },
         "end_time": {
           "anyOf": [
             {
+              "maximum": 253402300799.0,
+              "minimum": 0.0,
               "type": "number"
             },
             {
@@ -11035,6 +12029,7 @@
           "anyOf": [
             {
               "exclusiveMinimum": 0,
+              "maximum": 86400000,
               "type": "integer"
             },
             {
@@ -11056,6 +12051,7 @@
         "expected_visual_concept": {
           "anyOf": [
             {
+              "maxLength": 2000,
               "type": "string"
             },
             {
@@ -11080,6 +12076,9 @@
         "schema_definition": {
           "additionalProperties": true,
           "description": "A strict JSON Schema dictionary defining the required shape of the shared epistemic blackboard.",
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Schema Definition",
           "type": "object"
         },
@@ -11102,25 +12101,36 @@
       "properties": {
         "diff_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this state differential.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Diff Id",
           "type": "string"
         },
         "author_node_id": {
           "description": "The exact Lineage Watermark of the agent or system that authored this state mutation.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Author Node Id",
           "type": "string"
         },
         "lamport_timestamp": {
           "description": "Strict scalar logical clock governing deterministic LWW (Last-Writer-Wins) conflict resolution.",
+          "maximum": 1000000000,
           "minimum": 0,
           "title": "Lamport Timestamp",
           "type": "integer"
         },
         "vector_clock": {
           "additionalProperties": {
+            "minimum": 0,
             "type": "integer"
           },
           "description": "Causal history mapping of all known Lineage Watermarks to their latest logical mutation count at the time of authoring.",
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Vector Clock",
           "type": "object"
         },
@@ -11148,6 +12158,7 @@
       "properties": {
         "epistemic_coordinate": {
           "description": "A string ID representing the session or specific spatial trace binding.",
+          "maxLength": 2000,
           "title": "Epistemic Coordinate",
           "type": "string"
         },
@@ -11163,12 +12174,16 @@
         "working_context_variables": {
           "additionalProperties": true,
           "description": "A strictly typed dictionary for ephemeral context variables injected at runtime. AGENT INSTRUCTION: This matrix is deterministically sorted by CoreasonBaseState natively.",
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Working Context Variables",
           "type": "object"
         },
         "max_retained_tokens": {
           "description": "An integer representing the physical limit of the context window.",
           "exclusiveMinimum": 0,
+          "maximum": 1000000000,
           "title": "Max Retained Tokens",
           "type": "integer"
         }
@@ -11192,6 +12207,7 @@
         },
         "path": {
           "description": "The JSON pointer indicating the exact state vector to mutate deterministically.",
+          "maxLength": 2000,
           "title": "Path",
           "type": "string"
         },
@@ -11203,6 +12219,7 @@
         "from": {
           "anyOf": [
             {
+              "maxLength": 2000,
               "type": "string"
             },
             {
@@ -11234,22 +12251,29 @@
         },
         "command": {
           "description": "The command executable to run (e.g., 'node', 'python').",
+          "maxLength": 2000,
           "title": "Command",
           "type": "string"
         },
         "args": {
           "description": "The explicit array of arguments to pass to the command.",
           "items": {
+            "maxLength": 2000,
             "type": "string"
           },
+          "maxItems": 1000000000,
           "title": "Args",
           "type": "array"
         },
         "env_vars": {
           "additionalProperties": {
+            "maxLength": 2000,
             "type": "string"
           },
           "description": "Environment variables required by the transport.",
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Env Vars",
           "type": "object"
         }
@@ -11266,12 +12290,14 @@
       "properties": {
         "expected_max_latency": {
           "description": "The expected maximum latency under normal conditions.",
+          "maximum": 1000000000.0,
           "minimum": 0.0,
           "title": "Expected Max Latency",
           "type": "number"
         },
         "max_loops_allowed": {
           "description": "The maximum allowed loops for the swarm to reach a conclusion.",
+          "maximum": 1000000000,
           "title": "Max Loops Allowed",
           "type": "integer"
         },
@@ -11279,8 +12305,10 @@
           "anyOf": [
             {
               "items": {
+                "maxLength": 2000,
                 "type": "string"
               },
+              "maxItems": 1000000000,
               "type": "array"
             },
             {
@@ -11306,16 +12334,20 @@
         "observed_variables": {
           "description": "The nodes in the DAG that the agent can passively measure.",
           "items": {
+            "maxLength": 255,
             "type": "string"
           },
+          "maxItems": 1000000000,
           "title": "Observed Variables",
           "type": "array"
         },
         "latent_variables": {
           "description": "The unobserved confounders the agent suspects exist.",
           "items": {
+            "maxLength": 255,
             "type": "string"
           },
+          "maxItems": 1000000000,
           "title": "Latent Variables",
           "type": "array"
         },
@@ -11343,7 +12375,8 @@
         "epistemic_enforcement": {
           "anyOf": [
             {
-              "$ref": "#/$defs/TruthMaintenancePolicy"
+              "$ref": "#/$defs/TruthMaintenancePolicy",
+              "le": 1000000000
             },
             {
               "type": "null"
@@ -11365,6 +12398,7 @@
         "architectural_intent": {
           "anyOf": [
             {
+              "maxLength": 2000,
               "type": "string"
             },
             {
@@ -11378,6 +12412,7 @@
         "justification": {
           "anyOf": [
             {
+              "maxLength": 2000,
               "type": "string"
             },
             {
@@ -11445,6 +12480,8 @@
         "spawning_threshold": {
           "default": 3,
           "description": "Threshold limit for dynamic spawning of additional nodes.",
+          "maximum": 100,
+          "minimum": 1,
           "title": "Spawning Threshold",
           "type": "integer"
         },
@@ -11496,7 +12533,9 @@
       "properties": {
         "profile_id": {
           "description": "Unique identifier for this simulation profile.",
+          "maxLength": 128,
           "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Profile Id",
           "type": "string"
         },
@@ -11533,8 +12572,10 @@
         "allowed_passive_tools": {
           "description": "The explicit, bounded array of strictly non-mutating tool capabilities.",
           "items": {
+            "maxLength": 2000,
             "type": "string"
           },
+          "maxItems": 1000000000,
           "title": "Allowed Passive Tools",
           "type": "array"
         }
@@ -11552,7 +12593,9 @@
       "properties": {
         "fault_id": {
           "description": "A cryptographic Lineage Watermark (CID) tracking this specific dimensional collapse.",
+          "maxLength": 128,
           "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Fault Id",
           "type": "string"
         },
@@ -11563,6 +12606,7 @@
         "failing_pointers": {
           "description": "A strictly typed array of RFC 6902 JSON Pointers isolating the exact topological coordinate of the hallucination.",
           "items": {
+            "maxLength": 2000,
             "type": "string"
           },
           "minItems": 1,
@@ -11591,11 +12635,16 @@
       "properties": {
         "event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Id",
           "type": "string"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
           "title": "Timestamp",
           "type": "number"
         },
@@ -11620,12 +12669,14 @@
       "properties": {
         "description": {
           "description": "The semantic boundary defining the objective function or computational perimeter of the execution node.",
+          "maxLength": 2000,
           "title": "Description",
           "type": "string"
         },
         "architectural_intent": {
           "anyOf": [
             {
+              "maxLength": 2000,
               "type": "string"
             },
             {
@@ -11639,6 +12690,7 @@
         "justification": {
           "anyOf": [
             {
+              "maxLength": 2000,
               "type": "string"
             },
             {
@@ -11661,6 +12713,9 @@
           "anyOf": [
             {
               "additionalProperties": true,
+              "propertyNames": {
+                "maxLength": 255
+              },
               "type": "object"
             },
             {
@@ -11691,12 +12746,18 @@
       "properties": {
         "task_id": {
           "description": "Unique identifier for the required task.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Task Id",
           "type": "string"
         },
         "required_action_space_id": {
           "anyOf": [
             {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9_.:-]+$",
               "type": "string"
             },
             {
@@ -11709,6 +12770,7 @@
         },
         "max_budget_magnitude": {
           "description": "The absolute ceiling price the orchestrator is willing to pay.",
+          "maximum": 1000000000,
           "title": "Max Budget Magnitude",
           "type": "integer"
         }
@@ -11726,19 +12788,27 @@
       "properties": {
         "task_id": {
           "description": "The identifier of the resolved task.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Task Id",
           "type": "string"
         },
         "awarded_syndicate": {
           "additionalProperties": {
+            "minimum": 0,
             "type": "integer"
           },
           "description": "Strict mapping of agent NodeIdentifierStates to their exact fractional payout in magnitude.",
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Awarded Syndicate",
           "type": "object"
         },
         "cleared_price_magnitude": {
           "description": "The final cryptographic clearing price.",
+          "maximum": 1000000000,
           "title": "Cleared Price Magnitude",
           "type": "integer"
         },
@@ -11769,18 +12839,23 @@
       "properties": {
         "node_id": {
           "description": "A Content Identifier (CID) bounding this specific taxonomic coordinate.",
+          "maxLength": 128,
           "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Node Id",
           "type": "string"
         },
         "semantic_label": {
           "description": "The human-legible, dynamically synthesized categorical label (e.g., 'High Risk Policies').",
+          "maxLength": 2000,
           "title": "Semantic Label",
           "type": "string"
         },
         "children_node_ids": {
           "description": "Explicit array of child node CIDs to enforce the Directed Acyclic Graph.",
           "items": {
+            "maxLength": 128,
+            "minLength": 1,
             "type": "string"
           },
           "title": "Children Node Ids",
@@ -11842,7 +12917,9 @@
       "properties": {
         "policy_id": {
           "description": "Unique identifier for this pre-flight routing policy.",
+          "maxLength": 128,
           "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Policy Id",
           "type": "string"
         },
@@ -11857,6 +12934,10 @@
             "type": "string"
           },
           "description": "Strict dictionary binding classified natural language intents to bounded spatial heuristics.",
+          "maxProperties": 1000,
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Intent To Heuristic Matrix",
           "type": "object"
         },
@@ -11894,11 +12975,15 @@
           }
         ]
       },
+      "propertyNames": {
+        "maxLength": 255
+      },
       "type": "object"
     },
     "TelemetryScalarState": {
       "anyOf": [
         {
+          "maxLength": 100000,
           "type": "string"
         },
         {
@@ -11922,6 +13007,7 @@
         "valid_from": {
           "anyOf": [
             {
+              "maximum": 1000000000.0,
               "minimum": 0.0,
               "type": "number"
             },
@@ -11936,6 +13022,7 @@
         "valid_to": {
           "anyOf": [
             {
+              "maximum": 1000000000.0,
               "type": "number"
             },
             {
@@ -11968,16 +13055,23 @@
       "properties": {
         "checkpoint_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the temporal anchor.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Checkpoint Id",
           "type": "string"
         },
         "ledger_index": {
           "description": "The exact array index in the EpistemicLedgerState this checkpoint represents.",
+          "maximum": 1000000000,
           "title": "Ledger Index",
           "type": "integer"
         },
         "state_hash": {
           "description": "The canonical RFC 8785 SHA-256 hash of the entire topology at this exact index.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-f0-9]{64}$",
           "title": "State Hash",
           "type": "string"
         }
@@ -12016,21 +13110,31 @@
         },
         "working_directory": {
           "description": "Capability Perimeters defining context bounds.",
+          "maxLength": 2000,
           "title": "Working Directory",
           "type": "string"
         },
         "stdout_hash": {
           "description": "The SHA-256 hash of the Exogenous Perturbations captured.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-f0-9]{64}$",
           "title": "Stdout Hash",
           "type": "string"
         },
         "stderr_hash": {
           "description": "The SHA-256 hash tracking structural deviation anomalies.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-f0-9]{64}$",
           "title": "Stderr Hash",
           "type": "string"
         },
         "env_variables_hash": {
           "description": "The SHA-256 hash of the state-space context matrix.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-f0-9]{64}$",
           "title": "Env Variables Hash",
           "type": "string"
         }
@@ -12050,13 +13154,17 @@
       "properties": {
         "target_agent_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the agent whose mind is being modeled.",
+          "maxLength": 128,
           "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Target Agent Id",
           "type": "string"
         },
         "assumed_shared_beliefs": {
           "description": "The explicit array of Content Identifiers (CIDs) acting as cryptographic Lineage Watermarks that the modeling agent assumes the target already possesses.",
           "items": {
+            "maxLength": 128,
+            "minLength": 1,
             "type": "string"
           },
           "title": "Assumed Shared Beliefs",
@@ -12065,8 +13173,10 @@
         "identified_knowledge_gaps": {
           "description": "Specific topics or logical premises the target agent is assumed to be missing.",
           "items": {
+            "maxLength": 2000,
             "type": "string"
           },
+          "maxItems": 1000000000,
           "title": "Identified Knowledge Gaps",
           "type": "array"
         },
@@ -12093,13 +13203,18 @@
       "properties": {
         "branch_id": {
           "description": "A deterministic capability pointer bounding this specific topological divergence in the Latent Scratchpad Trace.",
+          "maxLength": 128,
           "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Branch Id",
           "type": "string"
         },
         "parent_branch_id": {
           "anyOf": [
             {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9_.:-]+$",
               "type": "string"
             },
             {
@@ -12112,6 +13227,8 @@
         },
         "latent_content_hash": {
           "description": "The SHA-256 hash of the raw latent dimensions explored in this branch.",
+          "maxLength": 128,
+          "minLength": 1,
           "pattern": "^[a-f0-9]{64}$",
           "title": "Latent Content Hash",
           "type": "string"
@@ -12154,11 +13271,16 @@
       "properties": {
         "event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Id",
           "type": "string"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
           "title": "Timestamp",
           "type": "number"
         },
@@ -12171,23 +13293,29 @@
         },
         "tool_invocation_id": {
           "description": "A string linking this burn back to the specific ToolInvocationEvent CID.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Tool Invocation Id",
           "type": "string"
         },
         "input_tokens": {
           "description": "The mathematical measure of input tokens consumed.",
+          "maximum": 1000000000,
           "minimum": 0,
           "title": "Input Tokens",
           "type": "integer"
         },
         "output_tokens": {
           "description": "The mathematical measure of output tokens generated.",
+          "maximum": 1000000000,
           "minimum": 0,
           "title": "Output Tokens",
           "type": "integer"
         },
         "burn_magnitude": {
           "description": "The normalized economic cost magnitude representing thermodynamic burn.",
+          "maximum": 1000000000,
           "minimum": 0,
           "title": "Burn Magnitude",
           "type": "integer"
@@ -12221,11 +13349,16 @@
       "properties": {
         "event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Id",
           "type": "string"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
           "title": "Timestamp",
           "type": "number"
         },
@@ -12238,18 +13371,24 @@
         },
         "tool_name": {
           "description": "The exact tool targeted in the ActionSpaceManifest.",
+          "maxLength": 2000,
           "title": "Tool Name",
           "type": "string"
         },
         "parameters": {
           "additionalProperties": true,
           "description": "The intended JSON-RPC payload.",
+          "maxProperties": 1000000000,
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Parameters",
           "type": "object"
         },
         "authorized_budget_magnitude": {
           "anyOf": [
             {
+              "maximum": 1000000000,
               "minimum": 0,
               "type": "integer"
             },
@@ -12286,17 +13425,23 @@
       "properties": {
         "tool_name": {
           "description": "The exact identifier of the tool.",
+          "maxLength": 2000,
           "title": "Tool Name",
           "type": "string"
         },
         "description": {
           "description": "The mathematically bounded semantic projection defining the tool's causal affordances.",
+          "maxLength": 2000,
           "title": "Description",
           "type": "string"
         },
         "input_schema": {
           "additionalProperties": true,
           "description": "The strict JSON Schema dictionary defining the required arguments.",
+          "maxProperties": 1000000000,
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Input Schema",
           "type": "object"
         },
@@ -12343,6 +13488,7 @@
       "properties": {
         "max_hop_depth": {
           "description": "The strictly typed search depth bound for the cDAG.",
+          "maximum": 1000000000,
           "minimum": 1,
           "title": "Max Hop Depth",
           "type": "integer"
@@ -12424,6 +13570,9 @@
       "properties": {
         "batch_id": {
           "description": "Unique identifier for this telemetry snapshot.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Batch Id",
           "type": "string"
         },
@@ -12469,12 +13618,14 @@
         "max_cascade_depth": {
           "description": "The absolute recursion depth limit for state retractions.",
           "exclusiveMinimum": 0,
+          "maximum": 1000000000,
           "title": "Max Cascade Depth",
           "type": "integer"
         },
         "max_quarantine_blast_radius": {
           "description": "The maximum number of nodes allowed to be severed in a single defeasible event.",
           "exclusiveMinimum": 0,
+          "maximum": 1000000000,
           "title": "Max Quarantine Blast Radius",
           "type": "integer"
         }
@@ -12494,22 +13645,35 @@
       "properties": {
         "optimizing_vectors": {
           "additionalProperties": {
+            "maximum": 1000.0,
+            "minimum": -1000.0,
             "type": "number"
           },
           "description": "Multi-dimensional continuous values representing optimizations.",
+          "le": 1000000000.0,
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Optimizing Vectors",
           "type": "object"
         },
         "degrading_vectors": {
           "additionalProperties": {
+            "maximum": 1000.0,
+            "minimum": -1000.0,
             "type": "number"
           },
           "description": "Multi-dimensional continuous values representing degradations.",
+          "le": 1000000000.0,
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Degrading Vectors",
           "type": "object"
         },
         "superposition_variance_threshold": {
           "description": "The statistical variance threshold below which deterministic fallback is enforced.",
+          "maximum": 1000000000.0,
           "minimum": 0.0,
           "title": "Superposition Variance Threshold",
           "type": "number"
@@ -12551,6 +13715,7 @@
         },
         "model_name": {
           "description": "The provenance of the embedding model used (e.g., 'text-embedding-3-large').",
+          "maxLength": 2000,
           "title": "Model Name",
           "type": "string"
         }
@@ -12584,12 +13749,17 @@
         },
         "cryptographic_proof_blob": {
           "description": "The base64-encoded cryptographic proof (e.g., ZK-SNARKs, zkVM receipts, or programmable trust attestations) proving the claims without revealing the private key.",
+          "maxLength": 100000,
           "title": "Cryptographic Proof Blob",
           "type": "string"
         },
         "authorization_claims": {
           "additionalProperties": true,
           "description": "The strict, domain-agnostic JSON dictionary of strictly bounded geometric predicates that define the operational perimeter of the agent (e.g., {'clearance': 'RESTRICTED'}).",
+          "maxProperties": 86400000,
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Authorization Claims",
           "type": "object"
         }
@@ -12621,7 +13791,9 @@
         },
         "seed_hash": {
           "description": "The SHA-256 hash of the origin seed used to initialize the VRF.",
+          "maxLength": 128,
           "minLength": 10,
+          "pattern": "^[a-f0-9]{64}$",
           "title": "Seed Hash",
           "type": "string"
         }
@@ -12654,6 +13826,7 @@
         },
         "field": {
           "description": "The exact column or field name from the semantic series.",
+          "maxLength": 2000,
           "title": "Field",
           "type": "string"
         },
@@ -12745,6 +13918,8 @@
           "anyOf": [
             {
               "maxLength": 255,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9_.:-]+$",
               "type": "string"
             },
             {
@@ -12759,6 +13934,8 @@
           "anyOf": [
             {
               "maxLength": 255,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9_.:-]+$",
               "type": "string"
             },
             {
@@ -12859,11 +14036,17 @@
         },
         "public_inputs_hash": {
           "description": "The SHA-256 hash of the public inputs (e.g., prompt, Lamport clock) anchoring this proof to the specific state index.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-f0-9]{64}$",
           "title": "Public Inputs Hash",
           "type": "string"
         },
         "verifier_key_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the public evaluation key.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Verifier Key Id",
           "type": "string"
         },
@@ -12879,6 +14062,10 @@
             "type": "string"
           },
           "description": "Cryptographic bindings (hashes) of intermediate residual stream states to prevent activation spoofing.",
+          "le": 1000000000,
+          "propertyNames": {
+            "maxLength": 255
+          },
           "title": "Latent State Commitments",
           "type": "object"
         }

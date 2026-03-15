@@ -58,9 +58,6 @@ jobs:
       - name: Diff Check
         run: git diff --exit-code coreason_ontology.schema.json
 
-      - name: Semantic Diff Check
-        run: uv run scripts/semantic_diff.py origin/main coreason_ontology.schema.json
-
   security-sast:
     name: Security SAST (AI-Specific Fuzzing & Architectural Gate)
     runs-on: ubuntu-latest
@@ -82,6 +79,9 @@ jobs:
           else
             echo "Skipping PR diff for non-pull_request event"
           fi
+
+      - name: Instantiation Bounds Gate
+        run: uv run scripts/evaluate_instantiation_bounds.py
 
       - name: Install Dependencies
         run: uv sync

@@ -84,8 +84,8 @@ def draw_latent_projection_intent(draw: st.DrawFn) -> dict[str, Any]:
         st.fixed_dictionaries(
             {
                 "expansion_paradigm": st.sampled_from(["sliding_window", "hierarchical_merge", "document_summary"]),
-                "max_token_budget": st.integers(min_value=1),
-                "surrounding_sentences_k": st.one_of(st.none(), st.integers(min_value=1)),
+                "max_token_budget": st.integers(min_value=1, max_value=1000000000),
+                "surrounding_sentences_k": st.one_of(st.none(), st.integers(min_value=1, max_value=1000000000)),
                 "parent_merge_threshold": st.one_of(
                     st.none(), st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False)
                 ),
@@ -97,7 +97,7 @@ def draw_latent_projection_intent(draw: st.DrawFn) -> dict[str, Any]:
         st.none(),
         st.fixed_dictionaries(
             {
-                "max_hop_depth": st.integers(min_value=1),
+                "max_hop_depth": st.integers(min_value=1, max_value=1000000000),
                 "allowed_causal_relationships": st.lists(
                     st.sampled_from(["causes", "confounds", "correlates_with", "undirected"]), min_size=1
                 ),

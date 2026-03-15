@@ -67,7 +67,7 @@ def test_browser_dom_state_topological_violations(url: str) -> None:
     ],
 )
 def test_browser_dom_state_mathematical_bounds(url: str) -> None:
-    with pytest.raises(ValidationError, match="SSRF mathematical bound violation detected"):
+    with pytest.raises(ValidationError, match="SSRF restricted IP detected"):
         BrowserDOMState(
             current_url=url, viewport_size=(1920, 1080), dom_hash="a" * 64, accessibility_tree_hash="b" * 64
         )
@@ -83,7 +83,7 @@ def test_browser_dom_state_fuzz_ipv4_space(ip: ipaddress.IPv4Address) -> None:
     url = f"http://{ip}/"
 
     if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast:
-        with pytest.raises(ValidationError, match="SSRF mathematical bound violation"):
+        with pytest.raises(ValidationError, match="SSRF restricted IP detected"):
             BrowserDOMState(
                 current_url=url, viewport_size=(1024, 768), dom_hash="a" * 64, accessibility_tree_hash="b" * 64
             )

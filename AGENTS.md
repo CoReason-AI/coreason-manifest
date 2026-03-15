@@ -214,6 +214,7 @@ You are strictly forbidden from introducing "Active" or "Runtime" logic into thi
 2.  **Atomic Implementation:** Break tasks into the smallest testable units.
 3.  **Regression Check:** Ensure no re-introduction of deprecated legacy artifacts (e.g., do not accidentally re-add a Dockerfile because a generic template suggested it).
 4.  **Test Coverage (The 95% Rule):** Maintain a strict `>= 95%` test coverage floor. **Do not write "filler tests" just to hit 100%.** If a branch of code is already proven impossible by strict Pydantic/mypy typing, remove the branch (Dead Code Elimination) rather than mocking Python internals to test it. Tests must verify *behavior* and *contracts*, not just line execution.
+5.  **Mathematical Correctness & Epistemic Security:** Mathematical correctness and epistemic security supersede legacy design patterns. If you discover underlying bugs, logical flaws, or missing validation logic while writing tests or scanning the codebase, you MUST propose a fix to the Python implementation (e.g., `@model_validator`, `@field_validator`, property methods) immediately.
 
 ---
 
@@ -251,6 +252,13 @@ You are strictly forbidden from introducing "Active" or "Runtime" logic into thi
 * **The Physics of State Creation:** Because all models inherit from `CoreasonBaseState` (`frozen=True`), an object becomes a mathematically immutable N-dimensional coordinate the exact millisecond it is created. Therefore, **lazy validation or post-init bounding is mathematically impossible and strictly forbidden.**
 * **The Pre-Flight Bounding Rule:** All topological boundaries, Euclidean limits, BFT calculations, and SSRF loopback quarantines MUST be enforced strictly during initiation via Pydantic `@field_validator` and `@model_validator(mode="after")` hooks. 
 * **Preventing Epistemic Contagion:** If a structural boundary or payload size limit is not mathematically proven during the initial instantiation cycle, the payload must be aggressively rejected (System 2 Remediation) before it enters the working context or consumes compute budget. You must never allow unvalidated data to sit in memory awaiting a later validation call.
+
+### **The Epistemic Boundary Mandate (Anti-Hallucination & Anti-Bombing)**
+In a zero-trust neurosymbolic swarm, accepting unbounded or loosely typed primitives from an LLM introduces catastrophic epistemic contagion and VRAM exhaustion vulnerabilities. You MUST mathematically bound all primitives at instantiation:
+
+* **Categorical Hallucination (The Literal Mandate):** When defining a routing heuristic, classification, or architectural action (e.g., `fallback_heuristic`), you MUST use strict Pydantic `Literal[...]` typing. This acts as a deterministic "Semantic Softmax Filter." It mathematically proves that if an LLM hallucinates an unsupported category (e.g., `"alphabetical"` instead of `"chronological"`), the graph instantly severs the execution via a `ValidationError` rather than passing a ghost node to the orchestrator.
+* **Dictionary Bombing (The Arbitrary String Ban):** You are strictly forbidden from using unbounded `str` types for dictionary keys or high-entropy values (e.g., `dict[str, Any]`) that process external or LLM-generated payloads. An adversarial or hallucinating agent could inject a 50MB string as a dictionary key, causing an Out-Of-Memory (OOM) crash during RFC 8785 canonical hashing. 
+    * *Implementation:* All arbitrary strings must be topologically bounded using `Annotated[str, StringConstraints(max_length=X)]` or rigorously caught in a `@field_validator` to enforce physical VRAM limits.
 
 ### **Logging (Passive Pattern)**
 * **Library Responsibility:** Expose a logger object (`loguru.logger`) but **DO NOT** configure it.
