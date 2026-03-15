@@ -120,8 +120,9 @@ def test_ephemeral_namespace_partition_state_invalid_hash() -> None:
         )
 
 def test_taxonomic_routing_policy_valid_domain_extension() -> None:
-    from coreason_manifest.spec.ontology import TaxonomicRoutingPolicy
     from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import TaxonomicRoutingPolicy
 
 
     # If no context is provided, it should fail because "ext:custom_intent" is not in allowed_ext_intents
