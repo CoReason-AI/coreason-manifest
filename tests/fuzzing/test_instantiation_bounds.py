@@ -16,6 +16,7 @@ from hypothesis import HealthCheck, given, settings
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
+    BaseStateEvent,
     BrowserDOMState,
     DAGTopologyManifest,
     MultimodalTokenAnchorState,
@@ -23,6 +24,7 @@ from coreason_manifest.spec.ontology import (
     SpatialBoundingBoxProfile,
     StateHydrationManifest,
     SystemNodeProfile,
+    TaskAnnouncementIntent,
     TaxonomicRoutingPolicy,
 )
 
@@ -159,7 +161,6 @@ all_ssrf_targets = bogon_ips + bogon_domains + bogon_obfuscations
     port=st.one_of(st.none(), st.integers(min_value=1, max_value=65535)),
     path=st.text(alphabet="abcdefghijklmnopqrstuvwxyz/", min_size=0, max_size=20),
 )
-@pytest.mark.xfail(strict=False, reason="Epic 3 will handle the refactoring of the God Context")
 def test_semantic_ssrf_bounding_fuzzing(target: str, scheme: str, port: int | None, path: str) -> None:
     """Semantic SSRF Bounding: Generate obfuscated local IPs, Bogon spaces, and loopbacks
     and attempt to feed into BrowserDOMState."""
@@ -213,8 +214,7 @@ def test_categorical_hallucination_fuzzing(target_heuristic: str) -> None:
         )
 
 
-@given(massive_key=st.text(min_size=10001))
-@pytest.mark.xfail(strict=False, reason="Epic 3 will handle the refactoring of the God Context")
+@given(massive_key=st.text(min_size=256))
 def test_dictionary_bombing_fuzzing(massive_key: str) -> None:
     """Dictionary Bombing Fuzzing: Attempt to pass a massive key to intent_to_heuristic_matrix."""
     with pytest.raises((ValidationError, ValueError)):
@@ -223,3 +223,15 @@ def test_dictionary_bombing_fuzzing(massive_key: str) -> None:
             intent_to_heuristic_matrix={massive_key: "chronological"},
             fallback_heuristic="chronological",
         )
+
+
+@given(timestamp=st.one_of(st.floats(max_value=-0.0001), st.floats(min_value=253402300799.1)))
+def test_temporal_dilation_fuzzing(timestamp: float) -> None:
+    with pytest.raises((ValidationError, ValueError)):
+        BaseStateEvent(event_id="test_id", timestamp=timestamp)
+
+
+@given(massive_id=st.text(min_size=129))
+def test_id_bombing_fuzzing(massive_id: str) -> None:
+    with pytest.raises((ValidationError, ValueError)):
+        TaskAnnouncementIntent(task_id=massive_id, required_action_space_id=None, max_budget_magnitude=100)

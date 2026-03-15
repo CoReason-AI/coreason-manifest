@@ -105,7 +105,7 @@ def test_semantic_discovery_isometry_bounds(min_isometry_score: float) -> None:
 
 
 @given(
-    sop_id=st.text(min_size=1),
+    sop_id=st.from_regex(r"^[a-zA-Z0-9_.:-]+$", fullmatch=True),
     target_persona=st.from_regex(r"^[a-zA-Z0-9_-]+$", fullmatch=True),
     ghost_source=st.text(min_size=1),
     ghost_target=st.text(min_size=1),
