@@ -5199,7 +5199,7 @@ class NegativeHeuristicProfile(CoreasonBaseState):
     """AGENT INSTRUCTION: Rigid symbolic constraint ledger for explicitly declared user exclusions."""
 
     forbidden_semantic_clusters: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
-        description="Explicit array of ontological clusters the orchestrator is mathematically forbidden from traversing."
+        description="Explicit array of ontological clusters the orchestrator is mathematically forbidden from traversing.",  # noqa: E501
     )
     banned_modalities: list[
         Literal["text", "raster_image", "vector_graphics", "tabular_grid", "n_dimensional_tensor"]
@@ -6737,7 +6737,10 @@ class DifferentiableLogicConstraint(CoreasonBaseState):
 
 
 class InformationStateManifest(CoreasonBaseState):
-    """AGENT INSTRUCTION: The unified epistemic coordinate merging probabilistic intent trajectories with deterministic symbolic constraints."""
+    """
+    AGENT INSTRUCTION: The unified epistemic coordinate merging probabilistic intent trajectories
+    with deterministic symbolic constraints.
+    """
 
     manifest_id: str = Field(
         min_length=1,
