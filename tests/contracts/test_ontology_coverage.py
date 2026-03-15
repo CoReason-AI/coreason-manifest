@@ -594,6 +594,7 @@ def test_bulk_array_sorting_coverage() -> None:
     with contextlib.suppress(AttributeError):
         o20.sort_arrays()  # type: ignore
 
+
 def test_epistemic_extraction_policy_sorting() -> None:
     from coreason_manifest.spec.ontology import EpistemicExtractionPolicy
 
