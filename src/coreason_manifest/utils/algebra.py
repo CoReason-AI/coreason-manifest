@@ -232,6 +232,24 @@ def calculate_remaining_compute(ledger: ontology.EpistemicLedgerState, initial_e
     return remaining
 
 
+def compile_action_space_to_openai_tools(action_space: ontology.ActionSpaceManifest) -> list[dict[str, Any]]:
+    """
+    A pure algebraic functor that projects the internal ActionSpaceManifest
+    into the standardized OpenAI/Anthropic external tool array format.
+    """
+    return [
+        {
+            "type": "function",
+            "function": {
+                "name": tool.tool_name,
+                "description": tool.description,
+                "parameters": tool.input_schema,
+            },
+        }
+        for tool in action_space.native_tools
+    ]
+
+
 def calculate_latent_alignment(
     v1: VectorEmbeddingState, v2: VectorEmbeddingState, policy: OntologicalAlignmentPolicy
 ) -> float:
