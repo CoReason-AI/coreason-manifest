@@ -21,7 +21,60 @@ from enum import StrEnum
 from typing import Annotated, Any, Literal, Self
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl, StringConstraints, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    HttpUrl,
+    StringConstraints,
+    ValidationInfo,
+    field_validator,
+    model_validator,
+)
+
+# The Extension Namespace Boundary
+type DomainExtensionString = Annotated[str, StringConstraints(pattern="^ext:[a-zA-Z0-9_.-]+$", max_length=128)]
+
+type CoreRoutingIntent = Literal[
+    "informational_inform", "directive_instruct", "semantic_discovery", "taxonomic_restructure"
+]
+
+CORE_ROUTING_SEMANTICS: dict[CoreRoutingIntent, str] = {
+    "informational_inform": "Provides strictly read-only informational context without requiring structural execution.",
+    "directive_instruct": "Commands the agent to deterministically alter state or execute a specialized action.",
+    "semantic_discovery": "Initiates a search to retrieve contextually latent structures or bounded tools.",
+    "taxonomic_restructure": "Dictates a structural reorganization of underlying data manifolds or graph boundaries.",
+}
+
+type CoreEBNFConstruct = Literal["terminal", "non_terminal", "production_rule", "quantifier"]
+type CoreTokenMergeMetric = Literal["cosine_similarity", "euclidean_distance", "manhattan_distance"]
+
+type CoreComputeStrategyTier = Literal["speed_single_pass", "precision_token_class", "reasoning_ensemble"]
+type CoreClinicalAssertion = Literal["present", "absent", "possible", "history", "family"]
+
+type CoreOBORelationEdge = Literal["is_a", "part_of", "has_part"]
+type CoreCognitiveMemoryDomain = Literal["working", "episodic", "semantic"]
+
+type CoreDisfluencyRole = Literal["reparandum", "interregnum", "repair"]
+type CoreCacheEviction = Literal["lru", "lfu", "fifo"]
+type CoreDefeasibleEdgeType = Literal["rebuttal", "undercut", "undermine"]
+
+type CoreIEEEAnomalyClass = Literal["logic_flaw", "data_fault", "interface_defect", "computation_error"]
+type CoreSMTSolverOutcome = Literal["sat", "unsat", "unknown"]
+
+type ValidRoutingIntent = CoreRoutingIntent | DomainExtensionString
+type EBNFConstruct = CoreEBNFConstruct | DomainExtensionString
+type TokenMergeMetric = CoreTokenMergeMetric | DomainExtensionString
+type ComputeStrategyTier = CoreComputeStrategyTier | DomainExtensionString
+type ClinicalAssertionState = CoreClinicalAssertion | DomainExtensionString
+type OBORelationEdge = CoreOBORelationEdge | DomainExtensionString
+type CognitiveMemoryDomain = CoreCognitiveMemoryDomain | DomainExtensionString
+type DisfluencyRole = CoreDisfluencyRole | DomainExtensionString
+type CacheEviction = CoreCacheEviction | DomainExtensionString
+type DefeasibleEdgeType = CoreDefeasibleEdgeType | DomainExtensionString
+type IEEEAnomalyClass = CoreIEEEAnomalyClass | DomainExtensionString
+type SMTSolverOutcome = CoreSMTSolverOutcome | DomainExtensionString
+
 
 type JsonPrimitiveState = (
     str
@@ -1707,7 +1760,7 @@ class BrowserDOMState(CoreasonBaseState):
                     ip = ipaddress.ip_address(ip_int)
                 else:
                     raise ValueError
-            except ValueError, OverflowError, IndexError:
+            except (ValueError, OverflowError, IndexError):
                 return url
         if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast:
             raise ValueError(f"SSRF restricted IP detected: {hostname}")
@@ -3174,7 +3227,7 @@ class TaxonomicRoutingPolicy(CoreasonBaseState):
         description="Unique identifier for this pre-flight routing policy.",
     )
     intent_to_heuristic_matrix: dict[
-        Annotated[str, StringConstraints(max_length=255)],
+        ValidRoutingIntent,
         Literal["chronological", "entity_centric", "semantic_cluster", "confidence_decay"],
     ] = Field(
         description="Strict dictionary binding classified natural language intents to bounded spatial heuristics."
@@ -3182,6 +3235,47 @@ class TaxonomicRoutingPolicy(CoreasonBaseState):
     fallback_heuristic: Literal["chronological", "entity_centric", "semantic_cluster", "confidence_decay"] = Field(
         description="The deterministic default applied if intent classification falls below the safety threshold."
     )
+    superposition_branching_threshold: float = Field(
+        default=0.85,
+        ge=0.0,
+        le=1.0,
+        description="If the primary intent's confidence is below this, the orchestrator MUST spawn parallel branches.",
+    )
+
+    @model_validator(mode="after")
+    def validate_domain_extensions(self, info: ValidationInfo) -> Self:
+        """
+        AGENT INSTRUCTION: If the intent uses the 'ext:' namespace, mathematically
+        prove it exists in the active client's dynamically loaded vocabulary.
+        """
+        allowed_exts = (info.context or {}).get("allowed_ext_intents", set())
+        for intent in self.intent_to_heuristic_matrix:
+            if intent.startswith("ext:") and intent not in allowed_exts:
+                raise ValueError(
+                    f"Domain Extension Violation: '{intent}' is not registered "
+                    f"in the active client's external vocabulary."
+                )
+        return self
+
+
+class IntentClassificationReceipt(CoreasonBaseState):
+    """The mathematical output of the routing LLM supporting superposition."""
+
+    primary_intent: ValidRoutingIntent = Field(description="The argmax intent with the highest probability.")
+    concurrent_intents: dict[ValidRoutingIntent, float] = Field(
+        default_factory=dict,
+        description="Dictionary of adjacent intents and confidence scores (0.0 to 1.0). Used for branching.",
+    )
+
+    @model_validator(mode="after")
+    def sort_concurrent_intents(self) -> Self:
+        """
+        AGENT INSTRUCTION: Mathematically guarantee deterministic hashing by sorting
+        the internal dictionaries exactly as required by RFC 8785 canonical serialization.
+        """
+        if self.concurrent_intents:
+            object.__setattr__(self, "concurrent_intents", dict(sorted(self.concurrent_intents.items())))
+        return self
 
 
 type AnyPresentationIntent = Annotated[
@@ -6427,3 +6521,5 @@ EpistemicFlowStateReceipt.model_rebuild()
 TopologicalRewardContract.model_rebuild()
 DifferentiableLogicConstraint.model_rebuild()
 CausalExplanationEvent.model_rebuild()
+
+IntentClassificationReceipt.model_rebuild()
