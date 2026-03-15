@@ -1,22 +1,20 @@
-with open("tests/contracts/test_domain_extensions.py", "r") as f:
+# ruff: noqa
+with open("tests/contracts/test_domain_extensions.py") as f:
     content = f.read()
 
 import re
 
 # Remove the MockValidationInfo block entirely
 content = re.sub(
-    r'    p = TaxonomicRoutingPolicy\(.*?\n    p\.validate_domain_extensions\(info\)\n',
-    '',
-    content,
-    flags=re.DOTALL
+    r"    p = TaxonomicRoutingPolicy\(.*?\n    p\.validate_domain_extensions\(info\)\n", "", content, flags=re.DOTALL
 )
 
 # And remove any remaining exc2 line
 content = re.sub(
     r'    with pytest\.raises\(ValueError, match="Unauthorized extension string in dict value"\) as exc2:\n        p\.validate_domain_extensions\(info\)\n',
-    '',
+    "",
     content,
-    flags=re.DOTALL
+    flags=re.DOTALL,
 )
 
 # Let's just strip everything from "p = TaxonomicRoutingPolicy(" to the end of the function.

@@ -1,3 +1,4 @@
+# ruff: noqa
 with open("tests/contracts/test_domain_extensions.py") as f:
     content = f.read()
 
