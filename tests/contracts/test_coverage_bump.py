@@ -1,2 +1,2 @@
-def test_dummy_coverage():
+def test_dummy_coverage() -> None:
     pass
