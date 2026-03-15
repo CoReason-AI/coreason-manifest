@@ -1,4 +1,4 @@
-with open("tests/contracts/test_domain_extensions.py", "r") as f:
+with open("tests/contracts/test_domain_extensions.py") as f:
     content = f.read()
 
 # Replace the previous bad dict validation tests with correct ones for TaxonomicRoutingPolicy and BargeInInterruptEvent
@@ -86,9 +86,20 @@ def test_dict_validation_in_taxonomic_routing_policy() -> None:
 
 # Remove old test_all_extension_cases, test_taxonomic_routing_policy_dict_validation, test_taxonomic_routing_policy_dict_validation_key
 import re
-content = re.sub(r'def test_taxonomic_routing_policy_dict_validation\(\) -> None:.*?context={"allowed_ext_intents": {"ext:custom_intent"}}\n        \)\n', '', content, flags=re.DOTALL)
-content = re.sub(r'def test_taxonomic_routing_policy_dict_validation_key\(\) -> None:.*?context={"allowed_ext_intents": {"ext:custom_intent"}}\n        \)\n', '', content, flags=re.DOTALL)
-content = re.sub(r'def test_all_extension_cases\(\) -> None:.*', '', content, flags=re.DOTALL)
+
+content = re.sub(
+    r'def test_taxonomic_routing_policy_dict_validation\(\) -> None:.*?context={"allowed_ext_intents": {"ext:custom_intent"}}\n        \)\n',
+    "",
+    content,
+    flags=re.DOTALL,
+)
+content = re.sub(
+    r'def test_taxonomic_routing_policy_dict_validation_key\(\) -> None:.*?context={"allowed_ext_intents": {"ext:custom_intent"}}\n        \)\n',
+    "",
+    content,
+    flags=re.DOTALL,
+)
+content = re.sub(r"def test_all_extension_cases\(\) -> None:.*", "", content, flags=re.DOTALL)
 
 content += "\n" + good_test_cases
 
