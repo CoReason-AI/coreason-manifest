@@ -593,3 +593,52 @@ def test_bulk_array_sorting_coverage() -> None:
     o20 = DefeasibleRebuttalContract.model_construct(permitted_attack_edges=[])  # type: ignore
     with contextlib.suppress(AttributeError):
         o20.sort_arrays()  # type: ignore
+
+def test_epistemic_extraction_policy_sorting() -> None:
+    from coreason_manifest.spec.ontology import EpistemicExtractionPolicy
+
+    policy = EpistemicExtractionPolicy(
+        strategy_tier="speed_single_pass", required_relations=["part_of", "is_a"], grounding_confidence_threshold=0.5
+    )
+    assert policy.required_relations == ["is_a", "part_of"]
+
+
+def test_semantic_node_state_canonical_grounding_sorting() -> None:
+    from coreason_manifest.spec.ontology import CanonicalGroundingReceipt, EpistemicProvenanceReceipt, SemanticNodeState
+
+    state = SemanticNodeState(
+        node_id="node_1",
+        label="Concept",
+        scope="global",
+        text_chunk="Some text",
+        provenance=EpistemicProvenanceReceipt(extracted_by="did:example:agent1", source_event_id="event_1"),
+        tier="semantic",
+        canonical_groundings=[
+            CanonicalGroundingReceipt(target_database="mesh", canonical_id="B", cosine_similarity=0.9),
+            CanonicalGroundingReceipt(target_database="snomed_ct", canonical_id="A", cosine_similarity=0.8),
+        ],
+    )
+    assert state.canonical_groundings[0].canonical_id == "A"
+    assert state.canonical_groundings[1].canonical_id == "B"
+
+
+def test_bulk_array_sorting_coverage_2() -> None:
+    import contextlib
+
+    from coreason_manifest.spec.ontology import (
+        AgentNodeProfile,
+        EpistemicExtractionPolicy,
+        SemanticNodeState,
+    )
+
+    o1 = EpistemicExtractionPolicy.model_construct(required_relations=[])  # type: ignore
+    with contextlib.suppress(AttributeError):
+        o1.sort_arrays()  # type: ignore
+
+    o2 = SemanticNodeState.model_construct(canonical_groundings=[])  # type: ignore
+    with contextlib.suppress(AttributeError):
+        o2.sort_arrays()  # type: ignore
+
+    o3 = AgentNodeProfile.model_construct(peft_adapters=[])  # type: ignore
+    with contextlib.suppress(AttributeError):
+        o3.sort_arrays()  # type: ignore

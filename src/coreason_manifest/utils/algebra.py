@@ -537,6 +537,12 @@ class ManifestSemanticRegistry:
     """
 
     _RESOURCES: typing.ClassVar[dict[str, SemanticResource]] = {
+        "mcp://coreason/semantics/extraction_ontology": SemanticResource(
+            uri="mcp://coreason/semantics/extraction_ontology",
+            name="Core Extraction Ontology Targets",
+            description="Authoritative nomenclature and vector databases for epistemic grounding.",
+            semantics=ontology.CORE_EXTRACTION_ONTOLOGY_SEMANTICS,
+        ),
         "mcp://coreason/semantics/routing": SemanticResource(
             uri="mcp://coreason/semantics/routing",
             name="Core Routing Intents",
