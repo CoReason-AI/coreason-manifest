@@ -1231,10 +1231,9 @@ class MultimodalTokenAnchorState(CoreasonBaseState):
         default_factory=list,
         description="The explicit array of SHA-256 hashes corresponding to specific VQ-VAE visual patches attended to.",
     )
-    bounding_box: tuple[float, float, float, float] | None = Field(
-        max_length=1000000000,
+    bounding_box: SpatialBoundingBoxProfile | None = Field(
         default=None,
-        description="The strictly typed [x_min, y_min, x_max, y_max] normalized coordinate matrix.",
+        description="The strictly typed SpatialBoundingBoxProfile.",
     )
     block_type: Literal["paragraph", "table", "figure", "footnote", "header", "equation"] | None = Field(
         default=None, description="The structural classification of the source region."
@@ -1250,17 +1249,6 @@ class MultimodalTokenAnchorState(CoreasonBaseState):
                 raise ValueError("token_span_end MUST be strictly greater than token_span_start.")
         elif self.token_span_end is not None:
             raise ValueError("token_span_end cannot be defined without a token_span_start.")
-        return self
-
-    @model_validator(mode="after")
-    def validate_spatial_geometry(self) -> Self:
-        """AGENT INSTRUCTION: Enforce mathematical spatial monotonicity."""
-        if self.bounding_box is not None:
-            x_min, y_min, x_max, y_max = self.bounding_box
-            if x_min > x_max or y_min > y_max:
-                raise ValueError(
-                    f"Spatial invariant violated: min bounds (x:{x_min}, y:{y_min}) exceed max bounds (x:{x_max}, y:{y_max})"  # noqa: E501
-                )
         return self
 
     @model_validator(mode="after")
@@ -4906,6 +4894,12 @@ class SpatialKinematicActionIntent(CoreasonBaseState):
     target_coordinate: SpatialCoordinateProfile | None = Field(
         default=None, description="The primary spatial terminus for clicks or hovers."
     )
+    target_frame_cid: str = Field(
+        min_length=1,
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        description="Cryptographic lock tying this physical kinematic action to the exact screenshot frame it was predicted on, preventing temporal mis-clicks.",  # noqa: E501
+    )
     trajectory_duration_ms: int | None = Field(
         le=86400000,
         default=None,
@@ -5361,7 +5355,7 @@ class TerminalBufferState(CoreasonBaseState):
 
 
 type AnyToolchainState = Annotated[
-    BrowserDOMState | TerminalBufferState,
+    BrowserDOMState | TerminalBufferState | ViewportRasterState,
     Field(
         discriminator="type",
         description="A discriminated union of Causal Actuators defining strict perimeters for Exogenous Perturbations to the causal graph.",  # noqa: E501
@@ -5513,6 +5507,54 @@ class VectorEmbeddingState(CoreasonBaseState):
     model_name: str = Field(
         max_length=2000, description="The provenance of the embedding model used (e.g., 'text-embedding-3-large')."
     )
+
+
+class VisualAffordancePatchState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A continuous zero-shot interactive UI element linking a
+    strict spatial geometry to its latent semantic vector and interaction probability.
+    """
+
+    patch_id: str = Field(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
+    spatial_boundary: SpatialBoundingBoxProfile = Field(description="Strict Euclidean boundaries for the patch.")
+    semantic_concept: VectorEmbeddingState = Field(
+        description="The latent vector representation of what this patch means."
+    )
+    affordance_probability: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="The neural track's calculated certainty that this spatial region possesses a kinetic "
+        "affordance like clickability.",
+    )
+    expected_kinetic_action: Literal["click", "scroll", "drag", "type"] | None = Field(
+        default=None, description="The predicted affordance type, if any."
+    )
+
+
+class ViewportRasterState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A purely visual spatial execution perimeter for DOM-less environments
+    (VDI, Canvas, Mobile Streaming).
+    """
+
+    type: Literal["viewport_raster"] = Field(default="viewport_raster")
+    viewport_size: tuple[int, int] = Field(
+        description="The absolute (W, H) pixel coordinate space used for the affine scaling matrix."
+    )
+    screenshot_cid: str = Field(
+        min_length=1,
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        description="The cryptographic lock to the exact rasterized frame tensor.",
+    )
+    extracted_affordances: list[VisualAffordancePatchState] = Field(
+        description="The array of identified interactive zones."
+    )
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "extracted_affordances", sorted(self.extracted_affordances, key=lambda x: x.patch_id))
+        return self
 
 
 class LatentIntentTrajectoryState(CoreasonBaseState):
@@ -7001,3 +7043,5 @@ PredictiveEntropySLA.model_rebuild()
 StreamInterruptionPolicy.model_rebuild()
 TokenMergingPolicy.model_rebuild()
 InformationFlowPolicy.model_rebuild()
+VisualAffordancePatchState.model_rebuild()
+ViewportRasterState.model_rebuild()

@@ -321,6 +321,8 @@ __all__ = [
     "VectorEmbeddingState",
     "VerifiableCredentialPresentationReceipt",
     "VerifiableEntropyReceipt",
+    "ViewportRasterState",
+    "VisualAffordancePatchState",
     "VisualEncodingProfile",
     "WetwareAttestationContract",
     "WorkflowManifest",
