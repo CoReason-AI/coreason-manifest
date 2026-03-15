@@ -1661,17 +1661,51 @@ class BrowserDOMState(CoreasonBaseState):
         } or hostname_lower.endswith((".local", ".internal", ".arpa", ".nip.io", ".sslip.io", "localhost.localdomain")):
             raise ValueError(f"SSRF topological violation detected: {hostname}")
         clean_hostname = hostname.strip("[]")
-        import socket
-        import struct
 
         try:
-            packed = socket.inet_aton(clean_hostname)
-            ip_int = struct.unpack("!I", packed)[0]
-            ip = ipaddress.ip_address(ip_int)
-        except OSError, ValueError, OverflowError:
+            ip = ipaddress.ip_address(clean_hostname)
+        except ValueError:
             try:
-                ip = ipaddress.ip_address(clean_hostname)
-            except ValueError:
+                parts = clean_hostname.split(".")
+                if len(parts) in (1, 2, 3, 4):
+                    parsed_parts = []
+                    for part in parts:
+                        if not part:
+                            raise ValueError
+                        if part.startswith(("0x", "0X")):
+                            parsed_parts.append(int(part, 16))
+                        elif part.startswith("0") and len(part) > 1 and all(c in "01234567" for c in part):
+                            parsed_parts.append(int(part, 8))
+                        elif part.isdigit():
+                            parsed_parts.append(int(part))
+                        else:
+                            raise ValueError
+
+                    for p in parsed_parts:
+                        if p < 0 or p > 0xFFFFFFFF:
+                            raise ValueError
+
+                    if len(parsed_parts) == 4:
+                        if any(p > 255 for p in parsed_parts):
+                            raise ValueError
+                        ip_int = (
+                            (parsed_parts[0] << 24) + (parsed_parts[1] << 16) + (parsed_parts[2] << 8) + parsed_parts[3]
+                        )
+                    elif len(parsed_parts) == 3:
+                        if parsed_parts[0] > 255 or parsed_parts[1] > 255 or parsed_parts[2] > 0xFFFF:
+                            raise ValueError
+                        ip_int = (parsed_parts[0] << 24) + (parsed_parts[1] << 16) + parsed_parts[2]
+                    elif len(parsed_parts) == 2:
+                        if parsed_parts[0] > 255 or parsed_parts[1] > 0xFFFFFF:
+                            raise ValueError
+                        ip_int = (parsed_parts[0] << 24) + parsed_parts[1]
+                    else:
+                        ip_int = parsed_parts[0]
+
+                    ip = ipaddress.ip_address(ip_int)
+                else:
+                    raise ValueError
+            except ValueError, OverflowError, IndexError:
                 return url
         if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast:
             raise ValueError(f"SSRF restricted IP detected: {hostname}")
