@@ -1418,6 +1418,25 @@ class TemporalCheckpointState(CoreasonBaseState):
     )
 
 
+class MonteCarloTreeSearchPolicy(CoreasonBaseState):
+    """AGENT INSTRUCTION: The strict mathematical hyperparameter profile governing the agent's internal latent rollouts (MCTS) prior to kinetic execution."""
+
+    exploration_constant_c: float = Field(
+        ge=0.0, description="The UCB1 exploration weight bounding curiosity vs. exploitation."
+    )
+    max_rollout_depth: int = Field(
+        ge=1, le=1000000000, description="The physical recursion limit for hallucinating future UI states."
+    )
+    num_simulations: int = Field(
+        ge=1,
+        le=1000000000,
+        description="The number of search iterations required before collapsing the probability wave into a physical action.",
+    )
+    discount_factor_gamma: float = Field(
+        ge=0.0, le=1.0, description="The mathematical discount applied to future expected rewards."
+    )
+
+
 class ThoughtBranchState(CoreasonBaseState):
     branch_id: str = Field(
         max_length=128,
@@ -1444,9 +1463,32 @@ class ThoughtBranchState(CoreasonBaseState):
         le=1.0,
         description="The logical validity score assigned to this branch by the Process Reward Model.",
     )
+    simulated_action_hash: str | None = Field(
+        default=None,
+        pattern="^[a-f0-9]{64}$",
+        description="The SHA-256 hash of the proposed tool or kinematic action intent ($A_t$).",
+    )
+    expected_next_state_hash: str | None = Field(
+        default=None,
+        pattern="^[a-f0-9]{64}$",
+        description="The SHA-256 hash of the hallucinated/expected UI state ($S_{t+1}$) resulting from the simulated action.",
+    )
+    q_value_estimate: float | None = Field(
+        default=None, description="The expected cumulative reward $Q(s,a)$ for this branch."
+    )
+    visit_count: int = Field(
+        default=1,
+        ge=1,
+        description="The mathematical visit count $N(s,a)$ used for UCT exploration/exploitation balancing.",
+    )
 
 
 class LatentScratchpadReceipt(CoreasonBaseState):
+    root_state_hash: str | None = Field(
+        default=None,
+        pattern="^[a-f0-9]{64}$",
+        description="The exact SHA-256 hash of the initial environment state (e.g., ViewportRasterState) from which the MCTS rollout originated.",
+    )
     trace_id: str = Field(
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
@@ -2001,7 +2043,7 @@ class BrowserDOMState(CoreasonBaseState):
                     ip = ipaddress.ip_address(ip_int)
                 else:
                     raise ValueError
-            except ValueError, OverflowError, IndexError:
+            except (ValueError, OverflowError, IndexError):
                 return url
         if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast:
             raise ValueError(f"SSRF restricted IP detected: {hostname}")
@@ -6025,6 +6067,9 @@ class AgentNodeProfile(BaseNodeProfile):
         description="The semantic boundary defining the objective function of the execution node. [SITD-Gamma: Neurosymbolic Substrate Alignment]",  # noqa: E501
     )
     type: Literal["agent"] = Field(default="agent", description="Discriminator for an Agent node.")
+    mcts_navigation_policy: MonteCarloTreeSearchPolicy | None = Field(
+        default=None, description="The policy governing multi-hop UI navigation via latent tree search."
+    )
     token_merging: TokenMergingPolicy | None = Field(default=None)
     extraction_policy: EpistemicExtractionPolicy | None = Field(default=None)
     logit_steganography: LogitSteganographyContract | None = Field(
@@ -7108,6 +7153,36 @@ class IntentTransitionEvent(BaseStateEvent):
     active_information_state: InformationStateManifest = Field(description="The current information state.")
 
 
+class MDPTransitionEvent(BaseStateEvent):
+    """AGENT INSTRUCTION: The rigid, cryptographic logging of a physical Markov Decision Process transition. Binds the $(S_t, A_t, R_{t+1}, S_{t+1})$ tuple for RL tracing."""
+
+    type: Literal["mdp_transition"] = Field(default="mdp_transition")
+    source_state_event_id: str = Field(
+        min_length=1,
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        description="CID pointing to the prior BrowserDOMState or ViewportRasterState.",
+    )
+    action_event_id: str = Field(
+        min_length=1,
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        description="CID pointing to the executed ToolInvocationEvent or SpatialKinematicActionIntent.",
+    )
+    resulting_state_event_id: str = Field(
+        min_length=1,
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        description="CID pointing to the new, post-action BrowserDOMState or ViewportRasterState.",
+    )
+    reward_signal: float = Field(
+        ge=-1000000000.0,
+        le=1000000000.0,
+        description="The actual dense or sparse reward emitted by the environment or PRM after the transition.",
+    )
+    is_terminal: bool = Field(description="Flags if this transition explicitly concluded the multi-hop trajectory.")
+
+
 type AnyStateEvent = Annotated[
     ObservationEvent
     | BeliefMutationEvent
@@ -7127,7 +7202,8 @@ type AnyStateEvent = Annotated[
     | CognitiveRewardEvaluationReceipt
     | EpistemicFlowStateReceipt
     | CausalExplanationEvent
-    | IntentTransitionEvent,
+    | IntentTransitionEvent
+    | MDPTransitionEvent,
     Field(discriminator="type", description="A discriminated union of state events."),
 ]
 
@@ -7239,3 +7315,5 @@ DecomposedSubQueryState.model_rebuild()
 QueryDecompositionManifest.model_rebuild()
 AdversarialKinematicProfile.model_rebuild()
 BrowserFingerprintManifest.model_rebuild()
+MonteCarloTreeSearchPolicy.model_rebuild()
+MDPTransitionEvent.model_rebuild()
