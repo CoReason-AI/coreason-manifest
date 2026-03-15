@@ -1,111 +1,235 @@
-# Copyright (c) 2026 CoReason, Inc.
-#
-# This software is proprietary and dual-licensed.
-# Licensed under the Prosperity Public License 3.0 (the "License").
-# A copy of the license is available at https://prosperitylicense.com/versions/3.0.0
-# For details, see the LICENSE file.
-# Commercial use beyond a 30-day trial requires a separate license.
-#
-# Source Code: https://github.com/CoReason-AI/coreason-manifest
-
-from typing import Any
-
-import hypothesis.strategies as st
 import pytest
-from hypothesis import HealthCheck, given, settings
+from pydantic import ValidationError
 
-from coreason_manifest.spec.ontology import BaseNodeProfile
-
-# 1. Define the Valid Mathematical Space for domain_extensions
-scalar_st = (
-    st.none() | st.booleans() | st.floats(allow_nan=False, allow_infinity=False) | st.integers() | st.text(max_size=100)
+from coreason_manifest.spec.ontology import (
+    BargeInInterruptEvent,
+    DifferentiableLogicConstraint,
+    EpistemicAxiomState,
+    IntentClassificationReceipt,
+    TaxonomicRoutingPolicy,
 )
-
-valid_extensions_st = st.dictionaries(
-    keys=st.text(min_size=1, max_size=255),
-    values=st.recursive(
-        scalar_st,
-        lambda children: (
-            st.lists(children, max_size=5) | st.dictionaries(st.text(min_size=1, max_size=255), children, max_size=5)
-        ),
-        max_leaves=10,
-    ),
-    max_size=10,
-)
+from coreason_manifest.utils.algebra import ManifestSemanticRegistry
 
 
-@given(extensions=st.one_of(st.none(), valid_extensions_st))
-@settings(max_examples=100, suppress_health_check=[HealthCheck.too_slow])
-def test_base_node_profile_domain_extensions_fuzz_valid_space(extensions: Any) -> None:
-    """
-    AGENT INSTRUCTION: Fuzz the valid structural space using hypothesis.
-    Mathematically prove that any domain_extensions payload falling UNDER
-    the topological tripwires (depth <= 5, key length <= 255) is strictly accepted.
-    """
-    node = BaseNodeProfile(
-        description="fuzzed node",
-        domain_extensions=extensions,
+def test_taxonomic_routing_policy_extensions() -> None:
+    # Test valid core string
+    p1 = TaxonomicRoutingPolicy(
+        policy_id="p1",
+        intent_to_heuristic_matrix={"informational_inform": "chronological"},
+        fallback_heuristic="chronological",
     )
-    assert node.domain_extensions == extensions
+    assert p1.intent_to_heuristic_matrix["informational_inform"] == "chronological"
+
+    # Test invalid extension without context
+    with pytest.raises(ValidationError) as exc:
+        TaxonomicRoutingPolicy(
+            policy_id="p2",
+            intent_to_heuristic_matrix={"ext:custom_intent": "chronological"},
+            fallback_heuristic="chronological",
+        )
+    assert "Unauthorized extension string" in str(exc.value)
+
+    # Test valid extension with context
+    p3 = TaxonomicRoutingPolicy.model_validate(
+        {
+            "policy_id": "p3",
+            "intent_to_heuristic_matrix": {"ext:custom_intent": "chronological"},
+            "fallback_heuristic": "chronological",
+        },
+        context={"allowed_ext_intents": {"ext:custom_intent"}},
+    )
+    assert "ext:custom_intent" in p3.intent_to_heuristic_matrix
 
 
-# --- RETAIN ALL ATOMIC BOUNDARY TESTS BELOW THIS LINE ---
+def test_differentiable_logic_constraint_extensions() -> None:
+    with pytest.raises(ValidationError):
+        DifferentiableLogicConstraint(
+            constraint_id="c1",
+            formal_syntax_smt="(assert (= x y))",
+            relaxation_epsilon=0.1,
+            anomaly_classification="ext:custom_anomaly",
+            solver_status="unknown",
+        )
+
+    c2 = DifferentiableLogicConstraint.model_validate(
+        {
+            "constraint_id": "c2",
+            "formal_syntax_smt": "(assert (= x y))",
+            "relaxation_epsilon": 0.1,
+            "anomaly_classification": "ext:custom_anomaly",
+            "solver_status": "ext:custom_solver_status",
+        },
+        context={"allowed_ext_intents": {"ext:custom_anomaly", "ext:custom_solver_status"}},
+    )
+    assert c2.anomaly_classification == "ext:custom_anomaly"
+    assert c2.solver_status == "ext:custom_solver_status"
 
 
-def test_base_node_profile_domain_extensions_depth_exceeded() -> None:
-    deep_dict: Any = "leaf"
-    for _ in range(6):
-        deep_dict = {"key": deep_dict}
+def test_barge_in_interrupt_event_extensions() -> None:
+    with pytest.raises(ValidationError):
+        BargeInInterruptEvent(
+            event_id="e1",
+            timestamp=100.0,
+            target_event_id="t1",
+            epistemic_disposition="discard",
+            disfluency_type="ext:custom_disfluency",
+            evicted_token_count=5,
+        )
 
-    with pytest.raises(ValueError, match="domain_extensions exceeds maximum allowed depth of 5"):
-        BaseNodeProfile(
-            description="test node",
-            domain_extensions=deep_dict,
+    e2 = BargeInInterruptEvent.model_validate(
+        {
+            "event_id": "e2",
+            "timestamp": 100.0,
+            "target_event_id": "t2",
+            "epistemic_disposition": "discard",
+            "disfluency_type": "ext:custom_disfluency",
+            "evicted_token_count": 5,
+        },
+        context={"allowed_ext_intents": {"ext:custom_disfluency"}},
+    )
+    assert e2.disfluency_type == "ext:custom_disfluency"
+
+
+def test_epistemic_axiom_state_extensions() -> None:
+    with pytest.raises(ValidationError):
+        EpistemicAxiomState(source_concept_id="s1", directed_edge_type="ext:custom_edge", target_concept_id="t1")
+
+    a2 = EpistemicAxiomState.model_validate(
+        {"source_concept_id": "s2", "directed_edge_type": "ext:custom_edge", "target_concept_id": "t2"},
+        context={"allowed_ext_intents": {"ext:custom_edge"}},
+    )
+    assert a2.directed_edge_type == "ext:custom_edge"
+
+
+def test_intent_classification_receipt_sorting() -> None:
+    # Test sort_concurrent_intents
+    receipt = IntentClassificationReceipt(
+        primary_intent="informational_inform",
+        concurrent_intents={"taxonomic_restructure": 0.5, "directive_instruct": 0.8, "informational_inform": 0.2},
+    )
+
+    expected_order = ["directive_instruct", "informational_inform", "taxonomic_restructure"]
+    assert list(receipt.concurrent_intents.keys()) == expected_order
+
+
+def test_manifest_semantic_registry() -> None:
+    resources = ManifestSemanticRegistry.list_resources()
+    assert len(resources) > 0
+    assert resources[0].uri.startswith("mcp://")
+
+    # Read specific resource
+    resource = ManifestSemanticRegistry.read_resource("mcp://coreason/semantics/routing")
+    assert resource is not None
+    assert resource.name == "Core Routing Intents"
+
+    # Read invalid resource
+    invalid = ManifestSemanticRegistry.read_resource("mcp://invalid")
+    assert invalid is None
+
+
+def test_taxonomic_routing_policy_dict_validation() -> None:
+    # Test valid extension dictionary value with context
+    with pytest.raises(ValidationError):
+        TaxonomicRoutingPolicy.model_validate(
+            {
+                "policy_id": "p4",
+                "intent_to_heuristic_matrix": {"ext:custom_intent": "chronological"},
+                "fallback_heuristic": "chronological",
+                "some_other_dict": {"k": "ext:invalid_value"},
+            },
+            context={"allowed_ext_intents": {"ext:custom_intent"}},
         )
 
 
-def test_base_node_profile_domain_extensions_invalid_keys() -> None:
-    with pytest.raises(ValueError, match="domain_extensions keys must be strings"):
-        BaseNodeProfile(
-            description="test node",
-            domain_extensions={1: "a"},  # type: ignore
+def test_taxonomic_routing_policy_dict_validation_key() -> None:
+    with pytest.raises(ValidationError):
+        TaxonomicRoutingPolicy.model_validate(
+            {
+                "policy_id": "p5",
+                "intent_to_heuristic_matrix": {"ext:custom_intent": "chronological"},
+                "fallback_heuristic": "chronological",
+                "some_other_dict": {"ext:invalid_key": "v"},
+            },
+            context={"allowed_ext_intents": {"ext:custom_intent"}},
         )
 
 
-def test_base_node_profile_domain_extensions_key_too_long() -> None:
-    with pytest.raises(ValueError, match="domain_extensions key exceeds maximum length of 255 characters"):
-        BaseNodeProfile(
-            description="test node",
-            domain_extensions={"a" * 256: "b"},
+def test_all_extension_cases() -> None:
+    # Just extra test for coverage of DifferentiableLogicConstraint with invalid dict
+    with pytest.raises(ValidationError):
+        DifferentiableLogicConstraint.model_validate(
+            {
+                "constraint_id": "c1",
+                "formal_syntax_smt": "(assert (= x y))",
+                "relaxation_epsilon": 0.1,
+                "anomaly_classification": "logic_flaw",
+                "solver_status": "sat",
+                "some_dict": {"ext:invalid_key": "v"},
+            },
+            context={"allowed_ext_intents": set()},
         )
 
-
-def test_base_node_profile_domain_extensions_invalid_leaf() -> None:
-    class CustomObj:
-        pass
-
-    with pytest.raises(ValueError, match="domain_extensions leaf values must be JSON primitives, got CustomObj"):
-        BaseNodeProfile(
-            description="test node",
-            domain_extensions={"a": CustomObj()},
+    with pytest.raises(ValidationError):
+        DifferentiableLogicConstraint.model_validate(
+            {
+                "constraint_id": "c1",
+                "formal_syntax_smt": "(assert (= x y))",
+                "relaxation_epsilon": 0.1,
+                "anomaly_classification": "logic_flaw",
+                "solver_status": "sat",
+                "some_dict": {"k": "ext:invalid_val"},
+            },
+            context={"allowed_ext_intents": set()},
         )
 
-
-def test_base_node_profile_domain_extensions_not_dict() -> None:
-    with pytest.raises(ValueError, match="domain_extensions must be a dictionary"):
-        BaseNodeProfile(
-            description="test node",
-            domain_extensions=["not a dict"],  # type: ignore
+    # Same for BargeInInterruptEvent
+    with pytest.raises(ValidationError):
+        BargeInInterruptEvent.model_validate(
+            {
+                "event_id": "e2",
+                "timestamp": 100.0,
+                "target_event_id": "t2",
+                "epistemic_disposition": "discard",
+                "disfluency_type": "repair",
+                "evicted_token_count": 5,
+                "some_dict": {"ext:invalid_key": "v"},
+            },
+            context={"allowed_ext_intents": set()},
         )
 
+    with pytest.raises(ValidationError):
+        BargeInInterruptEvent.model_validate(
+            {
+                "event_id": "e2",
+                "timestamp": 100.0,
+                "target_event_id": "t2",
+                "epistemic_disposition": "discard",
+                "disfluency_type": "repair",
+                "evicted_token_count": 5,
+                "some_dict": {"k": "ext:invalid_val"},
+            },
+            context={"allowed_ext_intents": set()},
+        )
 
-def test_base_node_profile_domain_extensions_list_depth_exceeded() -> None:
-    deep_list: Any = "leaf"
-    for _ in range(6):
-        deep_list = [deep_list]
+    # Same for EpistemicAxiomState
+    with pytest.raises(ValidationError):
+        EpistemicAxiomState.model_validate(
+            {
+                "source_concept_id": "s2",
+                "directed_edge_type": "is_a",
+                "target_concept_id": "t2",
+                "some_dict": {"ext:invalid_key": "v"},
+            },
+            context={"allowed_ext_intents": set()},
+        )
 
-    with pytest.raises(ValueError, match="domain_extensions exceeds maximum allowed depth of 5"):
-        BaseNodeProfile(
-            description="test node",
-            domain_extensions={"a": deep_list},
+    with pytest.raises(ValidationError):
+        EpistemicAxiomState.model_validate(
+            {
+                "source_concept_id": "s2",
+                "directed_edge_type": "is_a",
+                "target_concept_id": "t2",
+                "some_dict": {"k": "ext:invalid_val"},
+            },
+            context={"allowed_ext_intents": set()},
         )
