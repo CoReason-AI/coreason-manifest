@@ -600,14 +600,14 @@ def test_epistemic_extraction_policy_sorting() -> None:
 
 
 def test_semantic_node_state_canonical_grounding_sorting() -> None:
-    from coreason_manifest.spec.ontology import CanonicalGroundingReceipt, SemanticNodeState
+    from coreason_manifest.spec.ontology import CanonicalGroundingReceipt, EpistemicProvenanceReceipt, SemanticNodeState
 
     state = SemanticNodeState(
         node_id="node_1",
         label="Concept",
         scope="global",
         text_chunk="Some text",
-        provenance={"extracted_by": "did:example:agent1", "source_event_id": "event_1"},
+        provenance=EpistemicProvenanceReceipt(extracted_by="did:example:agent1", source_event_id="event_1"),
         tier="semantic",
         canonical_groundings=[
             CanonicalGroundingReceipt(target_database="mesh", canonical_id="B", cosine_similarity=0.9),
