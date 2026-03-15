@@ -164,6 +164,56 @@ def validate_payload(step: str, payload_bytes: bytes) -> BaseModel:
     return target_schema.model_validate_json(payload_bytes)
 
 
+def wrap_intent_in_jsonrpc(intent_payload: BaseModel, request_id: str | int) -> ontology.BoundedJSONRPCIntent:
+    """
+    A pure algebraic functor that wraps an internal declarative intent
+    into a standard JSON-RPC 2.0 envelope for MCP transmission.
+    """
+    # Extract the discriminator field if it exists, otherwise fallback to class name
+    method_name = getattr(intent_payload, "type", intent_payload.__class__.__name__.lower())
+
+    return ontology.BoundedJSONRPCIntent(
+        jsonrpc="2.0",
+        method=f"mcp.intent.{method_name}",
+        params=intent_payload.model_dump(mode="json", exclude_none=True, by_alias=True),
+        id=request_id,
+    )
+
+
+def extract_mcp_tool_call(
+    rpc_request: ontology.BoundedJSONRPCIntent,
+    event_id: str,
+    timestamp: float,
+    agent_attestation: ontology.AgentAttestationReceipt,
+    zk_proof: ontology.ZeroKnowledgeReceipt,
+) -> ontology.ToolInvocationEvent:
+    """
+    A pure algebraic functor safely extracting an incoming MCP JSON-RPC tool call
+    into our heavily validated ToolInvocationEvent, actively binding cryptographic proofs.
+    """
+    params = rpc_request.params or {}
+
+    # Handle the standard MCP "tools/call" pattern
+    if rpc_request.method == "tools/call":
+        tool_name = str(params.get("name", "unknown_tool"))
+        parameters = params.get("arguments", {})
+    else:
+        tool_name = rpc_request.method
+        parameters = params
+
+    if not isinstance(parameters, dict):
+        parameters = {"payload": parameters}
+
+    return ontology.ToolInvocationEvent(
+        event_id=event_id,
+        timestamp=timestamp,
+        tool_name=tool_name,
+        parameters=parameters,
+        agent_attestation=agent_attestation,
+        zk_proof=zk_proof,
+    )
+
+
 def generate_correction_prompt(error: ValidationError, target_node_id: str, fault_id: str) -> System2RemediationIntent:
     """
     Pure functional adapter. Maps a raw Pythonic pydantic.ValidationError into a
