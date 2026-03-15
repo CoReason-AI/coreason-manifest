@@ -1705,7 +1705,7 @@ class BrowserDOMState(CoreasonBaseState):
                     ip = ipaddress.ip_address(ip_int)
                 else:
                     raise ValueError
-            except ValueError, OverflowError, IndexError:
+            except (ValueError, OverflowError, IndexError):
                 return url
         if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast:
             raise ValueError(f"SSRF restricted IP detected: {hostname}")
@@ -4475,8 +4475,8 @@ class ExecutionSpanReceipt(CoreasonBaseState):
     )
     name: str = Field(max_length=2000, description="The semantic identifier for the operation.")
     kind: SpanKindProfile = Field(default="internal", description="The role of the span.")
-    start_time_unix_nano: int = Field(ge=0, description="Temporal start bound.")
-    end_time_unix_nano: int | None = Field(default=None, ge=0, description="Temporal end bound, if completed.")
+    start_time_unix_nano: int = Field(ge=0, le=253402300799000000000, description="Temporal start bound.")
+    end_time_unix_nano: int | None = Field(default=None, ge=0, le=253402300799000000000, description="Temporal end bound, if completed.")
     status: SpanStatusCodeProfile = Field(default="unset", description="The execution health flag.")
     events: list[SpanEvent] = Field(
         default_factory=list, max_length=10000, description="Structured log records emitted during the span."
