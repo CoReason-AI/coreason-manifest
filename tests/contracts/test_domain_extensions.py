@@ -154,82 +154,82 @@ def test_taxonomic_routing_policy_dict_validation_key() -> None:
         )
 
 
-def test_all_extension_cases() -> None:
-    # Just extra test for coverage of DifferentiableLogicConstraint with invalid dict
-    with pytest.raises(ValidationError):
-        DifferentiableLogicConstraint.model_validate(
-            {
-                "constraint_id": "c1",
-                "formal_syntax_smt": "(assert (= x y))",
-                "relaxation_epsilon": 0.1,
-                "anomaly_classification": "logic_flaw",
-                "solver_status": "sat",
-                "some_dict": {"ext:invalid_key": "v"},
-            },
-            context={"allowed_ext_intents": set()},
-        )
 
-    with pytest.raises(ValidationError):
-        DifferentiableLogicConstraint.model_validate(
-            {
-                "constraint_id": "c1",
-                "formal_syntax_smt": "(assert (= x y))",
-                "relaxation_epsilon": 0.1,
-                "anomaly_classification": "logic_flaw",
-                "solver_status": "sat",
-                "some_dict": {"k": "ext:invalid_val"},
-            },
-            context={"allowed_ext_intents": set()},
-        )
 
-    # Same for BargeInInterruptEvent
-    with pytest.raises(ValidationError):
+def test_dict_validation_in_barge_in_event() -> None:
+    # Invalid key
+    with pytest.raises(ValidationError) as exc:
         BargeInInterruptEvent.model_validate(
             {
-                "event_id": "e2",
+                "event_id": "e3",
                 "timestamp": 100.0,
-                "target_event_id": "t2",
+                "target_event_id": "t3",
                 "epistemic_disposition": "discard",
                 "disfluency_type": "repair",
-                "evicted_token_count": 5,
-                "some_dict": {"ext:invalid_key": "v"},
+                "retained_partial_payload": {"ext:invalid_key": "v"}
             },
-            context={"allowed_ext_intents": set()},
+            context={"allowed_ext_intents": set()}
         )
+    assert "Unauthorized extension string in dict key" in str(exc.value)
 
-    with pytest.raises(ValidationError):
+    # Invalid value
+    with pytest.raises(ValidationError) as exc:
         BargeInInterruptEvent.model_validate(
             {
-                "event_id": "e2",
+                "event_id": "e4",
                 "timestamp": 100.0,
-                "target_event_id": "t2",
+                "target_event_id": "t4",
                 "epistemic_disposition": "discard",
                 "disfluency_type": "repair",
-                "evicted_token_count": 5,
-                "some_dict": {"k": "ext:invalid_val"},
+                "retained_partial_payload": {"k": "ext:invalid_val"}
             },
-            context={"allowed_ext_intents": set()},
+            context={"allowed_ext_intents": set()}
         )
+    assert "Unauthorized extension string in dict value" in str(exc.value)
 
-    # Same for EpistemicAxiomState
-    with pytest.raises(ValidationError):
-        EpistemicAxiomState.model_validate(
-            {
-                "source_concept_id": "s2",
-                "directed_edge_type": "is_a",
-                "target_concept_id": "t2",
-                "some_dict": {"ext:invalid_key": "v"},
-            },
-            context={"allowed_ext_intents": set()},
-        )
+def test_dict_validation_in_taxonomic_routing_policy() -> None:
+    # TaxonomicRoutingPolicy's intent_to_heuristic_matrix has keys as ValidRoutingIntent (which can be extension strings)
+    # and values as Literals. Values cannot be extensions, but let's test if the validator catches it anyway (even if pydantic catches it first).
+    # Wait, if pydantic catches it first, the custom validator won't run for the value.
+    # But it WILL run for the key because the key is ValidRoutingIntent.
 
-    with pytest.raises(ValidationError):
-        EpistemicAxiomState.model_validate(
+    with pytest.raises(ValidationError) as exc:
+        TaxonomicRoutingPolicy.model_validate(
             {
-                "source_concept_id": "s2",
-                "directed_edge_type": "is_a",
-                "target_concept_id": "t2",
-                "some_dict": {"k": "ext:invalid_val"},
+                "policy_id": "p6",
+                "intent_to_heuristic_matrix": {"ext:invalid_key": "chronological"},
+                "fallback_heuristic": "chronological"
             },
-            context={"allowed_ext_intents": set()},
+            context={"allowed_ext_intents": set()}
         )
+    assert "Unauthorized extension string in dict key" in str(exc.value)
+
+    # To test an invalid value in dict, we'd need to bypass pydantic's typing or use a field that allows it.
+    # intent_to_heuristic_matrix values are Literal, so passing "ext:invalid" fails pydantic typing.
+    # Is there another dict in TaxonomicRoutingPolicy? No.
+    # Therefore, the `if isinstance(dv, str) and dv.startswith("ext:")` branch is technically unreachable for TaxonomicRoutingPolicy via normal validation.
+    # We can hit it by explicitly calling the validator or by modifying the class `__dict__` and then calling the validator method.
+
+    p = TaxonomicRoutingPolicy(
+        policy_id="p7",
+        intent_to_heuristic_matrix={"informational_inform": "chronological"},
+        fallback_heuristic="chronological"
+    )
+    # forcefully insert a bad value into __dict__
+    p.__dict__["intent_to_heuristic_matrix"] = {"informational_inform": "ext:bad_value"}
+
+    from pydantic_core.core_schema import ValidationInfo
+    # Create a mock ValidationInfo
+    class MockValidationInfo:
+        def __init__(self, context):
+            self.context = context
+            self.config = None
+            self.mode = 'python'
+            self.data = {}
+            self.field_name = None
+
+    info = MockValidationInfo(context={"allowed_ext_intents": set()})
+
+    with pytest.raises(ValueError) as exc:
+        p.validate_domain_extensions(info)
+    assert "Unauthorized extension string in dict value" in str(exc.value)
