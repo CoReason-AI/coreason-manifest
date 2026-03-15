@@ -1150,6 +1150,40 @@ class SaeLatentPolicy(CoreasonBaseState):
         return self
 
 
+class BrowserFingerprintManifest(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: The deterministic hardware and network identity vector. Mathematically bounds
+    the TLS handshake and WebGL unmasked renderers to prevent fingerprinting detection.
+    """
+
+    user_agent_string: str = Field(
+        max_length=2000,
+        description="The exact `navigator.userAgent`.",
+    )
+    ja3_tls_fingerprint: str = Field(
+        min_length=32,
+        max_length=128,
+        pattern="^[a-f0-9A-F]+$",
+        description="The MD5/SHA hash of the strict TLS Client Hello signature.",
+    )
+    webgl_vendor_renderer: str = Field(
+        max_length=2000,
+        description="The spoofed GPU renderer string.",
+    )
+    canvas_noise_hash: str = Field(
+        min_length=1,
+        max_length=128,
+        pattern="^[a-f0-9]{64}$",
+        description="The SHA-256 seed used to deterministically poison Canvas rendering readouts.",
+    )
+    viewport_geometry: tuple[int, int] = Field(
+        description="The $W \\times H$ bound for `window.innerWidth`/`innerHeight`."
+    )
+    has_touch_capability: bool = Field(
+        description="Signals if `ontouchstart` should be mathematically present in the DOM."
+    )
+
+
 class SecureSubSessionState(CoreasonBaseState):
     """
     Declarative boundary for handling unredacted secrets within a temporarily isolated state partition.
@@ -1167,6 +1201,10 @@ class SecureSubSessionState(CoreasonBaseState):
     )
     max_ttl_seconds: int = Field(ge=1, le=3600, description="Maximum time-to-live for the unredacted state partition.")
     description: str = Field(max_length=2000, description="Audit justification for this temporary secure session.")
+    device_fingerprint: BrowserFingerprintManifest | None = Field(
+        default=None,
+        description="The cryptographic hardware and network stack identity bound to this authenticated session partition.",  # noqa: E501
+    )
 
     @model_validator(mode="after")
     def sort_arrays(self) -> Self:
@@ -5019,6 +5057,23 @@ class SpatialKinematicActionIntent(CoreasonBaseState):
         default=None,
         description="The visual anchor (e.g., 'Submit Button'). The orchestrator must verify this semantic concept exists at the target_coordinate before executing the macro, preventing blind clicks.",  # noqa: E501
     )
+    temporal_waypoints_ms: list[Annotated[int, Field(ge=0)]] = Field(
+        default_factory=list,
+        description="The strictly typed array of temporal waypoints ($t$) corresponding 1:1 with bezier_control_points, completing the $(x, y, t)$ kinematic tensor.",  # noqa: E501
+    )
+
+    @model_validator(mode="after")
+    def enforce_tensor_symmetry(self) -> Self:
+        object.__setattr__(self, "temporal_waypoints_ms", sorted(self.temporal_waypoints_ms))
+        if (
+            self.temporal_waypoints_ms
+            and self.bezier_control_points
+            and len(self.temporal_waypoints_ms) != len(self.bezier_control_points)
+        ):
+            raise ValueError(
+                "Kinematic Tensor Asymmetry: temporal_waypoints_ms and bezier_control_points must have the same length."
+            )
+        return self
 
 
 class StateContract(CoreasonBaseState):
@@ -5934,6 +5989,32 @@ class AgentAttestationReceipt(CoreasonBaseState):
         return self
 
 
+class AdversarialKinematicProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: The neural parameterization instructing the external physics engine how to
+    inject stochastic biomechanical noise (Fitts's Law) into continuous trajectories to defeat anomaly classifiers.
+    """
+
+    stochastic_noise_variance: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="The magnitude of fractional Brownian motion or Perlin noise applied to the spline.",
+    )
+    bezier_complexity_ceiling: int = Field(
+        ge=2,
+        le=100,
+        description="The maximum number of control points the generator is authorized to output for a single movement.",
+    )
+    keystroke_cadence: DistributionProfile = Field(
+        description="The exact probability density function governing $\\Delta t$ delays between keystrokes."
+    )
+    error_injection_probability: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="The probability of the neural engine intentionally generating an overshoot, transposition error, or backspace correction.",  # noqa: E501
+    )
+
+
 class AgentNodeProfile(BaseNodeProfile):
     """
     A node representing an autonomous agent.
@@ -5959,6 +6040,10 @@ class AgentNodeProfile(BaseNodeProfile):
     )
     agent_attestation: AgentAttestationReceipt | None = Field(
         default=None, description="The cryptographic identity passport and AI-BOM for the agent."
+    )
+    kinematic_emulation_policy: AdversarialKinematicProfile | None = Field(
+        default=None,
+        description="The mathematical constraints for generating adversarial pointer physics and human-like cadence.",
     )
     action_space_id: str | None = Field(
         min_length=1,
@@ -7152,3 +7237,5 @@ VisualAffordancePatchState.model_rebuild()
 ViewportRasterState.model_rebuild()
 DecomposedSubQueryState.model_rebuild()
 QueryDecompositionManifest.model_rebuild()
+AdversarialKinematicProfile.model_rebuild()
+BrowserFingerprintManifest.model_rebuild()
