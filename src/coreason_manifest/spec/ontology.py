@@ -892,16 +892,26 @@ class CognitiveUncertaintyProfile(CoreasonBaseState):
     """Structural Causal Models (SCMs) for active epistemic bounding."""
 
     aleatoric_entropy: float = Field(
-        ge=0.0, le=1.0, description="Irreducible ambiguity detected in the observational fields (P(y|x))."
+        ge=0.0,
+        le=1000000000.0,
+        description="Irreducible ambiguity detected in the observational fields (P(y|x)), measured in bits/nats.",
     )
     epistemic_uncertainty: float = Field(
-        ge=0.0, le=1.0, description="The causal gap demanding Do-Calculus Interventions (P(y|do(x)))."
+        ge=0.0,
+        le=1000000000.0,
+        description="The causal gap demanding Do-Calculus Interventions (P(y|do(x))), measured in bits/nats.",
     )
     semantic_consistency_score: float = Field(
         ge=0.0, le=1.0, description="Counterfactual Geometries representing alternative timeline vectors."
     )
     requires_abductive_escalation: bool = Field(
         description="True if epistemic_uncertainty breaches the safety threshold, requiring structural mandate escalation."  # noqa: E501
+    )
+    theory_of_mind_divergence: float | None = Field(
+        default=None,
+        ge=0.0,
+        le=1000000000.0,
+        description="The mathematical KL divergence between the agent's internal belief distribution and the explicitly modeled TheoryOfMindSnapshot.",  # noqa: E501
     )
 
 
@@ -5360,18 +5370,18 @@ type AnyToolchainState = Annotated[
 
 
 class TheoryOfMindSnapshot(CoreasonBaseState):
-    target_agent_id: str = Field(
-        max_length=128,
-        pattern="^[a-zA-Z0-9_.:-]+$",
-        min_length=1,
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the agent whose mind is being modeled.",  # noqa: E501
-    )
+    target_agent_id: (
+        NodeIdentifierState
+        | Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    ) = Field(description="The strict DID of the swarm node, or CID of an external user, whose mind is being modeled.")
     assumed_shared_beliefs: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
         description="The explicit array of Content Identifiers (CIDs) acting as cryptographic Lineage Watermarks that the modeling agent assumes the target already possesses.",  # noqa: E501
     )
-    identified_knowledge_gaps: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
-        max_length=1000000000,
-        description="Specific topics or logical premises the target agent is assumed to be missing.",
+    identified_knowledge_gaps: list[
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    ] = Field(
+        default_factory=list,
+        description="The explicit array of CIDs/DIDs representing the exact coordinate spaces (SemanticNodeStates or Domain Extensions) the target is mathematically proven to lack.",  # noqa: E501
     )
 
     @model_validator(mode="after")
