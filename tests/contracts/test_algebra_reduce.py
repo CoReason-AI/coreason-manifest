@@ -32,7 +32,7 @@ def test_reduce_ledger_to_active_state_filters_quarantined_events() -> None:
         cascade_id="c1",
         propagated_decay_factor=0.5,
         root_falsified_event_id="e1",
-        quarantined_event_ids=["e2"],  # type: ignore
+        quarantined_event_ids=["e2"],
     )
     object.__setattr__(cascade, "quarantined_event_ids", ["e2"])
 
