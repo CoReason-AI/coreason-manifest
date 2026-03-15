@@ -216,7 +216,6 @@ def test_dict_validation_in_taxonomic_routing_policy() -> None:
     # forcefully insert a bad value into __dict__
     p.__dict__["intent_to_heuristic_matrix"] = {"informational_inform": "ext:bad_value"}
 
-
     # Create a mock ValidationInfo
     class MockValidationInfo:
         def __init__(self, context):
