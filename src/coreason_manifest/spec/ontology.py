@@ -901,17 +901,17 @@ class CognitiveUncertaintyProfile(CoreasonBaseState):
         le=1000000000.0,
         description="The causal gap demanding Do-Calculus Interventions (P(y|do(x))), measured in bits/nats.",
     )
-    theory_of_mind_divergence: float | None = Field(
-        default=None,
-        ge=0.0,
-        le=1000000000.0,
-        description="The mathematical KL divergence between the agent's internal belief distribution and the explicitly modeled TheoryOfMindSnapshot.",  # noqa: E501
-    )
     semantic_consistency_score: float = Field(
         ge=0.0, le=1.0, description="Counterfactual Geometries representing alternative timeline vectors."
     )
     requires_abductive_escalation: bool = Field(
         description="True if epistemic_uncertainty breaches the safety threshold, requiring structural mandate escalation."  # noqa: E501
+    )
+    theory_of_mind_divergence: float | None = Field(
+        default=None,
+        ge=0.0,
+        le=1000000000.0,
+        description="The mathematical KL divergence between the agent's internal belief distribution and the explicitly modeled TheoryOfMindSnapshot.",  # noqa: E501
     )
 
 
@@ -1966,7 +1966,7 @@ class BrowserDOMState(CoreasonBaseState):
                     ip = ipaddress.ip_address(ip_int)
                 else:
                     raise ValueError
-            except (ValueError, OverflowError, IndexError):
+            except ValueError, OverflowError, IndexError:
                 return url
         if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast:
             raise ValueError(f"SSRF restricted IP detected: {hostname}")
@@ -5370,11 +5370,10 @@ type AnyToolchainState = Annotated[
 
 
 class TheoryOfMindSnapshot(CoreasonBaseState):
-    target_agent_id: NodeIdentifierState | Annotated[
-        str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
-    ] = Field(
-        description="The strict DID of the swarm node, or CID of an external user, whose mind is being modeled."
-    )
+    target_agent_id: (
+        NodeIdentifierState
+        | Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    ) = Field(description="The strict DID of the swarm node, or CID of an external user, whose mind is being modeled.")
     assumed_shared_beliefs: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
         description="The explicit array of Content Identifiers (CIDs) acting as cryptographic Lineage Watermarks that the modeling agent assumes the target already possesses.",  # noqa: E501
     )
