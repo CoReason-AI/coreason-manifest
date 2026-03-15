@@ -23,7 +23,9 @@ from coreason_manifest.spec.ontology import LatentScratchpadReceipt, ThoughtBran
 def valid_scratchpad_strategy(draw: st.DrawFn) -> dict[str, Any]:
     """Generates mathematically guaranteed valid branch matrices to test sorting determinism."""
     # Generate chaotic, unsorted branch IDs
-    branch_ids = draw(st.lists(st.text(min_size=1, max_size=20), min_size=2, max_size=15, unique=True))
+    branch_ids = draw(
+        st.lists(st.from_regex(r"^[a-zA-Z0-9_.:-]+$", fullmatch=True), min_size=2, max_size=15, unique=True)
+    )
 
     explored = [ThoughtBranchState(branch_id=b_id, latent_content_hash="a" * 64, prm_score=0.9) for b_id in branch_ids]
 

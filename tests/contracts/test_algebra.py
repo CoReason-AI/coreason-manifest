@@ -331,7 +331,7 @@ def test_apply_state_differential_property(
 
 def test_verify_merkle_proof_valid() -> None:
     receipt1 = ExecutionNodeReceipt(
-        request_id="req1", inputs={"in": 1}, outputs={"out": 1}, parent_hashes=[], node_hash="dummy1"
+        request_id="req1", inputs={"in": 1}, outputs={"out": 1}, parent_hashes=[], node_hash="a" * 64
     )
     # Use object.__setattr__ to bypass frozen=True
     object.__setattr__(receipt1, "node_hash", receipt1.generate_node_hash())
@@ -341,7 +341,7 @@ def test_verify_merkle_proof_valid() -> None:
         inputs={"in": 2},
         outputs={"out": 2},
         parent_hashes=[receipt1.node_hash],  # type: ignore[list-item]
-        node_hash="dummy2",
+        node_hash="b" * 64,
     )
     object.__setattr__(receipt2, "node_hash", receipt2.generate_node_hash())
 
@@ -351,7 +351,7 @@ def test_verify_merkle_proof_valid() -> None:
 
 def test_verify_merkle_proof_invalid_hash() -> None:
     receipt1 = ExecutionNodeReceipt(
-        request_id="req1", inputs={"in": 1}, outputs={"out": 1}, parent_hashes=[], node_hash="dummy1"
+        request_id="req1", inputs={"in": 1}, outputs={"out": 1}, parent_hashes=[], node_hash="a" * 64
     )
     object.__setattr__(receipt1, "node_hash", "invalid_hash")
     with pytest.raises(TamperFaultEvent, match="Node hash mismatch"):
@@ -364,7 +364,7 @@ def test_verify_merkle_proof_missing_parent() -> None:
         inputs={"in": 1},
         outputs={"out": 1},
         parent_hashes=["non_existent_parent"],
-        node_hash="dummy1",
+        node_hash="a" * 64,
     )
     object.__setattr__(receipt1, "node_hash", receipt1.generate_node_hash())
     with pytest.raises(TamperFaultEvent, match="Missing parent hash"):
@@ -373,7 +373,7 @@ def test_verify_merkle_proof_missing_parent() -> None:
 
 def test_verify_merkle_proof_none_hash() -> None:
     receipt1 = ExecutionNodeReceipt(
-        request_id="req1", inputs={"in": 1}, outputs={"out": 1}, parent_hashes=[], node_hash="valid"
+        request_id="req1", inputs={"in": 1}, outputs={"out": 1}, parent_hashes=[], node_hash="a" * 64
     )
     object.__setattr__(receipt1, "node_hash", None)
     assert verify_merkle_proof([receipt1]) is False
@@ -406,7 +406,7 @@ def test_apply_state_differential_atomic_failures(patch_kwargs: dict[str, Any], 
     base_state = {"arr": [1, 2, 3], "nested": {"key": "value"}}
     patch = StateMutationIntent(**patch_kwargs)
     manifest = StateDifferentialManifest(
-        diff_id="did:web:patch-fail",
+        diff_id="did:web:patch:fail",
         author_node_id="did:web:node-1",
         lamport_timestamp=1,
         vector_clock={"did:web:node-1": 1},
