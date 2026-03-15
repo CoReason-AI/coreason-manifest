@@ -507,6 +507,7 @@ def test_bulk_array_sorting_coverage() -> None:
     from coreason_manifest.spec.ontology import (
         BeliefMutationEvent,
         ChaosExperimentTask,
+        DefeasibleRebuttalContract,
         EpistemicQuarantineSnapshot,
         HypothesisGenerationEvent,
         MarketResolutionState,
@@ -521,7 +522,6 @@ def test_bulk_array_sorting_coverage() -> None:
         SwarmTopologyManifest,
         System1ReflexPolicy,
         TheoryOfMindSnapshot,
-        DefeasibleRebuttalContract,
     )
 
     o1 = MCPResourceManifest.model_construct(schema_dependencies=[])  # type: ignore

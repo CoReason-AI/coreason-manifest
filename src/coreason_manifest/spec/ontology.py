@@ -1142,7 +1142,7 @@ class DefeasibleRebuttalContract(CoreasonBaseState):
     max_quarantine_blast_radius: int = Field(
         gt=0,
         le=1000000000,
-        description="Limits how many downstream API calls or semantic dependencies can be automatically severed by the logical cascade.",
+        description="Limits how many downstream API calls or semantic dependencies can be automatically severed by the logical cascade.",  # noqa: E501
     )
 
     @model_validator(mode="after")
@@ -4522,7 +4522,7 @@ class ProcessRewardContract(CoreasonBaseState):
     )
     enforce_reasoning_trace: bool = Field(
         default=True,
-        description="Forces the LLM to output a CognitiveReasoningTraceState explaining WHY it failed before it is allowed to attempt the generation again.",
+        description="Forces the LLM to output a CognitiveReasoningTraceState explaining WHY it failed before it is allowed to attempt the generation again.",  # noqa: E501
     )
     pruning_threshold: float = Field(
         ge=0.0,
@@ -5273,7 +5273,7 @@ class TraceExportManifest(CoreasonBaseState):
 class TruthMaintenancePolicy(CoreasonBaseState):
     rebuttal_contract: DefeasibleRebuttalContract | None = Field(
         default=None,
-        description="Governs exactly how an incoming correction zeroes out a previous node in the Epistemic Argument Graph without destroying the historical ledger.",
+        description="Governs exactly how an incoming correction zeroes out a previous node in the Epistemic Argument Graph without destroying the historical ledger.",  # noqa: E501
     )
     decay_propagation_rate: float = Field(
         ge=0.0, le=1.0, description="Entropy Penalty applied per edge traversal during a defeasible cascade."
