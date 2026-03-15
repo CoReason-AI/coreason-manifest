@@ -460,7 +460,8 @@ class ComputeEngineProfile(CoreasonBaseState):
     provider: str = Field(max_length=2000, description="The name of the provider hosting the model.")
     context_window_size: int = Field(le=1000000000, description="The maximum context window size in tokens.")
     capabilities: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
-        max_length=1000000000, description="The explicit, structurally bounded array of capabilities authorized for this model."
+        max_length=1000000000,
+        description="The explicit, structurally bounded array of capabilities authorized for this model.",
     )
     rate_card: ComputeRateContract = Field(description="The economic cost definition associated with the model.")
     supported_functional_experts: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
@@ -1320,7 +1321,8 @@ class FederatedDiscoveryManifest(CoreasonBaseState):
         max_length=1000000000, description="The explicit array of strictly bounded MCP URI broadcast endpoints."
     )
     supported_ontologies: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
-        max_length=1000000000, description="The explicit array of cryptographic hashes defining acceptable domain ontologies."
+        max_length=1000000000,
+        description="The explicit array of cryptographic hashes defining acceptable domain ontologies.",
     )
 
     @model_validator(mode="after")
@@ -1370,7 +1372,9 @@ class AdjudicationIntent(CoreasonBaseState):
         description="Discriminator for breaking deadlocks within a CouncilTopologyManifest.",
     )
     deadlocked_claims: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
-        max_length=86400000, min_length=2, description="The conflicting claim IDs or proposals the human must choose between."
+        max_length=86400000,
+        min_length=2,
+        description="The conflicting claim IDs or proposals the human must choose between.",
     )
     resolution_schema: dict[Annotated[str, StringConstraints(max_length=255)], Any] = Field(
         description="The strict JSON Schema for the tie-breaking response (usually an enum of the deadlocked_claims).",
@@ -1594,7 +1598,8 @@ class BoundedInterventionScopePolicy(CoreasonBaseState):
     """
 
     allowed_fields: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
-        max_length=1000000000, description="The explicit whitelist of top-level JSON pointers mathematically open to mutation."
+        max_length=1000000000,
+        description="The explicit whitelist of top-level JSON pointers mathematically open to mutation.",
     )
     json_schema_whitelist: dict[
         Annotated[str, StringConstraints(max_length=255)],
@@ -2216,7 +2221,7 @@ class LatentProjectionIntent(CoreasonBaseState):
         description="The strictly typed embedding tensor directing the query."
     )
     top_k_candidates: int = Field(
-        le=9000000000000000000, gt=0, description="The maximum number of nodes to extract from the index."
+        gt=0, description="The maximum number of nodes to extract from the index."
     )
     min_isometry_score: float = Field(
         ge=-1.0, le=1.0, description="The minimum cosine similarity bounds for accepting a vector match."
@@ -2240,7 +2245,8 @@ class SemanticDiscoveryIntent(CoreasonBaseState):
         ge=-1.0, le=1.0, description="The minimum cosine similarity required to authorize a capability mount."
     )
     required_structural_types: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
-        max_length=1000000000, description="The strict array of strings defining topological limits on the discovered tools."
+        max_length=1000000000,
+        description="The strict array of strings defining topological limits on the discovered tools.",
     )
 
     @model_validator(mode="after")
@@ -2257,7 +2263,8 @@ class DraftingIntent(CoreasonBaseState):
         max_length=2000, description="The prompt explaining what information the swarm is missing."
     )
     resolution_schema: dict[Annotated[str, StringConstraints(max_length=255)], Any] = Field(
-        max_length=1000000000, description="The strict JSON Schema the human's input must satisfy before the graph can resume."
+        max_length=1000000000,
+        description="The strict JSON Schema the human's input must satisfy before the graph can resume.",
     )
     timeout_action: Literal["rollback", "proceed_default", "terminate"] = Field(
         description="The action to take if the human fails to provide the draft."
@@ -4648,7 +4655,9 @@ class StdioTransportProfile(CoreasonBaseState):
     type: Literal["stdio"] = Field(default="stdio", description="Type of transport.")
     command: str = Field(..., max_length=2000, description="The command executable to run (e.g., 'node', 'python').")
     args: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
-        max_length=1000000000, default_factory=list, description="The explicit array of arguments to pass to the command."
+        max_length=1000000000,
+        default_factory=list,
+        description="The explicit array of arguments to pass to the command.",
     )
     env_vars: dict[
         Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=2000)]
@@ -5016,7 +5025,8 @@ class TheoryOfMindSnapshot(CoreasonBaseState):
         description="The explicit array of Content Identifiers (CIDs) acting as cryptographic Lineage Watermarks that the modeling agent assumes the target already possesses.",  # noqa: E501
     )
     identified_knowledge_gaps: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
-        max_length=1000000000, description="Specific topics or logical premises the target agent is assumed to be missing."
+        max_length=1000000000,
+        description="Specific topics or logical premises the target agent is assumed to be missing.",
     )
 
     @model_validator(mode="after")
@@ -5140,7 +5150,7 @@ class VectorEmbeddingState(CoreasonBaseState):
     vector_base64: str = Field(
         pattern="^[A-Za-z0-9+/]*={0,2}$", max_length=5000000, description="The base64-encoded dense vector array."
     )
-    dimensionality: int = Field(le=9000000000000000000, description="The size of the vector array.")
+    dimensionality: int = Field(description="The size of the vector array.")
     model_name: str = Field(
         max_length=2000, description="The provenance of the embedding model used (e.g., 'text-embedding-3-large')."
     )
