@@ -16,9 +16,11 @@ import hypothesis.strategies as st
 from hypothesis import HealthCheck, given, settings
 
 from coreason_manifest.spec.ontology import (
+    ActionSpaceManifest,
     AgentAttestationReceipt,
     AgentBidIntent,
     AuctionState,
+    ConceptBottleneckPolicy,
     ConsensusFederationTopologyManifest,
     ConstitutionalPolicy,
     EpistemicAxiomState,
@@ -263,3 +265,31 @@ def test_mcp_client_binding_sorts_allowed_tools() -> None:
         allowed_mcp_tools=None,
     )
     assert binding_none.allowed_mcp_tools is None
+
+
+@given(st.dictionaries(st.text(min_size=1, max_size=100), st.booleans(), min_size=2, max_size=50))
+def test_concept_bottleneck_policy_sorts_concept_vector(required_concepts: dict[str, bool]) -> None:
+    """Prove ConceptBottleneckPolicy deterministically sorts required_concept_vector keys."""
+    policy = ConceptBottleneckPolicy(
+        required_concept_vector=required_concepts, explanation_modality="feature_attribution"
+    )
+    assert list(policy.required_concept_vector.keys()) == sorted(required_concepts.keys())
+
+
+@given(
+    st.lists(
+        st.from_regex(r"^ext:[a-zA-Z0-9_.-]+$", fullmatch=True).filter(lambda x: len(x) <= 128), min_size=2, max_size=50
+    )
+)
+def test_action_space_manifest_sorts_allowed_discovery_namespaces(namespaces: list[str]) -> None:
+    """Prove ActionSpaceManifest deterministically sorts allowed_discovery_namespaces."""
+    # ActionSpaceManifest calls `validate_global_domain_extensions` which validates against `allowed_ext_intents`
+    # We need to pass validation context for this to succeed since "ext:*" domains are globally blocked without it.
+    from pydantic import TypeAdapter
+
+    adapter = TypeAdapter(ActionSpaceManifest)
+    manifest = adapter.validate_python(
+        {"action_space_id": "test_space", "allowed_discovery_namespaces": namespaces},
+        context={"allowed_ext_intents": set(namespaces)},
+    )
+    assert manifest.allowed_discovery_namespaces == sorted(namespaces)

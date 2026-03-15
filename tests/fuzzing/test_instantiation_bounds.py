@@ -8,6 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+import re
 from typing import Any
 
 import hypothesis.strategies as st
@@ -18,7 +19,9 @@ from pydantic import ValidationError
 from coreason_manifest.spec.ontology import (
     BaseStateEvent,
     BrowserDOMState,
+    ConceptBottleneckPolicy,
     DAGTopologyManifest,
+    EpistemicProvenanceReceipt,
     MultimodalTokenAnchorState,
     QuorumPolicy,
     SpatialBoundingBoxProfile,
@@ -26,6 +29,8 @@ from coreason_manifest.spec.ontology import (
     SystemNodeProfile,
     TaskAnnouncementIntent,
     TaxonomicRoutingPolicy,
+    TokenMergingPolicy,
+    WorkflowManifest,
 )
 
 valid_node_id_st = st.from_regex(r"^did:[a-z0-9]+:[a-zA-Z0-9.\-_:]+$", fullmatch=True)
@@ -235,3 +240,41 @@ def test_temporal_dilation_fuzzing(timestamp: float) -> None:
 def test_id_bombing_fuzzing(massive_id: str) -> None:
     with pytest.raises((ValidationError, ValueError)):
         TaskAnnouncementIntent(task_id=massive_id, required_action_space_id=None, max_budget_magnitude=100)
+
+
+@given(st.floats(min_value=0.0001, max_value=1000.0) | st.floats(min_value=-1000.0, max_value=-0.0001))
+def test_concept_bottleneck_policy_zero_variance(bottleneck_temp: float) -> None:
+    """Fuzz Absolute Zero Variance: attempt to instantiate ConceptBottleneckPolicy with non-zero temperature."""
+    with pytest.raises(ValidationError):
+        ConceptBottleneckPolicy(
+            required_concept_vector={"test": True},
+            bottleneck_temperature=bottleneck_temp,
+            explanation_modality="feature_attribution",
+        )
+
+
+@given(st.text().filter(lambda x: not re.match(r"^[a-f0-9]{64}$", x)))
+def test_workflow_manifest_cryptographic_regex(invalid_hash: str) -> None:
+    """Fuzz Cryptographic Regex: attempt to instantiate WorkflowManifest with invalid global_system_prompt_hash."""
+    prov = EpistemicProvenanceReceipt(extracted_by="did:web:node_1", source_event_id="evt_01")
+    topo = DAGTopologyManifest(nodes={}, edges=[], allow_cycles=False, max_depth=1, max_fan_out=1)
+
+    with pytest.raises(ValidationError):
+        WorkflowManifest(
+            genesis_provenance=prov,
+            manifest_version="1.0.0",
+            topology=topo,
+            global_system_prompt_hash=invalid_hash,
+        )
+
+
+@given(st.lists(st.integers(max_value=-1), min_size=1, max_size=10))
+def test_token_merging_policy_array_geometry(negative_layers: list[int]) -> None:
+    """Fuzz Array Geometry Starvation: attempt to instantiate TokenMergingPolicy with exclusively negative layers."""
+    with pytest.raises(ValidationError):
+        TokenMergingPolicy(
+            metric="cosine_similarity",
+            matching_algorithm="bipartite_soft_matching",
+            target_compression_ratio=0.5,
+            layer_whitelist=negative_layers,
+        )
