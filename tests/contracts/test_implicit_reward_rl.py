@@ -19,9 +19,9 @@ from coreason_manifest.spec.ontology import (
 def test_cognitive_reward_evaluation_receipt_sorting() -> None:
     # Prove CognitiveRewardEvaluationReceipt mathematically sorts the extracted_axioms list
     # regardless of the order they are passed in during instantiation.
-    axiom1 = EpistemicAxiomState(source_concept_id="B", directed_edge_type="type1", target_concept_id="A")
-    axiom2 = EpistemicAxiomState(source_concept_id="A", directed_edge_type="type1", target_concept_id="C")
-    axiom3 = EpistemicAxiomState(source_concept_id="A", directed_edge_type="type2", target_concept_id="B")
+    axiom1 = EpistemicAxiomState(source_concept_id="B", directed_edge_type="has_part", target_concept_id="A")
+    axiom2 = EpistemicAxiomState(source_concept_id="A", directed_edge_type="has_part", target_concept_id="C")
+    axiom3 = EpistemicAxiomState(source_concept_id="A", directed_edge_type="part_of", target_concept_id="B")
 
     receipt = CognitiveRewardEvaluationReceipt(
         event_id="test_event_id",

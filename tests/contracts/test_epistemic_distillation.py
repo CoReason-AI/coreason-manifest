@@ -20,9 +20,9 @@ from coreason_manifest.spec.ontology import (
 
 
 def test_epistemic_chain_graph_state_sorting() -> None:
-    axiom1 = EpistemicAxiomState(source_concept_id="B", directed_edge_type="type1", target_concept_id="A")
-    axiom2 = EpistemicAxiomState(source_concept_id="A", directed_edge_type="type2", target_concept_id="C")
-    axiom3 = EpistemicAxiomState(source_concept_id="A", directed_edge_type="type1", target_concept_id="C")
+    axiom1 = EpistemicAxiomState(source_concept_id="B", directed_edge_type="has_part", target_concept_id="A")
+    axiom2 = EpistemicAxiomState(source_concept_id="A", directed_edge_type="part_of", target_concept_id="C")
+    axiom3 = EpistemicAxiomState(source_concept_id="A", directed_edge_type="has_part", target_concept_id="C")
 
     # Pass in a non-sorted list of axioms for semantic_leaves
     state = EpistemicChainGraphState(
