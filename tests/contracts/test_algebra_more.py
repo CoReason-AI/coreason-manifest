@@ -1,39 +1,34 @@
-import pytest
-import ast
 import base64
-import struct
-from pydantic import ValidationError
+
+import pytest
 
 from coreason_manifest.spec.ontology import (
-    WorkflowManifest,
-    VectorEmbeddingState,
     OntologicalAlignmentPolicy,
+    VectorEmbeddingState,
 )
 from coreason_manifest.utils.algebra import (
-    project_manifest_to_markdown,
-    verify_ast_safety,
     calculate_latent_alignment,
+    verify_ast_safety,
 )
+
 
 def test_verify_ast_safety_slice():
     payload = "[1, 2, 3][0:2]"
-    assert verify_ast_safety(payload) == True
+    assert verify_ast_safety(payload)
+
 
 def test_verify_ast_safety_forbidden():
-    payload = "[x for x in range(10)]" # List comprehension isn't in base_allowlist
+    payload = "[x for x in range(10)]"  # List comprehension isn't in base_allowlist
     with pytest.raises(ValueError, match="Kinetic execution bleed detected"):
         verify_ast_safety(payload)
 
+
 def test_calculate_latent_alignment_struct_error():
     v1 = VectorEmbeddingState(
-        model_name="test-model",
-        dimensionality=1000,
-        vector_base64=base64.b64encode(b"not enough data").decode()
+        model_name="test-model", dimensionality=1000, vector_base64=base64.b64encode(b"not enough data").decode()
     )
     v2 = VectorEmbeddingState(
-        model_name="test-model",
-        dimensionality=1000,
-        vector_base64=base64.b64encode(b"not enough data").decode()
+        model_name="test-model", dimensionality=1000, vector_base64=base64.b64encode(b"not enough data").decode()
     )
     policy = OntologicalAlignmentPolicy(min_cosine_similarity=0.5, require_isometry_proof=False)
     with pytest.raises(ValueError, match="Byte length does not match declared dimensionality"):
