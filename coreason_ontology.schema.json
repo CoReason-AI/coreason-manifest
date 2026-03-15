@@ -79,7 +79,7 @@
         },
         "scaling_factor": {
           "description": "The mathematical magnitude/strength of the injection (can be negative for ablation).",
-          "maximum": 1.0,
+          "maximum": 100.0,
           "title": "Scaling Factor",
           "type": "number"
         },
@@ -181,7 +181,7 @@
             "minLength": 1,
             "type": "string"
           },
-          "le": 86400000,
+          "maxItems": 86400000,
           "minItems": 2,
           "title": "Deadlocked Claims",
           "type": "array"
@@ -1857,7 +1857,7 @@
             "maxLength": 2000,
             "type": "string"
           },
-          "le": 1000000000,
+          "maxItems": 1000000000,
           "title": "Allowed Fields",
           "type": "array"
         },
@@ -1927,7 +1927,7 @@
           "anyOf": [
             {
               "additionalProperties": true,
-              "le": 86400000,
+              "maxProperties": 86400000,
               "propertyNames": {
                 "maxLength": 255
               },
@@ -1992,8 +1992,7 @@
         },
         "viewport_size": {
           "description": "Capability Perimeters detailing bounding coordinates.",
-          "le": 1000000000,
-          "maxItems": 2,
+          "maxItems": 1000000000,
           "minItems": 2,
           "prefixItems": [
             {
@@ -2611,7 +2610,7 @@
         },
         "total_advantage_score": {
           "description": "The final computed GRPO advantage signal used to update the policy gradients.",
-          "maximum": 1.0,
+          "maximum": 100.0,
           "title": "Total Advantage Score",
           "type": "number"
         }
@@ -2972,7 +2971,7 @@
             "maxLength": 255,
             "type": "string"
           },
-          "le": 1000000000,
+          "maxItems": 1000000000,
           "title": "Capabilities",
           "type": "array"
         },
@@ -3016,7 +3015,7 @@
             "maxLength": 255,
             "type": "string"
           },
-          "le": 1000000000,
+          "maxItems": 1000000000,
           "title": "Required Capabilities",
           "type": "array"
         },
@@ -3252,7 +3251,7 @@
             "minLength": 1,
             "type": "string"
           },
-          "le": 1000000000,
+          "maxItems": 1000000000,
           "title": "Forbidden Intents",
           "type": "array"
         }
@@ -4383,8 +4382,7 @@
         "confidence_interval_95": {
           "anyOf": [
             {
-              "le": 1000000000.0,
-              "maxItems": 2,
+              "maxItems": 1000000000,
               "minItems": 2,
               "prefixItems": [
                 {
@@ -4465,7 +4463,7 @@
             "$ref": "#/$defs/DocumentLayoutRegionState"
           },
           "description": "Dictionary mapping block_ids to their strict spatial definitions.",
-          "le": 1000000000,
+          "maxProperties": 1000000000,
           "propertyNames": {
             "maxLength": 255
           },
@@ -4556,7 +4554,7 @@
         "resolution_schema": {
           "additionalProperties": true,
           "description": "The strict JSON Schema the human's input must satisfy before the graph can resume.",
-          "le": 1000000000,
+          "maxProperties": 1000000000,
           "propertyNames": {
             "maxLength": 255
           },
@@ -4676,7 +4674,7 @@
             "type": "integer"
           },
           "description": "The strict allocation of compute budget bound to specific nodes.",
-          "le": 1000000000,
+          "maxProperties": 1000000000,
           "propertyNames": {
             "$ref": "#/$defs/NodeIdentifierState"
           },
@@ -4889,8 +4887,7 @@
             "$ref": "#/$defs/EpistemicArgumentClaimState"
           },
           "description": "Components of an Abstract Argumentation Framework.",
-          "le": 86400000,
-          "maxLength": 10000,
+          "maxProperties": 10000,
           "propertyNames": {
             "maxLength": 255
           },
@@ -5280,7 +5277,7 @@
           "items": {
             "$ref": "#/$defs/TemporalCheckpointState"
           },
-          "le": 1000000000,
+          "maxItems": 1000000000,
           "title": "Checkpoints",
           "type": "array"
         },
@@ -5622,7 +5619,7 @@
             "$ref": "#/$defs/CognitiveStateProfile"
           },
           "description": "Dictionary mapping step_ids to strict causal DAG constraints.",
-          "le": 1000000000,
+          "maxProperties": 1000000000,
           "propertyNames": {
             "maxLength": 255
           },
@@ -6648,7 +6645,7 @@
         "synthetic_payload": {
           "additionalProperties": true,
           "description": "Bounded dictionary representing the injected hallucination or observation.",
-          "le": 1000000000,
+          "maxProperties": 1000000000,
           "propertyNames": {
             "maxLength": 255
           },
@@ -6932,7 +6929,7 @@
             "maxLength": 2000,
             "type": "string"
           },
-          "le": 1000000000,
+          "maxItems": 1000000000,
           "title": "Broadcast Endpoints",
           "type": "array"
         },
@@ -6943,7 +6940,7 @@
             "minLength": 1,
             "type": "string"
           },
-          "le": 1000000000,
+          "maxItems": 1000000000,
           "title": "Supported Ontologies",
           "type": "array"
         }
@@ -6968,7 +6965,7 @@
         "vram_footprint_bytes": {
           "description": "CoReason Shared Kernel Ontology: The exact spatial geometry required in VRAM to mount this adapter.",
           "exclusiveMinimum": 0,
-          "maximum": 1000000000,
+          "maximum": 100000000000,
           "title": "Vram Footprint Bytes",
           "type": "integer"
         },
@@ -7146,7 +7143,7 @@
             "$ref": "#/$defs/TaxonomicNodeState"
           },
           "description": "Flat dictionary matrix containing all nodes within the manifold.",
-          "le": 1000000000,
+          "maxProperties": 1000000000,
           "propertyNames": {
             "maxLength": 255
           },
@@ -7319,7 +7316,7 @@
         },
         "weight": {
           "description": "Weight or significance of this criterion.",
-          "maximum": 1.0,
+          "maximum": 100.0,
           "minimum": 0.0,
           "title": "Weight",
           "type": "number"
@@ -8014,7 +8011,7 @@
             ]
           },
           "description": "The action proposed by the agent that requires approval.",
-          "le": 1000000000.0,
+          "maxProperties": 1000000000,
           "propertyNames": {
             "maxLength": 255
           },
@@ -8402,7 +8399,6 @@
         "top_k_candidates": {
           "description": "The maximum number of nodes to extract from the index.",
           "exclusiveMinimum": 0,
-          "maximum": 1000000000,
           "title": "Top K Candidates",
           "type": "integer"
         },
@@ -8803,7 +8799,7 @@
           "anyOf": [
             {
               "additionalProperties": true,
-              "le": 86400000,
+              "maxProperties": 86400000,
               "propertyNames": {
                 "maxLength": 255
               },
@@ -8870,7 +8866,7 @@
         "arguments": {
           "additionalProperties": true,
           "description": "Arguments to fill the prompt template.",
-          "le": 1000000000,
+          "maxProperties": 1000000000,
           "propertyNames": {
             "maxLength": 255
           },
@@ -9076,7 +9072,7 @@
             },
             "type": "array"
           },
-          "le": 1000000000,
+          "maxItems": 1000000000,
           "title": "Layout Matrix",
           "type": "array"
         },
@@ -9109,7 +9105,6 @@
         },
         "slashing_penalty": {
           "description": "The exact token amount slashed for Byzantine faults.",
-          "maximum": 1.0,
           "minimum": 0.0,
           "title": "Slashing Penalty",
           "type": "number"
@@ -9148,7 +9143,7 @@
             "minLength": 1,
             "type": "string"
           },
-          "le": 1000000000,
+          "maxItems": 1000000000,
           "title": "Falsified Hypothesis Ids",
           "type": "array"
         },
@@ -9302,7 +9297,7 @@
         "expected_output_schema": {
           "additionalProperties": true,
           "description": "The strictly typed JSON Schema expected from the cached payload.",
-          "le": 1000000000,
+          "maxProperties": 1000000000,
           "propertyNames": {
             "maxLength": 255
           },
@@ -9463,8 +9458,7 @@
         "bounding_box": {
           "anyOf": [
             {
-              "le": 1000000000.0,
-              "maxItems": 4,
+              "maxItems": 1000000000,
               "minItems": 4,
               "prefixItems": [
                 {
@@ -9565,13 +9559,13 @@
           "items": {
             "type": "integer"
           },
-          "le": 1000000000,
+          "maxItems": 1000000000,
           "title": "Shape",
           "type": "array"
         },
         "vram_footprint_bytes": {
           "description": "Exact byte size of the uncompressed tensor.",
-          "maximum": 1000000000,
+          "maximum": 100000000000,
           "title": "Vram Footprint Bytes",
           "type": "integer"
         },
@@ -9969,7 +9963,7 @@
             "minLength": 1,
             "type": "string"
           },
-          "le": 1000000000,
+          "maxItems": 1000000000,
           "minItems": 2,
           "title": "Participant Node Ids",
           "type": "array"
@@ -10128,7 +10122,7 @@
             ]
           },
           "description": "The exact payload forcefully injected into the state.",
-          "le": 1000000000.0,
+          "maxProperties": 1000000000,
           "propertyNames": {
             "maxLength": 255
           },
@@ -10731,7 +10725,6 @@
                 "maxLength": 2000,
                 "type": "string"
               },
-              "le": 1000000000,
               "maxItems": 100,
               "type": "array"
             },
@@ -11384,7 +11377,7 @@
             "maxLength": 255,
             "type": "string"
           },
-          "le": 1000000000,
+          "maxItems": 1000000000,
           "title": "Required Structural Types",
           "type": "array"
         }
@@ -11829,7 +11822,7 @@
         "attributes": {
           "additionalProperties": true,
           "description": "Typed metadata bound to the event.",
-          "le": 1000000000,
+          "maxProperties": 1000000000,
           "propertyNames": {
             "maxLength": 255
           },
@@ -12268,7 +12261,7 @@
             "maxLength": 2000,
             "type": "string"
           },
-          "le": 1000000000,
+          "maxItems": 1000000000,
           "title": "Args",
           "type": "array"
         },
@@ -12315,7 +12308,7 @@
                 "maxLength": 2000,
                 "type": "string"
               },
-              "le": 1000000000,
+              "maxItems": 1000000000,
               "type": "array"
             },
             {
@@ -12344,7 +12337,7 @@
             "maxLength": 255,
             "type": "string"
           },
-          "le": 1000000000,
+          "maxItems": 1000000000,
           "title": "Observed Variables",
           "type": "array"
         },
@@ -12354,7 +12347,7 @@
             "maxLength": 255,
             "type": "string"
           },
-          "le": 1000000000,
+          "maxItems": 1000000000,
           "title": "Latent Variables",
           "type": "array"
         },
@@ -12582,7 +12575,7 @@
             "maxLength": 2000,
             "type": "string"
           },
-          "le": 1000000000,
+          "maxItems": 1000000000,
           "title": "Allowed Passive Tools",
           "type": "array"
         }
@@ -12941,7 +12934,7 @@
             "type": "string"
           },
           "description": "Strict dictionary binding classified natural language intents to bounded spatial heuristics.",
-          "le": 1000000000,
+          "maxProperties": 1000,
           "propertyNames": {
             "maxLength": 255
           },
@@ -13183,7 +13176,7 @@
             "maxLength": 2000,
             "type": "string"
           },
-          "le": 1000000000,
+          "maxItems": 1000000000,
           "title": "Identified Knowledge Gaps",
           "type": "array"
         },
@@ -13385,7 +13378,7 @@
         "parameters": {
           "additionalProperties": true,
           "description": "The intended JSON-RPC payload.",
-          "le": 1000000000,
+          "maxProperties": 1000000000,
           "propertyNames": {
             "maxLength": 255
           },
@@ -13445,7 +13438,7 @@
         "input_schema": {
           "additionalProperties": true,
           "description": "The strict JSON Schema dictionary defining the required arguments.",
-          "le": 1000000000,
+          "maxProperties": 1000000000,
           "propertyNames": {
             "maxLength": 255
           },
@@ -13717,7 +13710,6 @@
         },
         "dimensionality": {
           "description": "The size of the vector array.",
-          "maximum": 1000000000,
           "title": "Dimensionality",
           "type": "integer"
         },
@@ -13764,7 +13756,7 @@
         "authorization_claims": {
           "additionalProperties": true,
           "description": "The strict, domain-agnostic JSON dictionary of strictly bounded geometric predicates that define the operational perimeter of the agent (e.g., {'clearance': 'RESTRICTED'}).",
-          "le": 86400000,
+          "maxProperties": 86400000,
           "propertyNames": {
             "maxLength": 255
           },

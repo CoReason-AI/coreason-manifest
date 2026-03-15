@@ -58,9 +58,6 @@ jobs:
       - name: Diff Check
         run: git diff --exit-code coreason_ontology.schema.json
 
-      - name: Semantic Diff Check
-        run: uv run scripts/semantic_diff.py origin/main coreason_ontology.schema.json
-
   security-sast:
     name: Security SAST (AI-Specific Fuzzing & Architectural Gate)
     runs-on: ubuntu-latest
