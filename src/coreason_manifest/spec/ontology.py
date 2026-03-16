@@ -2391,6 +2391,25 @@ class BoundedJSONRPCIntent(CoreasonBaseState):
 
 
 class BrowserDOMState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Defines the exogenous structural boundary of a headless browser
+    environment within a Partially Observable Markov Decision Process (POMDP). As a
+    ...State suffix, this is a declarative, frozen snapshot of an external topography.
+
+    CAUSAL AFFORDANCE: Exposes the deterministic coordinate space (viewport_size,
+    dom_hash, accessibility_tree_hash) enabling spatial kinematics and visual
+    grounding. The current_url (max_length=2000) anchors the spatial execution bound.
+    An optional screenshot_cid (max_length=2000, default=None) captures the visual
+    snapshot.
+
+    EPISTEMIC BOUNDS: Enforces strict Server-Side Request Forgery (SSRF) quarantine
+    via the @field_validator _enforce_spatial_safety, mathematically isolating the
+    agent from Bogon/private IP space. The dom_hash and accessibility_tree_hash are
+    rigidly locked to SHA-256 pattern (^[a-f0-9]{64}$).
+
+    MCP ROUTING TRIGGERS: Exogenous Perturbation, DOM Topography, SSRF Quarantine,
+    Spatial Execution Bound, Accessibility Tree
+    """
     type: Literal["browser"] = Field(
         default="browser", description="Discriminator for Causal Actuators representing structural shifts."
     )
@@ -7024,6 +7043,24 @@ class TemporalBoundsProfile(CoreasonBaseState):
 
 
 class TerminalBufferState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Represents the discrete, deterministic crystallization of an
+    ephemeral POSIX/TTY execution buffer into a verifiable Merkle-DAG state vector.
+    As a ...State suffix, this is a declarative, frozen snapshot of an external
+    console.
+
+    CAUSAL AFFORDANCE: Acts as the structural sensor array for shell interactions,
+    capturing continuous stdout/stderr streams and environment matrices as
+    cryptographically locked exogenous perturbations. The working_directory
+    (max_length=2000) anchors the filesystem context.
+
+    EPISTEMIC BOUNDS: Physically restricted to SHA-256 canonical fingerprints
+    (stdout_hash, stderr_hash, env_variables_hash, all matching ^[a-f0-9]{64}$) to
+    mathematically prevent VRAM memory exhaustion from unbounded shell log buffering.
+
+    MCP ROUTING TRIGGERS: POSIX Environment, Exogenous Perturbation, TTY Buffer,
+    Causal Actuator, Stream Crystallization
+    """
     type: Literal["terminal"] = Field(
         default="terminal", description="Discriminator for Causal Actuators on structural buffers."
     )
@@ -7086,7 +7123,25 @@ class TheoryOfMindSnapshot(CoreasonBaseState):
 
 
 class ToolInvocationEvent(BaseStateEvent):
-    """A Priori Kinetic Commitment representing the Pearlian Do-Operator prior to network execution."""
+    """
+    AGENT INSTRUCTION: Formalizes Judea Pearl's Do-Operator ($do(X=x)$) on an
+    external or internal toolset, acting as an A Priori Kinetic Commitment. As an
+    ...Event suffix, this is an append-only, cryptographically frozen coordinate on
+    the Merkle-DAG.
+
+    CAUSAL AFFORDANCE: Transitions the swarm from internal epistemic deliberation to
+    kinetic execution. It targets tool_name (max_length=2000) with parameters (dict,
+    max_length=1000000000) and requires a mandatory agent_attestation
+    (AgentAttestationReceipt) proving identity.
+
+    EPISTEMIC BOUNDS: The execution's thermodynamic cost is economically bounded by
+    authorized_budget_magnitude (int | None, le=1000000000, ge=0, default=None).
+    Zero-Trust execution is rigidly enforced by the mandatory zk_proof
+    (ZeroKnowledgeReceipt), physically prohibiting forged network executions.
+
+    MCP ROUTING TRIGGERS: Pearlian Do-Operator, Kinetic Commitment, Active Inference,
+    Thermodynamic Escrow, Zero-Trust Actuation
+    """
 
     type: Literal["tool_invocation"] = Field(
         default="tool_invocation", description="Discriminator type for a tool invocation event."
@@ -8410,6 +8465,27 @@ class BeliefMutationEvent(BaseStateEvent):
 
 
 class ObservationEvent(BaseStateEvent):
+    """
+    AGENT INSTRUCTION: Formalizes the ingestion of Bayesian Evidence ($E$) by
+    capturing the raw, lossless semantic output from a ToolInvocationEvent or
+    environmental shift. As an ...Event suffix, this is an append-only coordinate.
+
+    CAUSAL AFFORDANCE: Injects verified exogenous truth into the
+    EpistemicLedgerState. The payload (dict[str, JsonPrimitiveState]) is linked
+    to its source via triggering_invocation_id (128-char CID, default=None). Optional
+    toolchain_snapshot (AnyToolchainState), sensory_trigger
+    (EmbodiedSensoryVectorProfile), and neural_audit
+    (NeuralAuditAttestationReceipt) extend the observation envelope.
+
+    EPISTEMIC BOUNDS: The payload dictionary is physically constrained against OOM
+    exhaustion and JSON-bombing via the @field_validator enforce_payload_topology,
+    which invokes _validate_payload_bounds to mandate strict recursive depth limits.
+    Optional hardware_attestation (HardwareEnclaveReceipt) and zk_proof
+    (ZeroKnowledgeReceipt) provide cryptographic integrity.
+
+    MCP ROUTING TRIGGERS: Bayesian Evidence, Neurosymbolic Binding, Exogenous Truth,
+    Epistemic Grounding, Payload Topological Bounding
+    """
     type: Literal["observation"] = Field(
         default="observation", description="Discriminator type for an observation event."
     )
