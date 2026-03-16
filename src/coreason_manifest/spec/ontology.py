@@ -1020,7 +1020,20 @@ class ConstitutionalPolicy(CoreasonBaseState):
 
 class GradingCriterionProfile(CoreasonBaseState):
     """
-    Defines criteria governing grading LLM behavior or output.
+    AGENT INSTRUCTION: Defines a discrete objective dimension within a Multi-Attribute
+    Utility Theory (MAUT) framework. As a ...Profile suffix, this is a declarative,
+    frozen snapshot of an evaluation geometry.
+
+    CAUSAL AFFORDANCE: Provides the orchestrator's reward model with a formalized
+    mathematical vector to compute partial utility scores during algorithmic adjudication.
+    The description field (max_length=2000) carries the exact logical boundary.
+
+    EPISTEMIC BOUNDS: The objective significance is physically constrained by weight
+    (ge=0.0, le=100.0). The geometric perimeter is locked to a 128-char criterion_id CID
+    regex.
+
+    MCP ROUTING TRIGGERS: Multi-Attribute Utility Theory, Objective Dimension,
+    Adjudication Heuristic, Scalar Weighting, Dimensional Check
     """
 
     criterion_id: str = Field(
@@ -1038,7 +1051,22 @@ class GradingCriterionProfile(CoreasonBaseState):
 
 class AdjudicationRubricProfile(CoreasonBaseState):
     """
-    Rubric defining multiple criteria and passing threshold for algorithmic adjudication.
+    AGENT INSTRUCTION: Formalizes an Aggregation Function for Multi-Criteria Decision
+    Analysis (MCDA), compiling multiple utility dimensions into a definitive evaluation
+    boundary for the swarm. As a ...Profile suffix, this is a declarative property
+    descriptor.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator's verification engine on how to
+    calculate the total weighted score of a generated trajectory, triggering a
+    deterministic boolean pass/fail gate based on the aggregate sum.
+
+    EPISTEMIC BOUNDS: The success condition is mathematically locked by passing_threshold
+    (ge=0.0, le=100.0). The rubric_id is a 128-char CID anchor. The @model_validator
+    sort_arrays deterministically sorts the criteria array by criterion_id, guaranteeing
+    invariant RFC 8785 canonical hashing.
+
+    MCP ROUTING TRIGGERS: Multi-Criteria Decision Analysis, Aggregation Function,
+    Adjudication Rubric, RFC 8785 Canonicalization, Evaluation Threshold
     """
 
     rubric_id: str = Field(
@@ -1944,7 +1972,22 @@ class AdjudicationIntent(CoreasonBaseState):
 
 class AdjudicationReceipt(CoreasonBaseState):
     """
-    Verdict resulting from grading an LLM behavior or output against a rubric.
+    AGENT INSTRUCTION: A cryptographically frozen historical fact representing the
+    definitive collapse of an MCDA evaluation, acting as a verified Outcome Reward Model
+    (ORM) signal. As a ...Receipt suffix, this is an append-only coordinate on the
+    Merkle-DAG.
+
+    CAUSAL AFFORDANCE: Commits the calculated score and boolean passed verdict to the
+    Epistemic Ledger, permanently binding the deterministic evaluation to the specific
+    target_node_id (NodeIdentifierState) and authorizing downstream policy updates.
+
+    EPISTEMIC BOUNDS: The evaluation outcome is strictly bounded to an integer score
+    (ge=0, le=100). The underlying deductive proof (reasoning) is physically capped at
+    max_length=2000. The entire receipt is cryptographically locked to the originating
+    rubric_id CID (128-char regex).
+
+    MCP ROUTING TRIGGERS: Outcome Reward Model, Epistemic Ledger Commit, Algorithmic
+    Adjudication, Deterministic Verdict, Utility Realization
     """
 
     rubric_id: str = Field(
