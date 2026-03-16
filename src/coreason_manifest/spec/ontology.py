@@ -2963,21 +2963,21 @@ class EpistemicPromotionEvent(BaseStateEvent):
 
 class EpistemicScanningPolicy(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Grounded in Active Inference and Epistemic Logic, this policy
-    dictates the continuous background monitoring of the active context for ungrounded
-    assertions and cognitive dissonance. As a ...Policy suffix, this object defines rigid
-    mathematical boundaries that the orchestrator must enforce globally.
+    AGENT INSTRUCTION: Implements Metacognitive Monitoring and Fristonian Active Inference
+    to continuously scan the agent's internal belief distribution and residual stream for
+    epistemic gaps. As a ...Policy suffix, this object defines rigid mathematical boundaries
+    that the orchestrator must enforce globally.
 
-    CAUSAL AFFORDANCE: Actively measures the Variational Free Energy of the working memory
-    partition, forcing the orchestrator to transition to a System 2 probing state or sever
-    the execution branch if ambiguity spikes. Gated by the active boolean toggle.
+    CAUSAL AFFORDANCE: Triggers a structural interlock when the agent detects a spike in
+    aleatoric entropy, forcing the orchestrator to halt forward-pass generation and actively
+    probe or clarify the uncertainty. Gated by the active boolean toggle.
 
-    EPISTEMIC BOUNDS: The acceptable ambiguity limit is rigidly defined by the
-    dissonance_threshold (ge=0.0, le=1.0). Remediation routing is constrained strictly to
-    the Literal FSM state transitions ["fail", "probe", "clarify"] via action_on_gap.
+    EPISTEMIC BOUNDS: The sensitivity of the metacognitive scanner is physically clamped by
+    the dissonance_threshold (ge=0.0, le=1.0). Recovery mechanisms are deterministically
+    restricted by the action_on_gap FSM literal automaton ["fail", "probe", "clarify"].
 
-    MCP ROUTING TRIGGERS: Active Inference, Cognitive Dissonance, Epistemic Logic,
-    Uncertainty Monitoring, Belief State Validation
+    MCP ROUTING TRIGGERS: Metacognitive Monitoring, Active Inference, Cognitive Dissonance,
+    Epistemic Foraging, Entropy Scanning
     """
 
     active: bool = Field(description="Whether the epistemic scanner is active.")
@@ -5471,21 +5471,22 @@ type ScaleTypeProfile = Literal["linear", "log", "time", "ordinal", "nominal"]
 
 class SelfCorrectionPolicy(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Formalizes a closed-loop Control Theory system for autonomous,
-    non-monotonic error correction and iterative belief refinement during generation. As a
-    ...Policy suffix, this object defines rigid mathematical boundaries that the
-    orchestrator must enforce globally.
+    AGENT INSTRUCTION: Acts as the System 2 executive controller, utilizing Non-Monotonic
+    Logic and iterative backtracking to mathematically resolve structural, semantic, or
+    kinetic execution errors. As a ...Policy suffix, this object defines rigid mathematical
+    boundaries that the orchestrator must enforce globally.
 
-    CAUSAL AFFORDANCE: Authorizes the agent to execute cyclic reflection and transactional
-    graph rollbacks, refining its N-dimensional state representation prior to crystallizing
-    the output into the EpistemicLedgerState.
+    CAUSAL AFFORDANCE: Authorizes the orchestrator to physically rewind the causal DAG and
+    retry generation paths via an Actor-Critic refinement loop when a System 1 failure or
+    epistemic gap is detected.
 
-    EPISTEMIC BOUNDS: Mathematically bounds the Halting Problem by physically capping
-    max_loops at 50 (ge=0, le=50), preventing infinite compute burn. Enforces transactional
-    safety via the rollback_on_failure boolean constraint.
+    EPISTEMIC BOUNDS: Mathematically prevents infinite compute burn (State-Space Explosion)
+    by strictly capping max_loops (ge=0, le=50). The rollback_on_failure boolean serves as
+    a physical fail-safe, forcing a deterministic reversion to the last pristine Merkle root
+    if the loop ceiling is breached.
 
-    MCP ROUTING TRIGGERS: Control Theory, Feedback Loop, Iterative Refinement,
-    Non-Monotonic Revision, Cyclic Reflection
+    MCP ROUTING TRIGGERS: Non-Monotonic Logic, Actor-Critic Refinement, System 2 Executive,
+    Backtracking Search, State-Space Explosion Prevention
     """
 
     max_loops: int = Field(ge=0, le=50, description="The maximum number of self-correction loops allowed.")
@@ -5999,22 +6000,21 @@ class SyntheticGenerationProfile(CoreasonBaseState):
 
 class System1ReflexPolicy(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Implements Kahneman's Dual-Process Theory (System 1) to define the
-    exact topological boundary for fast, automatic, heuristic-driven cognitive processing.
-    As a ...Policy suffix, this object defines rigid mathematical boundaries that the
-    orchestrator must enforce globally.
+    AGENT INSTRUCTION: Formalizes Kahneman's Dual-Process Theory (System 1) to execute
+    rapid, heuristic-based reflex actions without invoking deep logical search trees. As a
+    ...Policy suffix, this enforces a rigid computational boundary.
 
-    CAUSAL AFFORDANCE: Bypasses deep test-time compute and Monte Carlo Tree Search (MCTS)
-    to instantly authorize zero-shot execution of passive, non-mutating vectors when
-    epistemic certainty is high.
+    CAUSAL AFFORDANCE: Unlocks zero-shot execution of side-effect-free capabilities when
+    the working context matches established high-probability priors, intentionally bypassing
+    expensive System 2 Monte Carlo Tree Search (MCTS).
 
     EPISTEMIC BOUNDS: Execution is mathematically gated by the confidence_threshold
-    (ge=0.0, le=1.0). If triggered, the orchestrator is strictly limited to invoking tools
-    present in the deterministically sorted allowed_passive_tools array
-    (max_length=1000000000, StringConstraints max_length=2000), sorted via @model_validator.
+    (ge=0.0, le=1.0). The allowed_passive_tools array (max_length=1000000000,
+    StringConstraints max_length=2000) strictly bounds the agent to non-mutating
+    capabilities, deterministically sorted via @model_validator.
 
-    MCP ROUTING TRIGGERS: Dual-Process Theory, System 1 Heuristics, Zero-Shot Execution,
-    Reactive Bounding, Cognitive Fast-Path
+    MCP ROUTING TRIGGERS: Dual-Process Theory, System 1 Heuristics, Zero-Shot Reflex,
+    Metacognition, Amygdala Hijack Prevention
     """
 
     confidence_threshold: float = Field(
