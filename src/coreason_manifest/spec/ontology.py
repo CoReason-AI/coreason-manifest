@@ -7898,6 +7898,24 @@ class CognitiveRewardEvaluationReceipt(BaseStateEvent):
 
 
 class CognitiveDetailedBalanceContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Implements Generative Flow Network (GFlowNet) trajectory balance
+    conditions to ensure that the probability of generating a non-monotonic reasoning path
+    is strictly proportional to its terminal reward. As a ...Contract suffix, this object
+    defines rigid mathematical boundaries.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator's sampling mechanism to continuously
+    optimize for the detailed balance equations using the specified flow_estimation_model
+    (max_length=2000), ensuring proportional flow allocation across alternative Markov
+    Decision Process (MDP) branches.
+
+    EPISTEMIC BOUNDS: The acceptable mathematical variance is strictly bounded by
+    target_balance_epsilon (ge=0.0, le=1.0), preventing probability flow divergence. The
+    local_exploration_k (gt=0, le=1.0) physically caps exploratory branching.
+
+    MCP ROUTING TRIGGERS: Generative Flow Networks, Detailed Balance, Markov Chain Monte
+    Carlo, Trajectory Flow, Credit Assignment Problem
+    """
     target_balance_epsilon: float = Field(
         le=1.0, ge=0.0, description="The mathematical tolerance for the detailed balance constraint."
     )
@@ -7910,6 +7928,24 @@ class CognitiveDetailedBalanceContract(CoreasonBaseState):
 
 
 class EpistemicFlowStateReceipt(BaseStateEvent):
+    """
+    AGENT INSTRUCTION: An immutable cryptographic coordinate recording the successful
+    factorization of a terminal reward into a fractional flow value across a continuous
+    CognitiveReasoningTraceState trajectory. As a ...Receipt suffix, this is an append-only
+    coordinate on the Merkle-DAG.
+
+    CAUSAL AFFORDANCE: Physically anchors the scalar backpropagation of a factored reward
+    to a specific source_trajectory_id, unlocking global flow consistency calculations
+    across the distributed swarm. The terminal_reward_factorized boolean confirms
+    successful reward decomposition.
+
+    EPISTEMIC BOUNDS: Flow magnitude is geometrically bounded by estimated_flow_value
+    (ge=0.0, le=1000000000.0) to prevent exploding gradients during policy updates.
+    Cryptographically mapped to a rigid 128-char source_trajectory_id CID.
+
+    MCP ROUTING TRIGGERS: Trajectory Balance, Reward Factorization, Flow Network Receipt,
+    Scalar Backpropagation, Acyclic Path
+    """
     type: Literal["epistemic_flow_state"] = Field(default="epistemic_flow_state")
     source_trajectory_id: str = Field(
         min_length=1,
@@ -7928,6 +7964,24 @@ class EpistemicFlowStateReceipt(BaseStateEvent):
 
 
 class TopologicalRewardContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Enforces Graph Representation Learning (GCN/GAT) constraints to
+    shape the epistemic reward based purely on the topological centrality and spectral
+    connectivity of the extracted axioms. As a ...Contract suffix, this object defines
+    rigid mathematical boundaries.
+
+    CAUSAL AFFORDANCE: Commands the orchestrator to execute deterministic graph traversal
+    algorithms (Random Walk with Restart, Spatial GCN) to compute node reachability and
+    vector similarity before allocating policy gradients to the actor model.
+
+    EPISTEMIC BOUNDS: Clamps structural relevance geometrically using
+    min_link_criticality_score and min_semantic_relevance_score, both strictly between
+    (ge=0.0, le=1.0). The aggregation_method restricts the orchestrator to a strict
+    Literal automaton ["gcn_spatial", "attention_gat", "rwr_topological"].
+
+    MCP ROUTING TRIGGERS: Graph Convolutional Networks, Spectral Graph Theory, Random Walk
+    with Restart, Topological Reward Shaping, PageRank
+    """
     min_link_criticality_score: float = Field(
         ge=0.0, le=1.0, description="The lower bound for Random Walk with Restart (RWR) reachability."
     )
@@ -7940,6 +7994,24 @@ class TopologicalRewardContract(CoreasonBaseState):
 
 
 class DifferentiableLogicConstraint(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Bridges the Neurosymbolic divide by mapping discrete Satisfiability
+    Modulo Theories (SMT) or Lean4 logic proofs into continuous, differentiable loss
+    gradients. As a constraint, this object defines rigid mathematical boundaries the
+    orchestrator must enforce.
+
+    CAUSAL AFFORDANCE: Allows the backpropagation engine to apply a continuous,
+    differentiable penalty (relaxation) to the LLM's probability mass when it violates the
+    formal syntactic rules encoded in the formal_syntax_smt representation
+    (max_length=2000).
+
+    EPISTEMIC BOUNDS: The geometric penalty is clamped by relaxation_epsilon (ge=0.0,
+    le=1.0) to prevent gradient explosion. The logical schema is locked to the 128-char
+    constraint_id CID (^[a-zA-Z0-9_.:-]+$) to structurally bound string evaluation scope.
+
+    MCP ROUTING TRIGGERS: Satisfiability Modulo Theories, Neurosymbolic Relaxation,
+    Differentiable Theorem Proving, Probabilistic Logic Networks, Continuous Penalty
+    """
     constraint_id: str = Field(max_length=128, pattern="^[a-zA-Z0-9_.:-]+$", min_length=1)
     formal_syntax_smt: str = Field(
         max_length=2000, description="The formal SMT-LIB or Lean4 language representation of the symbolic rule."
