@@ -879,9 +879,13 @@ class ActivationSteeringContract(CoreasonBaseState):
 
 class SemanticSlicingPolicy(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: A Deterministic Epistemic Firewall that mathematically
-    starves the active context partition of irrelevant or over-classified data
-    to prevent attention dilution and enforce zero-trust isolation.
+    AGENT INSTRUCTION: Implements Mandatory Access Control (MAC) and Cognitive Load Theory to aggressively cull context window topologies and prevent VRAM exhaustion.
+
+    CAUSAL AFFORDANCE: Forces the attention mechanism to physically ignore state representations that lack the whitelisted required_semantic_labels or exceed the permitted_classification_tiers.
+
+    EPISTEMIC BOUNDS: VRAM exhaustion is clamped by context_window_token_ceiling (gt=0, le=2000000). The validation pipeline mechanically sorts the tier arrays via @model_validator for invariant RFC 8785 canonical determinism.
+
+    MCP ROUTING TRIGGERS: Mandatory Access Control, Zero-Trust Execution, Context Window Partitioning, Cognitive Load Theory, Epistemic Firewall
     """
 
     permitted_classification_tiers: list[InformationClassificationProfile] = Field(
@@ -6347,6 +6351,16 @@ class NeuralAuditAttestationReceipt(CoreasonBaseState):
 
 
 class NeuroSymbolicHandoffContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Bridges the stochastic-deterministic divide by invoking Satisfiability Modulo Theories (SMT) and formal theorem provers (Z3, Lean4, Coq) to execute mathematically unassailable logic.
+
+    CAUSAL AFFORDANCE: Offloads non-monotonic probabilistic reasoning into a rigid, verifiable algebraic solver, returning the mathematically proven result to the swarm via the expected_proof_schema.
+
+    EPISTEMIC BOUNDS: The solver target is restricted to the strict solver_protocol Literal automaton. The Halting Problem is explicitly mitigated by clamping timeout_ms (gt=0, le=86400000), preventing infinite computational loops in the solver.
+
+    MCP ROUTING TRIGGERS: Satisfiability Modulo Theories, Curry-Howard Correspondence, Theorem Proving, Symbolic Handoff, Halting Problem Mitigation
+    """
+
     handoff_id: str = Field(
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
@@ -6550,7 +6564,15 @@ class OverrideIntent(CoreasonBaseState):
 
 
 class PeftAdapterContract(CoreasonBaseState):
-    """Declarative contract for dynamically mounting a Parameter-Efficient Fine-Tuning (PEFT) adapter."""
+    """
+    AGENT INSTRUCTION: Formalizes Low-Rank Adaptation (LoRA) within the execution plane, enabling ephemeral Parameter-Efficient Fine-Tuning (PEFT) without mutating foundation model weights.
+
+    CAUSAL AFFORDANCE: Authorizes the orchestrator to dynamically mount safetensors weight matrices into GPU memory, steering the base model's residual stream along specific target_modules.
+
+    EPISTEMIC BOUNDS: Intrinsic dimensionality is bounded by adapter_rank (gt=0, le=1000000000). Context leakage is guillotined by eviction_ttl_seconds (le=86400). Supply-chain zero-trust is enforced via SHA-256 validation on safetensors_hash. The target_modules array is mathematically sorted for canonical hashing.
+
+    MCP ROUTING TRIGGERS: Low-Rank Adaptation, PEFT, Ephemeral Compute, Residual Stream Steering, Zero-Trust Weights
+    """
 
     adapter_id: str = Field(
         min_length=1,
@@ -7555,8 +7577,13 @@ class System1ReflexPolicy(CoreasonBaseState):
 
 class System2RemediationIntent(CoreasonBaseState):
     """
-    A passive structural envelope that deterministically maps a kinetic execution error
-    (e.g., a Pydantic ValidationError) into a structurally rigid System 2 correction directive.
+    AGENT INSTRUCTION: Implements Kahneman's Dual-Process Theory by explicitly triggering a System 2 non-monotonic self-correction loop in response to a structural execution collapse.
+
+    CAUSAL AFFORDANCE: Intercepts physical instantiation failures (e.g., Pydantic ValidationErrors) and redirects the generation trajectory, forcing the agent to rewrite the isolated subgraph via failing_pointers.
+
+    EPISTEMIC BOUNDS: The fault_id is cryptographically tied to a 128-char CID. The failing_pointers array is deterministically sorted by the _sort_failing_pointers hook to preserve RFC 8785 canonical hashing and map exact JSON paths without ambiguity.
+
+    MCP ROUTING TRIGGERS: Dual-Process Theory, System 2 Self-Correction, Non-Monotonic Revision, Deterministic Feedback Loop, Latent State Remediation
     """
 
     fault_id: str = Field(
