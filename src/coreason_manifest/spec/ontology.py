@@ -2194,6 +2194,41 @@ class AdversarialSimulationProfile(CoreasonBaseState):
     )
 
 
+class AdversarialEmulationProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Aggregates the full Adversarial Emulation geometry, composing
+    KinematicNoiseProfile (pointer perturbation) and EnvironmentalSpoofingProfile
+    (browser fingerprint masking) into a unified anti-detection manifold. As a
+    ...Profile suffix, this is a declarative, frozen snapshot of an N-dimensional
+    emulation coordinate.
+
+    CAUSAL AFFORDANCE: Authorizes the orchestrator's Spatial Kinematics engine to
+    simultaneously inject stochastic pointer noise and spoof environmental telemetry,
+    achieving a target emulation_fidelity_target score against anti-bot heuristics.
+
+    EPISTEMIC BOUNDS: The emulation_fidelity_target is strictly clamped to the
+    normalized probability range (ge=0.0, le=1.0). Both sub-profiles are optional
+    (default=None), allowing partial emulation geometries.
+
+    MCP ROUTING TRIGGERS: Adversarial Emulation, Anti-Bot Evasion, Pointer Noise
+    Injection, Browser Fingerprint Spoofing, Emulation Fidelity
+    """
+
+    kinematic_noise: "KinematicNoiseProfile | None" = Field(
+        default=None,
+        description="The stochastic pointer trajectory perturbation profile for human-like motor control emulation.",
+    )
+    environmental_spoofing: "EnvironmentalSpoofingProfile | None" = Field(
+        default=None,
+        description="The browser fingerprint and environmental telemetry spoofing geometry.",
+    )
+    emulation_fidelity_target: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="The target normalized score for human-likeness against anti-bot heuristic classifiers.",
+    )
+
+
 class AgentBidIntent(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Represents a probabilistic agentic bid in a multi-objective
@@ -3768,6 +3803,54 @@ class EnsembleTopologyProfile(CoreasonBaseState):
     def sort_arrays(self) -> Self:
         object.__setattr__(self, "concurrent_branch_ids", sorted(self.concurrent_branch_ids))
         return self
+
+
+class EnvironmentalSpoofingProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Defines the deterministic Browser Fingerprint Entropy geometry
+    for spoofing environmental telemetry vectors (WebGL canvas hashes, User-Agent
+    strings, timezone offsets, and display resolution). As a ...Profile suffix, this
+    is a declarative, frozen snapshot of a spoofed environmental coordinate.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator's Spatial Kinematics engine to
+    project a synthetic browser identity, masking the true computational substrate
+    from exogenous anti-bot fingerprinting oracles.
+
+    EPISTEMIC BOUNDS: The webgl_entropy_seed_hash is constrained to a 128-char CID
+    pattern. The user_agent_template is clamped to max_length=2000. The
+    timezone_offset_minutes is mathematically bounded to the valid UTC range
+    (ge=-720, le=840). Screen resolution components are bounded to reasonable
+    display geometries (ge=1, le=15360).
+
+    MCP ROUTING TRIGGERS: Browser Fingerprinting, WebGL Canvas Entropy, User-Agent
+    Spoofing, Environmental Telemetry, Anti-Fingerprint Evasion
+    """
+
+    webgl_entropy_seed_hash: str = Field(
+        min_length=1,
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        description="The Content Identifier (CID) of the WebGL canvas entropy seed used to generate a deterministic spoofed fingerprint.",
+    )
+    user_agent_template: str = Field(
+        max_length=2000,
+        description="The User-Agent string template projected to exogenous web servers to mask the true computational substrate.",
+    )
+    timezone_offset_minutes: int = Field(
+        ge=-720,
+        le=840,
+        description="The spoofed UTC timezone offset in minutes, bounded to the valid terrestrial range.",
+    )
+    screen_resolution_width: int = Field(
+        ge=1,
+        le=15360,
+        description="The spoofed horizontal display resolution in pixels.",
+    )
+    screen_resolution_height: int = Field(
+        ge=1,
+        le=15360,
+        description="The spoofed vertical display resolution in pixels.",
+    )
 
 
 class EpistemicCompressionSLA(CoreasonBaseState):
@@ -5803,6 +5886,42 @@ class MCPServerManifest(CoreasonBaseState):
                 "UNAUTHORIZED MCP MOUNT: The presented Verifiable Credential is not signed by a valid CoReason issuer DID. The orchestrator MUST immediately emit a QuarantineIntent and terminate the handshake."
             )
         return self
+
+
+class KinematicNoiseProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Implements Stochastic Process Theory (1/f^β spectral noise)
+    to inject human-like motor control perturbations into pointer trajectories,
+    preventing deterministic bot-detection via timing analysis. As a ...Profile
+    suffix, this is a declarative, frozen snapshot of a noise geometry.
+
+    CAUSAL AFFORDANCE: Authorizes the Spatial Kinematics engine to perturb each
+    SpatialCoordinateProfile along the Bezier trajectory by sampling from the
+    specified noise distribution, achieving biomechanically plausible jitter.
+
+    EPISTEMIC BOUNDS: The pink_noise_amplitude is strictly clamped to the
+    normalized range (ge=0.0, le=1.0), preventing trajectory corruption. The
+    frequency_exponent (1/f^β) is bounded (ge=0.0, le=5.0) to cover the full
+    spectrum from white noise (β=0) to black noise (β≥2). The noise_type Literal
+    automaton locks generation to ["pink", "brownian", "gaussian"].
+
+    MCP ROUTING TRIGGERS: Stochastic Process, Pink Noise, Brownian Motion,
+    Motor Control Perturbation, Anti-Bot Trajectory Jitter
+    """
+
+    noise_type: Literal["pink", "brownian", "gaussian"] = Field(
+        description="The stochastic process governing the noise generation for pointer trajectory perturbation.",
+    )
+    pink_noise_amplitude: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="The normalized amplitude of the 1/f noise injected into the pointer trajectory. Bounded [0.0, 1.0].",
+    )
+    frequency_exponent: float = Field(
+        ge=0.0,
+        le=5.0,
+        description="The spectral exponent β in the 1/f^β power spectral density function governing noise color.",
+    )
 
 
 class KineticSeparationPolicy(CoreasonBaseState):
@@ -8797,6 +8916,10 @@ class AgentNodeProfile(BaseNodeProfile):
         default=None,
         description="The RL post-training contract forcing the agent to evaluate traces against an implicit graph reward.",
     )
+    emulation_profile: AdversarialEmulationProfile | None = Field(
+        default=None,
+        description="The adversarial emulation geometry composing kinematic noise and environmental spoofing for anti-bot trajectory evasion.",
+    )
 
     @model_validator(mode="after")
     def sort_agent_node_arrays(self) -> Self:
@@ -10562,3 +10685,6 @@ DifferentiableLogicConstraint.model_rebuild()
 CausalExplanationEvent.model_rebuild()
 LatentSchemaInferenceIntent.model_rebuild()
 IntentClassificationReceipt.model_rebuild()
+KinematicNoiseProfile.model_rebuild()
+EnvironmentalSpoofingProfile.model_rebuild()
+AdversarialEmulationProfile.model_rebuild()
