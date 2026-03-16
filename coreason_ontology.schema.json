@@ -2529,7 +2529,7 @@
             }
           ],
           "default": "^Final Answer: .*$",
-          "description": "The strict regular expression the model must satisfy to yield a valid discrete classification.",
+          "description": "The strict regular expression the model must satisfy to yield a valid discrete classification. Optional because LMQL/Guidance do not use standard regex.",
           "title": "Final Answer Regex"
         },
         "decoding_policy": {
@@ -3389,6 +3389,7 @@
             }
           ],
           "default": null,
+          "description": "The raw LMQL query string, Guidance program, or EBNF grammar. Required if the enforcement_strategy is not standard JSON/Regex masking.",
           "title": "Formal Grammar String"
         },
         "terminate_on_eos_leak": {
