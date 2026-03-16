@@ -1006,21 +1006,13 @@ class CognitiveStateProfile(CoreasonBaseState):
 
 class CognitiveUncertaintyProfile(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Implements Structural Causal Models (SCMs) to mathematically quantify
-    doubt and partition irreducible aleatoric noise from actionable epistemic knowledge gaps.
-    As a ...Profile suffix, this is a declarative, frozen snapshot of N-dimensional geometry
-    at a specific point in time.
+    AGENT INSTRUCTION: Formalizes Pearlian Structural Causal Models (SCMs) and Variational Free Energy to mathematically quantify and partition irreducible aleatoric noise from actionable epistemic knowledge gaps. As a ...Profile suffix, this is a declarative, frozen snapshot of N-dimensional geometry at a specific point in time.
 
-    CAUSAL AFFORDANCE: Unlocks non-monotonic logic via Pearlian do-operators ($P(y|do(x))$),
-    computing exactly when to trigger a structural abductive escalation or active inference
-    loop via the requires_abductive_escalation flag.
+    CAUSAL AFFORDANCE: Unlocks non-monotonic logic via Pearlian do-operators ($P(y|do(x))$), computing exactly when to trigger a structural abductive escalation or active inference loop via the requires_abductive_escalation flag.
 
-    EPISTEMIC BOUNDS: Enforces absolute mathematical float boundaries [ge=0.0, le=1.0] on
-    aleatoric_entropy, epistemic_uncertainty, and semantic_consistency_score, mathematically
-    preventing probability wave overflow across all three continuous dimensions.
+    EPISTEMIC BOUNDS: Enforces absolute mathematical float boundaries [ge=0.0, le=1.0] on aleatoric_entropy, epistemic_uncertainty, and semantic_consistency_score, mathematically preventing probability wave overflow across all three continuous dimensions.
 
-    MCP ROUTING TRIGGERS: Structural Causal Models, Active Inference, Epistemic Uncertainty,
-    Aleatoric Entropy, Pearlian Do-Calculus
+    MCP ROUTING TRIGGERS: Structural Causal Models, Active Inference, Variational Free Energy, Aleatoric Entropy, Pearlian Do-Calculus
     """
 
     aleatoric_entropy: float = Field(
@@ -2045,13 +2037,13 @@ class FederatedDiscoveryManifest(CoreasonBaseState):
 
 class ActiveInferenceContract(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Defines the formal Fristonian Active Inference policy for an autonomous agent, mandating the minimization of Expected Free Energy through targeted epistemic foraging.
+    AGENT INSTRUCTION: Defines the formal Fristonian Active Inference policy for an autonomous agent, mandating the minimization of Expected Free Energy through targeted epistemic foraging. As a ...Contract suffix, this object defines rigid mathematical boundaries.
 
-    CAUSAL AFFORDANCE: Unlocks kinetic tool execution strictly for the purpose of empirical observation, routing compute to maximize epistemic certainty regarding a specific hypothesis.
+    CAUSAL AFFORDANCE: Unlocks kinetic tool execution strictly for the purpose of empirical observation, routing compute to maximize epistemic certainty (Shannon Information Gain) regarding a specific hypothesis to collapse the probability wave.
 
-    EPISTEMIC BOUNDS: Mathematically constrained by expected_information_gain (a float bounded between 0.0 and 1.0 representing Shannon entropy reduction) and an economic execution_cost_budget_magnitude cap (le=1000000000).
+    EPISTEMIC BOUNDS: Mathematically constrained by expected_information_gain (a continuous float bounded between ge=0.0 and le=1.0 representing Shannon entropy reduction) and an economic execution_cost_budget_magnitude cap (ge=0, le=1000000000) to prevent thermodynamic runaway.
 
-    MCP ROUTING TRIGGERS: Active Inference, Expected Free Energy, Epistemic Foraging, Fristonian Mechanics, Shannon Entropy
+    MCP ROUTING TRIGGERS: Active Inference, Expected Free Energy, Epistemic Foraging, Fristonian Mechanics, Shannon Entropy Reduction
     """
 
     task_id: str = Field(
@@ -3851,21 +3843,13 @@ class EpistemicPromotionEvent(BaseStateEvent):
 
 class EpistemicScanningPolicy(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Implements Metacognitive Monitoring and Fristonian Active Inference
-    to continuously scan the agent's internal belief distribution and residual stream for
-    epistemic gaps. As a ...Policy suffix, this object defines rigid mathematical boundaries
-    that the orchestrator must enforce globally.
+    AGENT INSTRUCTION: Implements Metacognitive Monitoring and Fristonian Active Inference to continuously scan the agent's internal belief distribution and residual stream for epistemic gaps. As a ...Policy suffix, this object defines rigid mathematical boundaries that the orchestrator must enforce globally.
 
-    CAUSAL AFFORDANCE: Triggers a structural interlock when the agent detects a spike in
-    aleatoric entropy, forcing the orchestrator to halt forward-pass generation and actively
-    probe or clarify the uncertainty. Gated by the active boolean toggle.
+    CAUSAL AFFORDANCE: Triggers a structural interlock when the agent detects a spike in Shannon Entropy or cognitive dissonance, forcing the orchestrator to halt forward-pass generation and actively probe or clarify the uncertainty. Gated by the active boolean toggle.
 
-    EPISTEMIC BOUNDS: The sensitivity of the metacognitive scanner is physically clamped by
-    the dissonance_threshold (ge=0.0, le=1.0). Recovery mechanisms are deterministically
-    restricted by the action_on_gap FSM literal automaton ["fail", "probe", "clarify"].
+    EPISTEMIC BOUNDS: The sensitivity of the metacognitive scanner is physically clamped by the dissonance_threshold (ge=0.0, le=1.0). Recovery mechanisms are deterministically restricted by the action_on_gap FSM literal automaton ["fail", "probe", "clarify"].
 
-    MCP ROUTING TRIGGERS: Metacognitive Monitoring, Active Inference, Cognitive Dissonance,
-    Epistemic Foraging, Entropy Scanning
+    MCP ROUTING TRIGGERS: Metacognitive Monitoring, Active Inference, Cognitive Dissonance, Epistemic Foraging, Shannon Entropy
     """
 
     active: bool = Field(description="Whether the epistemic scanner is active.")
@@ -8437,22 +8421,13 @@ class KineticBudgetPolicy(CoreasonBaseState):
 
 class EpistemicEscalationContract(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Establishes a Kahneman System 2 Test-Time Compute Allocation
-    heuristic, leveraging Information Theory to dynamically unlock compute budgets
-    based on measured Shannon Entropy. As a ...Contract suffix, this enforces a rigid
-    mathematical boundary globally.
+    AGENT INSTRUCTION: Establishes a Kahneman System 2 Test-Time Compute Allocation heuristic, leveraging Information Theory to dynamically unlock compute budgets based on measured Shannon Entropy. As a ...Contract suffix, this enforces a rigid mathematical boundary globally.
 
-    CAUSAL AFFORDANCE: Authorizes the orchestrator to recursively scale the active
-    max_latent_tokens_budget via the test_time_multiplier when the agent's internal
-    predictive distribution breaches the baseline_entropy_threshold (ge=0.0,
-    le=1000000000.0).
+    CAUSAL AFFORDANCE: Authorizes the orchestrator to recursively scale the active max_latent_tokens_budget via the test_time_multiplier when the agent's internal predictive distribution breaches the baseline_entropy_threshold.
 
-    EPISTEMIC BOUNDS: Prevents runaway state-space explosion by strictly clamping
-    max_escalation_tiers (ge=1, le=1000000000). The test_time_multiplier is
-    physically forced to be expansive (gt=1.0, le=1000000000.0).
+    EPISTEMIC BOUNDS: Prevents runaway state-space explosion by strictly clamping max_escalation_tiers (ge=1, le=1000000000). The test_time_multiplier is physically forced to be mathematically expansive (gt=1.0, le=1000000000.0).
 
-    MCP ROUTING TRIGGERS: System 2 Processing, Test-Time Compute, Shannon Entropy,
-    Epistemic Escalation, Non-Monotonic Scaling
+    MCP ROUTING TRIGGERS: System 2 Processing, Test-Time Compute, Shannon Entropy, Epistemic Escalation, Non-Monotonic Scaling
     """
 
     baseline_entropy_threshold: float = Field(
