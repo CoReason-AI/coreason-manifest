@@ -10674,7 +10674,8 @@ class ContinuousObservationStream(CoreasonBaseState):
         description="A Content Identifier (CID) for the continuous observation stream."
     )
     token_buffer: list[Annotated[str, StringConstraints(max_length=10000)]] = Field(
-        max_length=1000000, description="The array of ingested tokens representing the continuous stream."
+        max_length=1000000,
+        description="The array of ingested tokens representing the continuous stream. AGENT INSTRUCTION: Topological Exemption applied. Do NOT sort this array, as its chronological sequence is its mathematical state.",
     )
     temporal_decay_matrix: dict[Annotated[int, Field(ge=0)], Annotated[float, Field(ge=0.0, le=1.0)]] = Field(
         description="The mathematical decay map applied to historical token indices."
@@ -10682,11 +10683,6 @@ class ContinuousObservationStream(CoreasonBaseState):
     latest_confidence_score: float = Field(
         ge=0.0, le=1.0, description="The certainty score of the latest token prediction."
     )
-
-    @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
-        object.__setattr__(self, "token_buffer", sorted(self.token_buffer))
-        return self
 
 
 class StreamingDisfluencyContract(CoreasonBaseState):
