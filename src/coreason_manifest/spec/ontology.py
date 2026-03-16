@@ -548,7 +548,24 @@ class HardwareEnclaveReceipt(CoreasonBaseState):
 
 
 class LatentSmoothingProfile(CoreasonBaseState):
-    """The mathematical curve used to gently taper an adversarial activation to prevent logit collapse."""
+    """
+    AGENT INSTRUCTION: Defines a differentiable attenuation curve to mitigate adversarial
+    activation spikes during forward-pass token generation. As a ...Profile suffix, this
+    is a declarative, frozen snapshot of a specific geometric decay coordinate.
+
+    CAUSAL AFFORDANCE: Instructs the tensor execution engine to apply trigonometric
+    (cosine_annealing) or algebraic (linear, exponential) decay functions to specific
+    latent circuits, smoothly steering the probability wave without causing logit
+    collapse.
+
+    EPISTEMIC BOUNDS: The decay geometry is strictly typed to the decay_function Literal
+    ["linear", "exponential", "cosine_annealing"]. The temporal horizon is physically
+    bounded by transition_window_tokens (gt=0, le=1000000000). The optional
+    decay_rate_param (float | None, le=1.0, default=None) tunes half-life lambda.
+
+    MCP ROUTING TRIGGERS: Mechanistic Interpretability, Tensor Attenuation, Cosine
+    Annealing, Logit Collapse Prevention, Activation Smoothing
+    """
 
     decay_function: Literal["linear", "exponential", "cosine_annealing"] = Field(
         description="The trigonometric or algebraic function governing the attenuation curve."
@@ -766,6 +783,24 @@ class RoutingFrontierPolicy(CoreasonBaseState):
 
 
 class SaeFeatureActivationState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Isolates a discrete, monosemantic feature from the foundational
+    model's polysemantic residual stream using a Sparse Autoencoder (SAE) projection
+    matrix. As a ...State suffix, this is a frozen N-dimensional coordinate.
+
+    CAUSAL AFFORDANCE: Surfaces hidden geometric concept vectors (e.g., 'sycophancy' or
+    'truth_retrieval') to the orchestrator, enabling real-time circuit-level inspection,
+    feature clamping, and causal tracing.
+
+    EPISTEMIC BOUNDS: The semantic abstraction is rigidly bounded to a specific
+    feature_index (ge=0, le=1000000000). The activation_magnitude physically measures
+    the Euclidean strength (le=1000000000, no ge bound). The optional
+    interpretability_label (str | None, max_length=2000, default=None) restricts
+    semantic descriptions.
+
+    MCP ROUTING TRIGGERS: Sparse Autoencoder, Monosemantic Feature, Concept Vector,
+    Mechanistic Interpretability, Euclidean Magnitude
+    """
     feature_index: int = Field(
         le=1000000000,
         ge=0,
@@ -5397,6 +5432,26 @@ class MarketResolutionState(CoreasonBaseState):
 
 
 class MechanisticAuditContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Establishes a rigorous Mechanistic Interpretability brain-scan
+    protocol, executing real-time latent state extraction across targeted neural
+    circuits. As a ...Contract suffix, this defines rigid boundaries the orchestrator
+    must enforce globally.
+
+    CAUSAL AFFORDANCE: Authorizes the orchestrator to halt token generation upon
+    specific trigger_conditions Literal ["on_tool_call", "on_belief_mutation",
+    "on_quarantine", "on_falsification"] to physically slice, quantify, and export
+    the top-k SAE features from the designated target_layers.
+
+    EPISTEMIC BOUNDS: GPU VRAM exhaustion is mathematically prevented by capping
+    max_features_per_layer (gt=0, le=1000000000). The @model_validator sort_arrays
+    deterministically sorts both trigger_conditions and target_layers for RFC 8785
+    canonical hashing. System integrity is enforced via require_zk_commitments
+    (default=True) to prevent activation spoofing.
+
+    MCP ROUTING TRIGGERS: Latent State Extraction, Mechanistic Interpretability, Sparse
+    Autoencoder, Zero-Knowledge Commitments, VRAM Optimization
+    """
     trigger_conditions: list[Literal["on_tool_call", "on_belief_mutation", "on_quarantine", "on_falsification"]] = (
         Field(
             min_length=1,
@@ -5570,6 +5625,25 @@ class NDimensionalTensorManifest(CoreasonBaseState):
 
 
 class NeuralAuditAttestationReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: An append-only, cryptographically frozen coordinate representing
+    the verifiable output of a MechanisticAuditContract. As a ...Receipt suffix, the
+    LLM must never hallucinate a mutation to this object.
+
+    CAUSAL AFFORDANCE: Commits the extracted SaeFeatureActivationState matrix
+    (layer_activations: dict[int, list[SaeFeatureActivationState]]) to the Merkle-DAG.
+    The causal_scrubbing_applied boolean (default=False) mathematically proves that
+    the orchestrator actively resampled or ablated the circuit to confirm its direct
+    causal responsibility.
+
+    EPISTEMIC BOUNDS: Cryptographic integrity is structurally anchored by the audit_id
+    CID (128-char regex). The @model_validator sort_arrays sorts each
+    SaeFeatureActivationState list within layer_activations by feature_index,
+    guaranteeing zero-variance RFC 8785 Merkle-DAG hashing.
+
+    MCP ROUTING TRIGGERS: Causal Scrubbing, Epistemic Provenance, Mechanistic Audit,
+    RFC 8785 Canonicalization, Cryptographic Brain-Scan
+    """
     audit_id: str = Field(
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
