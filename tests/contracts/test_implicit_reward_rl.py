@@ -10,8 +10,8 @@
 
 from coreason_manifest.spec.ontology import (
     CognitiveFormatContract,
-    ConstrainedDecodingPolicy,
     CognitiveRewardEvaluationReceipt,
+    ConstrainedDecodingPolicy,
     EpistemicAxiomState,
     EpistemicRewardModelPolicy,
 )
