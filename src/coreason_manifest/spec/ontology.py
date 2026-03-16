@@ -1419,7 +1419,7 @@ class TemporalCheckpointState(CoreasonBaseState):
 
 
 class MonteCarloTreeSearchPolicy(CoreasonBaseState):
-    """AGENT INSTRUCTION: The strict mathematical hyperparameter profile governing the agent's internal latent rollouts (MCTS) prior to kinetic execution."""
+    """AGENT INSTRUCTION: The strict mathematical hyperparameter profile governing the agent's internal latent rollouts (MCTS) prior to kinetic execution."""  # noqa: E501
 
     exploration_constant_c: float = Field(
         ge=0.0, description="The UCB1 exploration weight bounding curiosity vs. exploitation."
@@ -1430,7 +1430,7 @@ class MonteCarloTreeSearchPolicy(CoreasonBaseState):
     num_simulations: int = Field(
         ge=1,
         le=1000000000,
-        description="The number of search iterations required before collapsing the probability wave into a physical action.",
+        description="The number of search iterations required before collapsing the probability wave into a physical action.",  # noqa: E501
     )
     discount_factor_gamma: float = Field(
         ge=0.0, le=1.0, description="The mathematical discount applied to future expected rewards."
@@ -1471,7 +1471,7 @@ class ThoughtBranchState(CoreasonBaseState):
     expected_next_state_hash: str | None = Field(
         default=None,
         pattern="^[a-f0-9]{64}$",
-        description="The SHA-256 hash of the hallucinated/expected UI state ($S_{t+1}$) resulting from the simulated action.",
+        description="The SHA-256 hash of the hallucinated/expected UI state ($S_{t+1}$) resulting from the simulated action.",  # noqa: E501
     )
     q_value_estimate: float | None = Field(
         default=None, description="The expected cumulative reward $Q(s,a)$ for this branch."
@@ -1487,7 +1487,7 @@ class LatentScratchpadReceipt(CoreasonBaseState):
     root_state_hash: str | None = Field(
         default=None,
         pattern="^[a-f0-9]{64}$",
-        description="The exact SHA-256 hash of the initial environment state (e.g., ViewportRasterState) from which the MCTS rollout originated.",
+        description="The exact SHA-256 hash of the initial environment state (e.g., ViewportRasterState) from which the MCTS rollout originated.",  # noqa: E501
     )
     trace_id: str = Field(
         max_length=128,
@@ -2043,7 +2043,7 @@ class BrowserDOMState(CoreasonBaseState):
                     ip = ipaddress.ip_address(ip_int)
                 else:
                     raise ValueError
-            except (ValueError, OverflowError, IndexError):
+            except ValueError, OverflowError, IndexError:
                 return url
         if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast:
             raise ValueError(f"SSRF restricted IP detected: {hostname}")
@@ -7154,7 +7154,7 @@ class IntentTransitionEvent(BaseStateEvent):
 
 
 class MDPTransitionEvent(BaseStateEvent):
-    """AGENT INSTRUCTION: The rigid, cryptographic logging of a physical Markov Decision Process transition. Binds the $(S_t, A_t, R_{t+1}, S_{t+1})$ tuple for RL tracing."""
+    """AGENT INSTRUCTION: The rigid, cryptographic logging of a physical Markov Decision Process transition. Binds the $(S_t, A_t, R_{t+1}, S_{t+1})$ tuple for RL tracing."""  # noqa: E501
 
     type: Literal["mdp_transition"] = Field(default="mdp_transition")
     source_state_event_id: str = Field(
