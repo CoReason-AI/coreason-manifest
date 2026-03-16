@@ -4441,7 +4441,23 @@ class GraphFlatteningPolicy(CoreasonBaseState):
 
 
 class HTTPTransportProfile(CoreasonBaseState):
-    """Configuration for stateless HTTP-based MCP transport."""
+    """
+    AGENT INSTRUCTION: Establishes a Stateless Client-Server Architecture for JSON-RPC
+    2.0 message passing, serving as the egress manifold for Zero-Trust Network Access
+    (ZTNA). As a ...Profile suffix, this is a declarative property descriptor.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator to open an out-of-band HTTP socket
+    (uri: HttpUrl), transmitting structured semantic payloads while strictly confining
+    custom headers to prevent protocol manipulation.
+
+    EPISTEMIC BOUNDS: The headers dictionary is mathematically bounded (le=1000000000
+    properties, key max_length=255, value max_length=2000, default_factory=dict) and
+    explicitly trapped by the @field_validator _prevent_crlf_injection to physically
+    block HTTP Request Smuggling.
+
+    MCP ROUTING TRIGGERS: Stateless Architecture, Zero-Trust Network Access, HTTP
+    Request Smuggling Prevention, JSON-RPC Egress, Out-of-Band Socket
+    """
 
     type: Literal["http"] = Field(default="http", description="Type of transport.")
     uri: HttpUrl = Field(..., description="The HTTP URL endpoint for the stateless connection.")
@@ -5379,7 +5395,22 @@ type MCPTransportProtocolProfile = Literal["stdio", "sse", "http"]
 
 class MCPClientBindingProfile(CoreasonBaseState):
     """
-    Binding configuration for a Model Context Protocol (MCP) server.
+    AGENT INSTRUCTION: Defines a Bipartite Graph Projection, mathematically binding a
+    decentralized agent node to the remote or local capabilities exposed by a specific
+    Model Context Protocol (MCP) server. As a ...Profile suffix, this is a declarative
+    property descriptor.
+
+    CAUSAL AFFORDANCE: Projects the external MCP server's affordance matrix into the
+    agent's local working memory, allowing authorized JSON-RPC intents to traverse the
+    specified transport_type (MCPTransportProtocolProfile Literal). The server_uri
+    (max_length=2000) anchors the connection.
+
+    EPISTEMIC BOUNDS: The optional allowed_mcp_tools (list[str] | None, default=None,
+    string max_length=2000) is deterministically alphabetized by @model_validator
+    sort_arrays for RFC 8785 canonical hashing when not None.
+
+    MCP ROUTING TRIGGERS: Bipartite Graph Projection, Capability Binding, Model
+    Context Protocol, RFC 8785 Canonicalization, Zero-Trust RPC
     """
 
     server_uri: str = Field(max_length=2000, description="The URI or command path to the MCP server.")
@@ -6206,7 +6237,24 @@ type AnyResilienceIntent = Annotated[
 
 
 class SSETransportProfile(CoreasonBaseState):
-    """Configuration for remote SSE-based MCP transport."""
+    """
+    AGENT INSTRUCTION: Implements an Asynchronous Event-Driven Architecture leveraging
+    Server-Sent Events (SSE) to map a unidirectional, continuous topology of
+    Server-to-Client state transitions. As a ...Profile suffix, this is a declarative
+    property descriptor.
+
+    CAUSAL AFFORDANCE: Authorizes the orchestrator to maintain a persistent, long-lived
+    TCP connection (uri: HttpUrl), processing incoming JSON-RPC streams without the
+    thermodynamic overhead of continuous polling.
+
+    EPISTEMIC BOUNDS: The headers (default_factory=dict) are strictly limited via
+    StringConstraints (key max_length=255, value max_length=2000) and mathematically
+    sanitized against CRLF injection via @field_validator _prevent_crlf_injection to
+    preserve protocol boundary integrity.
+
+    MCP ROUTING TRIGGERS: Event-Driven Architecture, Server-Sent Events,
+    Unidirectional Stream, Asynchronous Message Passing, TCP Persistence
+    """
 
     type: Literal["sse"] = Field(default="sse", description="Type of transport.")
     uri: HttpUrl = Field(..., description="The HTTP URL endpoint for the SSE connection.")
@@ -6601,7 +6649,24 @@ class OntologicalAlignmentPolicy(CoreasonBaseState):
 
 
 class StdioTransportProfile(CoreasonBaseState):
-    """Configuration for local Stdio-based MCP transport."""
+    """
+    AGENT INSTRUCTION: Formalizes Inter-Process Communication (IPC) utilizing POSIX
+    standard streams to execute highly isolated, local binary sandboxing. As a
+    ...Profile suffix, this is a declarative property descriptor.
+
+    CAUSAL AFFORDANCE: Physically spawns a child process restricted to the host's
+    operating system namespace, mapping remote procedure calls directly into the
+    binary's stdin/stdout descriptors via command (max_length=2000).
+
+    EPISTEMIC BOUNDS: To prevent buffer overflow and command injection, args are
+    structurally constrained (max_length=1000000000, string max_length=2000,
+    default_factory=list) and env_vars keys/values are strictly delimited via
+    StringConstraints (key max_length=255, value max_length=2000,
+    default_factory=dict).
+
+    MCP ROUTING TRIGGERS: Inter-Process Communication, POSIX Standard Streams, Local
+    Sandboxing, Binary Execution, Subprocess Spawn
+    """
 
     type: Literal["stdio"] = Field(default="stdio", description="Type of transport.")
     command: str = Field(..., max_length=2000, description="The command executable to run (e.g., 'node', 'python').")
