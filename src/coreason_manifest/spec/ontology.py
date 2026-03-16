@@ -8288,6 +8288,24 @@ class EpistemicChainGraphState(CoreasonBaseState):
 
 
 class CognitivePredictionReceipt(BaseStateEvent):
+    """
+    AGENT INSTRUCTION: Captures the pre-verification predictive distribution (Softmax
+    outputs) of an LLM across a latent conceptual boundary. As a ...Receipt suffix,
+    this is an append-only, cryptographically frozen coordinate on the Merkle-DAG.
+
+    CAUSAL AFFORDANCE: Exposes the raw generative probability manifold to the
+    orchestrator, enabling external solvers to evaluate token divergence before
+    crystallizing it into a permanent epistemic axiom. The target_source_concept
+    (max_length=2000) provides the semantic anchor.
+
+    EPISTEMIC BOUNDS: Mathematical isolation is enforced by binding predictions to a
+    strict source_chain_id CID (128-char regex). The prediction vector is physically
+    capped by predicted_top_k_tokens (min_length=1, string max_length=255) to prevent
+    unbounded tensor serialization.
+
+    MCP ROUTING TRIGGERS: Predictive Distribution, Softmax Output, Generative Manifold,
+    Pre-Verification State, Token Entropy
+    """
     type: Literal["cognitive_prediction"] = Field(default="cognitive_prediction")
     source_chain_id: str = Field(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
     target_source_concept: str = Field(max_length=2000)
@@ -8295,6 +8313,24 @@ class CognitivePredictionReceipt(BaseStateEvent):
 
 
 class EpistemicAxiomVerificationReceipt(BaseStateEvent):
+    """
+    AGENT INSTRUCTION: Implements automated Fact-Checking and Entailment Verification to
+    structurally quarantine hallucinated tokens. As a ...Receipt suffix, it represents
+    an immutable cryptographic verdict on the factual alignment of a prediction.
+
+    CAUSAL AFFORDANCE: Acts as a definitive Truth Maintenance filter. If verification
+    succeeds, it unlocks the promotion of the source prediction (source_prediction_id,
+    128-char CID) into the semantic knowledge graph.
+
+    EPISTEMIC BOUNDS: The factual alignment is mathematically bounded by
+    sequence_similarity_score (ge=0.0, le=1.0). The @model_validator
+    enforce_epistemic_quarantine enforces a strict invariant, deliberately crashing
+    instantiation if fact_score_passed is False, physically preventing the Merkle-DAG
+    from recording unverified epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Entailment Verification, Truth Maintenance System, Epistemic
+    Quarantine, Hallucination Filtering, Invariant Assertion
+    """
     type: Literal["epistemic_axiom_verification"] = Field(default="epistemic_axiom_verification")
     source_prediction_id: str = Field(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
     sequence_similarity_score: float = Field(ge=0.0, le=1.0)
@@ -8414,6 +8450,23 @@ class CognitiveReasoningTraceState(CoreasonBaseState):
 
 
 class CognitiveDualVerificationReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Formalizes a Byzantine-tolerant Multi-Agent Debate and Consensus
+    protocol (the "Two-Man Rule") to eliminate single-point epistemic failures. As a
+    ...Receipt suffix, this is a frozen historical fact on the Merkle-DAG.
+
+    CAUSAL AFFORDANCE: Authorizes the final cryptographic lock on a reasoning trace or
+    semantic payload, proving that two independent cognitive agents achieved symmetric
+    factual alignment via trace_factual_alignment (bool).
+
+    EPISTEMIC BOUNDS: The @model_validator enforce_dual_key_lock mathematically
+    guarantees zero-trust isolation by demanding that primary_verifier_id and
+    secondary_verifier_id (both NodeIdentifierState) resolve to completely distinct
+    Decentralized Identifiers (DIDs).
+
+    MCP ROUTING TRIGGERS: Multi-Agent Debate, Byzantine Tolerance, Dual-Key
+    Cryptography, Symmetric Consensus, Zero-Trust Evaluation
+    """
     primary_verifier_id: NodeIdentifierState = Field(description="The DID of the primary evaluating agent.")
     secondary_verifier_id: NodeIdentifierState = Field(
         description="The DID of the independent secondary evaluating agent."
@@ -8496,6 +8549,24 @@ class EpistemicCurriculumManifest(CoreasonBaseState):
 
 
 class CognitiveFormatContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Employs Finite State Machine (FSM) Logit Masking and Constrained
+    Decoding to deterministically herd LLM stochasticity into rigorous syntactic
+    structures. As a ...Contract suffix, this enforces a rigid mathematical boundary
+    globally.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator's inference engine to physically
+    suffocate invalid token probabilities to negative infinity, mechanically ensuring
+    the output conforms to downstream parser requirements.
+
+    EPISTEMIC BOUNDS: Execution constraints are rigidly defined by require_think_tags
+    (default=True, forcing XML-bounded internal monologues) and final_answer_regex
+    (max_length=2000, default="^Final Answer: .*$") to prevent ReDoS CPU exhaustion
+    during evaluation and routing.
+
+    MCP ROUTING TRIGGERS: FSM Logit Masking, Constrained Decoding, Regular Expression
+    Automaton, Syntactic Boundary, Token Suffocation
+    """
     require_think_tags: bool = Field(
         default=True, description="Forces the inclusion of structural XML tags to isolate the reasoning trace."
     )
