@@ -541,7 +541,21 @@ class LogitSteganographyContract(CoreasonBaseState):
 
 class ComputeEngineProfile(CoreasonBaseState):
     """
-    Abstraction for an underlying LLM provider in liquid compute.
+    AGENT INSTRUCTION: Acts as the liquid compute substrate abstraction, defining the
+    foundational LLM matrix available on the Spot Market for dynamic routing. As a ...Profile
+    suffix, this is a declarative, frozen snapshot of a compute geometry.
+
+    CAUSAL AFFORDANCE: Projects the physical LLM capabilities, contextual memory constraints,
+    and thermodynamic rate cards (ComputeRateContract) into the orchestrator's active routing
+    manifold, allowing cost-aware topological planning.
+
+    EPISTEMIC BOUNDS: The token working memory is mathematically bounded by
+    context_window_size (le=1000000000). To guarantee RFC 8785 canonical hashing across
+    disparate nodes, the capabilities and supported_functional_experts arrays are strictly
+    sorted at instantiation via @model_validator.
+
+    MCP ROUTING TRIGGERS: Liquid Compute, Spot Market Routing, Foundation Model Matrix,
+    Thermodynamic Rate Card, Substrate Abstraction
     """
 
     model_name: str = Field(max_length=2000, description="The identifier of the underlying model.")
@@ -3503,7 +3517,22 @@ class DelegatedCapabilityManifest(CoreasonBaseState):
 
 class BudgetExhaustionEvent(BaseStateEvent):
     """
-    Mathematical boundary condition representing economic exhaustion.
+    AGENT INSTRUCTION: Represents the definitive algorithmic circuit breaker (Optimal
+    Stopping boundary) triggered the exact millisecond thermodynamic token burn
+    mathematically exceeds the locked Proof-of-Stake escrow. As an ...Event suffix, this is
+    an append-only coordinate on the Merkle-DAG that the LLM must never hallucinate a
+    mutation to.
+
+    CAUSAL AFFORDANCE: Instantly collapses the active Latent Scratchpad trajectory and
+    physically severs the kinetic execution loop, preventing malicious or hallucinating
+    agents from executing Sybil griefing attacks against the swarm's compute pool.
+
+    EPISTEMIC BOUNDS: Cryptographically targets the specific exhausted_escrow_id and the
+    exact final_burn_receipt_id (CID regex ^[a-zA-Z0-9_.:-]+$, max_length=128) that pushed
+    the thermodynamic ledger into a negative state, providing an undeniable audit trail.
+
+    MCP ROUTING TRIGGERS: Optimal Stopping Theory, Escrow Exhaustion, Sybil Resistance,
+    Algorithmic Circuit Breaker, Generation Halting
     """
 
     type: Literal["budget_exhaustion"] = Field(
@@ -3525,7 +3554,21 @@ class BudgetExhaustionEvent(BaseStateEvent):
 
 class TokenBurnReceipt(BaseStateEvent):
     """
-    Lock-free thermodynamic compute tracking receipt.
+    AGENT INSTRUCTION: Formalizes Landauer's Principle of thermodynamic computing within the
+    neurosymbolic network, serving as a lock-free, cryptographically frozen record of
+    irreversible token and energy expenditure. As a ...Receipt suffix, this is an append-only
+    coordinate on the Merkle-DAG that the LLM must never hallucinate a mutation to.
+
+    CAUSAL AFFORDANCE: Deducts exact computational magnitude from the agent's localized
+    Proof-of-Stake (PoS) execution escrow, progressively narrowing its available search
+    depth. Cryptographically bound to its causal origin via tool_invocation_id CID.
+
+    EPISTEMIC BOUNDS: Integer bounds (ge=0, le=1000000000) on input_tokens, output_tokens,
+    and burn_magnitude mathematically prevent integer overflow and fractional bypasses during
+    decentralized ledger tallying.
+
+    MCP ROUTING TRIGGERS: Landauer's Principle, Thermodynamic Compute, Token Burn, Resource
+    Exhaustion, Lock-Free Tallying
     """
 
     type: Literal["token_burn"] = Field(
@@ -5263,7 +5306,23 @@ type QoSClassificationProfile = Literal["critical", "high", "interactive", "back
 
 class ComputeProvisioningIntent(CoreasonBaseState):
     """
-    A request by a swarm to provision resources based on requirements.
+    AGENT INSTRUCTION: Formulates a constrained Knapsack Problem for dynamically allocating
+    liquid compute resources based on exact Quality of Service (QoS) priorities and semantic
+    load shedding rules. As an ...Intent suffix, the LLM may execute non-monotonic reasoning
+    here.
+
+    CAUSAL AFFORDANCE: Emits a structural demand to the swarm orchestrator to negotiate,
+    acquire, and cryptographically lock the requisite token escrow before allocating kinetic
+    execution cycles to a sub-graph. QoS priority defaults to "interactive" via
+    QoSClassificationProfile.
+
+    EPISTEMIC BOUNDS: The economic velocity is strictly clamped by max_budget
+    (le=1000000000.0). The required_capabilities array is deterministically sorted by a
+    @model_validator to prevent Byzantine hash fractures during peer-to-peer ledger
+    synchronization.
+
+    MCP ROUTING TRIGGERS: Knapsack Optimization, Semantic Load Shedding, Spot Compute
+    Bidding, QoS Classification, Resource Provisioning
     """
 
     max_budget: float = Field(
