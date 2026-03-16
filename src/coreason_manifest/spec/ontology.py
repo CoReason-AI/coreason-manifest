@@ -195,16 +195,19 @@ def _inject_topological_lock(schema: dict[str, Any]) -> None:
 
 class CoreasonBaseState(BaseModel):
     """
-    Base class for all domain models in the Coreason Manifest.
+    AGENT INSTRUCTION: CoreasonBaseState is the immutable mathematical bedrock of the Hollow Data Plane.
+    Every single node, contract, and manifest in the swarm MUST inherit from this substrate.
 
-    This model guarantees deterministic serialization for Tamper-Evident Hash Chains and
-    Merkle-Tree Attestations, preventing epistemic contamination.
+    CAUSAL AFFORDANCE: Enforces absolute structural rigidity. By declaring frozen=True, strict=True,
+    and extra='forbid', it mechanically prevents silent type coercion and blocks adversarial agents
+    from injecting hallucinated keys into the execution graph.
 
-    Enforces:
-    1. Immutability (frozen=True) - Essential for distributed state consistency.
-    2. Strict validation (strict=True) - No silent coercion.
-    3. Forbidden extra fields (extra='forbid') - Schema strictness.
-    4. Deterministic serialization - Keys are sorted for hash consistency.
+    EPISTEMIC BOUNDS: Bypasses Python's immutability lock exclusively during the instantiation phase
+    (__setattr__) to mechanically sort all arrays and dictionaries. This guarantees flawless,
+    zero-variance RFC 8785 canonical serialization, ensuring two identical graphs produce the
+    exact same Merkle root hash.
+
+    MCP ROUTING TRIGGERS: Merkle-DAG Root, Deterministic Hashing, Immutable Substrate, Zero-Trust Architecture
     """
 
     model_config = ConfigDict(
@@ -284,7 +287,18 @@ class DynamicLayoutManifest(CoreasonBaseState):
 
 class ExecutionSLA(CoreasonBaseState):
     """
-    Service Level Agreement (limits) for executing a tool.
+    AGENT INSTRUCTION: ExecutionSLA is the rigid physical boundary dictating the absolute time and memory
+    limits for any kinetic execution within the swarm.
+
+    CAUSAL AFFORDANCE: Acts as the hardware guillotine. It instructs the orchestrator's C++/Rust runtime
+    to physically sever the thread, drop the VRAM context, or kill the WASM container if an agent
+    exceeds its authorized physical footprint, preventing infinite loops or DoS memory exhaustion.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are intrinsic Pydantic limits on
+    max_execution_time_ms (le=86400000, gt=0) and max_compute_footprint_mb (le=1000000000, gt=0).
+    Any breach instantly triggers a SystemFaultEvent.
+
+    MCP ROUTING TRIGGERS: Hardware Guillotine, VRAM Allocation, Process Termination, Temporal Bound
     """
 
     max_execution_time_ms: int = Field(
@@ -320,7 +334,18 @@ class SpatialCoordinateProfile(CoreasonBaseState):
 
 class ComputeRateContract(CoreasonBaseState):
     """
-    Economic constraints for liquid compute operations.
+    AGENT INSTRUCTION: ComputeRateContract is the immutable economic physics engine defining the
+    thermodynamic cost of token generation across the network.
+
+    CAUSAL AFFORDANCE: Allows the swarm orchestrator to mathematically project the budget exhaustion of
+    a specific Latent Scratchpad trace or MCTS (Monte Carlo Tree Search) rollout before committing
+    to the execution graph, effectively acting as an economic look-ahead.
+
+    EPISTEMIC BOUNDS: Strict float boundaries (le=1000000000.0) on cost_per_million_input_tokens and
+    cost_per_million_output_tokens ensure that economic execution vectors cannot overflow the integers
+    in the Epistemic Ledger, protecting the escrow math.
+
+    MCP ROUTING TRIGGERS: Economic Escrow, Token Burn, Thermodynamic Cost, Budget Calculation
     """
 
     cost_per_million_input_tokens: float = Field(
@@ -478,7 +503,18 @@ class ComputeEngineProfile(CoreasonBaseState):
 
 class PermissionBoundaryPolicy(CoreasonBaseState):
     """
-    Zero-trust security boundaries for tool execution.
+    AGENT INSTRUCTION: PermissionBoundaryPolicy is the strict zero-trust security perimeter defining
+    exactly what external physical systems or networks an agent node is authorized to touch.
+
+    CAUSAL AFFORDANCE: Mechanically limits the subgraph's kinetic reach. It forces the orchestrator to
+    drop network egress packets or block disk I/O unless explicitly whitelisted, and mandates the
+    negotiation of specific cryptographic handshakes (e.g., OAuth2, mTLS) before allocating compute.
+
+    EPISTEMIC BOUNDS: Bounded by deterministic string arrays (allowed_domains, auth_requirements)
+    that must be strictly evaluated at runtime. The arrays are alphabetically sorted at instantiation
+    to prevent hash poisoning.
+
+    MCP ROUTING TRIGGERS: Network Egress, Disk I/O Block, mTLS Handshake, Zero-Trust Perimeter
     """
 
     network_access: bool = Field(description="Whether the tool is permitted to make external network requests.")
@@ -521,7 +557,18 @@ class PostQuantumSignatureReceipt(CoreasonBaseState):
 
 class RoutingFrontierPolicy(CoreasonBaseState):
     """
-    Mathematical Pareto boundaries for dynamic spot-market liquid compute.
+    AGENT INSTRUCTION: RoutingFrontierPolicy is the multi-objective optimization matrix used to navigate
+    the Spot-Market compute layer. It defines the acceptable trade-offs between speed, cost, and intelligence.
+
+    CAUSAL AFFORDANCE: Instructs the Spot-Market router on how to mechanically weigh competing inference
+    engines. If a query requires extreme logic, it authorizes high cost; if it requires a UI reflex,
+    it enforces strict latency bounds.
+
+    EPISTEMIC BOUNDS: Strict physical, economic, and thermodynamic ceilings are mathematically enforced:
+    max_latency_ms (le=86400000), max_cost_magnitude_per_token (le=1000000000), and an absolute ESG bound
+    via max_carbon_intensity_gco2eq_kwh (le=10000.0).
+
+    MCP ROUTING TRIGGERS: Spot-Market Routing, Pareto Optimization, Carbon Budget, Compute Allocation
     """
 
     max_latency_ms: int = Field(
