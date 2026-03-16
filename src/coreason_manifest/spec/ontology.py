@@ -3227,6 +3227,23 @@ class FalsificationContract(CoreasonBaseState):
 
 
 class FaultInjectionProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Defines a deterministic Byzantine fault vector for Chaos Engineering
+    perturbation tests. As a ...Profile suffix, this is a declarative, frozen snapshot of an
+    attack geometry at a specific point in time.
+
+    CAUSAL AFFORDANCE: Instructs the execution engine to physically degrade, throttle, or
+    corrupt the structural state or network connectivity of the target_node_id based on the
+    specific fault_type (FaultCategoryProfile) manifold.
+
+    EPISTEMIC BOUNDS: The severity of the perturbation is constrained above by the intensity
+    scalar (le=1000000000.0) but unbounded below, permitting negative fault magnitudes. The
+    blast radius targets either the entire swarm (target_node_id=None) or a specific node
+    bounded to a valid 128-char CID regex ^[a-zA-Z0-9_.:-]+$.
+
+    MCP ROUTING TRIGGERS: Chaos Engineering, Byzantine Fault Injection, Perturbation Theory,
+    Structural Sabotage, Resilience Testing
+    """
     fault_type: FaultCategoryProfile = Field(description="The specific type of fault to inject.")
     target_node_id: str | None = Field(
         min_length=1,
@@ -5094,7 +5111,20 @@ class InformationFlowPolicy(CoreasonBaseState):
 
 class SimulationConvergenceSLA(CoreasonBaseState):
     """
-    The statistical limits of the sandbox simulation.
+    AGENT INSTRUCTION: Implements Optimal Stopping Theory for Monte Carlo Tree Search (MCTS)
+    and sandbox simulations. As an ...SLA suffix, this defines rigid mathematical boundaries
+    that the orchestrator must enforce globally.
+
+    CAUSAL AFFORDANCE: Triggers early probability wave collapse when the statistical variance
+    of the simulation rollouts falls below the tolerance, conserving GPU VRAM and halting
+    unnecessary compute expansion.
+
+    EPISTEMIC BOUNDS: Physically constrained by max_monte_carlo_rollouts (gt=0,
+    le=1000000000) to prevent infinite branching. Statistical confidence is mathematically
+    clamped by variance_tolerance to a probability distribution between [ge=0.0, le=1.0].
+
+    MCP ROUTING TRIGGERS: Optimal Stopping Theory, Monte Carlo Tree Search, Variance
+    Reduction, Probability Wave Collapse, Simulation Convergence
     """
 
     max_monte_carlo_rollouts: int = Field(
@@ -5110,6 +5140,22 @@ class SimulationConvergenceSLA(CoreasonBaseState):
 
 
 class SimulationEscrowContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Establishes a Proof-of-Stake (PoS) cryptographic boundary to fund
+    sandbox simulations and exogenous shocks. As a ...Contract suffix, this object defines
+    rigid economic requirements that must be met prior to execution.
+
+    CAUSAL AFFORDANCE: Unlocks the authorization for the orchestrator to execute
+    resource-intensive chaos experiments by mathematically reserving thermodynamic compute
+    upfront.
+
+    EPISTEMIC BOUNDS: Physically bounded by locked_magnitude, which must be strictly positive
+    (gt=0, le=1000000000) to mathematically prevent zero-cost Sybil griefing attacks against
+    the swarm's compute resources.
+
+    MCP ROUTING TRIGGERS: Proof-of-Stake, Economic Escrow, Sybil Resistance, Thermodynamic
+    Cost, Sandbox Funding
+    """
     locked_magnitude: int = Field(
         le=1000000000,
         gt=0,
@@ -5118,6 +5164,24 @@ class SimulationEscrowContract(CoreasonBaseState):
 
 
 class ExogenousEpistemicEvent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Formalizes Nassim Taleb's Black Swan Theory by injecting
+    Out-of-Distribution (OOD) epistemic shocks into the causal graph. As an ...Event suffix,
+    this is an append-only coordinate on the Merkle-DAG that the LLM must never hallucinate
+    a mutation to.
+
+    CAUSAL AFFORDANCE: Forces the active reasoning topology to process a high-entropy
+    synthetic_payload, actively testing the swarm's non-monotonic truth maintenance,
+    defeasible reasoning, and overall topological resilience.
+
+    EPISTEMIC BOUNDS: Cryptographically targets a specific Merkle root via target_node_hash
+    (strict SHA-256 pattern ^[a-f0-9]{64}$) and bounds the Variational Free Energy via
+    bayesian_surprise_score [ge=0.0, le=1.0, allow_inf_nan=False]. The @model_validator
+    physically guarantees execution is halted if the attached escrow is not strictly positive.
+
+    MCP ROUTING TRIGGERS: Black Swan Theory, Out-of-Distribution Shock, Variational Free
+    Energy, Exogenous Perturbation, Epistemic Stress Test
+    """
     shock_id: str = Field(
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
@@ -5320,6 +5384,22 @@ class SteadyStateHypothesisState(CoreasonBaseState):
 
 
 class ChaosExperimentTask(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Orchestrates an automated steady-state hypothesis falsification loop
+    via structured Chaos Engineering. As a ...Task suffix, this represents an authorized
+    kinetic execution trigger initiating active topological stress testing.
+
+    CAUSAL AFFORDANCE: Deploys a deterministic matrix of faults and exogenous shocks against
+    a baseline SteadyStateHypothesisState to empirically discover latent fragility and
+    evaluate the resilience of the DAG topology.
+
+    EPISTEMIC BOUNDS: Cryptographic determinism is mathematically guaranteed by the
+    @model_validator, which sorts the faults array by composite key (fault_type,
+    target_node_id) and the shocks array by shock_id to preserve RFC 8785 canonical hashing.
+
+    MCP ROUTING TRIGGERS: Steady State Falsification, Chaos Engineering, Automated Failure
+    Discovery, Resilience Orchestration, Systemic Perturbation
+    """
     experiment_id: str = Field(
         min_length=1,
         max_length=128,
