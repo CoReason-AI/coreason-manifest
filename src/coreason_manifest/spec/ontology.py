@@ -2356,7 +2356,24 @@ class CrossSwarmHandshakeState(CoreasonBaseState):
 
 
 class CrossoverPolicy(CoreasonBaseState):
-    """The mathematical rules for combining elite agents."""
+    """
+    AGENT INSTRUCTION: Establishes the chromosomal crossover and genetic recombination
+    heuristics for blending latent feature vectors of elite parent agents. As a ...Policy
+    suffix, this object defines rigid mathematical boundaries that the orchestrator must
+    enforce globally.
+
+    CAUSAL AFFORDANCE: Executes the deterministic interpolation of N-dimensional properties
+    from successful agents using a specific geometric strategy (CrossoverMechanismProfile)
+    to breed the next generation's starting state.
+
+    EPISTEMIC BOUNDS: The blending_factor is strictly constrained to a fractional
+    interpolation ratio (ge=0.0, le=1.0) to mathematically prevent extrapolated state drift
+    beyond the parents' bounding box. Relies on optional verifiable_entropy
+    (VerifiableEntropyReceipt) to ensure unbiased recombination.
+
+    MCP ROUTING TRIGGERS: Genetic Recombination, Chromosomal Crossover, Vector
+    Interpolation, Elitism, Reproduction Heuristic
+    """
 
     strategy_type: CrossoverMechanismProfile = Field(
         description="The heuristic method for blending successful parent agents."
@@ -3448,7 +3465,23 @@ class FederatedStateSnapshot(CoreasonBaseState):
 
 
 class FitnessObjectiveProfile(CoreasonBaseState):
-    """A specific objective function to optimize within a generation."""
+    """
+    AGENT INSTRUCTION: Defines a specific mathematical objective function (fitness dimension)
+    within a multi-objective optimization landscape for evaluating agent phenotypes. As a
+    ...Profile suffix, this is a declarative, frozen snapshot of an evaluation geometry.
+
+    CAUSAL AFFORDANCE: Provides the mathematical vector (OptimizationDirectionProfile:
+    minimize/maximize) and scalar weight required by the orchestrator to score an agent's
+    execution telemetry, ultimately determining its survival on the Pareto Efficiency
+    frontier.
+
+    EPISTEMIC BOUNDS: The relative influence of this objective is mathematically clamped by
+    the weight field (le=1.0, default=1.0) to prevent gradient or reward explosion during
+    fitness aggregation. The target_metric is bounded to max_length=2000.
+
+    MCP ROUTING TRIGGERS: Fitness Landscape, Objective Function, Multi-Objective
+    Optimization, Phenotype Scoring, Pareto Efficiency
+    """
 
     target_metric: str = Field(
         max_length=2000,
@@ -4857,7 +4890,23 @@ class MultimodalArtifactReceipt(CoreasonBaseState):
 
 
 class MutationPolicy(CoreasonBaseState):
-    """Constraints governing random heuristic mutations."""
+    """
+    AGENT INSTRUCTION: Implements stochastic perturbation and genetic drift constraints for
+    agent variations between generations. As a ...Policy suffix, this object defines rigid
+    mathematical boundaries that the orchestrator must enforce globally.
+
+    CAUSAL AFFORDANCE: Authorizes the execution engine to inject mathematically bounded
+    random variance (temperature_shift_variance) into an agent's topological parameters,
+    forcing the exploration of novel manifolds in the fitness landscape.
+
+    EPISTEMIC BOUNDS: The mutation_rate is clamped strictly to a probability distribution
+    (ge=0.0, le=1.0). The temperature_shift_variance is bounded (le=1000000000.0). To
+    prevent Byzantine Hash Poisoning, the variance can require a VerifiableEntropyReceipt
+    (VRF) via the optional verifiable_entropy field to prove stochastic fairness.
+
+    MCP ROUTING TRIGGERS: Stochastic Perturbation, Genetic Drift, Simulated Annealing,
+    Parameter Variance, Verifiable Random Function
+    """
 
     mutation_rate: float = Field(
         ge=0.0,
@@ -6831,7 +6880,22 @@ class EvaluatorOptimizerTopologyManifest(BaseTopologyManifest):
 
 class EvolutionaryTopologyManifest(BaseTopologyManifest):
     """
-    An Evolutionary workflow topology that mutates and breeds agents over generations.
+    AGENT INSTRUCTION: Formalizes a Genetic Algorithm (GA) or Evolutionary Strategy (ES)
+    topology for the gradient-free optimization of agent populations over discrete temporal
+    generations. As a ...Manifest suffix, this is a declarative, frozen snapshot of an
+    N-dimensional execution coordinate.
+
+    CAUSAL AFFORDANCE: Orchestrates the iterative instantiation, evaluation, and culling of
+    autonomous agents, actively applying stochastic perturbations (MutationPolicy) and
+    chromosomal combinations (CrossoverPolicy) to maximize fitness.
+
+    EPISTEMIC BOUNDS: The state space explosion is physically restricted by integer limits
+    on population_size (le=1000000000) and generations (le=1.0). The @model_validator
+    mathematically guarantees that fitness_objectives are deterministically sorted by
+    target_metric, preserving RFC 8785 canonical hashing across the decentralized swarm.
+
+    MCP ROUTING TRIGGERS: Genetic Algorithm, Evolutionary Strategy, Gradient-Free
+    Optimization, Population Dynamics, Multi-Objective Optimization
     """
 
     type: Literal["evolutionary"] = Field(
