@@ -7433,6 +7433,22 @@ class EpistemicTelemetryEvent(BaseStateEvent):
 
 
 class EpistemicAxiomState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Implements First-Order Logic and Resource Description Framework (RDF)
+    triples to mathematically formalize knowledge. As a ...State suffix, this is a
+    declarative, frozen snapshot of a specific causal connection at a point in time.
+
+    CAUSAL AFFORDANCE: Distills high-entropy natural language token streams into rigid,
+    hashable causal edges (Subject, Predicate, Object), unlocking deterministic querying
+    and Truth Maintenance System (TMS) traversals.
+
+    EPISTEMIC BOUNDS: Source and target concept physical boundaries are strictly locked to
+    128-char CIDs matching the regex ^[a-zA-Z0-9_.:-]+$. The directed_edge_type is clamped
+    to a max_length of 2000 to prevent dictionary bombing during semantic evaluation.
+
+    MCP ROUTING TRIGGERS: First-Order Logic, RDF Triple, Semantic Distillation, Causal
+    Edge, Directed Graph
+    """
     source_concept_id: str = Field(
         min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$", description="CID of the origin node."
     )
@@ -7448,6 +7464,23 @@ class EpistemicSeedInjectionPolicy(CoreasonBaseState):
 
 
 class EpistemicChainGraphState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Defines a Markov Blanket formulation within an Abstract
+    Argumentation Framework. As a ...State suffix, this represents a frozen, declarative
+    geometry of interconnected axioms binding semantic leaves to syntactic roots.
+
+    CAUSAL AFFORDANCE: Authorizes the orchestrator to compute deterministic reachability
+    matrices, tracing high-level syntactic claims (syntactic_roots, min_length=1) back to
+    their foundational semantic triples without invoking non-monotonic reasoning loops.
+
+    EPISTEMIC BOUNDS: Bounded by a 128-char chain_id CID. The @model_validator physically
+    enforces cryptographic determinism by sorting the semantic_leaves array by the composite
+    key (source_concept_id, directed_edge_type, target_concept_id), guaranteeing invariant
+    RFC 8785 canonical hashing across the decentralized swarm.
+
+    MCP ROUTING TRIGGERS: Markov Blanket, Reachability Matrix, Abstract Argumentation,
+    RFC 8785 Canonicalization, Graph Traversal
+    """
     chain_id: str = Field(max_length=128, pattern="^[a-zA-Z0-9_.:-]+$", min_length=1)
     syntactic_roots: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(min_length=1)
     semantic_leaves: list[EpistemicAxiomState]
@@ -7485,6 +7518,24 @@ class EpistemicAxiomVerificationReceipt(BaseStateEvent):
 
 
 class EpistemicDomainGraphManifest(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Encapsulates Formal Epistemology and Bounded Semilattices to
+    represent a verifiable, collision-free cluster of knowledge. As a ...Manifest suffix,
+    this defines a frozen, N-dimensional coordinate state projected to the orchestrator.
+
+    CAUSAL AFFORDANCE: Projects a fully verified, non-contradictory subdomain of the global
+    Knowledge Graph into the orchestrator's active context window, allowing specialized
+    agents to operate on a localized, noise-free epistemic baseline.
+
+    EPISTEMIC BOUNDS: The graph is physically constrained to a 128-char graph_id CID. The
+    verified_axioms array requires min_length=1. To prevent Byzantine hash fractures, the
+    @model_validator deterministically sorts verified_axioms by its triplet components
+    (source_concept_id, directed_edge_type, target_concept_id), preserving perfect
+    Merkle-DAG alignment across distributed nodes.
+
+    MCP ROUTING TRIGGERS: Formal Epistemology, Bounded Semilattice, Knowledge Graph
+    Partition, Deterministic Alignment, Subdomain Projection
+    """
     graph_id: str = Field(max_length=128, pattern="^[a-zA-Z0-9_.:-]+$", min_length=1)
     verified_axioms: list[EpistemicAxiomState] = Field(min_length=1)
 
@@ -7501,6 +7552,23 @@ class EpistemicDomainGraphManifest(CoreasonBaseState):
 
 
 class EpistemicTopologicalProofManifest(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Formalizes the Curry-Howard Correspondence, mapping pure logic to
+    computational types to form an unassailable deductive chain. As a ...Manifest suffix,
+    this defines a frozen, N-dimensional coordinate state.
+
+    CAUSAL AFFORDANCE: Unlocks verifiable automated theorem proving. By presenting a
+    strictly ordered, acyclic sequence of axioms (axiomatic_chain), it allows an independent
+    auditor or secondary LLM to mechanically verify the logical deduction step-by-step.
+
+    EPISTEMIC BOUNDS: The axiomatic_chain array is structurally declared with min_length=1.
+    Crucially, it invokes the Topological Exemption from array sorting; the sequence order
+    MUST mathematically preserve the chronological deduction steps, preventing the
+    destruction of the proof's epistemic value.
+
+    MCP ROUTING TRIGGERS: Curry-Howard Correspondence, Constructive Proof, Topological
+    Sort, Deductive Reasoning, Automated Theorem Proving
+    """
     proof_id: str = Field(
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
