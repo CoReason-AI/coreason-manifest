@@ -2436,6 +2436,16 @@ class BasePanelProfile(CoreasonBaseState):
 
 
 class BaseStateEvent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Establishes the foundational topological root for all temporal occurrences in Event Sourcing, utilizing a Merkle-DAG to permanently freeze chronological facts.
+
+    CAUSAL AFFORDANCE: Provides the baseline causal graph tracking required for the orchestrator to append new N-dimensional coordinate state diffs without mutating historical truth.
+
+    EPISTEMIC BOUNDS: The chronological reality is strictly clamped by timestamp (ge=0.0, le=253402300799.0, representing physical time). The geometric anchor event_id is locked to a 128-char CID regex (^[a-zA-Z0-9_.:-]+$).
+
+    MCP ROUTING TRIGGERS: Event Sourcing, Merkle-DAG, Temporal Coordinate, Cryptographic Lineage, Append-Only Ledger
+    """
+
     event_id: str = Field(
         min_length=1,
         max_length=128,
@@ -2450,6 +2460,16 @@ class BaseStateEvent(CoreasonBaseState):
 
 
 class SystemFaultEvent(BaseStateEvent):
+    """
+    AGENT INSTRUCTION: Acts as a structural terminal state mapping a Byzantine Fault or catastrophic topological execution collapse within the distributed system.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator's circuit breakers to completely sever the active execution branch and quarantine the associated probability wave, preventing failure contagion.
+
+    EPISTEMIC BOUNDS: Inherits strict temporal and spatial bounds from BaseStateEvent. Its semantic geometry is permanently constrained to the strict Literal automaton ["system_fault"].
+
+    MCP ROUTING TRIGGERS: Byzantine Fault Tolerance, Circuit Breaker, Terminal State, Execution Collapse, Fault Isolation
+    """
+
     type: Literal["system_fault"] = Field(
         default="system_fault", description="Discriminator type for a system fault event."
     )
@@ -5462,7 +5482,13 @@ class InterventionPolicy(CoreasonBaseState):
 
 class BaseNodeProfile(CoreasonBaseState):
     """
-    Base configuration for any execution node in a topology.
+    AGENT INSTRUCTION: Establishes the Graph Theory topological root structure (vertex) for all execution participants within a decentralized multi-agent graph.
+
+    CAUSAL AFFORDANCE: Defines the foundational perimeter (objective function) of a participant, enabling the orchestrator to inject proactive oversight hooks (intervention_policies) across the node's lifecycle.
+
+    EPISTEMIC BOUNDS: The semantic boundary is physically constrained by description (max_length=2000). The domain_extensions payload is mathematically bounded to a max recursive depth of 5 via @field_validator to prevent JSON-bomb memory leaks.
+
+    MCP ROUTING TRIGGERS: Graph Theory, Topological Vertex, Subgraph Node, Lifecycle Hook, JSON-Bomb Prevention
     """
 
     description: str = Field(
@@ -7588,6 +7614,16 @@ class ChaosExperimentTask(CoreasonBaseState):
 
 
 class StructuralCausalGraphProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Formalizes Judea Pearl's Structural Causal Models (SCMs) to explicitly map the agent's structural assumptions and endogenous/exogenous boundaries of the environment. As a ...Profile suffix, this is a declarative descriptor.
+
+    CAUSAL AFFORDANCE: Empowers the orchestrator's causal engine to compute back-door adjustments, actively isolating latent confounders from observed variables during counterfactual reasoning or active inference.
+
+    EPISTEMIC BOUNDS: Dimensional space is physically capped to max_length=1000000000 to prevent RAM exhaustion. The @model_validator mathematically sorts observed_variables, latent_variables, and causal_edges to guarantee zero-variance RFC 8785 canonical hashing across distributed nodes.
+
+    MCP ROUTING TRIGGERS: Structural Causal Models, Pearlian DAG, Back-door Criterion, Latent Confounders, Causal Inference
+    """
+
     observed_variables: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
         max_length=1000000000, description="The nodes in the DAG that the agent can passively measure."
     )
@@ -7607,6 +7643,16 @@ class StructuralCausalGraphProfile(CoreasonBaseState):
 
 
 class HypothesisGenerationEvent(BaseStateEvent):
+    """
+    AGENT INSTRUCTION: Implements Popperian Falsificationism and Bayesian Epistemology to formalize an abductive logical leap. As an ...Event suffix, this is an append-only, cryptographically frozen coordinate on the Merkle-DAG.
+
+    CAUSAL AFFORDANCE: Injects a falsifiable premise into the Truth Maintenance System, authorizing the orchestrator to route kinetic tools specifically to execute the attached falsification_conditions to attempt to kill the hypothesis.
+
+    EPISTEMIC BOUNDS: The bayesian_prior is mathematically clamped to a continuous probability distribution between [ge=0.0, le=1.0]. The @model_validator physically enforces cryptographic determinism by sorting the falsification_conditions array by condition_id.
+
+    MCP ROUTING TRIGGERS: Popperian Falsificationism, Bayesian Prior, Abductive Reasoning, Null Hypothesis, Epistemic Ledger
+    """
+
     type: Literal["hypothesis"] = Field(
         default="hypothesis", description="Discriminator for a hypothesis generation event."
     )
@@ -7889,7 +7935,13 @@ class LogEvent(CoreasonBaseState):
 
 class SpanTraceReceipt(CoreasonBaseState):
     """
-    An execution window span trace.
+    AGENT INSTRUCTION: Implements the Dapper Distributed Tracing model to deterministically map an execution span and its nested causal DAG geometry.
+
+    CAUSAL AFFORDANCE: Unlocks systemic observability by connecting parent and child invocations (via parent_span_id), allowing the orchestrator to measure exact latency bottlenecks and topological health.
+
+    EPISTEMIC BOUNDS: Temporal geometries are rigidly clamped between start_time and end_time (ge=0.0, le=253402300799.0). Execution health is strictly governed by the status Literal ["OK", "ERROR", "PENDING"].
+
+    MCP ROUTING TRIGGERS: Dapper Tracing Model, Distributed Observability, Execution Span, Causal DAG, OpenTelemetry
     """
 
     span_id: str = Field(
@@ -9582,8 +9634,13 @@ class ObservationEvent(BaseStateEvent):
 
 class EpistemicTelemetryEvent(BaseStateEvent):
     """
-    The cryptographic receipt of human-in-the-loop interaction tracking used to calculate
-    Epistemic Regret and iteratively tune retrieval gradients without explicit human grading.
+    AGENT INSTRUCTION: Implements Human-in-the-Loop (HITL) Supervisory Control Theory and Epistemic Regret tracking to measure out-of-band human physical attention kinematics.
+
+    CAUSAL AFFORDANCE: Emits passive structural telemetry to update retrieval gradients and Bayesian priors based on human spatial interaction, without halting the underlying execution DAG.
+
+    EPISTEMIC BOUNDS: The human interaction is rigidly confined to the interaction_modality Literal automaton. Temporal liveness of attention is bounded by dwell_duration_ms (ge=0, le=86400000). The target is locked to the 128-char target_node_id CID.
+
+    MCP ROUTING TRIGGERS: Epistemic Regret, Supervisory Control Theory, Human-in-the-Loop, Dwell Time, Spatial Telemetry
     """
 
     type: Literal["epistemic_telemetry"] = Field(
@@ -9693,23 +9750,15 @@ class EpistemicChainGraphState(CoreasonBaseState):
 
 class CognitivePredictionReceipt(BaseStateEvent):
     """
-    AGENT INSTRUCTION: Captures the pre-verification predictive distribution (Softmax
-    outputs) of an LLM across a latent conceptual boundary. As a ...Receipt suffix,
-    this is an append-only, cryptographically frozen coordinate on the Merkle-DAG.
+    AGENT INSTRUCTION: Captures the pre-verification predictive distribution (Softmax logit outputs) of an LLM across a latent conceptual boundary. As a ...Receipt suffix, this is an append-only, cryptographically frozen coordinate.
 
-    CAUSAL AFFORDANCE: Exposes the raw generative probability manifold to the
-    orchestrator, enabling external solvers to evaluate token divergence before
-    crystallizing it into a permanent epistemic axiom. The target_source_concept
-    (max_length=2000) provides the semantic anchor.
+    CAUSAL AFFORDANCE: Exposes the raw generative probability manifold to the orchestrator, enabling external mechanistic solvers to evaluate token divergence before crystallizing the probability wave into a permanent epistemic axiom.
 
-    EPISTEMIC BOUNDS: Mathematical isolation is enforced by binding predictions to a
-    strict source_chain_id CID (128-char regex). The prediction vector is physically
-    capped by predicted_top_k_tokens (min_length=1, string max_length=255) to prevent
-    unbounded tensor serialization.
+    EPISTEMIC BOUNDS: Mathematical isolation is enforced by binding predictions to a strict source_chain_id CID (128-char regex). The prediction vector is physically capped by predicted_top_k_tokens (string max_length=255) to prevent unbounded tensor serialization.
 
-    MCP ROUTING TRIGGERS: Predictive Distribution, Softmax Output, Generative Manifold,
-    Pre-Verification State, Token Entropy
+    MCP ROUTING TRIGGERS: Predictive Distribution, Softmax Logits, Generative Manifold, Probability Wave Collapse, Entropy
     """
+
     type: Literal["cognitive_prediction"] = Field(default="cognitive_prediction")
     source_chain_id: str = Field(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
     target_source_concept: str = Field(max_length=2000)
@@ -9718,23 +9767,15 @@ class CognitivePredictionReceipt(BaseStateEvent):
 
 class EpistemicAxiomVerificationReceipt(BaseStateEvent):
     """
-    AGENT INSTRUCTION: Implements automated Fact-Checking and Entailment Verification to
-    structurally quarantine hallucinated tokens. As a ...Receipt suffix, it represents
-    an immutable cryptographic verdict on the factual alignment of a prediction.
+    AGENT INSTRUCTION: Implements automated Natural Language Inference (NLI) and Entailment Verification to mechanically quarantine hallucinated tokens. As a ...Receipt suffix, it represents an immutable cryptographic verdict.
 
-    CAUSAL AFFORDANCE: Acts as a definitive Truth Maintenance filter. If verification
-    succeeds, it unlocks the promotion of the source prediction (source_prediction_id,
-    128-char CID) into the semantic knowledge graph.
+    CAUSAL AFFORDANCE: Acts as the definitive logic gate for the Truth Maintenance System. If verification succeeds, it physically unlocks the promotion of the source prediction into the global semantic knowledge graph.
 
-    EPISTEMIC BOUNDS: The factual alignment is mathematically bounded by
-    sequence_similarity_score (ge=0.0, le=1.0). The @model_validator
-    enforce_epistemic_quarantine enforces a strict invariant, deliberately crashing
-    instantiation if fact_score_passed is False, physically preventing the Merkle-DAG
-    from recording unverified epistemic contagion.
+    EPISTEMIC BOUNDS: Factual alignment is geometrically bounded by sequence_similarity_score (ge=0.0, le=1.0). The @model_validator enforce_epistemic_quarantine deliberately crashes instantiation if fact_score_passed is False, physically severing the DAG to prevent epistemic contagion.
 
-    MCP ROUTING TRIGGERS: Entailment Verification, Truth Maintenance System, Epistemic
-    Quarantine, Hallucination Filtering, Invariant Assertion
+    MCP ROUTING TRIGGERS: Entailment Verification, Natural Language Inference, Truth Maintenance System, Epistemic Quarantine, Hallucination Filtering
     """
+
     type: Literal["epistemic_axiom_verification"] = Field(default="epistemic_axiom_verification")
     source_prediction_id: str = Field(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
     sequence_similarity_score: float = Field(ge=0.0, le=1.0)
