@@ -7743,7 +7743,26 @@ class SemanticNodeState(CoreasonBaseState):
 
 
 class VerifiableCredentialPresentationReceipt(CoreasonBaseState):
-    """A cryptographic proof of clearance or capability presented to a zero-trust orchestrator."""
+    """
+    AGENT INSTRUCTION: Implements the W3C Verifiable Credentials Data Model v2.0
+    and Selective Disclosure (SD-JWT) frameworks. As a ...Receipt suffix, this is an
+    append-only, cryptographically frozen coordinate on the Merkle-DAG that the LLM
+    must never hallucinate a mutation to.
+
+    CAUSAL AFFORDANCE: Unlocks topological traversal and zero-trust capability
+    mounting by cryptographically proving the agent possesses specific clearances
+    via issuer_did (NodeIdentifierState) without revealing the underlying private
+    key.
+
+    EPISTEMIC BOUNDS: The presentation_format is rigidly constrained to a Literal
+    automaton ["jwt_vc", "ldp_vc", "sd_jwt", "zkp_vc"]. To prevent memory
+    exhaustion from massive ZK-SNARK polynomials, the cryptographic_proof_blob is
+    physically capped at max_length=100000, and authorization_claims is bounded
+    (max_length=86400000, key max_length=255).
+
+    MCP ROUTING TRIGGERS: W3C Verifiable Credentials, Decentralized Identifiers,
+    Zero-Knowledge Proofs, Selective Disclosure JWT, Zero-Trust Architecture
+    """
 
     presentation_format: Literal["jwt_vc", "ldp_vc", "sd_jwt", "zkp_vc"] = Field(
         description="The exact cryptographic standard used to encode this credential presentation."
@@ -7763,7 +7782,24 @@ class VerifiableCredentialPresentationReceipt(CoreasonBaseState):
 
 class AgentAttestationReceipt(CoreasonBaseState):
     """
-    Cryptographic identity passport and AI-BOM for the agent.
+    AGENT INSTRUCTION: Establishes a rigorous AI Software Bill of Materials (AI-BOM)
+    adhering to Supply Chain Levels for Software Artifacts (SLSA) provenance
+    guidelines. As a ...Receipt suffix, this defines an immutable cryptographic
+    passport that the LLM must never hallucinate a mutation to.
+
+    CAUSAL AFFORDANCE: Projects the structural identity and training lineage of the
+    agent into the orchestrator. The developer_signature (max_length=2000) proves
+    vendor accountability. The credential_presentations
+    (list[VerifiableCredentialPresentationReceipt], default_factory=list) carry
+    the selective disclosure wallet.
+
+    EPISTEMIC BOUNDS: The training_lineage_hash and capability_merkle_root are
+    locked to strict SHA-256 regex (^[a-f0-9]{64}$). The @model_validator
+    sort_arrays deterministically sorts credential_presentations by issuer_did,
+    guaranteeing invariant RFC 8785 canonical hashing.
+
+    MCP ROUTING TRIGGERS: AI-BOM, SLSA Provenance, Merkle Tree, Supply Chain
+    Security, Cryptographic Identity
     """
 
     training_lineage_hash: str = Field(
@@ -8465,8 +8501,24 @@ class WorkflowManifest(CoreasonBaseState):
 
 class WetwareAttestationContract(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: This model represents a SOTA cryptographic receipt
-    proving a human in the loop physically authorized a state transition.
+    AGENT INSTRUCTION: Formalizes Proof of Humanity within Supervisory Control
+    Theory, utilizing FIDO2/WebAuthn to capture undeniable biological intent. As a
+    ...Contract suffix, this enforces rigid mathematical boundaries globally.
+
+    CAUSAL AFFORDANCE: Physically collapses a Mixed-Initiative pause, injecting
+    external biological entropy (wetware) to authorize a definitive state
+    transition. The mechanism (AttestationMechanismProfile) specifies the exact
+    cryptographic standard. The did_subject (DID pattern ^did:[a-z0-9]+:.*$)
+    anchors the human identity.
+
+    EPISTEMIC BOUNDS: The biological signature is rigorously anchored via
+    dag_node_nonce (UUID), mechanically binding the payload to a singular
+    Merkle-DAG coordinate and neutralizing cross-graph Replay Attacks. The
+    cryptographic_payload (pattern ^[A-Za-z0-9+/=_-]+$) ensures strict Base64url
+    encoding.
+
+    MCP ROUTING TRIGGERS: Proof of Humanity, FIDO2/WebAuthn, Supervisory Control
+    Theory, Mixed-Initiative Interaction, Anti-Replay Nonce
     """
 
     mechanism: AttestationMechanismProfile = Field(
