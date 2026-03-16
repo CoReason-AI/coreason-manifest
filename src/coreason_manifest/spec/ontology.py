@@ -81,6 +81,13 @@ CORE_ENTROPY_METRIC_SEMANTICS = {
     "predictive_variance": "Statistical bounds of token probability distributions during sequence generation.",
 }
 
+type CoreGrammarEnforcementStrategy = Literal["fsm_logit_mask", "speculative_validation", "post_hoc_rejection"]
+CORE_GRAMMAR_ENFORCEMENT_SEMANTICS = {
+    "fsm_logit_mask": "The orchestrator MUST compile the schema into a Deterministic Finite Automaton (DFA) and force invalid token logits to negative infinity.",
+    "speculative_validation": "The engine generates speculatively and rolls back the KV-cache the exact moment a schema violation occurs.",
+    "post_hoc_rejection": "Generates the full string and throws a System2RemediationIntent if it fails validation.",
+}
+
 type CoreComputeStrategyTier = Literal["speed_single_pass", "precision_token_class", "reasoning_ensemble"]
 CORE_COMPUTE_STRATEGY_SEMANTICS = {
     "speed_single_pass": (
@@ -183,6 +190,7 @@ type CacheEviction = CoreCacheEviction | DomainExtensionString
 type DefeasibleEdgeType = CoreDefeasibleEdgeType | DomainExtensionString
 type IEEEAnomalyClass = CoreIEEEAnomalyClass | DomainExtensionString
 type SMTSolverOutcome = CoreSMTSolverOutcome | DomainExtensionString
+type GrammarEnforcementStrategy = CoreGrammarEnforcementStrategy | DomainExtensionString
 
 type JsonPrimitiveState = (
     str
@@ -488,6 +496,31 @@ class DynamicLayoutManifest(CoreasonBaseState):
                 if not isinstance(node, allowed_nodes):
                     raise ValueError(f"Kinetic execution bleed detected: Forbidden AST node {type(node).__name__}")
         return v
+
+
+class ConstrainedDecodingPolicy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: ConstrainedDecodingPolicy is a rigid mathematical boundary enforcing systemic constraints globally.
+    Dictates execution limits and mathematical thresholds for the token sampling phase.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation by physically masking logits.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals on fields:
+    enforcement_action, compiler_backend. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
+
+    enforcement_strategy: GrammarEnforcementStrategy = Field(
+        description="Mandates the physical mechanism the orchestrator must use to intercept the LLM's vocabulary during the forward pass."
+    )
+    compiler_backend: Literal["outlines", "xgrammar", "llama_cpp", "agnostic"] = Field(
+        description="Specifies the required C++/Rust AST-to-Grammar compiler for the inference engine."
+    )
+    terminate_on_eos_leak: bool = Field(
+        default=True,
+        description="If the LLM attempts to output an <|end_of_text|> token before the DFA reaches an accepting state, mathematically sever the generation.",
+    )
 
 
 class ExecutionSLA(CoreasonBaseState):
@@ -7657,6 +7690,10 @@ class StateContract(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
     """
 
+    decoding_policy: ConstrainedDecodingPolicy | None = Field(
+        default=None,
+        description="If provided, the orchestrator is mathematically forbidden from running the inference without pre-compiling the JSON Schema into a tokenizer mask.",
+    )
     schema_definition: dict[Annotated[str, StringConstraints(max_length=255)], Any] = Field(
         description="A strict JSON Schema dictionary defining the required shape of the shared epistemic blackboard.",
     )
@@ -10467,6 +10504,9 @@ class CognitiveFormatContract(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
     """
 
+    decoding_policy: ConstrainedDecodingPolicy = Field(
+        description="The hardware-level instruction forcing the LLM to physically obey the regex at the logit level."
+    )
     require_think_tags: bool = Field(
         default=True, description="Forces the inclusion of structural XML tags to isolate the reasoning trace."
     )
@@ -10991,3 +11031,6 @@ WorkflowManifest.model_rebuild()
 ProgramSynthesisIntent.model_rebuild()
 SymbolicExecutionReceipt.model_rebuild()
 SemanticGapAnalysisProfile.model_rebuild()
+ConstrainedDecodingPolicy.model_rebuild()
+CognitiveFormatContract.model_rebuild()
+StateContract.model_rebuild()
