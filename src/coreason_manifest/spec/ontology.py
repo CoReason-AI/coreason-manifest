@@ -1413,21 +1413,21 @@ class SecureSubSessionState(CoreasonBaseState):
 
 class DefeasibleCascadeEvent(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: A cryptographically frozen historical fact representing the active
-    propagation of an undercutting defeater within an Abstract Argumentation Framework. As an
-    ...Event suffix, this object is an append-only coordinate on the Merkle-DAG that the LLM
-    must never hallucinate a mutation to.
+    AGENT INSTRUCTION: Executes Jon Doyle's Truth Maintenance System (TMS) protocol. As an
+    ...Event suffix, this is an append-only coordinate on the Merkle-DAG representing the
+    active propagation of belief retraction.
 
-    CAUSAL AFFORDANCE: Executes the physical quarantine of the quarantined_event_ids subgraph,
-    mathematically zeroing out their probability mass and halting all execution branches
-    dependent on the root_falsified_event_id.
+    CAUSAL AFFORDANCE: Applies a Pearlian do-operator to mathematically zero-out the
+    probability mass of the quarantined_event_ids subgraph, physically halting all execution
+    branches dependent on the root_falsified_event_id to prevent epistemic contagion.
 
-    EPISTEMIC BOUNDS: Deterministic canonical hashing is guaranteed by the @model_validator
-    which strictly sorts quarantined_event_ids. The propagated_decay_factor float is bounded
-    (ge=0.0, le=1.0), capping the maximum entropy penalty per edge traversal.
+    EPISTEMIC BOUNDS: The Shannon Entropy reduction across edges is strictly clamped by
+    propagated_decay_factor (ge=0.0, le=1.0). Deterministic alignment is guaranteed by a
+    @model_validator that physically sorts the quarantined_event_ids array to preserve
+    RFC 8785 canonical hashing.
 
-    MCP ROUTING TRIGGERS: Abstract Argumentation, Undercutting Defeater, Epistemic Contagion,
-    Wave Collapse, Quarantine Topology
+    MCP ROUTING TRIGGERS: Jon Doyle TMS, Epistemic Contagion, Belief Retraction, Shannon
+    Entropy Penalty, Graph Quarantine
     """
 
     cascade_id: str = Field(
@@ -3223,22 +3223,21 @@ class CustodyReceipt(CoreasonBaseState):
 
 class DefeasibleAttackEvent(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: A directed causal edge executing non-monotonic truth maintenance
-    within a Dung-style Abstract Argumentation Framework. It mathematically projects a defeater
-    from a source claim against a target claim. As an ...Event suffix, this object is a
-    cryptographically frozen historical fact that the LLM must never hallucinate a mutation to.
+    AGENT INSTRUCTION: Formalizes the binary attack relation in Dung's Abstract Argumentation
+    Framework ($AF = \langle AR, \rightarrow \rangle$). As an ...Event suffix, this is an
+    append-only, cryptographically frozen historical fact on the Merkle-DAG.
 
-    CAUSAL AFFORDANCE: Modulates the probabilistic acceptability of the target_claim_id within
-    the EpistemicArgumentGraphState. If valid, it triggers a DefeasibleCascadeEvent to
-    physically sever and quarantine downstream nodes relying on the target.
+    CAUSAL AFFORDANCE: Projects an undercutting or rebutting defeater from a source claim
+    against a target claim. If mathematically validated, it physically triggers a
+    DefeasibleCascadeEvent to sever all downstream nodes relying on the target.
 
     EPISTEMIC BOUNDS: Strictly bounds the attack geometry using AttackVectorProfile enums
     (Literal["rebuttal", "undercutter", "underminer"]). Source (source_claim_id) and target
     (target_claim_id) mappings are locked to 128-character cryptographic CIDs via strict
     regex ^[a-zA-Z0-9_.:-]+$, preventing unbounded graph traversals.
 
-    MCP ROUTING TRIGGERS: Undercutting Defeater, Non-Monotonic Logic, Directed Attack Edge,
-    Belief Retraction, Defeasible Reasoning
+    MCP ROUTING TRIGGERS: Undercutting Defeater, Dialectical Edge, Truth Maintenance System,
+    Bipartite Mapping, Non-Monotonic Retraction
     """
 
     attack_id: str = Field(
@@ -4110,22 +4109,21 @@ class EvidentiaryWarrantState(CoreasonBaseState):
 
 class EpistemicArgumentClaimState(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Represents a discrete, falsifiable proposition within a Dung-style
-    Abstract Argumentation Framework. It serves as a static node in the dialectical graph,
-    awaiting challenge or verification. As a ...State suffix, this is a declarative, frozen
-    snapshot of N-dimensional geometry at a specific point in time.
+    AGENT INSTRUCTION: Implements a discrete node $A \in AR$ within Dung's Abstract
+    Argumentation Framework. As a ...State suffix, this is a declarative, frozen snapshot of
+    a falsifiable proposition at a specific point in time.
 
     CAUSAL AFFORDANCE: Acts as the primary target for DefeasibleAttackEvent undercutting.
-    Successfully defending this claim stabilizes the truth value, allowing it to act as a
-    premise in higher-order topological proofs.
+    Successfully defending this claim stabilizes the probability mass, allowing it to serve
+    as a premise in the Grounded Extension.
 
     EPISTEMIC BOUNDS: The proposition payload (text_chunk) is mathematically capped at
     max_length=50000. The internal warrants array is deterministically sorted by the
     justification field via a @model_validator to preserve RFC 8785 canonical hashing of
     the dialectical state. The proponent_id is bounded to a 128-char CID.
 
-    MCP ROUTING TRIGGERS: Abstract Argumentation Framework, Falsifiable Proposition,
-    Dialectical Node, Non-Monotonic Premise
+    MCP ROUTING TRIGGERS: Dung's AAF, Defeasible Logic, Abstract Argumentation,
+    Non-Monotonic Node, Grounded Extension Premise
     """
 
     claim_id: str = Field(
@@ -4153,22 +4151,21 @@ class EpistemicArgumentClaimState(CoreasonBaseState):
 
 class EpistemicArgumentGraphState(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: A comprehensive Truth Maintenance System (TMS) calculating dialectical
-    justification semantics across the swarm's working context. It houses the complete bipartite
-    mapping of claims and their defeasible attacks. As a ...State suffix, this is a declarative,
-    frozen snapshot of N-dimensional geometry at a specific point in time.
+    AGENT INSTRUCTION: Constructs the macroscopic adjacency matrix for the complete
+    $AF = \langle AR, \rightarrow \rangle$ topology. As a ...State suffix, this is a
+    declarative, frozen snapshot of the dialectical geometry at a specific point in time.
 
-    CAUSAL AFFORDANCE: Provides the holistic adjacency matrix required by the orchestrator to
-    execute grounded extension semantics, determining which set of claims survive the attacks
-    and can be crystallized into the permanent EpistemicLedgerState.
+    CAUSAL AFFORDANCE: Exposes the holistic bipartite mapping of claims and their defeasible
+    attacks to the orchestrator, allowing graph traversal algorithms to deterministically
+    compute the conflict-free Grounded Extension of surviving truths.
 
     EPISTEMIC BOUNDS: Physically limits state-space explosion by capping the claims and attacks
     dictionaries at max_length=10000 keys each. Key geometries are strictly bounded to 255
     characters via StringConstraints(max_length=255) to prevent Dictionary Bombing during
     canonicalization.
 
-    MCP ROUTING TRIGGERS: Truth Maintenance System, Adjacency Matrix, Grounded Extension,
-    Dialectical Justification, Belief State Bounding
+    MCP ROUTING TRIGGERS: Dung's AAF, Adjacency Matrix, Grounded Extension,
+    State-Space Bounding, Dialectical Justification
     """
 
     claims: dict[Annotated[str, StringConstraints(max_length=255)], EpistemicArgumentClaimState] = Field(
