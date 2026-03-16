@@ -423,7 +423,19 @@ class CoreasonBaseState(BaseModel):
 
 
 class SpatialBoundingBoxProfile(CoreasonBaseState):
-    """A resolution-independent spatial region."""
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
 
     x_min: float = Field(ge=0.0, le=1.0, description="The left boundary.")
     y_min: float = Field(ge=0.0, le=1.0, description="The top boundary.")
@@ -440,7 +452,18 @@ class SpatialBoundingBoxProfile(CoreasonBaseState):
 
 
 class DynamicLayoutManifest(CoreasonBaseState):
-    """Schema representing a template for dynamic grid layouts."""
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are enforced via @field_validator structural
+    bounds. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
 
     layout_tstring: str = Field(
         max_length=2000, description="A Python 3.14 t-string template definition for dynamic UI grid evaluation."
@@ -467,7 +490,15 @@ class DynamicLayoutManifest(CoreasonBaseState):
 
 class ExecutionSLA(CoreasonBaseState):
     """
-    Service Level Agreement (limits) for executing a tool.
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
     """
 
     max_execution_time_ms: int = Field(
@@ -484,7 +515,18 @@ class ExecutionSLA(CoreasonBaseState):
 
 
 class FacetMatrixProfile(CoreasonBaseState):
-    """Optional small-multiple faceting layout."""
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
 
     row_field: str | None = Field(
         max_length=2000, default=None, description="The dataset field used to split the chart into rows."
@@ -495,7 +537,18 @@ class FacetMatrixProfile(CoreasonBaseState):
 
 
 class SpatialCoordinateProfile(CoreasonBaseState):
-    """A resolution-independent 2D spatial vector."""
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
 
     x: float = Field(ge=0.0, le=1.0, description="The normalized X-axis coordinate (0.0 = left, 1.0 = right).")
     y: float = Field(ge=0.0, le=1.0, description="The normalized Y-axis coordinate (0.0 = top, 1.0 = bottom).")
@@ -503,7 +556,15 @@ class SpatialCoordinateProfile(CoreasonBaseState):
 
 class ComputeRateContract(CoreasonBaseState):
     """
-    Economic constraints for liquid compute operations.
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
     """
 
     cost_per_million_input_tokens: float = Field(
@@ -516,6 +577,19 @@ class ComputeRateContract(CoreasonBaseState):
 
 
 class ConceptBottleneckPolicy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
+
     required_concept_vector: dict[Annotated[str, StringConstraints(max_length=255)], bool] = Field(
         min_length=1,
         description="A strictly defined dictionary of boolean dimensions representing required monosemantic concepts.",
@@ -541,7 +615,17 @@ class ConceptBottleneckPolicy(CoreasonBaseState):
 
 
 class ScalePolicy(CoreasonBaseState):
-    """The mathematical mapping constraint for a channel."""
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
 
     type: Literal["linear", "log", "time", "ordinal", "nominal"] = Field(
         description="The mathematical scale mapping metrics to pixels."
@@ -555,7 +639,18 @@ class ScalePolicy(CoreasonBaseState):
 
 
 class VisualEncodingProfile(CoreasonBaseState):
-    """The visual property being manipulated."""
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
 
     channel: Literal["x", "y", "color", "size", "opacity", "shape", "text"] = Field(
         description="The visual channel the metric is mapped to."
@@ -566,7 +661,16 @@ class VisualEncodingProfile(CoreasonBaseState):
 
 class SideEffectProfile(CoreasonBaseState):
     """
-    Profile for describing the side effects and idempotency of a tool.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     is_idempotent: bool = Field(
@@ -576,7 +680,17 @@ class SideEffectProfile(CoreasonBaseState):
 
 
 class VerifiableEntropyReceipt(CoreasonBaseState):
-    """Passive cryptographic envelope for verifiable random functions."""
+    """
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
+    """
 
     vrf_proof: str = Field(
         min_length=10, description="The zero-knowledge cryptographic proof of fair random generation."
@@ -593,6 +707,18 @@ class VerifiableEntropyReceipt(CoreasonBaseState):
 
 
 class HardwareEnclaveReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
+    """
+
     enclave_type: Literal["intel_tdx", "amd_sev_snp", "aws_nitro", "nvidia_cc"] = Field(
         le=1000000000, description="The physical silicon architecture generating the root-of-trust quote."
     )
@@ -609,7 +735,18 @@ class HardwareEnclaveReceipt(CoreasonBaseState):
 
 
 class LatentSmoothingProfile(CoreasonBaseState):
-    """The mathematical curve used to gently taper an adversarial activation to prevent logit collapse."""
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
 
     decay_function: Literal["linear", "exponential", "cosine_annealing"] = Field(
         description="The trigonometric or algebraic function governing the attenuation curve."
@@ -627,8 +764,17 @@ class LatentSmoothingProfile(CoreasonBaseState):
 
 
 class LogitSteganographyContract(CoreasonBaseState):
-    """Cryptographic contract for embedding undeniable, un-strippable provenance signatures
-    directly into the token entropy."""
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
 
     verification_public_key_id: str = Field(
         min_length=1,
@@ -661,7 +807,17 @@ class LogitSteganographyContract(CoreasonBaseState):
 
 class ComputeEngineProfile(CoreasonBaseState):
     """
-    Abstraction for an underlying LLM provider in liquid compute.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     model_name: str = Field(max_length=2000, description="The identifier of the underlying model.")
@@ -686,7 +842,16 @@ class ComputeEngineProfile(CoreasonBaseState):
 
 class PermissionBoundaryPolicy(CoreasonBaseState):
     """
-    Zero-trust security boundaries for tool execution.
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
     """
 
     network_access: bool = Field(description="Whether the tool is permitted to make external network requests.")
@@ -712,6 +877,18 @@ class PermissionBoundaryPolicy(CoreasonBaseState):
 
 
 class PostQuantumSignatureReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
+    """
+
     pq_algorithm: Literal["ml-dsa", "slh-dsa", "falcon"] = Field(
         description="The NIST FIPS post-quantum cryptographic algorithm used."
     )
@@ -729,7 +906,15 @@ class PostQuantumSignatureReceipt(CoreasonBaseState):
 
 class RoutingFrontierPolicy(CoreasonBaseState):
     """
-    Mathematical Pareto boundaries for dynamic spot-market liquid compute.
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
     """
 
     max_latency_ms: int = Field(
@@ -757,6 +942,19 @@ class RoutingFrontierPolicy(CoreasonBaseState):
 
 
 class SaeFeatureActivationState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
+
     feature_index: int = Field(
         le=1000000000,
         ge=0,
@@ -774,7 +972,16 @@ class SaeFeatureActivationState(CoreasonBaseState):
 
 class ActivationSteeringContract(CoreasonBaseState):
     """
-    Hardware-level contract for Representation Engineering via activation injection/ablation.
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
     """
 
     steering_vector_hash: str = Field(
@@ -802,9 +1009,16 @@ class ActivationSteeringContract(CoreasonBaseState):
 
 class SemanticSlicingPolicy(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: A Deterministic Epistemic Firewall that mathematically
-    starves the active context partition of irrelevant or over-classified data
-    to prevent attention dilution and enforce zero-trust isolation.
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
     """
 
     permitted_classification_tiers: list[InformationClassificationProfile] = Field(
@@ -835,7 +1049,15 @@ class SemanticSlicingPolicy(CoreasonBaseState):
 
 class CognitiveRoutingContract(CoreasonBaseState):
     """
-    Hardware-level contract overriding MoE routing to enforce functional/specialist paths.
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
     """
 
     dynamic_top_k: int = Field(
@@ -862,7 +1084,18 @@ class CognitiveRoutingContract(CoreasonBaseState):
 
 
 class CognitiveStateProfile(CoreasonBaseState):
-    """Causal Directed Acyclic Graphs (cDAGs) and constraints for state progression."""
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
 
     urgency_index: float = Field(
         ge=0.0, le=1.0, description="Drives structural constraints; high urgency forces fast heuristic routing."
@@ -889,7 +1122,18 @@ class CognitiveStateProfile(CoreasonBaseState):
 
 
 class CognitiveUncertaintyProfile(CoreasonBaseState):
-    """Structural Causal Models (SCMs) for active epistemic bounding."""
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
 
     decomposition_entropy_threshold: float | None = Field(
         default=None,
@@ -926,7 +1170,16 @@ class CognitiveUncertaintyProfile(CoreasonBaseState):
 
 class ConstitutionalPolicy(CoreasonBaseState):
     """
-    Defines a constitutional rule for AI governance.
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
     """
 
     rule_id: str = Field(
@@ -953,7 +1206,16 @@ class ConstitutionalPolicy(CoreasonBaseState):
 
 class GradingCriterionProfile(CoreasonBaseState):
     """
-    Defines criteria governing grading LLM behavior or output.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     criterion_id: str = Field(
@@ -971,7 +1233,17 @@ class GradingCriterionProfile(CoreasonBaseState):
 
 class AdjudicationRubricProfile(CoreasonBaseState):
     """
-    Rubric defining multiple criteria and passing threshold for algorithmic adjudication.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     rubric_id: str = Field(
@@ -990,8 +1262,15 @@ class AdjudicationRubricProfile(CoreasonBaseState):
 
 class PredictionMarketPolicy(CoreasonBaseState):
     """
-    The ruleset governing the market. It enforces Sybil resistance
-    (via quadratic staking) and dictates when the market stops trading.
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
     """
 
     staking_function: Literal["linear", "quadratic"] = Field(
@@ -1006,7 +1285,18 @@ class PredictionMarketPolicy(CoreasonBaseState):
 
 
 class QuorumPolicy(CoreasonBaseState):
-    """The mathematical boundaries required to survive Byzantine failures in a decentralized swarm."""
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
 
     max_tolerable_faults: int = Field(
         le=1000000000,
@@ -1033,7 +1323,16 @@ class QuorumPolicy(CoreasonBaseState):
 
 class ConsensusPolicy(CoreasonBaseState):
     """
-    Explicit ruleset governing how a council resolves disagreements.
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
     """
 
     strategy: Literal["unanimous", "majority", "debate_rounds", "prediction_market", "pbft"] = Field(
@@ -1064,7 +1363,16 @@ class ConsensusPolicy(CoreasonBaseState):
 
 class RedactionPolicy(CoreasonBaseState):
     """
-    A specific rule for algorithmic payload sanitization.
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
     """
 
     rule_id: str = Field(
@@ -1098,7 +1406,18 @@ class RedactionPolicy(CoreasonBaseState):
 
 
 class SaeLatentPolicy(CoreasonBaseState):
-    """A real-time mechanistic interpretability boundary that monitors and controls specific neural circuits."""
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
 
     target_feature_index: int = Field(
         le=1000000000,
@@ -1152,8 +1471,16 @@ class SaeLatentPolicy(CoreasonBaseState):
 
 class BrowserFingerprintManifest(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: The deterministic hardware and network identity vector. Mathematically bounds
-    the TLS handshake and WebGL unmasked renderers to prevent fingerprinting detection.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     user_agent_string: str = Field(
@@ -1186,7 +1513,17 @@ class BrowserFingerprintManifest(CoreasonBaseState):
 
 class SecureSubSessionState(CoreasonBaseState):
     """
-    Declarative boundary for handling unredacted secrets within a temporarily isolated state partition.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     session_id: str = Field(
@@ -1213,6 +1550,19 @@ class SecureSubSessionState(CoreasonBaseState):
 
 
 class DefeasibleCascadeEvent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
+    """
+
     cascade_id: str = Field(
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
@@ -1244,6 +1594,19 @@ class DefeasibleCascadeEvent(CoreasonBaseState):
 
 
 class DefeasibleRebuttalContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
+
     permitted_attack_edges: list[DefeasibleEdgeType] = Field(
         min_length=1, description="The formal argumentation edge types allowed to sever a prior operational intent."
     )
@@ -1265,8 +1628,19 @@ class DefeasibleRebuttalContract(CoreasonBaseState):
 
 
 class MultimodalTokenAnchorState(CoreasonBaseState):
-    """AGENT INSTRUCTION: Unified multimodal grounding mapping extracted facts to strict 1D token spans and 2D visual\n
-    patches."""
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
 
     token_span_start: int | None = Field(
         le=1000000000, default=None, ge=0, description="The starting index in the discrete VLM context window."
@@ -1305,6 +1679,20 @@ class MultimodalTokenAnchorState(CoreasonBaseState):
 
 
 class RollbackIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Non-monotonic kinetic trigger bounding a formal capability request. Serves as a strictly
+    typed execution coordinate.
+
+    CAUSAL AFFORDANCE: Unlocks targeted execution paths or non-monotonic execution logic via Pearlian do-
+    operators.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Kinetic Execution, Non-Monotonic Trigger, Pearlian Do-Operator, Active Inference
+    """
+
     request_id: str = Field(
         min_length=1,
         max_length=128,
@@ -1329,6 +1717,19 @@ class RollbackIntent(CoreasonBaseState):
 
 
 class StateMutationIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Non-monotonic kinetic trigger bounding a formal capability request. Serves as a strictly
+    typed execution coordinate.
+
+    CAUSAL AFFORDANCE: Unlocks targeted execution paths or non-monotonic execution logic via Pearlian do-
+    operators.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Kinetic Execution, Non-Monotonic Trigger, Pearlian Do-Operator, Active Inference
+    """
+
     op: PatchOperationProfile = Field(
         description="The strict RFC 6902 JSON Patch operation, acting as a deterministic state vector mutation."
     )
@@ -1348,6 +1749,19 @@ class StateMutationIntent(CoreasonBaseState):
 
 
 class StateDifferentialManifest(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
+
     diff_id: str = Field(
         min_length=1,
         max_length=128,
@@ -1374,6 +1788,20 @@ class StateDifferentialManifest(CoreasonBaseState):
 
 
 class StateHydrationManifest(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, enforced via @field_validator structural bounds. All field limits must be strictly
+    validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
+
     epistemic_coordinate: str = Field(
         max_length=2000, description="A string ID representing the session or specific spatial trace binding."
     )
@@ -1401,6 +1829,19 @@ class StateHydrationManifest(CoreasonBaseState):
 
 
 class TemporalCheckpointState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
+
     checkpoint_id: str = Field(
         min_length=1,
         max_length=128,
@@ -1419,7 +1860,17 @@ class TemporalCheckpointState(CoreasonBaseState):
 
 
 class MonteCarloTreeSearchPolicy(CoreasonBaseState):
-    """AGENT INSTRUCTION: The strict mathematical hyperparameter profile governing the agent's internal latent rollouts (MCTS) prior to kinetic execution."""  # noqa: E501
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
 
     exploration_constant_c: float = Field(
         ge=0.0, description="The UCB1 exploration weight bounding curiosity vs. exploitation."
@@ -1438,6 +1889,19 @@ class MonteCarloTreeSearchPolicy(CoreasonBaseState):
 
 
 class ThoughtBranchState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
+
     branch_id: str = Field(
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
@@ -1484,6 +1948,19 @@ class ThoughtBranchState(CoreasonBaseState):
 
 
 class LatentScratchpadReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
+    """
+
     root_state_hash: str | None = Field(
         default=None,
         pattern="^[a-f0-9]{64}$",
@@ -1531,7 +2008,17 @@ class LatentScratchpadReceipt(CoreasonBaseState):
 
 class EphemeralNamespacePartitionState(CoreasonBaseState):
     """
-    A hermetically sealed, ephemeral execution partition for dynamic dependency resolution.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     partition_id: str = Field(
@@ -1575,7 +2062,16 @@ class EphemeralNamespacePartitionState(CoreasonBaseState):
 
 class ToolManifest(CoreasonBaseState):
     """
-    Declarative mathematical definition of a tool.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     tool_name: str = Field(max_length=2000, description="The exact identifier of the tool.")
@@ -1600,6 +2096,19 @@ class ToolManifest(CoreasonBaseState):
 
 
 class BilateralSLA(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
+
     receiving_tenant_id: str = Field(
         min_length=1,
         pattern="^[a-zA-Z0-9_.:-]+$",
@@ -1633,6 +2142,20 @@ class BilateralSLA(CoreasonBaseState):
 
 
 class FederatedDiscoveryManifest(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
+
     broadcast_endpoints: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
         max_length=1000000000, description="The explicit array of strictly bounded MCP URI broadcast endpoints."
     )
@@ -1649,6 +2172,18 @@ class FederatedDiscoveryManifest(CoreasonBaseState):
 
 
 class ActiveInferenceContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
+
     task_id: str = Field(
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
@@ -1683,6 +2218,20 @@ class ActiveInferenceContract(CoreasonBaseState):
 
 
 class AdjudicationIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Non-monotonic kinetic trigger bounding a formal capability request. Serves as a strictly
+    typed execution coordinate.
+
+    CAUSAL AFFORDANCE: Unlocks targeted execution paths or non-monotonic execution logic via Pearlian do-
+    operators.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Kinetic Execution, Non-Monotonic Trigger, Pearlian Do-Operator, Active Inference
+    """
+
     type: Literal["forced_adjudication"] = Field(
         default="forced_adjudication",
         description="Discriminator for breaking deadlocks within a CouncilTopologyManifest.",
@@ -1707,7 +2256,15 @@ class AdjudicationIntent(CoreasonBaseState):
 
 class AdjudicationReceipt(CoreasonBaseState):
     """
-    Verdict resulting from grading an LLM behavior or output against a rubric.
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
     """
 
     rubric_id: str = Field(
@@ -1727,8 +2284,16 @@ class AdjudicationReceipt(CoreasonBaseState):
 
 class AdversarialSimulationProfile(CoreasonBaseState):
     """
-    A deterministic red-team configuration defining a structural attack vector
-    to continuously validate semantic firewalls and execution bounds.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     simulation_id: str = Field(
@@ -1758,6 +2323,19 @@ class AdversarialSimulationProfile(CoreasonBaseState):
 
 
 class AgentBidIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Non-monotonic kinetic trigger bounding a formal capability request. Serves as a strictly
+    typed execution coordinate.
+
+    CAUSAL AFFORDANCE: Unlocks targeted execution paths or non-monotonic execution logic via Pearlian do-
+    operators.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Kinetic Execution, Non-Monotonic Trigger, Pearlian Do-Operator, Active Inference
+    """
+
     agent_id: str = Field(
         min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$", description="The NodeIdentifierState of the bidder."
     )
@@ -1773,7 +2351,16 @@ class AgentBidIntent(CoreasonBaseState):
 
 class AmbientState(CoreasonBaseState):
     """
-    Lightweight UX signal for UI rendering of progress.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     status_message: str = Field(
@@ -1786,6 +2373,19 @@ class AmbientState(CoreasonBaseState):
 
 
 class AnalogicalMappingTask(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Non-monotonic kinetic trigger bounding a formal capability request. Serves as a strictly
+    typed execution coordinate.
+
+    CAUSAL AFFORDANCE: Unlocks targeted execution paths or non-monotonic execution logic via Pearlian do-
+    operators.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Kinetic Execution, Non-Monotonic Trigger, Pearlian Do-Operator, Active Inference
+    """
+
     task_id: str = Field(
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
@@ -1811,7 +2411,15 @@ class AnalogicalMappingTask(CoreasonBaseState):
 
 class AnchoringPolicy(CoreasonBaseState):
     """
-    The mathematical center of gravity preventing epistemic drift and sycophancy in the swarm.
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
     """
 
     anchor_prompt_hash: str = Field(
@@ -1831,6 +2439,18 @@ type AttestationMechanismProfile = Literal["fido2_webauthn", "zk_snark_groth16",
 
 
 class AuctionPolicy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
+
     auction_type: AuctionMechanismProfile = Field(description="The market mechanism governing the auction.")
     tie_breaker: TieBreakerPolicy = Field(description="The deterministic rule for resolving tied bids.")
     max_bidding_window_ms: int = Field(
@@ -1840,7 +2460,15 @@ class AuctionPolicy(CoreasonBaseState):
 
 class BackpressurePolicy(CoreasonBaseState):
     """
-    Declarative backpressure constraints.
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
     """
 
     max_queue_depth: int = Field(
@@ -1876,11 +2504,33 @@ class BackpressurePolicy(CoreasonBaseState):
 
 
 class BaseIntent(CoreasonBaseState):
-    """Base class for presentation intents."""
+    """
+    AGENT INSTRUCTION: Non-monotonic kinetic trigger bounding a formal capability request. Serves as a strictly
+    typed execution coordinate.
+
+    CAUSAL AFFORDANCE: Unlocks targeted execution paths or non-monotonic execution logic via Pearlian do-
+    operators.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Kinetic Execution, Non-Monotonic Trigger, Pearlian Do-Operator, Active Inference
+    """
 
 
 class BasePanelProfile(CoreasonBaseState):
-    """Base class for Scientific Visualization panels."""
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
 
     panel_id: str = Field(
         min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$", description="Unique identifier for the panel."
@@ -1888,6 +2538,18 @@ class BasePanelProfile(CoreasonBaseState):
 
 
 class BaseStateEvent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
+    """
+
     event_id: str = Field(
         min_length=1,
         max_length=128,
@@ -1902,6 +2564,18 @@ class BaseStateEvent(CoreasonBaseState):
 
 
 class SystemFaultEvent(BaseStateEvent):
+    """
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
+    """
+
     type: Literal["system_fault"] = Field(
         default="system_fault", description="Discriminator type for a system fault event."
     )
@@ -1909,7 +2583,16 @@ class SystemFaultEvent(BaseStateEvent):
 
 class BoundedInterventionScopePolicy(CoreasonBaseState):
     """
-    Constraints bounding human interaction for interventions.
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
     """
 
     allowed_fields: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
@@ -1928,7 +2611,19 @@ class BoundedInterventionScopePolicy(CoreasonBaseState):
 
 
 class BoundedJSONRPCIntent(CoreasonBaseState):
-    """Base schema enforcing rigorous JSON-RPC 2.0 boundaries to prevent DoS attacks."""
+    """
+    AGENT INSTRUCTION: Non-monotonic kinetic trigger bounding a formal capability request. Serves as a strictly
+    typed execution coordinate.
+
+    CAUSAL AFFORDANCE: Unlocks targeted execution paths or non-monotonic execution logic via Pearlian do-
+    operators.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are enforced via @field_validator structural
+    bounds, strictly bounded categorical literals. All field limits must be strictly validated at instantiation to
+    prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Kinetic Execution, Non-Monotonic Trigger, Pearlian Do-Operator, Active Inference
+    """
 
     jsonrpc: Literal["2.0"] = Field(..., description="JSON-RPC version.")
     method: str = Field(..., max_length=1000, description="Method to be invoked.")
@@ -1972,6 +2667,20 @@ class BoundedJSONRPCIntent(CoreasonBaseState):
 
 
 class BrowserDOMState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are enforced via @field_validator structural
+    bounds, strictly bounded categorical literals. All field limits must be strictly validated at instantiation to
+    prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
+
     type: Literal["browser"] = Field(
         default="browser", description="Discriminator for Causal Actuators representing structural shifts."
     )
@@ -2072,8 +2781,17 @@ class BrowserDOMState(CoreasonBaseState):
 
 
 class BypassReceipt(CoreasonBaseState):
-    """The Merkle Null-Op preserving the topological chain of custody when an extraction node is intentionally
-    skipped."""
+    """
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
+    """
 
     artifact_event_id: str = Field(
         max_length=128,
@@ -2096,6 +2814,18 @@ class BypassReceipt(CoreasonBaseState):
 
 
 class CanonicalGroundingReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
+    """
+
     target_database: ExtractionOntologyTarget = Field(
         description="The authoritative vector database or nomenclature system."
     )
@@ -2110,6 +2840,19 @@ class CanonicalGroundingReceipt(CoreasonBaseState):
 
 
 class CausalAttributionState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
+
     source_event_id: str = Field(
         min_length=1,
         max_length=128,
@@ -2124,6 +2867,19 @@ class CausalAttributionState(CoreasonBaseState):
 
 
 class CollectiveIntelligenceProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
+
     synergy_index: float = Field(
         le=1000000000.0,
         description="The mathematical measure of the degree of emergence. A high SI indicates strong positive emergence.",  # noqa: E501
@@ -2139,6 +2895,18 @@ class CollectiveIntelligenceProfile(CoreasonBaseState):
 
 
 class ShapleyAttributionReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
+    """
+
     target_node_id: NodeIdentifierState = Field(description="The agent whose causal influence is being measured.")
     causal_attribution_score: float = Field(
         le=1.0, description="The exact Shapley value (\\phi_i) satisfying efficiency, symmetry, and additivity axioms."
@@ -2155,6 +2923,19 @@ class ShapleyAttributionReceipt(CoreasonBaseState):
 
 
 class CausalExplanationEvent(BaseStateEvent):
+    """
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
+    """
+
     type: Literal["causal_explanation"] = Field(
         default="causal_explanation", description="Discriminator type for a causal explanation event."
     )
@@ -2176,6 +2957,19 @@ class CausalExplanationEvent(BaseStateEvent):
 
 
 class CausalDirectedEdgeState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
+
     source_variable: str = Field(min_length=1, description="The independent variable $X$.")
     target_variable: str = Field(min_length=1, description="The dependent variable $Y$.")
     edge_type: Literal["direct_cause", "confounder", "collider", "mediator"] = Field(
@@ -2185,7 +2979,15 @@ class CausalDirectedEdgeState(CoreasonBaseState):
 
 class CircuitBreakerEvent(CoreasonBaseState):
     """
-    Indicates that a circuit breaker has been tripped for a target node.
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
     """
 
     type: Literal["circuit_breaker_event"] = Field(
@@ -2199,7 +3001,16 @@ class CircuitBreakerEvent(CoreasonBaseState):
 
 class ConstitutionalAmendmentIntent(CoreasonBaseState):
     """
-    Proposed amendment generated in response to normative drift detection.
+    AGENT INSTRUCTION: Non-monotonic kinetic trigger bounding a formal capability request. Serves as a strictly
+    typed execution coordinate.
+
+    CAUSAL AFFORDANCE: Unlocks targeted execution paths or non-monotonic execution logic via Pearlian do-
+    operators.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Kinetic Execution, Non-Monotonic Trigger, Pearlian Do-Operator, Active Inference
     """
 
     type: Literal["constitutional_amendment"] = Field(
@@ -2221,6 +3032,19 @@ class ConstitutionalAmendmentIntent(CoreasonBaseState):
 
 
 class ContinuousMutationPolicy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
+
     mutation_paradigm: Literal["append_only", "merge_on_resolve"] = Field(
         description="Forces non-destructive graph mutations."
     )
@@ -2238,8 +3062,17 @@ class ContinuousMutationPolicy(CoreasonBaseState):
 
 
 class CounterfactualRegretEvent(BaseStateEvent):
-    """A cryptographic record of an agent simulating an alternative timeline to calculate epistemic regret
-    and update its policy."""
+    """
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
+    """
 
     type: Literal["counterfactual_regret"] = Field(
         default="counterfactual_regret", description="Discriminator type for a counterfactual regret event."
@@ -2274,6 +3107,19 @@ class CounterfactualRegretEvent(BaseStateEvent):
 
 
 class CrossSwarmHandshakeState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
+
     handshake_id: str = Field(
         min_length=1,
         max_length=128,
@@ -2299,7 +3145,17 @@ class CrossSwarmHandshakeState(CoreasonBaseState):
 
 
 class CrossoverPolicy(CoreasonBaseState):
-    """The mathematical rules for combining elite agents."""
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
 
     strategy_type: CrossoverMechanismProfile = Field(
         description="The heuristic method for blending successful parent agents."
@@ -2313,6 +3169,18 @@ class CrossoverPolicy(CoreasonBaseState):
 
 
 class CrystallizationPolicy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
+
     min_observations_required: int = Field(
         le=1000000000,
         ge=10,
@@ -2329,7 +3197,15 @@ class CrystallizationPolicy(CoreasonBaseState):
 
 class CustodyReceipt(CoreasonBaseState):
     """
-    Cryptographic state of an agent to ensure full traceability and provenance.
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
     """
 
     model_config = ConfigDict(frozen=True)
@@ -2370,6 +3246,18 @@ class CustodyReceipt(CoreasonBaseState):
 
 
 class DefeasibleAttackEvent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
+    """
+
     attack_id: str = Field(
         min_length=1,
         max_length=128,
@@ -2392,6 +3280,18 @@ class DefeasibleAttackEvent(CoreasonBaseState):
 
 
 class DimensionalProjectionContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
+
     source_model_name: str = Field(max_length=2000, description="The native embedding model of the origin agent.")
     target_model_name: str = Field(max_length=2000, description="The native embedding model of the destination agent.")
     projection_matrix_hash: str = Field(
@@ -2411,7 +3311,19 @@ type DistributionShapeProfile = Literal["gaussian", "uniform", "beta"]
 
 
 class DistributionProfile(CoreasonBaseState):
-    """Profile defining a probability density function."""
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
 
     distribution_type: DistributionShapeProfile = Field(
         description="The mathematical shape of the probability density function."
@@ -2435,7 +3347,15 @@ class DistributionProfile(CoreasonBaseState):
 
 class DiversityPolicy(CoreasonBaseState):
     """
-    Constraints enforcing cognitive heterogeneity.
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
     """
 
     min_adversaries: int = Field(
@@ -2453,6 +3373,19 @@ class DiversityPolicy(CoreasonBaseState):
 
 
 class DocumentLayoutRegionState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
+
     block_id: str = Field(
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
@@ -2468,6 +3401,20 @@ class DocumentLayoutRegionState(CoreasonBaseState):
 
 
 class DocumentLayoutManifest(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
+
     blocks: dict[Annotated[str, StringConstraints(max_length=255)], DocumentLayoutRegionState] = Field(
         max_length=1000000000, description="Dictionary mapping block_ids to their strict spatial definitions."
     )
@@ -2512,6 +3459,18 @@ class DocumentLayoutManifest(CoreasonBaseState):
 
 
 class ContextExpansionPolicy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
+
     expansion_paradigm: Literal["sliding_window", "hierarchical_merge", "document_summary"] = Field(
         description="The mathematical paradigm governing how context is expanded."
     )
@@ -2530,6 +3489,19 @@ class ContextExpansionPolicy(CoreasonBaseState):
 
 
 class TopologicalRetrievalContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
+
     max_hop_depth: int = Field(le=1000000000, ge=1, description="The strictly typed search depth bound for the cDAG.")
     allowed_causal_relationships: list[Literal["causes", "confounds", "correlates_with", "undirected"]] = Field(
         min_length=1, description="The explicit whitelist of permissible causal edges to traverse."
@@ -2543,6 +3515,19 @@ class TopologicalRetrievalContract(CoreasonBaseState):
 
 
 class LatentProjectionIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Non-monotonic kinetic trigger bounding a formal capability request. Serves as a strictly
+    typed execution coordinate.
+
+    CAUSAL AFFORDANCE: Unlocks targeted execution paths or non-monotonic execution logic via Pearlian do-
+    operators.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Kinetic Execution, Non-Monotonic Trigger, Pearlian Do-Operator, Active Inference
+    """
+
     type: Literal["latent_projection"] = Field(
         default="latent_projection", description="Discriminator for RAG projection intent."
     )
@@ -2563,8 +3548,17 @@ class LatentProjectionIntent(CoreasonBaseState):
 
 class DecomposedSubQueryState(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: A continuous latent representation of a fragmented semantic intent (a sub-goal),
-    structurally isolated from the monolithic user prompt.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     sub_query_id: str = Field(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
@@ -2585,6 +3579,20 @@ class DecomposedSubQueryState(CoreasonBaseState):
 
 
 class SemanticDiscoveryIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Non-monotonic kinetic trigger bounding a formal capability request. Serves as a strictly
+    typed execution coordinate.
+
+    CAUSAL AFFORDANCE: Unlocks targeted execution paths or non-monotonic execution logic via Pearlian do-
+    operators.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Kinetic Execution, Non-Monotonic Trigger, Pearlian Do-Operator, Active Inference
+    """
+
     type: Literal["semantic_discovery"] = Field(
         default="semantic_discovery", description="Discriminator for geometric boundary of latent tool discovery."
     )
@@ -2617,8 +3625,17 @@ class SemanticDiscoveryIntent(CoreasonBaseState):
 
 class QueryDecompositionManifest(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: The strict structural Directed Acyclic Graph (DAG) ordering multi-hop
-    information retrieval, mathematically preventing execution cycles and hallucinatory capability generation.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     type: Literal["query_decomposition"] = Field(default="query_decomposition")
@@ -2681,6 +3698,19 @@ class QueryDecompositionManifest(CoreasonBaseState):
 
 
 class DraftingIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Non-monotonic kinetic trigger bounding a formal capability request. Serves as a strictly
+    typed execution coordinate.
+
+    CAUSAL AFFORDANCE: Unlocks targeted execution paths or non-monotonic execution logic via Pearlian do-
+    operators.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Kinetic Execution, Non-Monotonic Trigger, Pearlian Do-Operator, Active Inference
+    """
+
     type: Literal["drafting"] = Field(
         default="drafting", description="Discriminator for requesting specific missing context from a human."
     )
@@ -2697,7 +3727,17 @@ class DraftingIntent(CoreasonBaseState):
 
 
 class DynamicConvergenceSLA(CoreasonBaseState):
-    """Service Level Agreement defining the mathematical conditions for early termination of a reasoning search."""
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
 
     convergence_delta_epsilon: float = Field(
         le=1.0,
@@ -2715,6 +3755,19 @@ class DynamicConvergenceSLA(CoreasonBaseState):
 
 
 class EmbodiedSensoryVectorProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
+
     sensory_modality: Literal["video", "audio", "spatial_telemetry"] = Field(
         description="Multimodal Sensor Fusion and Spatial-Temporal Bindings representing Proprioceptive State and Exteroceptive Vectors."  # noqa: E501
     )
@@ -2732,7 +3785,17 @@ class EmbodiedSensoryVectorProfile(CoreasonBaseState):
 
 
 class BargeInInterruptEvent(BaseStateEvent):
-    """A cryptographic receipt of a continuous multimodal sequence being prematurely severed by an external stimulus."""
+    """
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
+    """
 
     type: Literal["barge_in"] = Field(
         default="barge_in", description="Discriminator type for a barge-in interruption event."
@@ -2764,8 +3827,17 @@ type EncodingChannelProfile = Literal["x", "y", "color", "size", "opacity", "sha
 
 class EnsembleTopologyProfile(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Declarative mapping of concurrent topology branches for test-time superposition.
-    Must map to strict W3C DIDs (NodeIdentifierStates) and provide an explicit wave-collapse opcode.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     concurrent_branch_ids: list[NodeIdentifierState] = Field(
@@ -2784,6 +3856,18 @@ class EnsembleTopologyProfile(CoreasonBaseState):
 
 
 class EpistemicCompressionSLA(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
+
     strict_probability_retention: bool = Field(
         default=True, description="If True, forces the resulting SemanticNodeState to populate its uncertainty_profile."
     )
@@ -2798,6 +3882,19 @@ class EpistemicCompressionSLA(CoreasonBaseState):
 
 
 class EpistemicPromotionEvent(BaseStateEvent):
+    """
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
+    """
+
     type: Literal["epistemic_promotion"] = Field(
         default="epistemic_promotion", description="Discriminator type for an epistemic promotion event."
     )
@@ -2823,7 +3920,15 @@ class EpistemicPromotionEvent(BaseStateEvent):
 
 class EpistemicScanningPolicy(CoreasonBaseState):
     """
-    Policy for epistemic scanning and gap detection.
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
     """
 
     active: bool = Field(description="Whether the epistemic scanner is active.")
@@ -2837,8 +3942,17 @@ class EpistemicScanningPolicy(CoreasonBaseState):
 
 class EpistemicTransmutationTask(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: The strict mathematical boundary governing the reformulation
-    and compression of messy, multi-modal entropy into clean, topologically bounded semantic states.
+    AGENT INSTRUCTION: Non-monotonic kinetic trigger bounding a formal capability request. Serves as a strictly
+    typed execution coordinate.
+
+    CAUSAL AFFORDANCE: Unlocks targeted execution paths or non-monotonic execution logic via Pearlian do-
+    operators.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Kinetic Execution, Non-Monotonic Trigger, Pearlian Do-Operator, Active Inference
     """
 
     task_id: str = Field(
@@ -2883,6 +3997,18 @@ class EpistemicTransmutationTask(CoreasonBaseState):
 
 
 class EscalationContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
+
     uncertainty_escalation_threshold: float = Field(
         ge=0.0,
         le=1.0,
@@ -2902,6 +4028,19 @@ class EscalationContract(CoreasonBaseState):
 
 
 class EscalationIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Non-monotonic kinetic trigger bounding a formal capability request. Serves as a strictly
+    typed execution coordinate.
+
+    CAUSAL AFFORDANCE: Unlocks targeted execution paths or non-monotonic execution logic via Pearlian do-
+    operators.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Kinetic Execution, Non-Monotonic Trigger, Pearlian Do-Operator, Active Inference
+    """
+
     type: Literal["escalation"] = Field(
         default="escalation", description="Discriminator for security or economic boundary overrides."
     )
@@ -2920,6 +4059,18 @@ class EscalationIntent(CoreasonBaseState):
 
 
 class EscrowPolicy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
+
     escrow_locked_magnitude: int = Field(
         le=1000000000,
         ge=0,
@@ -2937,6 +4088,19 @@ class EscrowPolicy(CoreasonBaseState):
 
 
 class EvictionPolicy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
+
     strategy: Literal["fifo", "salience_decay", "summarize"] = Field(
         description="The mathematical heuristic used to select which semantic memories are retracted or compressed."
     )
@@ -2957,6 +4121,19 @@ class EvictionPolicy(CoreasonBaseState):
 
 
 class EvidentiaryWarrantState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
+
     source_event_id: str | None = Field(
         min_length=1,
         max_length=128,
@@ -2977,6 +4154,20 @@ class EvidentiaryWarrantState(CoreasonBaseState):
 
 
 class EpistemicArgumentClaimState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
+
     claim_id: str = Field(
         min_length=1,
         max_length=128,
@@ -3001,7 +4192,18 @@ class EpistemicArgumentClaimState(CoreasonBaseState):
 
 
 class EpistemicArgumentGraphState(CoreasonBaseState):
-    """A Truth Maintenance System (TMS) calculating dialectical justification for non-monotonic belief retraction."""
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
 
     claims: dict[Annotated[str, StringConstraints(max_length=255)], EpistemicArgumentClaimState] = Field(
         max_length=10000, description="Components of an Abstract Argumentation Framework."
@@ -3015,7 +4217,16 @@ class EpistemicArgumentGraphState(CoreasonBaseState):
 
 class ExecutionNodeReceipt(CoreasonBaseState):
     """
-    Cryptographic state of an execution node in a Merkle DAG trace.
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, enforced via @field_validator structural bounds. All field limits must be strictly
+    validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
     """
 
     model_config = ConfigDict(frozen=True)
@@ -3102,14 +4313,33 @@ class ExecutionNodeReceipt(CoreasonBaseState):
 
 
 class FYIIntent(BaseIntent):
-    """Intent indicating the presentation is informational only."""
+    """
+    AGENT INSTRUCTION: Non-monotonic kinetic trigger bounding a formal capability request. Serves as a strictly
+    typed execution coordinate.
+
+    CAUSAL AFFORDANCE: Unlocks targeted execution paths or non-monotonic execution logic via Pearlian do-
+    operators.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Kinetic Execution, Non-Monotonic Trigger, Pearlian Do-Operator, Active Inference
+    """
 
     type: Literal["fyi"] = Field(default="fyi", description="Discriminator for an FYI intent.")
 
 
 class FallbackSLA(CoreasonBaseState):
     """
-    SLA defining bounds on human intervention delays.
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
     """
 
     timeout_seconds: int = Field(le=86400, gt=0, description="The maximum allowed delay for a human intervention.")
@@ -3124,7 +4354,16 @@ class FallbackSLA(CoreasonBaseState):
 
 class FallbackIntent(CoreasonBaseState):
     """
-    Indicates that fallback procedures should be triggered for a target node.
+    AGENT INSTRUCTION: Non-monotonic kinetic trigger bounding a formal capability request. Serves as a strictly
+    typed execution coordinate.
+
+    CAUSAL AFFORDANCE: Unlocks targeted execution paths or non-monotonic execution logic via Pearlian do-
+    operators.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Kinetic Execution, Non-Monotonic Trigger, Pearlian Do-Operator, Active Inference
     """
 
     type: Literal["fallback_intent"] = Field(
@@ -3135,6 +4374,18 @@ class FallbackIntent(CoreasonBaseState):
 
 
 class FalsificationContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
+
     condition_id: str = Field(
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
@@ -3157,6 +4408,19 @@ class FalsificationContract(CoreasonBaseState):
 
 
 class FaultInjectionProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
+
     fault_type: FaultCategoryProfile = Field(description="The specific type of fault to inject.")
     target_node_id: str | None = Field(
         min_length=1,
@@ -3170,8 +4434,16 @@ class FaultInjectionProfile(CoreasonBaseState):
 
 class FederatedCapabilityAttestationReceipt(CoreasonBaseState):
     """
-    An immutable cryptographic receipt proving an agent has the structural authority
-    to query a remote resource.
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
     """
 
     attestation_id: str = Field(
@@ -3200,6 +4472,18 @@ class FederatedCapabilityAttestationReceipt(CoreasonBaseState):
 
 
 class FederatedStateSnapshot(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Exact topological boundary enforcing strict capability parameters and physical execution
+    state.
+
+    CAUSAL AFFORDANCE: Resolves graph constraints and unlocks specific spatial operations or API boundaries.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: DAG Routing, Topographical Component, Capability Definition, Semantic Anchor
+    """
+
     topology_id: str | None = Field(
         min_length=1,
         max_length=128,
@@ -3210,7 +4494,18 @@ class FederatedStateSnapshot(CoreasonBaseState):
 
 
 class FitnessObjectiveProfile(CoreasonBaseState):
-    """A specific objective function to optimize within a generation."""
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
 
     target_metric: str = Field(
         max_length=2000,
@@ -3226,7 +4521,15 @@ class FitnessObjectiveProfile(CoreasonBaseState):
 
 class FormalVerificationContract(CoreasonBaseState):
     """
-    Passive schema defining a mathematical proof of safety invariants.
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
     """
 
     proof_system: Literal["tla_plus", "lean4", "coq", "z3"] = Field(
@@ -3246,7 +4549,17 @@ class FormalVerificationContract(CoreasonBaseState):
 
 class DelegatedCapabilityManifest(CoreasonBaseState):
     """
-    Decentralized capability tickets representing authority delegation.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     capability_id: str = Field(
@@ -3279,7 +4592,15 @@ class DelegatedCapabilityManifest(CoreasonBaseState):
 
 class BudgetExhaustionEvent(BaseStateEvent):
     """
-    Mathematical boundary condition representing economic exhaustion.
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
     """
 
     type: Literal["budget_exhaustion"] = Field(
@@ -3301,7 +4622,15 @@ class BudgetExhaustionEvent(BaseStateEvent):
 
 class TokenBurnReceipt(BaseStateEvent):
     """
-    Lock-free thermodynamic compute tracking receipt.
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
     """
 
     type: Literal["token_burn"] = Field(
@@ -3321,6 +4650,19 @@ class TokenBurnReceipt(BaseStateEvent):
 
 
 class TokenMergingPolicy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
+
     metric: TokenMergeMetric = Field(description="The mathematical metric used to evaluate attention entropy.")
     matching_algorithm: TokenMatchingAlgorithm = Field(
         description="The algorithm used to physically fuse redundant tokens."
@@ -3340,7 +4682,16 @@ class TokenMergingPolicy(CoreasonBaseState):
 
 class GlobalGovernancePolicy(CoreasonBaseState):
     """
-    Global governance bounds for a swarm executing a workflow manifest.
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
     """
 
     mandatory_license_rule: ConstitutionalPolicy
@@ -3379,7 +4730,18 @@ class GlobalGovernancePolicy(CoreasonBaseState):
 
 
 class GenerativeManifoldSLA(CoreasonBaseState):
-    """Mathematical governor for fractal/cyclic graph synthesis."""
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
 
     max_topological_depth: int = Field(
         le=1000000000, ge=1, description="The absolute physical depth limit for recursive encapsulation."
@@ -3400,7 +4762,19 @@ class GenerativeManifoldSLA(CoreasonBaseState):
 
 
 class GlobalSemanticProfile(CoreasonBaseState):
-    """The immutable receipt of Step 1 ingestion acting as a static structural index of the artifact."""
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
 
     artifact_event_id: str = Field(
         max_length=128,
@@ -3424,7 +4798,19 @@ class GlobalSemanticProfile(CoreasonBaseState):
 
 
 class DynamicRoutingManifest(CoreasonBaseState):
-    """The Softmax Router Gate dictating the active execution topology and spot compute allocation."""
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
 
     manifest_id: str = Field(
         max_length=128,
@@ -3476,7 +4862,16 @@ class DynamicRoutingManifest(CoreasonBaseState):
 
 class GovernancePolicy(CoreasonBaseState):
     """
-    Defines a governance policy comprising multiple constitutional rules.
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
     """
 
     policy_name: str = Field(max_length=2000, description="Name of the governance policy.")
@@ -3492,7 +4887,19 @@ class GovernancePolicy(CoreasonBaseState):
 
 
 class GrammarPanelProfile(CoreasonBaseState):
-    """Panel representing a deterministic, declarative visual grammar."""
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
 
     panel_id: str = Field(
         min_length=1,
@@ -3524,6 +4931,18 @@ class GrammarPanelProfile(CoreasonBaseState):
 
 
 class GraphFlatteningPolicy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
+
     node_projection_mode: Literal["wide_columnar", "struct_array"] = Field(
         description="How to flatten SemanticNodeState."
     )
@@ -3536,7 +4955,19 @@ class GraphFlatteningPolicy(CoreasonBaseState):
 
 
 class HTTPTransportProfile(CoreasonBaseState):
-    """Configuration for stateless HTTP-based MCP transport."""
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are enforced via @field_validator structural
+    bounds, strictly bounded categorical literals. All field limits must be strictly validated at instantiation to
+    prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
 
     type: Literal["http"] = Field(default="http", description="Type of transport.")
     uri: HttpUrl = Field(..., description="The HTTP URL endpoint for the stateless connection.")
@@ -3559,6 +4990,19 @@ class HTTPTransportProfile(CoreasonBaseState):
 
 
 class HomomorphicEncryptionProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
+
     fhe_scheme: Literal["ckks", "bgv", "bfv", "tfhe"] = Field(
         description="The specific homomorphic encryption dialect used to encode the ciphertext."
     )
@@ -3573,7 +5017,15 @@ class HomomorphicEncryptionProfile(CoreasonBaseState):
 
 class HypothesisStakeReceipt(CoreasonBaseState):
     """
-    The mathematical record of an agent taking a magnitude/compute position on a specific causal hypothesis.
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
     """
 
     agent_id: Annotated[str, StringConstraints(min_length=1)] = Field(
@@ -3589,6 +5041,19 @@ class HypothesisStakeReceipt(CoreasonBaseState):
 
 
 class InformationalIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Non-monotonic kinetic trigger bounding a formal capability request. Serves as a strictly
+    typed execution coordinate.
+
+    CAUSAL AFFORDANCE: Unlocks targeted execution paths or non-monotonic execution logic via Pearlian do-
+    operators.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Kinetic Execution, Non-Monotonic Trigger, Pearlian Do-Operator, Active Inference
+    """
+
     type: Literal["informational"] = Field(
         default="informational", description="Discriminator for read-only informational handoffs."
     )
@@ -3600,8 +5065,17 @@ class InformationalIntent(CoreasonBaseState):
 
 class TaxonomicNodeState(CoreasonBaseState):
     """
-    A strictly bounded dimensional reduction coordinate representing a single cluster or leaf
-    in the synthesized generative taxonomy (Virtual File System).
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     node_id: str = Field(
@@ -3633,8 +5107,17 @@ class TaxonomicNodeState(CoreasonBaseState):
 
 class GenerativeTaxonomyManifest(CoreasonBaseState):
     """
-    The structural schema representing a synthesized manifold (Virtual File System)
-    that projects high-dimensional dense vectors into a navigable N-ary tree.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     manifest_id: str = Field(
@@ -3666,7 +5149,16 @@ class GenerativeTaxonomyManifest(CoreasonBaseState):
 
 class TaxonomicRestructureIntent(CoreasonBaseState):
     """
-    The active UI-mutation payload for dynamic regrouping across the Hollow Data Plane.
+    AGENT INSTRUCTION: Non-monotonic kinetic trigger bounding a formal capability request. Serves as a strictly
+    typed execution coordinate.
+
+    CAUSAL AFFORDANCE: Unlocks targeted execution paths or non-monotonic execution logic via Pearlian do-
+    operators.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Kinetic Execution, Non-Monotonic Trigger, Pearlian Do-Operator, Active Inference
     """
 
     type: Literal["taxonomic_restructure"] = Field(
@@ -3681,7 +5173,18 @@ class TaxonomicRestructureIntent(CoreasonBaseState):
 
 
 class IntentClassificationReceipt(CoreasonBaseState):
-    """The mathematical output of the routing LLM supporting superposition."""
+    """
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
+    """
 
     primary_intent: ValidRoutingIntent = Field(description="The argmax intent with highest probability.")
     concurrent_intents: dict[ValidRoutingIntent, float] = Field(
@@ -3698,8 +5201,15 @@ class IntentClassificationReceipt(CoreasonBaseState):
 
 class TaxonomicRoutingPolicy(CoreasonBaseState):
     """
-    The deterministic Softmax gate mapping classified operational intents to pre-defined
-    spatial organizing frameworks to prevent token exhaustion.
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
     """
 
     policy_id: str = Field(
@@ -3740,7 +5250,15 @@ type AnyIntent = Annotated[
 
 class InputMappingContract(CoreasonBaseState):
     """
-    Dictates how keys from a parent's shared_state_contract map to a nested topology's state.
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
     """
 
     parent_key: str = Field(max_length=2000, description="The key in the parent's shared state contract.")
@@ -3748,7 +5266,19 @@ class InputMappingContract(CoreasonBaseState):
 
 
 class InsightCardProfile(CoreasonBaseState):
-    """Panel displaying a semantic text summary."""
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are enforced via @field_validator structural
+    bounds, strictly bounded categorical literals. All field limits must be strictly validated at instantiation to
+    prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
 
     panel_id: str = Field(
         min_length=1,
@@ -3795,7 +5325,16 @@ type AnyPanelProfile = Annotated[
 
 class InterventionIntent(CoreasonBaseState):
     """
-    Emitted when an agent needs human approval or further intervention.
+    AGENT INSTRUCTION: Non-monotonic kinetic trigger bounding a formal capability request. Serves as a strictly
+    typed execution coordinate.
+
+    CAUSAL AFFORDANCE: Unlocks targeted execution paths or non-monotonic execution logic via Pearlian do-
+    operators.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Kinetic Execution, Non-Monotonic Trigger, Pearlian Do-Operator, Active Inference
     """
 
     type: Literal["request"] = Field(default="request", description="The type of the intervention payload.")
@@ -3814,6 +5353,19 @@ class InterventionIntent(CoreasonBaseState):
 
 
 class InterventionalCausalTask(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Non-monotonic kinetic trigger bounding a formal capability request. Serves as a strictly
+    typed execution coordinate.
+
+    CAUSAL AFFORDANCE: Unlocks targeted execution paths or non-monotonic execution logic via Pearlian do-
+    operators.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Kinetic Execution, Non-Monotonic Trigger, Pearlian Do-Operator, Active Inference
+    """
+
     task_id: str = Field(
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
@@ -3846,7 +5398,18 @@ class InterventionalCausalTask(CoreasonBaseState):
 
 
 class JSONRPCErrorState(CoreasonBaseState):
-    """JSON-RPC 2.0 Error object."""
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
 
     code: int = Field(..., le=1000000000, description="A Number that indicates the error type that occurred.")
     message: str = Field(
@@ -3862,7 +5425,18 @@ class JSONRPCErrorState(CoreasonBaseState):
 
 
 class JSONRPCErrorResponseState(CoreasonBaseState):
-    """JSON-RPC 2.0 Error Response object."""
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
 
     jsonrpc: Literal["2.0"] = Field(..., description="JSON-RPC version.")
     error: JSONRPCErrorState = Field(..., description="The error object.")
@@ -3883,7 +5457,15 @@ type LifecycleTriggerEvent = Literal[
 
 class InterventionPolicy(CoreasonBaseState):
     """
-    Proactive oversight hook bound to a specific lifecycle event.
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
     """
 
     trigger: LifecycleTriggerEvent = Field(
@@ -3901,7 +5483,17 @@ class InterventionPolicy(CoreasonBaseState):
 
 class BaseNodeProfile(CoreasonBaseState):
     """
-    Base configuration for any execution node in a topology.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, enforced via @field_validator structural bounds. All field limits must be strictly
+    validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     description: str = Field(
@@ -3960,7 +5552,16 @@ class BaseNodeProfile(CoreasonBaseState):
 
 class HumanNodeProfile(BaseNodeProfile):
     """
-    A node representing a human participant in the workflow.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     type: Literal["human"] = Field(default="human", description="Discriminator for a Human node.")
@@ -3972,7 +5573,16 @@ class HumanNodeProfile(BaseNodeProfile):
 
 class MemoizedNodeProfile(BaseNodeProfile):
     """
-    A passive structural interlock representing a historically executed graph branch.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     type: Literal["memoized"] = Field(default="memoized", description="Discriminator for a Memoized node.")
@@ -3986,13 +5596,34 @@ class MemoizedNodeProfile(BaseNodeProfile):
 
 class SystemNodeProfile(BaseNodeProfile):
     """
-    A node representing a deterministic system capability.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     type: Literal["system"] = Field(default="system", description="Discriminator for a System node.")
 
 
 class LineageWatermarkReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
+    """
+
     watermark_protocol: Literal["merkle_dag", "statistical_token", "homomorphic_mac"] = Field(
         description="The mathematical methodology used to embed the chain of custody."
     )
@@ -4010,8 +5641,16 @@ class LineageWatermarkReceipt(CoreasonBaseState):
 
 class MCPCapabilityWhitelistPolicy(CoreasonBaseState):
     """
-    A zero-trust boundary defining exactly which JSON-RPC capabilities
-    the execution node is authorized to mount from the remote server.
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
     """
 
     allowed_tools: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
@@ -4042,7 +5681,17 @@ class MCPCapabilityWhitelistPolicy(CoreasonBaseState):
 
 class MCPServerManifest(CoreasonBaseState):
     """
-    The structural contract for mounting an external Model Context Protocol server.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     server_uri: str = Field(
@@ -4074,8 +5723,16 @@ class MCPServerManifest(CoreasonBaseState):
 
 class KineticSeparationPolicy(CoreasonBaseState):
     """
-    A strict bipartite graph constraint mathematically preventing toxic tool combinations
-    from existing in the same causal execution chain.
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
     """
 
     policy_id: str = Field(
@@ -4104,7 +5761,17 @@ class KineticSeparationPolicy(CoreasonBaseState):
 
 class ActionSpaceManifest(CoreasonBaseState):
     """
-    A curated environment of tools accessible to an agent or node.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     action_space_id: str = Field(
@@ -4157,9 +5824,16 @@ class ActionSpaceManifest(CoreasonBaseState):
 
 class ProceduralMetadataManifest(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: A Level-1 Epistemic Discovery Surface acting as a
-    progressive disclosure pointer to a massive EpistemicSOPManifest in cold storage.
-    Prevents context window token exhaustion.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     metadata_id: str = Field(
@@ -4186,8 +5860,17 @@ class ProceduralMetadataManifest(CoreasonBaseState):
 
 class OntologicalSurfaceProjectionManifest(CoreasonBaseState):
     """
-    A mathematically bounded, declarative subgraph of all ToolManifests and
-    MCPServerManifests currently valid for the agent's ProfileIdentifierState.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     projection_id: str = Field(
@@ -4222,13 +5905,35 @@ class OntologicalSurfaceProjectionManifest(CoreasonBaseState):
 
 
 class MCPClientIntent(BoundedJSONRPCIntent):
-    """Strict JSON-RPC 2.0 structure for MCP client messages."""
+    """
+    AGENT INSTRUCTION: Non-monotonic kinetic trigger bounding a formal capability request. Serves as a strictly
+    typed execution coordinate.
+
+    CAUSAL AFFORDANCE: Unlocks targeted execution paths or non-monotonic execution logic via Pearlian do-
+    operators.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Kinetic Execution, Non-Monotonic Trigger, Pearlian Do-Operator, Active Inference
+    """
 
     method: Literal["mcp.ui.emit_intent"] = Field(..., le=1000000000, description="Method for intent bubbling.")
 
 
 class MCPPromptReferenceState(CoreasonBaseState):
-    """A dynamic reference to an MCP-provided prompt template."""
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
 
     server_id: str = Field(
         ...,
@@ -4254,7 +5959,19 @@ class MCPPromptReferenceState(CoreasonBaseState):
 
 
 class MCPResourceManifest(CoreasonBaseState):
-    """A collection of Latent State resource URIs provided by a specific MCP server."""
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
 
     server_id: str = Field(
         ...,
@@ -4279,7 +5996,17 @@ type MCPTransportProtocolProfile = Literal["stdio", "sse", "http"]
 
 class MCPClientBindingProfile(CoreasonBaseState):
     """
-    Binding configuration for a Model Context Protocol (MCP) server.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     server_uri: str = Field(max_length=2000, description="The URI or command path to the MCP server.")
@@ -4299,7 +6026,19 @@ class MCPClientBindingProfile(CoreasonBaseState):
 
 
 class MacroGridProfile(CoreasonBaseState):
-    """A layout matrix containing a strict array of panels."""
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
 
     layout_matrix: list[list[Annotated[str, StringConstraints(max_length=255)]]] = Field(
         max_length=1000000000, description="A matrix defining the layout structure, using panel IDs."
@@ -4323,6 +6062,19 @@ type GeometricMarkProfile = Literal["point", "line", "area", "bar", "rect", "arc
 
 
 class MarketContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
+
     minimum_collateral: float = Field(
         le=1000000000.0, ge=0.0, description="The minimum amount of token collateral held in escrow."
     )
@@ -4340,7 +6092,17 @@ class MarketContract(CoreasonBaseState):
 
 class MarketResolutionState(CoreasonBaseState):
     """
-    The resolution state of an algorithmic prediction market.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     market_id: Annotated[str, StringConstraints(min_length=1)] = Field(
@@ -4363,6 +6125,19 @@ class MarketResolutionState(CoreasonBaseState):
 
 
 class MechanisticAuditContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
+
     trigger_conditions: list[Literal["on_tool_call", "on_belief_mutation", "on_quarantine", "on_falsification"]] = (
         Field(
             min_length=1,
@@ -4389,6 +6164,18 @@ class MechanisticAuditContract(CoreasonBaseState):
 
 
 class EpistemicProvenanceReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
+    """
+
     extracted_by: NodeIdentifierState = Field(
         description="The Content Identifier (CID) of the agent node that extracted this payload."
     )
@@ -4415,6 +6202,19 @@ class EpistemicProvenanceReceipt(CoreasonBaseState):
 
 
 class MigrationContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
+
     contract_id: str = Field(
         min_length=1,
         max_length=128,
@@ -4446,7 +6246,17 @@ class MigrationContract(CoreasonBaseState):
 
 
 class MultimodalArtifactReceipt(CoreasonBaseState):
-    """AGENT INSTRUCTION: The root Genesis Block for an unstructured document entering the Merkle-DAG."""
+    """
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
+    """
 
     artifact_id: str = Field(
         min_length=1,
@@ -4469,7 +6279,17 @@ class MultimodalArtifactReceipt(CoreasonBaseState):
 
 
 class MutationPolicy(CoreasonBaseState):
-    """Constraints governing random heuristic mutations."""
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
 
     mutation_rate: float = Field(
         ge=0.0,
@@ -4486,8 +6306,17 @@ class MutationPolicy(CoreasonBaseState):
 
 class NDimensionalTensorManifest(CoreasonBaseState):
     """
-    Cryptographic shadow of an N-Dimensional spatial or mathematical array.
-    Facilitating the routing of multi-dimensional compute without passing raw bytes.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     structural_type: TensorStructuralFormatProfile = Field(..., description="Structural type of the tensor elements.")
@@ -4520,6 +6349,19 @@ class NDimensionalTensorManifest(CoreasonBaseState):
 
 
 class NeuralAuditAttestationReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
+    """
+
     audit_id: str = Field(
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
@@ -4546,9 +6388,15 @@ class NeuralAuditAttestationReceipt(CoreasonBaseState):
 
 class NeuroSymbolicHandoffContract(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: The structural boundary for deterministic Query Rewriting.
-    Forces the LLM to transmutate ambiguous natural language (NLP) into rigid,
-    provable formal grammar (e.g., Z3, Lean4, SQL) for external solver execution.
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
     """
 
     handoff_id: str = Field(
@@ -4572,6 +6420,18 @@ class NeuroSymbolicHandoffContract(CoreasonBaseState):
 
 
 class NormativeDriftEvent(BaseStateEvent):
+    """
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
+    """
+
     type: Literal["normative_drift"] = Field(
         default="normative_drift", description="Discriminator type for a normative drift event."
     )
@@ -4594,6 +6454,18 @@ class NormativeDriftEvent(BaseStateEvent):
 
 
 class ObservabilityPolicy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
+
     traces_sampled: bool = Field(
         default=True, description="Whether the orchestrator must record telemetry for this topology."
     )
@@ -4601,6 +6473,19 @@ class ObservabilityPolicy(CoreasonBaseState):
 
 
 class OntologicalHandshakeReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
+    """
+
     handshake_id: str = Field(
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
@@ -4629,7 +6514,15 @@ class OntologicalHandshakeReceipt(CoreasonBaseState):
 
 class OutputMappingContract(CoreasonBaseState):
     """
-    Dictates how keys from a nested topology's state map back to a parent's shared_state_contract.
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
     """
 
     child_key: str = Field(max_length=2000, description="The key in the nested topology's state contract.")
@@ -4638,7 +6531,17 @@ class OutputMappingContract(CoreasonBaseState):
 
 class CompositeNodeProfile(BaseNodeProfile):
     """
-    A node that encapsulates a nested workflow topology.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     type: Literal["composite"] = Field(default="composite", description="Discriminator for a Composite node.")
@@ -4659,7 +6562,16 @@ class CompositeNodeProfile(BaseNodeProfile):
 
 class OverrideIntent(CoreasonBaseState):
     """
-    Dictatorial oversight override payload.
+    AGENT INSTRUCTION: Non-monotonic kinetic trigger bounding a formal capability request. Serves as a strictly
+    typed execution coordinate.
+
+    CAUSAL AFFORDANCE: Unlocks targeted execution paths or non-monotonic execution logic via Pearlian do-
+    operators.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Kinetic Execution, Non-Monotonic Trigger, Pearlian Do-Operator, Active Inference
     """
 
     type: Literal["override"] = Field(default="override", description="The type of the intervention payload.")
@@ -4676,7 +6588,18 @@ class OverrideIntent(CoreasonBaseState):
 
 
 class PeftAdapterContract(CoreasonBaseState):
-    """Declarative contract for dynamically mounting a Parameter-Efficient Fine-Tuning (PEFT) adapter."""
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
 
     adapter_id: str = Field(
         min_length=1,
@@ -4719,6 +6642,18 @@ class PeftAdapterContract(CoreasonBaseState):
 
 
 class PersistenceCommitReceipt(BaseStateEvent):
+    """
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
+    """
+
     type: Literal["persistence_commit"] = Field(
         default="persistence_commit", description="Discriminator type for a persistence commit receipt."
     )
@@ -4739,8 +6674,17 @@ class PersistenceCommitReceipt(BaseStateEvent):
 
 class PredictionMarketState(CoreasonBaseState):
     """
-    The state of the Automated Market Maker (AMM) using Robin Hanson's
-    Logarithmic Market Scoring Rule (LMSR) to ensure infinite liquidity.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     market_id: Annotated[str, StringConstraints(min_length=1)] = Field(
@@ -4774,6 +6718,18 @@ class PredictionMarketState(CoreasonBaseState):
 
 
 class PredictiveEntropySLA(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
+
     metric: EntropyMetric = Field(
         default="semantic_entropy",
         description="The specific mathematical uncertainty metric used to evaluate the latent space.",
@@ -4788,13 +6744,38 @@ class PredictiveEntropySLA(CoreasonBaseState):
 
 
 class PresentationManifest(CoreasonBaseState):
-    """An envelope wrapping a grid presentation and its intent."""
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
 
     intent: AnyPresentationIntent = Field(description="The reason an agent is presenting this data to a human.")
     grid: MacroGridProfile = Field(description="The grid of panels being presented.")
 
 
 class EpistemicSOPManifest(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
+
     sop_id: str = Field(
         min_length=1,
         max_length=128,
@@ -4829,6 +6810,18 @@ class EpistemicSOPManifest(CoreasonBaseState):
 
 
 class ProcessRewardContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
+
     convergence_sla: DynamicConvergenceSLA | None = Field(
         default=None,
         description="The dynamic circuit breaker that halts the search when PRM variance converges, preventing VRAM waste.",  # noqa: E501
@@ -4859,7 +6852,17 @@ type QoSClassificationProfile = Literal["critical", "high", "interactive", "back
 
 class ComputeProvisioningIntent(CoreasonBaseState):
     """
-    A request by a swarm to provision resources based on requirements.
+    AGENT INSTRUCTION: Non-monotonic kinetic trigger bounding a formal capability request. Serves as a strictly
+    typed execution coordinate.
+
+    CAUSAL AFFORDANCE: Unlocks targeted execution paths or non-monotonic execution logic via Pearlian do-
+    operators.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Kinetic Execution, Non-Monotonic Trigger, Pearlian Do-Operator, Active Inference
     """
 
     max_budget: float = Field(
@@ -4881,7 +6884,16 @@ class ComputeProvisioningIntent(CoreasonBaseState):
 
 class QuarantineIntent(CoreasonBaseState):
     """
-    Indicates that a target node should be quarantined.
+    AGENT INSTRUCTION: Non-monotonic kinetic trigger bounding a formal capability request. Serves as a strictly
+    typed execution coordinate.
+
+    CAUSAL AFFORDANCE: Unlocks targeted execution paths or non-monotonic execution logic via Pearlian do-
+    operators.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Kinetic Execution, Non-Monotonic Trigger, Pearlian Do-Operator, Active Inference
     """
 
     type: Literal["quarantine_intent"] = Field(
@@ -4899,7 +6911,19 @@ type AnyResilienceIntent = Annotated[
 
 
 class SSETransportProfile(CoreasonBaseState):
-    """Configuration for remote SSE-based MCP transport."""
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are enforced via @field_validator structural
+    bounds, strictly bounded categorical literals. All field limits must be strictly validated at instantiation to
+    prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
 
     type: Literal["sse"] = Field(default="sse", description="Type of transport.")
     uri: HttpUrl = Field(..., description="The HTTP URL endpoint for the SSE connection.")
@@ -4918,6 +6942,19 @@ class SSETransportProfile(CoreasonBaseState):
 
 
 class SalienceProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
+
     baseline_importance: float = Field(
         ge=0.0, le=1.0, description="The starting importance score of this latent state from 0.0 to 1.0."
     )
@@ -4931,7 +6968,15 @@ type ScaleTypeProfile = Literal["linear", "log", "time", "ordinal", "nominal"]
 
 class SelfCorrectionPolicy(CoreasonBaseState):
     """
-    Policy for self-correction and iterative refinement.
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
     """
 
     max_loops: int = Field(ge=0, le=50, description="The maximum number of self-correction loops allowed.")
@@ -4939,6 +6984,19 @@ class SelfCorrectionPolicy(CoreasonBaseState):
 
 
 class SemanticFirewallPolicy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
+
     max_input_tokens: int = Field(
         le=1000000000, gt=0, description="The absolute physical ceiling of tokens allowed in a single ingress payload."
     )
@@ -4958,7 +7016,16 @@ class SemanticFirewallPolicy(CoreasonBaseState):
 
 class InformationFlowPolicy(CoreasonBaseState):
     """
-    Mathematical Payload Loss Prevention (PLP) contract that bounds the graph.
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
     """
 
     policy_id: str = Field(
@@ -4994,7 +7061,15 @@ class InformationFlowPolicy(CoreasonBaseState):
 
 class SimulationConvergenceSLA(CoreasonBaseState):
     """
-    The statistical limits of the sandbox simulation.
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
     """
 
     max_monte_carlo_rollouts: int = Field(
@@ -5010,6 +7085,18 @@ class SimulationConvergenceSLA(CoreasonBaseState):
 
 
 class SimulationEscrowContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
+
     locked_magnitude: int = Field(
         le=1000000000,
         gt=0,
@@ -5018,6 +7105,18 @@ class SimulationEscrowContract(CoreasonBaseState):
 
 
 class ExogenousEpistemicEvent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
+    """
+
     shock_id: str = Field(
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
@@ -5045,6 +7144,18 @@ class ExogenousEpistemicEvent(CoreasonBaseState):
 
 
 class SpanEvent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
+    """
+
     name: str = Field(max_length=2000, description="The semantic name of the event.")
     timestamp_unix_nano: int = Field(
         ge=0, le=253402300799000000000, description="The precise temporal execution point."
@@ -5055,6 +7166,19 @@ class SpanEvent(CoreasonBaseState):
 
 
 class ExecutionSpanReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
+    """
+
     trace_id: str = Field(
         min_length=1,
         max_length=128,
@@ -5098,7 +7222,19 @@ class ExecutionSpanReceipt(CoreasonBaseState):
 
 
 class SpatialKinematicActionIntent(CoreasonBaseState):
-    """A mathematical declaration of an OS-level pointer or interaction trajectory."""
+    """
+    AGENT INSTRUCTION: Non-monotonic kinetic trigger bounding a formal capability request. Serves as a strictly
+    typed execution coordinate.
+
+    CAUSAL AFFORDANCE: Unlocks targeted execution paths or non-monotonic execution logic via Pearlian do-
+    operators.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Kinetic Execution, Non-Monotonic Trigger, Pearlian Do-Operator, Active Inference
+    """
 
     action_type: Literal["click", "double_click", "drag_and_drop", "scroll", "hover", "keystroke"] = Field(
         description="The specific kinematic interaction paradigm."
@@ -5147,7 +7283,15 @@ class SpatialKinematicActionIntent(CoreasonBaseState):
 
 class StateContract(CoreasonBaseState):
     """
-    A strict Cryptographic State Contract (Typed Blackboard) for multi-agent state sharing.
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
     """
 
     schema_definition: dict[Annotated[str, StringConstraints(max_length=255)], Any] = Field(
@@ -5161,7 +7305,15 @@ class StateContract(CoreasonBaseState):
 
 class OntologicalAlignmentPolicy(CoreasonBaseState):
     """
-    The pre-flight execution gate forcing agents to mathematically align their latent semantics.
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
     """
 
     min_cosine_similarity: float = Field(
@@ -5179,7 +7331,18 @@ class OntologicalAlignmentPolicy(CoreasonBaseState):
 
 
 class StdioTransportProfile(CoreasonBaseState):
-    """Configuration for local Stdio-based MCP transport."""
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
 
     type: Literal["stdio"] = Field(default="stdio", description="Type of transport.")
     command: str = Field(..., max_length=2000, description="The command executable to run (e.g., 'node', 'python').")
@@ -5197,7 +7360,19 @@ type MCPTransportProfile = StdioTransportProfile | SSETransportProfile | HTTPTra
 
 
 class MCPServerBindingProfile(CoreasonBaseState):
-    """Configuration definition for connecting to an MCP Server."""
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
 
     server_id: str = Field(
         ...,
@@ -5221,6 +7396,20 @@ class MCPServerBindingProfile(CoreasonBaseState):
 
 
 class SteadyStateHypothesisState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
+
     expected_max_latency: float = Field(
         le=1000000000.0, ge=0.0, description="The expected maximum latency under normal conditions."
     )
@@ -5239,6 +7428,18 @@ class SteadyStateHypothesisState(CoreasonBaseState):
 
 
 class StreamInterruptionPolicy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
+
     kinematic_reversal_threshold: int = Field(
         default=3,
         ge=1,
@@ -5256,6 +7457,20 @@ class StreamInterruptionPolicy(CoreasonBaseState):
 
 
 class ChaosExperimentTask(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Non-monotonic kinetic trigger bounding a formal capability request. Serves as a strictly
+    typed execution coordinate.
+
+    CAUSAL AFFORDANCE: Unlocks targeted execution paths or non-monotonic execution logic via Pearlian do-
+    operators.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Kinetic Execution, Non-Monotonic Trigger, Pearlian Do-Operator, Active Inference
+    """
+
     experiment_id: str = Field(
         min_length=1,
         max_length=128,
@@ -5279,6 +7494,20 @@ class ChaosExperimentTask(CoreasonBaseState):
 
 
 class StructuralCausalGraphProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
+
     observed_variables: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
         max_length=1000000000, description="The nodes in the DAG that the agent can passively measure."
     )
@@ -5298,6 +7527,19 @@ class StructuralCausalGraphProfile(CoreasonBaseState):
 
 
 class HypothesisGenerationEvent(BaseStateEvent):
+    """
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
+    """
+
     type: Literal["hypothesis"] = Field(
         default="hypothesis", description="Discriminator for a hypothesis generation event."
     )
@@ -5332,7 +7574,18 @@ class HypothesisGenerationEvent(BaseStateEvent):
 
 
 class SyntheticGenerationProfile(CoreasonBaseState):
-    """Authoritative blueprint for external fuzzing and simulation engines."""
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
 
     profile_id: str = Field(
         max_length=128,
@@ -5346,7 +7599,16 @@ class SyntheticGenerationProfile(CoreasonBaseState):
 
 class System1ReflexPolicy(CoreasonBaseState):
     """
-    Policy for fast, intuitive system 1 thinking.
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
     """
 
     confidence_threshold: float = Field(
@@ -5364,8 +7626,17 @@ class System1ReflexPolicy(CoreasonBaseState):
 
 class System2RemediationIntent(CoreasonBaseState):
     """
-    A passive structural envelope that deterministically maps a kinetic execution error
-    (e.g., a Pydantic ValidationError) into a structurally rigid System 2 correction directive.
+    AGENT INSTRUCTION: Non-monotonic kinetic trigger bounding a formal capability request. Serves as a strictly
+    typed execution coordinate.
+
+    CAUSAL AFFORDANCE: Unlocks targeted execution paths or non-monotonic execution logic via Pearlian do-
+    operators.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Kinetic Execution, Non-Monotonic Trigger, Pearlian Do-Operator, Active Inference
     """
 
     fault_id: str = Field(
@@ -5397,6 +7668,19 @@ class TamperFaultEvent(ValueError):  # noqa: N818
 
 
 class TaskAnnouncementIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Non-monotonic kinetic trigger bounding a formal capability request. Serves as a strictly
+    typed execution coordinate.
+
+    CAUSAL AFFORDANCE: Unlocks targeted execution paths or non-monotonic execution logic via Pearlian do-
+    operators.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Kinetic Execution, Non-Monotonic Trigger, Pearlian Do-Operator, Active Inference
+    """
+
     task_id: str = Field(
         min_length=1,
         max_length=128,
@@ -5416,6 +7700,19 @@ class TaskAnnouncementIntent(CoreasonBaseState):
 
 
 class TaskAwardReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
+    """
+
     task_id: str = Field(
         min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$", description="The identifier of the resolved task."
     )
@@ -5440,6 +7737,20 @@ class TaskAwardReceipt(CoreasonBaseState):
 
 
 class AuctionState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
+
     announcement: TaskAnnouncementIntent = Field(description="The original call for proposals.")
     bids: list[AgentBidIntent] = Field(default_factory=list, description="The array of received bids.")
     award: TaskAwardReceipt | None = Field(
@@ -5465,7 +7776,15 @@ type TelemetryContextProfile = dict[
 
 class LogEvent(CoreasonBaseState):
     """
-    An out-of-band telemetry log manifest.
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
     """
 
     timestamp: float = Field(ge=0.0, le=253402300799.0, description="The UNIX timestamp of the log event.")
@@ -5480,7 +7799,15 @@ class LogEvent(CoreasonBaseState):
 
 class SpanTraceReceipt(CoreasonBaseState):
     """
-    An execution window span trace.
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
     """
 
     span_id: str = Field(
@@ -5509,6 +7836,20 @@ class SpanTraceReceipt(CoreasonBaseState):
 
 
 class TemporalBoundsProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
+
     valid_from: float | None = Field(
         le=1000000000.0, default=None, ge=0.0, description="The UNIX timestamp when this coordinate became true."
     )
@@ -5527,7 +7868,19 @@ class TemporalBoundsProfile(CoreasonBaseState):
 
 
 class NegativeHeuristicProfile(CoreasonBaseState):
-    """AGENT INSTRUCTION: Rigid symbolic constraint ledger for explicitly declared user exclusions."""
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
 
     forbidden_semantic_clusters: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
         description="Explicit array of ontological clusters the orchestrator is mathematically forbidden from traversing.",  # noqa: E501
@@ -5559,6 +7912,19 @@ class NegativeHeuristicProfile(CoreasonBaseState):
 
 
 class TerminalBufferState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
+
     type: Literal["terminal"] = Field(
         default="terminal", description="Discriminator for Causal Actuators on structural buffers."
     )
@@ -5593,6 +7959,19 @@ type AnyToolchainState = Annotated[
 
 
 class TheoryOfMindSnapshot(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Exact topological boundary enforcing strict capability parameters and physical execution
+    state.
+
+    CAUSAL AFFORDANCE: Resolves graph constraints and unlocks specific spatial operations or API boundaries.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: DAG Routing, Topographical Component, Capability Definition, Semantic Anchor
+    """
+
     target_agent_id: (
         NodeIdentifierState
         | Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
@@ -5621,7 +8000,17 @@ class TheoryOfMindSnapshot(CoreasonBaseState):
 
 
 class ToolInvocationEvent(BaseStateEvent):
-    """A Priori Kinetic Commitment representing the Pearlian Do-Operator prior to network execution."""
+    """
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
+    """
 
     type: Literal["tool_invocation"] = Field(
         default="tool_invocation", description="Discriminator type for a tool invocation event."
@@ -5640,6 +8029,20 @@ class ToolInvocationEvent(BaseStateEvent):
 
 
 class TraceExportManifest(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
+
     batch_id: str = Field(
         min_length=1,
         max_length=128,
@@ -5657,6 +8060,18 @@ class TraceExportManifest(CoreasonBaseState):
 
 
 class TruthMaintenancePolicy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
+
     rebuttal_contract: DefeasibleRebuttalContract | None = Field(
         default=None,
         description="Governs exactly how an incoming correction zeroes out a previous node in the Epistemic Argument Graph without destroying the historical ledger.",  # noqa: E501
@@ -5685,8 +8100,16 @@ class TruthMaintenancePolicy(CoreasonBaseState):
 
 class UtilityJustificationGraphReceipt(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Immutable cryptographic receipt of multi-dimensional utility routing.
-    If variance threshold falls below delta, fallback to deterministic ensemble superposition.
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
     """
 
     optimizing_vectors: dict[
@@ -5729,6 +8152,19 @@ class UtilityJustificationGraphReceipt(CoreasonBaseState):
 
 
 class VectorEmbeddingState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
+
     vector_base64: str = Field(
         pattern="^[A-Za-z0-9+/]*={0,2}$", max_length=5000000, description="The base64-encoded dense vector array."
     )
@@ -5740,8 +8176,16 @@ class VectorEmbeddingState(CoreasonBaseState):
 
 class VisualAffordancePatchState(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: A continuous zero-shot interactive UI element linking a
-    strict spatial geometry to its latent semantic vector and interaction probability.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     patch_id: str = Field(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
@@ -5762,8 +8206,17 @@ class VisualAffordancePatchState(CoreasonBaseState):
 
 class ViewportRasterState(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: A purely visual spatial execution perimeter for DOM-less environments
-    (VDI, Canvas, Mobile Streaming).
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     type: Literal["viewport_raster"] = Field(default="viewport_raster")
@@ -5788,9 +8241,16 @@ class ViewportRasterState(CoreasonBaseState):
 
 class LatentIntentTrajectoryState(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Tracks the continuous POMDP belief distribution of the active user query.
-    Acts as the mathematical ledger for Query Reformulation, mapping how the high-dimensional intent vector
-    evolves as the agent gathers new observations.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     current_intent_vector: VectorEmbeddingState = Field(
@@ -5805,7 +8265,18 @@ class LatentIntentTrajectoryState(CoreasonBaseState):
 
 
 class EpistemicTransitionMatrixProfile(CoreasonBaseState):
-    """AGENT INSTRUCTION: SOTA HMM matrix mapping current context to anticipated future intent sub-goals."""
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
 
     anticipated_subgoals: dict[
         Annotated[str, StringConstraints(max_length=255)], Annotated[float, Field(ge=0.0, le=1.0)]
@@ -5814,8 +8285,16 @@ class EpistemicTransitionMatrixProfile(CoreasonBaseState):
 
 class CognitiveCritiqueProfile(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: A declarative, dense supervision vector generated
-    by a Process Reward Model (PRM) to steer intermediate test-time reasoning.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     reasoning_trace_hash: str = Field(
@@ -5837,8 +8316,15 @@ class CognitiveCritiqueProfile(CoreasonBaseState):
 
 class KineticBudgetPolicy(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: The mathematical boundary forcing the collapse of
-    probability waves and wide-search trees as physical compute resources deplete.
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
     """
 
     exploration_decay_curve: Literal["linear", "exponential", "step"] = Field(
@@ -5858,8 +8344,15 @@ class KineticBudgetPolicy(CoreasonBaseState):
 
 class EpistemicEscalationContract(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: The strict mathematical agreement governing when
-    an agent is authorized to expand its test-time compute allocation based on measured doubt.
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
     """
 
     baseline_entropy_threshold: float = Field(
@@ -5880,6 +8373,19 @@ class EpistemicEscalationContract(CoreasonBaseState):
 
 
 class EpistemicExtractionPolicy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
+
     strategy_tier: ComputeStrategyTier = Field(
         description="The mandatory hardware execution mode for this extraction pass."
     )
@@ -5900,8 +8406,15 @@ class EpistemicExtractionPolicy(CoreasonBaseState):
 
 class FederatedPeftContract(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: The physical and temporal bounding constraints
-    for hot-swapping low-rank adapter tensors into GPU memory.
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
     """
 
     adapter_merkle_root: str = Field(
@@ -5926,6 +8439,19 @@ class FederatedPeftContract(CoreasonBaseState):
 
 
 class SemanticEdgeState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
+
     edge_id: str = Field(
         min_length=1,
         max_length=128,
@@ -5967,6 +8493,20 @@ class SemanticEdgeState(CoreasonBaseState):
 
 
 class SemanticNodeState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
+
     node_id: str = Field(
         min_length=1,
         max_length=128,
@@ -6014,7 +8554,17 @@ class SemanticNodeState(CoreasonBaseState):
 
 
 class VerifiableCredentialPresentationReceipt(CoreasonBaseState):
-    """A cryptographic proof of clearance or capability presented to a zero-trust orchestrator."""
+    """
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
+    """
 
     presentation_format: Literal["jwt_vc", "ldp_vc", "sd_jwt", "zkp_vc"] = Field(
         description="The exact cryptographic standard used to encode this credential presentation."
@@ -6034,7 +8584,16 @@ class VerifiableCredentialPresentationReceipt(CoreasonBaseState):
 
 class AgentAttestationReceipt(CoreasonBaseState):
     """
-    Cryptographic identity passport and AI-BOM for the agent.
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
     """
 
     training_lineage_hash: str = Field(
@@ -6064,8 +8623,16 @@ class AgentAttestationReceipt(CoreasonBaseState):
 
 class AdversarialKinematicProfile(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: The neural parameterization instructing the external physics engine how to
-    inject stochastic biomechanical noise (Fitts's Law) into continuous trajectories to defeat anomaly classifiers.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     stochastic_noise_variance: float = Field(
@@ -6090,7 +8657,17 @@ class AdversarialKinematicProfile(CoreasonBaseState):
 
 class AgentNodeProfile(BaseNodeProfile):
     """
-    A node representing an autonomous agent.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     description: str = Field(
@@ -6193,7 +8770,16 @@ type AnyNodeProfile = Annotated[
 
 class BaseTopologyManifest(CoreasonBaseState):
     """
-    Base configuration for any workflow topology.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     epistemic_enforcement: TruthMaintenancePolicy | None = Field(
@@ -6225,7 +8811,17 @@ class BaseTopologyManifest(CoreasonBaseState):
 
 class CouncilTopologyManifest(BaseTopologyManifest):
     """
-    A Council workflow topology involving multiple voting members and an adjudicator.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     type: Literal["council"] = Field(default="council", description="Discriminator for a Council topology.")
@@ -6267,7 +8863,17 @@ class CouncilTopologyManifest(BaseTopologyManifest):
 
 class DAGTopologyManifest(BaseTopologyManifest):
     """
-    A Directed Acyclic Graph workflow topology.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     type: Literal["dag"] = Field(default="dag", description="Discriminator for a DAG topology.")
@@ -6329,7 +8935,16 @@ class DAGTopologyManifest(BaseTopologyManifest):
 
 class DigitalTwinTopologyManifest(BaseTopologyManifest):
     """
-    An isolated sandbox graph representing a Digital Twin.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     type: Literal["digital_twin"] = Field(
@@ -6352,7 +8967,17 @@ class DigitalTwinTopologyManifest(BaseTopologyManifest):
 
 class EvaluatorOptimizerTopologyManifest(BaseTopologyManifest):
     """
-    A formalized Actor-Critic micro-topology enforcing strict, finite generation-evaluation-revision cycles.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     type: Literal["evaluator_optimizer"] = Field(
@@ -6382,7 +9007,17 @@ class EvaluatorOptimizerTopologyManifest(BaseTopologyManifest):
 
 class EvolutionaryTopologyManifest(BaseTopologyManifest):
     """
-    An Evolutionary workflow topology that mutates and breeds agents over generations.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     type: Literal["evolutionary"] = Field(
@@ -6408,7 +9043,16 @@ class EvolutionaryTopologyManifest(BaseTopologyManifest):
 
 class SMPCTopologyManifest(BaseTopologyManifest):
     """
-    A Secure Multi-Party Computation topology.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     type: Literal["smpc"] = Field(default="smpc", description="Discriminator for SMPC Topology.")
@@ -6431,7 +9075,17 @@ class SMPCTopologyManifest(BaseTopologyManifest):
 
 class SwarmTopologyManifest(BaseTopologyManifest):
     """
-    A dynamic Swarm workflow topology.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     type: Literal["swarm"] = Field(default="swarm", description="Discriminator for a Swarm topology.")
@@ -6469,7 +9123,17 @@ class SwarmTopologyManifest(BaseTopologyManifest):
 
 class AdversarialMarketTopologyManifest(CoreasonBaseState):
     """
-    A Zero-Cost Macro abstraction that deterministically compiles into a Red/Blue team CouncilTopologyManifest.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     type: Literal["macro_adversarial"] = Field(
@@ -6513,7 +9177,17 @@ class AdversarialMarketTopologyManifest(CoreasonBaseState):
 
 class ConsensusFederationTopologyManifest(CoreasonBaseState):
     """
-    A Zero-Cost Macro abstraction compiling into a standard PBFT CouncilTopologyManifest.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     type: Literal["macro_federation"] = Field(
@@ -6563,7 +9237,17 @@ type AnyTopologyManifest = Annotated[
 
 class WorkflowManifest(CoreasonBaseState):
     """
-    The root envelope for an orchestrated workflow payload.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     genesis_provenance: EpistemicProvenanceReceipt = Field(
@@ -6631,8 +9315,15 @@ class WorkflowManifest(CoreasonBaseState):
 
 class WetwareAttestationContract(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: This model represents a SOTA cryptographic receipt
-    proving a human in the loop physically authorized a state transition.
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
     """
 
     mechanism: AttestationMechanismProfile = Field(
@@ -6653,7 +9344,16 @@ class WetwareAttestationContract(CoreasonBaseState):
 
 class InterventionReceipt(CoreasonBaseState):
     """
-    Emitted by a human or oversight AI to resume the swarm.
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
     """
 
     type: Literal["verdict"] = Field(default="verdict", description="The type of the intervention payload.")
@@ -6687,7 +9387,18 @@ type AnyInterventionState = Annotated[
 
 
 class EpistemicQuarantineSnapshot(CoreasonBaseState):
-    """Represents the Epistemic Quarantine, partitioned from the Committed Epistemic Ledger."""
+    """
+    AGENT INSTRUCTION: Exact topological boundary enforcing strict capability parameters and physical execution
+    state.
+
+    CAUSAL AFFORDANCE: Resolves graph constraints and unlocks specific spatial operations or API boundaries.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: DAG Routing, Topographical Component, Capability Definition, Semantic Anchor
+    """
 
     active_information_state: "InformationStateManifest | None" = Field(
         default=None, description="The continuous POMDP epistemic coordinate currently driving active inference."
@@ -6730,6 +9441,18 @@ class EpistemicQuarantineSnapshot(CoreasonBaseState):
 
 
 class ZeroKnowledgeReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
+    """
+
     proof_protocol: Literal["zk-SNARK", "zk-STARK", "plonk", "bulletproofs"] = Field(
         description="The mathematical dialect of the cryptographic proof."
     )
@@ -6758,6 +9481,19 @@ class ZeroKnowledgeReceipt(CoreasonBaseState):
 
 
 class BeliefMutationEvent(BaseStateEvent):
+    """
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, enforced via @field_validator structural bounds, strictly bounded categorical
+    literals. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
+    """
+
     type: Literal["belief_mutation"] = Field(
         default="belief_mutation", description="Discriminator type for a Belief Assertion event."
     )
@@ -6807,6 +9543,19 @@ class BeliefMutationEvent(BaseStateEvent):
 
 
 class ObservationEvent(BaseStateEvent):
+    """
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are enforced via @field_validator structural
+    bounds, strictly bounded categorical literals. All field limits must be strictly validated at instantiation to
+    prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
+    """
+
     type: Literal["observation"] = Field(
         default="observation", description="Discriminator type for an observation event."
     )
@@ -6850,8 +9599,15 @@ class ObservationEvent(BaseStateEvent):
 
 class EpistemicTelemetryEvent(BaseStateEvent):
     """
-    The cryptographic receipt of human-in-the-loop interaction tracking used to calculate
-    Epistemic Regret and iteratively tune retrieval gradients without explicit human grading.
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
     """
 
     type: Literal["epistemic_telemetry"] = Field(
@@ -6878,6 +9634,19 @@ class EpistemicTelemetryEvent(BaseStateEvent):
 
 
 class EpistemicAxiomState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
+
     source_concept_id: str = Field(
         min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$", description="CID of the origin node."
     )
@@ -6888,11 +9657,37 @@ class EpistemicAxiomState(CoreasonBaseState):
 
 
 class EpistemicSeedInjectionPolicy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
+
     similarity_threshold_alpha: float = Field(ge=0.0, le=1.0)
     relation_diversity_bucket_size: int = Field(le=1000000000, gt=0)
 
 
 class EpistemicChainGraphState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
+
     chain_id: str = Field(max_length=128, pattern="^[a-zA-Z0-9_.:-]+$", min_length=1)
     syntactic_roots: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(min_length=1)
     semantic_leaves: list[EpistemicAxiomState]
@@ -6910,6 +9705,18 @@ class EpistemicChainGraphState(CoreasonBaseState):
 
 
 class CognitivePredictionReceipt(BaseStateEvent):
+    """
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
+    """
+
     type: Literal["cognitive_prediction"] = Field(default="cognitive_prediction")
     source_chain_id: str = Field(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
     target_source_concept: str = Field(max_length=2000)
@@ -6917,6 +9724,19 @@ class CognitivePredictionReceipt(BaseStateEvent):
 
 
 class EpistemicAxiomVerificationReceipt(BaseStateEvent):
+    """
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
+    """
+
     type: Literal["epistemic_axiom_verification"] = Field(default="epistemic_axiom_verification")
     source_prediction_id: str = Field(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
     sequence_similarity_score: float = Field(ge=0.0, le=1.0)
@@ -6930,6 +9750,20 @@ class EpistemicAxiomVerificationReceipt(BaseStateEvent):
 
 
 class EpistemicDomainGraphManifest(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
+
     graph_id: str = Field(max_length=128, pattern="^[a-zA-Z0-9_.:-]+$", min_length=1)
     verified_axioms: list[EpistemicAxiomState] = Field(min_length=1)
 
@@ -6946,6 +9780,19 @@ class EpistemicDomainGraphManifest(CoreasonBaseState):
 
 
 class EpistemicTopologicalProofManifest(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
+
     proof_id: str = Field(
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
@@ -6958,6 +9805,18 @@ class EpistemicTopologicalProofManifest(CoreasonBaseState):
 
 
 class CognitiveSamplingPolicy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
+
     max_complexity_hops: int = Field(le=1000000000, ge=1, description="The absolute physical limit on path length N.")
     inverse_frequency_smoothing_epsilon: float = Field(
         le=1.0, default=1.0, description="The epsilon constant ensuring unsampled nodes are mathematically prioritized."
@@ -6965,6 +9824,19 @@ class CognitiveSamplingPolicy(CoreasonBaseState):
 
 
 class CognitiveReasoningTraceState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
+
     trace_id: str = Field(
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
@@ -6984,6 +9856,19 @@ class CognitiveReasoningTraceState(CoreasonBaseState):
 
 
 class CognitiveDualVerificationReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
+    """
+
     primary_verifier_id: NodeIdentifierState = Field(description="The DID of the primary evaluating agent.")
     secondary_verifier_id: NodeIdentifierState = Field(
         description="The DID of the independent secondary evaluating agent."
@@ -7002,6 +9887,19 @@ class CognitiveDualVerificationReceipt(CoreasonBaseState):
 
 
 class EpistemicGroundedTaskManifest(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
+
     task_id: str = Field(
         max_length=128, pattern="^[a-zA-Z0-9_.:-]+$", min_length=1, description="The cryptographic CID of the task."
     )
@@ -7014,6 +9912,20 @@ class EpistemicGroundedTaskManifest(CoreasonBaseState):
 
 
 class EpistemicCurriculumManifest(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
+
     curriculum_id: str = Field(
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
@@ -7031,6 +9943,18 @@ class EpistemicCurriculumManifest(CoreasonBaseState):
 
 
 class CognitiveFormatContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
+
     require_think_tags: bool = Field(
         default=True, description="Forces the inclusion of structural XML tags to isolate the reasoning trace."
     )
@@ -7042,6 +9966,18 @@ class CognitiveFormatContract(CoreasonBaseState):
 
 
 class EpistemicRewardModelPolicy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
+
     policy_id: str = Field(
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
@@ -7068,6 +10004,19 @@ class EpistemicRewardModelPolicy(CoreasonBaseState):
 
 
 class CognitiveRewardEvaluationReceipt(BaseStateEvent):
+    """
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism, strictly bounded categorical literals. All field limits must be strictly validated at
+    instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
+    """
+
     type: Literal["cognitive_reward_evaluation"] = Field(default="cognitive_reward_evaluation")
     source_generation_id: str = Field(
         min_length=1,
@@ -7099,6 +10048,18 @@ class CognitiveRewardEvaluationReceipt(BaseStateEvent):
 
 
 class CognitiveDetailedBalanceContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
+
     target_balance_epsilon: float = Field(
         le=1.0, ge=0.0, description="The mathematical tolerance for the detailed balance constraint."
     )
@@ -7111,6 +10072,18 @@ class CognitiveDetailedBalanceContract(CoreasonBaseState):
 
 
 class EpistemicFlowStateReceipt(BaseStateEvent):
+    """
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
+    """
+
     type: Literal["epistemic_flow_state"] = Field(default="epistemic_flow_state")
     source_trajectory_id: str = Field(
         min_length=1,
@@ -7129,6 +10102,18 @@ class EpistemicFlowStateReceipt(BaseStateEvent):
 
 
 class TopologicalRewardContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Rigid mathematical boundary enforcing systemic constraints globally. Dictates execution
+    limits and mathematical thresholds.
+
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Mathematical Boundary, Slashing Penalty, Truth Maintenance, Systemic Perimeter
+    """
+
     min_link_criticality_score: float = Field(
         ge=0.0, le=1.0, description="The lower bound for Random Walk with Restart (RWR) reachability."
     )
@@ -7141,6 +10126,18 @@ class TopologicalRewardContract(CoreasonBaseState):
 
 
 class DifferentiableLogicConstraint(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Exact topological boundary enforcing strict capability parameters and physical execution
+    state.
+
+    CAUSAL AFFORDANCE: Resolves graph constraints and unlocks specific spatial operations or API boundaries.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by intrinsic Pydantic field
+    limits. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: DAG Routing, Topographical Component, Capability Definition, Semantic Anchor
+    """
+
     constraint_id: str = Field(max_length=128, pattern="^[a-zA-Z0-9_.:-]+$", min_length=1)
     formal_syntax_smt: str = Field(
         max_length=2000, description="The formal SMT-LIB or Lean4 language representation of the symbolic rule."
@@ -7156,8 +10153,16 @@ class DifferentiableLogicConstraint(CoreasonBaseState):
 
 class InformationStateManifest(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: The unified epistemic coordinate merging probabilistic intent trajectories
-    with deterministic symbolic constraints.
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are enforced via @field_validator structural
+    bounds. All field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
     """
 
     manifest_id: str = Field(
@@ -7182,7 +10187,17 @@ class InformationStateManifest(CoreasonBaseState):
 
 
 class IntentTransitionEvent(BaseStateEvent):
-    """AGENT INSTRUCTION: Cryptographic receipt of a shift in the user's underlying information state goal."""
+    """
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
+    """
 
     type: Literal["intent_transition"] = Field(default="intent_transition", description="Discriminator type.")
     previous_state_hash: str | None = Field(
@@ -7195,7 +10210,17 @@ class IntentTransitionEvent(BaseStateEvent):
 
 
 class MDPTransitionEvent(BaseStateEvent):
-    """AGENT INSTRUCTION: The rigid, cryptographic logging of a physical Markov Decision Process transition. Binds the $(S_t, A_t, R_{t+1}, S_{t+1})$ tuple for RL tracing."""  # noqa: E501
+    """
+    AGENT INSTRUCTION: Mathematically defined coordinate on the Merkle-DAG representing an immutable historical
+    fact. Initializes as a frozen state vector.
+
+    CAUSAL AFFORDANCE: Appends a frozen historical point to the epistemic ledger, mutating the state graph.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals. All
+    field limits must be strictly validated at instantiation to prevent epistemic contagion.
+
+    MCP ROUTING TRIGGERS: Append-Only Ledger, Merkle-DAG Coordinate, Cryptographic Receipt, Epistemic History
+    """
 
     type: Literal["mdp_transition"] = Field(default="mdp_transition")
     source_state_event_id: str = Field(
@@ -7250,8 +10275,19 @@ type AnyStateEvent = Annotated[
 
 
 class EpistemicLedgerState(CoreasonBaseState):
-    """The Committed Epistemic Ledger (crystallized truth), completely partitioned from volatile working context
-    or Epistemic Quarantine."""
+    """
+    AGENT INSTRUCTION: Declarative and frozen snapshot representing N-dimensional geometry at a specific point in
+    time. Structurally projects active coordinates.
+
+    CAUSAL AFFORDANCE: Provides the baseline descriptive geometry and frozen boundaries for downstream workflow
+    traversal.
+
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are constrained by @model_validator hooks for
+    exact graph determinism. All field limits must be strictly validated at instantiation to prevent epistemic
+    contagion.
+
+    MCP ROUTING TRIGGERS: Declarative Geometry, Spatial Coordinate, N-Dimensional Snapshot, Topology Profile
+    """
 
     history: list[AnyStateEvent] = Field(
         max_length=10000,
