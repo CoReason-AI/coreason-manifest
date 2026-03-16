@@ -1484,6 +1484,24 @@ class TemporalCheckpointState(CoreasonBaseState):
 
 
 class ThoughtBranchState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A declarative, frozen snapshot of a discrete Markov Decision Process
+    (MDP) state representing a single coordinate within a non-monotonic reasoning tree. As
+    a ...State suffix, this is a frozen N-dimensional coordinate.
+
+    CAUSAL AFFORDANCE: Tracks a localized reasoning trajectory, enabling the orchestrator's
+    Process Reward Model (PRM) to score the branch and dictate if the traversal should
+    recursively backtrack or continue. Tree reconstruction is enabled via the optional
+    parent_branch_id.
+
+    EPISTEMIC BOUNDS: The mathematical validity of the branch is continuously clamped by
+    prm_score (optional, ge=0.0, le=1.0, default=None). The node is cryptographically
+    anchored to the execution tree via latent_content_hash (strict SHA-256 pattern
+    ^[a-f0-9]{64}$). The branch_id is locked to a 128-char CID.
+
+    MCP ROUTING TRIGGERS: Markov Decision Process, Process Reward Model, Reasoning Node,
+    Heuristic Search, Backtracking
+    """
     branch_id: str = Field(
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
@@ -1512,6 +1530,24 @@ class ThoughtBranchState(CoreasonBaseState):
 
 
 class LatentScratchpadReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: An append-only, cryptographically frozen coordinate representing an
+    Ephemeral Epistemic Quarantine used for Monte Carlo Tree Search (MCTS) or Beam Search.
+    As a ...Receipt suffix, this is an append-only coordinate on the Merkle-DAG.
+
+    CAUSAL AFFORDANCE: Isolates exploratory trajectories (ThoughtBranchState) from the
+    immutable EpistemicLedgerState, allowing the orchestrator to collapse probability waves
+    (via resolution_branch_id) and prune dead-ends without causal contamination.
+
+    EPISTEMIC BOUNDS: Two @model_validators enforce integrity: (1) verify_referential_
+    integrity confirms resolution_branch_id and all discarded_branches exist within
+    explored_branches; (2) sort_arrays deterministically sorts both explored_branches
+    (by branch_id) and discarded_branches for RFC 8785 Canonical Hashing.
+    total_latent_tokens is hard-capped (ge=0, le=1000000000).
+
+    MCP ROUTING TRIGGERS: Monte Carlo Tree Search, Beam Search, Epistemic Quarantine,
+    Probability Wave Collapse, State-Space Exploration
+    """
     trace_id: str = Field(
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
@@ -3208,6 +3244,22 @@ class EpistemicTransmutationTask(CoreasonBaseState):
 
 
 class EscalationContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A rigid mathematical agreement governing when an agent is authorized
+    to expand its test-time compute allocation (System 2 thinking) based on measured doubt.
+    As a ...Contract suffix, this object defines rigid mathematical boundaries.
+
+    CAUSAL AFFORDANCE: Physically unlocks the LatentScratchpadReceipt, granting the agent
+    a budget of hidden tokens to execute a non-monotonic search tree (MCTS or Beam Search).
+
+    EPISTEMIC BOUNDS: Mathematically bounded by uncertainty_escalation_threshold (ge=0.0,
+    le=1.0). The computation is physically capped by max_latent_tokens_budget (gt=0,
+    le=1000000000) and max_test_time_compute_ms (gt=0, le=86400000) to prevent infinite
+    loops and VRAM exhaustion.
+
+    MCP ROUTING TRIGGERS: Test-Time Compute, System 2 Thinking, Epistemic Uncertainty,
+    Non-Monotonic Escalation, Token Budgeting
+    """
     uncertainty_escalation_threshold: float = Field(
         ge=0.0,
         le=1.0,
@@ -7880,6 +7932,23 @@ class CognitiveSamplingPolicy(CoreasonBaseState):
 
 
 class CognitiveReasoningTraceState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A declarative, frozen snapshot of a continuous proof trace resulting
+    from a successfully resolved non-monotonic search, projecting internal System 2 thinking
+    into the observable graph. As a ...State suffix, this is a frozen N-dimensional
+    coordinate.
+
+    CAUSAL AFFORDANCE: Binds the raw, unstructured Chain-of-Thought (trace_payload) to a
+    formal EpistemicTopologicalProofManifest (source_proof_id), injecting the internal
+    monologue into the verifiable DAG for downstream reward shaping (GRPO).
+
+    EPISTEMIC BOUNDS: The token_length is restricted (ge=0, le=1000000000). The textual
+    reasoning is physically bounded to max_length=100000 to prevent context window
+    explosion. The trace_id is locked to a 128-char CID.
+
+    MCP ROUTING TRIGGERS: Chain of Thought, Non-Monotonic Trace, Proof Crystallization,
+    Latent Monologue, Verifiable Reasoning
+    """
     trace_id: str = Field(
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
