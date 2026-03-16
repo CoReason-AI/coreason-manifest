@@ -11,6 +11,7 @@
 from coreason_manifest.spec.ontology import (
     CognitiveFormatContract,
     CognitiveRewardEvaluationReceipt,
+    ConstrainedDecodingPolicy,
     EpistemicAxiomState,
     EpistemicRewardModelPolicy,
 )
@@ -53,7 +54,12 @@ def test_cognitive_reward_evaluation_receipt_inherits_base_state_event() -> None
 
 def test_epistemic_reward_model_policy_initialization() -> None:
     # Prove EpistemicRewardModelPolicy initializes successfully and properly nests the CognitiveFormatContract.
-    format_contract = CognitiveFormatContract(require_think_tags=True, final_answer_regex="^Final Answer: .*$")
+    decoding_policy = ConstrainedDecodingPolicy(
+        enforcement_strategy="fsm_logit_mask", compiler_backend="outlines", terminate_on_eos_leak=True
+    )
+    format_contract = CognitiveFormatContract(
+        require_think_tags=True, final_answer_regex="^Final Answer: .*$", decoding_policy=decoding_policy
+    )
 
     policy = EpistemicRewardModelPolicy(
         policy_id="test_policy", reference_graph_id="ref_graph", format_contract=format_contract, beta_path_weight=0.5

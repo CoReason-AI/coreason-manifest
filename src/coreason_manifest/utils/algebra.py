@@ -745,6 +745,12 @@ class ManifestSemanticRegistry:
             description="Outcomes for SMT solvers.",
             semantics=ontology.CORE_SMT_SOLVER_SEMANTICS,
         ),
+        "mcp://coreason/semantics/grammar_enforcement": SemanticResource(
+            uri="mcp://coreason/semantics/grammar_enforcement",
+            name="Core Grammar Enforcement Strategies",
+            description="Mechanistic strategies for LLM tokenizer logit masking and constrained decoding.",
+            semantics=ontology.CORE_GRAMMAR_ENFORCEMENT_SEMANTICS,
+        ),
     }
 
     @classmethod
