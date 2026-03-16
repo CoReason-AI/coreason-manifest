@@ -1017,7 +1017,24 @@ class ConsensusPolicy(CoreasonBaseState):
 
 class RedactionPolicy(CoreasonBaseState):
     """
-    A specific rule for algorithmic payload sanitization.
+    AGENT INSTRUCTION: Defines a deterministic Data Sanitization heuristic mapped to a
+    specific InformationClassificationProfile (e.g., Bell-LaPadula clearance levels). As a
+    ...Policy suffix, this object defines rigid mathematical boundaries that the orchestrator
+    must enforce globally.
+
+    CAUSAL AFFORDANCE: Executes a rigid regex-bounded search-and-replace algorithm via
+    target_regex_pattern to mutate or mask toxic data payloads, substituting matches with a
+    safe replacement_token. The action (SanitizationActionIntent) dictates the exact
+    sanitization method.
+
+    EPISTEMIC BOUNDS: The target_regex_pattern is strictly capped at max_length=200 to
+    mathematically prevent ReDoS (Regular Expression Denial of Service) CPU exhaustion. A
+    secondary target_pattern (max_length=2000) provides a broader semantic entity match. The
+    optional context_exclusion_zones array (max_length=100) is deterministically sorted by
+    the @model_validator.
+
+    MCP ROUTING TRIGGERS: Data Sanitization, Regular Expression DoS Prevention,
+    Bell-LaPadula Model, Masking Heuristic, Algorithmic Redaction
     """
 
     rule_id: str = Field(
@@ -2292,7 +2309,22 @@ class CrystallizationPolicy(CoreasonBaseState):
 
 class CustodyReceipt(CoreasonBaseState):
     """
-    Cryptographic state of an agent to ensure full traceability and provenance.
+    AGENT INSTRUCTION: A cryptographically frozen historical fact representing the successful
+    execution of an InformationFlowPolicy redaction on the Merkle-DAG. Enforced as fully
+    immutable via ConfigDict(frozen=True). As a ...Receipt suffix, this is an append-only
+    coordinate that the LLM must never hallucinate a mutation to.
+
+    CAUSAL AFFORDANCE: Unlocks strict audit compliance by mathematically mapping the optional
+    toxic pre_redaction_hash to the mandatory safe post_redaction_hash, proving
+    non-repudiation via the applied_policy_id.
+
+    EPISTEMIC BOUNDS: Temporal geometry is strictly clamped to redaction_timestamp_unix_nano
+    (ge=0, le=253402300799000000000). Both hashes are locked to immutable SHA-256 hexadecimal
+    bounds (^[a-f0-9]{64}$). The pre_redaction_hash is optional (default=None) for cases
+    where raw toxic data must not be stored.
+
+    MCP ROUTING TRIGGERS: Chain of Custody, Cryptographic Provenance, Merkle-DAG Audit,
+    Non-Repudiation, Data Isomorphism
     """
 
     model_config = ConfigDict(frozen=True)
@@ -5057,6 +5089,23 @@ class SelfCorrectionPolicy(CoreasonBaseState):
 
 
 class SemanticFirewallPolicy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Implements an execution-layer Semantic Firewall guarding against
+    adversarial control-flow overrides and prompt injection attacks. As a ...Policy suffix,
+    this object defines rigid mathematical boundaries that the orchestrator must enforce
+    globally.
+
+    CAUSAL AFFORDANCE: Intercepts and physically severs incoming observation topologies if
+    their classification matches forbidden_intents, executing the deterministic
+    action_on_violation (Literal["drop", "quarantine", "redact"]).
+
+    EPISTEMIC BOUNDS: VRAM exhaustion is mathematically prevented by capping max_input_tokens
+    (gt=0, le=1000000000). The forbidden_intents array is deterministically sorted by the
+    @model_validator to preserve RFC 8785 canonical hashing.
+
+    MCP ROUTING TRIGGERS: Semantic Firewall, Prompt Injection Defense, Adversarial Override,
+    Zero-Trust Perimeter, Control-Flow Hijacking
+    """
     max_input_tokens: int = Field(
         le=1000000000, gt=0, description="The absolute physical ceiling of tokens allowed in a single ingress payload."
     )
@@ -5076,7 +5125,22 @@ class SemanticFirewallPolicy(CoreasonBaseState):
 
 class InformationFlowPolicy(CoreasonBaseState):
     """
-    Mathematical Payload Loss Prevention (PLP) contract that bounds the graph.
+    AGENT INSTRUCTION: Establishes the macroscopic Payload Loss Prevention (PLP) and
+    Lattice-Based Information Flow Control (IFC) bounds across the entire execution graph.
+    As a ...Policy suffix, this object defines rigid mathematical boundaries that the
+    orchestrator must enforce globally.
+
+    CAUSAL AFFORDANCE: Projects a unified defensive mesh that aggregates RedactionPolicy
+    rules, an optional SemanticFirewallPolicy intercept, and tensor-level SaeLatentPolicy
+    firewalls to comprehensively sanitize all graph edges. The active toggle controls
+    whether enforcement is live.
+
+    EPISTEMIC BOUNDS: Ensures absolute deterministic evaluation by utilizing a
+    @model_validator to physically sort the rules array by rule_id and the latent_firewalls
+    array by target_feature_index, guaranteeing an invariant Merkle root.
+
+    MCP ROUTING TRIGGERS: Information Flow Control, Payload Loss Prevention, Lattice-Based
+    Security, Biba Integrity Model, Defense-in-Depth
     """
 
     policy_id: str = Field(
