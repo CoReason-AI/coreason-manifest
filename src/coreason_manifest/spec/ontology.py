@@ -10330,7 +10330,11 @@ class ConstrainedDecodingPolicy(CoreasonBaseState):
     compiler_backend: Literal["outlines", "xgrammar", "sglang", "lmql", "guidance", "llama_cpp", "agnostic"] = Field(
         description="The C++/CUDA backend used to compile the CFG or Regex into a DFA/PDA."
     )
-    formal_grammar_string: str | None = Field(default=None, max_length=50000)
+    formal_grammar_string: str | None = Field(
+        default=None,
+        max_length=50000,
+        description="The raw LMQL query string, Guidance program, or EBNF grammar. Required if the enforcement_strategy is not standard JSON/Regex masking.",
+    )
     terminate_on_eos_leak: bool = Field(
         default=True,
         description="If True, mathematically forces the engine to halt if the LLM attempts to generate an EOS token before the FSM reaches an accepting state.",
@@ -10338,9 +10342,14 @@ class ConstrainedDecodingPolicy(CoreasonBaseState):
 
     @model_validator(mode="after")
     def validate_grammar_requirements(self) -> Self:
+        """
+        AGENT INSTRUCTION: Mathematically prove the execution requirements for the chosen compiler backend.
+        If a generative routing layer expects a formal grammar (LMQL, Guidance, EBNF),
+        it is physically impossible to construct the structural bounding mask without the underlying definition string.
+        """
         if (
             self.enforcement_strategy in {"lmql_query", "guidance_program", "ebnf_grammar"}
-            and not self.formal_grammar_string
+            and self.formal_grammar_string is None
         ):
             raise ValueError(
                 f"formal_grammar_string must be provided when enforcement_strategy is '{self.enforcement_strategy}'"
@@ -10374,7 +10383,7 @@ class CognitiveFormatContract(CoreasonBaseState):
     final_answer_regex: str | None = Field(
         max_length=2000,
         default="^Final Answer: .*$",
-        description="The strict regular expression the model must satisfy to yield a valid discrete classification.",
+        description="The strict regular expression the model must satisfy to yield a valid discrete classification. Optional because LMQL/Guidance do not use standard regex.",
     )
     decoding_policy: ConstrainedDecodingPolicy = Field(
         description="The mandatory hardware-level execution limits for token masking."
@@ -10382,6 +10391,11 @@ class CognitiveFormatContract(CoreasonBaseState):
 
     @model_validator(mode="after")
     def resolve_contract_conflicts(self) -> Self:
+        """
+        AGENT INSTRUCTION: Ensure disjoint routing policies are not simultaneously requested.
+        LMQL and Guidance implement regex masking natively within the compiled grammar string.
+        Applying a separate downstream regex filter causes unresolvable compilation conflicts in the DFA.
+        """
         if self.decoding_policy.enforcement_strategy == "lmql_query" and self.final_answer_regex is not None:
             raise ValueError(
                 "Regex constraints must be embedded directly inside the LMQL grammar string when using 'lmql_query'."

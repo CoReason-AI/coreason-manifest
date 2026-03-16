@@ -16,9 +16,11 @@ from pydantic import ValidationError
 from coreason_manifest.spec.ontology import (
     ActivationSteeringContract,
     AdjudicationRubricProfile,
+    CognitiveFormatContract,
     ComputeEngineProfile,
     ComputeRateContract,
     ConsensusPolicy,
+    ConstrainedDecodingPolicy,
     CoreasonBaseState,
     DefeasibleCascadeEvent,
     DynamicLayoutManifest,
@@ -261,6 +263,48 @@ def test_redaction_policy_sorting() -> None:
 
 
 # --- 8. Missing specific validators coverage ---
+
+
+def test_constrained_decoding_policy_lmql_missing_string() -> None:
+    with pytest.raises(
+        ValidationError, match=r"formal_grammar_string must be provided when enforcement_strategy is 'lmql_query'"
+    ):
+        ConstrainedDecodingPolicy(
+            enforcement_strategy="lmql_query",
+            compiler_backend="lmql",
+            formal_grammar_string=None,
+        )
+
+
+def test_cognitive_format_contract_regex_conflict() -> None:
+    policy = ConstrainedDecodingPolicy(
+        enforcement_strategy="lmql_query",
+        compiler_backend="lmql",
+        formal_grammar_string='SELECT "Hello World"',
+    )
+    with pytest.raises(
+        ValidationError,
+        match=r"Regex constraints must be embedded directly inside the LMQL grammar string when using 'lmql_query'.",
+    ):
+        CognitiveFormatContract(
+            require_think_tags=False,
+            final_answer_regex="^Hello.*$",
+            decoding_policy=policy,
+        )
+
+
+def test_cognitive_format_contract_valid_lmql() -> None:
+    policy = ConstrainedDecodingPolicy(
+        enforcement_strategy="lmql_query",
+        compiler_backend="lmql",
+        formal_grammar_string='SELECT "Hello World"',
+    )
+    contract = CognitiveFormatContract(
+        require_think_tags=False,
+        final_answer_regex=None,
+        decoding_policy=policy,
+    )
+    assert contract.final_answer_regex is None
 
 
 @given(
