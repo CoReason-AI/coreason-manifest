@@ -1624,8 +1624,8 @@ class StateDifferentialManifest(CoreasonBaseState):
     (ge=0, le=1000000000), physically preventing logical clock integer overflow during
     prolonged swarm execution cycles.
 
-    MCP ROUTING TRIGGERS: CRDT, Vector Clock, Lamport Timestamp, Eventual Consistency,
-    Last-Writer-Wins
+    MCP ROUTING TRIGGERS: Conflict-Free Replicated Data Types, Lamport Logical Clock,
+    Vector Clock, Eventual Consistency, Last-Writer-Wins
     """
 
     diff_id: str = Field(
@@ -2980,22 +2980,22 @@ class ConstitutionalAmendmentIntent(CoreasonBaseState):
 
 class ContinuousMutationPolicy(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Implements Stream Processing and Micro-Batching heuristics for
-    continuous, high-velocity graph updates without violating Eventual Consistency.
-    As a ...Policy suffix, this defines rigid mathematical boundaries.
+    AGENT INSTRUCTION: Implements Queueing Theory and Micro-Batching Stream Processing
+    heuristics for continuous, high-velocity graph updates without violating Eventual
+    Consistency. As a ...Policy suffix, this defines rigid mathematical boundaries.
 
-    CAUSAL AFFORDANCE: Dictates how the orchestrator buffers and commits volatile
-    state differentials to the EpistemicLedgerState. The mutation_paradigm
-    Literal ["append_only", "merge_on_resolve"] controls whether edges are strictly
-    appended or deterministically merged.
+    CAUSAL AFFORDANCE: Dictates the thermodynamic flow of the orchestrator, determining
+    exactly when to buffer and when to force-commit volatile StateMutationIntent
+    matrices to the EpistemicLedgerState via the mutation_paradigm
+    Literal ["append_only", "merge_on_resolve"].
 
-    EPISTEMIC BOUNDS: Physically prevents OOM crashes by enforcing
-    max_uncommitted_edges (gt=0, le=1000000000). The @model_validator
-    enforce_append_only_vram_bound further restricts this to <= 10000 for
-    'append_only' paradigms. The commit cycle is temporally guillotined by
-    micro_batch_interval_ms (gt=0, le=86400000).
+    EPISTEMIC BOUNDS: Physically prevents Out-Of-Memory (OOM) VRAM crashes by
+    mathematically enforcing max_uncommitted_edges (gt=0, le=1000000000). The
+    @model_validator enforce_append_only_vram_bound further crushes this limit to
+    <= 10000 for append_only operations. The commit cycle is temporally guillotined
+    by micro_batch_interval_ms (gt=0, le=86400000).
 
-    MCP ROUTING TRIGGERS: Stream Processing, Micro-Batching, Eventual Consistency,
+    MCP ROUTING TRIGGERS: Queueing Theory, Stream Processing, Micro-Batching,
     Backpressure, Buffer Memory Bounding
     """
 
