@@ -2429,13 +2429,13 @@ class BaseIntent(CoreasonBaseState):
 
 class BasePanelProfile(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Establishes the foundational spatial vertex for Cartesian UI projection within Leland Wilkinson's Grammar of Graphics.
+    AGENT INSTRUCTION: Establishes the topological root for all visual projections in the UI manifold, utilizing Cartesian constraints. As a ...Profile suffix, this is a declarative, frozen snapshot of a rendering geometry.
 
-    CAUSAL AFFORDANCE: Provides the baseline 2D boundary allowing the orchestrator to physically bind data visualizations to explicit panel geometries without causing spatial overlap.
+    CAUSAL AFFORDANCE: Authorizes the rendering engine to map latent structural data into discrete, bounded graphical artifacts without executing active javascript or kinetic side-effects.
 
-    EPISTEMIC BOUNDS: The geometric reference is rigorously bounded by `panel_id` (a strict 128-char CID regex ^[a-zA-Z0-9_.:-]+$), mathematically preventing the generation of ghost panels.
+    EPISTEMIC BOUNDS: The geometric anchor (`panel_id`) is cryptographically locked to a 128-char CID regex (`^[a-zA-Z0-9_.:-]+$`), mathematically severing unauthorized or hallucinated DOM elements from the grid.
 
-    MCP ROUTING TRIGGERS: Grammar of Graphics, Cartesian Coordinate, Spatial Vertex, Topological UI, Rendering Geometry
+    MCP ROUTING TRIGGERS: Scientific Visualization, Topological Root, Cartesian Geometry, Declarative UI, Artifact Projection
     """
 
     panel_id: str = Field(
