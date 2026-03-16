@@ -2519,11 +2519,18 @@
           "type": "boolean"
         },
         "final_answer_regex": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
           "default": "^Final Answer: .*$",
           "description": "The strict regular expression the model must satisfy to yield a valid discrete classification.",
-          "maxLength": 2000,
-          "title": "Final Answer Regex",
-          "type": "string"
+          "title": "Final Answer Regex"
         },
         "decoding_policy": {
           "$ref": "#/$defs/ConstrainedDecodingPolicy",
@@ -3346,9 +3353,14 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: ConstrainedDecodingPolicy is a rigid mathematical boundary enforcing systemic constraints\nglobally. Dictates the hardware-level execution limits for the token sampling phase by converting structural\nformatting from a probabilistic neural suggestion into a deterministic physics problem.\n\nCAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation by physically\nsuffocating invalid token probabilities. It instructs the inference engine (e.g., Outlines, XGrammar)\nto compile a Deterministic Finite Automaton (DFA) or Pushdown Automaton (PDA) and mechanically overwrite\nillegal token logits to negative infinity.\n\nEPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals\non fields: enforcement_strategy, compiler_backend. All field limits must be strictly validated at\ninstantiation to prevent epistemic contagion and prompt-injection payload sabotage.\n\nMCP ROUTING TRIGGERS: FSM Logit Masking, Constrained Decoding, Tokenizer Interception, Hardware Execution Boundary",
       "properties": {
         "enforcement_strategy": {
-          "const": "fsm_logit_mask",
           "default": "fsm_logit_mask",
           "description": "The mechanistic strategy for intercepting the LLM forward pass.",
+          "enum": [
+            "fsm_logit_mask",
+            "lmql_query",
+            "guidance_program",
+            "ebnf_grammar"
+          ],
           "title": "Enforcement Strategy",
           "type": "string"
         },
@@ -3357,11 +3369,27 @@
           "enum": [
             "outlines",
             "xgrammar",
+            "sglang",
+            "lmql",
+            "guidance",
             "llama_cpp",
             "agnostic"
           ],
           "title": "Compiler Backend",
           "type": "string"
+        },
+        "formal_grammar_string": {
+          "anyOf": [
+            {
+              "maxLength": 50000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Formal Grammar String"
         },
         "terminate_on_eos_leak": {
           "default": true,
