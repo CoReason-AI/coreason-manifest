@@ -185,6 +185,20 @@ Before generating the `AGENT INSTRUCTION` block, you must analyze the object's s
 If NO, rewrite the docstring before outputting.
 </semantic_anchoring_directive>
 
+<semantic_gravity_directive priority="critical" action="reject_generation_if_violated">
+### 5. Semantic Gravity Wells (The Academic Integration Mandate)
+
+**SYSTEM DIRECTIVE:** You are strictly FORBIDDEN from adding a 5th category (such as `THEORETICAL BASIS:`) to the class docstrings. Doing so causes Vector Dilution in an LLM's attention mechanism by separating the theoretical *intent* from the kinetic *action*. 
+
+Instead, you must weaponize scientific, engineering, and mathematical concepts by weaving them directly into the 4-part schema to create highly dense "Semantic Gravity Wells" for zero-shot MCP routing. 
+
+When writing docstrings, you MUST distribute academic theory as follows:
+* **`AGENT INSTRUCTION` (The Theoretical Anchor):** Explicitly name the theorem, process, or academic framework. (e.g., *"Tracks the continuous POMDP belief distribution..."*)
+* **`CAUSAL AFFORDANCE` (The Applied Physics):** Describe how the mathematical concept translates into a kinetic action. (e.g., *"Unlocks non-monotonic logic via Pearlian do-operators ($P(y|do(x))$)."*)
+* **`EPISTEMIC BOUNDS` (The Mathematical Limits):** Define the exact formulas, equations, or statistical bounds enforced by the hardware. (e.g., *"The calculated KL divergence between the prior belief and evidence."*)
+* **`MCP ROUTING TRIGGERS` (The Academic Vector Tags):** Pack this list with highly specific algorithmic identifiers to guarantee optimal cosine-similarity matching. (e.g., `Abstract Argumentation Framework, Defeasible Logic, FSM Logit Masking`).
+</semantic_gravity_directive>
+
 ## 0.5 The F.A.I.R. Ecosystem Coordinator Doctrine
 
 **CRITICAL CONTEXT:** `coreason_manifest` is the absolute Central Nervous System of the swarm. To guarantee mathematical alignment, it adheres strictly to a 2026+ AI-Native interpretation of the scientific F.A.I.R. principles.
