@@ -23,7 +23,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, StringConstraints, field_validator, model_validator
 
-JsonPrimitiveState: TypeAlias = (
+type JsonPrimitiveState = (  # type: ignore[valid-type]
     str
     | int
     | float
@@ -8090,8 +8090,8 @@ class AuctionState(CoreasonBaseState):
         return self
 
 
-TelemetryScalarState: TypeAlias = Annotated[str, StringConstraints(max_length=100000)] | int | float | bool | None
-TelemetryContextProfile: TypeAlias = dict[
+type TelemetryScalarState = Annotated[str, StringConstraints(max_length=100000)] | int | float | bool | None  # type: ignore[valid-type]
+type TelemetryContextProfile = dict[  # type: ignore[valid-type]
     Annotated[str, StringConstraints(max_length=255)], "TelemetryScalarState | list[TelemetryScalarState]"
 ]
 
