@@ -5326,6 +5326,25 @@ class PresentationManifest(CoreasonBaseState):
 
 
 class EpistemicSOPManifest(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Encodes a macroscopic Petri net or Directed Acyclic Graph (DAG)
+    formalizing standard operating procedures into mathematically traversable state
+    transitions. As a ...Manifest suffix, this defines a frozen, N-dimensional coordinate
+    state.
+
+    CAUSAL AFFORDANCE: Physically bounds the executing agent (target_persona:
+    ProfileIdentifierState) to a deterministic sequence of CognitiveStateProfiles, unlocking
+    the ability for the orchestrator to dynamically evaluate execution via Process Reward
+    Models (prm_evaluations: list[ProcessRewardContract]) at each topological node.
+
+    EPISTEMIC BOUNDS: The cognitive_steps dictionary is constrained to max_length=1000000000
+    to cap memory footprint. The @model_validator reject_ghost_nodes mathematically enforces
+    referential integrity, guaranteeing that no chronological_flow_edges AND no
+    structural_grammar_hashes point to an undefined state.
+
+    MCP ROUTING TRIGGERS: Petri Net, Directed Acyclic Graph, Process Reward Model,
+    Topological Flow, Referential Integrity
+    """
     sop_id: str = Field(
         min_length=1,
         max_length=128,
@@ -7711,6 +7730,24 @@ class CognitiveDualVerificationReceipt(CoreasonBaseState):
 
 
 class EpistemicGroundedTaskManifest(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Formalizes Trajectory Distillation and Direct Preference Optimization
+    (DPO) by encapsulating a mathematically verified ground-truth training datum. As a
+    ...Manifest suffix, this defines a frozen, N-dimensional coordinate state.
+
+    CAUSAL AFFORDANCE: Unlocks verifiable Reinforcement Learning across the swarm by
+    securely binding an unstructured vignette_payload to a formal topological_proof
+    (EpistemicTopologicalProofManifest) and its resulting non-monotonic thinking_trace
+    (CognitiveReasoningTraceState).
+
+    EPISTEMIC BOUNDS: The task_id is cryptographically constrained to a 128-char CID
+    (^[a-zA-Z0-9_.:-]+$). The vignette_payload is bounded to 100000 characters to prevent
+    context exhaustion. A verification_lock (CognitiveDualVerificationReceipt) is
+    structurally mandated to physically prevent reward hacking via isolated consensus.
+
+    MCP ROUTING TRIGGERS: Trajectory Distillation, Direct Preference Optimization,
+    Reinforcement Learning, Dual Verification, Curry-Howard Correspondence
+    """
     task_id: str = Field(
         max_length=128, pattern="^[a-zA-Z0-9_.:-]+$", min_length=1, description="The cryptographic CID of the task."
     )
@@ -7723,6 +7760,23 @@ class EpistemicGroundedTaskManifest(CoreasonBaseState):
 
 
 class EpistemicCurriculumManifest(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Implements Curriculum Learning and Experience Replay manifolds,
+    serving as the definitive batch transport layer for continuous swarm optimization. As a
+    ...Manifest suffix, this defines a frozen, N-dimensional coordinate state.
+
+    CAUSAL AFFORDANCE: Injects a validated cluster of EpistemicGroundedTaskManifest
+    primitives into the decentralized training pipeline, forcing deterministic policy
+    gradient updates across all subscribing nodes.
+
+    EPISTEMIC BOUNDS: The tasks array requires min_length=1 to prevent empty compute
+    cycles. To guarantee zero-trust distribution and prevent Byzantine hash fractures, the
+    @model_validator sort_tasks mechanically sorts the array by task_id, ensuring perfect
+    RFC 8785 canonical hashing. Anchored by a 128-char curriculum_id CID.
+
+    MCP ROUTING TRIGGERS: Curriculum Learning, Experience Replay, Policy Gradient,
+    Canonical Hashing, Knowledge Distillation
+    """
     curriculum_id: str = Field(
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
