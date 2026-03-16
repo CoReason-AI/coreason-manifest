@@ -1781,6 +1781,24 @@ class AdversarialSimulationProfile(CoreasonBaseState):
 
 
 class AgentBidIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Represents a probabilistic agentic bid in a multi-objective
+    optimization market, factoring in projected compute latency, carbon constraints, and
+    internal epistemic certainty (Expected Utility Theory). As an ...Intent suffix, this is
+    a kinetic execution trigger.
+
+    CAUSAL AFFORDANCE: Injects a competitive trajectory into the AuctionState order book,
+    seeking authorization from the orchestrator to execute a specific
+    TaskAnnouncementIntent branch.
+
+    EPISTEMIC BOUNDS: The bid is geometrically bounded by estimated_cost_magnitude
+    (le=1000000000), estimated_latency_ms (ge=0, le=86400000), estimated_carbon_gco2eq
+    (ge=0.0, le=10000.0), and a continuous probability confidence_score (ge=0.0, le=1.0).
+    The bidder is anchored to a 128-char agent_id CID.
+
+    MCP ROUTING TRIGGERS: Expected Utility Theory, Multi-Objective Optimization, Epistemic
+    Certainty, Spot Market Bid, Cost Estimation
+    """
     agent_id: str = Field(
         min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$", description="The NodeIdentifierState of the bidder."
     )
@@ -1855,6 +1873,23 @@ type AttestationMechanismProfile = Literal["fido2_webauthn", "zk_snark_groth16",
 
 
 class AuctionPolicy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Defines the Algorithmic Mechanism Design for the decentralized spot
+    market, establishing the exact rules of engagement (e.g., Vickrey-Clarke-Groves, Dutch,
+    Sealed-Bid) to ensure truthful bidding (Strategyproofness). As a ...Policy suffix, this
+    object defines rigid mathematical boundaries.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator's clearinghouse on how to mathematically
+    resolve the AuctionState, applying the strict tie_breaker (TieBreakerPolicy) heuristic
+    when bid vectors collide.
+
+    EPISTEMIC BOUNDS: The market lifespan is strictly restricted by max_bidding_window_ms
+    (le=86400000). The combinatorial space is locked to the AuctionMechanismProfile and
+    TieBreakerPolicy Literal enums to prevent hallucinated market mechanics.
+
+    MCP ROUTING TRIGGERS: Algorithmic Mechanism Design, Vickrey-Clarke-Groves,
+    Strategyproofness, Market Clearing Heuristic, Strict Mathematical Boundary
+    """
     auction_type: AuctionMechanismProfile = Field(description="The market mechanism governing the auction.")
     tie_breaker: TieBreakerPolicy = Field(description="The deterministic rule for resolving tied bids.")
     max_bidding_window_ms: int = Field(
@@ -6065,6 +6100,22 @@ class TamperFaultEvent(ValueError):  # noqa: N818
 
 
 class TaskAnnouncementIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Initiates a Request for Proposal (RFP) within a decentralized Spot
+    Market to dynamically allocate thermodynamic compute based on task complexity. As an
+    ...Intent suffix, this is a kinetic execution trigger.
+
+    CAUSAL AFFORDANCE: Triggers an active, non-monotonic bidding phase where eligible Swarm
+    nodes evaluate their internal Q-K matrices to formulate competitive execution bids.
+
+    EPISTEMIC BOUNDS: The economic payload is physically capped by max_budget_magnitude
+    (le=1000000000). The topological routing is strictly constrained if
+    required_action_space_id is defined (optional, max_length=128, CID regex). Anchored by
+    a mandatory task_id CID (max_length=128).
+
+    MCP ROUTING TRIGGERS: Decentralized Spot Market, Request for Proposal, Thermodynamic
+    Compute Allocation, Algorithmic Mechanism Design, Kinetic Execution Trigger
+    """
     task_id: str = Field(
         min_length=1,
         max_length=128,
@@ -6084,6 +6135,23 @@ class TaskAnnouncementIntent(CoreasonBaseState):
 
 
 class TaskAwardReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A cryptographically frozen historical fact representing the
+    successful clearing of an algorithmic auction and the mathematically proven allocation
+    of compute capital. As a ...Receipt suffix, this is an append-only coordinate on the
+    Merkle-DAG.
+
+    CAUSAL AFFORDANCE: Definitively terminates the auction phase and authorizes the
+    awarded_syndicate to execute their task trajectory using the locked EscrowPolicy funds.
+
+    EPISTEMIC BOUNDS: Two @model_validators execute physical invariant checks: (1)
+    Conservation of Compute — the sum of awarded_syndicate values must exactly equal
+    cleared_price_magnitude (le=1000000000); (2) Escrow Ceiling — escrow_locked_magnitude
+    cannot exceed cleared_price_magnitude.
+
+    MCP ROUTING TRIGGERS: Market Clearing, Escrow Lock, Cryptographic Provenance, Syndicate
+    Allocation, Thermodynamic Execution
+    """
     task_id: str = Field(
         min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$", description="The identifier of the resolved task."
     )
@@ -6108,6 +6176,24 @@ class TaskAwardReceipt(CoreasonBaseState):
 
 
 class AuctionState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A frozen, declarative snapshot of the N-dimensional order book
+    tracking the ongoing convergence of an algorithmic spot market auction. As a ...State
+    suffix, this is a declarative, frozen coordinate.
+
+    CAUSAL AFFORDANCE: Aggregates incoming AgentBidIntent vectors against the foundational
+    TaskAnnouncementIntent (announcement), serving as the deterministic state space for the
+    orchestrator's clearing function. The optional award (TaskAwardReceipt) records the
+    final settlement.
+
+    EPISTEMIC BOUNDS: To guarantee RFC 8785 Canonical Hashing across the zero-trust swarm,
+    the bids array is deterministically sorted by agent_id via a @model_validator. Market
+    liveness is physically bounded by clearing_timeout (le=1000000000, gt=0) and
+    minimum_tick_size (le=1000000000.0, gt=0.0).
+
+    MCP ROUTING TRIGGERS: Order Book Snapshot, Market Convergence, RFC 8785
+    Canonicalization, Liquidity Aggregation, Declarative Coordinate
+    """
     announcement: TaskAnnouncementIntent = Field(description="The original call for proposals.")
     bids: list[AgentBidIntent] = Field(default_factory=list, description="The array of received bids.")
     award: TaskAwardReceipt | None = Field(
