@@ -7615,13 +7615,13 @@ class ChaosExperimentTask(CoreasonBaseState):
 
 class StructuralCausalGraphProfile(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Formalizes Judea Pearl's Structural Causal Models (SCMs) to explicitly map the agent's structural assumptions and endogenous/exogenous boundaries of the environment. As a ...Profile suffix, this is a declarative descriptor.
+    AGENT INSTRUCTION: Formalizes Judea Pearl's Structural Causal Models (SCMs) by mapping the causal topology of observed and latent variables.
 
-    CAUSAL AFFORDANCE: Empowers the orchestrator's causal engine to compute back-door adjustments, actively isolating latent confounders from observed variables during counterfactual reasoning or active inference.
+    CAUSAL AFFORDANCE: Unlocks do-calculus and interventional logic by providing the orchestrator with the explicit DAG required to identify confounders and compute causal effects.
 
-    EPISTEMIC BOUNDS: Dimensional space is physically capped to max_length=1000000000 to prevent RAM exhaustion. The @model_validator mathematically sorts observed_variables, latent_variables, and causal_edges to guarantee zero-variance RFC 8785 canonical hashing across distributed nodes.
+    EPISTEMIC BOUNDS: Variables are constrained by strict bounds (max_length=255). The @model_validator deterministically sorts observed_variables, latent_variables, and causal_edges to mathematically guarantee zero-variance RFC 8785 canonical hashing.
 
-    MCP ROUTING TRIGGERS: Structural Causal Models, Pearlian DAG, Back-door Criterion, Latent Confounders, Causal Inference
+    MCP ROUTING TRIGGERS: Structural Causal Models, Pearlian DAG, Latent Confounder, d-separation, Interventional Topology
     """
 
     observed_variables: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
@@ -7644,13 +7644,13 @@ class StructuralCausalGraphProfile(CoreasonBaseState):
 
 class HypothesisGenerationEvent(BaseStateEvent):
     """
-    AGENT INSTRUCTION: Implements Popperian Falsificationism and Bayesian Epistemology to formalize an abductive logical leap. As an ...Event suffix, this is an append-only, cryptographically frozen coordinate on the Merkle-DAG.
+    AGENT INSTRUCTION: Instantiates an abductive reasoning branch governed by Popperian Falsification and Bayesian updating on the Merkle-DAG.
 
-    CAUSAL AFFORDANCE: Injects a falsifiable premise into the Truth Maintenance System, authorizing the orchestrator to route kinetic tools specifically to execute the attached falsification_conditions to attempt to kill the hypothesis.
+    CAUSAL AFFORDANCE: Commits a formalized causal premise into the EpistemicLedgerState, unlocking the orchestration of empirical testing via active inference to falsify or verify the embedded causal_model.
 
-    EPISTEMIC BOUNDS: The bayesian_prior is mathematically clamped to a continuous probability distribution between [ge=0.0, le=1.0]. The @model_validator physically enforces cryptographic determinism by sorting the falsification_conditions array by condition_id.
+    EPISTEMIC BOUNDS: The bayesian_prior is mathematically clamped to a valid probability space (ge=0.0, le=1.0). The hypothesis identity is cryptographically locked via a 128-char CID (hypothesis_id), and falsification_conditions are deterministically sorted.
 
-    MCP ROUTING TRIGGERS: Popperian Falsificationism, Bayesian Prior, Abductive Reasoning, Null Hypothesis, Epistemic Ledger
+    MCP ROUTING TRIGGERS: Abductive Reasoning, Popperian Falsification, Bayesian Prior, Causal Hypothesis, Epistemic Commitment
     """
 
     type: Literal["hypothesis"] = Field(
@@ -8040,6 +8040,16 @@ type AnyToolchainState = Annotated[
 
 
 class TheoryOfMindSnapshot(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Employs Bayesian Theory of Mind (BToM) and Multi-Agent Epistemic Logic to model the hidden cognitive state and knowledge gaps of foreign agents.
+
+    CAUSAL AFFORDANCE: Empowers the orchestrator to dynamically compress and target interpersonal communication by referencing assumed_shared_beliefs to avoid redundant information transfer across the swarm.
+
+    EPISTEMIC BOUNDS: The predictive certainty is physically bounded by empathy_confidence_score (ge=0.0, le=1.0). The target_agent_id is anchored to a 128-char CID. Arrays are deterministically sorted by the @model_validator to preserve cryptographic canonicalization.
+
+    MCP ROUTING TRIGGERS: Bayesian Theory of Mind, Epistemic Logic, Cognitive Modeling, Common Knowledge, Multi-Agent Inference
+    """
+
     target_agent_id: str = Field(
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
