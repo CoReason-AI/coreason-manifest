@@ -2218,22 +2218,11 @@ class AdversarialEmulationProfile(CoreasonBaseState):
     """
 
     generative_persona: Literal["hesitant_novice", "fast_expert", "distracted_browser"] = Field(
-        default="fast_expert",
-        description="The imitation learning persona governing the behavioral emulation profile.",
+        default="fast_expert", description="The imitation learning persona governing the emulation."
     )
-    kinematic_noise: "KinematicNoiseProfile | None" = Field(
-        default=None,
-        description="The stochastic pointer trajectory perturbation profile for human-like motor control emulation.",
-    )
-    environmental_spoofing: "EnvironmentalSpoofingProfile | None" = Field(
-        default=None,
-        description="The browser fingerprint and environmental telemetry spoofing geometry.",
-    )
-    emulation_fidelity_target: float = Field(
-        ge=0.0,
-        le=1.0,
-        description="The target normalized score for human-likeness against anti-bot heuristic classifiers.",
-    )
+    kinematic_noise: "KinematicNoiseProfile | None" = Field(default=None)
+    environmental_spoofing: "EnvironmentalSpoofingProfile | None" = Field(default=None)
+    emulation_fidelity_target: float = Field(..., ge=0.0, le=1.0)
 
 
 class AgentBidIntent(CoreasonBaseState):
@@ -3836,40 +3825,16 @@ class EnvironmentalSpoofingProfile(CoreasonBaseState):
     """
 
     tls_cipher_permutation: Literal["chrome_windows", "safari_macos", "firefox_macos", "android_webview"] = Field(
-        default="chrome_windows",
-        description="The JA3/JA4 TLS Client Hello fingerprint to project during handshake emulation.",
+        default="chrome_windows", description="The JA3/JA4 TLS Client Hello fingerprint to project."
     )
-    webgl_entropy_seed_hash: str = Field(
-        min_length=1,
-        max_length=128,
-        pattern="^[a-zA-Z0-9_.:-]+$",
-        description="The Content Identifier (CID) of the WebGL canvas entropy seed used to generate a deterministic spoofed fingerprint.",
-    )
-    user_agent_template: str = Field(
-        max_length=2000,
-        description="The User-Agent string template projected to exogenous web servers to mask the true computational substrate.",
-    )
+    webgl_entropy_seed_hash: str = Field(..., min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
+    user_agent_template: str = Field(..., max_length=2000)
     hardware_concurrency_mask: int = Field(
-        gt=0,
-        le=256,
-        default=8,
-        description="The spoofed CPU core count projected to the DOM via navigator.hardwareConcurrency.",
+        default=8, gt=0, le=256, description="Spoofed CPU core count projected to the DOM."
     )
-    timezone_offset_minutes: int = Field(
-        ge=-720,
-        le=840,
-        description="The spoofed UTC timezone offset in minutes, bounded to the valid terrestrial range.",
-    )
-    screen_resolution_width: int = Field(
-        ge=1,
-        le=15360,
-        description="The spoofed horizontal display resolution in pixels.",
-    )
-    screen_resolution_height: int = Field(
-        ge=1,
-        le=15360,
-        description="The spoofed vertical display resolution in pixels.",
-    )
+    timezone_offset_minutes: int = Field(..., ge=-720, le=840)
+    screen_resolution_width: int = Field(..., ge=1, le=15360)
+    screen_resolution_height: int = Field(..., ge=1, le=15360)
 
 
 class EpistemicCompressionSLA(CoreasonBaseState):
@@ -5933,34 +5898,17 @@ class KinematicNoiseProfile(CoreasonBaseState):
     Motor Control Perturbation, Hick-Hyman Law, Fitts's Law
     """
 
-    noise_type: Literal["pink", "brownian", "gaussian"] = Field(
-        description="The stochastic process governing the noise generation for pointer trajectory perturbation.",
-    )
+    noise_type: Literal["pink", "brownian", "gaussian"] = Field(...)
     velocity_profile: Literal["minimum_jerk", "constant", "fractional_brownian"] = Field(
-        default="minimum_jerk",
-        description="The mathematical model governing movement acceleration and velocity smoothing.",
+        default="minimum_jerk", description="The mathematical model governing movement acceleration."
     )
-    pink_noise_amplitude: float = Field(
-        ge=0.0,
-        le=1.0,
-        description="The normalized amplitude of the 1/f noise injected into the pointer trajectory. Bounded [0.0, 1.0].",
-    )
-    frequency_exponent: float = Field(
-        ge=0.0,
-        le=5.0,
-        description="The spectral exponent β in the 1/f^β power spectral density function governing noise color.",
-    )
+    pink_noise_amplitude: float = Field(..., ge=0.0, le=1.0)
+    frequency_exponent: float = Field(..., ge=0.0, le=5.0)
     target_overshoot_radius_pixels: int = Field(
-        ge=0,
-        le=5000,
-        default=0,
-        description="The Euclidean radius in pixels for corrective submovements overshooting the target coordinate.",
+        default=0, ge=0, le=5000, description="The Euclidean radius for corrective submovements."
     )
     hick_hyman_dwell_time_ms: int = Field(
-        ge=0,
-        le=86400000,
-        default=0,
-        description="Cognitive choice reaction delay in milliseconds, modeled via Hick-Hyman Law.",
+        default=0, ge=0, le=86400000, description="Cognitive choice reaction delay in milliseconds."
     )
 
 
