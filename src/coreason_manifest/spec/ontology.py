@@ -1497,6 +1497,24 @@ class ToolManifest(CoreasonBaseState):
 
 
 class BilateralSLA(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Defines the zero-trust structural boundary for multi-tenant federation,
+    securing cross-boundary graph traversal against Shor's algorithm via an optional
+    PostQuantumSignatureReceipt. As an ...SLA suffix, this object enforces rigid mathematical
+    boundaries that the orchestrator must respect globally.
+
+    CAUSAL AFFORDANCE: Unlocks cross-swarm graph bridging by enforcing strict liability,
+    physical location routing, semantic data classification constraints via
+    max_permitted_classification, and ESG carbon intensity limits.
+
+    EPISTEMIC BOUNDS: Economically constrained by liability_limit_magnitude (ge=0,
+    le=1000000000). ESG limits physically bind the node grid to the optional
+    max_permitted_grid_carbon_intensity (ge=0.0, le=10000.0). The permitted_geographic_regions
+    array is deterministically sorted via @model_validator for RFC 8785 canonical hashing.
+
+    MCP ROUTING TRIGGERS: Zero-Trust Architecture, Post-Quantum Cryptography, Federated
+    Learning, Bilateral SLA, Data Residency
+    """
     receiving_tenant_id: str = Field(
         min_length=1,
         pattern="^[a-zA-Z0-9_.:-]+$",
@@ -1530,6 +1548,24 @@ class BilateralSLA(CoreasonBaseState):
 
 
 class FederatedDiscoveryManifest(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Governs the B2B Multi-Swarm Gossip Protocol, establishing the initial
+    Model Context Protocol (MCP) broadcast endpoints for external discovery. As a ...Manifest
+    suffix, this is a declarative, frozen snapshot of N-dimensional geometry at a specific
+    point in time.
+
+    CAUSAL AFFORDANCE: Emits a structured tensor beacon to neighboring swarms, authorizing
+    the initiation of an OntologicalHandshakeReceipt if the supported_ontologies hashes
+    mathematically overlap.
+
+    EPISTEMIC BOUNDS: Geometrically capped by broadcast_endpoints and supported_ontologies
+    string arrays (each max_length=1000000000). Both are explicitly sorted by the
+    @model_validator (broadcast_endpoints by str key, supported_ontologies alphabetically)
+    to guarantee invariant canonical RFC 8785 hashing across distinct environments.
+
+    MCP ROUTING TRIGGERS: Gossip Protocol, Peer-to-Peer Discovery, Decentralized Federation,
+    Semantic Broadcasting, Tensor Beacon
+    """
     broadcast_endpoints: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
         max_length=1000000000, description="The explicit array of strictly bounded MCP URI broadcast endpoints."
     )
@@ -2167,6 +2203,24 @@ class CounterfactualRegretEvent(BaseStateEvent):
 
 
 class CrossSwarmHandshakeState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Tracks the non-monotonic state transition of a Byzantine-tolerant B2B
+    negotiation between two distinct enterprise tenant CID identifiers (initiating_tenant_id
+    and receiving_tenant_id). As a ...State suffix, this is a declarative, frozen snapshot of
+    N-dimensional geometry at a specific point in time.
+
+    CAUSAL AFFORDANCE: Transitions the federated network from a proposed capability swap into
+    an active OntologicalHandshakeReceipt, forcing the execution of the strict offered_sla
+    (BilateralSLA).
+
+    EPISTEMIC BOUNDS: Cryptographically bounded by handshake_id (CID regex
+    ^[a-zA-Z0-9_.:-]+$). The negotiation lifecycle is physically constrained to the strict
+    Literal automaton ["proposed", "negotiating", "aligned", "rejected"] via FSM Logit
+    Masking, preventing execution deadlocks.
+
+    MCP ROUTING TRIGGERS: Byzantine-Tolerant Negotiation, Zero-Trust Handshake, Finite State
+    Machine, Cross-Tenant Federation, Asynchronous B2B
+    """
     handshake_id: str = Field(
         min_length=1,
         max_length=128,
@@ -4616,6 +4670,26 @@ class ObservabilityPolicy(CoreasonBaseState):
 
 
 class OntologicalHandshakeReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A cryptographically frozen historical fact representing the absolute
+    mathematical alignment of two swarms' latent vector spaces prior to establishing a shared
+    epistemic blackboard. As a ...Receipt suffix, this is an append-only coordinate on the
+    Merkle-DAG that the LLM must never hallucinate a mutation to.
+
+    CAUSAL AFFORDANCE: Authorizes the physical bridging of two independent N-dimensional
+    semantic spaces. If native geometries are incommensurable, it structurally demands the
+    application of a DimensionalProjectionContract (applied_projection). The alignment_status
+    Literal ["aligned", "projected", "fallback_triggered", "incommensurable"] records the
+    final verdict.
+
+    EPISTEMIC BOUNDS: Semantic isometry is quantified via measured_cosine_similarity, strictly
+    clamped between [ge=-1.0, le=1.0]. The participant_node_ids array (min_length=2) is
+    deterministically sorted via @model_validator to prevent Byzantine replay anomalies
+    during cross-swarm Merkle hashing.
+
+    MCP ROUTING TRIGGERS: Earth Mover's Distance, Cosine Similarity, Vector Space Isometry,
+    Latent Alignment, Holographic Graph Projection
+    """
     handshake_id: str = Field(
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
