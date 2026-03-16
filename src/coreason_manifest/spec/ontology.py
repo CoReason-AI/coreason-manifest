@@ -2169,6 +2169,24 @@ class AmbientState(CoreasonBaseState):
 
 
 class AnalogicalMappingTask(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Formalizes Structure-Mapping Theory (Gentner) to execute
+    systemic cross-domain lateral thinking. As a ...Task suffix, this represents an
+    authorized kinetic execution trigger or test-time compute branch.
+
+    CAUSAL AFFORDANCE: Forces the generative router to bridge the target_domain
+    (max_length=2000) with an unrelated source_domain (max_length=2000) by finding
+    relational isomorphisms, actively injecting out-of-distribution abstractions. The
+    task_id (128-char CID) anchors the task.
+
+    EPISTEMIC BOUNDS: The cognitive leap is physically forced by the
+    divergence_temperature_override (ge=0.0, le=10.0), shifting the sampling
+    distribution. The structural rigor is bounded by required_isomorphisms (ge=1,
+    le=86400000), demanding an exact count of valid mappings.
+
+    MCP ROUTING TRIGGERS: Structure-Mapping Theory, Lateral Thinking, Relational
+    Isomorphism, Cross-Domain Abstraction, High-Temperature Divergence
+    """
     task_id: str = Field(
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
@@ -2741,6 +2759,25 @@ class ConstitutionalAmendmentIntent(CoreasonBaseState):
 
 
 class ContinuousMutationPolicy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Implements Stream Processing and Micro-Batching heuristics for
+    continuous, high-velocity graph updates without violating Eventual Consistency.
+    As a ...Policy suffix, this defines rigid mathematical boundaries.
+
+    CAUSAL AFFORDANCE: Dictates how the orchestrator buffers and commits volatile
+    state differentials to the EpistemicLedgerState. The mutation_paradigm
+    Literal ["append_only", "merge_on_resolve"] controls whether edges are strictly
+    appended or deterministically merged.
+
+    EPISTEMIC BOUNDS: Physically prevents OOM crashes by enforcing
+    max_uncommitted_edges (gt=0, le=1000000000). The @model_validator
+    enforce_append_only_vram_bound further restricts this to <= 10000 for
+    'append_only' paradigms. The commit cycle is temporally guillotined by
+    micro_batch_interval_ms (gt=0, le=86400000).
+
+    MCP ROUTING TRIGGERS: Stream Processing, Micro-Batching, Eventual Consistency,
+    Backpressure, Buffer Memory Bounding
+    """
     mutation_paradigm: Literal["append_only", "merge_on_resolve"] = Field(
         description="Forces non-destructive graph mutations."
     )
@@ -3403,6 +3440,24 @@ class EnsembleTopologyProfile(CoreasonBaseState):
 
 
 class EpistemicCompressionSLA(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Implements the Information Bottleneck Method to govern the
+    lossy compression of episodic or multimodal payloads into structured semantic
+    geometry. As an ...SLA suffix, this enforces rigid mathematical boundaries.
+
+    CAUSAL AFFORDANCE: Instructs the extraction and transmutation engines to discard
+    aleatoric noise while mathematically preserving the mutual information of the
+    source artifact. The strict_probability_retention (bool, default=True) forces
+    the resulting SemanticNodeState to populate its uncertainty_profile.
+
+    EPISTEMIC BOUNDS: The informational loss is strictly bounded by
+    max_allowed_entropy_loss (ge=0.0, le=1.0), mathematically preventing the
+    over-compression of truth. The required_grounding_density is locked to the
+    Literal automaton ["sparse", "dense", "exhaustive"].
+
+    MCP ROUTING TRIGGERS: Information Bottleneck Method, Shannon Entropy Loss,
+    Semantic Compression, Multimodal Grounding, Autoencoder Distillation
+    """
     strict_probability_retention: bool = Field(
         default=True, description="If True, forces the resulting SemanticNodeState to populate its uncertainty_profile."
     )
@@ -3485,6 +3540,26 @@ class EpistemicScanningPolicy(CoreasonBaseState):
 
 
 class EpistemicTransmutationTask(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Orchestrates Cross-Modal Representation Alignment,
+    deterministically transmuting unstructured artifacts into machine-readable
+    N-dimensional tensors or discrete graphs. As a ...Task suffix, this represents
+    an authorized kinetic execution trigger.
+
+    CAUSAL AFFORDANCE: Forces the orchestrator's VLM or extraction engine to process
+    the artifact_event_id (128-char CID) and project it into target_modalities
+    (5-value Literal, min_length=1) while strictly adhering to the attached
+    compression_sla (EpistemicCompressionSLA).
+
+    EPISTEMIC BOUNDS: The @model_validator validate_grounding_density_for_visuals
+    rejects sparse grounding for visual/tabular modalities. The @model_validator
+    sort_arrays deterministically sorts target_modalities for RFC 8785 canonical
+    hashing. The optional execution_cost_budget_magnitude (int | None,
+    le=1000000000, ge=0, default=None) caps thermodynamic cost.
+
+    MCP ROUTING TRIGGERS: Cross-Modal Alignment, Representation Engineering,
+    Multimodal Extraction, VLM Transmutation, Deterministic Projection
+    """
     task_id: str = Field(
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
@@ -8648,6 +8723,23 @@ class EpistemicAxiomState(CoreasonBaseState):
 
 
 class EpistemicSeedInjectionPolicy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Formalizes Subgraph Injection and Graph Neural Network (GNN)
+    neighborhood sampling heuristics. As a ...Policy suffix, this defines rigid
+    mathematical boundaries the orchestrator must enforce globally.
+
+    CAUSAL AFFORDANCE: Authorizes the algorithmic injection of high-density semantic
+    seeds or priors into an existing Knowledge Graph, ensuring topological diversity
+    by clustering relationships into strictly bounded neighborhood buckets.
+
+    EPISTEMIC BOUNDS: The semantic proximity for neighborhood sampling is
+    mathematically clamped by similarity_threshold_alpha (ge=0.0, le=1.0). To
+    prevent topological density explosions (hub nodes), the
+    relation_diversity_bucket_size is bounded (gt=0, le=1000000000).
+
+    MCP ROUTING TRIGGERS: Subgraph Injection, Graph Neural Networks, Neighborhood
+    Sampling, Topological Diversity, Semantic Seeding
+    """
     similarity_threshold_alpha: float = Field(ge=0.0, le=1.0)
     relation_diversity_bucket_size: int = Field(le=1000000000, gt=0)
 
