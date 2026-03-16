@@ -19,7 +19,8 @@ repos:
     hooks:
       - id: mypy
         additional_dependencies:
-          [pydantic>=2.0, pytest, types-PyYAML]
+          [pydantic>=2.0, pytest, types-PyYAML, hypothesis, syrupy]
+        exclude: ^scripts/
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.24.0
     hooks:

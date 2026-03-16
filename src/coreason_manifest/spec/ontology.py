@@ -2721,7 +2721,7 @@ class BrowserDOMState(CoreasonBaseState):
                     ip = ipaddress.ip_address(ip_int)
                 else:
                     raise ValueError
-            except ValueError, OverflowError, IndexError:
+            except (ValueError, OverflowError, IndexError):
                 return url
         if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast:
             raise ValueError(f"SSRF restricted IP detected: {hostname}")
@@ -5325,7 +5325,7 @@ class TaxonomicRoutingPolicy(CoreasonBaseState):
     Load Theory to map high-entropy natural language intents into explicitly bounded spatial
     organizing frameworks. As a ...Policy suffix, this dictates a rigid global boundary.
 
-    CAUSAL AFFORDANCE: Pre-emptively routes classified intents to optimized taxonomic
+    CAUSAL AFFORDANCE: Preemptively routes classified intents to optimized taxonomic
     layouts, mechanically preventing token exhaustion and attention dilution in downstream
     processing nodes before compute is allocated. Unclassified intents default to the
     fallback_heuristic.

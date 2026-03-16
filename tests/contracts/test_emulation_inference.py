@@ -30,7 +30,7 @@ from coreason_manifest.spec.ontology import (
 from coreason_manifest.utils.algebra import extract_webgl_entropy_seed
 
 
-def test_kinematic_noise_profile_bounds():
+def test_kinematic_noise_profile_bounds() -> None:
     # Valid
     p = KinematicNoiseProfile(noise_type="pink", pink_noise_amplitude=0.5, frequency_exponent=1.0)
     assert p.pink_noise_amplitude == 0.5
@@ -48,7 +48,7 @@ def test_kinematic_noise_profile_bounds():
         KinematicNoiseProfile(noise_type="pink", pink_noise_amplitude=0.5, frequency_exponent=5.1)
 
 
-def test_environmental_spoofing_profile_bounds():
+def test_environmental_spoofing_profile_bounds() -> None:
     # Valid
     p = EnvironmentalSpoofingProfile(
         webgl_entropy_seed_hash="abc123",
@@ -70,7 +70,7 @@ def test_environmental_spoofing_profile_bounds():
         )
 
 
-def test_adversarial_emulation_profile():
+def test_adversarial_emulation_profile() -> None:
     p = AdversarialEmulationProfile(
         kinematic_noise=KinematicNoiseProfile(noise_type="pink", pink_noise_amplitude=0.5, frequency_exponent=1.0),
         environmental_spoofing=EnvironmentalSpoofingProfile(
@@ -89,7 +89,7 @@ def test_adversarial_emulation_profile():
         AdversarialEmulationProfile(emulation_fidelity_target=1.1)
 
 
-def test_latent_schema_inference_intent():
+def test_latent_schema_inference_intent() -> None:
     i = LatentSchemaInferenceIntent(
         target_buffer_id="buffer-1",
         max_schema_depth=5,
@@ -112,7 +112,7 @@ def test_latent_schema_inference_intent():
         )
 
 
-def test_intent_classification_receipt():
+def test_intent_classification_receipt() -> None:
     r = IntentClassificationReceipt(
         event_id="receipt-1",
         timestamp=123.0,
@@ -132,7 +132,7 @@ def test_intent_classification_receipt():
         )
 
 
-def test_extract_webgl_entropy_seed():
+def test_extract_webgl_entropy_seed() -> None:
     agent = AgentNodeProfile(
         description="Test Agent",
         adversarial_emulation=AdversarialEmulationProfile(
@@ -152,7 +152,7 @@ def test_extract_webgl_entropy_seed():
     assert extract_webgl_entropy_seed(agent2) is None
 
 
-def test_spatial_kinematic_action_intent_noise():
+def test_spatial_kinematic_action_intent_noise() -> None:
     i = SpatialKinematicActionIntent(
         action_type="click",
         target_coordinate=SpatialCoordinateProfile(x=0.5, y=0.5),
