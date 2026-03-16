@@ -7744,24 +7744,24 @@ class SemanticNodeState(CoreasonBaseState):
 
 class VerifiableCredentialPresentationReceipt(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Implements the W3C Verifiable Credentials Data Model v2.0
-    and Selective Disclosure (SD-JWT) frameworks. As a ...Receipt suffix, this is an
-    append-only, cryptographically frozen coordinate on the Merkle-DAG that the LLM
-    must never hallucinate a mutation to.
+    AGENT INSTRUCTION: Formalizes the W3C Verifiable Credentials Data Model
+    (VCDM v2.0) to establish a decentralized, Zero-Trust identity perimeter. As a
+    ...Receipt suffix, this is an append-only coordinate on the Merkle-DAG that the
+    LLM must never hallucinate a mutation to.
 
-    CAUSAL AFFORDANCE: Unlocks topological traversal and zero-trust capability
-    mounting by cryptographically proving the agent possesses specific clearances
-    via issuer_did (NodeIdentifierState) without revealing the underlying private
-    key.
+    CAUSAL AFFORDANCE: Unlocks isolated execution bounds by projecting
+    cryptographically verified geometric predicates (authorization_claims) into the
+    orchestrator via issuer_did (NodeIdentifierState), allowing an agent to prove
+    authorization clearance without centralized identity brokers.
 
-    EPISTEMIC BOUNDS: The presentation_format is rigidly constrained to a Literal
-    automaton ["jwt_vc", "ldp_vc", "sd_jwt", "zkp_vc"]. To prevent memory
-    exhaustion from massive ZK-SNARK polynomials, the cryptographic_proof_blob is
-    physically capped at max_length=100000, and authorization_claims is bounded
-    (max_length=86400000, key max_length=255).
+    EPISTEMIC BOUNDS: The cryptographic_proof_blob is physically capped at
+    max_length=100000 to prevent VRAM buffer overflow. The presentation_format is
+    rigidly clamped to a Literal automaton ["jwt_vc", "ldp_vc", "sd_jwt",
+    "zkp_vc"] enforcing Selective Disclosure and ZKP boundaries. The
+    authorization_claims dict is bounded (max_length=86400000, key max_length=255).
 
-    MCP ROUTING TRIGGERS: W3C Verifiable Credentials, Decentralized Identifiers,
-    Zero-Knowledge Proofs, Selective Disclosure JWT, Zero-Trust Architecture
+    MCP ROUTING TRIGGERS: W3C VCDM, Zero-Knowledge Proofs, Selective Disclosure,
+    Decentralized Identifiers, Object Capability Model
     """
 
     presentation_format: Literal["jwt_vc", "ldp_vc", "sd_jwt", "zkp_vc"] = Field(
@@ -7782,24 +7782,25 @@ class VerifiableCredentialPresentationReceipt(CoreasonBaseState):
 
 class AgentAttestationReceipt(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Establishes a rigorous AI Software Bill of Materials (AI-BOM)
-    adhering to Supply Chain Levels for Software Artifacts (SLSA) provenance
-    guidelines. As a ...Receipt suffix, this defines an immutable cryptographic
-    passport that the LLM must never hallucinate a mutation to.
+    AGENT INSTRUCTION: Serves as the definitive Artificial Intelligence Bill of
+    Materials (AI-BOM), mapping the agent's exact training provenance and capability
+    matrix onto the Merkle-DAG. As a ...Receipt suffix, this represents a
+    cryptographically frozen historical fact that the LLM must never mutate.
 
-    CAUSAL AFFORDANCE: Projects the structural identity and training lineage of the
-    agent into the orchestrator. The developer_signature (max_length=2000) proves
-    vendor accountability. The credential_presentations
-    (list[VerifiableCredentialPresentationReceipt], default_factory=list) carry
-    the selective disclosure wallet.
+    CAUSAL AFFORDANCE: Establishes the agent's physical identity passport,
+    authorizing the orchestrator to mount the node into a swarm topology only if
+    its training_lineage_hash satisfies the zero-trust alignment policy. The
+    developer_signature (max_length=2000) proves vendor accountability. The
+    credential_presentations (list[VerifiableCredentialPresentationReceipt],
+    default_factory=list) carry the selective disclosure wallet.
 
-    EPISTEMIC BOUNDS: The training_lineage_hash and capability_merkle_root are
-    locked to strict SHA-256 regex (^[a-f0-9]{64}$). The @model_validator
-    sort_arrays deterministically sorts credential_presentations by issuer_did,
-    guaranteeing invariant RFC 8785 canonical hashing.
+    EPISTEMIC BOUNDS: Supply-chain vulnerabilities are mathematically severed by
+    anchoring training_lineage_hash and capability_merkle_root to immutable SHA-256
+    bounds (^[a-f0-9]{64}$). The @model_validator sort_arrays deterministically
+    sorts credential_presentations by issuer_did for RFC 8785 canonical hashing.
 
-    MCP ROUTING TRIGGERS: AI-BOM, SLSA Provenance, Merkle Tree, Supply Chain
-    Security, Cryptographic Identity
+    MCP ROUTING TRIGGERS: AI-BOM, Merkle-DAG Provenance, Supply-Chain Security,
+    Cryptographic Passport, Deterministic Sorting
     """
 
     training_lineage_hash: str = Field(
@@ -8501,24 +8502,24 @@ class WorkflowManifest(CoreasonBaseState):
 
 class WetwareAttestationContract(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Formalizes Proof of Humanity within Supervisory Control
-    Theory, utilizing FIDO2/WebAuthn to capture undeniable biological intent. As a
-    ...Contract suffix, this enforces rigid mathematical boundaries globally.
+    AGENT INSTRUCTION: Formalizes Hardware-Backed Human-in-the-Loop (HITL)
+    authentication, utilizing FIDO2/WebAuthn or Post-Quantum physical security
+    keys to verify human intent. As a ...Contract suffix, this enforces rigid
+    mathematical boundaries globally.
 
-    CAUSAL AFFORDANCE: Physically collapses a Mixed-Initiative pause, injecting
-    external biological entropy (wetware) to authorize a definitive state
-    transition. The mechanism (AttestationMechanismProfile) specifies the exact
-    cryptographic standard. The did_subject (DID pattern ^did:[a-z0-9]+:.*$)
-    anchors the human identity.
+    CAUSAL AFFORDANCE: Translates physical human entropy (e.g., a biometric tap or
+    hardware key touch) into a definitive mathematical signature via mechanism
+    (AttestationMechanismProfile), authorizing the orchestrator to break a
+    Mixed-Initiative execution halt. The did_subject (DID pattern
+    ^did:[a-z0-9]+:.*$) anchors the human identity.
 
-    EPISTEMIC BOUNDS: The biological signature is rigorously anchored via
-    dag_node_nonce (UUID), mechanically binding the payload to a singular
-    Merkle-DAG coordinate and neutralizing cross-graph Replay Attacks. The
-    cryptographic_payload (pattern ^[A-Za-z0-9+/=_-]+$) ensures strict Base64url
-    encoding.
+    EPISTEMIC BOUNDS: Physically binds the signature to a specific Merkle-DAG
+    coordinate via dag_node_nonce (UUID), strictly preventing cryptographic Replay
+    Attacks. The cryptographic_payload is restricted by regex
+    (^[A-Za-z0-9+/=_-]+$) to prevent injection anomalies.
 
-    MCP ROUTING TRIGGERS: Proof of Humanity, FIDO2/WebAuthn, Supervisory Control
-    Theory, Mixed-Initiative Interaction, Anti-Replay Nonce
+    MCP ROUTING TRIGGERS: WebAuthn, FIDO2, Cryptographic Nonce, Replay Attack
+    Prevention, Wetware Entropy
     """
 
     mechanism: AttestationMechanismProfile = Field(
