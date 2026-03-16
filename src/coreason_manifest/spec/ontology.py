@@ -2923,13 +2923,13 @@ class CausalDirectedEdgeState(CoreasonBaseState):
 
 class CircuitBreakerEvent(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Implements the Circuit Breaker control-flow pattern from distributed systems theory and Lyapunov Stability to deterministically interrupt cascading failures in the neurosymbolic network.
+    AGENT INSTRUCTION: Implements Lyapunov Stability and distributed Control Theory to guarantee that the neurosymbolic network returns to a deterministic equilibrium when facing catastrophic variance. As an ...Event suffix, this is a cryptographically frozen coordinate.
 
-    CAUSAL AFFORDANCE: Physically severs the active execution thread for the `target_node_id`, immediately halting out-of-memory cascades, runaway generation loops, or API rate-limit breaches.
+    CAUSAL AFFORDANCE: Physically severs the active execution thread for the targeted node, acting as a hardware guillotine that immediately halts out-of-memory cascades, runaway generative loops, or API rate-limit breaches.
 
-    EPISTEMIC BOUNDS: The fault perimeter is mathematically restricted to a specific `NodeIdentifierState` (`target_node_id`). To prevent log-poisoning and VRAM exhaustion, the `error_signature` is strictly capped at `max_length=2000`.
+    EPISTEMIC BOUNDS: The fault perimeter is mathematically restricted to a specific `target_node_id` (`NodeIdentifierState`). To prevent log-poisoning and VRAM exhaustion during the crash, the `error_signature` is strictly clamped at `max_length=2000`.
 
-    MCP ROUTING TRIGGERS: Control Theory, Circuit Breaker, Cascading Failure Prevention, Lyapunov Stability, Fault Detection
+    MCP ROUTING TRIGGERS: Lyapunov Stability, Control Theory, Circuit Breaker, Cascading Failure, State Equilibrium
     """
 
     type: Literal["circuit_breaker_event"] = Field(
@@ -4327,13 +4327,13 @@ class FallbackSLA(CoreasonBaseState):
 
 class FallbackIntent(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Orchestrates Graceful Degradation by executing a deterministic state transition within the swarm's Markov Decision Process (MDP) to escape absorbing states upon node failure.
+    AGENT INSTRUCTION: Formalizes Graceful Degradation within a Markov Decision Process (MDP), executing a deterministic policy intervention to escape an absorbing state (terminal failure) upon node collapse. As an ...Intent suffix, this is a kinetic execution trigger.
 
     CAUSAL AFFORDANCE: Re-routes the probabilistic execution wave from a failing primary node (`target_node_id`) to a pre-verified, lower-variance backup node (`fallback_node_id`), actively bypassing structural collapse and maintaining systemic liveness.
 
-    EPISTEMIC BOUNDS: Enforces strict structural referential integrity by requiring both `target_node_id` and `fallback_node_id` to resolve to mathematically valid `NodeIdentifierState` DIDs.
+    EPISTEMIC BOUNDS: Enforces strict structural referential integrity by requiring both `target_node_id` and `fallback_node_id` to resolve to mathematically valid `NodeIdentifierState` DIDs, severing hallucinated graph traversals.
 
-    MCP ROUTING TRIGGERS: Graceful Degradation, Markov Decision Process, Absorbing State Escape, Fail-Safe Transition, Control-Flow Override
+    MCP ROUTING TRIGGERS: Markov Decision Process, Absorbing State, Graceful Degradation, Control-Flow Override, Policy Intervention
     """
 
     type: Literal["fallback_intent"] = Field(
@@ -7026,13 +7026,13 @@ class ComputeProvisioningIntent(CoreasonBaseState):
 
 class QuarantineIntent(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Triggers an Epistemic Quarantine, utilizing rigid Spectral Graph Partitioning to mathematically isolate a hallucinating, degraded, or Byzantine node from the active working context.
+    AGENT INSTRUCTION: Triggers an Epistemic Quarantine utilizing rigid Spectral Graph Partitioning to mathematically isolate a hallucinating, degraded, or Byzantine node from the active working context. As an ...Intent suffix, the LLM may execute non-monotonic reasoning here.
 
-    CAUSAL AFFORDANCE: Instructs the orchestrator to sever all outgoing causal edges from the `target_node_id`, neutralizing its probability mass in the routing manifold and preventing its entropy from contaminating the `EpistemicLedgerState`.
+    CAUSAL AFFORDANCE: Instructs the orchestrator to sever all outgoing causal edges from the `target_node_id`, reducing its algebraic connectivity to zero. This neutralizes its probability mass in the routing manifold and prevents entropy from contaminating the `EpistemicLedgerState`.
 
-    EPISTEMIC BOUNDS: The topological isolation is strictly targeted via a `NodeIdentifierState` (`target_node_id`). The causal justification for the graph cut is physically constrained to `reason` (`max_length=2000`) to mathematically prevent dictionary bombing attacks.
+    EPISTEMIC BOUNDS: The topological isolation is strictly targeted via a `NodeIdentifierState` (`target_node_id`). The causal justification for the graph cut is physically constrained to `reason` (`max_length=2000`) to mathematically prevent dictionary bombing attacks on the ledger.
 
-    MCP ROUTING TRIGGERS: Spectral Graph Partitioning, Epistemic Quarantine, Byzantine Fault Isolation, Defeasible Logic, Network Isolation
+    MCP ROUTING TRIGGERS: Spectral Graph Partitioning, Byzantine Fault Isolation, Epistemic Contagion, Defeasible Logic, Algebraic Connectivity
     """
 
     type: Literal["quarantine_intent"] = Field(
@@ -7816,13 +7816,13 @@ class System1ReflexPolicy(CoreasonBaseState):
 
 class System2RemediationIntent(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Implements Kahneman's Dual-Process Theory by explicitly triggering a System 2 non-monotonic self-correction loop in response to a structural execution collapse.
+    AGENT INSTRUCTION: Implements Kahneman's Dual-Process Theory by explicitly triggering a System 2 non-monotonic self-correction loop in response to a structural execution collapse. As an ...Intent suffix, this represents an authorized kinetic execution trigger.
 
-    CAUSAL AFFORDANCE: Intercepts physical instantiation failures (e.g., Pydantic ValidationErrors) and redirects the generation trajectory, forcing the agent to rewrite the isolated subgraph via failing_pointers.
+    CAUSAL AFFORDANCE: Intercepts physical instantiation failures (e.g., Pydantic ValidationErrors) and redirects the generation trajectory, forcing the agent into a recursive backtracking search to rewrite the isolated subgraph via `failing_pointers`.
 
-    EPISTEMIC BOUNDS: The fault_id is cryptographically tied to a 128-char CID. The failing_pointers array is deterministically sorted by the _sort_failing_pointers hook to preserve RFC 8785 canonical hashing and map exact JSON paths without ambiguity.
+    EPISTEMIC BOUNDS: The `fault_id` is cryptographically tied to a 128-char CID. The `failing_pointers` array (max_length=2000 per string) is deterministically sorted by the `_sort_failing_pointers` hook to preserve RFC 8785 canonical hashing and map exact JSON paths without ambiguity.
 
-    MCP ROUTING TRIGGERS: Dual-Process Theory, System 2 Self-Correction, Non-Monotonic Revision, Deterministic Feedback Loop, Latent State Remediation
+    MCP ROUTING TRIGGERS: Dual-Process Theory, Non-Monotonic Revision, System 2 Remediation, Backtracking Search, Abstract Syntax Tree
     """
 
     fault_id: str = Field(
