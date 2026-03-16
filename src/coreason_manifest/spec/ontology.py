@@ -7462,8 +7462,7 @@ class StateContract(CoreasonBaseState):
         description="If True, the orchestrator must reject any state mutation that fails the schema definition.",
     )
     decoding_policy: ConstrainedDecodingPolicy | None = Field(
-        default=None,
-        description="The optional hardware-level execution limits for token masking."
+        default=None, description="The optional hardware-level execution limits for token masking."
     )
 
 
@@ -10095,31 +10094,31 @@ class EpistemicCurriculumManifest(CoreasonBaseState):
 
 class ConstrainedDecodingPolicy(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: ConstrainedDecodingPolicy is a rigid mathematical boundary enforcing systemic constraints 
-    globally. Dictates the hardware-level execution limits for the token sampling phase by converting structural 
+    AGENT INSTRUCTION: ConstrainedDecodingPolicy is a rigid mathematical boundary enforcing systemic constraints
+    globally. Dictates the hardware-level execution limits for the token sampling phase by converting structural
     formatting from a probabilistic neural suggestion into a deterministic physics problem.
 
-    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation by physically 
-    suffocating invalid token probabilities. It instructs the inference engine (e.g., Outlines, XGrammar) 
-    to compile a Deterministic Finite Automaton (DFA) or Pushdown Automaton (PDA) and mechanically overwrite 
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation by physically
+    suffocating invalid token probabilities. It instructs the inference engine (e.g., Outlines, XGrammar)
+    to compile a Deterministic Finite Automaton (DFA) or Pushdown Automaton (PDA) and mechanically overwrite
     illegal token logits to negative infinity.
 
-    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals 
-    on fields: enforcement_strategy, compiler_backend. All field limits must be strictly validated at 
+    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals
+    on fields: enforcement_strategy, compiler_backend. All field limits must be strictly validated at
     instantiation to prevent epistemic contagion and prompt-injection payload sabotage.
 
     MCP ROUTING TRIGGERS: FSM Logit Masking, Constrained Decoding, Tokenizer Interception, Hardware Execution Boundary
     """
+
     enforcement_strategy: Literal["fsm_logit_mask"] = Field(
-        default="fsm_logit_mask",
-        description="The mechanistic strategy for intercepting the LLM forward pass."
+        default="fsm_logit_mask", description="The mechanistic strategy for intercepting the LLM forward pass."
     )
     compiler_backend: Literal["outlines", "xgrammar", "llama_cpp", "agnostic"] = Field(
         description="The C++/CUDA backend used to compile the CFG or Regex into a DFA/PDA."
     )
     terminate_on_eos_leak: bool = Field(
         default=True,
-        description="If True, mathematically forces the engine to halt if the LLM attempts to generate an EOS token before the FSM reaches an accepting state."
+        description="If True, mathematically forces the engine to halt if the LLM attempts to generate an EOS token before the FSM reaches an accepting state.",
     )
 
 

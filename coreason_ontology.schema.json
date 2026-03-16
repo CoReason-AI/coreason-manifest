@@ -2455,8 +2455,15 @@
           "maxLength": 2000,
           "title": "Final Answer Regex",
           "type": "string"
+        },
+        "decoding_policy": {
+          "$ref": "#/$defs/ConstrainedDecodingPolicy",
+          "description": "The mandatory hardware-level execution limits for token masking."
         }
       },
+      "required": [
+        "decoding_policy"
+      ],
       "title": "CognitiveFormatContract",
       "type": "object"
     },
@@ -3263,6 +3270,41 @@
         "forbidden_intents"
       ],
       "title": "ConstitutionalPolicy",
+      "type": "object"
+    },
+    "ConstrainedDecodingPolicy": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: ConstrainedDecodingPolicy is a rigid mathematical boundary enforcing systemic constraints\nglobally. Dictates the hardware-level execution limits for the token sampling phase by converting structural\nformatting from a probabilistic neural suggestion into a deterministic physics problem.\n\nCAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation by physically\nsuffocating invalid token probabilities. It instructs the inference engine (e.g., Outlines, XGrammar)\nto compile a Deterministic Finite Automaton (DFA) or Pushdown Automaton (PDA) and mechanically overwrite\nillegal token logits to negative infinity.\n\nEPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals\non fields: enforcement_strategy, compiler_backend. All field limits must be strictly validated at\ninstantiation to prevent epistemic contagion and prompt-injection payload sabotage.\n\nMCP ROUTING TRIGGERS: FSM Logit Masking, Constrained Decoding, Tokenizer Interception, Hardware Execution Boundary",
+      "properties": {
+        "enforcement_strategy": {
+          "const": "fsm_logit_mask",
+          "default": "fsm_logit_mask",
+          "description": "The mechanistic strategy for intercepting the LLM forward pass.",
+          "title": "Enforcement Strategy",
+          "type": "string"
+        },
+        "compiler_backend": {
+          "description": "The C++/CUDA backend used to compile the CFG or Regex into a DFA/PDA.",
+          "enum": [
+            "outlines",
+            "xgrammar",
+            "llama_cpp",
+            "agnostic"
+          ],
+          "title": "Compiler Backend",
+          "type": "string"
+        },
+        "terminate_on_eos_leak": {
+          "default": true,
+          "description": "If True, mathematically forces the engine to halt if the LLM attempts to generate an EOS token before the FSM reaches an accepting state.",
+          "title": "Terminate On Eos Leak",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "compiler_backend"
+      ],
+      "title": "ConstrainedDecodingPolicy",
       "type": "object"
     },
     "ContextExpansionPolicy": {
@@ -12087,6 +12129,18 @@
           "description": "If True, the orchestrator must reject any state mutation that fails the schema definition.",
           "title": "Strict Validation",
           "type": "boolean"
+        },
+        "decoding_policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ConstrainedDecodingPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The optional hardware-level execution limits for token masking."
         }
       },
       "required": [
