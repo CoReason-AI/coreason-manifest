@@ -998,6 +998,23 @@ class SecureSubSessionState(CoreasonBaseState):
 
 
 class DefeasibleCascadeEvent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A cryptographically frozen historical fact representing the active
+    propagation of an undercutting defeater within an Abstract Argumentation Framework. As an
+    ...Event suffix, this object is an append-only coordinate on the Merkle-DAG that the LLM
+    must never hallucinate a mutation to.
+
+    CAUSAL AFFORDANCE: Executes the physical quarantine of the quarantined_event_ids subgraph,
+    mathematically zeroing out their probability mass and halting all execution branches
+    dependent on the root_falsified_event_id.
+
+    EPISTEMIC BOUNDS: Deterministic canonical hashing is guaranteed by the @model_validator
+    which strictly sorts quarantined_event_ids. The propagated_decay_factor float is bounded
+    (ge=0.0, le=1.0), capping the maximum entropy penalty per edge traversal.
+
+    MCP ROUTING TRIGGERS: Abstract Argumentation, Undercutting Defeater, Epistemic Contagion,
+    Wave Collapse, Quarantine Topology
+    """
     cascade_id: str = Field(
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
@@ -1081,6 +1098,22 @@ class MultimodalTokenAnchorState(CoreasonBaseState):
 
 
 class RollbackIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A kinetic execution trigger initiating a macroscopic Pearlian
+    counterfactual reversal, mathematically rewinding the state vector to a pristine historical
+    Merkle root. As an ...Intent suffix, the LLM may execute non-monotonic reasoning here.
+
+    CAUSAL AFFORDANCE: Forces the orchestrator to execute a Pearlian do-operator intervention
+    ($do(X=x)$), flushing all invalidated_node_ids from the active context and restoring the
+    topology to the target_event_id coordinate.
+
+    EPISTEMIC BOUNDS: Deterministic execution is mathematically guaranteed by the
+    @model_validator which strictly alphabetizes invalidated_node_ids via sorted() prior to
+    RFC 8785 canonical hashing, preventing Byzantine replay divergence.
+
+    MCP ROUTING TRIGGERS: Pearlian Counterfactual, Causal Reversal, State Vector Rollback,
+    Temporal Negation, Topological Falsification
+    """
     request_id: str = Field(
         min_length=1,
         max_length=128,
@@ -4251,6 +4284,23 @@ class NeuroSymbolicHandoffContract(CoreasonBaseState):
 
 
 class NormativeDriftEvent(BaseStateEvent):
+    """
+    AGENT INSTRUCTION: A cryptographically frozen historical fact tracking the Kullback-Leibler
+    (KL) divergence between the swarm's active behavioral manifold and its foundational
+    ConstitutionalPolicy. As an ...Event suffix, this is an append-only coordinate on the
+    Merkle-DAG that the LLM must never hallucinate a mutation to.
+
+    CAUSAL AFFORDANCE: Emits a deterministic topological signal that the causal graph is
+    experiencing logical friction against the tripped_rule_id, unlocking the ability for the
+    orchestrator to inject a System2RemediationIntent constraint.
+
+    EPISTEMIC BOUNDS: Mathematically bounded by the continuous float measured_semantic_drift
+    (le=1000000000.0) and cryptographically tied to the exact contradiction_proof_hash
+    (SHA-256 pattern ^[a-f0-9]{64}$) proving the anomaly via ThoughtBranch trace.
+
+    MCP ROUTING TRIGGERS: Kullback-Leibler Divergence, Normative Drift, Distributional Shift,
+    Semantic Friction, Constitutional Alignment
+    """
     type: Literal["normative_drift"] = Field(
         default="normative_drift", description="Discriminator type for a normative drift event."
     )
@@ -5261,6 +5311,23 @@ class TraceExportManifest(CoreasonBaseState):
 
 
 class TruthMaintenancePolicy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Implements a Non-Monotonic Truth Maintenance System (TMS) governing
+    belief retraction across the Merkle-DAG. As a ...Policy suffix, this object defines rigid
+    mathematical boundaries that the orchestrator must enforce globally.
+
+    CAUSAL AFFORDANCE: Authorizes the orchestrator to automatically sever downstream
+    SemanticEdgeState vectors when an upstream axiom is falsified, halting epistemic contagion
+    across the swarm topology.
+
+    EPISTEMIC BOUNDS: Physically restricts catastrophic unravelling via integer limits on
+    max_cascade_depth (le=1000000000, gt=0) and max_quarantine_blast_radius (le=1000000000,
+    gt=0). Modulates continuous entropy via decay_propagation_rate (ge=0.0, le=1.0) and
+    enforces a minimum certainty floor via epistemic_quarantine_threshold (ge=0.0, le=1.0).
+
+    MCP ROUTING TRIGGERS: Truth Maintenance System, Non-Monotonic Logic, Defeasible Reasoning,
+    Belief Revision, Causal Graph Ablation
+    """
     decay_propagation_rate: float = Field(
         ge=0.0, le=1.0, description="Entropy Penalty applied per edge traversal during a defeasible cascade."
     )
