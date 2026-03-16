@@ -295,6 +295,38 @@
       "title": "AdjudicationRubricProfile",
       "type": "object"
     },
+    "AdversarialEmulationProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Orchestrates the simulation of complex adversarial actor heuristics.\n\nCAUSAL AFFORDANCE: Emulates advanced evasion tactics including non-linear spatial vectors.\n\nEPISTEMIC BOUNDS: Contains rigid constraints governing kinetic and environmental spoofing.\n\nMCP ROUTING TRIGGERS: Threat Emulation, Adversarial Actor, Evasion Tactics",
+      "properties": {
+        "kinematic_noise": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/KinematicNoiseProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The physical perturbation constraints."
+        },
+        "environmental_spoofing": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EnvironmentalSpoofingProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The hardware and DOM spoofing constraints."
+        }
+      },
+      "title": "AdversarialEmulationProfile",
+      "type": "object"
+    },
     "AdversarialMarketTopologyManifest": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A Zero-Cost Macro abstraction that mathematically projects a Zero-Sum Minimax game into a rigid Red/Blue team CouncilTopologyManifest. As a ...Manifest suffix, this defines a frozen coordinate of a topological structure.\n\nCAUSAL AFFORDANCE: Deterministically compiles into a fully bounded Council topology, forcing the generative router to evaluate claims through adversarial debate before the orchestrator resolves equilibrium via the designated market rules.\n\nEPISTEMIC BOUNDS: The @model_validator verify_disjoint_sets mathematically guarantees that blue_team_ids, red_team_ids, and the adjudicator_id are strictly disjoint to prevent self-dealing or topological paradoxes. Arrays are deterministically sorted to preserve RFC 8785 canonical hashes.\n\nMCP ROUTING TRIGGERS: Zero-Sum Minimax Game, Red Team vs Blue Team, Macro Abstraction, Generative Adversarial Networks, Topological Compilation",
@@ -574,6 +606,18 @@
           "description": "Discriminator for an Agent node.",
           "title": "Type",
           "type": "string"
+        },
+        "adversarial_emulation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AdversarialEmulationProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The deterministic emulation rules for simulating evasive behaviors."
         },
         "logit_steganography": {
           "anyOf": [
@@ -4811,6 +4855,30 @@
       "title": "EnsembleTopologyProfile",
       "type": "object"
     },
+    "EnvironmentalSpoofingProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Mathematically spoofs hardware and environmental markers.\n\nCAUSAL AFFORDANCE: Bypasses static fingerprinting heuristics by mutating DOM properties.\n\nEPISTEMIC BOUNDS: Bounded by rigid string constraints to prevent payload bloat.\n\nMCP ROUTING TRIGGERS: DOM Spoofing, Fingerprint Mutation, Environmental Marker",
+      "properties": {
+        "webgl_entropy_seed_hash": {
+          "description": "The SHA-256 hash used to deterministically alter WebGL rendering arrays.",
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Webgl Entropy Seed Hash",
+          "type": "string"
+        },
+        "canvas_noise_seed": {
+          "description": "The deterministic seed used to slightly mutate Canvas 2D render pixels.",
+          "maxLength": 128,
+          "title": "Canvas Noise Seed",
+          "type": "string"
+        }
+      },
+      "required": [
+        "webgl_entropy_seed_hash",
+        "canvas_noise_seed"
+      ],
+      "title": "EnvironmentalSpoofingProfile",
+      "type": "object"
+    },
     "EphemeralNamespacePartitionState": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements a hardware-level Sandboxing and Trusted Execution\nEnvironment (TEE) paradigm, utilizing WASI, eBPF, or zkVMs to safely execute\nexogenous bytecode. As a ...State suffix, this is a declarative, frozen snapshot of\nan execution geometry.\n\nCAUSAL AFFORDANCE: Physically isolates kinetic execution from the host OS via\nexecution_runtime Literal [\"wasm32-wasi\", \"riscv32-zkvm\", \"bpf\"], authorizing\nthe orchestrator to instantiate a temporary virtual machine strictly conforming to\nallow_network_egress (default=False) and allow_subprocess_spawning (default=False).\n\nEPISTEMIC BOUNDS: The Halting Problem is managed via max_ttl_seconds (le=86400,\ngt=0), and memory exhaustion is prevented via max_vram_mb (le=1000000000, gt=0).\nThe @model_validator validate_cryptographic_hashes enforces SHA-256 regex\n(^[a-f0-9]{64}$); a second @model_validator sort_arrays deterministically sorts the\nauthorized_bytecode_hashes for RFC 8785 canonical hashing.\n\nMCP ROUTING TRIGGERS: WebAssembly System Interface, Zero-Knowledge Virtual Machine,\neBPF, Execution Sandbox, Arbitrary Code Execution Mitigation",
@@ -8419,6 +8487,32 @@
           "type": "null"
         }
       ]
+    },
+    "KinematicNoiseProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements non-linear stochastic perturbations to physical trajectories.\n\nCAUSAL AFFORDANCE: Mutates continuous polynomial control points.\n\nEPISTEMIC BOUNDS: Clamped by pink_noise_amplitude (le=1.0).\n\nMCP ROUTING TRIGGERS: Mathematical Kinematics, Noise, Perturbation, Stochastic Vector",
+      "properties": {
+        "pink_noise_amplitude": {
+          "description": "The mathematical limit of non-linear noise injected.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Pink Noise Amplitude",
+          "type": "number"
+        },
+        "frequency_hz": {
+          "description": "The frequency of the injected noise.",
+          "maximum": 1000.0,
+          "minimum": 0.0,
+          "title": "Frequency Hz",
+          "type": "number"
+        }
+      },
+      "required": [
+        "pink_noise_amplitude",
+        "frequency_hz"
+      ],
+      "title": "KinematicNoiseProfile",
+      "type": "object"
     },
     "KineticBudgetPolicy": {
       "additionalProperties": false,
@@ -12166,6 +12260,18 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Employs Mathematical Kinematics and Fitts's Law to project precise, non-linear physical interactions across an exogenous UI manifold.\n\nCAUSAL AFFORDANCE: Authorizes the translation of latent spatial targets into OS-level actuation, utilizing bezier_control_points to construct continuous polynomial trajectories that simulate human motor control and bypass bot-evasive heuristics.\n\nEPISTEMIC BOUNDS: Spatial execution is clamped to normalized Euclidean limits (ge=0.0, le=1.0) via the nested SpatialCoordinateProfile. Execution liveness is temporally guillotined by trajectory_duration_ms (le=86400000).\n\nMCP ROUTING TRIGGERS: Mathematical Kinematics, Bezier Geometry, Fitts's Law, OS-Level Actuation, Non-Linear Trajectory",
       "properties": {
+        "noise_profile": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/KinematicNoiseProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematical constraints for applying stochastic perturbations."
+        },
         "action_type": {
           "description": "The specific kinematic interaction paradigm.",
           "enum": [

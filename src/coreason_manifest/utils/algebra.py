@@ -532,7 +532,6 @@ def extract_webgl_entropy_seed_hash(profile: ontology.AgentNodeProfile) -> str |
     A pure mathematical functor to passively extract the webgl_entropy_seed_hash
     from an AgentNodeProfile to ensure the orchestrator can natively access spoofing profiles.
     """
-    if profile.adversarial_emulation is not None:
-        if profile.adversarial_emulation.environmental_spoofing is not None:
-            return profile.adversarial_emulation.environmental_spoofing.webgl_entropy_seed_hash
+    if profile.adversarial_emulation is not None and profile.adversarial_emulation.environmental_spoofing is not None:
+        return profile.adversarial_emulation.environmental_spoofing.webgl_entropy_seed_hash
     return None
