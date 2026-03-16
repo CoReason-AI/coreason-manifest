@@ -1032,8 +1032,8 @@ class GradingCriterionProfile(CoreasonBaseState):
     (ge=0.0, le=100.0). The geometric perimeter is locked to a 128-char criterion_id CID
     regex.
 
-    MCP ROUTING TRIGGERS: Multi-Attribute Utility Theory, Objective Dimension,
-    Adjudication Heuristic, Scalar Weighting, Dimensional Check
+    MCP ROUTING TRIGGERS: Multi-Criteria Decision Analysis, Dimensional Weighting,
+    Behavioral Scoring, MCDA, Scalar Boundary
     """
 
     criterion_id: str = Field(
@@ -1053,8 +1053,8 @@ class AdjudicationRubricProfile(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Formalizes an Aggregation Function for Multi-Criteria Decision
     Analysis (MCDA), compiling multiple utility dimensions into a definitive evaluation
-    boundary for the swarm. As a ...Profile suffix, this is a declarative property
-    descriptor.
+    boundary for the swarm. As a ...Profile suffix, this defines a rigid mathematical
+    boundary.
 
     CAUSAL AFFORDANCE: Instructs the orchestrator's verification engine on how to
     calculate the total weighted score of a generated trajectory, triggering a
@@ -1065,8 +1065,8 @@ class AdjudicationRubricProfile(CoreasonBaseState):
     sort_arrays deterministically sorts the criteria array by criterion_id, guaranteeing
     invariant RFC 8785 canonical hashing.
 
-    MCP ROUTING TRIGGERS: Multi-Criteria Decision Analysis, Aggregation Function,
-    Adjudication Rubric, RFC 8785 Canonicalization, Evaluation Threshold
+    MCP ROUTING TRIGGERS: Evaluation Manifold, Threshold Gating, Deterministic Rubric,
+    RFC 8785 Canonicalization, Binary State Transition
     """
 
     rubric_id: str = Field(
@@ -1948,6 +1948,24 @@ class ActiveInferenceContract(CoreasonBaseState):
 
 
 class AdjudicationIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Triggers a Mixed-Initiative forced resolution to break an
+    epistemic deadlock within a CouncilTopologyManifest using Social Choice Theory. As
+    an ...Intent suffix, the LLM may execute non-monotonic reasoning here.
+
+    CAUSAL AFFORDANCE: Halts the active execution DAG and forces an external oracle
+    (human or system) to definitively collapse the probability wave of competing claims,
+    resolving the Condorcet paradox. The resolution_schema dict carries the strict
+    JSON Schema for the tie-breaking response.
+
+    EPISTEMIC BOUNDS: The state space is bounded by deadlocked_claims (min_length=2,
+    max_length=86400000), deterministically sorted via @model_validator sort_arrays for
+    RFC 8785 canonical hashing. The timeout_action is restricted to a strict Literal
+    ["rollback", "proceed_default", "terminate"] to prevent infinite stalling.
+
+    MCP ROUTING TRIGGERS: Social Choice Theory, Epistemic Deadlock, Mixed-Initiative
+    Resolution, Oracle Forcing, Condorcet Paradox
+    """
     type: Literal["forced_adjudication"] = Field(
         default="forced_adjudication",
         description="Discriminator for breaking deadlocks within a CouncilTopologyManifest.",
@@ -1986,8 +2004,8 @@ class AdjudicationReceipt(CoreasonBaseState):
     max_length=2000. The entire receipt is cryptographically locked to the originating
     rubric_id CID (128-char regex).
 
-    MCP ROUTING TRIGGERS: Outcome Reward Model, Epistemic Ledger Commit, Algorithmic
-    Adjudication, Deterministic Verdict, Utility Realization
+    MCP ROUTING TRIGGERS: Cryptographic Verdict, Deterministic Proof, Grading Execution,
+    Epistemic Commitment, Audit Trail
     """
 
     rubric_id: str = Field(
