@@ -19,7 +19,6 @@ import re
 import urllib.parse
 from enum import StrEnum
 from typing import Annotated, Any, Literal, Self
-from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, StringConstraints, field_validator, model_validator
 
