@@ -2081,22 +2081,23 @@ class ActiveInferenceContract(CoreasonBaseState):
 
 class AdjudicationIntent(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Triggers a Mixed-Initiative forced resolution to break an
-    epistemic deadlock within a CouncilTopologyManifest using Social Choice Theory. As
-    an ...Intent suffix, the LLM may execute non-monotonic reasoning here.
+    AGENT INSTRUCTION: Formalizes Social Choice Theory to resolve the Condorcet Paradox.
+    Triggers a Mixed-Initiative forced resolution to break an epistemic deadlock within a
+    CouncilTopologyManifest. As an ...Intent suffix, the LLM may execute non-monotonic
+    reasoning here.
 
     CAUSAL AFFORDANCE: Halts the active execution DAG and forces an external oracle
-    (human or system) to definitively collapse the probability wave of competing claims,
-    resolving the Condorcet paradox. The resolution_schema dict carries the strict
-    JSON Schema for the tie-breaking response.
+    (human or system) to act as a Dictatorial tie-breaker, definitively collapsing the
+    probability wave of competing claims in a Multi-Criteria Decision Analysis (MCDA)
+    framework.
 
     EPISTEMIC BOUNDS: The state space is bounded by deadlocked_claims (min_length=2,
     max_length=86400000), deterministically sorted via @model_validator sort_arrays for
     RFC 8785 canonical hashing. The timeout_action is restricted to a strict Literal
     ["rollback", "proceed_default", "terminate"] to prevent infinite stalling.
 
-    MCP ROUTING TRIGGERS: Social Choice Theory, Epistemic Deadlock, Mixed-Initiative
-    Resolution, Oracle Forcing, Condorcet Paradox
+    MCP ROUTING TRIGGERS: Social Choice Theory, Condorcet Paradox, MCDA Deadlock,
+    Dictatorial Resolution, Tie-Breaking Heuristic
     """
 
     type: Literal["forced_adjudication"] = Field(
@@ -3613,19 +3614,21 @@ class SemanticDiscoveryIntent(CoreasonBaseState):
 
 class DraftingIntent(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: DraftingIntent is an Active Inference mechanism designed to resolve a detected
-    Epistemic Gap. It is triggered when the swarm lacks the structural parameters necessary to minimize
-    predictive surprise mathematically.
+    AGENT INSTRUCTION: Implements Fristonian Active Inference to minimize Expected Free
+    Energy. It is triggered when the swarm detects a catastrophic Epistemic Gap and lacks
+    the structural parameters necessary to reduce Shannon Entropy autonomously.
 
-    CAUSAL AFFORDANCE: Emits a structural query to an external human oracle to forcefully reduce
-    Shannon Entropy. It suspends autonomous trajectory generation until the missing semantic dimensions
-    are projected back into the working memory partition.
+    CAUSAL AFFORDANCE: Emits a structural query to an external human oracle to explicitly
+    solicit data. It suspends autonomous trajectory generation until the missing semantic
+    dimensions are actively projected back into the working memory partition.
 
-    EPISTEMIC BOUNDS: The human's unstructured cognitive entropy is aggressively forced through a
-    mathematical funnel via the resolution_schema (a strict JSON Schema bounding the acceptable response).
-    If the human fails to satisfy the schema, the timeout_action guarantees deterministic fallback routing.
+    EPISTEMIC BOUNDS: The human's unstructured cognitive entropy is aggressively forced
+    through a mathematical funnel via the resolution_schema (a strict JSON Schema dict,
+    max_length=1000000000). If the human fails to satisfy the bounded schema, the
+    timeout_action guarantees deterministic fallback routing.
 
-    MCP ROUTING TRIGGERS: Active Inference, Shannon Entropy Reduction, Epistemic Gap, Zero-Shot Elicitation, Structural Oracle
+    MCP ROUTING TRIGGERS: Active Inference, Expected Free Energy, Shannon Entropy
+    Reduction, Zero-Shot Elicitation, Epistemic Gap
     """
 
     type: Literal["drafting"] = Field(
@@ -3960,9 +3963,9 @@ class EscalationContract(CoreasonBaseState):
 
 class EscalationIntent(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Orchestrates a Dictatorial Override mechanism within a
-    Zero-Trust Architecture. It is emitted when a rigid mathematical safety
-    boundary (like a Payload Loss Prevention rule) is breached during inference.
+    AGENT INSTRUCTION: Anchors in the Biba Integrity Model to orchestrate a Dictatorial
+    Override mechanism within a Zero-Trust Architecture. It is emitted when a rigid
+    mathematical safety boundary is breached during inference.
 
     CAUSAL AFFORDANCE: Severs the active kinetic thread when a rule is tripped,
     violently halting generation to force the presentation of a resolution_schema.
@@ -3975,8 +3978,8 @@ class EscalationIntent(CoreasonBaseState):
     ["rollback", "proceed_default", "terminate"] to guarantee systemic liveness
     if unhandled.
 
-    MCP ROUTING TRIGGERS: Dictatorial Override, Privilege Escalation, Payload
-    Loss Prevention, Governance Bypass, Cryptographic Sign-Off
+    MCP ROUTING TRIGGERS: Biba Integrity Model, Dictatorial Override, Privilege
+    Escalation, Payload Loss Prevention, Cryptographic Sign-Off
     """
 
     type: Literal["escalation"] = Field(
@@ -5047,22 +5050,22 @@ class HypothesisStakeReceipt(CoreasonBaseState):
 
 class InformationalIntent(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Formalizes Synchronous Mixed-Initiative Control. The agent
-    requires explicit acknowledgment from an external Oracle before committing the
-    next probability wave collapse. As an ...Intent suffix, this yields control.
+    AGENT INSTRUCTION: Formalizes Synchronous Epistemic Signaling within a Mixed-Initiative
+    Control paradigm. The agent requires explicit acknowledgment from an external Oracle
+    before committing the next probability wave collapse. As an ...Intent suffix, this
+    yields control.
 
-    CAUSAL AFFORDANCE: Conditionally suspends the continuous execution DAG to
-    project an observational message to the human operator. Resumption is
-    dynamically governed by the deterministic timeout_action.
+    CAUSAL AFFORDANCE: Conditionally suspends the continuous execution DAG to project a
+    read-only observational state manifold to the human operator. Resumption is dynamically
+    governed by the deterministic timeout_action.
 
     EPISTEMIC BOUNDS: The semantic payload (message) is physically clamped to
-    max_length=2000 to prevent UI dictionary bombing. The timeout_action is
-    locked to a strict Finite State Machine Literal ["rollback",
-    "proceed_default", "terminate"], solving the Halting Problem for
-    unresponsive oracles.
+    max_length=2000 to prevent UI dictionary bombing. The timeout_action is locked to a
+    strict Finite State Machine Literal ["rollback", "proceed_default", "terminate"],
+    solving the Halting Problem for unresponsive oracles.
 
-    MCP ROUTING TRIGGERS: Mixed-Initiative Control, Synchronous Halt, Finite
-    State Machine, Temporal Timeout, Oracle Projection
+    MCP ROUTING TRIGGERS: Synchronous Epistemic Signaling, Mixed-Initiative Control,
+    Finite State Machine, Oracle Projection, Halting Problem
     """
 
     type: Literal["informational"] = Field(
@@ -5367,19 +5370,21 @@ type AnyPanelProfile = Annotated[
 
 class InterventionIntent(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: InterventionIntent acts as a formal Mixed-Initiative Control mechanism within
-    Supervisory Control Theory. It is a kinetic trigger that mathematically suspends the active
-    execution graph, transferring decision authority to an external human or oversight oracle.
+    AGENT INSTRUCTION: Implements Supervisory Control Theory (Ramadge & Wonham) for
+    Discrete-Event Systems, acting as a formal Mixed-Initiative Control mechanism. As an
+    ...Intent suffix, this represents an authorized kinetic trigger.
 
-    CAUSAL AFFORDANCE: Physically halts the Directed Acyclic Graph (DAG) traversal or Petri net
-    reachability loop. It prevents the swarm from committing a state transition until an explicit,
-    authorized Pearlian intervention is negotiated.
+    CAUSAL AFFORDANCE: Physically halts the active Directed Acyclic Graph (DAG) traversal
+    or Petri Net reachability loop, preventing the swarm from committing a state transition
+    until an explicit, authorized Pearlian intervention is negotiated by the human supervisor.
 
-    EPISTEMIC BOUNDS: Execution suspension is strictly bounded by the temporal logic of the
-    adjudication_deadline (UNIX timestamp) and the FallbackSLA. If the deadline expires, the
-    orchestrator mechanically breaks the halt to guarantee systemic liveness.
+    EPISTEMIC BOUNDS: Execution suspension is rigorously bounded by the temporal logic of
+    the adjudication_deadline (a float representing a UNIX timestamp) and the attached
+    FallbackSLA. If the temporal limit expires, the orchestrator mechanically breaks the
+    halt via the timeout_action to solve the Halting Problem and guarantee systemic liveness.
 
-    MCP ROUTING TRIGGERS: Supervisory Control Theory, Mixed-Initiative System, Execution Halting, Bounded Delay, Human-in-the-Loop
+    MCP ROUTING TRIGGERS: Supervisory Control Theory, Mixed-Initiative System,
+    Discrete-Event System, Bounded Delay, Pearlian Intervention
     """
 
     type: Literal["request"] = Field(default="request", description="The type of the intervention payload.")
