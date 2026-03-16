@@ -2244,7 +2244,25 @@ class BoundedInterventionScopePolicy(CoreasonBaseState):
 
 
 class BoundedJSONRPCIntent(CoreasonBaseState):
-    """Base schema enforcing rigorous JSON-RPC 2.0 boundaries to prevent DoS attacks."""
+    """
+    AGENT INSTRUCTION: Enforces the formal JSON-RPC 2.0 specification as a stateless,
+    deterministic message-passing protocol, acting as the primary algorithmic firewall
+    at the Zero-Trust network boundary. As an ...Intent suffix, this represents an
+    authorized kinetic execution trigger.
+
+    CAUSAL AFFORDANCE: Unlocks remote procedure execution while preventing JSON Bombing
+    and Algorithmic Complexity Attacks. The method field (max_length=1000) specifies the
+    RPC target. The id field (128-char CID regex | int le=1000000000 | None) binds
+    request-response correlation.
+
+    EPISTEMIC BOUNDS: The @field_validator validate_params_depth_and_size mathematically
+    bounds recursive payload geometry (params) to: max depth=10, dict keys=100, key
+    length=1000, list elements=1000, string length=10000. The jsonrpc field is a rigid
+    Literal["2.0"] automaton.
+
+    MCP ROUTING TRIGGERS: JSON-RPC 2.0, Stateless RPC, Algorithmic Complexity Attack,
+    JSON Bombing Prevention, Deterministic Finite Automaton
+    """
 
     jsonrpc: Literal["2.0"] = Field(..., description="JSON-RPC version.")
     method: str = Field(..., max_length=1000, description="Method to be invoked.")
@@ -4672,7 +4690,23 @@ class InterventionalCausalTask(CoreasonBaseState):
 
 
 class JSONRPCErrorState(CoreasonBaseState):
-    """JSON-RPC 2.0 Error object."""
+    """
+    AGENT INSTRUCTION: A mathematically constrained error vector reflecting execution
+    collapse within the JSON-RPC 2.0 specification. As a ...State suffix, this is a
+    frozen N-dimensional coordinate.
+
+    CAUSAL AFFORDANCE: Projects execution faults back across the network boundary
+    without risking secondary buffer overflow attacks during serialization. The
+    error_payload (alias="data", External Protocol Exemption) carries optional
+    structured diagnostic data.
+
+    EPISTEMIC BOUNDS: The code integer is rigidly capped (le=1000000000, no ge bound)
+    and the semantic message is restricted to max_length=2000 to prevent log-poisoning
+    during telemetry serialization.
+
+    MCP ROUTING TRIGGERS: Fault Projection, Buffer Overflow Prevention, Error Vector,
+    Log Poisoning, Stateful Rollback
+    """
 
     code: int = Field(..., le=1000000000, description="A Number that indicates the error type that occurred.")
     message: str = Field(
@@ -4688,7 +4722,21 @@ class JSONRPCErrorState(CoreasonBaseState):
 
 
 class JSONRPCErrorResponseState(CoreasonBaseState):
-    """JSON-RPC 2.0 Error Response object."""
+    """
+    AGENT INSTRUCTION: The definitive top-level envelope for transmitting a
+    JSONRPCErrorState across a Zero-Trust Architecture boundary. As a ...State suffix,
+    this is a frozen N-dimensional coordinate.
+
+    CAUSAL AFFORDANCE: Concludes a failed Distributed RPC call via the error
+    (JSONRPCErrorState) typed reference, forcing the orchestrator to sever the current
+    execution tree and apply necessary truth maintenance.
+
+    EPISTEMIC BOUNDS: The jsonrpc field is a rigid Literal["2.0"] automaton. The id is
+    topologically locked to a 128-char CID regex or an integer (le=1000000000) or None.
+
+    MCP ROUTING TRIGGERS: Zero-Trust Architecture, Distributed RPC, Execution Severing,
+    Truth Maintenance, Fault Envelope
+    """
 
     jsonrpc: Literal["2.0"] = Field(..., description="JSON-RPC version.")
     error: JSONRPCErrorState = Field(..., description="The error object.")
@@ -5081,7 +5129,22 @@ class OntologicalSurfaceProjectionManifest(CoreasonBaseState):
 
 
 class MCPClientIntent(BoundedJSONRPCIntent):
-    """Strict JSON-RPC 2.0 structure for MCP client messages."""
+    """
+    AGENT INSTRUCTION: An inherited JSON-RPC 2.0 substrate specifically binding Model
+    Context Protocol (MCP) client intent emissions to the frontend UI. As an ...Intent
+    suffix, this represents an authorized kinetic execution trigger.
+
+    CAUSAL AFFORDANCE: Executes an exact semantic signal (Literal["mcp.ui.emit_intent"])
+    to bubble internal agent states (like drafting or adjudication) to the human
+    operator.
+
+    EPISTEMIC BOUNDS: Inherits all recursive depth bounds from BoundedJSONRPCIntent and
+    mathematically clamps the method space to a singular Literal["mcp.ui.emit_intent"]
+    to prevent execution drift.
+
+    MCP ROUTING TRIGGERS: Model Context Protocol, Intent Bubbling, Human-in-the-Loop,
+    Semantic Signaling, Method Clamping
+    """
 
     method: Literal["mcp.ui.emit_intent"] = Field(..., le=1000000000, description="Method for intent bubbling.")
 
