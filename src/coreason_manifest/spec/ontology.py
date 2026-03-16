@@ -3710,8 +3710,13 @@ type EncodingChannelProfile = Literal["x", "y", "color", "size", "opacity", "sha
 
 class EnsembleTopologyProfile(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Declarative mapping of concurrent topology branches for test-time superposition.
-    Must map to strict W3C DIDs (NodeIdentifierStates) and provide an explicit wave-collapse opcode.
+    AGENT INSTRUCTION: Implements Ensemble Learning and Quantum-like Superposition to evaluate multiple divergent reasoning topologies simultaneously before collapsing them into a singular truth.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator to execute the specified concurrent branches in parallel, holding the state in superposition until the fusion function mathematically collapses the wave.
+
+    EPISTEMIC BOUNDS: Requires a minimum of 2 concurrent branches (minItems=2). The wave-collapse opcode is strictly limited to the Literal FSM ["weighted_consensus", "highest_confidence", "brier_score_collapse"]. The @model_validator guarantees invariant RFC 8785 canonical hashing by sorting the DIDs.
+
+    MCP ROUTING TRIGGERS: Ensemble Learning, Superposition Wave Collapse, Brier Score, Parallel Execution, Condorcet's Jury Theorem
     """
 
     concurrent_branch_ids: list[NodeIdentifierState] = Field(
@@ -8190,8 +8195,13 @@ class TruthMaintenancePolicy(CoreasonBaseState):
 
 class UtilityJustificationGraphReceipt(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Immutable cryptographic receipt of multi-dimensional utility routing.
-    If variance threshold falls below delta, fallback to deterministic ensemble superposition.
+    AGENT INSTRUCTION: Formalizes Multi-Attribute Utility Theory (MAUT) to capture the exact multi-dimensional trade-offs (Pareto vectors) of a given routing decision.
+
+    CAUSAL AFFORDANCE: Provides explicit mathematical justification for an agent's trajectory. If the variance of the utility distribution exceeds the threshold, it physically forces the orchestrator to deploy the embedded ensemble specification for deterministic resolution.
+
+    EPISTEMIC BOUNDS: The superposition variance threshold is physically clamped (ge=0.0, le=1000000000.0). The @model_validator mathematically forbids a 0.0 variance threshold from co-existing with an active ensemble specification, as absolute certainty physically precludes superposition.
+
+    MCP ROUTING TRIGGERS: Multi-Attribute Utility Theory, Pareto Efficiency, Variance Reduction, Fallback Superposition, Utility Routing
     """
 
     optimizing_vectors: dict[
@@ -9862,6 +9872,16 @@ class EpistemicTopologicalProofManifest(CoreasonBaseState):
 
 
 class CognitiveSamplingPolicy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Implements the Upper Confidence Bound (UCB) algorithm and Inverse Frequency Smoothing to regulate the exploration-exploitation geometry of Monte Carlo Tree Search (MCTS).
+
+    CAUSAL AFFORDANCE: Physically regulates the search tree depth and dynamically prioritizes unexplored nodes, forcing the orchestrator to expand its epistemic search space before converging.
+
+    EPISTEMIC BOUNDS: Graph traversal depth is rigidly cut off by max_complexity_hops (ge=1, le=1000000000). The mathematical exploration bonus is constrained by inverse_frequency_smoothing_epsilon (le=1.0), preventing exponential divergence in node prioritization.
+
+    MCP ROUTING TRIGGERS: Monte Carlo Tree Search, Upper Confidence Bound, Inverse Frequency Smoothing, Heuristic Exploration, Graph Traversal
+    """
+
     max_complexity_hops: int = Field(le=1000000000, ge=1, description="The absolute physical limit on path length N.")
     inverse_frequency_smoothing_epsilon: float = Field(
         le=1.0, default=1.0, description="The epsilon constant ensuring unsampled nodes are mathematically prioritized."
