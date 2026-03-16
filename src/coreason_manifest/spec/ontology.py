@@ -5170,6 +5170,42 @@ class GenerativeTaxonomyManifest(CoreasonBaseState):
         return self
 
 
+class LatentSchemaInferenceIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Authorizes Abductive Reasoning on intercepted unstructured byte streams
+    or memory heaps to probabilistically derive a deterministic StateContract. As an ...Intent
+    suffix, the LLM may execute non-monotonic reasoning here.
+
+    CAUSAL AFFORDANCE: Triggers the LLM's representation engineering engine to process a
+    chaotic target_buffer_id and output a rigid JSON schema, bridging the gap between
+    exogenous data and the structural Hollow Data Plane.
+
+    EPISTEMIC BOUNDS: State-Space explosion is prevented by bounding max_schema_depth (le=10)
+    and max_properties (le=1000) to mathematically prevent recursive JSON-bombing during
+    schema generation. The target_buffer_id is locked to a 128-char CID.
+
+    MCP ROUTING TRIGGERS: Schema Inference, Memory Heap Parsing, Abductive Reasoning,
+    XHR Interception, Unstructured Transmutation
+    """
+
+    type: Literal["latent_schema_inference"] = Field(
+        default="latent_schema_inference", description="Discriminator for unstructured payload schema deduction."
+    )
+    target_buffer_id: str = Field(
+        min_length=1,
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        description="The CID pointing to the TerminalBufferState or raw intercepted byte stream.",
+    )
+    max_schema_depth: int = Field(
+        le=10, ge=1, description="The maximum recursive depth of the probabilistically generated schema."
+    )
+    max_properties: int = Field(le=1000, ge=1, description="The maximum allowed keys in the deduced JSON dictionary.")
+    require_strict_validation: bool = Field(
+        default=True, description="If True, forces the resulting schema to set additionalProperties=False."
+    )
+
+
 class TaxonomicRestructureIntent(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Executes a kinetic Graph Isomorphism transformation, dynamically
@@ -5248,7 +5284,8 @@ type AnyIntent = Annotated[
     | EscalationIntent
     | SemanticDiscoveryIntent
     | TaxonomicRestructureIntent
-    | LatentProjectionIntent,
+    | LatentProjectionIntent
+    | LatentSchemaInferenceIntent,
     Field(discriminator="type"),
 ]
 
@@ -9823,6 +9860,43 @@ class CognitivePredictionReceipt(BaseStateEvent):
     predicted_top_k_tokens: list[Annotated[str, StringConstraints(max_length=255)]] = Field(min_length=1)
 
 
+class IntentClassificationReceipt(BaseStateEvent):
+    """
+    AGENT INSTRUCTION: A cryptographically frozen historical fact representing the non-monotonic
+    collapse of a high-entropy human natural language string into a discrete, mathematically
+    bounded routing heuristic. As a ...Receipt suffix, this is an append-only Merkle-DAG coordinate.
+
+    CAUSAL AFFORDANCE: Commits the LLM's Softmax classification verdict to the Epistemic Ledger,
+    authorizing the TaxonomicRoutingPolicy or router gate to physically execute the targeted
+    topology or sub-agent.
+
+    EPISTEMIC BOUNDS: The raw_input_string is physically clamped (max_length=100000) to prevent
+    context window buffer overflows. The classification confidence is strictly bound to a
+    normalized float (ge=0.0, le=1.0).
+
+    MCP ROUTING TRIGGERS: Intent Classification, Softmax Gating, High-Entropy Parsing,
+    Routing Heuristic, Semantic Wave Collapse
+    """
+
+    type: Literal["intent_classification"] = Field(
+        default="intent_classification", description="Discriminator type for an intent classification receipt."
+    )
+    raw_input_string: str = Field(
+        max_length=100000, description="The raw, unparsed human natural language instruction."
+    )
+    classified_intent: str = Field(
+        max_length=255, description="The discrete, structurally bounded capability or heuristic mapped by the LLM."
+    )
+    confidence_score: float = Field(ge=0.0, le=1.0, description="The probabilistic certainty of the classification.")
+    routing_policy_id: str | None = Field(
+        min_length=1,
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        default=None,
+        description="The TaxonomicRoutingPolicy CID that governed this classification.",
+    )
+
+
 class EpistemicAxiomVerificationReceipt(BaseStateEvent):
     """
     AGENT INSTRUCTION: Implements automated Natural Language Inference (NLI) and Entailment Verification to mechanically quarantine hallucinated tokens. As a ...Receipt suffix, it represents an immutable cryptographic verdict.
@@ -10373,7 +10447,8 @@ type AnyStateEvent = Annotated[
     | EpistemicAxiomVerificationReceipt
     | CognitiveRewardEvaluationReceipt
     | EpistemicFlowStateReceipt
-    | CausalExplanationEvent,
+    | CausalExplanationEvent
+    | IntentClassificationReceipt,
     Field(discriminator="type", description="A discriminated union of state events."),
 ]
 
@@ -10483,3 +10558,5 @@ EpistemicFlowStateReceipt.model_rebuild()
 TopologicalRewardContract.model_rebuild()
 DifferentiableLogicConstraint.model_rebuild()
 CausalExplanationEvent.model_rebuild()
+LatentSchemaInferenceIntent.model_rebuild()
+IntentClassificationReceipt.model_rebuild()
