@@ -875,7 +875,21 @@ class CognitiveUncertaintyProfile(CoreasonBaseState):
 
 class ConstitutionalPolicy(CoreasonBaseState):
     """
-    Defines a constitutional rule for AI governance.
+    AGENT INSTRUCTION: Formalizes a discrete normative axiom within a Constitutional AI
+    framework to prevent instrumental convergence. As a ...Policy suffix, this object defines
+    rigid mathematical boundaries that the orchestrator must enforce globally.
+
+    CAUSAL AFFORDANCE: Establishes a hard structural boundary that mathematically repels the
+    swarm's generative trajectory away from forbidden semantic manifolds. Violation severity
+    is classified via a strict Literal["low", "medium", "high", "critical"] tier.
+
+    EPISTEMIC BOUNDS: Geometrically restricts the state space by blacklisting specific
+    execution branches via the forbidden_intents array (max_length=1000000000),
+    deterministically sorted by @model_validator to preserve RFC 8785 canonical hashing.
+    The rule_id is bounded to a 128-char CID.
+
+    MCP ROUTING TRIGGERS: Constitutional AI, Value Alignment, Normative Axiom, Instrumental
+    Convergence, Semantic Boundary
     """
 
     rule_id: str = Field(
@@ -2145,7 +2159,22 @@ class CircuitBreakerEvent(CoreasonBaseState):
 
 class ConstitutionalAmendmentIntent(CoreasonBaseState):
     """
-    Proposed amendment generated in response to normative drift detection.
+    AGENT INSTRUCTION: Represents a non-monotonic structural revision trigger within a
+    Defeasible Logic framework, engineered to adapt the GovernancePolicy to
+    out-of-distribution environments. As an ...Intent suffix, the LLM may execute
+    non-monotonic reasoning here.
+
+    CAUSAL AFFORDANCE: Triggers an active topological mutation (Pearlian intervention) to
+    resolve logical friction, applying a strict RFC 6902 JSON Patch (proposed_patch) to the
+    underlying alignment manifold.
+
+    EPISTEMIC BOUNDS: Cryptographically anchored to the specific drift_event_id (regex
+    bounded CID ^[a-zA-Z0-9_.:-]+$) that mathematically justified the revision. The payload
+    is strictly constrained to a JSON Schema object (proposed_patch). The justification
+    field (max_length=2000) bounds the natural language argument.
+
+    MCP ROUTING TRIGGERS: Defeasible Logic, Non-Monotonic Revision, Out-of-Distribution
+    Adaptation, Normative Drift Resolution, Pearlian Intervention
     """
 
     type: Literal["constitutional_amendment"] = Field(
@@ -3441,7 +3470,25 @@ class TokenBurnReceipt(BaseStateEvent):
 
 class GlobalGovernancePolicy(CoreasonBaseState):
     """
-    Global governance bounds for a swarm executing a workflow manifest.
+    AGENT INSTRUCTION: Superimposes macro-economic and thermodynamic constraints over the
+    swarm's execution graph to prevent unbounded compute exhaustion. As a ...Policy suffix,
+    this object defines rigid mathematical boundaries that the orchestrator must enforce
+    globally.
+
+    CAUSAL AFFORDANCE: Acts as the ultimate hardware guillotine, authorizing the orchestrator
+    to physically sever the execution thread if thermodynamic, economic, or temporal budgets
+    are breached. Includes a mandatory zero-trust @model_validator enforcing the Prosperity
+    Public License 3.0 via mandatory_license_rule (rule_id="PPL_3_0_COMPLIANCE",
+    severity="critical").
+
+    EPISTEMIC BOUNDS: Enforces absolute physical ceilings: max_budget_magnitude
+    (le=1000000000), max_global_tokens (le=1000000000), global_timeout_seconds (ge=0,
+    le=86400 — a strict 24-hour TTL), and optional max_carbon_budget_gco2eq (ge=0.0,
+    le=10000.0). An optional FormalVerificationContract provides mathematical proofs of
+    structural correctness.
+
+    MCP ROUTING TRIGGERS: Thermodynamic Compute Limits, Hardware Guillotine, Halting Problem
+    Bounding, ESG Constraint, Execution Envelope
     """
 
     mandatory_license_rule: ConstitutionalPolicy
@@ -3577,7 +3624,20 @@ class DynamicRoutingManifest(CoreasonBaseState):
 
 class GovernancePolicy(CoreasonBaseState):
     """
-    Defines a governance policy comprising multiple constitutional rules.
+    AGENT INSTRUCTION: Aggregates discrete ConstitutionalPolicy nodes into a cohesive,
+    version-controlled Normative Alignment Manifold. As a ...Policy suffix, this object
+    defines rigid mathematical boundaries that the orchestrator must enforce globally.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator to enforce a unified cybernetic governance
+    model across all swarm trajectories, grounding generative actions in a specific semantic
+    version (SemanticVersionState).
+
+    EPISTEMIC BOUNDS: The topological integrity of the manifold is mathematically guaranteed
+    by the @model_validator, which deterministically sorts the rules array by rule_id to
+    prevent Byzantine hash fractures across distributed nodes.
+
+    MCP ROUTING TRIGGERS: Cybernetic Governance, Normative Alignment Manifold, Rule
+    Aggregation, Version Control, RFC 8785 Canonicalization
     """
 
     policy_name: str = Field(max_length=2000, description="Name of the governance policy.")
