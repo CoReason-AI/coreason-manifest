@@ -2166,7 +2166,21 @@ class CausalDirectedEdgeState(CoreasonBaseState):
 
 class CircuitBreakerEvent(CoreasonBaseState):
     """
-    Indicates that a circuit breaker has been tripped for a target node.
+    AGENT INSTRUCTION: Implements the Circuit Breaker control-flow pattern from distributed
+    systems theory to deterministically interrupt cascading failures in the neurosymbolic
+    network. As an ...Event suffix, this is an append-only coordinate on the Merkle-DAG that
+    the LLM must never hallucinate a mutation to.
+
+    CAUSAL AFFORDANCE: Physically severs the active execution thread for the target_node_id
+    (NodeIdentifierState), immediately halting out-of-memory cascades, runaway generation
+    loops, or API rate-limit breaches.
+
+    EPISTEMIC BOUNDS: The fault perimeter is mathematically restricted to a specific
+    NodeIdentifierState (target_node_id). To prevent log-poisoning and VRAM exhaustion, the
+    error_signature is strictly capped at max_length=2000.
+
+    MCP ROUTING TRIGGERS: Control Theory, Circuit Breaker, Cascading Failure Prevention,
+    Telemetry Intercept, Fault Detection
     """
 
     type: Literal["circuit_breaker_event"] = Field(
@@ -3252,7 +3266,21 @@ class FYIIntent(BaseIntent):
 
 class FallbackSLA(CoreasonBaseState):
     """
-    SLA defining bounds on human intervention delays.
+    AGENT INSTRUCTION: Establishes a Hard Real-Time Systems deadline for Supervisory Control
+    Theory interactions, mathematically bounding the Halting Problem during human-in-the-loop
+    pauses. As an ...SLA suffix, this object enforces rigid mathematical boundaries globally.
+
+    CAUSAL AFFORDANCE: Dictates the deterministic timeout_action
+    (Literal["fail_safe", "proceed_with_defaults", "escalate"]) the orchestrator must execute
+    when the temporal limit expires, structurally preventing execution deadlocks. If
+    escalation is selected, traffic routes to the optional escalation_target_node_id.
+
+    EPISTEMIC BOUNDS: The temporal envelope is physically capped by timeout_seconds (gt=0,
+    le=86400 — a strict 24-hour absolute maximum TTL). Escalation routing targets a valid
+    NodeIdentifierState (escalation_target_node_id, default=None).
+
+    MCP ROUTING TRIGGERS: Hard Real-Time Systems, Supervisory Control Theory, Execution
+    Deadlock Prevention, Bounded Delay, Liveness Guarantee
     """
 
     timeout_seconds: int = Field(le=86400, gt=0, description="The maximum allowed delay for a human intervention.")
@@ -3267,7 +3295,19 @@ class FallbackSLA(CoreasonBaseState):
 
 class FallbackIntent(CoreasonBaseState):
     """
-    Indicates that fallback procedures should be triggered for a target node.
+    AGENT INSTRUCTION: Orchestrates Graceful Degradation by executing a deterministic state
+    transition within the swarm's Markov Decision Process (MDP) upon node failure. As an
+    ...Intent suffix, the LLM may execute non-monotonic reasoning here.
+
+    CAUSAL AFFORDANCE: Re-routes the probabilistic execution wave from a failing primary
+    node (target_node_id) to a pre-verified, lower-variance backup node (fallback_node_id),
+    actively bypassing the structural collapse and maintaining systemic liveness.
+
+    EPISTEMIC BOUNDS: Enforces strict structural referential integrity by requiring both
+    target_node_id and fallback_node_id to resolve to valid NodeIdentifierState DIDs.
+
+    MCP ROUTING TRIGGERS: Graceful Degradation, Markov Decision Process, Redundancy Routing,
+    Fail-Safe Transition, Control-Flow Override
     """
 
     type: Literal["fallback_intent"] = Field(
@@ -5112,7 +5152,21 @@ class ComputeProvisioningIntent(CoreasonBaseState):
 
 class QuarantineIntent(CoreasonBaseState):
     """
-    Indicates that a target node should be quarantined.
+    AGENT INSTRUCTION: Triggers an Epistemic Quarantine, utilizing rigid graph partitioning
+    to mathematically isolate a hallucinating, degraded, or Byzantine node from the active
+    working context. As an ...Intent suffix, the LLM may execute non-monotonic reasoning
+    here.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator to sever all outgoing causal edges from the
+    target_node_id (NodeIdentifierState), neutralizing its probability mass in the routing
+    manifold and preventing its entropy from contaminating the EpistemicLedgerState.
+
+    EPISTEMIC BOUNDS: The topological isolation is strictly targeted via a
+    NodeIdentifierState (target_node_id). The causal justification for the graph cut is
+    physically constrained to reason (max_length=2000) to prevent dictionary bombing.
+
+    MCP ROUTING TRIGGERS: Graph Partitioning, Epistemic Quarantine, Byzantine Fault
+    Isolation, Defeasible Logic, Network Isolation
     """
 
     type: Literal["quarantine_intent"] = Field(
