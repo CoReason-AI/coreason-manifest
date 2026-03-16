@@ -8480,7 +8480,9 @@
         },
         "intervention_request_id": {
           "description": "The cryptographic nonce uniquely identifying the intervention request.",
-          "format": "uuid",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Intervention Request Id",
           "type": "string"
         },
@@ -14485,7 +14487,9 @@
         },
         "dag_node_nonce": {
           "description": "The cryptographic nonce tightly binding this signature to the specific Merkle-DAG node.",
-          "format": "uuid",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Dag Node Nonce",
           "type": "string"
         }
