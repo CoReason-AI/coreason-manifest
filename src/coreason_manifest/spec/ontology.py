@@ -4673,7 +4673,15 @@ class GenerativeManifoldSLA(CoreasonBaseState):
 
 
 class GlobalSemanticProfile(CoreasonBaseState):
-    """The immutable receipt of Step 1 ingestion acting as a static structural index of the artifact."""
+    """
+    AGENT INSTRUCTION: Acts as a structural invariant profile mapping the macroscopic dimensional properties of an artifact prior to deep inference.
+
+    CAUSAL AFFORDANCE: Authorizes the orchestrator's routing engine to allocate specific functional experts and reserve physical VRAM budgets without needing to parse the full artifact into the active context window.
+
+    EPISTEMIC BOUNDS: Memory allocation limits are mathematically bounded by token_density (ge=0, le=1000000000). The @model_validator deterministically sorts the detected_modalities enum array, guaranteeing zero-variance RFC 8785 canonical hashing across distributed nodes.
+
+    MCP ROUTING TRIGGERS: Structural Indexing, VRAM Budgeting, Representation Engineering, Modality Detection, RFC 8785 Canonicalization
+    """
 
     artifact_event_id: str = Field(
         max_length=128,
@@ -4697,7 +4705,15 @@ class GlobalSemanticProfile(CoreasonBaseState):
 
 
 class DynamicRoutingManifest(CoreasonBaseState):
-    """The Softmax Router Gate dictating the active execution topology and spot compute allocation."""
+    """
+    AGENT INSTRUCTION: Implements a deterministic Softmax Router Gate to dictate the exact active execution topology, mapping multi-agent subgraphs to specific data modalities.
+
+    CAUSAL AFFORDANCE: Physically directs the thermodynamic compute flow, unlocking specific worker nodes (active_subgraphs) and explicitly bypassing others (bypassed_steps), while locking economic allocations via branch_budgets_magnitude.
+
+    EPISTEMIC BOUNDS: The @model_validator hooks mathematically verify topological soundness: validate_modality_alignment proves no routes to hallucinated modalities exist, and validate_conservation_of_custody ensures bypassed_steps perfectly align with the artifact_event_id.
+
+    MCP ROUTING TRIGGERS: Softmax Router Gate, Sparse Mixture of Experts, Conservation of Custody, Topos Theory, Spot Compute Allocation
+    """
 
     manifest_id: str = Field(
         max_length=128,
@@ -6189,7 +6205,15 @@ class MigrationContract(CoreasonBaseState):
 
 
 class MultimodalArtifactReceipt(CoreasonBaseState):
-    """AGENT INSTRUCTION: The root Genesis Block for an unstructured document entering the Merkle-DAG."""
+    """
+    AGENT INSTRUCTION: Establishes the formal Genesis Block within the Merkle-DAG for unstructured data ingestion, acting as the absolute origin vector for downstream knowledge extraction.
+
+    CAUSAL AFFORDANCE: Triggers the neurosymbolic ingestion pipeline, mechanically anchoring the raw byte stream to a verified temporal coordinate so that subsequent transmutations can deterministically prove their chain of custody.
+
+    EPISTEMIC BOUNDS: Enforces a physical boundary on causality via the temporal_ingest_timestamp (clamped between ge=0.0 and le=253402300799.0). Data integrity is mathematically locked by byte_stream_hash, mandating a strict SHA-256 regex (^[a-f0-9]{64}$).
+
+    MCP ROUTING TRIGGERS: Genesis Block, Merkle-DAG, Content Addressable Storage, Cryptographic Anchoring, Unstructured Ingestion
+    """
 
     artifact_id: str = Field(
         min_length=1,
