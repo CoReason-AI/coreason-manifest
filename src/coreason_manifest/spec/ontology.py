@@ -1662,6 +1662,25 @@ class StateHydrationManifest(CoreasonBaseState):
 
 
 class TemporalCheckpointState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Implements the Chandy-Lamport Distributed Snapshot Algorithm
+    and Temporal Logic to create hard, restorative anchors on the continuous
+    Merkle-DAG. As a ...State suffix, this is a declarative, frozen snapshot of
+    N-dimensional geometry.
+
+    CAUSAL AFFORDANCE: Unlocks O(1) state restoration and causal rollback.
+    Authorizes the orchestrator to instantly rewind the swarm's topology to a
+    pristine historical coordinate without requiring sequential re-computation.
+    The checkpoint_id (128-char CID) uniquely anchors the snapshot.
+
+    EPISTEMIC BOUNDS: The state geometry is mathematically locked to the
+    state_hash via a strict RFC 8785 SHA-256 regex (^[a-f0-9]{64}$). The temporal
+    pointer ledger_index is physically clamped (le=1000000000) to prevent integer
+    overflow during prolonged swarm execution.
+
+    MCP ROUTING TRIGGERS: Distributed Snapshot, Chandy-Lamport, Merkle-DAG
+    Restoration, Temporal Logic, O(1) Rollback
+    """
     checkpoint_id: str = Field(
         min_length=1,
         max_length=128,
@@ -2212,7 +2231,23 @@ class AnalogicalMappingTask(CoreasonBaseState):
 
 class AnchoringPolicy(CoreasonBaseState):
     """
-    The mathematical center of gravity preventing epistemic drift and sycophancy in the swarm.
+    AGENT INSTRUCTION: Utilizes Kullback-Leibler (KL) Divergence and Latent Space
+    Regularization to establish a mathematically inescapable center of gravity,
+    preventing epistemic drift and sycophancy. As a ...Policy suffix, this defines
+    rigid structural boundaries globally.
+
+    CAUSAL AFFORDANCE: Triggers an immediate SystemFaultEvent or state rollback
+    if the orchestrator detects that the swarm's semantic trajectory has
+    probabilistically drifted beyond the authorized cosine distance from its
+    origin constraints.
+
+    EPISTEMIC BOUNDS: The geometric radius of acceptable divergence is strictly
+    clamped by max_semantic_drift (ge=0.0, le=1.0). The origin is
+    cryptographically locked to the anchor_prompt_hash (SHA-256 regex
+    ^[a-f0-9]{64}$).
+
+    MCP ROUTING TRIGGERS: Kullback-Leibler Divergence, Latent Regularization,
+    Semantic Gravity Well, Epistemic Drift, Trajectory Bounding
     """
 
     anchor_prompt_hash: str = Field(
@@ -2563,8 +2598,26 @@ class BrowserDOMState(CoreasonBaseState):
 
 
 class BypassReceipt(CoreasonBaseState):
-    """The Merkle Null-Op preserving the topological chain of custody when an extraction node is intentionally
-    skipped."""
+    """
+    AGENT INSTRUCTION: Acts as a Cryptographic Null-Operator within Kahn's
+    Topological Sort, preserving the topological chain of custody when an
+    extraction node is intentionally skipped. As a ...Receipt suffix, this is an
+    append-only coordinate that the LLM must never mutate.
+
+    CAUSAL AFFORDANCE: Safely starves a subgraph of compute without fracturing
+    the continuous Merkle-DAG hash chain. The bypassed_node_id
+    (NodeIdentifierState) identifies the exact starved vertex. The
+    artifact_event_id (128-char CID) ensures continuity with the genesis artifact.
+
+    EPISTEMIC BOUNDS: The cryptographic_null_hash strictly requires a 64-char
+    SHA-256 fingerprint (^[a-f0-9]{64}$). The execution skip rationale is
+    mathematically locked to the justification Literal automaton
+    ["modality_mismatch", "budget_exhaustion", "sla_timeout"], preventing
+    hallucinated bypass reasons.
+
+    MCP ROUTING TRIGGERS: Topological Sort, Cryptographic Null-Operator, Compute
+    Starvation, DAG Integrity, Lazy Evaluation
+    """
 
     artifact_event_id: str = Field(
         max_length=128,
@@ -2720,6 +2773,25 @@ class CausalExplanationEvent(BaseStateEvent):
 
 
 class CausalDirectedEdgeState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Formalizes Judea Pearl's Structural Causal Models (SCMs)
+    and d-separation mechanics to map exact topological relationships between
+    variables. As a ...State suffix, this is a frozen, declarative connection
+    vector.
+
+    CAUSAL AFFORDANCE: Empowers the orchestrator's traversal engine to construct
+    interventional graphs for the Do-Operator (P(y|do(x))), isolating direct
+    causes from latent confounders during active inference or counterfactual
+    regret simulation.
+
+    EPISTEMIC BOUNDS: The edge_type physically restricts topological connections
+    to the Pearlian Literal automaton ["direct_cause", "confounder", "collider",
+    "mediator"]. The source_variable and target_variable are bounded by
+    min_length=1 (no max_length) to prevent ghost pointer allocation.
+
+    MCP ROUTING TRIGGERS: Structural Causal Models, Pearlian Causality,
+    d-separation, Do-Calculus, Directed Edge
+    """
     source_variable: str = Field(min_length=1, description="The independent variable $X$.")
     target_variable: str = Field(min_length=1, description="The dependent variable $Y$.")
     edge_type: Literal["direct_cause", "confounder", "collider", "mediator"] = Field(
