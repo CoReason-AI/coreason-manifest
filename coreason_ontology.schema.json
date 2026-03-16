@@ -3034,7 +3034,7 @@
     },
     "ComputeRateContract": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nEconomic constraints for liquid compute operations.",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: ComputeRateContract is the immutable economic physics engine defining the\nthermodynamic cost of token generation across the network.\n\nCAUSAL AFFORDANCE: Allows the swarm orchestrator to mathematically project the budget exhaustion of\na specific Latent Scratchpad trace or MCTS (Monte Carlo Tree Search) rollout before committing\nto the execution graph, effectively acting as an economic look-ahead.\n\nEPISTEMIC BOUNDS: Strict float boundaries (le=1000000000.0) on cost_per_million_input_tokens and\ncost_per_million_output_tokens ensure that economic execution vectors cannot overflow the integers\nin the Epistemic Ledger, protecting the escrow math.\n\nMCP ROUTING TRIGGERS: Economic Escrow, Token Burn, Thermodynamic Cost, Budget Calculation",
       "properties": {
         "cost_per_million_input_tokens": {
           "description": "The cost per 1 million input tokens provided to the model.",
@@ -6491,7 +6491,7 @@
     },
     "ExecutionSLA": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nService Level Agreement (limits) for executing a tool.",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: ExecutionSLA is the rigid physical boundary dictating the absolute time and memory\nlimits for any kinetic execution within the swarm.\n\nCAUSAL AFFORDANCE: Acts as the hardware guillotine. It instructs the orchestrator's C++/Rust runtime\nto physically sever the thread, drop the VRAM context, or kill the WASM container if an agent\nexceeds its authorized physical footprint, preventing infinite loops or DoS memory exhaustion.\n\nEPISTEMIC BOUNDS: The absolute mathematical and physical limits are intrinsic Pydantic limits on\nmax_execution_time_ms (le=86400000, gt=0) and max_compute_footprint_mb (le=1000000000, gt=0).\nAny breach instantly triggers a SystemFaultEvent.\n\nMCP ROUTING TRIGGERS: Hardware Guillotine, VRAM Allocation, Process Termination, Temporal Bound",
       "properties": {
         "max_execution_time_ms": {
           "description": "The maximum allowed execution time in milliseconds before the orchestrator kills the process.",
@@ -10229,7 +10229,7 @@
     },
     "PermissionBoundaryPolicy": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nZero-trust security boundaries for tool execution.",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: PermissionBoundaryPolicy is the strict zero-trust security perimeter defining\nexactly what external physical systems or networks an agent node is authorized to touch.\n\nCAUSAL AFFORDANCE: Mechanically limits the subgraph's kinetic reach. It forces the orchestrator to\ndrop network egress packets or block disk I/O unless explicitly whitelisted, and mandates the\nnegotiation of specific cryptographic handshakes (e.g., OAuth2, mTLS) before allocating compute.\n\nEPISTEMIC BOUNDS: Bounded by deterministic string arrays (allowed_domains, auth_requirements)\nthat must be strictly evaluated at runtime. The arrays are alphabetically sorted at instantiation\nto prevent hash poisoning.\n\nMCP ROUTING TRIGGERS: Network Egress, Disk I/O Block, mTLS Handshake, Zero-Trust Perimeter",
       "properties": {
         "network_access": {
           "description": "Whether the tool is permitted to make external network requests.",
@@ -10815,7 +10815,7 @@
     },
     "RoutingFrontierPolicy": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nMathematical Pareto boundaries for dynamic spot-market liquid compute.",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: RoutingFrontierPolicy is the multi-objective optimization matrix used to navigate\nthe Spot-Market compute layer. It defines the acceptable trade-offs between speed, cost, and intelligence.\n\nCAUSAL AFFORDANCE: Instructs the Spot-Market router on how to mechanically weigh competing inference\nengines. If a query requires extreme logic, it authorizes high cost; if it requires a UI reflex,\nit enforces strict latency bounds.\n\nEPISTEMIC BOUNDS: Strict physical, economic, and thermodynamic ceilings are mathematically enforced:\nmax_latency_ms (le=86400000), max_cost_magnitude_per_token (le=1000000000), and an absolute ESG bound\nvia max_carbon_intensity_gco2eq_kwh (le=10000.0).\n\nMCP ROUTING TRIGGERS: Spot-Market Routing, Pareto Optimization, Carbon Budget, Compute Allocation",
       "properties": {
         "max_latency_ms": {
           "description": "The absolute physical speed limit acceptable for time-to-first-token or total generation.",
