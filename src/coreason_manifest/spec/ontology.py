@@ -275,7 +275,25 @@ class SpatialBoundingBoxProfile(CoreasonBaseState):
 
 
 class DynamicLayoutManifest(CoreasonBaseState):
-    """Schema representing a template for dynamic grid layouts."""
+    """
+    AGENT INSTRUCTION: Encapsulates a Python 3.14 t-string template as an
+    Abstract Syntax Tree (AST) artifact for declarative, zero-trust UI
+    evaluation. As a ...Manifest suffix, this is a frozen N-dimensional
+    coordinate state.
+
+    CAUSAL AFFORDANCE: Projects dynamic visual grids onto the UI plane while
+    physically suffocating any capability for Arbitrary Code Execution (ACE)
+    during runtime string interpolation.
+
+    EPISTEMIC BOUNDS: The layout_tstring is physically clamped at
+    max_length=2000. The @field_validator validate_tstring mathematically proves
+    execution safety by traversing the AST and explicitly quarantining forbidden
+    kinetic nodes (e.g., Call, Import), restricting to declarative operations.
+
+    MCP ROUTING TRIGGERS: Abstract Syntax Tree Validation, Zero-Trust UI
+    Projection, Arbitrary Code Execution Prevention, Declarative Templating,
+    Sandboxed Evaluation
+    """
 
     layout_tstring: str = Field(
         max_length=2000, description="A Python 3.14 t-string template definition for dynamic UI grid evaluation."
@@ -1442,8 +1460,25 @@ class DefeasibleCascadeEvent(CoreasonBaseState):
 
 
 class MultimodalTokenAnchorState(CoreasonBaseState):
-    """AGENT INSTRUCTION: Unified multimodal grounding mapping extracted facts to strict 1D token spans and 2D visual\n
-    patches."""
+    """
+    AGENT INSTRUCTION: Orchestrates cross-modal coordinate geometry by mapping 1D
+    sequential token spaces (LLMs) to 2D continuous spatial patches
+    (Vision-Language Models). As a ...State suffix, this is a declarative, frozen
+    snapshot.
+
+    CAUSAL AFFORDANCE: Physically anchors extracted neurosymbolic concepts directly
+    to verifiable visual and textual evidence, locking them via block_type
+    classification and visual_patch_hashes arrays.
+
+    EPISTEMIC BOUNDS: Token sequences (token_span_start, token_span_end) are
+    mathematically bounded 1D limits (ge=0, le=1000000000) constrained by
+    @model_validator validate_token_spans to be monotonically increasing. Spatial
+    geometries (bounding_box) enforce normalized Cartesian invariants via
+    validate_spatial_geometry. Arrays are sorted via sort_arrays.
+
+    MCP ROUTING TRIGGERS: Vision-Language Alignment, 1D-2D Projection, VQ-VAE
+    Spatial Tracking, Geometric Affine Transforms, Coordinate Bounding
+    """
 
     token_span_start: int | None = Field(
         le=1000000000, default=None, ge=0, description="The starting index in the discrete VLM context window."
@@ -3234,6 +3269,24 @@ class DiversityPolicy(CoreasonBaseState):
 
 
 class DocumentLayoutRegionState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A discrete topological bounding box within a formalized
+    Document Object Model (DOM) taxonomy, acting as a spatial vertex in a
+    multimodal graph. As a ...State suffix, this is a frozen N-dimensional
+    coordinate.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator's spatial extraction engine to
+    classify, extract, and isolate explicit sub-regions for localized processing
+    using the anchor (MultimodalTokenAnchorState).
+
+    EPISTEMIC BOUNDS: The block_id is cryptographically anchored by a 128-char
+    CID regex (^[a-zA-Z0-9_.:-]+$). The block_type structurally limits extraction
+    geometry to a finite Literal automaton ["header", "paragraph", "figure",
+    "table", "footnote", "caption", "equation"].
+
+    MCP ROUTING TRIGGERS: DOM Taxonomy, Topological Vertex, Spatial
+    Classification, Bounding Box Geometry, Semantic Region Isolation
+    """
     block_id: str = Field(
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
@@ -3249,6 +3302,23 @@ class DocumentLayoutRegionState(CoreasonBaseState):
 
 
 class DocumentLayoutManifest(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Instantiates a Directed Acyclic Graph (DAG) to represent
+    the strictly chronological reading flow of a complex 2D multimodal manifold.
+    As a ...Manifest suffix, this is a frozen N-dimensional coordinate state.
+
+    CAUSAL AFFORDANCE: Synthesizes spatially disparate DocumentLayoutRegionState
+    nodes into a mathematically ordered execution trajectory, dictating the exact
+    sequential vector for downstream tokenization.
+
+    EPISTEMIC BOUNDS: The @model_validator verify_dag_and_integrity executes a
+    Depth First Search to mathematically prove chronological_flow_edges form a
+    paradox-free DAG. It simultaneously verifies referential integrity against the
+    blocks dictionary (bounded to 1,000,000,000 max properties).
+
+    MCP ROUTING TRIGGERS: Directed Acyclic Graph, Kahn's Algorithm, Topological
+    Sort, Referential Integrity, Spatial Reading Order
+    """
     blocks: dict[Annotated[str, StringConstraints(max_length=255)], DocumentLayoutRegionState] = Field(
         max_length=1000000000, description="Dictionary mapping block_ids to their strict spatial definitions."
     )
