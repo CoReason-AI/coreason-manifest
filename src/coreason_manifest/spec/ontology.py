@@ -4362,7 +4362,24 @@ class GlobalGovernancePolicy(CoreasonBaseState):
 
 
 class GenerativeManifoldSLA(CoreasonBaseState):
-    """Mathematical governor for fractal/cyclic graph synthesis."""
+    """
+    AGENT INSTRUCTION: Implements Ergodic Theory and Branching Factor Analysis to
+    rigorously bound the topological expansion of synthetic or fractal graphs. As
+    an ...SLA suffix, this enforces rigid mathematical boundaries globally.
+
+    CAUSAL AFFORDANCE: Acts as a physical gas limit on generative expansion,
+    authorizing the orchestrator to cull recursive encapsulation before it induces
+    state-space explosion or GPU VRAM exhaustion.
+
+    EPISTEMIC BOUNDS: Mathematically clamps geometric explosion via the
+    @model_validator enforce_geometric_bounds, guaranteeing
+    max_node_fanout ** max_topological_depth <= 1000. Both max_topological_depth
+    and max_node_fanout are strictly positive (ge=1, le=1000000000). Synthetic
+    token economy is capped by max_synthetic_tokens (ge=1, le=1000000000).
+
+    MCP ROUTING TRIGGERS: Ergodic Theory, Branching Factor Analysis, State-Space
+    Explosion, Fractal Graph Bounding, Gas Limit
+    """
 
     max_topological_depth: int = Field(
         le=1000000000, ge=1, description="The absolute physical depth limit for recursive encapsulation."
@@ -6912,6 +6929,26 @@ class MCPServerBindingProfile(CoreasonBaseState):
 
 
 class SteadyStateHypothesisState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Formalizes the baseline control group definition within
+    Chaos Engineering, leveraging Queueing Theory to model the expected systemic
+    equilibrium. As a ...State suffix, this is a declarative, frozen snapshot of
+    N-dimensional geometry.
+
+    CAUSAL AFFORDANCE: Provides the deterministic baseline against which chaotic
+    perturbations (e.g., ChaosExperimentTask) are measured, establishing temporal
+    and procedural expectations for standard execution loops.
+
+    EPISTEMIC BOUNDS: Latency expectations are continuously bounded by
+    expected_max_latency (ge=0.0, le=1000000000.0). The max_loops_allowed
+    (le=1000000000) physically caps algorithmic cycles. The optional
+    required_tool_usage (list[str] | None, default=None,
+    max_length=1000000000) is deterministically sorted via @model_validator
+    sort_arrays to preserve RFC 8785 canonical hashing.
+
+    MCP ROUTING TRIGGERS: Chaos Engineering, Queueing Theory, Steady-State
+    Equilibrium, Control Group Baseline, Systemic Perturbation
+    """
     expected_max_latency: float = Field(
         le=1000000000.0, ge=0.0, description="The expected maximum latency under normal conditions."
     )
@@ -7022,7 +7059,24 @@ class HypothesisGenerationEvent(BaseStateEvent):
 
 
 class SyntheticGenerationProfile(CoreasonBaseState):
-    """Authoritative blueprint for external fuzzing and simulation engines."""
+    """
+    AGENT INSTRUCTION: Defines a formal blueprint for Model-Based Fuzzing and
+    Generative Adversarial Testing against the Universal Unified Ontology. As a
+    ...Profile suffix, this is a declarative, frozen snapshot of an evaluation
+    geometry.
+
+    CAUSAL AFFORDANCE: Instructs exogenous fuzzing engines to synthesize
+    permutations of the target_schema_ref (min_length=1), actively injecting
+    structural entropy into the system while strictly adhering to the bounding
+    manifold_sla (GenerativeManifoldSLA).
+
+    EPISTEMIC BOUNDS: The profile identity is cryptographically anchored to the
+    profile_id (128-char CID regex ^[a-zA-Z0-9_.:-]+$). The simulation scope is
+    physically restricted by the underlying manifold_sla.
+
+    MCP ROUTING TRIGGERS: Model-Based Fuzzing, Generative Adversarial Testing,
+    Structural Entropy, Fuzzing Blueprint, Synthetic Permutation
+    """
 
     profile_id: str = Field(
         max_length=128,
