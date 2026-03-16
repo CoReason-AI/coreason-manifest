@@ -111,6 +111,7 @@ __all__ = [
     "DefeasibleAttackEvent",
     "DefeasibleCascadeEvent",
     "DelegatedCapabilityManifest",
+    "DeterministicExtractionContract",
     "DifferentiableLogicConstraint",
     "DigitalTwinTopologyManifest",
     "DimensionalProjectionContract",

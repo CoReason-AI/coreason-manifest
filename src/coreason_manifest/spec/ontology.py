@@ -1067,6 +1067,32 @@ class ActivationSteeringContract(CoreasonBaseState):
         return self
 
 
+class DeterministicExtractionContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: The strict symbolic boundary forcing the probabilistic VLM output into a deterministic string
+    or schema via hard execution of Regex, XPath, or CSS Selectors.
+    """
+
+    contract_id: str = Field(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
+    extraction_type: Literal["regex", "xpath", "css_selector", "json_pointer"] = Field(
+        description="The exact deterministic engine to use."
+    )
+    query_string: str = Field(max_length=2000, description="The actual Regex pattern or DOM selector.")
+    strict_type_coercion: Literal["string", "integer", "float", "boolean", "date"] = Field(
+        description="The required final primitive type post-extraction."
+    )
+    fallback_value: JsonPrimitiveState | None = Field(
+        default=None, description="Optional default if the query yields a null set."
+    )
+
+    @field_validator("fallback_value", mode="before")
+    @classmethod
+    def validate_payload(cls, v: Any) -> Any:
+        if v is None:
+            return None
+        return _validate_payload_bounds(v)
+
+
 class SemanticSlicingPolicy(CoreasonBaseState):
     """
     AGENT INSTRUCTION: SemanticSlicingPolicy is a rigid mathematical boundary enforcing systemic constraints
@@ -1093,6 +1119,10 @@ class SemanticSlicingPolicy(CoreasonBaseState):
         le=2000000,
         gt=0,
         description="The mathematical physical limit of the active context partition to prevent VRAM exhaustion.",
+    )
+    spatial_crop_boundary: SpatialBoundingBoxProfile | None = Field(
+        default=None,
+        description="The strict Euclidean geometric coordinate bounds. The orchestrator must physically crop the visual tensor to this exact region before VLM evaluation to prevent attention dilution.",  # noqa: E501
     )
 
     @model_validator(mode="after")
@@ -4185,6 +4215,14 @@ class EpistemicTransmutationTask(CoreasonBaseState):
         ge=0,
         description="Optional maximum economic expenditure authorized to run this VLM transmutation.",
     )
+    target_layout_region_ids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] | None = Field(
+        default=None,
+        description="The explicit array of DocumentLayoutRegionState block_ids the VLM must constrain its extraction to.",  # noqa: E501
+    )
+    extraction_contracts: list[DeterministicExtractionContract] = Field(
+        default_factory=list,
+        description="The strict array of deterministic Regex/Selector rules applied to the VLM output to sanitize the final payload.",  # noqa: E501
+    )
 
     @model_validator(mode="after")
     def validate_grounding_density_for_visuals(self) -> Self:
@@ -4199,6 +4237,9 @@ class EpistemicTransmutationTask(CoreasonBaseState):
     @model_validator(mode="after")
     def sort_arrays(self) -> Self:
         object.__setattr__(self, "target_modalities", sorted(self.target_modalities))
+        if self.target_layout_region_ids is not None:
+            object.__setattr__(self, "target_layout_region_ids", sorted(self.target_layout_region_ids))
+        object.__setattr__(self, "extraction_contracts", sorted(self.extraction_contracts, key=lambda x: x.contract_id))
         return self
 
 
@@ -11034,3 +11075,6 @@ SemanticGapAnalysisProfile.model_rebuild()
 ConstrainedDecodingPolicy.model_rebuild()
 CognitiveFormatContract.model_rebuild()
 StateContract.model_rebuild()
+DeterministicExtractionContract.model_rebuild()
+SemanticSlicingPolicy.model_rebuild()
+EpistemicTransmutationTask.model_rebuild()
