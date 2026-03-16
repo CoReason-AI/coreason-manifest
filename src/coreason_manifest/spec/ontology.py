@@ -2624,7 +2624,10 @@ class QueryDecompositionManifest(CoreasonBaseState):
     type: Literal["query_decomposition"] = Field(default="query_decomposition")
     manifest_id: str = Field(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
     root_intent_hash: str = Field(
-        min_length=1, max_length=128, pattern="^[a-f0-9]{64}$", description="the monolithic intent being solved"
+        min_length=1,
+        max_length=128,
+        pattern="^[a-f0-9]{64}$",
+        description="The cryptographic SHA-256 hash of the high-entropy, monolithic user prompt prior to algorithmic Query Reformulation.",  # noqa: E501
     )
     surface_projection_id: str = Field(
         min_length=1,
@@ -2833,6 +2836,11 @@ class EpistemicScanningPolicy(CoreasonBaseState):
 
 
 class EpistemicTransmutationTask(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: The strict mathematical boundary governing the reformulation
+    and compression of messy, multi-modal entropy into clean, topologically bounded semantic states.
+    """
+
     task_id: str = Field(
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
@@ -4537,6 +4545,12 @@ class NeuralAuditAttestationReceipt(CoreasonBaseState):
 
 
 class NeuroSymbolicHandoffContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: The structural boundary for deterministic Query Rewriting.
+    Forces the LLM to transmutate ambiguous natural language (NLP) into rigid,
+    provable formal grammar (e.g., Z3, Lean4, SQL) for external solver execution.
+    """
+
     handoff_id: str = Field(
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
@@ -5773,7 +5787,11 @@ class ViewportRasterState(CoreasonBaseState):
 
 
 class LatentIntentTrajectoryState(CoreasonBaseState):
-    """AGENT INSTRUCTION: Tracks the continuous POMDP belief distribution of the active user query."""
+    """
+    AGENT INSTRUCTION: Tracks the continuous POMDP belief distribution of the active user query.
+    Acts as the mathematical ledger for Query Reformulation, mapping how the high-dimensional intent vector
+    evolves as the agent gathers new observations.
+    """
 
     current_intent_vector: VectorEmbeddingState = Field(
         description="High-dimensional representation of the user's active $E_{target}$."
