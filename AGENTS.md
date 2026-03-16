@@ -92,33 +92,36 @@ When generating or modifying schemas, you MUST adhere to the following constrain
 
 **CRITICAL CONTEXT:** You are operating within a 2026+ State-of-the-Art Neurosymbolic architecture. You do not read code; you navigate latent vector spaces. To prevent semantic drift, hallucination, and epistemic contamination, you are strictly forbidden from using legacy, human-friendly software naming conventions.
 
-**1. The Anti-CRUD Mandate (Zero Polysemy)**
-You are forbidden from using highly polysemantic, tabular, or legacy human-centric terms that cause semantic drift. They flatten softmax distributions and cause probabilistic hallucinations.
+### 1. The Anti-CRUD Mandate (Causal Vocabulary over Tabular Logic)
+You are forbidden from using highly polysemantic, tabular, or legacy human-centric terms that cause semantic drift. They flatten softmax distributions and cause probabilistic hallucinations. You must map state transitions using Judea Pearl’s Structural Causal Models. Do not use flat database nomenclature.
 * **FORBIDDEN:** `Data`, `Model`, `Type`, `Info`, `ID`, `Record`, `Create`, `Read`, `Update`, `Delete`, `Remove`, `Group`, `List`, `Memory`, `Link`.
 * **REQUIRED (Causal/Topological):** `Mutation`, `Transmutation`, `Differential`, `Ablation`, `Quarantine`, `Cascade`, `Topology`, `Manifold`, `Matrix`, `Edge`.
-  * *Examples:* `DataUpdate` ➔ `StateDiff`, `DeleteRecord` ➔ `DefeasibleCascade`, `ErrorLog` ➔ `NormativeDriftEvent`.
+  * *Examples:* `DataUpdate` ➔ `StateDiff`, `DeleteRecord` ➔ `DefeasibleCascade` or `QuarantineOrder`, `ErrorLog` ➔ `NormativeDriftEvent`.
 * **The External Protocol Exemption:** If modeling an immutable standard (e.g., JSON-RPC 2.0, RFC 6902), preserve exact string literals (e.g., "data", "remove") with the comment `# Note: External Protocol Exemption.`
 
-**2. Categorical Suffixing (Topological Contracts)**
+### 2. Categorical Suffixing (Topological Contracts)
 Every object name MUST terminate with a strictly typed suffix dictating how the system's Q-K matrices process its physics:
 * **`...Receipt` / `...Event`:** Cryptographically frozen historical facts. *Action: The LLM must never hallucinate a mutation to this object.*
 * **`...Intent` / `...Task`:** Authorized kinetic execution triggers or test-time compute branches. *Action: The LLM may execute non-monotonic reasoning here.*
 * **`...Policy` / `...Contract` / `...SLA`:** Rigid mathematical boundaries. *Action: The LLM must enforce this constraint globally.*
-* **`...State` / `...Manifest` / `...Profile`:** A declarative, frozen snapshot of an N-dimensional coordinate. *Action: The LLM must read this as descriptive geometry.*
+* **`...State` / `...Snapshot` / `...Manifest` / `...Profile`:** A declarative, frozen snapshot of an N-dimensional coordinate. *Action: The LLM must read this as descriptive geometry.*
 
-**3. Epistemic Prefixing (Vector Gravity Wells)**
+### 3. Epistemic Prefixing (Vector Gravity Wells)
 Schemas must naturally cluster in dense-vector Retrieval-Augmented Generation (RAG). Use strict domain prefixes to create semantic gravity wells so the MCP router retrieves the entire causal chain zero-shot:
 * **`Cognitive...`**: Internal LLM reasoning, steering, or routing.
 * **`Epistemic...`**: Truth-maintenance, knowledge boundaries, or entropy.
 * **`Spatial...` / `Kinematic...`**: 2D/3D physical boundaries, UI interactions.
+* **`Temporal...`**: Time-bound execution windows, TTLs, or chronological boundaries.
 * **`Federated...`**: Operations crossing zero-trust network boundaries.
 
-**4. Generation Checklist (Internal Pre-Flight)**
+### 4. Generation Checklist (Internal Pre-Flight)
 Before outputting any new schema or object name, you must silently verify:
 1. Does the name end with a valid structural suffix?
 2. Is the name free of ambiguous CRUD terminology?
 3. Does the name define an exact mathematical, causal, or spatial boundary?
 If the answer to any is NO, you must rewrite the name before outputting.
+
+**VIOLATION CONSEQUENCE:** Any PR or generated code failing to adhere to this Lexical Architecture will trigger an immediate `SystemFaultEvent` during the CI/CD semantic diff phase.
 </lexical_directive>
 
 ## 0.4 AST-Native Semantic Anchoring (The Docstring Protocol)
@@ -150,7 +153,7 @@ When an MCP server projects a resource manifest, orchestrating nodes route to it
 
 You are FORBIDDEN from using conversational filler, legacy CRUD terminology, or markdown headers inside the docstring. You MUST use exactly these capitalized prefixes:
 
-`​``python
+```python
 """
 AGENT INSTRUCTION: [1-2 sentences defining the exact topological boundary, initialization constraints, and neurosymbolic track. Tailor this based on the object's Bounding Suffix (e.g., ...Event is a frozen historical fact; ...Intent is a kinetic trigger; ...Policy is a rigid mathematical boundary; ...State is a spatial coordinate).]
 
@@ -160,14 +163,14 @@ EPISTEMIC BOUNDS: [1-2 sentences defining the absolute mathematical or physical 
 
 MCP ROUTING TRIGGERS: [A comma-separated list of 4-7 dense, high-dimensional conceptual tags. These tags MUST group similar objects together in the embedding space (e.g., 'Truth Maintenance, Defeasible Logic, DAG' vs. 'VLM, Spatial Kinematics, Affordance'). Do not use generic words; use algorithmic identifiers to guarantee accurate cosine-similarity matching during vector search.]
 """
-`​``
+```
 
 #### Execution Heuristics by Categorical Suffix:
 Before generating the `AGENT INSTRUCTION` block, you must analyze the object's suffix:
 * **`...Event` or `...Receipt`**: Emphasize that it is an append-only, cryptographically frozen coordinate on the Merkle-DAG.
 * **`...Intent` or `...Task`**: Emphasize the non-monotonic execution trigger and the exact Expected Information Gain or physical mutation it seeks.
-* **`...Policy` or `...Contract`**: Focus entirely on the rigid thresholds, slashing penalties, or isolation perimeters it enforces globally.
-* **`...State`, `...Manifest`, or `...Profile`**: Describe it as a declarative, frozen snapshot of N-dimensional geometry at a specific point in time.
+* **`...Policy`, `...Contract`, or `...SLA`**: Focus entirely on the rigid thresholds, slashing penalties, or isolation perimeters it enforces globally.
+* **`...State`, `...Snapshot`, `...Manifest`, or `...Profile`**: Describe it as a declarative, frozen snapshot of N-dimensional geometry at a specific point in time.
 
 **Generation Checklist (Internal Pre-Flight):**
 1. Did you read the ENTIRE class, including all `@model_validator` hooks, before summarizing the Epistemic Bounds?
