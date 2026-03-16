@@ -5604,6 +5604,25 @@ class ExogenousEpistemicEvent(CoreasonBaseState):
 
 
 class SpanEvent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Represents a discrete, point-in-time OpenTelemetry annotation within
+    a broader Dapper-style ExecutionSpanReceipt. As an ...Event suffix, this is a
+    cryptographically frozen historical fact that the LLM must never hallucinate a mutation
+    to.
+
+    CAUSAL AFFORDANCE: Provides fine-grained, localized state-machine logging within an
+    active span, anchoring semantic attributes to a precise nanosecond coordinate without
+    spawning a new causal branch.
+
+    EPISTEMIC BOUNDS: The timestamp_unix_nano is physically bounded between
+    [0, 253402300799000000000]. The attributes payload is strictly constrained by a
+    dictionary with string keys (max_length=255, max_length=1000000000 entries) to
+    physically prevent dictionary bombing and VRAM exhaustion during telemetry
+    serialization.
+
+    MCP ROUTING TRIGGERS: Span Annotation, Point-in-Time Event, Micro-State Logging,
+    OpenTelemetry, Telemetry Serialization
+    """
     name: str = Field(max_length=2000, description="The semantic name of the event.")
     timestamp_unix_nano: int = Field(
         ge=0, le=253402300799000000000, description="The precise temporal execution point."
@@ -5614,6 +5633,28 @@ class SpanEvent(CoreasonBaseState):
 
 
 class ExecutionSpanReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Implements the Dapper distributed tracing model to deterministically
+    map the causal execution DAG of the swarm. As a ...Receipt suffix, this is an
+    append-only coordinate on the Merkle-DAG that the LLM must never hallucinate a mutation
+    to.
+
+    CAUSAL AFFORDANCE: Unlocks global observability by mathematically binding parent-child
+    RPC calls (parent_span_id to span_id) across the zero-trust network, enabling exact
+    bottleneck detection and graph reconstruction. Tracks execution role via kind
+    (SpanKindProfile, default="internal") and health via status (SpanStatusCodeProfile,
+    default="unset").
+
+    EPISTEMIC BOUNDS: Temporal boundaries are rigidly constrained by start_time_unix_nano
+    and optional end_time_unix_nano (ge=0, le=253402300799000000000). The @model_validator
+    enforces Allen's Interval Algebra to physically guarantee end_time cannot precede
+    start_time. The events array (max_length=10000) is deterministically sorted by
+    timestamp_unix_nano via a second @model_validator to preserve RFC 8785 canonical
+    hashing.
+
+    MCP ROUTING TRIGGERS: Dapper Tracing Model, Distributed Causal DAG, Allen's Interval
+    Algebra, OpenTelemetry, Execution Provenance
+    """
     trace_id: str = Field(
         min_length=1,
         max_length=128,
@@ -6000,7 +6041,20 @@ type TelemetryContextProfile = dict[
 
 class LogEvent(CoreasonBaseState):
     """
-    An out-of-band telemetry log manifest.
+    AGENT INSTRUCTION: Defines a purely out-of-band semantic logging vector, structurally
+    isolated from the rigorous causal constraints of the Dapper trace tree. As an ...Event
+    suffix, this is an append-only historical fact.
+
+    CAUSAL AFFORDANCE: Emits asynchronous telemetry for human-in-the-loop debugging or
+    peripheral auditing without mutating the active Epistemic Ledger's topological state.
+
+    EPISTEMIC BOUNDS: Temporal reality is clamped by timestamp (ge=0.0,
+    le=253402300799.0, float seconds). The severity level is strictly masked by a Literal
+    automaton ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]. The message is bounded
+    to max_length=2000. Recursive depth is constrained via TelemetryContextProfile.
+
+    MCP ROUTING TRIGGERS: Out-of-Band Telemetry, Asynchronous Logging, Severity Masking,
+    Peripheral Audit, Ephemeral Context
     """
 
     timestamp: float = Field(ge=0.0, le=253402300799.0, description="The UNIX timestamp of the log event.")
@@ -6143,6 +6197,23 @@ class ToolInvocationEvent(BaseStateEvent):
 
 
 class TraceExportManifest(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Functions as a deterministic serialization envelope for flushing
+    Dapper-style trace subgraphs to external observability sinks. As a ...Manifest suffix,
+    this defines a frozen, N-dimensional coordinate state.
+
+    CAUSAL AFFORDANCE: Authorizes the mass export of ExecutionSpanReceipt objects across
+    the network boundary, structurally binding disconnected spans into a coherent batch_id
+    for downstream reconstruction.
+
+    EPISTEMIC BOUNDS: Bounded by a rigid batch_id (CID regex ^[a-zA-Z0-9_.:-]+$,
+    max_length=128). The spans array is deterministically sorted by span_id via a
+    @model_validator to mathematically prevent Byzantine replay anomalies and guarantee
+    identical payload hashes during network egress.
+
+    MCP ROUTING TRIGGERS: Trace Serialization, Telemetry Export, Batch Flushing, DAG
+    Reconstruction, Canonical Egress
+    """
     batch_id: str = Field(
         min_length=1,
         max_length=128,
