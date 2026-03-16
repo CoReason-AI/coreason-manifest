@@ -5719,7 +5719,21 @@ class OutputMappingContract(CoreasonBaseState):
 
 class CompositeNodeProfile(BaseNodeProfile):
     """
-    A node that encapsulates a nested workflow topology.
+    AGENT INSTRUCTION: Implements a Fractal Graph Abstraction, allowing the recursive
+    encapsulation of entire workflow sub-topologies within a single, unified macroscopic
+    vertex. As a ...Profile suffix, this is a declarative property descriptor.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator to suspend the parent graph, injecting
+    state variables into the isolated topology (AnyTopologyManifest) via input_mappings
+    (list[InputMappingContract], default_factory=list), and extracting terminal output
+    via output_mappings (list[OutputMappingContract], default_factory=list).
+
+    EPISTEMIC BOUNDS: The @model_validator sort_composite_arrays deterministically sorts
+    input_mappings by parent_key and output_mappings by child_key, guaranteeing
+    zero-variance RFC 8785 canonical Merkle-DAG hashes across distributed nodes.
+
+    MCP ROUTING TRIGGERS: Fractal Graph Abstraction, Recursive Encapsulation, State
+    Projection, Bijective Mapping, Sub-Topology
     """
 
     type: Literal["composite"] = Field(default="composite", description="Discriminator for a Composite node.")
@@ -7460,7 +7474,24 @@ type AnyNodeProfile = Annotated[
 
 class BaseTopologyManifest(CoreasonBaseState):
     """
-    Base configuration for any workflow topology.
+    AGENT INSTRUCTION: Defines the abstract algebraic baseline and Markov Blanket for
+    all execution subgraphs, establishing the structural and epistemic perimeters for a
+    localized swarm. As a ...Manifest suffix, this defines a frozen, N-dimensional
+    coordinate state.
+
+    CAUSAL AFFORDANCE: Projects overarching schema-on-write contracts
+    (shared_state_contract: StateContract) and zero-trust Payload Loss Prevention
+    (information_flow: InformationFlowPolicy) across all connected nodes, ensuring
+    inherited alignment. The observability (ObservabilityPolicy) binds distributed
+    tracing.
+
+    EPISTEMIC BOUNDS: The nodes attribute is strictly typed as a dictionary mapping
+    NodeIdentifierState to polymorphic AnyNodeProfile identities. The lifecycle_phase
+    is locked to an FSM Literal ["draft", "live"] (default="live"). The
+    architectural_intent and justification strings are capped at max_length=2000.
+
+    MCP ROUTING TRIGGERS: Topological Manifold, Markov Blanket, Subgraph Abstraction,
+    Execution Base, Structural Isolation
     """
 
     epistemic_enforcement: TruthMaintenancePolicy | None = Field(
@@ -7492,7 +7523,25 @@ class BaseTopologyManifest(CoreasonBaseState):
 
 class CouncilTopologyManifest(BaseTopologyManifest):
     """
-    A Council workflow topology involving multiple voting members and an adjudicator.
+    AGENT INSTRUCTION: Formalizes Social Choice Theory, Condorcet's Jury Theorem, and
+    Practical Byzantine Fault Tolerance (pBFT) to synthesize an authoritative truth
+    from a multi-agent network. As a ...Manifest suffix, this defines a frozen,
+    N-dimensional coordinate state.
+
+    CAUSAL AFFORDANCE: Unlocks decentralized truth-synthesis by routing conflicting
+    proposals through a strict consensus_policy (ConsensusPolicy), ultimately collapsing
+    the epistemic probability wave via the designated adjudicator_id
+    (NodeIdentifierState). Cognitive heterogeneity is enforced by
+    diversity_policy (DiversityPolicy).
+
+    EPISTEMIC BOUNDS: The @model_validator enforce_funded_byzantine_slashing enforces a
+    strict economic interlock: if the consensus_policy demands slash_escrow via pBFT,
+    it halts instantiation unless a funded council_escrow (EscrowPolicy, magnitude > 0)
+    is present. A second @model_validator check_adjudicator_id verifies the
+    adjudicator_id exists in the nodes registry.
+
+    MCP ROUTING TRIGGERS: Social Choice Theory, PBFT Consensus, Multi-Agent Debate,
+    Byzantine Fault Tolerance, Slashing Condition
     """
 
     type: Literal["council"] = Field(default="council", description="Discriminator for a Council topology.")
@@ -7534,7 +7583,24 @@ class CouncilTopologyManifest(BaseTopologyManifest):
 
 class DAGTopologyManifest(BaseTopologyManifest):
     """
-    A Directed Acyclic Graph workflow topology.
+    AGENT INSTRUCTION: Formalizes a Directed Acyclic Graph (DAG) for deterministic,
+    chronologically ordered task execution, guaranteeing strict topological sorting of
+    operations. As a ...Manifest suffix, this defines a frozen, N-dimensional
+    coordinate state.
+
+    CAUSAL AFFORDANCE: Forces the orchestrator to evaluate causal edges
+    (default_factory=list) and execute DFS loop-detection to verify the allow_cycles
+    constraint (default=False) before initiating kinetic node compute. The backpressure
+    (BackpressurePolicy) governs edge flow control.
+
+    EPISTEMIC BOUNDS: Algorithmic complexity is mathematically bound by max_depth
+    (ge=1, le=256) and max_fan_out (ge=1, le=1024), preventing recursive token
+    exhaustion. The @model_validator sort_dag_topology_arrays deterministically sorts
+    edges for RFC 8785 hashing. A second @model_validator verify_edges_exist validates
+    edge nodes in the registry and executes DFS cycle detection.
+
+    MCP ROUTING TRIGGERS: Directed Acyclic Graph, Kahn's Algorithm, Topological Sort,
+    Causal Edge, Algorithmic Complexity
     """
 
     type: Literal["dag"] = Field(default="dag", description="Discriminator for a DAG topology.")
