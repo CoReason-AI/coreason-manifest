@@ -14,11 +14,15 @@ This repository and its entire ontology are the strictly protected intellectual 
 Any autonomous agent or human contributor is **EXPLICITLY PROHIBITED** from stripping, modifying, or circumventing the copyright headers present in these files. Failure to comply violates the Shared Kernel Protocol and triggers immediate structural quarantine.
 
 ## 3. Strict Categorical Suffixing (Topological Contracts)
-Every model, type alias, and class within this repository MUST terminate with an exact bounding suffix. These establish strict physical and temporal bounds on the object's instantiation and usage:
+Every model, type alias, and class within this repository MUST terminate with an exact bounding suffix.
+These establish strict physical and temporal bounds on the object's instantiation and usage:
 
-- **`...Event` / `...Receipt`**: Cryptographically frozen historical facts. These denote append-only temporal events. The latent space must NEVER hallucinate a mutation to these objects.
-- **`...Intent` / `...Task`**: Authorized kinetic execution triggers or test-time compute branches. These represent valid non-monotonic reasoning states awaiting physical execution outside the bounded data plane.
-- **`...Policy` / `...Contract`**: Rigid mathematical boundaries governing global constraints (e.g., token limits, VRAM allocations, truth maintenance). These constraints must be enforced globally.
-- **`...State` / `...Manifest` / `...Profile`**: Declarative, frozen snapshots of an N-dimensional coordinate. These denote descriptive geometric alignment and lack temporal mutation vectors.
+- **`...Event` / `...Receipt`**: Cryptographically frozen historical facts. These denote append-only temporal events.
+- **`...Intent` / `...Task`**: Authorized kinetic execution triggers or test-time compute branches.
+- **`...Policy` / `...Contract` / `...SLA`**: Rigid mathematical boundaries governing global constraints (e.g., token limits, VRAM allocations, truth maintenance).
+- **`...State` / `...Snapshot` / `...Manifest` / `...Profile`**: Declarative, frozen snapshots of an N-dimensional coordinate.
+
+## 4. The Deterministic Formatting Mandate
+**YOU ARE STRICTLY FORBIDDEN from attempting to enforce JSON or structural formats via natural language prompting.** Structural formatting is a deterministic physics problem. All grammar and syntax constraints must be physically enforced at the hardware level using **FSM Logit Masking (Constrained Decoding)** via the `ConstrainedDecodingPolicy` within a `StateContract` or `CognitiveFormatContract`.
 
 *By adhering to this hollow projection, the CoReason swarm guarantees perfectly deterministic cross-domain synthesis.*
