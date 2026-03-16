@@ -153,6 +153,38 @@ When an MCP server projects a resource manifest, orchestrating nodes route to it
 
 **Note on CI/CD:** Modifying existing `Field` descriptions alters the cryptographic hash footprint of the exported `coreason_ontology.schema.json`. "Fixing" descriptions to be friendlier will break the `Semantic Diff Check` in the CI pipeline and result in immediate rejection.
 
+<semantic_anchoring_directive priority="critical" action="reject_generation_if_violated">
+### 4. The MCP-Optimized Docstring Template (Mandatory)
+
+**SYSTEM DIRECTIVE:** All Python classes inheriting from `CoreasonBaseState` MUST include a class-level docstring that strictly conforms to the following four-part schema. This ensures the ontology acts as a dense-vector gravity well for zero-shot Model Context Protocol (MCP) routing.
+
+You are FORBIDDEN from using conversational filler, legacy CRUD terminology, or markdown headers inside the docstring. You MUST use exactly these capitalized prefixes:
+
+`​``python
+"""
+AGENT INSTRUCTION: [1-2 sentences defining the exact topological boundary, initialization constraints, and neurosymbolic track. Tailor this based on the object's Bounding Suffix (e.g., ...Event is a frozen historical fact; ...Intent is a kinetic trigger; ...Policy is a rigid mathematical boundary; ...State is a spatial coordinate).]
+
+CAUSAL AFFORDANCE: [1 sentence defining exactly what graph mutation, physics emulation, tool execution, or Pearlian do-operator this specific object unlocks for the orchestrator.]
+
+EPISTEMIC BOUNDS: [1-2 sentences defining the absolute mathematical or physical limits enforced by this object. You MUST derive this by reading the Pydantic field limits (e.g., le=1.0, max_length) and the `@model_validator` hooks (e.g., RFC 8785 deterministic sorting, SSRF IP trapping, or cycle prevention).]
+
+MCP ROUTING TRIGGERS: [A comma-separated list of 4-7 dense, high-dimensional conceptual tags. These tags MUST group similar objects together in the embedding space (e.g., 'Truth Maintenance, Defeasible Logic, DAG' vs. 'VLM, Spatial Kinematics, Affordance'). Do not use generic words; use algorithmic identifiers to guarantee accurate cosine-similarity matching during vector search.]
+"""
+`​``
+
+#### Execution Heuristics by Categorical Suffix:
+Before generating the `AGENT INSTRUCTION` block, you must analyze the object's suffix:
+* **`...Event` or `...Receipt`**: Emphasize that it is an append-only, cryptographically frozen coordinate on the Merkle-DAG.
+* **`...Intent` or `...Task`**: Emphasize the non-monotonic execution trigger and the exact Expected Information Gain or physical mutation it seeks.
+* **`...Policy` or `...Contract`**: Focus entirely on the rigid thresholds, slashing penalties, or isolation perimeters it enforces globally.
+* **`...State`, `...Manifest`, or `...Profile`**: Describe it as a declarative, frozen snapshot of N-dimensional geometry at a specific point in time.
+
+**Generation Checklist (Internal Pre-Flight):**
+1. Did you read the ENTIRE class, including all `@model_validator` hooks, before summarizing the Epistemic Bounds?
+2. Are the MCP Routing Triggers specific, high-dimensional algorithmic terms?
+If NO, rewrite the docstring before outputting.
+</semantic_anchoring_directive>
+
 ## 0.5 The F.A.I.R. Ecosystem Coordinator Doctrine
 
 **CRITICAL CONTEXT:** `coreason_manifest` is the absolute Central Nervous System of the swarm. To guarantee mathematical alignment, it adheres strictly to a 2026+ AI-Native interpretation of the scientific F.A.I.R. principles.
@@ -250,14 +282,14 @@ You are strictly forbidden from introducing "Active" or "Runtime" logic into thi
 
 ### **The Strict Instantiation Boundary (Anti-Lazy Validation Mandate)**
 * **The Physics of State Creation:** Because all models inherit from `CoreasonBaseState` (`frozen=True`), an object becomes a mathematically immutable N-dimensional coordinate the exact millisecond it is created. Therefore, **lazy validation or post-init bounding is mathematically impossible and strictly forbidden.**
-* **The Pre-Flight Bounding Rule:** All topological boundaries, Euclidean limits, BFT calculations, and SSRF loopback quarantines MUST be enforced strictly during initiation via Pydantic `@field_validator` and `@model_validator(mode="after")` hooks. 
+* **The Pre-Flight Bounding Rule:** All topological boundaries, Euclidean limits, BFT calculations, and SSRF loopback quarantines MUST be enforced strictly during initiation via Pydantic `@field_validator` and `@model_validator(mode="after")` hooks.
 * **Preventing Epistemic Contagion:** If a structural boundary or payload size limit is not mathematically proven during the initial instantiation cycle, the payload must be aggressively rejected (System 2 Remediation) before it enters the working context or consumes compute budget. You must never allow unvalidated data to sit in memory awaiting a later validation call.
 
 ### **The Epistemic Boundary Mandate (Anti-Hallucination & Anti-Bombing)**
 In a zero-trust neurosymbolic swarm, accepting unbounded or loosely typed primitives from an LLM introduces catastrophic epistemic contagion and VRAM exhaustion vulnerabilities. You MUST mathematically bound all primitives at instantiation:
 
 * **Categorical Hallucination (The Literal Mandate):** When defining a routing heuristic, classification, or architectural action (e.g., `fallback_heuristic`), you MUST use strict Pydantic `Literal[...]` typing. This acts as a deterministic "Semantic Softmax Filter." It mathematically proves that if an LLM hallucinates an unsupported category (e.g., `"alphabetical"` instead of `"chronological"`), the graph instantly severs the execution via a `ValidationError` rather than passing a ghost node to the orchestrator.
-* **Dictionary Bombing (The Arbitrary String Ban):** You are strictly forbidden from using unbounded `str` types for dictionary keys or high-entropy values (e.g., `dict[str, Any]`) that process external or LLM-generated payloads. An adversarial or hallucinating agent could inject a 50MB string as a dictionary key, causing an Out-Of-Memory (OOM) crash during RFC 8785 canonical hashing. 
+* **Dictionary Bombing (The Arbitrary String Ban):** You are strictly forbidden from using unbounded `str` types for dictionary keys or high-entropy values (e.g., `dict[str, Any]`) that process external or LLM-generated payloads. An adversarial or hallucinating agent could inject a 50MB string as a dictionary key, causing an Out-Of-Memory (OOM) crash during RFC 8785 canonical hashing.
     * *Implementation:* All arbitrary strings must be topologically bounded using `Annotated[str, StringConstraints(max_length=X)]` or rigorously caught in a `@field_validator` to enforce physical VRAM limits.
 
 ### **Logging (Passive Pattern)**
@@ -326,6 +358,9 @@ Schemas must naturally cluster in dense-vector Retrieval-Augmented Generation (R
 * **REQUIRED PREFIXES:** `Cognitive...`, `Epistemic...`, `Spatial...`, `Temporal...`, `Federated...`
 
 **VIOLATION CONSEQUENCE:** Any PR or generated code failing to adhere to this Lexical Architecture will trigger an immediate `SystemFaultEvent` during the CI/CD semantic diff phase.
+
+### 🚫 THE DEATH OF PROMPTING FOR SYNTAX
+**YOU ARE STRICTLY FORBIDDEN from attempting to enforce JSON or structural formats via natural language prompting.** Do NOT write instructions like: *"Output your response as a valid JSON object"* or *"Make sure your response matches this format."* In the CoReason architecture, structural formatting is no longer a probabilistic suggestion—it is a deterministic physics problem. All grammar and syntax constraints must be physically enforced at the hardware level using **FSM Logit Masking (Constrained Decoding)**. You must utilize the `ConstrainedDecodingPolicy` within a `StateContract` or `CognitiveFormatContract` to instruct the orchestrator to dynamically compile the JSON Schema into a Deterministic Finite Automaton (DFA), physically suffocating invalid token probabilities to $-\infty$.
 
 ## 🛡️ Mandatory Local Verification Workflow
 
