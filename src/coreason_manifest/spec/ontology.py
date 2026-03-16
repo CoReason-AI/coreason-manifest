@@ -3254,7 +3254,22 @@ type DistributionShapeProfile = Literal["gaussian", "uniform", "beta"]
 
 
 class DistributionProfile(CoreasonBaseState):
-    """Profile defining a probability density function."""
+    """
+    AGENT INSTRUCTION: Implements Bayesian Inference and Parametric Probability Density 
+    Functions (PDFs) to mathematically define the stochastic shape of latent variables. 
+    As a ...Profile suffix, this is a declarative, frozen snapshot of an evaluation geometry.
+
+    CAUSAL AFFORDANCE: Projects a continuous statistical geometry (Gaussian, Uniform, 
+    or Beta) onto a stochastic process, dictating the generative bounds of entropy or 
+    reward distributions during reinforcement learning.
+
+    EPISTEMIC BOUNDS: The Euclidean limits are physically clamped by mean and variance 
+    (le=1000000000.0). The @model_validator validate_confidence_interval mathematically 
+    enforces the invariant that the 95% confidence lower bound must be strictly less than 
+    the upper bound.
+
+    MCP ROUTING TRIGGERS: Probability Density Function, Bayesian Inference, Stochastic Geometry, Parametric Distribution, Variance Bounding
+    """
 
     distribution_type: DistributionShapeProfile = Field(
         description="The mathematical shape of the probability density function."
@@ -6273,8 +6288,21 @@ class MutationPolicy(CoreasonBaseState):
 
 class NDimensionalTensorManifest(CoreasonBaseState):
     """
-    Cryptographic shadow of an N-Dimensional spatial or mathematical array.
-    Facilitating the routing of multi-dimensional compute without passing raw bytes.
+    AGENT INSTRUCTION: Formalizes Tensor Calculus and Differential Geometry representations 
+    to safely proxy high-dimensional latent structures across zero-trust network boundaries 
+    without transmitting raw, uncompressed bytes. As a ...Manifest suffix, this defines a 
+    frozen, declarative coordinate.
+
+    CAUSAL AFFORDANCE: Allows the orchestrator to route traffic and reserve exact physical 
+    GPU memory for massive tensors prior to downloading them via the storage_uri, 
+    preventing runtime out-of-memory (OOM) execution faults.
+
+    EPISTEMIC BOUNDS: The @model_validator _enforce_physics_engine mathematically proves 
+    that the topological shape exactly matches the declared vram_footprint_bytes limit 
+    (le=100000000000) based on the scalar structural_type byte density. Supply-chain 
+    tampering is physically prevented via the merkle_root SHA-256 requirement.
+
+    MCP ROUTING TRIGGERS: Tensor Calculus, Differential Geometry, Merkle Tree Verification, Zero-Trust Computing, Memory Allocation
     """
 
     structural_type: TensorStructuralFormatProfile = Field(..., description="Structural type of the tensor elements.")
@@ -6565,13 +6593,21 @@ class OverrideIntent(CoreasonBaseState):
 
 class PeftAdapterContract(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Formalizes Low-Rank Adaptation (LoRA) within the execution plane, enabling ephemeral Parameter-Efficient Fine-Tuning (PEFT) without mutating foundation model weights.
+    AGENT INSTRUCTION: Implements Low-Rank Adaptation (LoRA) and Matrix Factorization 
+    to dynamically project parameter-efficient weight matrices into the base model's 
+    computation graph. As a ...Contract suffix, this object defines rigid mathematical 
+    boundaries that the orchestrator must enforce globally.
 
-    CAUSAL AFFORDANCE: Authorizes the orchestrator to dynamically mount safetensors weight matrices into GPU memory, steering the base model's residual stream along specific target_modules.
+    CAUSAL AFFORDANCE: Instructs the inference engine to dynamically hot-swap targeted 
+    attention modules via target_modules, altering the network's forward-pass physics 
+    without mutating the frozen foundation weights (base_model_hash).
 
-    EPISTEMIC BOUNDS: Intrinsic dimensionality is bounded by adapter_rank (gt=0, le=1000000000). Context leakage is guillotined by eviction_ttl_seconds (le=86400). Supply-chain zero-trust is enforced via SHA-256 validation on safetensors_hash. The target_modules array is mathematically sorted for canonical hashing.
+    EPISTEMIC BOUNDS: VRAM allocation is strictly clamped by the intrinsic rank parameter 
+    adapter_rank (gt=0, le=1000000000). The temporal presence of the matrix is guillotined 
+    by eviction_ttl_seconds (le=86400). The target_modules array is deterministically 
+    sorted via @model_validator to preserve RFC 8785 canonical hashing.
 
-    MCP ROUTING TRIGGERS: Low-Rank Adaptation, PEFT, Ephemeral Compute, Residual Stream Steering, Zero-Trust Weights
+    MCP ROUTING TRIGGERS: Low-Rank Adaptation, Matrix Factorization, LoRA, GPU VRAM Allocation, Attention Head Injection
     """
 
     adapter_id: str = Field(
