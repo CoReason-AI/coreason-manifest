@@ -4213,6 +4213,25 @@ class GrammarPanelProfile(CoreasonBaseState):
 
 
 class GraphFlatteningPolicy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A rigid Graph Isomorphism and Dimensionality Reduction protocol
+    defining the deterministic translation of high-dimensional neurosymbolic Knowledge
+    Graphs into flat, tabular matrices for standard OLAP processing. As a ...Policy
+    suffix, this object defines rigid mathematical boundaries.
+
+    CAUSAL AFFORDANCE: Forces the structural projection engine to serialize complex
+    semantic nodes and edges into wide-columnar arrays or adjacency matrices. The
+    preserve_cryptographic_lineage boolean (default=True) guarantees Merkle-DAG hashes
+    survive the flattening transformation.
+
+    EPISTEMIC BOUNDS: The reduction geometry is rigidly constrained by Literal enums for
+    node_projection_mode ["wide_columnar", "struct_array"] and edge_projection_mode
+    ["adjacency_matrix", "map_array"], mathematically severing the capability for agents
+    to hallucinate unsupported tabular schemas.
+
+    MCP ROUTING TRIGGERS: Graph Isomorphism, Dimensionality Reduction, Adjacency Matrix,
+    Wide-Columnar Projection, Structural Serialization
+    """
     node_projection_mode: Literal["wide_columnar", "struct_array"] = Field(
         description="How to flatten SemanticNodeState."
     )
@@ -6974,6 +6993,27 @@ class FederatedPeftContract(CoreasonBaseState):
 
 
 class SemanticEdgeState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A mathematical tensor bridging two SemanticNodeStates, executing
+    Judea Pearl's Structural Causal Models (SCMs) to explicitly formalize causality,
+    correlation, or confounding relationships across the Knowledge Graph. As a ...State
+    suffix, this is a frozen N-dimensional coordinate.
+
+    CAUSAL AFFORDANCE: Empowers the orchestrator's traversal engine to execute directed
+    graph algorithms (e.g., Random Walk with Restart) via subject_node_id and
+    object_node_id (both 128-char CIDs), utilizing the continuous confidence_score
+    (optional, ge=0.0, le=1.0, default=None) to probabilistically prune uncertain paths.
+    The predicate (max_length=2000) carries the semantic relationship label.
+
+    EPISTEMIC BOUNDS: Causal directionality is restricted to a strict Literal automaton
+    ["causes", "confounds", "correlates_with", "undirected"] (default="undirected").
+    Optional typed fields (embedding: VectorEmbeddingState, provenance:
+    EpistemicProvenanceReceipt, temporal_bounds: TemporalBoundsProfile) extend the edge
+    geometry without mandatory overhead.
+
+    MCP ROUTING TRIGGERS: Structural Causal Models, Pearlian Directed Edge, Semantic
+    Triplet, Adjacency Matrix, Epistemic Link
+    """
     edge_id: str = Field(
         min_length=1,
         max_length=128,
@@ -7015,6 +7055,25 @@ class SemanticEdgeState(CoreasonBaseState):
 
 
 class SemanticNodeState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A declarative, frozen N-dimensional coordinate representing a
+    discrete entity vertex within a Resource Description Framework (RDF) or continuous
+    Property Graph. As a ...State suffix, this is a mathematically immutable snapshot.
+
+    CAUSAL AFFORDANCE: Unlocks privacy-preserving mathematical operations on encrypted
+    state via fhe_profile (HomomorphicEncryptionProfile, optional) and enables zero-shot
+    semantic routing based on dense vector distances (embedding: VectorEmbeddingState,
+    optional). Provenance (EpistemicProvenanceReceipt) is required.
+
+    EPISTEMIC BOUNDS: The vertex geometry is physically anchored by node_id (128-char CID
+    regex). The internal representation (text_chunk) is capped at max_length=50000. The
+    scope Literal ["global", "tenant", "session"] (default="session") partitions the
+    cryptographic namespace. The tier (CognitiveTierProfile, default="semantic") and
+    salience (SalienceProfile, optional) govern structural pruning.
+
+    MCP ROUTING TRIGGERS: Resource Description Framework, Property Graph, Fully
+    Homomorphic Encryption, Semantic Coordinate, Vector Embedding
+    """
     node_id: str = Field(
         min_length=1,
         max_length=128,
