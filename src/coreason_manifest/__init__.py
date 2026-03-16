@@ -274,6 +274,7 @@ __all__ = [
     "SemanticDiscoveryIntent",
     "SemanticEdgeState",
     "SemanticFirewallPolicy",
+    "SemanticGapAnalysisProfile",
     "SemanticNodeState",
     "SemanticSlicingPolicy",
     "SemanticVersionState",
