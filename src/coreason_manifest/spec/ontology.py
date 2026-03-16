@@ -1015,7 +1015,23 @@ class PredictionMarketPolicy(CoreasonBaseState):
 
 
 class QuorumPolicy(CoreasonBaseState):
-    """The mathematical boundaries required to survive Byzantine failures in a decentralized swarm."""
+    """
+    AGENT INSTRUCTION: Establishes the Practical Byzantine Fault Tolerance (pBFT)
+    mathematical boundaries for a decentralized swarm to survive malicious or hallucinating
+    actors. As a ...Policy suffix, this object defines rigid mathematical boundaries.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator to validate the state_validation_metric
+    (Literal ["ledger_hash", "zk_proof", "semantic_embedding"]) across $N$ nodes, physically
+    executing the byzantine_action (Literal ["quarantine", "slash_escrow", "ignore"])
+    against nodes that violate the consensus.
+
+    EPISTEMIC BOUNDS: Physically bounds max_tolerable_faults (ge=0, le=1000000000) and
+    min_quorum_size (gt=0, le=1000000000). The @model_validator enforce_bft_math enforces
+    the strict invariant $N \ge 3f + 1$, guaranteeing Byzantine agreement.
+
+    MCP ROUTING TRIGGERS: Byzantine Fault Tolerance, pBFT, Quorum Sensing, Sybil
+    Resistance, Distributed Consensus
+    """
 
     max_tolerable_faults: int = Field(
         le=1000000000,
@@ -1042,7 +1058,23 @@ class QuorumPolicy(CoreasonBaseState):
 
 class ConsensusPolicy(CoreasonBaseState):
     """
-    Explicit ruleset governing how a council resolves disagreements.
+    AGENT INSTRUCTION: Formalizes Social Choice Theory and Distributed Consensus mechanisms
+    to systematically synthesize a singular, crystallized truth from a multi-agent council.
+    As a ...Policy suffix, this object defines rigid mathematical boundaries.
+
+    CAUSAL AFFORDANCE: Triggers deterministic tie-breaking (via optional
+    tie_breaker_node_id: NodeIdentifierState) or algorithmic market resolution (via
+    optional prediction_market_rules: PredictionMarketPolicy) when agents deadlock,
+    forcefully collapsing the debate probability wave to maintain systemic liveness.
+
+    EPISTEMIC BOUNDS: The max_debate_rounds (optional int) is clamped to le=1000000000 to
+    computationally solve the Halting Problem for runaway arguments. The strategy Literal
+    ["unanimous", "majority", "debate_rounds", "prediction_market", "pbft"] constrains
+    the combinatorial space. The @model_validator requires quorum_rules if strategy is
+    "pbft".
+
+    MCP ROUTING TRIGGERS: Social Choice Theory, Mechanism Design, Condorcet's Jury Theorem,
+    Algorithmic Consensus, Deadlock Resolution
     """
 
     strategy: Literal["unanimous", "majority", "debate_rounds", "prediction_market", "pbft"] = Field(
@@ -2688,7 +2720,21 @@ class DistributionProfile(CoreasonBaseState):
 
 class DiversityPolicy(CoreasonBaseState):
     """
-    Constraints enforcing cognitive heterogeneity.
+    AGENT INSTRUCTION: Implements Cognitive Heterogeneity and Ensemble Variance mandates to
+    physically prevent mode collapse, epistemic echo-chambers, and algorithmic Groupthink
+    within the swarm. As a ...Policy suffix, this object defines rigid mathematical
+    boundaries.
+
+    CAUSAL AFFORDANCE: Forces the orchestrator to construct a topologically diverse
+    multi-model matrix (if model_variance_required is True) and assigns explicit adversarial
+    ("Devil's Advocate") roles to intentionally perturb the consensus gradient.
+
+    EPISTEMIC BOUNDS: Physically bounds the lower limits of adversarial insertion via
+    min_adversaries (le=1000000000, no ge bound). Enforces continuous entropic variance via
+    the optional temperature_variance float (le=1000000000.0, default=None).
+
+    MCP ROUTING TRIGGERS: Cognitive Heterogeneity, Ensemble Variance, Groupthink
+    Mitigation, Red Teaming, Adversarial Perturbation
     """
 
     min_adversaries: int = Field(
