@@ -9082,6 +9082,53 @@ class CouncilTopologyManifest(BaseTopologyManifest):
         return self
 
 
+class SpeculativeExecutionBoundary(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Wraps any subgraph or tool execution triggered probabilistically
+    before the user finished speaking. As a ...Boundary suffix, this is a declarative
+    property descriptor defining an isolated topological partition.
+
+    CAUSAL AFFORDANCE: Unlocks Speculative Execution, allowing the orchestrator to guess
+    the human's intent and pre-compute subgraphs. It forces the system to preserve
+    rollback_pointers to rewind state if the guess is later falsified.
+
+    EPISTEMIC BOUNDS: The commit_probability is strictly clamped (ge=0.0, le=1.0) defining
+    when the branch can be permanently committed. The rollback_pointers array
+    (max_length=10000) physically lists the memory addresses to purge. Arrays are sorted
+    for RFC 8785 canonical hashing.
+
+    MCP ROUTING TRIGGERS: Speculative Execution, Transactional Isolation, Topological
+    Rollback, Probabilistic Branching, Markov Decision Process
+    """
+
+    boundary_id: str = Field(
+        min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$", description="Unique ID for this speculative branch."
+    )
+    is_speculative: bool = Field(
+        default=True,
+        description="Flags the execution path as defeasible (capable of being voided).",
+    )
+    commit_probability: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="The threshold at which this speculative branch is permanently committed to the main ledger.",
+    )
+    rollback_pointers: list[UUID] = Field(
+        max_length=10000,
+        description="The memory addresses of nodes/edges to cascade-delete if the guess is wrong.",
+    )
+    competing_hypotheses: list[UUID] = Field(
+        default_factory=list,
+        description="Pointers to alternative DAG branches that are lying dormant in case this one fails.",
+    )
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> "SpeculativeExecutionBoundary":
+        object.__setattr__(self, "rollback_pointers", sorted(self.rollback_pointers))
+        object.__setattr__(self, "competing_hypotheses", sorted(self.competing_hypotheses))
+        return self
+
+
 class DAGTopologyManifest(BaseTopologyManifest):
     """
     AGENT INSTRUCTION: Formalizes a Directed Acyclic Graph (DAG) for deterministic,
@@ -9118,10 +9165,21 @@ class DAGTopologyManifest(BaseTopologyManifest):
     "\n    TOPOLOGICAL BOUNDARY: Must be >= 1 and <= 256. Prevents runaway agentic cyclic recursion.\n    "
     max_fan_out: int = Field(ge=1, le=1024, description="The maximum number of parallel child nodes.")
     "\n    TOPOLOGICAL BOUNDARY: Must be >= 1 and <= 1024. Limits horizontal compute explosion.\n    "
+    speculative_boundaries: list[SpeculativeExecutionBoundary] = Field(
+        default_factory=list,
+        description="The explicit array of probabilistic branching bounds enforcing Speculative Execution within the DAG.",
+    )
 
     @model_validator(mode="after")
     def sort_dag_topology_arrays(self) -> Self:
         object.__setattr__(self, "edges", sorted(self.edges))
+        return self
+
+    @model_validator(mode="after")
+    def sort_speculative_boundaries(self) -> Self:
+        object.__setattr__(
+            self, "speculative_boundaries", sorted(self.speculative_boundaries, key=lambda x: x.boundary_id)
+        )
         return self
 
     @model_validator(mode="after")
@@ -9159,6 +9217,37 @@ class DAGTopologyManifest(BaseTopologyManifest):
                         recursion_stack.remove(curr)
                         stack.pop()
         return self
+
+    def trigger_rollback(self, boundary_id: str) -> None:
+        """
+        AGENT INSTRUCTION: Actively purges memory associated with a SpeculativeExecutionBoundary
+        when a contradictory observation falsifies the branch.
+        """
+        boundary_to_rollback = None
+        for boundary in self.speculative_boundaries:
+            if boundary.boundary_id == boundary_id:
+                boundary_to_rollback = boundary
+                break
+        if boundary_to_rollback is None:
+            raise ValueError(f"Boundary ID '{boundary_id}' not found in speculative_boundaries.")
+
+        nodes_to_purge = {str(uuid_val) for uuid_val in boundary_to_rollback.rollback_pointers}
+
+        # Purge nodes
+        for node_id in nodes_to_purge:
+            if node_id in self.nodes:
+                del self.nodes[node_id]
+
+        # Purge edges related to the purged nodes
+        edges_to_keep = []
+        for source, target in self.edges:
+            if source not in nodes_to_purge and target not in nodes_to_purge:
+                edges_to_keep.append((source, target))
+        object.__setattr__(self, "edges", edges_to_keep)
+
+        # Remove the boundary itself
+        boundaries_to_keep = [b for b in self.speculative_boundaries if b.boundary_id != boundary_id]
+        object.__setattr__(self, "speculative_boundaries", boundaries_to_keep)
 
 
 class DigitalTwinTopologyManifest(BaseTopologyManifest):
@@ -9823,6 +9912,75 @@ class BeliefMutationEvent(BaseStateEvent):
     @classmethod
     def enforce_payload_topology(cls, v: Any) -> Any:
         return _validate_payload_bounds(v)
+
+
+class ContinuousObservationStream(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Replaces discrete strings with a continuous, time-indexed
+    mathematical representation of the user's input stream to support hardware-level
+    forget gates for disfluencies. As a ...Stream suffix, this is a declarative,
+    frozen snapshot of an N-dimensional coordinate at a specific point in time.
+
+    CAUSAL AFFORDANCE: Unlocks Continuous State Space Models (SSMs) processing,
+    authorizing the orchestrator to dynamically decay the hidden state of specific
+    tokens in the buffer without waiting for an End-of-Sentence (<EOS>) token.
+
+    EPISTEMIC BOUNDS: The token buffer is physically bounded to max_length=1000000.
+    The temporal_decay_matrix maps discrete token indices to strict float probability
+    weights (ge=0.0, le=1.0). The latest_confidence_score is mathematically clamped
+    (ge=0.0, le=1.0).
+
+    MCP ROUTING TRIGGERS: Continuous State Space, Forget Gate, Streaming Ingestion,
+    Temporal Decay, LTI System
+    """
+
+    token_buffer: list[Annotated[str, StringConstraints(max_length=10000)]] = Field(
+        max_length=1000000,
+        description="The raw, incoming sequence of tokens.",
+    )
+    temporal_decay_matrix: dict[Annotated[int, Field(ge=0)], Annotated[float, Field(ge=0.0, le=1.0)]] = Field(
+        description="Maps token indices to a weight [0, 1]. If a stutter is detected, the weight decays to 0.",
+    )
+    latest_confidence_score: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="The continuous probability that the current intent is stable.",
+    )
+
+
+class StreamingDisfluencyContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Defines the deterministic rule-set governing when and how to
+    trigger a 'forget gate' during continuous ingestion. As a ...Contract suffix, this
+    object defines rigid mathematical boundaries the orchestrator must enforce globally.
+
+    CAUSAL AFFORDANCE: Physically alters the transition matrix of a Continuous Observation
+    Stream, acting as a hardware-level forget gate to automatically trim tails or drop
+    latent vectors if the LLM's confidence score drops due to user stuttering.
+
+    EPISTEMIC BOUNDS: The repair_marker_regex is stringently capped at max_length=2000
+    to prevent ReDoS exhaustion. The decay_threshold mathematically triggers trimming at a
+    precise drop in confidence (ge=0.0, le=1.0). The max_lookback_window physically limits
+    decay depth (ge=0, le=1000000000).
+
+    MCP ROUTING TRIGGERS: Forget Gate, Hardware-Level Trimming, Disfluency Detection,
+    Speech Repair, Temporal Matrix Alteration
+    """
+
+    repair_marker_regex: str = Field(
+        max_length=2000,
+        description="A pattern to detect speech disfluencies (e.g., r'\\b(uh|um|wait|i mean|no actually)\\b').",
+    )
+    decay_threshold: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="The exact mathematical drop in confidence_score required to trigger an automatic tail-trimming.",
+    )
+    max_lookback_window: int = Field(
+        ge=0,
+        le=1000000000,
+        description="How many tokens backward the system is allowed to decay/delete when a repair marker is hit.",
+    )
 
 
 class ObservationEvent(BaseStateEvent):
@@ -10652,6 +10810,77 @@ type AnyStateEvent = Annotated[
 ]
 
 
+class DefeasibleEpistemicLedger(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A non-monotonic memory store. Unlike a standard ledger that
+    only appends, this ledger acts as a Truth Maintenance System (TMS) where some
+    facts are mere presumptions capable of being mathematically retracted. As a
+    ...Ledger suffix, this defines a rigid, N-dimensional coordinate state.
+
+    CAUSAL AFFORDANCE: Upgrades the core ledger to utilize the AGM Postulates for
+    belief revision, unlocking the orchestrator's ability to recursively drop
+    defeasible claims without invalidating the immutable monotonic_core.
+
+    EPISTEMIC BOUNDS: The monotonic_core (max_length=1000000) stores immutable facts.
+    The defeasible_claims dict is indexed by UUID to allow strict excision via the
+    EpistemicContractionPolicy. The retracted_nodes array acts as a graveyard for
+    falsified claims. Arrays are sorted for canonicalization.
+
+    MCP ROUTING TRIGGERS: Truth Maintenance System, Defeasible Logic, Belief Revision,
+    AGM Postulates, Non-Monotonic Memory
+    """
+
+    monotonic_core: list[SemanticNodeState] = Field(
+        max_length=1000000,
+        description="Absolute facts that cannot be retracted (e.g., the current timestamp, hard user identity).",
+    )
+    defeasible_claims: dict[UUID, SemanticNodeState] = Field(
+        default_factory=dict,
+        description="Guesses made by the AI based on partial input.",
+    )
+    retracted_nodes: list[UUID] = Field(
+        default_factory=list,
+        description="A graveyard of facts that were proven false by later input.",
+    )
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> "DefeasibleEpistemicLedger":
+        object.__setattr__(self, "monotonic_core", sorted(self.monotonic_core, key=lambda x: x.node_id))
+        object.__setattr__(self, "retracted_nodes", sorted(self.retracted_nodes))
+        return self
+
+
+class EpistemicContractionPolicy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: The deterministic math that safely removes a belief without
+    destroying the whole system. As a ...Policy suffix, this defines rigid mathematical
+    boundaries the orchestrator must enforce globally.
+
+    CAUSAL AFFORDANCE: Instructs the DefeasibleEpistemicLedger to execute a localized
+    Pearlian do-operator intervention, performing a topological rollback of an excised
+    claim and mathematically pruning its recursive causal dependencies.
+
+    EPISTEMIC BOUNDS: The contradiction_trigger and excision_target are bound to UUID
+    pointers. The cascade_depth limit is physically capped (ge=0, le=1000000) to prevent
+    infinite loop stack exhaustion during dependency pruning.
+
+    MCP ROUTING TRIGGERS: Epistemic Contraction, Belief Revision, Dependency Pruning,
+    AGM Postulates, Defeasible Logic
+    """
+
+    contradiction_trigger: UUID = Field(
+        description="The ID of the new observation that violates an existing claim.",
+    )
+    excision_target: UUID = Field(
+        description="The exact defeasible_claim to be removed.",
+    )
+    cascade_depth: int = Field(
+        ge=0,
+        le=1000000,
+        description="How many downstream causal dependencies must be purged.",
+    )
+
+
 class EpistemicLedgerState(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Formalizes Event Sourcing and the Merkle-DAG structure as
@@ -10762,3 +10991,9 @@ IntentClassificationReceipt.model_rebuild()
 KinematicNoiseProfile.model_rebuild()
 EnvironmentalSpoofingProfile.model_rebuild()
 AdversarialEmulationProfile.model_rebuild()
+
+ContinuousObservationStream.model_rebuild()
+StreamingDisfluencyContract.model_rebuild()
+SpeculativeExecutionBoundary.model_rebuild()
+DefeasibleEpistemicLedger.model_rebuild()
+EpistemicContractionPolicy.model_rebuild()
