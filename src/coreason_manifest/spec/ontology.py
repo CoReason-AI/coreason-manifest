@@ -1383,6 +1383,15 @@ class FederatedDiscoveryManifest(CoreasonBaseState):
 
 
 class ActiveInferenceContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Defines the formal Fristonian Active Inference policy for an autonomous agent, mandating the minimization of Expected Free Energy through targeted epistemic foraging.
+
+    CAUSAL AFFORDANCE: Unlocks kinetic tool execution strictly for the purpose of empirical observation, routing compute to maximize epistemic certainty regarding a specific hypothesis.
+
+    EPISTEMIC BOUNDS: Mathematically constrained by expected_information_gain (a float bounded between 0.0 and 1.0 representing Shannon entropy reduction) and an economic execution_cost_budget_magnitude cap (le=1000000000).
+
+    MCP ROUTING TRIGGERS: Active Inference, Expected Free Energy, Epistemic Foraging, Fristonian Mechanics, Shannon Entropy
+    """
     task_id: str = Field(
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
@@ -2814,6 +2823,15 @@ class FallbackIntent(CoreasonBaseState):
 
 
 class FalsificationContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Enforces strict Popperian Falsificationism by defining the exact empirical boundary conditions that would logically invalidate a non-monotonic causal hypothesis.
+
+    CAUSAL AFFORDANCE: Provides the deterministic pattern-matching criteria (falsifying_observation_signature) that triggers a DefeasibleCascadeEvent, instantly quarantining the collapsed subgraph.
+
+    EPISTEMIC BOUNDS: Limits the falsification logic to a strictly typed condition_id (max_length=128) and physically binds the empirical test to an explicit required_tool_name to prevent unbounded or hallucinated search spaces.
+
+    MCP ROUTING TRIGGERS: Popperian Falsification, Null Hypothesis, Defeasible Logic, Empirical Falsifiability, Structural Boundary
+    """
     condition_id: str = Field(
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
@@ -3471,6 +3489,15 @@ class InterventionIntent(CoreasonBaseState):
 
 
 class InterventionalCausalTask(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Represents a formal Pearlian Do-Operator (P(y|do(X=x))) intervention, forcefully severing a variable from its historical back-door causal mechanisms to prove direct causal influence.
+
+    CAUSAL AFFORDANCE: Authorizes the orchestrator to physically mutate the intervention_variable to the do_operator_state, breaking confounding structural edges in the directed acyclic graph.
+
+    EPISTEMIC BOUNDS: The physical mutation is economically capped by execution_cost_budget_magnitude (le=1000000000), and its justification is strictly quantified by expected_causal_information_gain (bounded mathematically between 0.0 and 1.0).
+
+    MCP ROUTING TRIGGERS: Pearlian Do-Calculus, Structural Causal Models, Causal Intervention, Confounder Ablation, Back-door Criterion
+    """
     task_id: str = Field(
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
