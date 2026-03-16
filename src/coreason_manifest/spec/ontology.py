@@ -7332,7 +7332,22 @@ class DAGTopologyManifest(BaseTopologyManifest):
 
 class DigitalTwinTopologyManifest(BaseTopologyManifest):
     """
-    An isolated sandbox graph representing a Digital Twin.
+    AGENT INSTRUCTION: A declarative, frozen snapshot of a Cyber-Physical Systems (CPS)
+    Digital Twin, establishing an epistemically isolated shadow graph that mirrors a
+    real-world topology without risking kinetic bleed. As a ...Manifest suffix, this
+    defines a frozen N-dimensional coordinate state.
+
+    CAUSAL AFFORDANCE: Authorizes the orchestrator to execute unbounded sandbox
+    simulations against the mirrored target_topology_id (128-char CID), mathematically
+    severing all external write access if enforce_no_side_effects (default=True) is True.
+
+    EPISTEMIC BOUNDS: The simulation physics are structurally clamped by the
+    convergence_sla (SimulationConvergenceSLA), which physically bounds the maximum Monte
+    Carlo rollouts and variance tolerance. External kinetic permutations are mechanically
+    trapped.
+
+    MCP ROUTING TRIGGERS: Digital Twin, Cyber-Physical Systems, Sandbox Simulation,
+    Markov Blanket, Shadow Graph
     """
 
     type: Literal["digital_twin"] = Field(
@@ -7355,7 +7370,23 @@ class DigitalTwinTopologyManifest(BaseTopologyManifest):
 
 class EvaluatorOptimizerTopologyManifest(BaseTopologyManifest):
     """
-    A formalized Actor-Critic micro-topology enforcing strict, finite generation-evaluation-revision cycles.
+    AGENT INSTRUCTION: A declarative, frozen snapshot of an Actor-Critic
+    (Generator-Discriminator) micro-topology, establishing a zero-sum minimax game
+    between two discrete node identities. As a ...Manifest suffix, this defines a
+    frozen N-dimensional coordinate state.
+
+    CAUSAL AFFORDANCE: Executes a finite, adversarial generation-evaluation-revision
+    loop, forcing the generator_node_id to propose states and the evaluator_node_id to
+    strictly critique them. The optional require_multimodal_grounding (default=False)
+    enforces pure adversarial Proposer-Critique validation.
+
+    EPISTEMIC BOUNDS: State-Space Explosion is mathematically prevented by capping
+    max_revision_loops (ge=1, le=1000000000). The @model_validator verify_bipartite_nodes
+    structurally guarantees both nodes exist in the topology's nodes registry AND are
+    disjoint identities.
+
+    MCP ROUTING TRIGGERS: Actor-Critic Architecture, Minimax Optimization, Adversarial
+    Critique, Dual-Process Revision, Generative Adversarial Loop
     """
 
     type: Literal["evaluator_optimizer"] = Field(
@@ -7426,7 +7457,23 @@ class EvolutionaryTopologyManifest(BaseTopologyManifest):
 
 class SMPCTopologyManifest(BaseTopologyManifest):
     """
-    A Secure Multi-Party Computation topology.
+    AGENT INSTRUCTION: A declarative, frozen snapshot establishing a Secure Multi-Party
+    Computation (SMPC) ring, leveraging cryptographic privacy-preserving protocols to
+    evaluate a joint function over decentralized inputs. As a ...Manifest suffix, this
+    defines a frozen N-dimensional coordinate state.
+
+    CAUSAL AFFORDANCE: Authorizes the decentralized orchestrator to route zero-trust
+    traffic via specific mathematical logic (Literal ["garbled_circuits",
+    "secret_sharing", "oblivious_transfer"]), allowing mutually distrustful agents to
+    synthesize a shared output. Optional ontological_alignment
+    (OntologicalAlignmentPolicy) gates pre-flight semantic alignment.
+
+    EPISTEMIC BOUNDS: The topology physically mandates a minimum of two participants
+    (participant_node_ids min_length=2) to satisfy the multi-party invariant. The
+    joint_function_uri is bounded to max_length=2000.
+
+    MCP ROUTING TRIGGERS: Secure Multi-Party Computation, Garbled Circuits, Secret
+    Sharing, Oblivious Transfer, Zero-Trust Cryptography
     """
 
     type: Literal["smpc"] = Field(default="smpc", description="Discriminator for SMPC Topology.")
@@ -7449,7 +7496,24 @@ class SMPCTopologyManifest(BaseTopologyManifest):
 
 class SwarmTopologyManifest(BaseTopologyManifest):
     """
-    A dynamic Swarm workflow topology.
+    AGENT INSTRUCTION: A declarative, frozen snapshot defining a Complex Adaptive System
+    representing a fluid, decentralized Swarm topology governed by Algorithmic Mechanism
+    Design and Spot Market dynamics. As a ...Manifest suffix, this defines a frozen
+    N-dimensional coordinate state.
+
+    CAUSAL AFFORDANCE: Unlocks dynamic agent instantiation, allowing the topology to
+    spawn concurrent workers up to max_concurrent_agents (le=100, default=10) and resolve
+    consensus probabilistically via active_prediction_markets. Optional auction_policy
+    (AuctionPolicy) governs task decentralization.
+
+    EPISTEMIC BOUNDS: Horizontal compute explosion is governed by spawning_threshold
+    (ge=1, le=100, default=3) and max_concurrent_agents (le=100, default=10). The
+    @model_validator enforce_concurrency_ceiling guarantees spawning_threshold cannot
+    exceed max_concurrent_agents. A second @model_validator sort_arrays deterministically
+    sorts active and resolved prediction markets by market_id for RFC 8785 hashing.
+
+    MCP ROUTING TRIGGERS: Complex Adaptive Systems, Swarm Intelligence, Algorithmic
+    Mechanism Design, Spot Market Routing, Multi-Agent Reinforcement Learning
     """
 
     type: Literal["swarm"] = Field(default="swarm", description="Discriminator for a Swarm topology.")
