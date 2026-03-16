@@ -242,7 +242,23 @@ class CoreasonBaseState(BaseModel):
 
 
 class SpatialBoundingBoxProfile(CoreasonBaseState):
-    """A resolution-independent spatial region."""
+    """
+    AGENT INSTRUCTION: Defines a 2D Euclidean bounding box within a normalized coordinate
+    space to ensure resolution-independent topological scaling. As a ...Profile suffix,
+    this is a declarative property descriptor.
+
+    CAUSAL AFFORDANCE: Instructs the frontend rendering matrices to physically constrain
+    graphical overlays, multimodal tokens, and UI projections within a rigid, deterministic
+    spatial geometry.
+
+    EPISTEMIC BOUNDS: All coordinate tensors (x_min, y_min, x_max, y_max) are
+    mathematically clamped to a normalized continuous float space (ge=0.0, le=1.0). The
+    @model_validator validate_geometry physically guarantees min bounds cannot exceed max
+    bounds, preventing the generation of inverted or non-Euclidean manifolds.
+
+    MCP ROUTING TRIGGERS: Euclidean Geometry, Topological Scaling, Normalized Coordinate
+    Space, Bounding Box, Spatial Projection
+    """
 
     x_min: float = Field(ge=0.0, le=1.0, description="The left boundary.")
     y_min: float = Field(ge=0.0, le=1.0, description="The top boundary.")
@@ -314,7 +330,22 @@ class ExecutionSLA(CoreasonBaseState):
 
 
 class FacetMatrixProfile(CoreasonBaseState):
-    """Optional small-multiple faceting layout."""
+    """
+    AGENT INSTRUCTION: Formalizes Edward Tufte's principles of Small Multiples (Trellis
+    displays) by establishing a categorical partitioning matrix for high-dimensional data
+    projections. As a ...Profile suffix, this is a declarative property descriptor.
+
+    CAUSAL AFFORDANCE: Authorizes the rendering engine to recursively split and project a
+    singular visual grammar into a grid of structurally isomorphic sub-manifolds based on
+    distinct categorical fields.
+
+    EPISTEMIC BOUNDS: The partitioning constraints (row_field, column_field) are both
+    optional (default=None) and physically bounded by max_length=2000 to mathematically
+    prevent Dictionary Bombing and OOM crashes during matrix generation.
+
+    MCP ROUTING TRIGGERS: Small Multiples, Trellis Display, Isomorphic Sub-Manifold,
+    High-Dimensional Projection, Categorical Partitioning
+    """
 
     row_field: str | None = Field(
         max_length=2000, default=None, description="The dataset field used to split the chart into rows."
@@ -325,7 +356,22 @@ class FacetMatrixProfile(CoreasonBaseState):
 
 
 class SpatialCoordinateProfile(CoreasonBaseState):
-    """A resolution-independent 2D spatial vector."""
+    """
+    AGENT INSTRUCTION: Specifies an exact N-dimensional (2D) affine coordinate vector for
+    localized rendering and kinematic targeting. As a ...Profile suffix, this is a
+    declarative property descriptor.
+
+    CAUSAL AFFORDANCE: Provides the absolute spatial terminus for UI actions and overlays,
+    enabling the orchestrator to perform bijective mappings from abstract latent data
+    points to physical screen space.
+
+    EPISTEMIC BOUNDS: The x and y axes are mathematically clamped to a normalized float
+    space (ge=0.0, le=1.0), guaranteeing that dynamically generated coordinates can never
+    physically breach the absolute boundaries of the rendering viewport.
+
+    MCP ROUTING TRIGGERS: Affine Transformation, 2D Vector, Kinematic Terminus, Euclidean
+    Coordinate, Bijective Mapping
+    """
 
     x: float = Field(ge=0.0, le=1.0, description="The normalized X-axis coordinate (0.0 = left, 1.0 = right).")
     y: float = Field(ge=0.0, le=1.0, description="The normalized Y-axis coordinate (0.0 = top, 1.0 = bottom).")
@@ -357,7 +403,23 @@ class ComputeRateContract(CoreasonBaseState):
 
 
 class ScalePolicy(CoreasonBaseState):
-    """The mathematical mapping constraint for a channel."""
+    """
+    AGENT INSTRUCTION: Implements Stevens's levels of measurement and Wilkinson's Grammar
+    of Graphics to mathematically project abstract data domains into visual geometric
+    ranges. As a ...Policy suffix, this object defines rigid mathematical boundaries.
+
+    CAUSAL AFFORDANCE: Physically distorts or linearly maps the input metric tensor into
+    rendering space, dictating how the orchestrator processes logarithmic, temporal, or
+    ordinal data vectors for UI projection.
+
+    EPISTEMIC BOUNDS: The transformation algorithm is strictly constrained to a Literal
+    automaton ["linear", "log", "time", "ordinal", "nominal"]. Physical data boundaries
+    (domain_min, domain_max) are optional (default=None) and upper-bounded by
+    le=1000000000.0 to prevent geometric projection overflow (no ge bound enforced).
+
+    MCP ROUTING TRIGGERS: Grammar of Graphics, Metric Tensor Distortion, Levels of
+    Measurement, Scale Projection, FSM Literal
+    """
 
     type: Literal["linear", "log", "time", "ordinal", "nominal"] = Field(
         description="The mathematical scale mapping metrics to pixels."
