@@ -153,6 +153,38 @@ When an MCP server projects a resource manifest, orchestrating nodes route to it
 
 **Note on CI/CD:** Modifying existing `Field` descriptions alters the cryptographic hash footprint of the exported `coreason_ontology.schema.json`. "Fixing" descriptions to be friendlier will break the `Semantic Diff Check` in the CI pipeline and result in immediate rejection.
 
+<semantic_anchoring_directive priority="critical" action="reject_generation_if_violated">
+### 4. The MCP-Optimized Docstring Template (Mandatory)
+
+**SYSTEM DIRECTIVE:** All Python classes inheriting from `CoreasonBaseState` MUST include a class-level docstring that strictly conforms to the following four-part schema. This ensures the ontology acts as a dense-vector gravity well for zero-shot Model Context Protocol (MCP) routing.
+
+You are FORBIDDEN from using conversational filler, legacy CRUD terminology, or markdown headers inside the docstring. You MUST use exactly these capitalized prefixes:
+
+`​``python
+"""
+AGENT INSTRUCTION: [1-2 sentences defining the exact topological boundary, initialization constraints, and neurosymbolic track. Tailor this based on the object's Bounding Suffix (e.g., ...Event is a frozen historical fact; ...Intent is a kinetic trigger; ...Policy is a rigid mathematical boundary; ...State is a spatial coordinate).]
+
+CAUSAL AFFORDANCE: [1 sentence defining exactly what graph mutation, physics emulation, tool execution, or Pearlian do-operator this specific object unlocks for the orchestrator.]
+
+EPISTEMIC BOUNDS: [1-2 sentences defining the absolute mathematical or physical limits enforced by this object. You MUST derive this by reading the Pydantic field limits (e.g., le=1.0, max_length) and the `@model_validator` hooks (e.g., RFC 8785 deterministic sorting, SSRF IP trapping, or cycle prevention).]
+
+MCP ROUTING TRIGGERS: [A comma-separated list of 4-7 dense, high-dimensional conceptual tags. These tags MUST group similar objects together in the embedding space (e.g., 'Truth Maintenance, Defeasible Logic, DAG' vs. 'VLM, Spatial Kinematics, Affordance'). Do not use generic words; use algorithmic identifiers to guarantee accurate cosine-similarity matching during vector search.]
+"""
+`​``
+
+#### Execution Heuristics by Categorical Suffix:
+Before generating the `AGENT INSTRUCTION` block, you must analyze the object's suffix:
+* **`...Event` or `...Receipt`**: Emphasize that it is an append-only, cryptographically frozen coordinate on the Merkle-DAG.
+* **`...Intent` or `...Task`**: Emphasize the non-monotonic execution trigger and the exact Expected Information Gain or physical mutation it seeks.
+* **`...Policy` or `...Contract`**: Focus entirely on the rigid thresholds, slashing penalties, or isolation perimeters it enforces globally.
+* **`...State`, `...Manifest`, or `...Profile`**: Describe it as a declarative, frozen snapshot of N-dimensional geometry at a specific point in time.
+
+**Generation Checklist (Internal Pre-Flight):**
+1. Did you read the ENTIRE class, including all `@model_validator` hooks, before summarizing the Epistemic Bounds?
+2. Are the MCP Routing Triggers specific, high-dimensional algorithmic terms?
+If NO, rewrite the docstring before outputting.
+</semantic_anchoring_directive>
+
 ## 0.5 The F.A.I.R. Ecosystem Coordinator Doctrine
 
 **CRITICAL CONTEXT:** `coreason_manifest` is the absolute Central Nervous System of the swarm. To guarantee mathematical alignment, it adheres strictly to a 2026+ AI-Native interpretation of the scientific F.A.I.R. principles.
