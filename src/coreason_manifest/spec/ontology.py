@@ -2216,6 +2216,24 @@ class CustodyReceipt(CoreasonBaseState):
 
 
 class DefeasibleAttackEvent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A directed causal edge executing non-monotonic truth maintenance
+    within a Dung-style Abstract Argumentation Framework. It mathematically projects a defeater
+    from a source claim against a target claim. As an ...Event suffix, this object is a
+    cryptographically frozen historical fact that the LLM must never hallucinate a mutation to.
+
+    CAUSAL AFFORDANCE: Modulates the probabilistic acceptability of the target_claim_id within
+    the EpistemicArgumentGraphState. If valid, it triggers a DefeasibleCascadeEvent to
+    physically sever and quarantine downstream nodes relying on the target.
+
+    EPISTEMIC BOUNDS: Strictly bounds the attack geometry using AttackVectorProfile enums
+    (Literal["rebuttal", "undercutter", "underminer"]). Source (source_claim_id) and target
+    (target_claim_id) mappings are locked to 128-character cryptographic CIDs via strict
+    regex ^[a-zA-Z0-9_.:-]+$, preventing unbounded graph traversals.
+
+    MCP ROUTING TRIGGERS: Undercutting Defeater, Non-Monotonic Logic, Directed Attack Edge,
+    Belief Retraction, Defeasible Reasoning
+    """
     attack_id: str = Field(
         min_length=1,
         max_length=128,
@@ -2761,6 +2779,24 @@ class EvictionPolicy(CoreasonBaseState):
 
 
 class EvidentiaryWarrantState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Formalizes the Toulmin Model of Argumentation by creating a structural
+    bridge between a localized EpistemicArgumentClaimState and a globally verifiable Merkle-DAG
+    coordinate. As a ...State suffix, this is a declarative, frozen snapshot of N-dimensional
+    geometry at a specific point in time.
+
+    CAUSAL AFFORDANCE: Physically anchors a non-monotonic proposition to an immutable
+    historical fact, unlocking the ability for downstream evaluators to mathematically trace
+    the justification logic back to its evidentiary origin.
+
+    EPISTEMIC BOUNDS: Requires either a source_event_id or source_semantic_node_id (both
+    optional, bounded to 128-char CIDs via strict regex ^[a-zA-Z0-9_.:-]+$). The inferential
+    leap is constrained by justification, capped at max_length=2000 characters to prevent
+    context-window exhaustion.
+
+    MCP ROUTING TRIGGERS: Toulmin Model, Evidentiary Warrant, Inferential Bridge, Grounding
+    Coordinate, Argumentation Theory
+    """
     source_event_id: str | None = Field(
         min_length=1,
         max_length=128,
@@ -2781,6 +2817,24 @@ class EvidentiaryWarrantState(CoreasonBaseState):
 
 
 class EpistemicArgumentClaimState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Represents a discrete, falsifiable proposition within a Dung-style
+    Abstract Argumentation Framework. It serves as a static node in the dialectical graph,
+    awaiting challenge or verification. As a ...State suffix, this is a declarative, frozen
+    snapshot of N-dimensional geometry at a specific point in time.
+
+    CAUSAL AFFORDANCE: Acts as the primary target for DefeasibleAttackEvent undercutting.
+    Successfully defending this claim stabilizes the truth value, allowing it to act as a
+    premise in higher-order topological proofs.
+
+    EPISTEMIC BOUNDS: The proposition payload (text_chunk) is mathematically capped at
+    max_length=50000. The internal warrants array is deterministically sorted by the
+    justification field via a @model_validator to preserve RFC 8785 canonical hashing of
+    the dialectical state. The proponent_id is bounded to a 128-char CID.
+
+    MCP ROUTING TRIGGERS: Abstract Argumentation Framework, Falsifiable Proposition,
+    Dialectical Node, Non-Monotonic Premise
+    """
     claim_id: str = Field(
         min_length=1,
         max_length=128,
@@ -2805,7 +2859,24 @@ class EpistemicArgumentClaimState(CoreasonBaseState):
 
 
 class EpistemicArgumentGraphState(CoreasonBaseState):
-    """A Truth Maintenance System (TMS) calculating dialectical justification for non-monotonic belief retraction."""
+    """
+    AGENT INSTRUCTION: A comprehensive Truth Maintenance System (TMS) calculating dialectical
+    justification semantics across the swarm's working context. It houses the complete bipartite
+    mapping of claims and their defeasible attacks. As a ...State suffix, this is a declarative,
+    frozen snapshot of N-dimensional geometry at a specific point in time.
+
+    CAUSAL AFFORDANCE: Provides the holistic adjacency matrix required by the orchestrator to
+    execute grounded extension semantics, determining which set of claims survive the attacks
+    and can be crystallized into the permanent EpistemicLedgerState.
+
+    EPISTEMIC BOUNDS: Physically limits state-space explosion by capping the claims and attacks
+    dictionaries at max_length=10000 keys each. Key geometries are strictly bounded to 255
+    characters via StringConstraints(max_length=255) to prevent Dictionary Bombing during
+    canonicalization.
+
+    MCP ROUTING TRIGGERS: Truth Maintenance System, Adjacency Matrix, Grounded Extension,
+    Dialectical Justification, Belief State Bounding
+    """
 
     claims: dict[Annotated[str, StringConstraints(max_length=255)], EpistemicArgumentClaimState] = Field(
         max_length=10000, description="Components of an Abstract Argumentation Framework."
