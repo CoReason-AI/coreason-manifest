@@ -3625,6 +3625,16 @@ class DynamicConvergenceSLA(CoreasonBaseState):
 
 
 class EmbodiedSensoryVectorProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Formalizes Multimodal Sensor Fusion by quantifying Bayesian Surprise (KL Divergence) against the agent's prior belief manifold.
+
+    CAUSAL AFFORDANCE: Emits a quantified sensory vector to the orchestrator, determining whether an exogenous signal contains enough information-theoretic value to cross the continuous-to-discrete gap and trigger a topological observation.
+
+    EPISTEMIC BOUNDS: The bayesian_surprise_score is strictly clamped to a continuous float space (le=1.0), and physical presence is bounded by temporal_duration_ms (le=86400000).
+
+    MCP ROUTING TRIGGERS: Bayesian Surprise, Multimodal Sensor Fusion, Kullback-Leibler Divergence, Exteroceptive Vector, Proprioception
+    """
+
     sensory_modality: Literal["video", "audio", "spatial_telemetry"] = Field(
         description="Multimodal Sensor Fusion and Spatial-Temporal Bindings representing Proprioceptive State and Exteroceptive Vectors."  # noqa: E501
     )
@@ -3642,7 +3652,15 @@ class EmbodiedSensoryVectorProfile(CoreasonBaseState):
 
 
 class BargeInInterruptEvent(BaseStateEvent):
-    """A cryptographic receipt of a continuous multimodal sequence being prematurely severed by an external stimulus."""
+    """
+    AGENT INSTRUCTION: Encodes an asynchronous hardware interrupt or exogenous sensory spike that forces a premature probability wave collapse on an active generation trajectory.
+
+    CAUSAL AFFORDANCE: Physically severs the continuous multimodal sequence of the target_event_id, injecting the retained_partial_payload into the Epistemic Quarantine and forcing the orchestrator to execute the defined epistemic_disposition instruction.
+
+    EPISTEMIC BOUNDS: Topologically anchored to the target_event_id via a strict 128-char CID regex. The retained_partial_payload is mechanically capped at 100,000 bytes to mathematically prevent VRAM exhaustion from unbounded sensory streams.
+
+    MCP ROUTING TRIGGERS: Asynchronous Interrupt, Generative Severing, Context Switching, Defeasible Disposition, Wave Collapse
+    """
 
     type: Literal["barge_in"] = Field(
         default="barge_in", description="Discriminator type for a barge-in interruption event."
@@ -7255,7 +7273,15 @@ class ExecutionSpanReceipt(CoreasonBaseState):
 
 
 class SpatialKinematicActionIntent(CoreasonBaseState):
-    """A mathematical declaration of an OS-level pointer or interaction trajectory."""
+    """
+    AGENT INSTRUCTION: Employs Mathematical Kinematics and Fitts's Law to project precise, non-linear physical interactions across an exogenous UI manifold.
+
+    CAUSAL AFFORDANCE: Authorizes the translation of latent spatial targets into OS-level actuation, utilizing bezier_control_points to construct continuous polynomial trajectories that simulate human motor control and bypass bot-evasive heuristics.
+
+    EPISTEMIC BOUNDS: Spatial execution is clamped to normalized Euclidean limits (ge=0.0, le=1.0) via the nested SpatialCoordinateProfile. Execution liveness is temporally guillotined by trajectory_duration_ms (le=86400000).
+
+    MCP ROUTING TRIGGERS: Mathematical Kinematics, Bezier Geometry, Fitts's Law, OS-Level Actuation, Non-Linear Trajectory
+    """
 
     action_type: Literal["click", "double_click", "drag_and_drop", "scroll", "hover", "keystroke"] = Field(
         description="The specific kinematic interaction paradigm."
