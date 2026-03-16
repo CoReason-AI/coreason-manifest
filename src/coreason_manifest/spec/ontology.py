@@ -1321,22 +1321,22 @@ class SaeLatentPolicy(CoreasonBaseState):
 
 class SecureSubSessionState(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Formalizes a Temporal Logic boundary and Principle of Least
-    Privilege (PoLP) sandbox as a declarative spatial coordinate for unredacted secret
-    projection. As a ...State suffix, this is a frozen N-dimensional coordinate.
+    AGENT INSTRUCTION: Formalizes the Principle of Least Privilege (PoLP) and Time-Based
+    Access Control (TBAC) for handling high-entropy cryptographic secrets. As a ...State
+    suffix, this is a declarative, frozen N-dimensional coordinate.
 
-    CAUSAL AFFORDANCE: Unlocks a localized enclave where the orchestrator can temporarily
-    project high-entropy cryptographic vault keys into working memory without persisting
-    them to the immutable ledger. The description field (max_length=2000) provides audit
-    justification.
+    CAUSAL AFFORDANCE: Authorizes a temporary, mathematically bounded partition where
+    the agent can access unredacted enterprise vault keys (allowed_vault_keys) without
+    permanently leaking them into the global EpistemicLedgerState. The description field
+    (max_length=2000) provides audit justification.
 
-    EPISTEMIC BOUNDS: Temporal exposure is mathematically clamped by max_ttl_seconds
-    (ge=1, le=3600). Spatial access is geometrically restricted to the allowed_vault_keys
-    array (max_length=100), deterministically sorted by @model_validator sort_arrays for
-    RFC 8785 canonical hashing.
+    EPISTEMIC BOUNDS: The temporal exposure window is physically clamped by
+    max_ttl_seconds (ge=1, le=3600), enforcing an absolute maximum 1-hour session.
+    Spatial access is geometrically restricted to allowed_vault_keys (max_length=100),
+    deterministically sorted by @model_validator sort_arrays for RFC 8785 hashing.
 
-    MCP ROUTING TRIGGERS: Principle of Least Privilege, Temporal Logic, Secure Enclave,
-    Secret Projection, Ephemeral Partition
+    MCP ROUTING TRIGGERS: Principle of Least Privilege, Time-Based Access Control,
+    Secret Vaulting, Ephemeral Partition, Cryptographic Isolation
     """
 
     session_id: str = Field(
@@ -1751,24 +1751,24 @@ class LatentScratchpadReceipt(CoreasonBaseState):
 
 class EphemeralNamespacePartitionState(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Formalizes Capability-Based Security and strict Resource Isolation
-    for dynamic runtime execution as a frozen topological coordinate. As a ...State
-    suffix, this is a frozen N-dimensional coordinate.
+    AGENT INSTRUCTION: Implements a hardware-level Sandboxing and Trusted Execution
+    Environment (TEE) paradigm, utilizing WASI, eBPF, or zkVMs to safely execute
+    exogenous bytecode. As a ...State suffix, this is a declarative, frozen snapshot of
+    an execution geometry.
 
-    CAUSAL AFFORDANCE: Authorizes the orchestrator to spin up a hermetically sealed
-    computational manifold via execution_runtime Literal ["wasm32-wasi",
-    "riscv32-zkvm", "bpf"], physically severing OS-level interactions unless explicitly
-    authorized by allow_network_egress (default=False) and allow_subprocess_spawning
-    (default=False).
+    CAUSAL AFFORDANCE: Physically isolates kinetic execution from the host OS via
+    execution_runtime Literal ["wasm32-wasi", "riscv32-zkvm", "bpf"], authorizing
+    the orchestrator to instantiate a temporary virtual machine strictly conforming to
+    allow_network_egress (default=False) and allow_subprocess_spawning (default=False).
 
-    EPISTEMIC BOUNDS: The Halting Problem and memory exhaustion are physically bounded
-    by max_ttl_seconds (le=86400, gt=0) and max_vram_mb (le=1000000000, gt=0). The
-    @model_validator validate_cryptographic_hashes enforces SHA-256 regex
+    EPISTEMIC BOUNDS: The Halting Problem is managed via max_ttl_seconds (le=86400,
+    gt=0), and memory exhaustion is prevented via max_vram_mb (le=1000000000, gt=0).
+    The @model_validator validate_cryptographic_hashes enforces SHA-256 regex
     (^[a-f0-9]{64}$); a second @model_validator sort_arrays deterministically sorts the
-    authorized_bytecode_hashes for RFC 8785 hashing.
+    authorized_bytecode_hashes for RFC 8785 canonical hashing.
 
-    MCP ROUTING TRIGGERS: Capability-Based Security, Resource Isolation, WASM
-    Sandboxing, Halting Problem Bounding, Zero-Trust Execution
+    MCP ROUTING TRIGGERS: WebAssembly System Interface, Zero-Knowledge Virtual Machine,
+    eBPF, Execution Sandbox, Arbitrary Code Execution Mitigation
     """
 
     partition_id: str = Field(
@@ -3896,23 +3896,24 @@ class FaultInjectionProfile(CoreasonBaseState):
 
 class FederatedCapabilityAttestationReceipt(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Acts as an undeniable Macaroon or Capability Token within a
-    Zero-Trust Architecture, mathematically verifying an agent's right to cross
-    federated topological boundaries as an append-only historical fact. As a ...Receipt
-    suffix, this is a frozen coordinate on the Merkle-DAG.
+    AGENT INSTRUCTION: An immutable cryptographic receipt representing an Object
+    Capability (OCap) grant within a Federated Identity Management (FIM) framework. As
+    a ...Receipt suffix, this is an append-only coordinate on the Merkle-DAG that the
+    LLM must never hallucinate a mutation to.
 
-    CAUSAL AFFORDANCE: Forces the orchestrator to evaluate the cryptographic
-    presentation, authorizing DAG edge traversal into the remote target_topology_id
-    (NodeIdentifierState) under the governing_sla (BilateralSLA) constraints.
-
-    EPISTEMIC BOUNDS: The receipt is cryptographically locked to a 128-char
-    attestation_id (CID). The @model_validator enforce_restricted_vault_locks executes
-    a physical safety interlock, throwing a ValueError if a 'restricted'
-    max_permitted_classification SLA lacks explicitly defined allowed_vault_keys in the
+    CAUSAL AFFORDANCE: Unlocks cross-domain graph traversal, cryptographically proving
+    to the target_topology_id (NodeIdentifierState) that the swarm agent is authorized
+    to establish an active connection governed by the governing_sla (BilateralSLA) and
     authorized_session (SecureSubSessionState).
 
-    MCP ROUTING TRIGGERS: Zero-Trust Architecture, Capability Token, Cross-Boundary
-    Federation, Cryptographic Interlock, Decentralized Identity
+    EPISTEMIC BOUNDS: The receipt is cryptographically locked to a 128-char
+    attestation_id (CID). The @model_validator enforce_restricted_vault_locks
+    mathematically enforces cross-schema invariants: if
+    governing_sla.max_permitted_classification is 'restricted', the authorized_session
+    MUST contain explicit allowed_vault_keys, preventing unauthorized lateral movement.
+
+    MCP ROUTING TRIGGERS: Object Capability Model, Federated Identity Management,
+    Cross-Domain Federation, Capability Attestation, Zero-Trust Execution
     """
 
     attestation_id: str = Field(
@@ -4003,7 +4004,23 @@ class FormalVerificationContract(CoreasonBaseState):
 
 class DelegatedCapabilityManifest(CoreasonBaseState):
     """
-    Decentralized capability tickets representing authority delegation.
+    AGENT INSTRUCTION: Implements Macaroons and Decentralized Identifiers (DIDs) to
+    construct a verifiable delegation chain of authority from a human principal to an
+    autonomous agent. As a ...Manifest suffix, this defines a frozen, N-dimensional
+    coordinate state.
+
+    CAUSAL AFFORDANCE: Empowers the delegate_agent_did (NodeIdentifierState) to invoke
+    the explicitly whitelisted allowed_tool_ids (list[ToolIdentifierState]), acting as a
+    cryptographic proxy for the principal_did (NodeIdentifierState). The
+    cryptographic_signature (max_length=10000) proves the delegation chain.
+
+    EPISTEMIC BOUNDS: The delegation's temporal geometry is physically bounded by
+    expiration_timestamp (ge=0.0, le=253402300799.0). The capability_id is a 128-char
+    CID anchor. The allowed_tool_ids array is deterministically sorted by
+    @model_validator sort_arrays for RFC 8785 canonical hashing.
+
+    MCP ROUTING TRIGGERS: Macaroons, Delegation Chain, Public Key Infrastructure,
+    Object Capability Model, Decentralized Identifiers
     """
 
     capability_id: str = Field(
