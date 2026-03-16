@@ -6211,6 +6211,23 @@ class EpistemicProvenanceReceipt(CoreasonBaseState):
 
 
 class MigrationContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Establishes a Covariant Functor (Category Theory) mapping between disparate 
+    versions of the Universal Unified Ontology. As a ...Contract suffix, it enforces a rigid 
+    mathematical boundary globally.
+
+    CAUSAL AFFORDANCE: Unlocks backward-compatible schema transmutation, allowing the orchestrator 
+    to safely project historical payloads from source_version to target_version via structural 
+    path_transformations.
+
+    EPISTEMIC BOUNDS: The contract_id is cryptographically anchored to a 128-char CID. The 
+    path_transformations dictionary maps strict RFC 6902 JSON Pointers up to max_length=2000. 
+    The dropped_paths list is deterministically sorted by a @model_validator to preserve invariant 
+    RFC 8785 canonical hashing.
+
+    MCP ROUTING TRIGGERS: Category Theory, Schema Evolution, Covariant Functor, RFC 6902, Semantic Migration
+    """
+
     contract_id: str = Field(
         min_length=1,
         max_length=128,
@@ -6467,6 +6484,22 @@ class NormativeDriftEvent(BaseStateEvent):
 
 
 class ObservabilityPolicy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Defines the Dapper Distributed Tracing bounds for a given macroscopic 
+    topology, formalizing the transparency of the system's Markov Blanket. As a ...Policy suffix, 
+    this rigidly bounds the orchestrator's sampling physics.
+
+    CAUSAL AFFORDANCE: Modulates the thermodynamic cost of execution tracking by authorizing or 
+    severing the emission of high-granularity SpanEvent sequences (detailed_events) to prevent 
+    logging backpressure and telemetry starvation.
+
+    EPISTEMIC BOUNDS: Operates purely on strictly typed Boolean variables (traces_sampled, 
+    detailed_events), mathematically prohibiting adversarial manipulation of telemetry pipelines 
+    via unbounded tensor or string injection.
+
+    MCP ROUTING TRIGGERS: Distributed Tracing, Dapper Architecture, Telemetry Sampling, Observability Horizon, Thermodynamic Overhead
+    """
+
     traces_sampled: bool = Field(
         default=True, description="Whether the orchestrator must record telemetry for this topology."
     )
@@ -6669,6 +6702,22 @@ class PeftAdapterContract(CoreasonBaseState):
 
 
 class PersistenceCommitReceipt(BaseStateEvent):
+    """
+    AGENT INSTRUCTION: A cryptographically frozen historical fact representing the absolute 
+    Write-Ahead Logging (WAL) serialization of an ephemeral state differential to durable cold-storage. 
+    As a ...Receipt suffix, this is an append-only coordinate on the Merkle-DAG.
+
+    CAUSAL AFFORDANCE: Commits the internal committed_state_diff_id into the macroscopic Apache 
+    Iceberg or Delta Lake backing store, yielding a verifiable lakehouse_snapshot_id to guarantee 
+    cross-swarm Eventual Consistency.
+
+    EPISTEMIC BOUNDS: Inherits strict Merkle-DAG temporal limits from BaseStateEvent. Both the 
+    lakehouse_snapshot_id and committed_state_diff_id are rigorously clamped by max_length=128 
+    and a strict CID regex (^[a-zA-Z0-9_.:-]+$), mathematically preventing path traversal injections.
+
+    MCP ROUTING TRIGGERS: Event Sourcing, Write-Ahead Logging, Two-Phase Commit, Lakehouse Serialization, State Differential Flush
+    """
+
     type: Literal["persistence_commit"] = Field(
         default="persistence_commit", description="Discriminator type for a persistence commit receipt."
     )
@@ -6955,6 +7004,22 @@ class SSETransportProfile(CoreasonBaseState):
 
 
 class SalienceProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Implements the Ebbinghaus Forgetting Curve and Temporal Difference (TD) 
+    attention weighting to mechanistically degrade the systemic relevance of older epistemic 
+    coordinates. As a ...Profile suffix, this is a declarative, frozen snapshot.
+
+    CAUSAL AFFORDANCE: Drives the mathematical heuristic for the orchestrator's EvictionPolicy, 
+    continuously attenuating context retention based on the prescribed decay_rate scalar to 
+    freely recover GPU VRAM without catastrophic memory loss.
+
+    EPISTEMIC BOUNDS: Both baseline_importance and decay_rate are physically clamped to normalized 
+    probability vectors (ge=0.0, le=1.0). This strict bounding prevents exponential scalar explosion 
+    during unbounded timeframe calculations.
+
+    MCP ROUTING TRIGGERS: Ebbinghaus Forgetting Curve, Temporal Difference, Attention Decay, GPU VRAM Optimization, Memory Salience
+    """
+
     baseline_importance: float = Field(
         ge=0.0, le=1.0, description="The starting importance score of this latent state from 0.0 to 1.0."
     )
