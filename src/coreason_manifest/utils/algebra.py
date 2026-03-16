@@ -247,6 +247,43 @@ def extract_mcp_tool_call(
     )
 
 
+def compile_constrained_decoding_intent(
+    contract: ontology.StateContract | ontology.CognitiveFormatContract,
+    target_node_id: str,
+    request_id: str | int,
+) -> ontology.BoundedJSONRPCIntent:
+    """
+    A pure algebraic functor that projects a strict structural contract into a
+    hardware-level execution instruction for an inference engine (e.g., vLLM/XGrammar).
+    Instructs the engine to compile a Deterministic Finite Automaton (DFA) to mask logits.
+    """
+    if not contract.decoding_policy:
+        raise ValueError("Cannot compile decoding intent: ConstrainedDecodingPolicy is missing or None.")
+
+    payload: dict[str, Any] = {
+        "target_node_id": target_node_id,
+        "enforcement_strategy": contract.decoding_policy.enforcement_strategy,
+        "compiler_backend": contract.decoding_policy.compiler_backend,
+        "terminate_on_eos_leak": contract.decoding_policy.terminate_on_eos_leak,
+    }
+
+    if isinstance(contract, ontology.StateContract):
+        payload["schema_definition"] = contract.schema_definition
+        method = "mcp.inference.compile_json_schema_mask"
+    elif isinstance(contract, ontology.CognitiveFormatContract):
+        payload["regex_pattern"] = contract.final_answer_regex
+        method = "mcp.inference.compile_regex_mask"
+    else:
+        raise TypeError("Unsupported contract type for constrained decoding projection.")
+
+    return ontology.BoundedJSONRPCIntent(
+        jsonrpc="2.0",
+        method=method,
+        params=payload,
+        id=request_id,
+    )
+
+
 def generate_correction_prompt(error: ValidationError, target_node_id: str, fault_id: str) -> System2RemediationIntent:
     """
     Pure functional adapter. Maps a raw Pythonic pydantic.ValidationError into a
