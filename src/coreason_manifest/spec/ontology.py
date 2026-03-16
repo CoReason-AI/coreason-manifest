@@ -2394,7 +2394,23 @@ class DraftingIntent(CoreasonBaseState):
 
 
 class DynamicConvergenceSLA(CoreasonBaseState):
-    """Service Level Agreement defining the mathematical conditions for early termination of a reasoning search."""
+    """
+    AGENT INSTRUCTION: Defines the mathematical Optimal Stopping Theory boundaries for Monte
+    Carlo Tree Search (MCTS) and test-time compute scaling. As an ...SLA suffix, this object
+    enforces rigid mathematical boundaries that the orchestrator must respect globally.
+
+    CAUSAL AFFORDANCE: Triggers an early termination circuit breaker on reasoning trajectories
+    when the gradient of the Process Reward Model (PRM) score falls below the epsilon delta,
+    halting unnecessary probability wave expansion and preserving VRAM.
+
+    EPISTEMIC BOUNDS: Mathematically constrained by convergence_delta_epsilon (ge=0.0, le=1.0)
+    over a strictly positive lookback_window_steps (gt=0, le=1000000000). Physically mandates
+    a minimum_reasoning_steps burn-in period (gt=0, le=1000000000) to prevent premature
+    collapse before the latent space is adequately explored.
+
+    MCP ROUTING TRIGGERS: Optimal Stopping Theory, MCTS, PRM Convergence, Circuit Breaker,
+    Bellman Equation
+    """
 
     convergence_delta_epsilon: float = Field(
         le=1.0,
@@ -4556,6 +4572,24 @@ class EpistemicSOPManifest(CoreasonBaseState):
 
 
 class ProcessRewardContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Enforces the Step-Level Verification heuristics for Process Reward
+    Models (PRMs) during non-monotonic reasoning searches and test-time compute. As a
+    ...Contract suffix, this object defines rigid mathematical boundaries that the
+    orchestrator must enforce globally.
+
+    CAUSAL AFFORDANCE: Authorizes the orchestrator to physically prune hallucinating
+    ThoughtBranchState vectors from the LatentScratchpadReceipt if their logit probabilities
+    drop below the viable threshold, emulating rigorous Beam Search pruning.
+
+    EPISTEMIC BOUNDS: Strictly bounds the search space geometry via pruning_threshold
+    (ge=0.0, le=1.0) and mechanically caps State-Space Explosion through
+    max_backtracks_allowed (ge=0, le=1000000000). Includes an optional
+    convergence_sla (DynamicConvergenceSLA) to monitor trajectory variance.
+
+    MCP ROUTING TRIGGERS: Process Reward Model, Beam Search Pruning, Latent Trajectory,
+    State-Space Explosion, A* Search
+    """
     convergence_sla: DynamicConvergenceSLA | None = Field(
         default=None,
         description="The dynamic circuit breaker that halts the search when PRM variance converges, preventing VRAM waste.",  # noqa: E501
@@ -6570,6 +6604,24 @@ class CognitiveFormatContract(CoreasonBaseState):
 
 
 class EpistemicRewardModelPolicy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Establishes the Group Relative Policy Optimization (GRPO) reward
+    shaping ruleset, mathematically immunizing the swarm against Goodhart's Law and reward
+    hacking. As a ...Policy suffix, this object defines rigid mathematical boundaries that
+    the orchestrator must enforce globally.
+
+    CAUSAL AFFORDANCE: Projects a continuous penalty/reward gradient across extracted axiomatic
+    paths, enforcing syntactic compliance through the format_contract (CognitiveFormatContract)
+    while simultaneously evaluating semantic and topological validity via the optional
+    topological_scoring (TopologicalRewardContract).
+
+    EPISTEMIC BOUNDS: Prevents reward hacking by scaling the logical validity score (R_path)
+    via the beta_path_weight scalar (ge=0.0, le=1.0). Gated by a cryptographic
+    reference_graph_id providing the deterministic ground-truth topology.
+
+    MCP ROUTING TRIGGERS: GRPO, Reward Shaping, Goodhart's Law, Policy Gradient,
+    Advantage Estimation
+    """
     policy_id: str = Field(
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
@@ -6596,6 +6648,24 @@ class EpistemicRewardModelPolicy(CoreasonBaseState):
 
 
 class CognitiveRewardEvaluationReceipt(BaseStateEvent):
+    """
+    AGENT INSTRUCTION: The immutable cryptographic receipt of a GRPO Advantage Actor-Critic
+    evaluation step, permanently logging the mathematically verified advantage score of a
+    specific generation trajectory. As a ...Receipt suffix, this is an append-only coordinate
+    on the Merkle-DAG that the LLM must never hallucinate a mutation to.
+
+    CAUSAL AFFORDANCE: Unlocks policy gradient updates by providing the deterministic advantage
+    signal derived from the extracted_axioms of the source_generation_id.
+
+    EPISTEMIC BOUNDS: The calculated_r_path is strictly clamped between [ge=0.0, le=1.0], and
+    the total_advantage_score is capped at le=100.0. The @model_validator physically guarantees
+    that the extracted_axioms array is deterministically sorted by the composite key
+    (source_concept_id, directed_edge_type, target_concept_id) to preserve RFC 8785 canonical
+    hashing across the distributed swarm.
+
+    MCP ROUTING TRIGGERS: Advantage Actor-Critic, Policy Gradient Update, Epistemic Reward,
+    Baseline Normalization, Reinforcement Learning
+    """
     type: Literal["cognitive_reward_evaluation"] = Field(default="cognitive_reward_evaluation")
     source_generation_id: str = Field(
         min_length=1,
