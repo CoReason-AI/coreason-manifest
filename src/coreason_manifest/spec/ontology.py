@@ -3140,6 +3140,25 @@ class DefeasibleAttackEvent(CoreasonBaseState):
 
 
 class DimensionalProjectionContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Formalizes a linear algebraic transformation (e.g.,
+    Singular Value Decomposition) mapping one embedding manifold to another,
+    grounded in the Johnson-Lindenstrauss Lemma. As a ...Contract suffix, this
+    enforces rigid mathematical boundaries globally.
+
+    CAUSAL AFFORDANCE: Authorizes the orchestrator to translate latent vectors
+    across zero-trust network boundaries, bridging incompatible LLM spaces. The
+    source_model_name and target_model_name (both max_length=2000) identify the
+    origin and destination geometries.
+
+    EPISTEMIC BOUNDS: Translation fidelity is physically proven by the
+    isometry_preservation_score (ge=0.0, le=1.0), ensuring Earth Mover's Distance
+    preservation. Cryptographic integrity is locked via projection_matrix_hash
+    (SHA-256 regex ^[a-f0-9]{64}$).
+
+    MCP ROUTING TRIGGERS: Singular Value Decomposition, Johnson-Lindenstrauss
+    Lemma, Tensor Projection, Earth Mover's Distance, Latent Translation
+    """
     source_model_name: str = Field(max_length=2000, description="The native embedding model of the origin agent.")
     target_model_name: str = Field(max_length=2000, description="The native embedding model of the destination agent.")
     projection_matrix_hash: str = Field(
@@ -4693,6 +4712,23 @@ class HTTPTransportProfile(CoreasonBaseState):
 
 
 class HomomorphicEncryptionProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Implements Lattice-Based Cryptography to enable the
+    evaluation of geometric and arithmetic operations directly on an encrypted
+    tensor state. As a ...Profile suffix, this is a declarative, frozen snapshot.
+
+    CAUSAL AFFORDANCE: Permits an external, untrusted orchestrator to calculate
+    geometric distances or compute reward gradients on sensitive representations
+    without exposing plaintext. The public_key_id (128-char CID) identifies the
+    evaluation key for privacy-preserving computation.
+
+    EPISTEMIC BOUNDS: The encryption dialect is rigidly locked to the fhe_scheme
+    Literal automaton ["ckks", "bgv", "bfv", "tfhe"]. Cryptographic memory
+    explosion is prevented by capping ciphertext_blob (max_length=5000000).
+
+    MCP ROUTING TRIGGERS: Fully Homomorphic Encryption, Lattice-Based
+    Cryptography, CKKS Scheme, Privacy-Preserving Computation, Encrypted Tensor
+    """
     fhe_scheme: Literal["ckks", "bgv", "bfv", "tfhe"] = Field(
         description="The specific homomorphic encryption dialect used to encode the ciphertext."
     )
@@ -7657,6 +7693,24 @@ class UtilityJustificationGraphReceipt(CoreasonBaseState):
 
 
 class VectorEmbeddingState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Represents a declarative, frozen geometric coordinate
+    within a high-dimensional latent manifold, acting as a dense vector anchor
+    for zero-shot semantic routing. As a ...State suffix, this is a frozen
+    N-dimensional coordinate.
+
+    CAUSAL AFFORDANCE: Unlocks Maximum Inner Product Search (MIPS) and k-Nearest
+    Neighbors (k-NN) retrieval without invoking stochastic token generation. The
+    model_name (max_length=2000) traces embedding provenance. The dimensionality
+    (int, unbounded) specifies the vector array size.
+
+    EPISTEMIC BOUNDS: The vector_base64 enforces a strict Base64 regex
+    (^[A-Za-z0-9+/]*={0,2}$) and is physically capped at max_length=5000000 to
+    prevent VRAM exhaustion during deserialization.
+
+    MCP ROUTING TRIGGERS: Topological Data Analysis, Dense Vector Embedding,
+    Latent Manifold, Maximum Inner Product Search, k-Nearest Neighbors
+    """
     vector_base64: str = Field(
         pattern="^[A-Za-z0-9+/]*={0,2}$", max_length=5000000, description="The base64-encoded dense vector array."
     )
