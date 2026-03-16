@@ -8,4 +8,4 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-__all__ = []
+__all__: list[str] = []

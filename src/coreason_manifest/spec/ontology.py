@@ -18,12 +18,12 @@ import math
 import re
 import urllib.parse
 from enum import StrEnum
-from typing import Annotated, Any, Literal, Self
+from typing import Annotated, Any, Literal, Self, TypeAlias
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, StringConstraints, field_validator, model_validator
 
-type JsonPrimitiveState = (
+JsonPrimitiveState: TypeAlias = (
     str
     | int
     | float
@@ -62,7 +62,7 @@ def _validate_payload_bounds(value: JsonPrimitiveState, current_depth: int = 0) 
     elif isinstance(value, str):
         if len(value) > max_str_len:
             raise ValueError(f"String exceeds max length of {max_str_len}")
-    elif value is not None and (not isinstance(value, (int, float, bool))):
+    elif value is not None and (not isinstance(value, int | float | bool)):
         raise ValueError(f"Payload value must be a valid JSON primitive, got {type(value).__name__}")
     return value
 
@@ -3260,7 +3260,7 @@ class CustodyReceipt(CoreasonBaseState):
 class DefeasibleAttackEvent(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Formalizes the binary attack relation in Dung's Abstract Argumentation
-    Framework ($AF = \langle AR, \rightarrow \rangle$). As an ...Event suffix, this is an
+    Framework ($AF = \\langle AR, \\rightarrow \\rangle$). As an ...Event suffix, this is an
     append-only, cryptographically frozen historical fact on the Merkle-DAG.
 
     CAUSAL AFFORDANCE: Projects an undercutting or rebutting defeater from a source claim
@@ -4195,7 +4195,7 @@ class EvidentiaryWarrantState(CoreasonBaseState):
 
 class EpistemicArgumentClaimState(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Implements a discrete node $A \in AR$ within Dung's Abstract
+    AGENT INSTRUCTION: Implements a discrete node $A \\in AR$ within Dung's Abstract
     Argumentation Framework. As a ...State suffix, this is a declarative, frozen snapshot of
     a falsifiable proposition at a specific point in time.
 
@@ -4238,7 +4238,7 @@ class EpistemicArgumentClaimState(CoreasonBaseState):
 class EpistemicArgumentGraphState(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Constructs the macroscopic adjacency matrix for the complete
-    $AF = \langle AR, \rightarrow \rangle$ topology. As a ...State suffix, this is a
+    $AF = \\langle AR, \\rightarrow \\rangle$ topology. As a ...State suffix, this is a
     declarative, frozen snapshot of the dialectical geometry at a specific point in time.
 
     CAUSAL AFFORDANCE: Exposes the holistic bipartite mapping of claims and their defeasible
@@ -5685,7 +5685,7 @@ class BaseNodeProfile(CoreasonBaseState):
             elif isinstance(obj, list):
                 for item in obj:
                     _check_depth(item, depth + 1)
-            elif obj is not None and (not isinstance(obj, (str, int, float, bool))):
+            elif obj is not None and (not isinstance(obj, str | int | float | bool)):
                 raise ValueError(f"domain_extensions leaf values must be JSON primitives, got {type(obj).__name__}")
 
         _check_depth(v, 0)
@@ -8090,9 +8090,9 @@ class AuctionState(CoreasonBaseState):
         return self
 
 
-type TelemetryScalarState = Annotated[str, StringConstraints(max_length=100000)] | int | float | bool | None
-type TelemetryContextProfile = dict[
-    Annotated[str, StringConstraints(max_length=255)], TelemetryScalarState | list[TelemetryScalarState]
+TelemetryScalarState: TypeAlias = Annotated[str, StringConstraints(max_length=100000)] | int | float | bool | None
+TelemetryContextProfile: TypeAlias = dict[
+    Annotated[str, StringConstraints(max_length=255)], "TelemetryScalarState | list[TelemetryScalarState]"
 ]
 
 
