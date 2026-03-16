@@ -1321,7 +1321,22 @@ class SaeLatentPolicy(CoreasonBaseState):
 
 class SecureSubSessionState(CoreasonBaseState):
     """
-    Declarative boundary for handling unredacted secrets within a temporarily isolated state partition.
+    AGENT INSTRUCTION: Formalizes a Temporal Logic boundary and Principle of Least
+    Privilege (PoLP) sandbox as a declarative spatial coordinate for unredacted secret
+    projection. As a ...State suffix, this is a frozen N-dimensional coordinate.
+
+    CAUSAL AFFORDANCE: Unlocks a localized enclave where the orchestrator can temporarily
+    project high-entropy cryptographic vault keys into working memory without persisting
+    them to the immutable ledger. The description field (max_length=2000) provides audit
+    justification.
+
+    EPISTEMIC BOUNDS: Temporal exposure is mathematically clamped by max_ttl_seconds
+    (ge=1, le=3600). Spatial access is geometrically restricted to the allowed_vault_keys
+    array (max_length=100), deterministically sorted by @model_validator sort_arrays for
+    RFC 8785 canonical hashing.
+
+    MCP ROUTING TRIGGERS: Principle of Least Privilege, Temporal Logic, Secure Enclave,
+    Secret Projection, Ephemeral Partition
     """
 
     session_id: str = Field(
@@ -1736,7 +1751,24 @@ class LatentScratchpadReceipt(CoreasonBaseState):
 
 class EphemeralNamespacePartitionState(CoreasonBaseState):
     """
-    A hermetically sealed, ephemeral execution partition for dynamic dependency resolution.
+    AGENT INSTRUCTION: Formalizes Capability-Based Security and strict Resource Isolation
+    for dynamic runtime execution as a frozen topological coordinate. As a ...State
+    suffix, this is a frozen N-dimensional coordinate.
+
+    CAUSAL AFFORDANCE: Authorizes the orchestrator to spin up a hermetically sealed
+    computational manifold via execution_runtime Literal ["wasm32-wasi",
+    "riscv32-zkvm", "bpf"], physically severing OS-level interactions unless explicitly
+    authorized by allow_network_egress (default=False) and allow_subprocess_spawning
+    (default=False).
+
+    EPISTEMIC BOUNDS: The Halting Problem and memory exhaustion are physically bounded
+    by max_ttl_seconds (le=86400, gt=0) and max_vram_mb (le=1000000000, gt=0). The
+    @model_validator validate_cryptographic_hashes enforces SHA-256 regex
+    (^[a-f0-9]{64}$); a second @model_validator sort_arrays deterministically sorts the
+    authorized_bytecode_hashes for RFC 8785 hashing.
+
+    MCP ROUTING TRIGGERS: Capability-Based Security, Resource Isolation, WASM
+    Sandboxing, Halting Problem Bounding, Zero-Trust Execution
     """
 
     partition_id: str = Field(
@@ -3864,8 +3896,23 @@ class FaultInjectionProfile(CoreasonBaseState):
 
 class FederatedCapabilityAttestationReceipt(CoreasonBaseState):
     """
-    An immutable cryptographic receipt proving an agent has the structural authority
-    to query a remote resource.
+    AGENT INSTRUCTION: Acts as an undeniable Macaroon or Capability Token within a
+    Zero-Trust Architecture, mathematically verifying an agent's right to cross
+    federated topological boundaries as an append-only historical fact. As a ...Receipt
+    suffix, this is a frozen coordinate on the Merkle-DAG.
+
+    CAUSAL AFFORDANCE: Forces the orchestrator to evaluate the cryptographic
+    presentation, authorizing DAG edge traversal into the remote target_topology_id
+    (NodeIdentifierState) under the governing_sla (BilateralSLA) constraints.
+
+    EPISTEMIC BOUNDS: The receipt is cryptographically locked to a 128-char
+    attestation_id (CID). The @model_validator enforce_restricted_vault_locks executes
+    a physical safety interlock, throwing a ValueError if a 'restricted'
+    max_permitted_classification SLA lacks explicitly defined allowed_vault_keys in the
+    authorized_session (SecureSubSessionState).
+
+    MCP ROUTING TRIGGERS: Zero-Trust Architecture, Capability Token, Cross-Boundary
+    Federation, Cryptographic Interlock, Decentralized Identity
     """
 
     attestation_id: str = Field(
@@ -6406,7 +6453,24 @@ type MCPTransportProfile = StdioTransportProfile | SSETransportProfile | HTTPTra
 
 
 class MCPServerBindingProfile(CoreasonBaseState):
-    """Configuration definition for connecting to an MCP Server."""
+    """
+    AGENT INSTRUCTION: Defines a Distributed RPC substrate and Lattice-Based Access
+    Control (LBAC) boundary for integrating exogenous Model Context Protocol instances
+    as a frozen geometric snapshot. As a ...Profile suffix, this is a declarative
+    property descriptor.
+
+    CAUSAL AFFORDANCE: Physically wires an external semantic manifold into the local
+    orchestrator's routing graph via the transport (MCPTransportProfile, discriminated
+    union) vector. The server_id (128-char CID) anchors the binding.
+
+    EPISTEMIC BOUNDS: The capabilities allowed across the wire are geometrically bounded
+    by required_capabilities (max_length=255 strings, default=["tools", "resources",
+    "prompts"]), strictly alphabetized by @model_validator sort_arrays for RFC 8785
+    canonical hashing.
+
+    MCP ROUTING TRIGGERS: Distributed RPC, Lattice-Based Access Control, Stateless
+    Transport, Capability Projection, Bipartite Graph
+    """
 
     server_id: str = Field(
         ...,
