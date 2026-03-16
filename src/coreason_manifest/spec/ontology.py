@@ -679,7 +679,22 @@ class SaeFeatureActivationState(CoreasonBaseState):
 
 class ActivationSteeringContract(CoreasonBaseState):
     """
-    Hardware-level contract for Representation Engineering via activation injection/ablation.
+    AGENT INSTRUCTION: Establishes a hardware-level Representation Engineering (RepE)
+    directive to mechanically manipulate latent dimensions via forward-pass tensor injection.
+    As a ...Contract suffix, this object defines rigid mathematical boundaries that the
+    orchestrator must enforce globally.
+
+    CAUSAL AFFORDANCE: Physically forces an additive, ablation, or clamping operation onto
+    the model's residual stream at specific injection_layers, steering the generator away
+    from unstable hallucination geometries prior to token projection.
+
+    EPISTEMIC BOUNDS: Cryptographically locked by the steering_vector_hash (SHA-256 pattern
+    ^[a-f0-9]{64}$). The scaling_factor is bounded above (le=100.0) but unbounded below,
+    permitting negative magnitudes for ablation. The @model_validator deterministically
+    sorts injection_layers (each ge=0, min_length=1) to preserve RFC 8785 canonical hashing.
+
+    MCP ROUTING TRIGGERS: Representation Engineering, RepE, Activation Steering, Residual
+    Stream Ablation, Concept Vectors
     """
 
     steering_vector_hash: str = Field(
@@ -740,7 +755,22 @@ class SemanticSlicingPolicy(CoreasonBaseState):
 
 class CognitiveRoutingContract(CoreasonBaseState):
     """
-    Hardware-level contract overriding MoE routing to enforce functional/specialist paths.
+    AGENT INSTRUCTION: Overrides the default Softmax gating mechanism of a Sparse Mixture of
+    Experts (MoE) architecture to enforce deterministic functional isolation. As a ...Contract
+    suffix, this object defines rigid mathematical boundaries that the orchestrator must
+    enforce globally.
+
+    CAUSAL AFFORDANCE: Physically biases or mathematically masks out (-inf via
+    enforce_functional_isolation) entire swaths of neural circuits, forcing continuous compute
+    through highly specialized expert topological perimeters.
+
+    EPISTEMIC BOUNDS: Limits structural instability by clamping expert_logit_biases strictly
+    between [ge=-1000.0, le=1000.0], hard-bounding dynamic_top_k execution threads
+    (ge=1, le=1000000000), and constraining routing_temperature (ge=0.0, le=1000000000.0)
+    to prevent softmax gate collapse.
+
+    MCP ROUTING TRIGGERS: Sparse Mixture of Experts, Softmax Gating, Logit Biasing,
+    Functional Expert Routing, FSM Masking
     """
 
     dynamic_top_k: int = Field(
@@ -767,7 +797,24 @@ class CognitiveRoutingContract(CoreasonBaseState):
 
 
 class CognitiveStateProfile(CoreasonBaseState):
-    """Causal Directed Acyclic Graphs (cDAGs) and constraints for state progression."""
+    """
+    AGENT INSTRUCTION: Tracks the continuous Partially Observable Markov Decision Process
+    (POMDP) belief distribution and dictates the active cognitive heuristic. As a ...Profile
+    suffix, this is a declarative, frozen snapshot of N-dimensional geometry at a specific
+    point in time.
+
+    CAUSAL AFFORDANCE: Orchestrates multi-dimensional state progression, determining if the
+    agent explores via high divergence_tolerance or exploits via constrained caution vectors.
+    Optionally embeds an ActivationSteeringContract, CognitiveRoutingContract, and
+    SemanticSlicingPolicy for full mechanistic control.
+
+    EPISTEMIC BOUNDS: Relies on strict Pydantic bounding of internal indices (urgency_index,
+    caution_index, divergence_tolerance) to continuous probability distributions between
+    [ge=0.0, le=1.0].
+
+    MCP ROUTING TRIGGERS: POMDP, Continuous Belief Distribution, Heuristic Routing, State
+    Progression, Cognitive Constraining
+    """
 
     urgency_index: float = Field(
         ge=0.0, le=1.0, description="Drives structural constraints; high urgency forces fast heuristic routing."
@@ -794,7 +841,23 @@ class CognitiveStateProfile(CoreasonBaseState):
 
 
 class CognitiveUncertaintyProfile(CoreasonBaseState):
-    """Structural Causal Models (SCMs) for active epistemic bounding."""
+    """
+    AGENT INSTRUCTION: Implements Structural Causal Models (SCMs) to mathematically quantify
+    doubt and partition irreducible aleatoric noise from actionable epistemic knowledge gaps.
+    As a ...Profile suffix, this is a declarative, frozen snapshot of N-dimensional geometry
+    at a specific point in time.
+
+    CAUSAL AFFORDANCE: Unlocks non-monotonic logic via Pearlian do-operators ($P(y|do(x))$),
+    computing exactly when to trigger a structural abductive escalation or active inference
+    loop via the requires_abductive_escalation flag.
+
+    EPISTEMIC BOUNDS: Enforces absolute mathematical float boundaries [ge=0.0, le=1.0] on
+    aleatoric_entropy, epistemic_uncertainty, and semantic_consistency_score, mathematically
+    preventing probability wave overflow across all three continuous dimensions.
+
+    MCP ROUTING TRIGGERS: Structural Causal Models, Active Inference, Epistemic Uncertainty,
+    Aleatoric Entropy, Pearlian Do-Calculus
+    """
 
     aleatoric_entropy: float = Field(
         ge=0.0, le=1.0, description="Irreducible ambiguity detected in the observational fields (P(y|x))."
