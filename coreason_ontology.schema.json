@@ -3500,6 +3500,55 @@
       "title": "ContinuousMutationPolicy",
       "type": "object"
     },
+    "ContinuousObservationStream": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the geometric snapshot of a continuous stream and its \"forget gate\" disfluency rules. As a ...Stream suffix, this acts as a declarative snapshot of continuous token flows.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator to continuously process and retain token buffers governed by a temporal decay matrix.\n\nEPISTEMIC BOUNDS: The token_buffer is mathematically capped at max_length=1000000. Each token is restricted to max_length=10000. The temporal_decay_matrix forces bounded temporal scaling (ge=0.0, le=1.0) applied to continuous sequence identifiers (ge=0).\n\nMCP ROUTING TRIGGERS: Continuous Observation, State Space Models, Temporal Decay, Forget Gate, Streaming Disfluency",
+      "properties": {
+        "stream_id": {
+          "description": "A Content Identifier (CID) for the continuous observation stream.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Stream Id",
+          "type": "string"
+        },
+        "token_buffer": {
+          "description": "The array of ingested tokens representing the continuous stream.",
+          "items": {
+            "maxLength": 10000,
+            "type": "string"
+          },
+          "maxItems": 1000000,
+          "title": "Token Buffer",
+          "type": "array"
+        },
+        "temporal_decay_matrix": {
+          "additionalProperties": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "type": "number"
+          },
+          "description": "The mathematical decay map applied to historical token indices.",
+          "title": "Temporal Decay Matrix",
+          "type": "object"
+        },
+        "latest_confidence_score": {
+          "description": "The certainty score of the latest token prediction.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Latest Confidence Score",
+          "type": "number"
+        }
+      },
+      "required": [
+        "stream_id",
+        "token_buffer",
+        "temporal_decay_matrix",
+        "latest_confidence_score"
+      ],
+      "title": "ContinuousObservationStream",
+      "type": "object"
+    },
     "CouncilTopologyManifest": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Social Choice Theory, Condorcet's Jury Theorem, and\nPractical Byzantine Fault Tolerance (pBFT) to synthesize an authoritative truth\nfrom a multi-agent network. As a ...Manifest suffix, this defines a frozen,\nN-dimensional coordinate state.\n\nCAUSAL AFFORDANCE: Unlocks decentralized truth-synthesis by routing conflicting\nproposals through a strict consensus_policy (ConsensusPolicy), ultimately collapsing\nthe epistemic probability wave via the designated adjudicator_id\n(NodeIdentifierState). Cognitive heterogeneity is enforced by\ndiversity_policy (DiversityPolicy).\n\nEPISTEMIC BOUNDS: The @model_validator enforce_funded_byzantine_slashing enforces a\nstrict economic interlock: if the consensus_policy demands slash_escrow via pBFT,\nit halts instantiation unless a funded council_escrow (EscrowPolicy, magnitude > 0)\nis present. A second @model_validator check_adjudicator_id verifies the\nadjudicator_id exists in the nodes registry.\n\nMCP ROUTING TRIGGERS: Social Choice Theory, PBFT Consensus, Multi-Agent Debate,\nByzantine Fault Tolerance, Slashing Condition",
@@ -4114,6 +4163,14 @@
           "minimum": 1,
           "title": "Max Fan Out",
           "type": "integer"
+        },
+        "speculative_boundaries": {
+          "description": "The deterministic speculative boundaries executing within the DAG.",
+          "items": {
+            "$ref": "#/$defs/SpeculativeExecutionBoundary"
+          },
+          "title": "Speculative Boundaries",
+          "type": "array"
         }
       },
       "required": [
@@ -5282,6 +5339,42 @@
       "title": "EpistemicCompressionSLA",
       "type": "object"
     },
+    "EpistemicContractionPolicy": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the mathematical rules for surgically retracting a belief within a Defeasible Logic framework. As a ...Policy suffix, this defines rigid algorithmic boundaries.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator's Truth Maintenance System to physically severe edges in the Knowledge Graph by excising the target CID and cascading the falsification recursively.\n\nEPISTEMIC BOUNDS: The contraction operation is physically bounded by the cascade_depth (ge=0, le=1000000) integer constraint, preventing runaway causal unravelling. The triggers are restricted to strict 128-char CID regex strings.\n\nMCP ROUTING TRIGGERS: Defeasible Logic, Belief Retraction, Causal Excising, Non-Monotonic Inference, Topological Amputation",
+      "properties": {
+        "contradiction_trigger": {
+          "description": "The CID of the observation or event that triggered the logical contradiction.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Contradiction Trigger",
+          "type": "string"
+        },
+        "excision_target": {
+          "description": "The target CID of the specific axiom or node slated for epistemic amputation.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Excision Target",
+          "type": "string"
+        },
+        "cascade_depth": {
+          "description": "The mathematical limit determining how deep the falsification signal propagates through connected edges.",
+          "maximum": 1000000,
+          "minimum": 0,
+          "title": "Cascade Depth",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "contradiction_trigger",
+        "excision_target",
+        "cascade_depth"
+      ],
+      "title": "EpistemicContractionPolicy",
+      "type": "object"
+    },
     "EpistemicCurriculumManifest": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Curriculum Learning and Experience Replay manifolds,\nserving as the definitive batch transport layer for continuous swarm optimization. As a\n...Manifest suffix, this defines a frozen, N-dimensional coordinate state.\n\nCAUSAL AFFORDANCE: Injects a validated cluster of EpistemicGroundedTaskManifest\nprimitives into the decentralized training pipeline, forcing deterministic policy\ngradient updates across all subscribing nodes.\n\nEPISTEMIC BOUNDS: The tasks array requires min_length=1 to prevent empty compute\ncycles. To guarantee zero-trust distribution and prevent Byzantine hash fractures, the\n@model_validator sort_tasks mechanically sorts the array by task_id, ensuring perfect\nRFC 8785 canonical hashing. Anchored by a 128-char curriculum_id CID.\n\nMCP ROUTING TRIGGERS: Curriculum Learning, Experience Replay, Policy Gradient,\nCanonical Hashing, Knowledge Distillation",
@@ -5480,6 +5573,30 @@
           },
           "maxItems": 10000,
           "title": "History",
+          "type": "array"
+        },
+        "defeasible_claims": {
+          "description": "The set of non-monotonic claims residing in the epistemic ledger that are structurally liable to falsification.",
+          "patternProperties": {
+            "^[a-zA-Z0-9_.:-]+$": {
+              "$ref": "#/$defs/SemanticNodeState"
+            }
+          },
+          "propertyNames": {
+            "maxLength": 128
+          },
+          "title": "Defeasible Claims",
+          "type": "object"
+        },
+        "retracted_nodes": {
+          "description": "A strict sequence of CIDs representing historical nodes that have been severed from the causal graph via defeasible logic.",
+          "items": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[a-zA-Z0-9_.:-]+$",
+            "type": "string"
+          },
+          "title": "Retracted Nodes",
           "type": "array"
         },
         "checkpoints": {
@@ -12463,6 +12580,63 @@
       "title": "SpatialKinematicActionIntent",
       "type": "object"
     },
+    "SpeculativeExecutionBoundary": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the structural boundary for executing graph nodes probabilistically, enabling speculative execution branches and time-rewinding geometry. As a ...Boundary suffix, this object acts as a declarative state checkpoint for probabilistic divergence.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator's traversal engine to fork the execution context, probabilistically committing or reversing the subgraph based on downstream verification results.\n\nEPISTEMIC BOUNDS: The commit_probability is strictly clamped (ge=0.0, le=1.0). The graph is physically bounded by the boundary_id (128-char CID). The rollback_pointers and competing_hypotheses arrays are deterministically sorted via @model_validator to preserve invariant RFC 8785 hashing.\n\nMCP ROUTING TRIGGERS: Speculative Topology, Time-Rewinding Geometry, Probabilistic Divergence, Subgraph Fork, Execution Boundary",
+      "properties": {
+        "boundary_id": {
+          "description": "The unique CID anchoring the start of the speculative execution branch.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Boundary Id",
+          "type": "string"
+        },
+        "is_speculative": {
+          "default": true,
+          "description": "Strict boolean indicating whether the boundary forces probabilistic execution paths.",
+          "title": "Is Speculative",
+          "type": "boolean"
+        },
+        "commit_probability": {
+          "description": "The assigned mathematical likelihood that the speculative branch will merge successfully.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Commit Probability",
+          "type": "number"
+        },
+        "rollback_pointers": {
+          "description": "CIDs referencing the deterministic states the orchestrator must rewind to upon branch falsification.",
+          "items": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[a-zA-Z0-9_.:-]+$",
+            "type": "string"
+          },
+          "maxItems": 10000,
+          "title": "Rollback Pointers",
+          "type": "array"
+        },
+        "competing_hypotheses": {
+          "description": "CIDs for concurrent alternative paths generated during speculation.",
+          "items": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[a-zA-Z0-9_.:-]+$",
+            "type": "string"
+          },
+          "maxItems": 10000,
+          "title": "Competing Hypotheses",
+          "type": "array"
+        }
+      },
+      "required": [
+        "boundary_id",
+        "commit_probability"
+      ],
+      "title": "SpeculativeExecutionBoundary",
+      "type": "object"
+    },
     "StateContract": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements a Cryptographic Tuple Space (Blackboard Pattern)\nserving as the strictly typed epistemic synchronization layer for multi-agent\nmanifolds. As a ...Contract suffix, this enforces rigid mathematical boundaries\nglobally.\n\nCAUSAL AFFORDANCE: Physically restricts all state mutations within the topology\nto conform to the explicit schema_definition (JSON Schema dict, key\nmax_length=255), acting as a deterministic Schema-on-Write validation gate.\n\nEPISTEMIC BOUNDS: The strict_validation boolean (default=True) acts as a\nphysical barrier against stochastic drift, forcing the orchestrator to reject\nany state mutation that fails the schema definition. Property names are capped\nat max_length=255 to prevent dictionary bombing.\n\nMCP ROUTING TRIGGERS: Tuple Space, Blackboard Architecture, Schema-on-Write,\nFinite State Automaton, Epistemic Synchronization",
@@ -12731,6 +12905,39 @@
         "max_loops_allowed"
       ],
       "title": "SteadyStateHypothesisState",
+      "type": "object"
+    },
+    "StreamingDisfluencyContract": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements non-monotonic disfluency and \"forget gate\" triggers to repair continuous ingestion streams. As a ...Contract suffix, this object defines rigid mathematical boundaries that the orchestrator must enforce globally.\n\nCAUSAL AFFORDANCE: Triggers the orchestrator to excise or repair segments of the token stream when the repair_marker_regex matches, probabilistically governed by the decay_threshold.\n\nEPISTEMIC BOUNDS: The repair_marker_regex is strictly capped at max_length=2000 to prevent ReDoS CPU exhaustion. The decay_threshold is geometrically bounded (ge=0.0, le=1.0). The maximum temporal lookback window is clamped (ge=0, le=1000000000).\n\nMCP ROUTING TRIGGERS: Streaming Disfluency, Forget Gate, Token Excise, Sequence Repair, Temporal Lookback",
+      "properties": {
+        "repair_marker_regex": {
+          "description": "The regular expression pattern identifying a structural disfluency marker in the stream.",
+          "maxLength": 2000,
+          "title": "Repair Marker Regex",
+          "type": "string"
+        },
+        "decay_threshold": {
+          "description": "The probability boundary below which historical stream data is aggressively decayed.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Decay Threshold",
+          "type": "number"
+        },
+        "max_lookback_window": {
+          "description": "The maximum number of sequence steps the orchestrator is permitted to rewind and repair.",
+          "maximum": 1000000000,
+          "minimum": 0,
+          "title": "Max Lookback Window",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "repair_marker_regex",
+        "decay_threshold",
+        "max_lookback_window"
+      ],
+      "title": "StreamingDisfluencyContract",
       "type": "object"
     },
     "StructuralCausalGraphProfile": {
