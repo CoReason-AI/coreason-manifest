@@ -295,6 +295,48 @@
       "title": "AdjudicationRubricProfile",
       "type": "object"
     },
+    "AdversarialEmulationProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Aggregates stochastic and environmental profiles to establish a unified Threat Emulation geometry. As a ...Profile suffix, this is a declarative property descriptor.\n\nCAUSAL AFFORDANCE: Instructs the simulation matrix to fully wrap an execution manifold in a hostile or obfuscated physical context, linking noise injection (`KinematicNoiseProfile`) with hardware spoofing (`EnvironmentalSpoofingProfile`).\n\nEPISTEMIC BOUNDS: Relies entirely on the strict validation cascades of its nested structural members to prevent probability wave overflow or payload bombing.\n\nMCP ROUTING TRIGGERS: Threat Emulation, Adversarial Virtualization, Execution Manifold Wrapping, Epistemic Obfuscation",
+      "properties": {
+        "kinematic_noise": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/KinematicNoiseProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The continuous spatial perturbation profile."
+        },
+        "environmental_spoof": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EnvironmentalSpoofingProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The OS/Hardware spoofing envelope."
+        },
+        "rotation_ttl_seconds": {
+          "description": "The exact temporal threshold before the emulation environment must be structurally rotated.",
+          "maximum": 86400,
+          "minimum": 0,
+          "title": "Rotation Ttl Seconds",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "rotation_ttl_seconds"
+      ],
+      "title": "AdversarialEmulationProfile",
+      "type": "object"
+    },
     "AdversarialMarketTopologyManifest": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A Zero-Cost Macro abstraction that mathematically projects a Zero-Sum Minimax game into a rigid Red/Blue team CouncilTopologyManifest. As a ...Manifest suffix, this defines a frozen coordinate of a topological structure.\n\nCAUSAL AFFORDANCE: Deterministically compiles into a fully bounded Council topology, forcing the generative router to evaluate claims through adversarial debate before the orchestrator resolves equilibrium via the designated market rules.\n\nEPISTEMIC BOUNDS: The @model_validator verify_disjoint_sets mathematically guarantees that blue_team_ids, red_team_ids, and the adjudicator_id are strictly disjoint to prevent self-dealing or topological paradoxes. Arrays are deterministically sorted to preserve RFC 8785 canonical hashes.\n\nMCP ROUTING TRIGGERS: Zero-Sum Minimax Game, Red Team vs Blue Team, Macro Abstraction, Generative Adversarial Networks, Topological Compilation",
@@ -718,6 +760,18 @@
           ],
           "default": null,
           "description": "The ruleset governing how intermediate thoughts are scored and pruned."
+        },
+        "adversarial_emulation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AdversarialEmulationProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The declarative structural envelope authorizing physical hardware spoofing and kinematic noise injection for this agent."
         },
         "active_inference_policy": {
           "anyOf": [
@@ -4811,6 +4865,55 @@
       "title": "EnsembleTopologyProfile",
       "type": "object"
     },
+    "EnvironmentalSpoofingProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines a deterministic topological envelope for hardware and OS-level emulation. As a ...Profile suffix, this is a declarative property descriptor.\n\nCAUSAL AFFORDANCE: Authorizes the orchestrator to dynamically inject spoofed environmental telemetry (e.g., user agents, canvas hashes) into a simulated exogenous plane (e.g., headless browser) to evade epistemic fingerprinting.\n\nEPISTEMIC BOUNDS: Hardware geometries are bounded: `screen_resolution` must map to physical integer coordinates (max 100000). Fingerprints are bounded to 128-char SHA-256 or explicit CID geometries.\n\nMCP ROUTING TRIGGERS: Topological Spoofing, Canvas Fingerprinting, OS-Level Emulation, Hardware Virtualization, Epistemic Evastion",
+      "properties": {
+        "screen_resolution": {
+          "description": "The spoofed Euclidean bounds of the display.",
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "integer"
+            }
+          ],
+          "title": "Screen Resolution",
+          "type": "array"
+        },
+        "user_agent_override": {
+          "description": "The explicit browser/OS telemetry injected into the header.",
+          "maxLength": 2000,
+          "title": "User Agent Override",
+          "type": "string"
+        },
+        "webgl_entropy_seed_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The optional SHA-256 seed used to deterministically perturb WebGL readouts.",
+          "title": "Webgl Entropy Seed Hash"
+        }
+      },
+      "required": [
+        "screen_resolution",
+        "user_agent_override"
+      ],
+      "title": "EnvironmentalSpoofingProfile",
+      "type": "object"
+    },
     "EphemeralNamespacePartitionState": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements a hardware-level Sandboxing and Trusted Execution\nEnvironment (TEE) paradigm, utilizing WASI, eBPF, or zkVMs to safely execute\nexogenous bytecode. As a ...State suffix, this is a declarative, frozen snapshot of\nan execution geometry.\n\nCAUSAL AFFORDANCE: Physically isolates kinetic execution from the host OS via\nexecution_runtime Literal [\"wasm32-wasi\", \"riscv32-zkvm\", \"bpf\"], authorizing\nthe orchestrator to instantiate a temporary virtual machine strictly conforming to\nallow_network_egress (default=False) and allow_subprocess_spawning (default=False).\n\nEPISTEMIC BOUNDS: The Halting Problem is managed via max_ttl_seconds (le=86400,\ngt=0), and memory exhaustion is prevented via max_vram_mb (le=1000000000, gt=0).\nThe @model_validator validate_cryptographic_hashes enforces SHA-256 regex\n(^[a-f0-9]{64}$); a second @model_validator sort_arrays deterministically sorts the\nauthorized_bytecode_hashes for RFC 8785 canonical hashing.\n\nMCP ROUTING TRIGGERS: WebAssembly System Interface, Zero-Knowledge Virtual Machine,\neBPF, Execution Sandbox, Arbitrary Code Execution Mitigation",
@@ -8419,6 +8522,32 @@
           "type": "null"
         }
       ]
+    },
+    "KinematicNoiseProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Brownian motion and Fitts's Law variances to simulate human-like imprecision in spatial execution. As a ...Profile suffix, this is a declarative property descriptor.\n\nCAUSAL AFFORDANCE: Instructs the kinematic actuation engine to dynamically perturb trajectory control points, injecting continuous stochastic noise to bypass bot-evasive heuristics.\n\nEPISTEMIC BOUNDS: Bounded by strict mathematical float limits. `pink_noise_amplitude` must be in [0.0, 1.0]. `fitts_law_variance_ms` is a temporal delta bounded to le=10000.\n\nMCP ROUTING TRIGGERS: Brownian Motion, Fitts's Law, Stochastic Perturbation, Kinematic Entropy, Exogenous Actuation",
+      "properties": {
+        "pink_noise_amplitude": {
+          "description": "The strictly typed scalar governing the amplitude of spatial perturbation.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Pink Noise Amplitude",
+          "type": "number"
+        },
+        "fitts_law_variance_ms": {
+          "description": "The mathematical variance applied to the temporal duration of a trajectory.",
+          "maximum": 10000,
+          "minimum": 0,
+          "title": "Fitts Law Variance Ms",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "pink_noise_amplitude",
+        "fitts_law_variance_ms"
+      ],
+      "title": "KinematicNoiseProfile",
+      "type": "object"
     },
     "KineticBudgetPolicy": {
       "additionalProperties": false,
@@ -12166,6 +12295,18 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Employs Mathematical Kinematics and Fitts's Law to project precise, non-linear physical interactions across an exogenous UI manifold.\n\nCAUSAL AFFORDANCE: Authorizes the translation of latent spatial targets into OS-level actuation, utilizing bezier_control_points to construct continuous polynomial trajectories that simulate human motor control and bypass bot-evasive heuristics.\n\nEPISTEMIC BOUNDS: Spatial execution is clamped to normalized Euclidean limits (ge=0.0, le=1.0) via the nested SpatialCoordinateProfile. Execution liveness is temporally guillotined by trajectory_duration_ms (le=86400000).\n\nMCP ROUTING TRIGGERS: Mathematical Kinematics, Bezier Geometry, Fitts's Law, OS-Level Actuation, Non-Linear Trajectory",
       "properties": {
+        "noise_override": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/KinematicNoiseProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The specific Brownian motion envelope to apply to this kinematic trajectory."
+        },
         "action_type": {
           "description": "The specific kinematic interaction paradigm.",
           "enum": [
