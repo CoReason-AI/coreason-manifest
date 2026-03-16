@@ -1040,15 +1040,11 @@ class DeterministicExtractionContract(CoreasonBaseState):
     or schema via hard execution of Regex, XPath, or CSS Selectors.
     """
 
-    contract_id: str = Field(
-        min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$"
-    )
+    contract_id: str = Field(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
     extraction_type: Literal["regex", "xpath", "css_selector", "json_pointer"] = Field(
         description="The exact deterministic engine to use."
     )
-    query_string: str = Field(
-        max_length=2000, description="The actual Regex pattern or DOM selector."
-    )
+    query_string: str = Field(max_length=2000, description="The actual Regex pattern or DOM selector.")
     strict_type_coercion: Literal["string", "integer", "float", "boolean", "date"] = Field(
         description="The required final primitive type post-extraction."
     )
@@ -1093,7 +1089,7 @@ class SemanticSlicingPolicy(CoreasonBaseState):
     )
     spatial_crop_boundary: SpatialBoundingBoxProfile | None = Field(
         default=None,
-        description="The strict Euclidean geometric coordinate bounds. The orchestrator must physically crop the visual tensor to this exact region before VLM evaluation to prevent attention dilution."  # noqa: E501
+        description="The strict Euclidean geometric coordinate bounds. The orchestrator must physically crop the visual tensor to this exact region before VLM evaluation to prevent attention dilution.",  # noqa: E501
     )
 
     @model_validator(mode="after")
@@ -4188,11 +4184,11 @@ class EpistemicTransmutationTask(CoreasonBaseState):
     )
     target_layout_region_ids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] | None = Field(
         default=None,
-        description="The explicit array of DocumentLayoutRegionState block_ids the VLM must constrain its extraction to."  # noqa: E501
+        description="The explicit array of DocumentLayoutRegionState block_ids the VLM must constrain its extraction to.",  # noqa: E501
     )
     extraction_contracts: list[DeterministicExtractionContract] = Field(
         default_factory=list,
-        description="The strict array of deterministic Regex/Selector rules applied to the VLM output to sanitize the final payload."  # noqa: E501
+        description="The strict array of deterministic Regex/Selector rules applied to the VLM output to sanitize the final payload.",  # noqa: E501
     )
 
     @model_validator(mode="after")
@@ -4210,11 +4206,7 @@ class EpistemicTransmutationTask(CoreasonBaseState):
         object.__setattr__(self, "target_modalities", sorted(self.target_modalities))
         if self.target_layout_region_ids is not None:
             object.__setattr__(self, "target_layout_region_ids", sorted(self.target_layout_region_ids))
-        object.__setattr__(
-            self,
-            "extraction_contracts",
-            sorted(self.extraction_contracts, key=lambda x: x.contract_id)
-        )
+        object.__setattr__(self, "extraction_contracts", sorted(self.extraction_contracts, key=lambda x: x.contract_id))
         return self
 
 
