@@ -11,6 +11,9 @@ permissions:
   id-token: write # Required for PyPI OIDC Trusted Publishing and Sigstore
   pages: write    # Required for GitHub Pages deployment
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   release:
     runs-on: ubuntu-latest

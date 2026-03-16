@@ -1,16 +1,17 @@
-# Copyright (c) 2026 CoReason, Inc.
+# Copyright (c) 2026 CoReason, Inc
 #
-# This software is proprietary and dual-licensed.
-# Licensed under the Prosperity Public License 3.0 (the "License").
-# A copy of the license is available at https://prosperitylicense.com/versions/3.0.0
-# For details, see the LICENSE file.
-# Commercial use beyond a 30-day trial requires a separate license.
+# This software is proprietary and dual-licensed
+# Licensed under the Prosperity Public License 3.0 (the "License")
+# A copy of the license is available at <https://prosperitylicense.com/versions/3.0.0>
+# For details, see the LICENSE file
+# Commercial use beyond a 30-day trial requires a separate license
 #
-# Source Code: https://github.com/CoReason-AI/coreason-manifest
+# Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
 from coreason_manifest.spec.ontology import (
     CognitiveFormatContract,
     CognitiveRewardEvaluationReceipt,
+    ConstrainedDecodingPolicy,
     EpistemicAxiomState,
     EpistemicRewardModelPolicy,
 )
@@ -53,7 +54,10 @@ def test_cognitive_reward_evaluation_receipt_inherits_base_state_event() -> None
 
 def test_epistemic_reward_model_policy_initialization() -> None:
     # Prove EpistemicRewardModelPolicy initializes successfully and properly nests the CognitiveFormatContract.
-    format_contract = CognitiveFormatContract(require_think_tags=True, final_answer_regex="^Final Answer: .*$")
+    decoding_policy = ConstrainedDecodingPolicy(compiler_backend="outlines")
+    format_contract = CognitiveFormatContract(
+        require_think_tags=True, final_answer_regex="^Final Answer: .*$", decoding_policy=decoding_policy
+    )
 
     policy = EpistemicRewardModelPolicy(
         policy_id="test_policy", reference_graph_id="ref_graph", format_contract=format_contract, beta_path_weight=0.5

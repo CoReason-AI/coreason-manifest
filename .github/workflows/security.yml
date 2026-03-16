@@ -8,6 +8,9 @@ on:
       - 'uv.lock'
       - 'pyproject.toml'
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   audit:
     name: Dependency Audit

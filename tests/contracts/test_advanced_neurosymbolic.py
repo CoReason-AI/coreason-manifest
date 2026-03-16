@@ -1,18 +1,19 @@
-# Copyright (c) 2026 CoReason, Inc.
+# Copyright (c) 2026 CoReason, Inc
 #
-# This software is proprietary and dual-licensed.
-# Licensed under the Prosperity Public License 3.0 (the "License").
-# A copy of the license is available at https://prosperitylicense.com/versions/3.0.0
-# For details, see the LICENSE file.
-# Commercial use beyond a 30-day trial requires a separate license.
+# This software is proprietary and dual-licensed
+# Licensed under the Prosperity Public License 3.0 (the "License")
+# A copy of the license is available at <https://prosperitylicense.com/versions/3.0.0>
+# For details, see the LICENSE file
+# Commercial use beyond a 30-day trial requires a separate license
 #
-# Source Code: https://github.com/CoReason-AI/coreason-manifest
+# Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
 import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
     CognitiveFormatContract,
+    ConstrainedDecodingPolicy,
     EpistemicFlowStateReceipt,
     EpistemicRewardModelPolicy,
     TopologicalRewardContract,
@@ -65,7 +66,10 @@ def test_epistemic_flow_state_receipt() -> None:
 
 
 def test_epistemic_reward_model_policy() -> None:
-    format_contract = CognitiveFormatContract(require_think_tags=True, final_answer_regex="^Final Answer: .*$")
+    decoding_policy = ConstrainedDecodingPolicy(compiler_backend="outlines")
+    format_contract = CognitiveFormatContract(
+        require_think_tags=True, final_answer_regex="^Final Answer: .*$", decoding_policy=decoding_policy
+    )
     topological_contract = TopologicalRewardContract(
         min_link_criticality_score=0.8, min_semantic_relevance_score=0.9, aggregation_method="rwr_topological"
     )
