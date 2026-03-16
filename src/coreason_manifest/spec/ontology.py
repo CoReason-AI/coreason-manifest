@@ -1,12 +1,12 @@
-# Copyright (c) 2026 CoReason, Inc.
+# Copyright (c) 2026 CoReason, Inc
 #
-# This software is proprietary and dual-licensed.
-# Licensed under the Prosperity Public License 3.0 (the "License").
-# A copy of the license is available at https://prosperitylicense.com/versions/3.0.0
-# For details, see the LICENSE file.
-# Commercial use beyond a 30-day trial requires a separate license.
+# This software is proprietary and dual-licensed
+# Licensed under the Prosperity Public License 3.0 (the "License")
+# A copy of the license is available at <https://prosperitylicense.com/versions/3.0.0>
+# For details, see the LICENSE file
+# Commercial use beyond a 30-day trial requires a separate license
 #
-# Source Code: https://github.com/CoReason-AI/coreason-manifest
+# Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
 from __future__ import annotations
 
@@ -3267,7 +3267,7 @@ class CustodyReceipt(CoreasonBaseState):
 class DefeasibleAttackEvent(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Formalizes the binary attack relation in Dung's Abstract Argumentation
-    Framework ($AF = \langle AR, \rightarrow \rangle$). As an ...Event suffix, this is an
+    Framework ($AF = \\langle AR, \\rightarrow \\rangle$). As an ...Event suffix, this is an
     append-only, cryptographically frozen historical fact on the Merkle-DAG.
 
     CAUSAL AFFORDANCE: Projects an undercutting or rebutting defeater from a source claim
@@ -4214,7 +4214,7 @@ class EvidentiaryWarrantState(CoreasonBaseState):
 
 class EpistemicArgumentClaimState(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Implements a discrete node $A \in AR$ within Dung's Abstract
+    AGENT INSTRUCTION: Implements a discrete node $A \\in AR$ within Dung's Abstract
     Argumentation Framework. As a ...State suffix, this is a declarative, frozen snapshot of
     a falsifiable proposition at a specific point in time.
 
@@ -4257,7 +4257,7 @@ class EpistemicArgumentClaimState(CoreasonBaseState):
 class EpistemicArgumentGraphState(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Constructs the macroscopic adjacency matrix for the complete
-    $AF = \langle AR, \rightarrow \rangle$ topology. As a ...State suffix, this is a
+    $AF = \\langle AR, \\rightarrow \\rangle$ topology. As a ...State suffix, this is a
     declarative, frozen snapshot of the dialectical geometry at a specific point in time.
 
     CAUSAL AFFORDANCE: Exposes the holistic bipartite mapping of claims and their defeasible
