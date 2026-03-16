@@ -124,6 +124,39 @@ def project_manifest_to_markdown(manifest: WorkflowManifest) -> str:
     return "\n".join(lines)
 
 
+def reduce_ledger_to_active_state(ledger: ontology.EpistemicLedgerState) -> list[ontology.AnyStateEvent]:
+    """
+    A pure algebraic functor that mathematically collapses the non-monotonic
+    EpistemicLedgerState into a linear array of valid historical events,
+    filtering out any events that have been causally rolled back or quarantined.
+    """
+    quarantined_events: set[str] = set()
+    quarantined_nodes: set[str] = set()
+
+    for cascade in ledger.active_cascades:
+        quarantined_events.add(cascade.root_falsified_event_id)
+        quarantined_events.update(cascade.quarantined_event_ids)
+
+    for rollback in ledger.active_rollbacks:
+        quarantined_events.add(rollback.target_event_id)
+        quarantined_nodes.update(rollback.invalidated_node_ids)
+
+    active_history: list[ontology.AnyStateEvent] = []
+    for event in ledger.history:
+        # 1. Filter out directly falsified/rolled-back events
+        if event.event_id in quarantined_events:
+            continue
+
+        # 2. Filter out events authored by nodes that were causally invalidated
+        source_node = getattr(event, "source_node_id", None)
+        if source_node is not None and source_node in quarantined_nodes:
+            continue
+
+        active_history.append(event)
+
+    return active_history
+
+
 def get_ontology_schema() -> dict[str, Any]:
     """Dynamically generate the CoReason ontology JSON schema."""
     models_to_export: list[type[CoreasonBaseState]] = []
@@ -162,6 +195,56 @@ def validate_payload(step: str, payload_bytes: bytes) -> BaseModel:
         raise ValueError(f"FATAL: Unknown step '{step}'. Valid steps: {list(SCHEMA_REGISTRY.keys())}")
 
     return target_schema.model_validate_json(payload_bytes)
+
+
+def wrap_intent_in_jsonrpc(intent_payload: BaseModel, request_id: str | int) -> ontology.BoundedJSONRPCIntent:
+    """
+    A pure algebraic functor that wraps an internal declarative intent
+    into a standard JSON-RPC 2.0 envelope for MCP transmission.
+    """
+    # Extract the discriminator field if it exists, otherwise fallback to class name
+    method_name = getattr(intent_payload, "type", intent_payload.__class__.__name__.lower())
+
+    return ontology.BoundedJSONRPCIntent(
+        jsonrpc="2.0",
+        method=f"mcp.intent.{method_name}",
+        params=intent_payload.model_dump(mode="json", exclude_none=True, by_alias=True),
+        id=request_id,
+    )
+
+
+def extract_mcp_tool_call(
+    rpc_request: ontology.BoundedJSONRPCIntent,
+    event_id: str,
+    timestamp: float,
+    agent_attestation: ontology.AgentAttestationReceipt,
+    zk_proof: ontology.ZeroKnowledgeReceipt,
+) -> ontology.ToolInvocationEvent:
+    """
+    A pure algebraic functor safely extracting an incoming MCP JSON-RPC tool call
+    into our heavily validated ToolInvocationEvent, actively binding cryptographic proofs.
+    """
+    params = rpc_request.params or {}
+
+    # Handle the standard MCP "tools/call" pattern
+    if rpc_request.method == "tools/call":
+        tool_name = str(params.get("name", "unknown_tool"))
+        parameters = params.get("arguments", {})
+    else:
+        tool_name = rpc_request.method
+        parameters = params
+
+    if not isinstance(parameters, dict):
+        parameters = {"payload": parameters}
+
+    return ontology.ToolInvocationEvent(
+        event_id=event_id,
+        timestamp=timestamp,
+        tool_name=tool_name,
+        parameters=parameters,
+        agent_attestation=agent_attestation,
+        zk_proof=zk_proof,
+    )
 
 
 def generate_correction_prompt(error: ValidationError, target_node_id: str, fault_id: str) -> System2RemediationIntent:
@@ -230,6 +313,24 @@ def calculate_remaining_compute(ledger: ontology.EpistemicLedgerState, initial_e
             if remaining < 0:
                 raise ValueError("Mathematical Boundary Breached: Compute escrow exhausted.")
     return remaining
+
+
+def compile_action_space_to_openai_tools(action_space: ontology.ActionSpaceManifest) -> list[dict[str, Any]]:
+    """
+    A pure algebraic functor that projects the internal ActionSpaceManifest
+    into the standardized OpenAI/Anthropic external tool array format.
+    """
+    return [
+        {
+            "type": "function",
+            "function": {
+                "name": tool.tool_name,
+                "description": tool.description,
+                "parameters": tool.input_schema,
+            },
+        }
+        for tool in action_space.native_tools
+    ]
 
 
 def calculate_latent_alignment(
@@ -330,6 +431,17 @@ def verify_ast_safety(payload: str) -> bool:
             raise ValueError(f"Kinetic execution bleed detected. Forbidden AST node: {type(node).__name__}")
 
     return True
+
+
+def calculate_agent_vram_footprint(agent: ontology.AgentNodeProfile) -> int:
+    """
+    A pure algebraic functor that calculates the total VRAM footprint
+    required to mount all ephemeral PEFT adapters for a given agent.
+    """
+    total_vram_bytes = 0
+    for adapter in agent.peft_adapters:
+        total_vram_bytes += getattr(adapter, "vram_footprint_bytes", 0)
+    return total_vram_bytes
 
 
 def apply_state_differential(

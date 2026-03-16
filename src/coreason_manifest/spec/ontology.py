@@ -4117,6 +4117,17 @@ class ActionSpaceManifest(CoreasonBaseState):
         default_factory=list,
         description="Hermetically sealed context boundaries for dynamically resolved scripts and PEFT adapters.",
     )
+    max_concurrent_tool_invocations: int | None = Field(
+        default=None,
+        gt=0,
+        le=1000000000,
+        description="The mathematical limit of parallel tool execution to prevent thread starvation.",
+    )
+    allowed_discovery_namespaces: list[DomainExtensionString] = Field(
+        default_factory=list,
+        max_length=1000,
+        description="The strict whitelist of domain namespaces (e.g., 'ext:clinical') this Action Space is authorized to query via MCP.",  # noqa: E501
+    )
     kinetic_separation: KineticSeparationPolicy | None = Field(
         default=None, description="The bipartite graph constraint preventing toxic tool combinations."
     )
@@ -4131,6 +4142,8 @@ class ActionSpaceManifest(CoreasonBaseState):
         object.__setattr__(
             self, "ephemeral_partitions", sorted(self.ephemeral_partitions, key=lambda x: x.partition_id)
         )
+        # AGENT INSTRUCTION: NEW SORTING LOGIC INJECTED HERE
+        object.__setattr__(self, "allowed_discovery_namespaces", sorted(self.allowed_discovery_namespaces))
         return self
 
 
@@ -6578,6 +6591,16 @@ class WorkflowManifest(CoreasonBaseState):
     pq_signature: PostQuantumSignatureReceipt | None = Field(
         default=None, description="The quantum-resistant signature securing the root execution graph."
     )
+    global_system_prompt_hash: str | None = Field(
+        default=None,
+        min_length=64,
+        max_length=64,
+        pattern="^[a-f0-9]{64}$",
+        description="The SHA-256 Merkle root of the master non-monotonic instruction set.",
+    )
+    global_observability: ObservabilityPolicy | None = Field(
+        default=None, description="The overarching OpenTelemetry rules for the entire swarm graph."
+    )
 
     @model_validator(mode="after")
     def sort_arrays(self) -> Self:
@@ -7242,6 +7265,16 @@ class EpistemicLedgerState(CoreasonBaseState):
         default=None,
         description="The mathematical threshold required to compress episodic observations into semantic rules.",
     )
+    active_concept_bottlenecks: dict[NodeIdentifierState, ConceptBottleneckPolicy] = Field(
+        default_factory=dict,
+        max_length=1000,
+        description="Active XAI routing constraints currently locking the execution graph, mapped to specific agent DIDs.",  # noqa: E501
+    )
+    active_extraction_policies: dict[NodeIdentifierState, EpistemicExtractionPolicy] = Field(
+        default_factory=dict,
+        max_length=1000,
+        description="Active hardware extraction rules governing the current ingestion cycle, mapped to specific agent DIDs.",  # noqa: E501
+    )
 
     @model_validator(mode="after")
     def sort_history(self) -> Self:
@@ -7250,6 +7283,9 @@ class EpistemicLedgerState(CoreasonBaseState):
         object.__setattr__(self, "active_rollbacks", sorted(self.active_rollbacks, key=lambda x: x.request_id))
         object.__setattr__(self, "migration_contracts", sorted(self.migration_contracts, key=lambda x: x.contract_id))
         object.__setattr__(self, "active_cascades", sorted(self.active_cascades, key=lambda x: x.cascade_id))
+        # AGENT INSTRUCTION: NEW SORTING LOGIC INJECTED HERE
+        object.__setattr__(self, "active_concept_bottlenecks", dict(sorted(self.active_concept_bottlenecks.items())))
+        object.__setattr__(self, "active_extraction_policies", dict(sorted(self.active_extraction_policies.items())))
         return self
 
 
@@ -7301,7 +7337,6 @@ CanonicalGroundingReceipt.model_rebuild()
 EpistemicExtractionPolicy.model_rebuild()
 SemanticNodeState.model_rebuild()
 AgentNodeProfile.model_rebuild()
-
 IntentTransitionEvent.model_rebuild()
 InformationStateManifest.model_rebuild()
 ConceptBottleneckPolicy.model_rebuild()
@@ -7317,3 +7352,6 @@ AdversarialKinematicProfile.model_rebuild()
 BrowserFingerprintManifest.model_rebuild()
 MonteCarloTreeSearchPolicy.model_rebuild()
 MDPTransitionEvent.model_rebuild()
+ActionSpaceManifest.model_rebuild()
+EpistemicLedgerState.model_rebuild()
+WorkflowManifest.model_rebuild()

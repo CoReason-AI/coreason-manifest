@@ -251,6 +251,37 @@ def test_verify_ast_safety_kinetic_bleed(payload: str) -> None:
         verify_ast_safety(payload)
 
 
+def test_calculate_agent_vram_footprint() -> None:
+    from coreason_manifest.spec.ontology import AgentNodeProfile, PeftAdapterContract
+    from coreason_manifest.utils.algebra import calculate_agent_vram_footprint
+
+    """Test pure algebraic calculation of an agent's VRAM footprint."""
+    adapter1 = PeftAdapterContract(
+        adapter_id="adapter_1",
+        safetensors_hash="a" * 64,
+        base_model_hash="b" * 64,
+        adapter_rank=8,
+        target_modules=["q_proj", "v_proj"],
+    )
+    object.__setattr__(adapter1, "vram_footprint_bytes", 1024)
+
+    adapter2 = PeftAdapterContract(
+        adapter_id="adapter_2",
+        safetensors_hash="c" * 64,
+        base_model_hash="d" * 64,
+        adapter_rank=16,
+        target_modules=["k_proj"],
+    )
+    object.__setattr__(adapter2, "vram_footprint_bytes", 2048)
+
+    agent = AgentNodeProfile(
+        description="Test Agent",
+        peft_adapters=[adapter1, adapter2],
+    )
+
+    assert calculate_agent_vram_footprint(agent) == 3072
+
+
 def test_apply_state_differential() -> None:
     base_state = {"user": {"name": "Alice", "tags": ["admin"]}}
 

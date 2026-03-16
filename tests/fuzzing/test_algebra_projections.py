@@ -12,20 +12,30 @@
 
 from typing import Any
 
+import hypothesis.strategies as st
 import pytest
+from hypothesis import given
 
 from coreason_manifest.spec.ontology import (
+    ActionSpaceManifest,
+    AgentNodeProfile,
     BypassReceipt,
     DynamicRoutingManifest,
     EpistemicProvenanceReceipt,
     GlobalSemanticProfile,
+    PeftAdapterContract,
+    PermissionBoundaryPolicy,
+    SideEffectProfile,
     StateDifferentialManifest,
     StateMutationIntent,
     SystemNodeProfile,
+    ToolManifest,
     WorkflowManifest,
 )
 from coreason_manifest.utils.algebra import (
     apply_state_differential,
+    calculate_agent_vram_footprint,
+    compile_action_space_to_openai_tools,
     project_manifest_to_markdown,
     project_manifest_to_mermaid,
 )
@@ -235,3 +245,69 @@ def test_state_differential_non_traversable_target() -> None:
     state = {"scalar": "plain_string"}
     with pytest.raises(ValueError, match=r"Cannot add to path|Invalid path"):
         apply_state_differential(state, manifest)
+
+
+tool_st = st.builds(
+    ToolManifest,
+    tool_name=st.from_regex(r"^[a-zA-Z0-9_-]+$", fullmatch=True).filter(lambda x: 1 <= len(x) <= 128),
+    description=st.text(min_size=1, max_size=100),
+    input_schema=st.just({"type": "object", "properties": {"arg": {"type": "string"}}}),
+    side_effects=st.builds(SideEffectProfile, is_idempotent=st.booleans(), mutates_state=st.booleans()),
+    permissions=st.builds(
+        PermissionBoundaryPolicy,
+        network_access=st.booleans(),
+        file_system_mutation_forbidden=st.booleans(),
+        allowed_domains=st.none(),
+        auth_requirements=st.none(),
+    ),
+    sla=st.none(),
+    is_preemptible=st.booleans(),
+)
+
+
+@given(st.lists(tool_st, min_size=0, max_size=10, unique_by=lambda x: x.tool_name))
+def test_compile_action_space_to_openai_tools(tools: list[ToolManifest]) -> None:
+    """Prove compile_action_space_to_openai_tools maps native_tools correctly."""
+    manifest = ActionSpaceManifest(
+        action_space_id="test_space",
+        native_tools=tools,
+    )
+    result = compile_action_space_to_openai_tools(manifest)
+
+    # native_tools in ActionSpaceManifest gets sorted by tool_name, so we sort our list too
+    sorted_tools = sorted(tools, key=lambda x: x.tool_name)
+
+    assert len(result) == len(sorted_tools)
+    for i, tool in enumerate(sorted_tools):
+        assert result[i]["type"] == "function"
+        assert result[i]["function"]["name"] == tool.tool_name
+        assert result[i]["function"]["description"] == tool.description
+        assert result[i]["function"]["parameters"] == tool.input_schema
+
+
+@given(st.lists(st.integers(min_value=1, max_value=1000000000), min_size=0, max_size=10))
+def test_calculate_agent_vram_footprint(vram_sizes: list[int]) -> None:
+    """Prove calculate_agent_vram_footprint perfectly matches sum() of vram_footprint_bytes."""
+    adapters = []
+    for i, size in enumerate(vram_sizes):
+        # We must use setattr to bypass the frozen=True restriction of CoreasonBaseState
+        # because PeftAdapterContract no longer defines vram_footprint_bytes in ontology.
+        # But calculate_agent_vram_footprint uses getattr(adapter, "vram_footprint_bytes", 0).
+        adapter = PeftAdapterContract(
+            adapter_id=f"adapter_{i}",
+            safetensors_hash="a" * 64,
+            base_model_hash="b" * 64,
+            adapter_rank=8,
+            target_modules=["q_proj", "v_proj"],
+        )
+        object.__setattr__(adapter, "vram_footprint_bytes", size)
+        adapters.append(adapter)
+
+    agent = AgentNodeProfile(
+        description="test agent",
+        type="agent",
+        peft_adapters=adapters,
+    )
+
+    result = calculate_agent_vram_footprint(agent)
+    assert result == sum(vram_sizes)
