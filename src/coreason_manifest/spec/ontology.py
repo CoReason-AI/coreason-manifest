@@ -9119,9 +9119,16 @@ class DAGTopologyManifest(BaseTopologyManifest):
     max_fan_out: int = Field(ge=1, le=1024, description="The maximum number of parallel child nodes.")
     "\n    TOPOLOGICAL BOUNDARY: Must be >= 1 and <= 1024. Limits horizontal compute explosion.\n    "
 
+    speculative_boundaries: list[SpeculativeExecutionBoundary] = Field(
+        default_factory=list, description="The deterministic speculative boundaries executing within the DAG."
+    )
+
     @model_validator(mode="after")
     def sort_dag_topology_arrays(self) -> Self:
         object.__setattr__(self, "edges", sorted(self.edges))
+        object.__setattr__(
+            self, "speculative_boundaries", sorted(self.speculative_boundaries, key=lambda x: x.boundary_id)
+        )
         return self
 
     @model_validator(mode="after")
@@ -10652,6 +10659,131 @@ type AnyStateEvent = Annotated[
 ]
 
 
+class ContinuousObservationStream(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Defines the geometric snapshot of a continuous stream and its "forget gate" disfluency rules. As a ...Stream suffix, this acts as a declarative snapshot of continuous token flows.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator to continuously process and retain token buffers governed by a temporal decay matrix.
+
+    EPISTEMIC BOUNDS: The token_buffer is mathematically capped at max_length=1000000. Each token is restricted to max_length=10000. The temporal_decay_matrix forces bounded temporal scaling (ge=0.0, le=1.0) applied to continuous sequence identifiers (ge=0).
+
+    MCP ROUTING TRIGGERS: Continuous Observation, State Space Models, Temporal Decay, Forget Gate, Streaming Disfluency
+    """
+
+    stream_id: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="A Content Identifier (CID) for the continuous observation stream."
+    )
+    token_buffer: list[Annotated[str, StringConstraints(max_length=10000)]] = Field(
+        max_length=1000000, description="The array of ingested tokens representing the continuous stream."
+    )
+    temporal_decay_matrix: dict[Annotated[int, Field(ge=0)], Annotated[float, Field(ge=0.0, le=1.0)]] = Field(
+        description="The mathematical decay map applied to historical token indices."
+    )
+    latest_confidence_score: float = Field(
+        ge=0.0, le=1.0, description="The certainty score of the latest token prediction."
+    )
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "token_buffer", sorted(self.token_buffer))
+        return self
+
+
+class StreamingDisfluencyContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Implements non-monotonic disfluency and "forget gate" triggers to repair continuous ingestion streams. As a ...Contract suffix, this object defines rigid mathematical boundaries that the orchestrator must enforce globally.
+
+    CAUSAL AFFORDANCE: Triggers the orchestrator to excise or repair segments of the token stream when the repair_marker_regex matches, probabilistically governed by the decay_threshold.
+
+    EPISTEMIC BOUNDS: The repair_marker_regex is strictly capped at max_length=2000 to prevent ReDoS CPU exhaustion. The decay_threshold is geometrically bounded (ge=0.0, le=1.0). The maximum temporal lookback window is clamped (ge=0, le=1000000000).
+
+    MCP ROUTING TRIGGERS: Streaming Disfluency, Forget Gate, Token Excise, Sequence Repair, Temporal Lookback
+    """
+
+    repair_marker_regex: str = Field(
+        max_length=2000,
+        description="The regular expression pattern identifying a structural disfluency marker in the stream.",
+    )
+    decay_threshold: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="The probability boundary below which historical stream data is aggressively decayed.",
+    )
+    max_lookback_window: int = Field(
+        ge=0,
+        le=1000000000,
+        description="The maximum number of sequence steps the orchestrator is permitted to rewind and repair.",
+    )
+
+
+class SpeculativeExecutionBoundary(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Defines the structural boundary for executing graph nodes probabilistically, enabling speculative execution branches and time-rewinding geometry. As a ...Boundary suffix, this object acts as a declarative state checkpoint for probabilistic divergence.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator's traversal engine to fork the execution context, probabilistically committing or reversing the subgraph based on downstream verification results.
+
+    EPISTEMIC BOUNDS: The commit_probability is strictly clamped (ge=0.0, le=1.0). The graph is physically bounded by the boundary_id (128-char CID). The rollback_pointers and competing_hypotheses arrays are deterministically sorted via @model_validator to preserve invariant RFC 8785 hashing.
+
+    MCP ROUTING TRIGGERS: Speculative Topology, Time-Rewinding Geometry, Probabilistic Divergence, Subgraph Fork, Execution Boundary
+    """
+
+    boundary_id: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="The unique CID anchoring the start of the speculative execution branch."
+    )
+    is_speculative: bool = Field(
+        default=True, description="Strict boolean indicating whether the boundary forces probabilistic execution paths."
+    )
+    commit_probability: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="The assigned mathematical likelihood that the speculative branch will merge successfully.",
+    )
+    rollback_pointers: list[
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    ] = Field(
+        max_length=10000,
+        default_factory=list,
+        description="CIDs referencing the deterministic states the orchestrator must rewind to upon branch falsification.",
+    )
+    competing_hypotheses: list[
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    ] = Field(
+        max_length=10000,
+        default_factory=list,
+        description="CIDs for concurrent alternative paths generated during speculation.",
+    )
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "rollback_pointers", sorted(self.rollback_pointers))
+        object.__setattr__(self, "competing_hypotheses", sorted(self.competing_hypotheses))
+        return self
+
+
+class EpistemicContractionPolicy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Defines the mathematical rules for surgically retracting a belief within a Defeasible Logic framework. As a ...Policy suffix, this defines rigid algorithmic boundaries.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator's Truth Maintenance System to physically severe edges in the Knowledge Graph by excising the target CID and cascading the falsification recursively.
+
+    EPISTEMIC BOUNDS: The contraction operation is physically bounded by the cascade_depth (ge=0, le=1000000) integer constraint, preventing runaway causal unravelling. The triggers are restricted to strict 128-char CID regex strings.
+
+    MCP ROUTING TRIGGERS: Defeasible Logic, Belief Retraction, Causal Excising, Non-Monotonic Inference, Topological Amputation
+    """
+
+    contradiction_trigger: Annotated[
+        str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
+    ] = Field(description="The CID of the observation or event that triggered the logical contradiction.")
+    excision_target: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
+        Field(description="The target CID of the specific axiom or node slated for epistemic amputation.")
+    )
+    cascade_depth: int = Field(
+        ge=0,
+        le=1000000,
+        description="The mathematical limit determining how deep the falsification signal propagates through connected edges.",
+    )
+
+
 class EpistemicLedgerState(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Formalizes Event Sourcing and the Merkle-DAG structure as
@@ -10678,6 +10810,18 @@ class EpistemicLedgerState(CoreasonBaseState):
     history: list[AnyStateEvent] = Field(
         max_length=10000,
         description="An append-only, cryptographic ledger of state events. [SITD-Alpha: Non-Monotonic Epistemic Quarantine Isometry]",
+    )
+    defeasible_claims: dict[
+        Annotated[str, StringConstraints(max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")], SemanticNodeState
+    ] = Field(
+        default_factory=dict,
+        description="The set of non-monotonic claims residing in the epistemic ledger that are structurally liable to falsification.",
+    )
+    retracted_nodes: list[
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    ] = Field(
+        default_factory=list,
+        description="A strict sequence of CIDs representing historical nodes that have been severed from the causal graph via defeasible logic.",
     )
     checkpoints: list[TemporalCheckpointState] = Field(
         max_length=1000000000, default_factory=list, description="Hard temporal anchors allowing state restoration."
@@ -10709,6 +10853,7 @@ class EpistemicLedgerState(CoreasonBaseState):
     @model_validator(mode="after")
     def sort_history(self) -> Self:
         object.__setattr__(self, "history", sorted(self.history, key=lambda event: event.timestamp))
+        object.__setattr__(self, "retracted_nodes", sorted(self.retracted_nodes))
         object.__setattr__(self, "checkpoints", sorted(self.checkpoints, key=lambda x: x.checkpoint_id))
         object.__setattr__(self, "active_rollbacks", sorted(self.active_rollbacks, key=lambda x: x.request_id))
         object.__setattr__(self, "migration_contracts", sorted(self.migration_contracts, key=lambda x: x.contract_id))
@@ -10762,3 +10907,8 @@ IntentClassificationReceipt.model_rebuild()
 KinematicNoiseProfile.model_rebuild()
 EnvironmentalSpoofingProfile.model_rebuild()
 AdversarialEmulationProfile.model_rebuild()
+ContinuousObservationStream.model_rebuild()
+StreamingDisfluencyContract.model_rebuild()
+SpeculativeExecutionBoundary.model_rebuild()
+EpistemicContractionPolicy.model_rebuild()
+EpistemicLedgerState.model_rebuild()
