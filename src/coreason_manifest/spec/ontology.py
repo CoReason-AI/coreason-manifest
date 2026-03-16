@@ -397,7 +397,20 @@ class VisualEncodingProfile(CoreasonBaseState):
 
 class SideEffectProfile(CoreasonBaseState):
     """
-    Profile for describing the side effects and idempotency of a tool.
+    AGENT INSTRUCTION: Implements Lambda Calculus principles of referential transparency
+    and state isolation by rigidly categorizing tool capabilities. As a ...Profile suffix,
+    this is a declarative property descriptor.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator's graph traversal engine on whether a
+    tool can be safely re-evaluated during a Monte Carlo Tree Search (is_idempotent) or if
+    it induces irreversible kinetic entropy (mutates_state).
+
+    EPISTEMIC BOUNDS: Constrained entirely to strict Pydantic boolean logic (is_idempotent,
+    mutates_state), mathematically severing ambiguity in side-effect classifications to
+    prevent uncontrolled state mutation.
+
+    MCP ROUTING TRIGGERS: Referential Transparency, Lambda Calculus, Idempotence, State
+    Monad, Causal Actuator
     """
 
     is_idempotent: bool = Field(
@@ -2170,6 +2183,21 @@ class BypassReceipt(CoreasonBaseState):
 
 
 class CausalAttributionState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Formalizes Pearlian causal tracing, linking a localized cognitive
+    synthesis back to its historical Merkle-DAG origin. As a ...State suffix, this is a
+    declarative, frozen snapshot of a causal connection at a point in time.
+
+    CAUSAL AFFORDANCE: Authorizes the assignment of fractional attention or influence
+    weights to prior events, establishing a Directed Acyclic Graph (DAG) of causal lineage.
+
+    EPISTEMIC BOUNDS: The influence_weight is mathematically bounded to a continuous
+    probability distribution (ge=0.0, le=1.0). The source_event_id is locked to a 128-char
+    CID regex (^[a-zA-Z0-9_.:-]+$).
+
+    MCP ROUTING TRIGGERS: Pearlian Causal Tracing, Directed Acyclic Graph, Causal Lineage,
+    Attention Weighting, Influence Distribution
+    """
     source_event_id: str = Field(
         min_length=1,
         max_length=128,
@@ -2184,6 +2212,23 @@ class CausalAttributionState(CoreasonBaseState):
 
 
 class CollectiveIntelligenceProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Implements Integrated Information Theory (IIT) and synergy metrics
+    to quantify system-level emergence in the neurosymbolic swarm. As a ...Profile suffix,
+    this is a declarative property descriptor.
+
+    CAUSAL AFFORDANCE: Provides the orchestrator with macroscopic topological variables to
+    evaluate whether the multi-agent ensemble is producing non-linear, synergistic output
+    versus independent parallel processing.
+
+    EPISTEMIC BOUNDS: coordination_score and information_integration are upper-clamped at
+    le=1.0 to represent normalized mutual information. synergy_index is capped at
+    le=1000000000.0 to prevent scalar explosion. Note: no lower ge bounds are enforced on
+    these fields.
+
+    MCP ROUTING TRIGGERS: Integrated Information Theory, Systemic Emergence, Conditional
+    Mutual Information, Synergy Index, Multi-Agent Coupling
+    """
     synergy_index: float = Field(
         le=1000000000.0,
         description="The mathematical measure of the degree of emergence. A high SI indicates strong positive emergence.",  # noqa: E501
@@ -2199,6 +2244,23 @@ class CollectiveIntelligenceProfile(CoreasonBaseState):
 
 
 class ShapleyAttributionReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Formalizes Cooperative Game Theory to compute the exact Shapley
+    value ($\phi_i$) for a specific agent's marginal contribution to a collective outcome.
+    As a ...Receipt suffix, this is an append-only coordinate on the Merkle-DAG.
+
+    CAUSAL AFFORDANCE: Unlocks deterministic credit assignment and thermodynamic reward
+    distribution, allowing the orchestrator to equitably distribute escrow payouts or
+    policy gradient updates to the participating target_node_id (NodeIdentifierState).
+
+    EPISTEMIC BOUNDS: normalized_contribution_percentage is strictly clamped (ge=0.0,
+    le=1.0). The causal_attribution_score has only le=1.0 (no ge bound). The Monte Carlo
+    approximation confidence bounds (confidence_interval_lower/upper) are capped at
+    le=1000000000.0.
+
+    MCP ROUTING TRIGGERS: Cooperative Game Theory, Shapley Value, Credit Assignment,
+    Marginal Contribution, Monte Carlo Approximation
+    """
     target_node_id: NodeIdentifierState = Field(description="The agent whose causal influence is being measured.")
     causal_attribution_score: float = Field(
         le=1.0, description="The exact Shapley value (\\phi_i) satisfying efficiency, symmetry, and additivity axioms."
@@ -2215,6 +2277,24 @@ class ShapleyAttributionReceipt(CoreasonBaseState):
 
 
 class CausalExplanationEvent(BaseStateEvent):
+    """
+    AGENT INSTRUCTION: A cryptographically frozen historical fact representing the
+    macroscopic factorization of a collective swarm outcome into its constituent causal
+    components. As an ...Event suffix, this is an append-only coordinate on the
+    Merkle-DAG.
+
+    CAUSAL AFFORDANCE: Commits the system-level CollectiveIntelligenceProfile and the
+    individual ShapleyAttributionReceipt array to the Epistemic Ledger, finalizing the
+    credit assignment for a target_outcome_event_id.
+
+    EPISTEMIC BOUNDS: The target_outcome_event_id is locked to a 128-char CID regex. The
+    @model_validator mathematically enforces deterministic canonical hashing by sorting the
+    agent_attributions array by target_node_id (NodeIdentifierState), guaranteeing RFC 8785
+    alignment.
+
+    MCP ROUTING TRIGGERS: Causal Factorization, Epistemic Ledger Commit, Credit Assignment,
+    Macroscopic Explanation, Deterministic Sorting
+    """
     type: Literal["causal_explanation"] = Field(
         default="causal_explanation", description="Discriminator type for a causal explanation event."
     )
@@ -4478,22 +4558,22 @@ class LineageWatermarkReceipt(CoreasonBaseState):
 
 class MCPCapabilityWhitelistPolicy(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Implements a Zero-Trust Architecture (ZTA) and the Principle of
-    Least Privilege (PoLP) as a bipartite graph filter over an external RPC manifold. As a
-    ...Policy suffix, this object defines rigid mathematical boundaries that the
+    AGENT INSTRUCTION: Formalizes a Lattice-Based Access Control (LBAC) and Zero-Trust
+    Architecture perimeter, restricting JSON-RPC capability mounts from foreign subgraphs.
+    As a ...Policy suffix, this object defines rigid mathematical boundaries that the
     orchestrator must enforce globally.
 
-    CAUSAL AFFORDANCE: Mathematically severs unauthorized capability edges from a remote
-    server's projected DAG, preventing the agent from perceiving or executing out-of-scope
-    JSON-RPC methods or tools.
+    CAUSAL AFFORDANCE: Acts as a structural firewall that physically prevents the
+    orchestrator from binding unauthorized external tools, resources, or prompts into the
+    active agent's ActionSpaceManifest.
 
-    EPISTEMIC BOUNDS: The arrays (allowed_tools, allowed_resources, allowed_prompts,
-    required_licenses) are physically constrained (StringConstraints max_length=2000/255)
-    and deterministically sorted via a @model_validator to guarantee invariant RFC 8785
-    canonical hashing across distributed nodes.
+    EPISTEMIC BOUNDS: The boundary is geometrically enforced via StringConstraints
+    (max_length=2000 for allowed_tools, allowed_resources, allowed_prompts;
+    max_length=255 for required_licenses). The @model_validator strictly sorts all four
+    arrays alphabetically to mathematically guarantee RFC 8785 Canonical Hashing.
 
-    MCP ROUTING TRIGGERS: Zero-Trust Architecture, Principle of Least Privilege, Bipartite
-    Graph Filtering, Capability Whitelist, Edge Severing
+    MCP ROUTING TRIGGERS: Zero-Trust Architecture, Lattice-Based Access Control, Least
+    Privilege, RPC Firewall, Bipartite Partitioning
     """
 
     allowed_tools: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
@@ -4524,22 +4604,23 @@ class MCPCapabilityWhitelistPolicy(CoreasonBaseState):
 
 class MCPServerManifest(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Acts as a verifiable Remote Procedure Call (RPC) Boundary connecting
-    the swarm to an external Model Context Protocol (MCP) domain. As a ...Manifest suffix,
-    this defines a frozen, declarative state projection.
+    AGENT INSTRUCTION: Represents a cryptographically verifiable Distributed RPC substrate
+    mapping, binding an external Model Context Protocol (MCP) manifold into the swarm's
+    local topology. As a ...Manifest suffix, this defines a frozen, declarative state
+    projection.
 
-    CAUSAL AFFORDANCE: Authorizes the bridging of the local epistemic blackboard with a
-    remote data plane over transport_type Literal ["stdio", "sse", "http"], governed
-    strictly by the nested capability_whitelist (MCPCapabilityWhitelistPolicy).
+    CAUSAL AFFORDANCE: Authorizes the physical connection to an exogenous compute node
+    over specific transport_type vectors (Literal ["stdio", "sse", "http"]), provided the
+    capability_whitelist (MCPCapabilityWhitelistPolicy) and mandatory attestation_receipt
+    constraints are fully satisfied.
 
-    EPISTEMIC BOUNDS: Cryptographically locks the connection using attestation_receipt
-    (VerifiableCredentialPresentationReceipt). The @model_validator enforces that the
-    Verifiable Credential MUST be signed by a valid did:coreason: issuer, neutralizing
-    Byzantine supply-chain execution attacks. Optional binary_hash (SHA-256) prevents
-    local binary tampering over stdio.
+    EPISTEMIC BOUNDS: Supply-chain execution attacks are mitigated by the optional
+    binary_hash (strictly matching SHA-256 pattern ^[a-f0-9]{64}$). A @model_validator
+    structurally enforces that the presented Verifiable Credential is signed by a valid
+    did:coreason: authority, emitting a QuarantineIntent upon failure.
 
-    MCP ROUTING TRIGGERS: Remote Procedure Call, Model Context Protocol, Supply-Chain
-    Zero-Trust, Verifiable Credential, Byzantine Fault Tolerance
+    MCP ROUTING TRIGGERS: Distributed RPC, Capability-Based Security, Remote Procedure
+    Call, Transport Layer, Verifiable Credential
     """
 
     server_uri: str = Field(
@@ -4601,23 +4682,23 @@ class KineticSeparationPolicy(CoreasonBaseState):
 
 class ActionSpaceManifest(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Represents the complete, enumerable mathematical Action Space ($A$)
-    within the agent's Partially Observable Markov Decision Process (POMDP). As a ...Manifest
+    AGENT INSTRUCTION: Defines the finite, discrete Markov Decision Process (MDP) Action
+    Space and affordance landscape available to a specific execution node. As a ...Manifest
     suffix, this defines a frozen, N-dimensional coordinate state.
 
-    CAUSAL AFFORDANCE: Projects a unified manifold of native_tools, mcp_servers, and
-    ephemeral_partitions into the agent's working context, dictating the absolute limits of
-    its kinetic reach. Optionally enforces kinetic_separation (KineticSeparationPolicy) to
-    prevent toxic tool combinations.
+    CAUSAL AFFORDANCE: Projects the combined multi-dimensional matrix of native_tools,
+    mcp_servers, and ephemeral_partitions into the agent's context, mathematically dictating
+    which kinetic operations it can initiate. Optionally enforces kinetic_separation
+    (KineticSeparationPolicy) to prevent toxic tool combinations.
 
     EPISTEMIC BOUNDS: The action_space_id is geometrically constrained to a 128-char CID.
-    A @model_validator mathematically guarantees that all tool_names within native_tools
-    are strictly unique, and sorts all capability arrays (native_tools by tool_name,
-    mcp_servers by server_uri, ephemeral_partitions by partition_id) to preserve RFC 8785
-    canonical hashing.
+    A @model_validator strictly bounds the topology by enforcing uniqueness across all
+    native_tools namespaces, and ensures deterministic RFC 8785 representation by sorting
+    tools, servers, and partitions by their respective identifiers (tool_name, server_uri,
+    partition_id).
 
-    MCP ROUTING TRIGGERS: POMDP Action Space, Operant Resources, Capability Manifold,
-    Deterministic Sorting, Kinetic Boundary
+    MCP ROUTING TRIGGERS: Markov Decision Process, Action Space, Affordance Theory,
+    Curated Environment, State Transition Matrix
     """
 
     action_space_id: str = Field(
