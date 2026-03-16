@@ -4951,7 +4951,21 @@ class BaseNodeProfile(CoreasonBaseState):
 
 class HumanNodeProfile(BaseNodeProfile):
     """
-    A node representing a human participant in the workflow.
+    AGENT INSTRUCTION: Formalizes Supervisory Control Theory within the causal DAG,
+    instantiating an out-of-band Oracle node for Mixed-Initiative truth resolution.
+    As a ...Profile suffix, this is a declarative property descriptor.
+
+    CAUSAL AFFORDANCE: Physically halts the continuous multi-agent generation loop,
+    forcing the probability wave to suspend until external wetware (human) entropy is
+    safely injected into the topological state.
+
+    EPISTEMIC BOUNDS: Execution resumption is cryptographically gated by the optional
+    required_attestation (AttestationMechanismProfile | None, default=None). If set,
+    the orchestrator MUST physically drop all responses lacking a matching
+    cryptographic attestation. The type discriminator is locked to Literal["human"].
+
+    MCP ROUTING TRIGGERS: Supervisory Control Theory, Oracle Node, Mixed-Initiative,
+    Proof of Humanity, Out-of-Band Entropy
     """
 
     type: Literal["human"] = Field(default="human", description="Discriminator for a Human node.")
@@ -4963,7 +4977,22 @@ class HumanNodeProfile(BaseNodeProfile):
 
 class MemoizedNodeProfile(BaseNodeProfile):
     """
-    A passive structural interlock representing a historically executed graph branch.
+    AGENT INSTRUCTION: Employs Dynamic Programming principles to create a passive,
+    cryptographic structural interlock pointing to a historically executed and verified
+    graph branch. As a ...Profile suffix, this is a declarative property descriptor.
+
+    CAUSAL AFFORDANCE: Bypasses redundant thermodynamic compute expenditure by
+    collapsing an entire sub-DAG execution into a single, O(1) state retrieval
+    keyed by the target_topology_hash (TopologyHashReceipt).
+
+    EPISTEMIC BOUNDS: The cache-hit is mathematically locked to the exact
+    target_topology_hash (TopologyHashReceipt), guaranteeing perfect graph
+    isomorphism. The retrieved payload is physically constrained by
+    expected_output_schema (dict, max_length=1000000000). The type discriminator is
+    locked to Literal["memoized"].
+
+    MCP ROUTING TRIGGERS: Dynamic Programming, O(1) Retrieval, Cryptographic Cache,
+    Graph Isomorphism, Compute Conservation
     """
 
     type: Literal["memoized"] = Field(default="memoized", description="Discriminator for a Memoized node.")
@@ -4977,7 +5006,20 @@ class MemoizedNodeProfile(BaseNodeProfile):
 
 class SystemNodeProfile(BaseNodeProfile):
     """
-    A node representing a deterministic system capability.
+    AGENT INSTRUCTION: Encapsulates pure functional logic (Lambda Calculus) and Finite
+    State Machine (FSM) mechanics to represent a completely deterministic,
+    side-effect-free system capability. As a ...Profile suffix, this is a declarative
+    property descriptor.
+
+    CAUSAL AFFORDANCE: Executes rigid, zero-variance procedural logic without invoking
+    the expensive stochastic policy gradients required by foundational LLM models.
+
+    EPISTEMIC BOUNDS: This node defines NO additional fields beyond inherited
+    BaseNodeProfile constraints, including the rigorous domain_extensions recursive
+    depth limits. The type discriminator is locked to Literal["system"].
+
+    MCP ROUTING TRIGGERS: Lambda Calculus, Finite State Machine, Referential
+    Transparency, Deterministic Execution, Zero Variance
     """
 
     type: Literal["system"] = Field(default="system", description="Discriminator for a System node.")
@@ -7454,7 +7496,26 @@ class AgentAttestationReceipt(CoreasonBaseState):
 
 class AgentNodeProfile(BaseNodeProfile):
     """
-    A node representing an autonomous agent.
+    AGENT INSTRUCTION: Implements a stochastic actor traversing a Partially Observable
+    Markov Decision Process (POMDP). It establishes the cognitive and physical
+    constraints for autonomous swarm participants. As a ...Profile suffix, this is a
+    declarative property descriptor.
+
+    CAUSAL AFFORDANCE: Authorizes the orchestrator to instantiate an independent
+    generative trajectory capable of active inference, Representation Engineering
+    (RepE) steering via baseline_cognitive_state (CognitiveStateProfile), and
+    non-monotonic test-time compute escalation via escalation_policy
+    (EscalationContract). The description field (max_length=2000) provides the
+    objective function.
+
+    EPISTEMIC BOUNDS: The node's operational variance is physically bounded by its
+    thermodynamic Spot-Market budget (compute_frontier: RoutingFrontierPolicy). The
+    @model_validator sort_agent_node_arrays deterministically sorts peft_adapters by
+    adapter_id for RFC 8785 canonical hashing. The type discriminator is strictly
+    locked to Literal["agent"].
+
+    MCP ROUTING TRIGGERS: POMDP, Stochastic Actor, Active Inference, Representation
+    Engineering, Policy Gradient
     """
 
     description: str = Field(
