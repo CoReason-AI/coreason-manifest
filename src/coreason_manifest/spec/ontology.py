@@ -4088,7 +4088,13 @@ class EpistemicArgumentGraphState(CoreasonBaseState):
 
 class ExecutionNodeReceipt(CoreasonBaseState):
     """
-    Cryptographic state of an execution node in a Merkle DAG trace.
+    AGENT INSTRUCTION: Formalizes a discrete computational vertex within a Merkle-DAG execution trace, binding raw data inputs to deterministic outputs. As a ...Receipt suffix, this is an append-only coordinate on the Merkle-DAG.
+
+    CAUSAL AFFORDANCE: Permits the orchestrator to cryptographically re-evaluate, replay, or slash execution branches by guaranteeing all computational inputs, outputs, and parent pointers are deterministically serialized and preserved.
+
+    EPISTEMIC BOUNDS: The @model_validator mathematically guarantees the node_hash via RFC 8785 canonical JSON serialization, trapping any non-deterministic dictionary properties. Orphaned lineages are structurally blocked by cross-field validation between parent_request_id and root_request_id.
+
+    MCP ROUTING TRIGGERS: Merkle-DAG, RFC 8785 Canonicalization, Execution Trace, Cryptographic Determinism, Directed Acyclic Graph
     """
 
     model_config = ConfigDict(frozen=True)
@@ -5537,6 +5543,16 @@ class SystemNodeProfile(BaseNodeProfile):
 
 
 class LineageWatermarkReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Implements Cryptographic Watermarking and Homomorphic MAC frameworks to mathematically seal the chain of custody against laundering, obfuscation, or Byzantine tampering. As a ...Receipt suffix, this is an append-only coordinate on the Merkle-DAG.
+
+    CAUSAL AFFORDANCE: Enforces a zero-trust execution perimeter by forcing participating agents to append their deterministic execution signatures to the hop_signatures matrix, verifying non-repudiation before advancing the graph.
+
+    EPISTEMIC BOUNDS: The mathematical sealing mechanism is strictly constrained by the watermark_protocol Literal automaton ["merkle_dag", "statistical_token", "homomorphic_mac"]. The hop_signatures dictionary keys and values are physically bounded by StringConstraints to prevent memory exhaustion during serialization.
+
+    MCP ROUTING TRIGGERS: Cryptographic Watermarking, Homomorphic MAC, Byzantine Fault Detection, Zero-Trust Lineage, Chain of Custody
+    """
+
     watermark_protocol: Literal["merkle_dag", "statistical_token", "homomorphic_mac"] = Field(
         description="The mathematical methodology used to embed the chain of custody."
     )
@@ -6106,6 +6122,16 @@ class MechanisticAuditContract(CoreasonBaseState):
 
 
 class EpistemicProvenanceReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Establishes a formal Data Provenance anchor, cryptographically locking a semantic state to its exact physical, temporal, or neural genesis block. As a ...Receipt suffix, this is an append-only coordinate on the Merkle-DAG.
+
+    CAUSAL AFFORDANCE: Unlocks deterministic causal tracing and auditability, granting the orchestrator the physical capability to walk the Knowledge Graph backward across multiple swarm hops to the raw multimodal source.
+
+    EPISTEMIC BOUNDS: The geometric topology is rigidly anchored by the source_event_id (128-char CID regex ^[a-zA-Z0-9_.:-]+$). The spatial and temporal origin is physically clamped by the optional multimodal_anchor (MultimodalTokenAnchorState).
+
+    MCP ROUTING TRIGGERS: Data Provenance, Causal Tracing, Epistemic Anchoring, Bijective Mapping, Genesis Block
+    """
+
     extracted_by: NodeIdentifierState = Field(
         description="The Content Identifier (CID) of the agent node that extracted this payload."
     )
