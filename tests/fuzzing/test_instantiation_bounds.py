@@ -95,7 +95,7 @@ def test_multimodal_token_anchor_state_fuzzing(coords: tuple[float, float, float
     """Geometric/Spatial Fuzzing: Generate normalized coordinates for MultimodalTokenAnchorState
     where minimums exceed maximums."""
     with pytest.raises((ValidationError, ValueError)):
-        MultimodalTokenAnchorState(visual_patch_hashes=[], bounding_box=coords)
+        MultimodalTokenAnchorState(visual_patch_hashes=[], bounding_box=coords)  # type: ignore[arg-type]
 
 
 @st.composite

@@ -891,17 +891,36 @@ class CognitiveStateProfile(CoreasonBaseState):
 class CognitiveUncertaintyProfile(CoreasonBaseState):
     """Structural Causal Models (SCMs) for active epistemic bounding."""
 
+    decomposition_entropy_threshold: float | None = Field(
+        default=None,
+        ge=0.0,
+        le=1000000000.0,
+        description=(
+            "The exact epistemic entropy boundary (in bits/nats) that, when breached, mathematically "
+            "mandates the orchestrator to splinter the monolithic prompt into a QueryDecompositionManifest."
+        ),
+    )
     aleatoric_entropy: float = Field(
-        ge=0.0, le=1.0, description="Irreducible ambiguity detected in the observational fields (P(y|x))."
+        ge=0.0,
+        le=1000000000.0,
+        description="Irreducible ambiguity detected in the observational fields (P(y|x)), measured in bits/nats.",
     )
     epistemic_uncertainty: float = Field(
-        ge=0.0, le=1.0, description="The causal gap demanding Do-Calculus Interventions (P(y|do(x)))."
+        ge=0.0,
+        le=1000000000.0,
+        description="The causal gap demanding Do-Calculus Interventions (P(y|do(x))), measured in bits/nats.",
     )
     semantic_consistency_score: float = Field(
         ge=0.0, le=1.0, description="Counterfactual Geometries representing alternative timeline vectors."
     )
     requires_abductive_escalation: bool = Field(
         description="True if epistemic_uncertainty breaches the safety threshold, requiring structural mandate escalation."  # noqa: E501
+    )
+    theory_of_mind_divergence: float | None = Field(
+        default=None,
+        ge=0.0,
+        le=1000000000.0,
+        description="The mathematical KL divergence between the agent's internal belief distribution and the explicitly modeled TheoryOfMindSnapshot.",  # noqa: E501
     )
 
 
@@ -1131,6 +1150,40 @@ class SaeLatentPolicy(CoreasonBaseState):
         return self
 
 
+class BrowserFingerprintManifest(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: The deterministic hardware and network identity vector. Mathematically bounds
+    the TLS handshake and WebGL unmasked renderers to prevent fingerprinting detection.
+    """
+
+    user_agent_string: str = Field(
+        max_length=2000,
+        description="The exact `navigator.userAgent`.",
+    )
+    ja3_tls_fingerprint: str = Field(
+        min_length=32,
+        max_length=128,
+        pattern="^[a-f0-9A-F]+$",
+        description="The MD5/SHA hash of the strict TLS Client Hello signature.",
+    )
+    webgl_vendor_renderer: str = Field(
+        max_length=2000,
+        description="The spoofed GPU renderer string.",
+    )
+    canvas_noise_hash: str = Field(
+        min_length=1,
+        max_length=128,
+        pattern="^[a-f0-9]{64}$",
+        description="The SHA-256 seed used to deterministically poison Canvas rendering readouts.",
+    )
+    viewport_geometry: tuple[int, int] = Field(
+        description="The $W \\times H$ bound for `window.innerWidth`/`innerHeight`."
+    )
+    has_touch_capability: bool = Field(
+        description="Signals if `ontouchstart` should be mathematically present in the DOM."
+    )
+
+
 class SecureSubSessionState(CoreasonBaseState):
     """
     Declarative boundary for handling unredacted secrets within a temporarily isolated state partition.
@@ -1148,6 +1201,10 @@ class SecureSubSessionState(CoreasonBaseState):
     )
     max_ttl_seconds: int = Field(ge=1, le=3600, description="Maximum time-to-live for the unredacted state partition.")
     description: str = Field(max_length=2000, description="Audit justification for this temporary secure session.")
+    device_fingerprint: BrowserFingerprintManifest | None = Field(
+        default=None,
+        description="The cryptographic hardware and network stack identity bound to this authenticated session partition.",  # noqa: E501
+    )
 
     @model_validator(mode="after")
     def sort_arrays(self) -> Self:
@@ -1221,10 +1278,9 @@ class MultimodalTokenAnchorState(CoreasonBaseState):
         default_factory=list,
         description="The explicit array of SHA-256 hashes corresponding to specific VQ-VAE visual patches attended to.",
     )
-    bounding_box: tuple[float, float, float, float] | None = Field(
-        max_length=1000000000,
+    bounding_box: SpatialBoundingBoxProfile | None = Field(
         default=None,
-        description="The strictly typed [x_min, y_min, x_max, y_max] normalized coordinate matrix.",
+        description="The strictly typed SpatialBoundingBoxProfile.",
     )
     block_type: Literal["paragraph", "table", "figure", "footnote", "header", "equation"] | None = Field(
         default=None, description="The structural classification of the source region."
@@ -1240,17 +1296,6 @@ class MultimodalTokenAnchorState(CoreasonBaseState):
                 raise ValueError("token_span_end MUST be strictly greater than token_span_start.")
         elif self.token_span_end is not None:
             raise ValueError("token_span_end cannot be defined without a token_span_start.")
-        return self
-
-    @model_validator(mode="after")
-    def validate_spatial_geometry(self) -> Self:
-        """AGENT INSTRUCTION: Enforce mathematical spatial monotonicity."""
-        if self.bounding_box is not None:
-            x_min, y_min, x_max, y_max = self.bounding_box
-            if x_min > x_max or y_min > y_max:
-                raise ValueError(
-                    f"Spatial invariant violated: min bounds (x:{x_min}, y:{y_min}) exceed max bounds (x:{x_max}, y:{y_max})"  # noqa: E501
-                )
         return self
 
     @model_validator(mode="after")
@@ -1373,6 +1418,25 @@ class TemporalCheckpointState(CoreasonBaseState):
     )
 
 
+class MonteCarloTreeSearchPolicy(CoreasonBaseState):
+    """AGENT INSTRUCTION: The strict mathematical hyperparameter profile governing the agent's internal latent rollouts (MCTS) prior to kinetic execution."""  # noqa: E501
+
+    exploration_constant_c: float = Field(
+        ge=0.0, description="The UCB1 exploration weight bounding curiosity vs. exploitation."
+    )
+    max_rollout_depth: int = Field(
+        ge=1, le=1000000000, description="The physical recursion limit for hallucinating future UI states."
+    )
+    num_simulations: int = Field(
+        ge=1,
+        le=1000000000,
+        description="The number of search iterations required before collapsing the probability wave into a physical action.",  # noqa: E501
+    )
+    discount_factor_gamma: float = Field(
+        ge=0.0, le=1.0, description="The mathematical discount applied to future expected rewards."
+    )
+
+
 class ThoughtBranchState(CoreasonBaseState):
     branch_id: str = Field(
         max_length=128,
@@ -1399,9 +1463,32 @@ class ThoughtBranchState(CoreasonBaseState):
         le=1.0,
         description="The logical validity score assigned to this branch by the Process Reward Model.",
     )
+    simulated_action_hash: str | None = Field(
+        default=None,
+        pattern="^[a-f0-9]{64}$",
+        description="The SHA-256 hash of the proposed tool or kinematic action intent ($A_t$).",
+    )
+    expected_next_state_hash: str | None = Field(
+        default=None,
+        pattern="^[a-f0-9]{64}$",
+        description="The SHA-256 hash of the hallucinated/expected UI state ($S_{t+1}$) resulting from the simulated action.",  # noqa: E501
+    )
+    q_value_estimate: float | None = Field(
+        default=None, description="The expected cumulative reward $Q(s,a)$ for this branch."
+    )
+    visit_count: int = Field(
+        default=1,
+        ge=1,
+        description="The mathematical visit count $N(s,a)$ used for UCT exploration/exploitation balancing.",
+    )
 
 
 class LatentScratchpadReceipt(CoreasonBaseState):
+    root_state_hash: str | None = Field(
+        default=None,
+        pattern="^[a-f0-9]{64}$",
+        description="The exact SHA-256 hash of the initial environment state (e.g., ViewportRasterState) from which the MCTS rollout originated.",  # noqa: E501
+    )
     trace_id: str = Field(
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
@@ -2474,9 +2561,42 @@ class LatentProjectionIntent(CoreasonBaseState):
     )
 
 
+class DecomposedSubQueryState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A continuous latent representation of a fragmented semantic intent (a sub-goal),
+    structurally isolated from the monolithic user prompt.
+    """
+
+    sub_query_id: str = Field(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
+    latent_target_vector: VectorEmbeddingState = Field(
+        description="The dense embedding of what this specific sub-query is hunting for."
+    )
+    expected_information_gain: float = Field(
+        ge=0.0, le=1.0, description="The Bayesian EIG expected from resolving this specific branch."
+    )
+    required_surface_capabilities: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
+        description="The explicit array of capability strings expected to resolve this."
+    )
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "required_surface_capabilities", sorted(self.required_surface_capabilities))
+        return self
+
+
 class SemanticDiscoveryIntent(CoreasonBaseState):
     type: Literal["semantic_discovery"] = Field(
         default="semantic_discovery", description="Discriminator for geometric boundary of latent tool discovery."
+    )
+    parent_decomposition_id: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        description=(
+            "The cryptographic pointer linking this specific retrieval hop back to the "
+            "governing QueryDecompositionManifest DAG."
+        ),
     )
     query_vector: VectorEmbeddingState = Field(
         description="The latent vector representation of the epistemic deficit the agent is trying to solve."
@@ -2492,6 +2612,68 @@ class SemanticDiscoveryIntent(CoreasonBaseState):
     @model_validator(mode="after")
     def sort_required_structural_types(self) -> Self:
         object.__setattr__(self, "required_structural_types", sorted(self.required_structural_types))
+        return self
+
+
+class QueryDecompositionManifest(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: The strict structural Directed Acyclic Graph (DAG) ordering multi-hop
+    information retrieval, mathematically preventing execution cycles and hallucinatory capability generation.
+    """
+
+    type: Literal["query_decomposition"] = Field(default="query_decomposition")
+    manifest_id: str = Field(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
+    root_intent_hash: str = Field(
+        min_length=1, max_length=128, pattern="^[a-f0-9]{64}$", description="the monolithic intent being solved"
+    )
+    surface_projection_id: str = Field(
+        min_length=1,
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        description="The pointer to the OntologicalSurfaceProjectionManifest",
+    )
+    sub_queries: dict[Annotated[str, StringConstraints(max_length=255)], DecomposedSubQueryState] = Field(
+        description="Matrix of decomposed semantic intents"
+    )
+    execution_dag_edges: list[tuple[str, str]] = Field(
+        description="Directed edges (source_sub_query_id, target_sub_query_id)"
+    )
+
+    @model_validator(mode="after")
+    def sort_execution_dag_edges(self) -> Self:
+        object.__setattr__(self, "execution_dag_edges", sorted(self.execution_dag_edges))
+        return self
+
+    @model_validator(mode="after")
+    def verify_dag_integrity(self) -> Self:
+        adj: dict[str, list[str]] = {node_id: [] for node_id in self.sub_queries}
+        for source, target in self.execution_dag_edges:
+            if source not in self.sub_queries:
+                raise ValueError(f"Ghost node referenced in execution_dag_edges source: {source}")
+            if target not in self.sub_queries:
+                raise ValueError(f"Ghost node referenced in execution_dag_edges target: {target}")
+            adj[source].append(target)
+        visited: set[str] = set()
+        recursion_stack: set[str] = set()
+        for start_node in self.sub_queries:
+            if start_node in visited:
+                continue
+            stack = [(start_node, iter(adj[start_node]))]
+            visited.add(start_node)
+            recursion_stack.add(start_node)
+            while stack:
+                curr, neighbors = stack[-1]
+                try:
+                    neighbor = next(neighbors)
+                    if neighbor not in visited:
+                        visited.add(neighbor)
+                        recursion_stack.add(neighbor)
+                        stack.append((neighbor, iter(adj[neighbor])))
+                    elif neighbor in recursion_stack:
+                        raise ValueError("Execution DAG contains cycles")
+                except StopIteration:
+                    recursion_stack.remove(curr)
+                    stack.pop()
         return self
 
 
@@ -3542,7 +3724,8 @@ type AnyIntent = Annotated[
     | EscalationIntent
     | SemanticDiscoveryIntent
     | TaxonomicRestructureIntent
-    | LatentProjectionIntent,
+    | LatentProjectionIntent
+    | QueryDecompositionManifest,
     Field(discriminator="type"),
 ]
 
@@ -4909,6 +5092,12 @@ class SpatialKinematicActionIntent(CoreasonBaseState):
     target_coordinate: SpatialCoordinateProfile | None = Field(
         default=None, description="The primary spatial terminus for clicks or hovers."
     )
+    target_frame_cid: str = Field(
+        min_length=1,
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        description="Cryptographic lock tying this physical kinematic action to the exact screenshot frame it was predicted on, preventing temporal mis-clicks.",  # noqa: E501
+    )
     trajectory_duration_ms: int | None = Field(
         le=86400000,
         default=None,
@@ -4923,6 +5112,23 @@ class SpatialKinematicActionIntent(CoreasonBaseState):
         default=None,
         description="The visual anchor (e.g., 'Submit Button'). The orchestrator must verify this semantic concept exists at the target_coordinate before executing the macro, preventing blind clicks.",  # noqa: E501
     )
+    temporal_waypoints_ms: list[Annotated[int, Field(ge=0)]] = Field(
+        default_factory=list,
+        description="The strictly typed array of temporal waypoints ($t$) corresponding 1:1 with bezier_control_points, completing the $(x, y, t)$ kinematic tensor.",  # noqa: E501
+    )
+
+    @model_validator(mode="after")
+    def enforce_tensor_symmetry(self) -> Self:
+        object.__setattr__(self, "temporal_waypoints_ms", sorted(self.temporal_waypoints_ms))
+        if (
+            self.temporal_waypoints_ms
+            and self.bezier_control_points
+            and len(self.temporal_waypoints_ms) != len(self.bezier_control_points)
+        ):
+            raise ValueError(
+                "Kinematic Tensor Asymmetry: temporal_waypoints_ms and bezier_control_points must have the same length."
+            )
+        return self
 
 
 class StateContract(CoreasonBaseState):
@@ -5364,7 +5570,7 @@ class TerminalBufferState(CoreasonBaseState):
 
 
 type AnyToolchainState = Annotated[
-    BrowserDOMState | TerminalBufferState,
+    BrowserDOMState | TerminalBufferState | ViewportRasterState,
     Field(
         discriminator="type",
         description="A discriminated union of Causal Actuators defining strict perimeters for Exogenous Perturbations to the causal graph.",  # noqa: E501
@@ -5373,18 +5579,18 @@ type AnyToolchainState = Annotated[
 
 
 class TheoryOfMindSnapshot(CoreasonBaseState):
-    target_agent_id: str = Field(
-        max_length=128,
-        pattern="^[a-zA-Z0-9_.:-]+$",
-        min_length=1,
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the agent whose mind is being modeled.",  # noqa: E501
-    )
+    target_agent_id: (
+        NodeIdentifierState
+        | Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    ) = Field(description="The strict DID of the swarm node, or CID of an external user, whose mind is being modeled.")
     assumed_shared_beliefs: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
         description="The explicit array of Content Identifiers (CIDs) acting as cryptographic Lineage Watermarks that the modeling agent assumes the target already possesses.",  # noqa: E501
     )
-    identified_knowledge_gaps: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
-        max_length=1000000000,
-        description="Specific topics or logical premises the target agent is assumed to be missing.",
+    identified_knowledge_gaps: list[
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    ] = Field(
+        default_factory=list,
+        description="The explicit array of CIDs/DIDs representing the exact coordinate spaces (SemanticNodeStates or Domain Extensions) the target is mathematically proven to lack.",  # noqa: E501
     )
 
     @model_validator(mode="after")
@@ -5516,6 +5722,54 @@ class VectorEmbeddingState(CoreasonBaseState):
     model_name: str = Field(
         max_length=2000, description="The provenance of the embedding model used (e.g., 'text-embedding-3-large')."
     )
+
+
+class VisualAffordancePatchState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A continuous zero-shot interactive UI element linking a
+    strict spatial geometry to its latent semantic vector and interaction probability.
+    """
+
+    patch_id: str = Field(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
+    spatial_boundary: SpatialBoundingBoxProfile = Field(description="Strict Euclidean boundaries for the patch.")
+    semantic_concept: VectorEmbeddingState = Field(
+        description="The latent vector representation of what this patch means."
+    )
+    affordance_probability: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="The neural track's calculated certainty that this spatial region possesses a kinetic "
+        "affordance like clickability.",
+    )
+    expected_kinetic_action: Literal["click", "scroll", "drag", "type"] | None = Field(
+        default=None, description="The predicted affordance type, if any."
+    )
+
+
+class ViewportRasterState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A purely visual spatial execution perimeter for DOM-less environments
+    (VDI, Canvas, Mobile Streaming).
+    """
+
+    type: Literal["viewport_raster"] = Field(default="viewport_raster")
+    viewport_size: tuple[int, int] = Field(
+        description="The absolute (W, H) pixel coordinate space used for the affine scaling matrix."
+    )
+    screenshot_cid: str = Field(
+        min_length=1,
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        description="The cryptographic lock to the exact rasterized frame tensor.",
+    )
+    extracted_affordances: list[VisualAffordancePatchState] = Field(
+        description="The array of identified interactive zones."
+    )
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        object.__setattr__(self, "extracted_affordances", sorted(self.extracted_affordances, key=lambda x: x.patch_id))
+        return self
 
 
 class LatentIntentTrajectoryState(CoreasonBaseState):
@@ -5790,6 +6044,32 @@ class AgentAttestationReceipt(CoreasonBaseState):
         return self
 
 
+class AdversarialKinematicProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: The neural parameterization instructing the external physics engine how to
+    inject stochastic biomechanical noise (Fitts's Law) into continuous trajectories to defeat anomaly classifiers.
+    """
+
+    stochastic_noise_variance: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="The magnitude of fractional Brownian motion or Perlin noise applied to the spline.",
+    )
+    bezier_complexity_ceiling: int = Field(
+        ge=2,
+        le=100,
+        description="The maximum number of control points the generator is authorized to output for a single movement.",
+    )
+    keystroke_cadence: DistributionProfile = Field(
+        description="The exact probability density function governing $\\Delta t$ delays between keystrokes."
+    )
+    error_injection_probability: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="The probability of the neural engine intentionally generating an overshoot, transposition error, or backspace correction.",  # noqa: E501
+    )
+
+
 class AgentNodeProfile(BaseNodeProfile):
     """
     A node representing an autonomous agent.
@@ -5800,6 +6080,9 @@ class AgentNodeProfile(BaseNodeProfile):
         description="The semantic boundary defining the objective function of the execution node. [SITD-Gamma: Neurosymbolic Substrate Alignment]",  # noqa: E501
     )
     type: Literal["agent"] = Field(default="agent", description="Discriminator for an Agent node.")
+    mcts_navigation_policy: MonteCarloTreeSearchPolicy | None = Field(
+        default=None, description="The policy governing multi-hop UI navigation via latent tree search."
+    )
     token_merging: TokenMergingPolicy | None = Field(default=None)
     extraction_policy: EpistemicExtractionPolicy | None = Field(default=None)
     logit_steganography: LogitSteganographyContract | None = Field(
@@ -5815,6 +6098,10 @@ class AgentNodeProfile(BaseNodeProfile):
     )
     agent_attestation: AgentAttestationReceipt | None = Field(
         default=None, description="The cryptographic identity passport and AI-BOM for the agent."
+    )
+    kinematic_emulation_policy: AdversarialKinematicProfile | None = Field(
+        default=None,
+        description="The mathematical constraints for generating adversarial pointer physics and human-like cadence.",
     )
     action_space_id: str | None = Field(
         min_length=1,
@@ -6889,6 +7176,36 @@ class IntentTransitionEvent(BaseStateEvent):
     active_information_state: InformationStateManifest = Field(description="The current information state.")
 
 
+class MDPTransitionEvent(BaseStateEvent):
+    """AGENT INSTRUCTION: The rigid, cryptographic logging of a physical Markov Decision Process transition. Binds the $(S_t, A_t, R_{t+1}, S_{t+1})$ tuple for RL tracing."""  # noqa: E501
+
+    type: Literal["mdp_transition"] = Field(default="mdp_transition")
+    source_state_event_id: str = Field(
+        min_length=1,
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        description="CID pointing to the prior BrowserDOMState or ViewportRasterState.",
+    )
+    action_event_id: str = Field(
+        min_length=1,
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        description="CID pointing to the executed ToolInvocationEvent or SpatialKinematicActionIntent.",
+    )
+    resulting_state_event_id: str = Field(
+        min_length=1,
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        description="CID pointing to the new, post-action BrowserDOMState or ViewportRasterState.",
+    )
+    reward_signal: float = Field(
+        ge=-1000000000.0,
+        le=1000000000.0,
+        description="The actual dense or sparse reward emitted by the environment or PRM after the transition.",
+    )
+    is_terminal: bool = Field(description="Flags if this transition explicitly concluded the multi-hop trajectory.")
+
+
 type AnyStateEvent = Annotated[
     ObservationEvent
     | BeliefMutationEvent
@@ -6908,7 +7225,8 @@ type AnyStateEvent = Annotated[
     | CognitiveRewardEvaluationReceipt
     | EpistemicFlowStateReceipt
     | CausalExplanationEvent
-    | IntentTransitionEvent,
+    | IntentTransitionEvent
+    | MDPTransitionEvent,
     Field(discriminator="type", description="A discriminated union of state events."),
 ]
 
@@ -7019,7 +7337,6 @@ CanonicalGroundingReceipt.model_rebuild()
 EpistemicExtractionPolicy.model_rebuild()
 SemanticNodeState.model_rebuild()
 AgentNodeProfile.model_rebuild()
-
 IntentTransitionEvent.model_rebuild()
 InformationStateManifest.model_rebuild()
 ConceptBottleneckPolicy.model_rebuild()
@@ -7027,7 +7344,14 @@ PredictiveEntropySLA.model_rebuild()
 StreamInterruptionPolicy.model_rebuild()
 TokenMergingPolicy.model_rebuild()
 InformationFlowPolicy.model_rebuild()
-
+VisualAffordancePatchState.model_rebuild()
+ViewportRasterState.model_rebuild()
+DecomposedSubQueryState.model_rebuild()
+QueryDecompositionManifest.model_rebuild()
+AdversarialKinematicProfile.model_rebuild()
+BrowserFingerprintManifest.model_rebuild()
+MonteCarloTreeSearchPolicy.model_rebuild()
+MDPTransitionEvent.model_rebuild()
 ActionSpaceManifest.model_rebuild()
 EpistemicLedgerState.model_rebuild()
 WorkflowManifest.model_rebuild()
