@@ -5744,9 +5744,19 @@ class ActionSpaceManifest(CoreasonBaseState):
 
 class ProceduralMetadataManifest(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: A Level-1 Epistemic Discovery Surface acting as a
-    progressive disclosure pointer to a massive EpistemicSOPManifest in cold storage.
-    Prevents context window token exhaustion.
+    AGENT INSTRUCTION: Implements Progressive Disclosure and Pointer Swizzling to mitigate 
+    context window token exhaustion (the Von Neumann bottleneck). As a ...Manifest suffix, 
+    this defines a frozen, N-dimensional coordinate state.
+
+    CAUSAL AFFORDANCE: Serves as a Level-1 Epistemic Discovery Surface, authorizing the 
+    orchestrator to dynamically hot-swap a massive EpistemicSOPManifest from cold storage 
+    into active memory only when the trigger_description or latent_vector_coordinate is hit.
+
+    EPISTEMIC BOUNDS: Physical memory bounds are preserved by storing only a 128-char CID 
+    pointer (target_sop_id) rather than the raw graph. Semantic textual triggers are rigidly 
+    clamped to max_length=2000 to mathematically prevent dictionary bombing in the routing plane.
+
+    MCP ROUTING TRIGGERS: Progressive Disclosure, Pointer Swizzling, Von Neumann Bottleneck, Zero-Shot Routing, Epistemic Discovery Surface
     """
 
     metadata_id: str = Field(
@@ -5773,22 +5783,20 @@ class ProceduralMetadataManifest(CoreasonBaseState):
 
 class OntologicalSurfaceProjectionManifest(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Formalizes a Level-0 Bipartite Graph Projection,
-    mathematically defining the complete, authorized capability surface for a given
-    cognitive profile. As a ...Manifest suffix, this is a frozen N-dimensional
-    coordinate state.
+    AGENT INSTRUCTION: Implements a Bipartite Graph Projection mapping discrete cognitive 
+    personas to their mathematically permitted capabilities. As a ...Manifest suffix, this 
+    is a declarative, frozen N-dimensional coordinate of an agent's affordance space.
 
-    CAUSAL AFFORDANCE: Restricts the agent's Reinforcement Learning Action Space
-    (A) to the explicitly defined action_spaces and
-    available_procedural_manifolds, preventing capability hallucination.
+    CAUSAL AFFORDANCE: Provides the orchestrator with the definitive, fully evaluated 
+    subgraph of action_spaces and available_procedural_manifolds, physically locking out 
+    the LLM from attempting out-of-distribution operations or hallucinated tool executions.
 
-    EPISTEMIC BOUNDS: Anchored by a 128-character projection_id. The
-    @model_validator verify_unique_action_spaces strictly enforces topological
-    uniqueness across action_space_ids and deterministically sorts all arrays to
-    guarantee invariant Merkle-DAG hashing.
+    EPISTEMIC BOUNDS: Cryptographically anchored by projection_id. The @model_validator 
+    verify_unique_action_spaces executes a referential integrity sweep to ensure all 
+    action_space_ids are strictly unique, and deterministically sorts all matrices 
+    (supported_personas, available_procedural_manifolds) for invariant Merkle-DAG hashing.
 
-    MCP ROUTING TRIGGERS: Bipartite Graph Projection, Lattice-Based Access
-    Control, MDP Action Space, Progressive Disclosure, Zero-Trust Architecture
+    MCP ROUTING TRIGGERS: Bipartite Graph, Affordance Landscape, Persona Routing, Deterministic Bounding, Capability Subgraph
     """
 
     projection_id: str = Field(
@@ -5845,21 +5853,20 @@ class MCPClientIntent(BoundedJSONRPCIntent):
 
 class MCPPromptReferenceState(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Acts as an external structural template reference within
-    the Model Context Protocol, resolving dynamic prompts without allowing
-    arbitrary code execution. As a ...State suffix, this is a frozen coordinate.
+    AGENT INSTRUCTION: Formalizes Late-Binding and Lazy Evaluation mechanics for the 
+    dynamic retrieval of generative instruction templates. As a ...State suffix, this 
+    is a declarative, frozen N-dimensional coordinate of an exogenous reference.
 
-    CAUSAL AFFORDANCE: Triggers the orchestrator to request and hydrate the remote
-    prompt_name from the server_id, passing safely bounded arguments to steer
-    test-time compute. Includes an optional fallback_persona.
+    CAUSAL AFFORDANCE: Authorizes the orchestrator to fetch and hydrate logic templates 
+    from an external Model Context Protocol server precisely at test-time, injecting 
+    runtime arguments into the evaluation stream without exhausting the persistent context.
 
-    EPISTEMIC BOUNDS: Dictionary bombing is mathematically prevented by clamping
-    the arguments dictionary keys (max_length=255) and properties
-    (max_length=1000000000). The optional prompt_hash enforces a rigid SHA-256
-    fingerprint (^[a-f0-9]{64}$) to verify template integrity before hydration.
+    EPISTEMIC BOUNDS: The server_id is geometrically constrained to a 128-char CID regex 
+    (^[a-zA-Z0-9_.:-]+$). The arguments dictionary is mathematically capped to a physical 
+    property limit (max_length=1000000000) to physically prevent JSON-bombing during 
+    template hydration.
 
-    MCP ROUTING TRIGGERS: Model Context Protocol, Declarative Templating,
-    Capability-Based Security, Hash Verification, Dynamic Hydration
+    MCP ROUTING TRIGGERS: Late-Binding, Lazy Evaluation, Prompt Engineering, Ephemeral Context, Capability Hydration
     """
 
     server_id: str = Field(
@@ -5887,21 +5894,19 @@ class MCPPromptReferenceState(CoreasonBaseState):
 
 class MCPResourceManifest(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Projects a read-only Epistemic Discovery Surface via the
-    Model Context Protocol, exposing Latent State resource URIs. As a ...Manifest
-    suffix, this is a frozen N-dimensional coordinate state.
+    AGENT INSTRUCTION: Establishes a Bounded Context for the zero-trust passive perception 
+    of remote epistemic resources. As a ...Manifest suffix, this defines a frozen, 
+    declarative state projection spanning an external boundary.
 
-    CAUSAL AFFORDANCE: Authorizes the orchestrator to passively mount and ingest
-    the specified uris from the remote server_id without executing kinetic
-    side-effects.
+    CAUSAL AFFORDANCE: Exposes an explicit whitelist of resource uris that the local 
+    orchestrator is mathematically permitted to read, extending the swarm's sensory 
+    horizon across the network without introducing any kinetic mutation vectors.
 
-    EPISTEMIC BOUNDS: The server_id is restricted to a 128-character CID. The
-    uris array physically restricts paths to 2000 characters and is
-    deterministically alphabetized by the @model_validator sort_arrays to
-    preserve RFC 8785 canonical hashing.
+    EPISTEMIC BOUNDS: The uris array strings are strictly bounded by max_length=2000 to 
+    prevent path-traversal buffer overflows. The array is deterministically alphabetized 
+    via the @model_validator sort_arrays, preserving RFC 8785 Canonical Hashing guarantees.
 
-    MCP ROUTING TRIGGERS: Model Context Protocol, Epistemic Discovery Surface,
-    Latent State Projection, Read-Only Mount, Canonical Array Sorting
+    MCP ROUTING TRIGGERS: Bounded Context, Passive Perception, Sensory Horizon, Zero-Trust Architecture, Exogenous State
     """
 
     server_id: str = Field(
