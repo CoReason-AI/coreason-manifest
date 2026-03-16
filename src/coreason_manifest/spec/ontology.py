@@ -3780,6 +3780,24 @@ class EscalationIntent(CoreasonBaseState):
 
 
 class EscrowPolicy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Enforces Algorithmic Mechanism Design and Proof-of-Stake
+    (PoS) physics, forcing agents to cryptographically lock thermodynamic compute
+    capacity prior to execution. As a ...Policy suffix, this defines rigid
+    mathematical boundaries.
+
+    CAUSAL AFFORDANCE: Authorizes the orchestrator's clearinghouse to
+    automatically slash or refund the locked budget based on the deterministic
+    evaluation of the release_condition_metric (max_length=2000). The
+    refund_target_node_id (128-char CID) specifies the refund destination.
+
+    EPISTEMIC BOUNDS: The collateral is rigidly bounded by
+    escrow_locked_magnitude (ge=0, le=1000000000) to physically prevent integer
+    overflow during thermodynamic tallying.
+
+    MCP ROUTING TRIGGERS: Algorithmic Mechanism Design, Proof-of-Stake, Nash
+    Equilibrium, Sybil Resistance, Escrow Collateralization
+    """
     escrow_locked_magnitude: int = Field(
         le=1000000000,
         ge=0,
@@ -4197,6 +4215,23 @@ class FederatedCapabilityAttestationReceipt(CoreasonBaseState):
 
 
 class FederatedStateSnapshot(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Establishes a Distributed Systems Theory cryptographic
+    partition, mapping an external swarm's execution state into a localized,
+    sandboxed coordinate. As a ...Snapshot suffix, this is a frozen N-dimensional
+    coordinate of ephemeral context.
+
+    CAUSAL AFFORDANCE: Exposes the topological footprint of an exogenous network
+    to the local orchestrator, authorizing cross-boundary telemetry and capability
+    exchange without merging underlying working contexts.
+
+    EPISTEMIC BOUNDS: The coordinate is restricted by the optional topology_id
+    (str | None, default=None, 128-char CID regex ^[a-zA-Z0-9_.:-]+$),
+    mathematically severing unauthorized topological mutations.
+
+    MCP ROUTING TRIGGERS: Distributed Systems Theory, Federated Namespace,
+    Zero-Trust Architecture, Cross-Swarm Federation, Sandbox Partition
+    """
     topology_id: str | None = Field(
         min_length=1,
         max_length=128,
@@ -6943,7 +6978,23 @@ class StateContract(CoreasonBaseState):
 
 class OntologicalAlignmentPolicy(CoreasonBaseState):
     """
-    The pre-flight execution gate forcing agents to mathematically align their latent semantics.
+    AGENT INSTRUCTION: Implements Vector Space Isometry and Earth Mover's Distance
+    bounds to mathematically verify semantic compatibility across disjoint neural
+    models before allowing multi-agent graph coupling. As a ...Policy suffix, this
+    defines rigid mathematical boundaries.
+
+    CAUSAL AFFORDANCE: Mechanically severs federated discovery attempts if the
+    participating agents' internal embedding distances fall below the required
+    threshold. A fallback_state_contract (StateContract | None, default=None)
+    forces agents to use canonical JSON Schemas when geometries are
+    incommensurable.
+
+    EPISTEMIC BOUNDS: The min_cosine_similarity is strictly clamped
+    (ge=-1.0, le=1.0). The require_isometry_proof boolean (no default) enforces
+    rigid projection validation prior to semantic mapping.
+
+    MCP ROUTING TRIGGERS: Vector Space Isometry, Earth Mover's Distance, Latent
+    Semantic Alignment, Zero-Trust Federation, Geometric Projection
     """
 
     min_cosine_similarity: float = Field(
@@ -8691,7 +8742,24 @@ type AnyTopologyManifest = Annotated[
 
 class WorkflowManifest(CoreasonBaseState):
     """
-    The root envelope for an orchestrated workflow payload.
+    AGENT INSTRUCTION: Formalizes the Topos Theory representation of a fully
+    encapsulated swarm environment, serving as the macroscopic topological
+    envelope for the entire execution payload. As a ...Manifest suffix, this is
+    a frozen N-dimensional coordinate state.
+
+    CAUSAL AFFORDANCE: Physically initializes the execution DAG via topology
+    (AnyTopologyManifest), bounding thermodynamic capacity through governance
+    (GlobalGovernancePolicy | None). Cryptographically anchored to
+    genesis_provenance (EpistemicProvenanceReceipt). Federation is controlled
+    via federated_discovery, federated_sla, and pq_signature. Enterprise
+    isolation via tenant_id/session_id (max_length=255).
+
+    EPISTEMIC BOUNDS: The @model_validator sort_arrays deterministically sorts
+    allowed_information_classifications (list | None) for RFC 8785 canonical
+    hashing. manifest_version (SemanticVersionState) pins the schema.
+
+    MCP ROUTING TRIGGERS: Topos Theory, Cybernetics, Execution Envelope,
+    Macroscopic Topology, Viable System Model
     """
 
     genesis_provenance: EpistemicProvenanceReceipt = Field(
