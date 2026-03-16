@@ -32,52 +32,61 @@ from coreason_manifest.utils.algebra import extract_webgl_entropy_seed
 
 def test_kinematic_noise_profile_bounds():
     # Valid
-    p = KinematicNoiseProfile(pink_noise_amplitude=0.5, fitts_law_variance_ms=100)
+    p = KinematicNoiseProfile(noise_type="pink", pink_noise_amplitude=0.5, frequency_exponent=1.0)
     assert p.pink_noise_amplitude == 0.5
 
     # Invalid amplitude (too high)
     with pytest.raises(ValidationError):
-        KinematicNoiseProfile(pink_noise_amplitude=1.5, fitts_law_variance_ms=100)
+        KinematicNoiseProfile(noise_type="pink", pink_noise_amplitude=1.5, frequency_exponent=1.0)
 
     # Invalid amplitude (too low)
     with pytest.raises(ValidationError):
-        KinematicNoiseProfile(pink_noise_amplitude=-0.1, fitts_law_variance_ms=100)
+        KinematicNoiseProfile(noise_type="pink", pink_noise_amplitude=-0.1, frequency_exponent=1.0)
 
-    # Invalid variance (too high)
+    # Invalid frequency_exponent (too high)
     with pytest.raises(ValidationError):
-        KinematicNoiseProfile(pink_noise_amplitude=0.5, fitts_law_variance_ms=10001)
+        KinematicNoiseProfile(noise_type="pink", pink_noise_amplitude=0.5, frequency_exponent=5.1)
 
 
 def test_environmental_spoofing_profile_bounds():
     # Valid
     p = EnvironmentalSpoofingProfile(
-        screen_resolution=(1920, 1080),
-        user_agent_override="Mozilla/5.0",
-        webgl_entropy_seed_hash="a" * 64,
+        webgl_entropy_seed_hash="abc123",
+        user_agent_template="Mozilla/5.0",
+        timezone_offset_minutes=0,
+        screen_resolution_width=1920,
+        screen_resolution_height=1080,
     )
-    assert p.screen_resolution == (1920, 1080)
+    assert p.screen_resolution_width == 1920
 
-    # Invalid hash length
+    # Invalid hash (contains spaces)
     with pytest.raises(ValidationError):
         EnvironmentalSpoofingProfile(
-            screen_resolution=(1920, 1080), user_agent_override="Mozilla", webgl_entropy_seed_hash="short"
+            webgl_entropy_seed_hash="invalid hash!",
+            user_agent_template="Mozilla",
+            timezone_offset_minutes=0,
+            screen_resolution_width=1920,
+            screen_resolution_height=1080,
         )
 
 
 def test_adversarial_emulation_profile():
     p = AdversarialEmulationProfile(
-        kinematic_noise=KinematicNoiseProfile(pink_noise_amplitude=0.5, fitts_law_variance_ms=100),
-        environmental_spoof=EnvironmentalSpoofingProfile(
-            screen_resolution=(1920, 1080),
-            user_agent_override="Mozilla/5.0",
+        kinematic_noise=KinematicNoiseProfile(noise_type="pink", pink_noise_amplitude=0.5, frequency_exponent=1.0),
+        environmental_spoofing=EnvironmentalSpoofingProfile(
+            webgl_entropy_seed_hash="abc123",
+            user_agent_template="Mozilla/5.0",
+            timezone_offset_minutes=0,
+            screen_resolution_width=1920,
+            screen_resolution_height=1080,
         ),
-        rotation_ttl_seconds=3600,
+        emulation_fidelity_target=0.95,
     )
-    assert p.rotation_ttl_seconds == 3600
+    assert p.emulation_fidelity_target == 0.95
 
-    # Invalid TTL
+    # Invalid fidelity (above 1.0)
     with pytest.raises(ValidationError):
-        AdversarialEmulationProfile(rotation_ttl_seconds=86401)
+        AdversarialEmulationProfile(emulation_fidelity_target=1.1)
 
 
 def test_latent_schema_inference_intent():
@@ -127,9 +136,13 @@ def test_extract_webgl_entropy_seed():
     agent = AgentNodeProfile(
         description="Test Agent",
         adversarial_emulation=AdversarialEmulationProfile(
-            rotation_ttl_seconds=3600,
-            environmental_spoof=EnvironmentalSpoofingProfile(
-                screen_resolution=(1920, 1080), user_agent_override="Mozilla", webgl_entropy_seed_hash="b" * 64
+            emulation_fidelity_target=0.9,
+            environmental_spoofing=EnvironmentalSpoofingProfile(
+                webgl_entropy_seed_hash="b" * 64,
+                user_agent_template="Mozilla",
+                timezone_offset_minutes=0,
+                screen_resolution_width=1920,
+                screen_resolution_height=1080,
             ),
         ),
     )
@@ -143,11 +156,11 @@ def test_spatial_kinematic_action_intent_noise():
     i = SpatialKinematicActionIntent(
         action_type="click",
         target_coordinate=SpatialCoordinateProfile(x=0.5, y=0.5),
-        noise_override=KinematicNoiseProfile(pink_noise_amplitude=0.1, fitts_law_variance_ms=50),
+        noise_override=KinematicNoiseProfile(noise_type="pink", pink_noise_amplitude=0.1, frequency_exponent=1.0),
     )
     assert i.noise_override is not None
     assert i.noise_override.pink_noise_amplitude == 0.1
-)
+
 
 # ---------------------------------------------------------------------------
 # 1. KinematicNoiseProfile — Stochastic Trajectory Perturbation Bounds

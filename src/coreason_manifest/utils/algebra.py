@@ -532,6 +532,7 @@ def extract_webgl_entropy_seed(agent_profile: ontology.AgentNodeProfile) -> str 
     """
     if not agent_profile.adversarial_emulation:
         return None
-    if not agent_profile.adversarial_emulation.environmental_spoof:
+    if not agent_profile.adversarial_emulation.environmental_spoofing:
         return None
-    return agent_profile.adversarial_emulation.environmental_spoof.webgl_entropy_seed_hash
+    spoofing = agent_profile.adversarial_emulation.environmental_spoofing
+    return str(spoofing.webgl_entropy_seed_hash) if spoofing.webgl_entropy_seed_hash else None
