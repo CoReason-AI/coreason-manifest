@@ -5643,8 +5643,23 @@ class MCPServerManifest(CoreasonBaseState):
 
 class KineticSeparationPolicy(CoreasonBaseState):
     """
-    A strict bipartite graph constraint mathematically preventing toxic tool combinations
-    from existing in the same causal execution chain.
+    AGENT INSTRUCTION: Implements strict Bipartite Graph Separation (Conflict
+    Graphs) to mathematically prevent toxic capability combinations from co-existing
+    within the same causal execution chain. As a ...Policy suffix, this enforces
+    rigid mathematical boundaries.
+
+    CAUSAL AFFORDANCE: Forces the orchestrator to perform an intersection check
+    across mutually_exclusive_clusters; if an overlap occurs, it mechanically
+    triggers the enforcement_action (e.g., halt_and_quarantine) to sever the
+    chain.
+
+    EPISTEMIC BOUNDS: The 2D matrix of string constraints (max_length=2000) is
+    rigidly sorted both internally and externally by @model_validator sort_clusters,
+    ensuring deterministic RFC 8785 hashing. The enforcement_action is clamped to
+    a strict Finite State Machine Literal.
+
+    MCP ROUTING TRIGGERS: Bipartite Graph Separation, Toxic Capability Quarantine,
+    Finite State Machine, Structural Interlock, Conflict Graph
     """
 
     policy_id: str = Field(
@@ -5758,8 +5773,22 @@ class ProceduralMetadataManifest(CoreasonBaseState):
 
 class OntologicalSurfaceProjectionManifest(CoreasonBaseState):
     """
-    A mathematically bounded, declarative subgraph of all ToolManifests and
-    MCPServerManifests currently valid for the agent's ProfileIdentifierState.
+    AGENT INSTRUCTION: Formalizes a Level-0 Bipartite Graph Projection,
+    mathematically defining the complete, authorized capability surface for a given
+    cognitive profile. As a ...Manifest suffix, this is a frozen N-dimensional
+    coordinate state.
+
+    CAUSAL AFFORDANCE: Restricts the agent's Reinforcement Learning Action Space
+    (A) to the explicitly defined action_spaces and
+    available_procedural_manifolds, preventing capability hallucination.
+
+    EPISTEMIC BOUNDS: Anchored by a 128-character projection_id. The
+    @model_validator verify_unique_action_spaces strictly enforces topological
+    uniqueness across action_space_ids and deterministically sorts all arrays to
+    guarantee invariant Merkle-DAG hashing.
+
+    MCP ROUTING TRIGGERS: Bipartite Graph Projection, Lattice-Based Access
+    Control, MDP Action Space, Progressive Disclosure, Zero-Trust Architecture
     """
 
     projection_id: str = Field(
@@ -5815,7 +5844,23 @@ class MCPClientIntent(BoundedJSONRPCIntent):
 
 
 class MCPPromptReferenceState(CoreasonBaseState):
-    """A dynamic reference to an MCP-provided prompt template."""
+    """
+    AGENT INSTRUCTION: Acts as an external structural template reference within
+    the Model Context Protocol, resolving dynamic prompts without allowing
+    arbitrary code execution. As a ...State suffix, this is a frozen coordinate.
+
+    CAUSAL AFFORDANCE: Triggers the orchestrator to request and hydrate the remote
+    prompt_name from the server_id, passing safely bounded arguments to steer
+    test-time compute. Includes an optional fallback_persona.
+
+    EPISTEMIC BOUNDS: Dictionary bombing is mathematically prevented by clamping
+    the arguments dictionary keys (max_length=255) and properties
+    (max_length=1000000000). The optional prompt_hash enforces a rigid SHA-256
+    fingerprint (^[a-f0-9]{64}$) to verify template integrity before hydration.
+
+    MCP ROUTING TRIGGERS: Model Context Protocol, Declarative Templating,
+    Capability-Based Security, Hash Verification, Dynamic Hydration
+    """
 
     server_id: str = Field(
         ...,
@@ -5841,7 +5886,23 @@ class MCPPromptReferenceState(CoreasonBaseState):
 
 
 class MCPResourceManifest(CoreasonBaseState):
-    """A collection of Latent State resource URIs provided by a specific MCP server."""
+    """
+    AGENT INSTRUCTION: Projects a read-only Epistemic Discovery Surface via the
+    Model Context Protocol, exposing Latent State resource URIs. As a ...Manifest
+    suffix, this is a frozen N-dimensional coordinate state.
+
+    CAUSAL AFFORDANCE: Authorizes the orchestrator to passively mount and ingest
+    the specified uris from the remote server_id without executing kinetic
+    side-effects.
+
+    EPISTEMIC BOUNDS: The server_id is restricted to a 128-character CID. The
+    uris array physically restricts paths to 2000 characters and is
+    deterministically alphabetized by the @model_validator sort_arrays to
+    preserve RFC 8785 canonical hashing.
+
+    MCP ROUTING TRIGGERS: Model Context Protocol, Epistemic Discovery Surface,
+    Latent State Projection, Read-Only Mount, Canonical Array Sorting
+    """
 
     server_id: str = Field(
         ...,
