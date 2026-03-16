@@ -10324,16 +10324,28 @@ class ConstrainedDecodingPolicy(CoreasonBaseState):
     MCP ROUTING TRIGGERS: FSM Logit Masking, Constrained Decoding, Tokenizer Interception, Hardware Execution Boundary
     """
 
-    enforcement_strategy: Literal["fsm_logit_mask"] = Field(
+    enforcement_strategy: Literal["fsm_logit_mask", "lmql_query", "guidance_program", "ebnf_grammar"] = Field(
         default="fsm_logit_mask", description="The mechanistic strategy for intercepting the LLM forward pass."
     )
-    compiler_backend: Literal["outlines", "xgrammar", "llama_cpp", "agnostic"] = Field(
+    compiler_backend: Literal["outlines", "xgrammar", "sglang", "lmql", "guidance", "llama_cpp", "agnostic"] = Field(
         description="The C++/CUDA backend used to compile the CFG or Regex into a DFA/PDA."
     )
+    formal_grammar_string: str | None = Field(default=None, max_length=50000)
     terminate_on_eos_leak: bool = Field(
         default=True,
         description="If True, mathematically forces the engine to halt if the LLM attempts to generate an EOS token before the FSM reaches an accepting state.",
     )
+
+    @model_validator(mode="after")
+    def validate_grammar_requirements(self) -> Self:
+        if (
+            self.enforcement_strategy in {"lmql_query", "guidance_program", "ebnf_grammar"}
+            and not self.formal_grammar_string
+        ):
+            raise ValueError(
+                f"formal_grammar_string must be provided when enforcement_strategy is '{self.enforcement_strategy}'"
+            )
+        return self
 
 
 class CognitiveFormatContract(CoreasonBaseState):
@@ -10359,7 +10371,7 @@ class CognitiveFormatContract(CoreasonBaseState):
     require_think_tags: bool = Field(
         default=True, description="Forces the inclusion of structural XML tags to isolate the reasoning trace."
     )
-    final_answer_regex: str = Field(
+    final_answer_regex: str | None = Field(
         max_length=2000,
         default="^Final Answer: .*$",
         description="The strict regular expression the model must satisfy to yield a valid discrete classification.",
@@ -10367,6 +10379,14 @@ class CognitiveFormatContract(CoreasonBaseState):
     decoding_policy: ConstrainedDecodingPolicy = Field(
         description="The mandatory hardware-level execution limits for token masking."
     )
+
+    @model_validator(mode="after")
+    def resolve_contract_conflicts(self) -> Self:
+        if self.decoding_policy.enforcement_strategy == "lmql_query" and self.final_answer_regex is not None:
+            raise ValueError(
+                "Regex constraints must be embedded directly inside the LMQL grammar string when using 'lmql_query'."
+            )
+        return self
 
 
 class EpistemicRewardModelPolicy(CoreasonBaseState):
