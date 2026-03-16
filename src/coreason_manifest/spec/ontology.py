@@ -8779,7 +8779,26 @@ type AnyInterventionState = Annotated[
 
 
 class EpistemicQuarantineSnapshot(CoreasonBaseState):
-    """Represents the Epistemic Quarantine, partitioned from the Committed Epistemic Ledger."""
+    """
+    AGENT INSTRUCTION: Implements a discrete Epistemic Quarantine and Working
+    Memory partition, isolating volatile, non-monotonic probability waves from
+    the immutable ledger. As a ...Snapshot suffix, this is a frozen N-dimensional
+    coordinate of ephemeral context.
+
+    CAUSAL AFFORDANCE: Provides a sandbox for the agent to simulate Theory of
+    Mind (theory_of_mind_models, list[TheoryOfMindSnapshot]) and compute
+    defeasible argumentation (argumentation, EpistemicArgumentGraphState | None).
+    The system_prompt (max_length=2000) defines the basal instruction set.
+    affordance_projection and capability_attestations extend the discovery surface.
+
+    EPISTEMIC BOUNDS: Physical memory is clamped by active_context (key
+    max_length=255, value max_length=100000, le=1000000000). The @model_validator
+    sort_arrays deterministically sorts theory_of_mind_models by target_agent_id
+    and capability_attestations by attestation_id for RFC 8785 hashing.
+
+    MCP ROUTING TRIGGERS: Working Memory Partition, Epistemic Quarantine, Theory
+    of Mind, Volatile State Isolation, Semantic Sandbox
+    """
 
     system_prompt: str = Field(
         max_length=2000, description="The basal non-monotonic instruction set currently held in Epistemic Quarantine."
@@ -8819,6 +8838,26 @@ class EpistemicQuarantineSnapshot(CoreasonBaseState):
 
 
 class ZeroKnowledgeReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Enforces Computational Integrity via Verifiable Computing,
+    utilizing succinct non-interactive arguments of knowledge (zk-SNARKs/STARKs)
+    to prove execution correctness without revealing private state. As a ...Receipt
+    suffix, this is a cryptographically frozen historical fact.
+
+    CAUSAL AFFORDANCE: Authorizes the zero-trust orchestrator to accept and merge
+    off-chain state mutations by verifying the cryptographic_blob
+    (max_length=5000000) against the public_inputs_hash and verifier_key_id
+    (128-char CID). The latent_state_commitments (dict, key max_length=255,
+    value max_length=100, le=1000000000, default_factory=dict) bind intermediate
+    residual stream states.
+
+    EPISTEMIC BOUNDS: The proof_protocol is strictly clamped to a Literal
+    automaton ["zk-SNARK", "zk-STARK", "plonk", "bulletproofs"]. The
+    public_inputs_hash guarantees linkage via SHA-256 regex (^[a-f0-9]{64}$).
+
+    MCP ROUTING TRIGGERS: Computational Integrity, Verifiable Computing,
+    Zero-Knowledge Proofs, zk-SNARK, State Attestation
+    """
     proof_protocol: Literal["zk-SNARK", "zk-STARK", "plonk", "bulletproofs"] = Field(
         description="The mathematical dialect of the cryptographic proof."
     )
@@ -8847,6 +8886,27 @@ class ZeroKnowledgeReceipt(CoreasonBaseState):
 
 
 class BeliefMutationEvent(BaseStateEvent):
+    """
+    AGENT INSTRUCTION: Formalizes Bayesian Belief Updating and Pearlian Causal
+    Tracing by synthesizing internal cognitive shifts into discrete, hashable
+    facts. As an ...Event suffix, this is an append-only coordinate on the
+    Merkle-DAG that the LLM must never hallucinate a mutation to.
+
+    CAUSAL AFFORDANCE: Projects a synthesized conclusion into the shared topology,
+    binding the new belief to causal_attributions (list[CausalAttributionState],
+    default_factory=list). Optional zk_proof (ZeroKnowledgeReceipt),
+    hardware_attestation (HardwareEnclaveReceipt), uncertainty_profile
+    (CognitiveUncertaintyProfile), scratchpad_trace (LatentScratchpadReceipt),
+    and neural_audit (NeuralAuditAttestationReceipt) extend the attestation.
+
+    EPISTEMIC BOUNDS: payload is clamped by @field_validator
+    enforce_payload_topology via _validate_payload_bounds. The @model_validator
+    sort_arrays sorts causal_attributions by source_event_id for RFC 8785
+    canonical hashing. source_node_id (NodeIdentifierState | None) traces origin.
+
+    MCP ROUTING TRIGGERS: Bayesian Belief Updating, Causal Tracing, Cognitive
+    Synthesis, Merkle-DAG Coordinate, Non-Monotonic Leap
+    """
     type: Literal["belief_mutation"] = Field(
         default="belief_mutation", description="Discriminator type for a Belief Assertion event."
     )
@@ -9602,8 +9662,27 @@ type AnyStateEvent = Annotated[
 
 
 class EpistemicLedgerState(CoreasonBaseState):
-    """The Committed Epistemic Ledger (crystallized truth), completely partitioned from volatile working context
-    or Epistemic Quarantine."""
+    """
+    AGENT INSTRUCTION: Formalizes Event Sourcing and the Merkle-DAG structure as
+    the absolute, immutable source of truth for the swarm, fully partitioned from
+    volatile memory. As a ...State suffix, this is a declarative, frozen snapshot
+    of the macro-topology.
+
+    CAUSAL AFFORDANCE: Permanently crystallizes validated events into the history
+    (list[AnyStateEvent], max_length=10000). Applies Truth Maintenance via
+    truth_maintenance_policy (TruthMaintenancePolicy | None), eviction via
+    eviction_policy (EvictionPolicy | None), crystallization via
+    crystallization_policy (CrystallizationPolicy | None), and tracks active
+    DefeasibleCascadeEvents and RollbackIntents.
+
+    EPISTEMIC BOUNDS: The @model_validator sort_history deterministically sorts
+    history by timestamp, checkpoints by checkpoint_id, active_rollbacks by
+    request_id, migration_contracts by contract_id, and active_cascades by
+    cascade_id — guaranteeing invariant RFC 8785 canonical hashing.
+
+    MCP ROUTING TRIGGERS: Event Sourcing, Merkle-DAG, Immutable Ledger, Truth
+    Crystallization, Chronological Sort
+    """
 
     history: list[AnyStateEvent] = Field(
         max_length=10000,
