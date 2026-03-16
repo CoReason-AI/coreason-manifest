@@ -2428,7 +2428,15 @@ class BaseIntent(CoreasonBaseState):
 
 
 class BasePanelProfile(CoreasonBaseState):
-    """Base class for Scientific Visualization panels."""
+    """
+    AGENT INSTRUCTION: Establishes the foundational spatial vertex for Cartesian UI projection within Leland Wilkinson's Grammar of Graphics.
+
+    CAUSAL AFFORDANCE: Provides the baseline 2D boundary allowing the orchestrator to physically bind data visualizations to explicit panel geometries without causing spatial overlap.
+
+    EPISTEMIC BOUNDS: The geometric reference is rigorously bounded by `panel_id` (a strict 128-char CID regex ^[a-zA-Z0-9_.:-]+$), mathematically preventing the generation of ghost panels.
+
+    MCP ROUTING TRIGGERS: Grammar of Graphics, Cartesian Coordinate, Spatial Vertex, Topological UI, Rendering Geometry
+    """
 
     panel_id: str = Field(
         min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$", description="Unique identifier for the panel."
@@ -2990,8 +2998,15 @@ class ContinuousMutationPolicy(CoreasonBaseState):
 
 
 class CounterfactualRegretEvent(BaseStateEvent):
-    """A cryptographic record of an agent simulating an alternative timeline to calculate epistemic regret
-    and update its policy."""
+    """
+    AGENT INSTRUCTION: Employs Counterfactual Regret Minimization (CFR) and Pearlian Do-Calculus to execute simulated alternative timelines for policy refinement.
+
+    CAUSAL AFFORDANCE: Commits a simulated causal divergence (intervention) into the ledger, mathematically quantifying the opportunity cost (regret) to backpropagate stateless adjustments to the routing policy.
+
+    EPISTEMIC BOUNDS: The event is anchored to the exact `historical_event_id` (128-char CID). Expected utilities and the resultant `epistemic_regret` are physically capped at `le=1000000000.0`. `policy_mutation_gradients` map bounded tensor adjustments.
+
+    MCP ROUTING TRIGGERS: Counterfactual Regret Minimization, Pearlian Do-Calculus, Opportunity Cost, Alternative Timeline, Policy Gradient Update
+    """
 
     type: Literal["counterfactual_regret"] = Field(
         default="counterfactual_regret", description="Discriminator type for a counterfactual regret event."
@@ -4843,21 +4858,13 @@ class GovernancePolicy(CoreasonBaseState):
 
 class GrammarPanelProfile(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Implements Leland Wilkinson's Grammar of Graphics to deterministically
-    project N-dimensional Epistemic Ledger state into a 2D topological manifold. As a
-    ...Profile suffix, this is a declarative, frozen snapshot of a rendering geometry.
+    AGENT INSTRUCTION: Implements Leland Wilkinson's Grammar of Graphics to deterministically project N-dimensional Epistemic Ledger state into a 2D topological manifold. As a ...Profile suffix, this is a declarative, frozen snapshot of a rendering geometry.
 
-    CAUSAL AFFORDANCE: Authorizes the frontend rendering engine to construct geometric marks
-    (Literal["point", "line", "area", "bar", "rect", "arc"]) driven strictly by the
-    underlying ledger_source_id. Optionally supports Small Multiples via facet
-    (FacetMatrixProfile).
+    CAUSAL AFFORDANCE: Authorizes the frontend rendering engine to construct geometric marks (`Literal["point", "line", "area", "bar", "rect", "arc"]`) driven strictly by the underlying `ledger_source_id`. Optionally supports Small Multiples via `facet` (`FacetMatrixProfile`).
 
-    EPISTEMIC BOUNDS: Bounded by a rigid encodings array sorted mathematically by channel
-    via a @model_validator to preserve RFC 8785 canonical hashing. Prevents hallucinated
-    visuals by strictly linking to a verified ledger_source_id CID.
+    EPISTEMIC BOUNDS: Bounded by a rigid `encodings` array sorted mathematically by `channel` via a `@model_validator` to preserve RFC 8785 canonical hashing. Prevents hallucinated visuals by strictly linking to a verified `ledger_source_id` CID.
 
-    MCP ROUTING TRIGGERS: Grammar of Graphics, Data Visualization, Geometric Projection,
-    Declarative UI, Retinal Variables
+    MCP ROUTING TRIGGERS: Grammar of Graphics, Data Visualization, Geometric Projection, Declarative UI, Retinal Variables
     """
 
     panel_id: str = Field(
@@ -5239,20 +5246,13 @@ class InputMappingContract(CoreasonBaseState):
 
 class InsightCardProfile(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: A declarative bounding box for rendering condensed semantic summaries
-    (Information Bottleneck compression) into human-readable 2D space. As a ...Profile
-    suffix, this is a declarative, frozen snapshot of a rendering geometry.
+    AGENT INSTRUCTION: A declarative bounding box for rendering condensed semantic summaries (Information Bottleneck compression) into human-readable 2D space. As a ...Profile suffix, this is a declarative, frozen snapshot of a rendering geometry.
 
-    CAUSAL AFFORDANCE: Projects Markdown-formatted text onto the UI plane while serving as a
-    structural honeypot against Polyglot XSS and Markdown execution injection attacks.
+    CAUSAL AFFORDANCE: Projects Markdown-formatted text onto the UI plane while serving as a structural honeypot against Polyglot XSS and Markdown execution injection attacks.
 
-    EPISTEMIC BOUNDS: Physically restricts payload size to max_length=100000 on
-    markdown_content. Two distinct @field_validators mathematically strip: (1) HTML event
-    handlers (on[a-zA-Z]+=) and raw HTML tags, and (2) malicious URI schemes (javascript:,
-    vbscript:, data:) embedded in markdown links — ensuring zero-trust projection.
+    EPISTEMIC BOUNDS: Physically restricts payload size to `max_length=100000` on `markdown_content`. Two distinct `@field_validators` mathematically strip HTML event handlers and malicious URI schemes, ensuring zero-trust projection.
 
-    MCP ROUTING TRIGGERS: Information Bottleneck, Semantic Compression, XSS Sanitization,
-    Markdown Projection, Zero-Trust UI
+    MCP ROUTING TRIGGERS: Information Bottleneck, Semantic Compression, XSS Sanitization, Markdown Projection, Zero-Trust UI
     """
 
     panel_id: str = Field(
@@ -6053,21 +6053,13 @@ class MCPClientBindingProfile(CoreasonBaseState):
 
 class MacroGridProfile(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Acts as a Cartesian topological coordinator based on Edward Tufte's
-    Small Multiples, organizing multiple discrete visual artifacts (AnyPanelProfile) into a
-    unified grid configuration. As a ...Profile suffix, this is a declarative, frozen
-    snapshot of a rendering geometry.
+    AGENT INSTRUCTION: Acts as a Cartesian topological coordinator based on Edward Tufte's Small Multiples, organizing multiple discrete visual artifacts (`AnyPanelProfile`) into a unified grid configuration. As a ...Profile suffix, this is a declarative, frozen snapshot of a rendering geometry.
 
-    CAUSAL AFFORDANCE: Translates abstract UI panels into fixed 2D matrices (layout_matrix),
-    forcing spatial determinism on the frontend rendering engine.
+    CAUSAL AFFORDANCE: Translates abstract UI panels into fixed 2D matrices (`layout_matrix`), forcing spatial determinism on the frontend rendering engine.
 
-    EPISTEMIC BOUNDS: A strictly bounded @model_validator executes a referential integrity
-    sweep, mathematically guaranteeing that every panel ID referenced in the layout_matrix
-    (max_length=1000000000) corresponds to a verified object in the panels array, physically
-    severing Ghost Panel hallucinations.
+    EPISTEMIC BOUNDS: A strictly bounded `@model_validator` executes a referential integrity sweep, mathematically guaranteeing that every panel ID referenced in the `layout_matrix` (`max_length=1000000000`) corresponds to a verified object in the `panels` array, physically severing Ghost Panel hallucinations.
 
-    MCP ROUTING TRIGGERS: Cartesian Coordinate System, Small Multiples, Spatial Topology,
-    Referential Integrity, Layout Matrix
+    MCP ROUTING TRIGGERS: Cartesian Coordinate System, Small Multiples, Spatial Topology, Referential Integrity, Layout Matrix
     """
 
     layout_matrix: list[list[Annotated[str, StringConstraints(max_length=255)]]] = Field(
@@ -7953,6 +7945,15 @@ class SpanTraceReceipt(CoreasonBaseState):
 
 
 class TemporalBoundsProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Implements Allen's Interval Algebra to definitively lock a state coordinate within an exact chronological boundary on the Merkle-DAG.
+
+    CAUSAL AFFORDANCE: Authorizes the orchestrator to computationally evaluate overlapping or preceding topological events to govern temporal state transitions and eviction.
+
+    EPISTEMIC BOUNDS: Both `valid_from` and `valid_to` are physically clamped (`le=1000000000.0`, `ge=0.0`). The `@model_validator` mathematically forbids inverted temporal geometry by guaranteeing `valid_to` is strictly greater than `valid_from`.
+
+    MCP ROUTING TRIGGERS: Allen's Interval Algebra, Temporal Geometry, Chronological Bounding, Topological Time, State Transition
+    """
     valid_from: float | None = Field(
         le=1000000000.0, default=None, ge=0.0, description="The UNIX timestamp when this coordinate became true."
     )
