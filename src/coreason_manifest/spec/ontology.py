@@ -2728,7 +2728,7 @@ class BrowserDOMState(CoreasonBaseState):
                     ip = ipaddress.ip_address(ip_int)
                 else:
                     raise ValueError
-            except ValueError, OverflowError, IndexError:
+            except (ValueError, OverflowError, IndexError):
                 return url
         if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast:
             raise ValueError(f"SSRF restricted IP detected: {hostname}")
@@ -9218,20 +9218,21 @@ class DAGTopologyManifest(BaseTopologyManifest):
                         stack.pop()
         return self
 
-    def trigger_rollback(self, boundary_id: str) -> None:
+    @model_validator(mode="after")
+    def trigger_rollback(self) -> Self:
         """
-        AGENT INSTRUCTION: Actively purges memory associated with a SpeculativeExecutionBoundary
-        when a contradictory observation falsifies the branch.
+        AGENT INSTRUCTION: State validator that actively purges memory associated with a SpeculativeExecutionBoundary
+        when it is deemed falsified (e.g., commit_probability drops to 0.0 or a specific rollback flag is detected).
+        For deterministic execution, we purge any boundary whose commit_probability is exactly 0.0.
         """
-        boundary_to_rollback = None
-        for boundary in self.speculative_boundaries:
-            if boundary.boundary_id == boundary_id:
-                boundary_to_rollback = boundary
-                break
-        if boundary_to_rollback is None:
-            raise ValueError(f"Boundary ID '{boundary_id}' not found in speculative_boundaries.")
+        boundaries_to_rollback = [b for b in self.speculative_boundaries if b.commit_probability <= 0.0]
+        if not boundaries_to_rollback:
+            return self
 
-        nodes_to_purge = {str(uuid_val) for uuid_val in boundary_to_rollback.rollback_pointers}
+        nodes_to_purge = set()
+        for b in boundaries_to_rollback:
+            for uuid_val in b.rollback_pointers:
+                nodes_to_purge.add(str(uuid_val))
 
         # Purge nodes
         for node_id in nodes_to_purge:
@@ -9245,9 +9246,11 @@ class DAGTopologyManifest(BaseTopologyManifest):
                 edges_to_keep.append((source, target))
         object.__setattr__(self, "edges", edges_to_keep)
 
-        # Remove the boundary itself
-        boundaries_to_keep = [b for b in self.speculative_boundaries if b.boundary_id != boundary_id]
+        # Remove the boundaries themselves
+        boundaries_to_keep = [b for b in self.speculative_boundaries if b.commit_probability > 0.0]
         object.__setattr__(self, "speculative_boundaries", boundaries_to_keep)
+
+        return self
 
 
 class DigitalTwinTopologyManifest(BaseTopologyManifest):
