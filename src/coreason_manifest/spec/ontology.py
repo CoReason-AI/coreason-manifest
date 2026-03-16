@@ -19,7 +19,6 @@ import re
 import urllib.parse
 from enum import StrEnum
 from typing import Annotated, Any, Literal, Self
-from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, StringConstraints, field_validator, model_validator
 
@@ -2728,7 +2727,7 @@ class BrowserDOMState(CoreasonBaseState):
                     ip = ipaddress.ip_address(ip_int)
                 else:
                     raise ValueError
-            except ValueError, OverflowError, IndexError:
+            except (ValueError, OverflowError, IndexError):
                 return url
         if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast:
             raise ValueError(f"SSRF restricted IP detected: {hostname}")
@@ -9601,7 +9600,7 @@ class WetwareAttestationContract(CoreasonBaseState):
         pattern="^[A-Za-z0-9+/=_-]+$",
         description="The strictly formatted (Base64url/Hex/Multibase) signature or proof.",
     )
-    dag_node_nonce: UUID = Field(
+    dag_node_nonce: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
         ..., description="The cryptographic nonce tightly binding this signature to the specific Merkle-DAG node."
     )
 
@@ -9624,7 +9623,7 @@ class InterventionReceipt(CoreasonBaseState):
     """
 
     type: Literal["verdict"] = Field(default="verdict", description="The type of the intervention payload.")
-    intervention_request_id: UUID = Field(
+    intervention_request_id: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
         description="The cryptographic nonce uniquely identifying the intervention request."
     )
     target_node_id: NodeIdentifierState = Field(description="The ID of the target node.")
