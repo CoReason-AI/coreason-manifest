@@ -7235,8 +7235,22 @@ class VectorEmbeddingState(CoreasonBaseState):
 
 class CognitiveCritiqueProfile(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: A declarative, dense supervision vector generated
-    by a Process Reward Model (PRM) to steer intermediate test-time reasoning.
+    AGENT INSTRUCTION: Implements Step-Level Verification via Process Reward Models
+    (PRMs) to evaluate and critique intermediate steps in non-monotonic reasoning
+    trees. As a ...Profile suffix, this is a declarative, frozen snapshot.
+
+    CAUSAL AFFORDANCE: Injects a dense latent supervision vector
+    (logical_flaw_embedding: VectorEmbeddingState | None, default=None) to
+    mathematically repel the generative trajectory away from hallucinated or
+    logically flawed probability manifolds during test-time compute.
+
+    EPISTEMIC BOUNDS: The penalization magnitude is strictly clamped by
+    epistemic_penalty_scalar (ge=0.0, le=1.0) to prevent gradient explosion. The
+    target is cryptographically locked via reasoning_trace_hash (SHA-256 pattern
+    ^[a-f0-9]{64}$).
+
+    MCP ROUTING TRIGGERS: Process Reward Model, Step-Level Verification,
+    Representation Engineering, Latent Repulsion, Test-Time Supervision
     """
 
     reasoning_trace_hash: str = Field(
@@ -7258,8 +7272,22 @@ class CognitiveCritiqueProfile(CoreasonBaseState):
 
 class KineticBudgetPolicy(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: The mathematical boundary forcing the collapse of
-    probability waves and wide-search trees as physical compute resources deplete.
+    AGENT INSTRUCTION: Formalizes Optimal Stopping Theory and Simulated Annealing to
+    mechanistically manage the Exploration-Exploitation dilemma during Test-Time
+    Compute. As a ...Policy suffix, this defines rigid mathematical boundaries.
+
+    CAUSAL AFFORDANCE: Forces probability wave collapse by dynamically throttling
+    the sampling temperature toward the dynamic_temperature_asymptote (ge=0.0,
+    le=1000000000.0) and physically halting lateral ThoughtBranch generation when
+    the forced_exploitation_threshold_ms is breached.
+
+    EPISTEMIC BOUNDS: The decay geometry is strictly confined to the
+    exploration_decay_curve Literal ["linear", "exponential", "step"]. Physical
+    temporal limits are hard-capped by forced_exploitation_threshold_ms (gt=0,
+    le=86400000).
+
+    MCP ROUTING TRIGGERS: Optimal Stopping Theory, Simulated Annealing, Probability
+    Wave Collapse, Exploration-Exploitation Dilemma, Kinetic Thermodynamics
     """
 
     exploration_decay_curve: Literal["linear", "exponential", "step"] = Field(
@@ -7279,8 +7307,22 @@ class KineticBudgetPolicy(CoreasonBaseState):
 
 class EpistemicEscalationContract(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: The strict mathematical agreement governing when
-    an agent is authorized to expand its test-time compute allocation based on measured doubt.
+    AGENT INSTRUCTION: Establishes a Kahneman System 2 Test-Time Compute Allocation
+    heuristic, leveraging Information Theory to dynamically unlock compute budgets
+    based on measured Shannon Entropy. As a ...Contract suffix, this enforces a rigid
+    mathematical boundary globally.
+
+    CAUSAL AFFORDANCE: Authorizes the orchestrator to recursively scale the active
+    max_latent_tokens_budget via the test_time_multiplier when the agent's internal
+    predictive distribution breaches the baseline_entropy_threshold (ge=0.0,
+    le=1000000000.0).
+
+    EPISTEMIC BOUNDS: Prevents runaway state-space explosion by strictly clamping
+    max_escalation_tiers (ge=1, le=1000000000). The test_time_multiplier is
+    physically forced to be expansive (gt=1.0, le=1000000000.0).
+
+    MCP ROUTING TRIGGERS: System 2 Processing, Test-Time Compute, Shannon Entropy,
+    Epistemic Escalation, Non-Monotonic Scaling
     """
 
     baseline_entropy_threshold: float = Field(
@@ -7302,8 +7344,23 @@ class EpistemicEscalationContract(CoreasonBaseState):
 
 class FederatedPeftContract(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: The physical and temporal bounding constraints
-    for hot-swapping low-rank adapter tensors into GPU memory.
+    AGENT INSTRUCTION: Governs the spatial and temporal physics of Parameter-Efficient
+    Fine-Tuning (PEFT) and Low-Rank Adaptation (LoRA), managing the Von Neumann
+    bottleneck in distributed swarm VRAM. As a ...Contract suffix, this enforces a
+    rigid mathematical boundary globally.
+
+    CAUSAL AFFORDANCE: Instructs the tensor execution engine to hot-swap external
+    safetensors weight matrices into active GPU memory, modifying the foundational
+    activation circuits. The adapter_merkle_root (SHA-256 ^[a-f0-9]{64}$) provides
+    supply-chain integrity. The cache_priority_weight dictates LRU eviction priority.
+
+    EPISTEMIC BOUNDS: The spatial geometry is physically capped by
+    vram_footprint_bytes (gt=0, le=100000000000). The temporal presence is
+    mathematically guillotined by ephemeral_ttl_ms (gt=0, le=86400000). The
+    cache_priority_weight is normalized (ge=0.0, le=1.0).
+
+    MCP ROUTING TRIGGERS: Low-Rank Adaptation, PEFT, LRU Cache Eviction, Tensor
+    Hot-Swapping, GPU VRAM Management
     """
 
     adapter_merkle_root: str = Field(
