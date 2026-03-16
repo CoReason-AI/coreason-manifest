@@ -2963,7 +2963,21 @@ class EpistemicPromotionEvent(BaseStateEvent):
 
 class EpistemicScanningPolicy(CoreasonBaseState):
     """
-    Policy for epistemic scanning and gap detection.
+    AGENT INSTRUCTION: Grounded in Active Inference and Epistemic Logic, this policy
+    dictates the continuous background monitoring of the active context for ungrounded
+    assertions and cognitive dissonance. As a ...Policy suffix, this object defines rigid
+    mathematical boundaries that the orchestrator must enforce globally.
+
+    CAUSAL AFFORDANCE: Actively measures the Variational Free Energy of the working memory
+    partition, forcing the orchestrator to transition to a System 2 probing state or sever
+    the execution branch if ambiguity spikes. Gated by the active boolean toggle.
+
+    EPISTEMIC BOUNDS: The acceptable ambiguity limit is rigidly defined by the
+    dissonance_threshold (ge=0.0, le=1.0). Remediation routing is constrained strictly to
+    the Literal FSM state transitions ["fail", "probe", "clarify"] via action_on_gap.
+
+    MCP ROUTING TRIGGERS: Active Inference, Cognitive Dissonance, Epistemic Logic,
+    Uncertainty Monitoring, Belief State Validation
     """
 
     active: bool = Field(description="Whether the epistemic scanner is active.")
@@ -5457,7 +5471,21 @@ type ScaleTypeProfile = Literal["linear", "log", "time", "ordinal", "nominal"]
 
 class SelfCorrectionPolicy(CoreasonBaseState):
     """
-    Policy for self-correction and iterative refinement.
+    AGENT INSTRUCTION: Formalizes a closed-loop Control Theory system for autonomous,
+    non-monotonic error correction and iterative belief refinement during generation. As a
+    ...Policy suffix, this object defines rigid mathematical boundaries that the
+    orchestrator must enforce globally.
+
+    CAUSAL AFFORDANCE: Authorizes the agent to execute cyclic reflection and transactional
+    graph rollbacks, refining its N-dimensional state representation prior to crystallizing
+    the output into the EpistemicLedgerState.
+
+    EPISTEMIC BOUNDS: Mathematically bounds the Halting Problem by physically capping
+    max_loops at 50 (ge=0, le=50), preventing infinite compute burn. Enforces transactional
+    safety via the rollback_on_failure boolean constraint.
+
+    MCP ROUTING TRIGGERS: Control Theory, Feedback Loop, Iterative Refinement,
+    Non-Monotonic Revision, Cyclic Reflection
     """
 
     max_loops: int = Field(ge=0, le=50, description="The maximum number of self-correction loops allowed.")
@@ -5971,7 +5999,22 @@ class SyntheticGenerationProfile(CoreasonBaseState):
 
 class System1ReflexPolicy(CoreasonBaseState):
     """
-    Policy for fast, intuitive system 1 thinking.
+    AGENT INSTRUCTION: Implements Kahneman's Dual-Process Theory (System 1) to define the
+    exact topological boundary for fast, automatic, heuristic-driven cognitive processing.
+    As a ...Policy suffix, this object defines rigid mathematical boundaries that the
+    orchestrator must enforce globally.
+
+    CAUSAL AFFORDANCE: Bypasses deep test-time compute and Monte Carlo Tree Search (MCTS)
+    to instantly authorize zero-shot execution of passive, non-mutating vectors when
+    epistemic certainty is high.
+
+    EPISTEMIC BOUNDS: Execution is mathematically gated by the confidence_threshold
+    (ge=0.0, le=1.0). If triggered, the orchestrator is strictly limited to invoking tools
+    present in the deterministically sorted allowed_passive_tools array
+    (max_length=1000000000, StringConstraints max_length=2000), sorted via @model_validator.
+
+    MCP ROUTING TRIGGERS: Dual-Process Theory, System 1 Heuristics, Zero-Shot Execution,
+    Reactive Bounding, Cognitive Fast-Path
     """
 
     confidence_threshold: float = Field(
