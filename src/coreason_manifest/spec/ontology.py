@@ -1394,6 +1394,24 @@ class RollbackIntent(CoreasonBaseState):
 
 
 class StateMutationIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Implements the formal RFC 6902 JSON Patch standard to execute atomic,
+    deterministic state vector mutations across the swarm's N-dimensional blackboard. As an
+    ...Intent suffix, this represents an authorized kinetic execution trigger.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator's algebraic engine to surgically apply,
+    test, or ablate targeted JSON pointers without requiring full payload transmission. The
+    value (JsonPrimitiveState, default=None) carries the mutation payload; from_path
+    (alias="from") enables RFC 6902 move/copy operations.
+
+    EPISTEMIC BOUNDS: The operation geometry is rigidly restricted by the op field to the
+    PatchOperationProfile Literal automaton. Target topological coordinates (path and
+    from_path) are physically bounded to max_length=2000 to prevent path traversal and
+    string exhaustion during pointer resolution.
+
+    MCP ROUTING TRIGGERS: RFC 6902, JSON Patch, Atomic Mutation, State Vector Projection,
+    Deterministic Operator
+    """
     op: PatchOperationProfile = Field(
         description="The strict RFC 6902 JSON Patch operation, acting as a deterministic state vector mutation."
     )
@@ -1413,6 +1431,24 @@ class StateMutationIntent(CoreasonBaseState):
 
 
 class StateDifferentialManifest(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Formalizes Conflict-free Replicated Data Types (CRDTs) using Lamport
+    logical clocks and Vector Clocks to guarantee Eventual Consistency. As a ...Manifest
+    suffix, this defines a frozen, declarative coordinate of a state transition matrix.
+
+    CAUSAL AFFORDANCE: Enables lock-free, decentralized state synchronization across the
+    swarm. Forces the orchestrator to resolve Last-Writer-Wins (LWW) topological conflicts
+    before flushing the patches (list[StateMutationIntent]) to the immutable Epistemic
+    Ledger. The vector_clock dict maps node CIDs to their ge=0 integer mutation counts.
+
+    EPISTEMIC BOUNDS: Cryptographically anchored by diff_id and author_node_id (both
+    strict 128-char CID regex). The synchronization math is clamped by lamport_timestamp
+    (ge=0, le=1000000000), physically preventing logical clock integer overflow during
+    prolonged swarm execution cycles.
+
+    MCP ROUTING TRIGGERS: CRDT, Vector Clock, Lamport Timestamp, Eventual Consistency,
+    Last-Writer-Wins
+    """
     diff_id: str = Field(
         min_length=1,
         max_length=128,
@@ -1439,6 +1475,26 @@ class StateDifferentialManifest(CoreasonBaseState):
 
 
 class StateHydrationManifest(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Manages the Epistemic Hydration of an agent's active context
+    partition from cold storage, bridging immutable EpistemicLedgerState checkpoints and
+    ephemeral working memory. As a ...Manifest suffix, this defines a frozen configuration
+    state.
+
+    CAUSAL AFFORDANCE: Authorizes the physical injection of serialized semantic data
+    (working_context_variables) into the LLM's forward-pass generation window, seeding
+    the context prior to probability wave collapse. The crystallized_ledger_cids (SHA-256
+    pointers) bind to past immutable ledger blocks.
+
+    EPISTEMIC BOUNDS: VRAM exhaustion is prevented by max_retained_tokens (gt=0,
+    le=1000000000). The @field_validator enforce_payload_topology calls
+    _validate_payload_bounds to prevent Dictionary Bombing on working_context_variables.
+    The @model_validator sort_arrays deterministically sorts crystallized_ledger_cids for
+    RFC 8785 canonical hashing.
+
+    MCP ROUTING TRIGGERS: Epistemic Hydration, Working Memory Injection, Context Window
+    Partitioning, VRAM Bounding, Serialization Geometry
+    """
     epistemic_coordinate: str = Field(
         max_length=2000, description="A string ID representing the session or specific spatial trace binding."
     )
