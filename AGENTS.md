@@ -359,6 +359,9 @@ Schemas must naturally cluster in dense-vector Retrieval-Augmented Generation (R
 
 **VIOLATION CONSEQUENCE:** Any PR or generated code failing to adhere to this Lexical Architecture will trigger an immediate `SystemFaultEvent` during the CI/CD semantic diff phase.
 
+### 🚫 THE DEATH OF PROMPTING FOR SYNTAX
+**YOU ARE STRICTLY FORBIDDEN from attempting to enforce JSON or structural formats via natural language prompting.** Do NOT write instructions like: *"Output your response as a valid JSON object"* or *"Make sure your response matches this format."* In the CoReason architecture, structural formatting is no longer a probabilistic suggestion—it is a deterministic physics problem. All grammar and syntax constraints must be physically enforced at the hardware level using **FSM Logit Masking (Constrained Decoding)**. You must utilize the `ConstrainedDecodingPolicy` within a `StateContract` or `CognitiveFormatContract` to instruct the orchestrator to dynamically compile the JSON Schema into a Deterministic Finite Automaton (DFA), physically suffocating invalid token probabilities to $-\infty$.
+
 ## 🛡️ Mandatory Local Verification Workflow
 
 This package enforces a zero-tolerance policy for type errors, linting violations, and coverage drops. To ensure the Shared Kernel remains completely stable and immutable, **the following checks must be run locally before opening a Pull Request or finalizing an AI-generated refactor.** Failure to comply will result in an immediate rejection by the CI/CD pipeline.
