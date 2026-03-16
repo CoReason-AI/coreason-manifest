@@ -371,7 +371,22 @@ class ScalePolicy(CoreasonBaseState):
 
 
 class VisualEncodingProfile(CoreasonBaseState):
-    """The visual property being manipulated."""
+    """
+    AGENT INSTRUCTION: Defines the mathematical mapping function between an abstract data
+    dimension (field) and a physiological human perception vector (channel). As a ...Profile
+    suffix, this is a declarative, frozen snapshot of a rendering geometry.
+
+    CAUSAL AFFORDANCE: Constrains the renderer's geometric plotting algorithm by forcing the
+    interpretation of data through an optional ScalePolicy transformation (e.g., logarithmic
+    or linear).
+
+    EPISTEMIC BOUNDS: The channel is strictly typed to a Literal enum
+    ["x", "y", "color", "size", "opacity", "shape", "text"]. The target field is physically
+    bounded to max_length=2000 to prevent dictionary bombing during rendering loops.
+
+    MCP ROUTING TRIGGERS: Bijective Mapping, Retinal Variables, Dimensionality Reduction,
+    Geometric Plotting, Visual Channel Encoding
+    """
 
     channel: Literal["x", "y", "color", "size", "opacity", "shape", "text"] = Field(
         description="The visual channel the metric is mapped to."
@@ -3714,7 +3729,23 @@ class GovernancePolicy(CoreasonBaseState):
 
 
 class GrammarPanelProfile(CoreasonBaseState):
-    """Panel representing a deterministic, declarative visual grammar."""
+    """
+    AGENT INSTRUCTION: Implements Leland Wilkinson's Grammar of Graphics to deterministically
+    project N-dimensional Epistemic Ledger state into a 2D topological manifold. As a
+    ...Profile suffix, this is a declarative, frozen snapshot of a rendering geometry.
+
+    CAUSAL AFFORDANCE: Authorizes the frontend rendering engine to construct geometric marks
+    (Literal["point", "line", "area", "bar", "rect", "arc"]) driven strictly by the
+    underlying ledger_source_id. Optionally supports Small Multiples via facet
+    (FacetMatrixProfile).
+
+    EPISTEMIC BOUNDS: Bounded by a rigid encodings array sorted mathematically by channel
+    via a @model_validator to preserve RFC 8785 canonical hashing. Prevents hallucinated
+    visuals by strictly linking to a verified ledger_source_id CID.
+
+    MCP ROUTING TRIGGERS: Grammar of Graphics, Data Visualization, Geometric Projection,
+    Declarative UI, Retinal Variables
+    """
 
     panel_id: str = Field(
         min_length=1,
@@ -4009,7 +4040,22 @@ class InputMappingContract(CoreasonBaseState):
 
 
 class InsightCardProfile(CoreasonBaseState):
-    """Panel displaying a semantic text summary."""
+    """
+    AGENT INSTRUCTION: A declarative bounding box for rendering condensed semantic summaries
+    (Information Bottleneck compression) into human-readable 2D space. As a ...Profile
+    suffix, this is a declarative, frozen snapshot of a rendering geometry.
+
+    CAUSAL AFFORDANCE: Projects Markdown-formatted text onto the UI plane while serving as a
+    structural honeypot against Polyglot XSS and Markdown execution injection attacks.
+
+    EPISTEMIC BOUNDS: Physically restricts payload size to max_length=100000 on
+    markdown_content. Two distinct @field_validators mathematically strip: (1) HTML event
+    handlers (on[a-zA-Z]+=) and raw HTML tags, and (2) malicious URI schemes (javascript:,
+    vbscript:, data:) embedded in markdown links — ensuring zero-trust projection.
+
+    MCP ROUTING TRIGGERS: Information Bottleneck, Semantic Compression, XSS Sanitization,
+    Markdown Projection, Zero-Trust UI
+    """
 
     panel_id: str = Field(
         min_length=1,
@@ -4568,7 +4614,23 @@ class MCPClientBindingProfile(CoreasonBaseState):
 
 
 class MacroGridProfile(CoreasonBaseState):
-    """A layout matrix containing a strict array of panels."""
+    """
+    AGENT INSTRUCTION: Acts as a Cartesian topological coordinator based on Edward Tufte's
+    Small Multiples, organizing multiple discrete visual artifacts (AnyPanelProfile) into a
+    unified grid configuration. As a ...Profile suffix, this is a declarative, frozen
+    snapshot of a rendering geometry.
+
+    CAUSAL AFFORDANCE: Translates abstract UI panels into fixed 2D matrices (layout_matrix),
+    forcing spatial determinism on the frontend rendering engine.
+
+    EPISTEMIC BOUNDS: A strictly bounded @model_validator executes a referential integrity
+    sweep, mathematically guaranteeing that every panel ID referenced in the layout_matrix
+    (max_length=1000000000) corresponds to a verified object in the panels array, physically
+    severing Ghost Panel hallucinations.
+
+    MCP ROUTING TRIGGERS: Cartesian Coordinate System, Small Multiples, Spatial Topology,
+    Referential Integrity, Layout Matrix
+    """
 
     layout_matrix: list[list[Annotated[str, StringConstraints(max_length=255)]]] = Field(
         max_length=1000000000, description="A matrix defining the layout structure, using panel IDs."
@@ -5100,7 +5162,23 @@ class PredictionMarketState(CoreasonBaseState):
 
 
 class PresentationManifest(CoreasonBaseState):
-    """An envelope wrapping a grid presentation and its intent."""
+    """
+    AGENT INSTRUCTION: The macroscopic orchestrator envelope binding a deterministic visual
+    manifold (grid: MacroGridProfile) to a specific Supervisory Control Theory cognitive
+    state (intent: AnyPresentationIntent). As a ...Manifest suffix, this defines a frozen,
+    N-dimensional coordinate state.
+
+    CAUSAL AFFORDANCE: Forces the active orchestration loop to suspend or pivot by projecting
+    a human-in-the-loop interaction surface (e.g., Drafting, Adjudication) alongside its
+    visual evidentiary warrants.
+
+    EPISTEMIC BOUNDS: Mathematically binds exactly one AnyPresentationIntent to one
+    MacroGridProfile, preventing asynchronous UI state drift and ensuring the generated grid
+    is causally justified by a verified intent.
+
+    MCP ROUTING TRIGGERS: Supervisory Control Theory, Mixed-Initiative UI, Cognitive State
+    Binding, Structural Manifold Envelope, Human-in-the-Loop
+    """
 
     intent: AnyPresentationIntent = Field(description="The reason an agent is presenting this data to a human.")
     grid: MacroGridProfile = Field(description="The grid of panels being presented.")
