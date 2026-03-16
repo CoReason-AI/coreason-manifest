@@ -44,6 +44,8 @@ from coreason_manifest.spec.ontology import (
 SCHEMA_REGISTRY: dict[str, type[BaseModel]] = {
     "step8_vision": DocumentLayoutManifest,
     "state_differential": StateMutationIntent,
+    "latent_schema_inference": ontology.LatentSchemaInferenceIntent,
+    "intent_classification": ontology.IntentClassificationReceipt,
     "cognitive_sync": CognitiveStateProfile,
     "system2_remediation": System2RemediationIntent,
 }
@@ -521,3 +523,15 @@ def apply_state_differential(
                 raise ValueError("Patch test operation failed.") from e
 
     return new_state
+
+
+def extract_webgl_entropy_seed(agent_profile: ontology.AgentNodeProfile) -> str | None:
+    """
+    AGENT INSTRUCTION: A passive mathematical functor to extract the WebGL entropy seed
+    hash from an agent's topological spoofing envelope without triggering execution.
+    """
+    if not agent_profile.adversarial_emulation:
+        return None
+    if not agent_profile.adversarial_emulation.environmental_spoof:
+        return None
+    return agent_profile.adversarial_emulation.environmental_spoof.webgl_entropy_seed_hash
