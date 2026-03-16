@@ -3825,8 +3825,21 @@ class InformationalIntent(CoreasonBaseState):
 
 class TaxonomicNodeState(CoreasonBaseState):
     """
-    A strictly bounded dimensional reduction coordinate representing a single cluster or leaf
-    in the synthesized generative taxonomy (Virtual File System).
+    AGENT INSTRUCTION: Implements Hierarchical Agglomerative Clustering to project continuous,
+    dense latent vector spaces into a deterministic, discrete N-ary tree structure. As a
+    ...State suffix, this is a declarative, frozen snapshot of a specific geometric coordinate.
+
+    CAUSAL AFFORDANCE: Establishes a strictly bounded, navigable spatial coordinate within
+    the Virtual File System (VFS), allowing agents to traverse high-dimensional semantic
+    spaces without consuming excessive context window tokens.
+
+    EPISTEMIC BOUNDS: Spatial geometry is locked via node_id (a strictly typed 128-character
+    CID). The children_node_ids array is deterministically sorted, and the leaf_provenance
+    array is sorted by source_event_id, both via @model_validator to guarantee invariant
+    RFC 8785 canonical hashing.
+
+    MCP ROUTING TRIGGERS: Dimensionality Reduction, Hierarchical Clustering, N-ary Tree,
+    Virtual File System, Semantic Coordinate
     """
 
     node_id: str = Field(
@@ -3858,8 +3871,22 @@ class TaxonomicNodeState(CoreasonBaseState):
 
 class GenerativeTaxonomyManifest(CoreasonBaseState):
     """
-    The structural schema representing a synthesized manifold (Virtual File System)
-    that projects high-dimensional dense vectors into a navigable N-ary tree.
+    AGENT INSTRUCTION: Acts as a macroscopic Topological Data Analysis (TDA) manifold
+    projection, mapping continuous vector geometries into a discrete, traversable Directed
+    Acyclic Graph (DAG). As a ...Manifest suffix, this defines a frozen, N-dimensional
+    coordinate state.
+
+    CAUSAL AFFORDANCE: Projects the comprehensive Virtual File System (VFS) state to the
+    human UI or agentic context, structurally proving the geometric relations of all
+    subordinate TaxonomicNodeStates.
+
+    EPISTEMIC BOUNDS: The nodes matrix is physically capped at max_length=1000000000
+    properties to prevent memory overflow. The @model_validator mathematically verifies DAG
+    integrity by ensuring the root_node_id explicitly exists within the projection matrix,
+    preventing ghost nodes.
+
+    MCP ROUTING TRIGGERS: Manifold Learning, Topological Data Analysis, Directed Acyclic
+    Graph, Generative Taxonomy, Holographic Projection
     """
 
     manifest_id: str = Field(
@@ -3891,7 +3918,21 @@ class GenerativeTaxonomyManifest(CoreasonBaseState):
 
 class TaxonomicRestructureIntent(CoreasonBaseState):
     """
-    The active UI-mutation payload for dynamic regrouping across the Hollow Data Plane.
+    AGENT INSTRUCTION: Executes a kinetic Graph Isomorphism transformation, dynamically
+    mutating the UI's spatial organization via heuristic regrouping without altering the
+    underlying epistemic truth. As an ...Intent suffix, the LLM may execute non-monotonic
+    reasoning here.
+
+    CAUSAL AFFORDANCE: Forces the Hollow Data Plane to immediately discard the current
+    semantic manifold and re-render the hierarchical projection according to the newly
+    synthesized target_taxonomy (GenerativeTaxonomyManifest) and spatial heuristic.
+
+    EPISTEMIC BOUNDS: Execution is rigidly constrained by the restructure_heuristic, strictly
+    bounded to a Literal automaton ["chronological", "entity_centric", "semantic_cluster",
+    "confidence_decay"], mathematically preventing out-of-distribution UI mutations.
+
+    MCP ROUTING TRIGGERS: Graph Isomorphism, UI State Mutation, Heuristic Regrouping,
+    Dynamic Manifold, Spatial Reorganization
     """
 
     type: Literal["taxonomic_restructure"] = Field(
@@ -3907,8 +3948,22 @@ class TaxonomicRestructureIntent(CoreasonBaseState):
 
 class TaxonomicRoutingPolicy(CoreasonBaseState):
     """
-    The deterministic Softmax gate mapping classified operational intents to pre-defined
-    spatial organizing frameworks to prevent token exhaustion.
+    AGENT INSTRUCTION: Implements a deterministic Softmax Router Gate, leveraging Cognitive
+    Load Theory to map high-entropy natural language intents into explicitly bounded spatial
+    organizing frameworks. As a ...Policy suffix, this dictates a rigid global boundary.
+
+    CAUSAL AFFORDANCE: Pre-emptively routes classified intents to optimized taxonomic
+    layouts, mechanically preventing token exhaustion and attention dilution in downstream
+    processing nodes before compute is allocated. Unclassified intents default to the
+    fallback_heuristic.
+
+    EPISTEMIC BOUNDS: The intent_to_heuristic_matrix physically restricts state-space
+    explosion by capping at max_length=1000 dictionary properties. The matrix keys are
+    strictly bounded to 255 characters via StringConstraints to mathematically prevent
+    Dictionary Bombing during hashing.
+
+    MCP ROUTING TRIGGERS: Softmax Gating, Cognitive Load Theory, Pre-Flight Routing,
+    Dictionary Bombing Prevention, Token Exhaustion Mitigation
     """
 
     policy_id: str = Field(
