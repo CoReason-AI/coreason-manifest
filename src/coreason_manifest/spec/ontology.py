@@ -1553,7 +1553,22 @@ class EphemeralNamespacePartitionState(CoreasonBaseState):
 
 class ToolManifest(CoreasonBaseState):
     """
-    Declarative mathematical definition of a tool.
+    AGENT INSTRUCTION: Defines the discrete formalization of a Gibsonian Affordance within
+    the agent's Reinforcement Learning Action Space ($A$). As a ...Manifest suffix, this is
+    a declarative, frozen N-dimensional coordinate of a capability.
+
+    CAUSAL AFFORDANCE: Unlocks a specific, localized Pearlian Do-Operator intervention
+    ($do(X=x)$) mapped to an external kinetic capability. Governed by side_effects
+    (SideEffectProfile), permissions (PermissionBoundaryPolicy), and an optional sla
+    (ExecutionSLA).
+
+    EPISTEMIC BOUNDS: The tool's operational perimeter is rigidly confined by input_schema
+    (a dictionary bounded to max_length=1000000000 properties). The is_preemptible boolean
+    (default=False) establishes a physical Halting Problem limit by authorizing the
+    orchestrator to abort execution mid-flight.
+
+    MCP ROUTING TRIGGERS: Gibsonian Affordance, MDP Action Space, Pearlian Do-Operator,
+    Capability-Based Security, Halting Problem
     """
 
     tool_name: str = Field(max_length=2000, description="The exact identifier of the tool.")
@@ -4463,8 +4478,22 @@ class LineageWatermarkReceipt(CoreasonBaseState):
 
 class MCPCapabilityWhitelistPolicy(CoreasonBaseState):
     """
-    A zero-trust boundary defining exactly which JSON-RPC capabilities
-    the execution node is authorized to mount from the remote server.
+    AGENT INSTRUCTION: Implements a Zero-Trust Architecture (ZTA) and the Principle of
+    Least Privilege (PoLP) as a bipartite graph filter over an external RPC manifold. As a
+    ...Policy suffix, this object defines rigid mathematical boundaries that the
+    orchestrator must enforce globally.
+
+    CAUSAL AFFORDANCE: Mathematically severs unauthorized capability edges from a remote
+    server's projected DAG, preventing the agent from perceiving or executing out-of-scope
+    JSON-RPC methods or tools.
+
+    EPISTEMIC BOUNDS: The arrays (allowed_tools, allowed_resources, allowed_prompts,
+    required_licenses) are physically constrained (StringConstraints max_length=2000/255)
+    and deterministically sorted via a @model_validator to guarantee invariant RFC 8785
+    canonical hashing across distributed nodes.
+
+    MCP ROUTING TRIGGERS: Zero-Trust Architecture, Principle of Least Privilege, Bipartite
+    Graph Filtering, Capability Whitelist, Edge Severing
     """
 
     allowed_tools: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
@@ -4495,7 +4524,22 @@ class MCPCapabilityWhitelistPolicy(CoreasonBaseState):
 
 class MCPServerManifest(CoreasonBaseState):
     """
-    The structural contract for mounting an external Model Context Protocol server.
+    AGENT INSTRUCTION: Acts as a verifiable Remote Procedure Call (RPC) Boundary connecting
+    the swarm to an external Model Context Protocol (MCP) domain. As a ...Manifest suffix,
+    this defines a frozen, declarative state projection.
+
+    CAUSAL AFFORDANCE: Authorizes the bridging of the local epistemic blackboard with a
+    remote data plane over transport_type Literal ["stdio", "sse", "http"], governed
+    strictly by the nested capability_whitelist (MCPCapabilityWhitelistPolicy).
+
+    EPISTEMIC BOUNDS: Cryptographically locks the connection using attestation_receipt
+    (VerifiableCredentialPresentationReceipt). The @model_validator enforces that the
+    Verifiable Credential MUST be signed by a valid did:coreason: issuer, neutralizing
+    Byzantine supply-chain execution attacks. Optional binary_hash (SHA-256) prevents
+    local binary tampering over stdio.
+
+    MCP ROUTING TRIGGERS: Remote Procedure Call, Model Context Protocol, Supply-Chain
+    Zero-Trust, Verifiable Credential, Byzantine Fault Tolerance
     """
 
     server_uri: str = Field(
@@ -4557,7 +4601,23 @@ class KineticSeparationPolicy(CoreasonBaseState):
 
 class ActionSpaceManifest(CoreasonBaseState):
     """
-    A curated environment of tools accessible to an agent or node.
+    AGENT INSTRUCTION: Represents the complete, enumerable mathematical Action Space ($A$)
+    within the agent's Partially Observable Markov Decision Process (POMDP). As a ...Manifest
+    suffix, this defines a frozen, N-dimensional coordinate state.
+
+    CAUSAL AFFORDANCE: Projects a unified manifold of native_tools, mcp_servers, and
+    ephemeral_partitions into the agent's working context, dictating the absolute limits of
+    its kinetic reach. Optionally enforces kinetic_separation (KineticSeparationPolicy) to
+    prevent toxic tool combinations.
+
+    EPISTEMIC BOUNDS: The action_space_id is geometrically constrained to a 128-char CID.
+    A @model_validator mathematically guarantees that all tool_names within native_tools
+    are strictly unique, and sorts all capability arrays (native_tools by tool_name,
+    mcp_servers by server_uri, ephemeral_partitions by partition_id) to preserve RFC 8785
+    canonical hashing.
+
+    MCP ROUTING TRIGGERS: POMDP Action Space, Operant Resources, Capability Manifold,
+    Deterministic Sorting, Kinetic Boundary
     """
 
     action_space_id: str = Field(
