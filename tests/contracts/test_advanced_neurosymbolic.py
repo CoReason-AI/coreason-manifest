@@ -67,14 +67,10 @@ def test_epistemic_flow_state_receipt() -> None:
 
 def test_epistemic_reward_model_policy() -> None:
     decoding_policy = ConstrainedDecodingPolicy(
-        enforcement_strategy="fsm_logit_mask",
-        compiler_backend="outlines",
-        terminate_on_eos_leak=True
+        enforcement_strategy="fsm_logit_mask", compiler_backend="outlines", terminate_on_eos_leak=True
     )
     format_contract = CognitiveFormatContract(
-        require_think_tags=True,
-        final_answer_regex="^Final Answer: .*$",
-        decoding_policy=decoding_policy
+        require_think_tags=True, final_answer_regex="^Final Answer: .*$", decoding_policy=decoding_policy
     )
     topological_contract = TopologicalRewardContract(
         min_link_criticality_score=0.8, min_semantic_relevance_score=0.9, aggregation_method="rwr_topological"

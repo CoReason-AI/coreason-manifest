@@ -55,14 +55,10 @@ def test_cognitive_reward_evaluation_receipt_inherits_base_state_event() -> None
 def test_epistemic_reward_model_policy_initialization() -> None:
     # Prove EpistemicRewardModelPolicy initializes successfully and properly nests the CognitiveFormatContract.
     decoding_policy = ConstrainedDecodingPolicy(
-        enforcement_strategy="fsm_logit_mask",
-        compiler_backend="outlines",
-        terminate_on_eos_leak=True
+        enforcement_strategy="fsm_logit_mask", compiler_backend="outlines", terminate_on_eos_leak=True
     )
     format_contract = CognitiveFormatContract(
-        require_think_tags=True,
-        final_answer_regex="^Final Answer: .*$",
-        decoding_policy=decoding_policy
+        require_think_tags=True, final_answer_regex="^Final Answer: .*$", decoding_policy=decoding_policy
     )
 
     policy = EpistemicRewardModelPolicy(
