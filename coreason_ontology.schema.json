@@ -1006,6 +1006,7 @@
           "epistemic_promotion": "#/$defs/EpistemicPromotionEvent",
           "epistemic_telemetry": "#/$defs/EpistemicTelemetryEvent",
           "hypothesis": "#/$defs/HypothesisGenerationEvent",
+          "intent_classification": "#/$defs/IntentClassificationReceipt",
           "normative_drift": "#/$defs/NormativeDriftEvent",
           "observation": "#/$defs/ObservationEvent",
           "persistence_commit": "#/$defs/PersistenceCommitReceipt",
@@ -1069,6 +1070,9 @@
         },
         {
           "$ref": "#/$defs/CausalExplanationEvent"
+        },
+        {
+          "$ref": "#/$defs/IntentClassificationReceipt"
         }
       ]
     },
@@ -7987,6 +7991,78 @@
       "title": "InsightCardProfile",
       "type": "object"
     },
+    "IntentClassificationReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact representing the non-monotonic\ncollapse of a high-entropy human natural language string into a discrete, mathematically\nbounded routing heuristic. As a ...Receipt suffix, this is an append-only Merkle-DAG coordinate.\n\nCAUSAL AFFORDANCE: Commits the LLM's Softmax classification verdict to the Epistemic Ledger,\nauthorizing the TaxonomicRoutingPolicy or router gate to physically execute the targeted\ntopology or sub-agent.\n\nEPISTEMIC BOUNDS: The raw_input_string is physically clamped (max_length=100000) to prevent\ncontext window buffer overflows. The classification confidence is strictly bound to a\nnormalized float (ge=0.0, le=1.0).\n\nMCP ROUTING TRIGGERS: Intent Classification, Softmax Gating, High-Entropy Parsing,\nRouting Heuristic, Semantic Wave Collapse",
+      "properties": {
+        "event_id": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "type": {
+          "const": "intent_classification",
+          "default": "intent_classification",
+          "description": "Discriminator type for an intent classification receipt.",
+          "title": "Type",
+          "type": "string"
+        },
+        "raw_input_string": {
+          "description": "The raw, unparsed human natural language instruction.",
+          "maxLength": 100000,
+          "title": "Raw Input String",
+          "type": "string"
+        },
+        "classified_intent": {
+          "description": "The discrete, structurally bounded capability or heuristic mapped by the LLM.",
+          "maxLength": 255,
+          "title": "Classified Intent",
+          "type": "string"
+        },
+        "confidence_score": {
+          "description": "The probabilistic certainty of the classification.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Confidence Score",
+          "type": "number"
+        },
+        "routing_policy_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9_.:-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The TaxonomicRoutingPolicy CID that governed this classification.",
+          "title": "Routing Policy Id"
+        }
+      },
+      "required": [
+        "event_id",
+        "timestamp",
+        "raw_input_string",
+        "classified_intent",
+        "confidence_score"
+      ],
+      "title": "IntentClassificationReceipt",
+      "type": "object"
+    },
     "InterventionIntent": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: InterventionIntent acts as a formal Mixed-Initiative Control mechanism within\nSupervisory Control Theory. It is a kinetic trigger that mathematically suspends the active\nexecution graph, transferring decision authority to an external human or oversight oracle.\n\nCAUSAL AFFORDANCE: Physically halts the Directed Acyclic Graph (DAG) traversal or Petri net\nreachability loop. It prevents the swarm from committing a state transition until an explicit,\nauthorized Pearlian intervention is negotiated.\n\nEPISTEMIC BOUNDS: Execution suspension is strictly bounded by the temporal logic of the\nadjudication_deadline (UNIX timestamp) and the FallbackSLA. If the deadline expires, the\norchestrator mechanically breaks the halt to guarantee systemic liveness.\n\nMCP ROUTING TRIGGERS: Supervisory Control Theory, Mixed-Initiative System, Execution Halting, Bounded Delay, Human-in-the-Loop",
@@ -8482,6 +8558,54 @@
         "min_isometry_score"
       ],
       "title": "LatentProjectionIntent",
+      "type": "object"
+    },
+    "LatentSchemaInferenceIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Authorizes Abductive Reasoning on intercepted unstructured byte streams\nor memory heaps to probabilistically derive a deterministic StateContract. As an ...Intent\nsuffix, the LLM may execute non-monotonic reasoning here.\n\nCAUSAL AFFORDANCE: Triggers the LLM's representation engineering engine to process a\nchaotic target_buffer_id and output a rigid JSON schema, bridging the gap between\nexogenous data and the structural Hollow Data Plane.\n\nEPISTEMIC BOUNDS: State-Space explosion is prevented by bounding max_schema_depth (le=10)\nand max_properties (le=1000) to mathematically prevent recursive JSON-bombing during\nschema generation. The target_buffer_id is locked to a 128-char CID.\n\nMCP ROUTING TRIGGERS: Schema Inference, Memory Heap Parsing, Abductive Reasoning,\nXHR Interception, Unstructured Transmutation",
+      "properties": {
+        "type": {
+          "const": "latent_schema_inference",
+          "default": "latent_schema_inference",
+          "description": "Discriminator for unstructured payload schema deduction.",
+          "title": "Type",
+          "type": "string"
+        },
+        "target_buffer_id": {
+          "description": "The CID pointing to the TerminalBufferState or raw intercepted byte stream.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Target Buffer Id",
+          "type": "string"
+        },
+        "max_schema_depth": {
+          "description": "The maximum recursive depth of the probabilistically generated schema.",
+          "maximum": 10,
+          "minimum": 1,
+          "title": "Max Schema Depth",
+          "type": "integer"
+        },
+        "max_properties": {
+          "description": "The maximum allowed keys in the deduced JSON dictionary.",
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Max Properties",
+          "type": "integer"
+        },
+        "require_strict_validation": {
+          "default": true,
+          "description": "If True, forces the resulting schema to set additionalProperties=False.",
+          "title": "Require Strict Validation",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "target_buffer_id",
+        "max_schema_depth",
+        "max_properties"
+      ],
+      "title": "LatentSchemaInferenceIntent",
       "type": "object"
     },
     "LatentScratchpadReceipt": {
