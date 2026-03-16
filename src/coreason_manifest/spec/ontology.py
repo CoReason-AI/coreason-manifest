@@ -1178,7 +1178,7 @@ class QuorumPolicy(CoreasonBaseState):
 
     EPISTEMIC BOUNDS: Physically bounds max_tolerable_faults (ge=0, le=1000000000) and
     min_quorum_size (gt=0, le=1000000000). The @model_validator enforce_bft_math enforces
-    the strict invariant $N \ge 3f + 1$, guaranteeing Byzantine agreement.
+    the strict invariant $N \\ge 3f + 1$, guaranteeing Byzantine agreement.
 
     MCP ROUTING TRIGGERS: Byzantine Fault Tolerance, pBFT, Quorum Sensing, Sybil
     Resistance, Distributed Consensus
@@ -2829,7 +2829,7 @@ class CollectiveIntelligenceProfile(CoreasonBaseState):
 class ShapleyAttributionReceipt(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Formalizes Cooperative Game Theory to compute the exact Shapley
-    value ($\phi_i$) for a specific agent's marginal contribution to a collective outcome.
+    value ($\\phi_i$) for a specific agent's marginal contribution to a collective outcome.
     As a ...Receipt suffix, this is an append-only coordinate on the Merkle-DAG.
 
     CAUSAL AFFORDANCE: Unlocks deterministic credit assignment and thermodynamic reward
