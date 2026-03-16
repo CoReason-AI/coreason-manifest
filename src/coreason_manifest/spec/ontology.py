@@ -1082,7 +1082,28 @@ class RedactionPolicy(CoreasonBaseState):
 
 
 class SaeLatentPolicy(CoreasonBaseState):
-    """A real-time mechanistic interpretability boundary that monitors and controls specific neural circuits."""
+    """
+    AGENT INSTRUCTION: Implements Sparse Dictionary Learning and Mechanistic Interpretability
+    to actively monitor and steer monosemantic neural circuits during the model's forward
+    pass. As a ...Policy suffix, this object defines rigid mathematical boundaries that the
+    orchestrator must enforce globally.
+
+    CAUSAL AFFORDANCE: Executes real-time tensor remediation — clamping, halting, quarantining,
+    or smoothly decaying residual stream activations via violation_action
+    (Literal["clamp", "halt", "quarantine", "smooth_decay"]) — when specific features
+    diverge toward adversarial or hallucinated geometries. The smooth_decay path requires
+    both a LatentSmoothingProfile and clamp_value target asymptote, enforced by a
+    @model_validator.
+
+    EPISTEMIC BOUNDS: The max_activation_threshold (ge=0.0, le=1000000000.0) physically
+    bounds the continuous Euclidean magnitude of the target_feature_index (ge=0,
+    le=1000000000). The policy is topologically locked to the exact SAE projection matrix via
+    sae_dictionary_hash (SHA-256 ^[a-f0-9]{64}$). The monitored_layers array (min_length=1)
+    is deterministically sorted by @model_validator for RFC 8785 canonical hashing.
+
+    MCP ROUTING TRIGGERS: Mechanistic Interpretability, Sparse Autoencoders, Residual Stream
+    Steering, Tensor Remediation, Monosemantic Features
+    """
 
     target_feature_index: int = Field(
         le=1000000000,
