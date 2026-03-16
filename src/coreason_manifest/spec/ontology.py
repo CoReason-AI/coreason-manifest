@@ -2146,8 +2146,13 @@ class AdjudicationReceipt(CoreasonBaseState):
 
 class AdversarialSimulationProfile(CoreasonBaseState):
     """
-    A deterministic red-team configuration defining a structural attack vector
-    to continuously validate semantic firewalls and execution bounds.
+    AGENT INSTRUCTION: A deterministic red-team configuration injecting Chaos Engineering vectors into a targeted node to map the fragility of the active context boundary. As a ...Profile suffix, this is a declarative snapshot of an attack geometry.
+
+    CAUSAL AFFORDANCE: Authorizes the physical injection of a malicious structural payload (the "Judas Node" vector) to intentionally trip semantic firewalls, data exfiltration blocks, or tool poisoning filters, generating verification assertions.
+
+    EPISTEMIC BOUNDS: The attack surface is rigidly constrained by the Literal automaton attack_vector. The payload is physically bounded by the synthetic_payload limits (max_length=100000), explicitly targeting a specific 128-char CID (target_node_id).
+
+    MCP ROUTING TRIGGERS: Chaos Engineering, Judas Node, Threat Modeling, Structural Sabotage, Semantic Firewall Validation
     """
 
     simulation_id: str = Field(
@@ -6558,8 +6563,13 @@ class PersistenceCommitReceipt(BaseStateEvent):
 
 class PredictionMarketState(CoreasonBaseState):
     """
-    The state of the Automated Market Maker (AMM) using Robin Hanson's
-    Logarithmic Market Scoring Rule (LMSR) to ensure infinite liquidity.
+    AGENT INSTRUCTION: A declarative, frozen snapshot of an Automated Market Maker (AMM) utilizing Robin Hanson's Logarithmic Market Scoring Rule (LMSR) to guarantee infinite liquidity. As a ...State suffix, this represents an N-dimensional coordinate of market equilibrium.
+
+    CAUSAL AFFORDANCE: Aggregates HypothesisStakeReceipt vectors, allowing the orchestrator to track the shifting probability manifold and trigger market resolution when the AMM reaches the required convergence threshold.
+
+    EPISTEMIC BOUNDS: The order_book array is deterministically sorted by agent_id via @model_validator to preserve RFC 8785 canonical hashing. The liquidity parameter lmsr_b_parameter is physically restricted to a stringified decimal regex (^\\d+\\.\\d+$).
+
+    MCP ROUTING TRIGGERS: Logarithmic Market Scoring Rule, Automated Market Maker, Prediction Market, Infinite Liquidity, Brier Score
     """
 
     market_id: Annotated[str, StringConstraints(min_length=1)] = Field(
@@ -8862,7 +8872,13 @@ class SwarmTopologyManifest(BaseTopologyManifest):
 
 class AdversarialMarketTopologyManifest(CoreasonBaseState):
     """
-    A Zero-Cost Macro abstraction that deterministically compiles into a Red/Blue team CouncilTopologyManifest.
+    AGENT INSTRUCTION: A Zero-Cost Macro abstraction that mathematically projects a Zero-Sum Minimax game into a rigid Red/Blue team CouncilTopologyManifest. As a ...Manifest suffix, this defines a frozen coordinate of a topological structure.
+
+    CAUSAL AFFORDANCE: Deterministically compiles into a fully bounded Council topology, forcing the generative router to evaluate claims through adversarial debate before the orchestrator resolves equilibrium via the designated market rules.
+
+    EPISTEMIC BOUNDS: The @model_validator verify_disjoint_sets mathematically guarantees that blue_team_ids, red_team_ids, and the adjudicator_id are strictly disjoint to prevent self-dealing or topological paradoxes. Arrays are deterministically sorted to preserve RFC 8785 canonical hashes.
+
+    MCP ROUTING TRIGGERS: Zero-Sum Minimax Game, Red Team vs Blue Team, Macro Abstraction, Generative Adversarial Networks, Topological Compilation
     """
 
     type: Literal["macro_adversarial"] = Field(
@@ -8906,7 +8922,13 @@ class AdversarialMarketTopologyManifest(CoreasonBaseState):
 
 class ConsensusFederationTopologyManifest(CoreasonBaseState):
     """
-    A Zero-Cost Macro abstraction compiling into a standard PBFT CouncilTopologyManifest.
+    AGENT INSTRUCTION: A Zero-Cost Macro abstraction that deterministically projects a Practical Byzantine Fault Tolerance (pBFT) consensus ring into a multi-agent workflow. As a ...Manifest suffix, this defines a frozen coordinate of a topological structure.
+
+    CAUSAL AFFORDANCE: Unrolls into a base CouncilTopologyManifest, enforcing strict quorum rules and sequential adjudication to guarantee ledger alignment and truth maintenance across a decentralized, zero-trust swarm.
+
+    EPISTEMIC BOUNDS: Mathematically ensures Byzantine security by requiring a minimum of 3 participant_ids. The adjudicator_id is physically isolated from the voting pool via the verify_adjudicator_isolation hook. The participant_ids array is deterministically sorted for invariant hashing.
+
+    MCP ROUTING TRIGGERS: Practical Byzantine Fault Tolerance, pBFT, Distributed Consensus, Sybil Resistance, Macro Abstraction
     """
 
     type: Literal["macro_federation"] = Field(
