@@ -43,6 +43,9 @@ class TestKinematicNoiseProfile:
         assert profile.noise_type == "pink"
         assert profile.pink_noise_amplitude == 0.5
         assert profile.frequency_exponent == 1.0
+        assert profile.velocity_profile == "minimum_jerk"
+        assert profile.target_overshoot_radius_pixels == 0
+        assert profile.hick_hyman_dwell_time_ms == 0
 
     def test_valid_brownian_noise(self) -> None:
         profile = KinematicNoiseProfile(
@@ -110,6 +113,95 @@ class TestKinematicNoiseProfile:
         assert profile.pink_noise_amplitude == 0.0
         assert profile.frequency_exponent == 5.0
 
+    def test_velocity_profile_accepts_valid_literals(self) -> None:
+        for vp in ("minimum_jerk", "constant", "fractional_brownian"):
+            profile = KinematicNoiseProfile(
+                noise_type="pink",
+                pink_noise_amplitude=0.5,
+                frequency_exponent=1.0,
+                velocity_profile=vp,
+            )
+            assert profile.velocity_profile == vp
+
+    def test_velocity_profile_rejects_invalid(self) -> None:
+        with pytest.raises(ValidationError, match=r"Input should be"):
+            KinematicNoiseProfile(
+                noise_type="pink",
+                pink_noise_amplitude=0.5,
+                frequency_exponent=1.0,
+                velocity_profile="linear",  # type: ignore[arg-type]
+            )
+
+    def test_target_overshoot_rejects_below_0(self) -> None:
+        with pytest.raises(ValidationError, match=r"Input should be greater than or equal to 0"):
+            KinematicNoiseProfile(
+                noise_type="pink",
+                pink_noise_amplitude=0.5,
+                frequency_exponent=1.0,
+                target_overshoot_radius_pixels=-1,
+            )
+
+    def test_target_overshoot_rejects_above_5000(self) -> None:
+        with pytest.raises(ValidationError, match=r"Input should be less than or equal to 5000"):
+            KinematicNoiseProfile(
+                noise_type="pink",
+                pink_noise_amplitude=0.5,
+                frequency_exponent=1.0,
+                target_overshoot_radius_pixels=5001,
+            )
+
+    def test_target_overshoot_boundary_values(self) -> None:
+        p0 = KinematicNoiseProfile(
+            noise_type="pink",
+            pink_noise_amplitude=0.5,
+            frequency_exponent=1.0,
+            target_overshoot_radius_pixels=0,
+        )
+        assert p0.target_overshoot_radius_pixels == 0
+
+        p5k = KinematicNoiseProfile(
+            noise_type="pink",
+            pink_noise_amplitude=0.5,
+            frequency_exponent=1.0,
+            target_overshoot_radius_pixels=5000,
+        )
+        assert p5k.target_overshoot_radius_pixels == 5000
+
+    def test_hick_hyman_dwell_time_rejects_below_0(self) -> None:
+        with pytest.raises(ValidationError, match=r"Input should be greater than or equal to 0"):
+            KinematicNoiseProfile(
+                noise_type="pink",
+                pink_noise_amplitude=0.5,
+                frequency_exponent=1.0,
+                hick_hyman_dwell_time_ms=-1,
+            )
+
+    def test_hick_hyman_dwell_time_rejects_above_86400000(self) -> None:
+        with pytest.raises(ValidationError, match=r"Input should be less than or equal to 86400000"):
+            KinematicNoiseProfile(
+                noise_type="pink",
+                pink_noise_amplitude=0.5,
+                frequency_exponent=1.0,
+                hick_hyman_dwell_time_ms=86400001,
+            )
+
+    def test_hick_hyman_dwell_time_boundary_values(self) -> None:
+        p0 = KinematicNoiseProfile(
+            noise_type="pink",
+            pink_noise_amplitude=0.5,
+            frequency_exponent=1.0,
+            hick_hyman_dwell_time_ms=0,
+        )
+        assert p0.hick_hyman_dwell_time_ms == 0
+
+        p_max = KinematicNoiseProfile(
+            noise_type="pink",
+            pink_noise_amplitude=0.5,
+            frequency_exponent=1.0,
+            hick_hyman_dwell_time_ms=86400000,
+        )
+        assert p_max.hick_hyman_dwell_time_ms == 86400000
+
 
 # ---------------------------------------------------------------------------
 # 2. EnvironmentalSpoofingProfile — Browser Fingerprint Entropy Bounds
@@ -131,6 +223,8 @@ class TestEnvironmentalSpoofingProfile:
         assert profile.timezone_offset_minutes == -300
         assert profile.screen_resolution_width == 1920
         assert profile.screen_resolution_height == 1080
+        assert profile.tls_cipher_permutation == "chrome_windows"
+        assert profile.hardware_concurrency_mask == 8
 
     def test_timezone_offset_rejects_below_negative_720(self) -> None:
         with pytest.raises(ValidationError, match=r"Input should be greater than or equal to -720"):
@@ -212,6 +306,72 @@ class TestEnvironmentalSpoofingProfile:
         )
         assert profile_max.timezone_offset_minutes == 840
 
+    def test_tls_cipher_permutation_accepts_valid_literals(self) -> None:
+        for cipher in ("chrome_windows", "safari_macos", "firefox_macos", "android_webview"):
+            profile = EnvironmentalSpoofingProfile(
+                webgl_entropy_seed_hash="abc123",
+                user_agent_template="Mozilla/5.0",
+                timezone_offset_minutes=0,
+                screen_resolution_width=1920,
+                screen_resolution_height=1080,
+                tls_cipher_permutation=cipher,
+            )
+            assert profile.tls_cipher_permutation == cipher
+
+    def test_tls_cipher_permutation_rejects_invalid(self) -> None:
+        with pytest.raises(ValidationError, match=r"Input should be"):
+            EnvironmentalSpoofingProfile(
+                webgl_entropy_seed_hash="abc123",
+                user_agent_template="Mozilla/5.0",
+                timezone_offset_minutes=0,
+                screen_resolution_width=1920,
+                screen_resolution_height=1080,
+                tls_cipher_permutation="edge_windows",  # type: ignore[arg-type]
+            )
+
+    def test_hardware_concurrency_rejects_zero(self) -> None:
+        with pytest.raises(ValidationError, match=r"Input should be greater than 0"):
+            EnvironmentalSpoofingProfile(
+                webgl_entropy_seed_hash="abc123",
+                user_agent_template="Mozilla/5.0",
+                timezone_offset_minutes=0,
+                screen_resolution_width=1920,
+                screen_resolution_height=1080,
+                hardware_concurrency_mask=0,
+            )
+
+    def test_hardware_concurrency_rejects_above_256(self) -> None:
+        with pytest.raises(ValidationError, match=r"Input should be less than or equal to 256"):
+            EnvironmentalSpoofingProfile(
+                webgl_entropy_seed_hash="abc123",
+                user_agent_template="Mozilla/5.0",
+                timezone_offset_minutes=0,
+                screen_resolution_width=1920,
+                screen_resolution_height=1080,
+                hardware_concurrency_mask=257,
+            )
+
+    def test_hardware_concurrency_boundary_values(self) -> None:
+        p1 = EnvironmentalSpoofingProfile(
+            webgl_entropy_seed_hash="abc123",
+            user_agent_template="Mozilla/5.0",
+            timezone_offset_minutes=0,
+            screen_resolution_width=1920,
+            screen_resolution_height=1080,
+            hardware_concurrency_mask=1,
+        )
+        assert p1.hardware_concurrency_mask == 1
+
+        p256 = EnvironmentalSpoofingProfile(
+            webgl_entropy_seed_hash="abc123",
+            user_agent_template="Mozilla/5.0",
+            timezone_offset_minutes=0,
+            screen_resolution_width=1920,
+            screen_resolution_height=1080,
+            hardware_concurrency_mask=256,
+        )
+        assert p256.hardware_concurrency_mask == 256
+
 
 # ---------------------------------------------------------------------------
 # 3. AdversarialEmulationProfile — Composite Emulation Geometry Bounds
@@ -249,6 +409,7 @@ class TestAdversarialEmulationProfile:
         )
         assert profile.kinematic_noise is None
         assert profile.environmental_spoofing is None
+        assert profile.generative_persona == "fast_expert"
 
     def test_emulation_fidelity_target_rejects_above_1(self) -> None:
         with pytest.raises(ValidationError, match=r"Input should be less than or equal to 1"):
@@ -264,6 +425,21 @@ class TestAdversarialEmulationProfile:
 
         profile_one = AdversarialEmulationProfile(emulation_fidelity_target=1.0)
         assert profile_one.emulation_fidelity_target == 1.0
+
+    def test_generative_persona_accepts_valid_literals(self) -> None:
+        for persona in ("hesitant_novice", "fast_expert", "distracted_browser"):
+            profile = AdversarialEmulationProfile(
+                emulation_fidelity_target=0.5,
+                generative_persona=persona,
+            )
+            assert profile.generative_persona == persona
+
+    def test_generative_persona_rejects_invalid(self) -> None:
+        with pytest.raises(ValidationError, match=r"Input should be"):
+            AdversarialEmulationProfile(
+                emulation_fidelity_target=0.5,
+                generative_persona="casual_user",  # type: ignore[arg-type]
+            )
 
 
 # ---------------------------------------------------------------------------

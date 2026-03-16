@@ -2198,22 +2198,29 @@ class AdversarialEmulationProfile(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Aggregates the full Adversarial Emulation geometry, composing
     KinematicNoiseProfile (pointer perturbation) and EnvironmentalSpoofingProfile
-    (browser fingerprint masking) into a unified anti-detection manifold. As a
-    ...Profile suffix, this is a declarative, frozen snapshot of an N-dimensional
-    emulation coordinate.
+    (browser fingerprint masking) into a unified anti-detection manifold governed by
+    a generative imitation learning persona. As a ...Profile suffix, this is a
+    declarative, frozen snapshot of an N-dimensional emulation coordinate.
 
     CAUSAL AFFORDANCE: Authorizes the orchestrator's Spatial Kinematics engine to
     simultaneously inject stochastic pointer noise and spoof environmental telemetry,
-    achieving a target emulation_fidelity_target score against anti-bot heuristics.
+    achieving a target emulation_fidelity_target score against anti-bot heuristics
+    while behaviorally mimicking the selected generative_persona.
 
     EPISTEMIC BOUNDS: The emulation_fidelity_target is strictly clamped to the
     normalized probability range (ge=0.0, le=1.0). Both sub-profiles are optional
-    (default=None), allowing partial emulation geometries.
+    (default=None), allowing partial emulation geometries. The generative_persona
+    is locked to a Literal automaton ["hesitant_novice", "fast_expert",
+    "distracted_browser"].
 
-    MCP ROUTING TRIGGERS: Adversarial Emulation, Anti-Bot Evasion, Pointer Noise
-    Injection, Browser Fingerprint Spoofing, Emulation Fidelity
+    MCP ROUTING TRIGGERS: Adversarial Emulation, Anti-Bot Evasion, Imitation
+    Learning, Browser Fingerprint Spoofing, Emulation Fidelity
     """
 
+    generative_persona: Literal["hesitant_novice", "fast_expert", "distracted_browser"] = Field(
+        default="fast_expert",
+        description="The imitation learning persona governing the behavioral emulation profile.",
+    )
     kinematic_noise: "KinematicNoiseProfile | None" = Field(
         default=None,
         description="The stochastic pointer trajectory perturbation profile for human-like motor control emulation.",
@@ -3809,23 +3816,29 @@ class EnvironmentalSpoofingProfile(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Defines the deterministic Browser Fingerprint Entropy geometry
     for spoofing environmental telemetry vectors (WebGL canvas hashes, User-Agent
-    strings, timezone offsets, and display resolution). As a ...Profile suffix, this
-    is a declarative, frozen snapshot of a spoofed environmental coordinate.
+    strings, timezone offsets, TLS Client Hello fingerprints, and display resolution).
+    As a ...Profile suffix, this is a declarative, frozen snapshot of a spoofed
+    environmental coordinate.
 
     CAUSAL AFFORDANCE: Instructs the orchestrator's Spatial Kinematics engine to
     project a synthetic browser identity, masking the true computational substrate
-    from exogenous anti-bot fingerprinting oracles.
+    from exogenous anti-bot fingerprinting oracles including JA3/JA4 TLS analysis.
 
     EPISTEMIC BOUNDS: The webgl_entropy_seed_hash is constrained to a 128-char CID
     pattern. The user_agent_template is clamped to max_length=2000. The
     timezone_offset_minutes is mathematically bounded to the valid UTC range
-    (ge=-720, le=840). Screen resolution components are bounded to reasonable
-    display geometries (ge=1, le=15360).
+    (ge=-720, le=840). Screen resolution components are bounded (ge=1, le=15360).
+    The tls_cipher_permutation is locked to a Literal automaton. The
+    hardware_concurrency_mask is bounded (gt=0, le=256).
 
     MCP ROUTING TRIGGERS: Browser Fingerprinting, WebGL Canvas Entropy, User-Agent
-    Spoofing, Environmental Telemetry, Anti-Fingerprint Evasion
+    Spoofing, JA3 TLS Fingerprint, Anti-Fingerprint Evasion
     """
 
+    tls_cipher_permutation: Literal["chrome_windows", "safari_macos", "firefox_macos", "android_webview"] = Field(
+        default="chrome_windows",
+        description="The JA3/JA4 TLS Client Hello fingerprint to project during handshake emulation.",
+    )
     webgl_entropy_seed_hash: str = Field(
         min_length=1,
         max_length=128,
@@ -3835,6 +3848,12 @@ class EnvironmentalSpoofingProfile(CoreasonBaseState):
     user_agent_template: str = Field(
         max_length=2000,
         description="The User-Agent string template projected to exogenous web servers to mask the true computational substrate.",
+    )
+    hardware_concurrency_mask: int = Field(
+        gt=0,
+        le=256,
+        default=8,
+        description="The spoofed CPU core count projected to the DOM via navigator.hardwareConcurrency.",
     )
     timezone_offset_minutes: int = Field(
         ge=-720,
@@ -5891,26 +5910,35 @@ class MCPServerManifest(CoreasonBaseState):
 class KinematicNoiseProfile(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Implements Stochastic Process Theory (1/f^β spectral noise)
-    to inject human-like motor control perturbations into pointer trajectories,
-    preventing deterministic bot-detection via timing analysis. As a ...Profile
-    suffix, this is a declarative, frozen snapshot of a noise geometry.
+    and Hick-Hyman Law cognitive delay modeling to inject human-like motor control
+    perturbations into pointer trajectories, preventing deterministic bot-detection
+    via timing analysis. As a ...Profile suffix, this is a declarative, frozen
+    snapshot of a noise geometry.
 
     CAUSAL AFFORDANCE: Authorizes the Spatial Kinematics engine to perturb each
     SpatialCoordinateProfile along the Bezier trajectory by sampling from the
-    specified noise distribution, achieving biomechanically plausible jitter.
+    specified noise distribution, achieving biomechanically plausible jitter with
+    cognitive delay and corrective submovements.
 
     EPISTEMIC BOUNDS: The pink_noise_amplitude is strictly clamped to the
     normalized range (ge=0.0, le=1.0), preventing trajectory corruption. The
     frequency_exponent (1/f^β) is bounded (ge=0.0, le=5.0) to cover the full
     spectrum from white noise (β=0) to black noise (β≥2). The noise_type Literal
-    automaton locks generation to ["pink", "brownian", "gaussian"].
+    automaton locks generation to ["pink", "brownian", "gaussian"]. The
+    velocity_profile is locked to ["minimum_jerk", "constant",
+    "fractional_brownian"]. target_overshoot_radius_pixels is bounded (ge=0,
+    le=5000) and hick_hyman_dwell_time_ms is bounded (ge=0, le=86400000).
 
     MCP ROUTING TRIGGERS: Stochastic Process, Pink Noise, Brownian Motion,
-    Motor Control Perturbation, Anti-Bot Trajectory Jitter
+    Motor Control Perturbation, Hick-Hyman Law, Fitts's Law
     """
 
     noise_type: Literal["pink", "brownian", "gaussian"] = Field(
         description="The stochastic process governing the noise generation for pointer trajectory perturbation.",
+    )
+    velocity_profile: Literal["minimum_jerk", "constant", "fractional_brownian"] = Field(
+        default="minimum_jerk",
+        description="The mathematical model governing movement acceleration and velocity smoothing.",
     )
     pink_noise_amplitude: float = Field(
         ge=0.0,
@@ -5921,6 +5949,18 @@ class KinematicNoiseProfile(CoreasonBaseState):
         ge=0.0,
         le=5.0,
         description="The spectral exponent β in the 1/f^β power spectral density function governing noise color.",
+    )
+    target_overshoot_radius_pixels: int = Field(
+        ge=0,
+        le=5000,
+        default=0,
+        description="The Euclidean radius in pixels for corrective submovements overshooting the target coordinate.",
+    )
+    hick_hyman_dwell_time_ms: int = Field(
+        ge=0,
+        le=86400000,
+        default=0,
+        description="Cognitive choice reaction delay in milliseconds, modeled via Hick-Hyman Law.",
     )
 
 
