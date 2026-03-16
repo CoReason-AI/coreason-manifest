@@ -2210,7 +2210,23 @@ class AgentBidIntent(CoreasonBaseState):
 
 class AmbientState(CoreasonBaseState):
     """
-    Lightweight UX signal for UI rendering of progress.
+    AGENT INSTRUCTION: Acts as a unidirectional telemetry pipeline projecting
+    internal swarm kinematics across the Markov Blanket without inducing causal
+    feedback loops. As a ...State suffix, this is a declarative, ephemeral
+    N-dimensional coordinate.
+
+    CAUSAL AFFORDANCE: Emits an ephemeral, 1D representation of the active
+    probability distribution and execution progress to the external UI plane. The
+    orchestrator processes this signal without halting the underlying generative
+    trajectory.
+
+    EPISTEMIC BOUNDS: The semantic status_message is structurally clamped to
+    max_length=2000. The continuous progress metric is bounded by float limits
+    (le=1000000000.0) allowing it to represent either a 0.0-1.0 ratio or precise
+    raw token counts.
+
+    MCP ROUTING TRIGGERS: Markov Blanket, Ephemeral Projection, Continuous
+    Observability, Kinetic Execution State, UI Telemetry
     """
 
     status_message: str = Field(
@@ -2383,7 +2399,23 @@ class BackpressurePolicy(CoreasonBaseState):
 
 
 class BaseIntent(CoreasonBaseState):
-    """Base class for presentation intents."""
+    """
+    AGENT INSTRUCTION: Establishes the foundational polymorphic root for
+    Human-in-the-Loop (HITL) Supervisory Control Theory. As a base Intent
+    suffix, this object acts as an authorized trigger for out-of-band
+    communication.
+
+    CAUSAL AFFORDANCE: Provides the baseline causal graph bridging required for
+    the orchestrator to emit non-kinetic UI updates and presentation envelopes
+    across the network.
+
+    EPISTEMIC BOUNDS: Inherits absolute structural rigidity and RFC 8785
+    canonical hashing from CoreasonBaseState, ensuring all derived presentation
+    intents are mathematically immutable upon instantiation.
+
+    MCP ROUTING TRIGGERS: Supervisory Control Theory, Polymorphic Intent, HITL
+    Boundary, Out-of-Band Signal
+    """
 
 
 class BasePanelProfile(CoreasonBaseState):
@@ -3832,6 +3864,25 @@ class EscalationContract(CoreasonBaseState):
 
 
 class EscalationIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Orchestrates a Dictatorial Override mechanism within a
+    Zero-Trust Architecture. It is emitted when a rigid mathematical safety
+    boundary (like a Payload Loss Prevention rule) is breached during inference.
+
+    CAUSAL AFFORDANCE: Severs the active kinetic thread when a rule is tripped,
+    violently halting generation to force the presentation of a resolution_schema.
+    It demands explicit, structurally verified cryptographic sign-off from a
+    higher-clearance entity to bypass the breaker.
+
+    EPISTEMIC BOUNDS: The tripped_rule_id is strictly anchored to a 128-char CID
+    regex (^[a-zA-Z0-9_.:-]+$). The resolution_schema (dict) caps keys at
+    max_length=255. The fallback is governed by the Literal timeout_action
+    ["rollback", "proceed_default", "terminate"] to guarantee systemic liveness
+    if unhandled.
+
+    MCP ROUTING TRIGGERS: Dictatorial Override, Privilege Escalation, Payload
+    Loss Prevention, Governance Bypass, Cryptographic Sign-Off
+    """
     type: Literal["escalation"] = Field(
         default="escalation", description="Discriminator for security or economic boundary overrides."
     )
@@ -4119,7 +4170,22 @@ class ExecutionNodeReceipt(CoreasonBaseState):
 
 
 class FYIIntent(BaseIntent):
-    """Intent indicating the presentation is informational only."""
+    """
+    AGENT INSTRUCTION: Implements Asynchronous Epistemic Signaling, indicating
+    that the presented manifold requires no reciprocal causal action from the
+    human operator.
+
+    CAUSAL AFFORDANCE: Triggers a stateless UI projection event, allowing the
+    swarm to update the human on peripheral task completions without halting the
+    underlying Directed Acyclic Graph (DAG) execution.
+
+    EPISTEMIC BOUNDS: The execution path is rigidly constrained by the
+    Literal["fyi"] type discriminator, physically preventing this object from
+    being parsed as a blocking Mixed-Initiative state.
+
+    MCP ROUTING TRIGGERS: Asynchronous Telemetry, Epistemic Signaling, Stateless
+    Projection, Human-in-the-Loop
+    """
 
     type: Literal["fyi"] = Field(default="fyi", description="Discriminator for an FYI intent.")
 
@@ -4869,6 +4935,24 @@ class HypothesisStakeReceipt(CoreasonBaseState):
 
 
 class InformationalIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Formalizes Synchronous Mixed-Initiative Control. The agent
+    requires explicit acknowledgment from an external Oracle before committing the
+    next probability wave collapse. As an ...Intent suffix, this yields control.
+
+    CAUSAL AFFORDANCE: Conditionally suspends the continuous execution DAG to
+    project an observational message to the human operator. Resumption is
+    dynamically governed by the deterministic timeout_action.
+
+    EPISTEMIC BOUNDS: The semantic payload (message) is physically clamped to
+    max_length=2000 to prevent UI dictionary bombing. The timeout_action is
+    locked to a strict Finite State Machine Literal ["rollback",
+    "proceed_default", "terminate"], solving the Halting Problem for
+    unresponsive oracles.
+
+    MCP ROUTING TRIGGERS: Mixed-Initiative Control, Synchronous Halt, Finite
+    State Machine, Temporal Timeout, Oracle Projection
+    """
     type: Literal["informational"] = Field(
         default="informational", description="Discriminator for read-only informational handoffs."
     )
