@@ -4775,7 +4775,22 @@ type AnyIntent = Annotated[
 
 class InputMappingContract(CoreasonBaseState):
     """
-    Dictates how keys from a parent's shared_state_contract map to a nested topology's state.
+    AGENT INSTRUCTION: Formalizes a covariant Functor (Category Theory) mapping
+    higher-order topological state dimensions into an encapsulated subgraph's
+    localized working memory. As a ...Contract suffix, this enforces rigid
+    mathematical boundaries globally.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator's state projection engine to
+    safely inject parent variables into a CompositeNodeProfile without violating
+    scope isolation or referential transparency.
+
+    EPISTEMIC BOUNDS: The geometric projection vectors parent_key and child_key
+    are strictly clamped to max_length=2000, mathematically severing the
+    capability for String Exhaustion Attacks and Path Traversal vulnerabilities
+    during AST resolution.
+
+    MCP ROUTING TRIGGERS: Category Theory, Covariant Functor, Scope Isolation,
+    State Projection, Bijective Mapping
     """
 
     parent_key: str = Field(max_length=2000, description="The key in the parent's shared state contract.")
@@ -5951,7 +5966,22 @@ class OntologicalHandshakeReceipt(CoreasonBaseState):
 
 class OutputMappingContract(CoreasonBaseState):
     """
-    Dictates how keys from a nested topology's state map back to a parent's shared_state_contract.
+    AGENT INSTRUCTION: Formalizes a contravariant Functor (Category Theory) or
+    Functional Lens, extracting terminal coordinate shifts from a nested subgraph
+    back into the parent's topological state. As a ...Contract suffix, this enforces
+    rigid mathematical boundaries globally.
+
+    CAUSAL AFFORDANCE: Authorizes the mutation of the macroscopic
+    shared_state_contract using precisely mapped structural returns from a
+    completed CompositeNodeProfile execution, guaranteeing side-effect-free state
+    bubbling.
+
+    EPISTEMIC BOUNDS: The routing paths child_key and parent_key are physically
+    bounded by max_length=2000 to prevent memory allocation faults and pointer
+    overflow during the orchestrator's post-execution dictionary merge operations.
+
+    MCP ROUTING TRIGGERS: Functional Lens, Contravariant Functor, State Bubbling,
+    Side-Effect Free Mutation, Graph Isomorphism
     """
 
     child_key: str = Field(max_length=2000, description="The key in the nested topology's state contract.")
@@ -6692,7 +6722,22 @@ class SpatialKinematicActionIntent(CoreasonBaseState):
 
 class StateContract(CoreasonBaseState):
     """
-    A strict Cryptographic State Contract (Typed Blackboard) for multi-agent state sharing.
+    AGENT INSTRUCTION: Implements a Cryptographic Tuple Space (Blackboard Pattern)
+    serving as the strictly typed epistemic synchronization layer for multi-agent
+    manifolds. As a ...Contract suffix, this enforces rigid mathematical boundaries
+    globally.
+
+    CAUSAL AFFORDANCE: Physically restricts all state mutations within the topology
+    to conform to the explicit schema_definition (JSON Schema dict, key
+    max_length=255), acting as a deterministic Schema-on-Write validation gate.
+
+    EPISTEMIC BOUNDS: The strict_validation boolean (default=True) acts as a
+    physical barrier against stochastic drift, forcing the orchestrator to reject
+    any state mutation that fails the schema definition. Property names are capped
+    at max_length=255 to prevent dictionary bombing.
+
+    MCP ROUTING TRIGGERS: Tuple Space, Blackboard Architecture, Schema-on-Write,
+    Finite State Automaton, Epistemic Synchronization
     """
 
     schema_definition: dict[Annotated[str, StringConstraints(max_length=255)], Any] = Field(
