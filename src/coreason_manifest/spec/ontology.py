@@ -29,8 +29,8 @@ type JsonPrimitiveState = (
     | float
     | bool
     | None
-    | list["JsonPrimitiveState"]
-    | dict[Annotated[str, StringConstraints(max_length=255)], "JsonPrimitiveState"]
+    | list[JsonPrimitiveState]
+    | dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState]
 )
 
 

@@ -295,6 +295,59 @@
       "title": "AdjudicationRubricProfile",
       "type": "object"
     },
+    "AdversarialEmulationProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Aggregates the full Adversarial Emulation geometry, composing\nKinematicNoiseProfile (pointer perturbation) and EnvironmentalSpoofingProfile\n(browser fingerprint masking) into a unified anti-detection manifold governed by\na generative imitation learning persona. As a ...Profile suffix, this is a\ndeclarative, frozen snapshot of an N-dimensional emulation coordinate.\n\nCAUSAL AFFORDANCE: Authorizes the orchestrator's Spatial Kinematics engine to\nsimultaneously inject stochastic pointer noise and spoof environmental telemetry,\nachieving a target emulation_fidelity_target score against anti-bot heuristics\nwhile behaviorally mimicking the selected generative_persona.\n\nEPISTEMIC BOUNDS: The emulation_fidelity_target is strictly clamped to the\nnormalized probability range (ge=0.0, le=1.0). Both sub-profiles are optional\n(default=None), allowing partial emulation geometries. The generative_persona\nis locked to a Literal automaton [\"hesitant_novice\", \"fast_expert\",\n\"distracted_browser\"].\n\nMCP ROUTING TRIGGERS: Adversarial Emulation, Anti-Bot Evasion, Imitation\nLearning, Browser Fingerprint Spoofing, Emulation Fidelity",
+      "properties": {
+        "generative_persona": {
+          "default": "fast_expert",
+          "description": "The imitation learning persona governing the behavioral emulation profile.",
+          "enum": [
+            "hesitant_novice",
+            "fast_expert",
+            "distracted_browser"
+          ],
+          "title": "Generative Persona",
+          "type": "string"
+        },
+        "kinematic_noise": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/KinematicNoiseProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The stochastic pointer trajectory perturbation profile for human-like motor control emulation."
+        },
+        "environmental_spoofing": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EnvironmentalSpoofingProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The browser fingerprint and environmental telemetry spoofing geometry."
+        },
+        "emulation_fidelity_target": {
+          "description": "The target normalized score for human-likeness against anti-bot heuristic classifiers.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Emulation Fidelity Target",
+          "type": "number"
+        }
+      },
+      "required": [
+        "emulation_fidelity_target"
+      ],
+      "title": "AdversarialEmulationProfile",
+      "type": "object"
+    },
     "AdversarialMarketTopologyManifest": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A Zero-Cost Macro abstraction that mathematically projects a Zero-Sum Minimax game into a rigid Red/Blue team CouncilTopologyManifest. As a ...Manifest suffix, this defines a frozen coordinate of a topological structure.\n\nCAUSAL AFFORDANCE: Deterministically compiles into a fully bounded Council topology, forcing the generative router to evaluate claims through adversarial debate before the orchestrator resolves equilibrium via the designated market rules.\n\nEPISTEMIC BOUNDS: The @model_validator verify_disjoint_sets mathematically guarantees that blue_team_ids, red_team_ids, and the adjudicator_id are strictly disjoint to prevent self-dealing or topological paradoxes. Arrays are deterministically sorted to preserve RFC 8785 canonical hashes.\n\nMCP ROUTING TRIGGERS: Zero-Sum Minimax Game, Red Team vs Blue Team, Macro Abstraction, Generative Adversarial Networks, Topological Compilation",
@@ -802,6 +855,18 @@
           ],
           "default": null,
           "description": "The RL post-training contract forcing the agent to evaluate traces against an implicit graph reward."
+        },
+        "emulation_profile": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AdversarialEmulationProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The adversarial emulation geometry composing kinematic noise and environmental spoofing for anti-bot trajectory evasion."
         }
       },
       "required": [
@@ -4811,6 +4876,76 @@
       "title": "EnsembleTopologyProfile",
       "type": "object"
     },
+    "EnvironmentalSpoofingProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the deterministic Browser Fingerprint Entropy geometry\nfor spoofing environmental telemetry vectors (WebGL canvas hashes, User-Agent\nstrings, timezone offsets, TLS Client Hello fingerprints, and display resolution).\nAs a ...Profile suffix, this is a declarative, frozen snapshot of a spoofed\nenvironmental coordinate.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator's Spatial Kinematics engine to\nproject a synthetic browser identity, masking the true computational substrate\nfrom exogenous anti-bot fingerprinting oracles including JA3/JA4 TLS analysis.\n\nEPISTEMIC BOUNDS: The webgl_entropy_seed_hash is constrained to a 128-char CID\npattern. The user_agent_template is clamped to max_length=2000. The\ntimezone_offset_minutes is mathematically bounded to the valid UTC range\n(ge=-720, le=840). Screen resolution components are bounded (ge=1, le=15360).\nThe tls_cipher_permutation is locked to a Literal automaton. The\nhardware_concurrency_mask is bounded (gt=0, le=256).\n\nMCP ROUTING TRIGGERS: Browser Fingerprinting, WebGL Canvas Entropy, User-Agent\nSpoofing, JA3 TLS Fingerprint, Anti-Fingerprint Evasion",
+      "properties": {
+        "tls_cipher_permutation": {
+          "default": "chrome_windows",
+          "description": "The JA3/JA4 TLS Client Hello fingerprint to project during handshake emulation.",
+          "enum": [
+            "chrome_windows",
+            "safari_macos",
+            "firefox_macos",
+            "android_webview"
+          ],
+          "title": "Tls Cipher Permutation",
+          "type": "string"
+        },
+        "webgl_entropy_seed_hash": {
+          "description": "The Content Identifier (CID) of the WebGL canvas entropy seed used to generate a deterministic spoofed fingerprint.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Webgl Entropy Seed Hash",
+          "type": "string"
+        },
+        "user_agent_template": {
+          "description": "The User-Agent string template projected to exogenous web servers to mask the true computational substrate.",
+          "maxLength": 2000,
+          "title": "User Agent Template",
+          "type": "string"
+        },
+        "hardware_concurrency_mask": {
+          "default": 8,
+          "description": "The spoofed CPU core count projected to the DOM via navigator.hardwareConcurrency.",
+          "exclusiveMinimum": 0,
+          "maximum": 256,
+          "title": "Hardware Concurrency Mask",
+          "type": "integer"
+        },
+        "timezone_offset_minutes": {
+          "description": "The spoofed UTC timezone offset in minutes, bounded to the valid terrestrial range.",
+          "maximum": 840,
+          "minimum": -720,
+          "title": "Timezone Offset Minutes",
+          "type": "integer"
+        },
+        "screen_resolution_width": {
+          "description": "The spoofed horizontal display resolution in pixels.",
+          "maximum": 15360,
+          "minimum": 1,
+          "title": "Screen Resolution Width",
+          "type": "integer"
+        },
+        "screen_resolution_height": {
+          "description": "The spoofed vertical display resolution in pixels.",
+          "maximum": 15360,
+          "minimum": 1,
+          "title": "Screen Resolution Height",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "webgl_entropy_seed_hash",
+        "user_agent_template",
+        "timezone_offset_minutes",
+        "screen_resolution_width",
+        "screen_resolution_height"
+      ],
+      "title": "EnvironmentalSpoofingProfile",
+      "type": "object"
+    },
     "EphemeralNamespacePartitionState": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements a hardware-level Sandboxing and Trusted Execution\nEnvironment (TEE) paradigm, utilizing WASI, eBPF, or zkVMs to safely execute\nexogenous bytecode. As a ...State suffix, this is a declarative, frozen snapshot of\nan execution geometry.\n\nCAUSAL AFFORDANCE: Physically isolates kinetic execution from the host OS via\nexecution_runtime Literal [\"wasm32-wasi\", \"riscv32-zkvm\", \"bpf\"], authorizing\nthe orchestrator to instantiate a temporary virtual machine strictly conforming to\nallow_network_egress (default=False) and allow_subprocess_spawning (default=False).\n\nEPISTEMIC BOUNDS: The Halting Problem is managed via max_ttl_seconds (le=86400,\ngt=0), and memory exhaustion is prevented via max_vram_mb (le=1000000000, gt=0).\nThe @model_validator validate_cryptographic_hashes enforces SHA-256 regex\n(^[a-f0-9]{64}$); a second @model_validator sort_arrays deterministically sorts the\nauthorized_bytecode_hashes for RFC 8785 canonical hashing.\n\nMCP ROUTING TRIGGERS: WebAssembly System Interface, Zero-Knowledge Virtual Machine,\neBPF, Execution Sandbox, Arbitrary Code Execution Mitigation",
@@ -8419,6 +8554,70 @@
           "type": "null"
         }
       ]
+    },
+    "KinematicNoiseProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Stochastic Process Theory (1/f^β spectral noise)\nand Hick-Hyman Law cognitive delay modeling to inject human-like motor control\nperturbations into pointer trajectories, preventing deterministic bot-detection\nvia timing analysis. As a ...Profile suffix, this is a declarative, frozen\nsnapshot of a noise geometry.\n\nCAUSAL AFFORDANCE: Authorizes the Spatial Kinematics engine to perturb each\nSpatialCoordinateProfile along the Bezier trajectory by sampling from the\nspecified noise distribution, achieving biomechanically plausible jitter with\ncognitive delay and corrective submovements.\n\nEPISTEMIC BOUNDS: The pink_noise_amplitude is strictly clamped to the\nnormalized range (ge=0.0, le=1.0), preventing trajectory corruption. The\nfrequency_exponent (1/f^β) is bounded (ge=0.0, le=5.0) to cover the full\nspectrum from white noise (β=0) to black noise (β≥2). The noise_type Literal\nautomaton locks generation to [\"pink\", \"brownian\", \"gaussian\"]. The\nvelocity_profile is locked to [\"minimum_jerk\", \"constant\",\n\"fractional_brownian\"]. target_overshoot_radius_pixels is bounded (ge=0,\nle=5000) and hick_hyman_dwell_time_ms is bounded (ge=0, le=86400000).\n\nMCP ROUTING TRIGGERS: Stochastic Process, Pink Noise, Brownian Motion,\nMotor Control Perturbation, Hick-Hyman Law, Fitts's Law",
+      "properties": {
+        "noise_type": {
+          "description": "The stochastic process governing the noise generation for pointer trajectory perturbation.",
+          "enum": [
+            "pink",
+            "brownian",
+            "gaussian"
+          ],
+          "title": "Noise Type",
+          "type": "string"
+        },
+        "velocity_profile": {
+          "default": "minimum_jerk",
+          "description": "The mathematical model governing movement acceleration and velocity smoothing.",
+          "enum": [
+            "minimum_jerk",
+            "constant",
+            "fractional_brownian"
+          ],
+          "title": "Velocity Profile",
+          "type": "string"
+        },
+        "pink_noise_amplitude": {
+          "description": "The normalized amplitude of the 1/f noise injected into the pointer trajectory. Bounded [0.0, 1.0].",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Pink Noise Amplitude",
+          "type": "number"
+        },
+        "frequency_exponent": {
+          "description": "The spectral exponent β in the 1/f^β power spectral density function governing noise color.",
+          "maximum": 5.0,
+          "minimum": 0.0,
+          "title": "Frequency Exponent",
+          "type": "number"
+        },
+        "target_overshoot_radius_pixels": {
+          "default": 0,
+          "description": "The Euclidean radius in pixels for corrective submovements overshooting the target coordinate.",
+          "maximum": 5000,
+          "minimum": 0,
+          "title": "Target Overshoot Radius Pixels",
+          "type": "integer"
+        },
+        "hick_hyman_dwell_time_ms": {
+          "default": 0,
+          "description": "Cognitive choice reaction delay in milliseconds, modeled via Hick-Hyman Law.",
+          "maximum": 86400000,
+          "minimum": 0,
+          "title": "Hick Hyman Dwell Time Ms",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "noise_type",
+        "pink_noise_amplitude",
+        "frequency_exponent"
+      ],
+      "title": "KinematicNoiseProfile",
+      "type": "object"
     },
     "KineticBudgetPolicy": {
       "additionalProperties": false,
