@@ -2439,6 +2439,24 @@ class DocumentLayoutManifest(CoreasonBaseState):
 
 
 class ContextExpansionPolicy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Governs the structural logic for Hierarchical Navigable Small World
+    (HNSW) context hydration and dynamic text block aggregation. As a ...Policy suffix, this
+    object defines rigid mathematical boundaries that the orchestrator must enforce globally.
+
+    CAUSAL AFFORDANCE: Triggers the physical expansion of the active working memory partition,
+    authorizing the orchestrator to mathematically merge adjacent semantic nodes or sliding
+    windows via the selected expansion_paradigm (sliding_window, hierarchical_merge, or
+    document_summary).
+
+    EPISTEMIC BOUNDS: Strictly capped by max_token_budget (gt=0, le=1000000000) to prevent
+    GPU VRAM exhaustion. Further bounded by the optional spatial geometry
+    parent_merge_threshold (ge=0.0, le=1.0) and the optional temporal window
+    surrounding_sentences_k (ge=1, le=1000000000).
+
+    MCP ROUTING TRIGGERS: Hierarchical Navigable Small World, Context Hydration, Token Budget
+    Optimization, Semantic Merging
+    """
     expansion_paradigm: Literal["sliding_window", "hierarchical_merge", "document_summary"] = Field(
         description="The mathematical paradigm governing how context is expanded."
     )
@@ -2457,6 +2475,24 @@ class ContextExpansionPolicy(CoreasonBaseState):
 
 
 class TopologicalRetrievalContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Defines the rigid traversal perimeters for Graph Convolutional Network
+    (GCN) or Random Walk with Restart (RWR) operations across the Causal DAG. As a ...Contract
+    suffix, this object defines rigid mathematical boundaries that the orchestrator must
+    enforce globally.
+
+    CAUSAL AFFORDANCE: Restricts graph hopping algorithms to explicit Pearlian edge types
+    (Literal["causes", "confounds", "correlates_with", "undirected"]), mathematically
+    preventing epistemic drift and hallucination during deep multi-hop retrieval.
+
+    EPISTEMIC BOUNDS: Bounded recursively by max_hop_depth (ge=1, le=1000000000). The
+    @model_validator physically enforces deterministic sorting of
+    allowed_causal_relationships (min_length=1) to guarantee RFC 8785 canonical hashing.
+    Geometric distance preservation is toggled via enforce_isometry (default=True).
+
+    MCP ROUTING TRIGGERS: Directed Acyclic Graph, Pearlian Traversal, Isometry Preservation,
+    Random Walk with Restart
+    """
     max_hop_depth: int = Field(le=1000000000, ge=1, description="The strictly typed search depth bound for the cDAG.")
     allowed_causal_relationships: list[Literal["causes", "confounds", "correlates_with", "undirected"]] = Field(
         min_length=1, description="The explicit whitelist of permissible causal edges to traverse."
@@ -2470,6 +2506,23 @@ class TopologicalRetrievalContract(CoreasonBaseState):
 
 
 class LatentProjectionIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Acts as the kinetic trigger for Maximum Inner Product Search (MIPS)
+    and k-Nearest Neighbors (k-NN) retrieval across high-dimensional semantic manifolds. As
+    an ...Intent suffix, the LLM may execute non-monotonic reasoning here.
+
+    CAUSAL AFFORDANCE: Forces the orchestrator's embedding engine to dynamically hydrate the
+    working context by fetching the top_k_candidates nearest to the synthetic_target_vector.
+    Optionally embeds a TopologicalRetrievalContract for graph traversal bounds and a
+    ContextExpansionPolicy for post-retrieval merging.
+
+    EPISTEMIC BOUNDS: Mathematically boundary-enforced by min_isometry_score (ge=-1.0,
+    le=1.0) to automatically prune low-relevance hallucinations before they consume context
+    window tokens. The top_k_candidates is strictly positive (gt=0).
+
+    MCP ROUTING TRIGGERS: Maximum Inner Product Search, k-Nearest Neighbors, Latent Manifold
+    Projection, Retrieval-Augmented Generation
+    """
     type: Literal["latent_projection"] = Field(
         default="latent_projection", description="Discriminator for RAG projection intent."
     )
@@ -2489,6 +2542,22 @@ class LatentProjectionIntent(CoreasonBaseState):
 
 
 class SemanticDiscoveryIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Orchestrates zero-shot latent capability routing by computing the
+    geometric Cosine Distance between the agent's epistemic deficit vector and the available
+    tool manifold. As an ...Intent suffix, the LLM may execute non-monotonic reasoning here.
+
+    CAUSAL AFFORDANCE: Unlocks the dynamic, runtime mounting of tools and MCP servers whose
+    dense vector embeddings (query_vector) align mathematically with the query tensor,
+    bypassing hardcoded tool schemas.
+
+    EPISTEMIC BOUNDS: Mechanically rejects capabilities that fall below the min_isometry_score
+    (ge=-1.0, le=1.0) boundary. The returned toolsets are strictly limited to the
+    deterministically sorted required_structural_types array, enforced by the @model_validator.
+
+    MCP ROUTING TRIGGERS: Zero-Shot Tool Discovery, Capability Routing, Dense Vector
+    Embedding, Epistemic Deficit Resolution
+    """
     type: Literal["semantic_discovery"] = Field(
         default="semantic_discovery", description="Discriminator for geometric boundary of latent tool discovery."
     )
