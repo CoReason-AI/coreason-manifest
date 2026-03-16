@@ -7422,6 +7422,63 @@ class ExecutionSpanReceipt(CoreasonBaseState):
         return self
 
 
+class KinematicNoiseProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Implements non-linear stochastic perturbations to physical trajectories.
+
+    CAUSAL AFFORDANCE: Mutates continuous polynomial control points.
+
+    EPISTEMIC BOUNDS: Clamped by pink_noise_amplitude (le=1.0).
+
+    MCP ROUTING TRIGGERS: Mathematical Kinematics, Noise, Perturbation, Stochastic Vector
+    """
+
+    pink_noise_amplitude: float = Field(
+        le=1.0, ge=0.0, description="The mathematical limit of non-linear noise injected."
+    )
+    frequency_hz: float = Field(le=1000.0, ge=0.0, description="The frequency of the injected noise.")
+
+
+class EnvironmentalSpoofingProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Mathematically spoofs hardware and environmental markers.
+
+    CAUSAL AFFORDANCE: Bypasses static fingerprinting heuristics by mutating DOM properties.
+
+    EPISTEMIC BOUNDS: Bounded by rigid string constraints to prevent payload bloat.
+
+    MCP ROUTING TRIGGERS: DOM Spoofing, Fingerprint Mutation, Environmental Marker
+    """
+
+    webgl_entropy_seed_hash: str = Field(
+        pattern="^[a-f0-9]{64}$",
+        description="The SHA-256 hash used to deterministically alter WebGL rendering arrays.",
+    )
+    canvas_noise_seed: str = Field(
+        max_length=128,
+        description="The deterministic seed used to slightly mutate Canvas 2D render pixels.",
+    )
+
+
+class AdversarialEmulationProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Orchestrates the simulation of complex adversarial actor heuristics.
+
+    CAUSAL AFFORDANCE: Emulates advanced evasion tactics including non-linear spatial vectors.
+
+    EPISTEMIC BOUNDS: Contains rigid constraints governing kinetic and environmental spoofing.
+
+    MCP ROUTING TRIGGERS: Threat Emulation, Adversarial Actor, Evasion Tactics
+    """
+
+    kinematic_noise: KinematicNoiseProfile | None = Field(
+        default=None, description="The physical perturbation constraints."
+    )
+    environmental_spoofing: EnvironmentalSpoofingProfile | None = Field(
+        default=None, description="The hardware and DOM spoofing constraints."
+    )
+
+
 class SpatialKinematicActionIntent(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Employs Mathematical Kinematics and Fitts's Law to project precise, non-linear physical interactions across an exogenous UI manifold.
@@ -7433,6 +7490,9 @@ class SpatialKinematicActionIntent(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Mathematical Kinematics, Bezier Geometry, Fitts's Law, OS-Level Actuation, Non-Linear Trajectory
     """
 
+    noise_profile: KinematicNoiseProfile | None = Field(
+        default=None, description="The mathematical constraints for applying stochastic perturbations."
+    )
     action_type: Literal["click", "double_click", "drag_and_drop", "scroll", "hover", "keystroke"] = Field(
         description="The specific kinematic interaction paradigm."
     )
@@ -8724,6 +8784,10 @@ class AgentNodeProfile(BaseNodeProfile):
         description="The semantic boundary defining the objective function of the execution node. [SITD-Gamma: Neurosymbolic Substrate Alignment]",
     )
     type: Literal["agent"] = Field(default="agent", description="Discriminator for an Agent node.")
+    adversarial_emulation: AdversarialEmulationProfile | None = Field(
+        default=None, description="The deterministic emulation rules for simulating evasive behaviors."
+    )
+
     logit_steganography: LogitSteganographyContract | None = Field(
         default=None,
         description="The cryptographic contract forcing this agent to embed an undeniable provenance signature into its generative token stream.",
@@ -10560,3 +10624,7 @@ DifferentiableLogicConstraint.model_rebuild()
 CausalExplanationEvent.model_rebuild()
 LatentSchemaInferenceIntent.model_rebuild()
 IntentClassificationReceipt.model_rebuild()
+KinematicNoiseProfile.model_rebuild()
+EnvironmentalSpoofingProfile.model_rebuild()
+AdversarialEmulationProfile.model_rebuild()
+SpatialKinematicActionIntent.model_rebuild()
