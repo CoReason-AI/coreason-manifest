@@ -2259,7 +2259,25 @@ class AuctionPolicy(CoreasonBaseState):
 
 class BackpressurePolicy(CoreasonBaseState):
     """
-    Declarative backpressure constraints.
+    AGENT INSTRUCTION: Implements Queueing Theory and the Token Bucket algorithm to
+    mathematically regulate the thermodynamic flow of compute across topological
+    boundaries. As a ...Policy suffix, this defines rigid mathematical boundaries.
+
+    CAUSAL AFFORDANCE: Forces the orchestrator to yield execution threads, shed load,
+    or trip circuit breakers when temporal velocity (max_tokens_per_minute,
+    max_requests_per_minute) or spatial queues (max_queue_depth) reach physical
+    saturation. Optional token_budget_per_branch and max_concurrent_tool_invocations
+    further constrain parallel execution.
+
+    EPISTEMIC BOUNDS: Physical system limits are rigidly clamped by integer bounds
+    (le=1000000000) on max_queue_depth, token_budget_per_branch,
+    max_tokens_per_minute (gt=0), max_requests_per_minute (gt=0), and
+    max_concurrent_tool_invocations (gt=0). Temporal liveness is bounded by
+    max_uninterruptible_span_ms (le=86400000, gt=0). All rate fields are Optional
+    (default=None).
+
+    MCP ROUTING TRIGGERS: Queueing Theory, Token Bucket, Backpressure, Load
+    Shedding, Thermodynamic Flow Control
     """
 
     max_queue_depth: int = Field(
@@ -2328,7 +2346,24 @@ class SystemFaultEvent(BaseStateEvent):
 
 class BoundedInterventionScopePolicy(CoreasonBaseState):
     """
-    Constraints bounding human interaction for interventions.
+    AGENT INSTRUCTION: Formalizes the Principle of Least Privilege (PoLP) to
+    geometrically restrict the structural mutation surface available to a human or
+    external oracle. As a ...Policy suffix, this defines rigid mathematical
+    boundaries.
+
+    CAUSAL AFFORDANCE: Provides a deterministic mathematical mask over the
+    EpistemicLedgerState, guaranteeing that the external operator can only perturb
+    the graph at explicitly whitelisted JSON Pointers via allowed_fields
+    (string max_length=2000).
+
+    EPISTEMIC BOUNDS: The mutation topology is physically constrained by
+    allowed_fields (max_length=1000000000), deterministically sorted via
+    @model_validator sort_arrays to preserve RFC 8785 canonical hashing. The
+    json_schema_whitelist (key max_length=255) strictly bounds the acceptable
+    input types.
+
+    MCP ROUTING TRIGGERS: Principle of Least Privilege, State Mutation Masking,
+    Zero-Trust Architecture, RFC 8785 Canonicalization, Bounded Surface Area
     """
 
     allowed_fields: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
@@ -4113,7 +4148,23 @@ class FitnessObjectiveProfile(CoreasonBaseState):
 
 class FormalVerificationContract(CoreasonBaseState):
     """
-    Passive schema defining a mathematical proof of safety invariants.
+    AGENT INSTRUCTION: Leverages Automated Theorem Proving and the Curry-Howard
+    Correspondence to bind the causal graph to a mathematically verified safety
+    invariant. As a ...Contract suffix, this enforces rigid mathematical
+    boundaries globally.
+
+    CAUSAL AFFORDANCE: Authorizes the Rust/C++ orchestrator to ingest a compiled
+    proof artifact and mechanically verify that the topology cannot transition into
+    a catastrophic or forbidden geometric state. The invariant_theorem
+    (max_length=2000) specifies the exact safety assertion.
+
+    EPISTEMIC BOUNDS: The theorem prover dialect is strictly locked to the
+    proof_system Literal ["tla_plus", "lean4", "coq", "z3"]. Cryptographic
+    integrity is guaranteed by the compiled_proof_hash (SHA-256 regex
+    ^[a-f0-9]{64}$).
+
+    MCP ROUTING TRIGGERS: Automated Theorem Proving, Curry-Howard Correspondence,
+    Safety Invariant, TLA+, Formal Methods
     """
 
     proof_system: Literal["tla_plus", "lean4", "coq", "z3"] = Field(
@@ -4999,7 +5050,23 @@ type LifecycleTriggerEvent = Literal[
 
 class InterventionPolicy(CoreasonBaseState):
     """
-    Proactive oversight hook bound to a specific lifecycle event.
+    AGENT INSTRUCTION: Executes Supervisory Control Theory by embedding
+    deterministic execution hooks (transitions) into the swarm's Petri Net
+    lifecycle graph. As a ...Policy suffix, this defines rigid mathematical
+    boundaries.
+
+    CAUSAL AFFORDANCE: Physically halts the autonomous execution loop (if blocking
+    is True, default=True) at the exact topological trigger coordinate
+    (LifecycleTriggerEvent), forcing the orchestrator to await an external
+    InterventionReceipt before proceeding.
+
+    EPISTEMIC BOUNDS: The interruption locus is rigidly confined to the
+    LifecycleTriggerEvent literal automaton. The structural mutation permissions
+    during the pause are strictly governed by the optional scope
+    (BoundedInterventionScopePolicy | None, default=None).
+
+    MCP ROUTING TRIGGERS: Supervisory Control Theory, Petri Net Transition,
+    Lifecycle Hook, Execution Halting, Mixed-Initiative Interaction
     """
 
     trigger: LifecycleTriggerEvent = Field(
