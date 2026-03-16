@@ -30,14 +30,13 @@ We intentionally ignore legacy "Separation of Concerns" (SoC) anti-patterns.
 
 Legacy CRUD terminology flattens softmax distributions and introduces semantic drift.
 
-* **Banned Terms:** `Create`, `Read`, `Update`, `Delete`, `User`, `Data`, `List`.
+* **Banned Terms:** `Create`, `Read`, `Update`, `Delete`, `Remove`, `Group`, `List`, `User`, `Data`, `Memory`, `Link`.
 * **Required Paradigm:** State transitions are mapped using Judea Pearl’s Structural Causal Models (e.g., `Transmutation`, `DefeasibleCascade`, `StateMutationIntent`).
 * **Categorical Suffixing:** Every schema ends in a strict topological contract:
-* `...Event` / `...Receipt`: Cryptographically frozen historical facts (Append-only).
-* `...Intent` / `...Task`: Authorized kinetic execution triggers.
-* `...Policy` / `...Contract`: Rigid mathematical boundaries.
-* `...State` / `...Manifest`: Ephemeral or declarative N-dimensional coordinates.
-
+  * `...Event` / `...Receipt`: Cryptographically frozen historical facts (Append-only).
+  * `...Intent` / `...Task`: Authorized kinetic execution triggers.
+  * `...Policy` / `...Contract` / `...SLA`: Rigid mathematical boundaries.
+  * `...State` / `...Snapshot` / `...Manifest` / `...Profile`: Ephemeral or declarative N-dimensional coordinates.
 
 
 ### 4. Cryptographic Determinism

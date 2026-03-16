@@ -339,7 +339,7 @@ def test_execution_node_receipt_recursive_payload(params: dict[str, Any]) -> Non
 
 
 def test_state_hydration_manifest_long_string_quarantine() -> None:
-    """Prove that StateHydrationManifest immediately collapses instantiation and raises ValidationError for > 10k strings."""  # noqa: E501
+    """Prove that StateHydrationManifest immediately collapses instantiation and raises ValidationError for > 10k strings."""
     long_string = "a" * 10001
     with pytest.raises(ValidationError):
         StateHydrationManifest(
