@@ -4381,7 +4381,6 @@ class ExecutionNodeReceipt(CoreasonBaseState):
 
     parent_hashes: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
         # Note: parent_hashes is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
-        # Note: parent_hashes is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
         default_factory=list,
         description="The strict array of cryptographic hashes of parent execution nodes.",
     )
@@ -6235,7 +6234,11 @@ class OntologicalSurfaceProjectionManifest(CoreasonBaseState):
     @model_validator(mode="after")
     def sort_arrays(self) -> Self:
         if getattr(self, "available_procedural_manifolds", None) is not None:
-            object.__setattr__(self, "available_procedural_manifolds", sorted(self.available_procedural_manifolds, key=lambda x: x.metadata_id))
+            object.__setattr__(
+                self,
+                "available_procedural_manifolds",
+                sorted(self.available_procedural_manifolds, key=lambda x: x.metadata_id),
+            )
         return self
 
 
@@ -6347,13 +6350,11 @@ class MacroGridProfile(CoreasonBaseState):
 
     layout_matrix: list[list[Annotated[str, StringConstraints(max_length=255)]]] = Field(
         # Note: layout_matrix is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
-        # Note: layout_matrix is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
         max_length=1000000000,
         description="A matrix defining the layout structure, using panel IDs.",
     )
     panels: list[AnyPanelProfile] = Field(
         description="The ordered array of topological UI panels physically rendered in the grid."
-        # Note: panels is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
         # Note: panels is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     )
 
@@ -7149,7 +7150,6 @@ class EpistemicSOPManifest(CoreasonBaseState):
     prm_evaluations: list["ProcessRewardContract"] = Field(
         description="The strict array of Process Reward Contracts evaluating the logic."
         # Note: prm_evaluations is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
-        # Note: prm_evaluations is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     )
 
     @model_validator(mode="after")
@@ -7679,7 +7679,6 @@ class SpatialKinematicActionIntent(CoreasonBaseState):
         default_factory=list,
         description="Waypoints for constructing non-linear, bot-evasive movement curves.",
         # Note: bezier_control_points is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
-        # Note: bezier_control_points is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     )
     expected_visual_concept: str | None = Field(
         max_length=2000,
@@ -7778,7 +7777,6 @@ class StdioTransportProfile(CoreasonBaseState):
     type: Literal["stdio"] = Field(default="stdio", description="Type of transport.")
     command: str = Field(..., max_length=2000, description="The command executable to run (e.g., 'node', 'python').")
     args: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
-        # Note: args is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
         # Note: args is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
         max_length=1000000000,
         default_factory=list,
@@ -9600,7 +9598,9 @@ class WorkflowManifest(CoreasonBaseState):
             object.__setattr__(
                 self,
                 "allowed_information_classifications",
-                sorted(self.allowed_information_classifications, key=lambda x: str(x.value)) if self.allowed_information_classifications else [],
+                sorted(self.allowed_information_classifications, key=lambda x: str(x.value))
+                if self.allowed_information_classifications
+                else [],
             )
         return self
 
