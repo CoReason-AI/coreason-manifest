@@ -867,6 +867,18 @@
           ],
           "default": null,
           "description": "The adversarial emulation geometry composing kinematic noise and environmental spoofing for anti-bot trajectory evasion."
+        },
+        "gflownet_balance_policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CognitiveDetailedBalanceContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Authorizes trajectory balance optimization during non-monotonic reasoning."
         }
       },
       "required": [
@@ -10411,6 +10423,30 @@
           "default": null,
           "description": "The Event ID of the specific ToolInvocationEvent that spawned this observation, forming a strict bipartite directed edge.",
           "title": "Triggering Invocation Id"
+        },
+        "continuous_stream": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ContinuousObservationStream"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Buffers real-time audio/video or continuous token streams."
+        },
+        "disfluency_rules": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StreamingDisfluencyContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Rules for the forget gate to slice out stutters or ambient noise."
         }
       },
       "required": [
@@ -10510,6 +10546,18 @@
           ],
           "default": null,
           "description": "The projection applied if the agents natively used different embedding dimensionalities."
+        },
+        "remote_state_snapshot": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FederatedStateSnapshot"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Isolated holographic clone of remote swarm state for safe cross-boundary evaluation."
         }
       },
       "required": [
@@ -10997,6 +11045,18 @@
         "grid": {
           "$ref": "#/$defs/MacroGridProfile",
           "description": "The grid of panels being presented."
+        },
+        "ambient_telemetry": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AmbientState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Stateless non-blocking telemetry for continuous progress updates."
         }
       },
       "required": [

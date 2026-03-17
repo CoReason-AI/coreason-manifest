@@ -6792,6 +6792,10 @@ class OntologicalHandshakeReceipt(CoreasonBaseState):
         default=None,
         description="The projection applied if the agents natively used different embedding dimensionalities.",
     )
+    remote_state_snapshot: FederatedStateSnapshot | None = Field(
+        default=None,
+        description="Isolated holographic clone of remote swarm state for safe cross-boundary evaluation.",
+    )
 
     @model_validator(mode="after")
     def sort_arrays(self) -> Self:
@@ -7044,6 +7048,9 @@ class PresentationManifest(CoreasonBaseState):
 
     intent: AnyPresentationIntent = Field(description="The reason an agent is presenting this data to a human.")
     grid: MacroGridProfile = Field(description="The grid of panels being presented.")
+    ambient_telemetry: AmbientState | None = Field(
+        default=None, description="Stateless non-blocking telemetry for continuous progress updates."
+    )
 
 
 class EpistemicSOPManifest(CoreasonBaseState):
@@ -8959,6 +8966,10 @@ class AgentNodeProfile(BaseNodeProfile):
         default=None,
         description="The adversarial emulation geometry composing kinematic noise and environmental spoofing for anti-bot trajectory evasion.",
     )
+    gflownet_balance_policy: CognitiveDetailedBalanceContract | None = Field(
+        default=None,
+        description="Authorizes trajectory balance optimization during non-monotonic reasoning.",
+    )
 
     @model_validator(mode="after")
     def sort_agent_node_arrays(self) -> Self:
@@ -9889,6 +9900,14 @@ class ObservationEvent(BaseStateEvent):
         pattern="^[a-zA-Z0-9_.:-]+$",
         default=None,
         description="The Event ID of the specific ToolInvocationEvent that spawned this observation, forming a strict bipartite directed edge.",
+    )
+    continuous_stream: ContinuousObservationStream | None = Field(
+        default=None,
+        description="Buffers real-time audio/video or continuous token streams.",
+    )
+    disfluency_rules: StreamingDisfluencyContract | None = Field(
+        default=None,
+        description="Rules for the forget gate to slice out stutters or ambient noise.",
     )
 
     @field_validator("payload", mode="before")
@@ -10909,3 +10928,6 @@ StreamingDisfluencyContract.model_rebuild()
 SpeculativeExecutionBoundary.model_rebuild()
 EpistemicContractionPolicy.model_rebuild()
 EpistemicLedgerState.model_rebuild()
+PresentationManifest.model_rebuild()
+ObservationEvent.model_rebuild()
+OntologicalHandshakeReceipt.model_rebuild()
