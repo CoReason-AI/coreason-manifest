@@ -487,6 +487,7 @@
         },
         "capability_merkle_root": {
           "description": "The SHA-256 Merkle root of the agent's verified semantic capabilities.",
+          "maxLength": 128,
           "pattern": "^[a-f0-9]{64}$",
           "title": "Capability Merkle Root",
           "type": "string"
@@ -2236,12 +2237,14 @@
       "properties": {
         "source_variable": {
           "description": "The independent variable $X$.",
+          "maxLength": 255,
           "minLength": 1,
           "title": "Source Variable",
           "type": "string"
         },
         "target_variable": {
           "description": "The dependent variable $Y$.",
+          "maxLength": 255,
           "minLength": 1,
           "title": "Target Variable",
           "type": "string"
@@ -7242,6 +7245,7 @@
       "properties": {
         "adapter_merkle_root": {
           "description": "CoReason Shared Kernel Ontology: The tamper-evident SHA-256 hash of the exact safetensors weight matrix.",
+          "maxLength": 128,
           "pattern": "^[a-f0-9]{64}$",
           "title": "Adapter Merkle Root",
           "type": "string"
@@ -10749,6 +10753,7 @@
         },
         "target_table_uri": {
           "description": "The specific table mutated.",
+          "maxLength": 2048,
           "minLength": 1,
           "title": "Target Table Uri",
           "type": "string"
@@ -13008,6 +13013,7 @@
         },
         "target_schema_ref": {
           "description": "The string name of the Pydantic class to synthesize.",
+          "maxLength": 2048,
           "minLength": 1,
           "title": "Target Schema Ref",
           "type": "string"
@@ -13078,6 +13084,7 @@
         },
         "remediation_prompt": {
           "description": "The deterministic, non-monotonic natural-language constraint the agent must satisfy.",
+          "maxLength": 100000,
           "minLength": 1,
           "title": "Remediation Prompt",
           "type": "string"
@@ -14242,12 +14249,14 @@
       "properties": {
         "vrf_proof": {
           "description": "The zero-knowledge cryptographic proof of fair random generation.",
+          "maxLength": 5000000,
           "minLength": 10,
           "title": "Vrf Proof",
           "type": "string"
         },
         "public_key": {
           "description": "The public key of the oracle or node used to verify the VRF proof.",
+          "maxLength": 8192,
           "minLength": 10,
           "title": "Public Key",
           "type": "string"
@@ -14323,12 +14332,14 @@
         },
         "did_subject": {
           "description": "The Decentralized Identifier (DID) of the human operator.",
+          "maxLength": 1024,
           "pattern": "^did:[a-z0-9]+:.*$",
           "title": "Did Subject",
           "type": "string"
         },
         "cryptographic_payload": {
           "description": "The strictly formatted (Base64url/Hex/Multibase) signature or proof.",
+          "maxLength": 100000,
           "pattern": "^[A-Za-z0-9+/=_-]+$",
           "title": "Cryptographic Payload",
           "type": "string"

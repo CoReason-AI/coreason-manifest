@@ -1,3 +1,13 @@
+# Copyright (c) 2026 CoReason, Inc
+#
+# This software is proprietary and dual-licensed
+# Licensed under the Prosperity Public License 3.0 (the "License")
+# A copy of the license is available at <https://prosperitylicense.com/versions/3.0.0>
+# For details, see the LICENSE file
+# Commercial use beyond a 30-day trial requires a separate license
+#
+# Source Code: <https://github.com/CoReason-AI/coreason-manifest>
+
 from __future__ import annotations
 
 import ast
@@ -572,10 +582,10 @@ class VerifiableEntropyReceipt(CoreasonBaseState):
     Curve Cryptography, Zero-Knowledge Entropy
     """
 
-    vrf_proof: str = Field(
+    vrf_proof: Annotated[str, StringConstraints(max_length=5000000)] = Field(
         min_length=10, description="The zero-knowledge cryptographic proof of fair random generation."
     )
-    public_key: str = Field(
+    public_key: Annotated[str, StringConstraints(max_length=8192)] = Field(
         min_length=10, description="The public key of the oracle or node used to verify the VRF proof."
     )
     seed_hash: str = Field(
@@ -966,6 +976,12 @@ class SemanticSlicingPolicy(CoreasonBaseState):
         )
         if self.required_semantic_labels is not None:
             object.__setattr__(self, "required_semantic_labels", sorted(self.required_semantic_labels))
+        if getattr(self, "permitted_classification_tiers", None) is not None:
+            object.__setattr__(
+                self,
+                "permitted_classification_tiers",
+                sorted(self.permitted_classification_tiers, key=lambda x: str(x.value)),
+            )
         return self
 
 
@@ -1578,6 +1594,8 @@ class MultimodalTokenAnchorState(CoreasonBaseState):
     @model_validator(mode="after")
     def sort_arrays(self) -> Self:
         object.__setattr__(self, "visual_patch_hashes", sorted(self.visual_patch_hashes))
+        if getattr(self, "visual_patch_hashes", None) is not None:
+            object.__setattr__(self, "visual_patch_hashes", sorted(self.visual_patch_hashes))
         return self
 
 
@@ -1701,7 +1719,9 @@ class StateDifferentialManifest(CoreasonBaseState):
         description="Causal history mapping of all known Lineage Watermarks to their latest logical mutation count at the time of authoring."
     )
     patches: list[StateMutationIntent] = Field(
-        default_factory=list, description="The exact, ordered sequence of deterministic state vector mutations."
+        default_factory=list,
+        description="The exact, ordered sequence of deterministic state vector mutations.",
+        # Note: patches is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     )
 
 
@@ -1750,6 +1770,8 @@ class StateHydrationManifest(CoreasonBaseState):
     @model_validator(mode="after")
     def sort_arrays(self) -> Self:
         object.__setattr__(self, "crystallized_ledger_cids", sorted(self.crystallized_ledger_cids))
+        if getattr(self, "crystallized_ledger_cids", None) is not None:
+            object.__setattr__(self, "crystallized_ledger_cids", sorted(self.crystallized_ledger_cids))
         return self
 
 
@@ -2083,6 +2105,8 @@ class FederatedDiscoveryManifest(CoreasonBaseState):
     def sort_arrays(self) -> Self:
         object.__setattr__(self, "broadcast_endpoints", sorted(self.broadcast_endpoints, key=str))
         object.__setattr__(self, "supported_ontologies", sorted(self.supported_ontologies))
+        if getattr(self, "supported_ontologies", None) is not None:
+            object.__setattr__(self, "supported_ontologies", sorted(self.supported_ontologies))
         return self
 
 
@@ -2991,8 +3015,12 @@ class CausalDirectedEdgeState(CoreasonBaseState):
     d-separation, Do-Calculus, Directed Edge
     """
 
-    source_variable: str = Field(min_length=1, description="The independent variable $X$.")
-    target_variable: str = Field(min_length=1, description="The dependent variable $Y$.")
+    source_variable: Annotated[str, StringConstraints(max_length=255)] = Field(
+        min_length=1, description="The independent variable $X$."
+    )
+    target_variable: Annotated[str, StringConstraints(max_length=255)] = Field(
+        min_length=1, description="The dependent variable $Y$."
+    )
     edge_type: Literal["direct_cause", "confounder", "collider", "mediator"] = Field(
         description="The specific Pearlian topological relationship between the two variables."
     )
@@ -3507,6 +3535,7 @@ class DocumentLayoutManifest(CoreasonBaseState):
     )
     chronological_flow_edges: list[tuple[str, str]] = Field(
         default_factory=list,
+        # Note: chronological_flow_edges is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
         description="Directed edges defining the topological sort (chronological flow) of the document.",
     )
 
@@ -4351,7 +4380,10 @@ class ExecutionNodeReceipt(CoreasonBaseState):
         return _validate_payload_bounds(v)
 
     parent_hashes: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
-        default_factory=list, description="The strict array of cryptographic hashes of parent execution nodes."
+        # Note: parent_hashes is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
+        # Note: parent_hashes is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
+        default_factory=list,
+        description="The strict array of cryptographic hashes of parent execution nodes.",
     )
     node_hash: str | None = Field(
         min_length=1,
@@ -4960,6 +4992,7 @@ class DynamicRoutingManifest(CoreasonBaseState):
     @model_validator(mode="after")
     def sort_arrays(self) -> Self:
         object.__setattr__(self, "active_subgraphs", {k: sorted(v) for k, v in self.active_subgraphs.items()})
+
         return self
 
     @model_validator(mode="after")
@@ -6105,6 +6138,14 @@ class ActionSpaceManifest(CoreasonBaseState):
         )
         return self
 
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        if getattr(self, "ephemeral_partitions", None) is not None:
+            object.__setattr__(
+                self, "ephemeral_partitions", sorted(self.ephemeral_partitions, key=lambda x: x.partition_id)
+            )
+        return self
+
 
 class ProceduralMetadataManifest(CoreasonBaseState):
     """
@@ -6189,6 +6230,12 @@ class OntologicalSurfaceProjectionManifest(CoreasonBaseState):
             "available_procedural_manifolds",
             sorted(self.available_procedural_manifolds, key=lambda x: x.metadata_id),
         )
+        return self
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        if getattr(self, "available_procedural_manifolds", None) is not None:
+            object.__setattr__(self, "available_procedural_manifolds", sorted(self.available_procedural_manifolds, key=lambda x: x.metadata_id))
         return self
 
 
@@ -6299,10 +6346,15 @@ class MacroGridProfile(CoreasonBaseState):
     """
 
     layout_matrix: list[list[Annotated[str, StringConstraints(max_length=255)]]] = Field(
-        max_length=1000000000, description="A matrix defining the layout structure, using panel IDs."
+        # Note: layout_matrix is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
+        # Note: layout_matrix is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
+        max_length=1000000000,
+        description="A matrix defining the layout structure, using panel IDs.",
     )
     panels: list[AnyPanelProfile] = Field(
         description="The ordered array of topological UI panels physically rendered in the grid."
+        # Note: panels is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
+        # Note: panels is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     )
 
     @model_validator(mode="after")
@@ -6497,6 +6549,8 @@ class MigrationContract(CoreasonBaseState):
     @model_validator(mode="after")
     def sort_arrays(self) -> Self:
         object.__setattr__(self, "dropped_paths", sorted(self.dropped_paths))
+        if getattr(self, "dropped_paths", None) is not None:
+            object.__setattr__(self, "dropped_paths", sorted(self.dropped_paths))
         return self
 
 
@@ -6653,6 +6707,8 @@ class NeuralAuditAttestationReceipt(CoreasonBaseState):
             "layer_activations",
             {k: sorted(v, key=lambda x: x.feature_index) for k, v in self.layer_activations.items()},
         )
+        if getattr(self, "layer_activations", None) is not None:
+            object.__setattr__(self, "layer_activations", sorted(self.layer_activations, key=lambda x: x.layer_index))
         return self
 
 
@@ -6980,7 +7036,9 @@ class PersistenceCommitReceipt(BaseStateEvent):
         min_length=1,
         description="The internal StateDifferentialManifest CID that was flushed.",
     )
-    target_table_uri: str = Field(min_length=1, description="The specific table mutated.")
+    target_table_uri: Annotated[str, StringConstraints(max_length=2048)] = Field(
+        min_length=1, description="The specific table mutated."
+    )
 
 
 class PredictionMarketState(CoreasonBaseState):
@@ -7087,8 +7145,11 @@ class EpistemicSOPManifest(CoreasonBaseState):
         description="Dictionary mapping step_ids to SHA-256 hashes of strict Context-Free Grammars or JSON Schemas."
     )
     chronological_flow_edges: list[tuple[str, str]] = Field(description="The exact topological flow between step_ids.")
+    # Note: chronological_flow_edges is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     prm_evaluations: list["ProcessRewardContract"] = Field(
         description="The strict array of Process Reward Contracts evaluating the logic."
+        # Note: prm_evaluations is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
+        # Note: prm_evaluations is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     )
 
     @model_validator(mode="after")
@@ -7383,6 +7444,12 @@ class InformationFlowPolicy(CoreasonBaseState):
         )
         return self
 
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        if getattr(self, "latent_firewalls", None) is not None:
+            object.__setattr__(self, "latent_firewalls", sorted(self.latent_firewalls, key=lambda x: x.rule_id))
+        return self
+
 
 class SimulationConvergenceSLA(CoreasonBaseState):
     """
@@ -7609,7 +7676,10 @@ class SpatialKinematicActionIntent(CoreasonBaseState):
         description="The exact temporal duration of the movement, simulating human kinematics.",
     )
     bezier_control_points: list[SpatialCoordinateProfile] = Field(
-        default_factory=list, description="Waypoints for constructing non-linear, bot-evasive movement curves."
+        default_factory=list,
+        description="Waypoints for constructing non-linear, bot-evasive movement curves.",
+        # Note: bezier_control_points is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
+        # Note: bezier_control_points is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     )
     expected_visual_concept: str | None = Field(
         max_length=2000,
@@ -7708,6 +7778,8 @@ class StdioTransportProfile(CoreasonBaseState):
     type: Literal["stdio"] = Field(default="stdio", description="Type of transport.")
     command: str = Field(..., max_length=2000, description="The command executable to run (e.g., 'node', 'python').")
     args: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
+        # Note: args is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
+        # Note: args is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
         max_length=1000000000,
         default_factory=list,
         description="The explicit array of arguments to pass to the command.",
@@ -7825,6 +7897,10 @@ class StructuralCausalGraphProfile(CoreasonBaseState):
         object.__setattr__(
             self, "causal_edges", sorted(self.causal_edges, key=lambda x: (x.source_variable, x.target_variable))
         )
+        if getattr(self, "causal_edges", None) is not None:
+            object.__setattr__(
+                self, "causal_edges", sorted(self.causal_edges, key=lambda x: (x.source_node_id, x.target_node_id))
+            )
         return self
 
 
@@ -7869,6 +7945,10 @@ class HypothesisGenerationEvent(BaseStateEvent):
         object.__setattr__(
             self, "falsification_conditions", sorted(self.falsification_conditions, key=lambda x: x.condition_id)
         )
+        if getattr(self, "falsification_conditions", None) is not None:
+            object.__setattr__(
+                self, "falsification_conditions", sorted(self.falsification_conditions, key=lambda x: x.condition_id)
+            )
         return self
 
 
@@ -7899,7 +7979,9 @@ class SyntheticGenerationProfile(CoreasonBaseState):
         description="Unique identifier for this simulation profile.",
     )
     manifold_sla: GenerativeManifoldSLA = Field(description="The structural topological gas limit.")
-    target_schema_ref: str = Field(min_length=1, description="The string name of the Pydantic class to synthesize.")
+    target_schema_ref: Annotated[str, StringConstraints(max_length=2048)] = Field(
+        min_length=1, description="The string name of the Pydantic class to synthesize."
+    )
 
 
 class System1ReflexPolicy(CoreasonBaseState):
@@ -7958,7 +8040,7 @@ class System2RemediationIntent(CoreasonBaseState):
         min_length=1,
         description="A strictly typed array of RFC 6902 JSON Pointers isolating the exact topological coordinate of the hallucination.",
     )
-    remediation_prompt: str = Field(
+    remediation_prompt: Annotated[str, StringConstraints(max_length=100000)] = Field(
         min_length=1, description="The deterministic, non-monotonic natural-language constraint the agent must satisfy."
     )
 
@@ -8076,6 +8158,12 @@ class AuctionState(CoreasonBaseState):
         object.__setattr__(
             self, "bids", sorted(self.bids, key=lambda bid: (bid.estimated_cost_magnitude, bid.agent_id))
         )
+        return self
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        if getattr(self, "bids", None) is not None:
+            object.__setattr__(self, "bids", sorted(self.bids, key=lambda x: x.agent_id))
         return self
 
 
@@ -8223,6 +8311,8 @@ class TheoryOfMindSnapshot(CoreasonBaseState):
     def sort_arrays(self) -> Self:
         object.__setattr__(self, "assumed_shared_beliefs", sorted(self.assumed_shared_beliefs))
         object.__setattr__(self, "identified_knowledge_gaps", sorted(self.identified_knowledge_gaps))
+        if getattr(self, "identified_knowledge_gaps", None) is not None:
+            object.__setattr__(self, "identified_knowledge_gaps", sorted(self.identified_knowledge_gaps))
         return self
 
     empathy_confidence_score: float = Field(
@@ -8545,7 +8635,7 @@ class FederatedPeftContract(CoreasonBaseState):
     Hot-Swapping, GPU VRAM Management
     """
 
-    adapter_merkle_root: str = Field(
+    adapter_merkle_root: Annotated[str, StringConstraints(max_length=128)] = Field(
         pattern="^[a-f0-9]{64}$",
         description="CoReason Shared Kernel Ontology: The tamper-evident SHA-256 hash of the exact safetensors weight matrix.",
     )
@@ -8756,7 +8846,7 @@ class AgentAttestationReceipt(CoreasonBaseState):
     developer_signature: str = Field(
         max_length=2000, description="The cryptographic signature of the developer/vendor."
     )
-    capability_merkle_root: str = Field(
+    capability_merkle_root: Annotated[str, StringConstraints(max_length=128)] = Field(
         pattern="^[a-f0-9]{64}$", description="The SHA-256 Merkle root of the agent's verified semantic capabilities."
     )
     credential_presentations: list[VerifiableCredentialPresentationReceipt] = Field(
@@ -8769,6 +8859,10 @@ class AgentAttestationReceipt(CoreasonBaseState):
         object.__setattr__(
             self, "credential_presentations", sorted(self.credential_presentations, key=lambda x: x.issuer_did)
         )
+        if getattr(self, "credential_presentations", None) is not None:
+            object.__setattr__(
+                self, "credential_presentations", sorted(self.credential_presentations, key=lambda x: x.issuer_did)
+            )
         return self
 
 
@@ -9085,6 +9179,16 @@ class DAGTopologyManifest(BaseTopologyManifest):
                 )
         return self
 
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        if getattr(self, "speculative_boundaries", None) is not None:
+            object.__setattr__(
+                self, "speculative_boundaries", sorted(self.speculative_boundaries, key=lambda x: x.boundary_id)
+            )
+        if getattr(self, "edges", None) is not None:
+            object.__setattr__(self, "edges", sorted(self.edges))
+        return self
+
 
 class DigitalTwinTopologyManifest(BaseTopologyManifest):
     """
@@ -9214,6 +9318,14 @@ class EvolutionaryTopologyManifest(BaseTopologyManifest):
         )
         return self
 
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        if getattr(self, "fitness_objectives", None) is not None:
+            object.__setattr__(
+                self, "fitness_objectives", sorted(self.fitness_objectives, key=lambda x: x.target_metric)
+            )
+        return self
+
 
 class SMPCTopologyManifest(BaseTopologyManifest):
     """
@@ -9252,6 +9364,12 @@ class SMPCTopologyManifest(BaseTopologyManifest):
         default=None,
         description="The pre-flight execution gate forcing agents to mathematically align their latent semantics before participating in the topology.",
     )
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        if getattr(self, "participant_node_ids", None) is not None:
+            object.__setattr__(self, "participant_node_ids", sorted(self.participant_node_ids))
+        return self
 
 
 class SwarmTopologyManifest(BaseTopologyManifest):
@@ -9306,6 +9424,10 @@ class SwarmTopologyManifest(BaseTopologyManifest):
             self, "active_prediction_markets", sorted(self.active_prediction_markets, key=lambda x: x.market_id)
         )
         object.__setattr__(self, "resolved_markets", sorted(self.resolved_markets, key=lambda x: x.market_id))
+        if getattr(self, "active_prediction_markets", None) is not None:
+            object.__setattr__(
+                self, "active_prediction_markets", sorted(self.active_prediction_markets, key=lambda x: x.market_id)
+            )
         return self
 
 
@@ -9474,6 +9596,12 @@ class WorkflowManifest(CoreasonBaseState):
             object.__setattr__(
                 self, "allowed_information_classifications", sorted(self.allowed_information_classifications)
             )
+        if getattr(self, "allowed_information_classifications", None) is not None:
+            object.__setattr__(
+                self,
+                "allowed_information_classifications",
+                sorted(self.allowed_information_classifications, key=lambda x: str(x.value)) if self.allowed_information_classifications else [],
+            )
         return self
 
     @model_validator(mode="after")
@@ -9513,10 +9641,10 @@ class WetwareAttestationContract(CoreasonBaseState):
     mechanism: AttestationMechanismProfile = Field(
         ..., description="The SOTA cryptographic mechanism used to generate the proof."
     )
-    did_subject: str = Field(
+    did_subject: Annotated[str, StringConstraints(max_length=1024)] = Field(
         ..., pattern="^did:[a-z0-9]+:.*$", description="The Decentralized Identifier (DID) of the human operator."
     )
-    cryptographic_payload: str = Field(
+    cryptographic_payload: Annotated[str, StringConstraints(max_length=100000)] = Field(
         ...,
         pattern="^[A-Za-z0-9+/=_-]+$",
         description="The strictly formatted (Base64url/Hex/Multibase) signature or proof.",
@@ -9633,6 +9761,14 @@ class EpistemicQuarantineSnapshot(CoreasonBaseState):
         object.__setattr__(
             self, "capability_attestations", sorted(self.capability_attestations, key=lambda x: x.attestation_id)
         )
+        if getattr(self, "theory_of_mind_models", None) is not None:
+            object.__setattr__(
+                self, "theory_of_mind_models", sorted(self.theory_of_mind_models, key=lambda x: x.target_agent_id)
+            )
+        if getattr(self, "capability_attestations", None) is not None:
+            object.__setattr__(
+                self, "capability_attestations", sorted(self.capability_attestations, key=lambda x: x.attestation_id)
+            )
         return self
 
 
@@ -9748,6 +9884,10 @@ class BeliefMutationEvent(BaseStateEvent):
         object.__setattr__(
             self, "causal_attributions", sorted(self.causal_attributions, key=lambda x: x.source_event_id)
         )
+        if getattr(self, "causal_attributions", None) is not None:
+            object.__setattr__(
+                self, "causal_attributions", sorted(self.causal_attributions, key=lambda x: x.source_event_id)
+            )
         return self
 
     @field_validator("payload", mode="before")
@@ -9948,6 +10088,7 @@ class EpistemicChainGraphState(CoreasonBaseState):
                 self.semantic_leaves, key=lambda x: (x.source_concept_id, x.directed_edge_type, x.target_concept_id)
             ),
         )
+
         return self
 
 
@@ -9966,6 +10107,12 @@ class CognitivePredictionReceipt(BaseStateEvent):
     source_chain_id: str = Field(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
     target_source_concept: str = Field(max_length=2000)
     predicted_top_k_tokens: list[Annotated[str, StringConstraints(max_length=255)]] = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        if getattr(self, "predicted_top_k_tokens", None) is not None:
+            object.__setattr__(self, "predicted_top_k_tokens", sorted(self.predicted_top_k_tokens))
+        return self
 
 
 class IntentClassificationReceipt(BaseStateEvent):
@@ -10060,6 +10207,7 @@ class EpistemicDomainGraphManifest(CoreasonBaseState):
                 self.verified_axioms, key=lambda x: (x.source_concept_id, x.directed_edge_type, x.target_concept_id)
             ),
         )
+
         return self
 
 
@@ -10089,7 +10237,9 @@ class EpistemicTopologicalProofManifest(CoreasonBaseState):
         description="A Content Identifier (CID) for this specific topological proof.",
     )
     axiomatic_chain: list[EpistemicAxiomState] = Field(
-        min_length=1, description="The strictly ordered sequence of axioms forming the reasoning path."
+        min_length=1,
+        description="The strictly ordered sequence of axioms forming the reasoning path.",
+        # Note: axiomatic_chain is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     )
 
 
@@ -10443,6 +10593,7 @@ class CognitiveRewardEvaluationReceipt(BaseStateEvent):
                 self.extracted_axioms, key=lambda x: (x.source_concept_id, x.directed_edge_type, x.target_concept_id)
             ),
         )
+
         return self
 
 
@@ -10615,6 +10766,7 @@ class ContinuousObservationStream(CoreasonBaseState):
         description="A Content Identifier (CID) for the continuous observation stream."
     )
     token_buffer: list[Annotated[str, StringConstraints(max_length=10000)]] = Field(
+        # Note: token_buffer is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
         max_length=1000000,
         description="The array of ingested tokens representing the continuous stream. AGENT INSTRUCTION: Topological Exemption applied. Do NOT sort this array, as its chronological sequence is its mathematical state.",
     )
@@ -10771,6 +10923,12 @@ class EpistemicLedgerState(CoreasonBaseState):
         object.__setattr__(self, "active_rollbacks", sorted(self.active_rollbacks, key=lambda x: x.request_id))
         object.__setattr__(self, "migration_contracts", sorted(self.migration_contracts, key=lambda x: x.contract_id))
         object.__setattr__(self, "active_cascades", sorted(self.active_cascades, key=lambda x: x.cascade_id))
+        return self
+
+    @model_validator(mode="after")
+    def sort_arrays(self) -> Self:
+        if getattr(self, "history", None) is not None:
+            object.__setattr__(self, "history", sorted(self.history, key=lambda x: x.timestamp))
         return self
 
 
