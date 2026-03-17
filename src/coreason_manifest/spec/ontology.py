@@ -73,13 +73,45 @@ type CrossoverMechanismProfile = Literal["uniform_blend", "single_point", "heuri
 
 class InformationClassificationProfile(StrEnum):
     """
-    Standardized Information Flow Control (IFC) lattice boundaries.
+    AGENT INSTRUCTION: Implements the Bell-LaPadula Model and Lattice-Based Access Control (LBAC), establishing the foundational mathematical axis for Information Flow Control across the distributed swarm.
+
+    CAUSAL AFFORDANCE: Physically authorizes or severs the projection of semantic payloads. By exposing rich comparison operators (e.g., `<=`), it enables the orchestrator's verification engine to natively execute mathematical dominance checks between a payload's classification and an agent's clearance partition.
+
+    EPISTEMIC BOUNDS: Constrained to a strict, 4-dimensional string literal space to prevent the hallucination of unauthorized clearance levels. The internal `clearance_level` property maps these strings to an immutable integer hierarchy [0, 1, 2, 3], guaranteeing deterministic threshold evaluation.
+
+    MCP ROUTING TRIGGERS: Bell-LaPadula Model, Lattice-Based Access Control, Mandatory Access Control, Information Flow Control, Epistemic Quarantine
     """
 
     PUBLIC = "public"
     INTERNAL = "internal"
     CONFIDENTIAL = "confidential"
     RESTRICTED = "restricted"
+
+    @property
+    def clearance_level(self) -> int:
+        """Map the semantic string to a discrete scalar magnitude for lattice dominance checks."""
+        mapping = {"public": 0, "internal": 1, "confidential": 2, "restricted": 3}
+        return mapping[self.value]
+
+    def __lt__(self, other: Any) -> bool:
+        if not isinstance(other, InformationClassificationProfile):
+            return NotImplemented
+        return self.clearance_level < other.clearance_level
+
+    def __le__(self, other: Any) -> bool:
+        if not isinstance(other, InformationClassificationProfile):
+            return NotImplemented
+        return self.clearance_level <= other.clearance_level
+
+    def __gt__(self, other: Any) -> bool:
+        if not isinstance(other, InformationClassificationProfile):
+            return NotImplemented
+        return self.clearance_level > other.clearance_level
+
+    def __ge__(self, other: Any) -> bool:
+        if not isinstance(other, InformationClassificationProfile):
+            return NotImplemented
+        return self.clearance_level >= other.clearance_level
 
 
 type FaultCategoryProfile = Literal[
@@ -117,8 +149,13 @@ type ProfileIdentifierState = Annotated[
 
 class RiskLevelPolicy(StrEnum):
     """
-    Cryptographic risk classification for governance.
-    Order matters: safe < standard < critical.
+    AGENT INSTRUCTION: Formalizes Quantitative Risk Assessment and Utility Theory, translating qualitative human threat vectors into computable scalar magnitudes that dictate systemic halting thresholds.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator's control theory loop to measure the aggregate expected utility loss of a proposed topology. It serves as the physical threshold that triggers hardware circuit breakers or forced escalation overrides.
+
+    EPISTEMIC BOUNDS: The semantic strings are mathematically locked to an absolute integer space via the `weight` property (0, 1, 2). Rich comparison methods explicitly bridge the string definitions to integer evaluations, guaranteeing zero variance during distributed ledger verification.
+
+    MCP ROUTING TRIGGERS: Quantitative Risk Assessment, Game Theory, Cybernetic Governance, Structural Circuit Breaker, Utility Theory
     """
 
     SAFE = "safe"
@@ -133,6 +170,26 @@ class RiskLevelPolicy(StrEnum):
         if self == RiskLevelPolicy.STANDARD:
             return 1
         return 2
+
+    def __lt__(self, other: Any) -> bool:
+        if not isinstance(other, RiskLevelPolicy):
+            return NotImplemented
+        return self.weight < other.weight
+
+    def __le__(self, other: Any) -> bool:
+        if not isinstance(other, RiskLevelPolicy):
+            return NotImplemented
+        return self.weight <= other.weight
+
+    def __gt__(self, other: Any) -> bool:
+        if not isinstance(other, RiskLevelPolicy):
+            return NotImplemented
+        return self.weight > other.weight
+
+    def __ge__(self, other: Any) -> bool:
+        if not isinstance(other, RiskLevelPolicy):
+            return NotImplemented
+        return self.weight >= other.weight
 
 
 type SanitizationActionIntent = Literal["redact", "hash", "drop_event", "trigger_quarantine"]
@@ -149,7 +206,15 @@ type SpanStatusCodeProfile = Literal["unset", "ok", "error"]
 
 
 class TensorStructuralFormatProfile(StrEnum):
-    """Mathematical tensor types for tensor payloads."""
+    """
+    AGENT INSTRUCTION: Mathematically aligns abstract Tensor Calculus with rigid Von Neumann Memory Hierarchy limits and IEEE 754 Floating-Point Arithmetic physics.
+
+    CAUSAL AFFORDANCE: Empowers the orchestrator to preemptively calculate exact thermodynamic and spatial memory exhaustion limits (VRAM footprint) prior to authorizing the download or projection of N-dimensional tensor payloads.
+
+    EPISTEMIC BOUNDS: The `bytes_per_element` property physically clamps array allocations to rigid hardware byte multiples (e.g., 4 bytes for float32). The literal automaton prevents the execution graph from hallucinating non-standard or unsupported silicon data types.
+
+    MCP ROUTING TRIGGERS: IEEE 754, Von Neumann Architecture, Tensor Calculus, GPU VRAM Allocation, Memory Hierarchy
+    """
 
     FLOAT32 = "float32"
     FLOAT64 = "float64"
@@ -5839,12 +5904,13 @@ class MCPCapabilityWhitelistPolicy(CoreasonBaseState):
 
 class MCPServerManifest(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Represents a cryptographically verifiable Distributed RPC substrate
-    mapping, binding an external Model Context Protocol (MCP) manifold into the swarm's
-    local topology.
+    AGENT INSTRUCTION: Represents a cryptographically verifiable Distributed RPC substrate mapping within the Actor Model, binding an external Model Context Protocol (MCP) manifold into the swarm's local topology under strict Object-Capability (OCap) rules.
 
-    This unified manifest merges robust polymorphic transport capabilities with strict
-    Zero-Trust Architecture (ZTA) and LBAC security boundaries.
+    CAUSAL AFFORDANCE: Authorizes the orchestrator to physically bridge a zero-trust network boundary, establishing a polymorphic communication channel (stdio, sse, or http) to perceive external resources and actuate remote functions.
+
+    EPISTEMIC BOUNDS: The `server_id` is locked to a 128-char CID regex (`^[a-zA-Z0-9_.:-]+$`). The `@model_validator` `enforce_coreason_did_authority` physically intercepts capability injection lacking a valid `did:coreason:` attestation. The `enforce_stdio_supply_chain_lock` strictly mandates a `binary_hash` (SHA-256) for local process generation, sealing the execution envelope against supply-chain poisoning.
+
+    MCP ROUTING TRIGGERS: Actor Model, Object Capability Model, Zero-Trust Architecture, Distributed RPC, Supply-Chain Isolation
     """
 
     server_id: str = Field(
@@ -5879,6 +5945,20 @@ class MCPServerManifest(CoreasonBaseState):
         if not self.attestation_receipt.issuer_did.startswith("did:coreason:"):
             raise ValueError(
                 "UNAUTHORIZED MCP MOUNT: The presented Verifiable Credential is not signed by a valid CoReason issuer DID. The orchestrator MUST immediately emit a QuarantineIntent and terminate the handshake."
+            )
+        return self
+
+    @model_validator(mode="after")
+    def enforce_stdio_supply_chain_lock(self) -> Self:
+        """
+        AGENT INSTRUCTION: Mathematically prove structural safety prior to host OS allocation.
+        If a local POSIX stream (stdio) is requested, an explicit cryptographic hash of the
+        binary MUST be provided to prevent Arbitrary Code Execution (ACE) via file-swapping.
+        """
+        if getattr(self.transport, "type", None) == "stdio" and not self.binary_hash:
+            raise ValueError(
+                "SUPPLY CHAIN VULNERABILITY: An MCPServerManifest utilizing a StdioTransportProfile "
+                "MUST provide a cryptographic 'binary_hash' to prevent arbitrary code execution attacks on the host OS."
             )
         return self
 
@@ -6254,21 +6334,21 @@ class MacroGridProfile(CoreasonBaseState):
 
 class MarketContract(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Enforces the baseline Proof-of-Stake (PoS) economic collateralization required for an agent to participate in the epistemic market.
+    AGENT INSTRUCTION: Enforces Algorithmic Mechanism Design and Proof-of-Stake (PoS) economic collateralization required for an agent to participate in the epistemic market.
 
     CAUSAL AFFORDANCE: Unlocks the ability for the orchestrator to computationally slash Byzantine or hallucinating nodes, ensuring a strict thermodynamic cost to semantic drift.
 
-    EPISTEMIC BOUNDS: Physically restricts the mathematical invariant where `slashing_penalty` <= `minimum_collateral` via an `@model_validator`, bounding both fields to non-negative floats (`ge=0.0`).
+    EPISTEMIC BOUNDS: Physically restricts the mathematical invariant where `slashing_penalty` <= `minimum_collateral` via an `@model_validator`. Downstream agents must secure this collateral before execution. To prevent floating-point consensus vulnerabilities across the distributed ledger, both bounds are strictly enforced as atomic integer magnitudes (`ge=0`).
 
     MCP ROUTING TRIGGERS: Proof-of-Stake, Slashing Condition, Byzantine Fault Tolerance, Economic Escrow
     """
 
-    minimum_collateral: float = Field(
-        le=1000000000.0, ge=0.0, description="The minimum amount of token collateral held in escrow."
+    minimum_collateral: int = Field(
+        le=1000000000, ge=0, description="The minimum atomic token collateral held in escrow."
     )
-    "\n    MATHEMATICAL BOUNDARY: Must be >= 0.0. Downstream agents must secure this collateral before execution.\n    "
-    slashing_penalty: float = Field(ge=0.0, description="The exact token amount slashed for Byzantine faults.")
-    "\n    MATHEMATICAL BOUNDARY: Must be >= 0.0 AND mathematically less than or equal to minimum_collateral.\n    "
+    slashing_penalty: int = Field(
+        ge=0, description="The exact atomic token amount slashed for Byzantine faults."
+    )
 
     @model_validator(mode="after")
     def _enforce_economic_escrow_invariant(self) -> Self:
@@ -7992,22 +8072,13 @@ class TaskAwardReceipt(CoreasonBaseState):
 
 class AuctionState(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: A frozen, declarative snapshot of the N-dimensional order book
-    tracking the ongoing convergence of an algorithmic spot market auction. As a ...State
-    suffix, this is a declarative, frozen coordinate.
+    AGENT INSTRUCTION: A frozen, declarative snapshot of the N-dimensional order book tracking the ongoing convergence of an algorithmic spot market auction. As a ...State suffix, this is a declarative, frozen coordinate.
 
-    CAUSAL AFFORDANCE: Aggregates incoming AgentBidIntent vectors against the foundational
-    TaskAnnouncementIntent (announcement), serving as the deterministic state space for the
-    orchestrator's clearing function. The optional award (TaskAwardReceipt) records the
-    final settlement.
+    CAUSAL AFFORDANCE: Aggregates incoming AgentBidIntent vectors against the foundational TaskAnnouncementIntent (announcement), serving as the deterministic state space for the orchestrator's clearing function. The optional award (TaskAwardReceipt) records the final settlement.
 
-    EPISTEMIC BOUNDS: To guarantee RFC 8785 Canonical Hashing across the zero-trust swarm,
-    the bids array is deterministically sorted by agent_id via a @model_validator. Market
-    liveness is physically bounded by clearing_timeout (le=1000000000, gt=0) and
-    minimum_tick_size (le=1000000000.0, gt=0.0).
+    EPISTEMIC BOUNDS: Market liveness is physically bounded by `clearing_timeout` (`le=1000000000`, `gt=0`), defining the absolute execution ceiling before forced timeout. The `minimum_tick_size` is clamped (`gt=0`) as an integer to prevent floating-point consensus failures. To guarantee RFC 8785 Canonical Hashing while preserving market physics, the `bids` array is deterministically sorted by `estimated_cost_magnitude` (price) and then by `agent_id`.
 
-    MCP ROUTING TRIGGERS: Order Book Snapshot, Market Convergence, RFC 8785
-    Canonicalization, Liquidity Aggregation, Declarative Coordinate
+    MCP ROUTING TRIGGERS: Order Book Snapshot, Market Convergence, RFC 8785 Canonicalization, Liquidity Aggregation, Declarative Coordinate
     """
 
     announcement: TaskAnnouncementIntent = Field(description="The original call for proposals.")
@@ -8015,15 +8086,19 @@ class AuctionState(CoreasonBaseState):
     award: TaskAwardReceipt | None = Field(
         default=None, description="The final cryptographic receipt of the auction, if resolved."
     )
-    clearing_timeout: int = Field(le=1000000000, gt=0, description="Maximum wait time for auction settlement.")
-    "\n    MATHEMATICAL BOUNDARY: Must be > 0. Defines the absolute execution ceiling before forced timeout.\n    "
-    minimum_tick_size: float = Field(le=1000000000.0, gt=0.0, description="The smallest allowable bid increment.")
-    "\n    MATHEMATICAL BOUNDARY: Must be > 0.0. Negative or zero tick sizes will instantly trigger validation faults.\n    "
+    clearing_timeout: int = Field(
+        le=1000000000, gt=0, description="Maximum wait time for auction settlement."
+    )
+    minimum_tick_size: int = Field(
+        le=1000000000, gt=0, description="The smallest allowable discrete bid increment."
+    )
 
     @model_validator(mode="after")
     def sort_bids(self) -> Self:
-        """Mathematically sort bids by agent_id for deterministic hashing."""
-        object.__setattr__(self, "bids", sorted(self.bids, key=lambda bid: bid.agent_id))
+        """Mathematically sort bids by price then agent_id for deterministic hashing and correct supply curve geometry."""
+        object.__setattr__(
+            self, "bids", sorted(self.bids, key=lambda bid: (bid.estimated_cost_magnitude, bid.agent_id))
+        )
         return self
 
 
@@ -8952,24 +9027,13 @@ class CouncilTopologyManifest(BaseTopologyManifest):
 
 class DAGTopologyManifest(BaseTopologyManifest):
     """
-    AGENT INSTRUCTION: Formalizes a Directed Acyclic Graph (DAG) for deterministic,
-    chronologically ordered task execution, guaranteeing strict topological sorting of
-    operations. As a ...Manifest suffix, this defines a frozen, N-dimensional
-    coordinate state.
+    AGENT INSTRUCTION: Formalizes a Directed Acyclic Graph (DAG) for deterministic, chronologically ordered task execution, guaranteeing strict topological sorting of operations. As a ...Manifest suffix, this defines a frozen, N-dimensional coordinate state.
 
-    CAUSAL AFFORDANCE: Forces the orchestrator to evaluate causal edges
-    (default_factory=list) and execute DFS loop-detection to verify the allow_cycles
-    constraint (default=False) before initiating kinetic node compute. The backpressure
-    (BackpressurePolicy) governs edge flow control.
+    CAUSAL AFFORDANCE: Forces the orchestrator to evaluate causal edges and execute rigorous DFS loop-detection to verify the `allow_cycles` constraint before initiating kinetic node compute. The backpressure governs edge flow control.
 
-    EPISTEMIC BOUNDS: Algorithmic complexity is mathematically bound by max_depth
-    (ge=1, le=256) and max_fan_out (ge=1, le=1024), preventing recursive token
-    exhaustion. The @model_validator sort_dag_topology_arrays deterministically sorts
-    edges for RFC 8785 hashing. A second @model_validator verify_edges_exist validates
-    edge nodes in the registry and executes DFS cycle detection.
+    EPISTEMIC BOUNDS: Algorithmic complexity is mathematically bound by `max_depth` (`ge=1`, `le=256`) to prevent runaway agentic cyclic recursion, and `max_fan_out` (`ge=1`, `le=1024`) to limit horizontal compute explosion. The `@model_validator` actively measures these constraints during traversal to guarantee physical adherence. Edges are deterministically sorted for RFC 8785 hashing.
 
-    MCP ROUTING TRIGGERS: Directed Acyclic Graph, Kahn's Algorithm, Topological Sort,
-    Causal Edge, Algorithmic Complexity
+    MCP ROUTING TRIGGERS: Directed Acyclic Graph, Kahn's Algorithm, Topological Sort, Causal Edge, Algorithmic Complexity
     """
 
     type: Literal["dag"] = Field(default="dag", description="Discriminator for a DAG topology.")
@@ -8983,10 +9047,7 @@ class DAGTopologyManifest(BaseTopologyManifest):
         default=None, description="Declarative backpressure constraints for the graph edges."
     )
     max_depth: int = Field(ge=1, le=256, description="The maximum recursive depth of the routing DAG.")
-    "\n    TOPOLOGICAL BOUNDARY: Must be >= 1 and <= 256. Prevents runaway agentic cyclic recursion.\n    "
     max_fan_out: int = Field(ge=1, le=1024, description="The maximum number of parallel child nodes.")
-    "\n    TOPOLOGICAL BOUNDARY: Must be >= 1 and <= 1024. Limits horizontal compute explosion.\n    "
-
     speculative_boundaries: list[SpeculativeExecutionBoundary] = Field(
         default_factory=list, description="The deterministic speculative boundaries executing within the DAG."
     )
@@ -9000,39 +9061,63 @@ class DAGTopologyManifest(BaseTopologyManifest):
         return self
 
     @model_validator(mode="after")
-    def verify_edges_exist(self) -> Self:
+    def verify_edges_exist_and_compute_bounds(self) -> Self:
         if self.lifecycle_phase == "draft":
             return self
+
+        adj: dict[NodeIdentifierState, list[NodeIdentifierState]] = {node_id: [] for node_id in self.nodes}
+        in_degree: dict[NodeIdentifierState, int] = {node_id: 0 for node_id in self.nodes}
+
         for source, target in self.edges:
             if source not in self.nodes:
                 raise ValueError(f"Edge source '{source}' does not exist in nodes registry.")
             if target not in self.nodes:
                 raise ValueError(f"Edge target '{target}' does not exist in nodes registry.")
+            adj[source].append(target)
+            in_degree[target] += 1
+
+        # Validate max_fan_out
+        for node, neighbors in adj.items():
+            if len(neighbors) > self.max_fan_out:
+                raise ValueError(f"Topological Violation: Node '{node}' exceeds max_fan_out of {self.max_fan_out}.")
+
         if not self.allow_cycles:
-            adj: dict[NodeIdentifierState, list[NodeIdentifierState]] = {node_id: [] for node_id in self.nodes}
-            for source, target in self.edges:
-                adj[source].append(target)
             visited: set[NodeIdentifierState] = set()
             recursion_stack: set[NodeIdentifierState] = set()
+            depth_memo: dict[NodeIdentifierState, int] = {}
+
+            def dfs(curr: NodeIdentifierState) -> int:
+                if curr in recursion_stack:
+                    raise ValueError("Graph contains cycles but allow_cycles is False.")
+                if curr in visited:
+                    return depth_memo.get(curr, 1)
+
+                visited.add(curr)
+                recursion_stack.add(curr)
+
+                max_child_depth = 0
+                for neighbor in adj[curr]:
+                    max_child_depth = max(max_child_depth, dfs(neighbor))
+
+                recursion_stack.remove(curr)
+                current_depth = 1 + max_child_depth
+                depth_memo[curr] = current_depth
+                return current_depth
+
+            max_calculated_depth = 0
             for start_node in self.nodes:
-                if start_node in visited:
-                    continue
-                stack = [(start_node, iter(adj[start_node]))]
-                visited.add(start_node)
-                recursion_stack.add(start_node)
-                while stack:
-                    curr, neighbors = stack[-1]
-                    try:
-                        neighbor = next(neighbors)
-                        if neighbor not in visited:
-                            visited.add(neighbor)
-                            recursion_stack.add(neighbor)
-                            stack.append((neighbor, iter(adj[neighbor])))
-                        elif neighbor in recursion_stack:
-                            raise ValueError("Graph contains cycles but allow_cycles is False.")
-                    except StopIteration:
-                        recursion_stack.remove(curr)
-                        stack.pop()
+                if in_degree[start_node] == 0:  # Start from roots
+                    max_calculated_depth = max(max_calculated_depth, dfs(start_node))
+
+            # Handle isolated cyclic components if no roots exist
+            if max_calculated_depth == 0 and self.nodes:
+                for start_node in self.nodes:
+                    if start_node not in visited:
+                        max_calculated_depth = max(max_calculated_depth, dfs(start_node))
+
+            if max_calculated_depth > self.max_depth:
+                raise ValueError(f"Topological Violation: Graph depth {max_calculated_depth} exceeds max_depth of {self.max_depth}.")
+
         return self
 
 
@@ -9363,34 +9448,23 @@ type AnyTopologyManifest = Annotated[
 
 class WorkflowManifest(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Formalizes the Topos Theory representation of a fully
-    encapsulated swarm environment, serving as the macroscopic topological
-    envelope for the entire execution payload. As a ...Manifest suffix, this is
-    a frozen N-dimensional coordinate state.
+    AGENT INSTRUCTION: Formalizes the Topos Theory representation of a fully encapsulated swarm environment, serving as the macroscopic topological envelope for the entire execution payload and enforcing the Viable System Model.
 
-    CAUSAL AFFORDANCE: Physically initializes the execution DAG via topology
-    (AnyTopologyManifest), bounding thermodynamic capacity through governance
-    (GlobalGovernancePolicy | None). Cryptographically anchored to
-    genesis_provenance (EpistemicProvenanceReceipt). Federation is controlled
-    via federated_discovery, federated_sla, and pq_signature. Enterprise
-    isolation via tenant_id/session_id (max_length=255).
+    CAUSAL AFFORDANCE: Physically initializes the execution DAG. This structural lock guarantees that any graph execution is mathematically anchored to a CoReason Genesis Block via `genesis_provenance`; stripping this violates the Topological Consistency of the Shared Kernel. Bounding thermodynamic capacity through governance constraints.
 
-    EPISTEMIC BOUNDS: The @model_validator sort_arrays deterministically sorts
-    allowed_information_classifications (list | None) for RFC 8785 canonical
-    hashing. manifest_version (SemanticVersionState) pins the schema.
+    EPISTEMIC BOUNDS: The `@model_validator` `sort_arrays` deterministically sorts `allowed_information_classifications` for RFC 8785 canonical hashing. The `@model_validator` `enforce_lbac_dominance` ensures network interlock, mathematically proving that any federated SLA clearance level is <= the local workflow bounds. The `manifest_version` strictly pins the schema.
 
-    MCP ROUTING TRIGGERS: Topos Theory, Cybernetics, Execution Envelope,
-    Macroscopic Topology, Viable System Model
+    MCP ROUTING TRIGGERS: Topos Theory, Cybernetics, Execution Envelope, Macroscopic Topology, Viable System Model
     """
 
     genesis_provenance: EpistemicProvenanceReceipt = Field(
-        description='"""AGENT INSTRUCTION: This structural lock guarantees that any graph execution is mathematically anchored to a CoReason Genesis Block. Stripping this field violates the Topological Consistency of the Shared Kernel."""'
+        description="The cryptographic chain of custody anchoring this execution graph to its genesis block."
     )
     manifest_version: SemanticVersionState = Field(
         description="The semantic version of this workflow manifestation schema."
     )
     topology: AnyTopologyManifest = Field(
-        description="The underlying topology governing execution routing. [SITD-Beta: Defeasible Merkle-DAG Causal Bounding]"
+        description="The underlying topology governing execution routing."
     )
     governance: GlobalGovernancePolicy | None = Field(
         default=None, description="Macro-economic circuit breakers and TTL limits for the swarm."
@@ -9433,6 +9507,19 @@ class WorkflowManifest(CoreasonBaseState):
             object.__setattr__(
                 self, "allowed_information_classifications", sorted(self.allowed_information_classifications)
             )
+        return self
+
+    @model_validator(mode="after")
+    def enforce_lbac_dominance(self) -> Self:
+        """Mathematically interlocks the local LBAC bounds with federated SLA egress bounds."""
+        if self.federated_sla is not None and self.allowed_information_classifications:
+            max_local_clearance = max(
+                [profile.clearance_level for profile in self.allowed_information_classifications]
+            )
+            if self.federated_sla.max_permitted_classification.clearance_level > max_local_clearance:
+                raise ValueError(
+                    "LBAC Boundary Breach: The federated SLA permits an information clearance level higher than the local workflow's maximum allowed classification."
+                )
         return self
 
 

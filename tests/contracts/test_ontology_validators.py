@@ -599,6 +599,7 @@ def test_mcpservermanifest_enforce_did() -> None:
     manifest = MCPServerManifest(
         server_id="server_1",
         transport=StdioTransportProfile(command="cmd", args=[]),
+        binary_hash="a" * 64,
         capability_whitelist=MCPCapabilityWhitelistPolicy(),
         attestation_receipt=vc_valid,
     )
