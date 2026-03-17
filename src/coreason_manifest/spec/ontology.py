@@ -505,7 +505,7 @@ class ScalePolicy(CoreasonBaseState):
     """
 
     type: Literal["linear", "log", "time", "ordinal", "nominal"] = Field(
-        description="The mathematical scale mapping metrics to pixels."
+        description="The strictly typed mathematical mapping function distorting metrics into Euclidean pixel space."
     )
     domain_min: float | None = Field(
         le=1000000000.0, default=None, description="The optional minimum bound of the scale domain."
@@ -770,12 +770,14 @@ class PermissionBoundaryPolicy(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Zero-Trust Architecture, Network Egress Filtering, Capability-Based Security, mTLS Handshake, Hash Poisoning Prevention
     """
 
-    network_access: bool = Field(description="Whether the tool is permitted to make external network requests.")
+    network_access: bool = Field(
+        description="The absolute Boolean gate authorizing or severing exogenous network egress."
+    )
     allowed_domains: list[Annotated[str, StringConstraints(max_length=2000)]] | None = Field(
         default=None, description="The explicit whitelist of allowed network domains if network access is true."
     )
     file_system_mutation_forbidden: bool = Field(
-        description="True if the tool is strictly forbidden from writing to the disk."
+        description="The strict Boolean constraint severing local disk I/O capabilities."
     )
     auth_requirements: list[Annotated[str, StringConstraints(max_length=2000)]] | None = Field(
         default=None,
@@ -1127,7 +1129,7 @@ class ConstitutionalPolicy(CoreasonBaseState):
         max_length=2000, description="The definitive causal constraint or heuristic boundary enforced by this rule."
     )
     severity: Literal["low", "medium", "high", "critical"] = Field(
-        description="Severity level if the rule is violated."
+        description="The categorical magnitude of the systemic breach enacted upon rule violation."
     )
     forbidden_intents: list[Annotated[str, StringConstraints(min_length=1)]] = Field(
         max_length=1000000000, description="The explicit, structurally bounded set of forbidden semantic intents."
@@ -1196,7 +1198,9 @@ class AdjudicationRubricProfile(CoreasonBaseState):
     criteria: list[GradingCriterionProfile] = Field(
         description="The explicit array of strict evaluation criteria defining the rubric."
     )
-    passing_threshold: float = Field(ge=0.0, le=100.0, description="The minimum score required to pass.")
+    passing_threshold: float = Field(
+        ge=0.0, le=100.0, description="The absolute mathematical lower-bound scalar required to authorize execution."
+    )
 
     @model_validator(mode="after")
     def sort_arrays(self) -> Self:
@@ -5629,7 +5633,11 @@ class JSONRPCErrorState(CoreasonBaseState):
     Log Poisoning, Stateful Rollback
     """
 
-    code: int = Field(..., le=1000000000, description="A Number that indicates the error type that occurred.")
+    code: int = Field(
+        ...,
+        le=1000000000,
+        description="The strict integer identifier classifying the specific topological or execution collapse.",
+    )
     message: str = Field(
         ...,
         max_length=2000,
