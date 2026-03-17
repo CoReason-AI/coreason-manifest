@@ -347,7 +347,7 @@ You are strictly forbidden from introducing "Active" or "Runtime" logic into thi
 ### **Environment & Package Management**
 
 * **Manager:** `uv`.
-* **Language:** Python 3.12+.
+* **Language:** Python 3.14+.
 * **License:** Prosperity Public License 3.0. Every file must include the license header.
 
 ### **Code Style & Typing**
