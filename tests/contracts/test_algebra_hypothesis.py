@@ -112,5 +112,6 @@ def test_apply_state_differential(base_state, op, path, value, from_path):
         return  # invalid manifest built
 
     import contextlib
+
     with contextlib.suppress(ValueError):
         apply_state_differential(base_state, manifest)
