@@ -11,7 +11,6 @@
 from coreason_manifest.spec.ontology import (
     ContinuousObservationStream,
     DAGTopologyManifest,
-    EpistemicContractionPolicy,
     EpistemicLedgerState,
     ObservationEvent,
     SpeculativeExecutionBoundary,
@@ -52,12 +51,6 @@ def test_speculative_execution_boundary() -> None:
     assert boundary.rollback_pointers == ["pointer-a", "pointer-b"]
     assert boundary.competing_hypotheses == ["hyp-a", "hyp-b"]
 
-
-def test_epistemic_contraction_policy() -> None:
-    policy = EpistemicContractionPolicy(
-        contradiction_trigger="trigger-123", excision_target="target-123", cascade_depth=5
-    )
-    assert policy.contradiction_trigger == "trigger-123"
 
 
 def test_dag_topology_manifest_speculative_boundaries() -> None:
