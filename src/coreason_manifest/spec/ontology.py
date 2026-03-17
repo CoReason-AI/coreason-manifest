@@ -5176,16 +5176,22 @@ class HypothesisStakeReceipt(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Projects the agent's internal `implied_probability` into the shared LMSR order book, injecting liquidity and actively shifting the global consensus gradient.
 
-    EPISTEMIC BOUNDS: The `staked_magnitude` is constrained to a strictly positive integer `le=1000000000`, and the `implied_probability` is bounded mathematically to `[0.0, 1.0]`.
+    EPISTEMIC BOUNDS: Topological invariants are enforced: `agent_id` and `target_hypothesis_id` are strictly bounded to 128-char CIDs (`pattern="^[a-zA-Z0-9_.:-]+$"`), mathematically preventing string-overflow exploits and resolving previous category theory violations. The `staked_magnitude` is constrained to a strictly positive integer `le=1000000000`.
 
     MCP ROUTING TRIGGERS: Epistemic Staking, Brier Score Input, Belief Freezing, Market Order
     """
 
-    agent_id: Annotated[str, StringConstraints(min_length=1)] = Field(
-        le=1000000000, description="The ID of the agent placing the stake."
+    agent_id: str = Field(
+        min_length=1,
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        description="The ID of the agent placing the stake."
     )
-    target_hypothesis_id: Annotated[str, StringConstraints(min_length=1)] = Field(
-        le=1000000000, description="The exact HypothesisGenerationEvent the agent is betting on."
+    target_hypothesis_id: str = Field(
+        min_length=1,
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        description="The exact HypothesisGenerationEvent the agent is betting on."
     )
     staked_magnitude: int = Field(
         le=1000000000, gt=0, description="The volume of compute budget committed to this position."
@@ -7000,13 +7006,16 @@ class PredictionMarketState(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Aggregates HypothesisStakeReceipt vectors, allowing the orchestrator to track the shifting probability manifold and trigger market resolution when the AMM reaches the required convergence threshold.
 
-    EPISTEMIC BOUNDS: The order_book array is deterministically sorted by agent_id via @model_validator to preserve RFC 8785 canonical hashing. The liquidity parameter lmsr_b_parameter is physically restricted to a stringified decimal regex (^\\d+\\.\\d+$).
+    EPISTEMIC BOUNDS: State-Space mapping is rigorously typed: `current_market_probabilities` is geometrically bounded by `max_length=1000000000` to restrict cardinality, correcting prior categorical type violations. `market_id` is restricted to a 128-char CID. The order_book array is deterministically sorted by agent_id via @model_validator.
 
     MCP ROUTING TRIGGERS: Logarithmic Market Scoring Rule, Automated Market Maker, Prediction Market, Infinite Liquidity, Brier Score
     """
 
-    market_id: Annotated[str, StringConstraints(min_length=1)] = Field(
-        le=1000000000, description="The ID of the prediction market."
+    market_id: str = Field(
+        min_length=1,
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        description="The ID of the prediction market."
     )
     resolution_oracle_condition_id: str = Field(
         min_length=1,
@@ -7025,7 +7034,7 @@ class PredictionMarketState(CoreasonBaseState):
     current_market_probabilities: dict[
         Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=255)]
     ] = Field(
-        le=1000000000,
+        max_length=1000000000,
         description="Mapping of hypothesis IDs to their current LMSR-calculated market price (probability) as stringified decimals.",
     )
 
@@ -7203,13 +7212,13 @@ class QuarantineIntent(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Instructs the orchestrator to sever all outgoing causal edges from the `target_node_id`, reducing its algebraic connectivity to zero. This neutralizes its probability mass in the routing manifold and prevents entropy from contaminating the `EpistemicLedgerState`.
 
-    EPISTEMIC BOUNDS: The topological isolation is strictly targeted via a `NodeIdentifierState` (`target_node_id`). The causal justification for the graph cut is physically constrained to `reason` (`max_length=2000`) to mathematically prevent dictionary bombing attacks on the ledger.
+    EPISTEMIC BOUNDS: The execution discriminator is locked to a strict Literal string, free of invalid mathematical inequalities. The topological isolation is strictly targeted via a `NodeIdentifierState` (`target_node_id`). The causal justification for the graph cut is physically constrained to `reason` (`max_length=2000`).
 
     MCP ROUTING TRIGGERS: Spectral Graph Partitioning, Byzantine Fault Isolation, Epistemic Contagion, Defeasible Logic, Algebraic Connectivity
     """
 
     type: Literal["quarantine_intent"] = Field(
-        le=1000000000, default="quarantine_intent", description="The type of the resilience payload."
+        default="quarantine_intent", description="The type of the resilience payload."
     )
     target_node_id: NodeIdentifierState = Field(description="The ID of the node to be quarantined.")
     reason: str = Field(
@@ -8876,28 +8885,17 @@ type AnyNodeProfile = Annotated[
 
 class BaseTopologyManifest(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Defines the abstract algebraic baseline and Markov Blanket for
-    all execution subgraphs, establishing the structural and epistemic perimeters for a
-    localized swarm. As a ...Manifest suffix, this defines a frozen, N-dimensional
-    coordinate state.
+    AGENT INSTRUCTION: Defines the abstract algebraic baseline and Markov Blanket for all execution subgraphs, establishing the structural and epistemic perimeters for a localized swarm. As a ...Manifest suffix, this defines a frozen, N-dimensional coordinate state.
 
-    CAUSAL AFFORDANCE: Projects overarching schema-on-write contracts
-    (shared_state_contract: StateContract) and zero-trust Payload Loss Prevention
-    (information_flow: InformationFlowPolicy) across all connected nodes, ensuring
-    inherited alignment. The observability (ObservabilityPolicy) binds distributed
-    tracing.
+    CAUSAL AFFORDANCE: Projects overarching schema-on-write contracts (`shared_state_contract`) and zero-trust Payload Loss Prevention (`information_flow`) across all connected nodes, ensuring inherited alignment. The observability (`ObservabilityPolicy`) binds distributed tracing.
 
-    EPISTEMIC BOUNDS: The nodes attribute is strictly typed as a dictionary mapping
-    NodeIdentifierState to polymorphic AnyNodeProfile identities. The lifecycle_phase
-    is locked to an FSM Literal ["draft", "live"] (default="live"). The
-    architectural_intent and justification strings are capped at max_length=2000.
+    EPISTEMIC BOUNDS: Epistemic enforcement constraints (`TruthMaintenancePolicy`) are bound hierarchically via pointer delegation, preserving Category Theory invariants without applying raw scalar limits to object references. The nodes attribute is strictly typed as a dictionary mapping `NodeIdentifierState` to polymorphic `AnyNodeProfile` identities.
 
-    MCP ROUTING TRIGGERS: Topological Manifold, Markov Blanket, Subgraph Abstraction,
-    Execution Base, Structural Isolation
+    MCP ROUTING TRIGGERS: Topological Manifold, Markov Blanket, Subgraph Abstraction, Execution Base, Structural Isolation
     """
 
     epistemic_enforcement: TruthMaintenancePolicy | None = Field(
-        le=1000000000, default=None, description="Ties the topology to the Truth Maintenance layer."
+        default=None, description="Ties the topology to the Truth Maintenance layer."
     )
     lifecycle_phase: Literal["draft", "live"] = Field(
         default="live", description="The execution phase of the graph. 'draft' allows incomplete structural state."
@@ -9675,25 +9673,13 @@ class ZeroKnowledgeReceipt(CoreasonBaseState):
 
 class BeliefMutationEvent(BaseStateEvent):
     """
-    AGENT INSTRUCTION: Formalizes Bayesian Belief Updating and Pearlian Causal
-    Tracing by synthesizing internal cognitive shifts into discrete, hashable
-    facts. As an ...Event suffix, this is an append-only coordinate on the
-    Merkle-DAG that the LLM must never hallucinate a mutation to.
+    AGENT INSTRUCTION: Formalizes Bayesian Belief Updating and Pearlian Causal Tracing by synthesizing internal cognitive shifts into discrete, hashable facts. As an ...Event suffix, this is an append-only coordinate on the Merkle-DAG that the LLM must never hallucinate a mutation to.
 
-    CAUSAL AFFORDANCE: Projects a synthesized conclusion into the shared topology,
-    binding the new belief to causal_attributions (list[CausalAttributionState],
-    default_factory=list). Optional zk_proof (ZeroKnowledgeReceipt),
-    hardware_attestation (HardwareEnclaveReceipt), uncertainty_profile
-    (CognitiveUncertaintyProfile), scratchpad_trace (LatentScratchpadReceipt),
-    and neural_audit (NeuralAuditAttestationReceipt) extend the attestation.
+    CAUSAL AFFORDANCE: Projects a synthesized conclusion into the shared topology, binding the new belief to causal_attributions.
 
-    EPISTEMIC BOUNDS: payload is clamped by @field_validator
-    enforce_payload_topology via _validate_payload_bounds. The @model_validator
-    sort_arrays sorts causal_attributions by source_event_id for RFC 8785
-    canonical hashing. source_node_id (NodeIdentifierState | None) traces origin.
+    EPISTEMIC BOUNDS: Structural validation is enforced strictly via nested schema instantiation. The `uncertainty_profile` relies natively on its own internal continuous constraints rather than invalid scalar bounds. `payload` is clamped by `@field_validator`.
 
-    MCP ROUTING TRIGGERS: Bayesian Belief Updating, Causal Tracing, Cognitive
-    Synthesis, Merkle-DAG Coordinate, Non-Monotonic Leap
+    MCP ROUTING TRIGGERS: Bayesian Belief Updating, Causal Tracing, Cognitive Synthesis, Merkle-DAG Coordinate, Non-Monotonic Leap
     """
 
     type: Literal["belief_mutation"] = Field(
@@ -9718,7 +9704,6 @@ class BeliefMutationEvent(BaseStateEvent):
         description="The mathematical attestation proving this belief synthesis was appended securely without model-downgrade fraud.",
     )
     uncertainty_profile: CognitiveUncertaintyProfile | None = Field(
-        le=1000000000,
         default=None,
         description="The mathematical quantification of doubt associated with this synthesized belief.",
     )
