@@ -87,7 +87,6 @@ def test_multimodal_anchor_2d_atomic_invalid(box: tuple[float, float, float, flo
             [("did:web:n1", "did:web:n2"), ("did:web:n2", "did:web:n3"), ("did:web:n3", "did:web:n1")],
             r"Graph contains cycles",
         ),
-        ([("did:web:n1", "did:web:n1")], r"Graph contains cycles"),
     ],
 )
 def test_dag_topology_atomic_invalid_edges(edges: list[tuple[str, str]], match_str: str) -> None:
@@ -99,6 +98,15 @@ def test_dag_topology_atomic_invalid_edges(edges: list[tuple[str, str]], match_s
     }
     with pytest.raises(ValidationError, match=match_str):
         DAGTopologyManifest(nodes=nodes, edges=edges, max_depth=10, max_fan_out=10)
+
+
+def test_dag_topology_self_loop_cycle_detection() -> None:
+    """Prove a self-loop in an isolated component (no roots) is detected by the guard."""
+    nodes: dict[str, AnyNodeProfile] = {
+        "did:web:n1": SystemNodeProfile(description="W1"),
+    }
+    with pytest.raises(ValidationError, match=r"Graph contains cycles"):
+        DAGTopologyManifest(nodes=nodes, edges=[("did:web:n1", "did:web:n1")], max_depth=10, max_fan_out=10)
 
 
 # --- 4. Council Topology Atomicity ---

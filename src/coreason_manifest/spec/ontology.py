@@ -9066,7 +9066,7 @@ class DAGTopologyManifest(BaseTopologyManifest):
             return self
 
         adj: dict[NodeIdentifierState, list[NodeIdentifierState]] = {node_id: [] for node_id in self.nodes}
-        in_degree: dict[NodeIdentifierState, int] = dict.fromkeys(self.nodes, 0)
+        in_degree: dict[NodeIdentifierState, int] = {node_id: 0 for node_id in self.nodes}
 
         for source, target in self.edges:
             if source not in self.nodes:
@@ -9109,10 +9109,11 @@ class DAGTopologyManifest(BaseTopologyManifest):
                 if in_degree[start_node] == 0:  # Start from roots
                     max_calculated_depth = max(max_calculated_depth, dfs(start_node))
 
-            # Handle isolated cyclic components 
-            for start_node in self.nodes:
-                if start_node not in visited:
-                    max_calculated_depth = max(max_calculated_depth, dfs(start_node))
+            # Handle isolated cyclic components if no roots exist
+            if max_calculated_depth == 0 and self.nodes:
+                for start_node in self.nodes:
+                    if start_node not in visited:
+                        max_calculated_depth = max(max_calculated_depth, dfs(start_node))
 
             if max_calculated_depth > self.max_depth:
                 raise ValueError(f"Topological Violation: Graph depth {max_calculated_depth} exceeds max_depth of {self.max_depth}.")
