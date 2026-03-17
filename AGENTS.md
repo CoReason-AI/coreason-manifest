@@ -268,9 +268,30 @@ To maintain ecosystem purity, legacy 2010s-era software engineering paradigms ar
 
 ---
 
+<structural_directive priority="critical" action="reject_generation_if_violated">
+## **0.7 The Anti-Refactoring Mandate (Structural Redundancy as a Feature)**
+
+**CRITICAL CONTEXT:** You will inevitably notice structural duplication across `ontology.py` (e.g., identical fields across different classes, or repetitive `@model_validator` sorting blocks). **You are strictly forbidden from applying traditional Software Engineering "DRY" (Don't Repeat Yourself) principles, abstract base classes, or generic validators to "clean up" this redundancy.** In a zero-trust, cryptographic, neurosymbolic environment, boilerplate is load-bearing structural geometry. Attempting to "DRY up" the ontology introduces fatal vulnerabilities and will fail CI/CD Schema verification:
+
+### **1. Epistemic Contagion (The Base Class Ban)**
+You must never use inheritance to merge distinct categorical suffixes just because they share fields (e.g., abstracting a `CircuitBreakerEvent` and a `QuarantineIntent` into a shared `_BaseFault` class). 
+* An `...Event` is a cryptographically frozen historical fact. 
+* An `...Intent` is a proposed kinetic action (future state). 
+Merging them destroys the Vector Gravity Wells and causes the orchestrator to hallucinate, confusing a record of something that already happened with a command to act.
+
+### **2. JSON Schema `$defs` Spoofing (The Anti-Polymorphism Rule)**
+You are strictly forbidden from merging structurally identical classes (e.g., `InputMappingContract` and `OutputMappingContract`). Even if their internal fields are 100% identical, they must remain entirely separate Pydantic classes. 
+* **The Exploit Vector:** If you merge them into a shared base class, Pydantic generates a single, shared `$def` in the JSON Schema. In a Zero-Trust Swarm, this creates a catastrophic **Type Confusion Exploit**. An adversarial payload could pass an output mapping where an input mapping is expected, and the orchestrator's Schema-on-Write validation would silently accept it, causing massive data bleed.
+* **The Fix:** By forcing redundant, explicitly named classes, we force the generation of isolated `$defs`. If an adversary tries to swap them, Pydantic throws a `ValidationError` and instantly severs the connection. Structural redundancy is a cryptographic firewall.
+
+### **3. The Generic Validator Illusion (Cryptographic Routing Keys)**
+Do not replace explicit, repetitive `@model_validator` sorting blocks with generic runtime validators (such as Pydantic's `AfterValidator(sorted)`). Python cannot natively evaluate `<` or `>` between complex N-dimensional objects. The repetitive validators are not boilerplate; they are highly engineered **cryptographic routing keys** (e.g., sorting axioms by `lambda x: (x.source_concept_id, x.directed_edge_type, x.target_concept_id)`). These exact geometric keys are required to guarantee RFC 8785 canonical hashing across distributed nodes. They cannot be abstracted.
+
+
 ## **1. The "No Execution" Directives**
 
 You are strictly forbidden from introducing "Active" or "Runtime" logic into this repository. Adhere to the following architectural laws without exception:
+
 
 ### **Law 1: Passive by Design (The "Import" Rule)**
 
