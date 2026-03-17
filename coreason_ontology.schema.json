@@ -280,7 +280,7 @@
           "type": "array"
         },
         "passing_threshold": {
-          "description": "The minimum score required to pass.",
+          "description": "The absolute mathematical lower-bound scalar required to authorize execution.",
           "maximum": 100.0,
           "minimum": 0.0,
           "title": "Passing Threshold",
@@ -3314,7 +3314,7 @@
           "type": "string"
         },
         "severity": {
-          "description": "Severity level if the rule is violated.",
+          "description": "The categorical magnitude of the systemic breach enacted upon rule violation.",
           "enum": [
             "low",
             "medium",
@@ -8599,7 +8599,7 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A mathematically constrained error vector reflecting execution\ncollapse within the JSON-RPC 2.0 specification. As a ...State suffix, this is a\nfrozen N-dimensional coordinate.\n\nCAUSAL AFFORDANCE: Projects execution faults back across the network boundary\nwithout risking secondary buffer overflow attacks during serialization. The\nerror_payload (alias=\"data\", External Protocol Exemption) carries optional\nstructured diagnostic data.\n\nEPISTEMIC BOUNDS: The code integer is rigidly capped (le=1000000000, no ge bound)\nand the semantic message is restricted to max_length=2000 to prevent log-poisoning\nduring telemetry serialization.\n\nMCP ROUTING TRIGGERS: Fault Projection, Buffer Overflow Prevention, Error Vector,\nLog Poisoning, Stateful Rollback",
       "properties": {
         "code": {
-          "description": "A Number that indicates the error type that occurred.",
+          "description": "The strict integer identifier classifying the specific topological or execution collapse.",
           "maximum": 1000000000,
           "title": "Code",
           "type": "integer"
@@ -10658,7 +10658,7 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: PermissionBoundaryPolicy is the strict Zero-Trust Architecture security perimeter\ndefining exactly what external physical systems or networks an agent node is authorized to touch.\n\nCAUSAL AFFORDANCE: Mechanically limits the subgraph's kinetic reach. It forces the orchestrator to\ndrop network egress packets or block disk I/O unless explicitly whitelisted, and mandates the\nnegotiation of specific cryptographic handshakes (e.g., OAuth2, mTLS) before allocating compute.\n\nEPISTEMIC BOUNDS: Bounded by deterministic string arrays (allowed_domains, auth_requirements)\nthat must be strictly evaluated at runtime. The arrays are alphabetically sorted at instantiation\nto prevent Hash Poisoning attacks on the Merkle trace.\n\nMCP ROUTING TRIGGERS: Zero-Trust Architecture, Network Egress Filtering, Capability-Based Security, mTLS Handshake, Hash Poisoning Prevention",
       "properties": {
         "network_access": {
-          "description": "Whether the tool is permitted to make external network requests.",
+          "description": "The absolute Boolean gate authorizing or severing exogenous network egress.",
           "title": "Network Access",
           "type": "boolean"
         },
@@ -10680,7 +10680,7 @@
           "title": "Allowed Domains"
         },
         "file_system_mutation_forbidden": {
-          "description": "True if the tool is strictly forbidden from writing to the disk.",
+          "description": "The strict Boolean constraint severing local disk I/O capabilities.",
           "title": "File System Mutation Forbidden",
           "type": "boolean"
         },
@@ -11673,7 +11673,7 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Stevens's levels of measurement and Wilkinson's Grammar\nof Graphics to mathematically project abstract data domains into visual geometric\nranges. As a ...Policy suffix, this object defines rigid mathematical boundaries.\n\nCAUSAL AFFORDANCE: Physically distorts or linearly maps the input metric tensor into\nrendering space, dictating how the orchestrator processes logarithmic, temporal, or\nordinal data vectors for UI projection.\n\nEPISTEMIC BOUNDS: The transformation algorithm is strictly constrained to a Literal\nautomaton [\"linear\", \"log\", \"time\", \"ordinal\", \"nominal\"]. Physical data boundaries\n(domain_min, domain_max) are optional (default=None) and upper-bounded by\nle=1000000000.0 to prevent geometric projection overflow (no ge bound enforced).\n\nMCP ROUTING TRIGGERS: Grammar of Graphics, Metric Tensor Distortion, Levels of\nMeasurement, Scale Projection, FSM Literal",
       "properties": {
         "type": {
-          "description": "The mathematical scale mapping metrics to pixels.",
+          "description": "The strictly typed mathematical mapping function distorting metrics into Euclidean pixel space.",
           "enum": [
             "linear",
             "log",
