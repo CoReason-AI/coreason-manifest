@@ -52,7 +52,6 @@ def test_speculative_execution_boundary() -> None:
     assert boundary.competing_hypotheses == ["hyp-a", "hyp-b"]
 
 
-
 def test_dag_topology_manifest_speculative_boundaries() -> None:
     boundary_b = SpeculativeExecutionBoundary(boundary_id="b-bound", commit_probability=0.5)
     boundary_a = SpeculativeExecutionBoundary(boundary_id="a-bound", commit_probability=0.5)

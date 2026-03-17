@@ -653,7 +653,6 @@ def test_epistemic_sop_manifest_ghost_nodes() -> None:
         )
 
 
-
 def test_executionspanreceipt_sort_events() -> None:
     from coreason_manifest.spec.ontology import ExecutionSpanReceipt, SpanEvent
 

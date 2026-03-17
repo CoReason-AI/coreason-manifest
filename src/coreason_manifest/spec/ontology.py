@@ -2480,7 +2480,6 @@ class BaseIntent(CoreasonBaseState):
     """
 
 
-
 class BaseStateEvent(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Establishes the foundational topological root for all temporal occurrences in Event Sourcing, utilizing a Merkle-DAG to permanently freeze chronological facts.
@@ -2712,7 +2711,7 @@ class BrowserDOMState(CoreasonBaseState):
                     ip = ipaddress.ip_address(ip_int)
                 else:
                     raise ValueError
-            except (ValueError, OverflowError, IndexError):
+            except ValueError, OverflowError, IndexError:
                 return url
         if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast:
             raise ValueError(f"SSRF restricted IP detected: {hostname}")
@@ -3765,9 +3764,6 @@ class BargeInInterruptEvent(BaseStateEvent):
     epistemic_disposition: Literal["discard", "retain_as_context", "mark_as_falsified"] = Field(
         description="Explicit instruction to the orchestrator on how to patch the shared state blackboard with the partial payload."
     )
-
-
-type EncodingChannelProfile = Literal["x", "y", "color", "size", "opacity", "shape", "text"]
 
 
 class EnsembleTopologyProfile(CoreasonBaseState):
@@ -5066,9 +5062,7 @@ class HTTPTransportProfile(CoreasonBaseState):
     uri: HttpUrl = Field(..., description="The HTTP URL endpoint for the stateless connection.")
     headers: dict[
         Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=2000)]
-    ] = Field(
-        default_factory=dict, description="HTTP headers, strictly bounded for zero-trust credentials."
-    )
+    ] = Field(default_factory=dict, description="HTTP headers, strictly bounded for zero-trust credentials.")
 
     @field_validator("headers", mode="after")
     @classmethod
@@ -5863,7 +5857,7 @@ class MCPServerManifest(CoreasonBaseState):
     transport: "MCPTransportProfile" = Field(
         ...,
         discriminator="type",
-        description="Polymorphic transport configuration (stdio, sse, or http) including env_vars, args, and headers."
+        description="Polymorphic transport configuration (stdio, sse, or http) including env_vars, args, and headers.",
     )
     binary_hash: str | None = Field(
         min_length=1,
@@ -6229,7 +6223,6 @@ class MCPResourceManifest(CoreasonBaseState):
 type MCPTransportProtocolProfile = Literal["stdio", "sse", "http"]
 
 
-
 class MacroGridProfile(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Acts as a Cartesian topological coordinator based on Edward Tufte's Small Multiples, organizing multiple discrete visual artifacts (`AnyPanelProfile`) into a unified grid configuration. As a ...Profile suffix, this is a declarative, frozen snapshot of a rendering geometry.
@@ -6257,9 +6250,6 @@ class MacroGridProfile(CoreasonBaseState):
                 if panel_id not in panel_ids:
                     raise ValueError(f"Ghost Panel referenced in layout_matrix: {panel_id}")
         return self
-
-
-type GeometricMarkProfile = Literal["point", "line", "area", "bar", "rect", "arc"]
 
 
 class MarketContract(CoreasonBaseState):
@@ -7216,9 +7206,6 @@ class SalienceProfile(CoreasonBaseState):
     )
 
 
-type ScaleTypeProfile = Literal["linear", "log", "time", "ordinal", "nominal"]
-
-
 class SelfCorrectionPolicy(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Acts as the System 2 executive controller, utilizing Non-Monotonic
@@ -8065,7 +8052,6 @@ class LogEvent(CoreasonBaseState):
     context_profile: TelemetryContextProfile = Field(
         default_factory=dict, description="Contextual key-value metadata associated with the event."
     )
-
 
 
 class TemporalBoundsProfile(CoreasonBaseState):
