@@ -2480,22 +2480,6 @@ class BaseIntent(CoreasonBaseState):
     """
 
 
-class BasePanelProfile(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Establishes the topological root for all visual projections in the UI manifold, utilizing Cartesian constraints. As a ...Profile suffix, this is a declarative, frozen snapshot of a rendering geometry.
-
-    CAUSAL AFFORDANCE: Authorizes the rendering engine to map latent structural data into discrete, bounded graphical artifacts without executing active javascript or kinetic side-effects.
-
-    EPISTEMIC BOUNDS: The geometric anchor (`panel_id`) is cryptographically locked to a 128-char CID regex (`^[a-zA-Z0-9_.:-]+$`), mathematically severing unauthorized or hallucinated DOM elements from the grid.
-
-    MCP ROUTING TRIGGERS: Scientific Visualization, Topological Root, Cartesian Geometry, Declarative UI, Artifact Projection
-    """
-
-    panel_id: str = Field(
-        min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$", description="Unique identifier for the panel."
-    )
-
-
 class BaseStateEvent(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Establishes the foundational topological root for all temporal occurrences in Event Sourcing, utilizing a Merkle-DAG to permanently freeze chronological facts.
@@ -3780,9 +3764,6 @@ class BargeInInterruptEvent(BaseStateEvent):
     epistemic_disposition: Literal["discard", "retain_as_context", "mark_as_falsified"] = Field(
         description="Explicit instruction to the orchestrator on how to patch the shared state blackboard with the partial payload."
     )
-
-
-type EncodingChannelProfile = Literal["x", "y", "color", "size", "opacity", "shape", "text"]
 
 
 class EnsembleTopologyProfile(CoreasonBaseState):
@@ -5081,9 +5062,7 @@ class HTTPTransportProfile(CoreasonBaseState):
     uri: HttpUrl = Field(..., description="The HTTP URL endpoint for the stateless connection.")
     headers: dict[
         Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=2000)]
-    ] = Field(
-        le=1000000000, default_factory=dict, description="HTTP headers, strictly bounded for zero-trust credentials."
-    )
+    ] = Field(default_factory=dict, description="HTTP headers, strictly bounded for zero-trust credentials.")
 
     @field_validator("headers", mode="after")
     @classmethod
@@ -5862,28 +5841,23 @@ class MCPServerManifest(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Represents a cryptographically verifiable Distributed RPC substrate
     mapping, binding an external Model Context Protocol (MCP) manifold into the swarm's
-    local topology. As a ...Manifest suffix, this defines a frozen, declarative state
-    projection.
+    local topology.
 
-    CAUSAL AFFORDANCE: Authorizes the physical connection to an exogenous compute node
-    over specific transport_type vectors (Literal ["stdio", "sse", "http"]), provided the
-    capability_whitelist (MCPCapabilityWhitelistPolicy) and mandatory attestation_receipt
-    constraints are fully satisfied.
-
-    EPISTEMIC BOUNDS: Supply-chain execution attacks are mitigated by the optional
-    binary_hash (strictly matching SHA-256 pattern ^[a-f0-9]{64}$). A @model_validator
-    structurally enforces that the presented Verifiable Credential is signed by a valid
-    did:coreason: authority, emitting a QuarantineIntent upon failure.
-
-    MCP ROUTING TRIGGERS: Distributed RPC, Capability-Based Security, Remote Procedure
-    Call, Transport Layer, Verifiable Credential
+    This unified manifest merges robust polymorphic transport capabilities with strict
+    Zero-Trust Architecture (ZTA) and LBAC security boundaries.
     """
 
-    server_uri: str = Field(
-        max_length=2000, description="The network URI for SSE/HTTP, or the command execution string for stdio."
+    server_id: str = Field(
+        ...,
+        min_length=1,
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        description="A unique cryptographic identifier (CID) for this server instance.",
     )
-    transport_type: Literal["stdio", "sse", "http"] = Field(
-        description="The physical transport layer protocol used to stream the JSON-RPC packets."
+    transport: "MCPTransportProfile" = Field(
+        ...,
+        discriminator="type",
+        description="Polymorphic transport configuration (stdio, sse, or http) including env_vars, args, and headers.",
     )
     binary_hash: str | None = Field(
         min_length=1,
@@ -5893,12 +5867,15 @@ class MCPServerManifest(CoreasonBaseState):
         description="Optional SHA-256 hash of the local binary to prevent supply-chain execution attacks over stdio.",
     )
     capability_whitelist: MCPCapabilityWhitelistPolicy = Field(
-        description="The strict capability bounds enforced by the orchestrator prior to connection."
+        description="The strict capability bounds (tools, resources, prompts) enforced by the orchestrator prior to connection."
     )
-    attestation_receipt: VerifiableCredentialPresentationReceipt
+    attestation_receipt: VerifiableCredentialPresentationReceipt = Field(
+        description="Cryptographic proof of identity and authorization for the external server."
+    )
 
     @model_validator(mode="after")
     def enforce_coreason_did_authority(self) -> Self:
+        """Mathematically prevent unauthorized execution supply chains."""
         if not self.attestation_receipt.issuer_did.startswith("did:coreason:"):
             raise ValueError(
                 "UNAUTHORIZED MCP MOUNT: The presented Verifiable Credential is not signed by a valid CoReason issuer DID. The orchestrator MUST immediately emit a QuarantineIntent and terminate the handshake."
@@ -6246,42 +6223,6 @@ class MCPResourceManifest(CoreasonBaseState):
 type MCPTransportProtocolProfile = Literal["stdio", "sse", "http"]
 
 
-class MCPClientBindingProfile(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Defines a Bipartite Graph Projection, mathematically binding a
-    decentralized agent node to the remote or local capabilities exposed by a specific
-    Model Context Protocol (MCP) server. As a ...Profile suffix, this is a declarative
-    property descriptor.
-
-    CAUSAL AFFORDANCE: Projects the external MCP server's affordance matrix into the
-    agent's local working memory, allowing authorized JSON-RPC intents to traverse the
-    specified transport_type (MCPTransportProtocolProfile Literal). The server_uri
-    (max_length=2000) anchors the connection.
-
-    EPISTEMIC BOUNDS: The optional allowed_mcp_tools (list[str] | None, default=None,
-    string max_length=2000) is deterministically alphabetized by @model_validator
-    sort_arrays for RFC 8785 canonical hashing when not None.
-
-    MCP ROUTING TRIGGERS: Bipartite Graph Projection, Capability Binding, Model
-    Context Protocol, RFC 8785 Canonicalization, Zero-Trust RPC
-    """
-
-    server_uri: str = Field(max_length=2000, description="The URI or command path to the MCP server.")
-    transport_type: MCPTransportProtocolProfile = Field(
-        description="The transport protocol used to communicate with the MCP server."
-    )
-    allowed_mcp_tools: list[Annotated[str, StringConstraints(max_length=2000)]] | None = Field(
-        default=None,
-        description="An explicit whitelist of tools the agent is allowed to invoke from this server. If None, all discovered tools are allowed.",
-    )
-
-    @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
-        if self.allowed_mcp_tools is not None:
-            object.__setattr__(self, "allowed_mcp_tools", sorted(self.allowed_mcp_tools))
-        return self
-
-
 class MacroGridProfile(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Acts as a Cartesian topological coordinator based on Edward Tufte's Small Multiples, organizing multiple discrete visual artifacts (`AnyPanelProfile`) into a unified grid configuration. As a ...Profile suffix, this is a declarative, frozen snapshot of a rendering geometry.
@@ -6309,9 +6250,6 @@ class MacroGridProfile(CoreasonBaseState):
                 if panel_id not in panel_ids:
                     raise ValueError(f"Ghost Panel referenced in layout_matrix: {panel_id}")
         return self
-
-
-type GeometricMarkProfile = Literal["point", "line", "area", "bar", "rect", "arc"]
 
 
 class MarketContract(CoreasonBaseState):
@@ -7275,9 +7213,6 @@ class SalienceProfile(CoreasonBaseState):
     )
 
 
-type ScaleTypeProfile = Literal["linear", "log", "time", "ordinal", "nominal"]
-
-
 class SelfCorrectionPolicy(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Acts as the System 2 executive controller, utilizing Non-Monotonic
@@ -7724,47 +7659,6 @@ class StdioTransportProfile(CoreasonBaseState):
 type MCPTransportProfile = StdioTransportProfile | SSETransportProfile | HTTPTransportProfile
 
 
-class MCPServerBindingProfile(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Defines a Distributed RPC substrate and Lattice-Based Access
-    Control (LBAC) boundary for integrating exogenous Model Context Protocol instances
-    as a frozen geometric snapshot. As a ...Profile suffix, this is a declarative
-    property descriptor.
-
-    CAUSAL AFFORDANCE: Physically wires an external semantic manifold into the local
-    orchestrator's routing graph via the transport (MCPTransportProfile, discriminated
-    union) vector. The server_id (128-char CID) anchors the binding.
-
-    EPISTEMIC BOUNDS: The capabilities allowed across the wire are geometrically bounded
-    by required_capabilities (max_length=255 strings, default=["tools", "resources",
-    "prompts"]), strictly alphabetized by @model_validator sort_arrays for RFC 8785
-    canonical hashing.
-
-    MCP ROUTING TRIGGERS: Distributed RPC, Lattice-Based Access Control, Stateless
-    Transport, Capability Projection, Bipartite Graph
-    """
-
-    server_id: str = Field(
-        ...,
-        min_length=1,
-        max_length=128,
-        pattern="^[a-zA-Z0-9_.:-]+$",
-        description="A unique identifier for this server instance.",
-    )
-    transport: MCPTransportProfile = Field(
-        ..., discriminator="type", description="Polymorphic transport configuration."
-    )
-    required_capabilities: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
-        default_factory=lambda: ["tools", "resources", "prompts"],
-        description="The structurally bounded array of capabilities mandated for this server connection.",
-    )
-
-    @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
-        object.__setattr__(self, "required_capabilities", sorted(self.required_capabilities))
-        return self
-
-
 class SteadyStateHypothesisState(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Formalizes the baseline control group definition within
@@ -8164,42 +8058,6 @@ class LogEvent(CoreasonBaseState):
     message: str = Field(max_length=2000, description="The primary log message.")
     context_profile: TelemetryContextProfile = Field(
         default_factory=dict, description="Contextual key-value metadata associated with the event."
-    )
-
-
-class SpanTraceReceipt(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Implements the Dapper Distributed Tracing model to deterministically map an execution span and its nested causal DAG geometry.
-
-    CAUSAL AFFORDANCE: Unlocks systemic observability by connecting parent and child invocations (via parent_span_id), allowing the orchestrator to measure exact latency bottlenecks and topological health.
-
-    EPISTEMIC BOUNDS: Temporal geometries are rigidly clamped between start_time and end_time (ge=0.0, le=253402300799.0). Execution health is strictly governed by the status Literal ["OK", "ERROR", "PENDING"].
-
-    MCP ROUTING TRIGGERS: Dapper Tracing Model, Distributed Observability, Execution Span, Causal DAG, OpenTelemetry
-    """
-
-    span_id: str = Field(
-        min_length=1,
-        max_length=128,
-        pattern="^[a-zA-Z0-9_.:-]+$",
-        description="The unique identifier for this execution span.",
-    )
-    parent_span_id: str | None = Field(
-        min_length=1,
-        max_length=128,
-        pattern="^[a-zA-Z0-9_.:-]+$",
-        default=None,
-        description="The identifier of the parent span, if any.",
-    )
-    start_time: float = Field(ge=0.0, le=253402300799.0, description="The UNIX timestamp when the span started.")
-    end_time: float | None = Field(
-        ge=0.0, le=253402300799.0, default=None, description="The UNIX timestamp when the span ended."
-    )
-    status: Literal["OK", "ERROR", "PENDING"] = Field(
-        description="The definitive topological execution state of the span."
-    )
-    context_profile: TelemetryContextProfile = Field(
-        default_factory=dict, description="Contextual key-value metadata associated with the span execution."
     )
 
 
@@ -10776,30 +10634,6 @@ class SpeculativeExecutionBoundary(CoreasonBaseState):
         return self
 
 
-class EpistemicContractionPolicy(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Defines the mathematical rules for surgically retracting a belief within a Defeasible Logic framework. As a ...Policy suffix, this defines rigid algorithmic boundaries.
-
-    CAUSAL AFFORDANCE: Instructs the orchestrator's Truth Maintenance System to physically severe edges in the Knowledge Graph by excising the target CID and cascading the falsification recursively.
-
-    EPISTEMIC BOUNDS: The contraction operation is physically bounded by the cascade_depth (ge=0, le=1000000) integer constraint, preventing runaway causal unravelling. The triggers are restricted to strict 128-char CID regex strings.
-
-    MCP ROUTING TRIGGERS: Defeasible Logic, Belief Retraction, Causal Excising, Non-Monotonic Inference, Topological Amputation
-    """
-
-    contradiction_trigger: Annotated[
-        str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
-    ] = Field(description="The CID of the observation or event that triggered the logical contradiction.")
-    excision_target: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
-        Field(description="The target CID of the specific axiom or node slated for epistemic amputation.")
-    )
-    cascade_depth: int = Field(
-        ge=0,
-        le=1000000,
-        description="The mathematical limit determining how deep the falsification signal propagates through connected edges.",
-    )
-
-
 class EpistemicLedgerState(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Formalizes Event Sourcing and the Merkle-DAG structure as
@@ -10879,7 +10713,6 @@ class EpistemicLedgerState(CoreasonBaseState):
 
 CompositeNodeProfile.model_rebuild()
 WorkflowManifest.model_rebuild()
-MCPServerBindingProfile.model_rebuild()
 StateHydrationManifest.model_rebuild()
 BaseTopologyManifest.model_rebuild()
 DAGTopologyManifest.model_rebuild()
@@ -10926,7 +10759,6 @@ AdversarialEmulationProfile.model_rebuild()
 ContinuousObservationStream.model_rebuild()
 StreamingDisfluencyContract.model_rebuild()
 SpeculativeExecutionBoundary.model_rebuild()
-EpistemicContractionPolicy.model_rebuild()
 EpistemicLedgerState.model_rebuild()
 PresentationManifest.model_rebuild()
 ObservationEvent.model_rebuild()
