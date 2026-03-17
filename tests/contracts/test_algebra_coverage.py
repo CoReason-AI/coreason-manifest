@@ -299,7 +299,7 @@ def test_apply_state_differential_invalid_root() -> None:
         vector_clock={"n111": 1},
         patches=[StateMutationIntent(op="add", path="invalid", value="bar")],
     )
-    with pytest.raises(ValueError, match="path"):
+    with pytest.raises(ValueError, match="Invalid JSON pointer"):
         apply_state_differential({}, manifest)
 
 
