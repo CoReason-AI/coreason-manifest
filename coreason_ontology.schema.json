@@ -7842,7 +7842,7 @@
     },
     "HumanNodeProfile": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Supervisory Control Theory within the causal DAG,\ninstantiating an out-of-band Oracle node for Mixed-Initiative truth resolution.\nAs a ...Profile suffix, this is a declarative property descriptor.\n\nCAUSAL AFFORDANCE: Physically halts the continuous multi-agent generation loop,\nforcing the probability wave to suspend until external wetware (human) entropy is\nsafely injected into the topological state.\n\nEPISTEMIC BOUNDS: Execution resumption is cryptographically gated by the optional\nrequired_attestation (AttestationMechanismProfile | None, default=None). If set,\nthe orchestrator MUST physically drop all responses lacking a matching\ncryptographic attestation. The type discriminator is locked to Literal[\"human\"].\n\nMCP ROUTING TRIGGERS: Supervisory Control Theory, Oracle Node, Mixed-Initiative,\nProof of Humanity, Out-of-Band Entropy",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Supervisory Control Theory within the causal DAG, instantiating an out-of-band Oracle node for Mixed-Initiative truth resolution.\n\nCAUSAL AFFORDANCE: Physically halts the continuous multi-agent generation loop, forcing the probability wave to suspend until external wetware (human) entropy is safely injected into the topological state.\n\nEPISTEMIC BOUNDS: To mathematically satisfy Byzantine Fault Tolerance (BFT), the `required_attestation` is mandatory. The orchestrator MUST NOT resolve this node without a cryptographically matching WetwareAttestationContract, verifying the human operator and preventing Sybil attacks.\n\nMCP ROUTING TRIGGERS: Supervisory Control Theory, Oracle Node, Mixed-Initiative, Proof of Humanity, Out-of-Band Entropy",
       "properties": {
         "description": {
           "description": "The semantic boundary defining the objective function or computational perimeter of the execution node.",
@@ -7911,20 +7911,13 @@
           "type": "string"
         },
         "required_attestation": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/AttestationMechanismProfile"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "AGENT INSTRUCTION: If set, the orchestrator MUST NOT resolve\n        this node without a cryptographically matching WetwareAttestationContract\n        supplied in the InterventionReceipt."
+          "$ref": "#/$defs/AttestationMechanismProfile",
+          "description": "The mandatory cryptographic attestation required to verify the human operator's identity."
         }
       },
       "required": [
-        "description"
+        "description",
+        "required_attestation"
       ],
       "title": "HumanNodeProfile",
       "type": "object"
@@ -13808,7 +13801,7 @@
     },
     "ToolInvocationEvent": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Judea Pearl's Do-Operator ($do(X=x)$) on an\nexternal or internal toolset, acting as an A Priori Kinetic Commitment. As an\n...Event suffix, this is an append-only, cryptographically frozen coordinate on\nthe Merkle-DAG.\n\nCAUSAL AFFORDANCE: Transitions the swarm from internal epistemic deliberation to\nkinetic execution. It targets tool_name (max_length=2000) with parameters (dict,\nmax_length=1000000000) and requires a mandatory agent_attestation\n(AgentAttestationReceipt) proving identity.\n\nEPISTEMIC BOUNDS: The execution's thermodynamic cost is economically bounded by\nauthorized_budget_magnitude (int | None, le=1000000000, ge=0, default=None).\nZero-Trust execution is rigidly enforced by the mandatory zk_proof\n(ZeroKnowledgeReceipt), physically prohibiting forged network executions.\n\nMCP ROUTING TRIGGERS: Pearlian Do-Operator, Kinetic Commitment, Active Inference,\nThermodynamic Escrow, Zero-Trust Actuation",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Judea Pearl's Do-Operator ($do(X=x)$) on an external or internal toolset, acting as an A Priori Kinetic Commitment. As an ...Event suffix, this is an append-only, cryptographically frozen coordinate on the Merkle-DAG.\n\nCAUSAL AFFORDANCE: Transitions the swarm from internal epistemic deliberation to kinetic execution. It targets a specific `tool_name` with bound parameters, demanding a valid `agent_attestation` identity.\n\nEPISTEMIC BOUNDS: To prevent infinite compute loops (Landauer's Principle), the `authorized_budget_magnitude` is physically mandated to be `ge=1`. The `zk_proof` serves as the strict mathematical proof that the agent was authorized by the execution engine; stripping it violates the Zero-Trust boundary.\n\nMCP ROUTING TRIGGERS: Pearlian Do-Operator, Kinetic Commitment, Active Inference, Thermodynamic Escrow, Zero-Trust Actuation",
       "properties": {
         "event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
@@ -13849,26 +13842,18 @@
           "type": "object"
         },
         "authorized_budget_magnitude": {
-          "anyOf": [
-            {
-              "maximum": 1000000000,
-              "minimum": 0,
-              "type": "integer"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The maximum escrow unlocked for this specific run.",
-          "title": "Authorized Budget Magnitude"
+          "description": "The mandatory discrete thermodynamic token cost reserved for this specific run.",
+          "maximum": 1000000000,
+          "minimum": 1,
+          "title": "Authorized Budget Magnitude",
+          "type": "integer"
         },
         "agent_attestation": {
           "$ref": "#/$defs/AgentAttestationReceipt"
         },
         "zk_proof": {
           "$ref": "#/$defs/ZeroKnowledgeReceipt",
-          "description": "AGENT INSTRUCTION: The strict mathematical proof that the agent was authorized by the CoReason execution engine to evaluate this tool. Stripping this field violates the Zero-Trust execution boundary."
+          "description": "The mathematical attestation proving this tool execution was securely authorized."
         }
       },
       "required": [
@@ -13876,6 +13861,7 @@
         "timestamp",
         "tool_name",
         "parameters",
+        "authorized_budget_magnitude",
         "agent_attestation",
         "zk_proof"
       ],

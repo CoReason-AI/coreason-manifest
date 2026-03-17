@@ -33,7 +33,9 @@ type JsonPrimitiveState = (
 )
 
 
-def _validate_payload_bounds(value: JsonPrimitiveState, current_depth: int = 0, state: list[int] | None = None) -> JsonPrimitiveState:
+def _validate_payload_bounds(
+    value: JsonPrimitiveState, current_depth: int = 0, state: list[int] | None = None
+) -> JsonPrimitiveState:
     """
     AGENT INSTRUCTION: Implements Computational Complexity Theory to enforce an absolute Big-O volume limit on Merkle tree serialization, physically preventing RAM exhaustion.
 
@@ -2746,14 +2748,16 @@ class BrowserDOMState(CoreasonBaseState):
             return url
 
         hostname_lower = hostname.lower()
-        if hostname_lower in {"localhost", "broadcasthost", "local", "internal"} or hostname_lower.endswith((".local", ".internal", ".arpa", "localhost.localdomain")):
+        if hostname_lower in {"localhost", "broadcasthost", "local", "internal"} or hostname_lower.endswith(
+            (".local", ".internal", ".arpa", "localhost.localdomain")
+        ):
             raise ValueError(f"SSRF topological violation detected: {hostname}")
 
         try:
             # Canonical C-backed validation of affine coordinate isomorphism
             ip = ipaddress.ip_address(hostname.strip("[]"))
         except ValueError:
-            pass # DNS-based hostnames pass through standard string checks above
+            pass  # DNS-based hostnames pass through standard string checks above
         else:
             if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast:
                 raise ValueError(f"SSRF restricted IP detected: {hostname}")
@@ -8312,7 +8316,9 @@ class ToolInvocationEvent(BaseStateEvent):
         max_length=1000000000, description="The intended JSON-RPC payload."
     )
     authorized_budget_magnitude: int = Field(
-        le=1000000000, ge=1, description="The mandatory discrete thermodynamic token cost reserved for this specific run."
+        le=1000000000,
+        ge=1,
+        description="The mandatory discrete thermodynamic token cost reserved for this specific run.",
     )
     agent_attestation: AgentAttestationReceipt
     zk_proof: ZeroKnowledgeReceipt = Field(
