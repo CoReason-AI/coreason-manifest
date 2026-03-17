@@ -346,9 +346,7 @@ def test_epistemic_escalation_tiers_upper_bound() -> None:
     from coreason_manifest.spec.ontology import EpistemicEscalationContract
 
     with pytest.raises(ValidationError):
-        EpistemicEscalationContract(
-            baseline_entropy_threshold=0.5, test_time_multiplier=2.0, max_escalation_tiers=11
-        )
+        EpistemicEscalationContract(baseline_entropy_threshold=0.5, test_time_multiplier=2.0, max_escalation_tiers=11)
 
 
 def test_peft_adapter_rank_upper_bound() -> None:
