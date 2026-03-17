@@ -578,12 +578,14 @@ def test_mcpservermanifest_enforce_did() -> None:
         cryptographic_proof_blob="blob",
         authorization_claims={},
     )
+    from coreason_manifest.spec.ontology import StdioTransportProfile
+
     with pytest.raises(
         ValidationError, match=r"UNAUTHORIZED MCP MOUNT: The presented Verifiable Credential is not signed"
     ):
         MCPServerManifest(
-            server_uri="uri",
-            transport_type="stdio",
+            server_id="server_1",
+            transport=StdioTransportProfile(command="cmd", args=[]),
             capability_whitelist=MCPCapabilityWhitelistPolicy(),
             attestation_receipt=vc_invalid,
         )
@@ -595,8 +597,8 @@ def test_mcpservermanifest_enforce_did() -> None:
         authorization_claims={},
     )
     manifest = MCPServerManifest(
-        server_uri="uri",
-        transport_type="stdio",
+        server_id="server_1",
+        transport=StdioTransportProfile(command="cmd", args=[]),
         capability_whitelist=MCPCapabilityWhitelistPolicy(),
         attestation_receipt=vc_valid,
     )
@@ -649,17 +651,6 @@ def test_epistemic_sop_manifest_ghost_nodes() -> None:
             chronological_flow_edges=[],
             prm_evaluations=[],
         )
-
-
-def test_mcpserverbindingprofile_sort_arrays() -> None:
-    from coreason_manifest.spec.ontology import MCPServerBindingProfile, StdioTransportProfile
-
-    profile = MCPServerBindingProfile(
-        server_id="server_1",
-        transport=StdioTransportProfile(command="python", args=[]),
-        required_capabilities=["tools", "prompts", "resources"],
-    )
-    assert profile.required_capabilities == ["prompts", "resources", "tools"]
 
 
 def test_executionspanreceipt_sort_events() -> None:

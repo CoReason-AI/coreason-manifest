@@ -867,6 +867,18 @@
           ],
           "default": null,
           "description": "The adversarial emulation geometry composing kinematic noise and environmental spoofing for anti-bot trajectory evasion."
+        },
+        "gflownet_balance_policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CognitiveDetailedBalanceContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Authorizes trajectory balance optimization during non-monotonic reasoning."
         }
       },
       "required": [
@@ -1564,25 +1576,6 @@
         "description"
       ],
       "title": "BaseNodeProfile",
-      "type": "object"
-    },
-    "BasePanelProfile": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes the topological root for all visual projections in the UI manifold, utilizing Cartesian constraints. As a ...Profile suffix, this is a declarative, frozen snapshot of a rendering geometry.\n\nCAUSAL AFFORDANCE: Authorizes the rendering engine to map latent structural data into discrete, bounded graphical artifacts without executing active javascript or kinetic side-effects.\n\nEPISTEMIC BOUNDS: The geometric anchor (`panel_id`) is cryptographically locked to a 128-char CID regex (`^[a-zA-Z0-9_.:-]+$`), mathematically severing unauthorized or hallucinated DOM elements from the grid.\n\nMCP ROUTING TRIGGERS: Scientific Visualization, Topological Root, Cartesian Geometry, Declarative UI, Artifact Projection",
-      "properties": {
-        "panel_id": {
-          "description": "Unique identifier for the panel.",
-          "maxLength": 128,
-          "minLength": 1,
-          "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Panel Id",
-          "type": "string"
-        }
-      },
-      "required": [
-        "panel_id"
-      ],
-      "title": "BasePanelProfile",
       "type": "object"
     },
     "BaseStateEvent": {
@@ -5339,42 +5332,6 @@
       "title": "EpistemicCompressionSLA",
       "type": "object"
     },
-    "EpistemicContractionPolicy": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the mathematical rules for surgically retracting a belief within a Defeasible Logic framework. As a ...Policy suffix, this defines rigid algorithmic boundaries.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator's Truth Maintenance System to physically severe edges in the Knowledge Graph by excising the target CID and cascading the falsification recursively.\n\nEPISTEMIC BOUNDS: The contraction operation is physically bounded by the cascade_depth (ge=0, le=1000000) integer constraint, preventing runaway causal unravelling. The triggers are restricted to strict 128-char CID regex strings.\n\nMCP ROUTING TRIGGERS: Defeasible Logic, Belief Retraction, Causal Excising, Non-Monotonic Inference, Topological Amputation",
-      "properties": {
-        "contradiction_trigger": {
-          "description": "The CID of the observation or event that triggered the logical contradiction.",
-          "maxLength": 128,
-          "minLength": 1,
-          "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Contradiction Trigger",
-          "type": "string"
-        },
-        "excision_target": {
-          "description": "The target CID of the specific axiom or node slated for epistemic amputation.",
-          "maxLength": 128,
-          "minLength": 1,
-          "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Excision Target",
-          "type": "string"
-        },
-        "cascade_depth": {
-          "description": "The mathematical limit determining how deep the falsification signal propagates through connected edges.",
-          "maximum": 1000000,
-          "minimum": 0,
-          "title": "Cascade Depth",
-          "type": "integer"
-        }
-      },
-      "required": [
-        "contradiction_trigger",
-        "excision_target",
-        "cascade_depth"
-      ],
-      "title": "EpistemicContractionPolicy",
-      "type": "object"
-    },
     "EpistemicCurriculumManifest": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Curriculum Learning and Experience Replay manifolds,\nserving as the definitive batch transport layer for continuous swarm optimization. As a\n...Manifest suffix, this defines a frozen, N-dimensional coordinate state.\n\nCAUSAL AFFORDANCE: Injects a validated cluster of EpistemicGroundedTaskManifest\nprimitives into the decentralized training pipeline, forcing deterministic policy\ngradient updates across all subscribing nodes.\n\nEPISTEMIC BOUNDS: The tasks array requires min_length=1 to prevent empty compute\ncycles. To guarantee zero-trust distribution and prevent Byzantine hash fractures, the\n@model_validator sort_tasks mechanically sorts the array by task_id, ensuring perfect\nRFC 8785 canonical hashing. Anchored by a 128-char curriculum_id CID.\n\nMCP ROUTING TRIGGERS: Curriculum Learning, Experience Replay, Policy Gradient,\nCanonical Hashing, Knowledge Distillation",
@@ -7796,7 +7753,6 @@
             "type": "string"
           },
           "description": "HTTP headers, strictly bounded for zero-trust credentials.",
-          "le": 1000000000,
           "propertyNames": {
             "maxLength": 255
           },
@@ -9252,45 +9208,6 @@
       "title": "MCPCapabilityWhitelistPolicy",
       "type": "object"
     },
-    "MCPClientBindingProfile": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines a Bipartite Graph Projection, mathematically binding a\ndecentralized agent node to the remote or local capabilities exposed by a specific\nModel Context Protocol (MCP) server. As a ...Profile suffix, this is a declarative\nproperty descriptor.\n\nCAUSAL AFFORDANCE: Projects the external MCP server's affordance matrix into the\nagent's local working memory, allowing authorized JSON-RPC intents to traverse the\nspecified transport_type (MCPTransportProtocolProfile Literal). The server_uri\n(max_length=2000) anchors the connection.\n\nEPISTEMIC BOUNDS: The optional allowed_mcp_tools (list[str] | None, default=None,\nstring max_length=2000) is deterministically alphabetized by @model_validator\nsort_arrays for RFC 8785 canonical hashing when not None.\n\nMCP ROUTING TRIGGERS: Bipartite Graph Projection, Capability Binding, Model\nContext Protocol, RFC 8785 Canonicalization, Zero-Trust RPC",
-      "properties": {
-        "server_uri": {
-          "description": "The URI or command path to the MCP server.",
-          "maxLength": 2000,
-          "title": "Server Uri",
-          "type": "string"
-        },
-        "transport_type": {
-          "$ref": "#/$defs/MCPTransportProtocolProfile",
-          "description": "The transport protocol used to communicate with the MCP server."
-        },
-        "allowed_mcp_tools": {
-          "anyOf": [
-            {
-              "items": {
-                "maxLength": 2000,
-                "type": "string"
-              },
-              "type": "array"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "An explicit whitelist of tools the agent is allowed to invoke from this server. If None, all discovered tools are allowed.",
-          "title": "Allowed Mcp Tools"
-        }
-      },
-      "required": [
-        "server_uri",
-        "transport_type"
-      ],
-      "title": "MCPClientBindingProfile",
-      "type": "object"
-    },
     "MCPClientIntent": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: An inherited JSON-RPC 2.0 substrate specifically binding Model\nContext Protocol (MCP) client intent emissions to the frontend UI. As an ...Intent\nsuffix, this represents an authorized kinetic execution trigger.\n\nCAUSAL AFFORDANCE: Executes an exact semantic signal (Literal[\"mcp.ui.emit_intent\"])\nto bubble internal agent states (like drafting or adjudication) to the human\noperator.\n\nEPISTEMIC BOUNDS: Inherits all recursive depth bounds from BoundedJSONRPCIntent and\nmathematically clamps the method space to a singular Literal[\"mcp.ui.emit_intent\"]\nto prevent execution drift.\n\nMCP ROUTING TRIGGERS: Model Context Protocol, Intent Bubbling, Human-in-the-Loop,\nSemantic Signaling, Method Clamping",
@@ -9452,12 +9369,12 @@
       "title": "MCPResourceManifest",
       "type": "object"
     },
-    "MCPServerBindingProfile": {
+    "MCPServerManifest": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines a Distributed RPC substrate and Lattice-Based Access\nControl (LBAC) boundary for integrating exogenous Model Context Protocol instances\nas a frozen geometric snapshot. As a ...Profile suffix, this is a declarative\nproperty descriptor.\n\nCAUSAL AFFORDANCE: Physically wires an external semantic manifold into the local\norchestrator's routing graph via the transport (MCPTransportProfile, discriminated\nunion) vector. The server_id (128-char CID) anchors the binding.\n\nEPISTEMIC BOUNDS: The capabilities allowed across the wire are geometrically bounded\nby required_capabilities (max_length=255 strings, default=[\"tools\", \"resources\",\n\"prompts\"]), strictly alphabetized by @model_validator sort_arrays for RFC 8785\ncanonical hashing.\n\nMCP ROUTING TRIGGERS: Distributed RPC, Lattice-Based Access Control, Stateless\nTransport, Capability Projection, Bipartite Graph",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents a cryptographically verifiable Distributed RPC substrate\nmapping, binding an external Model Context Protocol (MCP) manifold into the swarm's\nlocal topology.\n\nThis unified manifest merges robust polymorphic transport capabilities with strict\nZero-Trust Architecture (ZTA) and LBAC security boundaries.",
       "properties": {
         "server_id": {
-          "description": "A unique identifier for this server instance.",
+          "description": "A unique cryptographic identifier (CID) for this server instance.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
@@ -9465,7 +9382,7 @@
           "type": "string"
         },
         "transport": {
-          "description": "Polymorphic transport configuration.",
+          "description": "Polymorphic transport configuration (stdio, sse, or http) including env_vars, args, and headers.",
           "discriminator": {
             "mapping": {
               "http": "#/$defs/MCPTransportProfile",
@@ -9480,43 +9397,6 @@
             }
           ],
           "title": "Transport"
-        },
-        "required_capabilities": {
-          "description": "The structurally bounded array of capabilities mandated for this server connection.",
-          "items": {
-            "maxLength": 255,
-            "type": "string"
-          },
-          "title": "Required Capabilities",
-          "type": "array"
-        }
-      },
-      "required": [
-        "server_id",
-        "transport"
-      ],
-      "title": "MCPServerBindingProfile",
-      "type": "object"
-    },
-    "MCPServerManifest": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents a cryptographically verifiable Distributed RPC substrate\nmapping, binding an external Model Context Protocol (MCP) manifold into the swarm's\nlocal topology. As a ...Manifest suffix, this defines a frozen, declarative state\nprojection.\n\nCAUSAL AFFORDANCE: Authorizes the physical connection to an exogenous compute node\nover specific transport_type vectors (Literal [\"stdio\", \"sse\", \"http\"]), provided the\ncapability_whitelist (MCPCapabilityWhitelistPolicy) and mandatory attestation_receipt\nconstraints are fully satisfied.\n\nEPISTEMIC BOUNDS: Supply-chain execution attacks are mitigated by the optional\nbinary_hash (strictly matching SHA-256 pattern ^[a-f0-9]{64}$). A @model_validator\nstructurally enforces that the presented Verifiable Credential is signed by a valid\ndid:coreason: authority, emitting a QuarantineIntent upon failure.\n\nMCP ROUTING TRIGGERS: Distributed RPC, Capability-Based Security, Remote Procedure\nCall, Transport Layer, Verifiable Credential",
-      "properties": {
-        "server_uri": {
-          "description": "The network URI for SSE/HTTP, or the command execution string for stdio.",
-          "maxLength": 2000,
-          "title": "Server Uri",
-          "type": "string"
-        },
-        "transport_type": {
-          "description": "The physical transport layer protocol used to stream the JSON-RPC packets.",
-          "enum": [
-            "stdio",
-            "sse",
-            "http"
-          ],
-          "title": "Transport Type",
-          "type": "string"
         },
         "binary_hash": {
           "anyOf": [
@@ -9536,15 +9416,16 @@
         },
         "capability_whitelist": {
           "$ref": "#/$defs/MCPCapabilityWhitelistPolicy",
-          "description": "The strict capability bounds enforced by the orchestrator prior to connection."
+          "description": "The strict capability bounds (tools, resources, prompts) enforced by the orchestrator prior to connection."
         },
         "attestation_receipt": {
-          "$ref": "#/$defs/VerifiableCredentialPresentationReceipt"
+          "$ref": "#/$defs/VerifiableCredentialPresentationReceipt",
+          "description": "Cryptographic proof of identity and authorization for the external server."
         }
       },
       "required": [
-        "server_uri",
-        "transport_type",
+        "server_id",
+        "transport",
         "capability_whitelist",
         "attestation_receipt"
       ],
@@ -9563,14 +9444,6 @@
           "$ref": "#/$defs/HTTPTransportProfile"
         }
       ]
-    },
-    "MCPTransportProtocolProfile": {
-      "enum": [
-        "stdio",
-        "sse",
-        "http"
-      ],
-      "type": "string"
     },
     "MacroGridProfile": {
       "additionalProperties": false,
@@ -10411,6 +10284,30 @@
           "default": null,
           "description": "The Event ID of the specific ToolInvocationEvent that spawned this observation, forming a strict bipartite directed edge.",
           "title": "Triggering Invocation Id"
+        },
+        "continuous_stream": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ContinuousObservationStream"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Buffers real-time audio/video or continuous token streams."
+        },
+        "disfluency_rules": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StreamingDisfluencyContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Rules for the forget gate to slice out stutters or ambient noise."
         }
       },
       "required": [
@@ -10510,6 +10407,18 @@
           ],
           "default": null,
           "description": "The projection applied if the agents natively used different embedding dimensionalities."
+        },
+        "remote_state_snapshot": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FederatedStateSnapshot"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Isolated holographic clone of remote swarm state for safe cross-boundary evaluation."
         }
       },
       "required": [
@@ -10997,6 +10906,18 @@
         "grid": {
           "$ref": "#/$defs/MacroGridProfile",
           "description": "The grid of panels being presented."
+        },
+        "ambient_telemetry": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AmbientState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Stateless non-blocking telemetry for continuous progress updates."
         }
       },
       "required": [
@@ -12367,79 +12288,6 @@
         "error"
       ],
       "type": "string"
-    },
-    "SpanTraceReceipt": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements the Dapper Distributed Tracing model to deterministically map an execution span and its nested causal DAG geometry.\n\nCAUSAL AFFORDANCE: Unlocks systemic observability by connecting parent and child invocations (via parent_span_id), allowing the orchestrator to measure exact latency bottlenecks and topological health.\n\nEPISTEMIC BOUNDS: Temporal geometries are rigidly clamped between start_time and end_time (ge=0.0, le=253402300799.0). Execution health is strictly governed by the status Literal [\"OK\", \"ERROR\", \"PENDING\"].\n\nMCP ROUTING TRIGGERS: Dapper Tracing Model, Distributed Observability, Execution Span, Causal DAG, OpenTelemetry",
-      "properties": {
-        "span_id": {
-          "description": "The unique identifier for this execution span.",
-          "maxLength": 128,
-          "minLength": 1,
-          "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Span Id",
-          "type": "string"
-        },
-        "parent_span_id": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-zA-Z0-9_.:-]+$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The identifier of the parent span, if any.",
-          "title": "Parent Span Id"
-        },
-        "start_time": {
-          "description": "The UNIX timestamp when the span started.",
-          "maximum": 253402300799.0,
-          "minimum": 0.0,
-          "title": "Start Time",
-          "type": "number"
-        },
-        "end_time": {
-          "anyOf": [
-            {
-              "maximum": 253402300799.0,
-              "minimum": 0.0,
-              "type": "number"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The UNIX timestamp when the span ended.",
-          "title": "End Time"
-        },
-        "status": {
-          "description": "The definitive topological execution state of the span.",
-          "enum": [
-            "OK",
-            "ERROR",
-            "PENDING"
-          ],
-          "title": "Status",
-          "type": "string"
-        },
-        "context_profile": {
-          "$ref": "#/$defs/TelemetryContextProfile",
-          "description": "Contextual key-value metadata associated with the span execution."
-        }
-      },
-      "required": [
-        "span_id",
-        "start_time",
-        "status"
-      ],
-      "title": "SpanTraceReceipt",
-      "type": "object"
     },
     "SpatialBoundingBoxProfile": {
       "additionalProperties": false,

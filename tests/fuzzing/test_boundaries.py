@@ -126,10 +126,14 @@ def test_mcp_quarantine_gateway_tripwire() -> None:
         cryptographic_proof_blob="a" * 64,
         authorization_claims={},
     )
+    from pydantic import HttpUrl
+
+    from coreason_manifest.spec.ontology import HTTPTransportProfile
+
     with pytest.raises(ValidationError, match="UNAUTHORIZED MCP MOUNT"):
         MCPServerManifest(
-            server_uri="http://rogue-server",
-            transport_type="http",
+            server_id="rogue_server_1",
+            transport=HTTPTransportProfile(uri=HttpUrl("http://rogue-server"), headers={}),
             capability_whitelist=MCPCapabilityWhitelistPolicy(
                 allowed_tools=["shell"], allowed_resources=["file://*"], allowed_prompts=["system"]
             ),
@@ -166,10 +170,12 @@ def test_mcp_quarantine_gateway_authorized_mount() -> None:
         authorization_claims={"clearance": "RESTRICTED"},
     )
 
+    from coreason_manifest.spec.ontology import StdioTransportProfile
+
     # This must instantiate cleanly without raising a ValidationError
     manifest = MCPServerManifest(
-        server_uri="stdio://coreason-mcp",
-        transport_type="stdio",
+        server_id="server_1",
+        transport=StdioTransportProfile(command="stdio://coreason-mcp", args=[]),
         capability_whitelist=MCPCapabilityWhitelistPolicy(
             allowed_tools=["fetch"], allowed_resources=[], allowed_prompts=[]
         ),
