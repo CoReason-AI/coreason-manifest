@@ -228,7 +228,7 @@
         },
         "target_node_id": {
           "$ref": "#/$defs/NodeIdentifierState",
-          "description": "The ID of the node that was evaluated."
+          "description": "The deterministic capability pointer representing the node that was evaluated."
         },
         "score": {
           "description": "The final score assigned based on the rubric.",
@@ -280,7 +280,7 @@
           "type": "array"
         },
         "passing_threshold": {
-          "description": "The minimum score required to pass.",
+          "description": "The absolute mathematical lower-bound scalar required to authorize execution.",
           "maximum": 100.0,
           "minimum": 0.0,
           "title": "Passing Threshold",
@@ -487,6 +487,7 @@
         },
         "capability_merkle_root": {
           "description": "The SHA-256 Merkle root of the agent's verified semantic capabilities.",
+          "maxLength": 128,
           "pattern": "^[a-f0-9]{64}$",
           "title": "Capability Merkle Root",
           "type": "string"
@@ -685,7 +686,7 @@
             }
           ],
           "default": null,
-          "description": "The ID of the specific ActionSpaceManifest (curated tool environment) bound to this agent.",
+          "description": "The globally unique decentralized identifier (DID) anchoring the specific ActionSpaceManifest (curated tool environment) bound to this agent.",
           "title": "Action Space Id"
         },
         "secure_sub_session": {
@@ -2164,7 +2165,7 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Acts as a Cryptographic Null-Operator within Kahn's\nTopological Sort, preserving the topological chain of custody when an\nextraction node is intentionally skipped. As a ...Receipt suffix, this is an\nappend-only coordinate that the LLM must never mutate.\n\nCAUSAL AFFORDANCE: Safely starves a subgraph of compute without fracturing\nthe continuous Merkle-DAG hash chain. The bypassed_node_id\n(NodeIdentifierState) identifies the exact starved vertex. The\nartifact_event_id (128-char CID) ensures continuity with the genesis artifact.\n\nEPISTEMIC BOUNDS: The cryptographic_null_hash strictly requires a 64-char\nSHA-256 fingerprint (^[a-f0-9]{64}$). The execution skip rationale is\nmathematically locked to the justification Literal automaton\n[\"modality_mismatch\", \"budget_exhaustion\", \"sla_timeout\"], preventing\nhallucinated bypass reasons.\n\nMCP ROUTING TRIGGERS: Topological Sort, Cryptographic Null-Operator, Compute\nStarvation, DAG Integrity, Lazy Evaluation",
       "properties": {
         "artifact_event_id": {
-          "description": "The exact genesis CID of the document, ensuring continuity.",
+          "description": "The exact genesis globally unique decentralized identifier (DID) anchoring the document, ensuring continuity.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
@@ -2236,12 +2237,14 @@
       "properties": {
         "source_variable": {
           "description": "The independent variable $X$.",
+          "maxLength": 255,
           "minLength": 1,
           "title": "Source Variable",
           "type": "string"
         },
         "target_variable": {
           "description": "The dependent variable $Y$.",
+          "maxLength": 255,
           "minLength": 1,
           "title": "Target Variable",
           "type": "string"
@@ -2293,7 +2296,7 @@
           "type": "string"
         },
         "target_outcome_event_id": {
-          "description": "The CID of the collective outcome being explained.",
+          "description": "The globally unique decentralized identifier (DID) anchoring the collective outcome being explained.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
@@ -2387,7 +2390,7 @@
         },
         "target_node_id": {
           "$ref": "#/$defs/NodeIdentifierState",
-          "description": "The ID of the node for which the circuit breaker was tripped."
+          "description": "The deterministic capability pointer representing the node for which the circuit breaker was tripped."
         },
         "error_signature": {
           "description": "Signature or summary of the error causing the trip.",
@@ -2481,11 +2484,11 @@
       "properties": {
         "primary_verifier_id": {
           "$ref": "#/$defs/NodeIdentifierState",
-          "description": "The DID of the primary evaluating agent."
+          "description": "The globally unique decentralized identifier (DID) anchoring the primary evaluating agent."
         },
         "secondary_verifier_id": {
           "$ref": "#/$defs/NodeIdentifierState",
-          "description": "The DID of the independent secondary evaluating agent."
+          "description": "The globally unique decentralized identifier (DID) anchoring the independent secondary evaluating agent."
         },
         "trace_factual_alignment": {
           "description": "Strict Boolean indicating if BOTH agents mathematically agree on factual alignment.",
@@ -2598,7 +2601,7 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative, frozen snapshot of a continuous proof trace resulting\nfrom a successfully resolved non-monotonic search, projecting internal System 2 thinking\ninto the observable graph. As a ...State suffix, this is a frozen N-dimensional\ncoordinate.\n\nCAUSAL AFFORDANCE: Binds the raw, unstructured Chain-of-Thought (trace_payload) to a\nformal EpistemicTopologicalProofManifest (source_proof_id), injecting the internal\nmonologue into the verifiable DAG for downstream reward shaping (GRPO).\n\nEPISTEMIC BOUNDS: The token_length is restricted (ge=0, le=1000000000). The textual\nreasoning is physically bounded to max_length=100000 to prevent context window\nexplosion. The trace_id is locked to a 128-char CID.\n\nMCP ROUTING TRIGGERS: Chain of Thought, Non-Monotonic Trace, Proof Crystallization,\nLatent Monologue, Verifiable Reasoning",
       "properties": {
         "trace_id": {
-          "description": "CID of this specific non-monotonic reasoning trace.",
+          "description": "The globally unique decentralized identifier (DID) anchoring this specific non-monotonic reasoning trace.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
@@ -2662,7 +2665,7 @@
           "type": "string"
         },
         "source_generation_id": {
-          "description": "The CID of the LLM's raw generated text trajectory.",
+          "description": "The globally unique decentralized identifier (DID) anchoring the LLM's raw generated text trajectory.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
@@ -3261,7 +3264,7 @@
           "type": "string"
         },
         "drift_event_id": {
-          "description": "The CID of the NormativeDriftEvent that justified triggering this proposal.",
+          "description": "The globally unique decentralized identifier (DID) anchoring the NormativeDriftEvent that justified triggering this proposal.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
@@ -3311,7 +3314,7 @@
           "type": "string"
         },
         "severity": {
-          "description": "Severity level if the rule is violated.",
+          "description": "The categorical magnitude of the systemic breach enacted upon rule violation.",
           "enum": [
             "low",
             "medium",
@@ -3949,7 +3952,7 @@
           "type": "string"
         },
         "applied_policy_id": {
-          "description": "The ID of the InformationFlowPolicy successfully applied.",
+          "description": "The deterministic capability pointer representing the InformationFlowPolicy successfully applied.",
           "maxLength": 255,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
@@ -5178,7 +5181,7 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements First-Order Logic and Resource Description Framework (RDF)\ntriples to mathematically formalize knowledge. As a ...State suffix, this is a\ndeclarative, frozen snapshot of a specific causal connection at a point in time.\n\nCAUSAL AFFORDANCE: Distills high-entropy natural language token streams into rigid,\nhashable causal edges (Subject, Predicate, Object), unlocking deterministic querying\nand Truth Maintenance System (TMS) traversals.\n\nEPISTEMIC BOUNDS: Source and target concept physical boundaries are strictly locked to\n128-char CIDs matching the regex ^[a-zA-Z0-9_.:-]+$. The directed_edge_type is clamped\nto a max_length of 2000 to prevent dictionary bombing during semantic evaluation.\n\nMCP ROUTING TRIGGERS: First-Order Logic, RDF Triple, Semantic Distillation, Causal\nEdge, Directed Graph",
       "properties": {
         "source_concept_id": {
-          "description": "CID of the origin node.",
+          "description": "The globally unique decentralized identifier (DID) anchoring the origin node.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
@@ -5192,7 +5195,7 @@
           "type": "string"
         },
         "target_concept_id": {
-          "description": "CID of destination node.",
+          "description": "The globally unique decentralized identifier (DID) anchoring destination node.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
@@ -5448,7 +5451,7 @@
           "type": "string"
         },
         "source_trajectory_id": {
-          "description": "The CID of the partial CognitiveReasoningTraceState.",
+          "description": "The globally unique decentralized identifier (DID) anchoring the partial CognitiveReasoningTraceState.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
@@ -5483,7 +5486,7 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Trajectory Distillation and Direct Preference Optimization\n(DPO) by encapsulating a mathematically verified ground-truth training datum. As a\n...Manifest suffix, this defines a frozen, N-dimensional coordinate state.\n\nCAUSAL AFFORDANCE: Unlocks verifiable Reinforcement Learning across the swarm by\nsecurely binding an unstructured vignette_payload to a formal topological_proof\n(EpistemicTopologicalProofManifest) and its resulting non-monotonic thinking_trace\n(CognitiveReasoningTraceState).\n\nEPISTEMIC BOUNDS: The task_id is cryptographically constrained to a 128-char CID\n(^[a-zA-Z0-9_.:-]+$). The vignette_payload is bounded to 100000 characters to prevent\ncontext exhaustion. A verification_lock (CognitiveDualVerificationReceipt) is\nstructurally mandated to physically prevent reward hacking via isolated consensus.\n\nMCP ROUTING TRIGGERS: Trajectory Distillation, Direct Preference Optimization,\nReinforcement Learning, Dual Verification, Curry-Howard Correspondence",
       "properties": {
         "task_id": {
-          "description": "The cryptographic CID of the task.",
+          "description": "The cryptographic globally unique decentralized identifier (DID) anchoring the task.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
@@ -5670,7 +5673,7 @@
           "type": "array"
         },
         "crystallized_semantic_node_id": {
-          "description": "The resulting permanent W3C DID / CID of the newly minted knowledge node.",
+          "description": "The resulting permanent W3C DID / The globally unique decentralized identifier (DID) anchoring the newly minted knowledge node.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
@@ -5723,7 +5726,7 @@
             }
           ],
           "default": null,
-          "description": "The CID of the Genesis MultimodalArtifactReceipt this semantic state was transmutated from.",
+          "description": "The globally unique decentralized identifier (DID) anchoring the Genesis MultimodalArtifactReceipt this semantic state was transmutated from.",
           "title": "Source Artifact Id"
         },
         "multimodal_anchor": {
@@ -5842,7 +5845,7 @@
           "type": "string"
         },
         "reference_graph_id": {
-          "description": "The CID of the EpistemicDomainGraphManifest acting as the deterministic ground truth.",
+          "description": "The globally unique decentralized identifier (DID) anchoring the EpistemicDomainGraphManifest acting as the deterministic ground truth.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
@@ -6142,7 +6145,7 @@
           "type": "string"
         },
         "artifact_event_id": {
-          "description": "The CID of the MultimodalArtifactReceipt being processed.",
+          "description": "The globally unique decentralized identifier (DID) anchoring the MultimodalArtifactReceipt being processed.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
@@ -6240,7 +6243,7 @@
           "type": "string"
         },
         "tripped_rule_id": {
-          "description": "The ID of the Payload Loss Prevention (PLP) or Governance rule that blocked execution.",
+          "description": "The deterministic capability pointer representing the Payload Loss Prevention (PLP) or Governance rule that blocked execution.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
@@ -6420,11 +6423,11 @@
         },
         "generator_node_id": {
           "$ref": "#/$defs/NodeIdentifierState",
-          "description": "The ID of the actor generating the payload."
+          "description": "The deterministic capability pointer representing the actor generating the payload."
         },
         "evaluator_node_id": {
           "$ref": "#/$defs/NodeIdentifierState",
-          "description": "The ID of the critic scoring the payload."
+          "description": "The deterministic capability pointer representing the critic scoring the payload."
         },
         "max_revision_loops": {
           "description": "The absolute limit on Actor-Critic cycles to prevent infinite compute burn.",
@@ -6711,7 +6714,7 @@
             }
           ],
           "default": null,
-          "description": "The ID of the parent request.",
+          "description": "The deterministic capability pointer anchoring the parent request manifold.",
           "title": "Parent Request Id"
         },
         "root_request_id": {
@@ -6727,7 +6730,7 @@
             }
           ],
           "default": null,
-          "description": "The ID of the trace root.",
+          "description": "The deterministic capability pointer anchoring the trace root manifold.",
           "title": "Root Request Id"
         },
         "inputs": {
@@ -7016,11 +7019,11 @@
         },
         "target_node_id": {
           "$ref": "#/$defs/NodeIdentifierState",
-          "description": "The ID of the failing node."
+          "description": "The deterministic capability pointer representing the failing node."
         },
         "fallback_node_id": {
           "$ref": "#/$defs/NodeIdentifierState",
-          "description": "The ID of the node to use as a fallback."
+          "description": "The deterministic capability pointer representing the node to use as a fallback."
         }
       },
       "required": [
@@ -7183,7 +7186,7 @@
         },
         "target_topology_id": {
           "$ref": "#/$defs/NodeIdentifierState",
-          "description": "The DID of the discovered external state matrix/VPC."
+          "description": "The globally unique decentralized identifier (DID) anchoring the discovered external state matrix/VPC."
         },
         "authorized_session": {
           "$ref": "#/$defs/SecureSubSessionState",
@@ -7242,6 +7245,7 @@
       "properties": {
         "adapter_merkle_root": {
           "description": "CoReason Shared Kernel Ontology: The tamper-evident SHA-256 hash of the exact safetensors weight matrix.",
+          "maxLength": 128,
           "pattern": "^[a-f0-9]{64}$",
           "title": "Adapter Merkle Root",
           "type": "string"
@@ -7415,7 +7419,7 @@
           "type": "string"
         },
         "root_node_id": {
-          "description": "The CID of the top-level TaxonomicNodeState initiating the tree.",
+          "description": "The globally unique decentralized identifier (DID) anchoring the top-level TaxonomicNodeState initiating the tree.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
@@ -7511,7 +7515,7 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Acts as a structural invariant profile mapping the macroscopic dimensional properties of an artifact prior to deep inference.\n\nCAUSAL AFFORDANCE: Authorizes the orchestrator's routing engine to allocate specific functional experts and reserve physical VRAM budgets without needing to parse the full artifact into the active context window.\n\nEPISTEMIC BOUNDS: Memory allocation limits are mathematically bounded by token_density (ge=0, le=1000000000). The @model_validator deterministically sorts the detected_modalities enum array, guaranteeing zero-variance RFC 8785 canonical hashing across distributed nodes.\n\nMCP ROUTING TRIGGERS: Structural Indexing, VRAM Budgeting, Representation Engineering, Modality Detection, RFC 8785 Canonicalization",
       "properties": {
         "artifact_event_id": {
-          "description": "The exact genesis CID of the MultimodalArtifactReceipt entering the routing tier.",
+          "description": "The exact genesis globally unique decentralized identifier (DID) anchoring the MultimodalArtifactReceipt entering the routing tier.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
@@ -8028,7 +8032,7 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Cryptographically freezes an agent's probabilistic belief in a `HypothesisGenerationEvent` as an immutable economic stake on the Epistemic Ledger.\n\nCAUSAL AFFORDANCE: Projects the agent's internal `implied_probability` into the shared LMSR order book, injecting liquidity and actively shifting the global consensus gradient.\n\nEPISTEMIC BOUNDS: The `staked_magnitude` is constrained to a strictly positive integer `le=1000000000`, and the `implied_probability` is bounded mathematically to `[0.0, 1.0]`.\n\nMCP ROUTING TRIGGERS: Epistemic Staking, Brier Score Input, Belief Freezing, Market Order",
       "properties": {
         "agent_id": {
-          "description": "The ID of the agent placing the stake.",
+          "description": "The deterministic capability pointer representing the agent placing the stake.",
           "le": 1000000000,
           "minLength": 1,
           "title": "Agent Id",
@@ -8136,7 +8140,7 @@
         "type": {
           "const": "informational",
           "default": "informational",
-          "description": "Discriminator for read-only informational handoffs.",
+          "description": "The discriminative topological boundary for read-only informational handoffs.",
           "title": "Type",
           "type": "string"
         },
@@ -8337,7 +8341,7 @@
         },
         "target_node_id": {
           "$ref": "#/$defs/NodeIdentifierState",
-          "description": "The ID of the target node."
+          "description": "The deterministic capability pointer representing the target node."
         },
         "context_summary": {
           "description": "A summary of the context requiring intervention.",
@@ -8444,7 +8448,7 @@
         },
         "target_node_id": {
           "$ref": "#/$defs/NodeIdentifierState",
-          "description": "The ID of the target node."
+          "description": "The deterministic capability pointer representing the target node."
         },
         "approved": {
           "description": "Indicates whether the proposed action was approved.",
@@ -8595,7 +8599,7 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A mathematically constrained error vector reflecting execution\ncollapse within the JSON-RPC 2.0 specification. As a ...State suffix, this is a\nfrozen N-dimensional coordinate.\n\nCAUSAL AFFORDANCE: Projects execution faults back across the network boundary\nwithout risking secondary buffer overflow attacks during serialization. The\nerror_payload (alias=\"data\", External Protocol Exemption) carries optional\nstructured diagnostic data.\n\nEPISTEMIC BOUNDS: The code integer is rigidly capped (le=1000000000, no ge bound)\nand the semantic message is restricted to max_length=2000 to prevent log-poisoning\nduring telemetry serialization.\n\nMCP ROUTING TRIGGERS: Fault Projection, Buffer Overflow Prevention, Error Vector,\nLog Poisoning, Stateful Rollback",
       "properties": {
         "code": {
-          "description": "A Number that indicates the error type that occurred.",
+          "description": "The strict integer identifier classifying the specific topological or execution collapse.",
           "maximum": 1000000000,
           "title": "Code",
           "type": "integer"
@@ -9280,7 +9284,7 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents a Higher-Order Function within the Model Context Protocol, mapping\na dynamic Latent Prompt Manifold into the agent's execution context.\n\nCAUSAL AFFORDANCE: Authorizes the orchestrator to fetch and interpolate an exogenous prompt\ntemplate from a remote server, using the arguments dictionary to inject localized state into the template.\n\nEPISTEMIC BOUNDS: Supply-chain execution attacks are mathematically mitigated by the optional\nprompt_hash (strictly matching SHA-256 pattern ^[a-f0-9]{64}$). The arguments matrix is physically\ncapped at max_length=1000000000 (with keys at max_length=255) to prevent OOM faults during interpolation.\nThe optional fallback_persona is bounded to max_length=2000.\n\nMCP ROUTING TRIGGERS: Higher-Order Function, Latent Prompt Manifold, Template Interpolation, Supply-Chain Verification, Stateless RPC",
       "properties": {
         "server_id": {
-          "description": "The ID of the MCP server providing this prompt.",
+          "description": "The deterministic capability pointer representing the MCP server providing this prompt.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
@@ -9346,7 +9350,7 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Exposes a zero-trust Resource Description Framework (RDF) URI mapping,\npassively projecting external data geometries into the swarm's accessible environment.\n\nCAUSAL AFFORDANCE: Unlocks the agent's ability to perceive specific remote or local files,\ndatabases, or API endpoints without granting them kinetic execution privileges over those endpoints.\n\nEPISTEMIC BOUNDS: The URI namespace is physically bounded by the uris array, where each string\nis clamped to max_length=2000. The server_id is restricted to a 128-character CID. The sort_arrays\n@model_validator deterministically alphabetizes the URIs to preserve Merkle-DAG integrity across the distributed system.\n\nMCP ROUTING TRIGGERS: Resource Description Framework, Zero-Trust Perception, Epistemic Projection, Passive URI Mapping, Data Topography",
       "properties": {
         "server_id": {
-          "description": "The ID of the MCP server providing these resources.",
+          "description": "The deterministic capability pointer representing the MCP server providing these resources.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
@@ -9508,7 +9512,7 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents the definitive collapse of the LMSR market superposition into a crystallized `payout_distribution` using Strictly Proper Scoring Rules (e.g., Brier scores).\n\nCAUSAL AFFORDANCE: Instructs the orchestrator to definitively allocate compute magnitudes to the `winning_hypothesis_id` and flush `falsified_hypothesis_ids` from the active context via a Defeasible Cascade.\n\nEPISTEMIC BOUNDS: Enforces a strictly bounded `payout_distribution` dictionary mapping W3C DIDs to non-negative integers (`ge=0`), with deterministic RFC 8785 array sorting applied to the falsified hypotheses.\n\nMCP ROUTING TRIGGERS: Brier Scoring, Market Settlement, Probability Wave Collapse, Truth Crystallization",
       "properties": {
         "market_id": {
-          "description": "The ID of the prediction market.",
+          "description": "The deterministic capability pointer representing the prediction market.",
           "le": 1000000000,
           "minLength": 1,
           "title": "Market Id",
@@ -10282,7 +10286,7 @@
             }
           ],
           "default": null,
-          "description": "The Event ID of the specific ToolInvocationEvent that spawned this observation, forming a strict bipartite directed edge.",
+          "description": "The deterministic capability pointer representing the specific ToolInvocationEvent that spawned this observation, forming a strict bipartite directed edge.",
           "title": "Triggering Invocation Id"
         },
         "continuous_stream": {
@@ -10654,7 +10658,7 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: PermissionBoundaryPolicy is the strict Zero-Trust Architecture security perimeter\ndefining exactly what external physical systems or networks an agent node is authorized to touch.\n\nCAUSAL AFFORDANCE: Mechanically limits the subgraph's kinetic reach. It forces the orchestrator to\ndrop network egress packets or block disk I/O unless explicitly whitelisted, and mandates the\nnegotiation of specific cryptographic handshakes (e.g., OAuth2, mTLS) before allocating compute.\n\nEPISTEMIC BOUNDS: Bounded by deterministic string arrays (allowed_domains, auth_requirements)\nthat must be strictly evaluated at runtime. The arrays are alphabetically sorted at instantiation\nto prevent Hash Poisoning attacks on the Merkle trace.\n\nMCP ROUTING TRIGGERS: Zero-Trust Architecture, Network Egress Filtering, Capability-Based Security, mTLS Handshake, Hash Poisoning Prevention",
       "properties": {
         "network_access": {
-          "description": "Whether the tool is permitted to make external network requests.",
+          "description": "The absolute Boolean gate authorizing or severing exogenous network egress.",
           "title": "Network Access",
           "type": "boolean"
         },
@@ -10676,7 +10680,7 @@
           "title": "Allowed Domains"
         },
         "file_system_mutation_forbidden": {
-          "description": "True if the tool is strictly forbidden from writing to the disk.",
+          "description": "The strict Boolean constraint severing local disk I/O capabilities.",
           "title": "File System Mutation Forbidden",
           "type": "boolean"
         },
@@ -10749,6 +10753,7 @@
         },
         "target_table_uri": {
           "description": "The specific table mutated.",
+          "maxLength": 2048,
           "minLength": 1,
           "title": "Target Table Uri",
           "type": "string"
@@ -10842,7 +10847,7 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative, frozen snapshot of an Automated Market Maker (AMM) utilizing Robin Hanson's Logarithmic Market Scoring Rule (LMSR) to guarantee infinite liquidity. As a ...State suffix, this represents an N-dimensional coordinate of market equilibrium.\n\nCAUSAL AFFORDANCE: Aggregates HypothesisStakeReceipt vectors, allowing the orchestrator to track the shifting probability manifold and trigger market resolution when the AMM reaches the required convergence threshold.\n\nEPISTEMIC BOUNDS: The order_book array is deterministically sorted by agent_id via @model_validator to preserve RFC 8785 canonical hashing. The liquidity parameter lmsr_b_parameter is physically restricted to a stringified decimal regex (^\\d+\\.\\d+$).\n\nMCP ROUTING TRIGGERS: Logarithmic Market Scoring Rule, Automated Market Maker, Prediction Market, Infinite Liquidity, Brier Score",
       "properties": {
         "market_id": {
-          "description": "The ID of the prediction market.",
+          "description": "The deterministic capability pointer representing the prediction market.",
           "le": 1000000000,
           "minLength": 1,
           "title": "Market Id",
@@ -11060,7 +11065,7 @@
         },
         "target_node_id": {
           "$ref": "#/$defs/NodeIdentifierState",
-          "description": "The ID of the node to be quarantined."
+          "description": "The deterministic capability pointer representing the node to be quarantined."
         },
         "reason": {
           "description": "The deterministic causal justification for the structural quarantine.",
@@ -11668,7 +11673,7 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Stevens's levels of measurement and Wilkinson's Grammar\nof Graphics to mathematically project abstract data domains into visual geometric\nranges. As a ...Policy suffix, this object defines rigid mathematical boundaries.\n\nCAUSAL AFFORDANCE: Physically distorts or linearly maps the input metric tensor into\nrendering space, dictating how the orchestrator processes logarithmic, temporal, or\nordinal data vectors for UI projection.\n\nEPISTEMIC BOUNDS: The transformation algorithm is strictly constrained to a Literal\nautomaton [\"linear\", \"log\", \"time\", \"ordinal\", \"nominal\"]. Physical data boundaries\n(domain_min, domain_max) are optional (default=None) and upper-bounded by\nle=1000000000.0 to prevent geometric projection overflow (no ge bound enforced).\n\nMCP ROUTING TRIGGERS: Grammar of Graphics, Metric Tensor Distortion, Levels of\nMeasurement, Scale Projection, FSM Literal",
       "properties": {
         "type": {
-          "description": "The mathematical scale mapping metrics to pixels.",
+          "description": "The strictly typed mathematical mapping function distorting metrics into Euclidean pixel space.",
           "enum": [
             "linear",
             "log",
@@ -12593,7 +12598,7 @@
           "type": "string"
         },
         "crystallized_ledger_cids": {
-          "description": "A list of cryptographic pointers to past immutable EpistemicLedgerState blocks.",
+          "description": "The explicit array of cryptographic pointers to past immutable EpistemicLedgerState blocks.",
           "items": {
             "pattern": "^[a-f0-9]{64}$",
             "type": "string"
@@ -12950,7 +12955,7 @@
         },
         "max_concurrent_agents": {
           "default": 10,
-          "description": "The absolute ceiling for concurrent agent threads.",
+          "description": "The mathematically bounded limit for concurrent agent threads.",
           "maximum": 100,
           "title": "Max Concurrent Agents",
           "type": "integer"
@@ -13008,6 +13013,7 @@
         },
         "target_schema_ref": {
           "description": "The string name of the Pydantic class to synthesize.",
+          "maxLength": 2048,
           "minLength": 1,
           "title": "Target Schema Ref",
           "type": "string"
@@ -13064,7 +13070,7 @@
         },
         "target_node_id": {
           "$ref": "#/$defs/NodeIdentifierState",
-          "description": "The strict W3C DID of the agent that authored the invalid state, ensuring the fault is routed back to the exact state partition."
+          "description": "The globally unique decentralized identifier (DID) anchoring the agent that authored the invalid state, ensuring the fault is routed back to the exact state partition."
         },
         "failing_pointers": {
           "description": "A strictly typed array of RFC 6902 JSON Pointers isolating the exact topological coordinate of the hallucination.",
@@ -13078,6 +13084,7 @@
         },
         "remediation_prompt": {
           "description": "The deterministic, non-monotonic natural-language constraint the agent must satisfy.",
+          "maxLength": 100000,
           "minLength": 1,
           "title": "Remediation Prompt",
           "type": "string"
@@ -14208,7 +14215,7 @@
         },
         "issuer_did": {
           "$ref": "#/$defs/NodeIdentifierState",
-          "description": "The W3C DID of the trusted authority that cryptographically signed the credential, explicitly representing the delegation of authority from a human or parent principal."
+          "description": "The globally unique decentralized identifier (DID) anchoring the trusted authority that cryptographically signed the credential, explicitly representing the delegation of authority from a human or parent principal."
         },
         "cryptographic_proof_blob": {
           "description": "The base64-encoded cryptographic proof (e.g., ZK-SNARKs, zkVM receipts, or programmable trust attestations) proving the claims without revealing the private key.",
@@ -14242,12 +14249,14 @@
       "properties": {
         "vrf_proof": {
           "description": "The zero-knowledge cryptographic proof of fair random generation.",
+          "maxLength": 5000000,
           "minLength": 10,
           "title": "Vrf Proof",
           "type": "string"
         },
         "public_key": {
           "description": "The public key of the oracle or node used to verify the VRF proof.",
+          "maxLength": 8192,
           "minLength": 10,
           "title": "Public Key",
           "type": "string"
@@ -14323,12 +14332,14 @@
         },
         "did_subject": {
           "description": "The Decentralized Identifier (DID) of the human operator.",
+          "maxLength": 1024,
           "pattern": "^did:[a-z0-9]+:.*$",
           "title": "Did Subject",
           "type": "string"
         },
         "cryptographic_payload": {
           "description": "The strictly formatted (Base64url/Hex/Multibase) signature or proof.",
+          "maxLength": 100000,
           "pattern": "^[A-Za-z0-9+/=_-]+$",
           "title": "Cryptographic Payload",
           "type": "string"
