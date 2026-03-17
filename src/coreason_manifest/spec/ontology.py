@@ -2749,18 +2749,25 @@ class BrowserDOMState(CoreasonBaseState):
 
         hostname_lower = hostname.lower()
         if hostname_lower in {"localhost", "broadcasthost", "local", "internal"} or hostname_lower.endswith(
-            (".local", ".internal", ".arpa", "localhost.localdomain")
+            (".local", ".internal", ".arpa", "localhost.localdomain", ".nip.io", ".sslip.io")
         ):
             raise ValueError(f"SSRF topological violation detected: {hostname}")
 
+        ip = None
         try:
-            # Canonical C-backed validation of affine coordinate isomorphism
-            ip = ipaddress.ip_address(hostname.strip("[]"))
-        except ValueError:
-            pass  # DNS-based hostnames pass through standard string checks above
-        else:
-            if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast:
-                raise ValueError(f"SSRF restricted IP detected: {hostname}")
+            import socket
+            # Catch obfuscated IPv4 formats (e.g., 0x7f.0.0.1, 2130706433)
+            # socket.inet_aton converts them, socket.inet_ntoa normalizes to canonical decimal
+            normalized_ip = socket.inet_ntoa(socket.inet_aton(hostname.strip("[]")))
+            ip = ipaddress.ip_address(normalized_ip)
+        except (OSError, ValueError):
+            import contextlib
+            with contextlib.suppress(ValueError):
+                # Canonical C-backed validation of affine coordinate isomorphism
+                ip = ipaddress.ip_address(hostname.strip("[]"))
+
+        if ip is not None and (ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast):
+            raise ValueError(f"SSRF restricted IP detected: {hostname}")
 
         return url
 
