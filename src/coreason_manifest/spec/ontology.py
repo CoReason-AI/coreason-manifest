@@ -6912,19 +6912,11 @@ class OverrideIntent(CoreasonBaseState):
 
 class PeftAdapterContract(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Implements Low-Rank Adaptation (LoRA) and Matrix Factorization
-    to dynamically project parameter-efficient weight matrices into the base model's
-    computation graph. As a ...Contract suffix, this object defines rigid mathematical
-    boundaries that the orchestrator must enforce globally.
+    AGENT INSTRUCTION: Implements Low-Rank Adaptation (LoRA) and Matrix Factorization to dynamically project parameter-efficient weight matrices into the base model's computation graph.
 
-    CAUSAL AFFORDANCE: Instructs the inference engine to dynamically hot-swap targeted
-    attention modules via target_modules, altering the network's forward-pass physics
-    without mutating the frozen foundation weights (base_model_hash).
+    CAUSAL AFFORDANCE: Instructs the inference engine to dynamically hot-swap targeted attention modules via `target_modules`, altering the network's forward-pass physics without mutating the frozen foundation weights (`base_model_hash`).
 
-    EPISTEMIC BOUNDS: VRAM allocation is strictly clamped by the intrinsic rank parameter
-    adapter_rank (gt=0, le=1000000000). The temporal presence of the matrix is guillotined
-    by eviction_ttl_seconds (le=86400). The target_modules array is deterministically
-    sorted via @model_validator to preserve RFC 8785 canonical hashing.
+    EPISTEMIC BOUNDS: VRAM allocation is strictly clamped by the intrinsic rank parameter `adapter_rank` (`gt=0`, `le=65536`). Ranks exceeding this threshold mathematically induce petabyte-scale matrix instantiations, triggering instant OOM hardware faults. The `target_modules` array is deterministically sorted via `@model_validator` to preserve RFC 8785 canonical hashing.
 
     MCP ROUTING TRIGGERS: Low-Rank Adaptation, Matrix Factorization, LoRA, GPU VRAM Allocation, Attention Head Injection
     """
@@ -6948,7 +6940,7 @@ class PeftAdapterContract(CoreasonBaseState):
         description="The SHA-256 hash of the exact foundational model this adapter was mathematically trained against.",
     )
     adapter_rank: int = Field(
-        le=1000000000,
+        le=65536,
         gt=0,
         description="The low-rank intrinsic dimension (r) of the update matrices, used by the orchestrator to calculate VRAM cost.",
     )
@@ -8449,83 +8441,65 @@ class VectorEmbeddingState(CoreasonBaseState):
 
 class CognitiveCritiqueProfile(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Implements Step-Level Verification via Process Reward Models
-    (PRMs) to evaluate and critique intermediate steps in non-monotonic reasoning
-    trees. As a ...Profile suffix, this is a declarative, frozen snapshot.
+    AGENT INSTRUCTION: Implements Step-Level Verification via Process Reward Models (PRMs) to evaluate and critique intermediate steps in non-monotonic reasoning trees.
 
-    CAUSAL AFFORDANCE: Injects a dense latent supervision vector
-    (logical_flaw_embedding: VectorEmbeddingState | None, default=None) to
-    mathematically repel the generative trajectory away from hallucinated or
-    logically flawed probability manifolds during test-time compute.
+    CAUSAL AFFORDANCE: Injects a dense latent supervision vector (`logical_flaw_embedding`) to mathematically repel the generative trajectory away from hallucinated or logically flawed probability manifolds during test-time compute.
 
-    EPISTEMIC BOUNDS: The penalization magnitude is strictly clamped by
-    epistemic_penalty_scalar (ge=0.0, le=1.0) to prevent gradient explosion. The
-    target is cryptographically locked via reasoning_trace_hash (SHA-256 pattern
-    ^[a-f0-9]{64}$).
+    EPISTEMIC BOUNDS: The penalization magnitude is strictly clamped by `epistemic_penalty_scalar` (`ge=0.0`, `le=1.0`) to prevent gradient explosion. The target is cryptographically locked via `reasoning_trace_hash` (SHA-256 pattern `^[a-f0-9]{64}$`).
 
-    MCP ROUTING TRIGGERS: Process Reward Model, Step-Level Verification,
-    Representation Engineering, Latent Repulsion, Test-Time Supervision
+    MCP ROUTING TRIGGERS: Process Reward Model, Step-Level Verification, Representation Engineering, Latent Repulsion, Test-Time Supervision
     """
 
     reasoning_trace_hash: str = Field(
         min_length=1,
         max_length=128,
         pattern="^[a-f0-9]{64}$",
-        description="CoReason Shared Kernel Ontology: The cryptographic Merkle root of the specific ThoughtBranch being evaluated.",
+        description="The cryptographic Merkle root of the specific ThoughtBranch being evaluated.",
     )
     logical_flaw_embedding: VectorEmbeddingState | None = Field(
         default=None,
-        description="CoReason Shared Kernel Ontology: A dense latent space representation of the specific logical fallacy identified, used to mathematically repel future generation trajectories.",
+        description="A dense latent space representation of the specific logical fallacy identified, used to mathematically repel future generation trajectories.",
     )
     epistemic_penalty_scalar: float = Field(
         ge=0.0,
         le=1.0,
-        description="CoReason Shared Kernel Ontology: A continuous penalty applied to the branch's probability mass if normative drift or hallucination is detected.",
+        description="A continuous penalty applied to the branch's probability mass if normative drift or hallucination is detected.",
     )
 
 
 class KineticBudgetPolicy(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Formalizes Optimal Stopping Theory and Simulated Annealing to
-    mechanistically manage the Exploration-Exploitation dilemma during Test-Time
-    Compute. As a ...Policy suffix, this defines rigid mathematical boundaries.
+    AGENT INSTRUCTION: Formalizes Optimal Stopping Theory and Simulated Annealing to mechanistically manage the Exploration-Exploitation dilemma during Test-Time Compute.
 
-    CAUSAL AFFORDANCE: Forces probability wave collapse by dynamically throttling
-    the sampling temperature toward the dynamic_temperature_asymptote (ge=0.0,
-    le=1000000000.0) and physically halting lateral ThoughtBranch generation when
-    the forced_exploitation_threshold_ms is breached.
+    CAUSAL AFFORDANCE: Forces probability wave collapse by dynamically throttling the sampling temperature toward the `dynamic_temperature_asymptote` and physically halting lateral ThoughtBranch generation when the `forced_exploitation_threshold_ms` is breached.
 
-    EPISTEMIC BOUNDS: The decay geometry is strictly confined to the
-    exploration_decay_curve Literal ["linear", "exponential", "step"]. Physical
-    temporal limits are hard-capped by forced_exploitation_threshold_ms (gt=0,
-    le=86400000).
+    EPISTEMIC BOUNDS: The `dynamic_temperature_asymptote` is physically clamped to `le=2.0`. In Softmax thermodynamics, T -> 0 forces argmax exploitation; exceeding this boundary induces uniform noise, mathematically defeating exploitation. The decay geometry is strictly confined to the `exploration_decay_curve` Literal.
 
-    MCP ROUTING TRIGGERS: Optimal Stopping Theory, Simulated Annealing, Probability
-    Wave Collapse, Exploration-Exploitation Dilemma, Kinetic Thermodynamics
+    MCP ROUTING TRIGGERS: Optimal Stopping Theory, Simulated Annealing, Probability Wave Collapse, Exploration-Exploitation Dilemma, Kinetic Thermodynamics
     """
 
     exploration_decay_curve: Literal["linear", "exponential", "step"] = Field(
-        description="CoReason Shared Kernel Ontology: The mathematical function dictating how rapidly lateral ThoughtBranches are restricted over time."
+        description="The mathematical function dictating how rapidly lateral ThoughtBranches are restricted over time."
     )
     forced_exploitation_threshold_ms: int = Field(
         le=86400000,
         gt=0,
-        description="CoReason Shared Kernel Ontology: The physical wall-clock time remaining at which the orchestrator is mathematically forbidden from opening new lateral branches.",
+        description="The physical wall-clock time remaining at which the orchestrator is mathematically forbidden from opening new lateral branches.",
     )
     dynamic_temperature_asymptote: float = Field(
-        le=1000000000.0,
+        le=2.0,
         ge=0.0,
-        description="CoReason Shared Kernel Ontology: The absolute minimum sampling temperature the system must converge to during the final exploitation phase.",
+        description="The absolute minimum sampling temperature the system must converge to during the final exploitation phase.",
     )
 
 
 class EpistemicEscalationContract(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Establishes a Kahneman System 2 Test-Time Compute Allocation heuristic, leveraging Information Theory to dynamically unlock compute budgets based on measured Shannon Entropy. As a ...Contract suffix, this enforces a rigid mathematical boundary globally.
+    AGENT INSTRUCTION: Establishes a Kahneman System 2 Test-Time Compute Allocation heuristic, leveraging Information Theory to dynamically unlock compute budgets based on measured Shannon Entropy.
 
-    CAUSAL AFFORDANCE: Authorizes the orchestrator to recursively scale the active max_latent_tokens_budget via the test_time_multiplier when the agent's internal predictive distribution breaches the baseline_entropy_threshold.
+    CAUSAL AFFORDANCE: Authorizes the orchestrator to recursively scale the active `max_latent_tokens_budget` via the `test_time_multiplier` when the agent's internal predictive distribution breaches the `baseline_entropy_threshold`.
 
-    EPISTEMIC BOUNDS: Prevents runaway state-space explosion by strictly clamping max_escalation_tiers (ge=1, le=1000000000). The test_time_multiplier is physically forced to be mathematically expansive (gt=1.0, le=1000000000.0).
+    EPISTEMIC BOUNDS: State-Space Explosion is physically prevented by clamping `max_escalation_tiers` to `le=10`. Exponential recursive multiplication beyond this bound mathematically guarantees integer overflow and VRAM hardware exhaustion.
 
     MCP ROUTING TRIGGERS: System 2 Processing, Test-Time Compute, Shannon Entropy, Epistemic Escalation, Non-Monotonic Scaling
     """
@@ -8533,59 +8507,49 @@ class EpistemicEscalationContract(CoreasonBaseState):
     baseline_entropy_threshold: float = Field(
         le=1000000000.0,
         ge=0.0,
-        description="CoReason Shared Kernel Ontology: The mathematical measure of uncertainty (e.g., variance in generated hypotheses) required to trigger escalation.",
+        description="The mathematical measure of uncertainty (e.g., variance in generated hypotheses) required to trigger escalation.",
     )
     test_time_multiplier: float = Field(
         le=1000000000.0,
         gt=1.0,
-        description="CoReason Shared Kernel Ontology: The continuous scalar applied to the agent's baseline max_latent_tokens_budget when the entropy threshold is breached.",
+        description="The continuous scalar applied to the agent's baseline max_latent_tokens_budget when the entropy threshold is breached.",
     )
     max_escalation_tiers: int = Field(
-        le=1000000000,
+        le=10,
         ge=1,
-        description="CoReason Shared Kernel Ontology: The absolute integer limit on how many times the orchestrator can recursively multiply the compute budget before forcing a SystemFaultEvent.",
+        description="The absolute integer limit on how many times the orchestrator can recursively multiply the compute budget before forcing a SystemFaultEvent.",
     )
 
 
 class FederatedPeftContract(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Governs the spatial and temporal physics of Parameter-Efficient
-    Fine-Tuning (PEFT) and Low-Rank Adaptation (LoRA), managing the Von Neumann
-    bottleneck in distributed swarm VRAM. As a ...Contract suffix, this enforces a
-    rigid mathematical boundary globally.
+    AGENT INSTRUCTION: Governs the spatial and temporal physics of Parameter-Efficient Fine-Tuning (PEFT) and Low-Rank Adaptation (LoRA), managing the Von Neumann bottleneck in distributed swarm VRAM.
 
-    CAUSAL AFFORDANCE: Instructs the tensor execution engine to hot-swap external
-    safetensors weight matrices into active GPU memory, modifying the foundational
-    activation circuits. The adapter_merkle_root (SHA-256 ^[a-f0-9]{64}$) provides
-    supply-chain integrity. The cache_priority_weight dictates LRU eviction priority.
+    CAUSAL AFFORDANCE: Instructs the tensor execution engine to hot-swap external safetensors weight matrices into active GPU memory, modifying the foundational activation circuits.
 
-    EPISTEMIC BOUNDS: The spatial geometry is physically capped by
-    vram_footprint_bytes (gt=0, le=100000000000). The temporal presence is
-    mathematically guillotined by ephemeral_ttl_ms (gt=0, le=86400000). The
-    cache_priority_weight is normalized (ge=0.0, le=1.0).
+    EPISTEMIC BOUNDS: The spatial geometry is physically capped by `vram_footprint_bytes` (`gt=0`, `le=100000000000`). The temporal presence is mathematically guillotined by `ephemeral_ttl_ms` (`gt=0`, `le=86400000`). Supply-chain integrity is anchored by `adapter_merkle_root`.
 
-    MCP ROUTING TRIGGERS: Low-Rank Adaptation, PEFT, LRU Cache Eviction, Tensor
-    Hot-Swapping, GPU VRAM Management
+    MCP ROUTING TRIGGERS: Low-Rank Adaptation, PEFT, LRU Cache Eviction, Tensor Hot-Swapping, GPU VRAM Management
     """
 
     adapter_merkle_root: str = Field(
         pattern="^[a-f0-9]{64}$",
-        description="CoReason Shared Kernel Ontology: The tamper-evident SHA-256 hash of the exact safetensors weight matrix.",
+        description="The tamper-evident SHA-256 hash of the exact safetensors weight matrix.",
     )
     vram_footprint_bytes: int = Field(
         le=100000000000,
         gt=0,
-        description="CoReason Shared Kernel Ontology: The exact spatial geometry required in VRAM to mount this adapter.",
+        description="The exact spatial geometry required in VRAM to mount this adapter.",
     )
     ephemeral_ttl_ms: int = Field(
         le=86400000,
         gt=0,
-        description="CoReason Shared Kernel Ontology: The absolute Time-To-Live for the adapter to exist in the kinetic execution plane before forced eviction.",
+        description="The absolute Time-To-Live for the adapter to exist in the kinetic execution plane before forced eviction.",
     )
     cache_priority_weight: float = Field(
         ge=0.0,
         le=1.0,
-        description="CoReason Shared Kernel Ontology: The relative importance scalar used by the orchestrator's LRU eviction algorithm when VRAM limits are saturated.",
+        description="The relative importance scalar used by the orchestrator's LRU eviction algorithm when VRAM limits are saturated.",
     )
 
 
