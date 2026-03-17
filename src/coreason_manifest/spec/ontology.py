@@ -1,13 +1,3 @@
-# Copyright (c) 2026 CoReason, Inc
-#
-# This software is proprietary and dual-licensed
-# Licensed under the Prosperity Public License 3.0 (the "License")
-# A copy of the license is available at <https://prosperitylicense.com/versions/3.0.0>
-# For details, see the LICENSE file
-# Commercial use beyond a 30-day trial requires a separate license
-#
-# Source Code: <https://github.com/CoReason-AI/coreason-manifest>
-
 from __future__ import annotations
 
 import ast
@@ -771,8 +761,7 @@ class PermissionBoundaryPolicy(CoreasonBaseState):
 
     network_access: bool = Field(description="Whether the tool is permitted to make external network requests.")
     allowed_domains: list[Annotated[str, StringConstraints(max_length=2000)]] | None = Field(
-        default=None,
-        description="The explicit whitelist of allowed network domains if network access is true.",
+        default=None, description="The explicit whitelist of allowed network domains if network access is true."
     )
     file_system_mutation_forbidden: bool = Field(
         description="True if the tool is strictly forbidden from writing to the disk."
@@ -928,8 +917,7 @@ class ActivationSteeringContract(CoreasonBaseState):
         description="The SHA-256 hash of the extracted RepE control tensor (e.g., the 'caution' vector).",
     )
     injection_layers: list[Annotated[int, Field(ge=0)]] = Field(
-        min_length=1,
-        description="The specific transformer layer indices where this vector must be applied.",
+        min_length=1, description="The specific transformer layer indices where this vector must be applied."
     )
     scaling_factor: float = Field(
         le=100.0, description="The mathematical magnitude/strength of the injection (can be negative for ablation)."
@@ -1710,7 +1698,7 @@ class StateDifferentialManifest(CoreasonBaseState):
         description="Strict scalar logical clock governing deterministic LWW (Last-Writer-Wins) conflict resolution.",
     )
     vector_clock: dict[Annotated[str, StringConstraints(max_length=255)], Annotated[int, Field(ge=0)]] = Field(
-        description="Causal history mapping of all known Lineage Watermarks to their latest logical mutation count at the time of authoring.",
+        description="Causal history mapping of all known Lineage Watermarks to their latest logical mutation count at the time of authoring."
     )
     patches: list[StateMutationIntent] = Field(
         default_factory=list, description="The exact, ordered sequence of deterministic state vector mutations."
@@ -1743,10 +1731,10 @@ class StateHydrationManifest(CoreasonBaseState):
         max_length=2000, description="A string ID representing the session or specific spatial trace binding."
     )
     crystallized_ledger_cids: list[Annotated[str, StringConstraints(pattern="^[a-f0-9]{64}$")]] = Field(
-        description="A list of cryptographic pointers to past immutable EpistemicLedgerState blocks."
+        description="The explicit array of cryptographic pointers to past immutable EpistemicLedgerState blocks."
     )
     working_context_variables: dict[Annotated[str, StringConstraints(max_length=255)], Any] = Field(
-        description="A strictly typed dictionary for ephemeral context variables injected at runtime. AGENT INSTRUCTION: This matrix is deterministically sorted by CoreasonBaseState natively.",
+        description="A strictly typed dictionary for ephemeral context variables injected at runtime. AGENT INSTRUCTION: This matrix is deterministically sorted by CoreasonBaseState natively."
     )
 
     @field_validator("working_context_variables", mode="before")
@@ -1880,7 +1868,7 @@ class LatentScratchpadReceipt(CoreasonBaseState):
         description="All logical paths the agent attempted within this Ephemeral Epistemic Quarantine—a volatile workspace where probability waves collapse before being committed to the immutable ledger."
     )
     discarded_branches: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
-        description="The strict array of Content Identifiers (CIDs) that were explicitly pruned due to logical dead-ends.",
+        description="The strict array of Content Identifiers (CIDs) that were explicitly pruned due to logical dead-ends."
     )
     resolution_branch_id: str | None = Field(
         min_length=1,
@@ -1942,8 +1930,7 @@ class EphemeralNamespacePartitionState(CoreasonBaseState):
         description="The strict virtual machine target mandated for dynamic execution."
     )
     authorized_bytecode_hashes: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
-        min_length=1,
-        description="The explicit whitelist of SHA-256 hashes allowed to execute within this partition.",
+        min_length=1, description="The explicit whitelist of SHA-256 hashes allowed to execute within this partition."
     )
     max_ttl_seconds: int = Field(
         le=86400, gt=0, description="The absolute temporal guillotine before the orchestrator drops the context."
@@ -2174,7 +2161,7 @@ class AdjudicationIntent(CoreasonBaseState):
         description="The conflicting claim IDs or proposals the human must choose between.",
     )
     resolution_schema: dict[Annotated[str, StringConstraints(max_length=255)], Any] = Field(
-        description="The strict JSON Schema for the tie-breaking response (usually an enum of the deadlocked_claims).",
+        description="The strict JSON Schema for the tie-breaking response (usually an enum of the deadlocked_claims)."
     )
     timeout_action: Literal["rollback", "proceed_default", "terminate"] = Field(
         description="The action to take if the oracle is unresponsive."
@@ -2212,7 +2199,9 @@ class AdjudicationReceipt(CoreasonBaseState):
         pattern="^[a-zA-Z0-9_.:-]+$",
         description="The cryptographic pointer to the rubric dictating adjudication.",
     )
-    target_node_id: NodeIdentifierState = Field(description="The ID of the node that was evaluated.")
+    target_node_id: NodeIdentifierState = Field(
+        description="The deterministic capability pointer representing the node that was evaluated."
+    )
     score: int = Field(ge=0, le=100, description="The final score assigned based on the rubric.")
     passed: bool = Field(description="Indicates whether the evaluation passed the threshold.")
     reasoning: str = Field(
@@ -2282,16 +2271,14 @@ class AdversarialEmulationProfile(CoreasonBaseState):
     """
 
     generative_persona: Literal["hesitant_novice", "fast_expert", "distracted_browser"] = Field(
-        default="fast_expert",
-        description="The imitation learning persona governing the behavioral emulation profile.",
+        default="fast_expert", description="The imitation learning persona governing the behavioral emulation profile."
     )
     kinematic_noise: "KinematicNoiseProfile | None" = Field(
         default=None,
         description="The stochastic pointer trajectory perturbation profile for human-like motor control emulation.",
     )
     environmental_spoofing: "EnvironmentalSpoofingProfile | None" = Field(
-        default=None,
-        description="The browser fingerprint and environmental telemetry spoofing geometry.",
+        default=None, description="The browser fingerprint and environmental telemetry spoofing geometry."
     )
     emulation_fidelity_target: float = Field(
         ge=0.0,
@@ -2830,7 +2817,7 @@ class BypassReceipt(CoreasonBaseState):
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
         min_length=1,
-        description="The exact genesis CID of the document, ensuring continuity.",
+        description="The exact genesis globally unique decentralized identifier (DID) anchoring the document, ensuring continuity.",
     )
     bypassed_node_id: NodeIdentifierState = Field(
         description="The exact extraction step in the DAG that was mathematically starved of compute."
@@ -2970,7 +2957,7 @@ class CausalExplanationEvent(BaseStateEvent):
         min_length=1,
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
-        description="The CID of the collective outcome being explained.",
+        description="The globally unique decentralized identifier (DID) anchoring the collective outcome being explained.",
     )
     collective_intelligence: CollectiveIntelligenceProfile = Field(description="The system-level emergence metrics.")
     agent_attributions: list[ShapleyAttributionReceipt] = Field(
@@ -3026,7 +3013,7 @@ class CircuitBreakerEvent(CoreasonBaseState):
         default="circuit_breaker_event", description="The type of the resilience payload."
     )
     target_node_id: NodeIdentifierState = Field(
-        description="The ID of the node for which the circuit breaker was tripped."
+        description="The deterministic capability pointer representing the node for which the circuit breaker was tripped."
     )
     error_signature: str = Field(max_length=2000, description="Signature or summary of the error causing the trip.")
 
@@ -3058,10 +3045,10 @@ class ConstitutionalAmendmentIntent(CoreasonBaseState):
         min_length=1,
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
-        description="The CID of the NormativeDriftEvent that justified triggering this proposal.",
+        description="The globally unique decentralized identifier (DID) anchoring the NormativeDriftEvent that justified triggering this proposal.",
     )
     proposed_patch: dict[Annotated[str, StringConstraints(max_length=255)], Any] = Field(
-        description="A strict, structurally bounded JSON Patch (RFC 6902) proposed by the AI to mutate the GovernancePolicy.",
+        description="A strict, structurally bounded JSON Patch (RFC 6902) proposed by the AI to mutate the GovernancePolicy."
     )
     justification: str = Field(
         max_length=2000,
@@ -3292,7 +3279,7 @@ class CustodyReceipt(CoreasonBaseState):
         min_length=1,
         pattern="^[a-zA-Z0-9_.:-]+$",
         max_length=255,
-        description="The ID of the InformationFlowPolicy successfully applied.",
+        description="The deterministic capability pointer representing the InformationFlowPolicy successfully applied.",
     )
     pre_redaction_hash: str | None = Field(
         min_length=1,
@@ -3906,14 +3893,10 @@ class EnvironmentalSpoofingProfile(CoreasonBaseState):
         description="The spoofed UTC timezone offset in minutes, bounded to the valid terrestrial range.",
     )
     screen_resolution_width: int = Field(
-        ge=1,
-        le=15360,
-        description="The spoofed horizontal display resolution in pixels.",
+        ge=1, le=15360, description="The spoofed horizontal display resolution in pixels."
     )
     screen_resolution_height: int = Field(
-        ge=1,
-        le=15360,
-        description="The spoofed vertical display resolution in pixels.",
+        ge=1, le=15360, description="The spoofed vertical display resolution in pixels."
     )
 
 
@@ -3971,13 +3954,13 @@ class EpistemicPromotionEvent(BaseStateEvent):
         default="epistemic_promotion", description="Discriminator type for an epistemic promotion event."
     )
     source_episodic_event_ids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
-        description="The strict array of CIDs (Content Identifiers) representing the raw logs being compressed and archived.",
+        description="The strict array of CIDs (Content Identifiers) representing the raw logs being compressed and archived."
     )
     crystallized_semantic_node_id: str = Field(
         min_length=1,
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
-        description="The resulting permanent W3C DID / CID of the newly minted knowledge node.",
+        description="The resulting permanent W3C DID / The globally unique decentralized identifier (DID) anchoring the newly minted knowledge node.",
     )
     compression_ratio: float = Field(
         le=1.0,
@@ -4042,7 +4025,7 @@ class EpistemicTransmutationTask(CoreasonBaseState):
         min_length=1,
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
-        description="The CID of the MultimodalArtifactReceipt being processed.",
+        description="The globally unique decentralized identifier (DID) anchoring the MultimodalArtifactReceipt being processed.",
     )
     target_modalities: list[
         Literal["text", "raster_image", "vector_graphics", "tabular_grid", "n_dimensional_tensor"]
@@ -4136,10 +4119,10 @@ class EscalationIntent(CoreasonBaseState):
         min_length=1,
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
-        description="The ID of the Payload Loss Prevention (PLP) or Governance rule that blocked execution.",
+        description="The deterministic capability pointer representing the Payload Loss Prevention (PLP) or Governance rule that blocked execution.",
     )
     resolution_schema: dict[Annotated[str, StringConstraints(max_length=255)], Any] = Field(
-        description="The strict JSON Schema requiring an explicit cryptographic sign-off or justification string to bypass the breaker.",
+        description="The strict JSON Schema requiring an explicit cryptographic sign-off or justification string to bypass the breaker."
     )
     timeout_action: Literal["rollback", "proceed_default", "terminate"] = Field(
         description="The default action is usually terminate or rollback for security escalations."
@@ -4322,9 +4305,7 @@ class EpistemicArgumentGraphState(CoreasonBaseState):
         max_length=10000, description="Components of an Abstract Argumentation Framework."
     )
     attacks: dict[Annotated[str, StringConstraints(max_length=255)], DefeasibleAttackEvent] = Field(
-        default_factory=dict,
-        max_length=10000,
-        description="Geometric matrices of undercutting defeaters.",
+        default_factory=dict, max_length=10000, description="Geometric matrices of undercutting defeaters."
     )
 
 
@@ -4351,14 +4332,14 @@ class ExecutionNodeReceipt(CoreasonBaseState):
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
         default=None,
-        description="The ID of the parent request.",
+        description="The deterministic capability pointer anchoring the parent request manifold.",
     )
     root_request_id: str | None = Field(
         min_length=1,
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
         default=None,
-        description="The ID of the trace root.",
+        description="The deterministic capability pointer anchoring the trace root manifold.",
     )
     inputs: JsonPrimitiveState = Field(description="The inputs provided to the execution node.")
     outputs: JsonPrimitiveState = Field(description="The outputs generated by the execution node.")
@@ -4370,8 +4351,7 @@ class ExecutionNodeReceipt(CoreasonBaseState):
         return _validate_payload_bounds(v)
 
     parent_hashes: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
-        default_factory=list,
-        description="The strict array of cryptographic hashes of parent execution nodes.",
+        default_factory=list, description="The strict array of cryptographic hashes of parent execution nodes."
     )
     node_hash: str | None = Field(
         min_length=1,
@@ -4486,8 +4466,12 @@ class FallbackIntent(CoreasonBaseState):
     type: Literal["fallback_intent"] = Field(
         le=1000000000, default="fallback_intent", description="The type of the resilience payload."
     )
-    target_node_id: NodeIdentifierState = Field(description="The ID of the failing node.")
-    fallback_node_id: NodeIdentifierState = Field(description="The ID of the node to use as a fallback.")
+    target_node_id: NodeIdentifierState = Field(
+        description="The deterministic capability pointer representing the failing node."
+    )
+    fallback_node_id: NodeIdentifierState = Field(
+        description="The deterministic capability pointer representing the node to use as a fallback."
+    )
 
 
 class FalsificationContract(CoreasonBaseState):
@@ -4580,7 +4564,9 @@ class FederatedCapabilityAttestationReceipt(CoreasonBaseState):
         min_length=1,
         description="Cryptographic Lineage Watermark for the attestation.",
     )
-    target_topology_id: NodeIdentifierState = Field(description="The DID of the discovered external state matrix/VPC.")
+    target_topology_id: NodeIdentifierState = Field(
+        description="The globally unique decentralized identifier (DID) anchoring the discovered external state matrix/VPC."
+    )
     authorized_session: SecureSubSessionState = Field(
         description="The isolated state partition granted to the agent for this connection."
     )
@@ -4926,7 +4912,7 @@ class GlobalSemanticProfile(CoreasonBaseState):
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
         min_length=1,
-        description="The exact genesis CID of the MultimodalArtifactReceipt entering the routing tier.",
+        description="The exact genesis globally unique decentralized identifier (DID) anchoring the MultimodalArtifactReceipt entering the routing tier.",
     )
     detected_modalities: list[
         Literal["text", "raster_image", "vector_graphics", "tabular_grid", "n_dimensional_tensor"]
@@ -4962,7 +4948,7 @@ class DynamicRoutingManifest(CoreasonBaseState):
     )
     artifact_profile: GlobalSemanticProfile = Field(description="The semantic profile governing this route.")
     active_subgraphs: dict[Annotated[str, StringConstraints(max_length=255)], list[NodeIdentifierState]] = Field(
-        description="Mapping of specific modalities (e.g., 'tabular_grid') to the explicit lists of worker NodeIdentifierStates authorized to execute.",
+        description="Mapping of specific modalities (e.g., 'tabular_grid') to the explicit lists of worker NodeIdentifierStates authorized to execute."
     )
     bypassed_steps: list[BypassReceipt] = Field(
         default_factory=list, description="The declarative array of steps the orchestrator is mandated to skip."
@@ -5182,7 +5168,7 @@ class HypothesisStakeReceipt(CoreasonBaseState):
     """
 
     agent_id: Annotated[str, StringConstraints(min_length=1)] = Field(
-        le=1000000000, description="The ID of the agent placing the stake."
+        le=1000000000, description="The deterministic capability pointer representing the agent placing the stake."
     )
     target_hypothesis_id: Annotated[str, StringConstraints(min_length=1)] = Field(
         le=1000000000, description="The exact HypothesisGenerationEvent the agent is betting on."
@@ -5214,7 +5200,8 @@ class InformationalIntent(CoreasonBaseState):
     """
 
     type: Literal["informational"] = Field(
-        default="informational", description="Discriminator for read-only informational handoffs."
+        default="informational",
+        description="The discriminative topological boundary for read-only informational handoffs.",
     )
     message: str = Field(max_length=2000, description="The context or summary to display to the human operator.")
     timeout_action: Literal["rollback", "proceed_default", "terminate"] = Field(
@@ -5252,8 +5239,7 @@ class TaxonomicNodeState(CoreasonBaseState):
         description="The human-legible, dynamically synthesized categorical label (e.g., 'High Risk Policies').",
     )
     children_node_ids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
-        default_factory=list,
-        description="Explicit array of child node CIDs to enforce the Directed Acyclic Graph.",
+        default_factory=list, description="Explicit array of child node CIDs to enforce the Directed Acyclic Graph."
     )
     leaf_provenance: list["EpistemicProvenanceReceipt"] = Field(
         default_factory=list,
@@ -5298,7 +5284,7 @@ class GenerativeTaxonomyManifest(CoreasonBaseState):
         min_length=1,
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
-        description="The CID of the top-level TaxonomicNodeState initiating the tree.",
+        description="The globally unique decentralized identifier (DID) anchoring the top-level TaxonomicNodeState initiating the tree.",
     )
     nodes: dict[Annotated[str, StringConstraints(max_length=255)], TaxonomicNodeState] = Field(
         max_length=1000000000, description="Flat dictionary matrix containing all nodes within the manifold."
@@ -5537,7 +5523,9 @@ class InterventionIntent(CoreasonBaseState):
         default=None, description="The scope constraints bounding the intervention."
     )
     fallback_sla: FallbackSLA | None = Field(default=None, description="The SLA constraints on the intervention delay.")
-    target_node_id: NodeIdentifierState = Field(description="The ID of the target node.")
+    target_node_id: NodeIdentifierState = Field(
+        description="The deterministic capability pointer representing the target node."
+    )
     context_summary: str = Field(max_length=2000, description="A summary of the context requiring intervention.")
     proposed_action: dict[Annotated[str, StringConstraints(max_length=255)], str | int | float | bool | None] = Field(
         max_length=1000000000, description="The action proposed by the agent that requires approval."
@@ -5877,16 +5865,14 @@ class MCPCapabilityWhitelistPolicy(CoreasonBaseState):
     """
 
     allowed_tools: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
-        default_factory=list,
-        description="The explicit whitelist of function names the node is allowed to call.",
+        default_factory=list, description="The explicit whitelist of function names the node is allowed to call."
     )
     allowed_resources: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
         default_factory=list,
         description="The explicit whitelist of resource URIs the node is allowed to passively perceive.",
     )
     allowed_prompts: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
-        default_factory=list,
-        description="The explicit whitelist of workflow templates the node is allowed to trigger.",
+        default_factory=list, description="The explicit whitelist of workflow templates the node is allowed to trigger."
     )
     required_licenses: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
         default_factory=list,
@@ -5955,10 +5941,9 @@ class MCPServerManifest(CoreasonBaseState):
         If a local POSIX stream (stdio) is requested, an explicit cryptographic hash of the
         binary MUST be provided to prevent Arbitrary Code Execution (ACE) via file-swapping.
         """
-        if getattr(self.transport, "type", None) == "stdio" and not self.binary_hash:
+        if getattr(self.transport, "type", None) == "stdio" and (not self.binary_hash):
             raise ValueError(
-                "SUPPLY CHAIN VULNERABILITY: An MCPServerManifest utilizing a StdioTransportProfile "
-                "MUST provide a cryptographic 'binary_hash' to prevent arbitrary code execution attacks on the host OS."
+                "SUPPLY CHAIN VULNERABILITY: An MCPServerManifest utilizing a StdioTransportProfile MUST provide a cryptographic 'binary_hash' to prevent arbitrary code execution attacks on the host OS."
             )
         return self
 
@@ -5990,7 +5975,7 @@ class KinematicNoiseProfile(CoreasonBaseState):
     """
 
     noise_type: Literal["pink", "brownian", "gaussian"] = Field(
-        description="The stochastic process governing the noise generation for pointer trajectory perturbation.",
+        description="The stochastic process governing the noise generation for pointer trajectory perturbation."
     )
     velocity_profile: Literal["minimum_jerk", "constant", "fractional_brownian"] = Field(
         default="minimum_jerk",
@@ -6048,7 +6033,7 @@ class KineticSeparationPolicy(CoreasonBaseState):
         description="Unique identifier for this specific separation boundary.",
     )
     mutually_exclusive_clusters: list[list[Annotated[str, StringConstraints(max_length=2000)]]] = Field(
-        description="A topological matrix of tool names or MCP URIs. If an agent mounts one capability in a cluster, all other capabilities in that cluster are mathematically quarantined.",
+        description="A topological matrix of tool names or MCP URIs. If an agent mounts one capability in a cluster, all other capabilities in that cluster are mathematically quarantined."
     )
     enforcement_action: Literal["halt_and_quarantine", "sever_causal_chain"] = Field(
         description="The deterministic action the orchestrator must take if a bipartite cycle is detected."
@@ -6249,7 +6234,7 @@ class MCPPromptReferenceState(CoreasonBaseState):
         min_length=1,
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
-        description="The ID of the MCP server providing this prompt.",
+        description="The deterministic capability pointer representing the MCP server providing this prompt.",
     )
     prompt_name: str = Field(..., max_length=2000, description="The name of the prompt template.")
     arguments: dict[Annotated[str, StringConstraints(max_length=255)], Any] = Field(
@@ -6287,11 +6272,10 @@ class MCPResourceManifest(CoreasonBaseState):
         min_length=1,
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
-        description="The ID of the MCP server providing these resources.",
+        description="The deterministic capability pointer representing the MCP server providing these resources.",
     )
     uris: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
-        default_factory=list,
-        description="The explicit array of resource URIs mathematically bound to the agent.",
+        default_factory=list, description="The explicit array of resource URIs mathematically bound to the agent."
     )
 
     @model_validator(mode="after")
@@ -6368,7 +6352,7 @@ class MarketResolutionState(CoreasonBaseState):
     """
 
     market_id: Annotated[str, StringConstraints(min_length=1)] = Field(
-        le=1000000000, description="The ID of the prediction market."
+        le=1000000000, description="The deterministic capability pointer representing the prediction market."
     )
     winning_hypothesis_id: str = Field(
         min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$", description="The hypothesis ID that was verified."
@@ -6377,7 +6361,7 @@ class MarketResolutionState(CoreasonBaseState):
         max_length=1000000000, description="The hypothesis IDs that were falsified."
     )
     payout_distribution: dict[Annotated[str, StringConstraints(max_length=255)], Annotated[int, Field(ge=0)]] = Field(
-        description="The deterministic mapping of agent IDs to their earned compute budget/magnitude based on Brier scoring.",
+        description="The deterministic mapping of agent IDs to their earned compute budget/magnitude based on Brier scoring."
     )
 
     @model_validator(mode="after")
@@ -6415,8 +6399,7 @@ class MechanisticAuditContract(CoreasonBaseState):
         )
     )
     target_layers: list[Annotated[int, Field(ge=0)]] = Field(
-        min_length=1,
-        description="The specific transformer block indices the execution engine must extract from.",
+        min_length=1, description="The specific transformer block indices the execution engine must extract from."
     )
     max_features_per_layer: int = Field(
         le=1000000000, gt=0, description="The top-k features to extract, preventing VRAM exhaustion."
@@ -6458,7 +6441,7 @@ class EpistemicProvenanceReceipt(CoreasonBaseState):
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
         default=None,
-        description="The CID of the Genesis MultimodalArtifactReceipt this semantic state was transmutated from.",
+        description="The globally unique decentralized identifier (DID) anchoring the Genesis MultimodalArtifactReceipt this semantic state was transmutated from.",
     )
     multimodal_anchor: MultimodalTokenAnchorState | None = Field(
         default=None, description="The unified VLM spatial and temporal token matrix where this data was extracted."
@@ -6656,7 +6639,7 @@ class NeuralAuditAttestationReceipt(CoreasonBaseState):
         description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
     )
     layer_activations: dict[int, list[SaeFeatureActivationState]] = Field(
-        description="A mapping of specific transformer layer indices to their top-k activated SAE features.",
+        description="A mapping of specific transformer layer indices to their top-k activated SAE features."
     )
     causal_scrubbing_applied: bool = Field(
         default=False,
@@ -6697,7 +6680,7 @@ class NeuroSymbolicHandoffContract(CoreasonBaseState):
         max_length=100000, description="The raw code or formal proof syntax generated by the LLM to be evaluated."
     )
     expected_proof_schema: dict[Annotated[str, StringConstraints(max_length=255)], Any] = Field(
-        description="The strict JSON Schema the deterministic solver must use to return the verified answer to the agent.",
+        description="The strict JSON Schema the deterministic solver must use to return the verified answer to the agent."
     )
     timeout_ms: int = Field(
         le=86400000, gt=0, description="The maximum compute time allocated to the symbolic solver before aborting."
@@ -6809,8 +6792,7 @@ class OntologicalHandshakeReceipt(CoreasonBaseState):
         description="The projection applied if the agents natively used different embedding dimensionalities.",
     )
     remote_state_snapshot: FederatedStateSnapshot | None = Field(
-        default=None,
-        description="Isolated holographic clone of remote swarm state for safe cross-boundary evaluation.",
+        default=None, description="Isolated holographic clone of remote swarm state for safe cross-boundary evaluation."
     )
 
     @model_validator(mode="after")
@@ -6951,8 +6933,7 @@ class PeftAdapterContract(CoreasonBaseState):
         description="The low-rank intrinsic dimension (r) of the update matrices, used by the orchestrator to calculate VRAM cost.",
     )
     target_modules: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
-        min_length=1,
-        description="The explicit array of attention head modules to inject (e.g., ['q_proj', 'v_proj']).",
+        min_length=1, description="The explicit array of attention head modules to inject (e.g., ['q_proj', 'v_proj'])."
     )
     eviction_ttl_seconds: int | None = Field(
         le=86400,
@@ -7014,7 +6995,7 @@ class PredictionMarketState(CoreasonBaseState):
     """
 
     market_id: Annotated[str, StringConstraints(min_length=1)] = Field(
-        le=1000000000, description="The ID of the prediction market."
+        le=1000000000, description="The deterministic capability pointer representing the prediction market."
     )
     resolution_oracle_condition_id: str = Field(
         min_length=1,
@@ -7103,7 +7084,7 @@ class EpistemicSOPManifest(CoreasonBaseState):
         max_length=1000000000, description="Dictionary mapping step_ids to strict causal DAG constraints."
     )
     structural_grammar_hashes: dict[Annotated[str, StringConstraints(max_length=255)], str] = Field(
-        description="Dictionary mapping step_ids to SHA-256 hashes of strict Context-Free Grammars or JSON Schemas.",
+        description="Dictionary mapping step_ids to SHA-256 hashes of strict Context-Free Grammars or JSON Schemas."
     )
     chronological_flow_edges: list[tuple[str, str]] = Field(description="The exact topological flow between step_ids.")
     prm_evaluations: list["ProcessRewardContract"] = Field(
@@ -7219,7 +7200,9 @@ class QuarantineIntent(CoreasonBaseState):
     type: Literal["quarantine_intent"] = Field(
         le=1000000000, default="quarantine_intent", description="The type of the resilience payload."
     )
-    target_node_id: NodeIdentifierState = Field(description="The ID of the node to be quarantined.")
+    target_node_id: NodeIdentifierState = Field(
+        description="The deterministic capability pointer representing the node to be quarantined."
+    )
     reason: str = Field(
         max_length=2000, description="The deterministic causal justification for the structural quarantine."
     )
@@ -7656,7 +7639,7 @@ class StateContract(CoreasonBaseState):
     """
 
     schema_definition: dict[Annotated[str, StringConstraints(max_length=255)], Any] = Field(
-        description="A strict JSON Schema dictionary defining the required shape of the shared epistemic blackboard.",
+        description="A strict JSON Schema dictionary defining the required shape of the shared epistemic blackboard."
     )
     strict_validation: bool = Field(
         default=True,
@@ -7969,7 +7952,7 @@ class System2RemediationIntent(CoreasonBaseState):
         description="A cryptographic Lineage Watermark (CID) tracking this specific dimensional collapse.",
     )
     target_node_id: NodeIdentifierState = Field(
-        description="The strict W3C DID of the agent that authored the invalid state, ensuring the fault is routed back to the exact state partition."
+        description="The globally unique decentralized identifier (DID) anchoring the agent that authored the invalid state, ensuring the fault is routed back to the exact state partition."
     )
     failing_pointers: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
         min_length=1,
@@ -8049,7 +8032,7 @@ class TaskAwardReceipt(CoreasonBaseState):
         min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$", description="The identifier of the resolved task."
     )
     awarded_syndicate: dict[Annotated[str, StringConstraints(max_length=255)], Annotated[int, Field(ge=0)]] = Field(
-        description="Strict mapping of agent NodeIdentifierStates to their exact fractional payout in magnitude.",
+        description="Strict mapping of agent NodeIdentifierStates to their exact fractional payout in magnitude."
     )
     cleared_price_magnitude: int = Field(le=1000000000, description="The final cryptographic clearing price.")
     escrow: EscrowPolicy | None = Field(default=None, description="The conditional escrow locking the compute budget.")
@@ -8229,7 +8212,7 @@ class TheoryOfMindSnapshot(CoreasonBaseState):
         description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the agent whose mind is being modeled.",
     )
     assumed_shared_beliefs: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
-        description="The explicit array of Content Identifiers (CIDs) acting as cryptographic Lineage Watermarks that the modeling agent assumes the target already possesses.",
+        description="The explicit array of Content Identifiers (CIDs) acting as cryptographic Lineage Watermarks that the modeling agent assumes the target already possesses."
     )
     identified_knowledge_gaps: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
         max_length=1000000000,
@@ -8729,7 +8712,7 @@ class VerifiableCredentialPresentationReceipt(CoreasonBaseState):
         description="The exact cryptographic standard used to encode this credential presentation."
     )
     issuer_did: NodeIdentifierState = Field(
-        description="The W3C DID of the trusted authority that cryptographically signed the credential, explicitly representing the delegation of authority from a human or parent principal."
+        description="The globally unique decentralized identifier (DID) anchoring the trusted authority that cryptographically signed the credential, explicitly representing the delegation of authority from a human or parent principal."
     )
     cryptographic_proof_blob: str = Field(
         max_length=100000,
@@ -8837,7 +8820,7 @@ class AgentNodeProfile(BaseNodeProfile):
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
         default=None,
-        description="The ID of the specific ActionSpaceManifest (curated tool environment) bound to this agent.",
+        description="The globally unique decentralized identifier (DID) anchoring the specific ActionSpaceManifest (curated tool environment) bound to this agent.",
     )
     secure_sub_session: SecureSubSessionState | None = Field(
         default=None,
@@ -8894,8 +8877,7 @@ class AgentNodeProfile(BaseNodeProfile):
         description="The adversarial emulation geometry composing kinematic noise and environmental spoofing for anti-bot trajectory evasion.",
     )
     gflownet_balance_policy: CognitiveDetailedBalanceContract | None = Field(
-        default=None,
-        description="Authorizes trajectory balance optimization during non-monotonic reasoning.",
+        default=None, description="Authorizes trajectory balance optimization during non-monotonic reasoning."
     )
 
     @model_validator(mode="after")
@@ -9058,10 +9040,8 @@ class DAGTopologyManifest(BaseTopologyManifest):
     def verify_edges_exist_and_compute_bounds(self) -> Self:
         if self.lifecycle_phase == "draft":
             return self
-
         adj: dict[NodeIdentifierState, list[NodeIdentifierState]] = {node_id: [] for node_id in self.nodes}
         in_degree: dict[NodeIdentifierState, int] = dict.fromkeys(self.nodes, 0)
-
         for source, target in self.edges:
             if source not in self.nodes:
                 raise ValueError(f"Edge source '{source}' does not exist in nodes registry.")
@@ -9069,12 +9049,9 @@ class DAGTopologyManifest(BaseTopologyManifest):
                 raise ValueError(f"Edge target '{target}' does not exist in nodes registry.")
             adj[source].append(target)
             in_degree[target] += 1
-
-        # Validate max_fan_out
         for node, neighbors in adj.items():
             if len(neighbors) > self.max_fan_out:
                 raise ValueError(f"Topological Violation: Node '{node}' exceeds max_fan_out of {self.max_fan_out}.")
-
         if not self.allow_cycles:
             visited: set[NodeIdentifierState] = set()
             recursion_stack: set[NodeIdentifierState] = set()
@@ -9085,14 +9062,11 @@ class DAGTopologyManifest(BaseTopologyManifest):
                     raise ValueError("Graph contains cycles but allow_cycles is False.")
                 if curr in visited:
                     return depth_memo.get(curr, 1)
-
                 visited.add(curr)
                 recursion_stack.add(curr)
-
                 max_child_depth = 0
                 for neighbor in adj[curr]:
                     max_child_depth = max(max_child_depth, dfs(neighbor))
-
                 recursion_stack.remove(curr)
                 current_depth = 1 + max_child_depth
                 depth_memo[curr] = current_depth
@@ -9100,19 +9074,15 @@ class DAGTopologyManifest(BaseTopologyManifest):
 
             max_calculated_depth = 0
             for start_node in self.nodes:
-                if in_degree[start_node] == 0:  # Start from roots
+                if in_degree[start_node] == 0:
                     max_calculated_depth = max(max_calculated_depth, dfs(start_node))
-
-            # Handle isolated cyclic components if no roots exist
             for start_node in self.nodes:
                 if start_node not in visited:
                     max_calculated_depth = max(max_calculated_depth, dfs(start_node))
-
             if max_calculated_depth > self.max_depth:
                 raise ValueError(
                     f"Topological Violation: Graph depth {max_calculated_depth} exceeds max_depth of {self.max_depth}."
                 )
-
         return self
 
 
@@ -9178,8 +9148,12 @@ class EvaluatorOptimizerTopologyManifest(BaseTopologyManifest):
     type: Literal["evaluator_optimizer"] = Field(
         default="evaluator_optimizer", description="Discriminator for an Evaluator-Optimizer loop."
     )
-    generator_node_id: NodeIdentifierState = Field(description="The ID of the actor generating the payload.")
-    evaluator_node_id: NodeIdentifierState = Field(description="The ID of the critic scoring the payload.")
+    generator_node_id: NodeIdentifierState = Field(
+        description="The deterministic capability pointer representing the actor generating the payload."
+    )
+    evaluator_node_id: NodeIdentifierState = Field(
+        description="The deterministic capability pointer representing the critic scoring the payload."
+    )
     max_revision_loops: int = Field(
         le=1000000000, ge=1, description="The absolute limit on Actor-Critic cycles to prevent infinite compute burn."
     )
@@ -9307,7 +9281,7 @@ class SwarmTopologyManifest(BaseTopologyManifest):
         ge=1, le=100, default=3, description="Threshold limit for dynamic spawning of additional nodes."
     )
     max_concurrent_agents: int = Field(
-        default=10, le=100, description="The absolute ceiling for concurrent agent threads."
+        default=10, le=100, description="The mathematically bounded limit for concurrent agent threads."
     )
     auction_policy: AuctionPolicy | None = Field(
         default=None, description="The mathematical policy governing task decentralization via Spot Markets."
@@ -9575,7 +9549,9 @@ class InterventionReceipt(CoreasonBaseState):
     intervention_request_id: Annotated[
         str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
     ] = Field(description="The cryptographic nonce uniquely identifying the intervention request.")
-    target_node_id: NodeIdentifierState = Field(description="The ID of the target node.")
+    target_node_id: NodeIdentifierState = Field(
+        description="The deterministic capability pointer representing the target node."
+    )
     approved: bool = Field(description="Indicates whether the proposed action was approved.")
     feedback: str | None = Field(max_length=2000, description="Optional feedback provided along with the verdict.")
     attestation: WetwareAttestationContract | None = Field(
@@ -9736,7 +9712,7 @@ class BeliefMutationEvent(BaseStateEvent):
         default="belief_mutation", description="Discriminator type for a Belief Assertion event."
     )
     payload: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
-        description="Topologically Bounded Latent Spaces capturing the semantic representation of the agent's internal cognitive shift or synthesis that anchor statistical probability to a definitive causal event hash.",
+        description="Topologically Bounded Latent Spaces capturing the semantic representation of the agent's internal cognitive shift or synthesis that anchor statistical probability to a definitive causal event hash."
     )
     source_node_id: NodeIdentifierState | None = Field(
         default=None, description="The specific topological node that synthesized this belief assertion."
@@ -9807,7 +9783,7 @@ class ObservationEvent(BaseStateEvent):
         default="observation", description="Discriminator type for an observation event."
     )
     payload: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
-        description="Neurosymbolic Bindings of the raw, lossless semantic output appended from the environment or tool execution that anchor statistical probability to a definitive causal event hash.",
+        description="Neurosymbolic Bindings of the raw, lossless semantic output appended from the environment or tool execution that anchor statistical probability to a definitive causal event hash."
     )
     source_node_id: NodeIdentifierState | None = Field(
         default=None, description="The specific topological node that appended this observation."
@@ -9835,15 +9811,13 @@ class ObservationEvent(BaseStateEvent):
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
         default=None,
-        description="The Event ID of the specific ToolInvocationEvent that spawned this observation, forming a strict bipartite directed edge.",
+        description="The deterministic capability pointer representing the specific ToolInvocationEvent that spawned this observation, forming a strict bipartite directed edge.",
     )
     continuous_stream: ContinuousObservationStream | None = Field(
-        default=None,
-        description="Buffers real-time audio/video or continuous token streams.",
+        default=None, description="Buffers real-time audio/video or continuous token streams."
     )
     disfluency_rules: StreamingDisfluencyContract | None = Field(
-        default=None,
-        description="Rules for the forget gate to slice out stutters or ambient noise.",
+        default=None, description="Rules for the forget gate to slice out stutters or ambient noise."
     )
 
     @field_validator("payload", mode="before")
@@ -9905,11 +9879,17 @@ class EpistemicAxiomState(CoreasonBaseState):
     """
 
     source_concept_id: str = Field(
-        min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$", description="CID of the origin node."
+        min_length=1,
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        description="The globally unique decentralized identifier (DID) anchoring the origin node.",
     )
     directed_edge_type: str = Field(max_length=2000, description="The topological relationship.")
     target_concept_id: str = Field(
-        min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$", description="CID of destination node."
+        min_length=1,
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        description="The globally unique decentralized identifier (DID) anchoring destination node.",
     )
 
 
@@ -10153,7 +10133,7 @@ class CognitiveReasoningTraceState(CoreasonBaseState):
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
         min_length=1,
-        description="CID of this specific non-monotonic reasoning trace.",
+        description="The globally unique decentralized identifier (DID) anchoring this specific non-monotonic reasoning trace.",
     )
     source_proof_id: str = Field(
         min_length=1,
@@ -10186,9 +10166,11 @@ class CognitiveDualVerificationReceipt(CoreasonBaseState):
     Cryptography, Symmetric Consensus, Zero-Trust Evaluation
     """
 
-    primary_verifier_id: NodeIdentifierState = Field(description="The DID of the primary evaluating agent.")
+    primary_verifier_id: NodeIdentifierState = Field(
+        description="The globally unique decentralized identifier (DID) anchoring the primary evaluating agent."
+    )
     secondary_verifier_id: NodeIdentifierState = Field(
-        description="The DID of the independent secondary evaluating agent."
+        description="The globally unique decentralized identifier (DID) anchoring the independent secondary evaluating agent."
     )
     trace_factual_alignment: bool = Field(
         description="Strict Boolean indicating if BOTH agents mathematically agree on factual alignment."
@@ -10224,7 +10206,10 @@ class EpistemicGroundedTaskManifest(CoreasonBaseState):
     """
 
     task_id: str = Field(
-        max_length=128, pattern="^[a-zA-Z0-9_.:-]+$", min_length=1, description="The cryptographic CID of the task."
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        min_length=1,
+        description="The cryptographic globally unique decentralized identifier (DID) anchoring the task.",
     )
     topological_proof: EpistemicTopologicalProofManifest = Field(description="The underlying latent path.")
     vignette_payload: str = Field(max_length=100000, description="The generated natural language scenario.")
@@ -10396,7 +10381,7 @@ class EpistemicRewardModelPolicy(CoreasonBaseState):
         min_length=1,
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
-        description="The CID of the EpistemicDomainGraphManifest acting as the deterministic ground truth.",
+        description="The globally unique decentralized identifier (DID) anchoring the EpistemicDomainGraphManifest acting as the deterministic ground truth.",
     )
     format_contract: CognitiveFormatContract = Field(
         description="The syntactic constraints the agent must follow to prevent reward zeroing."
@@ -10436,7 +10421,7 @@ class CognitiveRewardEvaluationReceipt(BaseStateEvent):
         min_length=1,
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
-        description="The CID of the LLM's raw generated text trajectory.",
+        description="The globally unique decentralized identifier (DID) anchoring the LLM's raw generated text trajectory.",
     )
     extracted_axioms: list[EpistemicAxiomState] = Field(
         default_factory=list,
@@ -10517,7 +10502,7 @@ class EpistemicFlowStateReceipt(BaseStateEvent):
         min_length=1,
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
-        description="The CID of the partial CognitiveReasoningTraceState.",
+        description="The globally unique decentralized identifier (DID) anchoring the partial CognitiveReasoningTraceState.",
     )
     estimated_flow_value: float = Field(
         le=1000000000.0,
