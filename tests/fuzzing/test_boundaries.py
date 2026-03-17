@@ -176,6 +176,7 @@ def test_mcp_quarantine_gateway_authorized_mount() -> None:
     manifest = MCPServerManifest(
         server_id="server_1",
         transport=StdioTransportProfile(command="stdio://coreason-mcp", args=[]),
+        binary_hash="a" * 64,
         capability_whitelist=MCPCapabilityWhitelistPolicy(
             allowed_tools=["fetch"], allowed_resources=[], allowed_prompts=[]
         ),

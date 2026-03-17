@@ -73,13 +73,45 @@ type CrossoverMechanismProfile = Literal["uniform_blend", "single_point", "heuri
 
 class InformationClassificationProfile(StrEnum):
     """
-    Standardized Information Flow Control (IFC) lattice boundaries.
+    AGENT INSTRUCTION: Implements the Bell-LaPadula Model and Lattice-Based Access Control (LBAC), establishing the foundational mathematical axis for Information Flow Control across the distributed swarm.
+
+    CAUSAL AFFORDANCE: Physically authorizes or severs the projection of semantic payloads. By exposing rich comparison operators (e.g., `<=`), it enables the orchestrator's verification engine to natively execute mathematical dominance checks between a payload's classification and an agent's clearance partition.
+
+    EPISTEMIC BOUNDS: Constrained to a strict, 4-dimensional string literal space to prevent the hallucination of unauthorized clearance levels. The internal `clearance_level` property maps these strings to an immutable integer hierarchy [0, 1, 2, 3], guaranteeing deterministic threshold evaluation.
+
+    MCP ROUTING TRIGGERS: Bell-LaPadula Model, Lattice-Based Access Control, Mandatory Access Control, Information Flow Control, Epistemic Quarantine
     """
 
     PUBLIC = "public"
     INTERNAL = "internal"
     CONFIDENTIAL = "confidential"
     RESTRICTED = "restricted"
+
+    @property
+    def clearance_level(self) -> int:
+        """Map the semantic string to a discrete scalar magnitude for lattice dominance checks."""
+        mapping = {"public": 0, "internal": 1, "confidential": 2, "restricted": 3}
+        return mapping[self.value]
+
+    def __lt__(self, other: Any) -> bool:
+        if not isinstance(other, InformationClassificationProfile):
+            return NotImplemented
+        return self.clearance_level < other.clearance_level
+
+    def __le__(self, other: Any) -> bool:
+        if not isinstance(other, InformationClassificationProfile):
+            return NotImplemented
+        return self.clearance_level <= other.clearance_level
+
+    def __gt__(self, other: Any) -> bool:
+        if not isinstance(other, InformationClassificationProfile):
+            return NotImplemented
+        return self.clearance_level > other.clearance_level
+
+    def __ge__(self, other: Any) -> bool:
+        if not isinstance(other, InformationClassificationProfile):
+            return NotImplemented
+        return self.clearance_level >= other.clearance_level
 
 
 type FaultCategoryProfile = Literal[
@@ -117,8 +149,13 @@ type ProfileIdentifierState = Annotated[
 
 class RiskLevelPolicy(StrEnum):
     """
-    Cryptographic risk classification for governance.
-    Order matters: safe < standard < critical.
+    AGENT INSTRUCTION: Formalizes Quantitative Risk Assessment and Utility Theory, translating qualitative human threat vectors into computable scalar magnitudes that dictate systemic halting thresholds.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator's control theory loop to measure the aggregate expected utility loss of a proposed topology. It serves as the physical threshold that triggers hardware circuit breakers or forced escalation overrides.
+
+    EPISTEMIC BOUNDS: The semantic strings are mathematically locked to an absolute integer space via the `weight` property (0, 1, 2). Rich comparison methods explicitly bridge the string definitions to integer evaluations, guaranteeing zero variance during distributed ledger verification.
+
+    MCP ROUTING TRIGGERS: Quantitative Risk Assessment, Game Theory, Cybernetic Governance, Structural Circuit Breaker, Utility Theory
     """
 
     SAFE = "safe"
@@ -133,6 +170,26 @@ class RiskLevelPolicy(StrEnum):
         if self == RiskLevelPolicy.STANDARD:
             return 1
         return 2
+
+    def __lt__(self, other: Any) -> bool:
+        if not isinstance(other, RiskLevelPolicy):
+            return NotImplemented
+        return self.weight < other.weight
+
+    def __le__(self, other: Any) -> bool:
+        if not isinstance(other, RiskLevelPolicy):
+            return NotImplemented
+        return self.weight <= other.weight
+
+    def __gt__(self, other: Any) -> bool:
+        if not isinstance(other, RiskLevelPolicy):
+            return NotImplemented
+        return self.weight > other.weight
+
+    def __ge__(self, other: Any) -> bool:
+        if not isinstance(other, RiskLevelPolicy):
+            return NotImplemented
+        return self.weight >= other.weight
 
 
 type SanitizationActionIntent = Literal["redact", "hash", "drop_event", "trigger_quarantine"]
@@ -149,7 +206,15 @@ type SpanStatusCodeProfile = Literal["unset", "ok", "error"]
 
 
 class TensorStructuralFormatProfile(StrEnum):
-    """Mathematical tensor types for tensor payloads."""
+    """
+    AGENT INSTRUCTION: Mathematically aligns abstract Tensor Calculus with rigid Von Neumann Memory Hierarchy limits and IEEE 754 Floating-Point Arithmetic physics.
+
+    CAUSAL AFFORDANCE: Empowers the orchestrator to preemptively calculate exact thermodynamic and spatial memory exhaustion limits (VRAM footprint) prior to authorizing the download or projection of N-dimensional tensor payloads.
+
+    EPISTEMIC BOUNDS: The `bytes_per_element` property physically clamps array allocations to rigid hardware byte multiples (e.g., 4 bytes for float32). The literal automaton prevents the execution graph from hallucinating non-standard or unsupported silicon data types.
+
+    MCP ROUTING TRIGGERS: IEEE 754, Von Neumann Architecture, Tensor Calculus, GPU VRAM Allocation, Memory Hierarchy
+    """
 
     FLOAT32 = "float32"
     FLOAT64 = "float64"
@@ -5839,12 +5904,13 @@ class MCPCapabilityWhitelistPolicy(CoreasonBaseState):
 
 class MCPServerManifest(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Represents a cryptographically verifiable Distributed RPC substrate
-    mapping, binding an external Model Context Protocol (MCP) manifold into the swarm's
-    local topology.
+    AGENT INSTRUCTION: Represents a cryptographically verifiable Distributed RPC substrate mapping within the Actor Model, binding an external Model Context Protocol (MCP) manifold into the swarm's local topology under strict Object-Capability (OCap) rules.
 
-    This unified manifest merges robust polymorphic transport capabilities with strict
-    Zero-Trust Architecture (ZTA) and LBAC security boundaries.
+    CAUSAL AFFORDANCE: Authorizes the orchestrator to physically bridge a zero-trust network boundary, establishing a polymorphic communication channel (stdio, sse, or http) to perceive external resources and actuate remote functions.
+
+    EPISTEMIC BOUNDS: The `server_id` is locked to a 128-char CID regex (`^[a-zA-Z0-9_.:-]+$`). The `@model_validator` `enforce_coreason_did_authority` physically intercepts capability injection lacking a valid `did:coreason:` attestation. The `enforce_stdio_supply_chain_lock` strictly mandates a `binary_hash` (SHA-256) for local process generation, sealing the execution envelope against supply-chain poisoning.
+
+    MCP ROUTING TRIGGERS: Actor Model, Object Capability Model, Zero-Trust Architecture, Distributed RPC, Supply-Chain Isolation
     """
 
     server_id: str = Field(
@@ -5879,6 +5945,20 @@ class MCPServerManifest(CoreasonBaseState):
         if not self.attestation_receipt.issuer_did.startswith("did:coreason:"):
             raise ValueError(
                 "UNAUTHORIZED MCP MOUNT: The presented Verifiable Credential is not signed by a valid CoReason issuer DID. The orchestrator MUST immediately emit a QuarantineIntent and terminate the handshake."
+            )
+        return self
+
+    @model_validator(mode="after")
+    def enforce_stdio_supply_chain_lock(self) -> Self:
+        """
+        AGENT INSTRUCTION: Mathematically prove structural safety prior to host OS allocation.
+        If a local POSIX stream (stdio) is requested, an explicit cryptographic hash of the
+        binary MUST be provided to prevent Arbitrary Code Execution (ACE) via file-swapping.
+        """
+        if getattr(self.transport, "type", None) == "stdio" and not self.binary_hash:
+            raise ValueError(
+                "SUPPLY CHAIN VULNERABILITY: An MCPServerManifest utilizing a StdioTransportProfile "
+                "MUST provide a cryptographic 'binary_hash' to prevent arbitrary code execution attacks on the host OS."
             )
         return self
 
