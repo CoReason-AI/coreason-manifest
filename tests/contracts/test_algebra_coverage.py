@@ -354,17 +354,20 @@ def test_apply_state_differential_exceptions() -> None:
 
     with pytest.raises(ValueError, match="Cannot extract"):
         apply_state_differential(
-            {"a": []}, manifest_base([StateMutationIntent(**{"op": "copy", "path": "/b", "from": "/a/-"})])  # type: ignore[arg-type]
+            {"a": []},
+            manifest_base([StateMutationIntent(**{"op": "copy", "path": "/b", "from": "/a/-"})]),  # type: ignore[arg-type]
         )
 
     with pytest.raises(ValueError, match="Invalid from_path operation: Invalid index"):
         apply_state_differential(
-            {"a": []}, manifest_base([StateMutationIntent(**{"op": "copy", "path": "/b", "from": "/a/99"})])  # type: ignore[arg-type]
+            {"a": []},
+            manifest_base([StateMutationIntent(**{"op": "copy", "path": "/b", "from": "/a/99"})]),  # type: ignore[arg-type]
         )
 
     with pytest.raises(ValueError, match="Invalid from_path operation: Invalid index"):
         apply_state_differential(
-            {"a": []}, manifest_base([StateMutationIntent(**{"op": "copy", "path": "/b", "from": "/a/foo"})])  # type: ignore[arg-type]
+            {"a": []},
+            manifest_base([StateMutationIntent(**{"op": "copy", "path": "/b", "from": "/a/foo"})]),  # type: ignore[arg-type]
         )
 
     with pytest.raises(ValueError, match="Cannot remove from path"):
@@ -419,13 +422,15 @@ def test_apply_state_differential_copy_ops() -> None:
 
     # Test deep copy op inside object
     res = apply_state_differential(
-        {"a": {"b": 1}}, manifest_base([StateMutationIntent(**{"op": "copy", "path": "/a/c", "from": "/a/b"})])  # type: ignore[arg-type]
+        {"a": {"b": 1}},
+        manifest_base([StateMutationIntent(**{"op": "copy", "path": "/a/c", "from": "/a/b"})]),  # type: ignore[arg-type]
     )
     assert res["a"]["c"] == 1
 
     # Test move op inside list
     res = apply_state_differential(
-        {"a": [1, 2]}, manifest_base([StateMutationIntent(**{"op": "move", "path": "/a/-", "from": "/a/0"})])  # type: ignore[arg-type]
+        {"a": [1, 2]},
+        manifest_base([StateMutationIntent(**{"op": "move", "path": "/a/-", "from": "/a/0"})]),  # type: ignore[arg-type]
     )
     assert res["a"] == [2, 1]
 
@@ -438,7 +443,8 @@ def test_apply_state_differential_copy_ops() -> None:
     # Test overlapping from_path for copy/move
     with pytest.raises(ValueError, match="proper prefix"):
         apply_state_differential(
-            {"a": {"b": 1}}, manifest_base([StateMutationIntent(**{"op": "copy", "path": "/a/b/c", "from": "/a/b"})])  # type: ignore[arg-type]
+            {"a": {"b": 1}},
+            manifest_base([StateMutationIntent(**{"op": "copy", "path": "/a/b/c", "from": "/a/b"})]),  # type: ignore[arg-type]
         )
 
     with pytest.raises(ValueError, match="from_path is mathematically required"):
@@ -453,28 +459,33 @@ def test_apply_state_differential_copy_ops() -> None:
     # cover 494-511 copy/move array logic
     # copy append to list (-)
     apply_state_differential(
-        {"a": [1]}, manifest_base([StateMutationIntent(**{"op": "copy", "path": "/a/-", "from": "/a/0"})])  # type: ignore[arg-type]
+        {"a": [1]},
+        manifest_base([StateMutationIntent(**{"op": "copy", "path": "/a/-", "from": "/a/0"})]),  # type: ignore[arg-type]
     )
 
     # copy insert to list (0)
     apply_state_differential(
-        {"a": [1]}, manifest_base([StateMutationIntent(**{"op": "copy", "path": "/a/0", "from": "/a/0"})])  # type: ignore[arg-type]
+        {"a": [1]},
+        manifest_base([StateMutationIntent(**{"op": "copy", "path": "/a/0", "from": "/a/0"})]),  # type: ignore[arg-type]
     )
 
     # copy insert to list invalid index
     with pytest.raises(ValueError, match="Invalid index"):
         apply_state_differential(
-            {"a": [1]}, manifest_base([StateMutationIntent(**{"op": "copy", "path": "/a/foo", "from": "/a/0"})])  # type: ignore[arg-type]
+            {"a": [1]},
+            manifest_base([StateMutationIntent(**{"op": "copy", "path": "/a/foo", "from": "/a/0"})]),  # type: ignore[arg-type]
         )
 
     # move insert to same list (from_idx < last_part)
     apply_state_differential(
-        {"a": [1, 2, 3]}, manifest_base([StateMutationIntent(**{"op": "move", "path": "/a/2", "from": "/a/0"})])  # type: ignore[arg-type]
+        {"a": [1, 2, 3]},
+        manifest_base([StateMutationIntent(**{"op": "move", "path": "/a/2", "from": "/a/0"})]),  # type: ignore[arg-type]
     )
 
     # move insert to same list (from_idx >= last_part)
     apply_state_differential(
-        {"a": [1, 2, 3]}, manifest_base([StateMutationIntent(**{"op": "move", "path": "/a/0", "from": "/a/2"})])  # type: ignore[arg-type]
+        {"a": [1, 2, 3]},
+        manifest_base([StateMutationIntent(**{"op": "move", "path": "/a/0", "from": "/a/2"})]),  # type: ignore[arg-type]
     )
 
 
