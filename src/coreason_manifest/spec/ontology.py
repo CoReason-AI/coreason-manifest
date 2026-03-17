@@ -985,7 +985,7 @@ class SemanticSlicingPolicy(CoreasonBaseState):
 
 class CognitiveRoutingContract(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Overrides the default Softmax gating mechanism of a Sparse Mixture of Experts (MoE) architecture to enforce deterministic functional isolation. 
+    AGENT INSTRUCTION: Overrides the default Softmax gating mechanism of a Sparse Mixture of Experts (MoE) architecture to enforce deterministic functional isolation.
 
     CAUSAL AFFORDANCE: Physically biases or mathematically masks out (-inf via `enforce_functional_isolation`) entire swaths of neural circuits, forcing continuous compute through highly specialized expert topological perimeters.
 
@@ -5194,13 +5194,13 @@ class HypothesisStakeReceipt(CoreasonBaseState):
         min_length=1,
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
-        description="The deterministic capability pointer representing the agent placing the stake."
+        description="The deterministic capability pointer representing the agent placing the stake.",
     )
     target_hypothesis_id: str = Field(
         min_length=1,
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
-        description="The exact HypothesisGenerationEvent the agent is betting on."
+        description="The exact HypothesisGenerationEvent the agent is betting on.",
     )
     staked_magnitude: int = Field(
         le=1000000000, gt=0, description="The volume of compute budget committed to this position."
@@ -7050,7 +7050,7 @@ class PredictionMarketState(CoreasonBaseState):
         min_length=1,
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
-        description="The deterministic capability pointer representing the prediction market."
+        description="The deterministic capability pointer representing the prediction market.",
     )
     resolution_oracle_condition_id: str = Field(
         min_length=1,
