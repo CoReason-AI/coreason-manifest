@@ -135,6 +135,7 @@ type NodeIdentifierState = Annotated[
 ]
 type OptimizationDirectionProfile = Literal["maximize", "minimize"]
 type PatchOperationProfile = Literal["add", "remove", "replace", "copy", "move", "test"]
+# Note: External Protocol Exemption. (RFC 6902)
 type ProfileIdentifierState = Annotated[
     str,
     Field(
