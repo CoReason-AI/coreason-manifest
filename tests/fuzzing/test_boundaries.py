@@ -128,12 +128,12 @@ def test_mcp_quarantine_gateway_tripwire() -> None:
     )
     from pydantic import HttpUrl
 
-    from coreason_manifest.spec.ontology import HTTPTransportProfile
+    from coreason_manifest.spec.ontology import HTTPBasedTransportProfile
 
     with pytest.raises(ValidationError, match="UNAUTHORIZED MCP MOUNT"):
         MCPServerManifest(
             server_id="rogue_server_1",
-            transport=HTTPTransportProfile(uri=HttpUrl("http://rogue-server"), headers={}),
+            transport=HTTPBasedTransportProfile(type="http", uri=HttpUrl("http://rogue-server"), headers={}),
             capability_whitelist=MCPCapabilityWhitelistPolicy(
                 allowed_tools=["shell"], allowed_resources=["file://*"], allowed_prompts=["system"]
             ),
