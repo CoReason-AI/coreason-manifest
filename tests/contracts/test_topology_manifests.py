@@ -28,9 +28,9 @@ from coreason_manifest.spec.ontology import (
 
 
 # --- 1. Market Contract Fuzzing ---
-@given(collateral=st.floats(min_value=0.0, max_value=1e6), penalty=st.floats(min_value=0.0, max_value=1e6))
+@given(collateral=st.integers(min_value=0, max_value=1000000), penalty=st.integers(min_value=0, max_value=1000000))
 @settings(max_examples=100, suppress_health_check=[HealthCheck.too_slow])
-def test_market_contract_bounds(collateral: float, penalty: float) -> None:
+def test_market_contract_bounds(collateral: int, penalty: int) -> None:
     """Mathematically prove the economic invariant: penalty <= collateral."""
     if penalty > collateral:
         with pytest.raises(ValidationError, match="slashing_penalty cannot exceed minimum_collateral"):
