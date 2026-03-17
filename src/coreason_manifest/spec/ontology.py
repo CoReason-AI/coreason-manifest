@@ -2172,9 +2172,9 @@ class AdjudicationIntent(CoreasonBaseState):
     framework.
 
     EPISTEMIC BOUNDS: The state space is bounded by deadlocked_claims (min_length=2,
-    max_length=86400000), deterministically sorted via @model_validator sort_arrays for
-    RFC 8785 canonical hashing. The timeout_action is restricted to a strict Literal
-    ["rollback", "proceed_default", "terminate"] to prevent infinite stalling.
+    max_length=86400000). The `resolution_schema` is mathematically bounded against recursive 
+    JSON-bombing by the `@field_validator` `enforce_payload_topology`, physically preventing 
+    Automata Intersection deadlocks (Halting Problem violations).
 
     MCP ROUTING TRIGGERS: Social Choice Theory, Condorcet Paradox, MCDA Deadlock,
     Dictatorial Resolution, Tie-Breaking Heuristic
@@ -2195,6 +2195,12 @@ class AdjudicationIntent(CoreasonBaseState):
     timeout_action: Literal["rollback", "proceed_default", "terminate"] = Field(
         description="The action to take if the oracle is unresponsive."
     )
+
+    @field_validator("resolution_schema", mode="before")
+    @classmethod
+    def enforce_payload_topology(cls, v: Any) -> Any:
+        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""
+        return _validate_payload_bounds(v)
 
     @model_validator(mode="after")
     def sort_arrays(self) -> Self:
@@ -2610,14 +2616,11 @@ class BoundedInterventionScopePolicy(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Provides a deterministic mathematical mask over the
     EpistemicLedgerState, guaranteeing that the external operator can only perturb
-    the graph at explicitly whitelisted JSON Pointers via allowed_fields
-    (string max_length=2000).
+    the graph at explicitly whitelisted JSON Pointers via allowed_fields.
 
-    EPISTEMIC BOUNDS: The mutation topology is physically constrained by
-    allowed_fields (max_length=1000000000), deterministically sorted via
-    @model_validator sort_arrays to preserve RFC 8785 canonical hashing. The
-    json_schema_whitelist (key max_length=255) strictly bounds the acceptable
-    input types.
+    EPISTEMIC BOUNDS: The `json_schema_whitelist` is physically restricted by the 
+    `enforce_payload_topology` validator to prevent algorithmic complexity attacks 
+    during schema intersection. The `allowed_fields` are deterministically sorted.
 
     MCP ROUTING TRIGGERS: Principle of Least Privilege, State Mutation Masking,
     Zero-Trust Architecture, RFC 8785 Canonicalization, Bounded Surface Area
@@ -2629,8 +2632,14 @@ class BoundedInterventionScopePolicy(CoreasonBaseState):
     )
     json_schema_whitelist: dict[
         Annotated[str, StringConstraints(max_length=255)],
-        str | int | float | bool | None | list[Any] | dict[Annotated[str, StringConstraints(max_length=255)], Any],
+        Any,
     ] = Field(description="Strict JSON Schema constraints for the human's input.")
+
+    @field_validator("json_schema_whitelist", mode="before")
+    @classmethod
+    def enforce_payload_topology(cls, v: Any) -> Any:
+        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""
+        return _validate_payload_bounds(v)
 
     @model_validator(mode="after")
     def sort_arrays(self) -> Self:
@@ -3700,9 +3709,8 @@ class DraftingIntent(CoreasonBaseState):
     dimensions are actively projected back into the working memory partition.
 
     EPISTEMIC BOUNDS: The human's unstructured cognitive entropy is aggressively forced
-    through a mathematical funnel via the resolution_schema (a strict JSON Schema dict,
-    max_length=1000000000). If the human fails to satisfy the bounded schema, the
-    timeout_action guarantees deterministic fallback routing.
+    through a mathematical funnel via the `resolution_schema`. This schema is volumetrically 
+    clamped by `enforce_payload_topology` to prevent AST explosion during input parsing. 
 
     MCP ROUTING TRIGGERS: Active Inference, Expected Free Energy, Shannon Entropy
     Reduction, Zero-Shot Elicitation, Epistemic Gap
@@ -3721,6 +3729,12 @@ class DraftingIntent(CoreasonBaseState):
     timeout_action: Literal["rollback", "proceed_default", "terminate"] = Field(
         description="The action to take if the human fails to provide the draft."
     )
+
+    @field_validator("resolution_schema", mode="before")
+    @classmethod
+    def enforce_payload_topology(cls, v: Any) -> Any:
+        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""
+        return _validate_payload_bounds(v)
 
 
 class DynamicConvergenceSLA(CoreasonBaseState):
@@ -6255,10 +6269,9 @@ class MCPPromptReferenceState(CoreasonBaseState):
     CAUSAL AFFORDANCE: Authorizes the orchestrator to fetch and interpolate an exogenous prompt
     template from a remote server, using the arguments dictionary to inject localized state into the template.
 
-    EPISTEMIC BOUNDS: Supply-chain execution attacks are mathematically mitigated by the optional
-    prompt_hash (strictly matching SHA-256 pattern ^[a-f0-9]{64}$). The arguments matrix is physically
-    capped at max_length=1000000000 (with keys at max_length=255) to prevent OOM faults during interpolation.
-    The optional fallback_persona is bounded to max_length=2000.
+    EPISTEMIC BOUNDS: The `arguments` matrix is aggressively routed through the volumetric hardware 
+    guillotine (`enforce_payload_topology`) to mathematically prevent Manifold Interpolation Complexity 
+    crashes from poisoned external servers. Supply-chain attacks are mitigated by the optional `prompt_hash`.
 
     MCP ROUTING TRIGGERS: Higher-Order Function, Latent Prompt Manifold, Template Interpolation, Supply-Chain Verification, Stateless RPC
     """
@@ -6284,6 +6297,12 @@ class MCPPromptReferenceState(CoreasonBaseState):
         default=None,
         description="Cryptographic hash for prompt integrity verification.",
     )
+
+    @field_validator("arguments", mode="before")
+    @classmethod
+    def enforce_payload_topology(cls, v: Any) -> Any:
+        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""
+        return _validate_payload_bounds(v)
 
 
 class MCPResourceManifest(CoreasonBaseState):
@@ -8724,14 +8743,12 @@ class VerifiableCredentialPresentationReceipt(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Unlocks isolated execution bounds by projecting
     cryptographically verified geometric predicates (authorization_claims) into the
-    orchestrator via issuer_did (NodeIdentifierState), allowing an agent to prove
+    orchestrator via issuer_did, allowing an agent to prove
     authorization clearance without centralized identity brokers.
 
-    EPISTEMIC BOUNDS: The cryptographic_proof_blob is physically capped at
-    max_length=100000 to prevent VRAM buffer overflow. The presentation_format is
-    rigidly clamped to a Literal automaton ["jwt_vc", "ldp_vc", "sd_jwt",
-    "zkp_vc"] enforcing Selective Disclosure and ZKP boundaries. The
-    authorization_claims dict is bounded (max_length=86400000, key max_length=255).
+    EPISTEMIC BOUNDS: The `authorization_claims` dict is volumetrically bounded by 
+    the `enforce_payload_topology` hook to completely sever Predicate Exhaustion Attacks 
+    during selective disclosure verification, guaranteeing $O(N)$ validation bounds.
 
     MCP ROUTING TRIGGERS: W3C VCDM, Zero-Knowledge Proofs, Selective Disclosure,
     Decentralized Identifiers, Object Capability Model
@@ -8751,6 +8768,12 @@ class VerifiableCredentialPresentationReceipt(CoreasonBaseState):
         max_length=86400000,
         description="The strict, domain-agnostic JSON dictionary of strictly bounded geometric predicates that define the operational perimeter of the agent (e.g., {'clearance': 'RESTRICTED'}).",
     )
+
+    @field_validator("authorization_claims", mode="before")
+    @classmethod
+    def enforce_payload_topology(cls, v: Any) -> Any:
+        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""
+        return _validate_payload_bounds(v)
 
 
 class AgentAttestationReceipt(CoreasonBaseState):
