@@ -1652,14 +1652,13 @@ class StateMutationIntent(CoreasonBaseState):
     ...Intent suffix, this represents an authorized kinetic execution trigger.
 
     CAUSAL AFFORDANCE: Instructs the orchestrator's algebraic engine to surgically apply,
-    test, or ablate targeted JSON pointers without requiring full payload transmission. The
-    value (JsonPrimitiveState, default=None) carries the mutation payload; from_path
-    (alias="from") enables RFC 6902 move/copy operations.
+    test, or ablate targeted JSON pointers without requiring full payload transmission. 
 
-    EPISTEMIC BOUNDS: The operation geometry is rigidly restricted by the op field to the
-    PatchOperationProfile Literal automaton. Target topological coordinates (path and
-    from_path) are physically bounded to max_length=2000 to prevent path traversal and
-    string exhaustion during pointer resolution.
+    EPISTEMIC BOUNDS: The `value` (JsonPrimitiveState) mutation payload is volumetrically 
+    clamped by `enforce_payload_topology` to guarantee that the resulting state matrix $S'$ 
+    does not expand beyond VRAM constraints. The operation geometry is rigidly restricted by 
+    the op field to the PatchOperationProfile. Target topological coordinates (path and 
+    from_path) are physically bounded to max_length=2000.
 
     MCP ROUTING TRIGGERS: RFC 6902, JSON Patch, Atomic Mutation, State Vector Projection,
     Deterministic Operator
@@ -1681,6 +1680,12 @@ class StateMutationIntent(CoreasonBaseState):
         alias="from",
         description="The JSON pointer from which to copy or move the state vector, if applicable.",
     )
+
+    @field_validator("value", mode="before")
+    @classmethod
+    def enforce_payload_topology(cls, v: Any) -> Any:
+        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""
+        return _validate_payload_bounds(v)
 
 
 class StateDifferentialManifest(CoreasonBaseState):
@@ -2656,13 +2661,13 @@ class BoundedJSONRPCIntent(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Unlocks remote procedure execution while preventing JSON Bombing
     and Algorithmic Complexity Attacks. The method field (max_length=1000) specifies the
-    RPC target. The id field (128-char CID regex | int le=1000000000 | None) binds
-    request-response correlation.
+    RPC target. The id field binds request-response correlation.
 
-    EPISTEMIC BOUNDS: The @field_validator validate_params_depth_and_size mathematically
-    bounds recursive payload geometry (params) to: max depth=10, dict keys=100, key
-    length=1000, list elements=1000, string length=10000. The jsonrpc field is a rigid
-    Literal["2.0"] automaton.
+    EPISTEMIC BOUNDS: The `params` field is routed through the volumetric hardware guillotine 
+    (`enforce_payload_topology`), mathematically capping the payload to an absolute $O(N)$ 
+    volume of 10,000 nodes. This replaces the legacy 1D-depth constraints that permitted 
+    geometric volume explosions. The `jsonrpc` field is a rigid Literal["2.0"] automaton. 
+    The `id` is topologically locked to a 128-char CID regex or an integer (le=1000000000) or None.
 
     MCP ROUTING TRIGGERS: JSON-RPC 2.0, Stateless RPC, Algorithmic Complexity Attack,
     JSON Bombing Prevention, Deterministic Finite Automaton
@@ -2679,34 +2684,9 @@ class BoundedJSONRPCIntent(CoreasonBaseState):
 
     @field_validator("params", mode="before")
     @classmethod
-    def validate_params_depth_and_size(cls, v: Any) -> Any:
-        """Enforce strict depth and size constraints to prevent RAM exhaustion and DoS attacks."""
-        if v is None:
-            return {}
-        if not isinstance(v, dict):
-            raise ValueError("params must be a dictionary")
-
-        def _enforce_limits(obj: Any, current_depth: int) -> None:
-            if current_depth > 10:
-                raise ValueError("JSON payload exceeds maximum depth of 10")
-            if isinstance(obj, dict):
-                if len(obj) > 100:
-                    raise ValueError("Dictionary exceeds maximum of 100 keys")
-                for key, val in obj.items():
-                    if len(key) > 1000:
-                        raise ValueError("Dictionary key exceeds maximum length of 1000")
-                    _enforce_limits(val, current_depth + 1)
-            elif isinstance(obj, list):
-                if len(obj) > 1000:
-                    raise ValueError("List exceeds maximum of 1000 elements")
-                for item in obj:
-                    _enforce_limits(item, current_depth + 1)
-            elif isinstance(obj, str):
-                if len(obj) > 10000:
-                    raise ValueError("String exceeds maximum length of 10000 characters")
-
-        _enforce_limits(v, 0)
-        return v
+    def enforce_payload_topology(cls, v: Any) -> Any:
+        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""
+        return _validate_payload_bounds(v)
 
 
 class BrowserDOMState(CoreasonBaseState):
@@ -3804,7 +3784,7 @@ class BargeInInterruptEvent(BaseStateEvent):
 
     CAUSAL AFFORDANCE: Physically severs the continuous multimodal sequence of the target_event_id, injecting the retained_partial_payload into the Epistemic Quarantine and forcing the orchestrator to execute the defined epistemic_disposition instruction.
 
-    EPISTEMIC BOUNDS: Topologically anchored to the target_event_id via a strict 128-char CID regex. The retained_partial_payload is mechanically capped at 100,000 bytes to mathematically prevent VRAM exhaustion from unbounded sensory streams.
+    EPISTEMIC BOUNDS: Topologically anchored to the target_event_id via a strict 128-char CID regex. The `retained_partial_payload` is volumetrically clamped by the `enforce_payload_topology` hook to mathematically prevent VRAM exhaustion from unbounded sensory streams.
 
     MCP ROUTING TRIGGERS: Asynchronous Interrupt, Generative Severing, Context Switching, Defeasible Disposition, Wave Collapse
     """
@@ -3830,6 +3810,12 @@ class BargeInInterruptEvent(BaseStateEvent):
     epistemic_disposition: Literal["discard", "retain_as_context", "mark_as_falsified"] = Field(
         description="Explicit instruction to the orchestrator on how to patch the shared state blackboard with the partial payload."
     )
+
+    @field_validator("retained_partial_payload", mode="before")
+    @classmethod
+    def enforce_payload_topology(cls, v: Any) -> Any:
+        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""
+        return _validate_payload_bounds(v)
 
 
 class EnsembleTopologyProfile(CoreasonBaseState):
@@ -4116,11 +4102,10 @@ class EscalationIntent(CoreasonBaseState):
     It demands explicit, structurally verified cryptographic sign-off from a
     higher-clearance entity to bypass the breaker.
 
-    EPISTEMIC BOUNDS: The tripped_rule_id is strictly anchored to a 128-char CID
-    regex (^[a-zA-Z0-9_.:-]+$). The resolution_schema (dict) caps keys at
-    max_length=255. The fallback is governed by the Literal timeout_action
-    ["rollback", "proceed_default", "terminate"] to guarantee systemic liveness
-    if unhandled.
+    EPISTEMIC BOUNDS: The `resolution_schema` is mathematically bounded against recursive 
+    JSON-bombing by the `enforce_payload_topology` hook, physically preventing Automata 
+    Intersection deadlocks. The tripped_rule_id is strictly anchored to a 128-char CID 
+    regex (^[a-zA-Z0-9_.:-]+$). The fallback is governed by the Literal timeout_action.
 
     MCP ROUTING TRIGGERS: Biba Integrity Model, Dictatorial Override, Privilege
     Escalation, Payload Loss Prevention, Cryptographic Sign-Off
@@ -4141,6 +4126,12 @@ class EscalationIntent(CoreasonBaseState):
     timeout_action: Literal["rollback", "proceed_default", "terminate"] = Field(
         description="The default action is usually terminate or rollback for security escalations."
     )
+
+    @field_validator("resolution_schema", mode="before")
+    @classmethod
+    def enforce_payload_topology(cls, v: Any) -> Any:
+        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""
+        return _validate_payload_bounds(v)
 
 
 class EscrowPolicy(CoreasonBaseState):
@@ -5616,12 +5607,13 @@ class JSONRPCErrorState(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Projects execution faults back across the network boundary
     without risking secondary buffer overflow attacks during serialization. The
-    error_payload (alias="data", External Protocol Exemption) carries optional
-    structured diagnostic data.
+    error_payload (alias="data") carries optional structured diagnostic data.
 
-    EPISTEMIC BOUNDS: The code integer is rigidly capped (le=1000000000, no ge bound)
-    and the semantic message is restricted to max_length=2000 to prevent log-poisoning
-    during telemetry serialization.
+    EPISTEMIC BOUNDS: The `error_payload` is strictly routed through the volumetric 
+    hardware guillotine (`enforce_payload_topology`) to mathematically prevent infinite 
+    recursive depth from triggering C-stack overflows during fault serialization. The 
+    code integer is rigidly capped (le=1000000000) and the semantic message is restricted 
+    to max_length=2000.
 
     MCP ROUTING TRIGGERS: Fault Projection, Buffer Overflow Prevention, Error Vector,
     Log Poisoning, Stateful Rollback
@@ -5642,6 +5634,12 @@ class JSONRPCErrorState(CoreasonBaseState):
         alias="data",
         description="A Primitive or Structured value that contains additional information about the error.",
     )
+
+    @field_validator("error_payload", mode="before")
+    @classmethod
+    def enforce_payload_topology(cls, v: Any) -> Any:
+        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""
+        return _validate_payload_bounds(v)
 
 
 class JSONRPCErrorResponseState(CoreasonBaseState):
@@ -5718,7 +5716,7 @@ class BaseNodeProfile(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Defines the foundational perimeter (objective function) of a participant, enabling the orchestrator to inject proactive oversight hooks (intervention_policies) across the node's lifecycle.
 
-    EPISTEMIC BOUNDS: The semantic boundary is physically constrained by description (max_length=2000). The domain_extensions payload is mathematically bounded to a max recursive depth of 5 via @field_validator to prevent JSON-bomb memory leaks.
+    EPISTEMIC BOUNDS: The semantic boundary is physically constrained by description (max_length=2000). The `domain_extensions` payload is volumetrically bounded by the `enforce_payload_topology` hook to an absolute $O(N)$ node limit, replacing the vulnerable recursive depth limit of 5 to definitively prevent JSON-bomb memory leaks and C-stack overflows during DAG serialization.
 
     MCP ROUTING TRIGGERS: Graph Theory, Topological Vertex, Subgraph Node, Lifecycle Hook, JSON-Bomb Prevention
     """
@@ -5751,30 +5749,9 @@ class BaseNodeProfile(CoreasonBaseState):
 
     @field_validator("domain_extensions", mode="before")
     @classmethod
-    def validate_domain_extensions_depth(cls, v: Any) -> Any:
-        if v is None:
-            return v
-        if not isinstance(v, dict):
-            raise ValueError("domain_extensions must be a dictionary")
-
-        def _check_depth(obj: Any, depth: int) -> None:
-            if depth > 5:
-                raise ValueError("domain_extensions exceeds maximum allowed depth of 5")
-            if isinstance(obj, dict):
-                for key, val in obj.items():
-                    if not isinstance(key, str):
-                        raise ValueError("domain_extensions keys must be strings")
-                    if len(key) > 255:
-                        raise ValueError("domain_extensions key exceeds maximum length of 255 characters")
-                    _check_depth(val, depth + 1)
-            elif isinstance(obj, list):
-                for item in obj:
-                    _check_depth(item, depth + 1)
-            elif obj is not None and (not isinstance(obj, (str, int, float, bool))):
-                raise ValueError(f"domain_extensions leaf values must be JSON primitives, got {type(obj).__name__}")
-
-        _check_depth(v, 0)
-        return v
+    def enforce_payload_topology(cls, v: Any) -> Any:
+        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""
+        return _validate_payload_bounds(v)
 
 
 class HumanNodeProfile(BaseNodeProfile):
@@ -8322,7 +8299,7 @@ class ToolInvocationEvent(BaseStateEvent):
 
     CAUSAL AFFORDANCE: Transitions the swarm from internal epistemic deliberation to kinetic execution. It targets a specific `tool_name` with bound parameters, demanding a valid `agent_attestation` identity.
 
-    EPISTEMIC BOUNDS: To prevent infinite compute loops (Landauer's Principle), the `authorized_budget_magnitude` is physically mandated to be `ge=1`. The `zk_proof` serves as the strict mathematical proof that the agent was authorized by the execution engine; stripping it violates the Zero-Trust boundary.
+    EPISTEMIC BOUNDS: The `parameters` payload is volumetrically capped by `enforce_payload_topology` to prevent external MCP servers from executing C-stack overflow attacks. To prevent infinite compute loops (Landauer's Principle), the `authorized_budget_magnitude` is physically mandated to be `ge=1`. The `zk_proof` serves as the strict mathematical proof that the agent was authorized by the execution engine.
 
     MCP ROUTING TRIGGERS: Pearlian Do-Operator, Kinetic Commitment, Active Inference, Thermodynamic Escrow, Zero-Trust Actuation
     """
@@ -8343,6 +8320,12 @@ class ToolInvocationEvent(BaseStateEvent):
     zk_proof: ZeroKnowledgeReceipt = Field(
         description="The mathematical attestation proving this tool execution was securely authorized."
     )
+
+    @field_validator("parameters", mode="before")
+    @classmethod
+    def enforce_payload_topology(cls, v: Any) -> Any:
+        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""
+        return _validate_payload_bounds(v)
 
 
 class TraceExportManifest(CoreasonBaseState):
