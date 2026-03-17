@@ -6346,9 +6346,7 @@ class MarketContract(CoreasonBaseState):
     minimum_collateral: int = Field(
         le=1000000000, ge=0, description="The minimum atomic token collateral held in escrow."
     )
-    slashing_penalty: int = Field(
-        ge=0, description="The exact atomic token amount slashed for Byzantine faults."
-    )
+    slashing_penalty: int = Field(ge=0, description="The exact atomic token amount slashed for Byzantine faults.")
 
     @model_validator(mode="after")
     def _enforce_economic_escrow_invariant(self) -> Self:
@@ -8078,12 +8076,8 @@ class AuctionState(CoreasonBaseState):
     award: TaskAwardReceipt | None = Field(
         default=None, description="The final cryptographic receipt of the auction, if resolved."
     )
-    clearing_timeout: int = Field(
-        le=1000000000, gt=0, description="Maximum wait time for auction settlement."
-    )
-    minimum_tick_size: int = Field(
-        le=1000000000, gt=0, description="The smallest allowable discrete bid increment."
-    )
+    clearing_timeout: int = Field(le=1000000000, gt=0, description="Maximum wait time for auction settlement.")
+    minimum_tick_size: int = Field(le=1000000000, gt=0, description="The smallest allowable discrete bid increment.")
 
     @model_validator(mode="after")
     def sort_bids(self) -> Self:
@@ -9030,7 +9024,7 @@ class DAGTopologyManifest(BaseTopologyManifest):
             return self
 
         adj: dict[NodeIdentifierState, list[NodeIdentifierState]] = {node_id: [] for node_id in self.nodes}
-        in_degree: dict[NodeIdentifierState, int] = {node_id: 0 for node_id in self.nodes}
+        in_degree: dict[NodeIdentifierState, int] = dict.fromkeys(self.nodes, 0)
 
         for source, target in self.edges:
             if source not in self.nodes:
@@ -9074,13 +9068,14 @@ class DAGTopologyManifest(BaseTopologyManifest):
                     max_calculated_depth = max(max_calculated_depth, dfs(start_node))
 
             # Handle isolated cyclic components if no roots exist
-            if max_calculated_depth == 0 and self.nodes:
-                for start_node in self.nodes:
-                    if start_node not in visited:
-                        max_calculated_depth = max(max_calculated_depth, dfs(start_node))
+            for start_node in self.nodes:
+                if start_node not in visited:
+                    max_calculated_depth = max(max_calculated_depth, dfs(start_node))
 
             if max_calculated_depth > self.max_depth:
-                raise ValueError(f"Topological Violation: Graph depth {max_calculated_depth} exceeds max_depth of {self.max_depth}.")
+                raise ValueError(
+                    f"Topological Violation: Graph depth {max_calculated_depth} exceeds max_depth of {self.max_depth}."
+                )
 
         return self
 
@@ -9427,9 +9422,7 @@ class WorkflowManifest(CoreasonBaseState):
     manifest_version: SemanticVersionState = Field(
         description="The semantic version of this workflow manifestation schema."
     )
-    topology: AnyTopologyManifest = Field(
-        description="The underlying topology governing execution routing."
-    )
+    topology: AnyTopologyManifest = Field(description="The underlying topology governing execution routing.")
     governance: GlobalGovernancePolicy | None = Field(
         default=None, description="Macro-economic circuit breakers and TTL limits for the swarm."
     )
@@ -9477,9 +9470,7 @@ class WorkflowManifest(CoreasonBaseState):
     def enforce_lbac_dominance(self) -> Self:
         """Mathematically interlocks the local LBAC bounds with federated SLA egress bounds."""
         if self.federated_sla is not None and self.allowed_information_classifications:
-            max_local_clearance = max(
-                [profile.clearance_level for profile in self.allowed_information_classifications]
-            )
+            max_local_clearance = max([profile.clearance_level for profile in self.allowed_information_classifications])
             if self.federated_sla.max_permitted_classification.clearance_level > max_local_clearance:
                 raise ValueError(
                     "LBAC Boundary Breach: The federated SLA permits an information clearance level higher than the local workflow's maximum allowed classification."
