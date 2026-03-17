@@ -2078,37 +2078,7 @@ class ActiveInferenceContract(CoreasonBaseState):
     )
 
 
-class BaseIntent(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Establishes the foundational polymorphic root for
-    Human-in-the-Loop (HITL) Supervisory Control Theory. As a base Intent
-    suffix, this object acts as an authorized trigger for out-of-band
-    communication.
-
-    CAUSAL AFFORDANCE: Provides the baseline causal graph bridging required for
-    the orchestrator to emit non-kinetic UI updates and presentation envelopes
-    across the network.
-
-    EPISTEMIC BOUNDS: Inherits absolute structural rigidity and RFC 8785
-    canonical hashing from CoreasonBaseState, ensuring all derived presentation
-    intents are mathematically immutable upon instantiation.
-
-    MCP ROUTING TRIGGERS: Supervisory Control Theory, Polymorphic Intent, HITL
-    Boundary, Out-of-Band Signal
-    """
-
-
-class BaseMixedInitiativeIntent(BaseIntent):
-    """Base boundary for Mixed-Initiative out-of-band resolutions."""
-    timeout_action: Literal["rollback", "proceed_default", "terminate"] = Field(
-        description="The action to take if the oracle is unresponsive."
-    )
-    resolution_schema: dict[Annotated[str, StringConstraints(max_length=255)], Any] | None = Field(
-        default=None, description="The strict JSON Schema the response must satisfy."
-    )
-
-
-class AdjudicationIntent(BaseMixedInitiativeIntent):
+class AdjudicationIntent(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Formalizes Social Choice Theory to resolve the Condorcet Paradox.
     Triggers a Mixed-Initiative forced resolution to break an epistemic deadlock within a
@@ -2137,6 +2107,12 @@ class AdjudicationIntent(BaseMixedInitiativeIntent):
         max_length=86400000,
         min_length=2,
         description="The conflicting claim IDs or proposals the human must choose between.",
+    )
+    resolution_schema: dict[Annotated[str, StringConstraints(max_length=255)], Any] = Field(
+        description="The strict JSON Schema for the tie-breaking response (usually an enum of the deadlocked_claims).",
+    )
+    timeout_action: Literal["rollback", "proceed_default", "terminate"] = Field(
+        description="The action to take if the oracle is unresponsive."
     )
 
     @model_validator(mode="after")
@@ -2484,6 +2460,25 @@ class BackpressurePolicy(CoreasonBaseState):
     )
 
 
+class BaseIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Establishes the foundational polymorphic root for
+    Human-in-the-Loop (HITL) Supervisory Control Theory. As a base Intent
+    suffix, this object acts as an authorized trigger for out-of-band
+    communication.
+
+    CAUSAL AFFORDANCE: Provides the baseline causal graph bridging required for
+    the orchestrator to emit non-kinetic UI updates and presentation envelopes
+    across the network.
+
+    EPISTEMIC BOUNDS: Inherits absolute structural rigidity and RFC 8785
+    canonical hashing from CoreasonBaseState, ensuring all derived presentation
+    intents are mathematically immutable upon instantiation.
+
+    MCP ROUTING TRIGGERS: Supervisory Control Theory, Polymorphic Intent, HITL
+    Boundary, Out-of-Band Signal
+    """
+
 
 class BaseStateEvent(CoreasonBaseState):
     """
@@ -2523,8 +2518,6 @@ class SystemFaultEvent(BaseStateEvent):
     type: Literal["system_fault"] = Field(
         default="system_fault", description="Discriminator type for a system fault event."
     )
-    target_node_id: NodeIdentifierState | None = Field(default=None, description="The ID of the node that collapsed.")
-    error_signature: str | None = Field(default=None, max_length=2000, description="Signature or summary of the error causing the trip.")
 
 
 class BoundedInterventionScopePolicy(CoreasonBaseState):
@@ -2953,7 +2946,24 @@ class CausalDirectedEdgeState(CoreasonBaseState):
     )
 
 
+class CircuitBreakerEvent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Implements Lyapunov Stability and distributed Control Theory to guarantee that the neurosymbolic network returns to a deterministic equilibrium when facing catastrophic variance. As an ...Event suffix, this is a cryptographically frozen coordinate.
 
+    CAUSAL AFFORDANCE: Physically severs the active execution thread for the targeted node, acting as a hardware guillotine that immediately halts out-of-memory cascades, runaway generative loops, or API rate-limit breaches.
+
+    EPISTEMIC BOUNDS: The fault perimeter is mathematically restricted to a specific `target_node_id` (`NodeIdentifierState`). To prevent log-poisoning and VRAM exhaustion during the crash, the `error_signature` is strictly clamped at `max_length=2000`.
+
+    MCP ROUTING TRIGGERS: Lyapunov Stability, Control Theory, Circuit Breaker, Cascading Failure, State Equilibrium
+    """
+
+    type: Literal["circuit_breaker_event"] = Field(
+        default="circuit_breaker_event", description="The type of the resilience payload."
+    )
+    target_node_id: NodeIdentifierState = Field(
+        description="The ID of the node for which the circuit breaker was tripped."
+    )
+    error_signature: str = Field(max_length=2000, description="Signature or summary of the error causing the trip.")
 
 
 class ConstitutionalAmendmentIntent(CoreasonBaseState):
@@ -3627,7 +3637,7 @@ class SemanticDiscoveryIntent(CoreasonBaseState):
         return self
 
 
-class DraftingIntent(BaseMixedInitiativeIntent):
+class DraftingIntent(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Implements Fristonian Active Inference to minimize Expected Free
     Energy. It is triggered when the swarm detects a catastrophic Epistemic Gap and lacks
@@ -3651,6 +3661,13 @@ class DraftingIntent(BaseMixedInitiativeIntent):
     )
     context_prompt: str = Field(
         max_length=2000, description="The prompt explaining what information the swarm is missing."
+    )
+    resolution_schema: dict[Annotated[str, StringConstraints(max_length=255)], Any] = Field(
+        max_length=1000000000,
+        description="The strict JSON Schema the human's input must satisfy before the graph can resume.",
+    )
+    timeout_action: Literal["rollback", "proceed_default", "terminate"] = Field(
+        description="The action to take if the human fails to provide the draft."
     )
 
 
@@ -4026,7 +4043,7 @@ class EscalationContract(CoreasonBaseState):
     )
 
 
-class EscalationIntent(BaseMixedInitiativeIntent):
+class EscalationIntent(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Anchors in the Biba Integrity Model to orchestrate a Dictatorial
     Override mechanism within a Zero-Trust Architecture. It is emitted when a rigid
@@ -4055,6 +4072,12 @@ class EscalationIntent(BaseMixedInitiativeIntent):
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
         description="The ID of the Payload Loss Prevention (PLP) or Governance rule that blocked execution.",
+    )
+    resolution_schema: dict[Annotated[str, StringConstraints(max_length=255)], Any] = Field(
+        description="The strict JSON Schema requiring an explicit cryptographic sign-off or justification string to bypass the breaker.",
+    )
+    timeout_action: Literal["rollback", "proceed_default", "terminate"] = Field(
+        description="The default action is usually terminate or rollback for security escalations."
     )
 
 
@@ -5016,10 +5039,27 @@ class GraphFlatteningPolicy(CoreasonBaseState):
     )
 
 
-class HTTPBasedTransportProfile(CoreasonBaseState):
-    """Merged profile for both Server-Sent Events (SSE) and stateless HTTP transports."""
-    type: Literal["sse", "http"] = Field(description="Type of transport.")
-    uri: HttpUrl = Field(..., description="The HTTP URL endpoint for the connection.")
+class HTTPTransportProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Establishes a Stateless Client-Server Architecture for JSON-RPC
+    2.0 message passing, serving as the egress manifold for Zero-Trust Network Access
+    (ZTNA). As a ...Profile suffix, this is a declarative property descriptor.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator to open an out-of-band HTTP socket
+    (uri: HttpUrl), transmitting structured semantic payloads while strictly confining
+    custom headers to prevent protocol manipulation.
+
+    EPISTEMIC BOUNDS: The headers dictionary is mathematically bounded (le=1000000000
+    properties, key max_length=255, value max_length=2000, default_factory=dict) and
+    explicitly trapped by the @field_validator _prevent_crlf_injection to physically
+    block HTTP Request Smuggling.
+
+    MCP ROUTING TRIGGERS: Stateless Architecture, Zero-Trust Network Access, HTTP
+    Request Smuggling Prevention, JSON-RPC Egress, Out-of-Band Socket
+    """
+
+    type: Literal["http"] = Field(default="http", description="Type of transport.")
+    uri: HttpUrl = Field(..., description="The HTTP URL endpoint for the stateless connection.")
     headers: dict[
         Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=2000)]
     ] = Field(default_factory=dict, description="HTTP headers, strictly bounded for zero-trust credentials.")
@@ -5088,7 +5128,7 @@ class HypothesisStakeReceipt(CoreasonBaseState):
     implied_probability: float = Field(ge=0.0, le=1.0, description="The agent's calculated internal confidence score.")
 
 
-class InformationalIntent(BaseMixedInitiativeIntent):
+class InformationalIntent(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Formalizes Synchronous Epistemic Signaling within a Mixed-Initiative
     Control paradigm. The agent requires explicit acknowledgment from an external Oracle
@@ -5112,6 +5152,9 @@ class InformationalIntent(BaseMixedInitiativeIntent):
         default="informational", description="Discriminator for read-only informational handoffs."
     )
     message: str = Field(max_length=2000, description="The context or summary to display to the human operator.")
+    timeout_action: Literal["rollback", "proceed_default", "terminate"] = Field(
+        description="The orchestrator's automatic fallback if the human does not acknowledge the intent in time."
+    )
 
 
 class TaxonomicNodeState(CoreasonBaseState):
@@ -5327,8 +5370,26 @@ type AnyIntent = Annotated[
 ]
 
 
-class StateMappingContract(CoreasonBaseState):
-    """Formalizes a functional lens or mapping between nested subgraphs and their parents."""
+class InputMappingContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Formalizes a covariant Functor (Category Theory) mapping
+    higher-order topological state dimensions into an encapsulated subgraph's
+    localized working memory. As a ...Contract suffix, this enforces rigid
+    mathematical boundaries globally.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator's state projection engine to
+    safely inject parent variables into a CompositeNodeProfile without violating
+    scope isolation or referential transparency.
+
+    EPISTEMIC BOUNDS: The geometric projection vectors parent_key and child_key
+    are strictly clamped to max_length=2000, mathematically severing the
+    capability for String Exhaustion Attacks and Path Traversal vulnerabilities
+    during AST resolution.
+
+    MCP ROUTING TRIGGERS: Category Theory, Covariant Functor, Scope Isolation,
+    State Projection, Bijective Mapping
+    """
+
     parent_key: str = Field(max_length=2000, description="The key in the parent's shared state contract.")
     child_key: str = Field(max_length=2000, description="The mapped key in the nested topology's state contract.")
 
@@ -6680,7 +6741,28 @@ class OntologicalHandshakeReceipt(CoreasonBaseState):
         return self
 
 
+class OutputMappingContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Formalizes a contravariant Functor (Category Theory) or
+    Functional Lens, extracting terminal coordinate shifts from a nested subgraph
+    back into the parent's topological state. As a ...Contract suffix, this enforces
+    rigid mathematical boundaries globally.
 
+    CAUSAL AFFORDANCE: Authorizes the mutation of the macroscopic
+    shared_state_contract using precisely mapped structural returns from a
+    completed CompositeNodeProfile execution, guaranteeing side-effect-free state
+    bubbling.
+
+    EPISTEMIC BOUNDS: The routing paths child_key and parent_key are physically
+    bounded by max_length=2000 to prevent memory allocation faults and pointer
+    overflow during the orchestrator's post-execution dictionary merge operations.
+
+    MCP ROUTING TRIGGERS: Functional Lens, Contravariant Functor, State Bubbling,
+    Side-Effect Free Mutation, Graph Isomorphism
+    """
+
+    child_key: str = Field(max_length=2000, description="The key in the nested topology's state contract.")
+    parent_key: str = Field(max_length=2000, description="The mapped key in the parent's shared state contract.")
 
 
 class CompositeNodeProfile(BaseNodeProfile):
@@ -6691,8 +6773,8 @@ class CompositeNodeProfile(BaseNodeProfile):
 
     CAUSAL AFFORDANCE: Instructs the orchestrator to suspend the parent graph, injecting
     state variables into the isolated topology (AnyTopologyManifest) via input_mappings
-    (list[StateMappingContract], default_factory=list), and extracting terminal output
-    via output_mappings (list[StateMappingContract], default_factory=list).
+    (list[InputMappingContract], default_factory=list), and extracting terminal output
+    via output_mappings (list[OutputMappingContract], default_factory=list).
 
     EPISTEMIC BOUNDS: The @model_validator sort_composite_arrays deterministically sorts
     input_mappings by parent_key and output_mappings by child_key, guaranteeing
@@ -6704,10 +6786,10 @@ class CompositeNodeProfile(BaseNodeProfile):
 
     type: Literal["composite"] = Field(default="composite", description="Discriminator for a Composite node.")
     topology: "AnyTopologyManifest" = Field(description="The encapsulated subgraph to execute.")
-    input_mappings: list[StateMappingContract] = Field(
+    input_mappings: list[InputMappingContract] = Field(
         default_factory=list, description="Explicit state projection inputs."
     )
-    output_mappings: list[StateMappingContract] = Field(
+    output_mappings: list[OutputMappingContract] = Field(
         default_factory=list, description="Explicit state projection outputs."
     )
 
@@ -7066,10 +7148,44 @@ class QuarantineIntent(CoreasonBaseState):
 
 
 type AnyResilienceIntent = Annotated[
-    QuarantineIntent | FallbackIntent, Field(discriminator="type")
+    QuarantineIntent | CircuitBreakerEvent | FallbackIntent, Field(discriminator="type")
 ]
 
 
+class SSETransportProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Implements an Asynchronous Event-Driven Architecture leveraging
+    Server-Sent Events (SSE) to map a unidirectional, continuous topology of
+    Server-to-Client state transitions. As a ...Profile suffix, this is a declarative
+    property descriptor.
+
+    CAUSAL AFFORDANCE: Authorizes the orchestrator to maintain a persistent, long-lived
+    TCP connection (uri: HttpUrl), processing incoming JSON-RPC streams without the
+    thermodynamic overhead of continuous polling.
+
+    EPISTEMIC BOUNDS: The headers (default_factory=dict) are strictly limited via
+    StringConstraints (key max_length=255, value max_length=2000) and mathematically
+    sanitized against CRLF injection via @field_validator _prevent_crlf_injection to
+    preserve protocol boundary integrity.
+
+    MCP ROUTING TRIGGERS: Event-Driven Architecture, Server-Sent Events,
+    Unidirectional Stream, Asynchronous Message Passing, TCP Persistence
+    """
+
+    type: Literal["sse"] = Field(default="sse", description="Type of transport.")
+    uri: HttpUrl = Field(..., description="The HTTP URL endpoint for the SSE connection.")
+    headers: dict[
+        Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=2000)]
+    ] = Field(default_factory=dict, description="HTTP headers, e.g., for authentication.")
+
+    @field_validator("headers", mode="after")
+    @classmethod
+    def _prevent_crlf_injection(cls, v: dict[str, str]) -> dict[str, str]:
+        """AGENT INSTRUCTION: Strictly forbid HTTP request smuggling vectors."""
+        for key, value in v.items():
+            if "\r" in key or "\n" in key or "\r" in value or ("\n" in value):
+                raise ValueError("CRLF injection detected in headers")
+        return v
 
 
 class SalienceProfile(CoreasonBaseState):
@@ -7540,7 +7656,7 @@ class StdioTransportProfile(CoreasonBaseState):
     ] = Field(default_factory=dict, description="Environment variables required by the transport.")
 
 
-type MCPTransportProfile = StdioTransportProfile | HTTPBasedTransportProfile
+type MCPTransportProfile = StdioTransportProfile | SSETransportProfile | HTTPTransportProfile
 
 
 class SteadyStateHypothesisState(CoreasonBaseState):

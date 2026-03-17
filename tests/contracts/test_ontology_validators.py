@@ -488,7 +488,6 @@ def test_adjudication_intent_sorting() -> None:
     intent = AdjudicationIntent(
         deadlocked_claims=["claim_3", "claim_1", "claim_2"],
         resolution_schema={"type": "string"},
-        type="forced_adjudication",
         timeout_action="rollback",
     )
     assert intent.deadlocked_claims == ["claim_1", "claim_2", "claim_3"]
@@ -498,18 +497,18 @@ def test_composite_node_profile_sorts_mappings() -> None:
     from coreason_manifest.spec.ontology import (
         CompositeNodeProfile,
         DAGTopologyManifest,
-        StateMappingContract,
-        StateMappingContract,
+        InputMappingContract,
+        OutputMappingContract,
         SystemNodeProfile,
     )
 
     topology = DAGTopologyManifest(
         nodes={"did:example:1": SystemNodeProfile(description="desc")}, edges=[], max_depth=10, max_fan_out=10
     )
-    in_map1 = StateMappingContract(parent_key="b", child_key="c1")
-    in_map2 = StateMappingContract(parent_key="a", child_key="c2")
-    out_map1 = StateMappingContract(child_key="y", parent_key="p1")
-    out_map2 = StateMappingContract(child_key="x", parent_key="p2")
+    in_map1 = InputMappingContract(parent_key="b", child_key="c1")
+    in_map2 = InputMappingContract(parent_key="a", child_key="c2")
+    out_map1 = OutputMappingContract(child_key="y", parent_key="p1")
+    out_map2 = OutputMappingContract(child_key="x", parent_key="p2")
 
     node = CompositeNodeProfile(
         description="composite",
