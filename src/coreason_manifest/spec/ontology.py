@@ -224,20 +224,8 @@ class CoreasonBaseState(BaseModel):
     def model_dump_canonical(self) -> bytes:
         """Return a strictly sorted, canonical JSON serialization for cryptographic hashing."""
         raw_dict = self.model_dump(mode="json", exclude_none=True, by_alias=True)
-
-        def _sort_collections(obj: Any) -> Any:
-            """
-            Recursively sorts dictionaries for canonical serialization while explicitly preserving
-            RFC 8785 array ordering.
-            """
-            if isinstance(obj, dict):
-                return {k: _sort_collections(v) for k, v in sorted(obj.items())}
-            if isinstance(obj, list):
-                return [_sort_collections(v) for v in obj]
-            return obj
-
-        canonical_dict = _sort_collections(raw_dict)
-        return json.dumps(canonical_dict, ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode("utf-8")
+        # json.dumps(..., sort_keys=True) natively handles deep canonical sorting of all nested dictionary keys
+        return json.dumps(raw_dict, ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode("utf-8")
 
 
 class SpatialBoundingBoxProfile(CoreasonBaseState):
