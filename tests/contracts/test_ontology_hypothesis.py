@@ -1,13 +1,14 @@
 import pytest
-from hypothesis import given, strategies as st
-from pydantic import ValidationError
+from hypothesis import given
+from hypothesis import strategies as st
 
 from coreason_manifest.spec.ontology import (
+    CoreasonBaseState,
     InformationClassificationProfile,
     RiskLevelPolicy,
     _validate_payload_bounds,
-    CoreasonBaseState,
 )
+
 
 class DummyState(CoreasonBaseState):
     a: int
@@ -15,11 +16,14 @@ class DummyState(CoreasonBaseState):
     c: list[int]
     d: dict[str, int]
 
+
 @given(
     a=st.sampled_from(list(InformationClassificationProfile)),
     b=st.sampled_from(list(InformationClassificationProfile)),
 )
-def test_information_classification_profile_comparisons(a: InformationClassificationProfile, b: InformationClassificationProfile) -> None:
+def test_information_classification_profile_comparisons(
+    a: InformationClassificationProfile, b: InformationClassificationProfile
+) -> None:
     assert (a < b) == (a.clearance_level < b.clearance_level)
     assert (a <= b) == (a.clearance_level <= b.clearance_level)
     assert (a > b) == (a.clearance_level > b.clearance_level)
@@ -32,12 +36,7 @@ def test_information_classification_profile_comparisons(a: InformationClassifica
     assert a.__ge__("string") is NotImplemented
 
 
-@given(
-    st.integers(),
-    st.text(),
-    st.lists(st.integers()),
-    st.dictionaries(st.text(), st.integers())
-)
+@given(st.integers(), st.text(), st.lists(st.integers()), st.dictionaries(st.text(), st.integers()))
 def test_coreason_base_state_hash(a: int, b: str, c: list[int], d: dict[str, int]) -> None:
     obj = DummyState(a=a, b=b, c=c, d=d)
 
@@ -50,15 +49,10 @@ def test_coreason_base_state_hash(a: int, b: str, c: list[int], d: dict[str, int
 
     # Verify cached attribute exists
     assert hasattr(obj, "_cached_hash")
-    assert getattr(obj, "_cached_hash") == h1
+    assert obj._cached_hash == h1
 
 
-@given(
-    st.integers(),
-    st.text(),
-    st.lists(st.integers()),
-    st.dictionaries(st.text(), st.integers())
-)
+@given(st.integers(), st.text(), st.lists(st.integers()), st.dictionaries(st.text(), st.integers()))
 def test_model_dump_canonical(a: int, b: str, c: list[int], d: dict[str, int]) -> None:
     obj1 = DummyState(a=a, b=b, c=c, d=d)
 
@@ -75,9 +69,15 @@ def test_model_dump_canonical(a: int, b: str, c: list[int], d: dict[str, int]) -
 
 @given(
     st.recursive(
-        st.none() | st.booleans() | st.floats(allow_nan=False, allow_infinity=False) | st.integers() | st.text(max_size=10000),
-        lambda children: st.lists(children, max_size=10) | st.dictionaries(st.text(max_size=10000), children, max_size=10),
-        max_leaves=10
+        st.none()
+        | st.booleans()
+        | st.floats(allow_nan=False, allow_infinity=False)
+        | st.integers()
+        | st.text(max_size=10000),
+        lambda children: (
+            st.lists(children, max_size=10) | st.dictionaries(st.text(max_size=10000), children, max_size=10)
+        ),
+        max_leaves=10,
     )
 )
 def test_validate_payload_bounds_valid(payload):
