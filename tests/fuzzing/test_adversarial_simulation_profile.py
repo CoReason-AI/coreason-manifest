@@ -68,7 +68,7 @@ def test_adversarial_simulation_dictionary_bombing() -> None:
     """
     # Massive key exceeding 255 chars
     massive_key = "a" * 256
-    payload = {massive_key: "malicious_injection"}
+    payload: dict[str, Any] = {massive_key: "malicious_injection"}
 
     with pytest.raises(ValidationError, match="String should have at most 255 characters"):
         AdversarialSimulationProfile(
