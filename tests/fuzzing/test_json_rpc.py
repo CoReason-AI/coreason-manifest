@@ -1,3 +1,5 @@
+import typing
+
 import hypothesis.strategies as st
 import pytest
 from hypothesis import given
@@ -25,7 +27,7 @@ valid_json_st = st.recursive(
 )
 
 
-import typing
+
 
 @given(params=st.one_of(st.none(), st.dictionaries(st.text(max_size=50), valid_json_st, max_size=5)))
 def test_valid_json_rpc_intent(params: typing.Any) -> None:
