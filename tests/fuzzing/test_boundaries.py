@@ -389,3 +389,146 @@ def test_state_hydration_manifest_long_string_quarantine() -> None:
             working_context_variables={"large_payload": long_string},
             max_retained_tokens=4096,
         )
+
+from coreason_manifest.spec.ontology import (
+    SpatialBoundingBoxProfile,
+    MultimodalTokenAnchorState,
+    DocumentLayoutRegionState,
+    ScalePolicy,
+    NDimensionalTensorManifest,
+    TensorStructuralFormatProfile
+)
+import math
+
+# --- SpatialBoundingBoxProfile ---
+@given(
+    x_min=st.floats(min_value=-1.0, max_value=2.0),
+    y_min=st.floats(min_value=-1.0, max_value=2.0),
+    x_max=st.floats(min_value=-1.0, max_value=2.0),
+    y_max=st.floats(min_value=-1.0, max_value=2.0)
+)
+def test_spatial_bounding_box_profile_all_floats(x_min, y_min, x_max, y_max):
+    valid = (0.0 <= x_min <= 1.0 and 0.0 <= y_min <= 1.0 and
+             0.0 <= x_max <= 1.0 and 0.0 <= y_max <= 1.0 and
+             x_min <= x_max and y_min <= y_max)
+
+    if valid:
+        SpatialBoundingBoxProfile(x_min=x_min, y_min=y_min, x_max=x_max, y_max=y_max)
+    else:
+        with pytest.raises((ValueError, ValidationError)):
+            SpatialBoundingBoxProfile(x_min=x_min, y_min=y_min, x_max=x_max, y_max=y_max)
+
+
+# --- MultimodalTokenAnchorState ---
+@given(
+    token_span_start=st.one_of(st.none(), st.integers(min_value=-10, max_value=100)),
+    token_span_end=st.one_of(st.none(), st.integers(min_value=-10, max_value=100)),
+    bounding_box=st.one_of(st.none(), st.tuples(st.floats(min_value=-1.0, max_value=2.0), st.floats(min_value=-1.0, max_value=2.0), st.floats(min_value=-1.0, max_value=2.0), st.floats(min_value=-1.0, max_value=2.0))),
+)
+def test_multimodal_token_anchor_state(token_span_start, token_span_end, bounding_box):
+    valid = True
+    if token_span_start is not None and token_span_end is None:
+        valid = False
+    if token_span_end is not None and token_span_start is None:
+        valid = False
+    if token_span_start is not None and token_span_end is not None:
+        if token_span_start < 0 or token_span_end < 0:
+            valid = False
+        if token_span_end <= token_span_start:
+            valid = False
+
+    if bounding_box is not None:
+        x_min, y_min, x_max, y_max = bounding_box
+        if x_min > x_max or y_min > y_max:
+            valid = False
+
+    if valid:
+        try:
+            MultimodalTokenAnchorState(token_span_start=token_span_start, token_span_end=token_span_end, bounding_box=bounding_box)
+        except ValidationError:
+            pass
+    else:
+        with pytest.raises((ValueError, ValidationError)):
+            MultimodalTokenAnchorState(token_span_start=token_span_start, token_span_end=token_span_end, bounding_box=bounding_box)
+
+
+# --- ScalePolicy ---
+@given(
+    type_val=st.sampled_from(["linear", "log", "time", "ordinal", "nominal"]),
+    domain_min=st.one_of(st.none(), st.floats(min_value=-1000.0, max_value=1000.0)),
+    domain_max=st.one_of(st.none(), st.floats(min_value=-1000.0, max_value=1000.0))
+)
+def test_scale_policy(type_val, domain_min, domain_max):
+    valid = True
+    if domain_min is not None and domain_max is not None:
+        if domain_min > domain_max:
+            valid = False
+        if type_val in ["linear", "log", "time"] and domain_min == domain_max:
+            valid = False
+
+    if type_val == "log":
+        if domain_min is not None and domain_min <= 0:
+            valid = False
+        if domain_max is not None and domain_max <= 0:
+            valid = False
+
+    if valid:
+        ScalePolicy(type=type_val, domain_min=domain_min, domain_max=domain_max)
+    else:
+        with pytest.raises((ValueError, ValidationError)):
+            ScalePolicy(type=type_val, domain_min=domain_min, domain_max=domain_max)
+
+
+# --- NDimensionalTensorManifest ---
+@given(
+    shape=st.lists(st.integers(min_value=-1, max_value=10), min_size=0, max_size=5),
+    structural_type=st.sampled_from(list(TensorStructuralFormatProfile)),
+)
+def test_ndimensional_tensor_manifest(shape, structural_type):
+    valid = True
+    if len(shape) < 1:
+        valid = False
+    elif any(dim <= 0 for dim in shape):
+        valid = False
+
+    if valid:
+        bytes_per_element = structural_type.bytes_per_element
+        vram_footprint_bytes = math.prod(shape) * bytes_per_element
+    else:
+        vram_footprint_bytes = 10
+
+    merkle_root = "a" * 64
+    storage_uri = "s3://bucket/tensor.bin"
+
+    if valid:
+        NDimensionalTensorManifest(
+            shape=tuple(shape),
+            structural_type=structural_type,
+            vram_footprint_bytes=vram_footprint_bytes,
+            merkle_root=merkle_root,
+            storage_uri=storage_uri
+        )
+    else:
+        with pytest.raises((ValueError, ValidationError)):
+            NDimensionalTensorManifest(
+                shape=tuple(shape),
+                structural_type=structural_type,
+                vram_footprint_bytes=vram_footprint_bytes,
+                merkle_root=merkle_root,
+                storage_uri=storage_uri
+            )
+
+# --- DocumentLayoutRegionState ---
+@given(
+    block_id=st.text(min_size=1, max_size=128, alphabet=st.characters(whitelist_categories=('L', 'N'), whitelist_characters='_.:-')),
+    block_type=st.sampled_from(["header", "paragraph", "figure", "table", "footnote", "caption", "equation"]),
+    token_span_start=st.integers(min_value=0, max_value=100),
+    token_span_end=st.integers(min_value=101, max_value=200)
+)
+def test_document_layout_region_state(block_id, block_type, token_span_start, token_span_end):
+    anchor = MultimodalTokenAnchorState(token_span_start=token_span_start, token_span_end=token_span_end)
+
+    try:
+        DocumentLayoutRegionState(block_id=block_id, block_type=block_type, anchor=anchor)
+    except (ValueError, ValidationError):
+        pass
