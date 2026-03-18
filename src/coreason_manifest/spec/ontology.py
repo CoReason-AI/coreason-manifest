@@ -819,7 +819,7 @@ class ComputeEngineProfile(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "capabilities", sorted(self.capabilities))
         object.__setattr__(self, "supported_functional_experts", sorted(self.supported_functional_experts))
         return self
@@ -856,7 +856,7 @@ class PermissionBoundaryPolicy(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         if self.allowed_domains is not None:
             object.__setattr__(self, "allowed_domains", sorted(self.allowed_domains))
         if self.auth_requirements is not None:
@@ -1011,7 +1011,7 @@ class ActivationSteeringContract(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "injection_layers", sorted(self.injection_layers))
         return self
 
@@ -1041,7 +1041,7 @@ class SemanticSlicingPolicy(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         """Mathematically sort arrays to guarantee deterministic canonical hashing."""
         object.__setattr__(
             self,
@@ -1198,7 +1198,7 @@ class ConstitutionalPolicy(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "forbidden_intents", sorted(self.forbidden_intents))
         return self
 
@@ -1265,7 +1265,7 @@ class AdjudicationRubricProfile(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "criteria", sorted(self.criteria, key=lambda x: x.criterion_id))
         return self
 
@@ -1427,7 +1427,7 @@ class RedactionPolicy(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         if self.context_exclusion_zones is not None:
             object.__setattr__(self, "context_exclusion_zones", sorted(self.context_exclusion_zones))
         return self
@@ -1491,7 +1491,7 @@ class SaeLatentPolicy(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "monitored_layers", sorted(self.monitored_layers))
         return self
 
@@ -1541,7 +1541,7 @@ class SecureSubSessionState(CoreasonBaseState):
     description: str = Field(max_length=2000, description="Audit justification for this temporary secure session.")
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "allowed_vault_keys", sorted(self.allowed_vault_keys))
         return self
 
@@ -1590,7 +1590,7 @@ class DefeasibleCascadeEvent(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "quarantined_event_ids", sorted(self.quarantined_event_ids))
         return self
 
@@ -1659,7 +1659,7 @@ class MultimodalTokenAnchorState(CoreasonBaseState):
         return self
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "visual_patch_hashes", sorted(self.visual_patch_hashes))
         if getattr(self, "visual_patch_hashes", None) is not None:
             object.__setattr__(self, "visual_patch_hashes", sorted(self.visual_patch_hashes))
@@ -1702,7 +1702,7 @@ class RollbackIntent(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_invalidated_nodes(self) -> Self:
+    def _enforce_canonical_sort_invalidated_nodes(self) -> Self:
         object.__setattr__(self, "invalidated_node_ids", sorted(self.invalidated_node_ids))
         return self
 
@@ -1842,7 +1842,7 @@ class StateHydrationManifest(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "crystallized_ledger_cids", sorted(self.crystallized_ledger_cids))
         if getattr(self, "crystallized_ledger_cids", None) is not None:
             object.__setattr__(self, "crystallized_ledger_cids", sorted(self.crystallized_ledger_cids))
@@ -1988,7 +1988,7 @@ class LatentScratchpadReceipt(CoreasonBaseState):
         return self
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "explored_branches", sorted(self.explored_branches, key=lambda x: x.branch_id))
         object.__setattr__(self, "discarded_branches", sorted(self.discarded_branches))
         return self
@@ -2049,7 +2049,7 @@ class EphemeralNamespacePartitionState(CoreasonBaseState):
         return self
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "authorized_bytecode_hashes", sorted(self.authorized_bytecode_hashes))
         return self
 
@@ -2142,7 +2142,7 @@ class BilateralSLA(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "permitted_geographic_regions", sorted(self.permitted_geographic_regions))
         return self
 
@@ -2176,7 +2176,7 @@ class FederatedDiscoveryManifest(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "broadcast_endpoints", sorted(self.broadcast_endpoints, key=str))
         object.__setattr__(self, "supported_ontologies", sorted(self.supported_ontologies))
         if getattr(self, "supported_ontologies", None) is not None:
@@ -2272,7 +2272,7 @@ class AdjudicationIntent(CoreasonBaseState):
         return _validate_payload_bounds(v)
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "deadlocked_claims", sorted(self.deadlocked_claims))
         return self
 
@@ -2715,7 +2715,7 @@ class BoundedInterventionScopePolicy(CoreasonBaseState):
         return _validate_payload_bounds(v)
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "allowed_fields", sorted(self.allowed_fields))
         return self
 
@@ -3054,7 +3054,7 @@ class CausalExplanationEvent(BaseStateEvent):
     )
 
     @model_validator(mode="after")
-    def sort_agent_attributions(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "agent_attributions", sorted(self.agent_attributions, key=lambda x: x.target_node_id))
         return self
 
@@ -3703,7 +3703,7 @@ class TopologicalRetrievalContract(CoreasonBaseState):
     enforce_isometry: bool = Field(default=True, description="Enforces preservation of geometric distances.")
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "allowed_causal_relationships", sorted(self.allowed_causal_relationships))
         return self
 
@@ -3778,7 +3778,7 @@ class SemanticDiscoveryIntent(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_required_structural_types(self) -> Self:
+    def _enforce_canonical_sort_types(self) -> Self:
         object.__setattr__(self, "required_structural_types", sorted(self.required_structural_types))
         return self
 
@@ -3946,7 +3946,7 @@ class EnsembleTopologyProfile(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "concurrent_branch_ids", sorted(self.concurrent_branch_ids))
         return self
 
@@ -4075,7 +4075,7 @@ class EpistemicPromotionEvent(BaseStateEvent):
     )
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "source_episodic_event_ids", sorted(self.source_episodic_event_ids))
         return self
 
@@ -4158,7 +4158,7 @@ class EpistemicTransmutationTask(CoreasonBaseState):
         return self
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "target_modalities", sorted(self.target_modalities))
         return self
 
@@ -4308,7 +4308,7 @@ class EvictionPolicy(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "protected_event_ids", sorted(self.protected_event_ids))
         return self
 
@@ -4389,7 +4389,7 @@ class EpistemicArgumentClaimState(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_argument_claim_arrays(self) -> Self:
+    def _enforce_canonical_sort_warrants(self) -> Self:
         object.__setattr__(self, "warrants", sorted(self.warrants, key=lambda x: x.justification))
         return self
 
@@ -4842,7 +4842,7 @@ class DelegatedCapabilityManifest(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "allowed_tool_ids", sorted(self.allowed_tool_ids))
         return self
 
@@ -5042,7 +5042,7 @@ class GlobalSemanticProfile(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "detected_modalities", sorted(self.detected_modalities))
         return self
 
@@ -5076,13 +5076,8 @@ class DynamicRoutingManifest(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "active_subgraphs", {k: sorted(v) for k, v in self.active_subgraphs.items()})
-
-        return self
-
-    @model_validator(mode="after")
-    def sort_bypassed_steps(self) -> Self:
         object.__setattr__(self, "bypassed_steps", sorted(self.bypassed_steps, key=lambda x: x.bypassed_node_id))
         return self
 
@@ -5132,7 +5127,7 @@ class GovernancePolicy(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_rules(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "rules", sorted(self.rules, key=lambda r: r.rule_id))
         return self
 
@@ -5171,7 +5166,7 @@ class GrammarPanelProfile(CoreasonBaseState):
     facet: FacetMatrixProfile | None = Field(default=None, description="Optional faceting matrix for small multiples.")
 
     @model_validator(mode="after")
-    def sort_encodings(self) -> Self:
+    def _enforce_canonical_sort_encodings(self) -> Self:
         """Mathematically sorts self.encodings by the string value of channel for deterministic hashing."""
         object.__setattr__(self, "encodings", sorted(self.encodings, key=lambda e: e.channel))
         return self
@@ -5380,7 +5375,7 @@ class TaxonomicNodeState(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_taxonomic_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         """Mathematically sort arrays to guarantee deterministic canonical hashing."""
         object.__setattr__(self, "children_node_ids", sorted(self.children_node_ids))
         object.__setattr__(self, "leaf_provenance", sorted(self.leaf_provenance, key=lambda x: x.source_event_id))
@@ -5854,7 +5849,7 @@ class BaseNodeProfile(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_agent_attestation_arrays(self) -> Self:
+    def _enforce_canonical_sort_intervention_policies(self) -> Self:
         object.__setattr__(self, "intervention_policies", sorted(self.intervention_policies, key=lambda x: x.trigger))
         return self
 
@@ -5994,7 +5989,7 @@ class MCPCapabilityWhitelistPolicy(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "allowed_tools", sorted(self.allowed_tools))
         object.__setattr__(self, "allowed_resources", sorted(self.allowed_resources))
         object.__setattr__(self, "allowed_prompts", sorted(self.allowed_prompts))
@@ -6158,7 +6153,7 @@ class KineticSeparationPolicy(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_clusters(self) -> Self:
+    def _enforce_canonical_sort_clusters(self) -> Self:
         """
         AGENT INSTRUCTION: Mathematically stabilize the 2D array to guarantee
         deterministic RFC 8785 canonical hashing across distributed nodes.
@@ -6212,23 +6207,19 @@ class ActionSpaceManifest(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def verify_unique_tool_namespaces_and_sort(self) -> Self:
+    def _enforce_structural_uniqueness(self) -> Self:
         tool_names = {t.tool_name for t in self.native_tools}
         if len(tool_names) < len(self.native_tools):
             raise ValueError("Tool names within an ActionSpaceManifest must be strictly unique.")
+        return self
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort_action_spaces(self) -> Self:
         object.__setattr__(self, "native_tools", sorted(self.native_tools, key=lambda x: x.tool_name))
         object.__setattr__(self, "mcp_servers", sorted(self.mcp_servers, key=lambda x: x.server_uri))
         object.__setattr__(
             self, "ephemeral_partitions", sorted(self.ephemeral_partitions, key=lambda x: x.partition_id)
         )
-        return self
-
-    @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
-        if getattr(self, "ephemeral_partitions", None) is not None:
-            object.__setattr__(
-                self, "ephemeral_partitions", sorted(self.ephemeral_partitions, key=lambda x: x.partition_id)
-            )
         return self
 
 
@@ -6304,10 +6295,14 @@ class OntologicalSurfaceProjectionManifest(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def verify_unique_action_spaces(self) -> Self:
+    def _enforce_structural_uniqueness(self) -> Self:
         space_ids = {space.action_space_id for space in self.action_spaces}
         if len(space_ids) < len(self.action_spaces):
             raise ValueError("Action spaces within a projection must have strictly unique action_space_ids.")
+        return self
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort_projections(self) -> Self:
         object.__setattr__(self, "action_spaces", sorted(self.action_spaces, key=lambda x: x.action_space_id))
         object.__setattr__(self, "supported_personas", sorted(self.supported_personas))
         object.__setattr__(
@@ -6315,16 +6310,6 @@ class OntologicalSurfaceProjectionManifest(CoreasonBaseState):
             "available_procedural_manifolds",
             sorted(self.available_procedural_manifolds, key=lambda x: x.metadata_id),
         )
-        return self
-
-    @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
-        if getattr(self, "available_procedural_manifolds", None) is not None:
-            object.__setattr__(
-                self,
-                "available_procedural_manifolds",
-                sorted(self.available_procedural_manifolds, key=lambda x: x.metadata_id),
-            )
         return self
 
 
@@ -6422,7 +6407,7 @@ class MCPResourceManifest(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "uris", sorted(self.uris))
         return self
 
@@ -6511,7 +6496,7 @@ class MarketResolutionState(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "falsified_hypothesis_ids", sorted(self.falsified_hypothesis_ids))
         return self
 
@@ -6556,7 +6541,7 @@ class MechanisticAuditContract(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "trigger_conditions", sorted(self.trigger_conditions))
         object.__setattr__(self, "target_layers", sorted(self.target_layers))
         return self
@@ -6641,7 +6626,7 @@ class MigrationContract(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "dropped_paths", sorted(self.dropped_paths))
         if getattr(self, "dropped_paths", None) is not None:
             object.__setattr__(self, "dropped_paths", sorted(self.dropped_paths))
@@ -6795,7 +6780,7 @@ class NeuralAuditAttestationReceipt(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(
             self,
             "layer_activations",
@@ -6946,7 +6931,7 @@ class OntologicalHandshakeReceipt(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "participant_node_ids", sorted(self.participant_node_ids))
         return self
 
@@ -7004,7 +6989,7 @@ class CompositeNodeProfile(BaseNodeProfile):
     )
 
     @model_validator(mode="after")
-    def sort_composite_arrays(self) -> Self:
+    def _enforce_canonical_sort_mappings(self) -> Self:
         object.__setattr__(self, "input_mappings", sorted(self.input_mappings, key=lambda x: x.parent_key))
         object.__setattr__(self, "output_mappings", sorted(self.output_mappings, key=lambda x: x.child_key))
         return self
@@ -7085,7 +7070,7 @@ class PeftAdapterContract(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "target_modules", sorted(self.target_modules))
         return self
 
@@ -7166,7 +7151,7 @@ class PredictionMarketState(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_prediction_market_state_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "order_book", sorted(self.order_book, key=lambda x: x.agent_id))
         return self
 
@@ -7320,7 +7305,7 @@ class ComputeProvisioningIntent(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "required_capabilities", sorted(self.required_capabilities))
         return self
 
@@ -7476,7 +7461,7 @@ class SemanticFirewallPolicy(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "forbidden_intents", sorted(self.forbidden_intents))
         return self
 
@@ -7520,7 +7505,7 @@ class InformationFlowPolicy(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_rules(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         """
         Mathematically sorts rules by rule_id to guarantee deterministic hashing.
         """
@@ -7528,12 +7513,6 @@ class InformationFlowPolicy(CoreasonBaseState):
         object.__setattr__(
             self, "latent_firewalls", sorted(self.latent_firewalls, key=lambda x: x.target_feature_index)
         )
-        return self
-
-    @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
-        if getattr(self, "latent_firewalls", None) is not None:
-            object.__setattr__(self, "latent_firewalls", sorted(self.latent_firewalls, key=lambda x: x.rule_id))
         return self
 
 
@@ -7733,7 +7712,7 @@ class ExecutionSpanReceipt(CoreasonBaseState):
         return self
 
     @model_validator(mode="after")
-    def sort_events(self) -> Any:
+    def _enforce_canonical_sort_events(self) -> Any:
         object.__setattr__(self, "events", sorted(self.events, key=lambda e: e.timestamp_unix_nano))
         return self
 
@@ -7909,7 +7888,7 @@ class SteadyStateHypothesisState(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         if self.required_tool_usage is not None:
             object.__setattr__(self, "required_tool_usage", sorted(self.required_tool_usage))
         return self
@@ -7949,7 +7928,7 @@ class ChaosExperimentTask(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "faults", sorted(self.faults, key=lambda x: (x.fault_type, x.target_node_id)))
         object.__setattr__(self, "shocks", sorted(self.shocks, key=lambda x: x.shock_id))
         return self
@@ -7975,7 +7954,7 @@ class StructuralCausalGraphProfile(CoreasonBaseState):
     causal_edges: list[CausalDirectedEdgeState] = Field(description="The declared topological mapping of causality.")
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "observed_variables", sorted(self.observed_variables))
         object.__setattr__(self, "latent_variables", sorted(self.latent_variables))
         object.__setattr__(
@@ -8025,7 +8004,7 @@ class HypothesisGenerationEvent(BaseStateEvent):
     )
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(
             self, "falsification_conditions", sorted(self.falsification_conditions, key=lambda x: x.condition_id)
         )
@@ -8095,7 +8074,7 @@ class System1ReflexPolicy(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "allowed_passive_tools", sorted(self.allowed_passive_tools))
         return self
 
@@ -8129,7 +8108,7 @@ class System2RemediationIntent(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def _sort_failing_pointers(self) -> Self:
+    def _enforce_canonical_sort_failing_pointers(self) -> Self:
         """Mathematically sort pointers to guarantee deterministic canonical hashing."""
         object.__setattr__(self, "failing_pointers", sorted(self.failing_pointers))
         return self
@@ -8237,17 +8216,11 @@ class AuctionState(CoreasonBaseState):
     minimum_tick_size: int = Field(le=1000000000, gt=0, description="The smallest allowable discrete bid increment.")
 
     @model_validator(mode="after")
-    def sort_bids(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         """Mathematically sort bids by price then agent_id for deterministic hashing and correct supply curve geometry."""
         object.__setattr__(
             self, "bids", sorted(self.bids, key=lambda bid: (bid.estimated_cost_magnitude, bid.agent_id))
         )
-        return self
-
-    @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
-        if getattr(self, "bids", None) is not None:
-            object.__setattr__(self, "bids", sorted(self.bids, key=lambda x: x.agent_id))
         return self
 
 
@@ -8392,7 +8365,7 @@ class TheoryOfMindSnapshot(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "assumed_shared_beliefs", sorted(self.assumed_shared_beliefs))
         object.__setattr__(self, "identified_knowledge_gaps", sorted(self.identified_knowledge_gaps))
         if getattr(self, "identified_knowledge_gaps", None) is not None:
@@ -8472,7 +8445,7 @@ class TraceExportManifest(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_spans(self) -> Any:
+    def _enforce_canonical_sort(self) -> Any:
         object.__setattr__(self, "spans", sorted(self.spans, key=lambda s: s.span_id))
         return self
 
@@ -8914,7 +8887,7 @@ class AgentAttestationReceipt(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(
             self, "credential_presentations", sorted(self.credential_presentations, key=lambda x: x.issuer_did)
         )
@@ -9034,7 +9007,7 @@ class AgentNodeProfile(BaseNodeProfile):
     )
 
     @model_validator(mode="after")
-    def sort_agent_node_arrays(self) -> Self:
+    def _enforce_canonical_sort_peft_adapters(self) -> Self:
         object.__setattr__(self, "peft_adapters", sorted(self.peft_adapters, key=lambda x: x.adapter_id))
         return self
 
@@ -9173,7 +9146,7 @@ class DAGTopologyManifest(BaseTopologyManifest):
     )
 
     @model_validator(mode="after")
-    def sort_dag_topology_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "edges", sorted(self.edges))
         object.__setattr__(
             self, "speculative_boundaries", sorted(self.speculative_boundaries, key=lambda x: x.boundary_id)
@@ -9227,16 +9200,6 @@ class DAGTopologyManifest(BaseTopologyManifest):
                 raise ValueError(
                     f"Topological Violation: Graph depth {max_calculated_depth} exceeds max_depth of {self.max_depth}."
                 )
-        return self
-
-    @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
-        if getattr(self, "speculative_boundaries", None) is not None:
-            object.__setattr__(
-                self, "speculative_boundaries", sorted(self.speculative_boundaries, key=lambda x: x.boundary_id)
-            )
-        if getattr(self, "edges", None) is not None:
-            object.__setattr__(self, "edges", sorted(self.edges))
         return self
 
 
@@ -9362,18 +9325,10 @@ class EvolutionaryTopologyManifest(BaseTopologyManifest):
     )
 
     @model_validator(mode="after")
-    def sort_objectives(self) -> Self:
+    def _enforce_canonical_sort_objectives(self) -> Self:
         object.__setattr__(
             self, "fitness_objectives", sorted(self.fitness_objectives, key=lambda obj: obj.target_metric)
         )
-        return self
-
-    @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
-        if getattr(self, "fitness_objectives", None) is not None:
-            object.__setattr__(
-                self, "fitness_objectives", sorted(self.fitness_objectives, key=lambda x: x.target_metric)
-            )
         return self
 
 
@@ -9416,7 +9371,7 @@ class SMPCTopologyManifest(BaseTopologyManifest):
     )
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         if getattr(self, "participant_node_ids", None) is not None:
             object.__setattr__(self, "participant_node_ids", sorted(self.participant_node_ids))
         return self
@@ -9469,15 +9424,11 @@ class SwarmTopologyManifest(BaseTopologyManifest):
         return self
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(
             self, "active_prediction_markets", sorted(self.active_prediction_markets, key=lambda x: x.market_id)
         )
         object.__setattr__(self, "resolved_markets", sorted(self.resolved_markets, key=lambda x: x.market_id))
-        if getattr(self, "active_prediction_markets", None) is not None:
-            object.__setattr__(
-                self, "active_prediction_markets", sorted(self.active_prediction_markets, key=lambda x: x.market_id)
-            )
         return self
 
 
@@ -9513,7 +9464,7 @@ class AdversarialMarketTopologyManifest(CoreasonBaseState):
         return self
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "blue_team_ids", sorted(self.blue_team_ids))
         object.__setattr__(self, "red_team_ids", sorted(self.red_team_ids))
         return self
@@ -9556,7 +9507,7 @@ class ConsensusFederationTopologyManifest(CoreasonBaseState):
         return self
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "participant_ids", sorted(self.participant_ids))
         return self
 
@@ -9643,7 +9594,7 @@ class WorkflowManifest(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         if self.allowed_information_classifications is not None:
             object.__setattr__(
                 self, "allowed_information_classifications", sorted(self.allowed_information_classifications)
@@ -9808,7 +9759,7 @@ class EpistemicQuarantineSnapshot(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(
             self, "theory_of_mind_models", sorted(self.theory_of_mind_models, key=lambda x: x.target_agent_id)
         )
@@ -9921,7 +9872,7 @@ class BeliefMutationEvent(BaseStateEvent):
     )
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(
             self, "causal_attributions", sorted(self.causal_attributions, key=lambda x: x.source_event_id)
         )
@@ -10121,7 +10072,7 @@ class EpistemicChainGraphState(CoreasonBaseState):
     semantic_leaves: list[EpistemicAxiomState]
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(
             self,
             "semantic_leaves",
@@ -10150,7 +10101,7 @@ class CognitivePredictionReceipt(BaseStateEvent):
     predicted_top_k_tokens: list[Annotated[str, StringConstraints(max_length=255)]] = Field(min_length=1)
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         if getattr(self, "predicted_top_k_tokens", None) is not None:
             object.__setattr__(self, "predicted_top_k_tokens", sorted(self.predicted_top_k_tokens))
         return self
@@ -10240,7 +10191,7 @@ class EpistemicDomainGraphManifest(CoreasonBaseState):
     verified_axioms: list[EpistemicAxiomState] = Field(min_length=1)
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(
             self,
             "verified_axioms",
@@ -10440,7 +10391,7 @@ class EpistemicCurriculumManifest(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_tasks(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "tasks", sorted(self.tasks, key=lambda task: task.task_id))
         return self
 
@@ -10630,7 +10581,7 @@ class CognitiveRewardEvaluationReceipt(BaseStateEvent):
     )
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(
             self,
             "extracted_axioms",
@@ -10888,7 +10839,7 @@ class SpeculativeExecutionBoundary(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "rollback_pointers", sorted(self.rollback_pointers))
         object.__setattr__(self, "competing_hypotheses", sorted(self.competing_hypotheses))
         return self
@@ -10961,19 +10912,13 @@ class EpistemicLedgerState(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def sort_history(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "history", sorted(self.history, key=lambda event: event.timestamp))
         object.__setattr__(self, "retracted_nodes", sorted(self.retracted_nodes))
         object.__setattr__(self, "checkpoints", sorted(self.checkpoints, key=lambda x: x.checkpoint_id))
         object.__setattr__(self, "active_rollbacks", sorted(self.active_rollbacks, key=lambda x: x.request_id))
         object.__setattr__(self, "migration_contracts", sorted(self.migration_contracts, key=lambda x: x.contract_id))
         object.__setattr__(self, "active_cascades", sorted(self.active_cascades, key=lambda x: x.cascade_id))
-        return self
-
-    @model_validator(mode="after")
-    def sort_arrays(self) -> Self:
-        if getattr(self, "history", None) is not None:
-            object.__setattr__(self, "history", sorted(self.history, key=lambda x: x.timestamp))
         return self
 
 
