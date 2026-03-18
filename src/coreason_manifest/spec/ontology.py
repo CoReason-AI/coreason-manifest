@@ -948,7 +948,9 @@ class RoutingFrontierPolicy(CoreasonBaseState):
             if "min_capability_score" in values:
                 values["min_capability_score"] = max(0.0, min(values["min_capability_score"], 1.0))
             if values.get("max_carbon_intensity_gco2eq_kwh") is not None:
-                values["max_carbon_intensity_gco2eq_kwh"] = max(0.0, min(values["max_carbon_intensity_gco2eq_kwh"], 10000.0))
+                values["max_carbon_intensity_gco2eq_kwh"] = max(
+                    0.0, min(values["max_carbon_intensity_gco2eq_kwh"], 10000.0)
+                )
         return values
 
 
@@ -4285,6 +4287,7 @@ class EscrowPolicy(CoreasonBaseState):
         if isinstance(values, dict):
             values["escrow_locked_magnitude"] = max(0, min(values.get("escrow_locked_magnitude", 0), 1000000000))
         return values
+
     release_condition_metric: str = Field(
         max_length=2000, description="A declarative pointer to the SLA or QA rubric required to release the funds."
     )
@@ -7192,6 +7195,7 @@ class PredictionMarketState(CoreasonBaseState):
             total = 0.0
 
             import math
+
             for k, v in values["current_market_probabilities"].items():
                 try:
                     prob = float(v)
@@ -7365,6 +7369,7 @@ class ComputeProvisioningIntent(CoreasonBaseState):
         if isinstance(values, dict):
             values["max_budget"] = max(0, min(values.get("max_budget", 0), 1000000000))
         return values
+
     required_capabilities: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
         max_length=1000000000, description="The minimal functional capabilities required by the requested compute."
     )
