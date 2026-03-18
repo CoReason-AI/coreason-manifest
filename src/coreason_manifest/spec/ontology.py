@@ -2759,7 +2759,7 @@ class BrowserDOMState(CoreasonBaseState):
             return val if val <= 0xFFFFFFFF else None
 
         ip: ipaddress.IPv4Address | ipaddress.IPv6Address | None = None
-        
+
         # Canonical validation of affine coordinate isomorphism for obfuscated IPv4 formats
         ip_int = _parse_obfuscated_ipv4(hostname_lower)
         if ip_int is not None:
