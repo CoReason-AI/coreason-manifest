@@ -24,13 +24,13 @@ malformed_json_rpc_st = st.recursive(
     | st.booleans()
     | st.floats(allow_nan=False, allow_infinity=False)
     | st.integers()
-    | st.text(max_size=150000),  
+    | st.text(max_size=150000),
     lambda children: (
-        st.lists(children, max_size=20) 
-        | st.dictionaries(st.text(min_size=1, max_size=300), children, max_size=20)
+        st.lists(children, max_size=20) | st.dictionaries(st.text(min_size=1, max_size=300), children, max_size=20)
     ),
     max_leaves=100,
 )
+
 
 @given(payload=malformed_json_rpc_st)
 @settings(max_examples=100, suppress_health_check=[HealthCheck.too_slow])
@@ -46,9 +46,9 @@ def test_adversarial_simulation_payload_fuzzing(payload: Any) -> None:
             simulation_id="sim-chaos-001",
             target_node_id="did:coreason:target-node:123",
             attack_vector="tool_poisoning",
-            synthetic_payload=payload
+            synthetic_payload=payload,
         )
-        
+
         # If instantiation succeeds, assert the payload successfully fell within the strict hardware boundaries
         if isinstance(profile.synthetic_payload, str):
             assert len(profile.synthetic_payload) <= 100000
@@ -56,10 +56,11 @@ def test_adversarial_simulation_payload_fuzzing(payload: Any) -> None:
             # Assert dictionary keys adhere to the 255-char StringConstraints limit
             for key in profile.synthetic_payload:
                 assert len(key) <= 255
-                
+
     except ValidationError:
         # Expected behavior: The validation layer correctly guillotines invalid schema/bounds
         pass
+
 
 def test_adversarial_simulation_dictionary_bombing() -> None:
     """
@@ -74,8 +75,9 @@ def test_adversarial_simulation_dictionary_bombing() -> None:
             simulation_id="sim-chaos-002",
             target_node_id="did:coreason:target-node:123",
             attack_vector="semantic_hijacking",
-            synthetic_payload=payload
+            synthetic_payload=payload,
         )
+
 
 def test_adversarial_simulation_string_overflow() -> None:
     """
@@ -88,8 +90,9 @@ def test_adversarial_simulation_string_overflow() -> None:
             simulation_id="sim-chaos-003",
             target_node_id="did:coreason:target-node:123",
             attack_vector="data_exfiltration",
-            synthetic_payload=massive_string
+            synthetic_payload=massive_string,
         )
+
 
 def test_adversarial_simulation_invalid_attack_vector() -> None:
     """
@@ -99,6 +102,6 @@ def test_adversarial_simulation_invalid_attack_vector() -> None:
         AdversarialSimulationProfile(
             simulation_id="sim-chaos-004",
             target_node_id="did:coreason:target-node:123",
-            attack_vector="invalid_attack_vector", # type: ignore
-            synthetic_payload={"method": "destroy"}
+            attack_vector="invalid_attack_vector",  # type: ignore
+            synthetic_payload={"method": "destroy"},
         )
