@@ -1,7 +1,8 @@
+from typing import Any
+
 import pytest
 from hypothesis import given
 from hypothesis import strategies as st
-from typing import Any
 
 from coreason_manifest.spec.ontology import (
     CoreasonBaseState,
