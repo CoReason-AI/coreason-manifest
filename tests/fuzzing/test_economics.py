@@ -18,6 +18,13 @@ from coreason_manifest.spec.ontology import (
     slashing_penalty=st.integers(min_value=-1000000000, max_value=2000000000),
 )
 def test_market_contract(minimum_collateral: int, slashing_penalty: int) -> None:
+    from pydantic import ValidationError
+    import pytest
+    expected_mc = max(0, min(minimum_collateral, 1000000000))
+    if slashing_penalty > expected_mc:
+        with pytest.raises(ValidationError):
+            MarketContract(minimum_collateral=minimum_collateral, slashing_penalty=slashing_penalty)
+        return
     mc = MarketContract(minimum_collateral=minimum_collateral, slashing_penalty=slashing_penalty)
     assert 0 <= mc.minimum_collateral <= 1000000000
     assert 0 <= mc.slashing_penalty <= mc.minimum_collateral

@@ -964,7 +964,8 @@ class RoutingFrontierPolicy(CoreasonBaseState):
     )
 
     @model_validator(mode="before")
-    def _clamp_frontier_bounds_before(self, values: Any) -> Any:
+    @classmethod
+    def _clamp_frontier_bounds_before(cls, values: Any) -> Any:
         if isinstance(values, dict):
             if "max_latency_ms" in values:
                 values["max_latency_ms"] = max(1, min(values["max_latency_ms"], 86400000))
@@ -4328,7 +4329,8 @@ class EscrowPolicy(CoreasonBaseState):
     )
 
     @model_validator(mode="before")
-    def _clamp_escrow_magnitude_before(self, values: Any) -> Any:
+    @classmethod
+    def _clamp_escrow_magnitude_before(cls, values: Any) -> Any:
         if isinstance(values, dict):
             values["escrow_locked_magnitude"] = max(0, min(values.get("escrow_locked_magnitude", 0), 1000000000))
         return values
@@ -4986,7 +4988,8 @@ class TokenBurnReceipt(BaseStateEvent):
     )
 
     @model_validator(mode="before")
-    def _clamp_token_burn_before(self, values: Any) -> Any:
+    @classmethod
+    def _clamp_token_burn_before(cls, values: Any) -> Any:
         if isinstance(values, dict):
             if "input_tokens" in values:
                 values["input_tokens"] = max(0, min(values["input_tokens"], 1000000000))
@@ -6542,13 +6545,23 @@ class MarketContract(CoreasonBaseState):
     slashing_penalty: int = Field(ge=0, description="The exact atomic token amount slashed for Byzantine faults.")
 
     @model_validator(mode="before")
-    def _clamp_economic_escrow_invariant(self, values: Any) -> Any:
-        """Mathematically clamp the invariant so a contract cannot penalize more than the escrowed amount."""
+    @classmethod
+    def _clamp_economic_escrow_invariant(cls, values: Any) -> Any:
+        """Mathematically evaluate the invariant so a contract cannot penalize more than the escrowed amount."""
         if isinstance(values, dict):
             mc = values.get("minimum_collateral", 0)
             sp = values.get("slashing_penalty", 0)
-            cmc = max(0, min(mc, 1000000000))
-            csp = max(0, min(sp, cmc))
+            mc_int, sp_int = 0, 0
+            if hasattr(mc, '__int__') and hasattr(sp, '__int__'):
+                try:
+                    mc_int = int(mc)
+                    sp_int = int(sp)
+                except (ValueError, TypeError):
+                    pass
+            cmc = max(0, min(mc_int, 1000000000))
+            if sp_int > cmc:
+                raise ValueError("slashing_penalty cannot exceed minimum_collateral")
+            csp = max(0, sp_int)
             values["minimum_collateral"] = cmc
             values["slashing_penalty"] = csp
         return values
@@ -7234,7 +7247,8 @@ class PredictionMarketState(CoreasonBaseState):
     )
 
     @model_validator(mode="before")
-    def _clamp_market_probabilities_before(self, values: Any) -> Any:
+    @classmethod
+    def _clamp_market_probabilities_before(cls, values: Any) -> Any:
         if isinstance(values, dict) and "current_market_probabilities" in values:
             clamped_probs: dict[str, str] = {}
             total = 0.0
@@ -7410,7 +7424,8 @@ class ComputeProvisioningIntent(CoreasonBaseState):
     )
 
     @model_validator(mode="before")
-    def _clamp_max_budget_before(self, values: Any) -> Any:
+    @classmethod
+    def _clamp_max_budget_before(cls, values: Any) -> Any:
         if isinstance(values, dict):
             values["max_budget"] = max(0, min(values.get("max_budget", 0), 1000000000))
         return values
