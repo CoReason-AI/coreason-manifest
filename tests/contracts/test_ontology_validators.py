@@ -523,7 +523,7 @@ def test_composite_node_profile_sorts_mappings() -> None:
     assert node.output_mappings[1].child_key == "y"
 
 
-def test_action_space_manifest_sort_arrays() -> None:
+def test_action_space_manifest_enforce_canonical_sort() -> None:
     from pydantic import ValidationError
 
     from coreason_manifest.spec.ontology import (
@@ -654,7 +654,7 @@ def test_epistemic_sop_manifest_ghost_nodes() -> None:
         )
 
 
-def test_executionspanreceipt_sort_events() -> None:
+def test_executionspanreceipt_enforce_canonical_sort_events() -> None:
     from coreason_manifest.spec.ontology import ExecutionSpanReceipt, SpanEvent
 
     event1 = SpanEvent(name="event_a", timestamp_unix_nano=1000)
