@@ -146,7 +146,7 @@ def test_epistemic_sop_ghost_node_rejection(
 )
 def test_dag_topology_cycles_and_bounds_fuzz(edges: list[tuple[str, str]]) -> None:
     edges_formatted = [("did:core:" + e[0], "did:core:" + e[1]) for e in edges]
-    nodes = {e[0]: {"type": "agent", "description": "desc"} for e in edges_formatted} | {
+    nodes: Any = {e[0]: {"type": "agent", "description": "desc"} for e in edges_formatted} | {
         e[1]: {"type": "agent", "description": "desc"} for e in edges_formatted
     }
 
@@ -182,7 +182,7 @@ def test_dag_topology_cycles_and_bounds_fuzz(edges: list[tuple[str, str]]) -> No
     max_concurrent_agents=st.integers(min_value=1, max_value=100),
 )
 def test_swarm_topology_constraints_fuzz(
-    nodes_dict: dict[str, dict[str, str]], spawning_threshold: int, max_concurrent_agents: int
+    nodes_dict: dict[str, Any], spawning_threshold: int, max_concurrent_agents: int
 ) -> None:
     try:
         SwarmTopologyManifest(
@@ -241,7 +241,7 @@ def test_defeasible_cascade_logic_fuzz(cascade_id: str, root: str, quarantined: 
     target=st.text(min_size=1, max_size=100),
     edge_type=st.sampled_from(["direct_cause", "confounder", "collider", "mediator"]),
 )
-def test_causal_directed_edge_state_fuzz(source: str, target: str, edge_type: str) -> None:
+def test_causal_directed_edge_state_fuzz(source: str, target: str, edge_type: Any) -> None:
     try:
         CausalDirectedEdgeState(source_variable=source, target_variable=target, edge_type=edge_type)
         if source == target:
@@ -267,7 +267,7 @@ def test_causal_directed_edge_state_fuzz(source: str, target: str, edge_type: st
         max_size=5,
     )
 )
-def test_epistemic_ledger_history_fuzz(history: list[ObservationEvent]) -> None:
+def test_epistemic_ledger_history_fuzz(history: Any) -> None:
     try:
         EpistemicLedgerState(history=history)
         # Should always succeed instantiation, but we sort the history

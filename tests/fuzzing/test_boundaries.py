@@ -406,7 +406,7 @@ def test_state_hydration_manifest_long_string_quarantine() -> None:
     x_max=st.floats(min_value=-1.0, max_value=2.0),
     y_max=st.floats(min_value=-1.0, max_value=2.0),
 )
-def test_spatial_bounding_box_profile_all_floats(x_min, y_min, x_max, y_max):
+def test_spatial_bounding_box_profile_all_floats(x_min: float, y_min: float, x_max: float, y_max: float) -> None:
     valid = (
         0.0 <= x_min <= 1.0
         and 0.0 <= y_min <= 1.0
@@ -437,7 +437,7 @@ def test_spatial_bounding_box_profile_all_floats(x_min, y_min, x_max, y_max):
         ),
     ),
 )
-def test_multimodal_token_anchor_state(token_span_start, token_span_end, bounding_box):
+def test_multimodal_token_anchor_state(token_span_start: int | None, token_span_end: int | None, bounding_box: tuple[float, float, float, float] | None) -> None:
     valid = True
     if token_span_start is not None and token_span_end is None:
         valid = False
@@ -472,7 +472,7 @@ def test_multimodal_token_anchor_state(token_span_start, token_span_end, boundin
     domain_min=st.one_of(st.none(), st.floats(min_value=-1000.0, max_value=1000.0)),
     domain_max=st.one_of(st.none(), st.floats(min_value=-1000.0, max_value=1000.0)),
 )
-def test_scale_policy(type_val, domain_min, domain_max):
+def test_scale_policy(type_val: Any, domain_min: float | None, domain_max: float | None) -> None:
     valid = True
     if domain_min is not None and domain_max is not None:
         if domain_min > domain_max:
@@ -498,7 +498,7 @@ def test_scale_policy(type_val, domain_min, domain_max):
     shape=st.lists(st.integers(min_value=-1, max_value=10), min_size=0, max_size=5),
     structural_type=st.sampled_from(list(TensorStructuralFormatProfile)),
 )
-def test_ndimensional_tensor_manifest(shape, structural_type):
+def test_ndimensional_tensor_manifest(shape: list[int], structural_type: Any) -> None:
     valid = True
     if len(shape) < 1 or any(dim <= 0 for dim in shape):
         valid = False
@@ -540,7 +540,7 @@ def test_ndimensional_tensor_manifest(shape, structural_type):
     token_span_start=st.integers(min_value=0, max_value=100),
     token_span_end=st.integers(min_value=101, max_value=200),
 )
-def test_document_layout_region_state(block_id, block_type, token_span_start, token_span_end):
+def test_document_layout_region_state(block_id: str, block_type: Any, token_span_start: int, token_span_end: int) -> None:
     anchor = MultimodalTokenAnchorState(token_span_start=token_span_start, token_span_end=token_span_end)
 
     with contextlib.suppress(ValueError, ValidationError):

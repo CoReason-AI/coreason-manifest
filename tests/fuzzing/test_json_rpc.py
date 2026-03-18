@@ -25,8 +25,10 @@ valid_json_st = st.recursive(
 )
 
 
+import typing
+
 @given(params=st.one_of(st.none(), st.dictionaries(st.text(max_size=50), valid_json_st, max_size=5)))
-def test_valid_json_rpc_intent(params):
+def test_valid_json_rpc_intent(params: typing.Any) -> None:
     # Prove that payloads under the depth limits are instantiated without error
     intent = BoundedJSONRPCIntent(jsonrpc="2.0", method="fuzzed_method", params=params, id=1)
     assert intent.params == params
@@ -39,8 +41,8 @@ def test_valid_json_rpc_intent(params):
     require_strict_validation=st.booleans(),
 )
 def test_latent_schema_inference_intent_valid(
-    target_buffer_id, max_schema_depth, max_properties, require_strict_validation
-):
+    target_buffer_id: str, max_schema_depth: int, max_properties: int, require_strict_validation: bool
+) -> None:
     intent = LatentSchemaInferenceIntent(
         target_buffer_id=target_buffer_id,
         max_schema_depth=max_schema_depth,
@@ -51,7 +53,7 @@ def test_latent_schema_inference_intent_valid(
 
 
 @given(minimum_collateral=st.integers(min_value=0, max_value=1000000000), slashing_penalty=st.integers(min_value=0))
-def test_market_contract_bounds(minimum_collateral, slashing_penalty):
+def test_market_contract_bounds(minimum_collateral: int, slashing_penalty: int) -> None:
     if slashing_penalty > minimum_collateral:
         with pytest.raises(ValidationError):
             MarketContract(minimum_collateral=minimum_collateral, slashing_penalty=slashing_penalty)
@@ -69,7 +71,7 @@ def test_market_contract_bounds(minimum_collateral, slashing_penalty):
     ),
     total_latent_tokens=st.integers(min_value=0, max_value=1000000000),
 )
-def test_latent_scratchpad_receipt_referential_integrity(trace_id, explored_branch_ids, total_latent_tokens):
+def test_latent_scratchpad_receipt_referential_integrity(trace_id: str, explored_branch_ids: list[str], total_latent_tokens: int) -> None:
     explored_branches = [
         ThoughtBranchState(branch_id=b_id, latent_content_hash="a" * 64, prm_score=0.5) for b_id in explored_branch_ids
     ]
@@ -96,7 +98,7 @@ def test_latent_scratchpad_receipt_referential_integrity(trace_id, explored_bran
         max_size=5,
     ),
 )
-def test_action_space_manifest_uniqueness(action_space_id, tool_names):
+def test_action_space_manifest_uniqueness(action_space_id: str, tool_names: list[str]) -> None:
     native_tools = [
         ToolManifest(
             tool_name=name,
@@ -114,7 +116,7 @@ def test_action_space_manifest_uniqueness(action_space_id, tool_names):
 @given(
     retracted_nodes=st.lists(st.from_regex("^[a-zA-Z0-9_.:-]+$", fullmatch=True).filter(lambda x: 1 <= len(x) <= 128))
 )
-def test_epistemic_ledger_state_bounds(retracted_nodes):
+def test_epistemic_ledger_state_bounds(retracted_nodes: list[str]) -> None:
     ledger = EpistemicLedgerState(
         history=[],
         defeasible_claims={},
@@ -132,7 +134,7 @@ def test_epistemic_ledger_state_bounds(retracted_nodes):
     max_uncommitted_edges=st.integers(min_value=1, max_value=1000000000),
     micro_batch_interval_ms=st.integers(min_value=1, max_value=86400000),
 )
-def test_continuous_mutation_policy_vram_bounds(mutation_paradigm, max_uncommitted_edges, micro_batch_interval_ms):
+def test_continuous_mutation_policy_vram_bounds(mutation_paradigm: typing.Any, max_uncommitted_edges: int, micro_batch_interval_ms: int) -> None:
     if mutation_paradigm == "append_only" and max_uncommitted_edges > 10000:
         with pytest.raises(ValidationError):
             ContinuousMutationPolicy(

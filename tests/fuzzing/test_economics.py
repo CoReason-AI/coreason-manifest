@@ -17,14 +17,14 @@ from coreason_manifest.spec.ontology import (
     minimum_collateral=st.integers(min_value=-1000000000, max_value=2000000000),
     slashing_penalty=st.integers(min_value=-1000000000, max_value=2000000000),
 )
-def test_market_contract(minimum_collateral, slashing_penalty):
+def test_market_contract(minimum_collateral: int, slashing_penalty: int) -> None:
     mc = MarketContract(minimum_collateral=minimum_collateral, slashing_penalty=slashing_penalty)
     assert 0 <= mc.minimum_collateral <= 1000000000
     assert 0 <= mc.slashing_penalty <= mc.minimum_collateral
 
 
 @given(probs=st.lists(st.floats(allow_nan=False, allow_infinity=False), min_size=1, max_size=10))
-def test_prediction_market_state(probs):
+def test_prediction_market_state(probs: list[float]) -> None:
     probs_dict = {f"h{i}": str(p) for i, p in enumerate(probs)}
     pms = PredictionMarketState(
         market_id="m1",
@@ -40,7 +40,7 @@ def test_prediction_market_state(probs):
 
 
 @given(max_budget=st.integers(min_value=-2000000000, max_value=2000000000))
-def test_compute_provisioning_intent(max_budget):
+def test_compute_provisioning_intent(max_budget: int) -> None:
     cpi = ComputeProvisioningIntent(max_budget=max_budget, required_capabilities=[], qos_class="interactive")
     assert 0 <= cpi.max_budget <= 1000000000
 
@@ -50,7 +50,7 @@ def test_compute_provisioning_intent(max_budget):
     inp=st.integers(min_value=-2000000000, max_value=2000000000),
     out=st.integers(min_value=-2000000000, max_value=2000000000),
 )
-def test_token_burn_receipt(burn, inp, out):
+def test_token_burn_receipt(burn: int, inp: int, out: int) -> None:
     tbr = TokenBurnReceipt(
         event_id="e1",
         timestamp=100.0,
@@ -69,7 +69,7 @@ def test_token_burn_receipt(burn, inp, out):
     cost=st.integers(min_value=-2000000000, max_value=2000000000),
     carbon=st.floats(min_value=-20000.0, max_value=20000.0),
 )
-def test_routing_frontier_policy(lat, cost, carbon):
+def test_routing_frontier_policy(lat: int, cost: int, carbon: float) -> None:
     rfp = RoutingFrontierPolicy(
         max_latency_ms=lat,
         max_cost_magnitude_per_token=cost,
@@ -84,6 +84,6 @@ def test_routing_frontier_policy(lat, cost, carbon):
 
 
 @given(escrow=st.integers(min_value=-2000000000, max_value=2000000000))
-def test_escrow_policy(escrow):
+def test_escrow_policy(escrow: int) -> None:
     ep = EscrowPolicy(escrow_locked_magnitude=escrow, release_condition_metric="rc1", refund_target_node_id="n1")
     assert 0 <= ep.escrow_locked_magnitude <= 1000000000
