@@ -104,7 +104,7 @@ def test_generate_correction_prompt_missing_and_invalid() -> None:
         WorkflowManifest(manifest_version="1.0.0")  # type: ignore[call-arg]
     except ValidationError as e:
         prompt = generate_correction_prompt(e, "did:node:faulty1", "fault1")
-        assert "completely missing" in prompt.remediation_prompt
+        assert any("completely missing" in r.diagnostic_message for r in prompt.violation_receipts)
 
     # Trigger an invalid error
     try:
@@ -117,7 +117,7 @@ def test_generate_correction_prompt_missing_and_invalid() -> None:
         )
     except ValidationError as e:
         prompt = generate_correction_prompt(e, "did:node:faulty1", "fault1")
-        assert "structural boundary violation" in prompt.remediation_prompt
+        assert any("String should match pattern" in r.diagnostic_message for r in prompt.violation_receipts)
 
 
 @given(source=st.lists(st.sampled_from(["text", "raster_image", "vector_graphics"]), min_size=2, unique=True))
