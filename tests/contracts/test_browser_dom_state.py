@@ -39,6 +39,8 @@ def test_browser_dom_state_valid_topology() -> None:
         "http://something.local/",
         "http://server.internal/",
         "http://test.arpa/",
+        "http://127.0.0.1.nip.io",  # Magic DNS bypass
+        "http://127.0.0.1.sslip.io",
     ],
 )
 def test_browser_dom_state_topological_violations(url: str) -> None:
@@ -48,15 +50,20 @@ def test_browser_dom_state_topological_violations(url: str) -> None:
         )
 
 
-# Parameterize explicit IP bypass vectors (canonical C-backed ipaddress parsing)
+# Parameterize explicit IP bypass vectors
 @pytest.mark.parametrize(
     "url",
     [
-        "http://127.0.0.1/",  # Standard loopback
+        "http://127.0.0.1/",  # Standard private
         "http://192.168.1.1/",  # Standard private
         "http://169.254.169.254/",  # Cloud metadata
+        "http://0x7f000001/",  # 127.0.0.1 in Hex
+        "http://2130706433/",  # 127.0.0.1 in Integer
+        "http://0177.0.0.1/",  # 127.0.0.1 in Octal format
+        "http://0x7f.0.0.1/",  # mixed Hex/Decimal
         "http://[::1]/",  # IPv6 loopback
-        "http://[::ffff:127.0.0.1]/",  # IPv4-mapped IPv6
+        "http://[::ffff:127.0.0.1]/",  # IPv4-mapped IPv6 (Missing Scenario)
+        "http://127.000.000.001/",  # Zero-padded (Missing Scenario)
     ],
 )
 def test_browser_dom_state_mathematical_bounds(url: str) -> None:

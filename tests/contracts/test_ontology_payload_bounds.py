@@ -62,13 +62,20 @@ def test_payload_bounds_recursion_depth_exceeded() -> None:
         _validate_payload_bounds(nested_payload)
 
 
-def test_payload_bounds_volume_exceeded() -> None:
-    """Mathematically prove the O(N) volume accumulator guillotines at 10001 nodes."""
-    # Create a flat dictionary with 10001 keys (exceeds 10000 node volume limit)
-    large_dict: dict[str, Any] = {f"k{i}": i for i in range(10001)}
+def test_payload_bounds_dict_keys_exceeded() -> None:
+    # Create a dictionary with 101 keys (max is 100)
+    large_dict: dict[str, Any] = {f"key_{i}": i for i in range(101)}
 
-    with pytest.raises(ValueError, match="Payload volume exceeds absolute hardware limit of 10000 nodes"):
+    with pytest.raises(ValueError, match="Dictionary exceeds maximum key count of 100"):
         _validate_payload_bounds(cast("JsonPrimitiveState", large_dict))
+
+
+def test_payload_bounds_list_items_exceeded() -> None:
+    # Create a list with 1001 items (max is 1000)
+    large_list: list[Any] = list(range(1001))
+
+    with pytest.raises(ValueError, match="List exceeds maximum item count of 1000"):
+        _validate_payload_bounds(cast("JsonPrimitiveState", large_list))
 
 
 def test_payload_bounds_string_length_exceeded() -> None:

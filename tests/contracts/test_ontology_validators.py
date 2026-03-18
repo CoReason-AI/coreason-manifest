@@ -372,6 +372,8 @@ def test_browser_dom_state_safety_valid_fuzzing(url: str) -> None:
             "test.local",
             "test.internal",
             "test.arpa",
+            "test.nip.io",
+            "test.sslip.io",
             "127.0.0.1",
             "192.168.1.1",
             "10.0.0.1",
