@@ -187,7 +187,9 @@
           "type": "array"
         },
         "resolution_schema": {
-          "additionalProperties": true,
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonPrimitiveState"
+          },
           "description": "The strict JSON Schema for the tie-breaking response (usually an enum of the deadlocked_claims).",
           "propertyNames": {
             "maxLength": 255
@@ -397,7 +399,7 @@
     },
     "AdversarialSimulationProfile": {
       "additionalProperties": false,
-      "description": "AGENT INSTRUCTION: A deterministic red-team configuration injecting Chaos Engineering vectors into a targeted node to map the fragility of the active context boundary. As a ...Profile suffix, this is a declarative snapshot of an attack geometry.\n\nCAUSAL AFFORDANCE: Authorizes the physical injection of a malicious structural payload (the \"Judas Node\" vector) to intentionally trip semantic firewalls, data exfiltration blocks, or tool poisoning filters, generating verification assertions.\n\nEPISTEMIC BOUNDS: The attack surface is rigidly constrained by the Literal automaton attack_vector. The payload is physically bounded by the synthetic_payload limits (max_length=100000), explicitly targeting a specific 128-char CID (target_node_id).\n\nMCP ROUTING TRIGGERS: Chaos Engineering, Judas Node, Threat Modeling, Structural Sabotage, Semantic Firewall Validation",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A deterministic red-team configuration injecting Chaos Engineering vectors into a targeted node to map the fragility of the active context boundary. As a ...Profile suffix, this is a declarative snapshot of an attack geometry.\n\nCAUSAL AFFORDANCE: Authorizes the physical injection of a malicious structural payload (the \"Judas Node\" vector) to intentionally trip semantic firewalls, data exfiltration blocks, or tool poisoning filters, generating verification assertions.\n\nEPISTEMIC BOUNDS: The attack surface is rigidly constrained by the Literal automaton attack_vector. The payload is physically bounded by the synthetic_payload limits (max_length=100000), explicitly targeting a specific 128-char CID (target_node_id).\n\nMCP ROUTING TRIGGERS: Chaos Engineering, Judas Node, Threat Modeling, Structural Sabotage, Semantic Firewall Validation",
       "examples": [
         {
           "attack_vector": "prompt_extraction",
@@ -3995,7 +3997,7 @@
     },
     "DAGTopologyManifest": {
       "additionalProperties": false,
-      "description": "AGENT INSTRUCTION: Formalizes a Directed Acyclic Graph (DAG) for deterministic, chronologically ordered task execution, guaranteeing strict topological sorting of operations. As a ...Manifest suffix, this defines a frozen, N-dimensional coordinate state.\n\nCAUSAL AFFORDANCE: Forces the orchestrator to evaluate causal edges and execute rigorous DFS loop-detection to verify the `allow_cycles` constraint before initiating kinetic node compute. The backpressure governs edge flow control.\n\nEPISTEMIC BOUNDS: Algorithmic complexity is mathematically bound by `max_depth` (`ge=1`, `le=256`) to prevent runaway agentic cyclic recursion, and `max_fan_out` (`ge=1`, `le=1024`) to limit horizontal compute explosion. The `@model_validator` actively measures these constraints during traversal to guarantee physical adherence. Edges are deterministically sorted for RFC 8785 hashing.\n\nMCP ROUTING TRIGGERS: Directed Acyclic Graph, Kahn's Algorithm, Topological Sort, Causal Edge, Algorithmic Complexity",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes a Directed Acyclic Graph (DAG) for deterministic, chronologically ordered task execution, guaranteeing strict topological sorting of operations. As a ...Manifest suffix, this defines a frozen, N-dimensional coordinate state.\n\nCAUSAL AFFORDANCE: Forces the orchestrator to evaluate causal edges and execute rigorous DFS loop-detection to verify the `allow_cycles` constraint before initiating kinetic node compute. The backpressure governs edge flow control.\n\nEPISTEMIC BOUNDS: Algorithmic complexity is mathematically bound by `max_depth` (`ge=1`, `le=256`) to prevent runaway agentic cyclic recursion, and `max_fan_out` (`ge=1`, `le=1024`) to limit horizontal compute explosion. The `@model_validator` actively measures these constraints during traversal to guarantee physical adherence. Edges are deterministically sorted for RFC 8785 hashing.\n\nMCP ROUTING TRIGGERS: Directed Acyclic Graph, Kahn's Algorithm, Topological Sort, Causal Edge, Algorithmic Complexity",
       "examples": [
         {
           "edges": [
@@ -9698,7 +9700,9 @@
           "description": "The exact SHA-256 fingerprint of the executed topology."
         },
         "expected_output_schema": {
-          "additionalProperties": true,
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonPrimitiveState"
+          },
           "description": "The strictly typed JSON Schema expected from the cached payload.",
           "maxProperties": 1000000000,
           "propertyNames": {
@@ -10066,7 +10070,9 @@
           "type": "string"
         },
         "expected_proof_schema": {
-          "additionalProperties": true,
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonPrimitiveState"
+          },
           "description": "The strict JSON Schema the deterministic solver must use to return the verified answer to the agent.",
           "propertyNames": {
             "maxLength": 255
@@ -12530,7 +12536,7 @@
     },
     "StateDifferentialManifest": {
       "additionalProperties": false,
-      "description": "AGENT INSTRUCTION: Formalizes Conflict-free Replicated Data Types (CRDTs) using Lamport\nlogical clocks and Vector Clocks to guarantee Eventual Consistency. As a ...Manifest\nsuffix, this defines a frozen, declarative coordinate of a state transition matrix.\n\nCAUSAL AFFORDANCE: Enables lock-free, decentralized state synchronization across the\nswarm. Forces the orchestrator to resolve Last-Writer-Wins (LWW) topological conflicts\nbefore flushing the patches (list[StateMutationIntent]) to the immutable Epistemic\nLedger. The vector_clock dict maps node CIDs to their ge=0 integer mutation counts.\n\nEPISTEMIC BOUNDS: Cryptographically anchored by diff_id and author_node_id (both\nstrict 128-char CID regex). The synchronization math is clamped by lamport_timestamp\n(ge=0, le=1000000000), physically preventing logical clock integer overflow during\nprolonged swarm execution cycles.\n\nMCP ROUTING TRIGGERS: Conflict-Free Replicated Data Types, Lamport Logical Clock,\nVector Clock, Eventual Consistency, Last-Writer-Wins",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Conflict-free Replicated Data Types (CRDTs) using Lamport\nlogical clocks and Vector Clocks to guarantee Eventual Consistency. As a ...Manifest\nsuffix, this defines a frozen, declarative coordinate of a state transition matrix.\n\nCAUSAL AFFORDANCE: Enables lock-free, decentralized state synchronization across the\nswarm. Forces the orchestrator to resolve Last-Writer-Wins (LWW) topological conflicts\nbefore flushing the patches (list[StateMutationIntent]) to the immutable Epistemic\nLedger. The vector_clock dict maps node CIDs to their ge=0 integer mutation counts.\n\nEPISTEMIC BOUNDS: Cryptographically anchored by diff_id and author_node_id (both\nstrict 128-char CID regex). The synchronization math is clamped by lamport_timestamp\n(ge=0, le=1000000000), physically preventing logical clock integer overflow during\nprolonged swarm execution cycles.\n\nMCP ROUTING TRIGGERS: Conflict-Free Replicated Data Types, Lamport Logical Clock,\nVector Clock, Eventual Consistency, Last-Writer-Wins",
       "examples": [
         {
           "author_node_id": "did:coreason:agent-1",
@@ -14387,7 +14393,7 @@
     },
     "WorkflowManifest": {
       "additionalProperties": false,
-      "description": "AGENT INSTRUCTION: Formalizes the Topos Theory representation of a fully encapsulated swarm environment, serving as the macroscopic topological envelope for the entire execution payload and enforcing the Viable System Model.\n\nCAUSAL AFFORDANCE: Physically initializes the execution DAG. This structural lock guarantees that any graph execution is mathematically anchored to a CoReason Genesis Block via `genesis_provenance`; stripping this violates the Topological Consistency of the Shared Kernel. Bounding thermodynamic capacity through governance constraints.\n\nEPISTEMIC BOUNDS: The `@model_validator` `sort_arrays` deterministically sorts `allowed_information_classifications` for RFC 8785 canonical hashing. The `@model_validator` `enforce_lbac_dominance` ensures network interlock, mathematically proving that any federated SLA clearance level is <= the local workflow bounds. The `manifest_version` strictly pins the schema.\n\nMCP ROUTING TRIGGERS: Topos Theory, Cybernetics, Execution Envelope, Macroscopic Topology, Viable System Model",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes the Topos Theory representation of a fully encapsulated swarm environment, serving as the macroscopic topological envelope for the entire execution payload and enforcing the Viable System Model.\n\nCAUSAL AFFORDANCE: Physically initializes the execution DAG. This structural lock guarantees that any graph execution is mathematically anchored to a CoReason Genesis Block via `genesis_provenance`; stripping this violates the Topological Consistency of the Shared Kernel. Bounding thermodynamic capacity through governance constraints.\n\nEPISTEMIC BOUNDS: The `@model_validator` `sort_arrays` deterministically sorts `allowed_information_classifications` for RFC 8785 canonical hashing. The `@model_validator` `enforce_lbac_dominance` ensures network interlock, mathematically proving that any federated SLA clearance level is <= the local workflow bounds. The `manifest_version` strictly pins the schema.\n\nMCP ROUTING TRIGGERS: Topos Theory, Cybernetics, Execution Envelope, Macroscopic Topology, Viable System Model",
       "examples": [
         {
           "genesis_provenance": {
