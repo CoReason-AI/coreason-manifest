@@ -2748,9 +2748,11 @@ class BoundedJSONRPCIntent(CoreasonBaseState):
         default=None,
         description="Payload parameters. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
     )
-    id: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] | int | None = (
-        Field(le=1000000000, default=None, description="Unique request identifier.")
-    )
+    id: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+        | Annotated[int, Field(le=1000000000)]
+        | None
+    ) = Field(default=None, description="Unique request identifier.")
 
     @field_validator("params", mode="before")
     @classmethod

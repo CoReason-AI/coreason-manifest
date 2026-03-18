@@ -2000,18 +2000,14 @@
         "id": {
           "anyOf": [
             {
-              "anyOf": [
-                {
-                  "maxLength": 128,
-                  "minLength": 1,
-                  "pattern": "^[a-zA-Z0-9_.:-]+$",
-                  "type": "string"
-                },
-                {
-                  "type": "integer"
-                }
-              ],
-              "le": 1000000000
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9_.:-]+$",
+              "type": "string"
+            },
+            {
+              "maximum": 1000000000,
+              "type": "integer"
             },
             {
               "type": "null"
@@ -9261,18 +9257,14 @@
         "id": {
           "anyOf": [
             {
-              "anyOf": [
-                {
-                  "maxLength": 128,
-                  "minLength": 1,
-                  "pattern": "^[a-zA-Z0-9_.:-]+$",
-                  "type": "string"
-                },
-                {
-                  "type": "integer"
-                }
-              ],
-              "le": 1000000000
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9_.:-]+$",
+              "type": "string"
+            },
+            {
+              "maximum": 1000000000,
+              "type": "integer"
             },
             {
               "type": "null"
