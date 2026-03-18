@@ -240,11 +240,29 @@ def calculate_latent_alignment(
     except struct.error as e:
         raise ValueError("Byte length does not match declared dimensionality.") from e
 
-    dot_product = math.fsum(a * b for a, b in zip(vec1, vec2, strict=True))
-    mag1 = math.sqrt(math.fsum(x * x for x in vec1))
-    mag2 = math.sqrt(math.fsum(x * x for x in vec2))
+    try:
+        dot_product = math.fsum(a * b for a, b in zip(vec1, vec2, strict=True))
+        mag1_sq = math.fsum(x * x for x in vec1)
+        mag2_sq = math.fsum(x * x for x in vec2)
+    except (OverflowError, ValueError) as e:
+        raise ValueError("Catastrophic loss of precision or overflow in vector calculation.") from e
 
-    similarity = 0.0 if mag1 == 0 or mag2 == 0 else dot_product / (mag1 * mag2)
+    if mag1_sq < 0 or mag2_sq < 0 or math.isinf(mag1_sq) or math.isinf(mag2_sq) or math.isnan(mag1_sq) or math.isnan(mag2_sq) or math.isinf(dot_product) or math.isnan(dot_product):
+        raise ValueError("Catastrophic loss of precision or overflow in vector calculation.")
+
+    mag1 = math.sqrt(mag1_sq)
+    mag2 = math.sqrt(mag2_sq)
+
+    similarity = 0.0 if mag1 == 0.0 or mag2 == 0.0 else dot_product / (mag1 * mag2)
+
+    if math.isnan(similarity):
+        similarity = 0.0
+
+    # Float precision clamp
+    if similarity > 1.0:
+        similarity = 1.0
+    elif similarity < -1.0:
+        similarity = -1.0
 
     if similarity < policy.min_cosine_similarity:
         raise TamperFaultEvent("Latent alignment failed.")
@@ -555,9 +573,7 @@ def apply_state_differential(
                 msg = str(e)
                 if msg.startswith("Cannot copy/move to path"):
                     raise ValueError(f"Cannot copy/move to path: {path}") from e
-                    raise ValueError(f"Cannot copy/move to path: {path}") from e
                 if msg.startswith("Index out of bounds"):
-                    raise ValueError(f"Index out of bounds: {path}") from e
                     raise ValueError(f"Index out of bounds: {path}") from e
                 raise
             if patch.op == "add":
