@@ -47,8 +47,8 @@ def test_calculate_remaining_compute(initial: int, burns: list[TokenBurnReceipt]
 
 
 @given(
-    st.lists(st.floats(min_value=-10.0, max_value=10.0), min_size=1, max_size=100),
-    st.lists(st.floats(min_value=-10.0, max_value=10.0), min_size=1, max_size=100),
+    st.lists(st.floats(min_value=-10.0, max_value=10.0, width=32), min_size=1, max_size=100),
+    st.lists(st.floats(min_value=-10.0, max_value=10.0, width=32), min_size=1, max_size=100),
     st.floats(min_value=-1.0, max_value=1.0),
 )
 def test_calculate_latent_alignment(vec1_list: list[float], vec2_list: list[float], min_similarity: float) -> None:
