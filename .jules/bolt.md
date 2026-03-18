@@ -1,0 +1,3 @@
+## 2025-02-17 - Eliminate redundant Python-level sorting for canonical JSON
+**Learning:** For producing canonically sorted JSON via Pydantic model dicts, traversing nested dicts/lists to sort the keys of dictionary items in Python is redundant and computationally expensive if `json.dumps(..., sort_keys=True)` is used on the resulting dict. Natively, `json.dumps` with `sort_keys=True` already guarantees all keys of all nested objects are recursively sorted during serialization, yielding the exact same output much faster.
+**Action:** Do not manually sort dictionary keys before passing them into `json.dumps` if `sort_keys=True` can be leveraged instead. Keep the sorting at the C-level serialization layer where it is significantly more optimized.
