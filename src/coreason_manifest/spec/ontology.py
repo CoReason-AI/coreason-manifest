@@ -1640,12 +1640,12 @@ class StateMutationIntent(CoreasonBaseState):
     ...Intent suffix, this represents an authorized kinetic execution trigger.
 
     CAUSAL AFFORDANCE: Instructs the orchestrator's algebraic engine to surgically apply,
-    test, or ablate targeted JSON pointers without requiring full payload transmission. 
+    test, or ablate targeted JSON pointers without requiring full payload transmission.
 
-    EPISTEMIC BOUNDS: The `value` (JsonPrimitiveState) mutation payload is volumetrically 
-    clamped by `enforce_payload_topology` to guarantee that the resulting state matrix $S'$ 
-    does not expand beyond VRAM constraints. The operation geometry is rigidly restricted by 
-    the op field to the PatchOperationProfile. Target topological coordinates (path and 
+    EPISTEMIC BOUNDS: The `value` (JsonPrimitiveState) mutation payload is volumetrically
+    clamped by `enforce_payload_topology` to guarantee that the resulting state matrix $S'$
+    does not expand beyond VRAM constraints. The operation geometry is rigidly restricted by
+    the op field to the PatchOperationProfile. Target topological coordinates (path and
     from_path) are physically bounded to max_length=2000.
 
     MCP ROUTING TRIGGERS: RFC 6902, JSON Patch, Atomic Mutation, State Vector Projection,
@@ -2165,8 +2165,8 @@ class AdjudicationIntent(CoreasonBaseState):
     framework.
 
     EPISTEMIC BOUNDS: The state space is bounded by deadlocked_claims (min_length=2,
-    max_length=86400000). The `resolution_schema` is mathematically bounded against recursive 
-    JSON-bombing by the `@field_validator` `enforce_payload_topology`, physically preventing 
+    max_length=86400000). The `resolution_schema` is mathematically bounded against recursive
+    JSON-bombing by the `@field_validator` `enforce_payload_topology`, physically preventing
     Automata Intersection deadlocks (Halting Problem violations).
 
     MCP ROUTING TRIGGERS: Social Choice Theory, Condorcet Paradox, MCDA Deadlock,
@@ -2611,8 +2611,8 @@ class BoundedInterventionScopePolicy(CoreasonBaseState):
     EpistemicLedgerState, guaranteeing that the external operator can only perturb
     the graph at explicitly whitelisted JSON Pointers via allowed_fields.
 
-    EPISTEMIC BOUNDS: The `json_schema_whitelist` is physically restricted by the 
-    `enforce_payload_topology` validator to prevent algorithmic complexity attacks 
+    EPISTEMIC BOUNDS: The `json_schema_whitelist` is physically restricted by the
+    `enforce_payload_topology` validator to prevent algorithmic complexity attacks
     during schema intersection. The `allowed_fields` are deterministically sorted.
 
     MCP ROUTING TRIGGERS: Principle of Least Privilege, State Mutation Masking,
@@ -2651,10 +2651,10 @@ class BoundedJSONRPCIntent(CoreasonBaseState):
     and Algorithmic Complexity Attacks. The method field (max_length=1000) specifies the
     RPC target. The id field binds request-response correlation.
 
-    EPISTEMIC BOUNDS: The `params` field is routed through the volumetric hardware guillotine 
-    (`enforce_payload_topology`), mathematically capping the payload to an absolute $O(N)$ 
-    volume of 10,000 nodes. This replaces the legacy 1D-depth constraints that permitted 
-    geometric volume explosions. The `jsonrpc` field is a rigid Literal["2.0"] automaton. 
+    EPISTEMIC BOUNDS: The `params` field is routed through the volumetric hardware guillotine
+    (`enforce_payload_topology`), mathematically capping the payload to an absolute $O(N)$
+    volume of 10,000 nodes. This replaces the legacy 1D-depth constraints that permitted
+    geometric volume explosions. The `jsonrpc` field is a rigid Literal["2.0"] automaton.
     The `id` is topologically locked to a 128-char CID regex or an integer (le=1000000000) or None.
 
     MCP ROUTING TRIGGERS: JSON-RPC 2.0, Stateless RPC, Algorithmic Complexity Attack,
@@ -3677,8 +3677,8 @@ class DraftingIntent(CoreasonBaseState):
     dimensions are actively projected back into the working memory partition.
 
     EPISTEMIC BOUNDS: The human's unstructured cognitive entropy is aggressively forced
-    through a mathematical funnel via the `resolution_schema`. This schema is volumetrically 
-    clamped by `enforce_payload_topology` to prevent AST explosion during input parsing. 
+    through a mathematical funnel via the `resolution_schema`. This schema is volumetrically
+    clamped by `enforce_payload_topology` to prevent AST explosion during input parsing.
 
     MCP ROUTING TRIGGERS: Active Inference, Expected Free Energy, Shannon Entropy
     Reduction, Zero-Shot Elicitation, Epistemic Gap
@@ -4090,9 +4090,9 @@ class EscalationIntent(CoreasonBaseState):
     It demands explicit, structurally verified cryptographic sign-off from a
     higher-clearance entity to bypass the breaker.
 
-    EPISTEMIC BOUNDS: The `resolution_schema` is mathematically bounded against recursive 
-    JSON-bombing by the `enforce_payload_topology` hook, physically preventing Automata 
-    Intersection deadlocks. The tripped_rule_id is strictly anchored to a 128-char CID 
+    EPISTEMIC BOUNDS: The `resolution_schema` is mathematically bounded against recursive
+    JSON-bombing by the `enforce_payload_topology` hook, physically preventing Automata
+    Intersection deadlocks. The tripped_rule_id is strictly anchored to a 128-char CID
     regex (^[a-zA-Z0-9_.:-]+$). The fallback is governed by the Literal timeout_action.
 
     MCP ROUTING TRIGGERS: Biba Integrity Model, Dictatorial Override, Privilege
@@ -5597,10 +5597,10 @@ class JSONRPCErrorState(CoreasonBaseState):
     without risking secondary buffer overflow attacks during serialization. The
     error_payload (alias="data") carries optional structured diagnostic data.
 
-    EPISTEMIC BOUNDS: The `error_payload` is strictly routed through the volumetric 
-    hardware guillotine (`enforce_payload_topology`) to mathematically prevent infinite 
-    recursive depth from triggering C-stack overflows during fault serialization. The 
-    code integer is rigidly capped (le=1000000000) and the semantic message is restricted 
+    EPISTEMIC BOUNDS: The `error_payload` is strictly routed through the volumetric
+    hardware guillotine (`enforce_payload_topology`) to mathematically prevent infinite
+    recursive depth from triggering C-stack overflows during fault serialization. The
+    code integer is rigidly capped (le=1000000000) and the semantic message is restricted
     to max_length=2000.
 
     MCP ROUTING TRIGGERS: Fault Projection, Buffer Overflow Prevention, Error Vector,
@@ -6234,8 +6234,8 @@ class MCPPromptReferenceState(CoreasonBaseState):
     CAUSAL AFFORDANCE: Authorizes the orchestrator to fetch and interpolate an exogenous prompt
     template from a remote server, using the arguments dictionary to inject localized state into the template.
 
-    EPISTEMIC BOUNDS: The `arguments` matrix is aggressively routed through the volumetric hardware 
-    guillotine (`enforce_payload_topology`) to mathematically prevent Manifold Interpolation Complexity 
+    EPISTEMIC BOUNDS: The `arguments` matrix is aggressively routed through the volumetric hardware
+    guillotine (`enforce_payload_topology`) to mathematically prevent Manifold Interpolation Complexity
     crashes from poisoned external servers. Supply-chain attacks are mitigated by the optional `prompt_hash`.
 
     MCP ROUTING TRIGGERS: Higher-Order Function, Latent Prompt Manifold, Template Interpolation, Supply-Chain Verification, Stateless RPC
@@ -8717,8 +8717,8 @@ class VerifiableCredentialPresentationReceipt(CoreasonBaseState):
     orchestrator via issuer_did, allowing an agent to prove
     authorization clearance without centralized identity brokers.
 
-    EPISTEMIC BOUNDS: The `authorization_claims` dict is volumetrically bounded by 
-    the `enforce_payload_topology` hook to completely sever Predicate Exhaustion Attacks 
+    EPISTEMIC BOUNDS: The `authorization_claims` dict is volumetrically bounded by
+    the `enforce_payload_topology` hook to completely sever Predicate Exhaustion Attacks
     during selective disclosure verification, guaranteeing $O(N)$ validation bounds.
 
     MCP ROUTING TRIGGERS: W3C VCDM, Zero-Knowledge Proofs, Selective Disclosure,
