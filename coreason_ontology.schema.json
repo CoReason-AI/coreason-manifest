@@ -2000,18 +2000,14 @@
         "id": {
           "anyOf": [
             {
-              "anyOf": [
-                {
-                  "maxLength": 128,
-                  "minLength": 1,
-                  "pattern": "^[a-zA-Z0-9_.:-]+$",
-                  "type": "string"
-                },
-                {
-                  "type": "integer"
-                }
-              ],
-              "le": 1000000000
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9_.:-]+$",
+              "type": "string"
+            },
+            {
+              "maximum": 1000000000,
+              "type": "integer"
             },
             {
               "type": "null"
@@ -9261,18 +9257,14 @@
         "id": {
           "anyOf": [
             {
-              "anyOf": [
-                {
-                  "maxLength": 128,
-                  "minLength": 1,
-                  "pattern": "^[a-zA-Z0-9_.:-]+$",
-                  "type": "string"
-                },
-                {
-                  "type": "integer"
-                }
-              ],
-              "le": 1000000000
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9_.:-]+$",
+              "type": "string"
+            },
+            {
+              "maximum": 1000000000,
+              "type": "integer"
             },
             {
               "type": "null"
@@ -13435,7 +13427,7 @@
     },
     "TaxonomicRoutingPolicy": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements a deterministic Softmax Router Gate, leveraging Cognitive\nLoad Theory to map high-entropy natural language intents into explicitly bounded spatial\norganizing frameworks. As a ...Policy suffix, this dictates a rigid global boundary.\n\nCAUSAL AFFORDANCE: Pre-emptively routes classified intents to optimized taxonomic\nlayouts, mechanically preventing token exhaustion and attention dilution in downstream\nprocessing nodes before compute is allocated. Unclassified intents default to the\nfallback_heuristic.\n\nEPISTEMIC BOUNDS: The intent_to_heuristic_matrix physically restricts state-space\nexplosion by capping at max_length=1000 dictionary properties. The matrix keys are\nstrictly bounded to 255 characters via StringConstraints to mathematically prevent\nDictionary Bombing during hashing.\n\nMCP ROUTING TRIGGERS: Softmax Gating, Cognitive Load Theory, Pre-Flight Routing,\nDictionary Bombing Prevention, Token Exhaustion Mitigation",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements a deterministic Softmax Router Gate, leveraging Cognitive\nLoad Theory to map high-entropy natural language intents into explicitly bounded spatial\norganizing frameworks. As a ...Policy suffix, this dictates a rigid global boundary.\n\nCAUSAL AFFORDANCE: Preemptively routes classified intents to optimized taxonomic\nlayouts, mechanically preventing token exhaustion and attention dilution in downstream\nprocessing nodes before compute is allocated. Unclassified intents default to the\nfallback_heuristic.\n\nEPISTEMIC BOUNDS: The intent_to_heuristic_matrix physically restricts state-space\nexplosion by capping at max_length=1000 dictionary properties. The matrix keys are\nstrictly bounded to 255 characters via StringConstraints to mathematically prevent\nDictionary Bombing during hashing.\n\nMCP ROUTING TRIGGERS: Softmax Gating, Cognitive Load Theory, Pre-Flight Routing,\nDictionary Bombing Prevention, Token Exhaustion Mitigation",
       "properties": {
         "policy_id": {
           "description": "Unique identifier for this pre-flight routing policy.",
