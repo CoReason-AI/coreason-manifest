@@ -1634,6 +1634,12 @@ class DefeasibleCascadeEvent(CoreasonBaseState):
         object.__setattr__(self, "quarantined_event_ids", sorted(self.quarantined_event_ids))
         return self
 
+    @model_validator(mode="after")
+    def reject_root_in_quarantine(self) -> Self:
+        if self.root_falsified_event_id in self.quarantined_event_ids:
+            raise ValueError("Epistemic paradox: root_falsified_event_id cannot be in quarantined_event_ids.")
+        return self
+
 
 class MultimodalTokenAnchorState(CoreasonBaseState):
     """
@@ -3137,6 +3143,12 @@ class CausalDirectedEdgeState(CoreasonBaseState):
     edge_type: Literal["direct_cause", "confounder", "collider", "mediator"] = Field(
         description="The specific Pearlian topological relationship between the two variables."
     )
+
+    @model_validator(mode="after")
+    def reject_self_referential_edge(self) -> Self:
+        if self.source_variable == self.target_variable:
+            raise ValueError("Causal paradox: source_variable cannot equal target_variable.")
+        return self
 
 
 class CircuitBreakerEvent(CoreasonBaseState):
@@ -5567,7 +5579,7 @@ class TaxonomicRoutingPolicy(CoreasonBaseState):
     Load Theory to map high-entropy natural language intents into explicitly bounded spatial
     organizing frameworks. As a ...Policy suffix, this dictates a rigid global boundary.
 
-    CAUSAL AFFORDANCE: Pre-emptively routes classified intents to optimized taxonomic
+    CAUSAL AFFORDANCE: Preemptively routes classified intents to optimized taxonomic
     layouts, mechanically preventing token exhaustion and attention dilution in downstream
     processing nodes before compute is allocated. Unclassified intents default to the
     fallback_heuristic.
@@ -9293,36 +9305,39 @@ class DAGTopologyManifest(BaseTopologyManifest):
             if len(neighbors) > self.max_fan_out:
                 raise ValueError(f"Topological Violation: Node '{node}' exceeds max_fan_out of {self.max_fan_out}.")
         if not self.allow_cycles:
-            visited: set[NodeIdentifierState] = set()
-            recursion_stack: set[NodeIdentifierState] = set()
+
             depth_memo: dict[NodeIdentifierState, int] = {}
 
-            def dfs(curr: NodeIdentifierState) -> int:
-                if curr in recursion_stack:
-                    raise ValueError("Graph contains cycles but allow_cycles is False.")
-                if curr in visited:
-                    return depth_memo.get(curr, 1)
-                visited.add(curr)
-                recursion_stack.add(curr)
-                max_child_depth = 0
-                for neighbor in adj[curr]:
-                    max_child_depth = max(max_child_depth, dfs(neighbor))
-                recursion_stack.remove(curr)
-                current_depth = 1 + max_child_depth
-                depth_memo[curr] = current_depth
-                return current_depth
+            # Using Kahn's Algorithm / Iterative topological sort for depth and cycles
+            # We calculate max depth without recursion to avoid stack overflow limits
 
-            max_calculated_depth = 0
-            for start_node in self.nodes:
-                if in_degree[start_node] == 0:
-                    max_calculated_depth = max(max_calculated_depth, dfs(start_node))
-            for start_node in self.nodes:
-                if start_node not in visited:
-                    max_calculated_depth = max(max_calculated_depth, dfs(start_node))
+            queue = [n for n in self.nodes if in_degree[n] == 0]
+            for n in queue:
+                depth_memo[n] = 1
+
+            processed_count = 0
+
+            while queue:
+                curr = queue.pop(0)
+                processed_count += 1
+                curr_depth = depth_memo[curr]
+
+                for neighbor in adj[curr]:
+                    in_degree[neighbor] -= 1
+                    depth_memo[neighbor] = max(depth_memo.get(neighbor, 1), curr_depth + 1)
+                    if in_degree[neighbor] == 0:
+                        queue.append(neighbor)
+
+            if processed_count != len(self.nodes):
+                raise ValueError("Graph contains cycles but allow_cycles is False.")
+
+            max_calculated_depth = max(depth_memo.values()) if depth_memo else 0
+
             if max_calculated_depth > self.max_depth:
                 raise ValueError(
                     f"Topological Violation: Graph depth {max_calculated_depth} exceeds max_depth of {self.max_depth}."
                 )
+
         return self
 
 
@@ -11037,6 +11052,17 @@ class EpistemicLedgerState(CoreasonBaseState):
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "history", sorted(self.history, key=lambda event: event.timestamp))
+
+        # Validate epistemic consistency: A child's logical state cannot precede its parent's state.
+        event_times = {event.event_id: event.timestamp for event in self.history}
+        for event in self.history:
+            if hasattr(event, "causal_attributions") and event.causal_attributions:
+                for attr in event.causal_attributions:
+                    if attr.source_event_id in event_times:
+                        parent_time = event_times[attr.source_event_id]
+                        if event.timestamp < parent_time:
+                            raise ValueError(f"Epistemic paradox: Child event {event.event_id} ({event.timestamp}) occurs before parent event {attr.source_event_id} ({parent_time}).")
+
         object.__setattr__(self, "retracted_nodes", sorted(self.retracted_nodes))
         object.__setattr__(self, "checkpoints", sorted(self.checkpoints, key=lambda x: x.checkpoint_id))
         object.__setattr__(self, "active_rollbacks", sorted(self.active_rollbacks, key=lambda x: x.request_id))
