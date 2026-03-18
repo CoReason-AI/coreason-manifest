@@ -2732,14 +2732,39 @@ class BrowserDOMState(CoreasonBaseState):
 
         import contextlib
         import ipaddress
-        import socket
+
+        def _parse_obfuscated_ipv4(ip_str: str) -> int | None:
+            parts = ip_str.split(".")
+            if len(parts) > 4:
+                return None
+            parsed = []
+            try:
+                for p in parts:
+                    if p.startswith(("0x", "0X")):
+                        parsed.append(int(p, 16))
+                    elif p.startswith("0") and len(p) > 1 and all(c in "01234567" for c in p):
+                        parsed.append(int(p, 8))
+                    else:
+                        parsed.append(int(p, 10))
+            except ValueError:
+                return None
+            if len(parts) == 1:
+                val = parsed[0]
+            elif len(parts) == 2:
+                val = (parsed[0] << 24) | parsed[1]
+            elif len(parts) == 3:
+                val = (parsed[0] << 24) | (parsed[1] << 16) | parsed[2]
+            else:
+                val = (parsed[0] << 24) | (parsed[1] << 16) | (parsed[2] << 8) | parsed[3]
+            return val if val <= 0xFFFFFFFF else None
 
         ip: ipaddress.IPv4Address | ipaddress.IPv6Address | None = None
-        try:
-            # Canonical C-backed validation of affine coordinate isomorphism for obfuscated IPv4 formats
-            packed_ip = socket.inet_aton(hostname_lower)
-            ip = ipaddress.IPv4Address(packed_ip)
-        except OSError:
+        
+        # Canonical validation of affine coordinate isomorphism for obfuscated IPv4 formats
+        ip_int = _parse_obfuscated_ipv4(hostname_lower)
+        if ip_int is not None:
+            ip = ipaddress.IPv4Address(ip_int)
+        else:
             with contextlib.suppress(ValueError):
                 # Fallback to standard IPv6 and canonical IPv4 string parsing
                 ip = ipaddress.ip_address(hostname.strip("[]"))
