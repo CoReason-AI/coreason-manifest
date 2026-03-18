@@ -32,7 +32,9 @@ from coreason_manifest.spec.ontology import (
 
 
 @given(st.sampled_from(list(InformationClassificationProfile)), st.sampled_from(list(InformationClassificationProfile)))
-def test_information_classification_profile_comparisons(prof1, prof2):
+def test_information_classification_profile_comparisons(
+    prof1: InformationClassificationProfile, prof2: InformationClassificationProfile
+) -> None:
     # Test __lt__
     assert (prof1 < prof2) == (prof1.clearance_level < prof2.clearance_level)
     assert prof1.__lt__("invalid") is NotImplemented
@@ -51,7 +53,7 @@ def test_information_classification_profile_comparisons(prof1, prof2):
 
 
 @given(st.sampled_from(list(RiskLevelPolicy)), st.sampled_from(list(RiskLevelPolicy)))
-def test_risk_level_policy_comparisons(risk1, risk2):
+def test_risk_level_policy_comparisons(risk1: RiskLevelPolicy, risk2: RiskLevelPolicy) -> None:
     # Test __lt__
     assert (risk1 < risk2) == (risk1.weight < risk2.weight)
     assert risk1.__lt__("invalid") is NotImplemented
@@ -70,11 +72,16 @@ def test_risk_level_policy_comparisons(risk1, risk2):
 
 
 @given(st.text(min_size=1, max_size=2000))
-def test_browser_dom_state_ssrf_quarantine_hypothesis(url_str):
+def test_browser_dom_state_ssrf_quarantine_hypothesis(url_str: str) -> None:
     import contextlib
 
     with contextlib.suppress(ValidationError):
-        BrowserDOMState(current_url=url_str)
+        BrowserDOMState(
+            current_url=url_str,
+            viewport_size=(1024, 768),
+            dom_hash="a" * 64,
+            accessibility_tree_hash="b" * 64,
+        )
 
 
 @given(
@@ -97,9 +104,14 @@ def test_browser_dom_state_ssrf_quarantine_hypothesis(url_str):
         ]
     )
 )
-def test_browser_dom_state_bogon_ssrf_strict(url_str):
+def test_browser_dom_state_bogon_ssrf_strict(url_str: str) -> None:
     with pytest.raises(ValidationError) as exc_info:
-        BrowserDOMState(current_url=url_str)
+        BrowserDOMState(
+            current_url=url_str,
+            viewport_size=(1024, 768),
+            dom_hash="a" * 64,
+            accessibility_tree_hash="b" * 64,
+        )
     assert "SSRF topological violation detected" in str(exc_info.value) or "restricted IP detected" in str(
         exc_info.value
     )
@@ -113,9 +125,14 @@ def test_browser_dom_state_bogon_ssrf_strict(url_str):
         ]
     )
 )
-def test_browser_dom_state_invalid_hostname_ssrf(url_str):
+def test_browser_dom_state_invalid_hostname_ssrf(url_str: str) -> None:
     with pytest.raises(ValidationError) as exc_info:
-        BrowserDOMState(current_url=url_str)
+        BrowserDOMState(
+            current_url=url_str,
+            viewport_size=(1024, 768),
+            dom_hash="a" * 64,
+            accessibility_tree_hash="b" * 64,
+        )
     assert "Invalid hostname in HTTP URI" in str(exc_info.value) or "restricted IP detected" in str(exc_info.value)
 
 
@@ -123,7 +140,9 @@ def test_browser_dom_state_invalid_hostname_ssrf(url_str):
     st.lists(st.sampled_from(list(InformationClassificationProfile)), min_size=1, max_size=4),
     st.sampled_from(list(InformationClassificationProfile)),
 )
-def test_workflow_manifest_lbac_dominance(allowed_classes, sla_max_class):
+def test_workflow_manifest_lbac_dominance(
+    allowed_classes: list[InformationClassificationProfile], sla_max_class: InformationClassificationProfile
+) -> None:
     # Setup the required fields for WorkflowManifest
     prov = EpistemicProvenanceReceipt(extracted_by="did:node:id-1", source_event_id="a" * 64)
     topology = DAGTopologyManifest(nodes={}, edges=[], max_depth=10, max_fan_out=10)
@@ -157,7 +176,7 @@ def test_workflow_manifest_lbac_dominance(allowed_classes, sla_max_class):
 
 
 @given(st.lists(st.text(min_size=1, max_size=128), min_size=2, max_size=10, unique=True))
-def test_smpc_topology_manifest_sorting(participant_ids):
+def test_smpc_topology_manifest_sorting(participant_ids: list[str]) -> None:
     # filter out non-matching DIDs
     dids = ["did:smpc:" + p for p in participant_ids]
     manifest = SMPCTopologyManifest(
@@ -170,10 +189,11 @@ def test_smpc_topology_manifest_sorting(participant_ids):
 
 
 @given(st.sampled_from([("did:node:gen1", "did:node:gen1"), ("did:node:eval1", "did:node:gen1")]))
-def test_evaluator_optimizer_bipartite_nodes(nodes_pair):
+def test_evaluator_optimizer_bipartite_nodes(nodes_pair: tuple[str, str]) -> None:
     gen_id, eval_id = nodes_pair
     # Populate the nodes dict with the gen_id only
-    nodes = {gen_id: SystemNodeProfile(description="desc")}
+    from coreason_manifest.spec.ontology import AnyNodeProfile
+    nodes: dict[str, AnyNodeProfile] = {gen_id: SystemNodeProfile(description="desc")}
 
     with pytest.raises(ValidationError) as exc_info:
         EvaluatorOptimizerTopologyManifest(
@@ -186,7 +206,7 @@ def test_evaluator_optimizer_bipartite_nodes(nodes_pair):
 
 
 @given(st.lists(st.tuples(st.text(min_size=1), st.floats(min_value=0.0, max_value=1.0)), min_size=1, max_size=5))
-def test_evolutionary_topology_manifest_sorting(objectives_data):
+def test_evolutionary_topology_manifest_sorting(objectives_data: list[tuple[str, float]]) -> None:
     objectives = [
         FitnessObjectiveProfile(target_metric=name, weight=weight, direction="maximize")
         for name, weight in objectives_data
