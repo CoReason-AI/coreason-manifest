@@ -585,6 +585,31 @@ class ScalePolicy(CoreasonBaseState):
         le=1000000000.0, default=None, description="The optional maximum bound of the scale domain."
     )
 
+    @model_validator(mode="after")
+    def validate_domain(self) -> Self:
+        if self.domain_min is not None and self.domain_max is not None and self.domain_min > self.domain_max:
+            raise ValueError("domain_min cannot be greater than domain_max.")
+
+        # Test zero or subnormal scales for division by zero risk or floating infinity failures.
+        # Specifically, for ScalePolicy, if we map zero values, etc.
+        # No specific bounds enforced by the requirements on scale other than domains shouldn't cross or zero magnitude ranges?
+        if (
+            self.domain_min is not None
+            and self.domain_max is not None
+            and self.domain_min == self.domain_max
+            and self.type in ["linear", "log", "time"]
+        ):
+            raise ValueError("Scale domain length cannot be zero for continuous mappings.")
+
+        # for log type, domain bounds must be strictly positive
+        if self.type == "log":
+            if self.domain_min is not None and self.domain_min <= 0:
+                raise ValueError("domain_min must be strictly positive for logarithmic scales.")
+            if self.domain_max is not None and self.domain_max <= 0:
+                raise ValueError("domain_max must be strictly positive for logarithmic scales.")
+
+        return self
+
 
 class VisualEncodingProfile(CoreasonBaseState):
     """
@@ -937,6 +962,22 @@ class RoutingFrontierPolicy(CoreasonBaseState):
         ge=0.0,
         description="The maximum operational carbon intensity of the physical data center grid allowed for this agent's routing.",
     )
+
+    @model_validator(mode="before")
+    @classmethod
+    def _clamp_frontier_bounds_before(cls, values: Any) -> Any:
+        if isinstance(values, dict):
+            if "max_latency_ms" in values:
+                values["max_latency_ms"] = max(1, min(values["max_latency_ms"], 86400000))
+            if "max_cost_magnitude_per_token" in values:
+                values["max_cost_magnitude_per_token"] = max(1, min(values["max_cost_magnitude_per_token"], 1000000000))
+            if "min_capability_score" in values:
+                values["min_capability_score"] = max(0.0, min(values["min_capability_score"], 1.0))
+            if values.get("max_carbon_intensity_gco2eq_kwh") is not None:
+                values["max_carbon_intensity_gco2eq_kwh"] = max(
+                    0.0, min(values["max_carbon_intensity_gco2eq_kwh"], 10000.0)
+                )
+        return values
 
 
 class SaeFeatureActivationState(CoreasonBaseState):
@@ -1594,6 +1635,12 @@ class DefeasibleCascadeEvent(CoreasonBaseState):
         object.__setattr__(self, "quarantined_event_ids", sorted(self.quarantined_event_ids))
         return self
 
+    @model_validator(mode="after")
+    def reject_root_in_quarantine(self) -> Self:
+        if self.root_falsified_event_id in self.quarantined_event_ids:
+            raise ValueError("Epistemic paradox: root_falsified_event_id cannot be in quarantined_event_ids.")
+        return self
+
 
 class MultimodalTokenAnchorState(CoreasonBaseState):
     """
@@ -1652,6 +1699,12 @@ class MultimodalTokenAnchorState(CoreasonBaseState):
         """AGENT INSTRUCTION: Enforce mathematical spatial monotonicity."""
         if self.bounding_box is not None:
             x_min, y_min, x_max, y_max = self.bounding_box
+            import math
+
+            if math.isnan(x_min) or math.isnan(y_min) or math.isnan(x_max) or math.isnan(y_max):
+                raise ValueError("Spatial bounds cannot be NaN.")
+            if math.isinf(x_min) or math.isinf(y_min) or math.isinf(x_max) or math.isinf(y_max):
+                raise ValueError("Spatial bounds cannot be Infinity.")
             if x_min > x_max or y_min > y_max:
                 raise ValueError(
                     f"Spatial invariant violated: min bounds (x:{x_min}, y:{y_min}) exceed max bounds (x:{x_max}, y:{y_max})"
@@ -2748,9 +2801,11 @@ class BoundedJSONRPCIntent(CoreasonBaseState):
         default=None,
         description="Payload parameters. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
     )
-    id: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] | int | None = (
-        Field(le=1000000000, default=None, description="Unique request identifier.")
-    )
+    id: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+        | Annotated[int, Field(le=1000000000)]
+        | None
+    ) = Field(default=None, description="Unique request identifier.")
 
     @field_validator("params", mode="before")
     @classmethod
@@ -3089,6 +3144,12 @@ class CausalDirectedEdgeState(CoreasonBaseState):
     edge_type: Literal["direct_cause", "confounder", "collider", "mediator"] = Field(
         description="The specific Pearlian topological relationship between the two variables."
     )
+
+    @model_validator(mode="after")
+    def reject_self_referential_edge(self) -> Self:
+        if self.source_variable == self.target_variable:
+            raise ValueError("Causal paradox: source_variable cannot equal target_variable.")
+        return self
 
 
 class CircuitBreakerEvent(CoreasonBaseState):
@@ -4266,6 +4327,14 @@ class EscrowPolicy(CoreasonBaseState):
         ge=0,
         description="The strictly typed integer amount cryptographically locked prior to execution.",
     )
+
+    @model_validator(mode="before")
+    @classmethod
+    def _clamp_escrow_magnitude_before(cls, values: Any) -> Any:
+        if isinstance(values, dict):
+            values["escrow_locked_magnitude"] = max(0, min(values.get("escrow_locked_magnitude", 0), 1000000000))
+        return values
+
     release_condition_metric: str = Field(
         max_length=2000, description="A declarative pointer to the SLA or QA rubric required to release the funds."
     )
@@ -4918,6 +4987,18 @@ class TokenBurnReceipt(BaseStateEvent):
         le=1000000000, ge=0, description="The normalized economic cost magnitude representing thermodynamic burn."
     )
 
+    @model_validator(mode="before")
+    @classmethod
+    def _clamp_token_burn_before(cls, values: Any) -> Any:
+        if isinstance(values, dict):
+            if "input_tokens" in values:
+                values["input_tokens"] = max(0, min(values["input_tokens"], 1000000000))
+            if "output_tokens" in values:
+                values["output_tokens"] = max(0, min(values["output_tokens"], 1000000000))
+            if "burn_magnitude" in values:
+                values["burn_magnitude"] = max(0, min(values["burn_magnitude"], 1000000000))
+        return values
+
 
 class GlobalGovernancePolicy(CoreasonBaseState):
     """
@@ -5501,7 +5582,7 @@ class TaxonomicRoutingPolicy(CoreasonBaseState):
     Load Theory to map high-entropy natural language intents into explicitly bounded spatial
     organizing frameworks. As a ...Policy suffix, this dictates a rigid global boundary.
 
-    CAUSAL AFFORDANCE: Pre-emptively routes classified intents to optimized taxonomic
+    CAUSAL AFFORDANCE: Preemptively routes classified intents to optimized taxonomic
     layouts, mechanically preventing token exhaustion and attention dilution in downstream
     processing nodes before compute is allocated. Unclassified intents default to the
     fallback_heuristic.
@@ -6463,12 +6544,27 @@ class MarketContract(CoreasonBaseState):
     )
     slashing_penalty: int = Field(ge=0, description="The exact atomic token amount slashed for Byzantine faults.")
 
-    @model_validator(mode="after")
-    def _enforce_economic_escrow_invariant(self) -> Self:
-        """Mathematically prove that a contract cannot penalize more than the escrowed amount."""
-        if self.slashing_penalty > self.minimum_collateral:
-            raise ValueError("ECONOMIC INVARIANT VIOLATION: slashing_penalty cannot exceed minimum_collateral.")
-        return self
+    @model_validator(mode="before")
+    @classmethod
+    def _clamp_economic_escrow_invariant(cls, values: Any) -> Any:
+        """Mathematically evaluate the invariant so a contract cannot penalize more than the escrowed amount."""
+        if isinstance(values, dict):
+            mc = values.get("minimum_collateral", 0)
+            sp = values.get("slashing_penalty", 0)
+            mc_int, sp_int = 0, 0
+            if hasattr(mc, "__int__") and hasattr(sp, "__int__"):
+                try:
+                    mc_int = int(mc)
+                    sp_int = int(sp)
+                except ValueError, TypeError:
+                    pass
+            cmc = max(0, min(mc_int, 1000000000))
+            if sp_int > cmc:
+                raise ValueError("slashing_penalty cannot exceed minimum_collateral")
+            csp = max(0, sp_int)
+            values["minimum_collateral"] = cmc
+            values["slashing_penalty"] = csp
+        return values
 
 
 class MarketResolutionState(CoreasonBaseState):
@@ -7150,6 +7246,36 @@ class PredictionMarketState(CoreasonBaseState):
         description="Mapping of hypothesis IDs to their current LMSR-calculated market price (probability) as stringified decimals.",
     )
 
+    @model_validator(mode="before")
+    @classmethod
+    def _clamp_market_probabilities_before(cls, values: Any) -> Any:
+        if isinstance(values, dict) and "current_market_probabilities" in values:
+            clamped_probs: dict[str, str] = {}
+            total = 0.0
+
+            import math
+
+            for k, v in values["current_market_probabilities"].items():
+                try:
+                    prob = float(v)
+                except ValueError:
+                    prob = 0.0
+
+                prob = max(0.0, min(prob, 1.0))
+                total += prob
+                clamped_probs[k] = str(prob)
+
+            if total > 0.0 and not math.isclose(total, 1.0, abs_tol=1e-5):
+                normalized_probs = {k: str(float(v) / total) for k, v in clamped_probs.items()}
+            elif total == 0.0 and clamped_probs:
+                uniform = 1.0 / len(clamped_probs)
+                normalized_probs = {k: str(uniform) for k in clamped_probs}
+            else:
+                normalized_probs = clamped_probs
+
+            values["current_market_probabilities"] = normalized_probs
+        return values
+
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "order_book", sorted(self.order_book, key=lambda x: x.agent_id))
@@ -7296,6 +7422,14 @@ class ComputeProvisioningIntent(CoreasonBaseState):
     max_budget: int = Field(
         le=1000000000, description="The maximum atomic cost budget allowable for the provisioned compute."
     )
+
+    @model_validator(mode="before")
+    @classmethod
+    def _clamp_max_budget_before(cls, values: Any) -> Any:
+        if isinstance(values, dict):
+            values["max_budget"] = max(0, min(values.get("max_budget", 0), 1000000000))
+        return values
+
     required_capabilities: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
         max_length=1000000000, description="The minimal functional capabilities required by the requested compute."
     )
@@ -9186,36 +9320,38 @@ class DAGTopologyManifest(BaseTopologyManifest):
             if len(neighbors) > self.max_fan_out:
                 raise ValueError(f"Topological Violation: Node '{node}' exceeds max_fan_out of {self.max_fan_out}.")
         if not self.allow_cycles:
-            visited: set[NodeIdentifierState] = set()
-            recursion_stack: set[NodeIdentifierState] = set()
             depth_memo: dict[NodeIdentifierState, int] = {}
 
-            def dfs(curr: NodeIdentifierState) -> int:
-                if curr in recursion_stack:
-                    raise ValueError("Graph contains cycles but allow_cycles is False.")
-                if curr in visited:
-                    return depth_memo.get(curr, 1)
-                visited.add(curr)
-                recursion_stack.add(curr)
-                max_child_depth = 0
-                for neighbor in adj[curr]:
-                    max_child_depth = max(max_child_depth, dfs(neighbor))
-                recursion_stack.remove(curr)
-                current_depth = 1 + max_child_depth
-                depth_memo[curr] = current_depth
-                return current_depth
+            # Using Kahn's Algorithm / Iterative topological sort for depth and cycles
+            # We calculate max depth without recursion to avoid stack overflow limits
 
-            max_calculated_depth = 0
-            for start_node in self.nodes:
-                if in_degree[start_node] == 0:
-                    max_calculated_depth = max(max_calculated_depth, dfs(start_node))
-            for start_node in self.nodes:
-                if start_node not in visited:
-                    max_calculated_depth = max(max_calculated_depth, dfs(start_node))
+            queue = [n for n in self.nodes if in_degree[n] == 0]
+            for n in queue:
+                depth_memo[n] = 1
+
+            processed_count = 0
+
+            while queue:
+                curr = queue.pop(0)
+                processed_count += 1
+                curr_depth = depth_memo[curr]
+
+                for neighbor in adj[curr]:
+                    in_degree[neighbor] -= 1
+                    depth_memo[neighbor] = max(depth_memo.get(neighbor, 1), curr_depth + 1)
+                    if in_degree[neighbor] == 0:
+                        queue.append(neighbor)
+
+            if processed_count != len(self.nodes):
+                raise ValueError("Graph contains cycles but allow_cycles is False.")
+
+            max_calculated_depth = max(depth_memo.values()) if depth_memo else 0
+
             if max_calculated_depth > self.max_depth:
                 raise ValueError(
                     f"Topological Violation: Graph depth {max_calculated_depth} exceeds max_depth of {self.max_depth}."
                 )
+
         return self
 
 
@@ -10930,6 +11066,19 @@ class EpistemicLedgerState(CoreasonBaseState):
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "history", sorted(self.history, key=lambda event: event.timestamp))
+
+        # Validate epistemic consistency: A child's logical state cannot precede its parent's state.
+        event_times = {event.event_id: event.timestamp for event in self.history}
+        for event in self.history:
+            if hasattr(event, "causal_attributions") and event.causal_attributions:
+                for attr in event.causal_attributions:
+                    if attr.source_event_id in event_times:
+                        parent_time = event_times[attr.source_event_id]
+                        if event.timestamp < parent_time:
+                            raise ValueError(
+                                f"Epistemic paradox: Child event {event.event_id} ({event.timestamp}) occurs before parent event {attr.source_event_id} ({parent_time})."
+                            )
+
         object.__setattr__(self, "retracted_nodes", sorted(self.retracted_nodes))
         object.__setattr__(self, "checkpoints", sorted(self.checkpoints, key=lambda x: x.checkpoint_id))
         object.__setattr__(self, "active_rollbacks", sorted(self.active_rollbacks, key=lambda x: x.request_id))
