@@ -116,13 +116,13 @@ def test_validate_payload_bounds_invalid_depth() -> None:
 
 
 def test_validate_payload_bounds_invalid_list_length() -> None:
-    with pytest.raises(ValueError, match="List exceeds maximum item count"):
-        _validate_payload_bounds([1] * 1001)
+    with pytest.raises(ValueError, match="Payload volume exceeds absolute hardware limit of 10000 nodes"):
+        _validate_payload_bounds([1] * 10001)
 
 
 def test_validate_payload_bounds_invalid_dict_length() -> None:
-    with pytest.raises(ValueError, match="Dictionary exceeds maximum key count"):
-        _validate_payload_bounds({str(i): 1 for i in range(101)})
+    with pytest.raises(ValueError, match="Payload volume exceeds absolute hardware limit of 10000 nodes"):
+        _validate_payload_bounds({str(i): 1 for i in range(10001)})
 
 
 @given(

@@ -49,8 +49,8 @@ def test_bounded_json_rpc_intent_fuzz_valid_space(params: dict[str, Any] | None)
     """
     intent = BoundedJSONRPCIntent(jsonrpc="2.0", method="fuzzed_method", params=params, id=1)
 
-    # BoundedJSONRPCIntent normalizes None to {}
-    expected_params = {} if params is None else params
+    # BoundedJSONRPCIntent no longer normalizes None to {}
+    expected_params = None if params is None else params
     assert intent.params == expected_params
 
 
@@ -64,38 +64,39 @@ def test_json_rpc_intent_max_depth() -> None:
         current["key"] = {}
         current = current["key"]
 
-    with pytest.raises(ValidationError, match="JSON payload exceeds maximum depth of 10"):
+    with pytest.raises(ValidationError, match="Payload exceeds maximum recursion depth of 10"):
         BoundedJSONRPCIntent(jsonrpc="2.0", method="test_method", params=params, id=1)
 
 
 def test_json_rpc_intent_max_dict_keys() -> None:
-    params: dict[str, Any] = {f"key_{i}": i for i in range(101)}
+    # Build a dictionary large enough to exceed the 10000 limit
+    params: dict[str, Any] = {f"key_{i}": i for i in range(10001)}
 
-    with pytest.raises(ValidationError, match="Dictionary exceeds maximum of 100 keys"):
+    with pytest.raises(ValidationError, match="Payload volume exceeds absolute hardware limit of 10000 nodes"):
         BoundedJSONRPCIntent(jsonrpc="2.0", method="test_method", params=params, id=1)
 
 
 def test_json_rpc_intent_max_dict_key_length() -> None:
-    params: dict[str, Any] = {"k" * 1001: "value"}
+    params: dict[str, Any] = {"k" * 10001: "value"}
 
-    with pytest.raises(ValidationError, match="Dictionary key exceeds maximum length of 1000"):
+    with pytest.raises(ValidationError, match="Dictionary key exceeds max string length of 10000"):
         BoundedJSONRPCIntent(jsonrpc="2.0", method="test_method", params=params, id=1)
 
 
 def test_json_rpc_intent_max_list_elements() -> None:
-    params: dict[str, Any] = {"list": [1] * 1001}
+    params: dict[str, Any] = {"list": [1] * 10001}
 
-    with pytest.raises(ValidationError, match="List exceeds maximum of 1000 elements"):
+    with pytest.raises(ValidationError, match="Payload volume exceeds absolute hardware limit of 10000 nodes"):
         BoundedJSONRPCIntent(jsonrpc="2.0", method="test_method", params=params, id=1)
 
 
 def test_json_rpc_intent_max_string_length() -> None:
     params: dict[str, Any] = {"key": "v" * 10001}
 
-    with pytest.raises(ValidationError, match="String exceeds maximum length of 10000 characters"):
+    with pytest.raises(ValidationError, match="String exceeds max length of 10000"):
         BoundedJSONRPCIntent(jsonrpc="2.0", method="test_method", params=params, id=1)
 
 
 def test_json_rpc_intent_params_not_dict() -> None:
-    with pytest.raises(ValidationError, match="params must be a dictionary"):
+    with pytest.raises(ValidationError, match="Input should be a valid dictionary"):
         BoundedJSONRPCIntent(jsonrpc="2.0", method="test_method", params=[1, 2, 3], id=1)  # type: ignore[arg-type]
