@@ -1,5 +1,6 @@
 import base64
 import struct
+from typing import Any, Literal
 
 import pytest
 from hypothesis import given
@@ -34,8 +35,8 @@ from coreason_manifest.utils.algebra import (
         max_size=10,
     ),
 )
-def test_calculate_remaining_compute(initial: int, burns: list[TokenBurnReceipt]):
-    ledger = EpistemicLedgerState(history=burns)
+def test_calculate_remaining_compute(initial: int, burns: list[TokenBurnReceipt]) -> None:
+    ledger = EpistemicLedgerState(history=burns)  # type: ignore[arg-type]
     total_burned = sum(b.burn_magnitude for b in burns)
 
     if initial >= total_burned:
@@ -50,7 +51,7 @@ def test_calculate_remaining_compute(initial: int, burns: list[TokenBurnReceipt]
     st.lists(st.floats(min_value=-10.0, max_value=10.0), min_size=1, max_size=100),
     st.floats(min_value=-1.0, max_value=1.0),
 )
-def test_calculate_latent_alignment(vec1_list, vec2_list, min_similarity):
+def test_calculate_latent_alignment(vec1_list: list[float], vec2_list: list[float], min_similarity: float) -> None:
     dim = len(vec1_list)
     if len(vec2_list) != dim:
         # Pad or truncate to match dimensions
@@ -95,7 +96,7 @@ def test_calculate_latent_alignment(vec1_list, vec2_list, min_similarity):
     st.integers() | st.text(max_size=10),
     st.text(min_size=1, max_size=10).map(lambda x: "/" + x),
 )
-def test_apply_state_differential(base_state, op, path, value, from_path):
+def test_apply_state_differential(base_state: dict[str, Any], op: Literal["add", "remove", "replace", "copy", "move", "test"], path: str, value: Any, from_path: str) -> None:
     # Validations are mostly strict, we expect many to fail on invalid paths or types
     # But it covers the conditionals
 

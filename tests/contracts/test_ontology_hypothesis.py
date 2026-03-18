@@ -1,6 +1,7 @@
 import pytest
 from hypothesis import given
 from hypothesis import strategies as st
+from typing import Any
 
 from coreason_manifest.spec.ontology import (
     CoreasonBaseState,
@@ -80,45 +81,45 @@ def test_model_dump_canonical(a: int, b: str, c: list[int], d: dict[str, int]) -
         max_leaves=10,
     )
 )
-def test_validate_payload_bounds_valid(payload):
+def test_validate_payload_bounds_valid(payload: Any) -> None:
     # Should not raise any exceptions
     _validate_payload_bounds(payload)
 
 
-def test_validate_payload_bounds_invalid_type():
+def test_validate_payload_bounds_invalid_type() -> None:
     with pytest.raises(ValueError, match="Payload value must be a valid JSON primitive"):
-        _validate_payload_bounds(object())
+        _validate_payload_bounds(object())  # type: ignore[arg-type]
 
 
-def test_validate_payload_bounds_invalid_dict_key():
+def test_validate_payload_bounds_invalid_dict_key() -> None:
     with pytest.raises(ValueError, match="Dictionary keys must be strings"):
-        _validate_payload_bounds({1: "test"})
+        _validate_payload_bounds({1: "test"})  # type: ignore[dict-item]
 
 
-def test_validate_payload_bounds_invalid_dict_key_length():
+def test_validate_payload_bounds_invalid_dict_key_length() -> None:
     with pytest.raises(ValueError, match="Dictionary key exceeds max string length"):
         _validate_payload_bounds({"a" * 10001: "test"})
 
 
-def test_validate_payload_bounds_invalid_string_length():
+def test_validate_payload_bounds_invalid_string_length() -> None:
     with pytest.raises(ValueError, match="String exceeds max length"):
         _validate_payload_bounds("a" * 10001)
 
 
-def test_validate_payload_bounds_invalid_depth():
-    payload = "test"
+def test_validate_payload_bounds_invalid_depth() -> None:
+    payload: Any = "test"
     for _ in range(12):
         payload = {"key": payload}
     with pytest.raises(ValueError, match="Payload exceeds maximum recursion depth"):
         _validate_payload_bounds(payload)
 
 
-def test_validate_payload_bounds_invalid_list_length():
+def test_validate_payload_bounds_invalid_list_length() -> None:
     with pytest.raises(ValueError, match="List exceeds maximum item count"):
         _validate_payload_bounds([1] * 1001)
 
 
-def test_validate_payload_bounds_invalid_dict_length():
+def test_validate_payload_bounds_invalid_dict_length() -> None:
     with pytest.raises(ValueError, match="Dictionary exceeds maximum key count"):
         _validate_payload_bounds({str(i): 1 for i in range(101)})
 
