@@ -12,6 +12,7 @@ from coreason_manifest.spec.ontology import (
     OntologicalAlignmentPolicy,
     StateDifferentialManifest,
     StateMutationIntent,
+    TamperFaultEvent,
     TokenBurnReceipt,
     VectorEmbeddingState,
 )
@@ -92,8 +93,8 @@ def test_calculate_latent_alignment(vec1_list: list[float], vec2_list: list[floa
             )  # Edge case due to floating point underflow with identical subnormals
             or (math.isclose(actual_similarity, 0.0, abs_tol=1e-5) and abs(expected_similarity) > 0.0)
         )
-    except ValueError as e:
-        if "TamperFaultEvent: Latent alignment failed" in str(e):
+    except (ValueError, TamperFaultEvent) as e:
+        if "TamperFaultEvent: Latent alignment failed" in str(e) or "Latent alignment failed" in str(e):
             pass
         else:
             raise
