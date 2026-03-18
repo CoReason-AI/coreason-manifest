@@ -8079,6 +8079,22 @@ class System1ReflexPolicy(CoreasonBaseState):
         return self
 
 
+
+class ManifestViolationReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A machine-readable, deterministic JSON receipt of an exact topological failure, replacing unstructured stack traces.
+
+    CAUSAL AFFORDANCE: Enables the agent to execute $O(1)$ surgical patches via StateMutationIntent rather than hallucinating fixes.
+
+    EPISTEMIC BOUNDS: failing_pointer maps exactly to RFC 6902 JSON Pointers.
+
+    MCP ROUTING TRIGGERS: Fault Receipt, RFC 6902, Epistemic Loss Prevention
+    """
+
+    failing_pointer: str = Field(max_length=2000, description="The exact RFC 6902 JSON pointer isolating the topological failure.")
+    violation_type: str = Field(max_length=255, description="Categorical descriptor of the failure, e.g., missing, type_error.")
+    diagnostic_message: str = Field(max_length=2000, description="The specific constraint breached.")
+
 class System2RemediationIntent(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Implements Kahneman's Dual-Process Theory by explicitly triggering a System 2 non-monotonic self-correction loop in response to a structural execution collapse. As an ...Intent suffix, this represents an authorized kinetic execution trigger.
@@ -8099,18 +8115,15 @@ class System2RemediationIntent(CoreasonBaseState):
     target_node_id: NodeIdentifierState = Field(
         description="The globally unique decentralized identifier (DID) anchoring the agent that authored the invalid state, ensuring the fault is routed back to the exact state partition."
     )
-    failing_pointers: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
+    violation_receipts: list[ManifestViolationReceipt] = Field(
         min_length=1,
-        description="A strictly typed array of RFC 6902 JSON Pointers isolating the exact topological coordinate of the hallucination.",
-    )
-    remediation_prompt: Annotated[str, StringConstraints(max_length=100000)] = Field(
-        min_length=1, description="The deterministic, non-monotonic natural-language constraint the agent must satisfy."
+        description="The deterministic array of exact structural faults the agent must correct."
     )
 
     @model_validator(mode="after")
-    def _enforce_canonical_sort_failing_pointers(self) -> Self:
-        """Mathematically sort pointers to guarantee deterministic canonical hashing."""
-        object.__setattr__(self, "failing_pointers", sorted(self.failing_pointers))
+    def _enforce_canonical_sort_receipts(self) -> Self:
+        """Mathematically sort receipts to guarantee deterministic canonical hashing."""
+        object.__setattr__(self, "violation_receipts", sorted(self.violation_receipts, key=lambda x: x.failing_pointer))
         return self
 
 
@@ -10974,3 +10987,6 @@ EpistemicLedgerState.model_rebuild()
 PresentationManifest.model_rebuild()
 ObservationEvent.model_rebuild()
 OntologicalHandshakeReceipt.model_rebuild()
+
+ManifestViolationReceipt.model_rebuild()
+System2RemediationIntent.model_rebuild()
