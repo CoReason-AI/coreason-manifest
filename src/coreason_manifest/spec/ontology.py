@@ -8079,7 +8079,6 @@ class System1ReflexPolicy(CoreasonBaseState):
         return self
 
 
-
 class ManifestViolationReceipt(CoreasonBaseState):
     """
     AGENT INSTRUCTION: A machine-readable, deterministic JSON receipt of an exact topological failure, replacing unstructured stack traces.
@@ -8091,9 +8090,14 @@ class ManifestViolationReceipt(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Fault Receipt, RFC 6902, Epistemic Loss Prevention
     """
 
-    failing_pointer: str = Field(max_length=2000, description="The exact RFC 6902 JSON pointer isolating the topological failure.")
-    violation_type: str = Field(max_length=255, description="Categorical descriptor of the failure, e.g., missing, type_error.")
+    failing_pointer: str = Field(
+        max_length=2000, description="The exact RFC 6902 JSON pointer isolating the topological failure."
+    )
+    violation_type: str = Field(
+        max_length=255, description="Categorical descriptor of the failure, e.g., missing, type_error."
+    )
     diagnostic_message: str = Field(max_length=2000, description="The specific constraint breached.")
+
 
 class System2RemediationIntent(CoreasonBaseState):
     """
@@ -8116,8 +8120,7 @@ class System2RemediationIntent(CoreasonBaseState):
         description="The globally unique decentralized identifier (DID) anchoring the agent that authored the invalid state, ensuring the fault is routed back to the exact state partition."
     )
     violation_receipts: list[ManifestViolationReceipt] = Field(
-        min_length=1,
-        description="The deterministic array of exact structural faults the agent must correct."
+        min_length=1, description="The deterministic array of exact structural faults the agent must correct."
     )
 
     @model_validator(mode="after")

@@ -178,17 +178,11 @@ def generate_correction_prompt(error: ValidationError, target_node_id: str, faul
         if err_type == "missing":
             msg = f"The required semantic boundary at '{loc_path}' is completely missing. You must project this missing dimension to satisfy the StateContract."
 
-        receipts.append(ManifestViolationReceipt(
-            failing_pointer=loc_path,
-            violation_type=err_type,
-            diagnostic_message=msg
-        ))
+        receipts.append(
+            ManifestViolationReceipt(failing_pointer=loc_path, violation_type=err_type, diagnostic_message=msg)
+        )
 
-    return System2RemediationIntent(
-        fault_id=fault_id,
-        target_node_id=target_node_id,
-        violation_receipts=receipts
-    )
+    return System2RemediationIntent(fault_id=fault_id, target_node_id=target_node_id, violation_receipts=receipts)
 
 
 def align_semantic_manifolds(
@@ -351,6 +345,7 @@ def _resolve_from_path(new_state: Any, from_path: str) -> tuple[Any, Any]:
     from_last = from_parts[-1]
     return from_target, from_last
 
+
 def _extract_from_target(t: Any, key: str) -> Any:
     if isinstance(t, dict):
         if key not in t:
@@ -368,6 +363,7 @@ def _extract_from_target(t: Any, key: str) -> Any:
             raise ValueError("Invalid index") from e
     raise ValueError("Target is not dict or list")
 
+
 def _ablate_from_target(t: Any, key: str) -> None:
     if isinstance(t, dict):
         if key not in t:
@@ -383,6 +379,7 @@ def _ablate_from_target(t: Any, key: str) -> None:
             t.pop(idx)
         except ValueError as e:
             raise ValueError("Invalid index") from e
+
 
 def _apply_patch_add(target: Any, last_part: str, value: Any) -> None:
     if isinstance(target, dict):
@@ -401,11 +398,13 @@ def _apply_patch_add(target: Any, last_part: str, value: Any) -> None:
     else:
         raise ValueError(f"Cannot add to path: {last_part}")
 
+
 def _apply_patch_remove(target: Any, last_part: str) -> None:
     try:
         _ablate_from_target(target, last_part)
     except ValueError as e:
         raise ValueError(f"Cannot remove from path: {e}") from e
+
 
 def _apply_patch_replace(target: Any, last_part: str, value: Any) -> None:
     try:
@@ -419,6 +418,7 @@ def _apply_patch_replace(target: Any, last_part: str, value: Any) -> None:
             target[idx] = value
     except ValueError as e:
         raise ValueError(f"{e}") from e
+
 
 def _apply_patch_copy_move(new_state: Any, target: Any, last_part: str, patch: Any) -> None:
     from_path = patch.from_path
@@ -463,15 +463,21 @@ def _apply_patch_copy_move(new_state: Any, target: Any, last_part: str, patch: A
     else:
         raise ValueError("Cannot copy/move to path")
 
+
 def _apply_patch_test(target: Any, last_part: str, value: Any) -> None:
     try:
         current_val = _extract_from_target(target, last_part)
         if current_val != value:
             raise ValueError("Patch test operation failed.")
     except ValueError as e:
-        if "Patch test operation failed" in str(e) or "Index out of bounds" in str(e) or "Cannot extract from end of array" in str(e):
+        if (
+            "Patch test operation failed" in str(e)
+            or "Index out of bounds" in str(e)
+            or "Cannot extract from end of array" in str(e)
+        ):
             raise
         raise ValueError("Patch test operation failed.") from e
+
 
 def apply_state_differential(
     current_state: dict[str, Any], manifest: ontology.StateDifferentialManifest
@@ -515,7 +521,6 @@ def apply_state_differential(
 
         last_part = parts[-1]
 
-
         patch_value = patch.value
 
         # Using default arguments in lambdas to correctly bind loop variables
@@ -532,8 +537,13 @@ def apply_state_differential(
             patch_dispatch[patch.op]()
         except ValueError as e:
             # We preserve the original exception messaging strategy to not break any possible external test suite reliance on the exact strings in apply_state_differential.
-            if patch.op in ("remove", "replace") and "Patch test operation failed" not in str(e) and "Index out of bounds" not in str(e) and "Cannot extract from end of array" not in str(e):
-               raise ValueError(f"Cannot {patch.op} at path {path}: {e}") from e
+            if (
+                patch.op in ("remove", "replace")
+                and "Patch test operation failed" not in str(e)
+                and "Index out of bounds" not in str(e)
+                and "Cannot extract from end of array" not in str(e)
+            ):
+                raise ValueError(f"Cannot {patch.op} at path {path}: {e}") from e
             if patch.op == "remove":
                 # Special case, old code used from path: {e} and from path {path}: {e} for remove/replace.
                 raise ValueError(f"Cannot remove from path {path}: {e}") from e
@@ -552,9 +562,9 @@ def apply_state_differential(
             if patch.op == "add":
                 msg = str(e)
                 if msg.startswith("Cannot add to path"):
-                   raise ValueError(f"Cannot add to path: {path}") from e
+                    raise ValueError(f"Cannot add to path: {path}") from e
                 if msg.startswith("Index out of bounds"):
-                   raise ValueError(f"Index out of bounds: {path}") from e
+                    raise ValueError(f"Index out of bounds: {path}") from e
                 raise
             raise
 

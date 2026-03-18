@@ -9495,6 +9495,37 @@
       "title": "MacroGridProfile",
       "type": "object"
     },
+    "ManifestViolationReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A machine-readable, deterministic JSON receipt of an exact topological failure, replacing unstructured stack traces.\n\nCAUSAL AFFORDANCE: Enables the agent to execute $O(1)$ surgical patches via StateMutationIntent rather than hallucinating fixes.\n\nEPISTEMIC BOUNDS: failing_pointer maps exactly to RFC 6902 JSON Pointers.\n\nMCP ROUTING TRIGGERS: Fault Receipt, RFC 6902, Epistemic Loss Prevention",
+      "properties": {
+        "failing_pointer": {
+          "description": "The exact RFC 6902 JSON pointer isolating the topological failure.",
+          "maxLength": 2000,
+          "title": "Failing Pointer",
+          "type": "string"
+        },
+        "violation_type": {
+          "description": "Categorical descriptor of the failure, e.g., missing, type_error.",
+          "maxLength": 255,
+          "title": "Violation Type",
+          "type": "string"
+        },
+        "diagnostic_message": {
+          "description": "The specific constraint breached.",
+          "maxLength": 2000,
+          "title": "Diagnostic Message",
+          "type": "string"
+        }
+      },
+      "required": [
+        "failing_pointer",
+        "violation_type",
+        "diagnostic_message"
+      ],
+      "title": "ManifestViolationReceipt",
+      "type": "object"
+    },
     "MarketContract": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Enforces Algorithmic Mechanism Design and Proof-of-Stake (PoS) economic collateralization required for an agent to participate in the epistemic market.\n\nCAUSAL AFFORDANCE: Unlocks the ability for the orchestrator to computationally slash Byzantine or hallucinating nodes, ensuring a strict thermodynamic cost to semantic drift.\n\nEPISTEMIC BOUNDS: Physically restricts the mathematical invariant where `slashing_penalty` <= `minimum_collateral` via an `@model_validator`. Downstream agents must secure this collateral before execution. To prevent floating-point consensus vulnerabilities across the distributed ledger, both bounds are strictly enforced as atomic integer magnitudes (`ge=0`).\n\nMCP ROUTING TRIGGERS: Proof-of-Stake, Slashing Condition, Byzantine Fault Tolerance, Economic Escrow",
@@ -13100,29 +13131,20 @@
           "$ref": "#/$defs/NodeIdentifierState",
           "description": "The globally unique decentralized identifier (DID) anchoring the agent that authored the invalid state, ensuring the fault is routed back to the exact state partition."
         },
-        "failing_pointers": {
-          "description": "A strictly typed array of RFC 6902 JSON Pointers isolating the exact topological coordinate of the hallucination.",
+        "violation_receipts": {
+          "description": "The deterministic array of exact structural faults the agent must correct.",
           "items": {
-            "maxLength": 2000,
-            "type": "string"
+            "$ref": "#/$defs/ManifestViolationReceipt"
           },
           "minItems": 1,
-          "title": "Failing Pointers",
+          "title": "Violation Receipts",
           "type": "array"
-        },
-        "remediation_prompt": {
-          "description": "The deterministic, non-monotonic natural-language constraint the agent must satisfy.",
-          "maxLength": 100000,
-          "minLength": 1,
-          "title": "Remediation Prompt",
-          "type": "string"
         }
       },
       "required": [
         "fault_id",
         "target_node_id",
-        "failing_pointers",
-        "remediation_prompt"
+        "violation_receipts"
       ],
       "title": "System2RemediationIntent",
       "type": "object"
