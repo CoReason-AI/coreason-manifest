@@ -1,2 +1,1 @@
-from coreason_manifest.spec.ontology import FederatedCapabilityAttestationReceipt
-print(FederatedCapabilityAttestationReceipt.model_fields.keys())
+from coreason_manifest.spec.ontology import EvaluationSandboxProfile, SpotMarketLedger, SyndicateSettlementReceipt
