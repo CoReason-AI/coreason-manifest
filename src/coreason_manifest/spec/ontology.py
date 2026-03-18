@@ -2731,9 +2731,10 @@ class BrowserDOMState(CoreasonBaseState):
             raise ValueError(f"SSRF topological violation detected: {hostname}")
 
         import contextlib
+        import ipaddress
         import socket
 
-        ip = None
+        ip: ipaddress.IPv4Address | ipaddress.IPv6Address | None = None
         try:
             # Canonical C-backed validation of affine coordinate isomorphism for obfuscated IPv4 formats
             packed_ip = socket.inet_aton(hostname_lower)
