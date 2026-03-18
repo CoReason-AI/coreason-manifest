@@ -247,7 +247,16 @@ def calculate_latent_alignment(
     except (OverflowError, ValueError) as e:
         raise ValueError("Catastrophic loss of precision or overflow in vector calculation.") from e
 
-    if mag1_sq < 0 or mag2_sq < 0 or math.isinf(mag1_sq) or math.isinf(mag2_sq) or math.isnan(mag1_sq) or math.isnan(mag2_sq) or math.isinf(dot_product) or math.isnan(dot_product):
+    if (
+        mag1_sq < 0
+        or mag2_sq < 0
+        or math.isinf(mag1_sq)
+        or math.isinf(mag2_sq)
+        or math.isnan(mag1_sq)
+        or math.isnan(mag2_sq)
+        or math.isinf(dot_product)
+        or math.isnan(dot_product)
+    ):
         raise ValueError("Catastrophic loss of precision or overflow in vector calculation.")
 
     mag1 = math.sqrt(mag1_sq)

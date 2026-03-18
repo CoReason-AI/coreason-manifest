@@ -104,12 +104,8 @@ def test_calculate_latent_alignment_fuzz(v1_floats: list[float], v2_floats: list
     v1_packed = struct.pack(f"<{dim}f", *v1_floats)
     v2_packed = struct.pack(f"<{dim}f", *v2_floats)
 
-    v1 = VectorEmbeddingState(
-        vector_base64=base64.b64encode(v1_packed).decode(), dimensionality=dim, model_name="fuzz"
-    )
-    v2 = VectorEmbeddingState(
-        vector_base64=base64.b64encode(v2_packed).decode(), dimensionality=dim, model_name="fuzz"
-    )
+    v1 = VectorEmbeddingState(vector_base64=base64.b64encode(v1_packed).decode(), dimensionality=dim, model_name="fuzz")
+    v2 = VectorEmbeddingState(vector_base64=base64.b64encode(v2_packed).decode(), dimensionality=dim, model_name="fuzz")
 
     policy = OntologicalAlignmentPolicy.model_construct(
         min_cosine_similarity=-1.0,
