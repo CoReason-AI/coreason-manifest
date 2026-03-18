@@ -45,7 +45,7 @@ def test_dag_topology_cycle_rejection(nodes: dict[str, Any], data: st.DataObject
     node_a = data.draw(st.sampled_from(keys))
     node_b = data.draw(st.sampled_from(keys))
 
-    with pytest.raises(ValidationError, match="Graph contains cycles but allow_cycles is False"):
+    with pytest.raises(ValidationError, match="Graph contains cycles"):
         DAGTopologyManifest(
             nodes=nodes, edges=[(node_a, node_b), (node_b, node_a)], allow_cycles=False, max_depth=10, max_fan_out=10
         )

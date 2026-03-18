@@ -176,6 +176,7 @@ def test_mcp_quarantine_gateway_authorized_mount() -> None:
     manifest = MCPServerManifest(
         server_id="server_1",
         transport=StdioTransportProfile(command="stdio://coreason-mcp", args=[]),
+        binary_hash="a" * 64,
         capability_whitelist=MCPCapabilityWhitelistPolicy(
             allowed_tools=["fetch"], allowed_resources=[], allowed_prompts=[]
         ),
@@ -325,6 +326,40 @@ def test_federated_peft_contract_bounds(merkle_root: str, vram: int, ttl: int, p
             vram_footprint_bytes=1000,
             ephemeral_ttl_ms=1000,
             cache_priority_weight=priority,
+        )
+
+
+def test_kinetic_budget_policy_temperature_upper_bound() -> None:
+    """Prove the thermodynamic asymptote is physically clamped to le=2.0, rejecting the old billion-scale bound."""
+    from coreason_manifest.spec.ontology import KineticBudgetPolicy
+
+    with pytest.raises(ValidationError):
+        KineticBudgetPolicy(
+            exploration_decay_curve="linear",
+            forced_exploitation_threshold_ms=10,
+            dynamic_temperature_asymptote=3.0,
+        )
+
+
+def test_epistemic_escalation_tiers_upper_bound() -> None:
+    """Prove state-space explosion is physically prevented by clamping max_escalation_tiers to le=10."""
+    from coreason_manifest.spec.ontology import EpistemicEscalationContract
+
+    with pytest.raises(ValidationError):
+        EpistemicEscalationContract(baseline_entropy_threshold=0.5, test_time_multiplier=2.0, max_escalation_tiers=11)
+
+
+def test_peft_adapter_rank_upper_bound() -> None:
+    """Prove the LoRA intrinsic dimension is physically clamped to le=65536, rejecting the old billion-scale bound."""
+    from coreason_manifest.spec.ontology import PeftAdapterContract
+
+    with pytest.raises(ValidationError):
+        PeftAdapterContract(
+            adapter_id="test_adapter",
+            safetensors_hash="a" * 64,
+            base_model_hash="b" * 64,
+            adapter_rank=65537,
+            target_modules=["q_proj"],
         )
 
 

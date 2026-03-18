@@ -197,8 +197,8 @@ def test_dynamic_layout_manifest_kinetic_bleed(tstring: str, bad_node: str) -> N
 # --- 7. Deterministic Array Sorting Validation ---
 def test_compute_engine_profile_sorting() -> None:
     rate = ComputeRateContract(
-        cost_per_million_input_tokens=1.0,
-        cost_per_million_output_tokens=2.0,
+        cost_per_million_input_tokens=1,
+        cost_per_million_output_tokens=2,
         magnitude_unit="USD",
     )
     profile = ComputeEngineProfile(
@@ -599,6 +599,7 @@ def test_mcpservermanifest_enforce_did() -> None:
     manifest = MCPServerManifest(
         server_id="server_1",
         transport=StdioTransportProfile(command="cmd", args=[]),
+        binary_hash="a" * 64,
         capability_whitelist=MCPCapabilityWhitelistPolicy(),
         attestation_receipt=vc_valid,
     )
