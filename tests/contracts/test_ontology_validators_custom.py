@@ -9,16 +9,17 @@
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
 import pytest
-from hypothesis import given, strategies as st
+from hypothesis import given
+from hypothesis import strategies as st
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
     CoreasonBaseState,
+    LatentSmoothingProfile,
     QuorumPolicy,
     RiskLevelPolicy,
-    SpatialBoundingBoxProfile,
     SaeLatentPolicy,
-    LatentSmoothingProfile
+    SpatialBoundingBoxProfile,
 )
 
 
@@ -80,32 +81,47 @@ def test_spatial_bounding_box_invalid_y(y_min: float, y_max: float) -> None:
 def test_quorum_policy_validity(max_faults: int, quorum_size: int) -> None:
     if quorum_size < (3 * max_faults + 1):
         with pytest.raises(ValidationError, match=r"requires min_quorum_size \(N\) >= 3f \+ 1"):
-            QuorumPolicy(max_tolerable_faults=max_faults, min_quorum_size=quorum_size, state_validation_metric="ledger_hash", byzantine_action="quarantine")
+            QuorumPolicy(
+                max_tolerable_faults=max_faults,
+                min_quorum_size=quorum_size,
+                state_validation_metric="ledger_hash",
+                byzantine_action="quarantine",
+            )
     else:
-        QuorumPolicy(max_tolerable_faults=max_faults, min_quorum_size=quorum_size, state_validation_metric="ledger_hash", byzantine_action="quarantine")
+        QuorumPolicy(
+            max_tolerable_faults=max_faults,
+            min_quorum_size=quorum_size,
+            state_validation_metric="ledger_hash",
+            byzantine_action="quarantine",
+        )
 
 
 def test_sae_latent_policy_smooth_decay() -> None:
     # Missing smoothing profile
-    with pytest.raises(ValidationError, match="smoothing_profile must be provided when violation_action is 'smooth_decay'"):
+    with pytest.raises(
+        ValidationError, match="smoothing_profile must be provided when violation_action is 'smooth_decay'"
+    ):
         SaeLatentPolicy(
             target_feature_index=1,
             max_activation_threshold=1.0,
             violation_action="smooth_decay",
-            sae_dictionary_hash="a"*64,
+            sae_dictionary_hash="a" * 64,
             clamp_value=1.0,
-            monitored_layers=[1]
+            monitored_layers=[1],
         )
 
     # Missing clamp value
-    with pytest.raises(ValidationError, match="clamp_value must be provided as the target asymptote when violation_action is 'smooth_decay'"):
+    with pytest.raises(
+        ValidationError,
+        match="clamp_value must be provided as the target asymptote when violation_action is 'smooth_decay'",
+    ):
         SaeLatentPolicy(
             target_feature_index=1,
             max_activation_threshold=1.0,
             violation_action="smooth_decay",
-            sae_dictionary_hash="a"*64,
+            sae_dictionary_hash="a" * 64,
             monitored_layers=[1],
-            smoothing_profile=LatentSmoothingProfile(decay_function="exponential", transition_window_tokens=100)
+            smoothing_profile=LatentSmoothingProfile(decay_function="exponential", transition_window_tokens=100),
         )
 
     # Valid smooth_decay
@@ -113,8 +129,8 @@ def test_sae_latent_policy_smooth_decay() -> None:
         target_feature_index=1,
         max_activation_threshold=1.0,
         violation_action="smooth_decay",
-        sae_dictionary_hash="a"*64,
+        sae_dictionary_hash="a" * 64,
         clamp_value=1.0,
         monitored_layers=[1],
-        smoothing_profile=LatentSmoothingProfile(decay_function="exponential", transition_window_tokens=100)
+        smoothing_profile=LatentSmoothingProfile(decay_function="exponential", transition_window_tokens=100),
     )
