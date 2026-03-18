@@ -125,3 +125,156 @@ def test_epistemic_sop_ghost_node_rejection(
             chronological_flow_edges=[(ghost_source, ghost_target)],
             prm_evaluations=[],
         )
+
+# ==============================================================================
+# Fuzzing tests added for CAUSAL cDAG & TOPOS FUZZER Agent Task
+# ==============================================================================
+
+from coreason_manifest.spec.ontology import (
+    SwarmTopologyManifest,
+    EpistemicLedgerState,
+    CausalDirectedEdgeState,
+    DefeasibleCascadeEvent,
+    ObservationEvent
+)
+from hypothesis import settings
+
+@settings(max_examples=250, deadline=None)
+@given(
+    edges=st.lists(
+        st.tuples(
+            st.text(min_size=7, alphabet="abcdefg01234_-"),
+            st.text(min_size=7, alphabet="abcdefg01234_-")
+        ),
+        min_size=1,
+        max_size=50
+    )
+)
+def test_dag_topology_cycles_and_bounds_fuzz(edges: list[tuple[str, str]]) -> None:
+    edges_formatted = [("did:core:" + e[0], "did:core:" + e[1]) for e in edges]
+    nodes = {e[0]: {"type": "agent", "description": "desc"} for e in edges_formatted} | {e[1]: {"type": "agent", "description": "desc"} for e in edges_formatted}
+
+    # We enforce constraints to trigger specific ValueErrors if they breach the limit.
+    # Otherwise, it should instantiate without error.
+    try:
+        DAGTopologyManifest(
+            type="dag",
+            nodes=nodes,
+            edges=edges_formatted,
+            max_depth=5,
+            max_fan_out=5,
+            allow_cycles=False
+        )
+        # If it succeeds, it must be valid.
+    except ValueError as e:
+        err_str = str(e).lower()
+        if "graph depth" in err_str or "graph contains cycles" in err_str or "exceeds max_fan_out" in err_str or "does not exist in nodes" in err_str:
+            pass # Expected
+        else:
+            pytest.fail(f"Unexpected ValueError: {e}")
+
+@settings(max_examples=250, deadline=None)
+@given(
+    nodes_dict=st.dictionaries(
+        keys=st.text(min_size=7, alphabet="abcdefg01234_-").map(lambda x: "did:core:" + x),
+        values=st.just({"type": "agent", "description": "desc"}),
+        min_size=1, max_size=50
+    ),
+    spawning_threshold=st.integers(min_value=1, max_value=200),
+    max_concurrent_agents=st.integers(min_value=1, max_value=100)
+)
+def test_swarm_topology_constraints_fuzz(nodes_dict: dict[str, dict[str, str]], spawning_threshold: int, max_concurrent_agents: int) -> None:
+    try:
+        SwarmTopologyManifest(
+            type="swarm",
+            nodes=nodes_dict,
+            spawning_threshold=spawning_threshold,
+            max_concurrent_agents=max_concurrent_agents
+        )
+        if spawning_threshold > max_concurrent_agents:
+            pytest.fail("SwarmTopologyManifest failed to reject spawning_threshold > max_concurrent_agents")
+    except ValueError as e:
+        err_str = str(e).lower()
+        if "spawning_threshold cannot exceed max_concurrent_agents" in err_str:
+            pass # Expected
+        elif "validation error" in err_str:
+            pass # Expected (e.g. less_than_equal constraint from pydantic itself)
+        else:
+            pytest.fail(f"Unexpected ValueError: {e}")
+
+@settings(max_examples=250, deadline=None)
+@given(
+    cascade_id=st.text(min_size=7, alphabet="abcdefg01234_-"),
+    root=st.text(min_size=7, alphabet="abcdefg01234_-"),
+    quarantined=st.lists(st.text(min_size=7, alphabet="abcdefg01234_-"), min_size=1, max_size=20),
+    decay=st.floats(min_value=-1.0, max_value=2.0)
+)
+def test_defeasible_cascade_logic_fuzz(cascade_id: str, root: str, quarantined: list[str], decay: float) -> None:
+    try:
+        DefeasibleCascadeEvent(
+            cascade_id=cascade_id,
+            root_falsified_event_id=root,
+            propagated_decay_factor=decay,
+            quarantined_event_ids=quarantined
+        )
+        if root in quarantined:
+            pytest.fail("DefeasibleCascadeEvent failed to reject root_falsified_event_id in quarantined_event_ids")
+        if decay < 0.0 or decay > 1.0:
+            pytest.fail("DefeasibleCascadeEvent failed to reject out-of-bounds decay factor")
+    except ValueError as e:
+        err_str = str(e).lower()
+        if "root_falsified_event_id cannot be in quarantined_event_ids" in err_str:
+            pass # Expected
+        elif "propagated_decay_factor" in err_str:
+            pass # Expected
+        elif "validation error" in err_str:
+            pass # pydantic validation
+        else:
+            pytest.fail(f"Unexpected ValueError: {e}")
+
+@settings(max_examples=250, deadline=None)
+@given(
+    source=st.text(min_size=1, max_size=100),
+    target=st.text(min_size=1, max_size=100),
+    edge_type=st.sampled_from(["direct_cause", "confounder", "collider", "mediator"])
+)
+def test_causal_directed_edge_state_fuzz(source: str, target: str, edge_type: str) -> None:
+    try:
+        CausalDirectedEdgeState(
+            source_variable=source,
+            target_variable=target,
+            edge_type=edge_type
+        )
+        if source == target:
+            pytest.fail("CausalDirectedEdgeState failed to reject self-referential edge")
+    except ValueError as e:
+        if "source_variable cannot equal target_variable" in str(e):
+            pass # Expected
+        elif "validation error" in str(e).lower():
+            pass
+        else:
+            pytest.fail(f"Unexpected ValueError: {e}")
+
+@settings(max_examples=50, deadline=None)
+@given(
+    history=st.lists(
+        st.builds(
+            ObservationEvent,
+            event_id=st.text(min_size=1, max_size=128, alphabet="abcdefg01234_-"),
+            timestamp=st.floats(min_value=0.0, max_value=253402300799.0),
+            payload=st.dictionaries(st.text(min_size=1, max_size=20), st.text(max_size=20), max_size=5)
+        ),
+        max_size=5
+    )
+)
+def test_epistemic_ledger_history_fuzz(history: list[ObservationEvent]) -> None:
+    try:
+        EpistemicLedgerState(history=history)
+        # Should always succeed instantiation, but we sort the history
+    except ValueError as e:
+        if "Epistemic paradox" in str(e):
+            pass
+        elif "validation error" in str(e).lower():
+            pass
+        else:
+            pytest.fail(f"Unexpected ValueError: {e}")
