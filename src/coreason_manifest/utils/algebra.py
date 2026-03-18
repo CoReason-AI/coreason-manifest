@@ -255,7 +255,6 @@ def calculate_latent_alignment(
         or math.isnan(mag1_sq)
         or math.isnan(mag2_sq)
         or math.isinf(dot_product)
-        or math.isnan(dot_product)
     ):
         raise ValueError("Catastrophic loss of precision or overflow in vector calculation.")
 

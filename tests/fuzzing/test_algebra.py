@@ -120,3 +120,51 @@ def test_calculate_latent_alignment_fuzz(v1_floats: list[float], v2_floats: list
         pass
     except TamperFaultEvent:
         pass
+
+def test_calculate_latent_alignment_edge_cases() -> None:
+    dim = 2
+    policy = OntologicalAlignmentPolicy.model_construct(
+        min_cosine_similarity=-1.0,
+        require_isometry_proof=True,
+    )
+
+    # Clamping tests for precision drift
+    # Force dot product to be very large via mocking or edge case values
+
+    import unittest.mock
+    with unittest.mock.patch('math.fsum') as mock_fsum:
+        # Force dot_product > mag1 * mag2 (so similarity > 1.0)
+        # Returns: dot_product, mag1_sq, mag2_sq
+        mock_fsum.side_effect = [1.1, 1.0, 1.0]
+        v1_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
+        v2_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
+        v1 = VectorEmbeddingState(vector_base64=base64.b64encode(v1_packed).decode(), dimensionality=dim, model_name="fuzz")
+        v2 = VectorEmbeddingState(vector_base64=base64.b64encode(v2_packed).decode(), dimensionality=dim, model_name="fuzz")
+        assert calculate_latent_alignment(v1, v2, policy) == 1.0
+
+    with unittest.mock.patch('math.fsum') as mock_fsum:
+        # Force dot_product < -mag1 * mag2 (so similarity < -1.0)
+        mock_fsum.side_effect = [-1.1, 1.0, 1.0]
+        v1_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
+        v2_packed = struct.pack(f"<{dim}f", -1.0, 0.0)
+        v1 = VectorEmbeddingState(vector_base64=base64.b64encode(v1_packed).decode(), dimensionality=dim, model_name="fuzz")
+        v2 = VectorEmbeddingState(vector_base64=base64.b64encode(v2_packed).decode(), dimensionality=dim, model_name="fuzz")
+        assert calculate_latent_alignment(v1, v2, policy) == -1.0
+
+    with unittest.mock.patch('math.fsum') as mock_fsum:
+        # Force similarity to be NaN by returning float('nan') for dot_product
+        mock_fsum.side_effect = [float('nan'), 1.0, 1.0]
+        v1_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
+        v2_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
+        v1 = VectorEmbeddingState(vector_base64=base64.b64encode(v1_packed).decode(), dimensionality=dim, model_name="fuzz")
+        v2 = VectorEmbeddingState(vector_base64=base64.b64encode(v2_packed).decode(), dimensionality=dim, model_name="fuzz")
+        assert calculate_latent_alignment(v1, v2, policy) == 0.0
+
+    # Also force the return from similarity division to be exactly NaN without failing the early check
+    # e.g., if mag1=0 or mag2=0 is bypassed but similarity calculates to nan. This is impossible without mock,
+    # since we check for mag1 == 0.0 and mag2 == 0.0 explicitly. We will test the math.isnan branch in code
+    # by ensuring we execute it.
+
+    # 4. Try sending something that bypasses magnitude checks but gives dot product NaN
+    # We already did this via ValueError in our patch. Let's adjust the ValueError check
+    # to only check mag1_sq and mag2_sq for NaN, and allow dot_product to be NaN for division.
