@@ -585,6 +585,31 @@ class ScalePolicy(CoreasonBaseState):
         le=1000000000.0, default=None, description="The optional maximum bound of the scale domain."
     )
 
+    @model_validator(mode="after")
+    def validate_domain(self) -> Self:
+        if self.domain_min is not None and self.domain_max is not None and self.domain_min > self.domain_max:
+            raise ValueError("domain_min cannot be greater than domain_max.")
+
+        # Test zero or subnormal scales for division by zero risk or floating infinity failures.
+        # Specifically, for ScalePolicy, if we map zero values, etc.
+        # No specific bounds enforced by the requirements on scale other than domains shouldn't cross or zero magnitude ranges?
+        if (
+            self.domain_min is not None
+            and self.domain_max is not None
+            and self.domain_min == self.domain_max
+            and self.type in ["linear", "log", "time"]
+        ):
+            raise ValueError("Scale domain length cannot be zero for continuous mappings.")
+
+        # for log type, domain bounds must be strictly positive
+        if self.type == "log":
+            if self.domain_min is not None and self.domain_min <= 0:
+                raise ValueError("domain_min must be strictly positive for logarithmic scales.")
+            if self.domain_max is not None and self.domain_max <= 0:
+                raise ValueError("domain_max must be strictly positive for logarithmic scales.")
+
+        return self
+
 
 class VisualEncodingProfile(CoreasonBaseState):
     """
@@ -1652,6 +1677,12 @@ class MultimodalTokenAnchorState(CoreasonBaseState):
         """AGENT INSTRUCTION: Enforce mathematical spatial monotonicity."""
         if self.bounding_box is not None:
             x_min, y_min, x_max, y_max = self.bounding_box
+            import math
+
+            if math.isnan(x_min) or math.isnan(y_min) or math.isnan(x_max) or math.isnan(y_max):
+                raise ValueError("Spatial bounds cannot be NaN.")
+            if math.isinf(x_min) or math.isinf(y_min) or math.isinf(x_max) or math.isinf(y_max):
+                raise ValueError("Spatial bounds cannot be Infinity.")
             if x_min > x_max or y_min > y_max:
                 raise ValueError(
                     f"Spatial invariant violated: min bounds (x:{x_min}, y:{y_min}) exceed max bounds (x:{x_max}, y:{y_max})"
