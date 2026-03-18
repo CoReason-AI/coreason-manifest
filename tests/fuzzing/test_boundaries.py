@@ -437,7 +437,9 @@ def test_spatial_bounding_box_profile_all_floats(x_min: float, y_min: float, x_m
         ),
     ),
 )
-def test_multimodal_token_anchor_state(token_span_start: int | None, token_span_end: int | None, bounding_box: tuple[float, float, float, float] | None) -> None:
+def test_multimodal_token_anchor_state(
+    token_span_start: int | None, token_span_end: int | None, bounding_box: tuple[float, float, float, float] | None
+) -> None:
     valid = True
     if token_span_start is not None and token_span_end is None:
         valid = False
@@ -540,7 +542,9 @@ def test_ndimensional_tensor_manifest(shape: list[int], structural_type: Any) ->
     token_span_start=st.integers(min_value=0, max_value=100),
     token_span_end=st.integers(min_value=101, max_value=200),
 )
-def test_document_layout_region_state(block_id: str, block_type: Any, token_span_start: int, token_span_end: int) -> None:
+def test_document_layout_region_state(
+    block_id: str, block_type: Any, token_span_start: int, token_span_end: int
+) -> None:
     anchor = MultimodalTokenAnchorState(token_span_start=token_span_start, token_span_end=token_span_end)
 
     with contextlib.suppress(ValueError, ValidationError):

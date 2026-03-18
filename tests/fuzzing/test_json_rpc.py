@@ -27,8 +27,6 @@ valid_json_st = st.recursive(
 )
 
 
-
-
 @given(params=st.one_of(st.none(), st.dictionaries(st.text(max_size=50), valid_json_st, max_size=5)))
 def test_valid_json_rpc_intent(params: typing.Any) -> None:
     # Prove that payloads under the depth limits are instantiated without error
@@ -73,7 +71,9 @@ def test_market_contract_bounds(minimum_collateral: int, slashing_penalty: int) 
     ),
     total_latent_tokens=st.integers(min_value=0, max_value=1000000000),
 )
-def test_latent_scratchpad_receipt_referential_integrity(trace_id: str, explored_branch_ids: list[str], total_latent_tokens: int) -> None:
+def test_latent_scratchpad_receipt_referential_integrity(
+    trace_id: str, explored_branch_ids: list[str], total_latent_tokens: int
+) -> None:
     explored_branches = [
         ThoughtBranchState(branch_id=b_id, latent_content_hash="a" * 64, prm_score=0.5) for b_id in explored_branch_ids
     ]
@@ -136,7 +136,9 @@ def test_epistemic_ledger_state_bounds(retracted_nodes: list[str]) -> None:
     max_uncommitted_edges=st.integers(min_value=1, max_value=1000000000),
     micro_batch_interval_ms=st.integers(min_value=1, max_value=86400000),
 )
-def test_continuous_mutation_policy_vram_bounds(mutation_paradigm: typing.Any, max_uncommitted_edges: int, micro_batch_interval_ms: int) -> None:
+def test_continuous_mutation_policy_vram_bounds(
+    mutation_paradigm: typing.Any, max_uncommitted_edges: int, micro_batch_interval_ms: int
+) -> None:
     if mutation_paradigm == "append_only" and max_uncommitted_edges > 10000:
         with pytest.raises(ValidationError):
             ContinuousMutationPolicy(
