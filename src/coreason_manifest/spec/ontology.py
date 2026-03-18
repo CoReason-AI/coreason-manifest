@@ -9305,7 +9305,6 @@ class DAGTopologyManifest(BaseTopologyManifest):
             if len(neighbors) > self.max_fan_out:
                 raise ValueError(f"Topological Violation: Node '{node}' exceeds max_fan_out of {self.max_fan_out}.")
         if not self.allow_cycles:
-
             depth_memo: dict[NodeIdentifierState, int] = {}
 
             # Using Kahn's Algorithm / Iterative topological sort for depth and cycles
@@ -11061,7 +11060,9 @@ class EpistemicLedgerState(CoreasonBaseState):
                     if attr.source_event_id in event_times:
                         parent_time = event_times[attr.source_event_id]
                         if event.timestamp < parent_time:
-                            raise ValueError(f"Epistemic paradox: Child event {event.event_id} ({event.timestamp}) occurs before parent event {attr.source_event_id} ({parent_time}).")
+                            raise ValueError(
+                                f"Epistemic paradox: Child event {event.event_id} ({event.timestamp}) occurs before parent event {attr.source_event_id} ({parent_time})."
+                            )
 
         object.__setattr__(self, "retracted_nodes", sorted(self.retracted_nodes))
         object.__setattr__(self, "checkpoints", sorted(self.checkpoints, key=lambda x: x.checkpoint_id))
