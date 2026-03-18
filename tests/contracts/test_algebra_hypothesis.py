@@ -8,11 +8,11 @@ from hypothesis import strategies as st
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
-    TamperFaultEvent,
     EpistemicLedgerState,
     OntologicalAlignmentPolicy,
     StateDifferentialManifest,
     StateMutationIntent,
+    TamperFaultEvent,
     TokenBurnReceipt,
     VectorEmbeddingState,
 )
