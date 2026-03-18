@@ -16,22 +16,20 @@ from pydantic import ValidationError
 from coreason_manifest.spec.ontology import (
     BilateralSLA,
     BrowserDOMState,
+    CrossoverPolicy,
     DAGTopologyManifest,
     EpistemicProvenanceReceipt,
     EvaluatorOptimizerTopologyManifest,
     EvolutionaryTopologyManifest,
     FitnessObjectiveProfile,
-    GlobalGovernancePolicy,
     InformationClassificationProfile,
     MutationPolicy,
-    CrossoverPolicy,
-    PostQuantumSignatureReceipt,
     RiskLevelPolicy,
-    SemanticVersionState,
     SMPCTopologyManifest,
     SystemNodeProfile,
     WorkflowManifest,
 )
+
 
 @given(
     st.sampled_from(list(InformationClassificationProfile)),
@@ -79,11 +77,10 @@ def test_risk_level_policy_comparisons(risk1, risk2):
 
 @given(st.text(min_size=1, max_size=2000))
 def test_browser_dom_state_ssrf_quarantine_hypothesis(url_str):
-    try:
+    import contextlib
+    with contextlib.suppress(ValidationError):
         BrowserDOMState(current_url=url_str)
-    except ValidationError:
-        # Invalid URLs and Bogon IPs will raise ValidationError which is the intended design
-        pass
+
 
 @given(
     st.sampled_from([
