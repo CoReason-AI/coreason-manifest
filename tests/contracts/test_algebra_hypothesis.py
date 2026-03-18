@@ -96,7 +96,13 @@ def test_calculate_latent_alignment(vec1_list: list[float], vec2_list: list[floa
     st.integers() | st.text(max_size=10),
     st.text(min_size=1, max_size=10).map(lambda x: "/" + x),
 )
-def test_apply_state_differential(base_state: dict[str, Any], op: Literal["add", "remove", "replace", "copy", "move", "test"], path: str, value: Any, from_path: str) -> None:
+def test_apply_state_differential(
+    base_state: dict[str, Any],
+    op: Literal["add", "remove", "replace", "copy", "move", "test"],
+    path: str,
+    value: Any,
+    from_path: str,
+) -> None:
     # Validations are mostly strict, we expect many to fail on invalid paths or types
     # But it covers the conditionals
 
