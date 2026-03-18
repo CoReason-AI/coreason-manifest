@@ -87,7 +87,7 @@ def test_base_node_profile_domain_extensions_invalid_leaf() -> None:
     with pytest.raises(ValueError, match="Payload value must be a valid JSON primitive, got CustomObj"):
         BaseNodeProfile(
             description="test node",
-            domain_extensions={"a": CustomObj()},
+            domain_extensions={"a": CustomObj()},  # type: ignore
         )
 
 
