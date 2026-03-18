@@ -7960,10 +7960,6 @@ class StructuralCausalGraphProfile(CoreasonBaseState):
         object.__setattr__(
             self, "causal_edges", sorted(self.causal_edges, key=lambda x: (x.source_variable, x.target_variable))
         )
-        if getattr(self, "causal_edges", None) is not None:
-            object.__setattr__(
-                self, "causal_edges", sorted(self.causal_edges, key=lambda x: (x.source_node_id, x.target_node_id))
-            )
         return self
 
 
@@ -8008,10 +8004,6 @@ class HypothesisGenerationEvent(BaseStateEvent):
         object.__setattr__(
             self, "falsification_conditions", sorted(self.falsification_conditions, key=lambda x: x.condition_id)
         )
-        if getattr(self, "falsification_conditions", None) is not None:
-            object.__setattr__(
-                self, "falsification_conditions", sorted(self.falsification_conditions, key=lambda x: x.condition_id)
-            )
         return self
 
 
@@ -8907,10 +8899,6 @@ class AgentAttestationReceipt(CoreasonBaseState):
         object.__setattr__(
             self, "credential_presentations", sorted(self.credential_presentations, key=lambda x: x.issuer_did)
         )
-        if getattr(self, "credential_presentations", None) is not None:
-            object.__setattr__(
-                self, "credential_presentations", sorted(self.credential_presentations, key=lambda x: x.issuer_did)
-            )
         return self
 
 
@@ -9782,14 +9770,6 @@ class EpistemicQuarantineSnapshot(CoreasonBaseState):
         object.__setattr__(
             self, "capability_attestations", sorted(self.capability_attestations, key=lambda x: x.attestation_id)
         )
-        if getattr(self, "theory_of_mind_models", None) is not None:
-            object.__setattr__(
-                self, "theory_of_mind_models", sorted(self.theory_of_mind_models, key=lambda x: x.target_agent_id)
-            )
-        if getattr(self, "capability_attestations", None) is not None:
-            object.__setattr__(
-                self, "capability_attestations", sorted(self.capability_attestations, key=lambda x: x.attestation_id)
-            )
         return self
 
 

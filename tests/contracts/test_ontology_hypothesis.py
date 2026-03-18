@@ -1,6 +1,8 @@
+import re
 from typing import Any
 
 import pytest
+import re
 from hypothesis import given
 from hypothesis import strategies as st
 
@@ -140,3 +142,17 @@ def test_risk_level_policy_comparisons(a: RiskLevelPolicy, b: RiskLevelPolicy) -
     assert a.__le__("string") is NotImplemented
     assert a.__gt__("string") is NotImplemented
     assert a.__ge__("string") is NotImplemented
+
+@given(st.lists(st.text(min_size=1, max_size=255), min_size=1, max_size=5), st.lists(st.text(min_size=1, max_size=255), min_size=1, max_size=5))
+def test_causal_model_manifest_sorting(observed: list[str], latent: list[str]) -> None:
+    from coreason_manifest.spec.ontology import CausalDirectedEdgeState
+    from coreason_manifest.spec.ontology import StructuralCausalGraphProfile
+
+    edges = [
+        CausalDirectedEdgeState(source_variable="b", target_variable="a", edge_type="direct_cause"),
+        CausalDirectedEdgeState(source_variable="a", target_variable="b", edge_type="direct_cause")
+    ]
+    manifest = StructuralCausalGraphProfile(observed_variables=observed, latent_variables=latent, causal_edges=edges)
+    assert manifest.observed_variables == sorted(observed)
+    assert manifest.latent_variables == sorted(latent)
+    assert manifest.causal_edges == sorted(edges, key=lambda x: (x.source_variable, x.target_variable))
