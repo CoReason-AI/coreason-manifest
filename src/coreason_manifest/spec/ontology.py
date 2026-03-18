@@ -9238,14 +9238,6 @@ class EvolutionaryTopologyManifest(BaseTopologyManifest):
         )
         return self
 
-    @model_validator(mode="after")
-    def _enforce_canonical_sort(self) -> Self:
-        if getattr(self, "fitness_objectives", None) is not None:
-            object.__setattr__(
-                self, "fitness_objectives", sorted(self.fitness_objectives, key=lambda x: x.target_metric)
-            )
-        return self
-
 
 class SMPCTopologyManifest(BaseTopologyManifest):
     """
