@@ -9198,7 +9198,7 @@ class DAGTopologyManifest(BaseTopologyManifest):
             if len(neighbors) > self.max_fan_out:
                 raise ValueError(f"Topological Violation: Node '{node}' exceeds max_fan_out of {self.max_fan_out}.")
         if not self.allow_cycles:
-            visited: set[NodeIdentifierState] = set()
+
             depth_memo: dict[NodeIdentifierState, int] = {}
 
             # Using Kahn's Algorithm / Iterative topological sort for depth and cycles

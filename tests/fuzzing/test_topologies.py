@@ -7,24 +7,28 @@
 # Commercial use beyond a 30-day trial requires a separate license
 #
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
-
 from typing import Any
 
 import hypothesis.strategies as st
 import pytest
-from hypothesis import given
+from hypothesis import given, settings
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
     AdversarialMarketTopologyManifest,
+    CausalDirectedEdgeState,
     ConsensusPolicy,
     CouncilTopologyManifest,
     DAGTopologyManifest,
+    DefeasibleCascadeEvent,
+    EpistemicLedgerState,
     EpistemicSOPManifest,
     GenerativeManifoldSLA,
+    ObservationEvent,
     PredictionMarketPolicy,
     QuorumPolicy,
     SemanticDiscoveryIntent,
+    SwarmTopologyManifest,
     SystemNodeProfile,
     VectorEmbeddingState,
 )
@@ -130,14 +134,8 @@ def test_epistemic_sop_ghost_node_rejection(
 # Fuzzing tests added for CAUSAL cDAG & TOPOS FUZZER Agent Task
 # ==============================================================================
 
-from coreason_manifest.spec.ontology import (
-    SwarmTopologyManifest,
-    EpistemicLedgerState,
-    CausalDirectedEdgeState,
-    DefeasibleCascadeEvent,
-    ObservationEvent
-)
-from hypothesis import settings
+
+
 
 @settings(max_examples=250, deadline=None)
 @given(
@@ -223,9 +221,7 @@ def test_defeasible_cascade_logic_fuzz(cascade_id: str, root: str, quarantined: 
             pytest.fail("DefeasibleCascadeEvent failed to reject out-of-bounds decay factor")
     except ValueError as e:
         err_str = str(e).lower()
-        if "root_falsified_event_id cannot be in quarantined_event_ids" in err_str:
-            pass # Expected
-        elif "propagated_decay_factor" in err_str:
+        if "root_falsified_event_id cannot be in quarantined_event_ids" in err_str or "propagated_decay_factor" in err_str:
             pass # Expected
         elif "validation error" in err_str:
             pass # pydantic validation
@@ -272,9 +268,7 @@ def test_epistemic_ledger_history_fuzz(history: list[ObservationEvent]) -> None:
         EpistemicLedgerState(history=history)
         # Should always succeed instantiation, but we sort the history
     except ValueError as e:
-        if "Epistemic paradox" in str(e):
-            pass
-        elif "validation error" in str(e).lower():
+        if "Epistemic paradox" in str(e) or "validation error" in str(e).lower():
             pass
         else:
             pytest.fail(f"Unexpected ValueError: {e}")
