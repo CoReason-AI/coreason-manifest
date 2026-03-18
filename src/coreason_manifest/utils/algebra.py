@@ -523,18 +523,19 @@ def apply_state_differential(
 
         patch_value = patch.value
 
-        # Using default arguments in lambdas to correctly bind loop variables
-        patch_dispatch = {
-            "add": lambda t=target, lp=last_part, v=patch_value: _apply_patch_add(t, lp, v),
-            "remove": lambda t=target, lp=last_part: _apply_patch_remove(t, lp),
-            "replace": lambda t=target, lp=last_part, v=patch_value: _apply_patch_replace(t, lp, v),
-            "copy": lambda ns=new_state, t=target, lp=last_part, p=patch: _apply_patch_copy_move(ns, t, lp, p),
-            "move": lambda ns=new_state, t=target, lp=last_part, p=patch: _apply_patch_copy_move(ns, t, lp, p),
-            "test": lambda t=target, lp=last_part, v=patch_value: _apply_patch_test(t, lp, v),
-        }
-
         try:
-            patch_dispatch[patch.op]()
+            if patch.op == "add":
+                _apply_patch_add(target, last_part, patch_value)
+            elif patch.op == "remove":
+                _apply_patch_remove(target, last_part)
+            elif patch.op == "replace":
+                _apply_patch_replace(target, last_part, patch_value)
+            elif patch.op in ("copy", "move"):
+                _apply_patch_copy_move(new_state, target, last_part, patch)
+            elif patch.op == "test":
+                _apply_patch_test(target, last_part, patch_value)
+            else:
+                raise ValueError(f"Unknown patch op: {patch.op}")
         except ValueError as e:
             # We preserve the original exception messaging strategy to not break any possible external test suite reliance on the exact strings in apply_state_differential.
             if (
