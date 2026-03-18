@@ -31,10 +31,7 @@ from coreason_manifest.spec.ontology import (
 )
 
 
-@given(
-    st.sampled_from(list(InformationClassificationProfile)),
-    st.sampled_from(list(InformationClassificationProfile))
-)
+@given(st.sampled_from(list(InformationClassificationProfile)), st.sampled_from(list(InformationClassificationProfile)))
 def test_information_classification_profile_comparisons(prof1, prof2):
     # Test __lt__
     assert (prof1 < prof2) == (prof1.clearance_level < prof2.clearance_level)
@@ -53,10 +50,7 @@ def test_information_classification_profile_comparisons(prof1, prof2):
     assert prof1.__ge__("invalid") is NotImplemented
 
 
-@given(
-    st.sampled_from(list(RiskLevelPolicy)),
-    st.sampled_from(list(RiskLevelPolicy))
-)
+@given(st.sampled_from(list(RiskLevelPolicy)), st.sampled_from(list(RiskLevelPolicy)))
 def test_risk_level_policy_comparisons(risk1, risk2):
     # Test __lt__
     assert (risk1 < risk2) == (risk1.weight < risk2.weight)
@@ -78,38 +72,46 @@ def test_risk_level_policy_comparisons(risk1, risk2):
 @given(st.text(min_size=1, max_size=2000))
 def test_browser_dom_state_ssrf_quarantine_hypothesis(url_str):
     import contextlib
+
     with contextlib.suppress(ValidationError):
         BrowserDOMState(current_url=url_str)
 
 
 @given(
-    st.sampled_from([
-        "file:///etc/passwd",
-        "file://localhost/C$/Windows/System32",
-        "http://localhost",
-        "https://127.0.0.1",
-        "http://10.0.0.1",
-        "http://[::1]",
-        "http://broadcasthost",
-        "http://something.local",
-        "http://internal",
-        "http://my.internal",
-        "http://192.168.1.1",
-        "http://169.254.169.254",
-        "http://0x7f000001",
-        "http://0177.0.0.1"
-    ])
+    st.sampled_from(
+        [
+            "file:///etc/passwd",
+            "file://localhost/C$/Windows/System32",
+            "http://localhost",
+            "https://127.0.0.1",
+            "http://10.0.0.1",
+            "http://[::1]",
+            "http://broadcasthost",
+            "http://something.local",
+            "http://internal",
+            "http://my.internal",
+            "http://192.168.1.1",
+            "http://169.254.169.254",
+            "http://0x7f000001",
+            "http://0177.0.0.1",
+        ]
+    )
 )
 def test_browser_dom_state_bogon_ssrf_strict(url_str):
     with pytest.raises(ValidationError) as exc_info:
         BrowserDOMState(current_url=url_str)
-    assert "SSRF topological violation detected" in str(exc_info.value) or "restricted IP detected" in str(exc_info.value)
+    assert "SSRF topological violation detected" in str(exc_info.value) or "restricted IP detected" in str(
+        exc_info.value
+    )
+
 
 @given(
-    st.sampled_from([
-        "http://",
-        "https://",
-    ])
+    st.sampled_from(
+        [
+            "http://",
+            "https://",
+        ]
+    )
 )
 def test_browser_dom_state_invalid_hostname_ssrf(url_str):
     with pytest.raises(ValidationError) as exc_info:
@@ -119,16 +121,14 @@ def test_browser_dom_state_invalid_hostname_ssrf(url_str):
 
 @given(
     st.lists(st.sampled_from(list(InformationClassificationProfile)), min_size=1, max_size=4),
-    st.sampled_from(list(InformationClassificationProfile))
+    st.sampled_from(list(InformationClassificationProfile)),
 )
 def test_workflow_manifest_lbac_dominance(allowed_classes, sla_max_class):
     # Setup the required fields for WorkflowManifest
-    prov = EpistemicProvenanceReceipt(extracted_by="did:node:id-1", source_event_id="a"*64)
+    prov = EpistemicProvenanceReceipt(extracted_by="did:node:id-1", source_event_id="a" * 64)
     topology = DAGTopologyManifest(nodes={}, edges=[], max_depth=10, max_fan_out=10)
     sla = BilateralSLA(
-        receiving_tenant_id="tenant-x",
-        max_permitted_classification=sla_max_class,
-        liability_limit_magnitude=100
+        receiving_tenant_id="tenant-x", max_permitted_classification=sla_max_class, liability_limit_magnitude=100
     )
 
     max_local_clearance = max(prof.clearance_level for prof in allowed_classes)
@@ -140,7 +140,7 @@ def test_workflow_manifest_lbac_dominance(allowed_classes, sla_max_class):
                 manifest_version="1.0.0",
                 topology=topology,
                 allowed_information_classifications=allowed_classes,
-                federated_sla=sla
+                federated_sla=sla,
             )
         assert "LBAC Boundary Breach" in str(exc_info.value)
     else:
@@ -149,7 +149,7 @@ def test_workflow_manifest_lbac_dominance(allowed_classes, sla_max_class):
             manifest_version="1.0.0",
             topology=topology,
             allowed_information_classifications=allowed_classes,
-            federated_sla=sla
+            federated_sla=sla,
         )
         assert manifest.allowed_information_classifications is not None
         # Assert sorting works
@@ -169,10 +169,7 @@ def test_smpc_topology_manifest_sorting(participant_ids):
     assert manifest.participant_node_ids == sorted(dids)
 
 
-@given(st.sampled_from([
-    ("did:node:gen1", "did:node:gen1"),
-    ("did:node:eval1", "did:node:gen1")
-]))
+@given(st.sampled_from([("did:node:gen1", "did:node:gen1"), ("did:node:eval1", "did:node:gen1")]))
 def test_evaluator_optimizer_bipartite_nodes(nodes_pair):
     gen_id, eval_id = nodes_pair
     # Populate the nodes dict with the gen_id only
@@ -180,10 +177,7 @@ def test_evaluator_optimizer_bipartite_nodes(nodes_pair):
 
     with pytest.raises(ValidationError) as exc_info:
         EvaluatorOptimizerTopologyManifest(
-            nodes=nodes,
-            generator_node_id=gen_id,
-            evaluator_node_id=eval_id,
-            max_revision_loops=5
+            nodes=nodes, generator_node_id=gen_id, evaluator_node_id=eval_id, max_revision_loops=5
         )
 
     # If they are the same, it fails the "cannot be the same node" or "not found"
@@ -191,12 +185,7 @@ def test_evaluator_optimizer_bipartite_nodes(nodes_pair):
     assert "Generator and Evaluator cannot be the same node" in err_str or "not found in topology nodes" in err_str
 
 
-@given(
-    st.lists(
-        st.tuples(st.text(min_size=1), st.floats(min_value=0.0, max_value=1.0)),
-        min_size=1, max_size=5
-    )
-)
+@given(st.lists(st.tuples(st.text(min_size=1), st.floats(min_value=0.0, max_value=1.0)), min_size=1, max_size=5))
 def test_evolutionary_topology_manifest_sorting(objectives_data):
     objectives = [
         FitnessObjectiveProfile(target_metric=name, weight=weight, direction="maximize")
