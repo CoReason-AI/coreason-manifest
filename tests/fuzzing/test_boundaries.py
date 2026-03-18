@@ -8,6 +8,8 @@
 #
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
+import contextlib
+import math
 from typing import Any
 
 import hypothesis.strategies as st
@@ -20,6 +22,7 @@ from coreason_manifest.spec.ontology import (
     BrowserDOMState,
     ConstitutionalPolicy,
     ContinuousMutationPolicy,
+    DocumentLayoutRegionState,
     DynamicLayoutManifest,
     EpistemicCompressionSLA,
     EpistemicTransmutationTask,
@@ -27,8 +30,13 @@ from coreason_manifest.spec.ontology import (
     GlobalGovernancePolicy,
     InformationClassificationProfile,
     InsightCardProfile,
+    MultimodalTokenAnchorState,
+    NDimensionalTensorManifest,
+    ScalePolicy,
     SemanticSlicingPolicy,
+    SpatialBoundingBoxProfile,
     StateHydrationManifest,
+    TensorStructuralFormatProfile,
 )
 
 
@@ -390,15 +398,8 @@ def test_state_hydration_manifest_long_string_quarantine() -> None:
             max_retained_tokens=4096,
         )
 
-from coreason_manifest.spec.ontology import (
-    SpatialBoundingBoxProfile,
-    MultimodalTokenAnchorState,
-    DocumentLayoutRegionState,
-    ScalePolicy,
-    NDimensionalTensorManifest,
-    TensorStructuralFormatProfile
-)
-import math
+
+
 
 # --- SpatialBoundingBoxProfile ---
 @given(
@@ -443,10 +444,8 @@ def test_multimodal_token_anchor_state(token_span_start, token_span_end, boundin
             valid = False
 
     if valid:
-        try:
+        with contextlib.suppress(ValidationError):
             MultimodalTokenAnchorState(token_span_start=token_span_start, token_span_end=token_span_end, bounding_box=bounding_box)
-        except ValidationError:
-            pass
     else:
         with pytest.raises((ValueError, ValidationError)):
             MultimodalTokenAnchorState(token_span_start=token_span_start, token_span_end=token_span_end, bounding_box=bounding_box)
@@ -486,9 +485,7 @@ def test_scale_policy(type_val, domain_min, domain_max):
 )
 def test_ndimensional_tensor_manifest(shape, structural_type):
     valid = True
-    if len(shape) < 1:
-        valid = False
-    elif any(dim <= 0 for dim in shape):
+    if len(shape) < 1 or any(dim <= 0 for dim in shape):
         valid = False
 
     if valid:
@@ -528,7 +525,5 @@ def test_ndimensional_tensor_manifest(shape, structural_type):
 def test_document_layout_region_state(block_id, block_type, token_span_start, token_span_end):
     anchor = MultimodalTokenAnchorState(token_span_start=token_span_start, token_span_end=token_span_end)
 
-    try:
+    with contextlib.suppress(ValueError, ValidationError):
         DocumentLayoutRegionState(block_id=block_id, block_type=block_type, anchor=anchor)
-    except (ValueError, ValidationError):
-        pass

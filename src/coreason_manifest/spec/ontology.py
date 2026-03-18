@@ -587,16 +587,14 @@ class ScalePolicy(CoreasonBaseState):
 
     @model_validator(mode="after")
     def validate_domain(self) -> Self:
-        if self.domain_min is not None and self.domain_max is not None:
-            if self.domain_min > self.domain_max:
-                raise ValueError("domain_min cannot be greater than domain_max.")
+        if self.domain_min is not None and self.domain_max is not None and self.domain_min > self.domain_max:
+            raise ValueError("domain_min cannot be greater than domain_max.")
 
         # Test zero or subnormal scales for division by zero risk or floating infinity failures.
         # Specifically, for ScalePolicy, if we map zero values, etc.
         # No specific bounds enforced by the requirements on scale other than domains shouldn't cross or zero magnitude ranges?
-        if self.domain_min is not None and self.domain_max is not None:
-            if self.domain_min == self.domain_max and self.type in ["linear", "log", "time"]:
-                raise ValueError("Scale domain length cannot be zero for continuous mappings.")
+        if self.domain_min is not None and self.domain_max is not None and self.domain_min == self.domain_max and self.type in ["linear", "log", "time"]:
+            raise ValueError("Scale domain length cannot be zero for continuous mappings.")
 
         # for log type, domain bounds must be strictly positive
         if self.type == "log":
