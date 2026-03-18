@@ -939,11 +939,14 @@ class RoutingFrontierPolicy(CoreasonBaseState):
     )
 
     @model_validator(mode="before")
-    def _clamp_frontier_bounds_before(cls, values: Any) -> Any:
+    def _clamp_frontier_bounds_before(self, values: Any) -> Any:
         if isinstance(values, dict):
-            if "max_latency_ms" in values: values["max_latency_ms"] = max(1, min(values["max_latency_ms"], 86400000))
-            if "max_cost_magnitude_per_token" in values: values["max_cost_magnitude_per_token"] = max(1, min(values["max_cost_magnitude_per_token"], 1000000000))
-            if "min_capability_score" in values: values["min_capability_score"] = max(0.0, min(values["min_capability_score"], 1.0))
+            if "max_latency_ms" in values:
+                values["max_latency_ms"] = max(1, min(values["max_latency_ms"], 86400000))
+            if "max_cost_magnitude_per_token" in values:
+                values["max_cost_magnitude_per_token"] = max(1, min(values["max_cost_magnitude_per_token"], 1000000000))
+            if "min_capability_score" in values:
+                values["min_capability_score"] = max(0.0, min(values["min_capability_score"], 1.0))
             if values.get("max_carbon_intensity_gco2eq_kwh") is not None:
                 values["max_carbon_intensity_gco2eq_kwh"] = max(0.0, min(values["max_carbon_intensity_gco2eq_kwh"], 10000.0))
         return values
@@ -4278,7 +4281,7 @@ class EscrowPolicy(CoreasonBaseState):
     )
 
     @model_validator(mode="before")
-    def _clamp_escrow_magnitude_before(cls, values: Any) -> Any:
+    def _clamp_escrow_magnitude_before(self, values: Any) -> Any:
         if isinstance(values, dict):
             values["escrow_locked_magnitude"] = max(0, min(values.get("escrow_locked_magnitude", 0), 1000000000))
         return values
@@ -4935,11 +4938,14 @@ class TokenBurnReceipt(BaseStateEvent):
     )
 
     @model_validator(mode="before")
-    def _clamp_token_burn_before(cls, values: Any) -> Any:
+    def _clamp_token_burn_before(self, values: Any) -> Any:
         if isinstance(values, dict):
-            if "input_tokens" in values: values["input_tokens"] = max(0, min(values["input_tokens"], 1000000000))
-            if "output_tokens" in values: values["output_tokens"] = max(0, min(values["output_tokens"], 1000000000))
-            if "burn_magnitude" in values: values["burn_magnitude"] = max(0, min(values["burn_magnitude"], 1000000000))
+            if "input_tokens" in values:
+                values["input_tokens"] = max(0, min(values["input_tokens"], 1000000000))
+            if "output_tokens" in values:
+                values["output_tokens"] = max(0, min(values["output_tokens"], 1000000000))
+            if "burn_magnitude" in values:
+                values["burn_magnitude"] = max(0, min(values["burn_magnitude"], 1000000000))
         return values
 
 
@@ -6488,7 +6494,7 @@ class MarketContract(CoreasonBaseState):
     slashing_penalty: int = Field(ge=0, description="The exact atomic token amount slashed for Byzantine faults.")
 
     @model_validator(mode="before")
-    def _clamp_economic_escrow_invariant(cls, values: Any) -> Any:
+    def _clamp_economic_escrow_invariant(self, values: Any) -> Any:
         """Mathematically clamp the invariant so a contract cannot penalize more than the escrowed amount."""
         if isinstance(values, dict):
             mc = values.get("minimum_collateral", 0)
@@ -7180,7 +7186,7 @@ class PredictionMarketState(CoreasonBaseState):
     )
 
     @model_validator(mode="before")
-    def _clamp_market_probabilities_before(cls, values: Any) -> Any:
+    def _clamp_market_probabilities_before(self, values: Any) -> Any:
         if isinstance(values, dict) and "current_market_probabilities" in values:
             clamped_probs: dict[str, str] = {}
             total = 0.0
@@ -7200,7 +7206,7 @@ class PredictionMarketState(CoreasonBaseState):
                 normalized_probs = {k: str(float(v) / total) for k, v in clamped_probs.items()}
             elif total == 0.0 and clamped_probs:
                 uniform = 1.0 / len(clamped_probs)
-                normalized_probs = {k: str(uniform) for k in clamped_probs.keys()}
+                normalized_probs = {k: str(uniform) for k in clamped_probs}
             else:
                 normalized_probs = clamped_probs
 
@@ -7355,7 +7361,7 @@ class ComputeProvisioningIntent(CoreasonBaseState):
     )
 
     @model_validator(mode="before")
-    def _clamp_max_budget_before(cls, values: Any) -> Any:
+    def _clamp_max_budget_before(self, values: Any) -> Any:
         if isinstance(values, dict):
             values["max_budget"] = max(0, min(values.get("max_budget", 0), 1000000000))
         return values

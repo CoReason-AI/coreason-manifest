@@ -1,14 +1,17 @@
-import pytest
-from hypothesis import given, strategies as st
+import math
+
+from hypothesis import given
+from hypothesis import strategies as st
+
 from coreason_manifest.spec.ontology import (
+    ComputeProvisioningIntent,
+    EscrowPolicy,
     MarketContract,
     PredictionMarketState,
-    TokenBurnReceipt,
     RoutingFrontierPolicy,
-    EscrowPolicy,
-    ComputeProvisioningIntent,
+    TokenBurnReceipt,
 )
-import math
+
 
 @given(
     minimum_collateral=st.integers(min_value=-1000000000, max_value=2000000000),

@@ -1,5 +1,4 @@
-import re
-with open("src/coreason_manifest/spec/ontology.py", "r") as f:
+with open("src/coreason_manifest/spec/ontology.py") as f:
     text = f.read()
 
 # Look for unreachable code in ONLY these 6 classes:
