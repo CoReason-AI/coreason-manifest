@@ -193,6 +193,7 @@ def test_evaluator_optimizer_bipartite_nodes(nodes_pair: tuple[str, str]) -> Non
     gen_id, eval_id = nodes_pair
     # Populate the nodes dict with the gen_id only
     from coreason_manifest.spec.ontology import AnyNodeProfile
+
     nodes: dict[str, AnyNodeProfile] = {gen_id: SystemNodeProfile(description="desc")}
 
     with pytest.raises(ValidationError) as exc_info:
