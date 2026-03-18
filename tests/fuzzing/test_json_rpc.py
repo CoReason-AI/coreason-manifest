@@ -1,19 +1,20 @@
 import hypothesis.strategies as st
+import pytest
 from hypothesis import given
 from pydantic import ValidationError
-import pytest
+
 from coreason_manifest.spec.ontology import (
-    BoundedJSONRPCIntent,
-    LatentSchemaInferenceIntent,
-    MarketContract,
-    LatentScratchpadReceipt,
-    ThoughtBranchState,
     ActionSpaceManifest,
-    ToolManifest,
+    BoundedJSONRPCIntent,
     ContinuousMutationPolicy,
     EpistemicLedgerState,
+    LatentSchemaInferenceIntent,
+    LatentScratchpadReceipt,
+    MarketContract,
+    PermissionBoundaryPolicy,
     SideEffectProfile,
-    PermissionBoundaryPolicy
+    ThoughtBranchState,
+    ToolManifest,
 )
 
 # Define a recursive strategy to simulate valid JSON payload topologies
