@@ -2,7 +2,6 @@ import re
 from typing import Any
 
 import pytest
-import re
 from hypothesis import given
 from hypothesis import strategies as st
 
@@ -145,8 +144,7 @@ def test_risk_level_policy_comparisons(a: RiskLevelPolicy, b: RiskLevelPolicy) -
 
 @given(st.lists(st.text(min_size=1, max_size=255), min_size=1, max_size=5), st.lists(st.text(min_size=1, max_size=255), min_size=1, max_size=5))
 def test_causal_model_manifest_sorting(observed: list[str], latent: list[str]) -> None:
-    from coreason_manifest.spec.ontology import CausalDirectedEdgeState
-    from coreason_manifest.spec.ontology import StructuralCausalGraphProfile
+    from coreason_manifest.spec.ontology import CausalDirectedEdgeState, StructuralCausalGraphProfile
 
     edges = [
         CausalDirectedEdgeState(source_variable="b", target_variable="a", edge_type="direct_cause"),

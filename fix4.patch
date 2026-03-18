@@ -1,0 +1,15 @@
+<<<<<<< SEARCH
+            VerifiableCredentialPresentationReceipt(
+                presentation_format="jwt_vc",
+                issuer_did=i,
+                credential_schema_uri="http://schema",
+                authorization_claims={"claim": "value"}
+            )
+=======
+            VerifiableCredentialPresentationReceipt(
+                presentation_format="jwt_vc",
+                issuer_did=i if len(i) >= 7 else i.ljust(7, "0"),
+                cryptographic_proof_blob="b"*64,
+                authorization_claims={"claim": "value"}
+            )
+>>>>>>> REPLACE

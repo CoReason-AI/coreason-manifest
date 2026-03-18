@@ -1,0 +1,5 @@
+<<<<<<< SEARCH
+        from coreason_manifest.spec.ontology import CausalModelManifest, CausalDirectedEdgeState
+=======
+        from coreason_manifest.spec.ontology import StructuralCausalModelManifest, CausalDirectedEdgeState
+>>>>>>> REPLACE

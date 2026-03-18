@@ -1,0 +1,5 @@
+<<<<<<< SEARCH
+    manifest = CausalModelManifest(observed_variables=observed, latent_variables=latent, causal_edges=edges)
+=======
+    manifest = StructuralCausalModelManifest(observed_variables=observed, latent_variables=latent, causal_edges=edges)
+>>>>>>> REPLACE

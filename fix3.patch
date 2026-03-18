@@ -1,0 +1,5 @@
+<<<<<<< SEARCH
+    ensemble = EnsembleTopologyProfile(nodes={}, routing_strategy="majority_vote")
+=======
+    ensemble = EnsembleTopologyProfile(nodes={}, routing_strategy="majority_vote", concurrent_branch_ids=["1"], fusion_function="test")
+>>>>>>> REPLACE

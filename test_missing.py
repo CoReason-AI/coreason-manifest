@@ -1,0 +1,2 @@
+from coreason_manifest.spec.ontology import FederatedCapabilityAttestationReceipt
+print(FederatedCapabilityAttestationReceipt.model_fields.keys())
