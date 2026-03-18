@@ -54,7 +54,7 @@ def test_adversarial_simulation_payload_fuzzing(payload: Any) -> None:
             assert len(profile.synthetic_payload) <= 100000
         elif isinstance(profile.synthetic_payload, dict):
             # Assert dictionary keys adhere to the 255-char StringConstraints limit
-            for key in profile.synthetic_payload.keys():
+            for key in profile.synthetic_payload:
                 assert len(key) <= 255
                 
     except ValidationError:
