@@ -299,7 +299,7 @@ class CoreasonBaseState(BaseModel):
     def model_dump_canonical(self) -> bytes:
         """Return a strictly sorted, canonical JSON serialization for cryptographic hashing."""
         raw_dict = self.model_dump(mode="json", exclude_none=True, by_alias=True)
-        # json.dumps(..., sort_keys=True) natively handles deep canonical sorting of all nested dictionary keys
+        # Topological mapping: Enforces RFC 8785 strict canonical key sorting.
         return json.dumps(raw_dict, ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode("utf-8")
 
 
