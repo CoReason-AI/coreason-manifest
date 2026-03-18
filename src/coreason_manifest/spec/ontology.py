@@ -593,7 +593,12 @@ class ScalePolicy(CoreasonBaseState):
         # Test zero or subnormal scales for division by zero risk or floating infinity failures.
         # Specifically, for ScalePolicy, if we map zero values, etc.
         # No specific bounds enforced by the requirements on scale other than domains shouldn't cross or zero magnitude ranges?
-        if self.domain_min is not None and self.domain_max is not None and self.domain_min == self.domain_max and self.type in ["linear", "log", "time"]:
+        if (
+            self.domain_min is not None
+            and self.domain_max is not None
+            and self.domain_min == self.domain_max
+            and self.type in ["linear", "log", "time"]
+        ):
             raise ValueError("Scale domain length cannot be zero for continuous mappings.")
 
         # for log type, domain bounds must be strictly positive
@@ -1673,6 +1678,7 @@ class MultimodalTokenAnchorState(CoreasonBaseState):
         if self.bounding_box is not None:
             x_min, y_min, x_max, y_max = self.bounding_box
             import math
+
             if math.isnan(x_min) or math.isnan(y_min) or math.isnan(x_max) or math.isnan(y_max):
                 raise ValueError("Spatial bounds cannot be NaN.")
             if math.isinf(x_min) or math.isinf(y_min) or math.isinf(x_max) or math.isinf(y_max):

@@ -399,19 +399,22 @@ def test_state_hydration_manifest_long_string_quarantine() -> None:
         )
 
 
-
-
 # --- SpatialBoundingBoxProfile ---
 @given(
     x_min=st.floats(min_value=-1.0, max_value=2.0),
     y_min=st.floats(min_value=-1.0, max_value=2.0),
     x_max=st.floats(min_value=-1.0, max_value=2.0),
-    y_max=st.floats(min_value=-1.0, max_value=2.0)
+    y_max=st.floats(min_value=-1.0, max_value=2.0),
 )
 def test_spatial_bounding_box_profile_all_floats(x_min, y_min, x_max, y_max):
-    valid = (0.0 <= x_min <= 1.0 and 0.0 <= y_min <= 1.0 and
-             0.0 <= x_max <= 1.0 and 0.0 <= y_max <= 1.0 and
-             x_min <= x_max and y_min <= y_max)
+    valid = (
+        0.0 <= x_min <= 1.0
+        and 0.0 <= y_min <= 1.0
+        and 0.0 <= x_max <= 1.0
+        and 0.0 <= y_max <= 1.0
+        and x_min <= x_max
+        and y_min <= y_max
+    )
 
     if valid:
         SpatialBoundingBoxProfile(x_min=x_min, y_min=y_min, x_max=x_max, y_max=y_max)
@@ -424,7 +427,15 @@ def test_spatial_bounding_box_profile_all_floats(x_min, y_min, x_max, y_max):
 @given(
     token_span_start=st.one_of(st.none(), st.integers(min_value=-10, max_value=100)),
     token_span_end=st.one_of(st.none(), st.integers(min_value=-10, max_value=100)),
-    bounding_box=st.one_of(st.none(), st.tuples(st.floats(min_value=-1.0, max_value=2.0), st.floats(min_value=-1.0, max_value=2.0), st.floats(min_value=-1.0, max_value=2.0), st.floats(min_value=-1.0, max_value=2.0))),
+    bounding_box=st.one_of(
+        st.none(),
+        st.tuples(
+            st.floats(min_value=-1.0, max_value=2.0),
+            st.floats(min_value=-1.0, max_value=2.0),
+            st.floats(min_value=-1.0, max_value=2.0),
+            st.floats(min_value=-1.0, max_value=2.0),
+        ),
+    ),
 )
 def test_multimodal_token_anchor_state(token_span_start, token_span_end, bounding_box):
     valid = True
@@ -445,17 +456,21 @@ def test_multimodal_token_anchor_state(token_span_start, token_span_end, boundin
 
     if valid:
         with contextlib.suppress(ValidationError):
-            MultimodalTokenAnchorState(token_span_start=token_span_start, token_span_end=token_span_end, bounding_box=bounding_box)
+            MultimodalTokenAnchorState(
+                token_span_start=token_span_start, token_span_end=token_span_end, bounding_box=bounding_box
+            )
     else:
         with pytest.raises((ValueError, ValidationError)):
-            MultimodalTokenAnchorState(token_span_start=token_span_start, token_span_end=token_span_end, bounding_box=bounding_box)
+            MultimodalTokenAnchorState(
+                token_span_start=token_span_start, token_span_end=token_span_end, bounding_box=bounding_box
+            )
 
 
 # --- ScalePolicy ---
 @given(
     type_val=st.sampled_from(["linear", "log", "time", "ordinal", "nominal"]),
     domain_min=st.one_of(st.none(), st.floats(min_value=-1000.0, max_value=1000.0)),
-    domain_max=st.one_of(st.none(), st.floats(min_value=-1000.0, max_value=1000.0))
+    domain_max=st.one_of(st.none(), st.floats(min_value=-1000.0, max_value=1000.0)),
 )
 def test_scale_policy(type_val, domain_min, domain_max):
     valid = True
@@ -503,7 +518,7 @@ def test_ndimensional_tensor_manifest(shape, structural_type):
             structural_type=structural_type,
             vram_footprint_bytes=vram_footprint_bytes,
             merkle_root=merkle_root,
-            storage_uri=storage_uri
+            storage_uri=storage_uri,
         )
     else:
         with pytest.raises((ValueError, ValidationError)):
@@ -512,15 +527,18 @@ def test_ndimensional_tensor_manifest(shape, structural_type):
                 structural_type=structural_type,
                 vram_footprint_bytes=vram_footprint_bytes,
                 merkle_root=merkle_root,
-                storage_uri=storage_uri
+                storage_uri=storage_uri,
             )
+
 
 # --- DocumentLayoutRegionState ---
 @given(
-    block_id=st.text(min_size=1, max_size=128, alphabet=st.characters(whitelist_categories=('L', 'N'), whitelist_characters='_.:-')),
+    block_id=st.text(
+        min_size=1, max_size=128, alphabet=st.characters(whitelist_categories=("L", "N"), whitelist_characters="_.:-")
+    ),
     block_type=st.sampled_from(["header", "paragraph", "figure", "table", "footnote", "caption", "equation"]),
     token_span_start=st.integers(min_value=0, max_value=100),
-    token_span_end=st.integers(min_value=101, max_value=200)
+    token_span_end=st.integers(min_value=101, max_value=200),
 )
 def test_document_layout_region_state(block_id, block_type, token_span_start, token_span_end):
     anchor = MultimodalTokenAnchorState(token_span_start=token_span_start, token_span_end=token_span_end)
