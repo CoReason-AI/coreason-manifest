@@ -54,10 +54,10 @@ def test_base_node_profile_domain_extensions_fuzz_valid_space(extensions: Any) -
 
 def test_base_node_profile_domain_extensions_depth_exceeded() -> None:
     deep_dict: Any = "leaf"
-    for _ in range(6):
+    for _ in range(11):
         deep_dict = {"key": deep_dict}
 
-    with pytest.raises(ValueError, match="domain_extensions exceeds maximum allowed depth of 5"):
+    with pytest.raises(ValueError, match="Payload exceeds maximum recursion depth of 10"):
         BaseNodeProfile(
             description="test node",
             domain_extensions=deep_dict,
@@ -65,7 +65,7 @@ def test_base_node_profile_domain_extensions_depth_exceeded() -> None:
 
 
 def test_base_node_profile_domain_extensions_invalid_keys() -> None:
-    with pytest.raises(ValueError, match="domain_extensions keys must be strings"):
+    with pytest.raises(ValueError, match="Dictionary keys must be strings"):
         BaseNodeProfile(
             description="test node",
             domain_extensions={1: "a"},  # type: ignore
@@ -73,7 +73,7 @@ def test_base_node_profile_domain_extensions_invalid_keys() -> None:
 
 
 def test_base_node_profile_domain_extensions_key_too_long() -> None:
-    with pytest.raises(ValueError, match="domain_extensions key exceeds maximum length of 255 characters"):
+    with pytest.raises(ValueError, match="String should have at most 255 characters"):
         BaseNodeProfile(
             description="test node",
             domain_extensions={"a" * 256: "b"},
@@ -84,7 +84,7 @@ def test_base_node_profile_domain_extensions_invalid_leaf() -> None:
     class CustomObj:
         pass
 
-    with pytest.raises(ValueError, match="domain_extensions leaf values must be JSON primitives, got CustomObj"):
+    with pytest.raises(ValueError, match="Payload value must be a valid JSON primitive, got CustomObj"):
         BaseNodeProfile(
             description="test node",
             domain_extensions={"a": CustomObj()},
@@ -92,7 +92,7 @@ def test_base_node_profile_domain_extensions_invalid_leaf() -> None:
 
 
 def test_base_node_profile_domain_extensions_not_dict() -> None:
-    with pytest.raises(ValueError, match="domain_extensions must be a dictionary"):
+    with pytest.raises(ValueError, match="Input should be a valid dictionary"):
         BaseNodeProfile(
             description="test node",
             domain_extensions=["not a dict"],  # type: ignore
@@ -101,10 +101,10 @@ def test_base_node_profile_domain_extensions_not_dict() -> None:
 
 def test_base_node_profile_domain_extensions_list_depth_exceeded() -> None:
     deep_list: Any = "leaf"
-    for _ in range(6):
+    for _ in range(11):
         deep_list = [deep_list]
 
-    with pytest.raises(ValueError, match="domain_extensions exceeds maximum allowed depth of 5"):
+    with pytest.raises(ValueError, match="Payload exceeds maximum recursion depth of 10"):
         BaseNodeProfile(
             description="test node",
             domain_extensions={"a": deep_list},
