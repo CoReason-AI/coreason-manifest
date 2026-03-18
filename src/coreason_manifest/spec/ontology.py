@@ -6552,11 +6552,11 @@ class MarketContract(CoreasonBaseState):
             mc = values.get("minimum_collateral", 0)
             sp = values.get("slashing_penalty", 0)
             mc_int, sp_int = 0, 0
-            if hasattr(mc, '__int__') and hasattr(sp, '__int__'):
+            if hasattr(mc, "__int__") and hasattr(sp, "__int__"):
                 try:
                     mc_int = int(mc)
                     sp_int = int(sp)
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
             cmc = max(0, min(mc_int, 1000000000))
             if sp_int > cmc:

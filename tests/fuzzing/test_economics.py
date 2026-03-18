@@ -20,6 +20,7 @@ from coreason_manifest.spec.ontology import (
 def test_market_contract(minimum_collateral: int, slashing_penalty: int) -> None:
     import pytest
     from pydantic import ValidationError
+
     expected_mc = max(0, min(minimum_collateral, 1000000000))
     if slashing_penalty > expected_mc:
         with pytest.raises(ValidationError):
