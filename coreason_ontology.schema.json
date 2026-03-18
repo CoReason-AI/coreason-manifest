@@ -165,7 +165,7 @@
     },
     "AdjudicationIntent": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Social Choice Theory to resolve the Condorcet Paradox.\nTriggers a Mixed-Initiative forced resolution to break an epistemic deadlock within a\nCouncilTopologyManifest. As an ...Intent suffix, the LLM may execute non-monotonic\nreasoning here.\n\nCAUSAL AFFORDANCE: Halts the active execution DAG and forces an external oracle\n(human or system) to act as a Dictatorial tie-breaker, definitively collapsing the\nprobability wave of competing claims in a Multi-Criteria Decision Analysis (MCDA)\nframework.\n\nEPISTEMIC BOUNDS: The state space is bounded by deadlocked_claims (min_length=2,\nmax_length=86400000), deterministically sorted via @model_validator sort_arrays for\nRFC 8785 canonical hashing. The timeout_action is restricted to a strict Literal\n[\"rollback\", \"proceed_default\", \"terminate\"] to prevent infinite stalling.\n\nMCP ROUTING TRIGGERS: Social Choice Theory, Condorcet Paradox, MCDA Deadlock,\nDictatorial Resolution, Tie-Breaking Heuristic",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Social Choice Theory to resolve the Condorcet Paradox.\nTriggers a Mixed-Initiative forced resolution to break an epistemic deadlock within a\nCouncilTopologyManifest. As an ...Intent suffix, the LLM may execute non-monotonic\nreasoning here.\n\nCAUSAL AFFORDANCE: Halts the active execution DAG and forces an external oracle\n(human or system) to act as a Dictatorial tie-breaker, definitively collapsing the\nprobability wave of competing claims in a Multi-Criteria Decision Analysis (MCDA)\nframework.\n\nEPISTEMIC BOUNDS: The state space is bounded by deadlocked_claims (min_length=2,\nmax_length=86400000). The `resolution_schema` is mathematically bounded against recursive\nJSON-bombing by the `@field_validator` `enforce_payload_topology`, physically preventing\nAutomata Intersection deadlocks (Halting Problem violations).\n\nMCP ROUTING TRIGGERS: Social Choice Theory, Condorcet Paradox, MCDA Deadlock,\nDictatorial Resolution, Tie-Breaking Heuristic",
       "properties": {
         "type": {
           "const": "forced_adjudication",
@@ -1413,7 +1413,7 @@
     },
     "BargeInInterruptEvent": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Encodes an asynchronous hardware interrupt or exogenous sensory spike that forces a premature probability wave collapse on an active generation trajectory.\n\nCAUSAL AFFORDANCE: Physically severs the continuous multimodal sequence of the target_event_id, injecting the retained_partial_payload into the Epistemic Quarantine and forcing the orchestrator to execute the defined epistemic_disposition instruction.\n\nEPISTEMIC BOUNDS: Topologically anchored to the target_event_id via a strict 128-char CID regex. The retained_partial_payload is mechanically capped at 100,000 bytes to mathematically prevent VRAM exhaustion from unbounded sensory streams.\n\nMCP ROUTING TRIGGERS: Asynchronous Interrupt, Generative Severing, Context Switching, Defeasible Disposition, Wave Collapse",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Encodes an asynchronous hardware interrupt or exogenous sensory spike that forces a premature probability wave collapse on an active generation trajectory.\n\nCAUSAL AFFORDANCE: Physically severs the continuous multimodal sequence of the target_event_id, injecting the retained_partial_payload into the Epistemic Quarantine and forcing the orchestrator to execute the defined epistemic_disposition instruction.\n\nEPISTEMIC BOUNDS: Topologically anchored to the target_event_id via a strict 128-char CID regex. The `retained_partial_payload` is volumetrically clamped by the `enforce_payload_topology` hook to mathematically prevent VRAM exhaustion from unbounded sensory streams.\n\nMCP ROUTING TRIGGERS: Asynchronous Interrupt, Generative Severing, Context Switching, Defeasible Disposition, Wave Collapse",
       "properties": {
         "event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
@@ -1511,7 +1511,7 @@
     },
     "BaseNodeProfile": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes the Graph Theory topological root structure (vertex) for all execution participants within a decentralized multi-agent graph.\n\nCAUSAL AFFORDANCE: Defines the foundational perimeter (objective function) of a participant, enabling the orchestrator to inject proactive oversight hooks (intervention_policies) across the node's lifecycle.\n\nEPISTEMIC BOUNDS: The semantic boundary is physically constrained by description (max_length=2000). The domain_extensions payload is mathematically bounded to a max recursive depth of 5 via @field_validator to prevent JSON-bomb memory leaks.\n\nMCP ROUTING TRIGGERS: Graph Theory, Topological Vertex, Subgraph Node, Lifecycle Hook, JSON-Bomb Prevention",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes the Graph Theory topological root structure (vertex) for all execution participants within a decentralized multi-agent graph.\n\nCAUSAL AFFORDANCE: Defines the foundational perimeter (objective function) of a participant, enabling the orchestrator to inject proactive oversight hooks (intervention_policies) across the node's lifecycle.\n\nEPISTEMIC BOUNDS: The semantic boundary is physically constrained by description (max_length=2000). The `domain_extensions` payload is volumetrically bounded by the `enforce_payload_topology` hook to an absolute $O(N)$ node limit, replacing the vulnerable recursive depth limit of 5 to definitively prevent JSON-bomb memory leaks and C-stack overflows during DAG serialization.\n\nMCP ROUTING TRIGGERS: Graph Theory, Topological Vertex, Subgraph Node, Lifecycle Hook, JSON-Bomb Prevention",
       "properties": {
         "description": {
           "description": "The semantic boundary defining the objective function or computational perimeter of the execution node.",
@@ -1910,7 +1910,7 @@
     },
     "BoundedInterventionScopePolicy": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes the Principle of Least Privilege (PoLP) to\ngeometrically restrict the structural mutation surface available to a human or\nexternal oracle. As a ...Policy suffix, this defines rigid mathematical\nboundaries.\n\nCAUSAL AFFORDANCE: Provides a deterministic mathematical mask over the\nEpistemicLedgerState, guaranteeing that the external operator can only perturb\nthe graph at explicitly whitelisted JSON Pointers via allowed_fields\n(string max_length=2000).\n\nEPISTEMIC BOUNDS: The mutation topology is physically constrained by\nallowed_fields (max_length=1000000000), deterministically sorted via\n@model_validator sort_arrays to preserve RFC 8785 canonical hashing. The\njson_schema_whitelist (key max_length=255) strictly bounds the acceptable\ninput types.\n\nMCP ROUTING TRIGGERS: Principle of Least Privilege, State Mutation Masking,\nZero-Trust Architecture, RFC 8785 Canonicalization, Bounded Surface Area",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes the Principle of Least Privilege (PoLP) to\ngeometrically restrict the structural mutation surface available to a human or\nexternal oracle. As a ...Policy suffix, this defines rigid mathematical\nboundaries.\n\nCAUSAL AFFORDANCE: Provides a deterministic mathematical mask over the\nEpistemicLedgerState, guaranteeing that the external operator can only perturb\nthe graph at explicitly whitelisted JSON Pointers via allowed_fields.\n\nEPISTEMIC BOUNDS: The `json_schema_whitelist` is physically restricted by the\n`enforce_payload_topology` validator to prevent algorithmic complexity attacks\nduring schema intersection. The `allowed_fields` are deterministically sorted.\n\nMCP ROUTING TRIGGERS: Principle of Least Privilege, State Mutation Masking,\nZero-Trust Architecture, RFC 8785 Canonicalization, Bounded Surface Area",
       "properties": {
         "allowed_fields": {
           "description": "The explicit whitelist of top-level JSON pointers mathematically open to mutation.",
@@ -1923,36 +1923,7 @@
           "type": "array"
         },
         "json_schema_whitelist": {
-          "additionalProperties": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "integer"
-              },
-              {
-                "type": "number"
-              },
-              {
-                "type": "boolean"
-              },
-              {
-                "items": {},
-                "type": "array"
-              },
-              {
-                "additionalProperties": true,
-                "propertyNames": {
-                  "maxLength": 255
-                },
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
+          "additionalProperties": true,
           "description": "Strict JSON Schema constraints for the human's input.",
           "propertyNames": {
             "maxLength": 255
@@ -1970,7 +1941,7 @@
     },
     "BoundedJSONRPCIntent": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Enforces the formal JSON-RPC 2.0 specification as a stateless,\ndeterministic message-passing protocol, acting as the primary algorithmic firewall\nat the Zero-Trust network boundary. As an ...Intent suffix, this represents an\nauthorized kinetic execution trigger.\n\nCAUSAL AFFORDANCE: Unlocks remote procedure execution while preventing JSON Bombing\nand Algorithmic Complexity Attacks. The method field (max_length=1000) specifies the\nRPC target. The id field (128-char CID regex | int le=1000000000 | None) binds\nrequest-response correlation.\n\nEPISTEMIC BOUNDS: The @field_validator validate_params_depth_and_size mathematically\nbounds recursive payload geometry (params) to: max depth=10, dict keys=100, key\nlength=1000, list elements=1000, string length=10000. The jsonrpc field is a rigid\nLiteral[\"2.0\"] automaton.\n\nMCP ROUTING TRIGGERS: JSON-RPC 2.0, Stateless RPC, Algorithmic Complexity Attack,\nJSON Bombing Prevention, Deterministic Finite Automaton",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Enforces the formal JSON-RPC 2.0 specification as a stateless,\ndeterministic message-passing protocol, acting as the primary algorithmic firewall\nat the Zero-Trust network boundary. As an ...Intent suffix, this represents an\nauthorized kinetic execution trigger.\n\nCAUSAL AFFORDANCE: Unlocks remote procedure execution while preventing JSON Bombing\nand Algorithmic Complexity Attacks. The method field (max_length=1000) specifies the\nRPC target. The id field binds request-response correlation.\n\nEPISTEMIC BOUNDS: The `params` field is routed through the volumetric hardware guillotine\n(`enforce_payload_topology`), mathematically capping the payload to an absolute $O(N)$\nvolume of 10,000 nodes. This replaces the legacy 1D-depth constraints that permitted\ngeometric volume explosions. The `jsonrpc` field is a rigid Literal[\"2.0\"] automaton.\nThe `id` is topologically locked to a 128-char CID regex or an integer (le=1000000000) or None.\n\nMCP ROUTING TRIGGERS: JSON-RPC 2.0, Stateless RPC, Algorithmic Complexity Attack,\nJSON Bombing Prevention, Deterministic Finite Automaton",
       "properties": {
         "jsonrpc": {
           "const": "2.0",
@@ -4724,7 +4695,7 @@
     },
     "DraftingIntent": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Fristonian Active Inference to minimize Expected Free\nEnergy. It is triggered when the swarm detects a catastrophic Epistemic Gap and lacks\nthe structural parameters necessary to reduce Shannon Entropy autonomously.\n\nCAUSAL AFFORDANCE: Emits a structural query to an external human oracle to explicitly\nsolicit data. It suspends autonomous trajectory generation until the missing semantic\ndimensions are actively projected back into the working memory partition.\n\nEPISTEMIC BOUNDS: The human's unstructured cognitive entropy is aggressively forced\nthrough a mathematical funnel via the resolution_schema (a strict JSON Schema dict,\nmax_length=1000000000). If the human fails to satisfy the bounded schema, the\ntimeout_action guarantees deterministic fallback routing.\n\nMCP ROUTING TRIGGERS: Active Inference, Expected Free Energy, Shannon Entropy\nReduction, Zero-Shot Elicitation, Epistemic Gap",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Fristonian Active Inference to minimize Expected Free\nEnergy. It is triggered when the swarm detects a catastrophic Epistemic Gap and lacks\nthe structural parameters necessary to reduce Shannon Entropy autonomously.\n\nCAUSAL AFFORDANCE: Emits a structural query to an external human oracle to explicitly\nsolicit data. It suspends autonomous trajectory generation until the missing semantic\ndimensions are actively projected back into the working memory partition.\n\nEPISTEMIC BOUNDS: The human's unstructured cognitive entropy is aggressively forced\nthrough a mathematical funnel via the `resolution_schema`. This schema is volumetrically\nclamped by `enforce_payload_topology` to prevent AST explosion during input parsing.\n\nMCP ROUTING TRIGGERS: Active Inference, Expected Free Energy, Shannon Entropy\nReduction, Zero-Shot Elicitation, Epistemic Gap",
       "properties": {
         "type": {
           "const": "drafting",
@@ -6228,7 +6199,7 @@
     },
     "EscalationIntent": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Anchors in the Biba Integrity Model to orchestrate a Dictatorial\nOverride mechanism within a Zero-Trust Architecture. It is emitted when a rigid\nmathematical safety boundary is breached during inference.\n\nCAUSAL AFFORDANCE: Severs the active kinetic thread when a rule is tripped,\nviolently halting generation to force the presentation of a resolution_schema.\nIt demands explicit, structurally verified cryptographic sign-off from a\nhigher-clearance entity to bypass the breaker.\n\nEPISTEMIC BOUNDS: The tripped_rule_id is strictly anchored to a 128-char CID\nregex (^[a-zA-Z0-9_.:-]+$). The resolution_schema (dict) caps keys at\nmax_length=255. The fallback is governed by the Literal timeout_action\n[\"rollback\", \"proceed_default\", \"terminate\"] to guarantee systemic liveness\nif unhandled.\n\nMCP ROUTING TRIGGERS: Biba Integrity Model, Dictatorial Override, Privilege\nEscalation, Payload Loss Prevention, Cryptographic Sign-Off",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Anchors in the Biba Integrity Model to orchestrate a Dictatorial\nOverride mechanism within a Zero-Trust Architecture. It is emitted when a rigid\nmathematical safety boundary is breached during inference.\n\nCAUSAL AFFORDANCE: Severs the active kinetic thread when a rule is tripped,\nviolently halting generation to force the presentation of a resolution_schema.\nIt demands explicit, structurally verified cryptographic sign-off from a\nhigher-clearance entity to bypass the breaker.\n\nEPISTEMIC BOUNDS: The `resolution_schema` is mathematically bounded against recursive\nJSON-bombing by the `enforce_payload_topology` hook, physically preventing Automata\nIntersection deadlocks. The tripped_rule_id is strictly anchored to a 128-char CID\nregex (^[a-zA-Z0-9_.:-]+$). The fallback is governed by the Literal timeout_action.\n\nMCP ROUTING TRIGGERS: Biba Integrity Model, Dictatorial Override, Privilege\nEscalation, Payload Loss Prevention, Cryptographic Sign-Off",
       "properties": {
         "type": {
           "const": "escalation",
@@ -7842,7 +7813,7 @@
     },
     "HumanNodeProfile": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Supervisory Control Theory within the causal DAG,\ninstantiating an out-of-band Oracle node for Mixed-Initiative truth resolution.\nAs a ...Profile suffix, this is a declarative property descriptor.\n\nCAUSAL AFFORDANCE: Physically halts the continuous multi-agent generation loop,\nforcing the probability wave to suspend until external wetware (human) entropy is\nsafely injected into the topological state.\n\nEPISTEMIC BOUNDS: Execution resumption is cryptographically gated by the optional\nrequired_attestation (AttestationMechanismProfile | None, default=None). If set,\nthe orchestrator MUST physically drop all responses lacking a matching\ncryptographic attestation. The type discriminator is locked to Literal[\"human\"].\n\nMCP ROUTING TRIGGERS: Supervisory Control Theory, Oracle Node, Mixed-Initiative,\nProof of Humanity, Out-of-Band Entropy",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Supervisory Control Theory within the causal DAG, instantiating an out-of-band Oracle node for Mixed-Initiative truth resolution.\n\nCAUSAL AFFORDANCE: Physically halts the continuous multi-agent generation loop, forcing the probability wave to suspend until external wetware (human) entropy is safely injected into the topological state.\n\nEPISTEMIC BOUNDS: To mathematically satisfy Byzantine Fault Tolerance (BFT), the `required_attestation` is mandatory. The orchestrator MUST NOT resolve this node without a cryptographically matching WetwareAttestationContract, verifying the human operator and preventing Sybil attacks.\n\nMCP ROUTING TRIGGERS: Supervisory Control Theory, Oracle Node, Mixed-Initiative, Proof of Humanity, Out-of-Band Entropy",
       "properties": {
         "description": {
           "description": "The semantic boundary defining the objective function or computational perimeter of the execution node.",
@@ -7911,20 +7882,13 @@
           "type": "string"
         },
         "required_attestation": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/AttestationMechanismProfile"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "AGENT INSTRUCTION: If set, the orchestrator MUST NOT resolve\n        this node without a cryptographically matching WetwareAttestationContract\n        supplied in the InterventionReceipt."
+          "$ref": "#/$defs/AttestationMechanismProfile",
+          "description": "The mandatory cryptographic attestation required to verify the human operator's identity."
         }
       },
       "required": [
-        "description"
+        "description",
+        "required_attestation"
       ],
       "title": "HumanNodeProfile",
       "type": "object"
@@ -8591,7 +8555,7 @@
     },
     "JSONRPCErrorState": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A mathematically constrained error vector reflecting execution\ncollapse within the JSON-RPC 2.0 specification. As a ...State suffix, this is a\nfrozen N-dimensional coordinate.\n\nCAUSAL AFFORDANCE: Projects execution faults back across the network boundary\nwithout risking secondary buffer overflow attacks during serialization. The\nerror_payload (alias=\"data\", External Protocol Exemption) carries optional\nstructured diagnostic data.\n\nEPISTEMIC BOUNDS: The code integer is rigidly capped (le=1000000000, no ge bound)\nand the semantic message is restricted to max_length=2000 to prevent log-poisoning\nduring telemetry serialization.\n\nMCP ROUTING TRIGGERS: Fault Projection, Buffer Overflow Prevention, Error Vector,\nLog Poisoning, Stateful Rollback",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A mathematically constrained error vector reflecting execution\ncollapse within the JSON-RPC 2.0 specification. As a ...State suffix, this is a\nfrozen N-dimensional coordinate.\n\nCAUSAL AFFORDANCE: Projects execution faults back across the network boundary\nwithout risking secondary buffer overflow attacks during serialization. The\nerror_payload (alias=\"data\") carries optional structured diagnostic data.\n\nEPISTEMIC BOUNDS: The `error_payload` is strictly routed through the volumetric\nhardware guillotine (`enforce_payload_topology`) to mathematically prevent infinite\nrecursive depth from triggering C-stack overflows during fault serialization. The\ncode integer is rigidly capped (le=1000000000) and the semantic message is restricted\nto max_length=2000.\n\nMCP ROUTING TRIGGERS: Fault Projection, Buffer Overflow Prevention, Error Vector,\nLog Poisoning, Stateful Rollback",
       "properties": {
         "code": {
           "description": "The strict integer identifier classifying the specific topological or execution collapse.",
@@ -9276,7 +9240,7 @@
     },
     "MCPPromptReferenceState": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents a Higher-Order Function within the Model Context Protocol, mapping\na dynamic Latent Prompt Manifold into the agent's execution context.\n\nCAUSAL AFFORDANCE: Authorizes the orchestrator to fetch and interpolate an exogenous prompt\ntemplate from a remote server, using the arguments dictionary to inject localized state into the template.\n\nEPISTEMIC BOUNDS: Supply-chain execution attacks are mathematically mitigated by the optional\nprompt_hash (strictly matching SHA-256 pattern ^[a-f0-9]{64}$). The arguments matrix is physically\ncapped at max_length=1000000000 (with keys at max_length=255) to prevent OOM faults during interpolation.\nThe optional fallback_persona is bounded to max_length=2000.\n\nMCP ROUTING TRIGGERS: Higher-Order Function, Latent Prompt Manifold, Template Interpolation, Supply-Chain Verification, Stateless RPC",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents a Higher-Order Function within the Model Context Protocol, mapping\na dynamic Latent Prompt Manifold into the agent's execution context.\n\nCAUSAL AFFORDANCE: Authorizes the orchestrator to fetch and interpolate an exogenous prompt\ntemplate from a remote server, using the arguments dictionary to inject localized state into the template.\n\nEPISTEMIC BOUNDS: The `arguments` matrix is aggressively routed through the volumetric hardware\nguillotine (`enforce_payload_topology`) to mathematically prevent Manifold Interpolation Complexity\ncrashes from poisoned external servers. Supply-chain attacks are mitigated by the optional `prompt_hash`.\n\nMCP ROUTING TRIGGERS: Higher-Order Function, Latent Prompt Manifold, Template Interpolation, Supply-Chain Verification, Stateless RPC",
       "properties": {
         "server_id": {
           "description": "The deterministic capability pointer representing the MCP server providing this prompt.",
@@ -12628,7 +12592,7 @@
     },
     "StateMutationIntent": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements the formal RFC 6902 JSON Patch standard to execute atomic,\ndeterministic state vector mutations across the swarm's N-dimensional blackboard. As an\n...Intent suffix, this represents an authorized kinetic execution trigger.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator's algebraic engine to surgically apply,\ntest, or ablate targeted JSON pointers without requiring full payload transmission. The\nvalue (JsonPrimitiveState, default=None) carries the mutation payload; from_path\n(alias=\"from\") enables RFC 6902 move/copy operations.\n\nEPISTEMIC BOUNDS: The operation geometry is rigidly restricted by the op field to the\nPatchOperationProfile Literal automaton. Target topological coordinates (path and\nfrom_path) are physically bounded to max_length=2000 to prevent path traversal and\nstring exhaustion during pointer resolution.\n\nMCP ROUTING TRIGGERS: RFC 6902, JSON Patch, Atomic Mutation, State Vector Projection,\nDeterministic Operator",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements the formal RFC 6902 JSON Patch standard to execute atomic,\ndeterministic state vector mutations across the swarm's N-dimensional blackboard. As an\n...Intent suffix, this represents an authorized kinetic execution trigger.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator's algebraic engine to surgically apply,\ntest, or ablate targeted JSON pointers without requiring full payload transmission.\n\nEPISTEMIC BOUNDS: The `value` (JsonPrimitiveState) mutation payload is volumetrically\nclamped by `enforce_payload_topology` to guarantee that the resulting state matrix $S'$\ndoes not expand beyond VRAM constraints. The operation geometry is rigidly restricted by\nthe op field to the PatchOperationProfile. Target topological coordinates (path and\nfrom_path) are physically bounded to max_length=2000.\n\nMCP ROUTING TRIGGERS: RFC 6902, JSON Patch, Atomic Mutation, State Vector Projection,\nDeterministic Operator",
       "properties": {
         "op": {
           "$ref": "#/$defs/PatchOperationProfile",
@@ -13808,7 +13772,7 @@
     },
     "ToolInvocationEvent": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Judea Pearl's Do-Operator ($do(X=x)$) on an\nexternal or internal toolset, acting as an A Priori Kinetic Commitment. As an\n...Event suffix, this is an append-only, cryptographically frozen coordinate on\nthe Merkle-DAG.\n\nCAUSAL AFFORDANCE: Transitions the swarm from internal epistemic deliberation to\nkinetic execution. It targets tool_name (max_length=2000) with parameters (dict,\nmax_length=1000000000) and requires a mandatory agent_attestation\n(AgentAttestationReceipt) proving identity.\n\nEPISTEMIC BOUNDS: The execution's thermodynamic cost is economically bounded by\nauthorized_budget_magnitude (int | None, le=1000000000, ge=0, default=None).\nZero-Trust execution is rigidly enforced by the mandatory zk_proof\n(ZeroKnowledgeReceipt), physically prohibiting forged network executions.\n\nMCP ROUTING TRIGGERS: Pearlian Do-Operator, Kinetic Commitment, Active Inference,\nThermodynamic Escrow, Zero-Trust Actuation",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Judea Pearl's Do-Operator ($do(X=x)$) on an external or internal toolset, acting as an A Priori Kinetic Commitment. As an ...Event suffix, this is an append-only, cryptographically frozen coordinate on the Merkle-DAG.\n\nCAUSAL AFFORDANCE: Transitions the swarm from internal epistemic deliberation to kinetic execution. It targets a specific `tool_name` with bound parameters, demanding a valid `agent_attestation` identity.\n\nEPISTEMIC BOUNDS: The `parameters` payload is volumetrically capped by `enforce_payload_topology` to prevent external MCP servers from executing C-stack overflow attacks. To prevent infinite compute loops (Landauer's Principle), the `authorized_budget_magnitude` is physically mandated to be `ge=1`. The `zk_proof` serves as the strict mathematical proof that the agent was authorized by the execution engine.\n\nMCP ROUTING TRIGGERS: Pearlian Do-Operator, Kinetic Commitment, Active Inference, Thermodynamic Escrow, Zero-Trust Actuation",
       "properties": {
         "event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
@@ -13849,26 +13813,18 @@
           "type": "object"
         },
         "authorized_budget_magnitude": {
-          "anyOf": [
-            {
-              "maximum": 1000000000,
-              "minimum": 0,
-              "type": "integer"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The maximum escrow unlocked for this specific run.",
-          "title": "Authorized Budget Magnitude"
+          "description": "The mandatory discrete thermodynamic token cost reserved for this specific run.",
+          "maximum": 1000000000,
+          "minimum": 1,
+          "title": "Authorized Budget Magnitude",
+          "type": "integer"
         },
         "agent_attestation": {
           "$ref": "#/$defs/AgentAttestationReceipt"
         },
         "zk_proof": {
           "$ref": "#/$defs/ZeroKnowledgeReceipt",
-          "description": "AGENT INSTRUCTION: The strict mathematical proof that the agent was authorized by the CoReason execution engine to evaluate this tool. Stripping this field violates the Zero-Trust execution boundary."
+          "description": "The mathematical attestation proving this tool execution was securely authorized."
         }
       },
       "required": [
@@ -13876,6 +13832,7 @@
         "timestamp",
         "tool_name",
         "parameters",
+        "authorized_budget_magnitude",
         "agent_attestation",
         "zk_proof"
       ],
@@ -14193,7 +14150,7 @@
     },
     "VerifiableCredentialPresentationReceipt": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes the W3C Verifiable Credentials Data Model\n(VCDM v2.0) to establish a decentralized, Zero-Trust identity perimeter. As a\n...Receipt suffix, this is an append-only coordinate on the Merkle-DAG that the\nLLM must never hallucinate a mutation to.\n\nCAUSAL AFFORDANCE: Unlocks isolated execution bounds by projecting\ncryptographically verified geometric predicates (authorization_claims) into the\norchestrator via issuer_did (NodeIdentifierState), allowing an agent to prove\nauthorization clearance without centralized identity brokers.\n\nEPISTEMIC BOUNDS: The cryptographic_proof_blob is physically capped at\nmax_length=100000 to prevent VRAM buffer overflow. The presentation_format is\nrigidly clamped to a Literal automaton [\"jwt_vc\", \"ldp_vc\", \"sd_jwt\",\n\"zkp_vc\"] enforcing Selective Disclosure and ZKP boundaries. The\nauthorization_claims dict is bounded (max_length=86400000, key max_length=255).\n\nMCP ROUTING TRIGGERS: W3C VCDM, Zero-Knowledge Proofs, Selective Disclosure,\nDecentralized Identifiers, Object Capability Model",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes the W3C Verifiable Credentials Data Model\n(VCDM v2.0) to establish a decentralized, Zero-Trust identity perimeter. As a\n...Receipt suffix, this is an append-only coordinate on the Merkle-DAG that the\nLLM must never hallucinate a mutation to.\n\nCAUSAL AFFORDANCE: Unlocks isolated execution bounds by projecting\ncryptographically verified geometric predicates (authorization_claims) into the\norchestrator via issuer_did, allowing an agent to prove\nauthorization clearance without centralized identity brokers.\n\nEPISTEMIC BOUNDS: The `authorization_claims` dict is volumetrically bounded by\nthe `enforce_payload_topology` hook to completely sever Predicate Exhaustion Attacks\nduring selective disclosure verification, guaranteeing $O(N)$ validation bounds.\n\nMCP ROUTING TRIGGERS: W3C VCDM, Zero-Knowledge Proofs, Selective Disclosure,\nDecentralized Identifiers, Object Capability Model",
       "properties": {
         "presentation_format": {
           "description": "The exact cryptographic standard used to encode this credential presentation.",

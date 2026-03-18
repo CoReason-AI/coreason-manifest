@@ -63,18 +63,18 @@ def test_payload_bounds_recursion_depth_exceeded() -> None:
 
 
 def test_payload_bounds_dict_keys_exceeded() -> None:
-    # Create a dictionary with 101 keys (max is 100)
-    large_dict: dict[str, Any] = {f"key_{i}": i for i in range(101)}
+    # Create a dictionary with 10001 keys to exceed the 10000 node volume limit
+    large_dict: dict[str, Any] = {f"key_{i}": i for i in range(10001)}
 
-    with pytest.raises(ValueError, match="Dictionary exceeds maximum key count of 100"):
+    with pytest.raises(ValueError, match="Payload volume exceeds absolute hardware limit of 10000 nodes"):
         _validate_payload_bounds(cast("JsonPrimitiveState", large_dict))
 
 
 def test_payload_bounds_list_items_exceeded() -> None:
-    # Create a list with 1001 items (max is 1000)
-    large_list: list[Any] = list(range(1001))
+    # Create a list with 10001 items to exceed the 10000 node volume limit
+    large_list: list[Any] = list(range(10001))
 
-    with pytest.raises(ValueError, match="List exceeds maximum item count of 1000"):
+    with pytest.raises(ValueError, match="Payload volume exceeds absolute hardware limit of 10000 nodes"):
         _validate_payload_bounds(cast("JsonPrimitiveState", large_list))
 
 
