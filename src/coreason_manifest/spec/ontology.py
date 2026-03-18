@@ -2730,6 +2730,7 @@ class BrowserDOMState(CoreasonBaseState):
         ):
             raise ValueError(f"SSRF topological violation detected: {hostname}")
 
+        import contextlib
         import socket
 
         ip = None
@@ -2738,15 +2739,14 @@ class BrowserDOMState(CoreasonBaseState):
             packed_ip = socket.inet_aton(hostname_lower)
             ip = ipaddress.IPv4Address(packed_ip)
         except OSError:
-            try:
+            with contextlib.suppress(ValueError):
                 # Fallback to standard IPv6 and canonical IPv4 string parsing
                 ip = ipaddress.ip_address(hostname.strip("[]"))
-            except ValueError:
-                pass  # DNS-based hostnames pass through standard string checks above
-        
-        if ip is not None:
-            if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast:
-                raise ValueError(f"SSRF restricted IP detected: {hostname}")
+
+        if ip is not None and (
+            ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast
+        ):
+            raise ValueError(f"SSRF restricted IP detected: {hostname}")
 
         return url
 
