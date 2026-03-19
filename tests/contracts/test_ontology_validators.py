@@ -75,9 +75,13 @@ def test_spatial_bounds_fuzzing(extents_x: float, extents_y: float, extents_z: f
     transform = SE3TransformProfile(reference_frame_id="frame", x=0, y=0, z=0)
     if extents_x * extents_y * extents_z == 0.0:
         with pytest.raises(ValidationError, match=r"strictly greater than 0"):
-            VolumetricBoundingProfile(center_transform=transform, extents_x=extents_x, extents_y=extents_y, extents_z=extents_z)
+            VolumetricBoundingProfile(
+                center_transform=transform, extents_x=extents_x, extents_y=extents_y, extents_z=extents_z
+            )
     else:
-        box = VolumetricBoundingProfile(center_transform=transform, extents_x=extents_x, extents_y=extents_y, extents_z=extents_z)
+        box = VolumetricBoundingProfile(
+            center_transform=transform, extents_x=extents_x, extents_y=extents_y, extents_z=extents_z
+        )
         assert box.extents_x == extents_x
 
 

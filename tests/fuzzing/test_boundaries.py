@@ -408,18 +408,17 @@ def test_state_hydration_manifest_long_string_quarantine() -> None:
 )
 def test_volumetric_bounding_profile_all_floats(extents_x: float, extents_y: float, extents_z: float) -> None:
     transform = SE3TransformProfile(reference_frame_id="frame", x=0, y=0, z=0)
-    valid = (
-        extents_x >= 0.0
-        and extents_y >= 0.0
-        and extents_z >= 0.0
-        and extents_x * extents_y * extents_z > 0.0
-    )
+    valid = extents_x >= 0.0 and extents_y >= 0.0 and extents_z >= 0.0 and extents_x * extents_y * extents_z > 0.0
 
     if valid:
-        VolumetricBoundingProfile(center_transform=transform, extents_x=extents_x, extents_y=extents_y, extents_z=extents_z)
+        VolumetricBoundingProfile(
+            center_transform=transform, extents_x=extents_x, extents_y=extents_y, extents_z=extents_z
+        )
     else:
         with pytest.raises((ValueError, ValidationError)):
-            VolumetricBoundingProfile(center_transform=transform, extents_x=extents_x, extents_y=extents_y, extents_z=extents_z)
+            VolumetricBoundingProfile(
+                center_transform=transform, extents_x=extents_x, extents_y=extents_y, extents_z=extents_z
+            )
 
 
 # --- MultimodalTokenAnchorState ---

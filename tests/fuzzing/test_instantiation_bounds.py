@@ -101,7 +101,9 @@ def test_volumetric_bounding_profile_fuzzing(extents: tuple[float, float, float]
     transform = SE3TransformProfile(reference_frame_id="frame", x=0, y=0, z=0)
 
     with pytest.raises((ValidationError, ValueError)):
-        VolumetricBoundingProfile(center_transform=transform, extents_x=extents_x, extents_y=extents_y, extents_z=extents_z)
+        VolumetricBoundingProfile(
+            center_transform=transform, extents_x=extents_x, extents_y=extents_y, extents_z=extents_z
+        )
 
 
 @given(coords=invalid_bbox_st())
