@@ -6202,6 +6202,12 @@ class BaseNodeProfile(CoreasonBaseState):
     optical_physics: PhysicallyBasedRenderingProfile | None = Field(
         default=None, description="The strict microfacet BRDF physics governing the visual representation of this node."
     )
+    semantic_zoom: SemanticZoomProfile | None = Field(
+        default=None, description="The mathematical Information Bottleneck thresholds dictating the semantic degradation of this specific node."
+    )
+    markov_blanket: MarkovBlanketRenderingPolicy | None = Field(
+        default=None, description="The epistemic isolation boundary guarding this agent's internal generative states."
+    )
 
     @model_validator(mode="after")
     def _enforce_canonical_sort_intervention_policies(self) -> Self:
@@ -7230,29 +7236,6 @@ class NormativeDriftEvent(BaseStateEvent):
         pattern="^[a-f0-9]{64}$",
         description="A cryptographic pointer to the internal scratchpad trace (ThoughtBranchState) definitively proving the rule is obsolete or causing a loop.",
     )
-
-
-class ObservabilityPolicy(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Defines the Dapper Distributed Tracing bounds for a given macroscopic
-    topology, formalizing the transparency of the system's Markov Blanket. As a ...Policy suffix,
-    this rigidly bounds the orchestrator's sampling physics.
-
-    CAUSAL AFFORDANCE: Modulates the thermodynamic cost of execution tracking by authorizing or
-    severing the emission of high-granularity SpanEvent sequences (detailed_events) to prevent
-    logging backpressure and telemetry starvation.
-
-    EPISTEMIC BOUNDS: Operates purely on strictly typed Boolean variables (traces_sampled,
-    detailed_events), mathematically prohibiting adversarial manipulation of telemetry pipelines
-    via unbounded tensor or string injection.
-
-    MCP ROUTING TRIGGERS: Distributed Tracing, Dapper Architecture, Telemetry Sampling, Observability Horizon, Thermodynamic Overhead
-    """
-
-    traces_sampled: bool = Field(
-        default=True, description="Whether the orchestrator must record telemetry for this topology."
-    )
-    detailed_events: bool = Field(default=False, description="Whether to include granular intra-tool loop events.")
 
 
 class OntologicalHandshakeReceipt(CoreasonBaseState):
@@ -9449,7 +9432,7 @@ class BaseTopologyManifest(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Defines the abstract algebraic baseline and Markov Blanket for all execution subgraphs, establishing the structural and epistemic perimeters for a localized swarm. As a ...Manifest suffix, this defines a frozen, N-dimensional coordinate state.
 
-    CAUSAL AFFORDANCE: Projects overarching schema-on-write contracts (`shared_state_contract`) and zero-trust Payload Loss Prevention (`information_flow`) across all connected nodes, ensuring inherited alignment. The observability (`ObservabilityPolicy`) binds distributed tracing.
+    CAUSAL AFFORDANCE: Projects overarching schema-on-write contracts (`shared_state_contract`) and zero-trust Payload Loss Prevention (`information_flow`) across all connected nodes, ensuring inherited alignment. The observability (`ObservabilityLODPolicy`) binds distributed tracing.
 
     EPISTEMIC BOUNDS: Epistemic enforcement constraints (`TruthMaintenancePolicy`) are bound hierarchically via pointer delegation, preserving Category Theory invariants without applying raw scalar limits to object references. The nodes attribute is strictly typed as a dictionary mapping `NodeIdentifierState` to polymorphic `AnyNodeProfile` identities.
 
@@ -9478,8 +9461,8 @@ class BaseTopologyManifest(CoreasonBaseState):
         default=None,
         description="The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology.",
     )
-    observability: ObservabilityPolicy | None = Field(
-        default=None, description="The distributed tracing rules bound to this specific execution graph."
+    observability: ObservabilityLODPolicy | None = Field(
+        default=None, description="The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph."
     )
 
 
@@ -11364,6 +11347,131 @@ class EpistemicLedgerState(CoreasonBaseState):
         return self
 
 
+class SemanticZoomProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Formalizes the Information Bottleneck principle to execute Semantic Zooming.
+    It defines the exact Euclidean distance thresholds at which a node's semantic payload
+    deterministically degrades to preserve computational entropy and visual salience.
+
+    CAUSAL AFFORDANCE: Instructs the spatial projection engine to dynamically collapse high-entropy
+    unstructured text (e.g., full cognitive traces) into low-entropy scalars or categorical taxonomic
+    labels as the observer's SE(3) camera recedes.
+
+    EPISTEMIC BOUNDS: The thresholds are bounded to continuous physical distance in meters (ge=0.0).
+    A strict mathematical invariant guarantees spatial monotonicity: micro < meso < macro.
+
+    MCP ROUTING TRIGGERS: Information Bottleneck, Semantic Compression, Euclidean Distance, Level of Detail, Entropy Degradation
+    """
+    macro_distance_threshold: float = Field(
+        ge=0.0,
+        description="The Euclidean distance in meters at which the node collapses into a pure scalar or color-coded coordinate representation."
+    )
+    meso_distance_threshold: float = Field(
+        ge=0.0,
+        description="The distance at which the node displays only its localized taxonomic label and boundary, stripping raw textual payloads."
+    )
+    micro_distance_threshold: float = Field(
+        ge=0.0,
+        description="The close-proximity boundary where full N-dimensional tensors and unstructured text blocks are mathematically hydrated into the observer's plane."
+    )
+
+    @model_validator(mode="after")
+    def enforce_spatial_monotonicity(self) -> Self:
+        if not (self.micro_distance_threshold < self.meso_distance_threshold < self.macro_distance_threshold):
+            raise ValueError("Topological Violation: Semantic zoom thresholds must strictly adhere to micro < meso < macro distance invariants.")
+        return self
+
+
+class MarkovBlanketRenderingPolicy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Translates Fristonian Active Inference boundaries into rigid physical optics.
+    It defines the exact geometric perimeter where an agent's internal generative states become
+    conditionally independent of (and thus occluded from) the external macroscopic swarm topology.
+
+    CAUSAL AFFORDANCE: Mathematically forces the opacity of internal mechanistics (e.g., SAE
+    activations, scratchpad trees) to absolute zero, until the observer's SE(3) coordinate
+    physically pierces the agent's volumetric bounding cage.
+
+    EPISTEMIC BOUNDS: The physical penetration depth is strictly bounded by pierce_distance_meters
+    (ge=0.0). Exogenous interfaces (sensory and active states) are governed by strict boolean gates.
+
+    MCP ROUTING TRIGGERS: Fristonian Active Inference, Markov Blanket, Epistemic Isolation, Volumetric Penetration, Conditional Independence
+    """
+    pierce_distance_meters: float = Field(
+        ge=0.0,
+        description="The precise Euclidean distance at which an observer's coordinate successfully breaches the agent's internal state partition."
+    )
+    expose_sensory_active_states: bool = Field(
+        default=True,
+        description="Authorizes the continuous projection of the agent's exogenous API interactions and structural tool commitments to the macroscopic layer."
+    )
+    occlude_internal_mechanistics: bool = Field(
+        default=True,
+        description="Forces absolute rendering occlusion of internal non-monotonic reasoning loops unless the pierce distance is breached."
+    )
+
+
+class TelemetryBackpressureContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Formalizes the Observer Effect to dynamically modulate the thermodynamic flow
+    of network egress based on the observer's spatial view frustum.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator's telemetry manifold to aggressively shed
+    bandwidth load by calculating the dot product of topology nodes against the observer's focal
+    vector. It starves occluded or peripheral subgraphs of kinematic updates to preserve system liveness.
+
+    EPISTEMIC BOUNDS: Temporal refresh velocities are strictly clamped to physical Hertz frequencies.
+    The mathematical invariant guarantees that flow rate monotonically increases as nodes approach the focal center.
+
+    MCP ROUTING TRIGGERS: Observer Effect, Frustum Culling, Thermodynamic Flow Control, Telemetry Backpressure, Spatial Masking
+    """
+    focal_refresh_rate_hz: int = Field(
+        ge=1, le=240,
+        description="The high-velocity telemetry budget (Hz) allocated exclusively to topologies intersecting the center of the observer's view frustum."
+    )
+    peripheral_refresh_rate_hz: int = Field(
+        ge=1, le=60,
+        description="The degraded telemetry budget (Hz) for nodes at the edges of the optical projection."
+    )
+    occluded_refresh_rate_hz: int = Field(
+        ge=0, le=1, default=0,
+        description="The starvation rate (Hz) for topologies failing the depth test or falling outside clipping planes."
+    )
+
+    @model_validator(mode="after")
+    def enforce_velocity_gradient(self) -> Self:
+        if not (self.occluded_refresh_rate_hz <= self.peripheral_refresh_rate_hz <= self.focal_refresh_rate_hz):
+            raise ValueError("Thermodynamic Violation: Telemetry refresh rates must monotonically increase from occluded -> peripheral -> focal.")
+        return self
+
+
+class ObservabilityLODPolicy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Establishes the macroscopic Graph Coarsening Engine, replacing binary
+    logging with structural Dimensionality Reduction for massive topologies.
+
+    CAUSAL AFFORDANCE: Authorizes the orchestrator to execute Spectral Graph Partitioning when
+    the topology exceeds the hardware rendering limit. It dynamically collapses dense subgraphs
+    into singular Hierarchical Level of Detail (HLOD) proxy meshes.
+
+    EPISTEMIC BOUNDS: The vertex ceiling is rigidly bounded by max_rendered_vertices (gt=0,
+    le=1000000000) to physically prevent GPU VRAM exhaustion on the observer client. Binds the
+    TelemetryBackpressureContract to link graph scaling with network flow.
+
+    MCP ROUTING TRIGGERS: Spectral Graph Coarsening, Hierarchical Level of Detail, HLOD, Topology Collapse, VRAM Optimization
+    """
+    max_rendered_vertices: int = Field(
+        gt=0, le=1000000000,
+        description="The absolute physical ceiling of simultaneous causal nodes authorized to exist in the spatial projection pipeline."
+    )
+    spectral_coarsening_active: bool = Field(
+        default=True,
+        description="Authorizes the dynamic algebraic collapse of dense node communities into single macroscopic proxy vertices when the vertex ceiling is threatened."
+    )
+    telemetry_backpressure: TelemetryBackpressureContract = Field(
+        description="The network flow constraints mathematically bound to the observer's kinematics."
+    )
+
 CompositeNodeProfile.model_rebuild()
 WorkflowManifest.model_rebuild()
 StateHydrationManifest.model_rebuild()
@@ -11429,3 +11537,8 @@ PhysicallyBasedRenderingProfile.model_rebuild()
 KinematicDeltaManifest.model_rebuild()
 SpatialBillboardContract.model_rebuild()
 VolumetricEdgeProfile.model_rebuild()
+
+SemanticZoomProfile.model_rebuild()
+MarkovBlanketRenderingPolicy.model_rebuild()
+TelemetryBackpressureContract.model_rebuild()
+ObservabilityLODPolicy.model_rebuild()
