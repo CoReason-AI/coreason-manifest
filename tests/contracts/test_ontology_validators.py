@@ -35,8 +35,9 @@ from coreason_manifest.spec.ontology import (
     RiskLevelPolicy,
     RollbackIntent,
     SaeLatentPolicy,
+    SE3TransformProfile,
     SecureSubSessionState,
-    SpatialBoundingBoxProfile,
+    VolumetricBoundingProfile,
 )
 
 
@@ -62,25 +63,22 @@ def test_coreason_base_state_hash() -> None:
     assert state._cached_hash == h1
 
 
-# --- 2. Spatial Bounding Box Fuzzing ---
+# --- 2. Volumetric Bounding Box Fuzzing ---
 @given(
-    x_min=st.floats(min_value=0.0, max_value=1.0),
-    x_max=st.floats(min_value=0.0, max_value=1.0),
-    y_min=st.floats(min_value=0.0, max_value=1.0),
-    y_max=st.floats(min_value=0.0, max_value=1.0),
+    extents_x=st.floats(min_value=0.0, max_value=10.0),
+    extents_y=st.floats(min_value=0.0, max_value=10.0),
+    extents_z=st.floats(min_value=0.0, max_value=10.0),
 )
 @settings(max_examples=100, suppress_health_check=[HealthCheck.too_slow])
-def test_spatial_bounds_fuzzing(x_min: float, x_max: float, y_min: float, y_max: float) -> None:
-    """Mathematically prove the 2D plane logic strictly rejects impossible Euclidean geometries."""
-    if x_min > x_max:
-        with pytest.raises(ValidationError, match=r"x_min cannot be strictly greater than x_max"):
-            SpatialBoundingBoxProfile(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
-    elif y_min > y_max:
-        with pytest.raises(ValidationError, match=r"y_min cannot be strictly greater than y_max"):
-            SpatialBoundingBoxProfile(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
+def test_spatial_bounds_fuzzing(extents_x: float, extents_y: float, extents_z: float) -> None:
+    """Mathematically prove the 3D plane logic strictly rejects impossible Euclidean geometries."""
+    transform = SE3TransformProfile(reference_frame_id="frame", x=0, y=0, z=0)
+    if extents_x * extents_y * extents_z == 0.0:
+        with pytest.raises(ValidationError, match=r"strictly greater than 0"):
+            VolumetricBoundingProfile(center_transform=transform, extents_x=extents_x, extents_y=extents_y, extents_z=extents_z)
     else:
-        box = SpatialBoundingBoxProfile(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
-        assert box.x_min == x_min
+        box = VolumetricBoundingProfile(center_transform=transform, extents_x=extents_x, extents_y=extents_y, extents_z=extents_z)
+        assert box.extents_x == extents_x
 
 
 # --- 3. Byzantine Fault Tolerance Fuzzing ---

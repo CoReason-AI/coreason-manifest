@@ -19,7 +19,8 @@ from coreason_manifest.spec.ontology import (
     QuorumPolicy,
     RiskLevelPolicy,
     SaeLatentPolicy,
-    SpatialBoundingBoxProfile,
+    SE3TransformProfile,
+    VolumetricBoundingProfile,
 )
 
 
@@ -57,21 +58,12 @@ def test_coreason_base_state_cached_hash(val: int) -> None:
 
 
 @given(
-    st.floats(min_value=0.5, max_value=1.0),
-    st.floats(min_value=0.0, max_value=0.4),
+    st.floats(min_value=0.0, max_value=0.0),
 )
-def test_spatial_bounding_box_invalid_x(x_min: float, x_max: float) -> None:
-    with pytest.raises(ValidationError, match="x_min cannot be strictly greater than x_max"):
-        SpatialBoundingBoxProfile(x_min=x_min, y_min=0.0, x_max=x_max, y_max=1.0)
-
-
-@given(
-    st.floats(min_value=0.5, max_value=1.0),
-    st.floats(min_value=0.0, max_value=0.4),
-)
-def test_spatial_bounding_box_invalid_y(y_min: float, y_max: float) -> None:
-    with pytest.raises(ValidationError, match="y_min cannot be strictly greater than y_max"):
-        SpatialBoundingBoxProfile(x_min=0.0, y_min=y_min, x_max=1.0, y_max=y_max)
+def test_volumetric_bounding_profile_invalid(extents_x: float) -> None:
+    transform = SE3TransformProfile(reference_frame_id="frame", x=0, y=0, z=0)
+    with pytest.raises(ValidationError, match="strictly greater than 0"):
+        VolumetricBoundingProfile(center_transform=transform, extents_x=extents_x, extents_y=1.0, extents_z=1.0)
 
 
 @given(
