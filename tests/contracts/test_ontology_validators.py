@@ -747,8 +747,8 @@ def test_kinematic_delta_manifest_sorting() -> None:
     manifest = KinematicDeltaManifest(
         stream_id="stream-123",
         deltas=[
-            ("node-B", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0),
-            ("node-A", 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0),
+            ("node-B", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
+            ("node-A", 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
         ],
     )
     assert manifest.deltas[0][0] == "node-A"

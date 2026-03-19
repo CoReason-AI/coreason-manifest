@@ -693,6 +693,18 @@
           "default": null,
           "description": "The cryptographic contract forcing this agent to embed an undeniable provenance signature into its generative token stream."
         },
+        "active_attention_ray": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EpistemicAttentionRay"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The continuous spatial vector representing the agent's localized cognitive focus prior to kinetic actuation."
+        },
         "compute_frontier": {
           "anyOf": [
             {
@@ -3656,6 +3668,34 @@
       "title": "ContinuousObservationStream",
       "type": "object"
     },
+    "ContinuousSpatialMutationIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes an Affine Conflict-free Replicated Data Type (CRDT) to\nexecute Optimistic Concurrency Control across geometric manipulations.\n\nCAUSAL AFFORDANCE: Authorizes a participant to kinetically drag, rotate, or scale a\ntopological node. The orchestrator uses the provided lamport_clock to mathematically resolve\nSpherical Linear Interpolation (SLERP) and translation collisions between concurrent actors.\n\nEPISTEMIC BOUNDS: The mutation strictly targets a verified NodeIdentifierState. The\nlamport_clock (ge=0, le=1000000000) prevents temporal overflow during logical state\nreconciliation.\n\nMCP ROUTING TRIGGERS: Optimistic Locking, Affine CRDT, Spherical Linear Interpolation, Continuous Reconciliation",
+      "properties": {
+        "target_node_id": {
+          "$ref": "#/$defs/NodeIdentifierState",
+          "description": "The specific topology vertex undergoing spatial mutation."
+        },
+        "proposed_transform": {
+          "$ref": "#/$defs/SE3TransformProfile",
+          "description": "The requested absolute SE(3) spatial terminus."
+        },
+        "lamport_clock": {
+          "description": "The logical clock scalar dictating Last-Writer-Wins consensus for the geometric shift.",
+          "maximum": 1000000000,
+          "minimum": 0,
+          "title": "Lamport Clock",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "target_node_id",
+        "proposed_transform",
+        "lamport_clock"
+      ],
+      "title": "ContinuousSpatialMutationIntent",
+      "type": "object"
+    },
     "CouncilTopologyManifest": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Social Choice Theory, Condorcet's Jury Theorem, and\nPractical Byzantine Fault Tolerance (pBFT) to synthesize an authoritative truth\nfrom a multi-agent network. As a ...Manifest suffix, this defines a frozen,\nN-dimensional coordinate state.\n\nCAUSAL AFFORDANCE: Unlocks decentralized truth-synthesis by routing conflicting\nproposals through a strict consensus_policy (ConsensusPolicy), ultimately collapsing\nthe epistemic probability wave via the designated adjudicator_id\n(NodeIdentifierState). Cognitive heterogeneity is enforced by\ndiversity_policy (DiversityPolicy).\n\nEPISTEMIC BOUNDS: The @model_validator enforce_funded_byzantine_slashing enforces a\nstrict economic interlock: if the consensus_policy demands slash_escrow via pBFT,\nit halts instantiation unless a funded council_escrow (EscrowPolicy, magnitude > 0)\nis present. A second @model_validator check_adjudicator_id verifies the\nadjudicator_id exists in the nodes registry.\n\nMCP ROUTING TRIGGERS: Social Choice Theory, PBFT Consensus, Multi-Agent Debate,\nByzantine Fault Tolerance, Slashing Condition",
@@ -5315,6 +5355,49 @@
         "claims"
       ],
       "title": "EpistemicArgumentGraphState",
+      "type": "object"
+    },
+    "EpistemicAttentionRay": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Joint Attention and Gaze Raycasting across the distributed topology.\nIt projects a continuous vector from an observer's optical center to indicate cognitive focus\nprior to physical mutation.\n\nCAUSAL AFFORDANCE: Broadacasts a non-kinetic 'cursor presence' to the swarm. The orchestrator\ncalculates the dot product between this vector and the VolumetricBoundingProfiles of surrounding\nnodes, identifying the exact topological vertices the observer is currently evaluating.\n\nEPISTEMIC BOUNDS: The direction_unit_vector must be mathematically normalized to exactly 1.0\nto prevent raycast scalar explosions. To mitigate O(N^2) intersection complexity, the\nintersected_node_ids array is strictly capped at max_length=100.\n\nMCP ROUTING TRIGGERS: Spatial Raycasting, Joint Attention, Cognitive Frustum Intersection, Vector Math",
+      "properties": {
+        "origin": {
+          "$ref": "#/$defs/SE3TransformProfile",
+          "description": "The absolute SE(3) spatial coordinate representing the observer's optical center."
+        },
+        "direction_unit_vector": {
+          "description": "The strictly normalized 3D directional vector representing the angle of gaze.",
+          "maxItems": 3,
+          "minItems": 3,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Direction Unit Vector",
+          "type": "array"
+        },
+        "intersected_node_ids": {
+          "description": "The array of topological vertices mathematically pierced by this attention ray.",
+          "items": {
+            "$ref": "#/$defs/NodeIdentifierState"
+          },
+          "maxItems": 100,
+          "title": "Intersected Node Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "origin",
+        "direction_unit_vector"
+      ],
+      "title": "EpistemicAttentionRay",
       "type": "object"
     },
     "EpistemicAxiomState": {
@@ -8113,6 +8196,18 @@
         "required_attestation": {
           "$ref": "#/$defs/AttestationMechanismProfile",
           "description": "The mandatory cryptographic attestation required to verify the human operator's identity."
+        },
+        "active_attention_ray": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EpistemicAttentionRay"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The continuous spatial vector representing the human operator's localized cognitive focus."
         }
       },
       "required": [
@@ -8861,14 +8956,32 @@
           "type": "string"
         },
         "deltas": {
-          "description": "The strictly typed contiguous memory block of 10-element kinematic tuples.",
+          "description": "The strictly typed contiguous memory block of 16-element kinematic tuples, embedding first-order temporal derivatives for continuous Hermite Spline interpolation.",
           "items": {
-            "maxItems": 10,
-            "minItems": 10,
+            "maxItems": 16,
+            "minItems": 16,
             "prefixItems": [
               {
                 "maxLength": 128,
                 "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
               },
               {
                 "type": "number"
@@ -10514,6 +10627,14 @@
         "telemetry_backpressure": {
           "$ref": "#/$defs/TelemetryBackpressureContract",
           "description": "The network flow constraints mathematically bound to the observer's kinematics."
+        },
+        "active_spatial_subscriptions": {
+          "description": "The array of Area of Interest perimeters dictating spatial telemetry isolation.",
+          "items": {
+            "$ref": "#/$defs/VolumetricPartitionSubscription"
+          },
+          "title": "Active Spatial Subscriptions",
+          "type": "array"
         }
       },
       "required": [
@@ -15087,6 +15208,29 @@
         "curve_type"
       ],
       "title": "VolumetricEdgeProfile",
+      "type": "object"
+    },
+    "VolumetricPartitionSubscription": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Hierarchical Spatial Hashing and Area of Interest (AOI) Management\nto prevent O(N^2) network saturation in massive spatial hypermedia environments.\n\nCAUSAL AFFORDANCE: Allows a distributed client to mathematically define a spatial perimeter.\nThe orchestrator restricts the egress of KinematicDeltaManifest streams exclusively to nodes\nresiding within this specific volumetric boundary.\n\nEPISTEMIC BOUNDS: The temporal liveness is guillotined by subscription_ttl_ms (ge=1, le=86400000).\nThe volume is physically restricted by the nested VolumetricBoundingProfile.\n\nMCP ROUTING TRIGGERS: Area of Interest Management, Hierarchical Spatial Hashing, Telemetry Isolation",
+      "properties": {
+        "partition_boundary": {
+          "$ref": "#/$defs/VolumetricBoundingProfile",
+          "description": "The 3D physical cage defining the observer's subscribed spatial area."
+        },
+        "subscription_ttl_ms": {
+          "description": "The exact Time-To-Live in milliseconds before the orchestrator forcibly drops the telemetry stream to prevent zombie subscriptions.",
+          "maximum": 86400000,
+          "minimum": 1,
+          "title": "Subscription Ttl Ms",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "partition_boundary",
+        "subscription_ttl_ms"
+      ],
+      "title": "VolumetricPartitionSubscription",
       "type": "object"
     },
     "WetwareAttestationContract": {
