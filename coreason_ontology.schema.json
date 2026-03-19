@@ -638,6 +638,18 @@
           "description": "Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
           "title": "Domain Extensions"
         },
+        "optical_physics": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PhysicallyBasedRenderingProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The strict microfacet BRDF physics governing the visual representation of this node."
+        },
         "type": {
           "const": "agent",
           "default": "agent",
@@ -1591,6 +1603,18 @@
           "default": null,
           "description": "Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
           "title": "Domain Extensions"
+        },
+        "optical_physics": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PhysicallyBasedRenderingProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The strict microfacet BRDF physics governing the visual representation of this node."
         }
       },
       "required": [
@@ -2237,6 +2261,18 @@
           "minLength": 1,
           "title": "Target Variable",
           "type": "string"
+        },
+        "volumetric_geometry": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/VolumetricEdgeProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The continuous parametric spline defining the physical connection manifold."
         },
         "edge_type": {
           "description": "The specific Pearlian topological relationship between the two variables.",
@@ -2977,6 +3013,18 @@
           "default": null,
           "description": "Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
           "title": "Domain Extensions"
+        },
+        "optical_physics": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PhysicallyBasedRenderingProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The strict microfacet BRDF physics governing the visual representation of this node."
         },
         "type": {
           "const": "composite",
@@ -7674,6 +7722,18 @@
           "title": "Ledger Source Id",
           "type": "string"
         },
+        "billboard_physics": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SpatialBillboardContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The kinematic constraint anchoring this 2D panel to the 3D topology."
+        },
         "mark": {
           "description": "The geometric shape used to represent the matrix.",
           "enum": [
@@ -7934,6 +7994,18 @@
           "default": null,
           "description": "Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
           "title": "Domain Extensions"
+        },
+        "optical_physics": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PhysicallyBasedRenderingProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The strict microfacet BRDF physics governing the visual representation of this node."
         },
         "type": {
           "const": "human",
@@ -8242,6 +8314,18 @@
           "maxLength": 100000,
           "title": "Markdown Content",
           "type": "string"
+        },
+        "billboard_physics": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SpatialBillboardContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The kinematic constraint anchoring this 2D card to the 3D topology."
         }
       },
       "required": [
@@ -8667,6 +8751,69 @@
           "type": "null"
         }
       ]
+    },
+    "KinematicDeltaManifest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes a zero-allocation, high-velocity telemetry manifold\ndesigned exclusively for continuous thermodynamic state updates across the Markov Blanket.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator to transmit continuous SE(3) coordinates\nand optic states as flattened contiguous memory blocks (Struct of Arrays), mechanically\nbypassing recursive Garbage Collection (GC) pauses in external clients.\n\nEPISTEMIC BOUNDS: The state differential is mathematically restricted to a strict\n10-element tuple mapping `[node_id, x, y, z, qx, qy, qz, qw, scale, opacity]`.\nThe deltas array is deterministically sorted by node_id to preserve RFC 8785 canonical hashing.\n\nMCP ROUTING TRIGGERS: Zero-Allocation Telemetry, Struct of Arrays, High-Velocity Buffer, SE3 Delta",
+      "properties": {
+        "stream_id": {
+          "description": "A Content Identifier (CID) anchoring the continuous telemetry stream.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Stream Id",
+          "type": "string"
+        },
+        "deltas": {
+          "description": "The strictly typed contiguous memory block of 10-element kinematic tuples.",
+          "items": {
+            "maxItems": 10,
+            "minItems": 10,
+            "prefixItems": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "type": "array"
+          },
+          "title": "Deltas",
+          "type": "array"
+        }
+      },
+      "required": [
+        "stream_id",
+        "deltas"
+      ],
+      "title": "KinematicDeltaManifest",
+      "type": "object"
     },
     "KinematicNoiseProfile": {
       "additionalProperties": false,
@@ -9710,6 +9857,18 @@
           "default": null,
           "description": "Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
           "title": "Domain Extensions"
+        },
+        "optical_physics": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PhysicallyBasedRenderingProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The strict microfacet BRDF physics governing the visual representation of this node."
         },
         "type": {
           "const": "memoized",
@@ -10793,6 +10952,69 @@
         "target_table_uri"
       ],
       "title": "PersistenceCommitReceipt",
+      "type": "object"
+    },
+    "PhysicallyBasedRenderingProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes the Cook-Torrance Microfacet BRDF (Bidirectional\nReflectance Distribution Function) to establish the exact physical optic\nproperties of a topological vertex.\n\nCAUSAL AFFORDANCE: Authorizes the spatial computing renderer to deterministically\ncompute light scattering, reflection, and refraction for the node's geometry,\ntranslating logical state into physical optic variables (e.g., pulsing emission\nduring active compute).\n\nEPISTEMIC BOUNDS: Diffuse and specular physics are rigidly clamped to normalized\nprobability spaces (ge=0.0, le=1.0) for metalness, roughness, and transmission.\nThe Index of Refraction (ior) is mathematically bounded to valid physical\nmaterials [1.0, 3.0].\n\nMCP ROUTING TRIGGERS: Physically Based Rendering, Microfacet BRDF, Index of\nRefraction, Spatial Optics, Material Thermodynamics",
+      "properties": {
+        "mesh_geometry": {
+          "description": "The rigid 3D primitive geometry bounding the topological vertex.",
+          "enum": [
+            "sphere",
+            "box",
+            "icosahedron",
+            "cylinder",
+            "tetrahedron"
+          ],
+          "title": "Mesh Geometry",
+          "type": "string"
+        },
+        "metalness": {
+          "description": "The dielectric vs. metallic material property scalar.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Metalness",
+          "type": "number"
+        },
+        "roughness": {
+          "description": "The microfacet surface scattering scalar.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Roughness",
+          "type": "number"
+        },
+        "transmission": {
+          "description": "The optical clarity or volumetric glass effect.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Transmission",
+          "type": "number"
+        },
+        "ior": {
+          "description": "The Index of Refraction dictating photon trajectory.",
+          "maximum": 3.0,
+          "minimum": 1.0,
+          "title": "Ior",
+          "type": "number"
+        },
+        "emissive_intensity": {
+          "description": "The thermodynamic glow indicating active kinetic compute.",
+          "maximum": 100.0,
+          "minimum": 0.0,
+          "title": "Emissive Intensity",
+          "type": "number"
+        }
+      },
+      "required": [
+        "mesh_geometry",
+        "metalness",
+        "roughness",
+        "transmission",
+        "ior",
+        "emissive_intensity"
+      ],
+      "title": "PhysicallyBasedRenderingProfile",
       "type": "object"
     },
     "PostQuantumSignatureReceipt": {
@@ -12027,6 +12249,18 @@
           ],
           "title": "Causal Relationship",
           "type": "string"
+        },
+        "volumetric_geometry": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/VolumetricEdgeProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The continuous parametric spline defining the physical connection manifold."
         }
       },
       "required": [
@@ -12395,6 +12629,41 @@
         "error"
       ],
       "type": "string"
+    },
+    "SpatialBillboardContract": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes a kinematic constraint binding a 2D typographic or\ngeometric matrix to a 3D SE(3) coordinate mesh.\n\nCAUSAL AFFORDANCE: Authorizes the spatial renderer to project 2D semantics over a\n3D topology, mathematically guaranteeing invariant visual alignment relative to the\nobserver's view frustum.\n\nEPISTEMIC BOUNDS: Strictly bounded by boolean physics gates (always_face_camera,\nocclude_behind_meshes) defining the object's Z-buffer collision behavior.\n\nMCP ROUTING TRIGGERS: Spherical Billboarding, View Frustum Alignment, Z-Buffer Occlusion, Projective Geometry",
+      "properties": {
+        "anchoring_node_id": {
+          "$ref": "#/$defs/NodeIdentifierState",
+          "description": "The target 3D SE(3) vertex to which the 2D matrix is mathematically bound."
+        },
+        "always_face_camera": {
+          "default": true,
+          "description": "Forces the normal vector of the 2D matrix to continuously align with the observer's camera.",
+          "title": "Always Face Camera",
+          "type": "boolean"
+        },
+        "occlude_behind_meshes": {
+          "default": false,
+          "description": "If true, subjects the 2D plane to depth-testing, allowing 3D geometry to block line-of-sight.",
+          "title": "Occlude Behind Meshes",
+          "type": "boolean"
+        },
+        "distance_scaling_factor": {
+          "default": 1.0,
+          "description": "Controls orthographic size invariance; scaling the matrix inversely to camera distance.",
+          "maximum": 10.0,
+          "minimum": 0.0,
+          "title": "Distance Scaling Factor",
+          "type": "number"
+        }
+      },
+      "required": [
+        "anchoring_node_id"
+      ],
+      "title": "SpatialBillboardContract",
+      "type": "object"
     },
     "SpatialKinematicActionIntent": {
       "additionalProperties": false,
@@ -13294,6 +13563,18 @@
           "description": "Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
           "title": "Domain Extensions"
         },
+        "optical_physics": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PhysicallyBasedRenderingProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The strict microfacet BRDF physics governing the visual representation of this node."
+        },
         "type": {
           "const": "system",
           "default": "system",
@@ -13436,6 +13717,18 @@
           },
           "title": "Leaf Provenance",
           "type": "array"
+        },
+        "optical_physics": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PhysicallyBasedRenderingProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The strict microfacet BRDF physics governing the visual representation of this node."
         }
       },
       "required": [
@@ -14502,6 +14795,51 @@
         "extents_z"
       ],
       "title": "VolumetricBoundingProfile",
+      "type": "object"
+    },
+    "VolumetricEdgeProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes the geometric curve and token flow thermodynamics\nbetween topological vertices.\n\nCAUSAL AFFORDANCE: Instructs the spatial rendering engine to compute C1-continuous\nparametric splines between discrete nodes, translating abstract logical edges into\nphysical volumetric manifolds.\n\nEPISTEMIC BOUNDS: Curve geometry is locked to the Literal automaton [\"straight\",\n\"bezier\", \"catmull_rom\"]. Thermodynamic token velocity is clamped by flow_velocity\n(ge=0.0, le=100.0).\n\nMCP ROUTING TRIGGERS: Parametric Spline Interpolation, Catmull-Rom, Bezier Geometry, C1 Continuity, Volumetric Edge",
+      "properties": {
+        "curve_type": {
+          "description": "The mathematical spline geometry used to interpolate the space between vertices.",
+          "enum": [
+            "straight",
+            "bezier",
+            "catmull_rom"
+          ],
+          "title": "Curve Type",
+          "type": "string"
+        },
+        "tension": {
+          "default": 0.5,
+          "description": "The mathematical rigidity scalar of the spline interpolation.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Tension",
+          "type": "number"
+        },
+        "flow_velocity": {
+          "default": 0.0,
+          "description": "The temporal speed (derivative) of token transmission visualized along the edge manifold.",
+          "maximum": 100.0,
+          "minimum": 0.0,
+          "title": "Flow Velocity",
+          "type": "number"
+        },
+        "edge_thickness": {
+          "default": 0.1,
+          "description": "The physical volumetric width of the connection manifold in meters.",
+          "maximum": 10.0,
+          "minimum": 0.01,
+          "title": "Edge Thickness",
+          "type": "number"
+        }
+      },
+      "required": [
+        "curve_type"
+      ],
+      "title": "VolumetricEdgeProfile",
       "type": "object"
     },
     "WetwareAttestationContract": {
