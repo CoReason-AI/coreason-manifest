@@ -401,15 +401,18 @@ class SpatialReferenceFrameManifest(CoreasonBaseState):
     """
 
     frame_id: str = Field(
-        min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$",
-        description="The unique cryptographic identifier for this local spatial volume."
+        min_length=1,
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        description="The unique cryptographic identifier for this local spatial volume.",
     )
-    anchor_protocol: Literal["openxr_spatial_anchor", "apple_world_anchor", "slam_feature_map", "relative_virtual"] = Field(
-        description="The scientific tracking standard utilized to establish this reference frame."
+    anchor_protocol: Literal["openxr_spatial_anchor", "apple_world_anchor", "slam_feature_map", "relative_virtual"] = (
+        Field(description="The scientific tracking standard utilized to establish this reference frame.")
     )
     physical_room_hash: str | None = Field(
-        default=None, pattern="^[a-f0-9]{64}$",
-        description="Optional SHA-256 hash of the environment's point-cloud or geometry signature."
+        default=None,
+        pattern="^[a-f0-9]{64}$",
+        description="Optional SHA-256 hash of the environment's point-cloud or geometry signature.",
     )
 
 
@@ -434,8 +437,10 @@ class SE3TransformProfile(CoreasonBaseState):
     """
 
     reference_frame_id: str = Field(
-        min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$",
-        description="The SpatialReferenceFrameManifest CID this coordinate is relative to, anchoring it to a physical or virtual room."
+        min_length=1,
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        description="The SpatialReferenceFrameManifest CID this coordinate is relative to, anchoring it to a physical or virtual room.",
     )
     x: float = Field(description="Translation along the X-axis relative to the reference frame.")
     y: float = Field(description="Translation along the Y-axis relative to the reference frame.")
@@ -446,7 +451,9 @@ class SE3TransformProfile(CoreasonBaseState):
     qz: float = Field(ge=-1.0, le=1.0, default=0.0, description="The k component of the rotation quaternion.")
     qw: float = Field(ge=-1.0, le=1.0, default=1.0, description="The real (scalar) part of the rotation quaternion.")
 
-    scale: float = Field(ge=0.0001, le=10000.0, default=1.0, description="Strictly positive uniform volumetric scaling factor.")
+    scale: float = Field(
+        ge=0.0001, le=10000.0, default=1.0, description="Strictly positive uniform volumetric scaling factor."
+    )
 
     @model_validator(mode="after")
     def enforce_quaternion_normalization(self) -> Self:
@@ -455,7 +462,9 @@ class SE3TransformProfile(CoreasonBaseState):
         if magnitude == 0.0:
             raise ValueError("Topological Violation: Quaternion cannot be a zero vector.")
         if not math.isclose(magnitude, 1.0, abs_tol=1e-3):
-            raise ValueError(f"Topological Violation: Quaternion magnitude is {magnitude}. Must be normalized to 1.0 to prevent matrix shear.")
+            raise ValueError(
+                f"Topological Violation: Quaternion magnitude is {magnitude}. Must be normalized to 1.0 to prevent matrix shear."
+            )
         return self
 
 
@@ -518,8 +527,10 @@ class ViewportProjectionContract(CoreasonBaseState):
         description="The linear algebraic projection operator applied to collapse the topology."
     )
     field_of_view_degrees: float | None = Field(
-        ge=1.0, le=179.0, default=None,
-        description="The Y-axis optical field of view. Mandatory for perspective projections."
+        ge=1.0,
+        le=179.0,
+        default=None,
+        description="The Y-axis optical field of view. Mandatory for perspective projections.",
     )
     clipping_plane_near: float = Field(ge=0.001, description="The near frustum clipping plane.")
     clipping_plane_far: float = Field(ge=0.01, description="The far frustum clipping plane.")
@@ -528,9 +539,13 @@ class ViewportProjectionContract(CoreasonBaseState):
     def validate_frustum_geometry(self) -> Self:
         """Mathematically verifies the optical integrity of the projection matrix."""
         if self.clipping_plane_near >= self.clipping_plane_far:
-            raise ValueError("Topological Violation: clipping_plane_near must be strictly less than clipping_plane_far.")
+            raise ValueError(
+                "Topological Violation: clipping_plane_near must be strictly less than clipping_plane_far."
+            )
         if self.projection_type == "perspective" and self.field_of_view_degrees is None:
-            raise ValueError("Optical Singularity Risk: Perspective projection mathematically requires field_of_view_degrees.")
+            raise ValueError(
+                "Optical Singularity Risk: Perspective projection mathematically requires field_of_view_degrees."
+            )
         return self
 
 

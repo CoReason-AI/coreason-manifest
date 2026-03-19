@@ -104,7 +104,9 @@ def test_viewport_projection_validation() -> None:
         )
 
     # Perspective without FOV
-    with pytest.raises(ValidationError, match=r"Perspective projection mathematically requires field_of_view_degrees\."):
+    with pytest.raises(
+        ValidationError, match=r"Perspective projection mathematically requires field_of_view_degrees\."
+    ):
         ViewportProjectionContract(projection_type="perspective", clipping_plane_near=0.1, clipping_plane_far=10.0)
 
     # Valid configurations
