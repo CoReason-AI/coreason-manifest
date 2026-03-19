@@ -549,6 +549,148 @@ class ViewportProjectionContract(CoreasonBaseState):
         return self
 
 
+class PhysicallyBasedRenderingProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Formalizes the Cook-Torrance Microfacet BRDF (Bidirectional
+    Reflectance Distribution Function) to establish the exact physical optic
+    properties of a topological vertex.
+
+    CAUSAL AFFORDANCE: Authorizes the spatial computing renderer to deterministically
+    compute light scattering, reflection, and refraction for the node's geometry,
+    translating logical state into physical optic variables (e.g., pulsing emission
+    during active compute).
+
+    EPISTEMIC BOUNDS: Diffuse and specular physics are rigidly clamped to normalized
+    probability spaces (ge=0.0, le=1.0) for metalness, roughness, and transmission.
+    The Index of Refraction (ior) is mathematically bounded to valid physical
+    materials [1.0, 3.0].
+
+    MCP ROUTING TRIGGERS: Physically Based Rendering, Microfacet BRDF, Index of
+    Refraction, Spatial Optics, Material Thermodynamics
+    """
+
+    mesh_geometry: Literal["sphere", "box", "icosahedron", "cylinder", "tetrahedron"] = Field(
+        description="The rigid 3D primitive geometry bounding the topological vertex."
+    )
+    metalness: float = Field(ge=0.0, le=1.0, description="The dielectric vs. metallic material property scalar.")
+    roughness: float = Field(ge=0.0, le=1.0, description="The microfacet surface scattering scalar.")
+    transmission: float = Field(ge=0.0, le=1.0, description="The optical clarity or volumetric glass effect.")
+    ior: float = Field(ge=1.0, le=3.0, description="The Index of Refraction dictating photon trajectory.")
+    emissive_intensity: float = Field(
+        ge=0.0, le=100.0, description="The thermodynamic glow indicating active kinetic compute."
+    )
+
+
+class KinematicDeltaManifest(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Establishes a zero-allocation, high-velocity telemetry manifold
+    designed exclusively for continuous thermodynamic state updates across the Markov Blanket.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator to transmit continuous SE(3) coordinates
+    and optic states as flattened contiguous memory blocks (Struct of Arrays), mechanically
+    bypassing recursive Garbage Collection (GC) pauses in external clients.
+
+    EPISTEMIC BOUNDS: The state differential is mathematically restricted to a strict
+    10-element tuple mapping `[node_id, x, y, z, qx, qy, qz, qw, scale, opacity]`.
+    The deltas array is deterministically sorted by node_id to preserve RFC 8785 canonical hashing.
+
+    MCP ROUTING TRIGGERS: Zero-Allocation Telemetry, Struct of Arrays, High-Velocity Buffer, SE3 Delta
+    """
+
+    stream_id: str = Field(
+        min_length=1,
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        description="A Content Identifier (CID) anchoring the continuous telemetry stream.",
+    )
+    deltas: list[
+        tuple[
+            Annotated[str, StringConstraints(max_length=128)],
+            float,
+            float,
+            float,
+            float,
+            float,
+            float,
+            float,
+            float,
+            float,
+        ]
+    ] = Field(description="The strictly typed contiguous memory block of 10-element kinematic tuples.")
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort_deltas(self) -> Self:
+        object.__setattr__(self, "deltas", sorted(self.deltas, key=lambda d: d[0]))
+        return self
+
+
+class SpatialBillboardContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Establishes a kinematic constraint binding a 2D typographic or
+    geometric matrix to a 3D SE(3) coordinate mesh.
+
+    CAUSAL AFFORDANCE: Authorizes the spatial renderer to project 2D semantics over a
+    3D topology, mathematically guaranteeing invariant visual alignment relative to the
+    observer's view frustum.
+
+    EPISTEMIC BOUNDS: Strictly bounded by boolean physics gates (always_face_camera,
+    occlude_behind_meshes) defining the object's Z-buffer collision behavior.
+
+    MCP ROUTING TRIGGERS: Spherical Billboarding, View Frustum Alignment, Z-Buffer Occlusion, Projective Geometry
+    """
+
+    anchoring_node_id: NodeIdentifierState = Field(
+        description="The target 3D SE(3) vertex to which the 2D matrix is mathematically bound."
+    )
+    always_face_camera: bool = Field(
+        default=True,
+        description="Forces the normal vector of the 2D matrix to continuously align with the observer's camera.",
+    )
+    occlude_behind_meshes: bool = Field(
+        default=False,
+        description="If true, subjects the 2D plane to depth-testing, allowing 3D geometry to block line-of-sight.",
+    )
+    distance_scaling_factor: float = Field(
+        ge=0.0,
+        le=10.0,
+        default=1.0,
+        description="Controls orthographic size invariance; scaling the matrix inversely to camera distance.",
+    )
+
+
+class VolumetricEdgeProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Formalizes the geometric curve and token flow thermodynamics
+    between topological vertices.
+
+    CAUSAL AFFORDANCE: Instructs the spatial rendering engine to compute C1-continuous
+    parametric splines between discrete nodes, translating abstract logical edges into
+    physical volumetric manifolds.
+
+    EPISTEMIC BOUNDS: Curve geometry is locked to the Literal automaton ["straight",
+    "bezier", "catmull_rom"]. Thermodynamic token velocity is clamped by flow_velocity
+    (ge=0.0, le=100.0).
+
+    MCP ROUTING TRIGGERS: Parametric Spline Interpolation, Catmull-Rom, Bezier Geometry, C1 Continuity, Volumetric Edge
+    """
+
+    curve_type: Literal["straight", "bezier", "catmull_rom"] = Field(
+        description="The mathematical spline geometry used to interpolate the space between vertices."
+    )
+    tension: float = Field(
+        ge=0.0, le=1.0, default=0.5, description="The mathematical rigidity scalar of the spline interpolation."
+    )
+    flow_velocity: float = Field(
+        ge=0.0,
+        le=100.0,
+        default=0.0,
+        description="The temporal speed (derivative) of token transmission visualized along the edge manifold.",
+    )
+    edge_thickness: float = Field(
+        ge=0.01, le=10.0, default=0.1, description="The physical volumetric width of the connection manifold in meters."
+    )
+
+
 class DynamicLayoutManifest(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Encapsulates a Python 3.14 t-string template as an
@@ -3258,6 +3400,9 @@ class CausalDirectedEdgeState(CoreasonBaseState):
     target_variable: Annotated[str, StringConstraints(max_length=255)] = Field(
         min_length=1, description="The dependent variable $Y$."
     )
+    volumetric_geometry: VolumetricEdgeProfile | None = Field(
+        default=None, description="The continuous parametric spline defining the physical connection manifold."
+    )
     edge_type: Literal["direct_cause", "confounder", "collider", "mediator"] = Field(
         description="The specific Pearlian topological relationship between the two variables."
     )
@@ -5357,6 +5502,9 @@ class GrammarPanelProfile(CoreasonBaseState):
         pattern="^[a-zA-Z0-9_.:-]+$",
         description="The cryptographic pointer to the semantic series in the EpistemicLedgerState.",
     )
+    billboard_physics: SpatialBillboardContract | None = Field(
+        default=None, description="The kinematic constraint anchoring this 2D panel to the 3D topology."
+    )
     mark: Literal["point", "line", "area", "bar", "rect", "arc"] = Field(
         le=1000000000, description="The geometric shape used to represent the matrix."
     )
@@ -5570,6 +5718,9 @@ class TaxonomicNodeState(CoreasonBaseState):
     leaf_provenance: list["EpistemicProvenanceReceipt"] = Field(
         default_factory=list,
         description="The mathematical chain of custody binding this virtual coordinate back to physical vectors.",
+    )
+    optical_physics: PhysicallyBasedRenderingProfile | None = Field(
+        default=None, description="The strict microfacet BRDF physics governing the visual representation of this node."
     )
 
     @model_validator(mode="after")
@@ -5796,6 +5947,9 @@ class InsightCardProfile(CoreasonBaseState):
         description="The declarative semantic anchor summarizing the underlying matrix or markdown projection.",
     )
     markdown_content: str = Field(max_length=100000, description="The markdown formatted text content.")
+    billboard_physics: SpatialBillboardContract | None = Field(
+        default=None, description="The kinematic constraint anchoring this 2D card to the 3D topology."
+    )
 
     @field_validator("markdown_content")
     @classmethod
@@ -6044,6 +6198,9 @@ class BaseNodeProfile(CoreasonBaseState):
     domain_extensions: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] | None = Field(
         default=None,
         description="Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
+    )
+    optical_physics: PhysicallyBasedRenderingProfile | None = Field(
+        default=None, description="The strict microfacet BRDF physics governing the visual representation of this node."
     )
 
     @model_validator(mode="after")
@@ -9012,6 +9169,9 @@ class SemanticEdgeState(CoreasonBaseState):
     causal_relationship: Literal["causes", "confounds", "correlates_with", "undirected"] = Field(
         default="undirected", description="The Pearlian directionality of the semantic relationship."
     )
+    volumetric_geometry: VolumetricEdgeProfile | None = Field(
+        default=None, description="The continuous parametric spline defining the physical connection manifold."
+    )
 
 
 class SemanticNodeState(CoreasonBaseState):
@@ -11264,3 +11424,8 @@ SpatialReferenceFrameManifest.model_rebuild()
 SE3TransformProfile.model_rebuild()
 VolumetricBoundingProfile.model_rebuild()
 ViewportProjectionContract.model_rebuild()
+
+PhysicallyBasedRenderingProfile.model_rebuild()
+KinematicDeltaManifest.model_rebuild()
+SpatialBillboardContract.model_rebuild()
+VolumetricEdgeProfile.model_rebuild()
