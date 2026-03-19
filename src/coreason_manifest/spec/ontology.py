@@ -6199,8 +6199,13 @@ class BaseNodeProfile(CoreasonBaseState):
         default=None,
         description="Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
     )
-    semantic_zoom: SemanticZoomProfile | None = Field(default=None, description="The mathematical Information Bottleneck thresholds dictating the semantic degradation of this specific node.")
-    markov_blanket: MarkovBlanketRenderingPolicy | None = Field(default=None, description="The epistemic isolation boundary guarding this agent's internal generative states.")
+    semantic_zoom: SemanticZoomProfile | None = Field(
+        default=None,
+        description="The mathematical Information Bottleneck thresholds dictating the semantic degradation of this specific node.",
+    )
+    markov_blanket: MarkovBlanketRenderingPolicy | None = Field(
+        default=None, description="The epistemic isolation boundary guarding this agent's internal generative states."
+    )
     optical_physics: PhysicallyBasedRenderingProfile | None = Field(
         default=None, description="The strict microfacet BRDF physics governing the visual representation of this node."
     )
@@ -7232,8 +7237,6 @@ class NormativeDriftEvent(BaseStateEvent):
         pattern="^[a-f0-9]{64}$",
         description="A cryptographic pointer to the internal scratchpad trace (ThoughtBranchState) definitively proving the rule is obsolete or causing a loop.",
     )
-
-
 
 
 class OntologicalHandshakeReceipt(CoreasonBaseState):
@@ -9441,23 +9444,26 @@ class SemanticZoomProfile(CoreasonBaseState):
 
     MCP ROUTING TRIGGERS: Information Bottleneck, Semantic Compression, Euclidean Distance, Level of Detail, Entropy Degradation
     """
+
     macro_distance_threshold: float = Field(
         ge=0.0,
-        description="The Euclidean distance in meters at which the node collapses into a pure scalar or color-coded coordinate representation."
+        description="The Euclidean distance in meters at which the node collapses into a pure scalar or color-coded coordinate representation.",
     )
     meso_distance_threshold: float = Field(
         ge=0.0,
-        description="The distance at which the node displays only its localized taxonomic label and boundary, stripping raw textual payloads."
+        description="The distance at which the node displays only its localized taxonomic label and boundary, stripping raw textual payloads.",
     )
     micro_distance_threshold: float = Field(
         ge=0.0,
-        description="The close-proximity boundary where full N-dimensional tensors and unstructured text blocks are mathematically hydrated into the observer's plane."
+        description="The close-proximity boundary where full N-dimensional tensors and unstructured text blocks are mathematically hydrated into the observer's plane.",
     )
 
     @model_validator(mode="after")
     def enforce_spatial_monotonicity(self) -> Self:
         if not (self.micro_distance_threshold < self.meso_distance_threshold < self.macro_distance_threshold):
-            raise ValueError("Topological Violation: Semantic zoom thresholds must strictly adhere to micro < meso < macro distance invariants.")
+            raise ValueError(
+                "Topological Violation: Semantic zoom thresholds must strictly adhere to micro < meso < macro distance invariants."
+            )
         return self
 
 
@@ -9476,17 +9482,18 @@ class MarkovBlanketRenderingPolicy(CoreasonBaseState):
 
     MCP ROUTING TRIGGERS: Fristonian Active Inference, Markov Blanket, Epistemic Isolation, Volumetric Penetration, Conditional Independence
     """
+
     pierce_distance_meters: float = Field(
         ge=0.0,
-        description="The precise Euclidean distance at which an observer's coordinate successfully breaches the agent's internal state partition."
+        description="The precise Euclidean distance at which an observer's coordinate successfully breaches the agent's internal state partition.",
     )
     expose_sensory_active_states: bool = Field(
         default=True,
-        description="Authorizes the continuous projection of the agent's exogenous API interactions and structural tool commitments to the macroscopic layer."
+        description="Authorizes the continuous projection of the agent's exogenous API interactions and structural tool commitments to the macroscopic layer.",
     )
     occlude_internal_mechanistics: bool = Field(
         default=True,
-        description="Forces absolute rendering occlusion of internal non-monotonic reasoning loops unless the pierce distance is breached."
+        description="Forces absolute rendering occlusion of internal non-monotonic reasoning loops unless the pierce distance is breached.",
     )
 
 
@@ -9504,23 +9511,28 @@ class TelemetryBackpressureContract(CoreasonBaseState):
 
     MCP ROUTING TRIGGERS: Observer Effect, Frustum Culling, Thermodynamic Flow Control, Telemetry Backpressure, Spatial Masking
     """
+
     focal_refresh_rate_hz: int = Field(
-        ge=1, le=240,
-        description="The high-velocity telemetry budget (Hz) allocated exclusively to topologies intersecting the center of the observer's view frustum."
+        ge=1,
+        le=240,
+        description="The high-velocity telemetry budget (Hz) allocated exclusively to topologies intersecting the center of the observer's view frustum.",
     )
     peripheral_refresh_rate_hz: int = Field(
-        ge=1, le=60,
-        description="The degraded telemetry budget (Hz) for nodes at the edges of the optical projection."
+        ge=1, le=60, description="The degraded telemetry budget (Hz) for nodes at the edges of the optical projection."
     )
     occluded_refresh_rate_hz: int = Field(
-        ge=0, le=1, default=0,
-        description="The starvation rate (Hz) for topologies failing the depth test or falling outside clipping planes."
+        ge=0,
+        le=1,
+        default=0,
+        description="The starvation rate (Hz) for topologies failing the depth test or falling outside clipping planes.",
     )
 
     @model_validator(mode="after")
     def enforce_velocity_gradient(self) -> Self:
         if not (self.occluded_refresh_rate_hz <= self.peripheral_refresh_rate_hz <= self.focal_refresh_rate_hz):
-            raise ValueError("Thermodynamic Violation: Telemetry refresh rates must monotonically increase from occluded -> peripheral -> focal.")
+            raise ValueError(
+                "Thermodynamic Violation: Telemetry refresh rates must monotonically increase from occluded -> peripheral -> focal."
+            )
         return self
 
 
@@ -9539,13 +9551,15 @@ class ObservabilityLODPolicy(CoreasonBaseState):
 
     MCP ROUTING TRIGGERS: Spectral Graph Coarsening, Hierarchical Level of Detail, HLOD, Topology Collapse, VRAM Optimization
     """
+
     max_rendered_vertices: int = Field(
-        gt=0, le=1000000000,
-        description="The absolute physical ceiling of simultaneous causal nodes authorized to exist in the spatial projection pipeline."
+        gt=0,
+        le=1000000000,
+        description="The absolute physical ceiling of simultaneous causal nodes authorized to exist in the spatial projection pipeline.",
     )
     spectral_coarsening_active: bool = Field(
         default=True,
-        description="Authorizes the dynamic algebraic collapse of dense node communities into single macroscopic proxy vertices when the vertex ceiling is threatened."
+        description="Authorizes the dynamic algebraic collapse of dense node communities into single macroscopic proxy vertices when the vertex ceiling is threatened.",
     )
     telemetry_backpressure: TelemetryBackpressureContract = Field(
         description="The network flow constraints mathematically bound to the observer's kinematics."
@@ -9585,7 +9599,10 @@ class BaseTopologyManifest(CoreasonBaseState):
         default=None,
         description="The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology.",
     )
-    observability: ObservabilityLODPolicy | None = Field(default=None, description="The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph.")
+    observability: ObservabilityLODPolicy | None = Field(
+        default=None,
+        description="The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph.",
+    )
 
 
 class CouncilTopologyManifest(BaseTopologyManifest):
