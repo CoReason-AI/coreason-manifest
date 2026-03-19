@@ -597,6 +597,7 @@ class EpistemicAttentionRay(CoreasonBaseState):
 
     MCP ROUTING TRIGGERS: Spatial Raycasting, Joint Attention, Cognitive Frustum Intersection, Vector Math
     """
+
     origin: SE3TransformProfile = Field(
         description="The absolute SE(3) spatial coordinate representing the observer's optical center."
     )
@@ -606,16 +607,20 @@ class EpistemicAttentionRay(CoreasonBaseState):
     intersected_node_ids: list[NodeIdentifierState] = Field(
         default_factory=list,
         max_length=100,
-        description="The array of topological vertices mathematically pierced by this attention ray."
+        description="The array of topological vertices mathematically pierced by this attention ray.",
     )
 
     @model_validator(mode="after")
     def validate_unit_vector(self) -> Self:
-        magnitude = math.sqrt(self.direction_unit_vector[0]**2 + self.direction_unit_vector[1]**2 + self.direction_unit_vector[2]**2)
+        magnitude = math.sqrt(
+            self.direction_unit_vector[0] ** 2 + self.direction_unit_vector[1] ** 2 + self.direction_unit_vector[2] ** 2
+        )
         if magnitude == 0.0:
             raise ValueError("Kinematic Violation: Attention Ray direction cannot be a zero vector.")
         if not math.isclose(magnitude, 1.0, abs_tol=1e-3):
-            raise ValueError(f"Kinematic Violation: Attention Ray direction vector must be normalized to 1.0. Got {magnitude}.")
+            raise ValueError(
+                f"Kinematic Violation: Attention Ray direction vector must be normalized to 1.0. Got {magnitude}."
+            )
         return self
 
     @model_validator(mode="after")
@@ -638,12 +643,14 @@ class VolumetricPartitionSubscription(CoreasonBaseState):
 
     MCP ROUTING TRIGGERS: Area of Interest Management, Hierarchical Spatial Hashing, Telemetry Isolation
     """
+
     partition_boundary: VolumetricBoundingProfile = Field(
         description="The 3D physical cage defining the observer's subscribed spatial area."
     )
     subscription_ttl_ms: int = Field(
-        ge=1, le=86400000,
-        description="The exact Time-To-Live in milliseconds before the orchestrator forcibly drops the telemetry stream to prevent zombie subscriptions."
+        ge=1,
+        le=86400000,
+        description="The exact Time-To-Live in milliseconds before the orchestrator forcibly drops the telemetry stream to prevent zombie subscriptions.",
     )
 
 
@@ -662,15 +669,13 @@ class ContinuousSpatialMutationIntent(CoreasonBaseState):
 
     MCP ROUTING TRIGGERS: Optimistic Locking, Affine CRDT, Spherical Linear Interpolation, Continuous Reconciliation
     """
-    target_node_id: NodeIdentifierState = Field(
-        description="The specific topology vertex undergoing spatial mutation."
-    )
-    proposed_transform: SE3TransformProfile = Field(
-        description="The requested absolute SE(3) spatial terminus."
-    )
+
+    target_node_id: NodeIdentifierState = Field(description="The specific topology vertex undergoing spatial mutation.")
+    proposed_transform: SE3TransformProfile = Field(description="The requested absolute SE(3) spatial terminus.")
     lamport_clock: int = Field(
-        ge=0, le=1000000000,
-        description="The logical clock scalar dictating Last-Writer-Wins consensus for the geometric shift."
+        ge=0,
+        le=1000000000,
+        description="The logical clock scalar dictating Last-Writer-Wins consensus for the geometric shift.",
     )
 
 
@@ -698,14 +703,26 @@ class KinematicDeltaManifest(CoreasonBaseState):
     )
     deltas: list[
         tuple[
-            Annotated[str, StringConstraints(max_length=128)], # node_id
-            float, float, float,             # x, y, z
-            float, float, float, float,      # qx, qy, qz, qw
-            float, float,                    # scale, opacity
-            float, float, float,             # v_x, v_y, v_z (linear velocity)
-            float, float, float              # w_x, w_y, w_z (angular velocity)
+            Annotated[str, StringConstraints(max_length=128)],  # node_id
+            float,
+            float,
+            float,  # x, y, z
+            float,
+            float,
+            float,
+            float,  # qx, qy, qz, qw
+            float,
+            float,  # scale, opacity
+            float,
+            float,
+            float,  # v_x, v_y, v_z (linear velocity)
+            float,
+            float,
+            float,  # w_x, w_y, w_z (angular velocity)
         ]
-    ] = Field(description="The strictly typed contiguous memory block of 16-element kinematic tuples, embedding first-order temporal derivatives for continuous Hermite Spline interpolation.")
+    ] = Field(
+        description="The strictly typed contiguous memory block of 16-element kinematic tuples, embedding first-order temporal derivatives for continuous Hermite Spline interpolation."
+    )
 
     @model_validator(mode="after")
     def _enforce_canonical_sort_deltas(self) -> Self:
@@ -6326,7 +6343,10 @@ class HumanNodeProfile(BaseNodeProfile):
     required_attestation: AttestationMechanismProfile = Field(
         description="The mandatory cryptographic attestation required to verify the human operator's identity."
     )
-    active_attention_ray: EpistemicAttentionRay | None = Field(default=None, description="The continuous spatial vector representing the human operator's localized cognitive focus.")
+    active_attention_ray: EpistemicAttentionRay | None = Field(
+        default=None,
+        description="The continuous spatial vector representing the human operator's localized cognitive focus.",
+    )
 
 
 class MemoizedNodeProfile(BaseNodeProfile):
@@ -9432,7 +9452,10 @@ class AgentNodeProfile(BaseNodeProfile):
         default=None,
         description="The cryptographic contract forcing this agent to embed an undeniable provenance signature into its generative token stream.",
     )
-    active_attention_ray: EpistemicAttentionRay | None = Field(default=None, description="The continuous spatial vector representing the agent's localized cognitive focus prior to kinetic actuation.")
+    active_attention_ray: EpistemicAttentionRay | None = Field(
+        default=None,
+        description="The continuous spatial vector representing the agent's localized cognitive focus prior to kinetic actuation.",
+    )
     compute_frontier: RoutingFrontierPolicy | None = Field(
         default=None, description="The dynamic spot-market compute requirements for this agent."
     )
@@ -9655,11 +9678,25 @@ class ObservabilityLODPolicy(CoreasonBaseState):
     telemetry_backpressure: TelemetryBackpressureContract = Field(
         description="The network flow constraints mathematically bound to the observer's kinematics."
     )
-    active_spatial_subscriptions: list[VolumetricPartitionSubscription] = Field(default_factory=list, description="The array of Area of Interest perimeters dictating spatial telemetry isolation.")
+    active_spatial_subscriptions: list[VolumetricPartitionSubscription] = Field(
+        default_factory=list,
+        description="The array of Area of Interest perimeters dictating spatial telemetry isolation.",
+    )
 
     @model_validator(mode="after")
     def _enforce_canonical_sort_subscriptions(self) -> Self:
-        object.__setattr__(self, "active_spatial_subscriptions", sorted(self.active_spatial_subscriptions, key=lambda x: (x.partition_boundary.center_transform.x, x.partition_boundary.center_transform.y, x.partition_boundary.center_transform.z)))
+        object.__setattr__(
+            self,
+            "active_spatial_subscriptions",
+            sorted(
+                self.active_spatial_subscriptions,
+                key=lambda x: (
+                    x.partition_boundary.center_transform.x,
+                    x.partition_boundary.center_transform.y,
+                    x.partition_boundary.center_transform.z,
+                ),
+            ),
+        )
         return self
 
 
