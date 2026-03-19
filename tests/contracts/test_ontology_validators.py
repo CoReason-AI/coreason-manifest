@@ -739,3 +739,17 @@ def test_causal_explanation_event_sorts_attributions() -> None:
 
     assert event.agent_attributions[0].target_node_id == "did:coreason:node-a"
     assert event.agent_attributions[1].target_node_id == "did:coreason:node-b"
+
+
+def test_kinematic_delta_manifest_sorting() -> None:
+    from coreason_manifest.spec.ontology import KinematicDeltaManifest
+
+    manifest = KinematicDeltaManifest(
+        stream_id="stream-123",
+        deltas=[
+            ("node-B", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0),
+            ("node-A", 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0),
+        ],
+    )
+    assert manifest.deltas[0][0] == "node-A"
+    assert manifest.deltas[1][0] == "node-B"
