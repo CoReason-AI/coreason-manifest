@@ -638,6 +638,30 @@
           "description": "Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
           "title": "Domain Extensions"
         },
+        "semantic_zoom": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SemanticZoomProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematical Information Bottleneck thresholds dictating the semantic degradation of this specific node."
+        },
+        "markov_blanket": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MarkovBlanketRenderingPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The epistemic isolation boundary guarding this agent's internal generative states."
+        },
         "optical_physics": {
           "anyOf": [
             {
@@ -1604,6 +1628,30 @@
           "description": "Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
           "title": "Domain Extensions"
         },
+        "semantic_zoom": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SemanticZoomProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematical Information Bottleneck thresholds dictating the semantic degradation of this specific node."
+        },
+        "markov_blanket": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MarkovBlanketRenderingPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The epistemic isolation boundary guarding this agent's internal generative states."
+        },
         "optical_physics": {
           "anyOf": [
             {
@@ -1652,7 +1700,7 @@
     },
     "BaseTopologyManifest": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the abstract algebraic baseline and Markov Blanket for all execution subgraphs, establishing the structural and epistemic perimeters for a localized swarm. As a ...Manifest suffix, this defines a frozen, N-dimensional coordinate state.\n\nCAUSAL AFFORDANCE: Projects overarching schema-on-write contracts (`shared_state_contract`) and zero-trust Payload Loss Prevention (`information_flow`) across all connected nodes, ensuring inherited alignment. The observability (`ObservabilityPolicy`) binds distributed tracing.\n\nEPISTEMIC BOUNDS: Epistemic enforcement constraints (`TruthMaintenancePolicy`) are bound hierarchically via pointer delegation, preserving Category Theory invariants without applying raw scalar limits to object references. The nodes attribute is strictly typed as a dictionary mapping `NodeIdentifierState` to polymorphic `AnyNodeProfile` identities.\n\nMCP ROUTING TRIGGERS: Topological Manifold, Markov Blanket, Subgraph Abstraction, Execution Base, Structural Isolation",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the abstract algebraic baseline and Markov Blanket for all execution subgraphs, establishing the structural and epistemic perimeters for a localized swarm. As a ...Manifest suffix, this defines a frozen, N-dimensional coordinate state.\n\nCAUSAL AFFORDANCE: Projects overarching schema-on-write contracts (`shared_state_contract`) and zero-trust Payload Loss Prevention (`information_flow`) across all connected nodes, ensuring inherited alignment. The observability (`ObservabilityLODPolicy`) binds distributed tracing.\n\nEPISTEMIC BOUNDS: Epistemic enforcement constraints (`TruthMaintenancePolicy`) are bound hierarchically via pointer delegation, preserving Category Theory invariants without applying raw scalar limits to object references. The nodes attribute is strictly typed as a dictionary mapping `NodeIdentifierState` to polymorphic `AnyNodeProfile` identities.\n\nMCP ROUTING TRIGGERS: Topological Manifold, Markov Blanket, Subgraph Abstraction, Execution Base, Structural Isolation",
       "properties": {
         "epistemic_enforcement": {
           "anyOf": [
@@ -1742,14 +1790,14 @@
         "observability": {
           "anyOf": [
             {
-              "$ref": "#/$defs/ObservabilityPolicy"
+              "$ref": "#/$defs/ObservabilityLODPolicy"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "The distributed tracing rules bound to this specific execution graph."
+          "description": "The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph."
         }
       },
       "required": [
@@ -3014,6 +3062,30 @@
           "description": "Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
           "title": "Domain Extensions"
         },
+        "semantic_zoom": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SemanticZoomProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematical Information Bottleneck thresholds dictating the semantic degradation of this specific node."
+        },
+        "markov_blanket": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MarkovBlanketRenderingPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The epistemic isolation boundary guarding this agent's internal generative states."
+        },
         "optical_physics": {
           "anyOf": [
             {
@@ -3676,14 +3748,14 @@
         "observability": {
           "anyOf": [
             {
-              "$ref": "#/$defs/ObservabilityPolicy"
+              "$ref": "#/$defs/ObservabilityLODPolicy"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "The distributed tracing rules bound to this specific execution graph."
+          "description": "The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph."
         },
         "type": {
           "const": "council",
@@ -4162,14 +4234,14 @@
         "observability": {
           "anyOf": [
             {
-              "$ref": "#/$defs/ObservabilityPolicy"
+              "$ref": "#/$defs/ObservabilityLODPolicy"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "The distributed tracing rules bound to this specific execution graph."
+          "description": "The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph."
         },
         "type": {
           "const": "dag",
@@ -4519,14 +4591,14 @@
         "observability": {
           "anyOf": [
             {
-              "$ref": "#/$defs/ObservabilityPolicy"
+              "$ref": "#/$defs/ObservabilityLODPolicy"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "The distributed tracing rules bound to this specific execution graph."
+          "description": "The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph."
         },
         "type": {
           "const": "digital_twin",
@@ -6475,14 +6547,14 @@
         "observability": {
           "anyOf": [
             {
-              "$ref": "#/$defs/ObservabilityPolicy"
+              "$ref": "#/$defs/ObservabilityLODPolicy"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "The distributed tracing rules bound to this specific execution graph."
+          "description": "The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph."
         },
         "type": {
           "const": "evaluator_optimizer",
@@ -6702,14 +6774,14 @@
         "observability": {
           "anyOf": [
             {
-              "$ref": "#/$defs/ObservabilityPolicy"
+              "$ref": "#/$defs/ObservabilityLODPolicy"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "The distributed tracing rules bound to this specific execution graph."
+          "description": "The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph."
         },
         "type": {
           "const": "evolutionary",
@@ -7994,6 +8066,30 @@
           "default": null,
           "description": "Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
           "title": "Domain Extensions"
+        },
+        "semantic_zoom": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SemanticZoomProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematical Information Bottleneck thresholds dictating the semantic degradation of this specific node."
+        },
+        "markov_blanket": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MarkovBlanketRenderingPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The epistemic isolation boundary guarding this agent's internal generative states."
         },
         "optical_physics": {
           "anyOf": [
@@ -9742,6 +9838,35 @@
       "title": "MarketResolutionState",
       "type": "object"
     },
+    "MarkovBlanketRenderingPolicy": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Translates Fristonian Active Inference boundaries into rigid physical optics.\nIt defines the exact geometric perimeter where an agent's internal generative states become\nconditionally independent of (and thus occluded from) the external macroscopic swarm topology.\n\nCAUSAL AFFORDANCE: Mathematically forces the opacity of internal mechanistics (e.g., SAE\nactivations, scratchpad trees) to absolute zero, until the observer's SE(3) coordinate\nphysically pierces the agent's volumetric bounding cage.\n\nEPISTEMIC BOUNDS: The physical penetration depth is strictly bounded by pierce_distance_meters\n(ge=0.0). Exogenous interfaces (sensory and active states) are governed by strict boolean gates.\n\nMCP ROUTING TRIGGERS: Fristonian Active Inference, Markov Blanket, Epistemic Isolation, Volumetric Penetration, Conditional Independence",
+      "properties": {
+        "pierce_distance_meters": {
+          "description": "The precise Euclidean distance at which an observer's coordinate successfully breaches the agent's internal state partition.",
+          "minimum": 0.0,
+          "title": "Pierce Distance Meters",
+          "type": "number"
+        },
+        "expose_sensory_active_states": {
+          "default": true,
+          "description": "Authorizes the continuous projection of the agent's exogenous API interactions and structural tool commitments to the macroscopic layer.",
+          "title": "Expose Sensory Active States",
+          "type": "boolean"
+        },
+        "occlude_internal_mechanistics": {
+          "default": true,
+          "description": "Forces absolute rendering occlusion of internal non-monotonic reasoning loops unless the pierce distance is breached.",
+          "title": "Occlude Internal Mechanistics",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "pierce_distance_meters"
+      ],
+      "title": "MarkovBlanketRenderingPolicy",
+      "type": "object"
+    },
     "MechanisticAuditContract": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes a rigorous Mechanistic Interpretability brain-scan\nprotocol, executing real-time latent state extraction across targeted neural\ncircuits. As a ...Contract suffix, this defines rigid boundaries the orchestrator\nmust enforce globally.\n\nCAUSAL AFFORDANCE: Authorizes the orchestrator to halt token generation upon\nspecific trigger_conditions Literal [\"on_tool_call\", \"on_belief_mutation\",\n\"on_quarantine\", \"on_falsification\"] to physically slice, quantify, and export\nthe top-k SAE features from the designated target_layers.\n\nEPISTEMIC BOUNDS: GPU VRAM exhaustion is mathematically prevented by capping\nmax_features_per_layer (gt=0, le=1000000000). The @model_validator sort_arrays\ndeterministically sorts both trigger_conditions and target_layers for RFC 8785\ncanonical hashing. System integrity is enforced via require_zk_commitments\n(default=True) to prevent activation spoofing.\n\nMCP ROUTING TRIGGERS: Latent State Extraction, Mechanistic Interpretability, Sparse\nAutoencoder, Zero-Knowledge Commitments, VRAM Optimization",
@@ -9857,6 +9982,30 @@
           "default": null,
           "description": "Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
           "title": "Domain Extensions"
+        },
+        "semantic_zoom": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SemanticZoomProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematical Information Bottleneck thresholds dictating the semantic degradation of this specific node."
+        },
+        "markov_blanket": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MarkovBlanketRenderingPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The epistemic isolation boundary guarding this agent's internal generative states."
         },
         "optical_physics": {
           "anyOf": [
@@ -10345,24 +10494,33 @@
       "title": "NormativeDriftEvent",
       "type": "object"
     },
-    "ObservabilityPolicy": {
+    "ObservabilityLODPolicy": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the Dapper Distributed Tracing bounds for a given macroscopic\ntopology, formalizing the transparency of the system's Markov Blanket. As a ...Policy suffix,\nthis rigidly bounds the orchestrator's sampling physics.\n\nCAUSAL AFFORDANCE: Modulates the thermodynamic cost of execution tracking by authorizing or\nsevering the emission of high-granularity SpanEvent sequences (detailed_events) to prevent\nlogging backpressure and telemetry starvation.\n\nEPISTEMIC BOUNDS: Operates purely on strictly typed Boolean variables (traces_sampled,\ndetailed_events), mathematically prohibiting adversarial manipulation of telemetry pipelines\nvia unbounded tensor or string injection.\n\nMCP ROUTING TRIGGERS: Distributed Tracing, Dapper Architecture, Telemetry Sampling, Observability Horizon, Thermodynamic Overhead",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes the macroscopic Graph Coarsening Engine, replacing binary\nlogging with structural Dimensionality Reduction for massive topologies.\n\nCAUSAL AFFORDANCE: Authorizes the orchestrator to execute Spectral Graph Partitioning when\nthe topology exceeds the hardware rendering limit. It dynamically collapses dense subgraphs\ninto singular Hierarchical Level of Detail (HLOD) proxy meshes.\n\nEPISTEMIC BOUNDS: The vertex ceiling is rigidly bounded by max_rendered_vertices (gt=0,\nle=1000000000) to physically prevent GPU VRAM exhaustion on the observer client. Binds the\nTelemetryBackpressureContract to link graph scaling with network flow.\n\nMCP ROUTING TRIGGERS: Spectral Graph Coarsening, Hierarchical Level of Detail, HLOD, Topology Collapse, VRAM Optimization",
       "properties": {
-        "traces_sampled": {
+        "max_rendered_vertices": {
+          "description": "The absolute physical ceiling of simultaneous causal nodes authorized to exist in the spatial projection pipeline.",
+          "exclusiveMinimum": 0,
+          "maximum": 1000000000,
+          "title": "Max Rendered Vertices",
+          "type": "integer"
+        },
+        "spectral_coarsening_active": {
           "default": true,
-          "description": "Whether the orchestrator must record telemetry for this topology.",
-          "title": "Traces Sampled",
+          "description": "Authorizes the dynamic algebraic collapse of dense node communities into single macroscopic proxy vertices when the vertex ceiling is threatened.",
+          "title": "Spectral Coarsening Active",
           "type": "boolean"
         },
-        "detailed_events": {
-          "default": false,
-          "description": "Whether to include granular intra-tool loop events.",
-          "title": "Detailed Events",
-          "type": "boolean"
+        "telemetry_backpressure": {
+          "$ref": "#/$defs/TelemetryBackpressureContract",
+          "description": "The network flow constraints mathematically bound to the observer's kinematics."
         }
       },
-      "title": "ObservabilityPolicy",
+      "required": [
+        "max_rendered_vertices",
+        "telemetry_backpressure"
+      ],
+      "title": "ObservabilityLODPolicy",
       "type": "object"
     },
     "ObservationEvent": {
@@ -11731,14 +11889,14 @@
         "observability": {
           "anyOf": [
             {
-              "$ref": "#/$defs/ObservabilityPolicy"
+              "$ref": "#/$defs/ObservabilityLODPolicy"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "The distributed tracing rules bound to this specific execution graph."
+          "description": "The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph."
         },
         "type": {
           "const": "smpc",
@@ -12466,6 +12624,37 @@
       ],
       "pattern": "^\\d+\\.\\d+\\.\\d+$",
       "type": "string"
+    },
+    "SemanticZoomProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes the Information Bottleneck principle to execute Semantic Zooming.\nIt defines the exact Euclidean distance thresholds at which a node's semantic payload\ndeterministically degrades to preserve computational entropy and visual salience.\n\nCAUSAL AFFORDANCE: Instructs the spatial projection engine to dynamically collapse high-entropy\nunstructured text (e.g., full cognitive traces) into low-entropy scalars or categorical taxonomic\nlabels as the observer's SE(3) camera recedes.\n\nEPISTEMIC BOUNDS: The thresholds are bounded to continuous physical distance in meters (ge=0.0).\nA strict mathematical invariant guarantees spatial monotonicity: micro < meso < macro.\n\nMCP ROUTING TRIGGERS: Information Bottleneck, Semantic Compression, Euclidean Distance, Level of Detail, Entropy Degradation",
+      "properties": {
+        "macro_distance_threshold": {
+          "description": "The Euclidean distance in meters at which the node collapses into a pure scalar or color-coded coordinate representation.",
+          "minimum": 0.0,
+          "title": "Macro Distance Threshold",
+          "type": "number"
+        },
+        "meso_distance_threshold": {
+          "description": "The distance at which the node displays only its localized taxonomic label and boundary, stripping raw textual payloads.",
+          "minimum": 0.0,
+          "title": "Meso Distance Threshold",
+          "type": "number"
+        },
+        "micro_distance_threshold": {
+          "description": "The close-proximity boundary where full N-dimensional tensors and unstructured text blocks are mathematically hydrated into the observer's plane.",
+          "minimum": 0.0,
+          "title": "Micro Distance Threshold",
+          "type": "number"
+        }
+      },
+      "required": [
+        "macro_distance_threshold",
+        "meso_distance_threshold",
+        "micro_distance_threshold"
+      ],
+      "title": "SemanticZoomProfile",
+      "type": "object"
     },
     "ShapleyAttributionReceipt": {
       "additionalProperties": false,
@@ -13303,14 +13492,14 @@
         "observability": {
           "anyOf": [
             {
-              "$ref": "#/$defs/ObservabilityPolicy"
+              "$ref": "#/$defs/ObservabilityLODPolicy"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "The distributed tracing rules bound to this specific execution graph."
+          "description": "The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph."
         },
         "type": {
           "const": "swarm",
@@ -13562,6 +13751,30 @@
           "default": null,
           "description": "Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
           "title": "Domain Extensions"
+        },
+        "semantic_zoom": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SemanticZoomProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematical Information Bottleneck thresholds dictating the semantic degradation of this specific node."
+        },
+        "markov_blanket": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MarkovBlanketRenderingPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The epistemic isolation boundary guarding this agent's internal generative states."
         },
         "optical_physics": {
           "anyOf": [
@@ -13820,6 +14033,40 @@
         "fallback_heuristic"
       ],
       "title": "TaxonomicRoutingPolicy",
+      "type": "object"
+    },
+    "TelemetryBackpressureContract": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes the Observer Effect to dynamically modulate the thermodynamic flow\nof network egress based on the observer's spatial view frustum.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator's telemetry manifold to aggressively shed\nbandwidth load by calculating the dot product of topology nodes against the observer's focal\nvector. It starves occluded or peripheral subgraphs of kinematic updates to preserve system liveness.\n\nEPISTEMIC BOUNDS: Temporal refresh velocities are strictly clamped to physical Hertz frequencies.\nThe mathematical invariant guarantees that flow rate monotonically increases as nodes approach the focal center.\n\nMCP ROUTING TRIGGERS: Observer Effect, Frustum Culling, Thermodynamic Flow Control, Telemetry Backpressure, Spatial Masking",
+      "properties": {
+        "focal_refresh_rate_hz": {
+          "description": "The high-velocity telemetry budget (Hz) allocated exclusively to topologies intersecting the center of the observer's view frustum.",
+          "maximum": 240,
+          "minimum": 1,
+          "title": "Focal Refresh Rate Hz",
+          "type": "integer"
+        },
+        "peripheral_refresh_rate_hz": {
+          "description": "The degraded telemetry budget (Hz) for nodes at the edges of the optical projection.",
+          "maximum": 60,
+          "minimum": 1,
+          "title": "Peripheral Refresh Rate Hz",
+          "type": "integer"
+        },
+        "occluded_refresh_rate_hz": {
+          "default": 0,
+          "description": "The starvation rate (Hz) for topologies failing the depth test or falling outside clipping planes.",
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Occluded Refresh Rate Hz",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "focal_refresh_rate_hz",
+        "peripheral_refresh_rate_hz"
+      ],
+      "title": "TelemetryBackpressureContract",
       "type": "object"
     },
     "TelemetryContextProfile": {
