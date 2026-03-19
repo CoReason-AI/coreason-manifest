@@ -33,10 +33,11 @@ from coreason_manifest.spec.ontology import (
     MultimodalTokenAnchorState,
     NDimensionalTensorManifest,
     ScalePolicy,
+    SE3TransformProfile,
     SemanticSlicingPolicy,
-    SpatialBoundingBoxProfile,
     StateHydrationManifest,
     TensorStructuralFormatProfile,
+    VolumetricBoundingProfile,
 )
 
 
@@ -399,28 +400,25 @@ def test_state_hydration_manifest_long_string_quarantine() -> None:
         )
 
 
-# --- SpatialBoundingBoxProfile ---
+# --- VolumetricBoundingProfile ---
 @given(
-    x_min=st.floats(min_value=-1.0, max_value=2.0),
-    y_min=st.floats(min_value=-1.0, max_value=2.0),
-    x_max=st.floats(min_value=-1.0, max_value=2.0),
-    y_max=st.floats(min_value=-1.0, max_value=2.0),
+    extents_x=st.floats(min_value=-1.0, max_value=2.0),
+    extents_y=st.floats(min_value=-1.0, max_value=2.0),
+    extents_z=st.floats(min_value=-1.0, max_value=2.0),
 )
-def test_spatial_bounding_box_profile_all_floats(x_min: float, y_min: float, x_max: float, y_max: float) -> None:
-    valid = (
-        0.0 <= x_min <= 1.0
-        and 0.0 <= y_min <= 1.0
-        and 0.0 <= x_max <= 1.0
-        and 0.0 <= y_max <= 1.0
-        and x_min <= x_max
-        and y_min <= y_max
-    )
+def test_volumetric_bounding_profile_all_floats(extents_x: float, extents_y: float, extents_z: float) -> None:
+    transform = SE3TransformProfile(reference_frame_id="frame", x=0, y=0, z=0)
+    valid = extents_x >= 0.0 and extents_y >= 0.0 and extents_z >= 0.0 and extents_x * extents_y * extents_z > 0.0
 
     if valid:
-        SpatialBoundingBoxProfile(x_min=x_min, y_min=y_min, x_max=x_max, y_max=y_max)
+        VolumetricBoundingProfile(
+            center_transform=transform, extents_x=extents_x, extents_y=extents_y, extents_z=extents_z
+        )
     else:
         with pytest.raises((ValueError, ValidationError)):
-            SpatialBoundingBoxProfile(x_min=x_min, y_min=y_min, x_max=x_max, y_max=y_max)
+            VolumetricBoundingProfile(
+                center_transform=transform, extents_x=extents_x, extents_y=extents_y, extents_z=extents_z
+            )
 
 
 # --- MultimodalTokenAnchorState ---

@@ -638,6 +638,42 @@
           "description": "Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
           "title": "Domain Extensions"
         },
+        "semantic_zoom": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SemanticZoomProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematical Information Bottleneck thresholds dictating the semantic degradation of this specific node."
+        },
+        "markov_blanket": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MarkovBlanketRenderingPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The epistemic isolation boundary guarding this agent's internal generative states."
+        },
+        "optical_physics": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PhysicallyBasedRenderingProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The strict microfacet BRDF physics governing the visual representation of this node."
+        },
         "type": {
           "const": "agent",
           "default": "agent",
@@ -656,6 +692,18 @@
           ],
           "default": null,
           "description": "The cryptographic contract forcing this agent to embed an undeniable provenance signature into its generative token stream."
+        },
+        "active_attention_ray": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EpistemicAttentionRay"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The continuous spatial vector representing the agent's localized cognitive focus prior to kinetic actuation."
         },
         "compute_frontier": {
           "anyOf": [
@@ -1591,6 +1639,42 @@
           "default": null,
           "description": "Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
           "title": "Domain Extensions"
+        },
+        "semantic_zoom": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SemanticZoomProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematical Information Bottleneck thresholds dictating the semantic degradation of this specific node."
+        },
+        "markov_blanket": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MarkovBlanketRenderingPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The epistemic isolation boundary guarding this agent's internal generative states."
+        },
+        "optical_physics": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PhysicallyBasedRenderingProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The strict microfacet BRDF physics governing the visual representation of this node."
         }
       },
       "required": [
@@ -1628,7 +1712,7 @@
     },
     "BaseTopologyManifest": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the abstract algebraic baseline and Markov Blanket for all execution subgraphs, establishing the structural and epistemic perimeters for a localized swarm. As a ...Manifest suffix, this defines a frozen, N-dimensional coordinate state.\n\nCAUSAL AFFORDANCE: Projects overarching schema-on-write contracts (`shared_state_contract`) and zero-trust Payload Loss Prevention (`information_flow`) across all connected nodes, ensuring inherited alignment. The observability (`ObservabilityPolicy`) binds distributed tracing.\n\nEPISTEMIC BOUNDS: Epistemic enforcement constraints (`TruthMaintenancePolicy`) are bound hierarchically via pointer delegation, preserving Category Theory invariants without applying raw scalar limits to object references. The nodes attribute is strictly typed as a dictionary mapping `NodeIdentifierState` to polymorphic `AnyNodeProfile` identities.\n\nMCP ROUTING TRIGGERS: Topological Manifold, Markov Blanket, Subgraph Abstraction, Execution Base, Structural Isolation",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the abstract algebraic baseline and Markov Blanket for all execution subgraphs, establishing the structural and epistemic perimeters for a localized swarm. As a ...Manifest suffix, this defines a frozen, N-dimensional coordinate state.\n\nCAUSAL AFFORDANCE: Projects overarching schema-on-write contracts (`shared_state_contract`) and zero-trust Payload Loss Prevention (`information_flow`) across all connected nodes, ensuring inherited alignment. The observability (`ObservabilityLODPolicy`) binds distributed tracing.\n\nEPISTEMIC BOUNDS: Epistemic enforcement constraints (`TruthMaintenancePolicy`) are bound hierarchically via pointer delegation, preserving Category Theory invariants without applying raw scalar limits to object references. The nodes attribute is strictly typed as a dictionary mapping `NodeIdentifierState` to polymorphic `AnyNodeProfile` identities.\n\nMCP ROUTING TRIGGERS: Topological Manifold, Markov Blanket, Subgraph Abstraction, Execution Base, Structural Isolation",
       "properties": {
         "epistemic_enforcement": {
           "anyOf": [
@@ -1718,14 +1802,14 @@
         "observability": {
           "anyOf": [
             {
-              "$ref": "#/$defs/ObservabilityPolicy"
+              "$ref": "#/$defs/ObservabilityLODPolicy"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "The distributed tracing rules bound to this specific execution graph."
+          "description": "The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph."
         }
       },
       "required": [
@@ -2237,6 +2321,18 @@
           "minLength": 1,
           "title": "Target Variable",
           "type": "string"
+        },
+        "volumetric_geometry": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/VolumetricEdgeProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The continuous parametric spline defining the physical connection manifold."
         },
         "edge_type": {
           "description": "The specific Pearlian topological relationship between the two variables.",
@@ -2978,6 +3074,42 @@
           "description": "Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
           "title": "Domain Extensions"
         },
+        "semantic_zoom": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SemanticZoomProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematical Information Bottleneck thresholds dictating the semantic degradation of this specific node."
+        },
+        "markov_blanket": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MarkovBlanketRenderingPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The epistemic isolation boundary guarding this agent's internal generative states."
+        },
+        "optical_physics": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PhysicallyBasedRenderingProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The strict microfacet BRDF physics governing the visual representation of this node."
+        },
         "type": {
           "const": "composite",
           "default": "composite",
@@ -3536,6 +3668,34 @@
       "title": "ContinuousObservationStream",
       "type": "object"
     },
+    "ContinuousSpatialMutationIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes an Affine Conflict-free Replicated Data Type (CRDT) to\nexecute Optimistic Concurrency Control across geometric manipulations.\n\nCAUSAL AFFORDANCE: Authorizes a participant to kinetically drag, rotate, or scale a\ntopological node. The orchestrator uses the provided lamport_clock to mathematically resolve\nSpherical Linear Interpolation (SLERP) and translation collisions between concurrent actors.\n\nEPISTEMIC BOUNDS: The mutation strictly targets a verified NodeIdentifierState. The\nlamport_clock (ge=0, le=1000000000) prevents temporal overflow during logical state\nreconciliation.\n\nMCP ROUTING TRIGGERS: Optimistic Locking, Affine CRDT, Spherical Linear Interpolation, Continuous Reconciliation",
+      "properties": {
+        "target_node_id": {
+          "$ref": "#/$defs/NodeIdentifierState",
+          "description": "The specific topology vertex undergoing spatial mutation."
+        },
+        "proposed_transform": {
+          "$ref": "#/$defs/SE3TransformProfile",
+          "description": "The requested absolute SE(3) spatial terminus."
+        },
+        "lamport_clock": {
+          "description": "The logical clock scalar dictating Last-Writer-Wins consensus for the geometric shift.",
+          "maximum": 1000000000,
+          "minimum": 0,
+          "title": "Lamport Clock",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "target_node_id",
+        "proposed_transform",
+        "lamport_clock"
+      ],
+      "title": "ContinuousSpatialMutationIntent",
+      "type": "object"
+    },
     "CouncilTopologyManifest": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Social Choice Theory, Condorcet's Jury Theorem, and\nPractical Byzantine Fault Tolerance (pBFT) to synthesize an authoritative truth\nfrom a multi-agent network. As a ...Manifest suffix, this defines a frozen,\nN-dimensional coordinate state.\n\nCAUSAL AFFORDANCE: Unlocks decentralized truth-synthesis by routing conflicting\nproposals through a strict consensus_policy (ConsensusPolicy), ultimately collapsing\nthe epistemic probability wave via the designated adjudicator_id\n(NodeIdentifierState). Cognitive heterogeneity is enforced by\ndiversity_policy (DiversityPolicy).\n\nEPISTEMIC BOUNDS: The @model_validator enforce_funded_byzantine_slashing enforces a\nstrict economic interlock: if the consensus_policy demands slash_escrow via pBFT,\nit halts instantiation unless a funded council_escrow (EscrowPolicy, magnitude > 0)\nis present. A second @model_validator check_adjudicator_id verifies the\nadjudicator_id exists in the nodes registry.\n\nMCP ROUTING TRIGGERS: Social Choice Theory, PBFT Consensus, Multi-Agent Debate,\nByzantine Fault Tolerance, Slashing Condition",
@@ -3628,14 +3788,14 @@
         "observability": {
           "anyOf": [
             {
-              "$ref": "#/$defs/ObservabilityPolicy"
+              "$ref": "#/$defs/ObservabilityLODPolicy"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "The distributed tracing rules bound to this specific execution graph."
+          "description": "The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph."
         },
         "type": {
           "const": "council",
@@ -4114,14 +4274,14 @@
         "observability": {
           "anyOf": [
             {
-              "$ref": "#/$defs/ObservabilityPolicy"
+              "$ref": "#/$defs/ObservabilityLODPolicy"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "The distributed tracing rules bound to this specific execution graph."
+          "description": "The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph."
         },
         "type": {
           "const": "dag",
@@ -4471,14 +4631,14 @@
         "observability": {
           "anyOf": [
             {
-              "$ref": "#/$defs/ObservabilityPolicy"
+              "$ref": "#/$defs/ObservabilityLODPolicy"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "The distributed tracing rules bound to this specific execution graph."
+          "description": "The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph."
         },
         "type": {
           "const": "digital_twin",
@@ -5195,6 +5355,49 @@
         "claims"
       ],
       "title": "EpistemicArgumentGraphState",
+      "type": "object"
+    },
+    "EpistemicAttentionRay": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Joint Attention and Gaze Raycasting across the distributed topology.\nIt projects a continuous vector from an observer's optical center to indicate cognitive focus\nprior to physical mutation.\n\nCAUSAL AFFORDANCE: Broadacasts a non-kinetic 'cursor presence' to the swarm. The orchestrator\ncalculates the dot product between this vector and the VolumetricBoundingProfiles of surrounding\nnodes, identifying the exact topological vertices the observer is currently evaluating.\n\nEPISTEMIC BOUNDS: The direction_unit_vector must be mathematically normalized to exactly 1.0\nto prevent raycast scalar explosions. To mitigate O(N^2) intersection complexity, the\nintersected_node_ids array is strictly capped at max_length=100.\n\nMCP ROUTING TRIGGERS: Spatial Raycasting, Joint Attention, Cognitive Frustum Intersection, Vector Math",
+      "properties": {
+        "origin": {
+          "$ref": "#/$defs/SE3TransformProfile",
+          "description": "The absolute SE(3) spatial coordinate representing the observer's optical center."
+        },
+        "direction_unit_vector": {
+          "description": "The strictly normalized 3D directional vector representing the angle of gaze.",
+          "maxItems": 3,
+          "minItems": 3,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Direction Unit Vector",
+          "type": "array"
+        },
+        "intersected_node_ids": {
+          "description": "The array of topological vertices mathematically pierced by this attention ray.",
+          "items": {
+            "$ref": "#/$defs/NodeIdentifierState"
+          },
+          "maxItems": 100,
+          "title": "Intersected Node Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "origin",
+        "direction_unit_vector"
+      ],
+      "title": "EpistemicAttentionRay",
       "type": "object"
     },
     "EpistemicAxiomState": {
@@ -6105,14 +6308,14 @@
         "spatial_coordinates": {
           "anyOf": [
             {
-              "$ref": "#/$defs/SpatialCoordinateProfile"
+              "$ref": "#/$defs/SE3TransformProfile"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "Optional 2D trajectory of the human pointer event mapped to the visual grid."
+          "description": "Optional 3D trajectory of the human pointer event mapped to the spatial grid."
         }
       },
       "required": [
@@ -6427,14 +6630,14 @@
         "observability": {
           "anyOf": [
             {
-              "$ref": "#/$defs/ObservabilityPolicy"
+              "$ref": "#/$defs/ObservabilityLODPolicy"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "The distributed tracing rules bound to this specific execution graph."
+          "description": "The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph."
         },
         "type": {
           "const": "evaluator_optimizer",
@@ -6654,14 +6857,14 @@
         "observability": {
           "anyOf": [
             {
-              "$ref": "#/$defs/ObservabilityPolicy"
+              "$ref": "#/$defs/ObservabilityLODPolicy"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "The distributed tracing rules bound to this specific execution graph."
+          "description": "The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph."
         },
         "type": {
           "const": "evolutionary",
@@ -7674,6 +7877,18 @@
           "title": "Ledger Source Id",
           "type": "string"
         },
+        "billboard_physics": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SpatialBillboardContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The kinematic constraint anchoring this 2D panel to the 3D topology."
+        },
         "mark": {
           "description": "The geometric shape used to represent the matrix.",
           "enum": [
@@ -7935,6 +8150,42 @@
           "description": "Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
           "title": "Domain Extensions"
         },
+        "semantic_zoom": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SemanticZoomProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematical Information Bottleneck thresholds dictating the semantic degradation of this specific node."
+        },
+        "markov_blanket": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MarkovBlanketRenderingPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The epistemic isolation boundary guarding this agent's internal generative states."
+        },
+        "optical_physics": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PhysicallyBasedRenderingProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The strict microfacet BRDF physics governing the visual representation of this node."
+        },
         "type": {
           "const": "human",
           "default": "human",
@@ -7945,6 +8196,18 @@
         "required_attestation": {
           "$ref": "#/$defs/AttestationMechanismProfile",
           "description": "The mandatory cryptographic attestation required to verify the human operator's identity."
+        },
+        "active_attention_ray": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EpistemicAttentionRay"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The continuous spatial vector representing the human operator's localized cognitive focus."
         }
       },
       "required": [
@@ -8242,6 +8505,18 @@
           "maxLength": 100000,
           "title": "Markdown Content",
           "type": "string"
+        },
+        "billboard_physics": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SpatialBillboardContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The kinematic constraint anchoring this 2D card to the 3D topology."
         }
       },
       "required": [
@@ -8668,9 +8943,90 @@
         }
       ]
     },
+    "KinematicDeltaManifest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes a zero-allocation, high-velocity telemetry manifold\ndesigned exclusively for continuous thermodynamic state updates across the Markov Blanket.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator to transmit continuous SE(3) coordinates\nand optic states as flattened contiguous memory blocks (Struct of Arrays), mechanically\nbypassing recursive Garbage Collection (GC) pauses in external clients.\n\nEPISTEMIC BOUNDS: The state differential is mathematically restricted to a strict\n10-element tuple mapping `[node_id, x, y, z, qx, qy, qz, qw, scale, opacity]`.\nThe deltas array is deterministically sorted by node_id to preserve RFC 8785 canonical hashing.\n\nMCP ROUTING TRIGGERS: Zero-Allocation Telemetry, Struct of Arrays, High-Velocity Buffer, SE3 Delta",
+      "properties": {
+        "stream_id": {
+          "description": "A Content Identifier (CID) anchoring the continuous telemetry stream.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Stream Id",
+          "type": "string"
+        },
+        "deltas": {
+          "description": "The strictly typed contiguous memory block of 16-element kinematic tuples, embedding first-order temporal derivatives for continuous Hermite Spline interpolation.",
+          "items": {
+            "maxItems": 16,
+            "minItems": 16,
+            "prefixItems": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "type": "array"
+          },
+          "title": "Deltas",
+          "type": "array"
+        }
+      },
+      "required": [
+        "stream_id",
+        "deltas"
+      ],
+      "title": "KinematicDeltaManifest",
+      "type": "object"
+    },
     "KinematicNoiseProfile": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Stochastic Process Theory (1/f^β spectral noise)\nand Hick-Hyman Law cognitive delay modeling to inject human-like motor control\nperturbations into pointer trajectories, preventing deterministic bot-detection\nvia timing analysis. As a ...Profile suffix, this is a declarative, frozen\nsnapshot of a noise geometry.\n\nCAUSAL AFFORDANCE: Authorizes the Spatial Kinematics engine to perturb each\nSpatialCoordinateProfile along the Bezier trajectory by sampling from the\nspecified noise distribution, achieving biomechanically plausible jitter with\ncognitive delay and corrective submovements.\n\nEPISTEMIC BOUNDS: The pink_noise_amplitude is strictly clamped to the\nnormalized range (ge=0.0, le=1.0), preventing trajectory corruption. The\nfrequency_exponent (1/f^β) is bounded (ge=0.0, le=5.0) to cover the full\nspectrum from white noise (β=0) to black noise (β≥2). The noise_type Literal\nautomaton locks generation to [\"pink\", \"brownian\", \"gaussian\"]. The\nvelocity_profile is locked to [\"minimum_jerk\", \"constant\",\n\"fractional_brownian\"]. target_overshoot_radius_pixels is bounded (ge=0,\nle=5000) and hick_hyman_dwell_time_ms is bounded (ge=0, le=86400000).\n\nMCP ROUTING TRIGGERS: Stochastic Process, Pink Noise, Brownian Motion,\nMotor Control Perturbation, Hick-Hyman Law, Fitts's Law",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Stochastic Process Theory (1/f^β spectral noise)\nand Hick-Hyman Law cognitive delay modeling to inject human-like motor control\nperturbations into pointer trajectories, preventing deterministic bot-detection\nvia timing analysis. As a ...Profile suffix, this is a declarative, frozen\nsnapshot of a noise geometry.\n\nCAUSAL AFFORDANCE: Authorizes the Spatial Kinematics engine to perturb each\nSE3TransformProfile along the Bezier trajectory by sampling from the\nspecified noise distribution, achieving biomechanically plausible jitter with\ncognitive delay and corrective submovements.\n\nEPISTEMIC BOUNDS: The pink_noise_amplitude is strictly clamped to the\nnormalized range (ge=0.0, le=1.0), preventing trajectory corruption. The\nfrequency_exponent (1/f^β) is bounded (ge=0.0, le=5.0) to cover the full\nspectrum from white noise (β=0) to black noise (β≥2). The noise_type Literal\nautomaton locks generation to [\"pink\", \"brownian\", \"gaussian\"]. The\nvelocity_profile is locked to [\"minimum_jerk\", \"constant\",\n\"fractional_brownian\"]. target_overshoot_radius_pixels is bounded (ge=0,\nle=5000) and hick_hyman_dwell_time_ms is bounded (ge=0, le=86400000).\n\nMCP ROUTING TRIGGERS: Stochastic Process, Pink Noise, Brownian Motion,\nMotor Control Perturbation, Hick-Hyman Law, Fitts's Law",
       "properties": {
         "noise_type": {
           "description": "The stochastic process governing the noise generation for pointer trajectory perturbation.",
@@ -9595,6 +9951,35 @@
       "title": "MarketResolutionState",
       "type": "object"
     },
+    "MarkovBlanketRenderingPolicy": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Translates Fristonian Active Inference boundaries into rigid physical optics.\nIt defines the exact geometric perimeter where an agent's internal generative states become\nconditionally independent of (and thus occluded from) the external macroscopic swarm topology.\n\nCAUSAL AFFORDANCE: Mathematically forces the opacity of internal mechanistics (e.g., SAE\nactivations, scratchpad trees) to absolute zero, until the observer's SE(3) coordinate\nphysically pierces the agent's volumetric bounding cage.\n\nEPISTEMIC BOUNDS: The physical penetration depth is strictly bounded by pierce_distance_meters\n(ge=0.0). Exogenous interfaces (sensory and active states) are governed by strict boolean gates.\n\nMCP ROUTING TRIGGERS: Fristonian Active Inference, Markov Blanket, Epistemic Isolation, Volumetric Penetration, Conditional Independence",
+      "properties": {
+        "pierce_distance_meters": {
+          "description": "The precise Euclidean distance at which an observer's coordinate successfully breaches the agent's internal state partition.",
+          "minimum": 0.0,
+          "title": "Pierce Distance Meters",
+          "type": "number"
+        },
+        "expose_sensory_active_states": {
+          "default": true,
+          "description": "Authorizes the continuous projection of the agent's exogenous API interactions and structural tool commitments to the macroscopic layer.",
+          "title": "Expose Sensory Active States",
+          "type": "boolean"
+        },
+        "occlude_internal_mechanistics": {
+          "default": true,
+          "description": "Forces absolute rendering occlusion of internal non-monotonic reasoning loops unless the pierce distance is breached.",
+          "title": "Occlude Internal Mechanistics",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "pierce_distance_meters"
+      ],
+      "title": "MarkovBlanketRenderingPolicy",
+      "type": "object"
+    },
     "MechanisticAuditContract": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes a rigorous Mechanistic Interpretability brain-scan\nprotocol, executing real-time latent state extraction across targeted neural\ncircuits. As a ...Contract suffix, this defines rigid boundaries the orchestrator\nmust enforce globally.\n\nCAUSAL AFFORDANCE: Authorizes the orchestrator to halt token generation upon\nspecific trigger_conditions Literal [\"on_tool_call\", \"on_belief_mutation\",\n\"on_quarantine\", \"on_falsification\"] to physically slice, quantify, and export\nthe top-k SAE features from the designated target_layers.\n\nEPISTEMIC BOUNDS: GPU VRAM exhaustion is mathematically prevented by capping\nmax_features_per_layer (gt=0, le=1000000000). The @model_validator sort_arrays\ndeterministically sorts both trigger_conditions and target_layers for RFC 8785\ncanonical hashing. System integrity is enforced via require_zk_commitments\n(default=True) to prevent activation spoofing.\n\nMCP ROUTING TRIGGERS: Latent State Extraction, Mechanistic Interpretability, Sparse\nAutoencoder, Zero-Knowledge Commitments, VRAM Optimization",
@@ -9710,6 +10095,42 @@
           "default": null,
           "description": "Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
           "title": "Domain Extensions"
+        },
+        "semantic_zoom": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SemanticZoomProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematical Information Bottleneck thresholds dictating the semantic degradation of this specific node."
+        },
+        "markov_blanket": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MarkovBlanketRenderingPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The epistemic isolation boundary guarding this agent's internal generative states."
+        },
+        "optical_physics": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PhysicallyBasedRenderingProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The strict microfacet BRDF physics governing the visual representation of this node."
         },
         "type": {
           "const": "memoized",
@@ -10186,24 +10607,41 @@
       "title": "NormativeDriftEvent",
       "type": "object"
     },
-    "ObservabilityPolicy": {
+    "ObservabilityLODPolicy": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the Dapper Distributed Tracing bounds for a given macroscopic\ntopology, formalizing the transparency of the system's Markov Blanket. As a ...Policy suffix,\nthis rigidly bounds the orchestrator's sampling physics.\n\nCAUSAL AFFORDANCE: Modulates the thermodynamic cost of execution tracking by authorizing or\nsevering the emission of high-granularity SpanEvent sequences (detailed_events) to prevent\nlogging backpressure and telemetry starvation.\n\nEPISTEMIC BOUNDS: Operates purely on strictly typed Boolean variables (traces_sampled,\ndetailed_events), mathematically prohibiting adversarial manipulation of telemetry pipelines\nvia unbounded tensor or string injection.\n\nMCP ROUTING TRIGGERS: Distributed Tracing, Dapper Architecture, Telemetry Sampling, Observability Horizon, Thermodynamic Overhead",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes the macroscopic Graph Coarsening Engine, replacing binary\nlogging with structural Dimensionality Reduction for massive topologies.\n\nCAUSAL AFFORDANCE: Authorizes the orchestrator to execute Spectral Graph Partitioning when\nthe topology exceeds the hardware rendering limit. It dynamically collapses dense subgraphs\ninto singular Hierarchical Level of Detail (HLOD) proxy meshes.\n\nEPISTEMIC BOUNDS: The vertex ceiling is rigidly bounded by max_rendered_vertices (gt=0,\nle=1000000000) to physically prevent GPU VRAM exhaustion on the observer client. Binds the\nTelemetryBackpressureContract to link graph scaling with network flow.\n\nMCP ROUTING TRIGGERS: Spectral Graph Coarsening, Hierarchical Level of Detail, HLOD, Topology Collapse, VRAM Optimization",
       "properties": {
-        "traces_sampled": {
+        "max_rendered_vertices": {
+          "description": "The absolute physical ceiling of simultaneous causal nodes authorized to exist in the spatial projection pipeline.",
+          "exclusiveMinimum": 0,
+          "maximum": 1000000000,
+          "title": "Max Rendered Vertices",
+          "type": "integer"
+        },
+        "spectral_coarsening_active": {
           "default": true,
-          "description": "Whether the orchestrator must record telemetry for this topology.",
-          "title": "Traces Sampled",
+          "description": "Authorizes the dynamic algebraic collapse of dense node communities into single macroscopic proxy vertices when the vertex ceiling is threatened.",
+          "title": "Spectral Coarsening Active",
           "type": "boolean"
         },
-        "detailed_events": {
-          "default": false,
-          "description": "Whether to include granular intra-tool loop events.",
-          "title": "Detailed Events",
-          "type": "boolean"
+        "telemetry_backpressure": {
+          "$ref": "#/$defs/TelemetryBackpressureContract",
+          "description": "The network flow constraints mathematically bound to the observer's kinematics."
+        },
+        "active_spatial_subscriptions": {
+          "description": "The array of Area of Interest perimeters dictating spatial telemetry isolation.",
+          "items": {
+            "$ref": "#/$defs/VolumetricPartitionSubscription"
+          },
+          "title": "Active Spatial Subscriptions",
+          "type": "array"
         }
       },
-      "title": "ObservabilityPolicy",
+      "required": [
+        "max_rendered_vertices",
+        "telemetry_backpressure"
+      ],
+      "title": "ObservabilityLODPolicy",
       "type": "object"
     },
     "ObservationEvent": {
@@ -10795,6 +11233,69 @@
       "title": "PersistenceCommitReceipt",
       "type": "object"
     },
+    "PhysicallyBasedRenderingProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes the Cook-Torrance Microfacet BRDF (Bidirectional\nReflectance Distribution Function) to establish the exact physical optic\nproperties of a topological vertex.\n\nCAUSAL AFFORDANCE: Authorizes the spatial computing renderer to deterministically\ncompute light scattering, reflection, and refraction for the node's geometry,\ntranslating logical state into physical optic variables (e.g., pulsing emission\nduring active compute).\n\nEPISTEMIC BOUNDS: Diffuse and specular physics are rigidly clamped to normalized\nprobability spaces (ge=0.0, le=1.0) for metalness, roughness, and transmission.\nThe Index of Refraction (ior) is mathematically bounded to valid physical\nmaterials [1.0, 3.0].\n\nMCP ROUTING TRIGGERS: Physically Based Rendering, Microfacet BRDF, Index of\nRefraction, Spatial Optics, Material Thermodynamics",
+      "properties": {
+        "mesh_geometry": {
+          "description": "The rigid 3D primitive geometry bounding the topological vertex.",
+          "enum": [
+            "sphere",
+            "box",
+            "icosahedron",
+            "cylinder",
+            "tetrahedron"
+          ],
+          "title": "Mesh Geometry",
+          "type": "string"
+        },
+        "metalness": {
+          "description": "The dielectric vs. metallic material property scalar.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Metalness",
+          "type": "number"
+        },
+        "roughness": {
+          "description": "The microfacet surface scattering scalar.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Roughness",
+          "type": "number"
+        },
+        "transmission": {
+          "description": "The optical clarity or volumetric glass effect.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Transmission",
+          "type": "number"
+        },
+        "ior": {
+          "description": "The Index of Refraction dictating photon trajectory.",
+          "maximum": 3.0,
+          "minimum": 1.0,
+          "title": "Ior",
+          "type": "number"
+        },
+        "emissive_intensity": {
+          "description": "The thermodynamic glow indicating active kinetic compute.",
+          "maximum": 100.0,
+          "minimum": 0.0,
+          "title": "Emissive Intensity",
+          "type": "number"
+        }
+      },
+      "required": [
+        "mesh_geometry",
+        "metalness",
+        "roughness",
+        "transmission",
+        "ior",
+        "emissive_intensity"
+      ],
+      "title": "PhysicallyBasedRenderingProfile",
+      "type": "object"
+    },
     "PostQuantumSignatureReceipt": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements NIST FIPS Post-Quantum Cryptography (PQC), utilizing\nlattice-based (ML-DSA, Falcon) or stateless hash-based (SLH-DSA) structures to guarantee\nlong-term topological integrity. As a ...Receipt suffix, this is an append-only coordinate\non the Merkle-DAG that the LLM must never hallucinate a mutation to.\n\nCAUSAL AFFORDANCE: Secures the causal execution graph and Bilateral SLAs against temporal\ndecryption attacks (Harvest Now, Decrypt Later) via Shor's algorithm executed on\nfault-tolerant quantum computers.\n\nEPISTEMIC BOUNDS: To accommodate the massive dimensional geometry of post-quantum\nsignatures (e.g., SPHINCS+ hash trees), the pq_signature_blob is structurally bound to a\n100,000-byte max_length. The pq_algorithm is restricted to the Literal set\n[ml-dsa, slh-dsa, falcon].\n\nMCP ROUTING TRIGGERS: Post-Quantum Cryptography, ML-DSA, SLH-DSA, Shor's Algorithm\nResistance, Lattice-based Cryptography",
@@ -11340,6 +11841,83 @@
       "title": "RoutingFrontierPolicy",
       "type": "object"
     },
+    "SE3TransformProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents a strict rigid-body transformation within the\nSpecial Euclidean group SE(3). Projects an absolute mathematical coordinate encompassing\nboth translation ($\\mathbb{R}^3$) and rotation ($S^3$).\n\nCAUSAL AFFORDANCE: Provides the absolute spatial terminus for UI matrices,\nmulti-agent topologies, and multimodal tokens. It dictates the exact kinematic\npositioning of a node relative to a verified SpatialReferenceFrameManifest.\n\nEPISTEMIC BOUNDS: Translation vectors (`x`, `y`, `z`) are unbounded continuous\nfloats representing spatial distance. Rotational geometry is rigidly constrained\nto a 4D unit quaternion (`qx`, `qy`, `qz`, `qw`) bounded [-1.0, 1.0]. The\n`@model_validator` physically guarantees singularity-free rotation by enforcing\nan absolute quaternion magnitude of 1.0, eliminating Gimbal Lock.\n\nMCP ROUTING TRIGGERS: Special Euclidean Group, SE(3) Manifold, Rigid Body\nTransformation, Hamiltonian Unit Quaternion, Kinematic Topology",
+      "properties": {
+        "reference_frame_id": {
+          "description": "The SpatialReferenceFrameManifest CID this coordinate is relative to, anchoring it to a physical or virtual room.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Reference Frame Id",
+          "type": "string"
+        },
+        "x": {
+          "description": "Translation along the X-axis relative to the reference frame.",
+          "title": "X",
+          "type": "number"
+        },
+        "y": {
+          "description": "Translation along the Y-axis relative to the reference frame.",
+          "title": "Y",
+          "type": "number"
+        },
+        "z": {
+          "description": "Translation along the Z-axis relative to the reference frame.",
+          "title": "Z",
+          "type": "number"
+        },
+        "qx": {
+          "default": 0.0,
+          "description": "The i component of the rotation quaternion.",
+          "maximum": 1.0,
+          "minimum": -1.0,
+          "title": "Qx",
+          "type": "number"
+        },
+        "qy": {
+          "default": 0.0,
+          "description": "The j component of the rotation quaternion.",
+          "maximum": 1.0,
+          "minimum": -1.0,
+          "title": "Qy",
+          "type": "number"
+        },
+        "qz": {
+          "default": 0.0,
+          "description": "The k component of the rotation quaternion.",
+          "maximum": 1.0,
+          "minimum": -1.0,
+          "title": "Qz",
+          "type": "number"
+        },
+        "qw": {
+          "default": 1.0,
+          "description": "The real (scalar) part of the rotation quaternion.",
+          "maximum": 1.0,
+          "minimum": -1.0,
+          "title": "Qw",
+          "type": "number"
+        },
+        "scale": {
+          "default": 1.0,
+          "description": "Strictly positive uniform volumetric scaling factor.",
+          "maximum": 10000.0,
+          "minimum": 0.0001,
+          "title": "Scale",
+          "type": "number"
+        }
+      },
+      "required": [
+        "reference_frame_id",
+        "x",
+        "y",
+        "z"
+      ],
+      "title": "SE3TransformProfile",
+      "type": "object"
+    },
     "SMPCTopologyManifest": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative, frozen snapshot establishing a Secure Multi-Party\nComputation (SMPC) ring, leveraging cryptographic privacy-preserving protocols to\nevaluate a joint function over decentralized inputs. As a ...Manifest suffix, this\ndefines a frozen N-dimensional coordinate state.\n\nCAUSAL AFFORDANCE: Authorizes the decentralized orchestrator to route zero-trust\ntraffic via specific mathematical logic (Literal [\"garbled_circuits\",\n\"secret_sharing\", \"oblivious_transfer\"]), allowing mutually distrustful agents to\nsynthesize a shared output. Optional ontological_alignment\n(OntologicalAlignmentPolicy) gates pre-flight semantic alignment.\n\nEPISTEMIC BOUNDS: The topology physically mandates a minimum of two participants\n(participant_node_ids min_length=2) to satisfy the multi-party invariant. The\njoint_function_uri is bounded to max_length=2000.\n\nMCP ROUTING TRIGGERS: Secure Multi-Party Computation, Garbled Circuits, Secret\nSharing, Oblivious Transfer, Zero-Trust Cryptography",
@@ -11432,14 +12010,14 @@
         "observability": {
           "anyOf": [
             {
-              "$ref": "#/$defs/ObservabilityPolicy"
+              "$ref": "#/$defs/ObservabilityLODPolicy"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "The distributed tracing rules bound to this specific execution graph."
+          "description": "The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph."
         },
         "type": {
           "const": "smpc",
@@ -11950,6 +12528,18 @@
           ],
           "title": "Causal Relationship",
           "type": "string"
+        },
+        "volumetric_geometry": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/VolumetricEdgeProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The continuous parametric spline defining the physical connection manifold."
         }
       },
       "required": [
@@ -12156,6 +12746,37 @@
       "pattern": "^\\d+\\.\\d+\\.\\d+$",
       "type": "string"
     },
+    "SemanticZoomProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes the Information Bottleneck principle to execute Semantic Zooming.\nIt defines the exact Euclidean distance thresholds at which a node's semantic payload\ndeterministically degrades to preserve computational entropy and visual salience.\n\nCAUSAL AFFORDANCE: Instructs the spatial projection engine to dynamically collapse high-entropy\nunstructured text (e.g., full cognitive traces) into low-entropy scalars or categorical taxonomic\nlabels as the observer's SE(3) camera recedes.\n\nEPISTEMIC BOUNDS: The thresholds are bounded to continuous physical distance in meters (ge=0.0).\nA strict mathematical invariant guarantees spatial monotonicity: micro < meso < macro.\n\nMCP ROUTING TRIGGERS: Information Bottleneck, Semantic Compression, Euclidean Distance, Level of Detail, Entropy Degradation",
+      "properties": {
+        "macro_distance_threshold": {
+          "description": "The Euclidean distance in meters at which the node collapses into a pure scalar or color-coded coordinate representation.",
+          "minimum": 0.0,
+          "title": "Macro Distance Threshold",
+          "type": "number"
+        },
+        "meso_distance_threshold": {
+          "description": "The distance at which the node displays only its localized taxonomic label and boundary, stripping raw textual payloads.",
+          "minimum": 0.0,
+          "title": "Meso Distance Threshold",
+          "type": "number"
+        },
+        "micro_distance_threshold": {
+          "description": "The close-proximity boundary where full N-dimensional tensors and unstructured text blocks are mathematically hydrated into the observer's plane.",
+          "minimum": 0.0,
+          "title": "Micro Distance Threshold",
+          "type": "number"
+        }
+      },
+      "required": [
+        "macro_distance_threshold",
+        "meso_distance_threshold",
+        "micro_distance_threshold"
+      ],
+      "title": "SemanticZoomProfile",
+      "type": "object"
+    },
     "ShapleyAttributionReceipt": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Cooperative Game Theory to compute the exact Shapley\nvalue ($\\phi_i$) for a specific agent's marginal contribution to a collective outcome.\nAs a ...Receipt suffix, this is an append-only coordinate on the Merkle-DAG.\n\nCAUSAL AFFORDANCE: Unlocks deterministic credit assignment and thermodynamic reward\ndistribution, allowing the orchestrator to equitably distribute escrow payouts or\npolicy gradient updates to the participating target_node_id (NodeIdentifierState).\n\nEPISTEMIC BOUNDS: normalized_contribution_percentage is strictly clamped (ge=0.0,\nle=1.0). The causal_attribution_score has only le=1.0 (no ge bound). The Monte Carlo\napproximation confidence bounds (confidence_interval_lower/upper) are capped at\nle=1000000000.0.\n\nMCP ROUTING TRIGGERS: Cooperative Game Theory, Shapley Value, Credit Assignment,\nMarginal Contribution, Monte Carlo Approximation",
@@ -12319,77 +12940,44 @@
       ],
       "type": "string"
     },
-    "SpatialBoundingBoxProfile": {
+    "SpatialBillboardContract": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines a 2D Euclidean bounding box within a normalized coordinate\nspace to ensure resolution-independent topological scaling. As a ...Profile suffix,\nthis is a declarative property descriptor.\n\nCAUSAL AFFORDANCE: Instructs the frontend rendering matrices to physically constrain\ngraphical overlays, multimodal tokens, and UI projections within a rigid, deterministic\nspatial geometry.\n\nEPISTEMIC BOUNDS: All coordinate tensors (x_min, y_min, x_max, y_max) are\nmathematically clamped to a normalized continuous float space (ge=0.0, le=1.0). The\n@model_validator validate_geometry physically guarantees min bounds cannot exceed max\nbounds, preventing the generation of inverted or non-Euclidean manifolds.\n\nMCP ROUTING TRIGGERS: Euclidean Geometry, Topological Scaling, Normalized Coordinate\nSpace, Bounding Box, Spatial Projection",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes a kinematic constraint binding a 2D typographic or\ngeometric matrix to a 3D SE(3) coordinate mesh.\n\nCAUSAL AFFORDANCE: Authorizes the spatial renderer to project 2D semantics over a\n3D topology, mathematically guaranteeing invariant visual alignment relative to the\nobserver's view frustum.\n\nEPISTEMIC BOUNDS: Strictly bounded by boolean physics gates (always_face_camera,\nocclude_behind_meshes) defining the object's Z-buffer collision behavior.\n\nMCP ROUTING TRIGGERS: Spherical Billboarding, View Frustum Alignment, Z-Buffer Occlusion, Projective Geometry",
       "properties": {
-        "x_min": {
-          "description": "The left boundary.",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "X Min",
-          "type": "number"
+        "anchoring_node_id": {
+          "$ref": "#/$defs/NodeIdentifierState",
+          "description": "The target 3D SE(3) vertex to which the 2D matrix is mathematically bound."
         },
-        "y_min": {
-          "description": "The top boundary.",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "Y Min",
-          "type": "number"
+        "always_face_camera": {
+          "default": true,
+          "description": "Forces the normal vector of the 2D matrix to continuously align with the observer's camera.",
+          "title": "Always Face Camera",
+          "type": "boolean"
         },
-        "x_max": {
-          "description": "The right boundary.",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "X Max",
-          "type": "number"
+        "occlude_behind_meshes": {
+          "default": false,
+          "description": "If true, subjects the 2D plane to depth-testing, allowing 3D geometry to block line-of-sight.",
+          "title": "Occlude Behind Meshes",
+          "type": "boolean"
         },
-        "y_max": {
-          "description": "The bottom boundary.",
-          "maximum": 1.0,
+        "distance_scaling_factor": {
+          "default": 1.0,
+          "description": "Controls orthographic size invariance; scaling the matrix inversely to camera distance.",
+          "maximum": 10.0,
           "minimum": 0.0,
-          "title": "Y Max",
+          "title": "Distance Scaling Factor",
           "type": "number"
         }
       },
       "required": [
-        "x_min",
-        "y_min",
-        "x_max",
-        "y_max"
+        "anchoring_node_id"
       ],
-      "title": "SpatialBoundingBoxProfile",
-      "type": "object"
-    },
-    "SpatialCoordinateProfile": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Specifies an exact N-dimensional (2D) affine coordinate vector for\nlocalized rendering and kinematic targeting. As a ...Profile suffix, this is a\ndeclarative property descriptor.\n\nCAUSAL AFFORDANCE: Provides the absolute spatial terminus for UI actions and overlays,\nenabling the orchestrator to perform bijective mappings from abstract latent data\npoints to physical screen space.\n\nEPISTEMIC BOUNDS: The x and y axes are mathematically clamped to a normalized float\nspace (ge=0.0, le=1.0), guaranteeing that dynamically generated coordinates can never\nphysically breach the absolute boundaries of the rendering viewport.\n\nMCP ROUTING TRIGGERS: Affine Transformation, 2D Vector, Kinematic Terminus, Euclidean\nCoordinate, Bijective Mapping",
-      "properties": {
-        "x": {
-          "description": "The normalized X-axis coordinate (0.0 = left, 1.0 = right).",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "X",
-          "type": "number"
-        },
-        "y": {
-          "description": "The normalized Y-axis coordinate (0.0 = top, 1.0 = bottom).",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "Y",
-          "type": "number"
-        }
-      },
-      "required": [
-        "x",
-        "y"
-      ],
-      "title": "SpatialCoordinateProfile",
+      "title": "SpatialBillboardContract",
       "type": "object"
     },
     "SpatialKinematicActionIntent": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Employs Mathematical Kinematics and Fitts's Law to project precise, non-linear physical interactions across an exogenous UI manifold.\n\nCAUSAL AFFORDANCE: Authorizes the translation of latent spatial targets into OS-level actuation, utilizing bezier_control_points to construct continuous polynomial trajectories that simulate human motor control and bypass bot-evasive heuristics.\n\nEPISTEMIC BOUNDS: Spatial execution is clamped to normalized Euclidean limits (ge=0.0, le=1.0) via the nested SpatialCoordinateProfile. Execution liveness is temporally guillotined by trajectory_duration_ms (le=86400000).\n\nMCP ROUTING TRIGGERS: Mathematical Kinematics, Bezier Geometry, Fitts's Law, OS-Level Actuation, Non-Linear Trajectory",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Employs Mathematical Kinematics and Fitts's Law to project precise, non-linear physical interactions across an exogenous UI manifold.\n\nCAUSAL AFFORDANCE: Authorizes the translation of latent spatial targets into OS-level actuation, utilizing bezier_control_points to construct continuous polynomial trajectories that simulate human motor control and bypass bot-evasive heuristics.\n\nEPISTEMIC BOUNDS: Spatial execution is clamped to SE3 dimensional boundaries via the nested SE3TransformProfile. Execution liveness is temporally guillotined by trajectory_duration_ms (le=86400000).\n\nMCP ROUTING TRIGGERS: Mathematical Kinematics, Bezier Geometry, Fitts's Law, OS-Level Actuation, Non-Linear Trajectory",
       "properties": {
         "action_type": {
           "description": "The specific kinematic interaction paradigm.",
@@ -12407,7 +12995,7 @@
         "target_coordinate": {
           "anyOf": [
             {
-              "$ref": "#/$defs/SpatialCoordinateProfile"
+              "$ref": "#/$defs/SE3TransformProfile"
             },
             {
               "type": "null"
@@ -12434,7 +13022,7 @@
         "bezier_control_points": {
           "description": "Waypoints for constructing non-linear, bot-evasive movement curves.",
           "items": {
-            "$ref": "#/$defs/SpatialCoordinateProfile"
+            "$ref": "#/$defs/SE3TransformProfile"
           },
           "title": "Bezier Control Points",
           "type": "array"
@@ -12458,6 +13046,51 @@
         "action_type"
       ],
       "title": "SpatialKinematicActionIntent",
+      "type": "object"
+    },
+    "SpatialReferenceFrameManifest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes a Federated Pose Graph anchor. Establishes a\ndeterministic localized origin point (e.g., a physical room geometry or SLAM\nfeature map) allowing disjoint spatial topologies to mathematically synchronize.\n\nCAUSAL AFFORDANCE: Instructs the spatial orchestrator to align the tracking\ncoordinate systems of multiple observer devices by computing the affine\ntransformation matrix between this shared cryptographic anchor and their local origins.\n\nEPISTEMIC BOUNDS: The semantic locus is cryptographically locked to a 128-char\nCID (`frame_id`). The alignment mathematics are strictly bounded to the\n`anchor_protocol` literal automaton, preventing unsupported SLAM parsing. An optional\n`physical_room_hash` prevents holographic spoofing across zero-trust domains.\n\nMCP ROUTING TRIGGERS: Federated Pose Graph, Spatial Reference Frame,\nSimultaneous Localization and Mapping, SLAM Anchor, Relative Coordinate Geometry",
+      "properties": {
+        "frame_id": {
+          "description": "The unique cryptographic identifier for this local spatial volume.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Frame Id",
+          "type": "string"
+        },
+        "anchor_protocol": {
+          "description": "The scientific tracking standard utilized to establish this reference frame.",
+          "enum": [
+            "openxr_spatial_anchor",
+            "apple_world_anchor",
+            "slam_feature_map",
+            "relative_virtual"
+          ],
+          "title": "Anchor Protocol",
+          "type": "string"
+        },
+        "physical_room_hash": {
+          "anyOf": [
+            {
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional SHA-256 hash of the environment's point-cloud or geometry signature.",
+          "title": "Physical Room Hash"
+        }
+      },
+      "required": [
+        "frame_id",
+        "anchor_protocol"
+      ],
+      "title": "SpatialReferenceFrameManifest",
       "type": "object"
     },
     "SpeculativeExecutionBoundary": {
@@ -12980,14 +13613,14 @@
         "observability": {
           "anyOf": [
             {
-              "$ref": "#/$defs/ObservabilityPolicy"
+              "$ref": "#/$defs/ObservabilityLODPolicy"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "The distributed tracing rules bound to this specific execution graph."
+          "description": "The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph."
         },
         "type": {
           "const": "swarm",
@@ -13240,6 +13873,42 @@
           "description": "Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
           "title": "Domain Extensions"
         },
+        "semantic_zoom": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SemanticZoomProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematical Information Bottleneck thresholds dictating the semantic degradation of this specific node."
+        },
+        "markov_blanket": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MarkovBlanketRenderingPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The epistemic isolation boundary guarding this agent's internal generative states."
+        },
+        "optical_physics": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PhysicallyBasedRenderingProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The strict microfacet BRDF physics governing the visual representation of this node."
+        },
         "type": {
           "const": "system",
           "default": "system",
@@ -13382,6 +14051,18 @@
           },
           "title": "Leaf Provenance",
           "type": "array"
+        },
+        "optical_physics": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PhysicallyBasedRenderingProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The strict microfacet BRDF physics governing the visual representation of this node."
         }
       },
       "required": [
@@ -13473,6 +14154,40 @@
         "fallback_heuristic"
       ],
       "title": "TaxonomicRoutingPolicy",
+      "type": "object"
+    },
+    "TelemetryBackpressureContract": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes the Observer Effect to dynamically modulate the thermodynamic flow\nof network egress based on the observer's spatial view frustum.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator's telemetry manifold to aggressively shed\nbandwidth load by calculating the dot product of topology nodes against the observer's focal\nvector. It starves occluded or peripheral subgraphs of kinematic updates to preserve system liveness.\n\nEPISTEMIC BOUNDS: Temporal refresh velocities are strictly clamped to physical Hertz frequencies.\nThe mathematical invariant guarantees that flow rate monotonically increases as nodes approach the focal center.\n\nMCP ROUTING TRIGGERS: Observer Effect, Frustum Culling, Thermodynamic Flow Control, Telemetry Backpressure, Spatial Masking",
+      "properties": {
+        "focal_refresh_rate_hz": {
+          "description": "The high-velocity telemetry budget (Hz) allocated exclusively to topologies intersecting the center of the observer's view frustum.",
+          "maximum": 240,
+          "minimum": 1,
+          "title": "Focal Refresh Rate Hz",
+          "type": "integer"
+        },
+        "peripheral_refresh_rate_hz": {
+          "description": "The degraded telemetry budget (Hz) for nodes at the edges of the optical projection.",
+          "maximum": 60,
+          "minimum": 1,
+          "title": "Peripheral Refresh Rate Hz",
+          "type": "integer"
+        },
+        "occluded_refresh_rate_hz": {
+          "default": 0,
+          "description": "The starvation rate (Hz) for topologies failing the depth test or falling outside clipping planes.",
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Occluded Refresh Rate Hz",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "focal_refresh_rate_hz",
+        "peripheral_refresh_rate_hz"
+      ],
+      "title": "TelemetryBackpressureContract",
       "type": "object"
     },
     "TelemetryContextProfile": {
@@ -14321,6 +15036,55 @@
       "title": "VerifiableEntropyReceipt",
       "type": "object"
     },
+    "ViewportProjectionContract": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the linear algebraic projection matrix required to\nmap N-dimensional spatial geometries onto a normalized View Frustum.\n\nCAUSAL AFFORDANCE: Authorizes an external rendering client to mathematically\nmultiply a 3D SE(3) topology by a projection matrix, safely collapsing depth\ndimensions into an SE(2) plane for flat-screen rendering without fracturing\nthe underlying topological relationships.\n\nEPISTEMIC BOUNDS: Bounding rules physically enforce valid optical geometry.\nThe `clipping_plane_near` must mathematically precede `clipping_plane_far`.\nPerspective projections unconditionally mandate a valid `field_of_view_degrees`\n(bounded between 1.0 and 179.0 degrees) to prevent division-by-zero optical\nsingularities.\n\nMCP ROUTING TRIGGERS: Viewport Projection Matrix, View Frustum, Field of View,\nClipping Planes, Linear Algebraic Projection, Homogeneous Coordinates",
+      "properties": {
+        "projection_type": {
+          "description": "The linear algebraic projection operator applied to collapse the topology.",
+          "enum": [
+            "perspective",
+            "orthographic"
+          ],
+          "title": "Projection Type",
+          "type": "string"
+        },
+        "field_of_view_degrees": {
+          "anyOf": [
+            {
+              "maximum": 179.0,
+              "minimum": 1.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The Y-axis optical field of view. Mandatory for perspective projections.",
+          "title": "Field Of View Degrees"
+        },
+        "clipping_plane_near": {
+          "description": "The near frustum clipping plane.",
+          "minimum": 0.001,
+          "title": "Clipping Plane Near",
+          "type": "number"
+        },
+        "clipping_plane_far": {
+          "description": "The far frustum clipping plane.",
+          "minimum": 0.01,
+          "title": "Clipping Plane Far",
+          "type": "number"
+        }
+      },
+      "required": [
+        "projection_type",
+        "clipping_plane_near",
+        "clipping_plane_far"
+      ],
+      "title": "ViewportProjectionContract",
+      "type": "object"
+    },
     "VisualEncodingProfile": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the mathematical mapping function between an abstract data\ndimension (field) and a physiological human perception vector (channel). As a ...Profile\nsuffix, this is a declarative, frozen snapshot of a rendering geometry.\n\nCAUSAL AFFORDANCE: Constrains the renderer's geometric plotting algorithm by forcing the\ninterpretation of data through an optional ScalePolicy transformation (e.g., logarithmic\nor linear).\n\nEPISTEMIC BOUNDS: The channel is strictly typed to a Literal enum\n[\"x\", \"y\", \"color\", \"size\", \"opacity\", \"shape\", \"text\"]. The target field is physically\nbounded to max_length=2000 to prevent dictionary bombing during rendering loops.\n\nMCP ROUTING TRIGGERS: Bijective Mapping, Retinal Variables, Dimensionality Reduction,\nGeometric Plotting, Visual Channel Encoding",
@@ -14363,6 +15127,110 @@
         "field"
       ],
       "title": "VisualEncodingProfile",
+      "type": "object"
+    },
+    "VolumetricBoundingProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines a continuous 3D Axis-Aligned Bounding Box (AABB)\nor Oriented Bounding Box (OBB) using spatial kinematics.\n\nCAUSAL AFFORDANCE: Instructs the spatial orchestrator to enforce a physical\nholographic cage. It structurally prevents agents or dynamic UI layouts from\nspawning coordinates that collide with environmental walls or overflow the\nuser's available spatial geometry.\n\nEPISTEMIC BOUNDS: The geometric center is anchored by an `SE3TransformProfile`.\nThe spatial magnitude is clamped by strictly non-negative extents (`extents_x`,\n`extents_y`, `extents_z`). The `@model_validator` mathematically prevents the\ninstantiation of zero-dimensional point anomalies by demanding a strictly\npositive aggregate volume.\n\nMCP ROUTING TRIGGERS: Volumetric Boundary, Holographic Cage, Oriented Bounding Box,\nSpatial Kinematics, Collision Perimeter",
+      "properties": {
+        "center_transform": {
+          "$ref": "#/$defs/SE3TransformProfile",
+          "description": "The absolute SE(3) position and rotation of the bounding volume's exact geometric center."
+        },
+        "extents_x": {
+          "description": "The total width of the boundary volume.",
+          "minimum": 0.0,
+          "title": "Extents X",
+          "type": "number"
+        },
+        "extents_y": {
+          "description": "The total height of the boundary volume.",
+          "minimum": 0.0,
+          "title": "Extents Y",
+          "type": "number"
+        },
+        "extents_z": {
+          "description": "The total depth of the boundary volume.",
+          "minimum": 0.0,
+          "title": "Extents Z",
+          "type": "number"
+        }
+      },
+      "required": [
+        "center_transform",
+        "extents_x",
+        "extents_y",
+        "extents_z"
+      ],
+      "title": "VolumetricBoundingProfile",
+      "type": "object"
+    },
+    "VolumetricEdgeProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes the geometric curve and token flow thermodynamics\nbetween topological vertices.\n\nCAUSAL AFFORDANCE: Instructs the spatial rendering engine to compute C1-continuous\nparametric splines between discrete nodes, translating abstract logical edges into\nphysical volumetric manifolds.\n\nEPISTEMIC BOUNDS: Curve geometry is locked to the Literal automaton [\"straight\",\n\"bezier\", \"catmull_rom\"]. Thermodynamic token velocity is clamped by flow_velocity\n(ge=0.0, le=100.0).\n\nMCP ROUTING TRIGGERS: Parametric Spline Interpolation, Catmull-Rom, Bezier Geometry, C1 Continuity, Volumetric Edge",
+      "properties": {
+        "curve_type": {
+          "description": "The mathematical spline geometry used to interpolate the space between vertices.",
+          "enum": [
+            "straight",
+            "bezier",
+            "catmull_rom"
+          ],
+          "title": "Curve Type",
+          "type": "string"
+        },
+        "tension": {
+          "default": 0.5,
+          "description": "The mathematical rigidity scalar of the spline interpolation.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Tension",
+          "type": "number"
+        },
+        "flow_velocity": {
+          "default": 0.0,
+          "description": "The temporal speed (derivative) of token transmission visualized along the edge manifold.",
+          "maximum": 100.0,
+          "minimum": 0.0,
+          "title": "Flow Velocity",
+          "type": "number"
+        },
+        "edge_thickness": {
+          "default": 0.1,
+          "description": "The physical volumetric width of the connection manifold in meters.",
+          "maximum": 10.0,
+          "minimum": 0.01,
+          "title": "Edge Thickness",
+          "type": "number"
+        }
+      },
+      "required": [
+        "curve_type"
+      ],
+      "title": "VolumetricEdgeProfile",
+      "type": "object"
+    },
+    "VolumetricPartitionSubscription": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Hierarchical Spatial Hashing and Area of Interest (AOI) Management\nto prevent O(N^2) network saturation in massive spatial hypermedia environments.\n\nCAUSAL AFFORDANCE: Allows a distributed client to mathematically define a spatial perimeter.\nThe orchestrator restricts the egress of KinematicDeltaManifest streams exclusively to nodes\nresiding within this specific volumetric boundary.\n\nEPISTEMIC BOUNDS: The temporal liveness is guillotined by subscription_ttl_ms (ge=1, le=86400000).\nThe volume is physically restricted by the nested VolumetricBoundingProfile.\n\nMCP ROUTING TRIGGERS: Area of Interest Management, Hierarchical Spatial Hashing, Telemetry Isolation",
+      "properties": {
+        "partition_boundary": {
+          "$ref": "#/$defs/VolumetricBoundingProfile",
+          "description": "The 3D physical cage defining the observer's subscribed spatial area."
+        },
+        "subscription_ttl_ms": {
+          "description": "The exact Time-To-Live in milliseconds before the orchestrator forcibly drops the telemetry stream to prevent zombie subscriptions.",
+          "maximum": 86400000,
+          "minimum": 1,
+          "title": "Subscription Ttl Ms",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "partition_boundary",
+        "subscription_ttl_ms"
+      ],
+      "title": "VolumetricPartitionSubscription",
       "type": "object"
     },
     "WetwareAttestationContract": {
