@@ -80,6 +80,9 @@ type CausalIntervalProfile = Literal["strictly_precedes", "overlaps", "contains"
 type CrossoverMechanismProfile = Literal["uniform_blend", "single_point", "heuristic"]
 
 
+_CLEARANCE_MAPPING: dict[str, int] = {"public": 0, "internal": 1, "confidential": 2, "restricted": 3}
+
+
 class InformationClassificationProfile(StrEnum):
     """
     AGENT INSTRUCTION: Implements the Bell-LaPadula Model and Lattice-Based Access Control (LBAC), establishing the foundational mathematical axis for Information Flow Control across the distributed swarm.
@@ -99,8 +102,7 @@ class InformationClassificationProfile(StrEnum):
     @property
     def clearance_level(self) -> int:
         """Map the semantic string to a discrete scalar magnitude for lattice dominance checks."""
-        mapping = {"public": 0, "internal": 1, "confidential": 2, "restricted": 3}
-        return mapping[self.value]
+        return _CLEARANCE_MAPPING[self.value]
 
     def __lt__(self, other: Any) -> bool:
         if not isinstance(other, InformationClassificationProfile):
@@ -215,6 +217,9 @@ type SpanKindProfile = Literal["client", "server", "producer", "consumer", "inte
 type SpanStatusCodeProfile = Literal["unset", "ok", "error"]
 
 
+_BYTES_MAPPING: dict[str, int] = {"float32": 4, "float64": 8, "int8": 1, "uint8": 1, "int32": 4, "int64": 8}
+
+
 class TensorStructuralFormatProfile(StrEnum):
     """
     AGENT INSTRUCTION: Mathematically aligns abstract Tensor Calculus with rigid Von Neumann Memory Hierarchy limits and IEEE 754 Floating-Point Arithmetic physics.
@@ -236,8 +241,7 @@ class TensorStructuralFormatProfile(StrEnum):
     @property
     def bytes_per_element(self) -> int:
         """Returns the byte footprint per element."""
-        mapping = {"float32": 4, "float64": 8, "int8": 1, "uint8": 1, "int32": 4, "int64": 8}
-        return mapping[self.value]
+        return _BYTES_MAPPING[self.value]
 
 
 type TieBreakerPolicy = Literal["lowest_cost", "lowest_latency", "highest_confidence", "random"]
