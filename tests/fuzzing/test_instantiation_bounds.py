@@ -21,11 +21,12 @@ from coreason_manifest.spec.ontology import (
     DAGTopologyManifest,
     MultimodalTokenAnchorState,
     QuorumPolicy,
-    SpatialBoundingBoxProfile,
+    SE3TransformProfile,
     StateHydrationManifest,
     SystemNodeProfile,
     TaskAnnouncementIntent,
     TaxonomicRoutingPolicy,
+    VolumetricBoundingProfile,
 )
 
 valid_node_id_st = st.from_regex(r"^did:[a-z0-9]+:[a-zA-Z0-9.\-_:]+$", fullmatch=True)
@@ -75,14 +76,34 @@ def invalid_bbox_st(draw: st.DrawFn) -> tuple[float, float, float, float]:
     return x_min, y_min, x_max, y_max
 
 
-@given(coords=invalid_bbox_st())
-def test_spatial_bounding_box_fuzzing(coords: tuple[float, float, float, float]) -> None:
-    """Geometric/Spatial Fuzzing: Generate normalized coordinates for SpatialBoundingBoxProfile
-    where minimums exceed maximums."""
-    x_min, y_min, x_max, y_max = coords
+@st.composite
+def invalid_volumetric_bounds_st(draw: st.DrawFn) -> tuple[float, float, float]:
+    extents_x = draw(st.floats(min_value=0.0, max_value=10.0))
+    extents_y = draw(st.floats(min_value=0.0, max_value=10.0))
+    extents_z = draw(st.floats(min_value=0.0, max_value=10.0))
+
+    # Force invalidity (volume is 0.0)
+    axis = draw(st.sampled_from(["x", "y", "z"]))
+    if axis == "x":
+        extents_x = 0.0
+    elif axis == "y":
+        extents_y = 0.0
+    else:
+        extents_z = 0.0
+
+    return extents_x, extents_y, extents_z
+
+
+@given(extents=invalid_volumetric_bounds_st())
+def test_volumetric_bounding_profile_fuzzing(extents: tuple[float, float, float]) -> None:
+    """Geometric/Spatial Fuzzing: Generate invalid extents for VolumetricBoundingProfile."""
+    extents_x, extents_y, extents_z = extents
+    transform = SE3TransformProfile(reference_frame_id="frame", x=0, y=0, z=0)
 
     with pytest.raises((ValidationError, ValueError)):
-        SpatialBoundingBoxProfile(x_min=x_min, y_min=y_min, x_max=x_max, y_max=y_max)
+        VolumetricBoundingProfile(
+            center_transform=transform, extents_x=extents_x, extents_y=extents_y, extents_z=extents_z
+        )
 
 
 @given(coords=invalid_bbox_st())

@@ -35,8 +35,10 @@ from coreason_manifest.spec.ontology import (
     RiskLevelPolicy,
     RollbackIntent,
     SaeLatentPolicy,
+    SE3TransformProfile,
     SecureSubSessionState,
-    SpatialBoundingBoxProfile,
+    ViewportProjectionContract,
+    VolumetricBoundingProfile,
 )
 
 
@@ -62,25 +64,56 @@ def test_coreason_base_state_hash() -> None:
     assert state._cached_hash == h1
 
 
-# --- 2. Spatial Bounding Box Fuzzing ---
+# --- 2. Volumetric Bounding Box Fuzzing ---
 @given(
-    x_min=st.floats(min_value=0.0, max_value=1.0),
-    x_max=st.floats(min_value=0.0, max_value=1.0),
-    y_min=st.floats(min_value=0.0, max_value=1.0),
-    y_max=st.floats(min_value=0.0, max_value=1.0),
+    extents_x=st.floats(min_value=0.0, max_value=10.0),
+    extents_y=st.floats(min_value=0.0, max_value=10.0),
+    extents_z=st.floats(min_value=0.0, max_value=10.0),
 )
 @settings(max_examples=100, suppress_health_check=[HealthCheck.too_slow])
-def test_spatial_bounds_fuzzing(x_min: float, x_max: float, y_min: float, y_max: float) -> None:
-    """Mathematically prove the 2D plane logic strictly rejects impossible Euclidean geometries."""
-    if x_min > x_max:
-        with pytest.raises(ValidationError, match=r"x_min cannot be strictly greater than x_max"):
-            SpatialBoundingBoxProfile(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
-    elif y_min > y_max:
-        with pytest.raises(ValidationError, match=r"y_min cannot be strictly greater than y_max"):
-            SpatialBoundingBoxProfile(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
+def test_spatial_bounds_fuzzing(extents_x: float, extents_y: float, extents_z: float) -> None:
+    """Mathematically prove the 3D plane logic strictly rejects impossible Euclidean geometries."""
+    transform = SE3TransformProfile(reference_frame_id="frame", x=0, y=0, z=0)
+    if extents_x * extents_y * extents_z == 0.0:
+        with pytest.raises(ValidationError, match=r"strictly greater than 0"):
+            VolumetricBoundingProfile(
+                center_transform=transform, extents_x=extents_x, extents_y=extents_y, extents_z=extents_z
+            )
     else:
-        box = SpatialBoundingBoxProfile(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
-        assert box.x_min == x_min
+        box = VolumetricBoundingProfile(
+            center_transform=transform, extents_x=extents_x, extents_y=extents_y, extents_z=extents_z
+        )
+        assert box.extents_x == extents_x
+
+
+def test_se3_transform_quaternion_validation() -> None:
+    # Magnitude 0.0
+    with pytest.raises(ValidationError, match="Quaternion cannot be a zero vector"):
+        SE3TransformProfile(reference_frame_id="frame", x=0, y=0, z=0, qx=0.0, qy=0.0, qz=0.0, qw=0.0)
+
+    # Not normalized
+    with pytest.raises(ValidationError, match="Quaternion magnitude is"):
+        SE3TransformProfile(reference_frame_id="frame", x=0, y=0, z=0, qx=1.0, qy=1.0, qz=1.0, qw=1.0)
+
+
+def test_viewport_projection_validation() -> None:
+    # Clipping plane near >= far
+    with pytest.raises(ValidationError, match=r"clipping_plane_near must be strictly less than clipping_plane_far\."):
+        ViewportProjectionContract(
+            projection_type="perspective", clipping_plane_near=0.5, clipping_plane_far=0.1, field_of_view_degrees=90.0
+        )
+
+    # Perspective without FOV
+    with pytest.raises(
+        ValidationError, match=r"Perspective projection mathematically requires field_of_view_degrees\."
+    ):
+        ViewportProjectionContract(projection_type="perspective", clipping_plane_near=0.1, clipping_plane_far=10.0)
+
+    # Valid configurations
+    ViewportProjectionContract(
+        projection_type="perspective", clipping_plane_near=0.1, clipping_plane_far=10.0, field_of_view_degrees=90.0
+    )
+    ViewportProjectionContract(projection_type="orthographic", clipping_plane_near=0.1, clipping_plane_far=10.0)
 
 
 # --- 3. Byzantine Fault Tolerance Fuzzing ---

@@ -6105,14 +6105,14 @@
         "spatial_coordinates": {
           "anyOf": [
             {
-              "$ref": "#/$defs/SpatialCoordinateProfile"
+              "$ref": "#/$defs/SE3TransformProfile"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "Optional 2D trajectory of the human pointer event mapped to the visual grid."
+          "description": "Optional 3D trajectory of the human pointer event mapped to the spatial grid."
         }
       },
       "required": [
@@ -8670,7 +8670,7 @@
     },
     "KinematicNoiseProfile": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Stochastic Process Theory (1/f^β spectral noise)\nand Hick-Hyman Law cognitive delay modeling to inject human-like motor control\nperturbations into pointer trajectories, preventing deterministic bot-detection\nvia timing analysis. As a ...Profile suffix, this is a declarative, frozen\nsnapshot of a noise geometry.\n\nCAUSAL AFFORDANCE: Authorizes the Spatial Kinematics engine to perturb each\nSpatialCoordinateProfile along the Bezier trajectory by sampling from the\nspecified noise distribution, achieving biomechanically plausible jitter with\ncognitive delay and corrective submovements.\n\nEPISTEMIC BOUNDS: The pink_noise_amplitude is strictly clamped to the\nnormalized range (ge=0.0, le=1.0), preventing trajectory corruption. The\nfrequency_exponent (1/f^β) is bounded (ge=0.0, le=5.0) to cover the full\nspectrum from white noise (β=0) to black noise (β≥2). The noise_type Literal\nautomaton locks generation to [\"pink\", \"brownian\", \"gaussian\"]. The\nvelocity_profile is locked to [\"minimum_jerk\", \"constant\",\n\"fractional_brownian\"]. target_overshoot_radius_pixels is bounded (ge=0,\nle=5000) and hick_hyman_dwell_time_ms is bounded (ge=0, le=86400000).\n\nMCP ROUTING TRIGGERS: Stochastic Process, Pink Noise, Brownian Motion,\nMotor Control Perturbation, Hick-Hyman Law, Fitts's Law",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Stochastic Process Theory (1/f^β spectral noise)\nand Hick-Hyman Law cognitive delay modeling to inject human-like motor control\nperturbations into pointer trajectories, preventing deterministic bot-detection\nvia timing analysis. As a ...Profile suffix, this is a declarative, frozen\nsnapshot of a noise geometry.\n\nCAUSAL AFFORDANCE: Authorizes the Spatial Kinematics engine to perturb each\nSE3TransformProfile along the Bezier trajectory by sampling from the\nspecified noise distribution, achieving biomechanically plausible jitter with\ncognitive delay and corrective submovements.\n\nEPISTEMIC BOUNDS: The pink_noise_amplitude is strictly clamped to the\nnormalized range (ge=0.0, le=1.0), preventing trajectory corruption. The\nfrequency_exponent (1/f^β) is bounded (ge=0.0, le=5.0) to cover the full\nspectrum from white noise (β=0) to black noise (β≥2). The noise_type Literal\nautomaton locks generation to [\"pink\", \"brownian\", \"gaussian\"]. The\nvelocity_profile is locked to [\"minimum_jerk\", \"constant\",\n\"fractional_brownian\"]. target_overshoot_radius_pixels is bounded (ge=0,\nle=5000) and hick_hyman_dwell_time_ms is bounded (ge=0, le=86400000).\n\nMCP ROUTING TRIGGERS: Stochastic Process, Pink Noise, Brownian Motion,\nMotor Control Perturbation, Hick-Hyman Law, Fitts's Law",
       "properties": {
         "noise_type": {
           "description": "The stochastic process governing the noise generation for pointer trajectory perturbation.",
@@ -11340,6 +11340,83 @@
       "title": "RoutingFrontierPolicy",
       "type": "object"
     },
+    "SE3TransformProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents a strict rigid-body transformation within the\nSpecial Euclidean group SE(3). Projects an absolute mathematical coordinate encompassing\nboth translation ($\\mathbb{R}^3$) and rotation ($S^3$).\n\nCAUSAL AFFORDANCE: Provides the absolute spatial terminus for UI matrices,\nmulti-agent topologies, and multimodal tokens. It dictates the exact kinematic\npositioning of a node relative to a verified SpatialReferenceFrameManifest.\n\nEPISTEMIC BOUNDS: Translation vectors (`x`, `y`, `z`) are unbounded continuous\nfloats representing spatial distance. Rotational geometry is rigidly constrained\nto a 4D unit quaternion (`qx`, `qy`, `qz`, `qw`) bounded [-1.0, 1.0]. The\n`@model_validator` physically guarantees singularity-free rotation by enforcing\nan absolute quaternion magnitude of 1.0, eliminating Gimbal Lock.\n\nMCP ROUTING TRIGGERS: Special Euclidean Group, SE(3) Manifold, Rigid Body\nTransformation, Hamiltonian Unit Quaternion, Kinematic Topology",
+      "properties": {
+        "reference_frame_id": {
+          "description": "The SpatialReferenceFrameManifest CID this coordinate is relative to, anchoring it to a physical or virtual room.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Reference Frame Id",
+          "type": "string"
+        },
+        "x": {
+          "description": "Translation along the X-axis relative to the reference frame.",
+          "title": "X",
+          "type": "number"
+        },
+        "y": {
+          "description": "Translation along the Y-axis relative to the reference frame.",
+          "title": "Y",
+          "type": "number"
+        },
+        "z": {
+          "description": "Translation along the Z-axis relative to the reference frame.",
+          "title": "Z",
+          "type": "number"
+        },
+        "qx": {
+          "default": 0.0,
+          "description": "The i component of the rotation quaternion.",
+          "maximum": 1.0,
+          "minimum": -1.0,
+          "title": "Qx",
+          "type": "number"
+        },
+        "qy": {
+          "default": 0.0,
+          "description": "The j component of the rotation quaternion.",
+          "maximum": 1.0,
+          "minimum": -1.0,
+          "title": "Qy",
+          "type": "number"
+        },
+        "qz": {
+          "default": 0.0,
+          "description": "The k component of the rotation quaternion.",
+          "maximum": 1.0,
+          "minimum": -1.0,
+          "title": "Qz",
+          "type": "number"
+        },
+        "qw": {
+          "default": 1.0,
+          "description": "The real (scalar) part of the rotation quaternion.",
+          "maximum": 1.0,
+          "minimum": -1.0,
+          "title": "Qw",
+          "type": "number"
+        },
+        "scale": {
+          "default": 1.0,
+          "description": "Strictly positive uniform volumetric scaling factor.",
+          "maximum": 10000.0,
+          "minimum": 0.0001,
+          "title": "Scale",
+          "type": "number"
+        }
+      },
+      "required": [
+        "reference_frame_id",
+        "x",
+        "y",
+        "z"
+      ],
+      "title": "SE3TransformProfile",
+      "type": "object"
+    },
     "SMPCTopologyManifest": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative, frozen snapshot establishing a Secure Multi-Party\nComputation (SMPC) ring, leveraging cryptographic privacy-preserving protocols to\nevaluate a joint function over decentralized inputs. As a ...Manifest suffix, this\ndefines a frozen N-dimensional coordinate state.\n\nCAUSAL AFFORDANCE: Authorizes the decentralized orchestrator to route zero-trust\ntraffic via specific mathematical logic (Literal [\"garbled_circuits\",\n\"secret_sharing\", \"oblivious_transfer\"]), allowing mutually distrustful agents to\nsynthesize a shared output. Optional ontological_alignment\n(OntologicalAlignmentPolicy) gates pre-flight semantic alignment.\n\nEPISTEMIC BOUNDS: The topology physically mandates a minimum of two participants\n(participant_node_ids min_length=2) to satisfy the multi-party invariant. The\njoint_function_uri is bounded to max_length=2000.\n\nMCP ROUTING TRIGGERS: Secure Multi-Party Computation, Garbled Circuits, Secret\nSharing, Oblivious Transfer, Zero-Trust Cryptography",
@@ -12319,77 +12396,9 @@
       ],
       "type": "string"
     },
-    "SpatialBoundingBoxProfile": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines a 2D Euclidean bounding box within a normalized coordinate\nspace to ensure resolution-independent topological scaling. As a ...Profile suffix,\nthis is a declarative property descriptor.\n\nCAUSAL AFFORDANCE: Instructs the frontend rendering matrices to physically constrain\ngraphical overlays, multimodal tokens, and UI projections within a rigid, deterministic\nspatial geometry.\n\nEPISTEMIC BOUNDS: All coordinate tensors (x_min, y_min, x_max, y_max) are\nmathematically clamped to a normalized continuous float space (ge=0.0, le=1.0). The\n@model_validator validate_geometry physically guarantees min bounds cannot exceed max\nbounds, preventing the generation of inverted or non-Euclidean manifolds.\n\nMCP ROUTING TRIGGERS: Euclidean Geometry, Topological Scaling, Normalized Coordinate\nSpace, Bounding Box, Spatial Projection",
-      "properties": {
-        "x_min": {
-          "description": "The left boundary.",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "X Min",
-          "type": "number"
-        },
-        "y_min": {
-          "description": "The top boundary.",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "Y Min",
-          "type": "number"
-        },
-        "x_max": {
-          "description": "The right boundary.",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "X Max",
-          "type": "number"
-        },
-        "y_max": {
-          "description": "The bottom boundary.",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "Y Max",
-          "type": "number"
-        }
-      },
-      "required": [
-        "x_min",
-        "y_min",
-        "x_max",
-        "y_max"
-      ],
-      "title": "SpatialBoundingBoxProfile",
-      "type": "object"
-    },
-    "SpatialCoordinateProfile": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Specifies an exact N-dimensional (2D) affine coordinate vector for\nlocalized rendering and kinematic targeting. As a ...Profile suffix, this is a\ndeclarative property descriptor.\n\nCAUSAL AFFORDANCE: Provides the absolute spatial terminus for UI actions and overlays,\nenabling the orchestrator to perform bijective mappings from abstract latent data\npoints to physical screen space.\n\nEPISTEMIC BOUNDS: The x and y axes are mathematically clamped to a normalized float\nspace (ge=0.0, le=1.0), guaranteeing that dynamically generated coordinates can never\nphysically breach the absolute boundaries of the rendering viewport.\n\nMCP ROUTING TRIGGERS: Affine Transformation, 2D Vector, Kinematic Terminus, Euclidean\nCoordinate, Bijective Mapping",
-      "properties": {
-        "x": {
-          "description": "The normalized X-axis coordinate (0.0 = left, 1.0 = right).",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "X",
-          "type": "number"
-        },
-        "y": {
-          "description": "The normalized Y-axis coordinate (0.0 = top, 1.0 = bottom).",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "Y",
-          "type": "number"
-        }
-      },
-      "required": [
-        "x",
-        "y"
-      ],
-      "title": "SpatialCoordinateProfile",
-      "type": "object"
-    },
     "SpatialKinematicActionIntent": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Employs Mathematical Kinematics and Fitts's Law to project precise, non-linear physical interactions across an exogenous UI manifold.\n\nCAUSAL AFFORDANCE: Authorizes the translation of latent spatial targets into OS-level actuation, utilizing bezier_control_points to construct continuous polynomial trajectories that simulate human motor control and bypass bot-evasive heuristics.\n\nEPISTEMIC BOUNDS: Spatial execution is clamped to normalized Euclidean limits (ge=0.0, le=1.0) via the nested SpatialCoordinateProfile. Execution liveness is temporally guillotined by trajectory_duration_ms (le=86400000).\n\nMCP ROUTING TRIGGERS: Mathematical Kinematics, Bezier Geometry, Fitts's Law, OS-Level Actuation, Non-Linear Trajectory",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Employs Mathematical Kinematics and Fitts's Law to project precise, non-linear physical interactions across an exogenous UI manifold.\n\nCAUSAL AFFORDANCE: Authorizes the translation of latent spatial targets into OS-level actuation, utilizing bezier_control_points to construct continuous polynomial trajectories that simulate human motor control and bypass bot-evasive heuristics.\n\nEPISTEMIC BOUNDS: Spatial execution is clamped to SE3 dimensional boundaries via the nested SE3TransformProfile. Execution liveness is temporally guillotined by trajectory_duration_ms (le=86400000).\n\nMCP ROUTING TRIGGERS: Mathematical Kinematics, Bezier Geometry, Fitts's Law, OS-Level Actuation, Non-Linear Trajectory",
       "properties": {
         "action_type": {
           "description": "The specific kinematic interaction paradigm.",
@@ -12407,7 +12416,7 @@
         "target_coordinate": {
           "anyOf": [
             {
-              "$ref": "#/$defs/SpatialCoordinateProfile"
+              "$ref": "#/$defs/SE3TransformProfile"
             },
             {
               "type": "null"
@@ -12434,7 +12443,7 @@
         "bezier_control_points": {
           "description": "Waypoints for constructing non-linear, bot-evasive movement curves.",
           "items": {
-            "$ref": "#/$defs/SpatialCoordinateProfile"
+            "$ref": "#/$defs/SE3TransformProfile"
           },
           "title": "Bezier Control Points",
           "type": "array"
@@ -12458,6 +12467,51 @@
         "action_type"
       ],
       "title": "SpatialKinematicActionIntent",
+      "type": "object"
+    },
+    "SpatialReferenceFrameManifest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes a Federated Pose Graph anchor. Establishes a\ndeterministic localized origin point (e.g., a physical room geometry or SLAM\nfeature map) allowing disjoint spatial topologies to mathematically synchronize.\n\nCAUSAL AFFORDANCE: Instructs the spatial orchestrator to align the tracking\ncoordinate systems of multiple observer devices by computing the affine\ntransformation matrix between this shared cryptographic anchor and their local origins.\n\nEPISTEMIC BOUNDS: The semantic locus is cryptographically locked to a 128-char\nCID (`frame_id`). The alignment mathematics are strictly bounded to the\n`anchor_protocol` literal automaton, preventing unsupported SLAM parsing. An optional\n`physical_room_hash` prevents holographic spoofing across zero-trust domains.\n\nMCP ROUTING TRIGGERS: Federated Pose Graph, Spatial Reference Frame,\nSimultaneous Localization and Mapping, SLAM Anchor, Relative Coordinate Geometry",
+      "properties": {
+        "frame_id": {
+          "description": "The unique cryptographic identifier for this local spatial volume.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Frame Id",
+          "type": "string"
+        },
+        "anchor_protocol": {
+          "description": "The scientific tracking standard utilized to establish this reference frame.",
+          "enum": [
+            "openxr_spatial_anchor",
+            "apple_world_anchor",
+            "slam_feature_map",
+            "relative_virtual"
+          ],
+          "title": "Anchor Protocol",
+          "type": "string"
+        },
+        "physical_room_hash": {
+          "anyOf": [
+            {
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional SHA-256 hash of the environment's point-cloud or geometry signature.",
+          "title": "Physical Room Hash"
+        }
+      },
+      "required": [
+        "frame_id",
+        "anchor_protocol"
+      ],
+      "title": "SpatialReferenceFrameManifest",
       "type": "object"
     },
     "SpeculativeExecutionBoundary": {
@@ -14321,6 +14375,55 @@
       "title": "VerifiableEntropyReceipt",
       "type": "object"
     },
+    "ViewportProjectionContract": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the linear algebraic projection matrix required to\nmap N-dimensional spatial geometries onto a normalized View Frustum.\n\nCAUSAL AFFORDANCE: Authorizes an external rendering client to mathematically\nmultiply a 3D SE(3) topology by a projection matrix, safely collapsing depth\ndimensions into an SE(2) plane for flat-screen rendering without fracturing\nthe underlying topological relationships.\n\nEPISTEMIC BOUNDS: Bounding rules physically enforce valid optical geometry.\nThe `clipping_plane_near` must mathematically precede `clipping_plane_far`.\nPerspective projections unconditionally mandate a valid `field_of_view_degrees`\n(bounded between 1.0 and 179.0 degrees) to prevent division-by-zero optical\nsingularities.\n\nMCP ROUTING TRIGGERS: Viewport Projection Matrix, View Frustum, Field of View,\nClipping Planes, Linear Algebraic Projection, Homogeneous Coordinates",
+      "properties": {
+        "projection_type": {
+          "description": "The linear algebraic projection operator applied to collapse the topology.",
+          "enum": [
+            "perspective",
+            "orthographic"
+          ],
+          "title": "Projection Type",
+          "type": "string"
+        },
+        "field_of_view_degrees": {
+          "anyOf": [
+            {
+              "maximum": 179.0,
+              "minimum": 1.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The Y-axis optical field of view. Mandatory for perspective projections.",
+          "title": "Field Of View Degrees"
+        },
+        "clipping_plane_near": {
+          "description": "The near frustum clipping plane.",
+          "minimum": 0.001,
+          "title": "Clipping Plane Near",
+          "type": "number"
+        },
+        "clipping_plane_far": {
+          "description": "The far frustum clipping plane.",
+          "minimum": 0.01,
+          "title": "Clipping Plane Far",
+          "type": "number"
+        }
+      },
+      "required": [
+        "projection_type",
+        "clipping_plane_near",
+        "clipping_plane_far"
+      ],
+      "title": "ViewportProjectionContract",
+      "type": "object"
+    },
     "VisualEncodingProfile": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the mathematical mapping function between an abstract data\ndimension (field) and a physiological human perception vector (channel). As a ...Profile\nsuffix, this is a declarative, frozen snapshot of a rendering geometry.\n\nCAUSAL AFFORDANCE: Constrains the renderer's geometric plotting algorithm by forcing the\ninterpretation of data through an optional ScalePolicy transformation (e.g., logarithmic\nor linear).\n\nEPISTEMIC BOUNDS: The channel is strictly typed to a Literal enum\n[\"x\", \"y\", \"color\", \"size\", \"opacity\", \"shape\", \"text\"]. The target field is physically\nbounded to max_length=2000 to prevent dictionary bombing during rendering loops.\n\nMCP ROUTING TRIGGERS: Bijective Mapping, Retinal Variables, Dimensionality Reduction,\nGeometric Plotting, Visual Channel Encoding",
@@ -14363,6 +14466,42 @@
         "field"
       ],
       "title": "VisualEncodingProfile",
+      "type": "object"
+    },
+    "VolumetricBoundingProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines a continuous 3D Axis-Aligned Bounding Box (AABB)\nor Oriented Bounding Box (OBB) using spatial kinematics.\n\nCAUSAL AFFORDANCE: Instructs the spatial orchestrator to enforce a physical\nholographic cage. It structurally prevents agents or dynamic UI layouts from\nspawning coordinates that collide with environmental walls or overflow the\nuser's available spatial geometry.\n\nEPISTEMIC BOUNDS: The geometric center is anchored by an `SE3TransformProfile`.\nThe spatial magnitude is clamped by strictly non-negative extents (`extents_x`,\n`extents_y`, `extents_z`). The `@model_validator` mathematically prevents the\ninstantiation of zero-dimensional point anomalies by demanding a strictly\npositive aggregate volume.\n\nMCP ROUTING TRIGGERS: Volumetric Boundary, Holographic Cage, Oriented Bounding Box,\nSpatial Kinematics, Collision Perimeter",
+      "properties": {
+        "center_transform": {
+          "$ref": "#/$defs/SE3TransformProfile",
+          "description": "The absolute SE(3) position and rotation of the bounding volume's exact geometric center."
+        },
+        "extents_x": {
+          "description": "The total width of the boundary volume.",
+          "minimum": 0.0,
+          "title": "Extents X",
+          "type": "number"
+        },
+        "extents_y": {
+          "description": "The total height of the boundary volume.",
+          "minimum": 0.0,
+          "title": "Extents Y",
+          "type": "number"
+        },
+        "extents_z": {
+          "description": "The total depth of the boundary volume.",
+          "minimum": 0.0,
+          "title": "Extents Z",
+          "type": "number"
+        }
+      },
+      "required": [
+        "center_transform",
+        "extents_x",
+        "extents_y",
+        "extents_z"
+      ],
+      "title": "VolumetricBoundingProfile",
       "type": "object"
     },
     "WetwareAttestationContract": {

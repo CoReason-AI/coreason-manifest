@@ -381,36 +381,171 @@ class CoreasonBaseState(BaseModel):
         return json.dumps(raw_dict, ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode("utf-8")
 
 
-class SpatialBoundingBoxProfile(CoreasonBaseState):
+class SpatialReferenceFrameManifest(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Defines a 2D Euclidean bounding box within a normalized coordinate
-    space to ensure resolution-independent topological scaling. As a ...Profile suffix,
-    this is a declarative property descriptor.
+    AGENT INSTRUCTION: Formalizes a Federated Pose Graph anchor. Establishes a
+    deterministic localized origin point (e.g., a physical room geometry or SLAM
+    feature map) allowing disjoint spatial topologies to mathematically synchronize.
 
-    CAUSAL AFFORDANCE: Instructs the frontend rendering matrices to physically constrain
-    graphical overlays, multimodal tokens, and UI projections within a rigid, deterministic
-    spatial geometry.
+    CAUSAL AFFORDANCE: Instructs the spatial orchestrator to align the tracking
+    coordinate systems of multiple observer devices by computing the affine
+    transformation matrix between this shared cryptographic anchor and their local origins.
 
-    EPISTEMIC BOUNDS: All coordinate tensors (x_min, y_min, x_max, y_max) are
-    mathematically clamped to a normalized continuous float space (ge=0.0, le=1.0). The
-    @model_validator validate_geometry physically guarantees min bounds cannot exceed max
-    bounds, preventing the generation of inverted or non-Euclidean manifolds.
+    EPISTEMIC BOUNDS: The semantic locus is cryptographically locked to a 128-char
+    CID (`frame_id`). The alignment mathematics are strictly bounded to the
+    `anchor_protocol` literal automaton, preventing unsupported SLAM parsing. An optional
+    `physical_room_hash` prevents holographic spoofing across zero-trust domains.
 
-    MCP ROUTING TRIGGERS: Euclidean Geometry, Topological Scaling, Normalized Coordinate
-    Space, Bounding Box, Spatial Projection
+    MCP ROUTING TRIGGERS: Federated Pose Graph, Spatial Reference Frame,
+    Simultaneous Localization and Mapping, SLAM Anchor, Relative Coordinate Geometry
     """
 
-    x_min: float = Field(ge=0.0, le=1.0, description="The left boundary.")
-    y_min: float = Field(ge=0.0, le=1.0, description="The top boundary.")
-    x_max: float = Field(ge=0.0, le=1.0, description="The right boundary.")
-    y_max: float = Field(ge=0.0, le=1.0, description="The bottom boundary.")
+    frame_id: str = Field(
+        min_length=1,
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        description="The unique cryptographic identifier for this local spatial volume.",
+    )
+    anchor_protocol: Literal["openxr_spatial_anchor", "apple_world_anchor", "slam_feature_map", "relative_virtual"] = (
+        Field(description="The scientific tracking standard utilized to establish this reference frame.")
+    )
+    physical_room_hash: str | None = Field(
+        default=None,
+        pattern="^[a-f0-9]{64}$",
+        description="Optional SHA-256 hash of the environment's point-cloud or geometry signature.",
+    )
+
+
+class SE3TransformProfile(CoreasonBaseState):
+    r"""
+    AGENT INSTRUCTION: Represents a strict rigid-body transformation within the
+    Special Euclidean group SE(3). Projects an absolute mathematical coordinate encompassing
+    both translation ($\mathbb{R}^3$) and rotation ($S^3$).
+
+    CAUSAL AFFORDANCE: Provides the absolute spatial terminus for UI matrices,
+    multi-agent topologies, and multimodal tokens. It dictates the exact kinematic
+    positioning of a node relative to a verified SpatialReferenceFrameManifest.
+
+    EPISTEMIC BOUNDS: Translation vectors (`x`, `y`, `z`) are unbounded continuous
+    floats representing spatial distance. Rotational geometry is rigidly constrained
+    to a 4D unit quaternion (`qx`, `qy`, `qz`, `qw`) bounded [-1.0, 1.0]. The
+    `@model_validator` physically guarantees singularity-free rotation by enforcing
+    an absolute quaternion magnitude of 1.0, eliminating Gimbal Lock.
+
+    MCP ROUTING TRIGGERS: Special Euclidean Group, SE(3) Manifold, Rigid Body
+    Transformation, Hamiltonian Unit Quaternion, Kinematic Topology
+    """
+
+    reference_frame_id: str = Field(
+        min_length=1,
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        description="The SpatialReferenceFrameManifest CID this coordinate is relative to, anchoring it to a physical or virtual room.",
+    )
+    x: float = Field(description="Translation along the X-axis relative to the reference frame.")
+    y: float = Field(description="Translation along the Y-axis relative to the reference frame.")
+    z: float = Field(description="Translation along the Z-axis relative to the reference frame.")
+
+    qx: float = Field(ge=-1.0, le=1.0, default=0.0, description="The i component of the rotation quaternion.")
+    qy: float = Field(ge=-1.0, le=1.0, default=0.0, description="The j component of the rotation quaternion.")
+    qz: float = Field(ge=-1.0, le=1.0, default=0.0, description="The k component of the rotation quaternion.")
+    qw: float = Field(ge=-1.0, le=1.0, default=1.0, description="The real (scalar) part of the rotation quaternion.")
+
+    scale: float = Field(
+        ge=0.0001, le=10000.0, default=1.0, description="Strictly positive uniform volumetric scaling factor."
+    )
 
     @model_validator(mode="after")
-    def validate_geometry(self) -> Self:
-        if self.x_min > self.x_max:
-            raise ValueError("x_min cannot be strictly greater than x_max.")
-        if self.y_min > self.y_max:
-            raise ValueError("y_min cannot be strictly greater than y_max.")
+    def enforce_quaternion_normalization(self) -> Self:
+        """Mathematically guarantees the quaternion represents a valid 3D rotation."""
+        magnitude = math.sqrt(self.qx**2 + self.qy**2 + self.qz**2 + self.qw**2)
+        if magnitude == 0.0:
+            raise ValueError("Topological Violation: Quaternion cannot be a zero vector.")
+        if not math.isclose(magnitude, 1.0, abs_tol=1e-3):
+            raise ValueError(
+                f"Topological Violation: Quaternion magnitude is {magnitude}. Must be normalized to 1.0 to prevent matrix shear."
+            )
+        return self
+
+
+class VolumetricBoundingProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Defines a continuous 3D Axis-Aligned Bounding Box (AABB)
+    or Oriented Bounding Box (OBB) using spatial kinematics.
+
+    CAUSAL AFFORDANCE: Instructs the spatial orchestrator to enforce a physical
+    holographic cage. It structurally prevents agents or dynamic UI layouts from
+    spawning coordinates that collide with environmental walls or overflow the
+    user's available spatial geometry.
+
+    EPISTEMIC BOUNDS: The geometric center is anchored by an `SE3TransformProfile`.
+    The spatial magnitude is clamped by strictly non-negative extents (`extents_x`,
+    `extents_y`, `extents_z`). The `@model_validator` mathematically prevents the
+    instantiation of zero-dimensional point anomalies by demanding a strictly
+    positive aggregate volume.
+
+    MCP ROUTING TRIGGERS: Volumetric Boundary, Holographic Cage, Oriented Bounding Box,
+    Spatial Kinematics, Collision Perimeter
+    """
+
+    center_transform: SE3TransformProfile = Field(
+        description="The absolute SE(3) position and rotation of the bounding volume's exact geometric center."
+    )
+    extents_x: float = Field(ge=0.0, description="The total width of the boundary volume.")
+    extents_y: float = Field(ge=0.0, description="The total height of the boundary volume.")
+    extents_z: float = Field(ge=0.0, description="The total depth of the boundary volume.")
+
+    @model_validator(mode="after")
+    def validate_volume_physics(self) -> Self:
+        """Ensures the defined bounds possess valid 3D physical magnitude."""
+        if self.extents_x * self.extents_y * self.extents_z == 0.0:
+            raise ValueError("Topological Violation: Volumetric space must have 3D magnitude strictly greater than 0.")
+        return self
+
+
+class ViewportProjectionContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Defines the linear algebraic projection matrix required to
+    map N-dimensional spatial geometries onto a normalized View Frustum.
+
+    CAUSAL AFFORDANCE: Authorizes an external rendering client to mathematically
+    multiply a 3D SE(3) topology by a projection matrix, safely collapsing depth
+    dimensions into an SE(2) plane for flat-screen rendering without fracturing
+    the underlying topological relationships.
+
+    EPISTEMIC BOUNDS: Bounding rules physically enforce valid optical geometry.
+    The `clipping_plane_near` must mathematically precede `clipping_plane_far`.
+    Perspective projections unconditionally mandate a valid `field_of_view_degrees`
+    (bounded between 1.0 and 179.0 degrees) to prevent division-by-zero optical
+    singularities.
+
+    MCP ROUTING TRIGGERS: Viewport Projection Matrix, View Frustum, Field of View,
+    Clipping Planes, Linear Algebraic Projection, Homogeneous Coordinates
+    """
+
+    projection_type: Literal["perspective", "orthographic"] = Field(
+        description="The linear algebraic projection operator applied to collapse the topology."
+    )
+    field_of_view_degrees: float | None = Field(
+        ge=1.0,
+        le=179.0,
+        default=None,
+        description="The Y-axis optical field of view. Mandatory for perspective projections.",
+    )
+    clipping_plane_near: float = Field(ge=0.001, description="The near frustum clipping plane.")
+    clipping_plane_far: float = Field(ge=0.01, description="The far frustum clipping plane.")
+
+    @model_validator(mode="after")
+    def validate_frustum_geometry(self) -> Self:
+        """Mathematically verifies the optical integrity of the projection matrix."""
+        if self.clipping_plane_near >= self.clipping_plane_far:
+            raise ValueError(
+                "Topological Violation: clipping_plane_near must be strictly less than clipping_plane_far."
+            )
+        if self.projection_type == "perspective" and self.field_of_view_degrees is None:
+            raise ValueError(
+                "Optical Singularity Risk: Perspective projection mathematically requires field_of_view_degrees."
+            )
         return self
 
 
@@ -516,28 +651,6 @@ class FacetMatrixProfile(CoreasonBaseState):
     column_field: str | None = Field(
         max_length=2000, default=None, description="The dataset field used to split the chart into columns."
     )
-
-
-class SpatialCoordinateProfile(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Specifies an exact N-dimensional (2D) affine coordinate vector for
-    localized rendering and kinematic targeting. As a ...Profile suffix, this is a
-    declarative property descriptor.
-
-    CAUSAL AFFORDANCE: Provides the absolute spatial terminus for UI actions and overlays,
-    enabling the orchestrator to perform bijective mappings from abstract latent data
-    points to physical screen space.
-
-    EPISTEMIC BOUNDS: The x and y axes are mathematically clamped to a normalized float
-    space (ge=0.0, le=1.0), guaranteeing that dynamically generated coordinates can never
-    physically breach the absolute boundaries of the rendering viewport.
-
-    MCP ROUTING TRIGGERS: Affine Transformation, 2D Vector, Kinematic Terminus, Euclidean
-    Coordinate, Bijective Mapping
-    """
-
-    x: float = Field(ge=0.0, le=1.0, description="The normalized X-axis coordinate (0.0 = left, 1.0 = right).")
-    y: float = Field(ge=0.0, le=1.0, description="The normalized Y-axis coordinate (0.0 = top, 1.0 = bottom).")
 
 
 class ComputeRateContract(CoreasonBaseState):
@@ -6155,7 +6268,7 @@ class KinematicNoiseProfile(CoreasonBaseState):
     snapshot of a noise geometry.
 
     CAUSAL AFFORDANCE: Authorizes the Spatial Kinematics engine to perturb each
-    SpatialCoordinateProfile along the Bezier trajectory by sampling from the
+    SE3TransformProfile along the Bezier trajectory by sampling from the
     specified noise distribution, achieving biomechanically plausible jitter with
     cognitive delay and corrective submovements.
 
@@ -7861,7 +7974,7 @@ class SpatialKinematicActionIntent(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Authorizes the translation of latent spatial targets into OS-level actuation, utilizing bezier_control_points to construct continuous polynomial trajectories that simulate human motor control and bypass bot-evasive heuristics.
 
-    EPISTEMIC BOUNDS: Spatial execution is clamped to normalized Euclidean limits (ge=0.0, le=1.0) via the nested SpatialCoordinateProfile. Execution liveness is temporally guillotined by trajectory_duration_ms (le=86400000).
+    EPISTEMIC BOUNDS: Spatial execution is clamped to SE3 dimensional boundaries via the nested SE3TransformProfile. Execution liveness is temporally guillotined by trajectory_duration_ms (le=86400000).
 
     MCP ROUTING TRIGGERS: Mathematical Kinematics, Bezier Geometry, Fitts's Law, OS-Level Actuation, Non-Linear Trajectory
     """
@@ -7869,7 +7982,7 @@ class SpatialKinematicActionIntent(CoreasonBaseState):
     action_type: Literal["click", "double_click", "drag_and_drop", "scroll", "hover", "keystroke"] = Field(
         description="The specific kinematic interaction paradigm."
     )
-    target_coordinate: SpatialCoordinateProfile | None = Field(
+    target_coordinate: SE3TransformProfile | None = Field(
         default=None, description="The primary spatial terminus for clicks or hovers."
     )
     trajectory_duration_ms: int | None = Field(
@@ -7878,7 +7991,7 @@ class SpatialKinematicActionIntent(CoreasonBaseState):
         gt=0,
         description="The exact temporal duration of the movement, simulating human kinematics.",
     )
-    bezier_control_points: list[SpatialCoordinateProfile] = Field(
+    bezier_control_points: list[SE3TransformProfile] = Field(
         default_factory=list,
         description="Waypoints for constructing non-linear, bot-evasive movement curves.",
         # Note: bezier_control_points is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
@@ -10143,8 +10256,8 @@ class EpistemicTelemetryEvent(BaseStateEvent):
         ge=0,
         description="The strictly typed temporal bound measuring human attention focus.",
     )
-    spatial_coordinates: SpatialCoordinateProfile | None = Field(
-        default=None, description="Optional 2D trajectory of the human pointer event mapped to the visual grid."
+    spatial_coordinates: SE3TransformProfile | None = Field(
+        default=None, description="Optional 3D trajectory of the human pointer event mapped to the spatial grid."
     )
 
 
@@ -11146,3 +11259,8 @@ OntologicalHandshakeReceipt.model_rebuild()
 
 ManifestViolationReceipt.model_rebuild()
 System2RemediationIntent.model_rebuild()
+
+SpatialReferenceFrameManifest.model_rebuild()
+SE3TransformProfile.model_rebuild()
+VolumetricBoundingProfile.model_rebuild()
+ViewportProjectionContract.model_rebuild()
