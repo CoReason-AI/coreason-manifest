@@ -37,6 +37,7 @@ from coreason_manifest.spec.ontology import (
     SaeLatentPolicy,
     SE3TransformProfile,
     SecureSubSessionState,
+    ViewportProjectionContract,
     VolumetricBoundingProfile,
 )
 
@@ -83,6 +84,34 @@ def test_spatial_bounds_fuzzing(extents_x: float, extents_y: float, extents_z: f
             center_transform=transform, extents_x=extents_x, extents_y=extents_y, extents_z=extents_z
         )
         assert box.extents_x == extents_x
+
+
+def test_se3_transform_quaternion_validation() -> None:
+    # Magnitude 0.0
+    with pytest.raises(ValidationError, match="Quaternion cannot be a zero vector"):
+        SE3TransformProfile(reference_frame_id="frame", x=0, y=0, z=0, qx=0.0, qy=0.0, qz=0.0, qw=0.0)
+
+    # Not normalized
+    with pytest.raises(ValidationError, match="Quaternion magnitude is"):
+        SE3TransformProfile(reference_frame_id="frame", x=0, y=0, z=0, qx=1.0, qy=1.0, qz=1.0, qw=1.0)
+
+
+def test_viewport_projection_validation() -> None:
+    # Clipping plane near >= far
+    with pytest.raises(ValidationError, match=r"clipping_plane_near must be strictly less than clipping_plane_far\."):
+        ViewportProjectionContract(
+            projection_type="perspective", clipping_plane_near=0.5, clipping_plane_far=0.1, field_of_view_degrees=90.0
+        )
+
+    # Perspective without FOV
+    with pytest.raises(ValidationError, match=r"Perspective projection mathematically requires field_of_view_degrees\."):
+        ViewportProjectionContract(projection_type="perspective", clipping_plane_near=0.1, clipping_plane_far=10.0)
+
+    # Valid configurations
+    ViewportProjectionContract(
+        projection_type="perspective", clipping_plane_near=0.1, clipping_plane_far=10.0, field_of_view_degrees=90.0
+    )
+    ViewportProjectionContract(projection_type="orthographic", clipping_plane_near=0.1, clipping_plane_far=10.0)
 
 
 # --- 3. Byzantine Fault Tolerance Fuzzing ---
