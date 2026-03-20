@@ -3227,8 +3227,24 @@ class BrowserDOMState(CoreasonBaseState):
             return url
 
         hostname_lower = hostname.lower()
-        if hostname_lower in {"localhost", "broadcasthost", "local", "internal"} or hostname_lower.endswith(
-            (".local", ".internal", ".arpa", "localhost.localdomain", ".nip.io", ".sslip.io")
+        if hostname_lower in {
+            "localhost",
+            "broadcasthost",
+            "local",
+            "internal",
+            "localtest.me",
+        } or hostname_lower.endswith(
+            (
+                ".local",
+                ".internal",
+                ".arpa",
+                "localhost.localdomain",
+                ".nip.io",
+                ".sslip.io",
+                ".xip.io",
+                ".vcap.me",
+                ".localtest.me",
+            )
         ):
             raise ValueError(f"SSRF topological violation detected: {hostname}")
 
@@ -4938,7 +4954,7 @@ class ExecutionNodeReceipt(CoreasonBaseState):
 
         def _canonicalize(obj: Any) -> Any:
             if isinstance(obj, dict):
-                return {k: _canonicalize(v) for k, v in sorted(obj.items()) if v is not None}
+                return {k: _canonicalize(v) for k, v in obj.items() if v is not None}
             if isinstance(obj, list):
                 return [_canonicalize(v) for v in obj]
             return obj

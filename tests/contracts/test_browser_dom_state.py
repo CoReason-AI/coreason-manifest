@@ -41,6 +41,9 @@ def test_browser_dom_state_valid_topology() -> None:
         "http://test.arpa/",
         "http://127.0.0.1.nip.io",  # Magic DNS bypass
         "http://127.0.0.1.sslip.io",
+        "http://127.0.0.1.xip.io",
+        "http://localtest.me",
+        "http://127.0.0.1.vcap.me",
     ],
 )
 def test_browser_dom_state_topological_violations(url: str) -> None:
