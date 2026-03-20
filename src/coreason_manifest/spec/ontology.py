@@ -9871,17 +9871,19 @@ class DAGTopologyManifest(BaseTopologyManifest):
         if not self.allow_cycles:
             depth_memo: dict[NodeIdentifierState, int] = {}
 
+            import collections
+
             # Using Kahn's Algorithm / Iterative topological sort for depth and cycles
             # We calculate max depth without recursion to avoid stack overflow limits
 
-            queue = [n for n in self.nodes if in_degree[n] == 0]
+            queue = collections.deque([n for n in self.nodes if in_degree[n] == 0])
             for n in queue:
                 depth_memo[n] = 1
 
             processed_count = 0
 
             while queue:
-                curr = queue.pop(0)
+                curr = queue.popleft()
                 processed_count += 1
                 curr_depth = depth_memo[curr]
 
