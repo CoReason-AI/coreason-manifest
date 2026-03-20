@@ -3227,7 +3227,13 @@ class BrowserDOMState(CoreasonBaseState):
             return url
 
         hostname_lower = hostname.lower()
-        if hostname_lower in {"localhost", "broadcasthost", "local", "internal", "localtest.me"} or hostname_lower.endswith(
+        if hostname_lower in {
+            "localhost",
+            "broadcasthost",
+            "local",
+            "internal",
+            "localtest.me",
+        } or hostname_lower.endswith(
             (
                 ".local",
                 ".internal",
