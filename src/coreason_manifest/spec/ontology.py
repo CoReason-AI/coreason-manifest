@@ -18,11 +18,9 @@ import math
 import re
 import urllib.parse
 from enum import StrEnum
-import typing
 from typing import Annotated, Any, Literal, Self
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, StringConstraints, field_validator, model_validator
-
 
 type JsonPrimitiveState = (
     str
@@ -381,13 +379,6 @@ class CoreasonBaseState(BaseModel):
         raw_dict = self.model_dump(mode="json", exclude_none=True, by_alias=True)
         # Topological mapping: Enforces RFC 8785 strict canonical key sorting.
         return json.dumps(raw_dict, ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode("utf-8")
-
-from coreason_manifest.causality import TraceContext
-from coreason_manifest.state import StateVector
-from coreason_manifest.envelope import ExecutionEnvelope
-
-
-
 
 
 

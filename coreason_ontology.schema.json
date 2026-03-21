@@ -14663,13 +14663,33 @@
           "additionalProperties": {
             "$ref": "#/$defs/JsonPrimitiveState"
           },
-          "description": "The strict JSON Schema dictionary defining the required arguments.",
+          "description": "The strict JSON Schema dictionary defining the required arguments, wrapped in the ExecutionEnvelope.",
           "maxProperties": 1000000000,
           "propertyNames": {
             "maxLength": 255
           },
           "title": "Input Schema",
           "type": "object"
+        },
+        "output_schema": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/JsonPrimitiveState"
+              },
+              "maxProperties": 1000000000,
+              "propertyNames": {
+                "maxLength": 255
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The strict JSON Schema dictionary defining the expected return values, wrapped in the ExecutionEnvelope.",
+          "title": "Output Schema"
         },
         "side_effects": {
           "$ref": "#/$defs/SideEffectProfile",
