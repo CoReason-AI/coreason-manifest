@@ -78,28 +78,34 @@ def test_action_space_manifest_rejects_custom_state() -> None:
     with pytest.raises(ValidationError) as excinfo:
         ActionSpaceManifest(
             action_space_id="test_id",
-            native_tools=[
-                ToolManifest(
+            entry_point_id="test_tool",
+            transition_matrix={"test_tool": []},
+            capabilities={
+                "test_tool": ToolManifest(
+                    type="native_tool",
                     tool_name="test_tool",
                     description="test tool",
                     input_schema={"type": "object", "properties": {"system_prompt": {"type": "string"}}},
                     side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
                     permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
                 )
-            ],
+            },
         )
-    assert "attempts to define reserved or illegal state management keys" in str(excinfo.value)
+    assert "Framework Violation" in str(excinfo.value)
 
     # Should pass cleanly without any exceptions.
     ActionSpaceManifest(
         action_space_id="test_id_2",
-        native_tools=[
-            ToolManifest(
+        entry_point_id="test_tool_2",
+        transition_matrix={"test_tool_2": []},
+        capabilities={
+            "test_tool_2": ToolManifest(
+                type="native_tool",
                 tool_name="test_tool_2",
                 description="test tool 2",
                 input_schema={"type": "object", "properties": {"sql_query": {"type": "string"}}},
                 side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
                 permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
             )
-        ],
+        },
     )
