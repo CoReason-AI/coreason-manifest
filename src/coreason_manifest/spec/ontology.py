@@ -18,9 +18,11 @@ import math
 import re
 import urllib.parse
 from enum import StrEnum
+import typing
 from typing import Annotated, Any, Literal, Self
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, StringConstraints, field_validator, model_validator
+
 
 type JsonPrimitiveState = (
     str
@@ -379,6 +381,14 @@ class CoreasonBaseState(BaseModel):
         raw_dict = self.model_dump(mode="json", exclude_none=True, by_alias=True)
         # Topological mapping: Enforces RFC 8785 strict canonical key sorting.
         return json.dumps(raw_dict, ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode("utf-8")
+
+from coreason_manifest.causality import TraceContext
+from coreason_manifest.state import StateVector
+from coreason_manifest.envelope import ExecutionEnvelope
+
+
+
+
 
 
 class SpatialReferenceFrameManifest(CoreasonBaseState):
@@ -2498,7 +2508,11 @@ class ToolManifest(CoreasonBaseState):
         description="The mathematically bounded semantic projection defining the tool's causal affordances.",
     )
     input_schema: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
-        max_length=1000000000, description="The strict JSON Schema dictionary defining the required arguments."
+        max_length=1000000000, description="The strict JSON Schema dictionary defining the required arguments, wrapped in the ExecutionEnvelope."
+    )
+    output_schema: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] | None = Field(
+        default=None,
+        max_length=1000000000, description="The strict JSON Schema dictionary defining the expected return values, wrapped in the ExecutionEnvelope."
     )
     side_effects: SideEffectProfile = Field(
         description="The declarative side-effect and idempotency profile of the tool."
@@ -6701,6 +6715,36 @@ class ActionSpaceManifest(CoreasonBaseState):
             raise ValueError("Tool names within an ActionSpaceManifest must be strictly unique.")
         return self
 
+
+    @model_validator(mode="after")
+    def _prevent_custom_state_management(self) -> Self:
+        """
+        AGENT INSTRUCTION: Ensure that no tool in the ActionSpaceManifest attempts to declare
+        custom state management outside of the explicit `StateVector`.
+        """
+        for tool in self.native_tools:
+            for schema_name in ("input_schema", "output_schema"):
+                schema = getattr(tool, schema_name, {})
+                if not isinstance(schema, dict) or not schema:
+                    continue
+
+                properties = schema.get("properties", {})
+                if not isinstance(properties, dict):
+                    continue
+
+                # Ensure the top-level keys match ExecutionEnvelope structure
+                if "trace_context" not in properties or "state_vector" not in properties or "payload" not in properties:
+                    raise ValueError(f"ActionSpaceManifest tool '{tool.tool_name}' {schema_name} does not conform to ExecutionEnvelope. Requires 'trace_context', 'state_vector', 'payload'.")
+
+                payload_schema = properties.get("payload", {})
+                if isinstance(payload_schema, dict):
+                    payload_props = payload_schema.get("properties", {})
+                    if isinstance(payload_props, dict):
+                        illegal_keys = {"memory", "context", "system_prompt", "chat_history", "history", "max_tokens"}
+                        for k in illegal_keys:
+                            if k in payload_props:
+                                raise ValueError(f"ActionSpaceManifest tool '{tool.tool_name}' attempts to define custom state management key '{k}' in payload properties. State must be handled by StateVector.")
+        return self
     @model_validator(mode="after")
     def _enforce_canonical_sort_action_spaces(self) -> Self:
         object.__setattr__(self, "native_tools", sorted(self.native_tools, key=lambda x: x.tool_name))
@@ -6963,7 +7007,7 @@ class MarketContract(CoreasonBaseState):
                 try:
                     mc_int = int(mc)
                     sp_int = int(sp)
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             cmc = max(0, min(mc_int, 1000000000))
             if sp_int > cmc:
