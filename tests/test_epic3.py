@@ -1,3 +1,13 @@
+# Copyright (c) 2026 CoReason, Inc
+#
+# This software is proprietary and dual-licensed
+# Licensed under the Prosperity Public License 3.0 (the "License")
+# A copy of the license is available at <https://prosperitylicense.com/versions/3.0.0>
+# For details, see the LICENSE file
+# Commercial use beyond a 30-day trial requires a separate license
+#
+# Source Code: <https://github.com/CoReason-AI/coreason-manifest>
+
 import pytest
 from pydantic import ValidationError
 
@@ -21,7 +31,7 @@ def test_transition_edge_xor_validation() -> None:
     intent = SemanticDiscoveryIntent(
         required_structural_types=["ToolManifest"],
         min_isometry_score=0.9,
-        query_vector={"vector_base64": "dummy", "dimensionality": 128, "model_name": "test-model"},
+        query_vector={"vector_base64": "dummy", "dimensionality": 128, "model_name": "test-model"},  # type: ignore[arg-type]
     )
     TransitionEdgeProfile(edge_type="acyclic", target_intent=intent, probability_weight=1.0, compute_weight_magnitude=5)
 
@@ -54,13 +64,13 @@ def test_dynamic_ghost_node_and_canonical_sorting() -> None:
     intent1 = SemanticDiscoveryIntent(
         required_structural_types=["ToolManifest"],
         min_isometry_score=0.8,
-        query_vector={"vector_base64": "dummy", "dimensionality": 128, "model_name": "test-model"},
+        query_vector={"vector_base64": "dummy", "dimensionality": 128, "model_name": "test-model"},  # type: ignore[arg-type]
     )
     # Intent 2 should sort second
     intent2 = SemanticDiscoveryIntent(
         required_structural_types=["ToolManifest"],
         min_isometry_score=0.9,
-        query_vector={"vector_base64": "dummy", "dimensionality": 128, "model_name": "test-model"},
+        query_vector={"vector_base64": "dummy", "dimensionality": 128, "model_name": "test-model"},  # type: ignore[arg-type]
     )
 
     edge1 = TransitionEdgeProfile(
@@ -82,5 +92,7 @@ def test_dynamic_ghost_node_and_canonical_sorting() -> None:
 
     # Assert canonical sorting worked
     edges = asm.transition_matrix["tool_A"]
+    assert edges[0].target_intent is not None
+    assert edges[1].target_intent is not None
     assert edges[0].target_intent.min_isometry_score == 0.8
     assert edges[1].target_intent.min_isometry_score == 0.9
