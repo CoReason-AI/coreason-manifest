@@ -81,18 +81,31 @@ def test_action_space_manifest_rejects_custom_state():
                     input_schema={
                         "type": "object",
                         "properties": {
-                            "trace_context": {},
-                            "state_vector": {},
-                            "payload": {
-                                "type": "object",
-                                "properties": {"system_prompt": {"type": "string"}}
-                            }
-                        },
-                        "required": ["trace_context", "state_vector", "payload"]
+                            "system_prompt": {"type": "string"}
+                        }
                     },
                     side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
                     permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True)
                 )
             ]
         )
-    assert "attempts to define custom state management key 'system_prompt'" in str(excinfo.value)
+    assert "attempts to define reserved or illegal state management keys" in str(excinfo.value)
+
+    # Should pass cleanly without any exceptions.
+    ActionSpaceManifest(
+        action_space_id="test_id_2",
+        native_tools=[
+            ToolManifest(
+                tool_name="test_tool_2",
+                description="test tool 2",
+                input_schema={
+                    "type": "object",
+                    "properties": {
+                        "sql_query": {"type": "string"}
+                    }
+                },
+                side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
+                permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True)
+            )
+        ]
+    )

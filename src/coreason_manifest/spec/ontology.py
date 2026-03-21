@@ -2499,11 +2499,11 @@ class ToolManifest(CoreasonBaseState):
         description="The mathematically bounded semantic projection defining the tool's causal affordances.",
     )
     input_schema: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
-        max_length=1000000000, description="The strict JSON Schema dictionary defining the required arguments, wrapped in the ExecutionEnvelope."
+        max_length=1000000000, description="The strict JSON Schema dictionary defining the pure domain-specific arguments ($T$). The framework orchestrator will automatically wrap this in the ExecutionEnvelope at runtime."
     )
     output_schema: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] | None = Field(
         default=None,
-        max_length=1000000000, description="The strict JSON Schema dictionary defining the expected return values, wrapped in the ExecutionEnvelope."
+        max_length=1000000000, description="The strict JSON Schema dictionary defining the pure domain-specific arguments ($T$). The framework orchestrator will automatically wrap this in the ExecutionEnvelope at runtime."
     )
     side_effects: SideEffectProfile = Field(
         description="The declarative side-effect and idempotency profile of the tool."
@@ -6710,8 +6710,11 @@ class ActionSpaceManifest(CoreasonBaseState):
     @model_validator(mode="after")
     def _prevent_custom_state_management(self) -> Self:
         """
-        AGENT INSTRUCTION: Ensure that no tool in the ActionSpaceManifest attempts to declare
-        custom state management outside of the explicit `StateVector`.
+        DE NOVO AGENT INSTRUCTION: In a native framework, the ToolManifest's schemas
+        represent ONLY the pure domain payload (T). The ExecutionEnvelope (trace, state)
+        is implicitly wrapped by the orchestrator at runtime.
+        We only need to verify the domain payload doesn't illegally attempt to manage state
+        or collide with the framework's native envelope wrappers.
         """
         for tool in self.native_tools:
             for schema_name in ("input_schema", "output_schema"):
@@ -6723,27 +6726,19 @@ class ActionSpaceManifest(CoreasonBaseState):
                 if not isinstance(properties, dict):
                     continue
 
-                # Ensure the top-level keys match ExecutionEnvelope structure
-                if "trace_context" not in properties or "state_vector" not in properties or "payload" not in properties:
-                    raise ValueError(f"ActionSpaceManifest tool '{tool.tool_name}' {schema_name} does not conform to ExecutionEnvelope. Requires 'trace_context', 'state_vector', 'payload'.")
+                # The strict list of forbidden keys in any domain payload
+                illegal_keys = {
+                    "memory", "context", "system_prompt", "chat_history", "history",
+                    "max_tokens", "trace_context", "state_vector", "payload"
+                }
 
-                allowed_keys = {"trace_context", "state_vector", "payload"}
-                extra_keys = set(properties.keys()) - allowed_keys
+                # Check for illegal state management or framework collisions
+                extra_keys = set(properties.keys()).intersection(illegal_keys)
                 if extra_keys:
-                    raise ValueError(f"ActionSpaceManifest tool '{tool.tool_name}' declares forbidden root keys: {extra_keys}. Must strictly conform to ExecutionEnvelope.")
-
-                required_fields = set(schema.get("required", []))
-                if not allowed_keys.issubset(required_fields):
-                    raise ValueError(f"ActionSpaceManifest tool '{tool.tool_name}' MUST explicitly list 'trace_context', 'state_vector', and 'payload' in its 'required' array.")
-
-                payload_schema = properties.get("payload", {})
-                if isinstance(payload_schema, dict):
-                    payload_props = payload_schema.get("properties", {})
-                    if isinstance(payload_props, dict):
-                        illegal_keys = {"memory", "context", "system_prompt", "chat_history", "history", "max_tokens"}
-                        for k in illegal_keys:
-                            if k in payload_props:
-                                raise ValueError(f"ActionSpaceManifest tool '{tool.tool_name}' attempts to define custom state management key '{k}' in payload properties. State must be handled by StateVector.")
+                    raise ValueError(
+                        f"ActionSpaceManifest tool '{tool.tool_name}' attempts to define reserved or illegal state management keys {extra_keys} in {schema_name}. "
+                        "State is natively handled by the framework's implicit ExecutionEnvelope."
+                    )
         return self
     @model_validator(mode="after")
     def _enforce_canonical_sort_action_spaces(self) -> Self:

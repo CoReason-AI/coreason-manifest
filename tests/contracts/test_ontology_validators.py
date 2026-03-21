@@ -569,21 +569,21 @@ def test_action_space_manifest_enforce_canonical_sort() -> None:
     tool1 = ToolManifest(
         tool_name="tool_b",
         description="description",
-        input_schema={"type": "object", "properties": {"trace_context": {}, "state_vector": {}, "payload": {}}, "required": ["trace_context", "state_vector", "payload"]},
+        input_schema={"type": "object", "properties": {}},
         side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
         permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
     )
     tool2 = ToolManifest(
         tool_name="tool_a",
         description="description 2",
-        input_schema={"type": "object", "properties": {"trace_context": {}, "state_vector": {}, "payload": {}}, "required": ["trace_context", "state_vector", "payload"]},
+        input_schema={"type": "object", "properties": {}},
         side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
         permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
     )
     tool3 = ToolManifest(
         tool_name="tool_b",
         description="description duplicate",
-        input_schema={"type": "object", "properties": {"trace_context": {}, "state_vector": {}, "payload": {}}, "required": ["trace_context", "state_vector", "payload"]},
+        input_schema={"type": "object", "properties": {}},
         side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
         permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
     )

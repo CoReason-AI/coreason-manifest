@@ -8,12 +8,13 @@
 #
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
+# ruff: noqa: F405
 
 
-
-
-
-
+from coreason_manifest.causality import TraceContext
+from coreason_manifest.envelope import ExecutionEnvelope
+from coreason_manifest.spec.ontology import *  # noqa: F403
+from coreason_manifest.state import StateVector
 from coreason_manifest.utils.algebra import (
     align_semantic_manifolds,
     apply_state_differential,
@@ -337,3 +338,9 @@ __all__ = [
     "verify_ast_safety",
     "verify_merkle_proof",
 ]
+
+__all__.extend([
+    "ExecutionEnvelope",
+    "StateVector",
+    "TraceContext"
+])
