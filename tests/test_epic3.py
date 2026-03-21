@@ -27,7 +27,7 @@ def test_transition_edge_xor_validation() -> None:
     )
 
     # Test invalid both
-    with pytest.raises(ValidationError, match="Exactly one of target_node_id or target_intent must be populated."):
+    with pytest.raises(ValidationError, match="Exactly one of target_node_id or target_intent must be populated"):
         TransitionEdgeProfile(
             edge_type="acyclic",
             target_node_id="tool_A",
@@ -37,7 +37,7 @@ def test_transition_edge_xor_validation() -> None:
         )
 
     # Test invalid neither
-    with pytest.raises(ValidationError, match="Exactly one of target_node_id or target_intent must be populated."):
+    with pytest.raises(ValidationError, match="Exactly one of target_node_id or target_intent must be populated"):
         TransitionEdgeProfile(
             edge_type="acyclic",
             probability_weight=1.0,
