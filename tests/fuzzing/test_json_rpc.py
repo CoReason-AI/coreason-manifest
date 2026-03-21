@@ -114,7 +114,7 @@ def test_action_space_manifest_uniqueness(action_space_id: str, tool_names: list
     native_tools = [
         ToolManifest(
             tool_name=name,
-                input_schema={"type": "object", "properties": {}},
+            input_schema={"type": "object", "properties": {}},
             description="desc",
             side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
             permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
