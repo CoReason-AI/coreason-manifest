@@ -38,7 +38,7 @@ dev = [
     "types-pyyaml>=6.0.12.20250915",
     "tzdata>=2025.3",
     "pytest-benchmark>=5.2.3",
-    "deepdiff>=8.6.1",
+    "deepdiff>=8.6.2",
     "deptry>=0.23.0",
     "pytest-xdist>=3.6.1",
     "hypothesis>=6.151.9",
@@ -82,7 +82,7 @@ exclude = [
 ]
 
 [tool.pytest.ini_options]
-
+addopts = "--cov=src/coreason_manifest --cov-report=xml"
 testpaths = ["tests"]
 asyncio_mode = "auto"
 filterwarnings = ["ignore:Pydantic serializer warnings:UserWarning"]

@@ -16,13 +16,12 @@ import ipaddress
 import json
 import math
 import re
+import typing
 import urllib.parse
 from enum import StrEnum
-import typing
 from typing import Annotated, Any, Literal, Self
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, StringConstraints, field_validator, model_validator
-
 
 type JsonPrimitiveState = (
     str
@@ -382,13 +381,90 @@ class CoreasonBaseState(BaseModel):
         # Topological mapping: Enforces RFC 8785 strict canonical key sorting.
         return json.dumps(raw_dict, ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode("utf-8")
 
-from coreason_manifest.causality import TraceContext
-from coreason_manifest.state import StateVector
-from coreason_manifest.envelope import ExecutionEnvelope
+
+T = typing.TypeVar("T")
 
 
+class TraceContextState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Implements Distributed Causality using Vector Clocks and rho-calculus.
+
+    CAUSAL AFFORDANCE: Acts as a Causal Graph Identifier, ensuring deterministic traceability
+    and state boundary enforcement without relying on hidden states.
+
+    EPISTEMIC BOUNDS: Relies on ULID or UUIDv7 string identifiers for strict topological ordering.
+    """
+
+    trace_id: str = Field(
+        min_length=26,
+        max_length=36,
+        pattern=r"^[0-9A-HJKMNP-TV-Z]{26}$|^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+        description="Globally unique ID generated once at the root user prompt. Must be a ULID or UUIDv7.",
+    )
+    span_id: str = Field(
+        min_length=26,
+        max_length=36,
+        pattern=r"^[0-9A-HJKMNP-TV-Z]{26}$|^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+        description="Unique identifier for the specific execution of this actionSpaceId. Must be a ULID or UUIDv7.",
+    )
+    parent_span_id: str | None = Field(
+        default=None,
+        min_length=26,
+        max_length=36,
+        pattern=r"^[0-9A-HJKMNP-TV-Z]{26}$|^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+        description="The span_id of the caller. If null, this node is the mathematically proven root.",
+    )
+    causal_clock: int = Field(
+        default=0, ge=0, description="Tracks the recursion depth/vector clock required for compute budget decay."
+    )
+
+    @model_validator(mode="after")
+    def verify_span_topology(self) -> Self:
+        """Mathematically prevents superficial infinite self-pointers."""
+        if self.parent_span_id is not None and self.span_id == self.parent_span_id:
+            raise ValueError("Topological Violation: span_id cannot equal parent_span_id.")
+        return self
 
 
+class StateVectorProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Implements Labeled Transition System (LTS) Determinism.
+
+    CAUSAL AFFORDANCE: Forces all hidden LLM contexts into an explicitly typed data structure,
+    making the agent a Markov Process with Full Observability.
+
+    EPISTEMIC BOUNDS: Bounded dictionary mapping of explicit schemas or primitives for both read and write state.
+    """
+
+    read_only_context: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
+        default_factory=dict,
+        description="Immutable behavior directives (e.g., global personas, fixed dataset schemas, boundary rules).",
+    )
+    mutable_memory: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] | None = Field(
+        default=None, description="The agent's scratchpad, chat history, and any writable states."
+    )
+    is_delta: bool = Field(
+        default=False,
+        description="A flag allowing the output to only return the keys in mutable_memory that changed, rather than forcing the entire array back up the network.",
+    )
+
+
+class ExecutionEnvelopeState[T](CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Implements the mathematical Reader/Writer/State (RWS) Monad, completely enveloping execution inside pure functions.
+
+    CAUSAL AFFORDANCE: The envelope functor that maps a pure value into a computational context.
+
+    EPISTEMIC BOUNDS: Strictly prevents external keys. Must consist solely of trace_context, state_vector, and payload.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    trace_context: TraceContextState = Field(
+        description="Represents the Reader/Writer monad for causality and recursion."
+    )
+    state_vector: StateVectorProfile = Field(description="Represents the State monad of Labeled Transition Systems.")
+    payload: T = Field(description="Represents the pure value payload data structure, domain-specific.")
 
 
 class SpatialReferenceFrameManifest(CoreasonBaseState):
@@ -2508,11 +2584,13 @@ class ToolManifest(CoreasonBaseState):
         description="The mathematically bounded semantic projection defining the tool's causal affordances.",
     )
     input_schema: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
-        max_length=1000000000, description="The strict JSON Schema dictionary defining the required arguments, wrapped in the ExecutionEnvelope."
+        max_length=1000000000,
+        description="The strict JSON Schema dictionary defining the pure domain-specific arguments ($T$). The framework orchestrator will automatically wrap this in the ExecutionEnvelopeState at runtime.",
     )
     output_schema: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] | None = Field(
         default=None,
-        max_length=1000000000, description="The strict JSON Schema dictionary defining the expected return values, wrapped in the ExecutionEnvelope."
+        max_length=1000000000,
+        description="The strict JSON Schema dictionary defining the pure domain-specific arguments ($T$). The framework orchestrator will automatically wrap this in the ExecutionEnvelopeState at runtime.",
     )
     side_effects: SideEffectProfile = Field(
         description="The declarative side-effect and idempotency profile of the tool."
@@ -6715,12 +6793,14 @@ class ActionSpaceManifest(CoreasonBaseState):
             raise ValueError("Tool names within an ActionSpaceManifest must be strictly unique.")
         return self
 
-
     @model_validator(mode="after")
     def _prevent_custom_state_management(self) -> Self:
         """
-        AGENT INSTRUCTION: Ensure that no tool in the ActionSpaceManifest attempts to declare
-        custom state management outside of the explicit `StateVector`.
+        DE NOVO AGENT INSTRUCTION: In a native framework, the ToolManifest's schemas
+        represent ONLY the pure domain payload (T). The ExecutionEnvelopeState (trace, state)
+        is implicitly wrapped by the orchestrator at runtime.
+        We only need to verify the domain payload doesn't illegally attempt to manage state
+        or collide with the framework's native envelope wrappers.
         """
         for tool in self.native_tools:
             for schema_name in ("input_schema", "output_schema"):
@@ -6732,19 +6812,28 @@ class ActionSpaceManifest(CoreasonBaseState):
                 if not isinstance(properties, dict):
                     continue
 
-                # Ensure the top-level keys match ExecutionEnvelope structure
-                if "trace_context" not in properties or "state_vector" not in properties or "payload" not in properties:
-                    raise ValueError(f"ActionSpaceManifest tool '{tool.tool_name}' {schema_name} does not conform to ExecutionEnvelope. Requires 'trace_context', 'state_vector', 'payload'.")
+                # The strict list of forbidden keys in any domain payload
+                illegal_keys = {
+                    "memory",
+                    "context",
+                    "system_prompt",
+                    "chat_history",
+                    "history",
+                    "max_tokens",
+                    "trace_context",
+                    "state_vector",
+                    "payload",
+                }
 
-                payload_schema = properties.get("payload", {})
-                if isinstance(payload_schema, dict):
-                    payload_props = payload_schema.get("properties", {})
-                    if isinstance(payload_props, dict):
-                        illegal_keys = {"memory", "context", "system_prompt", "chat_history", "history", "max_tokens"}
-                        for k in illegal_keys:
-                            if k in payload_props:
-                                raise ValueError(f"ActionSpaceManifest tool '{tool.tool_name}' attempts to define custom state management key '{k}' in payload properties. State must be handled by StateVector.")
+                # Check for illegal state management or framework collisions
+                extra_keys = set(properties.keys()).intersection(illegal_keys)
+                if extra_keys:
+                    raise ValueError(
+                        f"ActionSpaceManifest tool '{tool.tool_name}' attempts to define reserved or illegal state management keys {extra_keys} in {schema_name}. "
+                        "State is natively handled by the framework's implicit ExecutionEnvelopeState."
+                    )
         return self
+
     @model_validator(mode="after")
     def _enforce_canonical_sort_action_spaces(self) -> Self:
         object.__setattr__(self, "native_tools", sorted(self.native_tools, key=lambda x: x.tool_name))
@@ -7007,7 +7096,7 @@ class MarketContract(CoreasonBaseState):
                 try:
                     mc_int = int(mc)
                     sp_int = int(sp)
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
             cmc = max(0, min(mc_int, 1000000000))
             if sp_int > cmc:
