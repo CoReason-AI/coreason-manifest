@@ -124,7 +124,7 @@ def test_action_space_manifest_uniqueness(action_space_id: str, tool_names: list
     }
     manifest = ActionSpaceManifest(
         action_space_id=action_space_id,
-        capabilities=native_tools,
+        capabilities=native_tools,  # type: ignore[arg-type]
         entry_point_id=tool_names[0],
         transition_matrix={name: [] for name in tool_names},
     )
