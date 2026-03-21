@@ -216,7 +216,6 @@ __all__ = [
     "MarketResolutionState",
     "MechanisticAuditContract",
     "MemoizedNodeProfile",
-    "MigrationContract",
     "MultimodalArtifactReceipt",
     "MultimodalTokenAnchorState",
     "MutationPolicy",
