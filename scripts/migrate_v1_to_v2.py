@@ -1,12 +1,26 @@
-import os
-import sys
 import json
-import yaml
+import sys
 from pathlib import Path
 
+import yaml
+
+
 def migrate_schema(schema: dict) -> dict:
-    new_schema = {
+    existing_properties = schema.get("properties", {})
+    existing_required = schema.get("required", [])
+
+    payload_schema = {
         "type": "object",
+        "properties": existing_properties,
+        "additionalProperties": False
+    }
+
+    if existing_required:
+        payload_schema["required"] = existing_required
+
+    return {
+        "type": "object",
+        "additionalProperties": False,
         "properties": {
             "trace_context": {
                 "type": "object",
@@ -27,11 +41,10 @@ def migrate_schema(schema: dict) -> dict:
                 },
                 "required": ["read_only_context", "is_delta"]
             },
-            "payload": schema
+            "payload": payload_schema
         },
         "required": ["trace_context", "state_vector", "payload"]
     }
-    return new_schema
 
 def migrate_tool(tool: dict) -> dict:
     if "input_schema" in tool:
@@ -49,7 +62,7 @@ def process_file(filepath: str):
     if "node_modules" in filepath or "venv" in filepath or ".git" in filepath:
         return
 
-    with open(filepath, 'r') as f:
+    with open(filepath) as f:
         content = f.read()
 
     try:

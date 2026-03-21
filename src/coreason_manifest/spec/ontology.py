@@ -18,11 +18,9 @@ import math
 import re
 import urllib.parse
 from enum import StrEnum
-import typing
 from typing import Annotated, Any, Literal, Self
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, StringConstraints, field_validator, model_validator
-
 
 type JsonPrimitiveState = (
     str
@@ -381,13 +379,6 @@ class CoreasonBaseState(BaseModel):
         raw_dict = self.model_dump(mode="json", exclude_none=True, by_alias=True)
         # Topological mapping: Enforces RFC 8785 strict canonical key sorting.
         return json.dumps(raw_dict, ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode("utf-8")
-
-from coreason_manifest.causality import TraceContext
-from coreason_manifest.state import StateVector
-from coreason_manifest.envelope import ExecutionEnvelope
-
-
-
 
 
 
@@ -6735,6 +6726,15 @@ class ActionSpaceManifest(CoreasonBaseState):
                 # Ensure the top-level keys match ExecutionEnvelope structure
                 if "trace_context" not in properties or "state_vector" not in properties or "payload" not in properties:
                     raise ValueError(f"ActionSpaceManifest tool '{tool.tool_name}' {schema_name} does not conform to ExecutionEnvelope. Requires 'trace_context', 'state_vector', 'payload'.")
+
+                allowed_keys = {"trace_context", "state_vector", "payload"}
+                extra_keys = set(properties.keys()) - allowed_keys
+                if extra_keys:
+                    raise ValueError(f"ActionSpaceManifest tool '{tool.tool_name}' declares forbidden root keys: {extra_keys}. Must strictly conform to ExecutionEnvelope.")
+
+                required_fields = set(schema.get("required", []))
+                if not allowed_keys.issubset(required_fields):
+                    raise ValueError(f"ActionSpaceManifest tool '{tool.tool_name}' MUST explicitly list 'trace_context', 'state_vector', and 'payload' in its 'required' array.")
 
                 payload_schema = properties.get("payload", {})
                 if isinstance(payload_schema, dict):

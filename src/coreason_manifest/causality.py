@@ -8,10 +8,12 @@
 #
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
-from pydantic import Field, model_validator
 from typing import Self
 
+from pydantic import Field, model_validator
+
 from coreason_manifest.spec.ontology import CoreasonBaseState
+
 
 class TraceContext(CoreasonBaseState):
     """

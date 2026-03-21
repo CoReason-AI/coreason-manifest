@@ -8,16 +8,17 @@
 #
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
-from typing import Generic, TypeVar, Any
-from pydantic import Field, ConfigDict
+from typing import TypeVar
 
-from coreason_manifest.spec.ontology import CoreasonBaseState
+from pydantic import ConfigDict, Field
+
 from coreason_manifest.causality import TraceContext
+from coreason_manifest.spec.ontology import CoreasonBaseState
 from coreason_manifest.state import StateVector
 
 T = TypeVar("T")
 
-class ExecutionEnvelope(CoreasonBaseState, Generic[T]):
+class ExecutionEnvelope[T](CoreasonBaseState):
     """
     AGENT INSTRUCTION: Implements the mathematical Reader/Writer/State (RWS) Monad, completely enveloping execution inside pure functions.
 

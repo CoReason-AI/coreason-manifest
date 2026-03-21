@@ -2,39 +2,40 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.causality import TraceContext
-from coreason_manifest.state import StateVector
 from coreason_manifest.envelope import ExecutionEnvelope
 from coreason_manifest.spec.ontology import (
-    ToolManifest,
     ActionSpaceManifest,
     PermissionBoundaryPolicy,
     SideEffectProfile,
+    ToolManifest,
 )
+from coreason_manifest.state import StateVector
+
 
 def test_causal_integrity():
-    A = TraceContext(
+    a = TraceContext(
         trace_id="01HVK1Z5B7G6V5G8S8A2G1Z5B7",
         span_id="01HVK1Z5B7G6V5G8S8A2G1Z5B8",
         parent_span_id=None,
         causal_clock=0
     )
 
-    B = TraceContext(
-        trace_id=A.trace_id,
+    b = TraceContext(
+        trace_id=a.trace_id,
         span_id="01HVK1Z5B7G6V5G8S8A2G1Z5B9",
-        parent_span_id=A.span_id,
-        causal_clock=A.causal_clock + 1
+        parent_span_id=a.span_id,
+        causal_clock=a.causal_clock + 1
     )
 
-    C = TraceContext(
-        trace_id=A.trace_id,
+    c = TraceContext(
+        trace_id=a.trace_id,
         span_id="01HVK1Z5B7G6V5G8S8A2G1Z5BA",
-        parent_span_id=B.span_id,
-        causal_clock=B.causal_clock + 1
+        parent_span_id=b.span_id,
+        causal_clock=b.causal_clock + 1
     )
 
-    assert C.trace_id == A.trace_id
-    assert C.causal_clock == A.causal_clock + 2
+    assert c.trace_id == a.trace_id
+    assert c.causal_clock == a.causal_clock + 2
 
     # Prevent superficial infinite self-pointers
     with pytest.raises(ValidationError):
@@ -86,7 +87,8 @@ def test_action_space_manifest_rejects_custom_state():
                                 "type": "object",
                                 "properties": {"system_prompt": {"type": "string"}}
                             }
-                        }
+                        },
+                        "required": ["trace_context", "state_vector", "payload"]
                     },
                     side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
                     permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True)

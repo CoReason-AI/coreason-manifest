@@ -8,10 +8,12 @@
 #
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
-from typing import Any, Annotated
+from typing import Annotated
+
 from pydantic import Field, StringConstraints
 
 from coreason_manifest.spec.ontology import CoreasonBaseState, JsonPrimitiveState
+
 
 class StateVector(CoreasonBaseState):
     """
