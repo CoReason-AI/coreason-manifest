@@ -4210,9 +4210,47 @@
           "type": "string"
         },
         "target_node_id": {
+          "anyOf": [
+            {
+              "maxLength": 255,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
           "description": "The coinductive pointer to the destination capability.",
-          "maxLength": 255,
-          "title": "Target Node Id",
+          "title": "Target Node Id"
+        },
+        "target_intent": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SemanticDiscoveryIntent"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Dynamic discovery intent for bridging nodes."
+        },
+        "payload_mappings": {
+          "description": "The algebraic translation matrix mapping the source's Covariant output to the Contravariant input.",
+          "items": {
+            "$ref": "#/$defs/EdgeMappingContract"
+          },
+          "title": "Payload Mappings",
+          "type": "array"
+        },
+        "eval_strategy": {
+          "default": "strict",
+          "description": "The evaluation strategy: 'strict' pre-fetches schemas, 'lazy' uses Coalgebraic Thunking to prevent State-Space Explosion.",
+          "enum": [
+            "strict",
+            "lazy"
+          ],
+          "title": "Eval Strategy",
           "type": "string"
         },
         "probability_weight": {
@@ -4241,7 +4279,6 @@
         }
       },
       "required": [
-        "target_node_id",
         "probability_weight",
         "compute_weight_magnitude",
         "discount_factor",
@@ -5162,6 +5199,30 @@
         "branch_budgets_magnitude"
       ],
       "title": "DynamicRoutingManifest",
+      "type": "object"
+    },
+    "EdgeMappingContract": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes a Profunctor Optics (Lenses) mapping between\ndisjoint capabilities without computational glue logic. As a ...Contract suffix,\nthis creates a rigid algebraic boundary.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator's state projection engine to\nsafely project the Covariant output of a source node into the Contravariant\ninput of a target node using pure mathematical mappings.\n\nEPISTEMIC BOUNDS: The mapping uses RFC 6902 JSON Pointers (source_pointer and\ntarget_pointer) to extract and inject data, bounded by 2000-character limits.\n\nMCP ROUTING TRIGGERS: Category Theory, Profunctor Optics, Bijective Mapping,\nAlgebraic Translation, Lens, Prism",
+      "properties": {
+        "source_pointer": {
+          "description": "The RFC 6902 JSON Pointer extracting the Covariant output.",
+          "maxLength": 2000,
+          "title": "Source Pointer",
+          "type": "string"
+        },
+        "target_pointer": {
+          "description": "The RFC 6902 JSON Pointer injecting into the Contravariant input.",
+          "maxLength": 2000,
+          "title": "Target Pointer",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_pointer",
+        "target_pointer"
+      ],
+      "title": "EdgeMappingContract",
       "type": "object"
     },
     "EmbodiedSensoryVectorProfile": {
@@ -15125,9 +15186,47 @@
           "type": "string"
         },
         "target_node_id": {
+          "anyOf": [
+            {
+              "maxLength": 255,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
           "description": "The coinductive pointer to the destination capability.",
-          "maxLength": 255,
-          "title": "Target Node Id",
+          "title": "Target Node Id"
+        },
+        "target_intent": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SemanticDiscoveryIntent"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Dynamic discovery intent for bridging nodes."
+        },
+        "payload_mappings": {
+          "description": "The algebraic translation matrix mapping the source's Covariant output to the Contravariant input.",
+          "items": {
+            "$ref": "#/$defs/EdgeMappingContract"
+          },
+          "title": "Payload Mappings",
+          "type": "array"
+        },
+        "eval_strategy": {
+          "default": "strict",
+          "description": "The evaluation strategy: 'strict' pre-fetches schemas, 'lazy' uses Coalgebraic Thunking to prevent State-Space Explosion.",
+          "enum": [
+            "strict",
+            "lazy"
+          ],
+          "title": "Eval Strategy",
           "type": "string"
         },
         "probability_weight": {
@@ -15145,7 +15244,6 @@
         }
       },
       "required": [
-        "target_node_id",
         "probability_weight",
         "compute_weight_magnitude"
       ],
