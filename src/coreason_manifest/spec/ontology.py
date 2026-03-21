@@ -75,6 +75,18 @@ def _validate_payload_bounds(
     return value
 
 
+def _canonicalize_payload(obj: Any) -> Any:
+    """
+    AGENT INSTRUCTION: Mathematically strips all `None` values recursively from a payload before hashing.
+    Extracted to module level to prevent function-object recreation overhead during high-frequency DAG node serialization.
+    """
+    if isinstance(obj, dict):
+        return {k: _canonicalize_payload(v) for k, v in obj.items() if v is not None}
+    if isinstance(obj, list):
+        return [_canonicalize_payload(v) for v in obj]
+    return obj
+
+
 type AuctionMechanismProfile = Literal["sealed_bid", "dutch", "vickrey"]
 type CausalIntervalProfile = Literal["strictly_precedes", "overlaps", "contains", "causes", "mitigates"]
 type CrossoverMechanismProfile = Literal["uniform_blend", "single_point", "heuristic"]
@@ -4952,14 +4964,7 @@ class ExecutionNodeReceipt(CoreasonBaseState):
             "parent_hashes": self.parent_hashes,
         }
 
-        def _canonicalize(obj: Any) -> Any:
-            if isinstance(obj, dict):
-                return {k: _canonicalize(v) for k, v in obj.items() if v is not None}
-            if isinstance(obj, list):
-                return [_canonicalize(v) for v in obj]
-            return obj
-
-        canonical_payload = _canonicalize(payload)
+        canonical_payload = _canonicalize_payload(payload)
         json_bytes = json.dumps(canonical_payload, ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode(
             "utf-8"
         )
