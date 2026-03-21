@@ -12,7 +12,7 @@ from coreason_manifest.spec.ontology import (
 )
 
 
-def test_causal_integrity() -> None:
+def test_causal_integrity():
     a = TraceContextState(
         trace_id="01HVK1Z5B7G6V5G8S8A2G1Z5B7", span_id="01HVK1Z5B7G6V5G8S8A2G1Z5B8", parent_span_id=None, causal_clock=0
     )
@@ -44,7 +44,7 @@ def test_causal_integrity() -> None:
         )
 
 
-def test_pure_function() -> None:
+def test_pure_function():
     # Attempt to pass an arbitrary configuration key (e.g., max_tokens or system_prompt) at the root level of the envelope
     with pytest.raises(ValidationError):
         ExecutionEnvelopeState(
@@ -53,7 +53,7 @@ def test_pure_function() -> None:
             ),
             state_vector=StateVectorProfile(),
             payload={"test": "data"},
-            system_prompt="This should fail",  # type: ignore[call-arg]
+            system_prompt="This should fail",
         )
 
     with pytest.raises(ValidationError):
@@ -63,18 +63,18 @@ def test_pure_function() -> None:
             ),
             state_vector=StateVectorProfile(),
             payload={"test": "data"},
-            max_tokens=500,  # type: ignore[call-arg]
+            max_tokens=500,
         )
 
 
-def test_delta_state() -> None:
+def test_delta_state():
     # Assert that a StateVectorProfile with is_delta=True passes validation even if mandatory mutable_memory keys are omitted (it can be None or empty)
     s = StateVectorProfile(is_delta=True)
     assert s.is_delta is True
     assert s.mutable_memory is None
 
 
-def test_action_space_manifest_rejects_custom_state() -> None:
+def test_action_space_manifest_rejects_custom_state():
     with pytest.raises(ValidationError) as excinfo:
         ActionSpaceManifest(
             action_space_id="test_id",
