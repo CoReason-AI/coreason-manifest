@@ -6084,7 +6084,7 @@
     },
     "EpistemicLedgerState": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Event Sourcing and the Merkle-DAG structure as\nthe absolute, immutable source of truth for the swarm, fully partitioned from\nvolatile memory. As a ...State suffix, this is a declarative, frozen snapshot\nof the macro-topology.\n\nCAUSAL AFFORDANCE: Permanently crystallizes validated events into the history\n(list[AnyStateEvent], max_length=10000). Applies Truth Maintenance via\ntruth_maintenance_policy (TruthMaintenancePolicy | None), eviction via\neviction_policy (EvictionPolicy | None), crystallization via\ncrystallization_policy (CrystallizationPolicy | None), and tracks active\nDefeasibleCascadeEvents and RollbackIntents.\n\nEPISTEMIC BOUNDS: The @model_validator sort_history deterministically sorts\nhistory by timestamp, checkpoints by checkpoint_id, active_rollbacks by\nrequest_id, migration_contracts by contract_id, and active_cascades by\ncascade_id — guaranteeing invariant RFC 8785 canonical hashing.\n\nMCP ROUTING TRIGGERS: Event Sourcing, Merkle-DAG, Immutable Ledger, Truth\nCrystallization, Chronological Sort",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Event Sourcing and the Merkle-DAG structure as\nthe absolute, immutable source of truth for the swarm, fully partitioned from\nvolatile memory. As a ...State suffix, this is a declarative, frozen snapshot\nof the macro-topology.\n\nCAUSAL AFFORDANCE: Permanently crystallizes validated events into the history\n(list[AnyStateEvent], max_length=10000). Applies Truth Maintenance via\ntruth_maintenance_policy (TruthMaintenancePolicy | None), eviction via\neviction_policy (EvictionPolicy | None), crystallization via\ncrystallization_policy (CrystallizationPolicy | None), and tracks active\nDefeasibleCascadeEvents and RollbackIntents.\n\nEPISTEMIC BOUNDS: The @model_validator sort_history deterministically sorts\nhistory by timestamp, checkpoints by checkpoint_id, active_rollbacks by\nrequest_id, and active_cascades by\ncascade_id — guaranteeing invariant RFC 8785 canonical hashing.\n\nMCP ROUTING TRIGGERS: Event Sourcing, Merkle-DAG, Immutable Ledger, Truth\nCrystallization, Chronological Sort",
       "properties": {
         "history": {
           "description": "An append-only, cryptographic ledger of state events. [SITD-Alpha: Non-Monotonic Epistemic Quarantine Isometry]",
@@ -6147,14 +6147,6 @@
           ],
           "default": null,
           "description": "The strict mathematical boundary governing context window compression."
-        },
-        "migration_contracts": {
-          "description": "Declarative rules to translate historical states to the current active schema version.",
-          "items": {
-            "$ref": "#/$defs/MigrationContract"
-          },
-          "title": "Migration Contracts",
-          "type": "array"
         },
         "truth_maintenance_policy": {
           "anyOf": [
@@ -10594,61 +10586,6 @@
         "expected_output_schema"
       ],
       "title": "MemoizedNodeProfile",
-      "type": "object"
-    },
-    "MigrationContract": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes a Covariant Functor (Category Theory) mapping between disparate\nversions of the Universal Unified Ontology. As a ...Contract suffix, it enforces a rigid\nmathematical boundary globally.\n\nCAUSAL AFFORDANCE: Unlocks backward-compatible schema transmutation, allowing the orchestrator\nto safely project historical payloads from source_version to target_version via structural\npath_transformations.\n\nEPISTEMIC BOUNDS: The contract_id is cryptographically anchored to a 128-char CID. The\npath_transformations dictionary maps strict RFC 6902 JSON Pointers up to max_length=2000.\nThe dropped_paths list is deterministically sorted by a @model_validator to preserve invariant\nRFC 8785 canonical hashing.\n\nMCP ROUTING TRIGGERS: Category Theory, Schema Evolution, Covariant Functor, RFC 6902, Semantic Migration",
-      "properties": {
-        "contract_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this structural migration mapping.",
-          "maxLength": 128,
-          "minLength": 1,
-          "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Contract Id",
-          "type": "string"
-        },
-        "source_version": {
-          "description": "The exact semantic version string of the payload before migration.",
-          "maxLength": 2000,
-          "title": "Source Version",
-          "type": "string"
-        },
-        "target_version": {
-          "description": "The exact semantic version string of the payload after migration.",
-          "maxLength": 2000,
-          "title": "Target Version",
-          "type": "string"
-        },
-        "path_transformations": {
-          "additionalProperties": {
-            "maxLength": 2000,
-            "type": "string"
-          },
-          "description": "A strict mapping of old RFC 6902 JSON Pointers to new JSON Pointers.",
-          "le": 1000000000,
-          "propertyNames": {
-            "maxLength": 255
-          },
-          "title": "Path Transformations",
-          "type": "object"
-        },
-        "dropped_paths": {
-          "description": "Explicit whitelist of JSON Pointers that are safely deprecated and intentionally dropped during migration.",
-          "items": {
-            "maxLength": 2000,
-            "type": "string"
-          },
-          "title": "Dropped Paths",
-          "type": "array"
-        }
-      },
-      "required": [
-        "contract_id",
-        "source_version",
-        "target_version"
-      ],
-      "title": "MigrationContract",
       "type": "object"
     },
     "MultimodalArtifactReceipt": {

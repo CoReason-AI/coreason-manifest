@@ -7417,56 +7417,6 @@ class EpistemicProvenanceReceipt(CoreasonBaseState):
     )
 
 
-class MigrationContract(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Establishes a Covariant Functor (Category Theory) mapping between disparate
-    versions of the Universal Unified Ontology. As a ...Contract suffix, it enforces a rigid
-    mathematical boundary globally.
-
-    CAUSAL AFFORDANCE: Unlocks backward-compatible schema transmutation, allowing the orchestrator
-    to safely project historical payloads from source_version to target_version via structural
-    path_transformations.
-
-    EPISTEMIC BOUNDS: The contract_id is cryptographically anchored to a 128-char CID. The
-    path_transformations dictionary maps strict RFC 6902 JSON Pointers up to max_length=2000.
-    The dropped_paths list is deterministically sorted by a @model_validator to preserve invariant
-    RFC 8785 canonical hashing.
-
-    MCP ROUTING TRIGGERS: Category Theory, Schema Evolution, Covariant Functor, RFC 6902, Semantic Migration
-    """
-
-    contract_id: str = Field(
-        min_length=1,
-        max_length=128,
-        pattern="^[a-zA-Z0-9_.:-]+$",
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this structural migration mapping.",
-    )
-    source_version: str = Field(
-        max_length=2000, description="The exact semantic version string of the payload before migration."
-    )
-    target_version: str = Field(
-        max_length=2000, description="The exact semantic version string of the payload after migration."
-    )
-    path_transformations: dict[
-        Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=2000)]
-    ] = Field(
-        le=1000000000,
-        default_factory=dict,
-        description="A strict mapping of old RFC 6902 JSON Pointers to new JSON Pointers.",
-    )
-    dropped_paths: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
-        default_factory=list,
-        description="Explicit whitelist of JSON Pointers that are safely deprecated and intentionally dropped during migration.",
-    )
-
-    @model_validator(mode="after")
-    def _enforce_canonical_sort(self) -> Self:
-        object.__setattr__(self, "dropped_paths", sorted(self.dropped_paths))
-        if getattr(self, "dropped_paths", None) is not None:
-            object.__setattr__(self, "dropped_paths", sorted(self.dropped_paths))
-        return self
-
-
 class MultimodalArtifactReceipt(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Establishes the formal Genesis Block within the Merkle-DAG for unstructured data ingestion, acting as the absolute origin vector for downstream knowledge extraction.
@@ -11914,7 +11864,7 @@ class EpistemicLedgerState(CoreasonBaseState):
 
     EPISTEMIC BOUNDS: The @model_validator sort_history deterministically sorts
     history by timestamp, checkpoints by checkpoint_id, active_rollbacks by
-    request_id, migration_contracts by contract_id, and active_cascades by
+    request_id, and active_cascades by
     cascade_id — guaranteeing invariant RFC 8785 canonical hashing.
 
     MCP ROUTING TRIGGERS: Event Sourcing, Merkle-DAG, Immutable Ledger, Truth
@@ -11945,10 +11895,6 @@ class EpistemicLedgerState(CoreasonBaseState):
     )
     eviction_policy: EvictionPolicy | None = Field(
         default=None, description="The strict mathematical boundary governing context window compression."
-    )
-    migration_contracts: list[MigrationContract] = Field(
-        default_factory=list,
-        description="Declarative rules to translate historical states to the current active schema version.",
     )
     truth_maintenance_policy: TruthMaintenancePolicy | None = Field(
         le=1000000000,
@@ -11983,7 +11929,6 @@ class EpistemicLedgerState(CoreasonBaseState):
         object.__setattr__(self, "retracted_nodes", sorted(self.retracted_nodes))
         object.__setattr__(self, "checkpoints", sorted(self.checkpoints, key=lambda x: x.checkpoint_id))
         object.__setattr__(self, "active_rollbacks", sorted(self.active_rollbacks, key=lambda x: x.request_id))
-        object.__setattr__(self, "migration_contracts", sorted(self.migration_contracts, key=lambda x: x.contract_id))
         object.__setattr__(self, "active_cascades", sorted(self.active_cascades, key=lambda x: x.cascade_id))
         return self
 

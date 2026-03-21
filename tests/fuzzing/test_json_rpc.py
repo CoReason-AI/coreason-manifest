@@ -146,7 +146,6 @@ def test_epistemic_ledger_state_bounds(retracted_nodes: list[str]) -> None:
         checkpoints=[],
         active_cascades=[],
         active_rollbacks=[],
-        migration_contracts=[],
     )
     assert ledger.retracted_nodes == sorted(retracted_nodes)
 
