@@ -2499,6 +2499,9 @@ class LatentScratchpadReceipt(CoreasonBaseState):
 
 
 class EphemeralNamespacePartitionState(CoreasonBaseState):
+    type: Literal["ephemeral_partition"] = Field(
+        default="ephemeral_partition", description="Discriminator type for an ephemeral namespace partition."
+    )
     """
     AGENT INSTRUCTION: Implements a hardware-level Sandboxing and Trusted Execution
     Environment (TEE) paradigm, utilizing WASI, eBPF, or zkVMs to safely execute
@@ -2559,6 +2562,7 @@ class EphemeralNamespacePartitionState(CoreasonBaseState):
 
 
 class ToolManifest(CoreasonBaseState):
+    type: Literal["native_tool"] = Field(default="native_tool", description="Discriminator type for a native tool.")
     """
     AGENT INSTRUCTION: Defines the discrete formalization of a Gibsonian Affordance within
     the agent's Reinforcement Learning Action Space ($A$). As a ...Manifest suffix, this is
@@ -6578,6 +6582,7 @@ class MCPCapabilityWhitelistPolicy(CoreasonBaseState):
 
 
 class MCPServerManifest(CoreasonBaseState):
+    type: Literal["mcp_server"] = Field(default="mcp_server", description="Discriminator type for an MCP server.")
     """
     AGENT INSTRUCTION: Represents a cryptographically verifiable Distributed RPC substrate mapping within the Actor Model, binding an external Model Context Protocol (MCP) manifold into the swarm's local topology under strict Object-Capability (OCap) rules.
 
@@ -6743,25 +6748,109 @@ class KineticSeparationPolicy(CoreasonBaseState):
         return self
 
 
+class TerminalConditionContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Establishes the physical Halting Problem brakes for cyclic loops within the execution topology. As a ...Contract suffix, this object defines rigid mathematical boundaries that the orchestrator must enforce globally.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator's control theory loop to physically halt recursive execution branches if the causal depth exceeds the maximum bound or the decayed budget falls below the minimal required magnitude.
+
+    EPISTEMIC BOUNDS: Bounded physically by `max_causal_depth` (ge=1, optional) tracking recursion and `minimum_budget_magnitude` (ge=1, optional) guaranteeing a minimum viable thermodynamic state.
+
+    MCP ROUTING TRIGGERS: Halting Problem, Recursion Boundary, Causal Depth, Compute Budget Decay, Structural Circuit Breaker
+    """
+
+    max_causal_depth: int | None = Field(
+        default=None,
+        ge=1,
+        description="The absolute limit on TraceContextState.causal_clock.",
+    )
+    minimum_budget_magnitude: int | None = Field(
+        default=None,
+        ge=1,
+        description="Halts execution if the decayed compute budget drops below this.",
+    )
+
+
+class TransitionEdgeProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Represents a directed acyclic Markov edge for traversing the Action Space topology. As a ...Profile suffix, this is a declarative, frozen snapshot of a routing geometry.
+
+    CAUSAL AFFORDANCE: Unlocks stochastic pathfinding and graph traversal by projecting a probabilistic weight and thermodynamic cost required to advance to the next state node in the DCG.
+
+    EPISTEMIC BOUNDS: The semantic path relies on `target_node_id` (max_length=255). Mathematical optimization is bounded by `probability_weight` (ge=0.0, le=1.0) and `compute_weight_magnitude` (ge=0).
+
+    MCP ROUTING TRIGGERS: Markov Decision Process, Acyclic Edge, Stochastic Routing, Transition Probability, Directed Graph
+    """
+
+    edge_type: Literal["acyclic"] = Field(default="acyclic", description="Discriminator type for an acyclic edge.")
+    target_node_id: str = Field(
+        max_length=255,
+        description="The coinductive pointer to the destination capability.",
+    )
+    probability_weight: float = Field(ge=0.0, le=1.0, description="The stochastic heuristic preference of this path.")
+    compute_weight_magnitude: int = Field(ge=0, description="The thermodynamic cost to traverse this edge.")
+
+
+class CyclicEdgeProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Represents a self-referential or cyclic Markov edge for deep recursive execution, utilizing Thermodynamic Discounting to prevent infinite loops. As a ...Profile suffix, this is a declarative, frozen snapshot of a routing geometry.
+
+    CAUSAL AFFORDANCE: Authorizes recursive tool calls or non-monotonic backward execution. The orchestrator must apply the Bellman `discount_factor` to the compute budget during each traversal loop.
+
+    EPISTEMIC BOUNDS: Structural repetition is checked by applying a geometric decay factor (`discount_factor` ge=0.0, le=1.0). An `@model_validator` mathematically prevents un-haltable infinite recursion if the `discount_factor` equals 1.0 without a strict `max_causal_depth` explicitly defined in the `terminal_condition`.
+
+    MCP ROUTING TRIGGERS: Markov Decision Process, Cyclic Edge, Bellman Equation, Thermodynamic Discounting, Recursive Traversal
+    """
+
+    edge_type: Literal["cyclic"] = Field(default="cyclic", description="Discriminator type for a cyclic edge.")
+    target_node_id: str = Field(
+        max_length=255,
+        description="The coinductive pointer to the destination capability.",
+    )
+    probability_weight: float = Field(ge=0.0, le=1.0, description="The stochastic heuristic preference of this path.")
+    compute_weight_magnitude: int = Field(ge=0, description="The thermodynamic cost to traverse this edge.")
+    discount_factor: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="The Bellman Equation gamma applied to the budget on each cyclic loop.",
+    )
+    terminal_condition: TerminalConditionContract = Field(
+        description="The mandatory structural conditions guaranteed to eventually halt traversal."
+    )
+
+    @model_validator(mode="after")
+    def prevent_infinite_loop(self) -> Self:
+        if self.discount_factor == 1.0 and self.terminal_condition.max_causal_depth is None:
+            raise ValueError("Un-haltable infinite loop detected.")
+        return self
+
+
+type AnyTransitionEdge = Annotated[TransitionEdgeProfile | CyclicEdgeProfile, Field(discriminator="edge_type")]
+
+
+type AnyActionSpaceCapability = Annotated[
+    ToolManifest | MCPServerManifest | EphemeralNamespacePartitionState, Field(discriminator="type")
+]
+
+
 class ActionSpaceManifest(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Defines the finite, discrete Markov Decision Process (MDP) Action
     Space and affordance landscape available to a specific execution node. As a ...Manifest
     suffix, this defines a frozen, N-dimensional coordinate state.
 
-    CAUSAL AFFORDANCE: Projects the combined multi-dimensional matrix of native_tools,
-    mcp_servers, and ephemeral_partitions into the agent's context, mathematically dictating
-    which kinetic operations it can initiate. Optionally enforces kinetic_separation
-    (KineticSeparationPolicy) to prevent toxic tool combinations.
+    CAUSAL AFFORDANCE: Projects the combined multi-dimensional matrix of capabilities
+    into the agent's context, mathematically dictating which kinetic operations it can initiate.
+    Optionally enforces kinetic_separation (KineticSeparationPolicy) to prevent toxic
+    tool combinations.
 
     EPISTEMIC BOUNDS: The action_space_id is geometrically constrained to a 128-char CID.
     A @model_validator strictly bounds the topology by enforcing uniqueness across all
-    native_tools namespaces, and ensures deterministic RFC 8785 representation by sorting
-    tools, servers, and partitions by their respective identifiers (tool_name, server_uri,
-    partition_id).
+    capabilities namespaces, and ensures deterministic RFC 8785 representation by sorting
+    edges by their target_node_id.
 
     MCP ROUTING TRIGGERS: Markov Decision Process, Action Space, Affordance Theory,
-    Curated Environment, State Transition Matrix
+    Curated Environment, State Transition Matrix, Directed Cyclic Graph
     """
 
     action_space_id: str = Field(
@@ -6770,27 +6859,40 @@ class ActionSpaceManifest(CoreasonBaseState):
         pattern="^[a-zA-Z0-9_.:-]+$",
         description="The unique identifier for this curated environment of tools.",
     )
-    native_tools: list[ToolManifest] = Field(
-        default_factory=list,
-        description="The strict array of discrete, natively defined tools available in this space.",
+    capabilities: dict[Annotated[str, StringConstraints(max_length=255)], AnyActionSpaceCapability] = Field(
+        description="The State Space (S) of the MDP, indexed by their unique capability CIDs."
     )
-    mcp_servers: list[MCPServerManifest] = Field(
-        default_factory=list,
-        description="The array of verified external Model Context Protocol servers mounted into this action space.",
+    transition_matrix: dict[Annotated[str, StringConstraints(max_length=255)], list[AnyTransitionEdge]] = Field(
+        description="The Stochastic Transition Matrix (P)."
     )
-    ephemeral_partitions: list[EphemeralNamespacePartitionState] = Field(
-        default_factory=list,
-        description="Hermetically sealed context boundaries for dynamically resolved scripts and PEFT adapters.",
-    )
+    entry_point_id: str = Field(description="Defines the initial state (S_0) of the MDP.")
     kinetic_separation: KineticSeparationPolicy | None = Field(
         default=None, description="The bipartite graph constraint preventing toxic tool combinations."
     )
 
     @model_validator(mode="after")
-    def _enforce_structural_uniqueness(self) -> Self:
-        tool_names = {t.tool_name for t in self.native_tools}
-        if len(tool_names) < len(self.native_tools):
-            raise ValueError("Tool names within an ActionSpaceManifest must be strictly unique.")
+    def _enforce_structural_integrity(self) -> Self:
+        # Ghost Node Prevention
+        if self.entry_point_id not in self.capabilities:
+            raise ValueError(f"entry_point_id '{self.entry_point_id}' not found in capabilities.")
+
+        for source_id, edges in self.transition_matrix.items():
+            if source_id not in self.capabilities:
+                raise ValueError(f"Source node '{source_id}' in transition_matrix not found in capabilities.")
+            for edge in edges:
+                if edge.target_node_id not in self.capabilities:
+                    raise ValueError(
+                        f"Target node '{edge.target_node_id}' in edge from '{source_id}' not found in capabilities."
+                    )
+
+        # Matrix Canonical Sorting
+        for key in self.transition_matrix:
+            object.__setattr__(
+                self,
+                "transition_matrix",
+                {**self.transition_matrix, key: sorted(self.transition_matrix[key], key=lambda e: e.target_node_id)},
+            )
+
         return self
 
     @model_validator(mode="after")
@@ -6802,45 +6904,43 @@ class ActionSpaceManifest(CoreasonBaseState):
         We only need to verify the domain payload doesn't illegally attempt to manage state
         or collide with the framework's native envelope wrappers.
         """
-        for tool in self.native_tools:
-            for schema_name in ("input_schema", "output_schema"):
-                schema = getattr(tool, schema_name, {})
-                if not isinstance(schema, dict) or not schema:
-                    continue
+        for cap in self.capabilities.values():
+            if cap.type == "native_tool":
+                for schema_name in ("input_schema", "output_schema"):
+                    schema = getattr(cap, schema_name, {})
+                    if not isinstance(schema, dict) or not schema:
+                        continue
 
-                properties = schema.get("properties", {})
-                if not isinstance(properties, dict):
-                    continue
+                    properties = schema.get("properties", {})
+                    if not isinstance(properties, dict):
+                        continue
 
-                # The strict list of forbidden keys in any domain payload
-                illegal_keys = {
-                    "memory",
-                    "context",
-                    "system_prompt",
-                    "chat_history",
-                    "history",
-                    "max_tokens",
-                    "trace_context",
-                    "state_vector",
-                    "payload",
-                }
+                    # The strict list of forbidden keys in any domain payload
+                    illegal_keys = {
+                        "memory",
+                        "context",
+                        "system_prompt",
+                        "chat_history",
+                        "trace_context",
+                        "trace_id",
+                        "span_id",
+                        "parent_span_id",
+                        "causal_clock",
+                        "state_vector",
+                        "read_only_context",
+                        "mutable_memory",
+                        "is_delta",
+                        "envelope",
+                    }
 
-                # Check for illegal state management or framework collisions
-                extra_keys = set(properties.keys()).intersection(illegal_keys)
-                if extra_keys:
-                    raise ValueError(
-                        f"ActionSpaceManifest tool '{tool.tool_name}' attempts to define reserved or illegal state management keys {extra_keys} in {schema_name}. "
-                        "State is natively handled by the framework's implicit ExecutionEnvelopeState."
-                    )
-        return self
-
-    @model_validator(mode="after")
-    def _enforce_canonical_sort_action_spaces(self) -> Self:
-        object.__setattr__(self, "native_tools", sorted(self.native_tools, key=lambda x: x.tool_name))
-        object.__setattr__(self, "mcp_servers", sorted(self.mcp_servers, key=lambda x: x.server_uri))
-        object.__setattr__(
-            self, "ephemeral_partitions", sorted(self.ephemeral_partitions, key=lambda x: x.partition_id)
-        )
+                    for key in properties:
+                        if key in illegal_keys:
+                            raise ValueError(
+                                f"Framework Violation: Tool '{cap.tool_name}' illegaly attempts to "
+                                f"manage execution state by defining '{key}' in its {schema_name}. "
+                                "State and telemetry are strictly managed by the framework's "
+                                "ExecutionEnvelopeState."
+                            )
         return self
 
 
@@ -11841,3 +11941,8 @@ ObservabilityLODPolicy.model_rebuild()
 EpistemicAttentionRay.model_rebuild()
 VolumetricPartitionSubscription.model_rebuild()
 ContinuousSpatialMutationIntent.model_rebuild()
+
+TerminalConditionContract.model_rebuild()
+TransitionEdgeProfile.model_rebuild()
+CyclicEdgeProfile.model_rebuild()
+ActionSpaceManifest.model_rebuild()
