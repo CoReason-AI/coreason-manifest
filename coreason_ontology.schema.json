@@ -6913,6 +6913,31 @@
       "title": "EvolutionaryTopologyManifest",
       "type": "object"
     },
+    "ExecutionEnvelopeState": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements the mathematical Reader/Writer/State (RWS) Monad, completely enveloping execution inside pure functions.\n\nCAUSAL AFFORDANCE: The envelope functor that maps a pure value into a computational context.\n\nEPISTEMIC BOUNDS: Strictly prevents external keys. Must consist solely of trace_context, state_vector, and payload.",
+      "properties": {
+        "trace_context": {
+          "$ref": "#/$defs/TraceContextState",
+          "description": "Represents the Reader/Writer monad for causality and recursion."
+        },
+        "state_vector": {
+          "$ref": "#/$defs/StateVectorProfile",
+          "description": "Represents the State monad of Labeled Transition Systems."
+        },
+        "payload": {
+          "description": "Represents the pure value payload data structure, domain-specific.",
+          "title": "Payload"
+        }
+      },
+      "required": [
+        "trace_context",
+        "state_vector",
+        "payload"
+      ],
+      "title": "ExecutionEnvelopeState",
+      "type": "object"
+    },
     "ExecutionNodeReceipt": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes a discrete computational vertex within a Merkle-DAG execution trace, binding raw data inputs to deterministic outputs. As a ...Receipt suffix, this is an append-only coordinate on the Merkle-DAG.\n\nCAUSAL AFFORDANCE: Permits the orchestrator to cryptographically re-evaluate, replay, or slash execution branches by guaranteeing all computational inputs, outputs, and parent pointers are deterministically serialized and preserved.\n\nEPISTEMIC BOUNDS: The @model_validator mathematically guarantees the node_hash via RFC 8785 canonical JSON serialization, trapping any non-deterministic dictionary properties. Orphaned lineages are structurally blocked by cross-field validation between parent_request_id and root_request_id.\n\nMCP ROUTING TRIGGERS: Merkle-DAG, RFC 8785 Canonicalization, Execution Trace, Cryptographic Determinism, Directed Acyclic Graph",
@@ -13358,6 +13383,50 @@
       "title": "StateMutationIntent",
       "type": "object"
     },
+    "StateVectorProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Labeled Transition System (LTS) Determinism.\n\nCAUSAL AFFORDANCE: Forces all hidden LLM contexts into an explicitly typed data structure,\nmaking the agent a Markov Process with Full Observability.\n\nEPISTEMIC BOUNDS: Bounded dictionary mapping of explicit schemas or primitives for both read and write state.",
+      "properties": {
+        "read_only_context": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonPrimitiveState"
+          },
+          "description": "Immutable behavior directives (e.g., global personas, fixed dataset schemas, boundary rules).",
+          "propertyNames": {
+            "maxLength": 255
+          },
+          "title": "Read Only Context",
+          "type": "object"
+        },
+        "mutable_memory": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/JsonPrimitiveState"
+              },
+              "propertyNames": {
+                "maxLength": 255
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The agent's scratchpad, chat history, and any writable states.",
+          "title": "Mutable Memory"
+        },
+        "is_delta": {
+          "default": false,
+          "description": "A flag allowing the output to only return the keys in mutable_memory that changed, rather than forcing the entire array back up the network.",
+          "title": "Is Delta",
+          "type": "boolean"
+        }
+      },
+      "title": "StateVectorProfile",
+      "type": "object"
+    },
     "StdioTransportProfile": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Inter-Process Communication (IPC) utilizing POSIX\nstandard streams to execute highly isolated, local binary sandboxing. As a\n...Profile suffix, this is a declarative property descriptor.\n\nCAUSAL AFFORDANCE: Physically spawns a child process restricted to the host's\noperating system namespace, mapping remote procedure calls directly into the\nbinary's stdin/stdout descriptors via command (max_length=2000).\n\nEPISTEMIC BOUNDS: To prevent buffer overflow and command injection, args are\nstructurally constrained (max_length=1000000000, string max_length=2000,\ndefault_factory=list) and env_vars keys/values are strictly delimited via\nStringConstraints (key max_length=255, value max_length=2000,\ndefault_factory=dict).\n\nMCP ROUTING TRIGGERS: Inter-Process Communication, POSIX Standard Streams, Local\nSandboxing, Binary Execution, Subprocess Spawn",
@@ -14663,13 +14732,33 @@
           "additionalProperties": {
             "$ref": "#/$defs/JsonPrimitiveState"
           },
-          "description": "The strict JSON Schema dictionary defining the required arguments.",
+          "description": "The strict JSON Schema dictionary defining the pure domain-specific arguments ($T$). The framework orchestrator will automatically wrap this in the ExecutionEnvelopeState at runtime.",
           "maxProperties": 1000000000,
           "propertyNames": {
             "maxLength": 255
           },
           "title": "Input Schema",
           "type": "object"
+        },
+        "output_schema": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/JsonPrimitiveState"
+              },
+              "maxProperties": 1000000000,
+              "propertyNames": {
+                "maxLength": 255
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The strict JSON Schema dictionary defining the pure domain-specific arguments ($T$). The framework orchestrator will automatically wrap this in the ExecutionEnvelopeState at runtime.",
+          "title": "Output Schema"
         },
         "side_effects": {
           "$ref": "#/$defs/SideEffectProfile",
@@ -14789,6 +14878,57 @@
       "description": "A strictly typed SHA-256 hash pointing to a historically executed topological state.",
       "pattern": "^[a-f0-9]{64}$",
       "type": "string"
+    },
+    "TraceContextState": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Distributed Causality using Vector Clocks and rho-calculus.\n\nCAUSAL AFFORDANCE: Acts as a Causal Graph Identifier, ensuring deterministic traceability\nand state boundary enforcement without relying on hidden states.\n\nEPISTEMIC BOUNDS: Relies on ULID or UUIDv7 string identifiers for strict topological ordering.",
+      "properties": {
+        "trace_id": {
+          "description": "Globally unique ID generated once at the root user prompt. Must be a ULID or UUIDv7.",
+          "maxLength": 36,
+          "minLength": 26,
+          "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$|^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+          "title": "Trace Id",
+          "type": "string"
+        },
+        "span_id": {
+          "description": "Unique identifier for the specific execution of this actionSpaceId. Must be a ULID or UUIDv7.",
+          "maxLength": 36,
+          "minLength": 26,
+          "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$|^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+          "title": "Span Id",
+          "type": "string"
+        },
+        "parent_span_id": {
+          "anyOf": [
+            {
+              "maxLength": 36,
+              "minLength": 26,
+              "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$|^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The span_id of the caller. If null, this node is the mathematically proven root.",
+          "title": "Parent Span Id"
+        },
+        "causal_clock": {
+          "default": 0,
+          "description": "Tracks the recursion depth/vector clock required for compute budget decay.",
+          "minimum": 0,
+          "title": "Causal Clock",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "trace_id",
+        "span_id"
+      ],
+      "title": "TraceContextState",
+      "type": "object"
     },
     "TraceExportManifest": {
       "additionalProperties": false,

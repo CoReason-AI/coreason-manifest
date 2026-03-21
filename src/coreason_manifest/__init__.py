@@ -10,6 +10,7 @@
 
 # ruff: noqa: F405
 
+
 from coreason_manifest.spec.ontology import *  # noqa: F403
 from coreason_manifest.utils.algebra import (
     align_semantic_manifolds,
@@ -152,6 +153,7 @@ __all__ = [
     "EvictionPolicy",
     "EvidentiaryWarrantState",
     "EvolutionaryTopologyManifest",
+    "ExecutionEnvelopeState",
     "ExecutionNodeReceipt",
     "ExecutionSLA",
     "ExecutionSpanReceipt",
@@ -278,6 +280,7 @@ __all__ = [
     "StateDifferentialManifest",
     "StateHydrationManifest",
     "StateMutationIntent",
+    "StateVectorProfile",
     "StdioTransportProfile",
     "SteadyStateHypothesisState",
     "StructuralCausalGraphProfile",
@@ -308,6 +311,7 @@ __all__ = [
     "ToolManifest",
     "TopologicalRewardContract",
     "TopologyHashReceipt",
+    "TraceContextState",
     "TraceExportManifest",
     "TruthMaintenancePolicy",
     "UtilityJustificationGraphReceipt",
