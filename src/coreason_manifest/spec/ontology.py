@@ -6736,6 +6736,15 @@ class ActionSpaceManifest(CoreasonBaseState):
                 if "trace_context" not in properties or "state_vector" not in properties or "payload" not in properties:
                     raise ValueError(f"ActionSpaceManifest tool '{tool.tool_name}' {schema_name} does not conform to ExecutionEnvelope. Requires 'trace_context', 'state_vector', 'payload'.")
 
+                allowed_keys = {"trace_context", "state_vector", "payload"}
+                extra_keys = set(properties.keys()) - allowed_keys
+                if extra_keys:
+                    raise ValueError(f"ActionSpaceManifest tool '{tool.tool_name}' declares forbidden root keys: {extra_keys}. Must strictly conform to ExecutionEnvelope.")
+
+                required_fields = set(schema.get("required", []))
+                if not allowed_keys.issubset(required_fields):
+                    raise ValueError(f"ActionSpaceManifest tool '{tool.tool_name}' MUST explicitly list 'trace_context', 'state_vector', and 'payload' in its 'required' array.")
+
                 payload_schema = properties.get("payload", {})
                 if isinstance(payload_schema, dict):
                     payload_props = payload_schema.get("properties", {})

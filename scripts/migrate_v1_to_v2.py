@@ -5,8 +5,10 @@ import yaml
 from pathlib import Path
 
 def migrate_schema(schema: dict) -> dict:
+    existing_properties = schema.get("properties", {})
     new_schema = {
         "type": "object",
+        "additionalProperties": False,
         "properties": {
             "trace_context": {
                 "type": "object",
@@ -27,7 +29,11 @@ def migrate_schema(schema: dict) -> dict:
                 },
                 "required": ["read_only_context", "is_delta"]
             },
-            "payload": schema
+            "payload": {
+                "type": "object",
+                "properties": existing_properties,
+                "additionalProperties": False
+            }
         },
         "required": ["trace_context", "state_vector", "payload"]
     }

@@ -86,7 +86,8 @@ def test_action_space_manifest_rejects_custom_state():
                                 "type": "object",
                                 "properties": {"system_prompt": {"type": "string"}}
                             }
-                        }
+                        },
+                        "required": ["trace_context", "state_vector", "payload"]
                     },
                     side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
                     permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True)
