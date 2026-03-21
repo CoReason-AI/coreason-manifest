@@ -7,6 +7,17 @@ import yaml
 
 def migrate_schema(schema: dict) -> dict:
     existing_properties = schema.get("properties", {})
+    existing_required = schema.get("required", [])
+
+    payload_schema = {
+        "type": "object",
+        "properties": existing_properties,
+        "additionalProperties": False
+    }
+
+    if existing_required:
+        payload_schema["required"] = existing_required
+
     return {
         "type": "object",
         "additionalProperties": False,
@@ -30,11 +41,7 @@ def migrate_schema(schema: dict) -> dict:
                 },
                 "required": ["read_only_context", "is_delta"]
             },
-            "payload": {
-                "type": "object",
-                "properties": existing_properties,
-                "additionalProperties": False
-            }
+            "payload": payload_schema
         },
         "required": ["trace_context", "state_vector", "payload"]
     }
