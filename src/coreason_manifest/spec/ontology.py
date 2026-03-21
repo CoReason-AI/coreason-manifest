@@ -3169,6 +3169,13 @@ class BaseStateEvent(CoreasonBaseState):
         pattern="^[a-zA-Z0-9_.:-]+$",
         description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
     )
+    prior_event_hash: str | None = Field(
+        default=None,
+        pattern="^[a-f0-9]{64}$",
+        min_length=1,
+        max_length=128,
+        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+    )
     timestamp: float = Field(
         ge=0.0,
         le=253402300799.0,
@@ -10827,6 +10834,12 @@ class ZeroKnowledgeReceipt(CoreasonBaseState):
     proof_protocol: Literal["zk-SNARK", "zk-STARK", "plonk", "bulletproofs"] = Field(
         description="The mathematical dialect of the cryptographic proof."
     )
+    logical_circuit_hash: str = Field(
+        pattern="^[a-f0-9]{64}$",
+        min_length=1,
+        max_length=128,
+        description="The SHA-256 hash of the exact prompt, weights, and constraints evaluated by the prover.",
+    )
     public_inputs_hash: str = Field(
         min_length=1,
         max_length=128,
@@ -10895,6 +10908,10 @@ class BeliefMutationEvent(BaseStateEvent):
         default=None,
         description="The mathematical brain-scan proving exactly which neural circuits fired to append this event.",
     )
+    quorum_signatures: list[Annotated[str, StringConstraints(max_length=10000)]] = Field(
+        default_factory=list,
+        description="The deterministic execution signatures from the peer nodes that validated this belief.",
+    )
 
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
@@ -10905,6 +10922,17 @@ class BeliefMutationEvent(BaseStateEvent):
             object.__setattr__(
                 self, "causal_attributions", sorted(self.causal_attributions, key=lambda x: x.source_event_id)
             )
+        return self
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort_quorum(self) -> Self:
+        object.__setattr__(self, "quorum_signatures", sorted(self.quorum_signatures))
+        return self
+
+    @model_validator(mode="after")
+    def enforce_sybil_resistance(self) -> Self:
+        if len(set(self.quorum_signatures)) != len(self.quorum_signatures):
+            raise ValueError("Sybil Attack Detected: Duplicate signatures found in quorum.")
         return self
 
     @field_validator("payload", mode="before")
@@ -11957,6 +11985,24 @@ class EpistemicLedgerState(CoreasonBaseState):
         object.__setattr__(self, "active_rollbacks", sorted(self.active_rollbacks, key=lambda x: x.request_id))
         object.__setattr__(self, "migration_contracts", sorted(self.migration_contracts, key=lambda x: x.contract_id))
         object.__setattr__(self, "active_cascades", sorted(self.active_cascades, key=lambda x: x.cascade_id))
+        return self
+
+    @model_validator(mode="after")
+    def verify_merkle_chain(self) -> Self:
+        for i in range(1, len(self.history)):
+            if self.history[i].prior_event_hash is None:
+                raise ValueError("Merkle Chain Broken: Event missing prior_event_hash")
+        return self
+
+    @model_validator(mode="after")
+    def enforce_defeasible_quarantine(self) -> Self:
+        quarantined_ids: set[str] = set()
+        for cascade in self.active_cascades:
+            quarantined_ids.update(cascade.quarantined_event_ids)
+
+        intersection = quarantined_ids.intersection(self.defeasible_claims.keys())
+        if len(intersection) > 0:
+            raise ValueError("Epistemic Contagion Detected: Quarantined node found in active defeasible claims.")
         return self
 
 

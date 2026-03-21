@@ -1534,6 +1534,22 @@
           "title": "Event Id",
           "type": "string"
         },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
+        },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
           "maximum": 253402300799.0,
@@ -1742,6 +1758,22 @@
           "title": "Event Id",
           "type": "string"
         },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
+        },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
           "maximum": 253402300799.0,
@@ -1877,6 +1909,22 @@
           "title": "Event Id",
           "type": "string"
         },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
+        },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
           "maximum": 253402300799.0,
@@ -1981,6 +2029,15 @@
           ],
           "default": null,
           "description": "The mathematical brain-scan proving exactly which neural circuits fired to append this event."
+        },
+        "quorum_signatures": {
+          "description": "The deterministic execution signatures from the peer nodes that validated this belief.",
+          "items": {
+            "maxLength": 10000,
+            "type": "string"
+          },
+          "title": "Quorum Signatures",
+          "type": "array"
         }
       },
       "required": [
@@ -2240,6 +2297,22 @@
           "title": "Event Id",
           "type": "string"
         },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
+        },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
           "maximum": 253402300799.0,
@@ -2412,6 +2485,22 @@
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Id",
           "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
@@ -2683,6 +2772,22 @@
           "title": "Event Id",
           "type": "string"
         },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
+        },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
           "maximum": 253402300799.0,
@@ -2782,6 +2887,22 @@
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Id",
           "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
@@ -3922,6 +4043,22 @@
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Id",
           "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
@@ -5614,6 +5751,22 @@
           "title": "Event Id",
           "type": "string"
         },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
+        },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
           "maximum": 253402300799.0,
@@ -5828,6 +5981,22 @@
           "title": "Event Id",
           "type": "string"
         },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
+        },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
           "maximum": 253402300799.0,
@@ -6038,6 +6207,22 @@
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Id",
           "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
@@ -6423,6 +6608,22 @@
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Id",
           "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
@@ -8421,6 +8622,22 @@
           "title": "Event Id",
           "type": "string"
         },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
+        },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
           "maximum": 253402300799.0,
@@ -8730,6 +8947,22 @@
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Id",
           "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
@@ -10759,6 +10992,22 @@
           "title": "Event Id",
           "type": "string"
         },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
+        },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
           "maximum": 253402300799.0,
@@ -10854,6 +11103,22 @@
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Id",
           "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
@@ -11383,6 +11648,22 @@
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Id",
           "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
@@ -14029,6 +14310,22 @@
           "title": "Event Id",
           "type": "string"
         },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
+        },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
           "maximum": 253402300799.0,
@@ -14785,6 +15082,22 @@
           "title": "Event Id",
           "type": "string"
         },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
+        },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
           "maximum": 253402300799.0,
@@ -14862,6 +15175,22 @@
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Id",
           "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
@@ -15875,6 +16204,14 @@
           "title": "Proof Protocol",
           "type": "string"
         },
+        "logical_circuit_hash": {
+          "description": "The SHA-256 hash of the exact prompt, weights, and constraints evaluated by the prover.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Logical Circuit Hash",
+          "type": "string"
+        },
         "public_inputs_hash": {
           "description": "The SHA-256 hash of the public inputs (e.g., prompt, Lamport clock) anchoring this proof to the specific state index.",
           "maxLength": 128,
@@ -15913,6 +16250,7 @@
       },
       "required": [
         "proof_protocol",
+        "logical_circuit_hash",
         "public_inputs_hash",
         "verifier_key_id",
         "cryptographic_blob"
