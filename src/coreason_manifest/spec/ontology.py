@@ -6837,7 +6837,7 @@ class TransitionEdgeProfile(CoreasonBaseState):
             object.__setattr__(
                 self,
                 "payload_mappings",
-                sorted(self.payload_mappings, key=lambda m: m.source_pointer),
+                sorted(self.payload_mappings, key=lambda x: (x.source_pointer, x.target_pointer)),
             )
         return self
 
@@ -6891,7 +6891,7 @@ class CyclicEdgeProfile(CoreasonBaseState):
             object.__setattr__(
                 self,
                 "payload_mappings",
-                sorted(self.payload_mappings, key=lambda m: m.source_pointer),
+                sorted(self.payload_mappings, key=lambda x: (x.source_pointer, x.target_pointer)),
             )
         return self
 
@@ -6963,6 +6963,14 @@ class ActionSpaceManifest(CoreasonBaseState):
                     )
 
         # Matrix Canonical Sorting
+        def edge_sort_key(edge: AnyTransitionEdge) -> str:
+            if edge.target_node_id is not None:
+                return edge.target_node_id
+            if edge.target_intent is not None:
+                struct_types = "-".join(edge.target_intent.required_structural_types)
+                return f"intent:{edge.target_intent.min_isometry_score}:{struct_types}"
+            return "unknown"
+
         for key in self.transition_matrix:
             object.__setattr__(
                 self,
@@ -6971,7 +6979,7 @@ class ActionSpaceManifest(CoreasonBaseState):
                     **self.transition_matrix,
                     key: sorted(
                         self.transition_matrix[key],
-                        key=lambda e: e.target_node_id or f"intent:{e.target_intent.min_isometry_score}",
+                        key=edge_sort_key,
                     ),
                 },
             )
