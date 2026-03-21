@@ -6771,6 +6771,31 @@ class TerminalConditionContract(CoreasonBaseState):
     )
 
 
+class EdgeMappingContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Formalizes a Profunctor Optics (Lenses) mapping between
+    disjoint capabilities without computational glue logic. As a ...Contract suffix,
+    this creates a rigid algebraic boundary.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator's state projection engine to
+    safely project the Covariant output of a source node into the Contravariant
+    input of a target node using pure mathematical mappings.
+
+    EPISTEMIC BOUNDS: The mapping uses RFC 6902 JSON Pointers (source_pointer and
+    target_pointer) to extract and inject data, bounded by 2000-character limits.
+
+    MCP ROUTING TRIGGERS: Category Theory, Profunctor Optics, Bijective Mapping,
+    Algebraic Translation, Lens, Prism
+    """
+
+    source_pointer: str = Field(
+        max_length=2000, description="The RFC 6902 JSON Pointer extracting the Covariant output."
+    )
+    target_pointer: str = Field(
+        max_length=2000, description="The RFC 6902 JSON Pointer injecting into the Contravariant input."
+    )
+
+
 class TransitionEdgeProfile(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Represents a directed acyclic Markov edge for traversing the Action Space topology. As a ...Profile suffix, this is a declarative, frozen snapshot of a routing geometry.
@@ -6783,12 +6808,38 @@ class TransitionEdgeProfile(CoreasonBaseState):
     """
 
     edge_type: Literal["acyclic"] = Field(default="acyclic", description="Discriminator type for an acyclic edge.")
-    target_node_id: str = Field(
+    target_node_id: str | None = Field(
+        default=None,
         max_length=255,
         description="The coinductive pointer to the destination capability.",
     )
+    target_intent: SemanticDiscoveryIntent | None = Field(
+        default=None,
+        description="Dynamic discovery intent for bridging nodes.",
+    )
+    payload_mappings: list[EdgeMappingContract] = Field(
+        default_factory=list,
+        description="The algebraic translation matrix mapping the source's Covariant output to the Contravariant input.",
+    )
+    eval_strategy: Literal["strict", "lazy"] = Field(
+        default="strict",
+        description="The evaluation strategy: 'strict' pre-fetches schemas, 'lazy' uses Coalgebraic Thunking to prevent State-Space Explosion.",
+    )
     probability_weight: float = Field(ge=0.0, le=1.0, description="The stochastic heuristic preference of this path.")
     compute_weight_magnitude: int = Field(ge=0, description="The thermodynamic cost to traverse this edge.")
+
+    @model_validator(mode="after")
+    def _enforce_structural_integrity(self) -> Self:
+        if bool(self.target_node_id) == bool(self.target_intent):
+            raise ValueError("Exactly one of target_node_id or target_intent must be populated.")
+
+        if self.payload_mappings:
+            object.__setattr__(
+                self,
+                "payload_mappings",
+                sorted(self.payload_mappings, key=lambda m: m.source_pointer),
+            )
+        return self
 
 
 class CyclicEdgeProfile(CoreasonBaseState):
@@ -6803,9 +6854,22 @@ class CyclicEdgeProfile(CoreasonBaseState):
     """
 
     edge_type: Literal["cyclic"] = Field(default="cyclic", description="Discriminator type for a cyclic edge.")
-    target_node_id: str = Field(
+    target_node_id: str | None = Field(
+        default=None,
         max_length=255,
         description="The coinductive pointer to the destination capability.",
+    )
+    target_intent: SemanticDiscoveryIntent | None = Field(
+        default=None,
+        description="Dynamic discovery intent for bridging nodes.",
+    )
+    payload_mappings: list[EdgeMappingContract] = Field(
+        default_factory=list,
+        description="The algebraic translation matrix mapping the source's Covariant output to the Contravariant input.",
+    )
+    eval_strategy: Literal["strict", "lazy"] = Field(
+        default="strict",
+        description="The evaluation strategy: 'strict' pre-fetches schemas, 'lazy' uses Coalgebraic Thunking to prevent State-Space Explosion.",
     )
     probability_weight: float = Field(ge=0.0, le=1.0, description="The stochastic heuristic preference of this path.")
     compute_weight_magnitude: int = Field(ge=0, description="The thermodynamic cost to traverse this edge.")
@@ -6817,6 +6881,19 @@ class CyclicEdgeProfile(CoreasonBaseState):
     terminal_condition: TerminalConditionContract = Field(
         description="The mandatory structural conditions guaranteed to eventually halt traversal."
     )
+
+    @model_validator(mode="after")
+    def _enforce_structural_integrity_mapping(self) -> Self:
+        if bool(self.target_node_id) == bool(self.target_intent):
+            raise ValueError("Exactly one of target_node_id or target_intent must be populated.")
+
+        if self.payload_mappings:
+            object.__setattr__(
+                self,
+                "payload_mappings",
+                sorted(self.payload_mappings, key=lambda m: m.source_pointer),
+            )
+        return self
 
     @model_validator(mode="after")
     def prevent_infinite_loop(self) -> Self:
@@ -6880,7 +6957,7 @@ class ActionSpaceManifest(CoreasonBaseState):
             if source_id not in self.capabilities:
                 raise ValueError(f"Source node '{source_id}' in transition_matrix not found in capabilities.")
             for edge in edges:
-                if edge.target_node_id not in self.capabilities:
+                if edge.target_node_id is not None and edge.target_node_id not in self.capabilities:
                     raise ValueError(
                         f"Target node '{edge.target_node_id}' in edge from '{source_id}' not found in capabilities."
                     )
@@ -6890,7 +6967,13 @@ class ActionSpaceManifest(CoreasonBaseState):
             object.__setattr__(
                 self,
                 "transition_matrix",
-                {**self.transition_matrix, key: sorted(self.transition_matrix[key], key=lambda e: e.target_node_id)},
+                {
+                    **self.transition_matrix,
+                    key: sorted(
+                        self.transition_matrix[key],
+                        key=lambda e: e.target_node_id or f"intent:{e.target_intent.min_isometry_score}",
+                    ),
+                },
             )
 
         return self
