@@ -2314,29 +2314,20 @@ class LatentScratchpadReceipt(CoreasonBaseState):
 
 
 class EphemeralNamespacePartitionState(CoreasonBaseState):
+    r"""
+    AGENT INSTRUCTION: Implements a hardware-level Sandboxing and Trusted Execution Environment (TEE) paradigm, utilizing WASI, eBPF, or zkVMs to safely execute exogenous bytecode.
+
+    CAUSAL AFFORDANCE: Physically isolates kinetic execution from the host OS via `execution_runtime` Literal `["wasm32-wasi", "riscv32-zkvm", "bpf"]`, authorizing the orchestrator to instantiate a temporary virtual machine strictly conforming to bounded network egress and subprocess rules.
+
+    EPISTEMIC BOUNDS: The Halting Problem is managed via `max_ttl_seconds` (`le=86400, gt=0`), and memory exhaustion is prevented via `max_vram_mb` (`le=1000000000, gt=0`). The `@model_validator` enforces SHA-256 regex on `authorized_bytecode_hashes` and sorts them deterministically.
+
+    MCP ROUTING TRIGGERS: WebAssembly System Interface, Zero-Knowledge Virtual Machine, eBPF, Execution Sandbox, Arbitrary Code Execution Mitigation
+
+    """
+
     type: Literal["ephemeral_partition"] = Field(
         default="ephemeral_partition", description="Discriminator type for an ephemeral namespace partition."
     )
-    """
-    AGENT INSTRUCTION: Implements a hardware-level Sandboxing and Trusted Execution
-    Environment (TEE) paradigm, utilizing WASI, eBPF, or zkVMs to safely execute
-    exogenous bytecode. As a ...State suffix, this is a declarative, frozen snapshot of
-    an execution geometry.
-
-    CAUSAL AFFORDANCE: Physically isolates kinetic execution from the host OS via
-    execution_runtime Literal ["wasm32-wasi", "riscv32-zkvm", "bpf"], authorizing
-    the orchestrator to instantiate a temporary virtual machine strictly conforming to
-    allow_network_egress (default=False) and allow_subprocess_spawning (default=False).
-
-    EPISTEMIC BOUNDS: The Halting Problem is managed via max_ttl_seconds (le=86400,
-    gt=0), and memory exhaustion is prevented via max_vram_mb (le=1000000000, gt=0).
-    The @model_validator validate_cryptographic_hashes enforces SHA-256 regex
-    (^[a-f0-9]{64}$); a second @model_validator sort_arrays deterministically sorts the
-    authorized_bytecode_hashes for RFC 8785 canonical hashing.
-
-    MCP ROUTING TRIGGERS: WebAssembly System Interface, Zero-Knowledge Virtual Machine,
-    eBPF, Execution Sandbox, Arbitrary Code Execution Mitigation
-    """
 
     partition_id: str = Field(
         max_length=128,
@@ -2377,25 +2368,18 @@ class EphemeralNamespacePartitionState(CoreasonBaseState):
 
 
 class ToolManifest(CoreasonBaseState):
+    r"""
+    AGENT INSTRUCTION: Defines the discrete formalization of a Gibsonian Affordance within the agent's Reinforcement Learning Action Space ($A$). As a ...Manifest suffix, this is a declarative, frozen N-dimensional coordinate of a capability.
+
+    CAUSAL AFFORDANCE: Unlocks a specific, localized Pearlian Do-Operator intervention ($do(X=x)$) mapped to an external kinetic capability. Governed by side_effects, permissions, and an optional execution SLA.
+
+    EPISTEMIC BOUNDS: The operational perimeter is rigidly confined by `input_schema` and `output_schema` (dictionaries bounded to `max_length=1000000000` properties). The `is_preemptible` boolean (default=False) establishes a physical Halting Problem limit by authorizing the orchestrator to abort execution mid-flight.
+
+    MCP ROUTING TRIGGERS: Gibsonian Affordance, MDP Action Space, Pearlian Do-Operator, Capability-Based Security, Halting Problem
+
+    """
+
     type: Literal["native_tool"] = Field(default="native_tool", description="Discriminator type for a native tool.")
-    """
-    AGENT INSTRUCTION: Defines the discrete formalization of a Gibsonian Affordance within
-    the agent's Reinforcement Learning Action Space ($A$). As a ...Manifest suffix, this is
-    a declarative, frozen N-dimensional coordinate of a capability.
-
-    CAUSAL AFFORDANCE: Unlocks a specific, localized Pearlian Do-Operator intervention
-    ($do(X=x)$) mapped to an external kinetic capability. Governed by side_effects
-    (SideEffectProfile), permissions (PermissionBoundaryPolicy), and an optional sla
-    (ExecutionSLA).
-
-    EPISTEMIC BOUNDS: The tool's operational perimeter is rigidly confined by input_schema
-    (a dictionary bounded to max_length=1000000000 properties). The is_preemptible boolean
-    (default=False) establishes a physical Halting Problem limit by authorizing the
-    orchestrator to abort execution mid-flight.
-
-    MCP ROUTING TRIGGERS: Gibsonian Affordance, MDP Action Space, Pearlian Do-Operator,
-    Capability-Based Security, Halting Problem
-    """
 
     tool_name: str = Field(max_length=2000, description="The exact identifier of the tool.")
     description: str = Field(
@@ -5117,24 +5101,15 @@ class FormalVerificationContract(CoreasonBaseState):
 
 
 class DelegatedCapabilityManifest(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Implements Macaroons and Decentralized Identifiers (DIDs) to
-    construct a verifiable delegation chain of authority from a human principal to an
-    autonomous agent. As a ...Manifest suffix, this defines a frozen, N-dimensional
-    coordinate state.
+    r"""
+    AGENT INSTRUCTION: Implements Macaroons and Decentralized Identifiers (DIDs) to construct a verifiable delegation chain of authority from a human principal to an autonomous agent.
 
-    CAUSAL AFFORDANCE: Empowers the delegate_agent_did (NodeIdentifierState) to invoke
-    the explicitly whitelisted allowed_tool_ids (list[ToolIdentifierState]), acting as a
-    cryptographic proxy for the principal_did (NodeIdentifierState). The
-    cryptographic_signature (max_length=10000) proves the delegation chain.
+    CAUSAL AFFORDANCE: Empowers the `delegate_agent_did` to invoke the explicitly whitelisted `allowed_tool_ids`, acting as a cryptographic proxy for the `principal_did`. The `cryptographic_signature` proves the delegation chain.
 
-    EPISTEMIC BOUNDS: The delegation's temporal geometry is physically bounded by
-    expiration_timestamp (ge=0.0, le=253402300799.0). The capability_id is a 128-char
-    CID anchor. The allowed_tool_ids array is deterministically sorted by
-    @model_validator sort_arrays for RFC 8785 canonical hashing.
+    EPISTEMIC BOUNDS: The delegation's temporal geometry is physically bounded by `expiration_timestamp` (`ge=0.0, le=253402300799.0`). The `capability_id` is a 128-char CID anchor. The `allowed_tool_ids` array is deterministically sorted by `@model_validator` for RFC 8785 canonical hashing.
 
-    MCP ROUTING TRIGGERS: Macaroons, Delegation Chain, Public Key Infrastructure,
-    Object Capability Model, Decentralized Identifiers
+    MCP ROUTING TRIGGERS: Macaroons, Delegation Chain, Public Key Infrastructure, Object Capability Model, Decentralized Identifiers
+
     """
 
     capability_id: str = Field(
@@ -5539,22 +5514,15 @@ class GraphFlatteningPolicy(CoreasonBaseState):
 
 
 class HTTPTransportProfile(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Establishes a Stateless Client-Server Architecture for JSON-RPC
-    2.0 message passing, serving as the egress manifold for Zero-Trust Network Access
-    (ZTNA). As a ...Profile suffix, this is a declarative property descriptor.
+    r"""
+    AGENT INSTRUCTION: Establishes a Stateless Client-Server Architecture for JSON-RPC 2.0 message passing, serving as the egress manifold for Zero-Trust Network Access (ZTNA).
 
-    CAUSAL AFFORDANCE: Instructs the orchestrator to open an out-of-band HTTP socket
-    (uri: HttpUrl), transmitting structured semantic payloads while strictly confining
-    custom headers to prevent protocol manipulation.
+    CAUSAL AFFORDANCE: Instructs the orchestrator to open an out-of-band HTTP socket, transmitting structured semantic payloads while strictly confining custom headers to prevent protocol manipulation.
 
-    EPISTEMIC BOUNDS: The headers dictionary is mathematically bounded (le=1000000000
-    properties, key max_length=255, value max_length=2000, default_factory=dict) and
-    explicitly trapped by the @field_validator _prevent_crlf_injection to physically
-    block HTTP Request Smuggling.
+    EPISTEMIC BOUNDS: The `headers` dictionary is mathematically bounded (`max_length=2000`) and explicitly trapped by the `@field_validator` `_prevent_crlf_injection` to physically block HTTP Request Smuggling.
 
-    MCP ROUTING TRIGGERS: Stateless Architecture, Zero-Trust Network Access, HTTP
-    Request Smuggling Prevention, JSON-RPC Egress, Out-of-Band Socket
+    MCP ROUTING TRIGGERS: Stateless Architecture, Zero-Trust Network Access, HTTP Request Smuggling Prevention, JSON-RPC Egress, Out-of-Band Socket
+
     """
 
     type: Literal["http"] = Field(default="http", description="Type of transport.")
@@ -6325,23 +6293,15 @@ class LineageWatermarkReceipt(CoreasonBaseState):
 
 
 class MCPCapabilityWhitelistPolicy(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Formalizes a Lattice-Based Access Control (LBAC) and Zero-Trust
-    Architecture perimeter, restricting JSON-RPC capability mounts from foreign subgraphs.
-    As a ...Policy suffix, this object defines rigid mathematical boundaries that the
-    orchestrator must enforce globally.
+    r"""
+    AGENT INSTRUCTION: Formalizes a Lattice-Based Access Control (LBAC) and Zero-Trust Architecture perimeter, restricting JSON-RPC capability mounts from foreign subgraphs.
 
-    CAUSAL AFFORDANCE: Acts as a structural firewall that physically prevents the
-    orchestrator from binding unauthorized external tools, resources, or prompts into the
-    active agent's ActionSpaceManifest.
+    CAUSAL AFFORDANCE: Acts as a structural firewall that physically prevents the orchestrator from binding unauthorized external tools, resources, or prompts into the active agent's ActionSpaceManifest.
 
-    EPISTEMIC BOUNDS: The boundary is geometrically enforced via StringConstraints
-    (max_length=2000 for allowed_tools, allowed_resources, allowed_prompts;
-    max_length=255 for required_licenses). The @model_validator strictly sorts all four
-    arrays alphabetically to mathematically guarantee RFC 8785 Canonical Hashing.
+    EPISTEMIC BOUNDS: The boundary is geometrically enforced via `StringConstraints` (`max_length=2000` for `allowed_tools`, `allowed_resources`, `allowed_prompts`). The `@model_validator` strictly sorts all arrays alphabetically to mathematically guarantee RFC 8785 Canonical Hashing.
 
-    MCP ROUTING TRIGGERS: Zero-Trust Architecture, Lattice-Based Access Control, Least
-    Privilege, RPC Firewall, Bipartite Partitioning
+    MCP ROUTING TRIGGERS: Zero-Trust Architecture, Lattice-Based Access Control, Least Privilege, RPC Firewall, Bipartite Partitioning
+
     """
 
     allowed_tools: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
@@ -6369,16 +6329,18 @@ class MCPCapabilityWhitelistPolicy(CoreasonBaseState):
 
 
 class MCPServerManifest(CoreasonBaseState):
-    type: Literal["mcp_server"] = Field(default="mcp_server", description="Discriminator type for an MCP server.")
-    """
+    r"""
     AGENT INSTRUCTION: Represents a cryptographically verifiable Distributed RPC substrate mapping within the Actor Model, binding an external Model Context Protocol (MCP) manifold into the swarm's local topology under strict Object-Capability (OCap) rules.
 
     CAUSAL AFFORDANCE: Authorizes the orchestrator to physically bridge a zero-trust network boundary, establishing a polymorphic communication channel (stdio, sse, or http) to perceive external resources and actuate remote functions.
 
-    EPISTEMIC BOUNDS: The `server_id` is locked to a 128-char CID regex (`^[a-zA-Z0-9_.:-]+$`). The `@model_validator` `enforce_coreason_did_authority` physically intercepts capability injection lacking a valid `did:coreason:` attestation. The `enforce_stdio_supply_chain_lock` strictly mandates a `binary_hash` (SHA-256) for local process generation, sealing the execution envelope against supply-chain poisoning.
+    EPISTEMIC BOUNDS: The `server_id` is locked to a 128-char CID regex (`^[a-zA-Z0-9_.:-]+$`). The `@model_validator` `enforce_stdio_supply_chain_lock` strictly mandates a `binary_hash` (SHA-256) for local process generation, sealing the execution envelope against supply-chain poisoning.
 
     MCP ROUTING TRIGGERS: Actor Model, Object Capability Model, Zero-Trust Architecture, Distributed RPC, Supply-Chain Isolation
+
     """
+
+    type: Literal["mcp_server"] = Field(default="mcp_server", description="Discriminator type for an MCP server.")
 
     server_id: str = Field(
         ...,
@@ -6491,24 +6453,15 @@ class KinematicNoiseProfile(CoreasonBaseState):
 
 
 class KineticSeparationPolicy(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Implements strict Bipartite Graph Separation (Conflict
-    Graphs) to mathematically prevent toxic capability combinations from co-existing
-    within the same causal execution chain. As a ...Policy suffix, this enforces
-    rigid mathematical boundaries.
+    r"""
+    AGENT INSTRUCTION: Implements strict Bipartite Graph Separation (Conflict Graphs) to mathematically prevent toxic capability combinations from co-existing within the same causal execution chain.
 
-    CAUSAL AFFORDANCE: Forces the orchestrator to perform an intersection check
-    across mutually_exclusive_clusters; if an overlap occurs, it mechanically
-    triggers the enforcement_action (e.g., halt_and_quarantine) to sever the
-    chain.
+    CAUSAL AFFORDANCE: Forces the orchestrator to perform an intersection check across `mutually_exclusive_clusters`; if an overlap occurs, it mechanically triggers the `enforcement_action` (e.g., `halt_and_quarantine`) to sever the chain.
 
-    EPISTEMIC BOUNDS: The 2D matrix of string constraints (max_length=2000) is
-    rigidly sorted both internally and externally by @model_validator sort_clusters,
-    ensuring deterministic RFC 8785 hashing. The enforcement_action is clamped to
-    a strict Finite State Machine Literal.
+    EPISTEMIC BOUNDS: The 2D matrix of string constraints (`max_length=2000`) is rigidly sorted both internally and externally by `@model_validator` `_enforce_canonical_sort_clusters`, ensuring deterministic RFC 8785 hashing. The `enforcement_action` is clamped to a strict Literal.
 
-    MCP ROUTING TRIGGERS: Bipartite Graph Separation, Toxic Capability Quarantine,
-    Finite State Machine, Structural Interlock, Conflict Graph
+    MCP ROUTING TRIGGERS: Bipartite Graph Separation, Toxic Capability Quarantine, Finite State Machine, Structural Interlock, Conflict Graph
+
     """
 
     policy_id: str = Field(
@@ -6698,23 +6651,15 @@ type AnyActionSpaceCapability = Annotated[
 
 
 class ActionSpaceManifest(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Defines the finite, discrete Markov Decision Process (MDP) Action
-    Space and affordance landscape available to a specific execution node. As a ...Manifest
-    suffix, this defines a frozen, N-dimensional coordinate state.
+    r"""
+    AGENT INSTRUCTION: Defines the finite, discrete Markov Decision Process (MDP) Action Space and affordance landscape available to a specific execution node. As a ...Manifest suffix, this defines a frozen, N-dimensional coordinate state.
 
-    CAUSAL AFFORDANCE: Projects the combined multi-dimensional matrix of capabilities
-    into the agent's context, mathematically dictating which kinetic operations it can initiate.
-    Optionally enforces kinetic_separation (KineticSeparationPolicy) to prevent toxic
-    tool combinations.
+    CAUSAL AFFORDANCE: Projects the combined multi-dimensional matrix of capabilities into the agent's context, mathematically dictating which kinetic operations it can initiate via its `transition_matrix`. Optionally enforces kinetic separation.
 
-    EPISTEMIC BOUNDS: The action_space_id is geometrically constrained to a 128-char CID.
-    A @model_validator strictly bounds the topology by enforcing uniqueness across all
-    capabilities namespaces, and ensures deterministic RFC 8785 representation by sorting
-    edges by their target_node_id.
+    EPISTEMIC BOUNDS: The `action_space_id` is geometrically constrained to a 128-char CID. A `@model_validator` strictly bounds the topology by enforcing uniqueness across all capability namespaces and ensures deterministic RFC 8785 representation by sorting the transition matrix.
 
-    MCP ROUTING TRIGGERS: Markov Decision Process, Action Space, Affordance Theory,
-    Curated Environment, State Transition Matrix, Directed Cyclic Graph
+    MCP ROUTING TRIGGERS: Markov Decision Process, Action Space, Affordance Theory, State Transition Matrix, Directed Cyclic Graph
+
     """
 
     action_space_id: str = Field(
@@ -6823,21 +6768,15 @@ class ActionSpaceManifest(CoreasonBaseState):
 
 
 class ProceduralMetadataManifest(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Establishes a Level-1 Epistemic Discovery Surface utilizing Lazy Evaluation
-    and Information Bottleneck Theory to act as a progressive disclosure pointer to a massive
-    EpistemicSOPManifest.
+    r"""
+    AGENT INSTRUCTION: Establishes a Level-1 Epistemic Discovery Surface utilizing Lazy Evaluation and Information Bottleneck Theory to act as a progressive disclosure pointer to a massive EpistemicSOPManifest.
 
-    CAUSAL AFFORDANCE: Prevents context window token exhaustion by keeping the full Standard Operating
-    Procedure in cold storage until the agent's generative trajectory actively mathematically intersects
-    with the trigger_description.
+    CAUSAL AFFORDANCE: Prevents context window token exhaustion by keeping the full Standard Operating Procedure in cold storage until the agent's generative trajectory actively mathematically intersects with the `trigger_description`.
 
-    EPISTEMIC BOUNDS: The metadata_id and target_sop_id are physically locked to 128-char CIDs.
-    The semantic geometry of the trigger_description is clamped at max_length=2000 to prevent
-    dictionary bombing during routing evaluation. The latent_vector_coordinate provides optional
-    dense-vector geometry (VectorEmbeddingState).
+    EPISTEMIC BOUNDS: The `metadata_id` and `target_sop_id` are physically locked to 128-char CIDs. The semantic geometry of the `trigger_description` is clamped at `max_length=2000` to prevent dictionary bombing during routing evaluation.
 
     MCP ROUTING TRIGGERS: Lazy Evaluation, Progressive Disclosure, Information Bottleneck, Discovery Surface, Epistemic Pointer
+
     """
 
     metadata_id: str = Field(
@@ -6863,18 +6802,15 @@ class ProceduralMetadataManifest(CoreasonBaseState):
 
 
 class OntologicalSurfaceProjectionManifest(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Formalizes a Bipartite Graph Projection of Gibsonian Affordances, establishing
-    the mathematically bounded subgraph of all capabilities currently valid for the agent.
+    r"""
+    AGENT INSTRUCTION: Formalizes a Bipartite Graph Projection of Gibsonian Affordances, establishing the mathematically bounded subgraph of all capabilities currently valid for the agent.
 
-    CAUSAL AFFORDANCE: Injects a dynamic Action Space manifold into the agent's working memory,
-    authorizing the invocation of strictly defined toolsets and procedural manifolds.
+    CAUSAL AFFORDANCE: Injects a dynamic Action Space manifold into the agent's working memory, authorizing the invocation of strictly defined toolsets and procedural manifolds.
 
-    EPISTEMIC BOUNDS: The structural integrity is mathematically guaranteed by the verify_unique_action_spaces
-    @model_validator, which deterministically sorts action_spaces, supported_personas, and
-    available_procedural_manifolds by their respective CIDs, ensuring invariant RFC 8785 canonical hashing.
+    EPISTEMIC BOUNDS: Structural integrity is mathematically guaranteed by the `@model_validator`, which enforces unique `action_space_ids` and deterministically sorts `action_spaces`, `supported_personas`, and `available_procedural_manifolds` by their CIDs, ensuring invariant RFC 8785 hashing.
 
     MCP ROUTING TRIGGERS: Gibsonian Affordances, Bipartite Graph Projection, Action Space Manifold, RFC 8785 Canonicalization, Holographic Subgraph
+
     """
 
     projection_id: str = Field(
@@ -6934,18 +6870,15 @@ class MCPClientIntent(BoundedJSONRPCIntent):
 
 
 class MCPPromptReferenceState(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Represents a Higher-Order Function within the Model Context Protocol, mapping
-    a dynamic Latent Prompt Manifold into the agent's execution context.
+    r"""
+    AGENT INSTRUCTION: Represents a Higher-Order Function within the Model Context Protocol, mapping a dynamic Latent Prompt Manifold into the agent's execution context.
 
-    CAUSAL AFFORDANCE: Authorizes the orchestrator to fetch and interpolate an exogenous prompt
-    template from a remote server, using the arguments dictionary to inject localized state into the template.
+    CAUSAL AFFORDANCE: Authorizes the orchestrator to fetch and interpolate an exogenous prompt template from a remote server, using the `arguments` dictionary to inject localized state into the template.
 
-    EPISTEMIC BOUNDS: The `arguments` matrix is aggressively routed through the volumetric hardware
-    guillotine (`enforce_payload_topology`) to mathematically prevent Manifold Interpolation Complexity
-    crashes from poisoned external servers. Supply-chain attacks are mitigated by the optional `prompt_hash`.
+    EPISTEMIC BOUNDS: The `arguments` matrix is aggressively routed through the volumetric hardware guillotine (`enforce_payload_topology`) to mathematically prevent Manifold Interpolation Complexity crashes from poisoned external servers. Supply-chain attacks are mitigated by the optional `prompt_hash`.
 
     MCP ROUTING TRIGGERS: Higher-Order Function, Latent Prompt Manifold, Template Interpolation, Supply-Chain Verification, Stateless RPC
+
     """
 
     server_id: str = Field(
@@ -6980,18 +6913,15 @@ class MCPPromptReferenceState(CoreasonBaseState):
 
 
 class MCPResourceManifest(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Exposes a zero-trust Resource Description Framework (RDF) URI mapping,
-    passively projecting external data geometries into the swarm's accessible environment.
+    r"""
+    AGENT INSTRUCTION: Exposes a zero-trust Resource Description Framework (RDF) URI mapping, passively projecting external data geometries into the swarm's accessible environment.
 
-    CAUSAL AFFORDANCE: Unlocks the agent's ability to perceive specific remote or local files,
-    databases, or API endpoints without granting them kinetic execution privileges over those endpoints.
+    CAUSAL AFFORDANCE: Unlocks the agent's ability to perceive specific remote or local files, databases, or API endpoints without granting them kinetic execution privileges over those endpoints.
 
-    EPISTEMIC BOUNDS: The URI namespace is physically bounded by the uris array, where each string
-    is clamped to max_length=2000. The server_id is restricted to a 128-character CID. The sort_arrays
-    @model_validator deterministically alphabetizes the URIs to preserve Merkle-DAG integrity across the distributed system.
+    EPISTEMIC BOUNDS: The URI namespace is physically bounded by the `uris` array, where each string is clamped to `max_length=2000`. The `server_id` is restricted to a 128-character CID. The `@model_validator` deterministically alphabetizes the URIs to preserve Merkle-DAG integrity.
 
     MCP ROUTING TRIGGERS: Resource Description Framework, Zero-Trust Perception, Epistemic Projection, Passive URI Mapping, Data Topography
+
     """
 
     server_id: str = Field(
@@ -7937,23 +7867,15 @@ type AnyResilienceIntent = Annotated[
 
 
 class SSETransportProfile(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Implements an Asynchronous Event-Driven Architecture leveraging
-    Server-Sent Events (SSE) to map a unidirectional, continuous topology of
-    Server-to-Client state transitions. As a ...Profile suffix, this is a declarative
-    property descriptor.
+    r"""
+    AGENT INSTRUCTION: Implements an Asynchronous Event-Driven Architecture leveraging Server-Sent Events (SSE) to map a unidirectional, continuous topology of Server-to-Client state transitions.
 
-    CAUSAL AFFORDANCE: Authorizes the orchestrator to maintain a persistent, long-lived
-    TCP connection (uri: HttpUrl), processing incoming JSON-RPC streams without the
-    thermodynamic overhead of continuous polling.
+    CAUSAL AFFORDANCE: Authorizes the orchestrator to maintain a persistent, long-lived TCP connection, processing incoming JSON-RPC streams without the thermodynamic overhead of continuous polling.
 
-    EPISTEMIC BOUNDS: The headers (default_factory=dict) are strictly limited via
-    StringConstraints (key max_length=255, value max_length=2000) and mathematically
-    sanitized against CRLF injection via @field_validator _prevent_crlf_injection to
-    preserve protocol boundary integrity.
+    EPISTEMIC BOUNDS: The `headers` are strictly limited via `StringConstraints` (`max_length=255/2000`) and mathematically sanitized against CRLF injection via `@field_validator` `_prevent_crlf_injection` to preserve protocol boundary integrity.
 
-    MCP ROUTING TRIGGERS: Event-Driven Architecture, Server-Sent Events,
-    Unidirectional Stream, Asynchronous Message Passing, TCP Persistence
+    MCP ROUTING TRIGGERS: Event-Driven Architecture, Server-Sent Events, Unidirectional Stream, Asynchronous Message Passing, TCP Persistence
+
     """
 
     type: Literal["sse"] = Field(default="sse", description="Type of transport.")
@@ -8419,23 +8341,15 @@ class OntologicalAlignmentPolicy(CoreasonBaseState):
 
 
 class StdioTransportProfile(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Formalizes Inter-Process Communication (IPC) utilizing POSIX
-    standard streams to execute highly isolated, local binary sandboxing. As a
-    ...Profile suffix, this is a declarative property descriptor.
+    r"""
+    AGENT INSTRUCTION: Formalizes Inter-Process Communication (IPC) utilizing POSIX standard streams to execute highly isolated, local binary sandboxing.
 
-    CAUSAL AFFORDANCE: Physically spawns a child process restricted to the host's
-    operating system namespace, mapping remote procedure calls directly into the
-    binary's stdin/stdout descriptors via command (max_length=2000).
+    CAUSAL AFFORDANCE: Physically spawns a child process restricted to the host's operating system namespace, mapping remote procedure calls directly into the binary's stdin/stdout descriptors via `command` (`max_length=2000`).
 
-    EPISTEMIC BOUNDS: To prevent buffer overflow and command injection, args are
-    structurally constrained (max_length=1000000000, string max_length=2000,
-    default_factory=list) and env_vars keys/values are strictly delimited via
-    StringConstraints (key max_length=255, value max_length=2000,
-    default_factory=dict).
+    EPISTEMIC BOUNDS: To prevent buffer overflow and command injection, `args` are structurally constrained (`max_length=1000000000`, string `max_length=2000`) and `env_vars` keys/values are strictly delimited via `StringConstraints` (`max_length=255` and `2000`).
 
-    MCP ROUTING TRIGGERS: Inter-Process Communication, POSIX Standard Streams, Local
-    Sandboxing, Binary Execution, Subprocess Spawn
+    MCP ROUTING TRIGGERS: Inter-Process Communication, POSIX Standard Streams, Local Sandboxing, Binary Execution, Subprocess Spawn
+
     """
 
     type: Literal["stdio"] = Field(default="stdio", description="Type of transport.")
