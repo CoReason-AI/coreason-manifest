@@ -2512,6 +2512,7 @@ class EphemeralNamespacePartitionState(CoreasonBaseState):
     authorized_bytecode_hashes for RFC 8785 canonical hashing. `max_ttl_seconds`, `max_vram_mb`.
     MCP ROUTING TRIGGERS: WASI, zkVM, Arbitrary Code Execution Prevention.
     """
+
     type: Literal["ephemeral_partition"] = Field(
         default="ephemeral_partition", description="Discriminator type for an ephemeral namespace partition."
     )
@@ -2571,6 +2572,7 @@ class ToolManifest(CoreasonBaseState):
     orchestrator to abort execution mid-flight. Governed by `is_preemptible` for mid-flight aborts.
     MCP ROUTING TRIGGERS: Gibsonian Affordance, MDP Action Space, Do-Operator.
     """
+
     type: Literal["native_tool"] = Field(default="native_tool", description="Discriminator type for a native tool.")
 
     tool_name: str = Field(max_length=2000, description="The exact identifier of the tool.")
@@ -6574,6 +6576,7 @@ class MCPServerManifest(CoreasonBaseState):
     EPISTEMIC BOUNDS: The `server_id` is locked to a 128-char CID regex (`^[a-zA-Z0-9_.:-]+$`). The `@model_validator` `enforce_coreason_did_authority` physically intercepts capability injection lacking a valid `did:coreason:` attestation. The `enforce_stdio_supply_chain_lock` strictly mandates a `binary_hash` (SHA-256) for local process generation, sealing the execution envelope against supply-chain poisoning. Mandates `binary_hash` for `stdio` supply-chain locks.
     MCP ROUTING TRIGGERS: Actor Model, OCap, Distributed RPC.
     """
+
     type: Literal["mcp_server"] = Field(default="mcp_server", description="Discriminator type for an MCP server.")
 
     server_id: str = Field(
@@ -7262,7 +7265,7 @@ class MarketContract(CoreasonBaseState):
                 try:
                     mc_int = int(mc)
                     sp_int = int(sp)
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
             cmc = max(0, min(mc_int, 1000000000))
             if sp_int > cmc:
