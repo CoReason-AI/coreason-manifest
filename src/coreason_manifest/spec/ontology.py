@@ -359,19 +359,15 @@ def _inject_workflow_examples(schema: dict[str, Any]) -> None:
 
 
 class CoreasonBaseState(BaseModel):
-    """
-    AGENT INSTRUCTION: CoreasonBaseState is the immutable mathematical bedrock of the Hollow Data Plane,
-    utilizing RFC 8785 Canonical JSON Serialization to guarantee structural determinism across the swarm.
+    r"""
+    AGENT INSTRUCTION: The immutable mathematical bedrock of the Hollow Data Plane, utilizing RFC 8785 Canonical JSON Serialization to guarantee structural determinism across the swarm.
 
-    CAUSAL AFFORDANCE: Enforces absolute structural rigidity. By declaring frozen=True, strict=True,
-    and extra='forbid', it mechanically prevents silent type coercion and blocks adversarial agents
-    from injecting hallucinated keys into the execution graph.
+    CAUSAL AFFORDANCE: Enforces absolute structural rigidity. Mechanically prevents silent type coercion and blocks adversarial agents from injecting hallucinated keys into the execution graph.
 
-    EPISTEMIC BOUNDS: Bypasses Python's immutability lock exclusively during the instantiation phase
-    (__setattr__) to mechanically sort all unordered sets and arrays. This guarantees flawless,
-    zero-variance serialization, ensuring two identical graphs produce the exact same Merkle root hash.
+    EPISTEMIC BOUNDS: Declares `frozen=True`, `strict=True`, and `extra='forbid'`. Bypasses Python's immutability lock exclusively during `__setattr__` to mechanically sort all unordered sets and arrays, ensuring identical graphs produce the exact same Merkle root hash.
 
     MCP ROUTING TRIGGERS: Merkle-DAG Root, RFC 8785 Canonicalization, Cryptographic Determinism, Immutable Substrate, Zero-Trust Architecture
+
     """
 
     model_config = ConfigDict(
@@ -480,22 +476,15 @@ class ExecutionEnvelopeState[T](CoreasonBaseState):
 
 
 class SpatialReferenceFrameManifest(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Formalizes a Federated Pose Graph anchor. Establishes a
-    deterministic localized origin point (e.g., a physical room geometry or SLAM
-    feature map) allowing disjoint spatial topologies to mathematically synchronize.
+    r"""
+    AGENT INSTRUCTION: Formalizes a Federated Pose Graph anchor. Establishes a deterministic localized origin point (e.g., a physical room geometry or SLAM feature map) allowing disjoint spatial topologies to mathematically synchronize.
 
-    CAUSAL AFFORDANCE: Instructs the spatial orchestrator to align the tracking
-    coordinate systems of multiple observer devices by computing the affine
-    transformation matrix between this shared cryptographic anchor and their local origins.
+    CAUSAL AFFORDANCE: Instructs the spatial orchestrator to align the tracking coordinate systems of multiple observer devices by computing the affine transformation matrix between this shared cryptographic anchor and their local origins.
 
-    EPISTEMIC BOUNDS: The semantic locus is cryptographically locked to a 128-char
-    CID (`frame_id`). The alignment mathematics are strictly bounded to the
-    `anchor_protocol` literal automaton, preventing unsupported SLAM parsing. An optional
-    `physical_room_hash` prevents holographic spoofing across zero-trust domains.
+    EPISTEMIC BOUNDS: The semantic locus is cryptographically locked to a 128-char CID (`frame_id`). The alignment math is strictly bounded to the `anchor_protocol` literal automaton. An optional `physical_room_hash` prevents holographic spoofing across zero-trust domains.
 
-    MCP ROUTING TRIGGERS: Federated Pose Graph, Spatial Reference Frame,
-    Simultaneous Localization and Mapping, SLAM Anchor, Relative Coordinate Geometry
+    MCP ROUTING TRIGGERS: Federated Pose Graph, Spatial Reference Frame, SLAM Anchor, Relative Coordinate Geometry, Origin Point
+
     """
 
     frame_id: str = Field(
@@ -516,22 +505,14 @@ class SpatialReferenceFrameManifest(CoreasonBaseState):
 
 class SE3TransformProfile(CoreasonBaseState):
     r"""
-    AGENT INSTRUCTION: Represents a strict rigid-body transformation within the
-    Special Euclidean group SE(3). Projects an absolute mathematical coordinate encompassing
-    both translation ($\mathbb{R}^3$) and rotation ($S^3$).
+    AGENT INSTRUCTION: Represents a strict rigid-body transformation within the Special Euclidean group SE(3). Projects an absolute mathematical coordinate encompassing both translation ($\mathbb{R}^3$) and rotation ($S^3$).
 
-    CAUSAL AFFORDANCE: Provides the absolute spatial terminus for UI matrices,
-    multi-agent topologies, and multimodal tokens. It dictates the exact kinematic
-    positioning of a node relative to a verified SpatialReferenceFrameManifest.
+    CAUSAL AFFORDANCE: Provides the absolute spatial terminus for UI matrices, multi-agent topologies, and multimodal tokens, dictating the exact kinematic positioning of a node relative to a verified SpatialReferenceFrameManifest.
 
-    EPISTEMIC BOUNDS: Translation vectors (`x`, `y`, `z`) are unbounded continuous
-    floats representing spatial distance. Rotational geometry is rigidly constrained
-    to a 4D unit quaternion (`qx`, `qy`, `qz`, `qw`) bounded [-1.0, 1.0]. The
-    `@model_validator` physically guarantees singularity-free rotation by enforcing
-    an absolute quaternion magnitude of 1.0, eliminating Gimbal Lock.
+    EPISTEMIC BOUNDS: Translation vectors are unbounded floats. Rotational geometry is rigidly constrained to a 4D unit quaternion bounded `[-1.0, 1.0]`. The `@model_validator` `enforce_quaternion_normalization` physically guarantees singularity-free rotation by enforcing an absolute quaternion magnitude of 1.0, eliminating Gimbal Lock. `scale` is bounded `[0.0001, 10000.0]`.
 
-    MCP ROUTING TRIGGERS: Special Euclidean Group, SE(3) Manifold, Rigid Body
-    Transformation, Hamiltonian Unit Quaternion, Kinematic Topology
+    MCP ROUTING TRIGGERS: Special Euclidean Group, SE(3) Manifold, Rigid Body Transformation, Hamiltonian Unit Quaternion, Kinematic Topology
+
     """
 
     reference_frame_id: str = Field(
@@ -567,23 +548,15 @@ class SE3TransformProfile(CoreasonBaseState):
 
 
 class VolumetricBoundingProfile(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Defines a continuous 3D Axis-Aligned Bounding Box (AABB)
-    or Oriented Bounding Box (OBB) using spatial kinematics.
+    r"""
+    AGENT INSTRUCTION: Defines a continuous 3D Axis-Aligned Bounding Box (AABB) or Oriented Bounding Box (OBB) using spatial kinematics.
 
-    CAUSAL AFFORDANCE: Instructs the spatial orchestrator to enforce a physical
-    holographic cage. It structurally prevents agents or dynamic UI layouts from
-    spawning coordinates that collide with environmental walls or overflow the
-    user's available spatial geometry.
+    CAUSAL AFFORDANCE: Instructs the spatial orchestrator to enforce a physical holographic cage, structurally preventing agents or dynamic UI layouts from spawning coordinates that collide with environmental walls or overflow spatial geometry.
 
-    EPISTEMIC BOUNDS: The geometric center is anchored by an `SE3TransformProfile`.
-    The spatial magnitude is clamped by strictly non-negative extents (`extents_x`,
-    `extents_y`, `extents_z`). The `@model_validator` mathematically prevents the
-    instantiation of zero-dimensional point anomalies by demanding a strictly
-    positive aggregate volume.
+    EPISTEMIC BOUNDS: Anchored by an `SE3TransformProfile`. Spatial magnitude is clamped by strictly non-negative extents (`ge=0.0`). The `@model_validator` `validate_volume_physics` mathematically prevents the instantiation of zero-dimensional point anomalies by demanding a strictly positive aggregate volume.
 
-    MCP ROUTING TRIGGERS: Volumetric Boundary, Holographic Cage, Oriented Bounding Box,
-    Spatial Kinematics, Collision Perimeter
+    MCP ROUTING TRIGGERS: Volumetric Boundary, Holographic Cage, Oriented Bounding Box, Spatial Kinematics, Collision Perimeter
+
     """
 
     center_transform: SE3TransformProfile = Field(
@@ -602,23 +575,15 @@ class VolumetricBoundingProfile(CoreasonBaseState):
 
 
 class ViewportProjectionContract(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Defines the linear algebraic projection matrix required to
-    map N-dimensional spatial geometries onto a normalized View Frustum.
+    r"""
+    AGENT INSTRUCTION: Defines the linear algebraic projection matrix required to map N-dimensional spatial geometries onto a normalized View Frustum.
 
-    CAUSAL AFFORDANCE: Authorizes an external rendering client to mathematically
-    multiply a 3D SE(3) topology by a projection matrix, safely collapsing depth
-    dimensions into an SE(2) plane for flat-screen rendering without fracturing
-    the underlying topological relationships.
+    CAUSAL AFFORDANCE: Authorizes an external rendering client to mathematically multiply a 3D SE(3) topology by a projection matrix, safely collapsing depth dimensions into an SE(2) plane for flat-screen rendering without fracturing topological relationships.
 
-    EPISTEMIC BOUNDS: Bounding rules physically enforce valid optical geometry.
-    The `clipping_plane_near` must mathematically precede `clipping_plane_far`.
-    Perspective projections unconditionally mandate a valid `field_of_view_degrees`
-    (bounded between 1.0 and 179.0 degrees) to prevent division-by-zero optical
-    singularities.
+    EPISTEMIC BOUNDS: Bounding rules physically enforce valid optical geometry. The `clipping_plane_near` (`ge=0.001`) must mathematically precede `clipping_plane_far`. Perspective projections unconditionally mandate a valid `field_of_view_degrees` (`ge=1.0, le=179.0`) to prevent division-by-zero optical singularities.
 
-    MCP ROUTING TRIGGERS: Viewport Projection Matrix, View Frustum, Field of View,
-    Clipping Planes, Linear Algebraic Projection, Homogeneous Coordinates
+    MCP ROUTING TRIGGERS: Viewport Projection Matrix, View Frustum, Field of View, Clipping Planes, Linear Algebraic Projection
+
     """
 
     projection_type: Literal["perspective", "orthographic"] = Field(
@@ -648,23 +613,15 @@ class ViewportProjectionContract(CoreasonBaseState):
 
 
 class PhysicallyBasedRenderingProfile(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Formalizes the Cook-Torrance Microfacet BRDF (Bidirectional
-    Reflectance Distribution Function) to establish the exact physical optic
-    properties of a topological vertex.
+    r"""
+    AGENT INSTRUCTION: Formalizes the Cook-Torrance Microfacet BRDF (Bidirectional Reflectance Distribution Function) to establish the exact physical optic properties of a topological vertex.
 
-    CAUSAL AFFORDANCE: Authorizes the spatial computing renderer to deterministically
-    compute light scattering, reflection, and refraction for the node's geometry,
-    translating logical state into physical optic variables (e.g., pulsing emission
-    during active compute).
+    CAUSAL AFFORDANCE: Authorizes the spatial computing renderer to deterministically compute light scattering, reflection, and refraction for the node's geometry, translating logical state into physical optic variables (e.g., pulsing emission during active compute).
 
-    EPISTEMIC BOUNDS: Diffuse and specular physics are rigidly clamped to normalized
-    probability spaces (ge=0.0, le=1.0) for metalness, roughness, and transmission.
-    The Index of Refraction (ior) is mathematically bounded to valid physical
-    materials [1.0, 3.0].
+    EPISTEMIC BOUNDS: Diffuse and specular physics are rigidly clamped to normalized probability spaces (`ge=0.0, le=1.0`) for `metalness`, `roughness`, and `transmission`. The Index of Refraction (`ior`) is bounded to valid physical materials `[1.0, 3.0]`. `emissive_intensity` is clamped to `[0.0, 100.0]`.
 
-    MCP ROUTING TRIGGERS: Physically Based Rendering, Microfacet BRDF, Index of
-    Refraction, Spatial Optics, Material Thermodynamics
+    MCP ROUTING TRIGGERS: Physically Based Rendering, Microfacet BRDF, Index of Refraction, Spatial Optics, Material Thermodynamics
+
     """
 
     mesh_geometry: Literal["sphere", "box", "icosahedron", "cylinder", "tetrahedron"] = Field(
@@ -680,20 +637,15 @@ class PhysicallyBasedRenderingProfile(CoreasonBaseState):
 
 
 class EpistemicAttentionRay(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Formalizes Joint Attention and Gaze Raycasting across the distributed topology.
-    It projects a continuous vector from an observer's optical center to indicate cognitive focus
-    prior to physical mutation.
+    r"""
+    AGENT INSTRUCTION: Formalizes Joint Attention and Gaze Raycasting across the distributed topology. Projects a continuous vector from an observer's optical center to indicate cognitive focus prior to physical mutation.
 
-    CAUSAL AFFORDANCE: Broadacasts a non-kinetic 'cursor presence' to the swarm. The orchestrator
-    calculates the dot product between this vector and the VolumetricBoundingProfiles of surrounding
-    nodes, identifying the exact topological vertices the observer is currently evaluating.
+    CAUSAL AFFORDANCE: Broadcasts a non-kinetic 'cursor presence' to the swarm. The orchestrator calculates the dot product between this vector and surrounding nodes, identifying the exact topological vertices the observer is currently evaluating.
 
-    EPISTEMIC BOUNDS: The direction_unit_vector must be mathematically normalized to exactly 1.0
-    to prevent raycast scalar explosions. To mitigate O(N^2) intersection complexity, the
-    intersected_node_ids array is strictly capped at max_length=100.
+    EPISTEMIC BOUNDS: The `direction_unit_vector` is mathematically normalized to exactly 1.0 via `@model_validator` to prevent raycast scalar explosions. To mitigate $O(N^2)$ intersection complexity, the `intersected_node_ids` array is strictly capped at `max_length=100` and deterministically sorted.
 
-    MCP ROUTING TRIGGERS: Spatial Raycasting, Joint Attention, Cognitive Frustum Intersection, Vector Math
+    MCP ROUTING TRIGGERS: Spatial Raycasting, Joint Attention, Cognitive Frustum Intersection, Vector Math, Gaze Tracking
+
     """
 
     origin: SE3TransformProfile = Field(
@@ -728,18 +680,15 @@ class EpistemicAttentionRay(CoreasonBaseState):
 
 
 class VolumetricPartitionSubscription(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Implements Hierarchical Spatial Hashing and Area of Interest (AOI) Management
-    to prevent O(N^2) network saturation in massive spatial hypermedia environments.
+    r"""
+    AGENT INSTRUCTION: Implements Hierarchical Spatial Hashing and Area of Interest (AOI) Management to prevent $O(N^2)$ network saturation in massive spatial hypermedia environments.
 
-    CAUSAL AFFORDANCE: Allows a distributed client to mathematically define a spatial perimeter.
-    The orchestrator restricts the egress of KinematicDeltaManifest streams exclusively to nodes
-    residing within this specific volumetric boundary.
+    CAUSAL AFFORDANCE: Allows a distributed client to mathematically define a spatial perimeter. The orchestrator restricts the egress of KinematicDeltaManifest streams exclusively to nodes residing within this specific volumetric boundary.
 
-    EPISTEMIC BOUNDS: The temporal liveness is guillotined by subscription_ttl_ms (ge=1, le=86400000).
-    The volume is physically restricted by the nested VolumetricBoundingProfile.
+    EPISTEMIC BOUNDS: The temporal liveness is guillotined by `subscription_ttl_ms` (`ge=1, le=86400000`). The volume is physically restricted by the nested `VolumetricBoundingProfile`.
 
-    MCP ROUTING TRIGGERS: Area of Interest Management, Hierarchical Spatial Hashing, Telemetry Isolation
+    MCP ROUTING TRIGGERS: Area of Interest Management, Hierarchical Spatial Hashing, Telemetry Isolation, Spatial Partitioning, Culling
+
     """
 
     partition_boundary: VolumetricBoundingProfile = Field(
@@ -753,19 +702,15 @@ class VolumetricPartitionSubscription(CoreasonBaseState):
 
 
 class ContinuousSpatialMutationIntent(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Formalizes an Affine Conflict-free Replicated Data Type (CRDT) to
-    execute Optimistic Concurrency Control across geometric manipulations.
+    r"""
+    AGENT INSTRUCTION: Formalizes an Affine Conflict-free Replicated Data Type (CRDT) to execute Optimistic Concurrency Control across geometric manipulations.
 
-    CAUSAL AFFORDANCE: Authorizes a participant to kinetically drag, rotate, or scale a
-    topological node. The orchestrator uses the provided lamport_clock to mathematically resolve
-    Spherical Linear Interpolation (SLERP) and translation collisions between concurrent actors.
+    CAUSAL AFFORDANCE: Authorizes a participant to kinetically drag, rotate, or scale a topological node. The orchestrator uses the provided Lamport clock to mathematically resolve Spherical Linear Interpolation (SLERP) and translation collisions between concurrent actors.
 
-    EPISTEMIC BOUNDS: The mutation strictly targets a verified NodeIdentifierState. The
-    lamport_clock (ge=0, le=1000000000) prevents temporal overflow during logical state
-    reconciliation.
+    EPISTEMIC BOUNDS: The mutation strictly targets a verified `NodeIdentifierState`. The `lamport_clock` (`ge=0, le=1000000000`) prevents temporal overflow during logical state reconciliation.
 
-    MCP ROUTING TRIGGERS: Optimistic Locking, Affine CRDT, Spherical Linear Interpolation, Continuous Reconciliation
+    MCP ROUTING TRIGGERS: Optimistic Locking, Affine CRDT, Spherical Linear Interpolation, Continuous Reconciliation, Kinematic Drag
+
     """
 
     target_node_id: NodeIdentifierState = Field(description="The specific topology vertex undergoing spatial mutation.")
@@ -778,19 +723,15 @@ class ContinuousSpatialMutationIntent(CoreasonBaseState):
 
 
 class KinematicDeltaManifest(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Establishes a zero-allocation, high-velocity telemetry manifold
-    designed exclusively for continuous thermodynamic state updates across the Markov Blanket.
+    r"""
+    AGENT INSTRUCTION: Establishes a zero-allocation, high-velocity telemetry manifold designed exclusively for continuous thermodynamic state updates across the Markov Blanket.
 
-    CAUSAL AFFORDANCE: Instructs the orchestrator to transmit continuous SE(3) coordinates
-    and optic states as flattened contiguous memory blocks (Struct of Arrays), mechanically
-    bypassing recursive Garbage Collection (GC) pauses in external clients.
+    CAUSAL AFFORDANCE: Instructs the orchestrator to transmit continuous SE(3) coordinates and optic states as flattened contiguous memory blocks (Struct of Arrays), mechanically bypassing recursive Garbage Collection (GC) pauses in external clients.
 
-    EPISTEMIC BOUNDS: The state differential is mathematically restricted to a strict
-    10-element tuple mapping `[node_id, x, y, z, qx, qy, qz, qw, scale, opacity]`.
-    The deltas array is deterministically sorted by node_id to preserve RFC 8785 canonical hashing.
+    EPISTEMIC BOUNDS: The state differential is mathematically restricted to a strict 16-element tuple mapping (position, rotation, scale, opacity, velocity). The `deltas` array is deterministically sorted by `node_id` to preserve RFC 8785 canonical hashing.
 
-    MCP ROUTING TRIGGERS: Zero-Allocation Telemetry, Struct of Arrays, High-Velocity Buffer, SE3 Delta
+    MCP ROUTING TRIGGERS: Zero-Allocation Telemetry, Struct of Arrays, High-Velocity Buffer, SE3 Delta, Kinematic Stream
+
     """
 
     stream_id: str = Field(
@@ -829,18 +770,15 @@ class KinematicDeltaManifest(CoreasonBaseState):
 
 
 class SpatialBillboardContract(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Establishes a kinematic constraint binding a 2D typographic or
-    geometric matrix to a 3D SE(3) coordinate mesh.
+    r"""
+    AGENT INSTRUCTION: Establishes a kinematic constraint binding a 2D typographic or geometric matrix to a 3D SE(3) coordinate mesh.
 
-    CAUSAL AFFORDANCE: Authorizes the spatial renderer to project 2D semantics over a
-    3D topology, mathematically guaranteeing invariant visual alignment relative to the
-    observer's view frustum.
+    CAUSAL AFFORDANCE: Authorizes the spatial renderer to project 2D semantics over a 3D topology, mathematically guaranteeing invariant visual alignment relative to the observer's view frustum.
 
-    EPISTEMIC BOUNDS: Strictly bounded by boolean physics gates (always_face_camera,
-    occlude_behind_meshes) defining the object's Z-buffer collision behavior.
+    EPISTEMIC BOUNDS: Strictly bounded by boolean physics gates (`always_face_camera`, `occlude_behind_meshes`) defining Z-buffer collision behavior. `distance_scaling_factor` is bounded `[0.0, 10.0]` to control orthographic size invariance.
 
-    MCP ROUTING TRIGGERS: Spherical Billboarding, View Frustum Alignment, Z-Buffer Occlusion, Projective Geometry
+    MCP ROUTING TRIGGERS: Spherical Billboarding, View Frustum Alignment, Z-Buffer Occlusion, Projective Geometry, UI Anchoring
+
     """
 
     anchoring_node_id: NodeIdentifierState = Field(
@@ -863,19 +801,15 @@ class SpatialBillboardContract(CoreasonBaseState):
 
 
 class VolumetricEdgeProfile(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Formalizes the geometric curve and token flow thermodynamics
-    between topological vertices.
+    r"""
+    AGENT INSTRUCTION: Formalizes the geometric curve and token flow thermodynamics between topological vertices.
 
-    CAUSAL AFFORDANCE: Instructs the spatial rendering engine to compute C1-continuous
-    parametric splines between discrete nodes, translating abstract logical edges into
-    physical volumetric manifolds.
+    CAUSAL AFFORDANCE: Instructs the spatial rendering engine to compute C1-continuous parametric splines between discrete nodes, translating abstract logical edges into physical volumetric manifolds.
 
-    EPISTEMIC BOUNDS: Curve geometry is locked to the Literal automaton ["straight",
-    "bezier", "catmull_rom"]. Thermodynamic token velocity is clamped by flow_velocity
-    (ge=0.0, le=100.0).
+    EPISTEMIC BOUNDS: Curve geometry is locked to the Literal automaton `["straight", "bezier", "catmull_rom"]`. Thermodynamic token velocity is clamped by `flow_velocity` (`ge=0.0, le=100.0`). Spline rigidity (`tension`) is bounded `[0.0, 1.0]`.
 
     MCP ROUTING TRIGGERS: Parametric Spline Interpolation, Catmull-Rom, Bezier Geometry, C1 Continuity, Volumetric Edge
+
     """
 
     curve_type: Literal["straight", "bezier", "catmull_rom"] = Field(
