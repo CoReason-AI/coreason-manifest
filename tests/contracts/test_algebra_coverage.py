@@ -600,12 +600,8 @@ def test_get_ontology_schema_empty(mock_schema: Mock) -> None:
 
 def test_calculate_latent_alignment_invalid_base64() -> None:
     pol = OntologicalAlignmentPolicy(min_cosine_similarity=-1.0, require_isometry_proof=False)
-    v_invalid = VectorEmbeddingState(
-        vector_base64="aQ==", dimensionality=3, model_name="model1"
-    )
-    # But wait, "aQ==" is valid base64 but might fail struct.unpack. We need binascii.Error!
     # A string with valid chars but invalid length for base64: "a"
-    v_invalid2 = VectorEmbeddingState.model_construct(
+    v_invalid = VectorEmbeddingState.model_construct(
         vector_base64="a", dimensionality=3, model_name="model1"
     )
     v_valid = VectorEmbeddingState.model_construct(
@@ -614,5 +610,5 @@ def test_calculate_latent_alignment_invalid_base64() -> None:
         model_name="model1"
     )
 
-    with pytest.raises(ValueError, match="Topological Contradiction: Invalid base64 encoding."):
-        calculate_latent_alignment(v_invalid2, v_valid, pol)
+    with pytest.raises(ValueError, match=r"Topological Contradiction: Invalid base64 encoding\."):
+        calculate_latent_alignment(v_invalid, v_valid, pol)
