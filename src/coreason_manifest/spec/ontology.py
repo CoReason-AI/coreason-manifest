@@ -9356,6 +9356,108 @@ class UtilityJustificationGraphReceipt(CoreasonBaseState):
         return self
 
 
+class LiquidTypeContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Mathematically bounds a specific target property.
+    """
+
+    target_property: Annotated[str, StringConstraints(max_length=2000)] = Field(
+        description="The specific variable or schema key being bounded."
+    )
+    mathematical_predicate: Annotated[str, StringConstraints(max_length=2000)] = Field(
+        description="The formal algebraic constraint (e.g., x > 0 and x < 100)."
+    )
+
+
+class HoareLogicProofReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Replace unit tests with mathematical proofs of state bounds prior to capability deployment.
+    """
+
+    capability_id: Annotated[str, StringConstraints(max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="The forged tool being verified."
+    )
+    preconditions: Annotated[list[LiquidTypeContract], Field(min_length=1)] = Field(description="The P bounds.")
+    postconditions: Annotated[list[LiquidTypeContract], Field(min_length=1)] = Field(description="The Q bounds.")
+    proof_system: Literal["lean4", "coq", "z3", "tla_plus"] = Field(
+        description="The proof system used to mathematically prove bounds."
+    )
+    verified_theorem_hash: Annotated[str, StringConstraints(max_length=128, pattern="^[a-f0-9]{64}$")] = Field(
+        description="Cryptographic proof."
+    )
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "preconditions", sorted(self.preconditions, key=lambda x: x.target_property))
+        object.__setattr__(self, "postconditions", sorted(self.postconditions, key=lambda x: x.target_property))
+        return self
+
+
+class AsymptoticComplexityReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Automatically infer Big-O asymptotic complexity via Monte Carlo fuzzing to populate Markov transition costs.
+    """
+
+    capability_id: Annotated[str, StringConstraints(max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="The forged tool being profiled."
+    )
+    time_complexity_class: Literal["O(1)", "O(log N)", "O(N)", "O(N log N)", "O(N^2)", "O(2^N)"] = Field(
+        description="The mathematically inferred compute curve."
+    )
+    space_complexity_class: Literal["O(1)", "O(log N)", "O(N)", "O(N^2)"] = Field(
+        description="The inferred memory allocation curve."
+    )
+    peak_vram_bytes: int = Field(ge=0, le=100000000000, description="Absolute thermodynamic memory ceiling detected.")
+    simulated_cpu_cycles: int = Field(
+        ge=0, le=100000000000, description="Empirical cycle burn used to establish compute_weight_magnitude."
+    )
+
+
+class ASTGradientReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Replace unstructured string tracebacks with deterministic, high-dimensional loss vectors for automated code repair.
+    """
+
+    compilation_attempt_id: Annotated[str, StringConstraints(max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="Cryptographic anchor to the failed compile execution."
+    )
+    ast_node_pointer: Annotated[str, StringConstraints(max_length=2000)] = Field(
+        description="The exact RFC 6902 JSON Pointer or AST path where the syntax fractured."
+    )
+    expected_type_geometry: Annotated[str, StringConstraints(max_length=2000)] = Field(
+        description="The formal covariant requirement."
+    )
+    actual_type_geometry: Annotated[str, StringConstraints(max_length=2000)] = Field(
+        description="The invalid contravariant state provided."
+    )
+    structural_loss_vector: VectorEmbeddingState | None = Field(
+        default=None,
+        description="The dense vector embedding of the semantic error for vector-math remediation.",
+    )
+
+
+class TeleologicalIsometryReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Mathematically prove the deployed code actually satisfies the original epistemic deficit vector.
+    """
+
+    source_intent_id: Annotated[str, StringConstraints(max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="Pointer to the originating SemanticDiscoveryIntent."
+    )
+    target_intent_vector: VectorEmbeddingState = Field(description="The original deficit space.")
+    forged_output_vector: VectorEmbeddingState = Field(
+        description="The empirical behavioral output space of the forged tool."
+    )
+    measured_cosine_similarity: float = Field(ge=-1.0, le=1.0, description="The measured cosine similarity.")
+    alignment_threshold_passed: bool = Field(description="Whether the threshold was passed.")
+
+    @model_validator(mode="after")
+    def enforce_teleological_alignment(self) -> Self:
+        if self.measured_cosine_similarity < 0.85:
+            object.__setattr__(self, "alignment_threshold_passed", False)
+        return self
+
+
 class VectorEmbeddingState(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Represents a declarative, frozen geometric coordinate
@@ -10506,6 +10608,36 @@ class ConsensusFederationTopologyManifest(CoreasonBaseState):
         )
 
 
+class CapabilityForgeTopologyManifest(BaseTopologyManifest):
+    """
+    AGENT INSTRUCTION: Create a zero-cost macro abstraction that unrolls the entire Zero-to-One generation, verification, and profiling loop.
+    """
+
+    type: Literal["macro_forge"] = Field(default="macro_forge", description="Discriminator for forge macro.")
+    target_epistemic_deficit: SemanticDiscoveryIntent = Field(description="The target epistemic deficit.")
+    generator_node_id: NodeIdentifierState = Field(description="The agent writing the code.")
+    formal_verifier_id: NodeIdentifierState = Field(description="The formal verifier system node.")
+    fuzzing_engine_id: NodeIdentifierState = Field(description="The fuzzing engine system node.")
+
+    def compile_to_base_topology(self) -> DAGTopologyManifest:
+        """Deterministically unwraps the macro into a rigid DAGTopologyManifest."""
+        nodes: dict[NodeIdentifierState, AnyNodeProfile] = {
+            self.generator_node_id: AgentNodeProfile(description="Generator Node"),
+            self.formal_verifier_id: SystemNodeProfile(description="Formal Verifier Node"),
+            self.fuzzing_engine_id: SystemNodeProfile(description="Fuzzing Engine Node"),
+        }
+        edges = [
+            (self.generator_node_id, self.formal_verifier_id),
+            (self.formal_verifier_id, self.fuzzing_engine_id),
+        ]
+        return DAGTopologyManifest(
+            nodes=nodes,
+            edges=edges,
+            max_depth=10,
+            max_fan_out=10,
+        )
+
+
 type AnyTopologyManifest = Annotated[
     DAGTopologyManifest
     | CouncilTopologyManifest
@@ -10515,7 +10647,8 @@ type AnyTopologyManifest = Annotated[
     | EvaluatorOptimizerTopologyManifest
     | DigitalTwinTopologyManifest
     | AdversarialMarketTopologyManifest
-    | ConsensusFederationTopologyManifest,
+    | ConsensusFederationTopologyManifest
+    | CapabilityForgeTopologyManifest,
     Field(discriminator="type", description="A discriminated union of workflow topologies."),
 ]
 
@@ -11964,6 +12097,7 @@ EvaluatorOptimizerTopologyManifest.model_rebuild()
 DigitalTwinTopologyManifest.model_rebuild()
 AdversarialMarketTopologyManifest.model_rebuild()
 ConsensusFederationTopologyManifest.model_rebuild()
+CapabilityForgeTopologyManifest.model_rebuild()
 EpistemicSOPManifest.model_rebuild()
 DelegatedCapabilityManifest.model_rebuild()
 TokenBurnReceipt.model_rebuild()
@@ -12028,3 +12162,8 @@ TerminalConditionContract.model_rebuild()
 TransitionEdgeProfile.model_rebuild()
 CyclicEdgeProfile.model_rebuild()
 ActionSpaceManifest.model_rebuild()
+ASTGradientReceipt.model_rebuild()
+LiquidTypeContract.model_rebuild()
+HoareLogicProofReceipt.model_rebuild()
+AsymptoticComplexityReceipt.model_rebuild()
+TeleologicalIsometryReceipt.model_rebuild()
