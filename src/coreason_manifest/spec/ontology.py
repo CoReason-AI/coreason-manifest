@@ -830,24 +830,15 @@ class VolumetricEdgeProfile(CoreasonBaseState):
 
 
 class DynamicLayoutManifest(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Encapsulates a Python 3.14 t-string template as an
-    Abstract Syntax Tree (AST) artifact for declarative, zero-trust UI
-    evaluation. As a ...Manifest suffix, this is a frozen N-dimensional
-    coordinate state.
+    r"""
+    AGENT INSTRUCTION: Encapsulates a Python 3.14 t-string template as an Abstract Syntax Tree (AST) artifact for declarative, zero-trust UI evaluation.
 
-    CAUSAL AFFORDANCE: Projects dynamic visual grids onto the UI plane while
-    physically suffocating any capability for Arbitrary Code Execution (ACE)
-    during runtime string interpolation.
+    CAUSAL AFFORDANCE: Projects dynamic visual grids onto the UI plane while physically suffocating any capability for Arbitrary Code Execution (ACE) during runtime string interpolation.
 
-    EPISTEMIC BOUNDS: The layout_tstring is physically clamped at
-    max_length=2000. The @field_validator validate_tstring mathematically proves
-    execution safety by traversing the AST and explicitly quarantining forbidden
-    kinetic nodes (e.g., Call, Import), restricting to declarative operations.
+    EPISTEMIC BOUNDS: The `layout_tstring` is physically clamped at `max_length=2000`. The `@field_validator` `validate_tstring` mathematically proves execution safety by traversing the AST and explicitly quarantining forbidden kinetic nodes (e.g., Call, Import), restricting to declarative operations.
 
-    MCP ROUTING TRIGGERS: Abstract Syntax Tree Validation, Zero-Trust UI
-    Projection, Arbitrary Code Execution Prevention, Declarative Templating,
-    Sandboxed Evaluation
+    MCP ROUTING TRIGGERS: Abstract Syntax Tree Validation, Zero-Trust UI Projection, Arbitrary Code Execution Prevention, Declarative Templating
+
     """
 
     layout_tstring: str = Field(
@@ -879,19 +870,15 @@ class DynamicLayoutManifest(CoreasonBaseState):
 
 
 class ExecutionSLA(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: ExecutionSLA is the rigid physical boundary dictating the absolute time and memory
-    limits for kinetic execution, practically bounding the Halting Problem within the swarm.
+    r"""
+    AGENT INSTRUCTION: The rigid physical boundary dictating the absolute time and memory limits for kinetic execution, practically bounding the Halting Problem within the swarm.
 
-    CAUSAL AFFORDANCE: Acts as the hardware guillotine. It instructs the orchestrator's C++/Rust runtime
-    to physically sever the thread, drop the VRAM context, or kill the WASM container if an agent
-    exceeds its authorized footprint, preventing Denial of Service (DoS) via memory exhaustion.
+    CAUSAL AFFORDANCE: Acts as the hardware guillotine. Instructs the orchestrator's C++/Rust runtime to physically sever the thread, drop the VRAM context, or kill the WASM container if an agent exceeds its footprint, preventing Denial of Service (DoS).
 
-    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are intrinsic Pydantic limits on
-    max_execution_time_ms (le=86400000, gt=0) and max_compute_footprint_mb (le=1000000000, gt=0).
-    Any breach instantly triggers a SystemFaultEvent.
+    EPISTEMIC BOUNDS: Absolute physical limits are clamped via intrinsic Pydantic limits: `max_execution_time_ms` (`le=86400000`, `gt=0`) and `max_compute_footprint_mb` (`le=1000000000`, `gt=0`).
 
     MCP ROUTING TRIGGERS: Hardware Guillotine, Halting Problem Bounding, VRAM Allocation, Process Termination, Resource Exhaustion
+
     """
 
     max_execution_time_ms: int = Field(
@@ -908,21 +895,15 @@ class ExecutionSLA(CoreasonBaseState):
 
 
 class FacetMatrixProfile(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Formalizes Edward Tufte's principles of Small Multiples (Trellis
-    displays) by establishing a categorical partitioning matrix for high-dimensional data
-    projections. As a ...Profile suffix, this is a declarative property descriptor.
+    r"""
+    AGENT INSTRUCTION: Formalizes Edward Tufte's principles of Small Multiples (Trellis displays) by establishing a categorical partitioning matrix for high-dimensional data projections.
 
-    CAUSAL AFFORDANCE: Authorizes the rendering engine to recursively split and project a
-    singular visual grammar into a grid of structurally isomorphic sub-manifolds based on
-    distinct categorical fields.
+    CAUSAL AFFORDANCE: Authorizes the rendering engine to recursively split and project a singular visual grammar into a grid of structurally isomorphic sub-manifolds based on distinct categorical fields.
 
-    EPISTEMIC BOUNDS: The partitioning constraints (row_field, column_field) are both
-    optional (default=None) and physically bounded by max_length=2000 to mathematically
-    prevent Dictionary Bombing and OOM crashes during matrix generation.
+    EPISTEMIC BOUNDS: The partitioning constraints (`row_field`, `column_field`) are both optional (`default=None`) and physically bounded by `max_length=2000` to mathematically prevent Dictionary Bombing and OOM crashes during matrix generation.
 
-    MCP ROUTING TRIGGERS: Small Multiples, Trellis Display, Isomorphic Sub-Manifold,
-    High-Dimensional Projection, Categorical Partitioning
+    MCP ROUTING TRIGGERS: Small Multiples, Trellis Display, Isomorphic Sub-Manifold, High-Dimensional Projection, Categorical Partitioning
+
     """
 
     row_field: str | None = Field(
@@ -934,14 +915,15 @@ class FacetMatrixProfile(CoreasonBaseState):
 
 
 class ComputeRateContract(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: ComputeRateContract is the immutable economic physics engine defining the Thermodynamic Cost of token generation across the network.
+    r"""
+    AGENT INSTRUCTION: The immutable economic physics engine defining the Thermodynamic Cost of token generation across the network.
 
-    CAUSAL AFFORDANCE: Allows the swarm orchestrator to mathematically project the budget exhaustion of a specific Latent Scratchpad trace or Monte Carlo Tree Search (MCTS) rollout before committing to the execution graph, effectively acting as an economic look-ahead.
+    CAUSAL AFFORDANCE: Allows the swarm orchestrator to mathematically project the budget exhaustion of a specific Latent Scratchpad trace or MCTS rollout before committing to the execution graph.
 
-    EPISTEMIC BOUNDS: Strict integer boundaries (`le=1000000000`) on `cost_per_million_input_tokens` and `cost_per_million_output_tokens` ensure that economic execution vectors cannot overflow the Epistemic Ledger. Mutated from floats to atomic integer magnitudes to eliminate IEEE 754 precision loss and secure Byzantine consensus.
+    EPISTEMIC BOUNDS: Strict integer boundaries (`le=1000000000`) on `cost_per_million_input_tokens` and `cost_per_million_output_tokens` ensure economic execution vectors cannot overflow the Epistemic Ledger. Eliminates IEEE 754 precision loss.
 
     MCP ROUTING TRIGGERS: Thermodynamic Cost, Monte Carlo Tree Search, Economic Escrow, Token Burn, Budget Calculation
+
     """
 
     cost_per_million_input_tokens: int = Field(
@@ -954,22 +936,15 @@ class ComputeRateContract(CoreasonBaseState):
 
 
 class ScalePolicy(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Implements Stevens's levels of measurement and Wilkinson's Grammar
-    of Graphics to mathematically project abstract data domains into visual geometric
-    ranges. As a ...Policy suffix, this object defines rigid mathematical boundaries.
+    r"""
+    AGENT INSTRUCTION: Implements Stevens's levels of measurement and Wilkinson's Grammar of Graphics to mathematically project abstract data domains into visual geometric ranges.
 
-    CAUSAL AFFORDANCE: Physically distorts or linearly maps the input metric tensor into
-    rendering space, dictating how the orchestrator processes logarithmic, temporal, or
-    ordinal data vectors for UI projection.
+    CAUSAL AFFORDANCE: Physically distorts or linearly maps the input metric tensor into rendering space, dictating how the orchestrator processes logarithmic, temporal, or ordinal data vectors for UI projection.
 
-    EPISTEMIC BOUNDS: The transformation algorithm is strictly constrained to a Literal
-    automaton ["linear", "log", "time", "ordinal", "nominal"]. Physical data boundaries
-    (domain_min, domain_max) are optional (default=None) and upper-bounded by
-    le=1000000000.0 to prevent geometric projection overflow (no ge bound enforced).
+    EPISTEMIC BOUNDS: The transformation algorithm is strictly constrained to a Literal automaton `["linear", "log", "time", "ordinal", "nominal"]`. Physical data boundaries (`domain_min`, `domain_max`) are upper-bounded by `le=1000000000.0` to prevent geometric projection overflow.
 
-    MCP ROUTING TRIGGERS: Grammar of Graphics, Metric Tensor Distortion, Levels of
-    Measurement, Scale Projection, FSM Literal
+    MCP ROUTING TRIGGERS: Grammar of Graphics, Metric Tensor Distortion, Levels of Measurement, Scale Projection, FSM Literal
+
     """
 
     type: Literal["linear", "log", "time", "ordinal", "nominal"] = Field(
@@ -1009,21 +984,15 @@ class ScalePolicy(CoreasonBaseState):
 
 
 class VisualEncodingProfile(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Defines the mathematical mapping function between an abstract data
-    dimension (field) and a physiological human perception vector (channel). As a ...Profile
-    suffix, this is a declarative, frozen snapshot of a rendering geometry.
+    r"""
+    AGENT INSTRUCTION: Defines the mathematical mapping function between an abstract data dimension (field) and a physiological human perception vector (channel).
 
-    CAUSAL AFFORDANCE: Constrains the renderer's geometric plotting algorithm by forcing the
-    interpretation of data through an optional ScalePolicy transformation (e.g., logarithmic
-    or linear).
+    CAUSAL AFFORDANCE: Constrains the renderer's geometric plotting algorithm by forcing the interpretation of data through an optional ScalePolicy transformation.
 
-    EPISTEMIC BOUNDS: The channel is strictly typed to a Literal enum
-    ["x", "y", "color", "size", "opacity", "shape", "text"]. The target field is physically
-    bounded to max_length=2000 to prevent dictionary bombing during rendering loops.
+    EPISTEMIC BOUNDS: The channel is strictly typed to a Literal enum `["x", "y", "color", "size", "opacity", "shape", "text"]`. The target field is physically bounded to `max_length=2000` to prevent dictionary bombing during rendering loops.
 
-    MCP ROUTING TRIGGERS: Bijective Mapping, Retinal Variables, Dimensionality Reduction,
-    Geometric Plotting, Visual Channel Encoding
+    MCP ROUTING TRIGGERS: Bijective Mapping, Retinal Variables, Dimensionality Reduction, Geometric Plotting, Visual Channel Encoding
+
     """
 
     channel: Literal["x", "y", "color", "size", "opacity", "shape", "text"] = Field(
@@ -1034,21 +1003,15 @@ class VisualEncodingProfile(CoreasonBaseState):
 
 
 class SideEffectProfile(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Implements Lambda Calculus principles of referential transparency
-    and state isolation by rigidly categorizing tool capabilities. As a ...Profile suffix,
-    this is a declarative property descriptor.
+    r"""
+    AGENT INSTRUCTION: Implements Lambda Calculus principles of referential transparency and state isolation by rigidly categorizing tool capabilities.
 
-    CAUSAL AFFORDANCE: Instructs the orchestrator's graph traversal engine on whether a
-    tool can be safely re-evaluated during a Monte Carlo Tree Search (is_idempotent) or if
-    it induces irreversible kinetic entropy (mutates_state).
+    CAUSAL AFFORDANCE: Instructs the orchestrator's graph traversal engine (e.g., MCTS) whether a tool can be safely re-evaluated concurrently (`is_idempotent`) or if it induces irreversible kinetic entropy (`mutates_state`).
 
-    EPISTEMIC BOUNDS: Constrained entirely to strict Pydantic boolean logic (is_idempotent,
-    mutates_state), mathematically severing ambiguity in side-effect classifications to
-    prevent uncontrolled state mutation.
+    EPISTEMIC BOUNDS: Constrained entirely to strict Pydantic boolean logic to mathematically sever ambiguity in side-effect classifications, preventing uncontrolled state mutation.
 
-    MCP ROUTING TRIGGERS: Referential Transparency, Lambda Calculus, Idempotence, State
-    Monad, Causal Actuator
+    MCP ROUTING TRIGGERS: Referential Transparency, Lambda Calculus, Idempotence, State Monad, Causal Actuator
+
     """
 
     is_idempotent: bool = Field(
@@ -1248,19 +1211,15 @@ class ComputeEngineProfile(CoreasonBaseState):
 
 
 class PermissionBoundaryPolicy(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: PermissionBoundaryPolicy is the strict Zero-Trust Architecture security perimeter
-    defining exactly what external physical systems or networks an agent node is authorized to touch.
+    r"""
+    AGENT INSTRUCTION: The strict Zero-Trust Architecture security perimeter defining exactly what external physical systems or networks an agent node is authorized to touch.
 
-    CAUSAL AFFORDANCE: Mechanically limits the subgraph's kinetic reach. It forces the orchestrator to
-    drop network egress packets or block disk I/O unless explicitly whitelisted, and mandates the
-    negotiation of specific cryptographic handshakes (e.g., OAuth2, mTLS) before allocating compute.
+    CAUSAL AFFORDANCE: Mechanically limits kinetic reach. Forces the orchestrator to drop network egress packets, block disk I/O, or mandate cryptographic handshakes (e.g., mTLS) before allocating compute.
 
-    EPISTEMIC BOUNDS: Bounded by deterministic string arrays (allowed_domains, auth_requirements)
-    that must be strictly evaluated at runtime. The arrays are alphabetically sorted at instantiation
-    to prevent Hash Poisoning attacks on the Merkle trace.
+    EPISTEMIC BOUNDS: Bounded by deterministic string arrays (`allowed_domains`, `auth_requirements` constrained to `max_length=2000`) that are alphabetically sorted at instantiation via `@model_validator` to prevent Hash Poisoning attacks.
 
     MCP ROUTING TRIGGERS: Zero-Trust Architecture, Network Egress Filtering, Capability-Based Security, mTLS Handshake, Hash Poisoning Prevention
+
     """
 
     network_access: bool = Field(
@@ -1322,19 +1281,15 @@ class PostQuantumSignatureReceipt(CoreasonBaseState):
 
 
 class RoutingFrontierPolicy(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: RoutingFrontierPolicy is the Multi-Objective Optimization matrix used to navigate
-    the Spot-Market compute layer, calculating the Pareto Efficiency frontier between speed, cost, and intelligence.
+    r"""
+    AGENT INSTRUCTION: The Multi-Objective Optimization matrix used to navigate the Spot-Market compute layer, calculating the Pareto Efficiency frontier between speed, cost, and intelligence.
 
-    CAUSAL AFFORDANCE: Instructs the Spot-Market router on how to mechanically weigh competing inference
-    engines. If a query requires extreme logic, it authorizes high cost; if it requires a UI reflex,
-    it enforces strict latency bounds.
+    CAUSAL AFFORDANCE: Instructs the Spot-Market router on how to mechanically weigh competing inference engines. If a query requires extreme logic, it authorizes high cost; if it requires a UI reflex, it enforces strict latency bounds.
 
-    EPISTEMIC BOUNDS: Strict physical, economic, and thermodynamic ceilings are mathematically enforced:
-    max_latency_ms (le=86400000), max_cost_magnitude_per_token (le=1000000000), and an absolute ESG bound
-    via max_carbon_intensity_gco2eq_kwh (le=10000.0).
+    EPISTEMIC BOUNDS: Strict physical, economic, and thermodynamic ceilings are mathematically enforced: `max_latency_ms` (`le=86400000`), `max_cost_magnitude_per_token` (`le=1000000000`), and an absolute ESG bound via `max_carbon_intensity_gco2eq_kwh` (`le=10000.0`).
 
     MCP ROUTING TRIGGERS: Pareto Efficiency, Multi-Objective Optimization, Spot-Market Routing, Carbon Budget, Compute Allocation
+
     """
 
     max_latency_ms: int = Field(
@@ -5640,14 +5595,15 @@ class GovernancePolicy(CoreasonBaseState):
 
 
 class GrammarPanelProfile(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Implements Leland Wilkinson's Grammar of Graphics to deterministically project N-dimensional Epistemic Ledger state into a 2D topological manifold. As a ...Profile suffix, this is a declarative, frozen snapshot of a rendering geometry.
+    r"""
+    AGENT INSTRUCTION: Implements Leland Wilkinson's Grammar of Graphics to deterministically project N-dimensional Epistemic Ledger state into a 2D topological manifold.
 
-    CAUSAL AFFORDANCE: Authorizes the frontend rendering engine to construct geometric marks (`Literal["point", "line", "area", "bar", "rect", "arc"]`) driven strictly by the underlying `ledger_source_id`. Optionally supports Small Multiples via `facet` (`FacetMatrixProfile`).
+    CAUSAL AFFORDANCE: Authorizes the frontend rendering engine to construct geometric marks (`Literal["point", "line", "area", "bar", "rect", "arc"]`) driven strictly by the underlying `ledger_source_id`.
 
     EPISTEMIC BOUNDS: Bounded by a rigid `encodings` array sorted mathematically by `channel` via a `@model_validator` to preserve RFC 8785 canonical hashing. Prevents hallucinated visuals by strictly linking to a verified `ledger_source_id` CID.
 
     MCP ROUTING TRIGGERS: Grammar of Graphics, Data Visualization, Geometric Projection, Declarative UI, Retinal Variables
+
     """
 
     panel_id: str = Field(
@@ -6109,14 +6065,15 @@ class InputMappingContract(CoreasonBaseState):
 
 
 class InsightCardProfile(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: A declarative bounding box for rendering condensed semantic summaries (Information Bottleneck compression) into human-readable 2D space. As a ...Profile suffix, this is a declarative, frozen snapshot of a rendering geometry.
+    r"""
+    AGENT INSTRUCTION: A declarative bounding box for rendering condensed semantic summaries (Information Bottleneck compression) into human-readable 2D space.
 
     CAUSAL AFFORDANCE: Projects Markdown-formatted text onto the UI plane while serving as a structural honeypot against Polyglot XSS and Markdown execution injection attacks.
 
-    EPISTEMIC BOUNDS: Physically restricts payload size to `max_length=100000` on `markdown_content`. Two distinct `@field_validators` mathematically strip HTML event handlers and malicious URI schemes, ensuring zero-trust projection.
+    EPISTEMIC BOUNDS: Physically restricts payload size to `max_length=100000` on `markdown_content`. Two distinct `@field_validator` hooks mathematically strip HTML event handlers and malicious URI schemes, ensuring zero-trust projection.
 
     MCP ROUTING TRIGGERS: Information Bottleneck, Semantic Compression, XSS Sanitization, Markdown Projection, Zero-Trust UI
+
     """
 
     panel_id: str = Field(
@@ -7196,14 +7153,15 @@ type MCPTransportProtocolProfile = Literal["stdio", "sse", "http"]
 
 
 class MacroGridProfile(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Acts as a Cartesian topological coordinator based on Edward Tufte's Small Multiples, organizing multiple discrete visual artifacts (`AnyPanelProfile`) into a unified grid configuration. As a ...Profile suffix, this is a declarative, frozen snapshot of a rendering geometry.
+    r"""
+    AGENT INSTRUCTION: Acts as a Cartesian topological coordinator based on Edward Tufte's Small Multiples, organizing multiple discrete visual artifacts into a unified grid configuration.
 
     CAUSAL AFFORDANCE: Translates abstract UI panels into fixed 2D matrices (`layout_matrix`), forcing spatial determinism on the frontend rendering engine.
 
     EPISTEMIC BOUNDS: A strictly bounded `@model_validator` executes a referential integrity sweep, mathematically guaranteeing that every panel ID referenced in the `layout_matrix` (`max_length=1000000000`) corresponds to a verified object in the `panels` array, physically severing Ghost Panel hallucinations.
 
     MCP ROUTING TRIGGERS: Cartesian Coordinate System, Small Multiples, Spatial Topology, Referential Integrity, Layout Matrix
+
     """
 
     layout_matrix: list[list[Annotated[str, StringConstraints(max_length=255)]]] = Field(
@@ -9939,19 +9897,15 @@ type AnyNodeProfile = Annotated[
 
 
 class SemanticZoomProfile(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Formalizes the Information Bottleneck principle to execute Semantic Zooming.
-    It defines the exact Euclidean distance thresholds at which a node's semantic payload
-    deterministically degrades to preserve computational entropy and visual salience.
+    r"""
+    AGENT INSTRUCTION: Formalizes the Information Bottleneck principle to execute Semantic Zooming. It defines the exact Euclidean distance thresholds at which a node's semantic payload deterministically degrades to preserve computational entropy.
 
-    CAUSAL AFFORDANCE: Instructs the spatial projection engine to dynamically collapse high-entropy
-    unstructured text (e.g., full cognitive traces) into low-entropy scalars or categorical taxonomic
-    labels as the observer's SE(3) camera recedes.
+    CAUSAL AFFORDANCE: Instructs the spatial projection engine to dynamically collapse high-entropy unstructured text into low-entropy scalars or categorical labels as the observer's SE(3) camera recedes.
 
-    EPISTEMIC BOUNDS: The thresholds are bounded to continuous physical distance in meters (ge=0.0).
-    A strict mathematical invariant guarantees spatial monotonicity: micro < meso < macro.
+    EPISTEMIC BOUNDS: The thresholds are bounded to continuous physical distance in meters (`ge=0.0`). A strict mathematical invariant guaranteed by a `@model_validator` enforces spatial monotonicity: micro < meso < macro.
 
     MCP ROUTING TRIGGERS: Information Bottleneck, Semantic Compression, Euclidean Distance, Level of Detail, Entropy Degradation
+
     """
 
     macro_distance_threshold: float = Field(
