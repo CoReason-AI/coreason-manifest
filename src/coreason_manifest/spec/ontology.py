@@ -16,6 +16,7 @@ import ipaddress
 import json
 import math
 import re
+import typing
 import urllib.parse
 from enum import StrEnum
 from typing import Annotated, Any, Literal, Self
@@ -379,6 +380,91 @@ class CoreasonBaseState(BaseModel):
         raw_dict = self.model_dump(mode="json", exclude_none=True, by_alias=True)
         # Topological mapping: Enforces RFC 8785 strict canonical key sorting.
         return json.dumps(raw_dict, ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode("utf-8")
+
+
+T = typing.TypeVar("T")
+
+
+class TraceContextState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Implements Distributed Causality using Vector Clocks and rho-calculus.
+
+    CAUSAL AFFORDANCE: Acts as a Causal Graph Identifier, ensuring deterministic traceability
+    and state boundary enforcement without relying on hidden states.
+
+    EPISTEMIC BOUNDS: Relies on ULID or UUIDv7 string identifiers for strict topological ordering.
+    """
+
+    trace_id: str = Field(
+        min_length=26,
+        max_length=36,
+        pattern=r"^[0-9A-HJKMNP-TV-Z]{26}$|^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+        description="Globally unique ID generated once at the root user prompt. Must be a ULID or UUIDv7.",
+    )
+    span_id: str = Field(
+        min_length=26,
+        max_length=36,
+        pattern=r"^[0-9A-HJKMNP-TV-Z]{26}$|^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+        description="Unique identifier for the specific execution of this actionSpaceId. Must be a ULID or UUIDv7.",
+    )
+    parent_span_id: str | None = Field(
+        default=None,
+        min_length=26,
+        max_length=36,
+        pattern=r"^[0-9A-HJKMNP-TV-Z]{26}$|^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+        description="The span_id of the caller. If null, this node is the mathematically proven root.",
+    )
+    causal_clock: int = Field(
+        default=0, ge=0, description="Tracks the recursion depth/vector clock required for compute budget decay."
+    )
+
+    @model_validator(mode="after")
+    def verify_span_topology(self) -> Self:
+        """Mathematically prevents superficial infinite self-pointers."""
+        if self.parent_span_id is not None and self.span_id == self.parent_span_id:
+            raise ValueError("Topological Violation: span_id cannot equal parent_span_id.")
+        return self
+
+
+class StateVectorProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Implements Labeled Transition System (LTS) Determinism.
+
+    CAUSAL AFFORDANCE: Forces all hidden LLM contexts into an explicitly typed data structure,
+    making the agent a Markov Process with Full Observability.
+
+    EPISTEMIC BOUNDS: Bounded dictionary mapping of explicit schemas or primitives for both read and write state.
+    """
+
+    read_only_context: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
+        default_factory=dict,
+        description="Immutable behavior directives (e.g., global personas, fixed dataset schemas, boundary rules).",
+    )
+    mutable_memory: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] | None = Field(
+        default=None, description="The agent's scratchpad, chat history, and any writable states."
+    )
+    is_delta: bool = Field(
+        default=False,
+        description="A flag allowing the output to only return the keys in mutable_memory that changed, rather than forcing the entire array back up the network.",
+    )
+
+
+class ExecutionEnvelopeState[T](CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Implements the mathematical Reader/Writer/State (RWS) Monad, completely enveloping execution inside pure functions.
+
+    CAUSAL AFFORDANCE: The envelope functor that maps a pure value into a computational context.
+
+    EPISTEMIC BOUNDS: Strictly prevents external keys. Must consist solely of trace_context, state_vector, and payload.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    trace_context: TraceContextState = Field(
+        description="Represents the Reader/Writer monad for causality and recursion."
+    )
+    state_vector: StateVectorProfile = Field(description="Represents the State monad of Labeled Transition Systems.")
+    payload: T = Field(description="Represents the pure value payload data structure, domain-specific.")
 
 
 class SpatialReferenceFrameManifest(CoreasonBaseState):
@@ -2413,6 +2499,9 @@ class LatentScratchpadReceipt(CoreasonBaseState):
 
 
 class EphemeralNamespacePartitionState(CoreasonBaseState):
+    type: Literal["ephemeral_partition"] = Field(
+        default="ephemeral_partition", description="Discriminator type for an ephemeral namespace partition."
+    )
     """
     AGENT INSTRUCTION: Implements a hardware-level Sandboxing and Trusted Execution
     Environment (TEE) paradigm, utilizing WASI, eBPF, or zkVMs to safely execute
@@ -2473,6 +2562,7 @@ class EphemeralNamespacePartitionState(CoreasonBaseState):
 
 
 class ToolManifest(CoreasonBaseState):
+    type: Literal["native_tool"] = Field(default="native_tool", description="Discriminator type for a native tool.")
     """
     AGENT INSTRUCTION: Defines the discrete formalization of a Gibsonian Affordance within
     the agent's Reinforcement Learning Action Space ($A$). As a ...Manifest suffix, this is
@@ -2498,7 +2588,13 @@ class ToolManifest(CoreasonBaseState):
         description="The mathematically bounded semantic projection defining the tool's causal affordances.",
     )
     input_schema: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
-        max_length=1000000000, description="The strict JSON Schema dictionary defining the required arguments."
+        max_length=1000000000,
+        description="The strict JSON Schema dictionary defining the pure domain-specific arguments ($T$). The framework orchestrator will automatically wrap this in the ExecutionEnvelopeState at runtime.",
+    )
+    output_schema: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] | None = Field(
+        default=None,
+        max_length=1000000000,
+        description="The strict JSON Schema dictionary defining the pure domain-specific arguments ($T$). The framework orchestrator will automatically wrap this in the ExecutionEnvelopeState at runtime.",
     )
     side_effects: SideEffectProfile = Field(
         description="The declarative side-effect and idempotency profile of the tool."
@@ -3072,6 +3168,13 @@ class BaseStateEvent(CoreasonBaseState):
         max_length=128,
         pattern="^[a-zA-Z0-9_.:-]+$",
         description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+    )
+    prior_event_hash: str | None = Field(
+        default=None,
+        pattern="^[a-f0-9]{64}$",
+        min_length=1,
+        max_length=128,
+        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
     )
     timestamp: float = Field(
         ge=0.0,
@@ -6486,6 +6589,7 @@ class MCPCapabilityWhitelistPolicy(CoreasonBaseState):
 
 
 class MCPServerManifest(CoreasonBaseState):
+    type: Literal["mcp_server"] = Field(default="mcp_server", description="Discriminator type for an MCP server.")
     """
     AGENT INSTRUCTION: Represents a cryptographically verifiable Distributed RPC substrate mapping within the Actor Model, binding an external Model Context Protocol (MCP) manifold into the swarm's local topology under strict Object-Capability (OCap) rules.
 
@@ -6651,25 +6755,186 @@ class KineticSeparationPolicy(CoreasonBaseState):
         return self
 
 
+class TerminalConditionContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Establishes the physical Halting Problem brakes for cyclic loops within the execution topology. As a ...Contract suffix, this object defines rigid mathematical boundaries that the orchestrator must enforce globally.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator's control theory loop to physically halt recursive execution branches if the causal depth exceeds the maximum bound or the decayed budget falls below the minimal required magnitude.
+
+    EPISTEMIC BOUNDS: Bounded physically by `max_causal_depth` (ge=1, optional) tracking recursion and `minimum_budget_magnitude` (ge=1, optional) guaranteeing a minimum viable thermodynamic state.
+
+    MCP ROUTING TRIGGERS: Halting Problem, Recursion Boundary, Causal Depth, Compute Budget Decay, Structural Circuit Breaker
+    """
+
+    max_causal_depth: int | None = Field(
+        default=None,
+        ge=1,
+        description="The absolute limit on TraceContextState.causal_clock.",
+    )
+    minimum_budget_magnitude: int | None = Field(
+        default=None,
+        ge=1,
+        description="Halts execution if the decayed compute budget drops below this.",
+    )
+
+
+class EdgeMappingContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Formalizes a Profunctor Optics (Lenses) mapping between
+    disjoint capabilities without computational glue logic. As a ...Contract suffix,
+    this creates a rigid algebraic boundary.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator's state projection engine to
+    safely project the Covariant output of a source node into the Contravariant
+    input of a target node using pure mathematical mappings.
+
+    EPISTEMIC BOUNDS: The mapping uses RFC 6902 JSON Pointers (source_pointer and
+    target_pointer) to extract and inject data, bounded by 2000-character limits.
+
+    MCP ROUTING TRIGGERS: Category Theory, Profunctor Optics, Bijective Mapping,
+    Algebraic Translation, Lens, Prism
+    """
+
+    source_pointer: str = Field(
+        max_length=2000, description="The RFC 6902 JSON Pointer extracting the Covariant output."
+    )
+    target_pointer: str = Field(
+        max_length=2000, description="The RFC 6902 JSON Pointer injecting into the Contravariant input."
+    )
+
+
+class TransitionEdgeProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Represents a directed acyclic Markov edge for traversing the Action Space topology. As a ...Profile suffix, this is a declarative, frozen snapshot of a routing geometry.
+
+    CAUSAL AFFORDANCE: Unlocks stochastic pathfinding and graph traversal by projecting a probabilistic weight and thermodynamic cost required to advance to the next state node in the DCG.
+
+    EPISTEMIC BOUNDS: The semantic path relies on `target_node_id` (max_length=255). Mathematical optimization is bounded by `probability_weight` (ge=0.0, le=1.0) and `compute_weight_magnitude` (ge=0).
+
+    MCP ROUTING TRIGGERS: Markov Decision Process, Acyclic Edge, Stochastic Routing, Transition Probability, Directed Graph
+    """
+
+    edge_type: Literal["acyclic"] = Field(default="acyclic", description="Discriminator type for an acyclic edge.")
+    target_node_id: str | None = Field(
+        default=None,
+        max_length=255,
+        description="The coinductive pointer to the destination capability.",
+    )
+    target_intent: SemanticDiscoveryIntent | None = Field(
+        default=None,
+        description="Dynamic discovery intent for bridging nodes.",
+    )
+    payload_mappings: list[EdgeMappingContract] = Field(
+        default_factory=list,
+        description="The algebraic translation matrix mapping the source's Covariant output to the Contravariant input.",
+    )
+    eval_strategy: Literal["strict", "lazy"] = Field(
+        default="strict",
+        description="The evaluation strategy: 'strict' pre-fetches schemas, 'lazy' uses Coalgebraic Thunking to prevent State-Space Explosion.",
+    )
+    probability_weight: float = Field(ge=0.0, le=1.0, description="The stochastic heuristic preference of this path.")
+    compute_weight_magnitude: int = Field(ge=0, description="The thermodynamic cost to traverse this edge.")
+
+    @model_validator(mode="after")
+    def _enforce_structural_integrity(self) -> Self:
+        if bool(self.target_node_id) == bool(self.target_intent):
+            raise ValueError("Exactly one of target_node_id or target_intent must be populated.")
+
+        if self.payload_mappings:
+            object.__setattr__(
+                self,
+                "payload_mappings",
+                sorted(self.payload_mappings, key=lambda x: (x.source_pointer, x.target_pointer)),
+            )
+        return self
+
+
+class CyclicEdgeProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Represents a self-referential or cyclic Markov edge for deep recursive execution, utilizing Thermodynamic Discounting to prevent infinite loops. As a ...Profile suffix, this is a declarative, frozen snapshot of a routing geometry.
+
+    CAUSAL AFFORDANCE: Authorizes recursive tool calls or non-monotonic backward execution. The orchestrator must apply the Bellman `discount_factor` to the compute budget during each traversal loop.
+
+    EPISTEMIC BOUNDS: Structural repetition is checked by applying a geometric decay factor (`discount_factor` ge=0.0, le=1.0). An `@model_validator` mathematically prevents un-haltable infinite recursion if the `discount_factor` equals 1.0 without a strict `max_causal_depth` explicitly defined in the `terminal_condition`.
+
+    MCP ROUTING TRIGGERS: Markov Decision Process, Cyclic Edge, Bellman Equation, Thermodynamic Discounting, Recursive Traversal
+    """
+
+    edge_type: Literal["cyclic"] = Field(default="cyclic", description="Discriminator type for a cyclic edge.")
+    target_node_id: str | None = Field(
+        default=None,
+        max_length=255,
+        description="The coinductive pointer to the destination capability.",
+    )
+    target_intent: SemanticDiscoveryIntent | None = Field(
+        default=None,
+        description="Dynamic discovery intent for bridging nodes.",
+    )
+    payload_mappings: list[EdgeMappingContract] = Field(
+        default_factory=list,
+        description="The algebraic translation matrix mapping the source's Covariant output to the Contravariant input.",
+    )
+    eval_strategy: Literal["strict", "lazy"] = Field(
+        default="strict",
+        description="The evaluation strategy: 'strict' pre-fetches schemas, 'lazy' uses Coalgebraic Thunking to prevent State-Space Explosion.",
+    )
+    probability_weight: float = Field(ge=0.0, le=1.0, description="The stochastic heuristic preference of this path.")
+    compute_weight_magnitude: int = Field(ge=0, description="The thermodynamic cost to traverse this edge.")
+    discount_factor: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="The Bellman Equation gamma applied to the budget on each cyclic loop.",
+    )
+    terminal_condition: TerminalConditionContract = Field(
+        description="The mandatory structural conditions guaranteed to eventually halt traversal."
+    )
+
+    @model_validator(mode="after")
+    def _enforce_structural_integrity_mapping(self) -> Self:
+        if bool(self.target_node_id) == bool(self.target_intent):
+            raise ValueError("Exactly one of target_node_id or target_intent must be populated.")
+
+        if self.payload_mappings:
+            object.__setattr__(
+                self,
+                "payload_mappings",
+                sorted(self.payload_mappings, key=lambda x: (x.source_pointer, x.target_pointer)),
+            )
+        return self
+
+    @model_validator(mode="after")
+    def prevent_infinite_loop(self) -> Self:
+        if self.discount_factor == 1.0 and self.terminal_condition.max_causal_depth is None:
+            raise ValueError("Un-haltable infinite loop detected.")
+        return self
+
+
+type AnyTransitionEdge = Annotated[TransitionEdgeProfile | CyclicEdgeProfile, Field(discriminator="edge_type")]
+
+
+type AnyActionSpaceCapability = Annotated[
+    ToolManifest | MCPServerManifest | EphemeralNamespacePartitionState, Field(discriminator="type")
+]
+
+
 class ActionSpaceManifest(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Defines the finite, discrete Markov Decision Process (MDP) Action
     Space and affordance landscape available to a specific execution node. As a ...Manifest
     suffix, this defines a frozen, N-dimensional coordinate state.
 
-    CAUSAL AFFORDANCE: Projects the combined multi-dimensional matrix of native_tools,
-    mcp_servers, and ephemeral_partitions into the agent's context, mathematically dictating
-    which kinetic operations it can initiate. Optionally enforces kinetic_separation
-    (KineticSeparationPolicy) to prevent toxic tool combinations.
+    CAUSAL AFFORDANCE: Projects the combined multi-dimensional matrix of capabilities
+    into the agent's context, mathematically dictating which kinetic operations it can initiate.
+    Optionally enforces kinetic_separation (KineticSeparationPolicy) to prevent toxic
+    tool combinations.
 
     EPISTEMIC BOUNDS: The action_space_id is geometrically constrained to a 128-char CID.
     A @model_validator strictly bounds the topology by enforcing uniqueness across all
-    native_tools namespaces, and ensures deterministic RFC 8785 representation by sorting
-    tools, servers, and partitions by their respective identifiers (tool_name, server_uri,
-    partition_id).
+    capabilities namespaces, and ensures deterministic RFC 8785 representation by sorting
+    edges by their target_node_id.
 
     MCP ROUTING TRIGGERS: Markov Decision Process, Action Space, Affordance Theory,
-    Curated Environment, State Transition Matrix
+    Curated Environment, State Transition Matrix, Directed Cyclic Graph
     """
 
     action_space_id: str = Field(
@@ -6678,36 +6943,102 @@ class ActionSpaceManifest(CoreasonBaseState):
         pattern="^[a-zA-Z0-9_.:-]+$",
         description="The unique identifier for this curated environment of tools.",
     )
-    native_tools: list[ToolManifest] = Field(
-        default_factory=list,
-        description="The strict array of discrete, natively defined tools available in this space.",
+    capabilities: dict[Annotated[str, StringConstraints(max_length=255)], AnyActionSpaceCapability] = Field(
+        description="The State Space (S) of the MDP, indexed by their unique capability CIDs."
     )
-    mcp_servers: list[MCPServerManifest] = Field(
-        default_factory=list,
-        description="The array of verified external Model Context Protocol servers mounted into this action space.",
+    transition_matrix: dict[Annotated[str, StringConstraints(max_length=255)], list[AnyTransitionEdge]] = Field(
+        description="The Stochastic Transition Matrix (P)."
     )
-    ephemeral_partitions: list[EphemeralNamespacePartitionState] = Field(
-        default_factory=list,
-        description="Hermetically sealed context boundaries for dynamically resolved scripts and PEFT adapters.",
-    )
+    entry_point_id: str = Field(description="Defines the initial state (S_0) of the MDP.")
     kinetic_separation: KineticSeparationPolicy | None = Field(
         default=None, description="The bipartite graph constraint preventing toxic tool combinations."
     )
 
     @model_validator(mode="after")
-    def _enforce_structural_uniqueness(self) -> Self:
-        tool_names = {t.tool_name for t in self.native_tools}
-        if len(tool_names) < len(self.native_tools):
-            raise ValueError("Tool names within an ActionSpaceManifest must be strictly unique.")
+    def _enforce_structural_integrity(self) -> Self:
+        # Ghost Node Prevention
+        if self.entry_point_id not in self.capabilities:
+            raise ValueError(f"entry_point_id '{self.entry_point_id}' not found in capabilities.")
+
+        for source_id, edges in self.transition_matrix.items():
+            if source_id not in self.capabilities:
+                raise ValueError(f"Source node '{source_id}' in transition_matrix not found in capabilities.")
+            for edge in edges:
+                if edge.target_node_id is not None and edge.target_node_id not in self.capabilities:
+                    raise ValueError(
+                        f"Target node '{edge.target_node_id}' in edge from '{source_id}' not found in capabilities."
+                    )
+
+        # Matrix Canonical Sorting
+        def edge_sort_key(edge: AnyTransitionEdge) -> str:
+            if edge.target_node_id is not None:
+                return edge.target_node_id
+            if edge.target_intent is not None:
+                struct_types = "-".join(edge.target_intent.required_structural_types)
+                return f"intent:{edge.target_intent.min_isometry_score}:{struct_types}"
+            return "unknown"
+
+        for key in self.transition_matrix:
+            object.__setattr__(
+                self,
+                "transition_matrix",
+                {
+                    **self.transition_matrix,
+                    key: sorted(
+                        self.transition_matrix[key],
+                        key=edge_sort_key,
+                    ),
+                },
+            )
+
         return self
 
     @model_validator(mode="after")
-    def _enforce_canonical_sort_action_spaces(self) -> Self:
-        object.__setattr__(self, "native_tools", sorted(self.native_tools, key=lambda x: x.tool_name))
-        object.__setattr__(self, "mcp_servers", sorted(self.mcp_servers, key=lambda x: x.server_uri))
-        object.__setattr__(
-            self, "ephemeral_partitions", sorted(self.ephemeral_partitions, key=lambda x: x.partition_id)
-        )
+    def _prevent_custom_state_management(self) -> Self:
+        """
+        DE NOVO AGENT INSTRUCTION: In a native framework, the ToolManifest's schemas
+        represent ONLY the pure domain payload (T). The ExecutionEnvelopeState (trace, state)
+        is implicitly wrapped by the orchestrator at runtime.
+        We only need to verify the domain payload doesn't illegally attempt to manage state
+        or collide with the framework's native envelope wrappers.
+        """
+        for cap in self.capabilities.values():
+            if cap.type == "native_tool":
+                for schema_name in ("input_schema", "output_schema"):
+                    schema = getattr(cap, schema_name, {})
+                    if not isinstance(schema, dict) or not schema:
+                        continue
+
+                    properties = schema.get("properties", {})
+                    if not isinstance(properties, dict):
+                        continue
+
+                    # The strict list of forbidden keys in any domain payload
+                    illegal_keys = {
+                        "memory",
+                        "context",
+                        "system_prompt",
+                        "chat_history",
+                        "trace_context",
+                        "trace_id",
+                        "span_id",
+                        "parent_span_id",
+                        "causal_clock",
+                        "state_vector",
+                        "read_only_context",
+                        "mutable_memory",
+                        "is_delta",
+                        "envelope",
+                    }
+
+                    for key in properties:
+                        if key in illegal_keys:
+                            raise ValueError(
+                                f"Framework Violation: Tool '{cap.tool_name}' illegaly attempts to "
+                                f"manage execution state by defining '{key}' in its {schema_name}. "
+                                "State and telemetry are strictly managed by the framework's "
+                                "ExecutionEnvelopeState."
+                            )
         return self
 
 
@@ -7084,56 +7415,6 @@ class EpistemicProvenanceReceipt(CoreasonBaseState):
         default=None,
         description="The cryptographic, tamper-evident chain of custody tracing this memory across multiple swarm hops.",
     )
-
-
-class MigrationContract(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Establishes a Covariant Functor (Category Theory) mapping between disparate
-    versions of the Universal Unified Ontology. As a ...Contract suffix, it enforces a rigid
-    mathematical boundary globally.
-
-    CAUSAL AFFORDANCE: Unlocks backward-compatible schema transmutation, allowing the orchestrator
-    to safely project historical payloads from source_version to target_version via structural
-    path_transformations.
-
-    EPISTEMIC BOUNDS: The contract_id is cryptographically anchored to a 128-char CID. The
-    path_transformations dictionary maps strict RFC 6902 JSON Pointers up to max_length=2000.
-    The dropped_paths list is deterministically sorted by a @model_validator to preserve invariant
-    RFC 8785 canonical hashing.
-
-    MCP ROUTING TRIGGERS: Category Theory, Schema Evolution, Covariant Functor, RFC 6902, Semantic Migration
-    """
-
-    contract_id: str = Field(
-        min_length=1,
-        max_length=128,
-        pattern="^[a-zA-Z0-9_.:-]+$",
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this structural migration mapping.",
-    )
-    source_version: str = Field(
-        max_length=2000, description="The exact semantic version string of the payload before migration."
-    )
-    target_version: str = Field(
-        max_length=2000, description="The exact semantic version string of the payload after migration."
-    )
-    path_transformations: dict[
-        Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=2000)]
-    ] = Field(
-        le=1000000000,
-        default_factory=dict,
-        description="A strict mapping of old RFC 6902 JSON Pointers to new JSON Pointers.",
-    )
-    dropped_paths: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
-        default_factory=list,
-        description="Explicit whitelist of JSON Pointers that are safely deprecated and intentionally dropped during migration.",
-    )
-
-    @model_validator(mode="after")
-    def _enforce_canonical_sort(self) -> Self:
-        object.__setattr__(self, "dropped_paths", sorted(self.dropped_paths))
-        if getattr(self, "dropped_paths", None) is not None:
-            object.__setattr__(self, "dropped_paths", sorted(self.dropped_paths))
-        return self
 
 
 class MultimodalArtifactReceipt(CoreasonBaseState):
@@ -9075,6 +9356,108 @@ class UtilityJustificationGraphReceipt(CoreasonBaseState):
         return self
 
 
+class LiquidTypeContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Mathematically bounds a specific target property.
+    """
+
+    target_property: Annotated[str, StringConstraints(max_length=2000)] = Field(
+        description="The specific variable or schema key being bounded."
+    )
+    mathematical_predicate: Annotated[str, StringConstraints(max_length=2000)] = Field(
+        description="The formal algebraic constraint (e.g., x > 0 and x < 100)."
+    )
+
+
+class HoareLogicProofReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Replace unit tests with mathematical proofs of state bounds prior to capability deployment.
+    """
+
+    capability_id: Annotated[str, StringConstraints(max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="The forged tool being verified."
+    )
+    preconditions: Annotated[list[LiquidTypeContract], Field(min_length=1)] = Field(description="The P bounds.")
+    postconditions: Annotated[list[LiquidTypeContract], Field(min_length=1)] = Field(description="The Q bounds.")
+    proof_system: Literal["lean4", "coq", "z3", "tla_plus"] = Field(
+        description="The proof system used to mathematically prove bounds."
+    )
+    verified_theorem_hash: Annotated[str, StringConstraints(max_length=128, pattern="^[a-f0-9]{64}$")] = Field(
+        description="Cryptographic proof."
+    )
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "preconditions", sorted(self.preconditions, key=lambda x: x.target_property))
+        object.__setattr__(self, "postconditions", sorted(self.postconditions, key=lambda x: x.target_property))
+        return self
+
+
+class AsymptoticComplexityReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Automatically infer Big-O asymptotic complexity via Monte Carlo fuzzing to populate Markov transition costs.
+    """
+
+    capability_id: Annotated[str, StringConstraints(max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="The forged tool being profiled."
+    )
+    time_complexity_class: Literal["O(1)", "O(log N)", "O(N)", "O(N log N)", "O(N^2)", "O(2^N)"] = Field(
+        description="The mathematically inferred compute curve."
+    )
+    space_complexity_class: Literal["O(1)", "O(log N)", "O(N)", "O(N^2)"] = Field(
+        description="The inferred memory allocation curve."
+    )
+    peak_vram_bytes: int = Field(ge=0, le=100000000000, description="Absolute thermodynamic memory ceiling detected.")
+    simulated_cpu_cycles: int = Field(
+        ge=0, le=100000000000, description="Empirical cycle burn used to establish compute_weight_magnitude."
+    )
+
+
+class ASTGradientReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Replace unstructured string tracebacks with deterministic, high-dimensional loss vectors for automated code repair.
+    """
+
+    compilation_attempt_id: Annotated[str, StringConstraints(max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="Cryptographic anchor to the failed compile execution."
+    )
+    ast_node_pointer: Annotated[str, StringConstraints(max_length=2000)] = Field(
+        description="The exact RFC 6902 JSON Pointer or AST path where the syntax fractured."
+    )
+    expected_type_geometry: Annotated[str, StringConstraints(max_length=2000)] = Field(
+        description="The formal covariant requirement."
+    )
+    actual_type_geometry: Annotated[str, StringConstraints(max_length=2000)] = Field(
+        description="The invalid contravariant state provided."
+    )
+    structural_loss_vector: VectorEmbeddingState | None = Field(
+        default=None,
+        description="The dense vector embedding of the semantic error for vector-math remediation.",
+    )
+
+
+class TeleologicalIsometryReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Mathematically prove the deployed code actually satisfies the original epistemic deficit vector.
+    """
+
+    source_intent_id: Annotated[str, StringConstraints(max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="Pointer to the originating SemanticDiscoveryIntent."
+    )
+    target_intent_vector: VectorEmbeddingState = Field(description="The original deficit space.")
+    forged_output_vector: VectorEmbeddingState = Field(
+        description="The empirical behavioral output space of the forged tool."
+    )
+    measured_cosine_similarity: float = Field(ge=-1.0, le=1.0, description="The measured cosine similarity.")
+    alignment_threshold_passed: bool = Field(description="Whether the threshold was passed.")
+
+    @model_validator(mode="after")
+    def enforce_teleological_alignment(self) -> Self:
+        if self.measured_cosine_similarity < 0.85:
+            object.__setattr__(self, "alignment_threshold_passed", False)
+        return self
+
+
 class VectorEmbeddingState(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Represents a declarative, frozen geometric coordinate
@@ -10225,6 +10608,36 @@ class ConsensusFederationTopologyManifest(CoreasonBaseState):
         )
 
 
+class CapabilityForgeTopologyManifest(BaseTopologyManifest):
+    """
+    AGENT INSTRUCTION: Create a zero-cost macro abstraction that unrolls the entire Zero-to-One generation, verification, and profiling loop.
+    """
+
+    type: Literal["macro_forge"] = Field(default="macro_forge", description="Discriminator for forge macro.")
+    target_epistemic_deficit: SemanticDiscoveryIntent = Field(description="The target epistemic deficit.")
+    generator_node_id: NodeIdentifierState = Field(description="The agent writing the code.")
+    formal_verifier_id: NodeIdentifierState = Field(description="The formal verifier system node.")
+    fuzzing_engine_id: NodeIdentifierState = Field(description="The fuzzing engine system node.")
+
+    def compile_to_base_topology(self) -> DAGTopologyManifest:
+        """Deterministically unwraps the macro into a rigid DAGTopologyManifest."""
+        nodes: dict[NodeIdentifierState, AnyNodeProfile] = {
+            self.generator_node_id: AgentNodeProfile(description="Generator Node"),
+            self.formal_verifier_id: SystemNodeProfile(description="Formal Verifier Node"),
+            self.fuzzing_engine_id: SystemNodeProfile(description="Fuzzing Engine Node"),
+        }
+        edges = [
+            (self.generator_node_id, self.formal_verifier_id),
+            (self.formal_verifier_id, self.fuzzing_engine_id),
+        ]
+        return DAGTopologyManifest(
+            nodes=nodes,
+            edges=edges,
+            max_depth=10,
+            max_fan_out=10,
+        )
+
+
 type AnyTopologyManifest = Annotated[
     DAGTopologyManifest
     | CouncilTopologyManifest
@@ -10234,7 +10647,8 @@ type AnyTopologyManifest = Annotated[
     | EvaluatorOptimizerTopologyManifest
     | DigitalTwinTopologyManifest
     | AdversarialMarketTopologyManifest
-    | ConsensusFederationTopologyManifest,
+    | ConsensusFederationTopologyManifest
+    | CapabilityForgeTopologyManifest,
     Field(discriminator="type", description="A discriminated union of workflow topologies."),
 ]
 
@@ -10503,6 +10917,12 @@ class ZeroKnowledgeReceipt(CoreasonBaseState):
     proof_protocol: Literal["zk-SNARK", "zk-STARK", "plonk", "bulletproofs"] = Field(
         description="The mathematical dialect of the cryptographic proof."
     )
+    logical_circuit_hash: str = Field(
+        pattern="^[a-f0-9]{64}$",
+        min_length=1,
+        max_length=128,
+        description="The SHA-256 hash of the exact prompt, weights, and constraints evaluated by the prover.",
+    )
     public_inputs_hash: str = Field(
         min_length=1,
         max_length=128,
@@ -10571,6 +10991,10 @@ class BeliefMutationEvent(BaseStateEvent):
         default=None,
         description="The mathematical brain-scan proving exactly which neural circuits fired to append this event.",
     )
+    quorum_signatures: list[Annotated[str, StringConstraints(max_length=10000)]] = Field(
+        default_factory=list,
+        description="The deterministic execution signatures from the peer nodes that validated this belief.",
+    )
 
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
@@ -10581,6 +11005,17 @@ class BeliefMutationEvent(BaseStateEvent):
             object.__setattr__(
                 self, "causal_attributions", sorted(self.causal_attributions, key=lambda x: x.source_event_id)
             )
+        return self
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort_quorum(self) -> Self:
+        object.__setattr__(self, "quorum_signatures", sorted(self.quorum_signatures))
+        return self
+
+    @model_validator(mode="after")
+    def enforce_sybil_resistance(self) -> Self:
+        if len(set(self.quorum_signatures)) != len(self.quorum_signatures):
+            raise ValueError("Sybil Attack Detected: Duplicate signatures found in quorum.")
         return self
 
     @field_validator("payload", mode="before")
@@ -11562,7 +11997,7 @@ class EpistemicLedgerState(CoreasonBaseState):
 
     EPISTEMIC BOUNDS: The @model_validator sort_history deterministically sorts
     history by timestamp, checkpoints by checkpoint_id, active_rollbacks by
-    request_id, migration_contracts by contract_id, and active_cascades by
+    request_id, and active_cascades by
     cascade_id — guaranteeing invariant RFC 8785 canonical hashing.
 
     MCP ROUTING TRIGGERS: Event Sourcing, Merkle-DAG, Immutable Ledger, Truth
@@ -11593,10 +12028,6 @@ class EpistemicLedgerState(CoreasonBaseState):
     )
     eviction_policy: EvictionPolicy | None = Field(
         default=None, description="The strict mathematical boundary governing context window compression."
-    )
-    migration_contracts: list[MigrationContract] = Field(
-        default_factory=list,
-        description="Declarative rules to translate historical states to the current active schema version.",
     )
     truth_maintenance_policy: TruthMaintenancePolicy | None = Field(
         le=1000000000,
@@ -11631,8 +12062,25 @@ class EpistemicLedgerState(CoreasonBaseState):
         object.__setattr__(self, "retracted_nodes", sorted(self.retracted_nodes))
         object.__setattr__(self, "checkpoints", sorted(self.checkpoints, key=lambda x: x.checkpoint_id))
         object.__setattr__(self, "active_rollbacks", sorted(self.active_rollbacks, key=lambda x: x.request_id))
-        object.__setattr__(self, "migration_contracts", sorted(self.migration_contracts, key=lambda x: x.contract_id))
         object.__setattr__(self, "active_cascades", sorted(self.active_cascades, key=lambda x: x.cascade_id))
+        return self
+
+    @model_validator(mode="after")
+    def verify_merkle_chain(self) -> Self:
+        for i in range(1, len(self.history)):
+            if self.history[i].prior_event_hash is None:
+                raise ValueError("Merkle Chain Broken: Event missing prior_event_hash")
+        return self
+
+    @model_validator(mode="after")
+    def enforce_defeasible_quarantine(self) -> Self:
+        quarantined_ids: set[str] = set()
+        for cascade in self.active_cascades:
+            quarantined_ids.update(cascade.quarantined_event_ids)
+
+        intersection = quarantined_ids.intersection(self.defeasible_claims.keys())
+        if len(intersection) > 0:
+            raise ValueError("Epistemic Contagion Detected: Quarantined node found in active defeasible claims.")
         return self
 
 
@@ -11649,6 +12097,7 @@ EvaluatorOptimizerTopologyManifest.model_rebuild()
 DigitalTwinTopologyManifest.model_rebuild()
 AdversarialMarketTopologyManifest.model_rebuild()
 ConsensusFederationTopologyManifest.model_rebuild()
+CapabilityForgeTopologyManifest.model_rebuild()
 EpistemicSOPManifest.model_rebuild()
 DelegatedCapabilityManifest.model_rebuild()
 TokenBurnReceipt.model_rebuild()
@@ -11708,3 +12157,13 @@ ObservabilityLODPolicy.model_rebuild()
 EpistemicAttentionRay.model_rebuild()
 VolumetricPartitionSubscription.model_rebuild()
 ContinuousSpatialMutationIntent.model_rebuild()
+
+TerminalConditionContract.model_rebuild()
+TransitionEdgeProfile.model_rebuild()
+CyclicEdgeProfile.model_rebuild()
+ActionSpaceManifest.model_rebuild()
+ASTGradientReceipt.model_rebuild()
+LiquidTypeContract.model_rebuild()
+HoareLogicProofReceipt.model_rebuild()
+AsymptoticComplexityReceipt.model_rebuild()
+TeleologicalIsometryReceipt.model_rebuild()
