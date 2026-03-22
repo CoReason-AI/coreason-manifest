@@ -2,6 +2,7 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
+    AgentNodeProfile,
     CapabilityForgeTopologyManifest,
     HumanDirectiveIntent,
     HumanNodeProfile,
@@ -92,5 +93,6 @@ def test_intent_elicitation_macro_compilation() -> None:
     assert dag.allow_cycles is True
 
     scanner_node = dag.nodes["did:coreason:agent-scanner"]
+    assert isinstance(scanner_node, AgentNodeProfile)
     assert scanner_node.epistemic_policy is not None
     assert scanner_node.epistemic_policy.action_on_gap == "clarify"

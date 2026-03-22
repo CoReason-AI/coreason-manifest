@@ -1327,6 +1327,7 @@
           "evaluator_optimizer": "#/$defs/EvaluatorOptimizerTopologyManifest",
           "evolutionary": "#/$defs/EvolutionaryTopologyManifest",
           "macro_adversarial": "#/$defs/AdversarialMarketTopologyManifest",
+          "macro_elicitation": "#/$defs/IntentElicitationTopologyManifest",
           "macro_federation": "#/$defs/ConsensusFederationTopologyManifest",
           "macro_forge": "#/$defs/CapabilityForgeTopologyManifest",
           "smpc": "#/$defs/SMPCTopologyManifest",
@@ -1364,6 +1365,9 @@
         },
         {
           "$ref": "#/$defs/CapabilityForgeTopologyManifest"
+        },
+        {
+          "$ref": "#/$defs/IntentElicitationTopologyManifest"
         }
       ]
     },
@@ -9421,6 +9425,153 @@
         "confidence_score"
       ],
       "title": "IntentClassificationReceipt",
+      "type": "object"
+    },
+    "IntentElicitationTopologyManifest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Zero-Cost Macro-Topology that translates unstructured, high-entropy human multimodal input into a mathematically verified, zero-entropy HumanDirectiveIntent.\n\nCAUSAL AFFORDANCE: Unrolls a cyclic Directed Graph that orchestrates Multimodal Transmutation, Metacognitive Scanning (Shannon Entropy measurement), and Schema-on-Write Drafting (Human Interrogation) before yielding to the Agentic Forge.\n\nEPISTEMIC BOUNDS: The max_clarification_loops physical Halting Problem guillotine is mathematically clamped between 1 and 50 to prevent infinite clarification loops.\n\nMCP ROUTING TRIGGERS: Intent Elicitation, Zero-Entropy Distillation, Cyclical Routing, Human Interrogation, Multimodal Transmutation",
+      "properties": {
+        "epistemic_enforcement": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TruthMaintenancePolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Ties the topology to the Truth Maintenance layer."
+        },
+        "lifecycle_phase": {
+          "default": "live",
+          "description": "The execution phase of the graph. 'draft' allows incomplete structural state.",
+          "enum": [
+            "draft",
+            "live"
+          ],
+          "title": "Lifecycle Phase",
+          "type": "string"
+        },
+        "architectural_intent": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The AI's declarative rationale for selecting this topology.",
+          "title": "Architectural Intent"
+        },
+        "justification": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cryptographic/audit justification for this topology's configuration.",
+          "title": "Justification"
+        },
+        "nodes": {
+          "additionalProperties": {
+            "$ref": "#/$defs/AnyNodeProfile"
+          },
+          "description": "Flat registry of all nodes in this topology.",
+          "propertyNames": {
+            "$ref": "#/$defs/NodeIdentifierState"
+          },
+          "title": "Nodes",
+          "type": "object"
+        },
+        "shared_state_contract": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StateContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The schema-on-write contract governing the internal state of this topology."
+        },
+        "information_flow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/InformationFlowPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology."
+        },
+        "observability": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ObservabilityLODPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph."
+        },
+        "type": {
+          "const": "macro_elicitation",
+          "default": "macro_elicitation",
+          "description": "Discriminator for the elicitation macro.",
+          "title": "Type",
+          "type": "string"
+        },
+        "raw_human_artifact_id": {
+          "description": "The anchor to the initial, unstructured MultimodalArtifactReceipt uploaded by the human.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Raw Human Artifact Id",
+          "type": "string"
+        },
+        "transmuter_node_id": {
+          "$ref": "#/$defs/NodeIdentifierState",
+          "description": "The system node responsible for executing the EpistemicTransmutationTask."
+        },
+        "scanner_node_id": {
+          "$ref": "#/$defs/NodeIdentifierState",
+          "description": "The agent node actively running the EpistemicScanningPolicy."
+        },
+        "human_oracle_id": {
+          "$ref": "#/$defs/NodeIdentifierState",
+          "description": "The human UI node receiving the DraftingIntent."
+        },
+        "max_clarification_loops": {
+          "default": 5,
+          "description": "A physical Halting Problem guillotine preventing infinite clarification loops.",
+          "maximum": 50,
+          "minimum": 1,
+          "title": "Max Clarification Loops",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "nodes",
+        "raw_human_artifact_id",
+        "transmuter_node_id",
+        "scanner_node_id",
+        "human_oracle_id"
+      ],
+      "title": "IntentElicitationTopologyManifest",
       "type": "object"
     },
     "InterventionIntent": {
