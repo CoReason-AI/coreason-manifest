@@ -2542,24 +2542,15 @@ class ActiveInferenceContract(CoreasonBaseState):
 
 
 class AdjudicationIntent(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Formalizes Social Choice Theory to resolve the Condorcet Paradox.
-    Triggers a Mixed-Initiative forced resolution to break an epistemic deadlock within a
-    CouncilTopologyManifest. As an ...Intent suffix, the LLM may execute non-monotonic
-    reasoning here.
+    r"""
+    AGENT INSTRUCTION: Formalizes Social Choice Theory to resolve the Condorcet Paradox. Triggers a Mixed-Initiative forced resolution to break an epistemic deadlock within a Council topology.
 
-    CAUSAL AFFORDANCE: Halts the active execution DAG and forces an external oracle
-    (human or system) to act as a Dictatorial tie-breaker, definitively collapsing the
-    probability wave of competing claims in a Multi-Criteria Decision Analysis (MCDA)
-    framework.
+    CAUSAL AFFORDANCE: Halts the active execution DAG and forces an external oracle (human or system) to act as a Dictatorial tie-breaker, definitively collapsing the probability wave of competing claims in a Multi-Criteria Decision Analysis (MCDA) framework.
 
-    EPISTEMIC BOUNDS: The state space is bounded by deadlocked_claims (min_length=2,
-    max_length=86400000). The `resolution_schema` is mathematically bounded against recursive
-    JSON-bombing by the `@field_validator` `enforce_payload_topology`, physically preventing
-    Automata Intersection deadlocks (Halting Problem violations).
+    EPISTEMIC BOUNDS: The state space is bounded by `deadlocked_claims` (`min_length=2, max_length=86400000`). The `resolution_schema` is mathematically bounded against recursive JSON-bombing by the `enforce_payload_topology` hook, physically preventing Automata Intersection deadlocks.
 
-    MCP ROUTING TRIGGERS: Social Choice Theory, Condorcet Paradox, MCDA Deadlock,
-    Dictatorial Resolution, Tie-Breaking Heuristic
+    MCP ROUTING TRIGGERS: Social Choice Theory, Condorcet Paradox, MCDA Deadlock, Dictatorial Resolution, Tie-Breaking Heuristic
+
     """
 
     type: Literal["forced_adjudication"] = Field(
@@ -3459,23 +3450,15 @@ class CircuitBreakerEvent(CoreasonBaseState):
 
 
 class ConstitutionalAmendmentIntent(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Represents a non-monotonic structural revision trigger within a
-    Defeasible Logic framework, engineered to adapt the GovernancePolicy to
-    out-of-distribution environments. As an ...Intent suffix, the LLM may execute
-    non-monotonic reasoning here.
+    r"""
+    AGENT INSTRUCTION: Represents a non-monotonic structural revision trigger within a Defeasible Logic framework, engineered to adapt the GovernancePolicy to out-of-distribution environments.
 
-    CAUSAL AFFORDANCE: Triggers an active topological mutation (Pearlian intervention) to
-    resolve logical friction, applying a strict RFC 6902 JSON Patch (proposed_patch) to the
-    underlying alignment manifold.
+    CAUSAL AFFORDANCE: Triggers an active topological mutation (Pearlian intervention) to resolve logical friction, applying a strict RFC 6902 JSON Patch (`proposed_patch`) to the underlying alignment manifold.
 
-    EPISTEMIC BOUNDS: Cryptographically anchored to the specific drift_event_id (regex
-    bounded CID ^[a-zA-Z0-9_.:-]+$) that mathematically justified the revision. The payload
-    is strictly constrained to a JSON Schema object (proposed_patch). The justification
-    field (max_length=2000) bounds the natural language argument.
+    EPISTEMIC BOUNDS: Cryptographically anchored to the specific `drift_event_id` (regex bounded CID `^[a-zA-Z0-9_.:-]+$`) that mathematically justified the revision. The payload is constrained to a JSON Schema object (`proposed_patch`).
 
-    MCP ROUTING TRIGGERS: Defeasible Logic, Non-Monotonic Revision, Out-of-Distribution
-    Adaptation, Normative Drift Resolution, Pearlian Intervention
+    MCP ROUTING TRIGGERS: Defeasible Logic, Non-Monotonic Revision, Out-of-Distribution Adaptation, Normative Drift Resolution, Pearlian Intervention
+
     """
 
     type: Literal["constitutional_amendment"] = Field(
@@ -4041,22 +4024,15 @@ class TopologicalRetrievalContract(CoreasonBaseState):
 
 
 class LatentProjectionIntent(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Acts as the kinetic trigger for Maximum Inner Product Search (MIPS)
-    and k-Nearest Neighbors (k-NN) retrieval across high-dimensional semantic manifolds. As
-    an ...Intent suffix, the LLM may execute non-monotonic reasoning here.
+    r"""
+    AGENT INSTRUCTION: Acts as the kinetic trigger for Maximum Inner Product Search (MIPS) and k-Nearest Neighbors (k-NN) retrieval across high-dimensional semantic manifolds.
 
-    CAUSAL AFFORDANCE: Forces the orchestrator's embedding engine to dynamically hydrate the
-    working context by fetching the top_k_candidates nearest to the synthetic_target_vector.
-    Optionally embeds a TopologicalRetrievalContract for graph traversal bounds and a
-    ContextExpansionPolicy for post-retrieval merging.
+    CAUSAL AFFORDANCE: Forces the orchestrator's embedding engine to dynamically hydrate the working context by fetching the `top_k_candidates` nearest to the `synthetic_target_vector`.
 
-    EPISTEMIC BOUNDS: Mathematically boundary-enforced by min_isometry_score (ge=-1.0,
-    le=1.0) to automatically prune low-relevance hallucinations before they consume context
-    window tokens. The top_k_candidates is strictly positive (gt=0).
+    EPISTEMIC BOUNDS: Mathematically boundary-enforced by `min_isometry_score` (`ge=-1.0, le=1.0`) to automatically prune low-relevance hallucinations before they consume context window tokens. `top_k_candidates` is strictly positive (`gt=0`).
 
-    MCP ROUTING TRIGGERS: Maximum Inner Product Search, k-Nearest Neighbors, Latent Manifold
-    Projection, Retrieval-Augmented Generation
+    MCP ROUTING TRIGGERS: Maximum Inner Product Search, k-Nearest Neighbors, Latent Manifold Projection, Retrieval-Augmented Generation
+
     """
 
     type: Literal["latent_projection"] = Field(
@@ -4078,21 +4054,15 @@ class LatentProjectionIntent(CoreasonBaseState):
 
 
 class SemanticDiscoveryIntent(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Orchestrates zero-shot latent capability routing by computing the
-    geometric Cosine Distance between the agent's epistemic deficit vector and the available
-    tool manifold. As an ...Intent suffix, the LLM may execute non-monotonic reasoning here.
+    r"""
+    AGENT INSTRUCTION: Orchestrates zero-shot latent capability routing by computing the geometric Cosine Distance between the agent's epistemic deficit vector and the available tool manifold.
 
-    CAUSAL AFFORDANCE: Unlocks the dynamic, runtime mounting of tools and MCP servers whose
-    dense vector embeddings (query_vector) align mathematically with the query tensor,
-    bypassing hardcoded tool schemas.
+    CAUSAL AFFORDANCE: Unlocks the dynamic, runtime mounting of tools and MCP servers whose dense vector embeddings (`query_vector`) align mathematically with the query tensor, bypassing hardcoded tool schemas.
 
-    EPISTEMIC BOUNDS: Mechanically rejects capabilities that fall below the min_isometry_score
-    (ge=-1.0, le=1.0) boundary. The returned toolsets are strictly limited to the
-    deterministically sorted required_structural_types array, enforced by the @model_validator.
+    EPISTEMIC BOUNDS: Mechanically rejects capabilities that fall below the `min_isometry_score` (`ge=-1.0, le=1.0`) boundary. The returned toolsets are strictly limited to the deterministically sorted `required_structural_types` array (`max_length=1000000000`), enforced by the `@model_validator`.
 
-    MCP ROUTING TRIGGERS: Zero-Shot Tool Discovery, Capability Routing, Dense Vector
-    Embedding, Epistemic Deficit Resolution
+    MCP ROUTING TRIGGERS: Zero-Shot Tool Discovery, Capability Routing, Dense Vector Embedding, Epistemic Deficit Resolution
+
     """
 
     type: Literal["semantic_discovery"] = Field(
@@ -4116,21 +4086,15 @@ class SemanticDiscoveryIntent(CoreasonBaseState):
 
 
 class DraftingIntent(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Implements Fristonian Active Inference to minimize Expected Free
-    Energy. It is triggered when the swarm detects a catastrophic Epistemic Gap and lacks
-    the structural parameters necessary to reduce Shannon Entropy autonomously.
+    r"""
+    AGENT INSTRUCTION: Implements Fristonian Active Inference to minimize Expected Free Energy. Triggered when the swarm detects a catastrophic Epistemic Gap and lacks the structural parameters necessary to reduce Shannon Entropy autonomously.
 
-    CAUSAL AFFORDANCE: Emits a structural query to an external human oracle to explicitly
-    solicit data. It suspends autonomous trajectory generation until the missing semantic
-    dimensions are actively projected back into the working memory partition.
+    CAUSAL AFFORDANCE: Emits a structural query to an external human oracle to explicitly solicit data. It suspends autonomous trajectory generation until the missing semantic dimensions are actively projected back into the working memory partition.
 
-    EPISTEMIC BOUNDS: The human's unstructured cognitive entropy is aggressively forced
-    through a mathematical funnel via the `resolution_schema`. This schema is volumetrically
-    clamped by `enforce_payload_topology` to prevent AST explosion during input parsing.
+    EPISTEMIC BOUNDS: The human's unstructured cognitive entropy is aggressively forced through a mathematical funnel via the `resolution_schema`. This schema is volumetrically clamped by the `enforce_payload_topology` hook to prevent AST explosion during input parsing.
 
-    MCP ROUTING TRIGGERS: Active Inference, Expected Free Energy, Shannon Entropy
-    Reduction, Zero-Shot Elicitation, Epistemic Gap
+    MCP ROUTING TRIGGERS: Active Inference, Expected Free Energy, Shannon Entropy Reduction, Zero-Shot Elicitation, Epistemic Gap
+
     """
 
     type: Literal["drafting"] = Field(
@@ -4531,23 +4495,15 @@ class EscalationContract(CoreasonBaseState):
 
 
 class EscalationIntent(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Anchors in the Biba Integrity Model to orchestrate a Dictatorial
-    Override mechanism within a Zero-Trust Architecture. It is emitted when a rigid
-    mathematical safety boundary is breached during inference.
+    r"""
+    AGENT INSTRUCTION: Anchors in the Biba Integrity Model to orchestrate a Dictatorial Override mechanism within a Zero-Trust Architecture. Emitted when a rigid mathematical safety boundary is breached during inference.
 
-    CAUSAL AFFORDANCE: Severs the active kinetic thread when a rule is tripped,
-    violently halting generation to force the presentation of a resolution_schema.
-    It demands explicit, structurally verified cryptographic sign-off from a
-    higher-clearance entity to bypass the breaker.
+    CAUSAL AFFORDANCE: Severs the active kinetic thread when a rule is tripped, violently halting generation to force the presentation of a `resolution_schema`. Demands explicit, structurally verified cryptographic sign-off from a higher-clearance entity to bypass the breaker.
 
-    EPISTEMIC BOUNDS: The `resolution_schema` is mathematically bounded against recursive
-    JSON-bombing by the `enforce_payload_topology` hook, physically preventing Automata
-    Intersection deadlocks. The tripped_rule_id is strictly anchored to a 128-char CID
-    regex (^[a-zA-Z0-9_.:-]+$). The fallback is governed by the Literal timeout_action.
+    EPISTEMIC BOUNDS: The `resolution_schema` is mathematically bounded against recursive JSON-bombing by the `enforce_payload_topology` hook. The `tripped_rule_id` is strictly anchored to a 128-char CID regex (`^[a-zA-Z0-9_.:-]+$`).
 
-    MCP ROUTING TRIGGERS: Biba Integrity Model, Dictatorial Override, Privilege
-    Escalation, Payload Loss Prevention, Cryptographic Sign-Off
+    MCP ROUTING TRIGGERS: Biba Integrity Model, Dictatorial Override, Privilege Escalation, Payload Loss Prevention, Cryptographic Sign-Off
+
     """
 
     type: Literal["escalation"] = Field(
@@ -5624,23 +5580,15 @@ class HumanDirectiveIntent(CoreasonBaseState):
 
 
 class InformationalIntent(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Formalizes Synchronous Epistemic Signaling within a Mixed-Initiative
-    Control paradigm. The agent requires explicit acknowledgment from an external Oracle
-    before committing the next probability wave collapse. As an ...Intent suffix, this
-    yields control.
+    r"""
+    AGENT INSTRUCTION: Formalizes Synchronous Epistemic Signaling within a Mixed-Initiative Control paradigm. Indicates that the presented manifold requires acknowledgment without reciprocal causal action.
 
-    CAUSAL AFFORDANCE: Conditionally suspends the continuous execution DAG to project a
-    read-only observational state manifold to the human operator. Resumption is dynamically
-    governed by the deterministic timeout_action.
+    CAUSAL AFFORDANCE: Conditionally suspends the continuous execution DAG to project a read-only observational state manifold to the human operator. Resumption is dynamically governed by the deterministic `timeout_action`.
 
-    EPISTEMIC BOUNDS: The semantic payload (message) is physically clamped to
-    max_length=2000 to prevent UI dictionary bombing. The timeout_action is locked to a
-    strict Finite State Machine Literal ["rollback", "proceed_default", "terminate"],
-    solving the Halting Problem for unresponsive oracles.
+    EPISTEMIC BOUNDS: The semantic payload (`message`) is physically clamped to `max_length=2000` to prevent UI dictionary bombing. The `timeout_action` is locked to a strict Finite State Machine Literal `["rollback", "proceed_default", "terminate"]`.
 
-    MCP ROUTING TRIGGERS: Synchronous Epistemic Signaling, Mixed-Initiative Control,
-    Finite State Machine, Oracle Projection, Halting Problem
+    MCP ROUTING TRIGGERS: Synchronous Epistemic Signaling, Mixed-Initiative Control, Finite State Machine, Oracle Projection, Halting Problem
+
     """
 
     type: Literal["informational"] = Field(
@@ -5749,21 +5697,15 @@ class GenerativeTaxonomyManifest(CoreasonBaseState):
 
 
 class LatentSchemaInferenceIntent(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Authorizes Abductive Reasoning on intercepted unstructured byte streams
-    or memory heaps to probabilistically derive a deterministic StateContract. As an ...Intent
-    suffix, the LLM may execute non-monotonic reasoning here.
+    r"""
+    AGENT INSTRUCTION: Authorizes Abductive Reasoning on intercepted unstructured byte streams or memory heaps to probabilistically derive a deterministic StateContract.
 
-    CAUSAL AFFORDANCE: Triggers the LLM's representation engineering engine to process a
-    chaotic target_buffer_id and output a rigid JSON schema, bridging the gap between
-    exogenous data and the structural Hollow Data Plane.
+    CAUSAL AFFORDANCE: Triggers the LLM's representation engineering engine to process a chaotic `target_buffer_id` and output a rigid JSON schema, bridging the gap between exogenous data and the structural Hollow Data Plane.
 
-    EPISTEMIC BOUNDS: State-Space explosion is prevented by bounding max_schema_depth (le=10)
-    and max_properties (le=1000) to mathematically prevent recursive JSON-bombing during
-    schema generation. The target_buffer_id is locked to a 128-char CID.
+    EPISTEMIC BOUNDS: State-Space explosion is prevented by bounding `max_schema_depth` (`le=10, ge=1`) and `max_properties` (`le=1000, ge=1`) to mathematically prevent recursive JSON-bombing during schema generation. The `target_buffer_id` is locked to a 128-char CID.
 
-    MCP ROUTING TRIGGERS: Schema Inference, Memory Heap Parsing, Abductive Reasoning,
-    XHR Interception, Unstructured Transmutation
+    MCP ROUTING TRIGGERS: Schema Inference, Memory Heap Parsing, Abductive Reasoning, XHR Interception, Unstructured Transmutation
+
     """
 
     type: Literal["latent_schema_inference"] = Field(
@@ -5785,22 +5727,15 @@ class LatentSchemaInferenceIntent(CoreasonBaseState):
 
 
 class TaxonomicRestructureIntent(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Executes a kinetic Graph Isomorphism transformation, dynamically
-    mutating the UI's spatial organization via heuristic regrouping without altering the
-    underlying epistemic truth. As an ...Intent suffix, the LLM may execute non-monotonic
-    reasoning here.
+    r"""
+    AGENT INSTRUCTION: Executes a kinetic Graph Isomorphism transformation, dynamically mutating the UI's spatial organization via heuristic regrouping without altering the underlying epistemic truth.
 
-    CAUSAL AFFORDANCE: Forces the Hollow Data Plane to immediately discard the current
-    semantic manifold and re-render the hierarchical projection according to the newly
-    synthesized target_taxonomy (GenerativeTaxonomyManifest) and spatial heuristic.
+    CAUSAL AFFORDANCE: Forces the Hollow Data Plane to immediately discard the current semantic manifold and re-render the hierarchical projection according to the newly synthesized `target_taxonomy` and spatial heuristic.
 
-    EPISTEMIC BOUNDS: Execution is rigidly constrained by the restructure_heuristic, strictly
-    bounded to a Literal automaton ["chronological", "entity_centric", "semantic_cluster",
-    "confidence_decay"], mathematically preventing out-of-distribution UI mutations.
+    EPISTEMIC BOUNDS: Execution is rigidly constrained by the `restructure_heuristic`, strictly bounded to a Literal automaton `["chronological", "entity_centric", "semantic_cluster", "confidence_decay"]`, mathematically preventing out-of-distribution UI mutations.
 
-    MCP ROUTING TRIGGERS: Graph Isomorphism, UI State Mutation, Heuristic Regrouping,
-    Dynamic Manifold, Spatial Reorganization
+    MCP ROUTING TRIGGERS: Graph Isomorphism, UI State Mutation, Heuristic Regrouping, Dynamic Manifold, Spatial Reorganization
+
     """
 
     type: Literal["taxonomic_restructure"] = Field(
@@ -5815,23 +5750,15 @@ class TaxonomicRestructureIntent(CoreasonBaseState):
 
 
 class TaxonomicRoutingPolicy(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Implements a deterministic Softmax Router Gate, leveraging Cognitive
-    Load Theory to map high-entropy natural language intents into explicitly bounded spatial
-    organizing frameworks. As a ...Policy suffix, this dictates a rigid global boundary.
+    r"""
+    AGENT INSTRUCTION: Implements a deterministic Softmax Router Gate, leveraging Cognitive Load Theory to map high-entropy natural language intents into explicitly bounded spatial organizing frameworks.
 
-    CAUSAL AFFORDANCE: Preemptively routes classified intents to optimized taxonomic
-    layouts, mechanically preventing token exhaustion and attention dilution in downstream
-    processing nodes before compute is allocated. Unclassified intents default to the
-    fallback_heuristic.
+    CAUSAL AFFORDANCE: Preemptively routes classified intents to optimized taxonomic layouts, mechanically preventing token exhaustion and attention dilution in downstream processing nodes before compute is allocated.
 
-    EPISTEMIC BOUNDS: The intent_to_heuristic_matrix physically restricts state-space
-    explosion by capping at max_length=1000 dictionary properties. The matrix keys are
-    strictly bounded to 255 characters via StringConstraints to mathematically prevent
-    Dictionary Bombing during hashing.
+    EPISTEMIC BOUNDS: The `intent_to_heuristic_matrix` physically restricts state-space explosion by capping at `max_length=1000` dictionary properties. The matrix keys are strictly bounded to 255 characters via `StringConstraints` to mathematically prevent Dictionary Bombing.
 
-    MCP ROUTING TRIGGERS: Softmax Gating, Cognitive Load Theory, Pre-Flight Routing,
-    Dictionary Bombing Prevention, Token Exhaustion Mitigation
+    MCP ROUTING TRIGGERS: Softmax Gating, Cognitive Load Theory, Pre-Flight Routing, Dictionary Bombing Prevention, Token Exhaustion Mitigation
+
     """
 
     policy_id: str = Field(
@@ -5952,22 +5879,15 @@ type AnyPanelProfile = Annotated[
 
 
 class InterventionIntent(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Implements Supervisory Control Theory (Ramadge & Wonham) for
-    Discrete-Event Systems, acting as a formal Mixed-Initiative Control mechanism. As an
-    ...Intent suffix, this represents an authorized kinetic trigger.
+    r"""
+    AGENT INSTRUCTION: Implements Supervisory Control Theory (Ramadge & Wonham) for Discrete-Event Systems, acting as a formal Mixed-Initiative Control mechanism.
 
-    CAUSAL AFFORDANCE: Physically halts the active Directed Acyclic Graph (DAG) traversal
-    or Petri Net reachability loop, preventing the swarm from committing a state transition
-    until an explicit, authorized Pearlian intervention is negotiated by the human supervisor.
+    CAUSAL AFFORDANCE: Physically halts the active Directed Acyclic Graph (DAG) traversal or Petri Net reachability loop, preventing the swarm from committing a state transition until an explicit, authorized Pearlian intervention is negotiated by the human supervisor.
 
-    EPISTEMIC BOUNDS: Execution suspension is rigorously bounded by the temporal logic of
-    the adjudication_deadline (a float representing a UNIX timestamp) and the attached
-    FallbackSLA. If the temporal limit expires, the orchestrator mechanically breaks the
-    halt via the timeout_action to solve the Halting Problem and guarantee systemic liveness.
+    EPISTEMIC BOUNDS: Execution suspension is rigorously bounded by the temporal logic of the `adjudication_deadline` (a float representing a UNIX timestamp) and the attached FallbackSLA. The `proposed_action` schema is clamped against deep recursion constraints.
 
-    MCP ROUTING TRIGGERS: Supervisory Control Theory, Mixed-Initiative System,
-    Discrete-Event System, Bounded Delay, Pearlian Intervention
+    MCP ROUTING TRIGGERS: Supervisory Control Theory, Mixed-Initiative System, Discrete-Event System, Bounded Delay, Pearlian Intervention
+
     """
 
     type: Literal["request"] = Field(default="request", description="The type of the intervention payload.")
@@ -7451,20 +7371,15 @@ class CompositeNodeProfile(BaseNodeProfile):
 
 
 class OverrideIntent(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: OverrideIntent is a Dictatorial Byzantine Fault Resolution mechanism. It is an
-    absolute, zero-trust kinetic override that violently preempts autonomous algorithmic consensus or
-    prediction market resolution.
+    r"""
+    AGENT INSTRUCTION: A Dictatorial Byzantine Fault Resolution mechanism. It is an absolute, zero-trust kinetic override that violently preempts autonomous algorithmic consensus or prediction market resolution.
 
-    CAUSAL AFFORDANCE: Forces an absolute Pearlian do-operator intervention ($do(X=x)$). It physically
-    shatters the active causal chain of the target_node_id and forcibly injects the override_action
-    payload into the state vector, bypassing all standard decentralized voting protocols.
+    CAUSAL AFFORDANCE: Forces an absolute Pearlian do-operator intervention ($do(X=x)$). Physically shatters the active causal chain of the `target_node_id` and forcibly injects the `override_action` payload into the state vector, bypassing decentralized voting.
 
-    EPISTEMIC BOUNDS: The blast radius is strictly confined to the target_node_id. The orchestrator
-    must mathematically verify the authorized_node_id against the highest-tier W3C DID enterprise
-    clearance before allowing the payload to overwrite the Epistemic Blackboard.
+    EPISTEMIC BOUNDS: The blast radius is strictly confined to the `target_node_id`. The orchestrator must mathematically verify the `authorized_node_id` against the highest-tier W3C DID enterprise clearance before allowing the payload to overwrite the Epistemic Blackboard (`override_action` bounded `max_length=1000000000`).
 
     MCP ROUTING TRIGGERS: Dictatorial Override, Byzantine Fault Resolution, Pearlian Intervention, Causal Shattering, Zero-Trust Override
+
     """
 
     type: Literal["override"] = Field(default="override", description="The type of the intervention payload.")
@@ -7804,14 +7719,15 @@ type QoSClassificationProfile = Literal["critical", "high", "interactive", "back
 
 
 class ComputeProvisioningIntent(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Formulates a constrained Knapsack Problem for dynamically allocating liquid compute resources based on exact Quality of Service (QoS) priorities and semantic load shedding rules. As an ...Intent suffix, the LLM may execute non-monotonic reasoning here.
+    r"""
+    AGENT INSTRUCTION: Formulates a constrained Knapsack Problem for dynamically allocating liquid compute resources based on exact Quality of Service (QoS) priorities and semantic load shedding rules.
 
     CAUSAL AFFORDANCE: Emits a structural demand to the swarm orchestrator to negotiate, acquire, and cryptographically lock the requisite token escrow before allocating kinetic execution cycles to a sub-graph.
 
-    EPISTEMIC BOUNDS: The economic velocity is strictly clamped by `max_budget` (`le=1000000000`), physically typed as an integer to prevent floating-point fractures during spot market bidding. The `required_capabilities` array is deterministically sorted by a `@model_validator` to prevent Byzantine hash anomalies.
+    EPISTEMIC BOUNDS: Economic velocity is strictly clamped by `max_budget` (`le=1000000000`), physically typed as an integer to prevent floating-point fractures during spot market bidding. The `required_capabilities` array is deterministically sorted by a `@model_validator`.
 
     MCP ROUTING TRIGGERS: Knapsack Optimization, Semantic Load Shedding, Spot Compute Bidding, QoS Classification, Resource Provisioning
+
     """
 
     max_budget: int = Field(
@@ -7840,14 +7756,15 @@ class ComputeProvisioningIntent(CoreasonBaseState):
 
 
 class QuarantineIntent(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Triggers an Epistemic Quarantine utilizing rigid Spectral Graph Partitioning to mathematically isolate a hallucinating, degraded, or Byzantine node from the active working context. As an ...Intent suffix, the LLM may execute non-monotonic reasoning here.
+    r"""
+    AGENT INSTRUCTION: Triggers an Epistemic Quarantine utilizing rigid Spectral Graph Partitioning to mathematically isolate a hallucinating, degraded, or Byzantine node from the active working context.
 
-    CAUSAL AFFORDANCE: Instructs the orchestrator to sever all outgoing causal edges from the `target_node_id`, reducing its algebraic connectivity to zero. This neutralizes its probability mass in the routing manifold and prevents entropy from contaminating the `EpistemicLedgerState`.
+    CAUSAL AFFORDANCE: Instructs the orchestrator to sever all outgoing causal edges from the `target_node_id`, reducing its algebraic connectivity to zero. Neutralizes probability mass in the routing manifold and prevents entropy contamination.
 
-    EPISTEMIC BOUNDS: The execution discriminator is locked to a strict Literal string, free of invalid mathematical inequalities. The topological isolation is strictly targeted via a `NodeIdentifierState` (`target_node_id`). The causal justification for the graph cut is physically constrained to `reason` (`max_length=2000`).
+    EPISTEMIC BOUNDS: The execution discriminator is locked to a strict Literal string. Topological isolation is strictly targeted via `target_node_id`. The causal justification for the graph cut is physically constrained to `reason` (`max_length=2000`).
 
     MCP ROUTING TRIGGERS: Spectral Graph Partitioning, Byzantine Fault Isolation, Epistemic Contagion, Defeasible Logic, Algebraic Connectivity
+
     """
 
     type: Literal["quarantine_intent"] = Field(
@@ -8649,21 +8566,15 @@ class TamperFaultEvent(ValueError):  # noqa: N818
 
 
 class TaskAnnouncementIntent(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Initiates a Request for Proposal (RFP) within a decentralized Spot
-    Market to dynamically allocate thermodynamic compute based on task complexity. As an
-    ...Intent suffix, this is a kinetic execution trigger.
+    r"""
+    AGENT INSTRUCTION: Initiates a Request for Proposal (RFP) within a decentralized Spot Market to dynamically allocate thermodynamic compute based on task complexity.
 
-    CAUSAL AFFORDANCE: Triggers an active, non-monotonic bidding phase where eligible Swarm
-    nodes evaluate their internal Q-K matrices to formulate competitive execution bids.
+    CAUSAL AFFORDANCE: Triggers an active, non-monotonic bidding phase where eligible Swarm nodes evaluate their internal Q-K matrices to formulate competitive execution bids.
 
-    EPISTEMIC BOUNDS: The economic payload is physically capped by max_budget_magnitude
-    (le=1000000000). The topological routing is strictly constrained if
-    required_action_space_id is defined (optional, max_length=128, CID regex). Anchored by
-    a mandatory task_id CID (max_length=128).
+    EPISTEMIC BOUNDS: The economic payload is physically capped by `max_budget_magnitude` (`le=1000000000`). The topological routing is strictly constrained if `required_action_space_id` is defined (optional, `max_length=128`, CID regex). Anchored by a mandatory `task_id` CID.
 
-    MCP ROUTING TRIGGERS: Decentralized Spot Market, Request for Proposal, Thermodynamic
-    Compute Allocation, Algorithmic Mechanism Design, Kinetic Execution Trigger
+    MCP ROUTING TRIGGERS: Decentralized Spot Market, Request for Proposal, Thermodynamic Compute Allocation, Algorithmic Mechanism Design, Kinetic Execution Trigger
+
     """
 
     task_id: str = Field(
