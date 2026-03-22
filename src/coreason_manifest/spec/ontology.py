@@ -2724,24 +2724,15 @@ class AgentBidIntent(CoreasonBaseState):
 
 
 class AmbientState(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Acts as a unidirectional telemetry pipeline projecting
-    internal swarm kinematics across the Markov Blanket without inducing causal
-    feedback loops. As a ...State suffix, this is a declarative, ephemeral
-    N-dimensional coordinate.
+    r"""
+    AGENT INSTRUCTION: Acts as a unidirectional telemetry pipeline projecting internal swarm kinematics across the Markov Blanket without inducing causal feedback loops.
 
-    CAUSAL AFFORDANCE: Emits an ephemeral, 1D representation of the active
-    probability distribution and execution progress to the external UI plane. The
-    orchestrator processes this signal without halting the underlying generative
-    trajectory.
+    CAUSAL AFFORDANCE: Emits an ephemeral, 1D representation of the active probability distribution and execution progress to the external UI plane without halting the underlying generative trajectory.
 
-    EPISTEMIC BOUNDS: The semantic status_message is structurally clamped to
-    max_length=2000. The continuous progress metric is bounded by float limits
-    (le=1000000000.0) allowing it to represent either a 0.0-1.0 ratio or precise
-    raw token counts.
+    EPISTEMIC BOUNDS: Semantic `status_message` structurally clamped to `max_length=2000`. The continuous `progress` metric bounded by float limits (`le=1000000000.0`) allowing it to represent 0.0-1.0 ratios or exact token counts.
 
-    MCP ROUTING TRIGGERS: Markov Blanket, Ephemeral Projection, Continuous
-    Observability, Kinetic Execution State, UI Telemetry
+    MCP ROUTING TRIGGERS: Markov Blanket, Ephemeral Projection, Continuous Observability, Kinetic Execution State, UI Telemetry
+
     """
 
     status_message: str = Field(
@@ -3061,24 +3052,15 @@ class BoundedJSONRPCIntent(CoreasonBaseState):
 
 
 class BrowserDOMState(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Defines the exogenous structural boundary of a headless browser
-    environment within a Partially Observable Markov Decision Process (POMDP). As a
-    ...State suffix, this is a declarative, frozen snapshot of an external topography.
+    r"""
+    AGENT INSTRUCTION: Defines the exogenous structural boundary of a headless browser environment within a Partially Observable Markov Decision Process (POMDP).
 
-    CAUSAL AFFORDANCE: Exposes the deterministic coordinate space (viewport_size,
-    dom_hash, accessibility_tree_hash) enabling spatial kinematics and visual
-    grounding. The current_url (max_length=2000) anchors the spatial execution bound.
-    An optional screenshot_cid (max_length=2000, default=None) captures the visual
-    snapshot.
+    CAUSAL AFFORDANCE: Exposes the deterministic coordinate space (`viewport_size`, `dom_hash`, `accessibility_tree_hash`) enabling spatial kinematics and visual grounding.
 
-    EPISTEMIC BOUNDS: Enforces strict Server-Side Request Forgery (SSRF) quarantine
-    via the @field_validator _enforce_spatial_safety, mathematically isolating the
-    agent from Bogon/private IP space. The dom_hash and accessibility_tree_hash are
-    rigidly locked to SHA-256 pattern (^[a-f0-9]{64}$).
+    EPISTEMIC BOUNDS: Enforces strict Server-Side Request Forgery (SSRF) quarantine via the `@field_validator` `_enforce_spatial_safety`, mathematically isolating the agent from Bogon/private IP space. `dom_hash` rigidly locked to SHA-256 pattern.
 
-    MCP ROUTING TRIGGERS: Exogenous Perturbation, DOM Topography, SSRF Quarantine,
-    Spatial Execution Bound, Accessibility Tree
+    MCP ROUTING TRIGGERS: Exogenous Perturbation, DOM Topography, SSRF Quarantine, Spatial Execution Bound, Accessibility Tree
+
     """
 
     type: Literal["browser"] = Field(
@@ -4673,14 +4655,15 @@ class EpistemicArgumentGraphState(CoreasonBaseState):
 
 
 class ExecutionNodeReceipt(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Formalizes a discrete computational vertex within a Merkle-DAG execution trace, binding raw data inputs to deterministic outputs. As a ...Receipt suffix, this is an append-only coordinate on the Merkle-DAG.
+    r"""
+    AGENT INSTRUCTION: Formalizes a discrete computational vertex within a Merkle-DAG execution trace, binding raw data inputs to deterministic outputs. As an append-only coordinate, it guarantees algorithmic reproducibility.
 
-    CAUSAL AFFORDANCE: Permits the orchestrator to cryptographically re-evaluate, replay, or slash execution branches by guaranteeing all computational inputs, outputs, and parent pointers are deterministically serialized and preserved.
+    CAUSAL AFFORDANCE: Permits the orchestrator to cryptographically re-evaluate, replay, or slash execution branches by guaranteeing all computational inputs, outputs, and parent pointers are deterministically serialized.
 
-    EPISTEMIC BOUNDS: The @model_validator mathematically guarantees the node_hash via RFC 8785 canonical JSON serialization, trapping any non-deterministic dictionary properties. Orphaned lineages are structurally blocked by cross-field validation between parent_request_id and root_request_id.
+    EPISTEMIC BOUNDS: The `@model_validator` mathematically guarantees the `node_hash` via RFC 8785 canonical JSON serialization, trapping any non-deterministic dictionary properties. Orphaned lineages are structurally blocked.
 
     MCP ROUTING TRIGGERS: Merkle-DAG, RFC 8785 Canonicalization, Execution Trace, Cryptographic Determinism, Directed Acyclic Graph
+
     """
 
     model_config = ConfigDict(frozen=True)
@@ -5522,12 +5505,15 @@ class HypothesisStakeReceipt(CoreasonBaseState):
 
 
 class HumanDirectiveIntent(CoreasonBaseState):
-    """
+    r"""
     AGENT INSTRUCTION: Translates unstructured human goals into the deterministic physics required to trigger the Agentic Forge.
 
-    CAUSAL AFFORDANCE: Maps an unstructured human objective to a dense VectorEmbeddingState target.
+    CAUSAL AFFORDANCE: Maps an unstructured human objective to a dense VectorEmbeddingState target, initiating capability generation.
 
-    EPISTEMIC BOUNDS: allocated_budget_magnitude is strictly bounded between 1 and 1,000,000,000.
+    EPISTEMIC BOUNDS: `allocated_budget_magnitude` is strictly bounded between 1 and 1,000,000,000 to lock escrow. Discriminator locked to `Literal["human_directive"]`.
+
+    MCP ROUTING TRIGGERS: Human-in-the-Loop, Intent Translation, Agentic Forge, Objective Setting, Budget Allocation
+
     """
 
     type: Literal["human_directive"] = Field(
@@ -6993,14 +6979,15 @@ class EpistemicProvenanceReceipt(CoreasonBaseState):
 
 
 class MultimodalArtifactReceipt(CoreasonBaseState):
-    """
+    r"""
     AGENT INSTRUCTION: Establishes the formal Genesis Block within the Merkle-DAG for unstructured data ingestion, acting as the absolute origin vector for downstream knowledge extraction.
 
-    CAUSAL AFFORDANCE: Triggers the neurosymbolic ingestion pipeline, mechanically anchoring the raw byte stream to a verified temporal coordinate so that subsequent transmutations can deterministically prove their chain of custody.
+    CAUSAL AFFORDANCE: Triggers the neurosymbolic ingestion pipeline, mechanically anchoring the raw byte stream to a verified temporal coordinate so subsequent transmutations can deterministically prove chain of custody.
 
-    EPISTEMIC BOUNDS: Enforces a physical boundary on causality via the temporal_ingest_timestamp (clamped between ge=0.0 and le=253402300799.0). Data integrity is mathematically locked by byte_stream_hash, mandating a strict SHA-256 regex (^[a-f0-9]{64}$).
+    EPISTEMIC BOUNDS: Enforces a physical boundary on causality via `temporal_ingest_timestamp`. Data integrity mathematically locked by `byte_stream_hash`, mandating a strict SHA-256 regex (`^[a-f0-9]{64}$`).
 
     MCP ROUTING TRIGGERS: Genesis Block, Merkle-DAG, Content Addressable Storage, Cryptographic Anchoring, Unstructured Ingestion
+
     """
 
     artifact_id: str = Field(
@@ -7493,12 +7480,15 @@ class PredictionMarketState(CoreasonBaseState):
 
 
 class DynamicManifoldProjectionManifest(CoreasonBaseState):
-    """
+    r"""
     AGENT INSTRUCTION: Provides the rendering matrix that translates the swarm's physics into human retinal variables using the Grammar of Graphics and Semantic Zooming.
 
     CAUSAL AFFORDANCE: Maps N-dimensional capabilities onto the UI plane without breaking semantic causal edges.
 
-    EPISTEMIC BOUNDS: Binds an AST gradient and thermodynamic burn metric, governed by a physical zoom profile limit.
+    EPISTEMIC BOUNDS: Binds an AST gradient and thermodynamic burn metric, governed by a physical zoom profile limit. Discriminator locked to `Literal["dynamic_manifold"]`.
+
+    MCP ROUTING TRIGGERS: Grammar of Graphics, Retinal Variables, UI Rendering, Semantic Zooming, Dynamic Manifold
+
     """
 
     type: Literal["dynamic_manifold"] = Field(
@@ -7987,24 +7977,15 @@ class ExogenousEpistemicEvent(CoreasonBaseState):
 
 
 class SpanEvent(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Represents a discrete, point-in-time OpenTelemetry annotation within
-    a broader Dapper-style ExecutionSpanReceipt. As an ...Event suffix, this is a
-    cryptographically frozen historical fact that the LLM must never hallucinate a mutation
-    to.
+    r"""
+    AGENT INSTRUCTION: Represents a discrete, point-in-time OpenTelemetry annotation within a broader Dapper-style `ExecutionSpanReceipt`.
 
-    CAUSAL AFFORDANCE: Provides fine-grained, localized state-machine logging within an
-    active span, anchoring semantic attributes to a precise nanosecond coordinate without
-    spawning a new causal branch.
+    CAUSAL AFFORDANCE: Provides fine-grained, localized state-machine logging within an active span, anchoring semantic attributes to a precise nanosecond coordinate without spawning a new causal branch.
 
-    EPISTEMIC BOUNDS: The timestamp_unix_nano is physically bounded between
-    [0, 253402300799000000000]. The attributes payload is strictly constrained by a
-    dictionary with string keys (max_length=255, max_length=1000000000 entries) to
-    physically prevent dictionary bombing and VRAM exhaustion during telemetry
-    serialization.
+    EPISTEMIC BOUNDS: `timestamp_unix_nano` physically bounded `[0, 253402300799000000000]`. The `attributes` payload strictly constrained by a dictionary with string keys (`max_length=255`) to prevent dictionary bombing.
 
-    MCP ROUTING TRIGGERS: Span Annotation, Point-in-Time Event, Micro-State Logging,
-    OpenTelemetry, Telemetry Serialization
+    MCP ROUTING TRIGGERS: Span Annotation, Point-in-Time Event, Micro-State Logging, OpenTelemetry, Telemetry Serialization
+
     """
 
     name: str = Field(max_length=2000, description="The semantic name of the event.")
@@ -8017,27 +7998,15 @@ class SpanEvent(CoreasonBaseState):
 
 
 class ExecutionSpanReceipt(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Implements the Dapper distributed tracing model to deterministically
-    map the causal execution DAG of the swarm. As a ...Receipt suffix, this is an
-    append-only coordinate on the Merkle-DAG that the LLM must never hallucinate a mutation
-    to.
+    r"""
+    AGENT INSTRUCTION: Implements the Dapper distributed tracing model to deterministically map the causal execution DAG of the swarm. As an append-only coordinate on the Merkle-DAG, it mathematically binds parent-child RPC calls.
 
-    CAUSAL AFFORDANCE: Unlocks global observability by mathematically binding parent-child
-    RPC calls (parent_span_id to span_id) across the zero-trust network, enabling exact
-    bottleneck detection and graph reconstruction. Tracks execution role via kind
-    (SpanKindProfile, default="internal") and health via status (SpanStatusCodeProfile,
-    default="unset").
+    CAUSAL AFFORDANCE: Unlocks global observability by mapping causal edges across the zero-trust network, enabling exact bottleneck detection and graph reconstruction.
 
-    EPISTEMIC BOUNDS: Temporal boundaries are rigidly constrained by start_time_unix_nano
-    and optional end_time_unix_nano (ge=0, le=253402300799000000000). The @model_validator
-    enforces Allen's Interval Algebra to physically guarantee end_time cannot precede
-    start_time. The events array (max_length=10000) is deterministically sorted by
-    timestamp_unix_nano via a second @model_validator to preserve RFC 8785 canonical
-    hashing.
+    EPISTEMIC BOUNDS: Temporal boundaries are rigidly constrained by `start_time_unix_nano` (`ge=0`). The `@model_validator` enforces Allen's Interval Algebra to physically guarantee `end_time` cannot precede `start_time`. `events` array sorted by time.
 
-    MCP ROUTING TRIGGERS: Dapper Tracing Model, Distributed Causal DAG, Allen's Interval
-    Algebra, OpenTelemetry, Execution Provenance
+    MCP ROUTING TRIGGERS: Dapper Tracing Model, Distributed Causal DAG, Allen's Interval Algebra, OpenTelemetry, Execution Provenance
+
     """
 
     trace_id: str = Field(
@@ -8438,14 +8407,15 @@ class System1ReflexPolicy(CoreasonBaseState):
 
 
 class ManifestViolationReceipt(CoreasonBaseState):
-    """
+    r"""
     AGENT INSTRUCTION: A machine-readable, deterministic JSON receipt of an exact topological failure, replacing unstructured stack traces.
 
     CAUSAL AFFORDANCE: Enables the agent to execute $O(1)$ surgical patches via StateMutationIntent rather than hallucinating fixes.
 
-    EPISTEMIC BOUNDS: failing_pointer maps exactly to RFC 6902 JSON Pointers.
+    EPISTEMIC BOUNDS: `failing_pointer` mathematically maps exactly to RFC 6902 JSON Pointers (`max_length=2000`). `violation_type` capped at `255`.
 
-    MCP ROUTING TRIGGERS: Fault Receipt, RFC 6902, Epistemic Loss Prevention
+    MCP ROUTING TRIGGERS: Fault Receipt, RFC 6902, Epistemic Loss Prevention, Surgical Patching, Traceback Serialization
+
     """
 
     failing_pointer: str = Field(
@@ -8594,21 +8564,15 @@ type TelemetryContextProfile = dict[
 
 
 class LogEvent(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Defines a purely out-of-band semantic logging vector, structurally
-    isolated from the rigorous causal constraints of the Dapper trace tree. As an ...Event
-    suffix, this is an append-only historical fact.
+    r"""
+    AGENT INSTRUCTION: Defines a purely out-of-band semantic logging vector, structurally isolated from the rigorous causal constraints of the Dapper trace tree.
 
-    CAUSAL AFFORDANCE: Emits asynchronous telemetry for human-in-the-loop debugging or
-    peripheral auditing without mutating the active Epistemic Ledger's topological state.
+    CAUSAL AFFORDANCE: Emits asynchronous telemetry for human-in-the-loop debugging or peripheral auditing without mutating the active Epistemic Ledger's topological state.
 
-    EPISTEMIC BOUNDS: Temporal reality is clamped by timestamp (ge=0.0,
-    le=253402300799.0, float seconds). The severity level is strictly masked by a Literal
-    automaton ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]. The message is bounded
-    to max_length=2000. Recursive depth is constrained via TelemetryContextProfile.
+    EPISTEMIC BOUNDS: Temporal reality clamped by `timestamp`. Severity strictly masked by a Literal automaton `["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]`. Message bounded to `max_length=2000`.
 
-    MCP ROUTING TRIGGERS: Out-of-Band Telemetry, Asynchronous Logging, Severity Masking,
-    Peripheral Audit, Ephemeral Context
+    MCP ROUTING TRIGGERS: Out-of-Band Telemetry, Asynchronous Logging, Severity Masking, Peripheral Audit, Ephemeral Context
+
     """
 
     timestamp: float = Field(ge=0.0, le=253402300799.0, description="The UNIX timestamp of the log event.")
@@ -8650,23 +8614,15 @@ class TemporalBoundsProfile(CoreasonBaseState):
 
 
 class TerminalBufferState(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Represents the discrete, deterministic crystallization of an
-    ephemeral POSIX/TTY execution buffer into a verifiable Merkle-DAG state vector.
-    As a ...State suffix, this is a declarative, frozen snapshot of an external
-    console.
+    r"""
+    AGENT INSTRUCTION: Represents the discrete, deterministic crystallization of an ephemeral POSIX/TTY execution buffer into a verifiable Merkle-DAG state vector.
 
-    CAUSAL AFFORDANCE: Acts as the structural sensor array for shell interactions,
-    capturing continuous stdout/stderr streams and environment matrices as
-    cryptographically locked exogenous perturbations. The working_directory
-    (max_length=2000) anchors the filesystem context.
+    CAUSAL AFFORDANCE: Acts as the structural sensor array for shell interactions, capturing continuous stdout/stderr streams and environment matrices as cryptographically locked exogenous perturbations.
 
-    EPISTEMIC BOUNDS: Physically restricted to SHA-256 canonical fingerprints
-    (stdout_hash, stderr_hash, env_variables_hash, all matching ^[a-f0-9]{64}$) to
-    mathematically prevent VRAM memory exhaustion from unbounded shell log buffering.
+    EPISTEMIC BOUNDS: Physically restricted to SHA-256 canonical fingerprints (`stdout_hash`, `stderr_hash`, `env_variables_hash`, all matching `^[a-f0-9]{64}$`) to mathematically prevent VRAM memory exhaustion from unbounded shell logs.
 
-    MCP ROUTING TRIGGERS: POSIX Environment, Exogenous Perturbation, TTY Buffer,
-    Causal Actuator, Stream Crystallization
+    MCP ROUTING TRIGGERS: POSIX Environment, Exogenous Perturbation, TTY Buffer, Causal Actuator, Stream Crystallization
+
     """
 
     type: Literal["terminal"] = Field(
@@ -8780,22 +8736,15 @@ class ToolInvocationEvent(BaseStateEvent):
 
 
 class TraceExportManifest(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Functions as a deterministic serialization envelope for flushing
-    Dapper-style trace subgraphs to external observability sinks. As a ...Manifest suffix,
-    this defines a frozen, N-dimensional coordinate state.
+    r"""
+    AGENT INSTRUCTION: Functions as a deterministic serialization envelope for flushing Dapper-style trace subgraphs to external observability sinks.
 
-    CAUSAL AFFORDANCE: Authorizes the mass export of ExecutionSpanReceipt objects across
-    the network boundary, structurally binding disconnected spans into a coherent batch_id
-    for downstream reconstruction.
+    CAUSAL AFFORDANCE: Authorizes the mass export of `ExecutionSpanReceipt` objects across the network boundary, structurally binding disconnected spans into a coherent `batch_id` for downstream reconstruction.
 
-    EPISTEMIC BOUNDS: Bounded by a rigid batch_id (CID regex ^[a-zA-Z0-9_.:-]+$,
-    max_length=128). The spans array is deterministically sorted by span_id via a
-    @model_validator to mathematically prevent Byzantine replay anomalies and guarantee
-    identical payload hashes during network egress.
+    EPISTEMIC BOUNDS: Bounded by a rigid `batch_id` (CID regex `^[a-zA-Z0-9_.:-]+$`). The `spans` array is deterministically sorted by `span_id` via a `@model_validator` to mathematically prevent Byzantine replay anomalies.
 
-    MCP ROUTING TRIGGERS: Trace Serialization, Telemetry Export, Batch Flushing, DAG
-    Reconstruction, Canonical Egress
+    MCP ROUTING TRIGGERS: Trace Serialization, Telemetry Export, Batch Flushing, DAG Reconstruction, Canonical Egress
+
     """
 
     batch_id: str = Field(
@@ -10184,14 +10133,15 @@ type AnyTopologyManifest = Annotated[
 
 
 class WorkflowManifest(CoreasonBaseState):
-    """
+    r"""
     AGENT INSTRUCTION: Formalizes the Topos Theory representation of a fully encapsulated swarm environment, serving as the macroscopic topological envelope for the entire execution payload and enforcing the Viable System Model.
 
-    CAUSAL AFFORDANCE: Physically initializes the execution DAG. This structural lock guarantees that any graph execution is mathematically anchored to a CoReason Genesis Block via `genesis_provenance`; stripping this violates the Topological Consistency of the Shared Kernel. Bounding thermodynamic capacity through governance constraints.
+    CAUSAL AFFORDANCE: Physically initializes the execution DAG. This structural lock guarantees that any graph execution is mathematically anchored to a CoReason Genesis Block via `genesis_provenance`; stripping this violates Topological Consistency.
 
-    EPISTEMIC BOUNDS: The `@model_validator` `sort_arrays` deterministically sorts `allowed_information_classifications` for RFC 8785 canonical hashing. The `@model_validator` `enforce_lbac_dominance` ensures network interlock, mathematically proving that any federated SLA clearance level is <= the local workflow bounds. The `manifest_version` strictly pins the schema.
+    EPISTEMIC BOUNDS: The `@model_validator` `enforce_lbac_dominance` mathematically interlocks the local LBAC bounds with federated SLA egress bounds, ensuring federated clearance never exceeds local workflow bounds. `allowed_information_classifications` sorted for RFC 8785.
 
     MCP ROUTING TRIGGERS: Topos Theory, Cybernetics, Execution Envelope, Macroscopic Topology, Viable System Model
+
     """
 
     model_config = ConfigDict(json_schema_extra=_inject_workflow_examples)
@@ -10605,12 +10555,15 @@ class ObservationEvent(BaseStateEvent):
 
 
 class ReasoningEngineeringPolicy(CoreasonBaseState):
-    """
+    r"""
     AGENT INSTRUCTION: Governs how human rejections translate into penalty scalars to bend the agent's Monte Carlo Tree Search.
 
-    CAUSAL AFFORDANCE: Permits human observation and penalty insertion into internal LatentScratchpadReceipt traces without halting.
+    CAUSAL AFFORDANCE: Permits human observation and penalty insertion into internal LatentScratchpadReceipt traces without halting the execution tree.
 
-    EPISTEMIC BOUNDS: Bounds telemetry_export_frequency_hz between 1 and 60. Bounds human_override_gradient between 0.0 and 1.0.
+    EPISTEMIC BOUNDS: Bounds `telemetry_export_frequency_hz` between 1 and 60. Bounds `human_override_gradient` between `0.0` and `1.0`.
+
+    MCP ROUTING TRIGGERS: Supervisory Control Theory, MCTS Bending, Penalty Scalar, Trace Evaluation, Cognitive Engineering
+
     """
 
     telemetry_export_frequency_hz: int = Field(
@@ -11339,14 +11292,15 @@ type AnyStateEvent = Annotated[
 
 
 class ContinuousObservationStream(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Defines the geometric snapshot of a continuous stream and its "forget gate" disfluency rules. As a ...Stream suffix, this acts as a declarative snapshot of continuous token flows.
+    r"""
+    AGENT INSTRUCTION: Defines the geometric snapshot of a continuous stream and its "forget gate" disfluency rules, acting as a declarative snapshot of continuous token flows.
 
     CAUSAL AFFORDANCE: Instructs the orchestrator to continuously process and retain token buffers governed by a temporal decay matrix.
 
-    EPISTEMIC BOUNDS: The token_buffer is mathematically capped at max_length=1000000. Each token is restricted to max_length=10000. The temporal_decay_matrix forces bounded temporal scaling (ge=0.0, le=1.0) applied to continuous sequence identifiers (ge=0).
+    EPISTEMIC BOUNDS: The `token_buffer` is mathematically capped at `max_length=1000000` (Topological Exemption: DO NOT SORT). Each token restricted to `max_length=10000`. `temporal_decay_matrix` forces bounded temporal scaling (`ge=0.0, le=1.0`).
 
     MCP ROUTING TRIGGERS: Continuous Observation, State Space Models, Temporal Decay, Forget Gate, Streaming Disfluency
+
     """
 
     stream_id: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
@@ -11366,14 +11320,15 @@ class ContinuousObservationStream(CoreasonBaseState):
 
 
 class StreamingDisfluencyContract(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Implements non-monotonic disfluency and "forget gate" triggers to repair continuous ingestion streams. As a ...Contract suffix, this object defines rigid mathematical boundaries that the orchestrator must enforce globally.
+    r"""
+    AGENT INSTRUCTION: Implements non-monotonic disfluency and "forget gate" triggers to repair continuous ingestion streams.
 
-    CAUSAL AFFORDANCE: Triggers the orchestrator to excise or repair segments of the token stream when the repair_marker_regex matches, probabilistically governed by the decay_threshold.
+    CAUSAL AFFORDANCE: Triggers the orchestrator to excise or repair segments of the token stream when the `repair_marker_regex` matches, probabilistically governed by the `decay_threshold`.
 
-    EPISTEMIC BOUNDS: The repair_marker_regex is strictly capped at max_length=2000 to prevent ReDoS CPU exhaustion. The decay_threshold is geometrically bounded (ge=0.0, le=1.0). The maximum temporal lookback window is clamped (ge=0, le=1000000000).
+    EPISTEMIC BOUNDS: `repair_marker_regex` is strictly capped at `max_length=2000` to prevent ReDoS CPU exhaustion. `decay_threshold` geometrically bounded (`ge=0.0, le=1.0`). Maximum temporal lookback clamped (`ge=0, le=1000000000`).
 
     MCP ROUTING TRIGGERS: Streaming Disfluency, Forget Gate, Token Excise, Sequence Repair, Temporal Lookback
+
     """
 
     repair_marker_regex: str = Field(
@@ -11393,14 +11348,15 @@ class StreamingDisfluencyContract(CoreasonBaseState):
 
 
 class SpeculativeExecutionBoundary(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Defines the structural boundary for executing graph nodes probabilistically, enabling speculative execution branches and time-rewinding geometry. As a ...Boundary suffix, this object acts as a declarative state checkpoint for probabilistic divergence.
+    r"""
+    AGENT INSTRUCTION: Defines the structural boundary for executing graph nodes probabilistically, enabling speculative execution branches and time-rewinding geometry.
 
     CAUSAL AFFORDANCE: Instructs the orchestrator's traversal engine to fork the execution context, probabilistically committing or reversing the subgraph based on downstream verification results.
 
-    EPISTEMIC BOUNDS: The commit_probability is strictly clamped (ge=0.0, le=1.0). The graph is physically bounded by the boundary_id (128-char CID). The rollback_pointers and competing_hypotheses arrays are deterministically sorted via @model_validator to preserve invariant RFC 8785 hashing.
+    EPISTEMIC BOUNDS: The `commit_probability` strictly clamped (`ge=0.0, le=1.0`). Graph physically bounded by `boundary_id` (128-char CID). The `rollback_pointers` and `competing_hypotheses` arrays deterministically sorted via `@model_validator`.
 
     MCP ROUTING TRIGGERS: Speculative Topology, Time-Rewinding Geometry, Probabilistic Divergence, Subgraph Fork, Execution Boundary
+
     """
 
     boundary_id: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
@@ -11437,26 +11393,15 @@ class SpeculativeExecutionBoundary(CoreasonBaseState):
 
 
 class EpistemicLedgerState(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Formalizes Event Sourcing and the Merkle-DAG structure as
-    the absolute, immutable source of truth for the swarm, fully partitioned from
-    volatile memory. As a ...State suffix, this is a declarative, frozen snapshot
-    of the macro-topology.
+    r"""
+    AGENT INSTRUCTION: Formalizes Event Sourcing and the Merkle-DAG structure as the absolute, immutable source of truth for the swarm, fully partitioned from volatile memory.
 
-    CAUSAL AFFORDANCE: Permanently crystallizes validated events into the history
-    (list[AnyStateEvent], max_length=10000). Applies Truth Maintenance via
-    truth_maintenance_policy (TruthMaintenancePolicy | None), eviction via
-    eviction_policy (EvictionPolicy | None), crystallization via
-    crystallization_policy (CrystallizationPolicy | None), and tracks active
-    DefeasibleCascadeEvents and RollbackIntents.
+    CAUSAL AFFORDANCE: Permanently crystallizes validated events into the `history` log. Applies Truth Maintenance, context eviction, and tracks active `DefeasibleCascadeEvents` and `RollbackIntents`.
 
-    EPISTEMIC BOUNDS: The @model_validator sort_history deterministically sorts
-    history by timestamp, checkpoints by checkpoint_id, active_rollbacks by
-    request_id, and active_cascades by
-    cascade_id — guaranteeing invariant RFC 8785 canonical hashing.
+    EPISTEMIC BOUNDS: The `@model_validator` `_enforce_canonical_sort` deterministically sorts history by timestamp, checkpoints by ID, and active cascades—guaranteeing invariant RFC 8785 canonical hashing. Validation prevents epistemic paradoxes (child before parent).
 
-    MCP ROUTING TRIGGERS: Event Sourcing, Merkle-DAG, Immutable Ledger, Truth
-    Crystallization, Chronological Sort
+    MCP ROUTING TRIGGERS: Event Sourcing, Merkle-DAG, Immutable Ledger, Truth Crystallization, Chronological Sort
+
     """
 
     history: list[AnyStateEvent] = Field(
