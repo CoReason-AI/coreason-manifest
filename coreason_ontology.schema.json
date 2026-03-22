@@ -1,5 +1,56 @@
 {
   "$defs": {
+    "ASTGradientReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Replace unstructured string tracebacks with deterministic, high-dimensional loss vectors for automated code repair.",
+      "properties": {
+        "compilation_attempt_id": {
+          "description": "Cryptographic anchor to the failed compile execution.",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Compilation Attempt Id",
+          "type": "string"
+        },
+        "ast_node_pointer": {
+          "description": "The exact RFC 6902 JSON Pointer or AST path where the syntax fractured.",
+          "maxLength": 2000,
+          "title": "Ast Node Pointer",
+          "type": "string"
+        },
+        "expected_type_geometry": {
+          "description": "The formal covariant requirement.",
+          "maxLength": 2000,
+          "title": "Expected Type Geometry",
+          "type": "string"
+        },
+        "actual_type_geometry": {
+          "description": "The invalid contravariant state provided.",
+          "maxLength": 2000,
+          "title": "Actual Type Geometry",
+          "type": "string"
+        },
+        "structural_loss_vector": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/VectorEmbeddingState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The dense vector embedding of the semantic error for vector-math remediation."
+        }
+      },
+      "required": [
+        "compilation_attempt_id",
+        "ast_node_pointer",
+        "expected_type_geometry",
+        "actual_type_geometry"
+      ],
+      "title": "ASTGradientReceipt",
+      "type": "object"
+    },
     "ActionSpaceManifest": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the finite, discrete Markov Decision Process (MDP) Action\nSpace and affordance landscape available to a specific execution node. As a ...Manifest\nsuffix, this defines a frozen, N-dimensional coordinate state.\n\nCAUSAL AFFORDANCE: Projects the combined multi-dimensional matrix of capabilities\ninto the agent's context, mathematically dictating which kinetic operations it can initiate.\nOptionally enforces kinetic_separation (KineticSeparationPolicy) to prevent toxic\ntool combinations.\n\nEPISTEMIC BOUNDS: The action_space_id is geometrically constrained to a 128-char CID.\nA @model_validator strictly bounds the topology by enforcing uniqueness across all\ncapabilities namespaces, and ensures deterministic RFC 8785 representation by sorting\nedges by their target_node_id.\n\nMCP ROUTING TRIGGERS: Markov Decision Process, Action Space, Affordance Theory,\nCurated Environment, State Transition Matrix, Directed Cyclic Graph",
@@ -1277,6 +1328,7 @@
           "evolutionary": "#/$defs/EvolutionaryTopologyManifest",
           "macro_adversarial": "#/$defs/AdversarialMarketTopologyManifest",
           "macro_federation": "#/$defs/ConsensusFederationTopologyManifest",
+          "macro_forge": "#/$defs/CapabilityForgeTopologyManifest",
           "smpc": "#/$defs/SMPCTopologyManifest",
           "swarm": "#/$defs/SwarmTopologyManifest"
         },
@@ -1309,6 +1361,9 @@
         },
         {
           "$ref": "#/$defs/ConsensusFederationTopologyManifest"
+        },
+        {
+          "$ref": "#/$defs/CapabilityForgeTopologyManifest"
         }
       ]
     },
@@ -1328,6 +1383,66 @@
           "$ref": "#/$defs/CyclicEdgeProfile"
         }
       ]
+    },
+    "AsymptoticComplexityReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Automatically infer Big-O asymptotic complexity via Monte Carlo fuzzing to populate Markov transition costs.",
+      "properties": {
+        "capability_id": {
+          "description": "The forged tool being profiled.",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Capability Id",
+          "type": "string"
+        },
+        "time_complexity_class": {
+          "description": "The mathematically inferred compute curve.",
+          "enum": [
+            "O(1)",
+            "O(log N)",
+            "O(N)",
+            "O(N log N)",
+            "O(N^2)",
+            "O(2^N)"
+          ],
+          "title": "Time Complexity Class",
+          "type": "string"
+        },
+        "space_complexity_class": {
+          "description": "The inferred memory allocation curve.",
+          "enum": [
+            "O(1)",
+            "O(log N)",
+            "O(N)",
+            "O(N^2)"
+          ],
+          "title": "Space Complexity Class",
+          "type": "string"
+        },
+        "peak_vram_bytes": {
+          "description": "Absolute thermodynamic memory ceiling detected.",
+          "maximum": 100000000000,
+          "minimum": 0,
+          "title": "Peak Vram Bytes",
+          "type": "integer"
+        },
+        "simulated_cpu_cycles": {
+          "description": "Empirical cycle burn used to establish compute_weight_magnitude.",
+          "maximum": 100000000000,
+          "minimum": 0,
+          "title": "Simulated Cpu Cycles",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "capability_id",
+        "time_complexity_class",
+        "space_complexity_class",
+        "peak_vram_bytes",
+        "simulated_cpu_cycles"
+      ],
+      "title": "AsymptoticComplexityReceipt",
+      "type": "object"
     },
     "AttackVectorProfile": {
       "enum": [
@@ -2395,6 +2510,141 @@
         "cryptographic_null_hash"
       ],
       "title": "BypassReceipt",
+      "type": "object"
+    },
+    "CapabilityForgeTopologyManifest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Create a zero-cost macro abstraction that unrolls the entire Zero-to-One generation, verification, and profiling loop.",
+      "properties": {
+        "epistemic_enforcement": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TruthMaintenancePolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Ties the topology to the Truth Maintenance layer."
+        },
+        "lifecycle_phase": {
+          "default": "live",
+          "description": "The execution phase of the graph. 'draft' allows incomplete structural state.",
+          "enum": [
+            "draft",
+            "live"
+          ],
+          "title": "Lifecycle Phase",
+          "type": "string"
+        },
+        "architectural_intent": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The AI's declarative rationale for selecting this topology.",
+          "title": "Architectural Intent"
+        },
+        "justification": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cryptographic/audit justification for this topology's configuration.",
+          "title": "Justification"
+        },
+        "nodes": {
+          "additionalProperties": {
+            "$ref": "#/$defs/AnyNodeProfile"
+          },
+          "description": "Flat registry of all nodes in this topology.",
+          "propertyNames": {
+            "$ref": "#/$defs/NodeIdentifierState"
+          },
+          "title": "Nodes",
+          "type": "object"
+        },
+        "shared_state_contract": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StateContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The schema-on-write contract governing the internal state of this topology."
+        },
+        "information_flow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/InformationFlowPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology."
+        },
+        "observability": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ObservabilityLODPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph."
+        },
+        "type": {
+          "const": "macro_forge",
+          "default": "macro_forge",
+          "description": "Discriminator for forge macro.",
+          "title": "Type",
+          "type": "string"
+        },
+        "target_epistemic_deficit": {
+          "$ref": "#/$defs/SemanticDiscoveryIntent",
+          "description": "The target epistemic deficit."
+        },
+        "generator_node_id": {
+          "$ref": "#/$defs/NodeIdentifierState",
+          "description": "The agent writing the code."
+        },
+        "formal_verifier_id": {
+          "$ref": "#/$defs/NodeIdentifierState",
+          "description": "The formal verifier system node."
+        },
+        "fuzzing_engine_id": {
+          "$ref": "#/$defs/NodeIdentifierState",
+          "description": "The fuzzing engine system node."
+        }
+      },
+      "required": [
+        "nodes",
+        "target_epistemic_deficit",
+        "generator_node_id",
+        "formal_verifier_id",
+        "fuzzing_engine_id"
+      ],
+      "title": "CapabilityForgeTopologyManifest",
       "type": "object"
     },
     "CausalAttributionState": {
@@ -8432,6 +8682,64 @@
       "title": "HardwareEnclaveReceipt",
       "type": "object"
     },
+    "HoareLogicProofReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Replace unit tests with mathematical proofs of state bounds prior to capability deployment.",
+      "properties": {
+        "capability_id": {
+          "description": "The forged tool being verified.",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Capability Id",
+          "type": "string"
+        },
+        "preconditions": {
+          "description": "The P bounds.",
+          "items": {
+            "$ref": "#/$defs/LiquidTypeContract"
+          },
+          "minItems": 1,
+          "title": "Preconditions",
+          "type": "array"
+        },
+        "postconditions": {
+          "description": "The Q bounds.",
+          "items": {
+            "$ref": "#/$defs/LiquidTypeContract"
+          },
+          "minItems": 1,
+          "title": "Postconditions",
+          "type": "array"
+        },
+        "proof_system": {
+          "description": "The proof system used to mathematically prove bounds.",
+          "enum": [
+            "lean4",
+            "coq",
+            "z3",
+            "tla_plus"
+          ],
+          "title": "Proof System",
+          "type": "string"
+        },
+        "verified_theorem_hash": {
+          "description": "Cryptographic proof.",
+          "maxLength": 128,
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Verified Theorem Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "capability_id",
+        "preconditions",
+        "postconditions",
+        "proof_system",
+        "verified_theorem_hash"
+      ],
+      "title": "HoareLogicProofReceipt",
+      "type": "object"
+    },
     "HomomorphicEncryptionProfile": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Lattice-Based Cryptography to enable the\nevaluation of geometric and arithmetic operations directly on an encrypted\ntensor state. As a ...Profile suffix, this is a declarative, frozen snapshot.\n\nCAUSAL AFFORDANCE: Permits an external, untrusted orchestrator to calculate\ngeometric distances or compute reward gradients on sensitive representations\nwithout exposing plaintext. The public_key_id (128-char CID) identifies the\nevaluation key for privacy-preserving computation.\n\nEPISTEMIC BOUNDS: The encryption dialect is rigidly locked to the fhe_scheme\nLiteral automaton [\"ckks\", \"bgv\", \"bfv\", \"tfhe\"]. Cryptographic memory\nexplosion is prevented by capping ciphertext_blob (max_length=5000000).\n\nMCP ROUTING TRIGGERS: Fully Homomorphic Encryption, Lattice-Based\nCryptography, CKKS Scheme, Privacy-Preserving Computation, Encrypted Tensor",
@@ -9850,6 +10158,30 @@
         "tamper_evident_root"
       ],
       "title": "LineageWatermarkReceipt",
+      "type": "object"
+    },
+    "LiquidTypeContract": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Mathematically bounds a specific target property.",
+      "properties": {
+        "target_property": {
+          "description": "The specific variable or schema key being bounded.",
+          "maxLength": 2000,
+          "title": "Target Property",
+          "type": "string"
+        },
+        "mathematical_predicate": {
+          "description": "The formal algebraic constraint (e.g., x > 0 and x < 100).",
+          "maxLength": 2000,
+          "title": "Mathematical Predicate",
+          "type": "string"
+        }
+      },
+      "required": [
+        "target_property",
+        "mathematical_predicate"
+      ],
+      "title": "LiquidTypeContract",
       "type": "object"
     },
     "LogEvent": {
@@ -14705,6 +15037,48 @@
           "type": "null"
         }
       ]
+    },
+    "TeleologicalIsometryReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Mathematically prove the deployed code actually satisfies the original epistemic deficit vector.",
+      "properties": {
+        "source_intent_id": {
+          "description": "Pointer to the originating SemanticDiscoveryIntent.",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Source Intent Id",
+          "type": "string"
+        },
+        "target_intent_vector": {
+          "$ref": "#/$defs/VectorEmbeddingState",
+          "description": "The original deficit space."
+        },
+        "forged_output_vector": {
+          "$ref": "#/$defs/VectorEmbeddingState",
+          "description": "The empirical behavioral output space of the forged tool."
+        },
+        "measured_cosine_similarity": {
+          "description": "The measured cosine similarity.",
+          "maximum": 1.0,
+          "minimum": -1.0,
+          "title": "Measured Cosine Similarity",
+          "type": "number"
+        },
+        "alignment_threshold_passed": {
+          "description": "Whether the threshold was passed.",
+          "title": "Alignment Threshold Passed",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "source_intent_id",
+        "target_intent_vector",
+        "forged_output_vector",
+        "measured_cosine_similarity",
+        "alignment_threshold_passed"
+      ],
+      "title": "TeleologicalIsometryReceipt",
+      "type": "object"
     },
     "TemporalBoundsProfile": {
       "additionalProperties": false,
