@@ -1605,14 +1605,15 @@ class AdjudicationRubricProfile(CoreasonBaseState):
 
 
 class PredictionMarketPolicy(CoreasonBaseState):
-    """
+    r"""
     AGENT INSTRUCTION: Defines the mathematical Automated Market Maker (AMM) using Robin Hanson's Logarithmic Market Scoring Rule (LMSR) parameters to guarantee infinite liquidity.
 
     CAUSAL AFFORDANCE: Triggers quadratic staking functions to mathematically prevent Sybil attacks and dictates the exact `convergence_delta_threshold` required to halt trading and collapse the probability wave.
 
-    EPISTEMIC BOUNDS: The `min_liquidity_magnitude` is capped at an integer `le=1000000000`, and the `convergence_delta_threshold` is strictly clamped to a probability distribution `[0.0, 1.0]`.
+    EPISTEMIC BOUNDS: `min_liquidity_magnitude` is capped at an integer `le=1000000000, ge=0`, and `convergence_delta_threshold` is strictly clamped to a probability distribution `[ge=0.0, le=1.0]`. `staking_function` is a Literal.
 
     MCP ROUTING TRIGGERS: LMSR, Automated Market Maker, Quadratic Staking, Sybil Resistance, Convergence Delta
+
     """
 
     staking_function: Literal["linear", "quadratic"] = Field(
@@ -2698,23 +2699,15 @@ class AdversarialEmulationProfile(CoreasonBaseState):
 
 
 class AgentBidIntent(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Represents a probabilistic agentic bid in a multi-objective
-    optimization market, factoring in projected compute latency, carbon constraints, and
-    internal epistemic certainty (Expected Utility Theory). As an ...Intent suffix, this is
-    a kinetic execution trigger.
+    r"""
+    AGENT INSTRUCTION: Represents a probabilistic agentic bid in a multi-objective optimization market, factoring in projected compute latency, carbon constraints, and internal epistemic certainty.
 
-    CAUSAL AFFORDANCE: Injects a competitive trajectory into the AuctionState order book,
-    seeking authorization from the orchestrator to execute a specific
-    TaskAnnouncementIntent branch.
+    CAUSAL AFFORDANCE: Injects a competitive trajectory into the AuctionState order book, seeking authorization from the orchestrator to execute a specific TaskAnnouncementIntent branch.
 
-    EPISTEMIC BOUNDS: The bid is geometrically bounded by estimated_cost_magnitude
-    (le=1000000000), estimated_latency_ms (ge=0, le=86400000), estimated_carbon_gco2eq
-    (ge=0.0, le=10000.0), and a continuous probability confidence_score (ge=0.0, le=1.0).
-    The bidder is anchored to a 128-char agent_id CID.
+    EPISTEMIC BOUNDS: Geometrically bounded by `estimated_cost_magnitude` (`le=1000000000`), `estimated_latency_ms` (`le=86400000, ge=0`), `estimated_carbon_gco2eq` (`le=10000.0, ge=0.0`), and `confidence_score` (`ge=0.0, le=1.0`). `agent_id` is a 128-char CID.
 
-    MCP ROUTING TRIGGERS: Expected Utility Theory, Multi-Objective Optimization, Epistemic
-    Certainty, Spot Market Bid, Cost Estimation
+    MCP ROUTING TRIGGERS: Expected Utility Theory, Multi-Objective Optimization, Epistemic Certainty, Spot Market Bid, Cost Estimation
+
     """
 
     agent_id: str = Field(
@@ -2842,22 +2835,15 @@ type AttestationMechanismProfile = Literal["fido2_webauthn", "zk_snark_groth16",
 
 
 class AuctionPolicy(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Defines the Algorithmic Mechanism Design for the decentralized spot
-    market, establishing the exact rules of engagement (e.g., Vickrey-Clarke-Groves, Dutch,
-    Sealed-Bid) to ensure truthful bidding (Strategyproofness). As a ...Policy suffix, this
-    object defines rigid mathematical boundaries.
+    r"""
+    AGENT INSTRUCTION: Defines the Algorithmic Mechanism Design for the decentralized spot market, establishing the exact rules of engagement (e.g., Vickrey-Clarke-Groves, Dutch, Sealed-Bid) to ensure truthful bidding.
 
-    CAUSAL AFFORDANCE: Instructs the orchestrator's clearinghouse on how to mathematically
-    resolve the AuctionState, applying the strict tie_breaker (TieBreakerPolicy) heuristic
-    when bid vectors collide.
+    CAUSAL AFFORDANCE: Instructs the orchestrator's clearinghouse on how to mathematically resolve the AuctionState, applying the strict `tie_breaker` heuristic when bid vectors collide.
 
-    EPISTEMIC BOUNDS: The market lifespan is strictly restricted by max_bidding_window_ms
-    (le=86400000). The combinatorial space is locked to the AuctionMechanismProfile and
-    TieBreakerPolicy Literal enums to prevent hallucinated market mechanics.
+    EPISTEMIC BOUNDS: Market lifespan is strictly restricted by `max_bidding_window_ms` (`le=86400000`). Combinatorial space is locked to the `AuctionMechanismProfile` and `TieBreakerPolicy` Literal enums.
 
-    MCP ROUTING TRIGGERS: Algorithmic Mechanism Design, Vickrey-Clarke-Groves,
-    Strategyproofness, Market Clearing Heuristic, Strict Mathematical Boundary
+    MCP ROUTING TRIGGERS: Algorithmic Mechanism Design, Vickrey-Clarke-Groves, Strategyproofness, Market Clearing Heuristic
+
     """
 
     auction_type: AuctionMechanismProfile = Field(description="The market mechanism governing the auction.")
@@ -4530,23 +4516,15 @@ class EscalationIntent(CoreasonBaseState):
 
 
 class EscrowPolicy(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Enforces Algorithmic Mechanism Design and Proof-of-Stake
-    (PoS) physics, forcing agents to cryptographically lock thermodynamic compute
-    capacity prior to execution. As a ...Policy suffix, this defines rigid
-    mathematical boundaries.
+    r"""
+    AGENT INSTRUCTION: Enforces Algorithmic Mechanism Design and Proof-of-Stake (PoS) physics, forcing agents to cryptographically lock thermodynamic compute capacity prior to execution.
 
-    CAUSAL AFFORDANCE: Authorizes the orchestrator's clearinghouse to
-    automatically slash or refund the locked budget based on the deterministic
-    evaluation of the release_condition_metric (max_length=2000). The
-    refund_target_node_id (128-char CID) specifies the refund destination.
+    CAUSAL AFFORDANCE: Authorizes the orchestrator's clearinghouse to automatically slash or refund the locked budget based on the deterministic evaluation of the `release_condition_metric`.
 
-    EPISTEMIC BOUNDS: The collateral is rigidly bounded by
-    escrow_locked_magnitude (ge=0, le=1000000000) to physically prevent integer
-    overflow during thermodynamic tallying.
+    EPISTEMIC BOUNDS: Collateral is rigidly bounded by `escrow_locked_magnitude` (`ge=0, le=1000000000`) to physically prevent integer overflow during thermodynamic tallying.
 
-    MCP ROUTING TRIGGERS: Algorithmic Mechanism Design, Proof-of-Stake, Nash
-    Equilibrium, Sybil Resistance, Escrow Collateralization
+    MCP ROUTING TRIGGERS: Algorithmic Mechanism Design, Proof-of-Stake, Nash Equilibrium, Sybil Resistance, Escrow Collateralization
+
     """
 
     escrow_locked_magnitude: int = Field(
@@ -5530,14 +5508,15 @@ class HomomorphicEncryptionProfile(CoreasonBaseState):
 
 
 class HypothesisStakeReceipt(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Cryptographically freezes an agent's probabilistic belief in a `HypothesisGenerationEvent` as an immutable economic stake on the Epistemic Ledger.
+    r"""
+    AGENT INSTRUCTION: Cryptographically freezes an agent's probabilistic belief in a HypothesisGenerationEvent as an immutable economic stake on the Epistemic Ledger.
 
     CAUSAL AFFORDANCE: Projects the agent's internal `implied_probability` into the shared LMSR order book, injecting liquidity and actively shifting the global consensus gradient.
 
-    EPISTEMIC BOUNDS: Topological invariants are enforced: `agent_id` and `target_hypothesis_id` are strictly bounded to 128-char CIDs (`pattern="^[a-zA-Z0-9_.:-]+$"`), mathematically preventing string-overflow exploits and resolving previous category theory violations. The `staked_magnitude` is constrained to a strictly positive integer `le=1000000000`.
+    EPISTEMIC BOUNDS: `agent_id` and `target_hypothesis_id` are strictly bounded to 128-char CIDs. `staked_magnitude` is constrained to a strictly positive integer `le=1000000000, gt=0`. `implied_probability` is bounded `ge=0.0, le=1.0`.
 
     MCP ROUTING TRIGGERS: Epistemic Staking, Brier Score Input, Belief Freezing, Market Order
+
     """
 
     agent_id: Annotated[str, StringConstraints(min_length=1)] = Field(
@@ -6886,14 +6865,15 @@ class MacroGridProfile(CoreasonBaseState):
 
 
 class MarketContract(CoreasonBaseState):
-    """
+    r"""
     AGENT INSTRUCTION: Enforces Algorithmic Mechanism Design and Proof-of-Stake (PoS) economic collateralization required for an agent to participate in the epistemic market.
 
     CAUSAL AFFORDANCE: Unlocks the ability for the orchestrator to computationally slash Byzantine or hallucinating nodes, ensuring a strict thermodynamic cost to semantic drift.
 
-    EPISTEMIC BOUNDS: Physically restricts the mathematical invariant where `slashing_penalty` <= `minimum_collateral` via an `@model_validator`. Downstream agents must secure this collateral before execution. To prevent floating-point consensus vulnerabilities across the distributed ledger, both bounds are strictly enforced as atomic integer magnitudes (`ge=0`).
+    EPISTEMIC BOUNDS: Physically restricts the mathematical invariant where `slashing_penalty <= minimum_collateral` via an `@model_validator`. Both bounds are strictly enforced as atomic integer magnitudes (`ge=0, le=1000000000`).
 
     MCP ROUTING TRIGGERS: Proof-of-Stake, Slashing Condition, Byzantine Fault Tolerance, Economic Escrow
+
     """
 
     minimum_collateral: int = Field(
@@ -6925,7 +6905,7 @@ class MarketContract(CoreasonBaseState):
 
 
 class MarketResolutionState(CoreasonBaseState):
-    """
+    r"""
     AGENT INSTRUCTION: Represents the definitive collapse of the LMSR market superposition into a crystallized `payout_distribution` using Strictly Proper Scoring Rules (e.g., Brier scores).
 
     CAUSAL AFFORDANCE: Instructs the orchestrator to definitively allocate compute magnitudes to the `winning_hypothesis_id` and flush `falsified_hypothesis_ids` from the active context via a Defeasible Cascade.
@@ -6933,6 +6913,7 @@ class MarketResolutionState(CoreasonBaseState):
     EPISTEMIC BOUNDS: Enforces a strictly bounded `payout_distribution` dictionary mapping W3C DIDs to non-negative integers (`ge=0`), with deterministic RFC 8785 array sorting applied to the falsified hypotheses.
 
     MCP ROUTING TRIGGERS: Brier Scoring, Market Settlement, Probability Wave Collapse, Truth Crystallization
+
     """
 
     market_id: Annotated[str, StringConstraints(min_length=1)] = Field(
@@ -7465,14 +7446,15 @@ class PersistenceCommitReceipt(BaseStateEvent):
 
 
 class PredictionMarketState(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: A declarative, frozen snapshot of an Automated Market Maker (AMM) utilizing Robin Hanson's Logarithmic Market Scoring Rule (LMSR) to guarantee infinite liquidity. As a ...State suffix, this represents an N-dimensional coordinate of market equilibrium.
+    r"""
+    AGENT INSTRUCTION: A declarative, frozen snapshot of an Automated Market Maker (AMM) utilizing Robin Hanson's Logarithmic Market Scoring Rule (LMSR) to guarantee infinite liquidity.
 
-    CAUSAL AFFORDANCE: Aggregates HypothesisStakeReceipt vectors, allowing the orchestrator to track the shifting probability manifold and trigger market resolution when the AMM reaches the required convergence threshold.
+    CAUSAL AFFORDANCE: Aggregates `HypothesisStakeReceipt` vectors, allowing the orchestrator to track the shifting probability manifold and trigger market resolution when the AMM reaches the required convergence threshold.
 
-    EPISTEMIC BOUNDS: State-Space mapping is rigorously typed: `current_market_probabilities` is geometrically bounded by `max_length=1000000000` to restrict cardinality, correcting prior categorical type violations. `market_id` is restricted to a 128-char CID. The order_book array is deterministically sorted by agent_id via @model_validator.
+    EPISTEMIC BOUNDS: `current_market_probabilities` is geometrically bounded by `max_length=1000000000`. `market_id` is restricted to a 128-char CID. `order_book` array is deterministically sorted by `agent_id` via `@model_validator`.
 
     MCP ROUTING TRIGGERS: Logarithmic Market Scoring Rule, Automated Market Maker, Prediction Market, Infinite Liquidity, Brier Score
+
     """
 
     market_id: Annotated[str, StringConstraints(min_length=1)] = Field(
@@ -7656,23 +7638,15 @@ class EpistemicSOPManifest(CoreasonBaseState):
 
 
 class ProcessRewardContract(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Enforces the Step-Level Verification heuristics for Process Reward
-    Models (PRMs) during non-monotonic reasoning searches and test-time compute. As a
-    ...Contract suffix, this object defines rigid mathematical boundaries that the
-    orchestrator must enforce globally.
+    r"""
+    AGENT INSTRUCTION: Enforces the Step-Level Verification heuristics for Process Reward Models (PRMs) during non-monotonic reasoning searches and test-time compute.
 
-    CAUSAL AFFORDANCE: Authorizes the orchestrator to physically prune hallucinating
-    ThoughtBranchState vectors from the LatentScratchpadReceipt if their logit probabilities
-    drop below the viable threshold, emulating rigorous Beam Search pruning.
+    CAUSAL AFFORDANCE: Authorizes the orchestrator to physically prune hallucinating ThoughtBranchState vectors from the LatentScratchpadReceipt if their logit probabilities drop below the viable threshold, emulating rigorous Beam Search pruning.
 
-    EPISTEMIC BOUNDS: Strictly bounds the search space geometry via pruning_threshold
-    (ge=0.0, le=1.0) and mechanically caps State-Space Explosion through
-    max_backtracks_allowed (ge=0, le=1000000000). Includes an optional
-    convergence_sla (DynamicConvergenceSLA) to monitor trajectory variance.
+    EPISTEMIC BOUNDS: Strictly bounds the search space geometry via `pruning_threshold` (`ge=0.0, le=1.0`) and mechanically caps State-Space Explosion through `max_backtracks_allowed` (`ge=0, le=1000000000`).
 
-    MCP ROUTING TRIGGERS: Process Reward Model, Beam Search Pruning, Latent Trajectory,
-    State-Space Explosion, A* Search
+    MCP ROUTING TRIGGERS: Process Reward Model, Beam Search Pruning, Latent Trajectory, State-Space Explosion, A* Search
+
     """
 
     convergence_sla: DynamicConvergenceSLA | None = Field(
@@ -8577,22 +8551,15 @@ class TaskAnnouncementIntent(CoreasonBaseState):
 
 
 class TaskAwardReceipt(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: A cryptographically frozen historical fact representing the
-    successful clearing of an algorithmic auction and the mathematically proven allocation
-    of compute capital. As a ...Receipt suffix, this is an append-only coordinate on the
-    Merkle-DAG.
+    r"""
+    AGENT INSTRUCTION: A cryptographically frozen historical fact representing the successful clearing of an algorithmic auction and the mathematically proven allocation of compute capital.
 
-    CAUSAL AFFORDANCE: Definitively terminates the auction phase and authorizes the
-    awarded_syndicate to execute their task trajectory using the locked EscrowPolicy funds.
+    CAUSAL AFFORDANCE: Definitively terminates the auction phase and authorizes the awarded syndicate to execute their task trajectory using the locked EscrowPolicy funds.
 
-    EPISTEMIC BOUNDS: Two @model_validators execute physical invariant checks: (1)
-    Conservation of Compute — the sum of awarded_syndicate values must exactly equal
-    cleared_price_magnitude (le=1000000000); (2) Escrow Ceiling — escrow_locked_magnitude
-    cannot exceed cleared_price_magnitude.
+    EPISTEMIC BOUNDS: Two `@model_validators` execute physical invariants: (1) Conservation of Compute (sum of `awarded_syndicate` values must exactly equal `cleared_price_magnitude` `le=1000000000`); (2) Escrow Ceiling (`escrow_locked_magnitude` cannot exceed `cleared_price_magnitude`).
 
-    MCP ROUTING TRIGGERS: Market Clearing, Escrow Lock, Cryptographic Provenance, Syndicate
-    Allocation, Thermodynamic Execution
+    MCP ROUTING TRIGGERS: Market Clearing, Escrow Lock, Cryptographic Provenance, Syndicate Allocation, Thermodynamic Execution
+
     """
 
     task_id: str = Field(
@@ -8619,14 +8586,15 @@ class TaskAwardReceipt(CoreasonBaseState):
 
 
 class AuctionState(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: A frozen, declarative snapshot of the N-dimensional order book tracking the ongoing convergence of an algorithmic spot market auction. As a ...State suffix, this is a declarative, frozen coordinate.
+    r"""
+    AGENT INSTRUCTION: A frozen, declarative snapshot of the N-dimensional order book tracking the ongoing convergence of an algorithmic spot market auction.
 
-    CAUSAL AFFORDANCE: Aggregates incoming AgentBidIntent vectors against the foundational TaskAnnouncementIntent (announcement), serving as the deterministic state space for the orchestrator's clearing function. The optional award (TaskAwardReceipt) records the final settlement.
+    CAUSAL AFFORDANCE: Aggregates incoming AgentBidIntent vectors against the foundational TaskAnnouncementIntent, serving as the deterministic state space for the orchestrator's clearing function.
 
-    EPISTEMIC BOUNDS: Market liveness is physically bounded by `clearing_timeout` (`le=1000000000`, `gt=0`), defining the absolute execution ceiling before forced timeout. The `minimum_tick_size` is clamped (`gt=0`) as an integer to prevent floating-point consensus failures. To guarantee RFC 8785 Canonical Hashing while preserving market physics, the `bids` array is deterministically sorted by `estimated_cost_magnitude` (price) and then by `agent_id`.
+    EPISTEMIC BOUNDS: Market liveness is physically bounded by `clearing_timeout` (`le=1000000000, gt=0`). `minimum_tick_size` is clamped (`gt=0`). The `bids` array is deterministically sorted by `estimated_cost_magnitude` (price) then `agent_id` for RFC 8785 Hashing.
 
     MCP ROUTING TRIGGERS: Order Book Snapshot, Market Convergence, RFC 8785 Canonicalization, Liquidity Aggregation, Declarative Coordinate
+
     """
 
     announcement: TaskAnnouncementIntent = Field(description="The original call for proposals.")
@@ -9088,14 +9056,15 @@ class VectorEmbeddingState(CoreasonBaseState):
 
 
 class CognitiveCritiqueProfile(CoreasonBaseState):
-    """
+    r"""
     AGENT INSTRUCTION: Implements Step-Level Verification via Process Reward Models (PRMs) to evaluate and critique intermediate steps in non-monotonic reasoning trees.
 
     CAUSAL AFFORDANCE: Injects a dense latent supervision vector (`logical_flaw_embedding`) to mathematically repel the generative trajectory away from hallucinated or logically flawed probability manifolds during test-time compute.
 
-    EPISTEMIC BOUNDS: The penalization magnitude is strictly clamped by `epistemic_penalty_scalar` (`ge=0.0`, `le=1.0`) to prevent gradient explosion. The target is cryptographically locked via `reasoning_trace_hash` (SHA-256 pattern `^[a-f0-9]{64}$`).
+    EPISTEMIC BOUNDS: Penalization magnitude strictly clamped by `epistemic_penalty_scalar` (`ge=0.0, le=1.0`) to prevent gradient explosion. Target is cryptographically locked via `reasoning_trace_hash` (SHA-256 pattern `^[a-f0-9]{64}$`).
 
     MCP ROUTING TRIGGERS: Process Reward Model, Step-Level Verification, Representation Engineering, Latent Repulsion, Test-Time Supervision
+
     """
 
     reasoning_trace_hash: str = Field(
@@ -11186,23 +11155,15 @@ class CognitiveFormatContract(CoreasonBaseState):
 
 
 class EpistemicRewardModelPolicy(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Establishes the Group Relative Policy Optimization (GRPO) reward
-    shaping ruleset, mathematically immunizing the swarm against Goodhart's Law and reward
-    hacking. As a ...Policy suffix, this object defines rigid mathematical boundaries that
-    the orchestrator must enforce globally.
+    r"""
+    AGENT INSTRUCTION: Establishes the Group Relative Policy Optimization (GRPO) reward shaping ruleset, mathematically immunizing the swarm against Goodhart's Law and reward hacking.
 
-    CAUSAL AFFORDANCE: Projects a continuous penalty/reward gradient across extracted axiomatic
-    paths, enforcing syntactic compliance through the format_contract (CognitiveFormatContract)
-    while simultaneously evaluating semantic and topological validity via the optional
-    topological_scoring (TopologicalRewardContract).
+    CAUSAL AFFORDANCE: Projects a continuous penalty/reward gradient across extracted axiomatic paths, enforcing syntactic compliance through the format contract while simultaneously evaluating semantic/topological validity.
 
-    EPISTEMIC BOUNDS: Prevents reward hacking by scaling the logical validity score (R_path)
-    via the beta_path_weight scalar (ge=0.0, le=1.0). Gated by a cryptographic
-    reference_graph_id providing the deterministic ground-truth topology.
+    EPISTEMIC BOUNDS: Prevents reward hacking by scaling the logical validity score (R_path) via the `beta_path_weight` scalar (`ge=0.0, le=1.0`). Gated by a cryptographic `reference_graph_id` CID.
 
-    MCP ROUTING TRIGGERS: GRPO, Reward Shaping, Goodhart's Law, Policy Gradient,
-    Advantage Estimation
+    MCP ROUTING TRIGGERS: GRPO, Reward Shaping, Goodhart's Law, Policy Gradient, Advantage Estimation
+
     """
 
     policy_id: str = Field(
@@ -11282,23 +11243,15 @@ class CognitiveRewardEvaluationReceipt(BaseStateEvent):
 
 
 class CognitiveDetailedBalanceContract(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Implements Generative Flow Network (GFlowNet) trajectory balance
-    conditions to ensure that the probability of generating a non-monotonic reasoning path
-    is strictly proportional to its terminal reward. As a ...Contract suffix, this object
-    defines rigid mathematical boundaries.
+    r"""
+    AGENT INSTRUCTION: Implements Generative Flow Network (GFlowNet) trajectory balance conditions to ensure that the probability of generating a non-monotonic reasoning path is strictly proportional to its terminal reward.
 
-    CAUSAL AFFORDANCE: Instructs the orchestrator's sampling mechanism to continuously
-    optimize for the detailed balance equations using the specified flow_estimation_model
-    (max_length=2000), ensuring proportional flow allocation across alternative Markov
-    Decision Process (MDP) branches.
+    CAUSAL AFFORDANCE: Instructs the orchestrator's sampling mechanism to continuously optimize for the detailed balance equations using the specified `flow_estimation_model`, ensuring proportional flow allocation across MDP branches.
 
-    EPISTEMIC BOUNDS: The acceptable mathematical variance is strictly bounded by
-    target_balance_epsilon (ge=0.0, le=1.0), preventing probability flow divergence. The
-    local_exploration_k (gt=0, le=1.0) physically caps exploratory branching.
+    EPISTEMIC BOUNDS: Mathematical variance is strictly bounded by `target_balance_epsilon` (`ge=0.0, le=1.0`), preventing probability flow divergence. `local_exploration_k` (`gt=0, le=1`) physically caps exploratory branching.
 
-    MCP ROUTING TRIGGERS: Generative Flow Networks, Detailed Balance, Markov Chain Monte
-    Carlo, Trajectory Flow, Credit Assignment Problem
+    MCP ROUTING TRIGGERS: Generative Flow Networks, Detailed Balance, Markov Chain Monte Carlo, Trajectory Flow, Credit Assignment Problem
+
     """
 
     target_balance_epsilon: float = Field(
@@ -11350,23 +11303,15 @@ class EpistemicFlowStateReceipt(BaseStateEvent):
 
 
 class TopologicalRewardContract(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Enforces Graph Representation Learning (GCN/GAT) constraints to
-    shape the epistemic reward based purely on the topological centrality and spectral
-    connectivity of the extracted axioms. As a ...Contract suffix, this object defines
-    rigid mathematical boundaries.
+    r"""
+    AGENT INSTRUCTION: Enforces Graph Representation Learning (GCN/GAT) constraints to shape the epistemic reward based purely on the topological centrality and spectral connectivity of the extracted axioms.
 
-    CAUSAL AFFORDANCE: Commands the orchestrator to execute deterministic graph traversal
-    algorithms (Random Walk with Restart, Spatial GCN) to compute node reachability and
-    vector similarity before allocating policy gradients to the actor model.
+    CAUSAL AFFORDANCE: Commands the orchestrator to execute deterministic graph traversal algorithms (Random Walk with Restart, Spatial GCN) to compute node reachability and vector similarity before allocating policy gradients.
 
-    EPISTEMIC BOUNDS: Clamps structural relevance geometrically using
-    min_link_criticality_score and min_semantic_relevance_score, both strictly between
-    (ge=0.0, le=1.0). The aggregation_method restricts the orchestrator to a strict
-    Literal automaton ["gcn_spatial", "attention_gat", "rwr_topological"].
+    EPISTEMIC BOUNDS: Clamps structural relevance geometrically using `min_link_criticality_score` and `min_semantic_relevance_score` (`ge=0.0, le=1.0`). `aggregation_method` restricts the orchestrator to a strict Literal automaton.
 
-    MCP ROUTING TRIGGERS: Graph Convolutional Networks, Spectral Graph Theory, Random Walk
-    with Restart, Topological Reward Shaping, PageRank
+    MCP ROUTING TRIGGERS: Graph Convolutional Networks, Spectral Graph Theory, Random Walk with Restart, Topological Reward Shaping, PageRank
+
     """
 
     min_link_criticality_score: float = Field(
