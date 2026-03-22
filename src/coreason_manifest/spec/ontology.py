@@ -76,6 +76,18 @@ def _validate_payload_bounds(
     return value
 
 
+def _canonicalize_payload(obj: Any) -> Any:
+    """
+    AGENT INSTRUCTION: Mathematically strips all `None` values recursively from a payload before hashing.
+    Extracted to module level to prevent function-object recreation overhead during high-frequency DAG node serialization.
+    """
+    if isinstance(obj, dict):
+        return {k: _canonicalize_payload(v) for k, v in obj.items() if v is not None}
+    if isinstance(obj, list):
+        return [_canonicalize_payload(v) for v in obj]
+    return obj
+
+
 type AuctionMechanismProfile = Literal["sealed_bid", "dutch", "vickrey"]
 type CausalIntervalProfile = Literal["strictly_precedes", "overlaps", "contains", "causes", "mitigates"]
 type CrossoverMechanismProfile = Literal["uniform_blend", "single_point", "heuristic"]
@@ -5055,14 +5067,7 @@ class ExecutionNodeReceipt(CoreasonBaseState):
             "parent_hashes": self.parent_hashes,
         }
 
-        def _canonicalize(obj: Any) -> Any:
-            if isinstance(obj, dict):
-                return {k: _canonicalize(v) for k, v in obj.items() if v is not None}
-            if isinstance(obj, list):
-                return [_canonicalize(v) for v in obj]
-            return obj
-
-        canonical_payload = _canonicalize(payload)
+        canonical_payload = _canonicalize_payload(payload)
         json_bytes = json.dumps(canonical_payload, ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode(
             "utf-8"
         )
@@ -10311,17 +10316,19 @@ class DAGTopologyManifest(BaseTopologyManifest):
         if not self.allow_cycles:
             depth_memo: dict[NodeIdentifierState, int] = {}
 
+            import collections
+
             # Using Kahn's Algorithm / Iterative topological sort for depth and cycles
             # We calculate max depth without recursion to avoid stack overflow limits
 
-            queue = [n for n in self.nodes if in_degree[n] == 0]
+            queue = collections.deque([n for n in self.nodes if in_degree[n] == 0])
             for n in queue:
                 depth_memo[n] = 1
 
             processed_count = 0
 
             while queue:
-                curr = queue.pop(0)
+                curr = queue.popleft()
                 processed_count += 1
                 curr_depth = depth_memo[curr]
 
@@ -10706,6 +10713,66 @@ class CapabilityForgeTopologyManifest(BaseTopologyManifest):
         )
 
 
+class IntentElicitationTopologyManifest(BaseTopologyManifest):
+    """
+    AGENT INSTRUCTION: Zero-Cost Macro-Topology that translates unstructured, high-entropy human multimodal input into a mathematically verified, zero-entropy HumanDirectiveIntent.
+
+    CAUSAL AFFORDANCE: Unrolls a cyclic Directed Graph that orchestrates Multimodal Transmutation, Metacognitive Scanning (Shannon Entropy measurement), and Schema-on-Write Drafting (Human Interrogation) before yielding to the Agentic Forge.
+
+    EPISTEMIC BOUNDS: The max_clarification_loops physical Halting Problem guillotine is mathematically clamped between 1 and 50 to prevent infinite clarification loops.
+
+    MCP ROUTING TRIGGERS: Intent Elicitation, Zero-Entropy Distillation, Cyclical Routing, Human Interrogation, Multimodal Transmutation
+    """
+
+    type: Literal["macro_elicitation"] = Field(
+        default="macro_elicitation", description="Discriminator for the elicitation macro."
+    )
+    raw_human_artifact_id: Annotated[
+        str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$", min_length=1, max_length=128)
+    ] = Field(description="The anchor to the initial, unstructured MultimodalArtifactReceipt uploaded by the human.")
+    transmuter_node_id: NodeIdentifierState = Field(
+        description="The system node responsible for executing the EpistemicTransmutationTask."
+    )
+    scanner_node_id: NodeIdentifierState = Field(
+        description="The agent node actively running the EpistemicScanningPolicy."
+    )
+    human_oracle_id: NodeIdentifierState = Field(description="The human UI node receiving the DraftingIntent.")
+    max_clarification_loops: int = Field(
+        default=5,
+        ge=1,
+        le=50,
+        description="A physical Halting Problem guillotine preventing infinite clarification loops.",
+    )
+
+    def compile_to_base_topology(self) -> DAGTopologyManifest:
+        """Deterministically unwraps the macro into a cyclic DAGTopologyManifest."""
+        nodes: dict[NodeIdentifierState, AnyNodeProfile] = {
+            self.transmuter_node_id: SystemNodeProfile(description="Multimodal Transmuter"),
+            self.scanner_node_id: AgentNodeProfile(
+                description="Metacognitive Entropy Scanner",
+                epistemic_policy=EpistemicScanningPolicy(
+                    active=True, dissonance_threshold=0.1, action_on_gap="clarify"
+                ),
+            ),
+            self.human_oracle_id: HumanNodeProfile(
+                description="Elicitation Oracle", required_attestation="fido2_webauthn"
+            ),
+        }
+        edges = [
+            (self.transmuter_node_id, self.scanner_node_id),
+            (self.scanner_node_id, self.human_oracle_id),
+            (self.human_oracle_id, self.scanner_node_id),
+        ]
+
+        return DAGTopologyManifest(
+            nodes=nodes,
+            edges=edges,
+            allow_cycles=True,
+            max_depth=50,
+            max_fan_out=10,
+        )
+
+
 type AnyTopologyManifest = Annotated[
     DAGTopologyManifest
     | CouncilTopologyManifest
@@ -10716,7 +10783,8 @@ type AnyTopologyManifest = Annotated[
     | DigitalTwinTopologyManifest
     | AdversarialMarketTopologyManifest
     | ConsensusFederationTopologyManifest
-    | CapabilityForgeTopologyManifest,
+    | CapabilityForgeTopologyManifest
+    | IntentElicitationTopologyManifest,
     Field(discriminator="type", description="A discriminated union of workflow topologies."),
 ]
 
@@ -12183,6 +12251,7 @@ DigitalTwinTopologyManifest.model_rebuild()
 AdversarialMarketTopologyManifest.model_rebuild()
 ConsensusFederationTopologyManifest.model_rebuild()
 CapabilityForgeTopologyManifest.model_rebuild()
+IntentElicitationTopologyManifest.model_rebuild()
 EpistemicSOPManifest.model_rebuild()
 DelegatedCapabilityManifest.model_rebuild()
 TokenBurnReceipt.model_rebuild()
