@@ -231,8 +231,11 @@ def calculate_latent_alignment(
     if v1.model_name != v2.model_name or v1.dimensionality != v2.dimensionality:
         raise ValueError("Topological Contradiction: Vector geometries are incommensurable.")
 
-    b1 = base64.b64decode(v1.vector_base64)
-    b2 = base64.b64decode(v2.vector_base64)
+    try:
+        b1 = base64.b64decode(v1.vector_base64)
+        b2 = base64.b64decode(v2.vector_base64)
+    except Exception as e:
+        raise ValueError("Topological Contradiction: Invalid base64 encoding.") from e
 
     try:
         vec1 = struct.unpack(f"<{v1.dimensionality}f", b1)

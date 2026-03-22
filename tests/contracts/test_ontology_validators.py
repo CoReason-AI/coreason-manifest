@@ -557,43 +557,52 @@ def test_composite_node_profile_sorts_mappings() -> None:
 
 
 def test_action_space_manifest_enforce_canonical_sort() -> None:
-    from pydantic import ValidationError
 
     from coreason_manifest.spec.ontology import (
         ActionSpaceManifest,
         PermissionBoundaryPolicy,
         SideEffectProfile,
         ToolManifest,
+        TransitionEdgeProfile,
     )
 
     tool1 = ToolManifest(
+        type="native_tool",
         tool_name="tool_b",
         description="description",
-        input_schema={},
+        input_schema={"type": "object", "properties": {}},
         side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
         permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
     )
     tool2 = ToolManifest(
+        type="native_tool",
         tool_name="tool_a",
         description="description 2",
-        input_schema={},
-        side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
-        permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
-    )
-    tool3 = ToolManifest(
-        tool_name="tool_b",
-        description="description duplicate",
-        input_schema={},
+        input_schema={"type": "object", "properties": {}},
         side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
         permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
     )
 
-    with pytest.raises(ValidationError, match=r"Tool names within an ActionSpaceManifest must be strictly unique"):
-        ActionSpaceManifest(action_space_id="space_1", native_tools=[tool1, tool3])
-
-    manifest = ActionSpaceManifest(action_space_id="space_1", native_tools=[tool1, tool2])
-    assert manifest.native_tools[0].tool_name == "tool_a"
-    assert manifest.native_tools[1].tool_name == "tool_b"
+    # Valid manifest
+    manifest = ActionSpaceManifest(
+        action_space_id="space_1",
+        entry_point_id="tool_b",
+        capabilities={"tool_a": tool2, "tool_b": tool1},
+        transition_matrix={
+            "tool_b": [
+                TransitionEdgeProfile(
+                    edge_type="acyclic", target_node_id="tool_b", probability_weight=0.5, compute_weight_magnitude=1
+                ),
+                TransitionEdgeProfile(
+                    edge_type="acyclic", target_node_id="tool_a", probability_weight=0.5, compute_weight_magnitude=1
+                ),
+            ],
+            "tool_a": [],
+        },
+    )
+    # Check canonical sorting of edges
+    assert manifest.transition_matrix["tool_b"][0].target_node_id == "tool_a"
+    assert manifest.transition_matrix["tool_b"][1].target_node_id == "tool_b"
 
 
 def test_mcpservermanifest_enforce_did() -> None:

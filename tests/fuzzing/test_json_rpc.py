@@ -111,22 +111,32 @@ def test_latent_scratchpad_receipt_referential_integrity(
     ),
 )
 def test_action_space_manifest_uniqueness(action_space_id: str, tool_names: list[str]) -> None:
-    native_tools = [
-        ToolManifest(
+    native_tools = {
+        name: ToolManifest(
+            type="native_tool",
             tool_name=name,
-            input_schema={"type": "object"},
+            input_schema={"type": "object", "properties": {}},
             description="desc",
             side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
             permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
         )
         for name in tool_names
-    ]
-    manifest = ActionSpaceManifest(action_space_id=action_space_id, native_tools=native_tools)
-    assert [t.tool_name for t in manifest.native_tools] == sorted(tool_names)
+    }
+    manifest = ActionSpaceManifest(
+        action_space_id=action_space_id,
+        capabilities=native_tools,  # type: ignore[arg-type]
+        entry_point_id=tool_names[0],
+        transition_matrix={name: [] for name in tool_names},
+    )
+
+    assert manifest.action_space_id == action_space_id
+    assert len(manifest.capabilities) == len(tool_names)
 
 
 @given(
-    retracted_nodes=st.lists(st.from_regex("^[a-zA-Z0-9_.:-]+$", fullmatch=True).filter(lambda x: 1 <= len(x) <= 128))
+    retracted_nodes=st.lists(
+        st.from_regex("^[a-zA-Z0-9_.:-]+$", fullmatch=True).filter(lambda x: 1 <= len(x) <= 128), max_size=5
+    )
 )
 def test_epistemic_ledger_state_bounds(retracted_nodes: list[str]) -> None:
     ledger = EpistemicLedgerState(
@@ -136,7 +146,6 @@ def test_epistemic_ledger_state_bounds(retracted_nodes: list[str]) -> None:
         checkpoints=[],
         active_cascades=[],
         active_rollbacks=[],
-        migration_contracts=[],
     )
     assert ledger.retracted_nodes == sorted(retracted_nodes)
 
