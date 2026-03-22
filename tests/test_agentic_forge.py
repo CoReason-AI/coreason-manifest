@@ -8,7 +8,7 @@ from coreason_manifest.spec.ontology import (
 )
 
 
-def test_teleological_isometry_threshold():
+def test_teleological_isometry_threshold() -> None:
     source_intent_id = "intent-id-12345"
     target_intent_vector = VectorEmbeddingState(vector_base64="abc", dimensionality=10, model_name="test-model")
     forged_output_vector = VectorEmbeddingState(vector_base64="xyz", dimensionality=10, model_name="test-model")
@@ -32,7 +32,7 @@ def test_teleological_isometry_threshold():
     assert receipt_failed.alignment_threshold_passed is False
 
 
-def test_hoare_logic_proof_receipt_canonical_sorting():
+def test_hoare_logic_proof_receipt_canonical_sorting() -> None:
     contract_b = LiquidTypeContract(target_property="b_prop", mathematical_predicate="x > 0")
     contract_a = LiquidTypeContract(target_property="a_prop", mathematical_predicate="x < 100")
     contract_c = LiquidTypeContract(target_property="c_prop", mathematical_predicate="x == 5")
@@ -55,7 +55,7 @@ def test_hoare_logic_proof_receipt_canonical_sorting():
     assert receipt.postconditions[2].target_property == "c_prop"
 
 
-def test_capability_forge_topology_compile():
+def test_capability_forge_topology_compile() -> None:
     intent = SemanticDiscoveryIntent(
         query_vector=VectorEmbeddingState(vector_base64="abc", dimensionality=10, model_name="test-model"),
         min_isometry_score=0.9,
