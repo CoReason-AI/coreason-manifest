@@ -2,9 +2,11 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
+    AgentNodeProfile,
     CapabilityForgeTopologyManifest,
     HumanDirectiveIntent,
     HumanNodeProfile,
+    IntentElicitationTopologyManifest,
     SemanticDiscoveryIntent,
     VectorEmbeddingState,
 )
@@ -70,3 +72,27 @@ def test_capability_forge_topology_manifest_with_human_supervisor() -> None:
     assert isinstance(human_node, HumanNodeProfile)
     assert human_node.description == "Forge HITL Supervisor"
     assert human_node.required_attestation == "fido2_webauthn"
+
+
+def test_intent_elicitation_macro_compilation() -> None:
+    manifest = IntentElicitationTopologyManifest(
+        raw_human_artifact_id="test_artifact_1",
+        transmuter_node_id="did:coreason:sys-transmuter",
+        scanner_node_id="did:coreason:agent-scanner",
+        human_oracle_id="did:coreason:human-oracle",
+        nodes={},
+    )
+    dag = manifest.compile_to_base_topology()
+
+    assert len(dag.nodes) == 3
+    assert len(dag.edges) == 3
+    assert ("did:coreason:sys-transmuter", "did:coreason:agent-scanner") in dag.edges
+    assert ("did:coreason:agent-scanner", "did:coreason:human-oracle") in dag.edges
+    assert ("did:coreason:human-oracle", "did:coreason:agent-scanner") in dag.edges
+
+    assert dag.allow_cycles is True
+
+    scanner_node = dag.nodes["did:coreason:agent-scanner"]
+    assert isinstance(scanner_node, AgentNodeProfile)
+    assert scanner_node.epistemic_policy is not None
+    assert scanner_node.epistemic_policy.action_on_gap == "clarify"
