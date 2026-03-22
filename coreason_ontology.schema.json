@@ -2635,6 +2635,18 @@
         "fuzzing_engine_id": {
           "$ref": "#/$defs/NodeIdentifierState",
           "description": "The fuzzing engine system node."
+        },
+        "human_supervisor_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NodeIdentifierState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The W3C DID of the human oracle required to cryptographically sign off on the forged capability."
         }
       },
       "required": [
@@ -5526,6 +5538,56 @@
         "layout_tstring"
       ],
       "title": "DynamicLayoutManifest",
+      "type": "object"
+    },
+    "DynamicManifoldProjectionManifest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Provides the rendering matrix that translates the swarm's physics into human retinal variables using the Grammar of Graphics and Semantic Zooming.\n\nCAUSAL AFFORDANCE: Maps N-dimensional capabilities onto the UI plane without breaking semantic causal edges.\n\nEPISTEMIC BOUNDS: Binds an AST gradient and thermodynamic burn metric, governed by a physical zoom profile limit.",
+      "properties": {
+        "type": {
+          "const": "dynamic_manifold",
+          "default": "dynamic_manifold",
+          "description": "Discriminator for the dynamic manifold projection.",
+          "title": "Type",
+          "type": "string"
+        },
+        "manifest_id": {
+          "description": "Unique identifier for this projection.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Manifest Id",
+          "type": "string"
+        },
+        "active_forge_id": {
+          "description": "A pointer to the CapabilityForgeTopologyManifest currently executing.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Active Forge Id",
+          "type": "string"
+        },
+        "ast_gradient_visual_mapping": {
+          "$ref": "#/$defs/GrammarPanelProfile",
+          "description": "Algebraically maps the ASTGradientReceipt loss vectors into a 2D plot."
+        },
+        "thermodynamic_burn_mapping": {
+          "$ref": "#/$defs/AnyPanelProfile",
+          "description": "Tracks the KinematicDeltaManifest against the human's allocated_budget_magnitude."
+        },
+        "viewport_zoom_profile": {
+          "$ref": "#/$defs/SemanticZoomProfile",
+          "description": "Governs Spectral Graph Coarsening as the human alters their Euclidean distance from the graph."
+        }
+      },
+      "required": [
+        "manifest_id",
+        "active_forge_id",
+        "ast_gradient_visual_mapping",
+        "thermodynamic_burn_mapping",
+        "viewport_zoom_profile"
+      ],
+      "title": "DynamicManifoldProjectionManifest",
       "type": "object"
     },
     "DynamicRoutingManifest": {
@@ -8776,6 +8838,43 @@
         "ciphertext_blob"
       ],
       "title": "HomomorphicEncryptionProfile",
+      "type": "object"
+    },
+    "HumanDirectiveIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Translates unstructured human goals into the deterministic physics required to trigger the Agentic Forge.\n\nCAUSAL AFFORDANCE: Maps an unstructured human objective to a dense VectorEmbeddingState target.\n\nEPISTEMIC BOUNDS: allocated_budget_magnitude is strictly bounded between 1 and 1,000,000,000.",
+      "properties": {
+        "type": {
+          "const": "human_directive",
+          "default": "human_directive",
+          "description": "Discriminator type for a human directive.",
+          "title": "Type",
+          "type": "string"
+        },
+        "natural_language_goal": {
+          "description": "The raw, unstructured human objective.",
+          "maxLength": 5000,
+          "title": "Natural Language Goal",
+          "type": "string"
+        },
+        "allocated_budget_magnitude": {
+          "description": "The absolute thermodynamic token budget the human is locking in escrow.",
+          "maximum": 1000000000,
+          "minimum": 1,
+          "title": "Allocated Budget Magnitude",
+          "type": "integer"
+        },
+        "target_qos": {
+          "$ref": "#/$defs/QoSClassificationProfile",
+          "description": "The priority classification for Spot Market compute routing."
+        }
+      },
+      "required": [
+        "natural_language_goal",
+        "allocated_budget_magnitude",
+        "target_qos"
+      ],
+      "title": "HumanDirectiveIntent",
       "type": "object"
     },
     "HumanNodeProfile": {
@@ -12403,6 +12502,32 @@
         "byzantine_action"
       ],
       "title": "QuorumPolicy",
+      "type": "object"
+    },
+    "ReasoningEngineeringPolicy": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Governs how human rejections translate into penalty scalars to bend the agent's Monte Carlo Tree Search.\n\nCAUSAL AFFORDANCE: Permits human observation and penalty insertion into internal LatentScratchpadReceipt traces without halting.\n\nEPISTEMIC BOUNDS: Bounds telemetry_export_frequency_hz between 1 and 60. Bounds human_override_gradient between 0.0 and 1.0.",
+      "properties": {
+        "telemetry_export_frequency_hz": {
+          "description": "The continuous stream rate of the thought branch expansion.",
+          "maximum": 60,
+          "minimum": 1,
+          "title": "Telemetry Export Frequency Hz",
+          "type": "integer"
+        },
+        "human_override_gradient": {
+          "description": "The absolute penalty applied to a prm_score if a human rejects the branch.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Human Override Gradient",
+          "type": "number"
+        }
+      },
+      "required": [
+        "telemetry_export_frequency_hz",
+        "human_override_gradient"
+      ],
+      "title": "ReasoningEngineeringPolicy",
       "type": "object"
     },
     "RedactionPolicy": {
