@@ -1074,23 +1074,15 @@ class HardwareEnclaveReceipt(CoreasonBaseState):
 
 
 class LatentSmoothingProfile(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Defines a differentiable attenuation curve to mitigate adversarial
-    activation spikes during forward-pass token generation. As a ...Profile suffix, this
-    is a declarative, frozen snapshot of a specific geometric decay coordinate.
+    r"""
+    AGENT INSTRUCTION: Defines a differentiable attenuation curve to mitigate adversarial activation spikes during forward-pass token generation.
 
-    CAUSAL AFFORDANCE: Instructs the tensor execution engine to apply trigonometric
-    (cosine_annealing) or algebraic (linear, exponential) decay functions to specific
-    latent circuits, smoothly steering the probability wave without causing logit
-    collapse.
+    CAUSAL AFFORDANCE: Instructs the tensor execution engine to apply trigonometric or algebraic decay functions to specific latent circuits, smoothly steering the probability wave without causing logit collapse.
 
-    EPISTEMIC BOUNDS: The decay geometry is strictly typed to the decay_function Literal
-    ["linear", "exponential", "cosine_annealing"]. The temporal horizon is physically
-    bounded by transition_window_tokens (gt=0, le=1000000000). The optional
-    decay_rate_param (float | None, le=1.0, default=None) tunes half-life lambda.
+    EPISTEMIC BOUNDS: The decay geometry is strictly typed to the `decay_function` Literal `["linear", "exponential", "cosine_annealing"]`. The temporal horizon is physically bounded by `transition_window_tokens` (`gt=0, le=1000000000`). The optional `decay_rate_param` is bounded `le=1.0`.
 
-    MCP ROUTING TRIGGERS: Mechanistic Interpretability, Tensor Attenuation, Cosine
-    Annealing, Logit Collapse Prevention, Activation Smoothing
+    MCP ROUTING TRIGGERS: Mechanistic Interpretability, Tensor Attenuation, Cosine Annealing, Logit Collapse Prevention, Activation Smoothing
+
     """
 
     decay_function: Literal["linear", "exponential", "cosine_annealing"] = Field(
@@ -1303,23 +1295,15 @@ class RoutingFrontierPolicy(CoreasonBaseState):
 
 
 class SaeFeatureActivationState(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Isolates a discrete, monosemantic feature from the foundational
-    model's polysemantic residual stream using a Sparse Autoencoder (SAE) projection
-    matrix. As a ...State suffix, this is a frozen N-dimensional coordinate.
+    r"""
+    AGENT INSTRUCTION: Isolates a discrete, monosemantic feature from the foundational model's polysemantic residual stream using a Sparse Autoencoder (SAE) projection matrix.
 
-    CAUSAL AFFORDANCE: Surfaces hidden geometric concept vectors (e.g., 'sycophancy' or
-    'truth_retrieval') to the orchestrator, enabling real-time circuit-level inspection,
-    feature clamping, and causal tracing.
+    CAUSAL AFFORDANCE: Surfaces hidden geometric concept vectors (e.g., 'sycophancy' or 'truth_retrieval') to the orchestrator, enabling real-time circuit-level inspection, feature clamping, and causal tracing.
 
-    EPISTEMIC BOUNDS: The semantic abstraction is rigidly bounded to a specific
-    feature_index (ge=0, le=1000000000). The activation_magnitude physically measures
-    the Euclidean strength (le=1000000000, no ge bound). The optional
-    interpretability_label (str | None, max_length=2000, default=None) restricts
-    semantic descriptions.
+    EPISTEMIC BOUNDS: The semantic abstraction is rigidly bounded to a specific `feature_index` (`ge=0, le=1000000000`). `activation_magnitude` physically measures Euclidean strength (`le=1000000000`). Optional `interpretability_label` restricts semantic descriptions (`max_length=2000`).
 
-    MCP ROUTING TRIGGERS: Sparse Autoencoder, Monosemantic Feature, Concept Vector,
-    Mechanistic Interpretability, Euclidean Magnitude
+    MCP ROUTING TRIGGERS: Sparse Autoencoder, Monosemantic Feature, Concept Vector, Mechanistic Interpretability, Euclidean Magnitude
+
     """
 
     feature_index: int = Field(
@@ -1338,23 +1322,15 @@ class SaeFeatureActivationState(CoreasonBaseState):
 
 
 class ActivationSteeringContract(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Establishes a hardware-level Representation Engineering (RepE)
-    directive to mechanically manipulate latent dimensions via forward-pass tensor injection.
-    As a ...Contract suffix, this object defines rigid mathematical boundaries that the
-    orchestrator must enforce globally.
+    r"""
+    AGENT INSTRUCTION: Establishes a hardware-level Representation Engineering (RepE) directive to mechanically manipulate latent dimensions via forward-pass tensor injection.
 
-    CAUSAL AFFORDANCE: Physically forces an additive, ablation, or clamping operation onto
-    the model's residual stream at specific injection_layers, steering the generator away
-    from unstable hallucination geometries prior to token projection.
+    CAUSAL AFFORDANCE: Physically forces an additive, ablation, or clamping operation onto the model's residual stream at specific `injection_layers`, steering the generator away from unstable hallucination geometries prior to token projection.
 
-    EPISTEMIC BOUNDS: Cryptographically locked by the steering_vector_hash (SHA-256 pattern
-    ^[a-f0-9]{64}$). The scaling_factor is bounded above (le=100.0) but unbounded below,
-    permitting negative magnitudes for ablation. The @model_validator deterministically
-    sorts injection_layers (each ge=0, min_length=1) to preserve RFC 8785 canonical hashing.
+    EPISTEMIC BOUNDS: Cryptographically locked by `steering_vector_hash` (SHA-256 pattern `^[a-f0-9]{64}$`). `scaling_factor` is bounded above (`le=100.0`) but unbounded below, permitting negative magnitudes for ablation. The `@model_validator` deterministically sorts `injection_layers` (each `ge=0`).
 
-    MCP ROUTING TRIGGERS: Representation Engineering, RepE, Activation Steering, Residual
-    Stream Ablation, Concept Vectors
+    MCP ROUTING TRIGGERS: Representation Engineering, RepE, Activation Steering, Residual Stream Ablation, Concept Vectors
+
     """
 
     steering_vector_hash: str = Field(
@@ -1380,14 +1356,15 @@ class ActivationSteeringContract(CoreasonBaseState):
 
 
 class SemanticSlicingPolicy(CoreasonBaseState):
-    """
+    r"""
     AGENT INSTRUCTION: Implements Mandatory Access Control (MAC) and Cognitive Load Theory to aggressively cull context window topologies and prevent VRAM exhaustion.
 
-    CAUSAL AFFORDANCE: Forces the attention mechanism to physically ignore state representations that lack the whitelisted required_semantic_labels or exceed the permitted_classification_tiers.
+    CAUSAL AFFORDANCE: Forces the attention mechanism to physically ignore state representations that lack the whitelisted `required_semantic_labels` or exceed the `permitted_classification_tiers`.
 
-    EPISTEMIC BOUNDS: VRAM exhaustion is clamped by context_window_token_ceiling (gt=0, le=2000000). The validation pipeline mechanically sorts the tier arrays via @model_validator for invariant RFC 8785 canonical determinism.
+    EPISTEMIC BOUNDS: VRAM exhaustion is clamped by `context_window_token_ceiling` (`gt=0, le=2000000`). The validation pipeline mechanically sorts the tier arrays via `@model_validator` for invariant RFC 8785 canonical determinism.
 
     MCP ROUTING TRIGGERS: Mandatory Access Control, Zero-Trust Execution, Context Window Partitioning, Cognitive Load Theory, Epistemic Firewall
+
     """
 
     permitted_classification_tiers: list[InformationClassificationProfile] = Field(
@@ -1423,14 +1400,15 @@ class SemanticSlicingPolicy(CoreasonBaseState):
 
 
 class CognitiveRoutingContract(CoreasonBaseState):
-    """
+    r"""
     AGENT INSTRUCTION: Overrides the default Softmax gating mechanism of a Sparse Mixture of Experts (MoE) architecture to enforce deterministic functional isolation.
 
     CAUSAL AFFORDANCE: Physically biases or mathematically masks out (-inf via `enforce_functional_isolation`) entire swaths of neural circuits, forcing continuous compute through highly specialized expert topological perimeters.
 
-    EPISTEMIC BOUNDS: Limits structural instability by hard-bounding dynamic_top_k execution threads (`ge=1`, `le=1000000000`). The `expert_logit_biases` spatial dictionary is correctly bounded by cardinality (`max_length=1000000000`), eliminating the previous type-algebra paradox of scalar magnitude bounds on a dictionary.
+    EPISTEMIC BOUNDS: Limits structural instability by hard-bounding `dynamic_top_k` execution threads (`ge=1, le=1000000000`). The `expert_logit_biases` spatial dictionary is bounded by cardinality (`max_length=1000000000`) with tensor biases clamped to `[ge=-1000.0, le=1000.0]`.
 
     MCP ROUTING TRIGGERS: Sparse Mixture of Experts, Softmax Gating, Logit Biasing, Functional Expert Routing, FSM Masking
+
     """
 
     dynamic_top_k: int = Field(
@@ -1457,23 +1435,15 @@ class CognitiveRoutingContract(CoreasonBaseState):
 
 
 class CognitiveStateProfile(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Tracks the continuous Partially Observable Markov Decision Process
-    (POMDP) belief distribution and dictates the active cognitive heuristic. As a ...Profile
-    suffix, this is a declarative, frozen snapshot of N-dimensional geometry at a specific
-    point in time.
+    r"""
+    AGENT INSTRUCTION: Tracks the continuous Partially Observable Markov Decision Process (POMDP) belief distribution and dictates the active cognitive heuristic.
 
-    CAUSAL AFFORDANCE: Orchestrates multi-dimensional state progression, determining if the
-    agent explores via high divergence_tolerance or exploits via constrained caution vectors.
-    Optionally embeds an ActivationSteeringContract, CognitiveRoutingContract, and
-    SemanticSlicingPolicy for full mechanistic control.
+    CAUSAL AFFORDANCE: Orchestrates multi-dimensional state progression, determining if the agent explores via high `divergence_tolerance` or exploits via constrained caution vectors. Embeds steering and routing contracts for mechanistic control.
 
-    EPISTEMIC BOUNDS: Relies on strict Pydantic bounding of internal indices (urgency_index,
-    caution_index, divergence_tolerance) to continuous probability distributions between
-    [ge=0.0, le=1.0].
+    EPISTEMIC BOUNDS: Relies on strict Pydantic bounding of internal indices (`urgency_index`, `caution_index`, `divergence_tolerance`) to continuous probability distributions mathematically locked between `[ge=0.0, le=1.0]`.
 
-    MCP ROUTING TRIGGERS: POMDP, Continuous Belief Distribution, Heuristic Routing, State
-    Progression, Cognitive Constraining
+    MCP ROUTING TRIGGERS: POMDP, Continuous Belief Distribution, Heuristic Routing, State Progression, Cognitive Constraining
+
     """
 
     urgency_index: float = Field(
@@ -1501,14 +1471,15 @@ class CognitiveStateProfile(CoreasonBaseState):
 
 
 class CognitiveUncertaintyProfile(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Formalizes Pearlian Structural Causal Models (SCMs) and Variational Free Energy to mathematically quantify and partition irreducible aleatoric noise from actionable epistemic knowledge gaps. As a ...Profile suffix, this is a declarative, frozen snapshot of N-dimensional geometry at a specific point in time.
+    r"""
+    AGENT INSTRUCTION: Formalizes Pearlian Structural Causal Models (SCMs) and Variational Free Energy to mathematically quantify and partition irreducible aleatoric noise from actionable epistemic knowledge gaps.
 
-    CAUSAL AFFORDANCE: Unlocks non-monotonic logic via Pearlian do-operators ($P(y|do(x))$), computing exactly when to trigger a structural abductive escalation or active inference loop via the requires_abductive_escalation flag.
+    CAUSAL AFFORDANCE: Unlocks non-monotonic logic via Pearlian do-operators, computing exactly when to trigger a structural abductive escalation or active inference loop via the `requires_abductive_escalation` flag.
 
-    EPISTEMIC BOUNDS: Enforces absolute mathematical float boundaries [ge=0.0, le=1.0] on aleatoric_entropy, epistemic_uncertainty, and semantic_consistency_score, mathematically preventing probability wave overflow across all three continuous dimensions.
+    EPISTEMIC BOUNDS: Enforces absolute mathematical float boundaries `[ge=0.0, le=1.0]` on `aleatoric_entropy`, `epistemic_uncertainty`, and `semantic_consistency_score`, mathematically preventing probability wave overflow across all three continuous dimensions.
 
     MCP ROUTING TRIGGERS: Structural Causal Models, Active Inference, Variational Free Energy, Aleatoric Entropy, Pearlian Do-Calculus
+
     """
 
     aleatoric_entropy: float = Field(
@@ -1797,27 +1768,15 @@ class RedactionPolicy(CoreasonBaseState):
 
 
 class SaeLatentPolicy(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Implements Sparse Dictionary Learning and Mechanistic Interpretability
-    to actively monitor and steer monosemantic neural circuits during the model's forward
-    pass. As a ...Policy suffix, this object defines rigid mathematical boundaries that the
-    orchestrator must enforce globally.
+    r"""
+    AGENT INSTRUCTION: Implements Sparse Dictionary Learning and Mechanistic Interpretability to actively monitor and steer monosemantic neural circuits during the model's forward pass.
 
-    CAUSAL AFFORDANCE: Executes real-time tensor remediation — clamping, halting, quarantining,
-    or smoothly decaying residual stream activations via violation_action
-    (Literal["clamp", "halt", "quarantine", "smooth_decay"]) — when specific features
-    diverge toward adversarial or hallucinated geometries. The smooth_decay path requires
-    both a LatentSmoothingProfile and clamp_value target asymptote, enforced by a
-    @model_validator.
+    CAUSAL AFFORDANCE: Executes real-time tensor remediation—clamping, halting, quarantining, or smoothly decaying residual stream activations—when specific features diverge toward adversarial or hallucinated geometries.
 
-    EPISTEMIC BOUNDS: The max_activation_threshold (ge=0.0, le=1000000000.0) physically
-    bounds the continuous Euclidean magnitude of the target_feature_index (ge=0,
-    le=1000000000). The policy is topologically locked to the exact SAE projection matrix via
-    sae_dictionary_hash (SHA-256 ^[a-f0-9]{64}$). The monitored_layers array (min_length=1)
-    is deterministically sorted by @model_validator for RFC 8785 canonical hashing.
+    EPISTEMIC BOUNDS: The `max_activation_threshold` (`ge=0.0, le=1000000000.0`) physically bounds the continuous Euclidean magnitude of the `target_feature_index`. Topologically locked to SAE matrix via `sae_dictionary_hash` (SHA-256). The `@model_validator` `validate_smooth_decay` mathematically enforces asymptotic bounds.
 
-    MCP ROUTING TRIGGERS: Mechanistic Interpretability, Sparse Autoencoders, Residual Stream
-    Steering, Tensor Remediation, Monosemantic Features
+    MCP ROUTING TRIGGERS: Mechanistic Interpretability, Sparse Autoencoders, Residual Stream Steering, Tensor Remediation, Monosemantic Features
+
     """
 
     target_feature_index: int = Field(
@@ -7193,25 +7152,15 @@ class MarketResolutionState(CoreasonBaseState):
 
 
 class MechanisticAuditContract(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Establishes a rigorous Mechanistic Interpretability brain-scan
-    protocol, executing real-time latent state extraction across targeted neural
-    circuits. As a ...Contract suffix, this defines rigid boundaries the orchestrator
-    must enforce globally.
+    r"""
+    AGENT INSTRUCTION: Establishes a rigorous Mechanistic Interpretability brain-scan protocol, executing real-time latent state extraction across targeted neural circuits.
 
-    CAUSAL AFFORDANCE: Authorizes the orchestrator to halt token generation upon
-    specific trigger_conditions Literal ["on_tool_call", "on_belief_mutation",
-    "on_quarantine", "on_falsification"] to physically slice, quantify, and export
-    the top-k SAE features from the designated target_layers.
+    CAUSAL AFFORDANCE: Authorizes the orchestrator to halt token generation upon specific `trigger_conditions` to physically slice, quantify, and export the top-k SAE features from the designated `target_layers`.
 
-    EPISTEMIC BOUNDS: GPU VRAM exhaustion is mathematically prevented by capping
-    max_features_per_layer (gt=0, le=1000000000). The @model_validator sort_arrays
-    deterministically sorts both trigger_conditions and target_layers for RFC 8785
-    canonical hashing. System integrity is enforced via require_zk_commitments
-    (default=True) to prevent activation spoofing.
+    EPISTEMIC BOUNDS: GPU VRAM exhaustion is mathematically prevented by capping `max_features_per_layer` (`gt=0, le=1000000000`). The `@model_validator` deterministically sorts conditions and layers for RFC 8785 hashing. System integrity enforced via `require_zk_commitments`.
 
-    MCP ROUTING TRIGGERS: Latent State Extraction, Mechanistic Interpretability, Sparse
-    Autoencoder, Zero-Knowledge Commitments, VRAM Optimization
+    MCP ROUTING TRIGGERS: Latent State Extraction, Mechanistic Interpretability, Sparse Autoencoder, Zero-Knowledge Commitments, VRAM Optimization
+
     """
 
     trigger_conditions: list[Literal["on_tool_call", "on_belief_mutation", "on_quarantine", "on_falsification"]] = (
@@ -7636,14 +7585,15 @@ class OverrideIntent(CoreasonBaseState):
 
 
 class PeftAdapterContract(CoreasonBaseState):
-    """
+    r"""
     AGENT INSTRUCTION: Implements Low-Rank Adaptation (LoRA) and Matrix Factorization to dynamically project parameter-efficient weight matrices into the base model's computation graph.
 
-    CAUSAL AFFORDANCE: Instructs the inference engine to dynamically hot-swap targeted attention modules via `target_modules`, altering the network's forward-pass physics without mutating the frozen foundation weights (`base_model_hash`).
+    CAUSAL AFFORDANCE: Instructs the inference engine to dynamically hot-swap targeted attention modules via `target_modules`, altering the network's forward-pass physics without mutating the frozen foundation weights.
 
-    EPISTEMIC BOUNDS: VRAM allocation is strictly clamped by the intrinsic rank parameter `adapter_rank` (`gt=0`, `le=65536`). Ranks exceeding this threshold mathematically induce petabyte-scale matrix instantiations, triggering instant OOM hardware faults. The `target_modules` array is deterministically sorted via `@model_validator` to preserve RFC 8785 canonical hashing.
+    EPISTEMIC BOUNDS: VRAM allocation strictly clamped by the intrinsic rank parameter `adapter_rank` (`gt=0, le=65536`), physically preventing petabyte-scale matrix instantiations and OOM faults. `target_modules` array deterministically sorted via `@model_validator`.
 
     MCP ROUTING TRIGGERS: Low-Rank Adaptation, Matrix Factorization, LoRA, GPU VRAM Allocation, Attention Head Injection
+
     """
 
     adapter_id: str = Field(
@@ -9454,14 +9404,15 @@ class EpistemicEscalationContract(CoreasonBaseState):
 
 
 class FederatedPeftContract(CoreasonBaseState):
-    """
+    r"""
     AGENT INSTRUCTION: Governs the spatial and temporal physics of Parameter-Efficient Fine-Tuning (PEFT) and Low-Rank Adaptation (LoRA), managing the Von Neumann bottleneck in distributed swarm VRAM.
 
     CAUSAL AFFORDANCE: Instructs the tensor execution engine to hot-swap external safetensors weight matrices into active GPU memory, modifying the foundational activation circuits.
 
-    EPISTEMIC BOUNDS: The spatial geometry is physically capped by `vram_footprint_bytes` (`gt=0`, `le=100000000000`). The temporal presence is mathematically guillotined by `ephemeral_ttl_ms` (`gt=0`, `le=86400000`). Supply-chain integrity is anchored by `adapter_merkle_root`.
+    EPISTEMIC BOUNDS: The spatial geometry is physically capped by `vram_footprint_bytes` (`gt=0, le=100000000000`). The temporal presence is mathematically guillotined by `ephemeral_ttl_ms` (`gt=0, le=86400000`). Supply-chain integrity is anchored by `adapter_merkle_root` (SHA-256).
 
     MCP ROUTING TRIGGERS: Low-Rank Adaptation, PEFT, LRU Cache Eviction, Tensor Hot-Swapping, GPU VRAM Management
+
     """
 
     adapter_merkle_root: Annotated[str, StringConstraints(max_length=128)] = Field(
@@ -11475,21 +11426,15 @@ class EpistemicCurriculumManifest(CoreasonBaseState):
 
 
 class ConstrainedDecodingPolicy(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: ConstrainedDecodingPolicy is a rigid mathematical boundary enforcing systemic constraints
-    globally. Dictates the hardware-level execution limits for the token sampling phase by converting structural
-    formatting from a probabilistic neural suggestion into a deterministic physics problem.
+    r"""
+    AGENT INSTRUCTION: A rigid mathematical boundary enforcing systemic constraints globally. Dictates the hardware-level execution limits for the token sampling phase by converting structural formatting from a probabilistic neural suggestion into a deterministic physics problem.
 
-    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation by physically
-    suffocating invalid token probabilities. It instructs the inference engine (e.g., Outlines, XGrammar)
-    to compile a Deterministic Finite Automaton (DFA) or Pushdown Automaton (PDA) and mechanically overwrite
-    illegal token logits to negative infinity.
+    CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation by physically suffocating invalid token probabilities. Instructs the inference engine (e.g., Outlines, XGrammar) to compile a DFA/PDA and mechanically overwrite illegal token logits to negative infinity.
 
-    EPISTEMIC BOUNDS: The absolute mathematical and physical limits are strictly bounded categorical literals
-    on fields: enforcement_strategy, compiler_backend. All field limits must be strictly validated at
-    instantiation to prevent epistemic contagion and prompt-injection payload sabotage.
+    EPISTEMIC BOUNDS: Strict categorical literals on `enforcement_strategy` and `compiler_backend`. The `validate_grammar_requirements` `@model_validator` mandates `formal_grammar_string` is non-null if the strategy expects a Context-Free Grammar (CFG).
 
-    MCP ROUTING TRIGGERS: FSM Logit Masking, Constrained Decoding, Tokenizer Interception, Hardware Execution Boundary
+    MCP ROUTING TRIGGERS: FSM Logit Masking, Constrained Decoding, Tokenizer Interception, Hardware Execution Boundary, Pushdown Automaton
+
     """
 
     enforcement_strategy: Literal["fsm_logit_mask", "lmql_query", "guidance_program", "ebnf_grammar"] = Field(
@@ -11530,23 +11475,15 @@ class ConstrainedDecodingPolicy(CoreasonBaseState):
 
 
 class CognitiveFormatContract(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Employs Finite State Machine (FSM) Logit Masking and Constrained
-    Decoding to deterministically herd LLM stochasticity into rigorous syntactic
-    structures. As a ...Contract suffix, this enforces a rigid mathematical boundary
-    globally.
+    r"""
+    AGENT INSTRUCTION: Employs Finite State Machine (FSM) Logit Masking and Constrained Decoding to deterministically herd LLM stochasticity into rigorous syntactic structures.
 
-    CAUSAL AFFORDANCE: Instructs the orchestrator's inference engine to physically
-    suffocate invalid token probabilities to negative infinity, mechanically ensuring
-    the output conforms to downstream parser requirements.
+    CAUSAL AFFORDANCE: Instructs the orchestrator's inference engine to physically suffocate invalid token probabilities to negative infinity, mechanically ensuring the output conforms to downstream parser requirements.
 
-    EPISTEMIC BOUNDS: Execution constraints are rigidly defined by require_think_tags
-    (default=True, forcing XML-bounded internal monologues) and final_answer_regex
-    (max_length=2000, default="^Final Answer: .*$") to prevent ReDoS CPU exhaustion
-    during evaluation and routing.
+    EPISTEMIC BOUNDS: Execution constraints are rigidly defined by `require_think_tags` and `final_answer_regex` (`max_length=2000`) to prevent ReDoS CPU exhaustion. The `@model_validator` `resolve_contract_conflicts` prevents unresolvable compilation conflicts in the DFA.
 
-    MCP ROUTING TRIGGERS: FSM Logit Masking, Constrained Decoding, Regular Expression
-    Automaton, Syntactic Boundary, Token Suffocation
+    MCP ROUTING TRIGGERS: FSM Logit Masking, Constrained Decoding, Regular Expression Automaton, Syntactic Boundary, Token Suffocation
+
     """
 
     require_think_tags: bool = Field(
