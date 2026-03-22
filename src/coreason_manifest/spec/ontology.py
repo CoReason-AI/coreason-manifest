@@ -5878,6 +5878,27 @@ class HypothesisStakeReceipt(CoreasonBaseState):
     implied_probability: float = Field(ge=0.0, le=1.0, description="The agent's calculated internal confidence score.")
 
 
+class HumanDirectiveIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Translates unstructured human goals into the deterministic physics required to trigger the Agentic Forge.
+
+    CAUSAL AFFORDANCE: Maps an unstructured human objective to a dense VectorEmbeddingState target.
+
+    EPISTEMIC BOUNDS: allocated_budget_magnitude is strictly bounded between 1 and 1,000,000,000.
+    """
+
+    type: Literal["human_directive"] = Field(
+        default="human_directive", description="Discriminator type for a human directive."
+    )
+    natural_language_goal: str = Field(max_length=5000, description="The raw, unstructured human objective.")
+    allocated_budget_magnitude: int = Field(
+        ge=1, le=1000000000, description="The absolute thermodynamic token budget the human is locking in escrow."
+    )
+    target_qos: QoSClassificationProfile = Field(
+        description="The priority classification for Spot Market compute routing."
+    )
+
+
 class InformationalIntent(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Formalizes Synchronous Epistemic Signaling within a Mixed-Initiative
@@ -6118,7 +6139,8 @@ type AnyIntent = Annotated[
     | SemanticDiscoveryIntent
     | TaxonomicRestructureIntent
     | LatentProjectionIntent
-    | LatentSchemaInferenceIntent,
+    | LatentSchemaInferenceIntent
+    | HumanDirectiveIntent,
     Field(discriminator="type"),
 ]
 
@@ -7945,6 +7967,41 @@ class PredictionMarketState(CoreasonBaseState):
     def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "order_book", sorted(self.order_book, key=lambda x: x.agent_id))
         return self
+
+
+class DynamicManifoldProjectionManifest(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Provides the rendering matrix that translates the swarm's physics into human retinal variables using the Grammar of Graphics and Semantic Zooming.
+
+    CAUSAL AFFORDANCE: Maps N-dimensional capabilities onto the UI plane without breaking semantic causal edges.
+
+    EPISTEMIC BOUNDS: Binds an AST gradient and thermodynamic burn metric, governed by a physical zoom profile limit.
+    """
+
+    type: Literal["dynamic_manifold"] = Field(
+        default="dynamic_manifold", description="Discriminator for the dynamic manifold projection."
+    )
+    manifest_id: str = Field(
+        min_length=1,
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        description="Unique identifier for this projection.",
+    )
+    active_forge_id: str = Field(
+        min_length=1,
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        description="A pointer to the CapabilityForgeTopologyManifest currently executing.",
+    )
+    ast_gradient_visual_mapping: GrammarPanelProfile = Field(
+        description="Algebraically maps the ASTGradientReceipt loss vectors into a 2D plot."
+    )
+    thermodynamic_burn_mapping: AnyPanelProfile = Field(
+        description="Tracks the KinematicDeltaManifest against the human's allocated_budget_magnitude."
+    )
+    viewport_zoom_profile: SemanticZoomProfile = Field(
+        description="Governs Spectral Graph Coarsening as the human alters their Euclidean distance from the graph."
+    )
 
 
 class PresentationManifest(CoreasonBaseState):
@@ -10618,6 +10675,10 @@ class CapabilityForgeTopologyManifest(BaseTopologyManifest):
     generator_node_id: NodeIdentifierState = Field(description="The agent writing the code.")
     formal_verifier_id: NodeIdentifierState = Field(description="The formal verifier system node.")
     fuzzing_engine_id: NodeIdentifierState = Field(description="The fuzzing engine system node.")
+    human_supervisor_id: NodeIdentifierState | None = Field(
+        default=None,
+        description="The W3C DID of the human oracle required to cryptographically sign off on the forged capability.",
+    )
 
     def compile_to_base_topology(self) -> DAGTopologyManifest:
         """Deterministically unwraps the macro into a rigid DAGTopologyManifest."""
@@ -10630,6 +10691,13 @@ class CapabilityForgeTopologyManifest(BaseTopologyManifest):
             (self.generator_node_id, self.formal_verifier_id),
             (self.formal_verifier_id, self.fuzzing_engine_id),
         ]
+
+        if self.human_supervisor_id is not None:
+            nodes[self.human_supervisor_id] = HumanNodeProfile(
+                description="Forge HITL Supervisor", required_attestation="fido2_webauthn"
+            )
+            edges.append((self.fuzzing_engine_id, self.human_supervisor_id))
+
         return DAGTopologyManifest(
             nodes=nodes,
             edges=edges,
@@ -11092,6 +11160,23 @@ class ObservationEvent(BaseStateEvent):
     @classmethod
     def enforce_payload_topology(cls, v: Any) -> Any:
         return _validate_payload_bounds(v)
+
+
+class ReasoningEngineeringPolicy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Governs how human rejections translate into penalty scalars to bend the agent's Monte Carlo Tree Search.
+
+    CAUSAL AFFORDANCE: Permits human observation and penalty insertion into internal LatentScratchpadReceipt traces without halting.
+
+    EPISTEMIC BOUNDS: Bounds telemetry_export_frequency_hz between 1 and 60. Bounds human_override_gradient between 0.0 and 1.0.
+    """
+
+    telemetry_export_frequency_hz: int = Field(
+        ge=1, le=60, description="The continuous stream rate of the thought branch expansion."
+    )
+    human_override_gradient: float = Field(
+        ge=0.0, le=1.0, description="The absolute penalty applied to a prm_score if a human rejects the branch."
+    )
 
 
 class EpistemicTelemetryEvent(BaseStateEvent):
@@ -12126,7 +12211,9 @@ TopologicalRewardContract.model_rebuild()
 DifferentiableLogicConstraint.model_rebuild()
 CausalExplanationEvent.model_rebuild()
 LatentSchemaInferenceIntent.model_rebuild()
+HumanDirectiveIntent.model_rebuild()
 IntentClassificationReceipt.model_rebuild()
+ReasoningEngineeringPolicy.model_rebuild()
 KinematicNoiseProfile.model_rebuild()
 EnvironmentalSpoofingProfile.model_rebuild()
 AdversarialEmulationProfile.model_rebuild()
@@ -12135,6 +12222,7 @@ StreamingDisfluencyContract.model_rebuild()
 SpeculativeExecutionBoundary.model_rebuild()
 EpistemicLedgerState.model_rebuild()
 PresentationManifest.model_rebuild()
+DynamicManifoldProjectionManifest.model_rebuild()
 ObservationEvent.model_rebuild()
 OntologicalHandshakeReceipt.model_rebuild()
 
