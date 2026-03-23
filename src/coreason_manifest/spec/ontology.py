@@ -3111,8 +3111,8 @@ class BrowserDOMState(CoreasonBaseState):
         ):
             raise ValueError(f"SSRF topological violation detected: {hostname}")
 
-        import socket
         import ipaddress
+        import socket
 
         def _parse_obfuscated_ipv4(ip_str: str) -> int | None:
             parts = ip_str.split(".")
@@ -3158,7 +3158,7 @@ class BrowserDOMState(CoreasonBaseState):
                     ip = ipaddress.ip_address(raw_ip)
                 except (socket.gaierror, ValueError) as e:
                     # Fail-Closed: If resolution fails or IP is invalid, reject the request
-                    raise ValueError(f"Security Validation Failed: Unresolvable or invalid host: {hostname}")
+                    raise ValueError(f"Security Validation Failed: Unresolvable or invalid host: {hostname}") from e
 
         if isinstance(ip, ipaddress.IPv6Address) and ip.ipv4_mapped:
             ip = ip.ipv4_mapped

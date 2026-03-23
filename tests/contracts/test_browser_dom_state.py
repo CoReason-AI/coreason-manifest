@@ -126,7 +126,7 @@ def test_browser_dom_state_ssrf_dns_resolution(url: str, monkeypatch: pytest.Mon
     def mock_gethostbyname(hostname: str) -> str:
         if hostname == "attacker-localhost.com":
             return "127.0.0.1"
-        elif hostname == "this-domain-does-not-exist.coreason.ai":
+        if hostname == "this-domain-does-not-exist.coreason.ai":
             raise socket.gaierror(-2, "Name or service not known")
         return original_gethostbyname(hostname)
 
