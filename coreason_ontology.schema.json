@@ -68,6 +68,7 @@
             "$ref": "#/$defs/AnyActionSpaceCapability"
           },
           "description": "The State Space (S) of the MDP, indexed by their unique capability CIDs.",
+          "maxProperties": 500,
           "propertyNames": {
             "maxLength": 255
           },
@@ -82,6 +83,7 @@
             "type": "array"
           },
           "description": "The Stochastic Transition Matrix (P).",
+          "maxProperties": 500,
           "propertyNames": {
             "maxLength": 255
           },
@@ -2245,7 +2247,7 @@
             "maxLength": 2000,
             "type": "string"
           },
-          "maxItems": 1000000000,
+          "maxItems": 1000,
           "title": "Allowed Fields",
           "type": "array"
         },
@@ -2351,7 +2353,7 @@
         },
         "viewport_size": {
           "description": "Capability Perimeters detailing bounding coordinates.",
-          "maxItems": 1000000000,
+          "maxItems": 1000,
           "minItems": 2,
           "prefixItems": [
             {
@@ -3225,7 +3227,7 @@
     },
     "CognitiveRoutingContract": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Overrides the default Softmax gating mechanism of a Sparse Mixture of Experts (MoE) architecture to enforce deterministic functional isolation.\n\nCAUSAL AFFORDANCE: Physically biases or mathematically masks out (-inf via `enforce_functional_isolation`) entire swaths of neural circuits, forcing continuous compute through highly specialized expert topological perimeters.\n\nEPISTEMIC BOUNDS: Limits structural instability by hard-bounding `dynamic_top_k` execution threads (`ge=1, le=1000000000`). The `expert_logit_biases` spatial dictionary is bounded by cardinality (`max_length=1000000000`) with tensor biases clamped to `[ge=-1000.0, le=1000.0]`.\n\nMCP ROUTING TRIGGERS: Sparse Mixture of Experts, Softmax Gating, Logit Biasing, Functional Expert Routing, FSM Masking",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Overrides the default Softmax gating mechanism of a Sparse Mixture of Experts (MoE) architecture to enforce deterministic functional isolation.\n\nCAUSAL AFFORDANCE: Physically biases or mathematically masks out (-inf via `enforce_functional_isolation`) entire swaths of neural circuits, forcing continuous compute through highly specialized expert topological perimeters.\n\nEPISTEMIC BOUNDS: Limits structural instability by hard-bounding `dynamic_top_k` execution threads (`ge=1, le=1000000000`). The `expert_logit_biases` spatial dictionary is bounded by cardinality (`max_length=1000`) with tensor biases clamped to `[ge=-1000.0, le=1000.0]`.\n\nMCP ROUTING TRIGGERS: Sparse Mixture of Experts, Softmax Gating, Logit Biasing, Functional Expert Routing, FSM Masking",
       "properties": {
         "dynamic_top_k": {
           "description": "The exact number of functional experts the router must activate per token. High values simulate deep cognitive strain.",
@@ -3248,7 +3250,7 @@
             "type": "number"
           },
           "description": "Explicit tensor biases applied to the router gate. Keys are expert IDs (e.g., 'expert_falsifier'), values are logit modifiers.",
-          "maxProperties": 1000000000,
+          "maxProperties": 1000,
           "propertyNames": {
             "maxLength": 255
           },
@@ -3607,7 +3609,7 @@
             "maxLength": 255,
             "type": "string"
           },
-          "maxItems": 1000000000,
+          "maxItems": 1000,
           "title": "Capabilities",
           "type": "array"
         },
@@ -3651,7 +3653,7 @@
             "maxLength": 255,
             "type": "string"
           },
-          "maxItems": 1000000000,
+          "maxItems": 1000,
           "title": "Required Capabilities",
           "type": "array"
         },
@@ -3854,7 +3856,7 @@
     },
     "ConstitutionalPolicy": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes a discrete normative axiom within a Constitutional AI\nframework to prevent instrumental convergence. As a ...Policy suffix, this object defines\nrigid mathematical boundaries that the orchestrator must enforce globally.\n\nCAUSAL AFFORDANCE: Establishes a hard structural boundary that mathematically repels the\nswarm's generative trajectory away from forbidden semantic manifolds. Violation severity\nis classified via a strict Literal[\"low\", \"medium\", \"high\", \"critical\"] tier.\n\nEPISTEMIC BOUNDS: Geometrically restricts the state space by blacklisting specific\nexecution branches via the forbidden_intents array (max_length=1000000000),\ndeterministically sorted by @model_validator to preserve RFC 8785 canonical hashing.\nThe rule_id is bounded to a 128-char CID.\n\nMCP ROUTING TRIGGERS: Constitutional AI, Value Alignment, Normative Axiom, Instrumental\nConvergence, Semantic Boundary",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes a discrete normative axiom within a Constitutional AI\nframework to prevent instrumental convergence. As a ...Policy suffix, this object defines\nrigid mathematical boundaries that the orchestrator must enforce globally.\n\nCAUSAL AFFORDANCE: Establishes a hard structural boundary that mathematically repels the\nswarm's generative trajectory away from forbidden semantic manifolds. Violation severity\nis classified via a strict Literal[\"low\", \"medium\", \"high\", \"critical\"] tier.\n\nEPISTEMIC BOUNDS: Geometrically restricts the state space by blacklisting specific\nexecution branches via the forbidden_intents array (max_length=1000),\ndeterministically sorted by @model_validator to preserve RFC 8785 canonical hashing.\nThe rule_id is bounded to a 128-char CID.\n\nMCP ROUTING TRIGGERS: Constitutional AI, Value Alignment, Normative Axiom, Instrumental\nConvergence, Semantic Boundary",
       "properties": {
         "rule_id": {
           "description": "Unique identifier for the constitutional rule.",
@@ -3887,7 +3889,7 @@
             "minLength": 1,
             "type": "string"
           },
-          "maxItems": 1000000000,
+          "maxItems": 1000,
           "title": "Forbidden Intents",
           "type": "array"
         }
@@ -4379,7 +4381,7 @@
             "type": "number"
           },
           "description": "The stateless routing gradient adjustments derived from the calculated regret, used to self-correct future routing.",
-          "maxProperties": 1000000000,
+          "maxProperties": 1000,
           "propertyNames": {
             "maxLength": 255
           },
@@ -5293,7 +5295,7 @@
         "confidence_interval_95": {
           "anyOf": [
             {
-              "maxItems": 1000000000,
+              "maxItems": 1000,
               "minItems": 2,
               "prefixItems": [
                 {
@@ -5374,7 +5376,7 @@
             "$ref": "#/$defs/DocumentLayoutRegionState"
           },
           "description": "Dictionary mapping block_ids to their strict spatial definitions.",
-          "maxProperties": 1000000000,
+          "maxProperties": 1000,
           "propertyNames": {
             "maxLength": 255
           },
@@ -5467,7 +5469,7 @@
             "$ref": "#/$defs/JsonPrimitiveState"
           },
           "description": "The strict JSON Schema the human's input must satisfy before the graph can resume. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
-          "maxProperties": 1000000000,
+          "maxProperties": 1000,
           "propertyNames": {
             "maxLength": 255
           },
@@ -5637,7 +5639,7 @@
             "type": "integer"
           },
           "description": "The strict allocation of compute budget bound to specific nodes.",
-          "maxProperties": 1000000000,
+          "maxProperties": 1000,
           "propertyNames": {
             "$ref": "#/$defs/NodeIdentifierState"
           },
@@ -6440,7 +6442,7 @@
           "items": {
             "$ref": "#/$defs/TemporalCheckpointState"
           },
-          "maxItems": 1000000000,
+          "maxItems": 1000,
           "title": "Checkpoints",
           "type": "array"
         },
@@ -6771,7 +6773,7 @@
     },
     "EpistemicSOPManifest": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Encodes a macroscopic Petri net or Directed Acyclic Graph (DAG)\nformalizing standard operating procedures into mathematically traversable state\ntransitions. As a ...Manifest suffix, this defines a frozen, N-dimensional coordinate\nstate.\n\nCAUSAL AFFORDANCE: Physically bounds the executing agent (target_persona:\nProfileIdentifierState) to a deterministic sequence of CognitiveStateProfiles, unlocking\nthe ability for the orchestrator to dynamically evaluate execution via Process Reward\nModels (prm_evaluations: list[ProcessRewardContract]) at each topological node.\n\nEPISTEMIC BOUNDS: The cognitive_steps dictionary is constrained to max_length=1000000000\nto cap memory footprint. The @model_validator reject_ghost_nodes mathematically enforces\nreferential integrity, guaranteeing that no chronological_flow_edges AND no\nstructural_grammar_hashes point to an undefined state.\n\nMCP ROUTING TRIGGERS: Petri Net, Directed Acyclic Graph, Process Reward Model,\nTopological Flow, Referential Integrity",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Encodes a macroscopic Petri net or Directed Acyclic Graph (DAG)\nformalizing standard operating procedures into mathematically traversable state\ntransitions. As a ...Manifest suffix, this defines a frozen, N-dimensional coordinate\nstate.\n\nCAUSAL AFFORDANCE: Physically bounds the executing agent (target_persona:\nProfileIdentifierState) to a deterministic sequence of CognitiveStateProfiles, unlocking\nthe ability for the orchestrator to dynamically evaluate execution via Process Reward\nModels (prm_evaluations: list[ProcessRewardContract]) at each topological node.\n\nEPISTEMIC BOUNDS: The cognitive_steps dictionary is constrained to max_length=1000\nto cap memory footprint. The @model_validator reject_ghost_nodes mathematically enforces\nreferential integrity, guaranteeing that no chronological_flow_edges AND no\nstructural_grammar_hashes point to an undefined state.\n\nMCP ROUTING TRIGGERS: Petri Net, Directed Acyclic Graph, Process Reward Model,\nTopological Flow, Referential Integrity",
       "properties": {
         "sop_id": {
           "description": "A Content Identifier (CID) for the Standard Operating Procedure.",
@@ -6790,7 +6792,7 @@
             "$ref": "#/$defs/CognitiveStateProfile"
           },
           "description": "Dictionary mapping step_ids to strict causal DAG constraints.",
-          "maxProperties": 1000000000,
+          "maxProperties": 1000,
           "propertyNames": {
             "maxLength": 255
           },
@@ -7859,7 +7861,7 @@
             "$ref": "#/$defs/JsonPrimitiveState"
           },
           "description": "Bounded dictionary representing the injected hallucination or observation.",
-          "maxProperties": 1000000000,
+          "maxProperties": 1000,
           "propertyNames": {
             "maxLength": 255
           },
@@ -8135,7 +8137,7 @@
     },
     "FederatedDiscoveryManifest": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Governs the B2B Multi-Swarm Gossip Protocol, establishing the initial\nModel Context Protocol (MCP) broadcast endpoints for external discovery. As a ...Manifest\nsuffix, this is a declarative, frozen snapshot of N-dimensional geometry at a specific\npoint in time.\n\nCAUSAL AFFORDANCE: Emits a structured tensor beacon to neighboring swarms, authorizing\nthe initiation of an OntologicalHandshakeReceipt if the supported_ontologies hashes\nmathematically overlap.\n\nEPISTEMIC BOUNDS: Geometrically capped by broadcast_endpoints and supported_ontologies\nstring arrays (each max_length=1000000000). Both are explicitly sorted by the\n@model_validator (broadcast_endpoints by str key, supported_ontologies alphabetically)\nto guarantee invariant canonical RFC 8785 hashing across distinct environments.\n\nMCP ROUTING TRIGGERS: Gossip Protocol, Peer-to-Peer Discovery, Decentralized Federation,\nSemantic Broadcasting, Tensor Beacon",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Governs the B2B Multi-Swarm Gossip Protocol, establishing the initial\nModel Context Protocol (MCP) broadcast endpoints for external discovery. As a ...Manifest\nsuffix, this is a declarative, frozen snapshot of N-dimensional geometry at a specific\npoint in time.\n\nCAUSAL AFFORDANCE: Emits a structured tensor beacon to neighboring swarms, authorizing\nthe initiation of an OntologicalHandshakeReceipt if the supported_ontologies hashes\nmathematically overlap.\n\nEPISTEMIC BOUNDS: Geometrically capped by broadcast_endpoints and supported_ontologies\nstring arrays (each max_length=1000). Both are explicitly sorted by the\n@model_validator (broadcast_endpoints by str key, supported_ontologies alphabetically)\nto guarantee invariant canonical RFC 8785 hashing across distinct environments.\n\nMCP ROUTING TRIGGERS: Gossip Protocol, Peer-to-Peer Discovery, Decentralized Federation,\nSemantic Broadcasting, Tensor Beacon",
       "properties": {
         "broadcast_endpoints": {
           "description": "The explicit array of strictly bounded MCP URI broadcast endpoints.",
@@ -8143,7 +8145,7 @@
             "maxLength": 2000,
             "type": "string"
           },
-          "maxItems": 1000000000,
+          "maxItems": 1000,
           "title": "Broadcast Endpoints",
           "type": "array"
         },
@@ -8154,7 +8156,7 @@
             "minLength": 1,
             "type": "string"
           },
-          "maxItems": 1000000000,
+          "maxItems": 1000,
           "title": "Supported Ontologies",
           "type": "array"
         }
@@ -8335,7 +8337,7 @@
     },
     "GenerativeTaxonomyManifest": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Acts as a macroscopic Topological Data Analysis (TDA) manifold\nprojection, mapping continuous vector geometries into a discrete, traversable Directed\nAcyclic Graph (DAG). As a ...Manifest suffix, this defines a frozen, N-dimensional\ncoordinate state.\n\nCAUSAL AFFORDANCE: Projects the comprehensive Virtual File System (VFS) state to the\nhuman UI or agentic context, structurally proving the geometric relations of all\nsubordinate TaxonomicNodeStates.\n\nEPISTEMIC BOUNDS: The nodes matrix is physically capped at max_length=1000000000\nproperties to prevent memory overflow. The @model_validator mathematically verifies DAG\nintegrity by ensuring the root_node_id explicitly exists within the projection matrix,\npreventing ghost nodes.\n\nMCP ROUTING TRIGGERS: Manifold Learning, Topological Data Analysis, Directed Acyclic\nGraph, Generative Taxonomy, Holographic Projection",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Acts as a macroscopic Topological Data Analysis (TDA) manifold\nprojection, mapping continuous vector geometries into a discrete, traversable Directed\nAcyclic Graph (DAG). As a ...Manifest suffix, this defines a frozen, N-dimensional\ncoordinate state.\n\nCAUSAL AFFORDANCE: Projects the comprehensive Virtual File System (VFS) state to the\nhuman UI or agentic context, structurally proving the geometric relations of all\nsubordinate TaxonomicNodeStates.\n\nEPISTEMIC BOUNDS: The nodes matrix is physically capped at max_length=1000\nproperties to prevent memory overflow. The @model_validator mathematically verifies DAG\nintegrity by ensuring the root_node_id explicitly exists within the projection matrix,\npreventing ghost nodes.\n\nMCP ROUTING TRIGGERS: Manifold Learning, Topological Data Analysis, Directed Acyclic\nGraph, Generative Taxonomy, Holographic Projection",
       "properties": {
         "manifest_id": {
           "description": "Unique Content Identifier (CID) for this generated taxonomy.",
@@ -8358,7 +8360,7 @@
             "$ref": "#/$defs/TaxonomicNodeState"
           },
           "description": "Flat dictionary matrix containing all nodes within the manifold.",
-          "maxProperties": 1000000000,
+          "maxProperties": 1000,
           "propertyNames": {
             "maxLength": 255
           },
@@ -9624,7 +9626,7 @@
             "$ref": "#/$defs/JsonPrimitiveState"
           },
           "description": "The action proposed by the agent that requires approval.",
-          "maxProperties": 1000000000,
+          "maxProperties": 1000,
           "propertyNames": {
             "maxLength": 255
           },
@@ -10660,7 +10662,7 @@
             "$ref": "#/$defs/JsonPrimitiveState"
           },
           "description": "Arguments to fill the prompt template. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
-          "maxProperties": 1000000000,
+          "maxProperties": 1000,
           "propertyNames": {
             "maxLength": 255
           },
@@ -10818,7 +10820,7 @@
     },
     "MacroGridProfile": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Acts as a Cartesian topological coordinator based on Edward Tufte's Small Multiples, organizing multiple discrete visual artifacts into a unified grid configuration.\n\nCAUSAL AFFORDANCE: Translates abstract UI panels into fixed 2D matrices (`layout_matrix`), forcing spatial determinism on the frontend rendering engine.\n\nEPISTEMIC BOUNDS: A strictly bounded `@model_validator` executes a referential integrity sweep, mathematically guaranteeing that every panel ID referenced in the `layout_matrix` (`max_length=1000000000`) corresponds to a verified object in the `panels` array, physically severing Ghost Panel hallucinations.\n\nMCP ROUTING TRIGGERS: Cartesian Coordinate System, Small Multiples, Spatial Topology, Referential Integrity, Layout Matrix",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Acts as a Cartesian topological coordinator based on Edward Tufte's Small Multiples, organizing multiple discrete visual artifacts into a unified grid configuration.\n\nCAUSAL AFFORDANCE: Translates abstract UI panels into fixed 2D matrices (`layout_matrix`), forcing spatial determinism on the frontend rendering engine.\n\nEPISTEMIC BOUNDS: A strictly bounded `@model_validator` executes a referential integrity sweep, mathematically guaranteeing that every panel ID referenced in the `layout_matrix` (`max_length=1000`) corresponds to a verified object in the `panels` array, physically severing Ghost Panel hallucinations.\n\nMCP ROUTING TRIGGERS: Cartesian Coordinate System, Small Multiples, Spatial Topology, Referential Integrity, Layout Matrix",
       "properties": {
         "layout_matrix": {
           "description": "A matrix defining the layout structure, using panel IDs.",
@@ -10829,7 +10831,7 @@
             },
             "type": "array"
           },
-          "maxItems": 1000000000,
+          "maxItems": 1000,
           "title": "Layout Matrix",
           "type": "array"
         },
@@ -10931,7 +10933,7 @@
             "minLength": 1,
             "type": "string"
           },
-          "maxItems": 1000000000,
+          "maxItems": 1000,
           "title": "Falsified Hypothesis Ids",
           "type": "array"
         },
@@ -11039,7 +11041,7 @@
     },
     "MemoizedNodeProfile": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Employs Dynamic Programming principles to create a passive, cryptographic structural interlock pointing to a historically executed and verified graph branch.\n\nCAUSAL AFFORDANCE: Bypasses redundant thermodynamic compute expenditure by collapsing an entire sub-DAG execution into a single, O(1) state retrieval keyed by the `target_topology_hash`.\n\nEPISTEMIC BOUNDS: The cache-hit is mathematically locked to the exact `target_topology_hash` (`TopologyHashReceipt`), guaranteeing perfect graph isomorphism. The retrieved payload is physically constrained by `expected_output_schema` (`max_length=1000000000`). The type discriminator is locked to `Literal[\"memoized\"]`.\n\nMCP ROUTING TRIGGERS: Dynamic Programming, O(1) Retrieval, Cryptographic Cache, Graph Isomorphism, Compute Conservation",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Employs Dynamic Programming principles to create a passive, cryptographic structural interlock pointing to a historically executed and verified graph branch.\n\nCAUSAL AFFORDANCE: Bypasses redundant thermodynamic compute expenditure by collapsing an entire sub-DAG execution into a single, O(1) state retrieval keyed by the `target_topology_hash`.\n\nEPISTEMIC BOUNDS: The cache-hit is mathematically locked to the exact `target_topology_hash` (`TopologyHashReceipt`), guaranteeing perfect graph isomorphism. The retrieved payload is physically constrained by `expected_output_schema` (`max_length=1000`). The type discriminator is locked to `Literal[\"memoized\"]`.\n\nMCP ROUTING TRIGGERS: Dynamic Programming, O(1) Retrieval, Cryptographic Cache, Graph Isomorphism, Compute Conservation",
       "properties": {
         "description": {
           "description": "The semantic boundary defining the objective function or computational perimeter of the execution node.",
@@ -11154,7 +11156,7 @@
             "$ref": "#/$defs/JsonPrimitiveState"
           },
           "description": "The strictly typed JSON Schema expected from the cached payload.",
-          "maxProperties": 1000000000,
+          "maxProperties": 1000,
           "propertyNames": {
             "maxLength": 255
           },
@@ -11260,7 +11262,7 @@
         "bounding_box": {
           "anyOf": [
             {
-              "maxItems": 1000000000,
+              "maxItems": 1000,
               "minItems": 4,
               "prefixItems": [
                 {
@@ -11361,7 +11363,7 @@
           "items": {
             "type": "integer"
           },
-          "maxItems": 1000000000,
+          "maxItems": 1000,
           "title": "Shape",
           "type": "array"
         },
@@ -11840,7 +11842,7 @@
             "minLength": 1,
             "type": "string"
           },
-          "maxItems": 1000000000,
+          "maxItems": 250,
           "minItems": 2,
           "title": "Participant Node Ids",
           "type": "array"
@@ -11973,7 +11975,7 @@
     },
     "OverrideIntent": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A Dictatorial Byzantine Fault Resolution mechanism. It is an absolute, zero-trust kinetic override that violently preempts autonomous algorithmic consensus or prediction market resolution.\n\nCAUSAL AFFORDANCE: Forces an absolute Pearlian do-operator intervention ($do(X=x)$). Physically shatters the active causal chain of the `target_node_id` and forcibly injects the `override_action` payload into the state vector, bypassing decentralized voting.\n\nEPISTEMIC BOUNDS: The blast radius is strictly confined to the `target_node_id`. The orchestrator must mathematically verify the `authorized_node_id` against the highest-tier W3C DID enterprise clearance before allowing the payload to overwrite the Epistemic Blackboard (`override_action` bounded `max_length=1000000000`).\n\nMCP ROUTING TRIGGERS: Dictatorial Override, Byzantine Fault Resolution, Pearlian Intervention, Causal Shattering, Zero-Trust Override",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A Dictatorial Byzantine Fault Resolution mechanism. It is an absolute, zero-trust kinetic override that violently preempts autonomous algorithmic consensus or prediction market resolution.\n\nCAUSAL AFFORDANCE: Forces an absolute Pearlian do-operator intervention ($do(X=x)$). Physically shatters the active causal chain of the `target_node_id` and forcibly injects the `override_action` payload into the state vector, bypassing decentralized voting.\n\nEPISTEMIC BOUNDS: The blast radius is strictly confined to the `target_node_id`. The orchestrator must mathematically verify the `authorized_node_id` against the highest-tier W3C DID enterprise clearance before allowing the payload to overwrite the Epistemic Blackboard (`override_action` bounded `max_length=1000`).\n\nMCP ROUTING TRIGGERS: Dictatorial Override, Byzantine Fault Resolution, Pearlian Intervention, Causal Shattering, Zero-Trust Override",
       "properties": {
         "type": {
           "const": "override",
@@ -11995,7 +11997,7 @@
             "$ref": "#/$defs/JsonPrimitiveState"
           },
           "description": "The exact payload forcefully injected into the state.",
-          "maxProperties": 1000000000,
+          "maxProperties": 1000,
           "propertyNames": {
             "maxLength": 255
           },
@@ -12370,7 +12372,7 @@
     },
     "PredictionMarketState": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative, frozen snapshot of an Automated Market Maker (AMM) utilizing Robin Hanson's Logarithmic Market Scoring Rule (LMSR) to guarantee infinite liquidity.\n\nCAUSAL AFFORDANCE: Aggregates `HypothesisStakeReceipt` vectors, allowing the orchestrator to track the shifting probability manifold and trigger market resolution when the AMM reaches the required convergence threshold.\n\nEPISTEMIC BOUNDS: `current_market_probabilities` is geometrically bounded by `max_length=1000000000`. `market_id` is restricted to a 128-char CID. `order_book` array is deterministically sorted by `agent_id` via `@model_validator`.\n\nMCP ROUTING TRIGGERS: Logarithmic Market Scoring Rule, Automated Market Maker, Prediction Market, Infinite Liquidity, Brier Score",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative, frozen snapshot of an Automated Market Maker (AMM) utilizing Robin Hanson's Logarithmic Market Scoring Rule (LMSR) to guarantee infinite liquidity.\n\nCAUSAL AFFORDANCE: Aggregates `HypothesisStakeReceipt` vectors, allowing the orchestrator to track the shifting probability manifold and trigger market resolution when the AMM reaches the required convergence threshold.\n\nEPISTEMIC BOUNDS: `current_market_probabilities` is geometrically bounded by `max_length=1000`. `market_id` is restricted to a 128-char CID. `order_book` array is deterministically sorted by `agent_id` via `@model_validator`.\n\nMCP ROUTING TRIGGERS: Logarithmic Market Scoring Rule, Automated Market Maker, Prediction Market, Infinite Liquidity, Brier Score",
       "properties": {
         "market_id": {
           "description": "The deterministic capability pointer representing the prediction market.",
@@ -12409,7 +12411,7 @@
             "type": "string"
           },
           "description": "Mapping of hypothesis IDs to their current LMSR-calculated market price (probability) as stringified decimals.",
-          "maxProperties": 1000000000,
+          "maxProperties": 1000,
           "propertyNames": {
             "maxLength": 255
           },
@@ -13418,7 +13420,7 @@
     },
     "SemanticDiscoveryIntent": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Orchestrates zero-shot latent capability routing by computing the geometric Cosine Distance between the agent's epistemic deficit vector and the available tool manifold.\n\nCAUSAL AFFORDANCE: Unlocks the dynamic, runtime mounting of tools and MCP servers whose dense vector embeddings (`query_vector`) align mathematically with the query tensor, bypassing hardcoded tool schemas.\n\nEPISTEMIC BOUNDS: Mechanically rejects capabilities that fall below the `min_isometry_score` (`ge=-1.0, le=1.0`) boundary. The returned toolsets are strictly limited to the deterministically sorted `required_structural_types` array (`max_length=1000000000`), enforced by the `@model_validator`.\n\nMCP ROUTING TRIGGERS: Zero-Shot Tool Discovery, Capability Routing, Dense Vector Embedding, Epistemic Deficit Resolution",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Orchestrates zero-shot latent capability routing by computing the geometric Cosine Distance between the agent's epistemic deficit vector and the available tool manifold.\n\nCAUSAL AFFORDANCE: Unlocks the dynamic, runtime mounting of tools and MCP servers whose dense vector embeddings (`query_vector`) align mathematically with the query tensor, bypassing hardcoded tool schemas.\n\nEPISTEMIC BOUNDS: Mechanically rejects capabilities that fall below the `min_isometry_score` (`ge=-1.0, le=1.0`) boundary. The returned toolsets are strictly limited to the deterministically sorted `required_structural_types` array (`max_length=1000`), enforced by the `@model_validator`.\n\nMCP ROUTING TRIGGERS: Zero-Shot Tool Discovery, Capability Routing, Dense Vector Embedding, Epistemic Deficit Resolution",
       "properties": {
         "type": {
           "const": "semantic_discovery",
@@ -13444,7 +13446,7 @@
             "maxLength": 255,
             "type": "string"
           },
-          "maxItems": 1000000000,
+          "maxItems": 1000,
           "title": "Required Structural Types",
           "type": "array"
         }
@@ -13932,7 +13934,7 @@
         "attributes": {
           "additionalProperties": true,
           "description": "Typed metadata bound to the event.",
-          "maxProperties": 1000000000,
+          "maxProperties": 1000,
           "propertyNames": {
             "maxLength": 255
           },
@@ -14429,7 +14431,7 @@
     },
     "StdioTransportProfile": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Inter-Process Communication (IPC) utilizing POSIX standard streams to execute highly isolated, local binary sandboxing.\n\nCAUSAL AFFORDANCE: Physically spawns a child process restricted to the host's operating system namespace, mapping remote procedure calls directly into the binary's stdin/stdout descriptors via `command` (`max_length=2000`).\n\nEPISTEMIC BOUNDS: To prevent buffer overflow and command injection, `args` are structurally constrained (`max_length=1000000000`, string `max_length=2000`) and `env_vars` keys/values are strictly delimited via `StringConstraints` (`max_length=255` and `2000`).\n\nMCP ROUTING TRIGGERS: Inter-Process Communication, POSIX Standard Streams, Local Sandboxing, Binary Execution, Subprocess Spawn",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Inter-Process Communication (IPC) utilizing POSIX standard streams to execute highly isolated, local binary sandboxing.\n\nCAUSAL AFFORDANCE: Physically spawns a child process restricted to the host's operating system namespace, mapping remote procedure calls directly into the binary's stdin/stdout descriptors via `command` (`max_length=2000`).\n\nEPISTEMIC BOUNDS: To prevent buffer overflow and command injection, `args` are structurally constrained (`max_length=1000`, string `max_length=2000`) and `env_vars` keys/values are strictly delimited via `StringConstraints` (`max_length=255` and `2000`).\n\nMCP ROUTING TRIGGERS: Inter-Process Communication, POSIX Standard Streams, Local Sandboxing, Binary Execution, Subprocess Spawn",
       "properties": {
         "type": {
           "const": "stdio",
@@ -14450,7 +14452,7 @@
             "maxLength": 2000,
             "type": "string"
           },
-          "maxItems": 1000000000,
+          "maxItems": 1000,
           "title": "Args",
           "type": "array"
         },
@@ -14475,7 +14477,7 @@
     },
     "SteadyStateHypothesisState": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes the baseline control group definition within\nChaos Engineering, leveraging Queueing Theory to model the expected systemic\nequilibrium. As a ...State suffix, this is a declarative, frozen snapshot of\nN-dimensional geometry.\n\nCAUSAL AFFORDANCE: Provides the deterministic baseline against which chaotic\nperturbations (e.g., ChaosExperimentTask) are measured, establishing temporal\nand procedural expectations for standard execution loops.\n\nEPISTEMIC BOUNDS: Latency expectations are continuously bounded by\nexpected_max_latency (ge=0.0, le=1000000000.0). The max_loops_allowed\n(le=1000000000) physically caps algorithmic cycles. The optional\nrequired_tool_usage (list[str] | None, default=None,\nmax_length=1000000000) is deterministically sorted via @model_validator\nsort_arrays to preserve RFC 8785 canonical hashing.\n\nMCP ROUTING TRIGGERS: Chaos Engineering, Queueing Theory, Steady-State\nEquilibrium, Control Group Baseline, Systemic Perturbation",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes the baseline control group definition within\nChaos Engineering, leveraging Queueing Theory to model the expected systemic\nequilibrium. As a ...State suffix, this is a declarative, frozen snapshot of\nN-dimensional geometry.\n\nCAUSAL AFFORDANCE: Provides the deterministic baseline against which chaotic\nperturbations (e.g., ChaosExperimentTask) are measured, establishing temporal\nand procedural expectations for standard execution loops.\n\nEPISTEMIC BOUNDS: Latency expectations are continuously bounded by\nexpected_max_latency (ge=0.0, le=1000000000.0). The max_loops_allowed\n(le=1000000000) physically caps algorithmic cycles. The optional\nrequired_tool_usage (list[str] | None, default=None,\nmax_length=1000) is deterministically sorted via @model_validator\nsort_arrays to preserve RFC 8785 canonical hashing.\n\nMCP ROUTING TRIGGERS: Chaos Engineering, Queueing Theory, Steady-State\nEquilibrium, Control Group Baseline, Systemic Perturbation",
       "properties": {
         "expected_max_latency": {
           "description": "The expected maximum latency under normal conditions.",
@@ -14497,7 +14499,7 @@
                 "maxLength": 2000,
                 "type": "string"
               },
-              "maxItems": 1000000000,
+              "maxItems": 1000,
               "type": "array"
             },
             {
@@ -14559,7 +14561,7 @@
             "maxLength": 255,
             "type": "string"
           },
-          "maxItems": 1000000000,
+          "maxItems": 1000,
           "title": "Observed Variables",
           "type": "array"
         },
@@ -14569,7 +14571,7 @@
             "maxLength": 255,
             "type": "string"
           },
-          "maxItems": 1000000000,
+          "maxItems": 1000,
           "title": "Latent Variables",
           "type": "array"
         },
@@ -14782,7 +14784,7 @@
     },
     "System1ReflexPolicy": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Kahneman's Dual-Process Theory (System 1) to execute\nrapid, heuristic-based reflex actions without invoking deep logical search trees. As a\n...Policy suffix, this enforces a rigid computational boundary.\n\nCAUSAL AFFORDANCE: Unlocks zero-shot execution of side-effect-free capabilities when\nthe working context matches established high-probability priors, intentionally bypassing\nexpensive System 2 Monte Carlo Tree Search (MCTS).\n\nEPISTEMIC BOUNDS: Execution is mathematically gated by the confidence_threshold\n(ge=0.0, le=1.0). The allowed_passive_tools array (max_length=1000000000,\nStringConstraints max_length=2000) strictly bounds the agent to non-mutating\ncapabilities, deterministically sorted via @model_validator.\n\nMCP ROUTING TRIGGERS: Dual-Process Theory, System 1 Heuristics, Zero-Shot Reflex,\nMetacognition, Amygdala Hijack Prevention",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Kahneman's Dual-Process Theory (System 1) to execute\nrapid, heuristic-based reflex actions without invoking deep logical search trees. As a\n...Policy suffix, this enforces a rigid computational boundary.\n\nCAUSAL AFFORDANCE: Unlocks zero-shot execution of side-effect-free capabilities when\nthe working context matches established high-probability priors, intentionally bypassing\nexpensive System 2 Monte Carlo Tree Search (MCTS).\n\nEPISTEMIC BOUNDS: Execution is mathematically gated by the confidence_threshold\n(ge=0.0, le=1.0). The allowed_passive_tools array (max_length=1000,\nStringConstraints max_length=2000) strictly bounds the agent to non-mutating\ncapabilities, deterministically sorted via @model_validator.\n\nMCP ROUTING TRIGGERS: Dual-Process Theory, System 1 Heuristics, Zero-Shot Reflex,\nMetacognition, Amygdala Hijack Prevention",
       "properties": {
         "confidence_threshold": {
           "description": "The confidence threshold required to execute a reflex action.",
@@ -14797,7 +14799,7 @@
             "maxLength": 2000,
             "type": "string"
           },
-          "maxItems": 1000000000,
+          "maxItems": 1000,
           "title": "Allowed Passive Tools",
           "type": "array"
         }
@@ -15568,7 +15570,7 @@
             "maxLength": 2000,
             "type": "string"
           },
-          "maxItems": 1000000000,
+          "maxItems": 1000,
           "title": "Identified Knowledge Gaps",
           "type": "array"
         },
@@ -15804,7 +15806,7 @@
             "$ref": "#/$defs/JsonPrimitiveState"
           },
           "description": "The intended JSON-RPC payload. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
-          "maxProperties": 1000000000,
+          "maxProperties": 1000,
           "propertyNames": {
             "maxLength": 255
           },
@@ -15840,7 +15842,7 @@
     },
     "ToolManifest": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the discrete formalization of a Gibsonian Affordance within the agent's Reinforcement Learning Action Space ($A$). As a ...Manifest suffix, this is a declarative, frozen N-dimensional coordinate of a capability.\n\nCAUSAL AFFORDANCE: Unlocks a specific, localized Pearlian Do-Operator intervention ($do(X=x)$) mapped to an external kinetic capability. Governed by side_effects, permissions, and an optional execution SLA.\n\nEPISTEMIC BOUNDS: The operational perimeter is rigidly confined by `input_schema` and `output_schema` (dictionaries bounded to `max_length=1000000000` properties). The `is_preemptible` boolean (default=False) establishes a physical Halting Problem limit by authorizing the orchestrator to abort execution mid-flight.\n\nMCP ROUTING TRIGGERS: Gibsonian Affordance, MDP Action Space, Pearlian Do-Operator, Capability-Based Security, Halting Problem",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the discrete formalization of a Gibsonian Affordance within the agent's Reinforcement Learning Action Space ($A$). As a ...Manifest suffix, this is a declarative, frozen N-dimensional coordinate of a capability.\n\nCAUSAL AFFORDANCE: Unlocks a specific, localized Pearlian Do-Operator intervention ($do(X=x)$) mapped to an external kinetic capability. Governed by side_effects, permissions, and an optional execution SLA.\n\nEPISTEMIC BOUNDS: The operational perimeter is rigidly confined by `input_schema` and `output_schema` (dictionaries bounded to `max_length=1000` properties). The `is_preemptible` boolean (default=False) establishes a physical Halting Problem limit by authorizing the orchestrator to abort execution mid-flight.\n\nMCP ROUTING TRIGGERS: Gibsonian Affordance, MDP Action Space, Pearlian Do-Operator, Capability-Based Security, Halting Problem",
       "properties": {
         "type": {
           "const": "native_tool",
@@ -15866,7 +15868,7 @@
             "$ref": "#/$defs/JsonPrimitiveState"
           },
           "description": "The strict JSON Schema dictionary defining the pure domain-specific arguments ($T$). The framework orchestrator will automatically wrap this in the ExecutionEnvelopeState at runtime.",
-          "maxProperties": 1000000000,
+          "maxProperties": 1000,
           "propertyNames": {
             "maxLength": 255
           },
@@ -15879,7 +15881,7 @@
               "additionalProperties": {
                 "$ref": "#/$defs/JsonPrimitiveState"
               },
-              "maxProperties": 1000000000,
+              "maxProperties": 1000,
               "propertyNames": {
                 "maxLength": 255
               },
@@ -16216,7 +16218,7 @@
     },
     "UtilityJustificationGraphReceipt": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Multi-Attribute Utility Theory (MAUT) to capture the exact multi-dimensional trade-offs (Pareto vectors) of a given routing decision.\n\nCAUSAL AFFORDANCE: Provides explicit mathematical justification for an agent's trajectory. If the variance of the utility distribution exceeds the threshold, it physically forces the orchestrator to deploy the embedded ensemble specification for deterministic resolution.\n\nEPISTEMIC BOUNDS: The `superposition_variance_threshold` is physically clamped strictly above zero (`gt=0.0`, `le=1000000000.0`), as a variance of absolute 0.0 represents mathematical certainty, which physically precludes superposition geometry. Vector dictionaries are bounded purely by spatial cardinality (`max_length=1000000000`).\n\nMCP ROUTING TRIGGERS: Multi-Attribute Utility Theory, Pareto Efficiency, Variance Reduction, Fallback Superposition, Utility Routing",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Multi-Attribute Utility Theory (MAUT) to capture the exact multi-dimensional trade-offs (Pareto vectors) of a given routing decision.\n\nCAUSAL AFFORDANCE: Provides explicit mathematical justification for an agent's trajectory. If the variance of the utility distribution exceeds the threshold, it physically forces the orchestrator to deploy the embedded ensemble specification for deterministic resolution.\n\nEPISTEMIC BOUNDS: The `superposition_variance_threshold` is physically clamped strictly above zero (`gt=0.0`, `le=1000000000.0`), as a variance of absolute 0.0 represents mathematical certainty, which physically precludes superposition geometry. Vector dictionaries are bounded purely by spatial cardinality (`max_length=1000`).\n\nMCP ROUTING TRIGGERS: Multi-Attribute Utility Theory, Pareto Efficiency, Variance Reduction, Fallback Superposition, Utility Routing",
       "properties": {
         "optimizing_vectors": {
           "additionalProperties": {
@@ -16225,7 +16227,7 @@
             "type": "number"
           },
           "description": "Multi-dimensional continuous values representing optimizations.",
-          "maxProperties": 1000000000,
+          "maxProperties": 1000,
           "propertyNames": {
             "maxLength": 255
           },
@@ -16239,7 +16241,7 @@
             "type": "number"
           },
           "description": "Multi-dimensional continuous values representing degradations.",
-          "maxProperties": 1000000000,
+          "maxProperties": 1000,
           "propertyNames": {
             "maxLength": 255
           },
