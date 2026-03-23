@@ -558,7 +558,6 @@ def test_composite_node_profile_sorts_mappings() -> None:
 
 
 def test_action_space_manifest_enforce_canonical_sort() -> None:
-
     from coreason_manifest.spec.ontology import (
         ActionSpaceManifest,
         PermissionBoundaryPolicy,

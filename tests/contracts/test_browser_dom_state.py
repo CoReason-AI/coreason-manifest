@@ -109,8 +109,8 @@ def test_browser_dom_state_fuzz_ipv4_space(ip: ipaddress.IPv4Address) -> None:
 @pytest.mark.parametrize(
     "url",
     [
-        "http://attacker-localhost.com/", # Domain resolving to 127.0.0.1
-        "http://this-domain-does-not-exist.coreason.ai/", # Non-existent domain
+        "http://attacker-localhost.com/",  # Domain resolving to 127.0.0.1
+        "http://this-domain-does-not-exist.coreason.ai/",  # Non-existent domain
     ],
 )
 def test_browser_dom_state_ssrf_dns_resolution(url: str, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -132,7 +132,7 @@ def test_browser_dom_state_ssrf_dns_resolution(url: str, monkeypatch: pytest.Mon
 
     monkeypatch.setattr(socket, "gethostbyname", mock_gethostbyname)
 
-    with pytest.raises(ValidationError, match=r"Security Validation Failed: Unresolvable or invalid host|SSRF restricted IP detected"):
-        BrowserDOMState(
-            current_url=url, viewport_size=(1024, 768), dom_hash="a" * 64, accessibility_tree_hash="b" * 64
-        )
+    with pytest.raises(
+        ValidationError, match=r"Security Validation Failed: Unresolvable or invalid host|SSRF restricted IP detected"
+    ):
+        BrowserDOMState(current_url=url, viewport_size=(1024, 768), dom_hash="a" * 64, accessibility_tree_hash="b" * 64)
