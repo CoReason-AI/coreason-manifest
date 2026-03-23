@@ -3111,7 +3111,7 @@ class BrowserDOMState(CoreasonBaseState):
         ):
             raise ValueError(f"SSRF topological violation detected: {hostname}")
 
-        import contextlib
+        import socket
         import ipaddress
 
         def _parse_obfuscated_ipv4(ip_str: str) -> int | None:
@@ -3146,24 +3146,33 @@ class BrowserDOMState(CoreasonBaseState):
         if ip_int is not None:
             ip = ipaddress.IPv4Address(ip_int)
         else:
-            with contextlib.suppress(ValueError):
-                # Fallback to standard IPv6 and canonical IPv4 string parsing
-                ip = ipaddress.ip_address(hostname.strip("[]"))
+            hostname_clean = hostname.strip("[]")
+            try:
+                # First try to parse as IP directly (covers IPv6 and standard IPv4 formats)
+                ip = ipaddress.ip_address(hostname_clean)
+            except ValueError:
+                try:
+                    # Step 1: Resolve the hostname to an IP address
+                    # This prevents bypassing the check via domain names
+                    raw_ip = socket.gethostbyname(hostname_clean)
+                    ip = ipaddress.ip_address(raw_ip)
+                except (socket.gaierror, ValueError) as e:
+                    # Fail-Closed: If resolution fails or IP is invalid, reject the request
+                    raise ValueError(f"Security Validation Failed: Unresolvable or invalid host: {hostname}")
 
-        if ip is not None:
-            if isinstance(ip, ipaddress.IPv6Address) and ip.ipv4_mapped:
-                ip = ip.ipv4_mapped
+        if isinstance(ip, ipaddress.IPv6Address) and ip.ipv4_mapped:
+            ip = ip.ipv4_mapped
 
-            if (
-                ip.is_private
-                or ip.is_loopback
-                or ip.is_link_local
-                or ip.is_reserved
-                or ip.is_multicast
-                or getattr(ip, "is_unspecified", False)
-                or not getattr(ip, "is_global", True)
-            ):
-                raise ValueError(f"SSRF restricted IP detected: {hostname}")
+        if (
+            ip.is_private
+            or ip.is_loopback
+            or ip.is_link_local
+            or ip.is_reserved
+            or ip.is_multicast
+            or getattr(ip, "is_unspecified", False)
+            or not getattr(ip, "is_global", True)
+        ):
+            raise ValueError(f"SSRF restricted IP detected: {hostname}")
 
         return url
 
@@ -6873,7 +6882,7 @@ class MarketContract(CoreasonBaseState):
                 try:
                     mc_int = int(mc)
                     sp_int = int(sp)
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             cmc = max(0, min(mc_int, 1000000000))
             if sp_int > cmc:

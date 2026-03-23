@@ -378,6 +378,7 @@ def test_active_inference_contract_bounds_fuzzing(eig: float) -> None:
         ),
     )
 )
+@settings(deadline=None)
 def test_browser_dom_state_safety_valid_fuzzing(url: str) -> None:
     from pydantic import ValidationError
 
