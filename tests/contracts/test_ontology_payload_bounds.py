@@ -121,3 +121,26 @@ def test_payload_bounds_invalid_type_nested() -> None:
 
     with pytest.raises(ValueError, match="Payload value must be a valid JSON primitive, got CustomObj"):
         _validate_payload_bounds(payload)  # type: ignore
+
+
+def test_state_vector_memory_bounds() -> None:
+    import pytest
+    from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import StateVectorProfile
+
+    s = StateVectorProfile(mutable_memory={"test": "abc"}, read_only_context={"rules": "abc"})
+    assert s.mutable_memory == {"test": "abc"}
+    assert s.read_only_context == {"rules": "abc"}
+
+    huge_dict: dict[str, Any] = {}
+    for i in range(10001):
+        huge_dict[f"key_{i}"] = i
+
+    with pytest.raises(ValidationError) as exc_info:
+        StateVectorProfile(mutable_memory=huge_dict)
+    assert "Payload volume exceeds absolute hardware limit" in str(exc_info.value)
+
+    with pytest.raises(ValidationError) as exc_info:
+        StateVectorProfile(read_only_context=huge_dict)
+    assert "Payload volume exceeds absolute hardware limit" in str(exc_info.value)
