@@ -121,7 +121,7 @@ def test_action_space_manifest_rejects_custom_state() -> None:
     )
 
 
-def test_state_vector_memory_bounds():
+def test_state_vector_memory_bounds() -> None:
     import pytest
     from pydantic import ValidationError
 
@@ -133,7 +133,9 @@ def test_state_vector_memory_bounds():
     assert s.read_only_context == {"rules": "abc"}
 
     # It should fail with huge payloads exceeding nodes
-    huge_dict = {}
+    from typing import Any
+
+    huge_dict: dict[str, Any] = {}
     for i in range(10001):
         huge_dict[f"key_{i}"] = i
 

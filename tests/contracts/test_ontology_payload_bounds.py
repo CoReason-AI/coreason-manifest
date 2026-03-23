@@ -123,7 +123,7 @@ def test_payload_bounds_invalid_type_nested() -> None:
         _validate_payload_bounds(payload)  # type: ignore
 
 
-def test_state_vector_memory_bounds():
+def test_state_vector_memory_bounds() -> None:
     import pytest
     from pydantic import ValidationError
 
@@ -133,7 +133,8 @@ def test_state_vector_memory_bounds():
     assert s.mutable_memory == {"test": "abc"}
     assert s.read_only_context == {"rules": "abc"}
 
-    huge_dict = {}
+
+    huge_dict: dict[str, Any] = {}
     for i in range(10001):
         huge_dict[f"key_{i}"] = i
 
