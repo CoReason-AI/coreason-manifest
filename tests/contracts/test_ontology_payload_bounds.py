@@ -122,10 +122,12 @@ def test_payload_bounds_invalid_type_nested() -> None:
     with pytest.raises(ValueError, match="Payload value must be a valid JSON primitive, got CustomObj"):
         _validate_payload_bounds(payload)  # type: ignore
 
+
 def test_state_vector_memory_bounds():
-    from coreason_manifest.spec.ontology import StateVectorProfile
     import pytest
     from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import StateVectorProfile
 
     s = StateVectorProfile(mutable_memory={"test": "abc"}, read_only_context={"rules": "abc"})
     assert s.mutable_memory == {"test": "abc"}

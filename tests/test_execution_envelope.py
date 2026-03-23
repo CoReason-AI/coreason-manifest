@@ -120,10 +120,12 @@ def test_action_space_manifest_rejects_custom_state() -> None:
         },
     )
 
+
 def test_state_vector_memory_bounds():
-    from coreason_manifest.spec.ontology import StateVectorProfile
     import pytest
     from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import StateVectorProfile
 
     # It should pass with small valid dictionaries
     s = StateVectorProfile(mutable_memory={"test": "abc"}, read_only_context={"rules": "abc"})
