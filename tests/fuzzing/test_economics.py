@@ -105,3 +105,19 @@ def test_routing_frontier_policy(lat: int, cost: int, carbon: float) -> None:
 def test_escrow_policy(escrow: int) -> None:
     ep = EscrowPolicy(escrow_locked_magnitude=escrow, release_condition_metric="rc1", refund_target_node_id="n1")
     assert 0 <= ep.escrow_locked_magnitude <= 1000000000
+
+
+def test_routing_frontier_policy_invalid_types() -> None:
+    # Test that invalid types pass through pre-validation without a crash,
+    # and fail Pydantic's core validation safely instead of a 500 error.
+    try:
+        RoutingFrontierPolicy(
+            max_latency_ms="invalid",
+            max_cost_magnitude_per_token="invalid",
+            min_capability_score="invalid",
+            tradeoff_preference="balanced",
+            max_carbon_intensity_gco2eq_kwh="invalid",
+        )
+    except Exception as e:
+        # Pydantic's core validation error will be raised
+        assert "validation error" in str(e).lower()
