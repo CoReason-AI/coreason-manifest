@@ -121,3 +121,13 @@ def test_routing_frontier_policy_invalid_types() -> None:
             tradeoff_preference="balanced",
             max_carbon_intensity_gco2eq_kwh="invalid",  # type: ignore[arg-type]
         )
+
+    # Test TypeError fallback
+    with pytest.raises(ValidationError, match=r"(?i)validation error"):
+        RoutingFrontierPolicy(
+            max_latency_ms=None,  # type: ignore[arg-type]
+            max_cost_magnitude_per_token=None,  # type: ignore[arg-type]
+            min_capability_score=None,  # type: ignore[arg-type]
+            tradeoff_preference="balanced",
+            max_carbon_intensity_gco2eq_kwh=None,
+        )
