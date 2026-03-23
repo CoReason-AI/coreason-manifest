@@ -214,9 +214,9 @@ def test_dynamic_layout_manifest_valid_ast(tstring: str) -> None:
 
 
 def test_dynamic_layout_manifest_syntax_error() -> None:
-    # A SyntaxError in parsing is silently ignored because it poses no execution bleed risk.
-    manifest = DynamicLayoutManifest(layout_tstring="f'{a")
-    assert manifest.layout_tstring == "f'{a"
+    # A SyntaxError in parsing must not be ignored to prevent fail-open security bypass.
+    with pytest.raises(ValidationError, match="Invalid syntax in dynamic string"):
+        DynamicLayoutManifest(layout_tstring="f'{a")
 
 
 @pytest.mark.parametrize(

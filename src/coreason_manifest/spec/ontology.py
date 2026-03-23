@@ -859,8 +859,8 @@ class DynamicLayoutManifest(CoreasonBaseState):
         """
         try:
             tree = ast.parse(v, mode="exec")
-        except SyntaxError:
-            pass
+        except SyntaxError as e:
+            raise ValueError(f"Security Validation Failed: Invalid syntax in dynamic string: {e}")
         else:
             allowed_nodes = (ast.Module, ast.Expr, ast.Constant, ast.Name, ast.Load, ast.FormattedValue, ast.JoinedStr)
             for node in ast.walk(tree):
