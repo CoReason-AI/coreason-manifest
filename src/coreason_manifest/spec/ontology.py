@@ -3150,10 +3150,20 @@ class BrowserDOMState(CoreasonBaseState):
                 # Fallback to standard IPv6 and canonical IPv4 string parsing
                 ip = ipaddress.ip_address(hostname.strip("[]"))
 
-        if ip is not None and (
-            ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast
-        ):
-            raise ValueError(f"SSRF restricted IP detected: {hostname}")
+        if ip is not None:
+            if isinstance(ip, ipaddress.IPv6Address) and ip.ipv4_mapped:
+                ip = ip.ipv4_mapped
+
+            if (
+                ip.is_private
+                or ip.is_loopback
+                or ip.is_link_local
+                or ip.is_reserved
+                or ip.is_multicast
+                or getattr(ip, "is_unspecified", False)
+                or not getattr(ip, "is_global", True)
+            ):
+                raise ValueError(f"SSRF restricted IP detected: {hostname}")
 
         return url
 
