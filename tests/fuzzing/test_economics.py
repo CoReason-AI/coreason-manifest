@@ -115,9 +115,9 @@ def test_routing_frontier_policy_invalid_types() -> None:
     # and fail Pydantic's core validation safely instead of a 500 error.
     with pytest.raises(ValidationError, match=r"(?i)validation error"):
         RoutingFrontierPolicy(
-            max_latency_ms="invalid",
-            max_cost_magnitude_per_token="invalid",  # noqa: S106
-            min_capability_score="invalid",
+            max_latency_ms="invalid",  # type: ignore[arg-type]
+            max_cost_magnitude_per_token="invalid",  # type: ignore[arg-type]  # noqa: S106
+            min_capability_score="invalid",  # type: ignore[arg-type]
             tradeoff_preference="balanced",
-            max_carbon_intensity_gco2eq_kwh="invalid",
+            max_carbon_intensity_gco2eq_kwh="invalid",  # type: ignore[arg-type]
         )
