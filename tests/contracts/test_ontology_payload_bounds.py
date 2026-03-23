@@ -133,7 +133,6 @@ def test_state_vector_memory_bounds() -> None:
     assert s.mutable_memory == {"test": "abc"}
     assert s.read_only_context == {"rules": "abc"}
 
-
     huge_dict: dict[str, Any] = {}
     for i in range(10001):
         huge_dict[f"key_{i}"] = i
