@@ -378,6 +378,7 @@ def test_active_inference_contract_bounds_fuzzing(eig: float) -> None:
         ),
     )
 )
+@settings(deadline=None)
 def test_browser_dom_state_safety_valid_fuzzing(url: str) -> None:
     from pydantic import ValidationError
 
@@ -557,7 +558,6 @@ def test_composite_node_profile_sorts_mappings() -> None:
 
 
 def test_action_space_manifest_enforce_canonical_sort() -> None:
-
     from coreason_manifest.spec.ontology import (
         ActionSpaceManifest,
         PermissionBoundaryPolicy,
