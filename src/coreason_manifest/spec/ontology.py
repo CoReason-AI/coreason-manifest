@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import ast
 import hashlib
+import html
 import ipaddress
 import json
 import math
@@ -5826,7 +5827,8 @@ class InsightCardProfile(CoreasonBaseState):
     @classmethod
     def _prevent_malicious_uri_schemes(cls, v: str) -> str:
         """AGENT INSTRUCTION: Statically sever XSS vectors embedded in markdown links."""
-        if re.search("\\]\\(\\s*(javascript|vbscript|data):", v, flags=re.IGNORECASE):
+        v_unescaped = html.unescape(v)
+        if re.search("\\]\\(\\s*(javascript|vbscript|data):", v_unescaped, flags=re.IGNORECASE):
             raise ValueError("Malicious executable link scheme detected in markdown content")
         return v
 

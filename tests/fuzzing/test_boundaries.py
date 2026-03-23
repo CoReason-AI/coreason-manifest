@@ -62,7 +62,13 @@ def test_browser_dom_ssrf_quarantine(url: str) -> None:
 
 
 @pytest.mark.parametrize(
-    "payload", ["<script>alert(1)</script>", "<img src='x' onerror='alert(1)'>", "[click me](javascript:alert(1))"]
+    "payload",
+    [
+        "<script>alert(1)</script>",
+        "<img src='x' onerror='alert(1)'>",
+        "[click me](javascript:alert(1))",
+        "[Click Here](javascript&#58;alert('XSS'))",
+    ],
 )
 def test_polymorphic_xss_proof(payload: str) -> None:
     """Prove InsightCardProfile definitively rejects malicious Markdown tags and schemas."""
