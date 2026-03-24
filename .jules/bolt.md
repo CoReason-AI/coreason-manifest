@@ -5,3 +5,7 @@
 ## 2025-02-18 - Optimize list popping for queues
 **Learning:** Using `list.pop(0)` for a queue in Kahn's algorithm (or any queue structure processing many elements) creates an $O(N)$ operation per element since all remaining list elements must shift. For large directed acyclic graphs, this cascades into an $O(N^2)$ algorithm instead of the intended $O(V+E)$.
 **Action:** Always use `collections.deque` and its $O(1)$ `popleft()` method when implementing FIFO queues in algorithms to ensure optimal temporal complexity.
+
+## 2025-02-19 - Eliminate static collection instantiation inside hot path functions
+**Learning:** Re-defining static collections (like lists, tuples, dictionaries, and sets used as allowlists) inside a function causes Python to re-allocate and garbage-collect those objects on every function call. For functions called frequently, like `verify_ast_safety`, this creates an unnecessary $O(N)$ allocation bottleneck on each invocation.
+**Action:** Extract static collections from function bodies into module-level constants (e.g., `_AST_ALLOWLIST: tuple[type, ...] = (...)`) and convert lists/sets to tuples or frozensets when mutability isn't required. This reduces per-call overhead and avoids redundant memory allocations.
