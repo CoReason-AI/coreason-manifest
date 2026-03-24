@@ -857,15 +857,34 @@ class DynamicLayoutManifest(CoreasonBaseState):
 
         MCP ROUTING TRIGGERS: Automata Theory, Abstract Syntax Tree, ACE Prevention, Turing-Incomplete Subgraph, Declarative Interpolation
         """
+        allowed_nodes = (
+            ast.Module,
+            ast.Expr,
+            ast.Constant,
+            ast.Name,
+            ast.Load,
+            ast.FormattedValue,
+            ast.JoinedStr,
+            ast.Expression,
+        )
+
         try:
             tree = ast.parse(v, mode="exec")
-        except SyntaxError:
-            pass
-        else:
-            allowed_nodes = (ast.Module, ast.Expr, ast.Constant, ast.Name, ast.Load, ast.FormattedValue, ast.JoinedStr)
             for node in ast.walk(tree):
                 if not isinstance(node, allowed_nodes):
                     raise ValueError(f"Kinetic execution bleed detected: Forbidden AST node {type(node).__name__}")
+        except SyntaxError:
+            pass
+
+        v_escaped = v.replace("'''", "\\'\\'\\'")
+        try:
+            f_tree = ast.parse(f"f'''{v_escaped}'''", mode="eval")
+            for node in ast.walk(f_tree):
+                if not isinstance(node, allowed_nodes):
+                    raise ValueError(f"Kinetic execution bleed detected: Forbidden AST node {type(node).__name__}")
+        except SyntaxError:
+            pass
+
         return v
 
 
