@@ -347,6 +347,8 @@ def verify_ast_safety(payload: str) -> bool:
     for node in ast.walk(tree):
         if not isinstance(node, allowlist):
             raise ValueError(f"Kinetic execution bleed detected. Forbidden AST node: {type(node).__name__}")
+        if isinstance(node, ast.Pow):
+            raise ValueError("Kinetic execution bleed detected. Forbidden AST node: Pow")
 
     return True
 
