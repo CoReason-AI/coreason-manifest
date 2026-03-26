@@ -27,7 +27,10 @@ class ClassInjectTransformer(cst.CSTTransformer):
             field_type = field.get("type", "Any")
             field_desc = field.get("description", "")
 
-            annotation = cst.Annotation(annotation=cst.Name(field_type))
+            try:
+                annotation = cst.Annotation(annotation=cst.parse_expression(field_type))
+            except Exception:
+                annotation = cst.Annotation(annotation=cst.Name("Any"))
 
             # Use Field(...) for description if present
             field_call_args = []
@@ -123,6 +126,44 @@ def mcp(name: str, description: str) -> None:
         typer.echo(f"Could not find {ontology_path}", err=True)
         raise typer.Exit(1)
 
+    def resolve_type(prop: dict) -> str:
+        if "$ref" in prop:
+            return prop["$ref"].split("/")[-1]
+
+        if "anyOf" in prop:
+            types = [resolve_type(opt) for opt in prop["anyOf"]]
+            types = [t for t in types if t != "Any"]
+            if not types:
+                return "Any"
+            if len(types) == 1:
+                return types[0]
+            if "type" in prop and prop["type"] == "null":
+                types.append("None")
+            return " | ".join(sorted(set(types)))
+
+        ptype = prop.get("type", "Any")
+        if ptype == "string":
+            return "str"
+        if ptype == "integer":
+            return "int"
+        if ptype == "number":
+            return "float"
+        if ptype == "boolean":
+            return "bool"
+        if ptype == "null":
+            return "None"
+        if ptype == "array":
+            items = prop.get("items", {})
+            item_type = resolve_type(items)
+            return f"list[{item_type}]"
+        if ptype == "object":
+            additional = prop.get("additionalProperties")
+            if isinstance(additional, dict):
+                val_type = resolve_type(additional)
+                return f"dict[str, {val_type}]"
+            return "dict[str, Any]"
+        return "Any"
+
     schema_path = Path("coreason_ontology.schema.json")
     fields = []
     if schema_path.exists():
@@ -132,23 +173,24 @@ def mcp(name: str, description: str) -> None:
             if name in defs:
                 props = defs[name].get("properties", {})
                 for prop_name, prop_details in props.items():
-                    ptype = prop_details.get("type", "Any")
+                    ptype = resolve_type(prop_details)
                     pdesc = prop_details.get("description", "")
 
-                    if ptype == "string":
-                        ptype = "str"
-                    elif ptype == "integer":
-                        ptype = "int"
-                    elif ptype == "number":
-                        ptype = "float"
-                    elif ptype == "boolean":
-                        ptype = "bool"
-
-                    fields.append({
+                    field_def = {
                         "name": prop_name,
                         "type": ptype,
-                        "description": pdesc
-                    })
+                        "description": pdesc,
+                    }
+                    if "minimum" in prop_details:
+                        field_def["minimum"] = prop_details["minimum"]
+                    if "maximum" in prop_details:
+                        field_def["maximum"] = prop_details["maximum"]
+                    if "exclusiveMinimum" in prop_details:
+                        field_def["exclusiveMinimum"] = prop_details["exclusiveMinimum"]
+                    if "exclusiveMaximum" in prop_details:
+                        field_def["exclusiveMaximum"] = prop_details["exclusiveMaximum"]
+
+                    fields.append(field_def)
 
     code = ontology_path.read_text(encoding="utf-8")
     module = cst.parse_module(code)
@@ -160,4 +202,4 @@ def mcp(name: str, description: str) -> None:
     typer.echo(f"Successfully scaffolded {name} in ontology.py")
     typer.echo("NOTICE: The generated schema extensions are governed by the Prosperity Public License 3.0.0. For commercial use, contact gowtham.rao@coreason.ai.")
 
-    generate_test(name)
+    generate_test(name, fields)

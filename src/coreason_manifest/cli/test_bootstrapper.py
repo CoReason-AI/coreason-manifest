@@ -9,7 +9,8 @@ def camel_to_snake(name: str) -> str:
     return re.sub("([a-z0-9])([A-Z])", r"\1_\2", name).lower()
 
 
-def generate_test(name: str) -> None:
+def generate_test(name: str, fields: list[dict] | None = None) -> None:
+    fields = fields or []
     snake_case_name = camel_to_snake(name)
     test_file_path = Path(f"tests/fuzzing/test_mcp_{snake_case_name}.py")
     test_file_path.parent.mkdir(parents=True, exist_ok=True)
@@ -178,5 +179,34 @@ def generate_test(name: str) -> None:
         ]
     )
 
-    test_file_path.write_text(module.code, encoding="utf-8")
+    # Inject property boundary assertions
+    test_func = module.body[-1]
+    body_items = list(test_func.body.body)
+
+    for field in fields:
+        field_name = field["name"]
+        checks = []
+        if "minimum" in field:
+            val = str(field["minimum"])
+            checks.append(f"obj.{field_name} is None or obj.{field_name} >= {val}")
+        if "maximum" in field:
+            val = str(field["maximum"])
+            checks.append(f"obj.{field_name} is None or obj.{field_name} <= {val}")
+        if "exclusiveMinimum" in field:
+            val = str(field["exclusiveMinimum"])
+            checks.append(f"obj.{field_name} is None or obj.{field_name} > {val}")
+        if "exclusiveMaximum" in field:
+            val = str(field["exclusiveMaximum"])
+            checks.append(f"obj.{field_name} is None or obj.{field_name} < {val}")
+
+        for check in checks:
+            stmt = cst.parse_statement(f"assert {check}")
+            body_items.append(stmt)
+
+    updated_func = test_func.with_deep_changes(test_func.body, body=body_items)
+    new_module_body = list(module.body)
+    new_module_body[-1] = updated_func
+    updated_module = module.with_changes(body=new_module_body)
+
+    test_file_path.write_text(updated_module.code, encoding="utf-8")
     print(f"Successfully bootstrapped test file at {test_file_path}")
