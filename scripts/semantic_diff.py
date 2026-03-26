@@ -17,7 +17,7 @@ from pathlib import Path
 def get_head_schema() -> dict:
     try:
         output = subprocess.check_output(
-            ["git", "show", "HEAD~1:coreason_ontology.schema.json"],
+            ["git", "show", "HEAD~1:coreason_ontology.schema.json"],  # noqa: S607
             stderr=subprocess.DEVNULL,
             text=True,
         )
@@ -31,7 +31,7 @@ def get_current_schema() -> dict:
     path = Path("coreason_ontology.schema.json")
     if not path.exists():
         return {}
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         return json.load(f)
 
 

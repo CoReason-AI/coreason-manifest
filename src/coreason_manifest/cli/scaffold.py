@@ -1,7 +1,7 @@
-import re
 
 import libcst as cst
 import typer
+
 
 class ClassInjectTransformer(cst.CSTTransformer):
     def __init__(self, name: str, description: str):
@@ -9,7 +9,7 @@ class ClassInjectTransformer(cst.CSTTransformer):
         self.description = description
         self.inserted = False
 
-    def leave_Module(self, original_node: cst.Module, updated_node: cst.Module) -> cst.Module:
+    def leave_Module(self, original_node: cst.Module, updated_node: cst.Module) -> cst.Module:  # noqa: N802, ARG002
         if self.inserted:
             return updated_node
 
@@ -35,10 +35,9 @@ class ClassInjectTransformer(cst.CSTTransformer):
         for i, node in enumerate(new_body):
             if isinstance(node, cst.SimpleStatementLine):
                 for stmt in node.body:
-                    if isinstance(stmt, cst.Expr) and isinstance(stmt.value, cst.Call):
-                        if isinstance(stmt.value.func, cst.Attribute) and stmt.value.func.attr.value == "model_rebuild":
-                            insert_idx = i
-                            break
+                    if isinstance(stmt, cst.Expr) and isinstance(stmt.value, cst.Call) and isinstance(stmt.value.func, cst.Attribute) and stmt.value.func.attr.value == "model_rebuild":
+                        insert_idx = i
+                        break
                 if insert_idx == i:
                     break
 
