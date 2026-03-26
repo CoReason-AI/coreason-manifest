@@ -829,6 +829,18 @@ class VolumetricEdgeProfile(CoreasonBaseState):
     )
 
 
+_TSTRING_AST_ALLOWLIST: tuple[type, ...] = (
+    ast.Module,
+    ast.Expr,
+    ast.Constant,
+    ast.Name,
+    ast.Load,
+    ast.FormattedValue,
+    ast.JoinedStr,
+    ast.Expression,
+)
+
+
 class DynamicLayoutManifest(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Encapsulates a Python 3.14 t-string template as an Abstract Syntax Tree (AST) artifact for declarative, zero-trust UI evaluation.
@@ -857,21 +869,10 @@ class DynamicLayoutManifest(CoreasonBaseState):
 
         MCP ROUTING TRIGGERS: Automata Theory, Abstract Syntax Tree, ACE Prevention, Turing-Incomplete Subgraph, Declarative Interpolation
         """
-        allowed_nodes = (
-            ast.Module,
-            ast.Expr,
-            ast.Constant,
-            ast.Name,
-            ast.Load,
-            ast.FormattedValue,
-            ast.JoinedStr,
-            ast.Expression,
-        )
-
         try:
             tree = ast.parse(v, mode="exec")
             for node in ast.walk(tree):
-                if not isinstance(node, allowed_nodes):
+                if not isinstance(node, _TSTRING_AST_ALLOWLIST):
                     raise ValueError(f"Kinetic execution bleed detected: Forbidden AST node {type(node).__name__}")
         except SyntaxError:
             pass
@@ -880,7 +881,7 @@ class DynamicLayoutManifest(CoreasonBaseState):
         try:
             f_tree = ast.parse(f"f'''{v_escaped}'''", mode="eval")
             for node in ast.walk(f_tree):
-                if not isinstance(node, allowed_nodes):
+                if not isinstance(node, _TSTRING_AST_ALLOWLIST):
                     raise ValueError(f"Kinetic execution bleed detected: Forbidden AST node {type(node).__name__}")
         except SyntaxError:
             pass
