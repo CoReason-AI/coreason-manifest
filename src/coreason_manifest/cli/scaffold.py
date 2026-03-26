@@ -39,44 +39,26 @@ class ClassInjectTransformer(cst.CSTTransformer):
                     cst.Arg(
                         keyword=cst.Name("description"),
                         equal=cst.AssignEqual(),
-                        value=cst.SimpleString(value=f'"{field_desc}"')
+                        value=cst.SimpleString(value=f'"{field_desc}"'),
                     )
                 )
 
             if field_call_args:
-                value = cst.Call(
-                    func=cst.Name("Field"),
-                    args=field_call_args
-                )
+                value = cst.Call(func=cst.Name("Field"), args=field_call_args)
                 body_items.append(
                     cst.SimpleStatementLine(
-                        body=[
-                            cst.AnnAssign(
-                                target=cst.Name(field_name),
-                                annotation=annotation,
-                                value=value
-                            )
-                        ]
+                        body=[cst.AnnAssign(target=cst.Name(field_name), annotation=annotation, value=value)]
                     )
                 )
             else:
                 body_items.append(
-                    cst.SimpleStatementLine(
-                        body=[
-                            cst.AnnAssign(
-                                target=cst.Name(field_name),
-                                annotation=annotation
-                            )
-                        ]
-                    )
+                    cst.SimpleStatementLine(body=[cst.AnnAssign(target=cst.Name(field_name), annotation=annotation)])
                 )
 
         class_def = cst.ClassDef(
             name=cst.Name(self.name),
             bases=[cst.Arg(value=cst.Name("CoreasonBaseState"))],
-            body=cst.IndentedBlock(
-                body=body_items
-            ),
+            body=cst.IndentedBlock(body=body_items),
         )
 
         new_body = list(updated_node.body)
@@ -200,6 +182,8 @@ def mcp(name: str, description: str) -> None:
 
     ontology_path.write_text(modified_module.code, encoding="utf-8")
     typer.echo(f"Successfully scaffolded {name} in ontology.py")
-    typer.echo("NOTICE: The generated schema extensions are governed by the Prosperity Public License 3.0.0. For commercial use, contact gowtham.rao@coreason.ai.")
+    typer.echo(
+        "NOTICE: The generated schema extensions are governed by the Prosperity Public License 3.0.0. For commercial use, contact gowtham.rao@coreason.ai."
+    )
 
     generate_test(name, fields)

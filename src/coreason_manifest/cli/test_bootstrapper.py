@@ -17,41 +17,18 @@ def generate_test(name: str, fields: list[dict] | None = None) -> None:
 
     module = cst.Module(
         body=[
+            cst.SimpleStatementLine(body=[cst.Import(names=[cst.ImportAlias(name=cst.Name("json"))])]),
             cst.SimpleStatementLine(
-                body=[
-                    cst.Import(
-                        names=[cst.ImportAlias(name=cst.Name("json"))]
-                    )
-                ]
+                body=[cst.ImportFrom(module=cst.Name("pathlib"), names=[cst.ImportAlias(name=cst.Name("Path"))])]
+            ),
+            cst.SimpleStatementLine(body=[cst.Import(names=[cst.ImportAlias(name=cst.Name("pytest"))])]),
+            cst.SimpleStatementLine(
+                body=[cst.ImportFrom(module=cst.Name("hypothesis"), names=[cst.ImportAlias(name=cst.Name("given"))])]
             ),
             cst.SimpleStatementLine(
                 body=[
                     cst.ImportFrom(
-                        module=cst.Name("pathlib"),
-                        names=[cst.ImportAlias(name=cst.Name("Path"))]
-                    )
-                ]
-            ),
-            cst.SimpleStatementLine(
-                body=[
-                    cst.Import(
-                        names=[cst.ImportAlias(name=cst.Name("pytest"))]
-                    )
-                ]
-            ),
-            cst.SimpleStatementLine(
-                body=[
-                    cst.ImportFrom(
-                        module=cst.Name("hypothesis"),
-                        names=[cst.ImportAlias(name=cst.Name("given"))]
-                    )
-                ]
-            ),
-            cst.SimpleStatementLine(
-                body=[
-                    cst.ImportFrom(
-                        module=cst.Name("hypothesis_jsonschema"),
-                        names=[cst.ImportAlias(name=cst.Name("from_schema"))]
+                        module=cst.Name("hypothesis_jsonschema"), names=[cst.ImportAlias(name=cst.Name("from_schema"))]
                     )
                 ]
             ),
@@ -67,13 +44,10 @@ def generate_test(name: str, fields: list[dict] | None = None) -> None:
                             body=[
                                 cst.ImportFrom(
                                     module=cst.Attribute(
-                                        value=cst.Attribute(
-                                            value=cst.Name("coreason_manifest"),
-                                            attr=cst.Name("spec")
-                                        ),
-                                        attr=cst.Name("ontology")
+                                        value=cst.Attribute(value=cst.Name("coreason_manifest"), attr=cst.Name("spec")),
+                                        attr=cst.Name("ontology"),
                                     ),
-                                    names=[cst.ImportAlias(name=cst.Name(name))]
+                                    names=[cst.ImportAlias(name=cst.Name(name))],
                                 )
                             ]
                         ),
@@ -81,16 +55,13 @@ def generate_test(name: str, fields: list[dict] | None = None) -> None:
                             body=[
                                 cst.Return(
                                     value=cst.Call(
-                                        func=cst.Attribute(
-                                            value=cst.Name(name),
-                                            attr=cst.Name("model_json_schema")
-                                        )
+                                        func=cst.Attribute(value=cst.Name(name), attr=cst.Name("model_json_schema"))
                                     )
                                 )
                             ]
-                        )
+                        ),
                     ]
-                )
+                ),
             ),
             cst.EmptyLine(),
             cst.EmptyLine(),
@@ -103,40 +74,25 @@ def generate_test(name: str, fields: list[dict] | None = None) -> None:
                                 cst.Arg(
                                     value=cst.Call(
                                         func=cst.Name("from_schema"),
-                                        args=[
-                                            cst.Arg(
-                                                value=cst.Call(
-                                                    func=cst.Name("get_target_schema")
-                                                )
-                                            )
-                                        ]
+                                        args=[cst.Arg(value=cst.Call(func=cst.Name("get_target_schema")))],
                                     )
                                 )
-                            ]
+                            ],
                         )
                     )
                 ],
                 name=cst.Name(f"test_mcp_{snake_case_name}_fuzzing"),
-                params=cst.Parameters(
-                    params=[
-                        cst.Param(
-                            name=cst.Name("instance")
-                        )
-                    ]
-                ),
+                params=cst.Parameters(params=[cst.Param(name=cst.Name("instance"))]),
                 body=cst.IndentedBlock(
                     body=[
                         cst.SimpleStatementLine(
                             body=[
                                 cst.ImportFrom(
                                     module=cst.Attribute(
-                                        value=cst.Attribute(
-                                            value=cst.Name("coreason_manifest"),
-                                            attr=cst.Name("spec")
-                                        ),
-                                        attr=cst.Name("ontology")
+                                        value=cst.Attribute(value=cst.Name("coreason_manifest"), attr=cst.Name("spec")),
+                                        attr=cst.Name("ontology"),
                                     ),
-                                    names=[cst.ImportAlias(name=cst.Name(name))]
+                                    names=[cst.ImportAlias(name=cst.Name(name))],
                                 )
                             ]
                         ),
@@ -145,16 +101,9 @@ def generate_test(name: str, fields: list[dict] | None = None) -> None:
                                 cst.Assign(
                                     targets=[cst.AssignTarget(target=cst.Name("obj"))],
                                     value=cst.Call(
-                                        func=cst.Attribute(
-                                            value=cst.Name(name),
-                                            attr=cst.Name("model_validate")
-                                        ),
-                                        args=[
-                                            cst.Arg(
-                                                value=cst.Name("instance")
-                                            )
-                                        ]
-                                    )
+                                        func=cst.Attribute(value=cst.Name(name), attr=cst.Name("model_validate")),
+                                        args=[cst.Arg(value=cst.Name("instance"))],
+                                    ),
                                 )
                             ]
                         ),
@@ -164,18 +113,15 @@ def generate_test(name: str, fields: list[dict] | None = None) -> None:
                                     test=cst.Comparison(
                                         left=cst.Name("obj"),
                                         comparisons=[
-                                            cst.ComparisonTarget(
-                                                operator=cst.IsNot(),
-                                                comparator=cst.Name("None")
-                                            )
-                                        ]
+                                            cst.ComparisonTarget(operator=cst.IsNot(), comparator=cst.Name("None"))
+                                        ],
                                     )
                                 )
                             ]
-                        )
+                        ),
                     ]
-                )
-            )
+                ),
+            ),
         ]
     )
 
