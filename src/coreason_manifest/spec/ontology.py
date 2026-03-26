@@ -5845,7 +5845,12 @@ class InsightCardProfile(CoreasonBaseState):
     @classmethod
     def _prevent_malicious_uri_schemes(cls, v: str) -> str:
         """AGENT INSTRUCTION: Statically sever XSS vectors embedded in markdown links."""
-        if re.search("\\]\\(\\s*(javascript|vbscript|data):", v, flags=re.IGNORECASE):
+        import html
+
+        # Decode HTML entities and strip out all whitespace/control characters to prevent filter bypass
+        v_decoded = html.unescape(v)
+        v_clean = re.sub(r"[\s\x00-\x1f\x7f]+", "", v_decoded)
+        if re.search("\\]\\((javascript|vbscript|data):", v_clean, flags=re.IGNORECASE):
             raise ValueError("Malicious executable link scheme detected in markdown content")
         return v
 
