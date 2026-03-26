@@ -11516,6 +11516,8 @@ class EpistemicLedgerState(CoreasonBaseState):
         if len(intersection) > 0:
             raise ValueError("Epistemic Contagion Detected: Quarantined node found in active defeasible claims.")
         return self
+
+
 class VectorSearch(CoreasonBaseState):
     """Performs a vector search across the dataset."""
 

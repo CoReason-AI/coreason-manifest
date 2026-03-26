@@ -13,7 +13,7 @@ def generate_test(name: str) -> None:
 
     test_file_path.parent.mkdir(parents=True, exist_ok=True)
 
-    test_content = f'''import json
+    test_content = f"""import json
 from pathlib import Path
 
 import pytest
@@ -31,6 +31,6 @@ def test_mcp_{snake_case_name}_fuzzing(instance):
     from coreason_manifest.spec.ontology import {name}
     obj = {name}.model_validate(instance)
     assert obj is not None
-'''
+"""
     test_file_path.write_text(test_content, encoding="utf-8")
     print(f"Successfully bootstrapped test file at {test_file_path}")

@@ -1,4 +1,3 @@
-
 import libcst as cst
 import typer
 
@@ -21,11 +20,9 @@ class ClassInjectTransformer(cst.CSTTransformer):
             bases=[cst.Arg(value=cst.Name("CoreasonBaseState"))],
             body=cst.IndentedBlock(
                 body=[
-                    cst.SimpleStatementLine(
-                        body=[cst.Expr(value=cst.SimpleString(value=f'"""{self.description}"""'))]
-                    )
+                    cst.SimpleStatementLine(body=[cst.Expr(value=cst.SimpleString(value=f'"""{self.description}"""'))])
                 ]
-            )
+            ),
         )
 
         new_body = list(updated_node.body)
@@ -35,7 +32,12 @@ class ClassInjectTransformer(cst.CSTTransformer):
         for i, node in enumerate(new_body):
             if isinstance(node, cst.SimpleStatementLine):
                 for stmt in node.body:
-                    if isinstance(stmt, cst.Expr) and isinstance(stmt.value, cst.Call) and isinstance(stmt.value.func, cst.Attribute) and stmt.value.func.attr.value == "model_rebuild":
+                    if (
+                        isinstance(stmt, cst.Expr)
+                        and isinstance(stmt.value, cst.Call)
+                        and isinstance(stmt.value.func, cst.Attribute)
+                        and stmt.value.func.attr.value == "model_rebuild"
+                    ):
                         insert_idx = i
                         break
                 if insert_idx == i:
@@ -47,14 +49,7 @@ class ClassInjectTransformer(cst.CSTTransformer):
         # append MyClass.model_rebuild() at the end
         rebuild_call = cst.SimpleStatementLine(
             body=[
-                cst.Expr(
-                    value=cst.Call(
-                        func=cst.Attribute(
-                            value=cst.Name(self.name),
-                            attr=cst.Name("model_rebuild")
-                        )
-                    )
-                )
+                cst.Expr(value=cst.Call(func=cst.Attribute(value=cst.Name(self.name), attr=cst.Name("model_rebuild"))))
             ]
         )
         new_body.append(rebuild_call)
@@ -62,7 +57,9 @@ class ClassInjectTransformer(cst.CSTTransformer):
         self.inserted = True
         return updated_node.with_changes(body=new_body)
 
+
 app = typer.Typer()
+
 
 @app.command()
 def mcp(name: str, description: str) -> None:

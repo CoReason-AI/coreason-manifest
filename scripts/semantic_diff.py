@@ -54,9 +54,7 @@ def check_for_breaking_changes(old_schema: dict, new_schema: dict) -> list[str]:
 
         added_required = new_required - old_required
         if added_required:
-            breaking_changes.append(
-                f"[{name}] Contravariance Violation: added required properties: {added_required}"
-            )
+            breaking_changes.append(f"[{name}] Contravariance Violation: added required properties: {added_required}")
 
         # Covariance check:
         # Check if type changed

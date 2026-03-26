@@ -16303,6 +16303,13 @@
       "title": "VectorEmbeddingState",
       "type": "object"
     },
+    "VectorSearch": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nPerforms a vector search across the dataset.",
+      "properties": {},
+      "title": "VectorSearch",
+      "type": "object"
+    },
     "VerifiableCredentialPresentationReceipt": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes the W3C Verifiable Credentials Data Model (VCDM v2.0) to establish a decentralized, Zero-Trust identity perimeter on the Merkle-DAG.\n\nCAUSAL AFFORDANCE: Unlocks isolated execution bounds by projecting cryptographically verified geometric predicates (`authorization_claims`) into the orchestrator via `issuer_did`, allowing an agent to prove authorization clearance without centralized identity brokers.\n\nEPISTEMIC BOUNDS: The `authorization_claims` dict (`max_length=86400000`) is volumetrically bounded by the `enforce_payload_topology` hook (`_validate_payload_bounds`) to completely sever Predicate Exhaustion Attacks during selective disclosure verification. `cryptographic_proof_blob` capped at `max_length=100000`.\n\nMCP ROUTING TRIGGERS: W3C VCDM, Zero-Knowledge Proofs, Selective Disclosure, Decentralized Identifiers, Object Capability Model",

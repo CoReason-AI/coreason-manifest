@@ -23,6 +23,8 @@ dependencies = [
     "hypothesis-jsonschema>=0.23.0",
 ]
 
+[tool.uv]
+
 [project.scripts]
 coreason-manifest = "coreason_manifest.cli.main:app"
 
