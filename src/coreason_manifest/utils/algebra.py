@@ -311,6 +311,24 @@ def verify_merkle_proof(trace: list[ExecutionNodeReceipt]) -> bool:
     return True
 
 
+_AST_ALLOWLIST: tuple[type, ...] = (
+    ast.Expression,
+    ast.Constant,
+    ast.Name,
+    ast.Load,
+    ast.Dict,
+    ast.List,
+    ast.Tuple,
+    ast.Set,
+    ast.BinOp,
+    ast.UnaryOp,
+    ast.operator,
+    ast.unaryop,
+    ast.Subscript,
+    ast.Slice,
+)
+
+
 def verify_ast_safety(payload: str) -> bool:
     """
     Mechanistically sandboxes dynamically generated strings by compiling them into an AST
@@ -324,28 +342,8 @@ def verify_ast_safety(payload: str) -> bool:
     except SyntaxError as e:
         raise ValueError("Payload is not valid syntax.") from e
 
-    base_allowlist = [
-        ast.Expression,
-        ast.Constant,
-        ast.Name,
-        ast.Load,
-        ast.Dict,
-        ast.List,
-        ast.Tuple,
-        ast.Set,
-        ast.BinOp,
-        ast.UnaryOp,
-        ast.operator,
-        ast.unaryop,
-        ast.Subscript,
-    ]
-
-    base_allowlist.append(ast.Slice)
-
-    allowlist: tuple[type, ...] = tuple(base_allowlist)
-
     for node in ast.walk(tree):
-        if not isinstance(node, allowlist):
+        if not isinstance(node, _AST_ALLOWLIST):
             raise ValueError(f"Kinetic execution bleed detected. Forbidden AST node: {type(node).__name__}")
         if isinstance(node, ast.Pow):
             raise ValueError("Kinetic execution bleed detected. Forbidden AST node: Pow")
