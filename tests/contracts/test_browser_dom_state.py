@@ -104,3 +104,35 @@ def test_browser_dom_state_fuzz_ipv4_space(ip: ipaddress.IPv4Address) -> None:
             current_url=url, viewport_size=(1024, 768), dom_hash="a" * 64, accessibility_tree_hash="b" * 64
         )
         assert state.current_url == url
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "http://attacker-localhost.com/",  # Domain resolving to 127.0.0.1
+        "http://this-domain-does-not-exist.coreason.ai/",  # Non-existent domain
+    ],
+)
+def test_browser_dom_state_ssrf_dns_resolution(url: str, monkeypatch: pytest.MonkeyPatch) -> None:
+    """
+    Ensure active DNS resolution correctly captures SSRF bypasses mapped to 127.0.0.1
+    and fails closed on unresolvable domains.
+    """
+    import socket
+
+    # Mock socket.gethostbyname to simulate DNS resolution for testing
+    original_gethostbyname = socket.gethostbyname
+
+    def mock_gethostbyname(hostname: str) -> str:
+        if hostname == "attacker-localhost.com":
+            return "127.0.0.1"
+        if hostname == "this-domain-does-not-exist.coreason.ai":
+            raise socket.gaierror(-2, "Name or service not known")
+        return original_gethostbyname(hostname)
+
+    monkeypatch.setattr(socket, "gethostbyname", mock_gethostbyname)
+
+    with pytest.raises(
+        ValidationError, match=r"Security Validation Failed: Unresolvable or invalid host|SSRF restricted IP detected"
+    ):
+        BrowserDOMState(current_url=url, viewport_size=(1024, 768), dom_hash="a" * 64, accessibility_tree_hash="b" * 64)

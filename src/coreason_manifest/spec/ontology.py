@@ -456,6 +456,15 @@ class StateVectorProfile(CoreasonBaseState):
         description="A flag allowing the output to only return the keys in mutable_memory that changed, rather than forcing the entire array back up the network.",
     )
 
+    @field_validator("mutable_memory", "read_only_context", mode="before")
+    @classmethod
+    def validate_memory_bounds(cls, v: Any) -> Any:
+        """
+        Enforces system-wide volumetric constraints (depth/node count)
+        on state memory to prevent OOM and recursion depth failures.
+        """
+        return _validate_payload_bounds(v)
+
 
 class ExecutionEnvelopeState[T](CoreasonBaseState):
     """
@@ -874,6 +883,7 @@ class DynamicLayoutManifest(CoreasonBaseState):
             for node in ast.walk(tree):
                 if not isinstance(node, _TSTRING_AST_ALLOWLIST):
                     raise ValueError(f"Kinetic execution bleed detected: Forbidden AST node {type(node).__name__}")
+            return v
         except SyntaxError:
             pass
 
@@ -883,8 +893,8 @@ class DynamicLayoutManifest(CoreasonBaseState):
             for node in ast.walk(f_tree):
                 if not isinstance(node, _TSTRING_AST_ALLOWLIST):
                     raise ValueError(f"Kinetic execution bleed detected: Forbidden AST node {type(node).__name__}")
-        except SyntaxError:
-            pass
+        except SyntaxError as e:
+            raise ValueError("Invalid syntax in dynamic string") from e
 
         return v
 
@@ -1184,7 +1194,7 @@ class ComputeEngineProfile(CoreasonBaseState):
     provider: str = Field(max_length=2000, description="The name of the provider hosting the model.")
     context_window_size: int = Field(le=1000000000, description="The maximum context window size in tokens.")
     capabilities: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
-        max_length=1000000000,
+        max_length=1000,
         description="The explicit, structurally bounded array of capabilities authorized for this model.",
     )
     rate_card: ComputeRateContract = Field(description="The economic cost definition associated with the model.")
@@ -1302,15 +1312,29 @@ class RoutingFrontierPolicy(CoreasonBaseState):
     def _clamp_frontier_bounds_before(cls, values: Any) -> Any:
         if isinstance(values, dict):
             if "max_latency_ms" in values:
-                values["max_latency_ms"] = max(1, min(values["max_latency_ms"], 86400000))
+                try:
+                    val = int(values["max_latency_ms"])
+                    values["max_latency_ms"] = int(max(1, min(val, 86400000)))
+                except ValueError, TypeError:
+                    pass
             if "max_cost_magnitude_per_token" in values:
-                values["max_cost_magnitude_per_token"] = max(1, min(values["max_cost_magnitude_per_token"], 1000000000))
+                try:
+                    val = int(values["max_cost_magnitude_per_token"])
+                    values["max_cost_magnitude_per_token"] = int(max(1, min(val, 1000000000)))
+                except ValueError, TypeError:
+                    pass
             if "min_capability_score" in values:
-                values["min_capability_score"] = max(0.0, min(values["min_capability_score"], 1.0))
+                try:
+                    val_float = float(values["min_capability_score"])
+                    values["min_capability_score"] = float(max(0.0, min(val_float, 1.0)))
+                except ValueError, TypeError:
+                    pass
             if values.get("max_carbon_intensity_gco2eq_kwh") is not None:
-                values["max_carbon_intensity_gco2eq_kwh"] = max(
-                    0.0, min(values["max_carbon_intensity_gco2eq_kwh"], 10000.0)
-                )
+                try:
+                    val_float = float(values["max_carbon_intensity_gco2eq_kwh"])
+                    values["max_carbon_intensity_gco2eq_kwh"] = float(max(0.0, min(val_float, 10000.0)))
+                except ValueError, TypeError:
+                    pass
         return values
 
 
@@ -1425,7 +1449,7 @@ class CognitiveRoutingContract(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Physically biases or mathematically masks out (-inf via `enforce_functional_isolation`) entire swaths of neural circuits, forcing continuous compute through highly specialized expert topological perimeters.
 
-    EPISTEMIC BOUNDS: Limits structural instability by hard-bounding `dynamic_top_k` execution threads (`ge=1, le=1000000000`). The `expert_logit_biases` spatial dictionary is bounded by cardinality (`max_length=1000000000`) with tensor biases clamped to `[ge=-1000.0, le=1000.0]`.
+    EPISTEMIC BOUNDS: Limits structural instability by hard-bounding `dynamic_top_k` execution threads (`ge=1, le=1000000000`). The `expert_logit_biases` spatial dictionary is bounded by cardinality (`max_length=1000`) with tensor biases clamped to `[ge=-1000.0, le=1000.0]`.
 
     MCP ROUTING TRIGGERS: Sparse Mixture of Experts, Softmax Gating, Logit Biasing, Functional Expert Routing, FSM Masking
 
@@ -1444,7 +1468,7 @@ class CognitiveRoutingContract(CoreasonBaseState):
     expert_logit_biases: dict[
         Annotated[str, StringConstraints(max_length=255)], Annotated[float, Field(ge=-1000.0, le=1000.0)]
     ] = Field(
-        max_length=1000000000,
+        max_length=1000,
         default_factory=dict,
         description="Explicit tensor biases applied to the router gate. Keys are expert IDs (e.g., 'expert_falsifier'), values are logit modifiers.",
     )
@@ -1527,7 +1551,7 @@ class ConstitutionalPolicy(CoreasonBaseState):
     is classified via a strict Literal["low", "medium", "high", "critical"] tier.
 
     EPISTEMIC BOUNDS: Geometrically restricts the state space by blacklisting specific
-    execution branches via the forbidden_intents array (max_length=1000000000),
+    execution branches via the forbidden_intents array (max_length=1000),
     deterministically sorted by @model_validator to preserve RFC 8785 canonical hashing.
     The rule_id is bounded to a 128-char CID.
 
@@ -1548,7 +1572,7 @@ class ConstitutionalPolicy(CoreasonBaseState):
         description="The categorical magnitude of the systemic breach enacted upon rule violation."
     )
     forbidden_intents: list[Annotated[str, StringConstraints(min_length=1)]] = Field(
-        max_length=1000000000, description="The explicit, structurally bounded set of forbidden semantic intents."
+        max_length=1000, description="The explicit, structurally bounded set of forbidden semantic intents."
     )
 
     @model_validator(mode="after")
@@ -1961,7 +1985,7 @@ class MultimodalTokenAnchorState(CoreasonBaseState):
         description="The explicit array of SHA-256 hashes corresponding to specific VQ-VAE visual patches attended to.",
     )
     bounding_box: tuple[float, float, float, float] | None = Field(
-        max_length=1000000000,
+        max_length=1000,
         default=None,
         description="The strictly typed [x_min, y_min, x_max, y_max] normalized coordinate matrix.",
     )
@@ -2394,7 +2418,7 @@ class ToolManifest(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Unlocks a specific, localized Pearlian Do-Operator intervention ($do(X=x)$) mapped to an external kinetic capability. Governed by side_effects, permissions, and an optional execution SLA.
 
-    EPISTEMIC BOUNDS: The operational perimeter is rigidly confined by `input_schema` and `output_schema` (dictionaries bounded to `max_length=1000000000` properties). The `is_preemptible` boolean (default=False) establishes a physical Halting Problem limit by authorizing the orchestrator to abort execution mid-flight.
+    EPISTEMIC BOUNDS: The operational perimeter is rigidly confined by `input_schema` and `output_schema` (dictionaries bounded to `max_length=1000` properties). The `is_preemptible` boolean (default=False) establishes a physical Halting Problem limit by authorizing the orchestrator to abort execution mid-flight.
 
     MCP ROUTING TRIGGERS: Gibsonian Affordance, MDP Action Space, Pearlian Do-Operator, Capability-Based Security, Halting Problem
 
@@ -2408,12 +2432,12 @@ class ToolManifest(CoreasonBaseState):
         description="The mathematically bounded semantic projection defining the tool's causal affordances.",
     )
     input_schema: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
-        max_length=1000000000,
+        max_length=1000,
         description="The strict JSON Schema dictionary defining the pure domain-specific arguments ($T$). The framework orchestrator will automatically wrap this in the ExecutionEnvelopeState at runtime.",
     )
     output_schema: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] | None = Field(
         default=None,
-        max_length=1000000000,
+        max_length=1000,
         description="The strict JSON Schema dictionary defining the pure domain-specific arguments ($T$). The framework orchestrator will automatically wrap this in the ExecutionEnvelopeState at runtime.",
     )
     side_effects: SideEffectProfile = Field(
@@ -2493,7 +2517,7 @@ class FederatedDiscoveryManifest(CoreasonBaseState):
     mathematically overlap.
 
     EPISTEMIC BOUNDS: Geometrically capped by broadcast_endpoints and supported_ontologies
-    string arrays (each max_length=1000000000). Both are explicitly sorted by the
+    string arrays (each max_length=1000). Both are explicitly sorted by the
     @model_validator (broadcast_endpoints by str key, supported_ontologies alphabetically)
     to guarantee invariant canonical RFC 8785 hashing across distinct environments.
 
@@ -2502,10 +2526,10 @@ class FederatedDiscoveryManifest(CoreasonBaseState):
     """
 
     broadcast_endpoints: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
-        max_length=1000000000, description="The explicit array of strictly bounded MCP URI broadcast endpoints."
+        max_length=1000, description="The explicit array of strictly bounded MCP URI broadcast endpoints."
     )
     supported_ontologies: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
-        max_length=1000000000,
+        max_length=1000,
         description="The explicit array of cryptographic hashes defining acceptable domain ontologies.",
     )
 
@@ -3008,7 +3032,7 @@ class BoundedInterventionScopePolicy(CoreasonBaseState):
     """
 
     allowed_fields: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
-        max_length=1000000000,
+        max_length=1000,
         description="The explicit whitelist of top-level JSON pointers mathematically open to mutation.",
     )
     json_schema_whitelist: dict[
@@ -3131,8 +3155,8 @@ class BrowserDOMState(CoreasonBaseState):
         ):
             raise ValueError(f"SSRF topological violation detected: {hostname}")
 
-        import contextlib
         import ipaddress
+        import socket
 
         def _parse_obfuscated_ipv4(ip_str: str) -> int | None:
             parts = ip_str.split(".")
@@ -3166,29 +3190,38 @@ class BrowserDOMState(CoreasonBaseState):
         if ip_int is not None:
             ip = ipaddress.IPv4Address(ip_int)
         else:
-            with contextlib.suppress(ValueError):
-                # Fallback to standard IPv6 and canonical IPv4 string parsing
-                ip = ipaddress.ip_address(hostname.strip("[]"))
+            hostname_clean = hostname.strip("[]")
+            try:
+                # First try to parse as IP directly (covers IPv6 and standard IPv4 formats)
+                ip = ipaddress.ip_address(hostname_clean)
+            except ValueError:
+                try:
+                    # Step 1: Resolve the hostname to an IP address
+                    # This prevents bypassing the check via domain names
+                    raw_ip = socket.gethostbyname(hostname_clean)
+                    ip = ipaddress.ip_address(raw_ip)
+                except (socket.gaierror, ValueError) as e:
+                    # Fail-Closed: If resolution fails or IP is invalid, reject the request
+                    raise ValueError(f"Security Validation Failed: Unresolvable or invalid host: {hostname}") from e
 
-        if ip is not None:
-            if isinstance(ip, ipaddress.IPv6Address) and ip.ipv4_mapped:
-                ip = ip.ipv4_mapped
+        if isinstance(ip, ipaddress.IPv6Address) and ip.ipv4_mapped:
+            ip = ip.ipv4_mapped
 
-            if (
-                ip.is_private
-                or ip.is_loopback
-                or ip.is_link_local
-                or ip.is_reserved
-                or ip.is_multicast
-                or getattr(ip, "is_unspecified", False)
-                or not getattr(ip, "is_global", True)
-            ):
-                raise ValueError(f"SSRF restricted IP detected: {hostname}")
+        if (
+            ip.is_private
+            or ip.is_loopback
+            or ip.is_link_local
+            or ip.is_reserved
+            or ip.is_multicast
+            or getattr(ip, "is_unspecified", False)
+            or not getattr(ip, "is_global", True)
+        ):
+            raise ValueError(f"SSRF restricted IP detected: {hostname}")
 
         return url
 
     viewport_size: tuple[int, int] = Field(
-        max_length=1000000000, description="Capability Perimeters detailing bounding coordinates."
+        max_length=1000, description="Capability Perimeters detailing bounding coordinates."
     )
     dom_hash: str = Field(
         min_length=1,
@@ -3554,7 +3587,7 @@ class CounterfactualRegretEvent(BaseStateEvent):
     policy_mutation_gradients: dict[
         Annotated[str, StringConstraints(max_length=255)], Annotated[float, Field(ge=-1000.0, le=1000.0)]
     ] = Field(
-        max_length=1000000000,
+        max_length=1000,
         default_factory=dict,
         description="The stateless routing gradient adjustments derived from the calculated regret, used to self-correct future routing.",
     )
@@ -3815,7 +3848,7 @@ class DistributionProfile(CoreasonBaseState):
         le=1000000000.0, default=None, description="The mathematical variance (sigma squared)."
     )
     confidence_interval_95: tuple[float, float] | None = Field(
-        max_length=1000000000, default=None, description="The 95% probability bounds."
+        max_length=1000, default=None, description="The 95% probability bounds."
     )
 
     @model_validator(mode="after")
@@ -3912,7 +3945,7 @@ class DocumentLayoutManifest(CoreasonBaseState):
     """
 
     blocks: dict[Annotated[str, StringConstraints(max_length=255)], DocumentLayoutRegionState] = Field(
-        max_length=1000000000, description="Dictionary mapping block_ids to their strict spatial definitions."
+        max_length=1000, description="Dictionary mapping block_ids to their strict spatial definitions."
     )
     chronological_flow_edges: list[tuple[str, str]] = Field(
         default_factory=list,
@@ -4060,7 +4093,7 @@ class SemanticDiscoveryIntent(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Unlocks the dynamic, runtime mounting of tools and MCP servers whose dense vector embeddings (`query_vector`) align mathematically with the query tensor, bypassing hardcoded tool schemas.
 
-    EPISTEMIC BOUNDS: Mechanically rejects capabilities that fall below the `min_isometry_score` (`ge=-1.0, le=1.0`) boundary. The returned toolsets are strictly limited to the deterministically sorted `required_structural_types` array (`max_length=1000000000`), enforced by the `@model_validator`.
+    EPISTEMIC BOUNDS: Mechanically rejects capabilities that fall below the `min_isometry_score` (`ge=-1.0, le=1.0`) boundary. The returned toolsets are strictly limited to the deterministically sorted `required_structural_types` array (`max_length=1000`), enforced by the `@model_validator`.
 
     MCP ROUTING TRIGGERS: Zero-Shot Tool Discovery, Capability Routing, Dense Vector Embedding, Epistemic Deficit Resolution
 
@@ -4076,7 +4109,7 @@ class SemanticDiscoveryIntent(CoreasonBaseState):
         ge=-1.0, le=1.0, description="The minimum cosine similarity required to authorize a capability mount."
     )
     required_structural_types: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
-        max_length=1000000000,
+        max_length=1000,
         description="The strict array of strings defining topological limits on the discovered tools.",
     )
 
@@ -4105,7 +4138,7 @@ class DraftingIntent(CoreasonBaseState):
         max_length=2000, description="The prompt explaining what information the swarm is missing."
     )
     resolution_schema: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
-        max_length=1000000000,
+        max_length=1000,
         description="The strict JSON Schema the human's input must satisfy before the graph can resume. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
     )
     timeout_action: Literal["rollback", "proceed_default", "terminate"] = Field(
@@ -5308,7 +5341,7 @@ class DynamicRoutingManifest(CoreasonBaseState):
         default_factory=list, description="The declarative array of steps the orchestrator is mandated to skip."
     )
     branch_budgets_magnitude: dict[NodeIdentifierState, int] = Field(
-        max_length=1000000000, description="The strict allocation of compute budget bound to specific nodes."
+        max_length=1000, description="The strict allocation of compute budget bound to specific nodes."
     )
 
     @model_validator(mode="after")
@@ -5639,7 +5672,7 @@ class GenerativeTaxonomyManifest(CoreasonBaseState):
     human UI or agentic context, structurally proving the geometric relations of all
     subordinate TaxonomicNodeStates.
 
-    EPISTEMIC BOUNDS: The nodes matrix is physically capped at max_length=1000000000
+    EPISTEMIC BOUNDS: The nodes matrix is physically capped at max_length=1000
     properties to prevent memory overflow. The @model_validator mathematically verifies DAG
     integrity by ensuring the root_node_id explicitly exists within the projection matrix,
     preventing ghost nodes.
@@ -5661,7 +5694,7 @@ class GenerativeTaxonomyManifest(CoreasonBaseState):
         description="The globally unique decentralized identifier (DID) anchoring the top-level TaxonomicNodeState initiating the tree.",
     )
     nodes: dict[Annotated[str, StringConstraints(max_length=255)], TaxonomicNodeState] = Field(
-        max_length=1000000000, description="Flat dictionary matrix containing all nodes within the manifold."
+        max_length=1000, description="Flat dictionary matrix containing all nodes within the manifold."
     )
 
     @model_validator(mode="after")
@@ -5884,7 +5917,7 @@ class InterventionIntent(CoreasonBaseState):
     )
     context_summary: str = Field(max_length=2000, description="A summary of the context requiring intervention.")
     proposed_action: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
-        max_length=1000000000, description="The action proposed by the agent that requires approval."
+        max_length=1000, description="The action proposed by the agent that requires approval."
     )
     adjudication_deadline: float = Field(
         ge=0.0, le=253402300799.0, description="The deadline for adjudication, represented as a UNIX timestamp."
@@ -6127,7 +6160,7 @@ class MemoizedNodeProfile(BaseNodeProfile):
 
     CAUSAL AFFORDANCE: Bypasses redundant thermodynamic compute expenditure by collapsing an entire sub-DAG execution into a single, O(1) state retrieval keyed by the `target_topology_hash`.
 
-    EPISTEMIC BOUNDS: The cache-hit is mathematically locked to the exact `target_topology_hash` (`TopologyHashReceipt`), guaranteeing perfect graph isomorphism. The retrieved payload is physically constrained by `expected_output_schema` (`max_length=1000000000`). The type discriminator is locked to `Literal["memoized"]`.
+    EPISTEMIC BOUNDS: The cache-hit is mathematically locked to the exact `target_topology_hash` (`TopologyHashReceipt`), guaranteeing perfect graph isomorphism. The retrieved payload is physically constrained by `expected_output_schema` (`max_length=1000`). The type discriminator is locked to `Literal["memoized"]`.
 
     MCP ROUTING TRIGGERS: Dynamic Programming, O(1) Retrieval, Cryptographic Cache, Graph Isomorphism, Compute Conservation
 
@@ -6138,7 +6171,7 @@ class MemoizedNodeProfile(BaseNodeProfile):
         description="The exact SHA-256 fingerprint of the executed topology."
     )
     expected_output_schema: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
-        max_length=1000000000, description="The strictly typed JSON Schema expected from the cached payload."
+        max_length=1000, description="The strictly typed JSON Schema expected from the cached payload."
     )
 
 
@@ -6561,10 +6594,10 @@ class ActionSpaceManifest(CoreasonBaseState):
         description="The unique identifier for this curated environment of tools.",
     )
     capabilities: dict[Annotated[str, StringConstraints(max_length=255)], AnyActionSpaceCapability] = Field(
-        description="The State Space (S) of the MDP, indexed by their unique capability CIDs."
+        max_length=500, description="The State Space (S) of the MDP, indexed by their unique capability CIDs."
     )
     transition_matrix: dict[Annotated[str, StringConstraints(max_length=255)], list[AnyTransitionEdge]] = Field(
-        description="The Stochastic Transition Matrix (P)."
+        max_length=500, description="The Stochastic Transition Matrix (P)."
     )
     entry_point_id: str = Field(description="Defines the initial state (S_0) of the MDP.")
     kinetic_separation: KineticSeparationPolicy | None = Field(
@@ -6782,7 +6815,7 @@ class MCPPromptReferenceState(CoreasonBaseState):
     )
     prompt_name: str = Field(..., max_length=2000, description="The name of the prompt template.")
     arguments: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
-        max_length=1000000000,
+        max_length=1000,
         default_factory=dict,
         description="Arguments to fill the prompt template. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
     )
@@ -6842,7 +6875,7 @@ class MacroGridProfile(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Translates abstract UI panels into fixed 2D matrices (`layout_matrix`), forcing spatial determinism on the frontend rendering engine.
 
-    EPISTEMIC BOUNDS: A strictly bounded `@model_validator` executes a referential integrity sweep, mathematically guaranteeing that every panel ID referenced in the `layout_matrix` (`max_length=1000000000`) corresponds to a verified object in the `panels` array, physically severing Ghost Panel hallucinations.
+    EPISTEMIC BOUNDS: A strictly bounded `@model_validator` executes a referential integrity sweep, mathematically guaranteeing that every panel ID referenced in the `layout_matrix` (`max_length=1000`) corresponds to a verified object in the `panels` array, physically severing Ghost Panel hallucinations.
 
     MCP ROUTING TRIGGERS: Cartesian Coordinate System, Small Multiples, Spatial Topology, Referential Integrity, Layout Matrix
 
@@ -6850,7 +6883,7 @@ class MacroGridProfile(CoreasonBaseState):
 
     layout_matrix: list[list[Annotated[str, StringConstraints(max_length=255)]]] = Field(
         # Note: layout_matrix is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
-        max_length=1000000000,
+        max_length=1000,
         description="A matrix defining the layout structure, using panel IDs.",
     )
     panels: list[AnyPanelProfile] = Field(
@@ -6928,7 +6961,7 @@ class MarketResolutionState(CoreasonBaseState):
         min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$", description="The hypothesis ID that was verified."
     )
     falsified_hypothesis_ids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
-        max_length=1000000000, description="The hypothesis IDs that were falsified."
+        max_length=1000, description="The hypothesis IDs that were falsified."
     )
     payout_distribution: dict[Annotated[str, StringConstraints(max_length=255)], Annotated[int, Field(ge=0)]] = Field(
         description="The deterministic mapping of agent IDs to their earned compute budget/magnitude based on Brier scoring."
@@ -7097,7 +7130,7 @@ class NDimensionalTensorManifest(CoreasonBaseState):
     """
 
     structural_type: TensorStructuralFormatProfile = Field(..., description="Structural type of the tensor elements.")
-    shape: tuple[int, ...] = Field(..., max_length=1000000000, description="N-Dimensional shape tuple.")
+    shape: tuple[int, ...] = Field(..., max_length=1000, description="N-Dimensional shape tuple.")
     vram_footprint_bytes: int = Field(..., le=100000000000, description="Exact byte size of the uncompressed tensor.")
     merkle_root: str = Field(
         ...,
@@ -7257,7 +7290,7 @@ class OntologicalHandshakeReceipt(CoreasonBaseState):
         description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this protocol handshake to the Merkle-DAG.",
     )
     participant_node_ids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
-        max_length=1000000000, min_length=2, description="The agents establishing semantic alignment."
+        max_length=250, min_length=2, description="The agents establishing semantic alignment."
     )
     measured_cosine_similarity: float = Field(
         ge=-1.0, le=1.0, description="The calculated geometric alignment of the agents' core definitions."
@@ -7337,7 +7370,7 @@ class OverrideIntent(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Forces an absolute Pearlian do-operator intervention ($do(X=x)$). Physically shatters the active causal chain of the `target_node_id` and forcibly injects the `override_action` payload into the state vector, bypassing decentralized voting.
 
-    EPISTEMIC BOUNDS: The blast radius is strictly confined to the `target_node_id`. The orchestrator must mathematically verify the `authorized_node_id` against the highest-tier W3C DID enterprise clearance before allowing the payload to overwrite the Epistemic Blackboard (`override_action` bounded `max_length=1000000000`).
+    EPISTEMIC BOUNDS: The blast radius is strictly confined to the `target_node_id`. The orchestrator must mathematically verify the `authorized_node_id` against the highest-tier W3C DID enterprise clearance before allowing the payload to overwrite the Epistemic Blackboard (`override_action` bounded `max_length=1000`).
 
     MCP ROUTING TRIGGERS: Dictatorial Override, Byzantine Fault Resolution, Pearlian Intervention, Causal Shattering, Zero-Trust Override
 
@@ -7349,7 +7382,7 @@ class OverrideIntent(CoreasonBaseState):
     )
     target_node_id: NodeIdentifierState = Field(description="The NodeIdentifierState being forcefully overridden.")
     override_action: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
-        max_length=1000000000, description="The exact payload forcefully injected into the state."
+        max_length=1000, description="The exact payload forcefully injected into the state."
     )
     justification: str = Field(
         max_length=2000, description="Cryptographic audit justification for bypassing algorithmic consensus."
@@ -7445,7 +7478,7 @@ class PredictionMarketState(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Aggregates `HypothesisStakeReceipt` vectors, allowing the orchestrator to track the shifting probability manifold and trigger market resolution when the AMM reaches the required convergence threshold.
 
-    EPISTEMIC BOUNDS: `current_market_probabilities` is geometrically bounded by `max_length=1000000000`. `market_id` is restricted to a 128-char CID. `order_book` array is deterministically sorted by `agent_id` via `@model_validator`.
+    EPISTEMIC BOUNDS: `current_market_probabilities` is geometrically bounded by `max_length=1000`. `market_id` is restricted to a 128-char CID. `order_book` array is deterministically sorted by `agent_id` via `@model_validator`.
 
     MCP ROUTING TRIGGERS: Logarithmic Market Scoring Rule, Automated Market Maker, Prediction Market, Infinite Liquidity, Brier Score
 
@@ -7474,7 +7507,7 @@ class PredictionMarketState(CoreasonBaseState):
     current_market_probabilities: dict[
         Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=255)]
     ] = Field(
-        max_length=1000000000,
+        max_length=1000,
         description="Mapping of hypothesis IDs to their current LMSR-calculated market price (probability) as stringified decimals.",
     )
 
@@ -7590,7 +7623,7 @@ class EpistemicSOPManifest(CoreasonBaseState):
     the ability for the orchestrator to dynamically evaluate execution via Process Reward
     Models (prm_evaluations: list[ProcessRewardContract]) at each topological node.
 
-    EPISTEMIC BOUNDS: The cognitive_steps dictionary is constrained to max_length=1000000000
+    EPISTEMIC BOUNDS: The cognitive_steps dictionary is constrained to max_length=1000
     to cap memory footprint. The @model_validator reject_ghost_nodes mathematically enforces
     referential integrity, guaranteeing that no chronological_flow_edges AND no
     structural_grammar_hashes point to an undefined state.
@@ -7609,7 +7642,7 @@ class EpistemicSOPManifest(CoreasonBaseState):
         description="The deterministic cognitive routing boundary for the persona executing the SOP."
     )
     cognitive_steps: dict[Annotated[str, StringConstraints(max_length=255)], CognitiveStateProfile] = Field(
-        max_length=1000000000, description="Dictionary mapping step_ids to strict causal DAG constraints."
+        max_length=1000, description="Dictionary mapping step_ids to strict causal DAG constraints."
     )
     structural_grammar_hashes: dict[Annotated[str, StringConstraints(max_length=255)], str] = Field(
         description="Dictionary mapping step_ids to SHA-256 hashes of strict Context-Free Grammars or JSON Schemas."
@@ -7694,7 +7727,7 @@ class ComputeProvisioningIntent(CoreasonBaseState):
         return values
 
     required_capabilities: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
-        max_length=1000000000, description="The minimal functional capabilities required by the requested compute."
+        max_length=1000, description="The minimal functional capabilities required by the requested compute."
     )
     qos_class: QoSClassificationProfile = Field(
         default="interactive",
@@ -8000,7 +8033,7 @@ class ExogenousEpistemicEvent(CoreasonBaseState):
         description="Strictly bounded mathematical quantification of the epistemic decay or Variational Free Energy.",
     )
     synthetic_payload: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
-        max_length=1000000000, description="Bounded dictionary representing the injected hallucination or observation."
+        max_length=1000, description="Bounded dictionary representing the injected hallucination or observation."
     )
     escrow: SimulationEscrowContract = Field(description="The cryptographic Proof-of-Stake funding the shock.")
 
@@ -8028,7 +8061,7 @@ class SpanEvent(CoreasonBaseState):
         ge=0, le=253402300799000000000, description="The precise temporal execution point."
     )
     attributes: dict[Annotated[str, StringConstraints(max_length=255)], Any] = Field(
-        max_length=1000000000, default_factory=dict, description="Typed metadata bound to the event."
+        max_length=1000, default_factory=dict, description="Typed metadata bound to the event."
     )
 
 
@@ -8194,7 +8227,7 @@ class StdioTransportProfile(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Physically spawns a child process restricted to the host's operating system namespace, mapping remote procedure calls directly into the binary's stdin/stdout descriptors via `command` (`max_length=2000`).
 
-    EPISTEMIC BOUNDS: To prevent buffer overflow and command injection, `args` are structurally constrained (`max_length=1000000000`, string `max_length=2000`) and `env_vars` keys/values are strictly delimited via `StringConstraints` (`max_length=255` and `2000`).
+    EPISTEMIC BOUNDS: To prevent buffer overflow and command injection, `args` are structurally constrained (`max_length=1000`, string `max_length=2000`) and `env_vars` keys/values are strictly delimited via `StringConstraints` (`max_length=255` and `2000`).
 
     MCP ROUTING TRIGGERS: Inter-Process Communication, POSIX Standard Streams, Local Sandboxing, Binary Execution, Subprocess Spawn
 
@@ -8204,7 +8237,7 @@ class StdioTransportProfile(CoreasonBaseState):
     command: str = Field(..., max_length=2000, description="The command executable to run (e.g., 'node', 'python').")
     args: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
         # Note: args is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
-        max_length=1000000000,
+        max_length=1000,
         default_factory=list,
         description="The explicit array of arguments to pass to the command.",
     )
@@ -8231,7 +8264,7 @@ class SteadyStateHypothesisState(CoreasonBaseState):
     expected_max_latency (ge=0.0, le=1000000000.0). The max_loops_allowed
     (le=1000000000) physically caps algorithmic cycles. The optional
     required_tool_usage (list[str] | None, default=None,
-    max_length=1000000000) is deterministically sorted via @model_validator
+    max_length=1000) is deterministically sorted via @model_validator
     sort_arrays to preserve RFC 8785 canonical hashing.
 
     MCP ROUTING TRIGGERS: Chaos Engineering, Queueing Theory, Steady-State
@@ -8245,7 +8278,7 @@ class SteadyStateHypothesisState(CoreasonBaseState):
         le=1000000000, description="The maximum allowed loops for the swarm to reach a conclusion."
     )
     required_tool_usage: list[Annotated[str, StringConstraints(max_length=2000)]] | None = Field(
-        max_length=1000000000, default=None, description="The strict array of required tools that must be utilized."
+        max_length=1000, default=None, description="The strict array of required tools that must be utilized."
     )
 
     @model_validator(mode="after")
@@ -8307,10 +8340,10 @@ class StructuralCausalGraphProfile(CoreasonBaseState):
     """
 
     observed_variables: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
-        max_length=1000000000, description="The nodes in the DAG that the agent can passively measure."
+        max_length=1000, description="The nodes in the DAG that the agent can passively measure."
     )
     latent_variables: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
-        max_length=1000000000, description="The unobserved confounders the agent suspects exist."
+        max_length=1000, description="The unobserved confounders the agent suspects exist."
     )
     causal_edges: list[CausalDirectedEdgeState] = Field(description="The declared topological mapping of causality.")
 
@@ -8420,7 +8453,7 @@ class System1ReflexPolicy(CoreasonBaseState):
     expensive System 2 Monte Carlo Tree Search (MCTS).
 
     EPISTEMIC BOUNDS: Execution is mathematically gated by the confidence_threshold
-    (ge=0.0, le=1.0). The allowed_passive_tools array (max_length=1000000000,
+    (ge=0.0, le=1.0). The allowed_passive_tools array (max_length=1000,
     StringConstraints max_length=2000) strictly bounds the agent to non-mutating
     capabilities, deterministically sorted via @model_validator.
 
@@ -8432,7 +8465,7 @@ class System1ReflexPolicy(CoreasonBaseState):
         ge=0.0, le=1.0, description="The confidence threshold required to execute a reflex action."
     )
     allowed_passive_tools: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
-        max_length=1000000000, description="The explicit, bounded array of strictly non-mutating tool capabilities."
+        max_length=1000, description="The explicit, bounded array of strictly non-mutating tool capabilities."
     )
 
     @model_validator(mode="after")
@@ -8714,7 +8747,7 @@ class TheoryOfMindSnapshot(CoreasonBaseState):
         description="The explicit array of Content Identifiers (CIDs) acting as cryptographic Lineage Watermarks that the modeling agent assumes the target already possesses."
     )
     identified_knowledge_gaps: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
-        max_length=1000000000,
+        max_length=1000,
         description="Specific topics or logical premises the target agent is assumed to be missing.",
     )
 
@@ -8750,7 +8783,7 @@ class ToolInvocationEvent(BaseStateEvent):
     )
     tool_name: str = Field(max_length=2000, description="The exact tool targeted in the ActionSpaceManifest.")
     parameters: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
-        max_length=1000000000,
+        max_length=1000,
         description="The intended JSON-RPC payload. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
     )
     authorized_budget_magnitude: int = Field(
@@ -8838,7 +8871,7 @@ class UtilityJustificationGraphReceipt(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Provides explicit mathematical justification for an agent's trajectory. If the variance of the utility distribution exceeds the threshold, it physically forces the orchestrator to deploy the embedded ensemble specification for deterministic resolution.
 
-    EPISTEMIC BOUNDS: The `superposition_variance_threshold` is physically clamped strictly above zero (`gt=0.0`, `le=1000000000.0`), as a variance of absolute 0.0 represents mathematical certainty, which physically precludes superposition geometry. Vector dictionaries are bounded purely by spatial cardinality (`max_length=1000000000`).
+    EPISTEMIC BOUNDS: The `superposition_variance_threshold` is physically clamped strictly above zero (`gt=0.0`, `le=1000000000.0`), as a variance of absolute 0.0 represents mathematical certainty, which physically precludes superposition geometry. Vector dictionaries are bounded purely by spatial cardinality (`max_length=1000`).
 
     MCP ROUTING TRIGGERS: Multi-Attribute Utility Theory, Pareto Efficiency, Variance Reduction, Fallback Superposition, Utility Routing
     """
@@ -8846,14 +8879,14 @@ class UtilityJustificationGraphReceipt(CoreasonBaseState):
     optimizing_vectors: dict[
         Annotated[str, StringConstraints(max_length=255)], Annotated[float, Field(ge=-1000.0, le=1000.0)]
     ] = Field(
-        max_length=1000000000,
+        max_length=1000,
         default_factory=dict,
         description="Multi-dimensional continuous values representing optimizations.",
     )
     degrading_vectors: dict[
         Annotated[str, StringConstraints(max_length=255)], Annotated[float, Field(ge=-1000.0, le=1000.0)]
     ] = Field(
-        max_length=1000000000,
+        max_length=1000,
         default_factory=dict,
         description="Multi-dimensional continuous values representing degradations.",
     )
@@ -11456,7 +11489,7 @@ class EpistemicLedgerState(CoreasonBaseState):
         description="A strict sequence of CIDs representing historical nodes that have been severed from the causal graph via defeasible logic.",
     )
     checkpoints: list[TemporalCheckpointState] = Field(
-        max_length=1000000000, default_factory=list, description="Hard temporal anchors allowing state restoration."
+        max_length=1000, default_factory=list, description="Hard temporal anchors allowing state restoration."
     )
     active_rollbacks: list[RollbackIntent] = Field(
         default_factory=list, description="Causal invalidations actively enforced on the execution tree."

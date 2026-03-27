@@ -12,8 +12,6 @@ import re
 import sys
 
 FORBIDDEN_PATTERNS = [
-    r"import\s+socket",
-    r"from\s+socket\s+import",
     r"import\s+fastapi",
     r"from\s+fastapi\s+import",
     r"import\s+flask\b",

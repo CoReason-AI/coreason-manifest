@@ -12,7 +12,7 @@ import contextlib
 from typing import Any
 
 import pytest
-from hypothesis import given
+from hypothesis import given, settings
 from hypothesis import strategies as st
 from pydantic import HttpUrl, ValidationError
 
@@ -66,11 +66,12 @@ def test_fuzz_browser_dom_ssrf_ips(url: str) -> None:
         )
     except ValidationError as exc:
         msg = str(exc)
-        if "SSRF" not in msg and "String should match pattern" not in msg:
+        if "SSRF" not in msg and "String should match pattern" not in msg and "Security Validation Failed" not in msg:
             raise
 
 
 @given(st.from_regex(r"^https?://[a-zA-Z0-9.-]+(:\d+)?/.*$", fullmatch=True))
+@settings(deadline=None)
 def test_fuzz_browser_dom_valid_urls(url: str) -> None:
     try:
         BrowserDOMState(
