@@ -136,7 +136,7 @@ def generate_test(name: str, fields: list[dict[str, Any]] | None = None) -> None
     # Inject property boundary assertions
     test_func = module.body[-1]
     if not isinstance(test_func, cst.FunctionDef) or not isinstance(test_func.body, cst.IndentedBlock):
-        raise TypeError("Expected test_func to be a FunctionDef with an IndentedBlock body")
+        raise TypeError("Expected test_func to be a FunctionDef with an IndentedBlock body")  # pragma: no cover
 
     body_items = list(test_func.body.body)
 

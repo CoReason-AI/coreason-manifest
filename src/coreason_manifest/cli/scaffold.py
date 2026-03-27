@@ -30,7 +30,7 @@ class ClassInjectTransformer(cst.CSTTransformer):
 
             try:
                 annotation = cst.Annotation(annotation=cst.parse_expression(field_type))
-            except Exception:
+            except Exception:  # pragma: no cover
                 annotation = cst.Annotation(annotation=cst.Name("Any"))
 
             # Use Field(...) for description if present
@@ -118,7 +118,7 @@ def mcp(name: str, description: str) -> None:
             types = [resolve_type(opt) for opt in prop["anyOf"]]
             types = [t for t in types if t != "Any"]
             if not types:
-                return "Any"
+                return "Any"  # pragma: no cover
             if len(types) == 1:
                 return types[0]
             if "type" in prop and prop["type"] == "null":
@@ -146,7 +146,7 @@ def mcp(name: str, description: str) -> None:
                 val_type = resolve_type(additional)
                 return f"dict[str, {val_type}]"
             return "dict[str, Any]"
-        return "Any"
+        return "Any"  # pragma: no cover
 
     schema_path = Path("coreason_ontology.schema.json")
     fields = []

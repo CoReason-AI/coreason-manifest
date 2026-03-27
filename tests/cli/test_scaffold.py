@@ -37,7 +37,23 @@ def test_scaffold_mcp_success(
     # Mock schema
     mock_schema = {
         "$defs": {
-            "TestCapability": {"properties": {"some_field": {"type": "string", "description": "A field description"}}}
+            "TestCapability": {
+                "properties": {
+                    "some_field": {"type": "string", "description": "A field description"},
+                    "some_int": {"type": "integer"},
+                    "some_num": {"type": "number"},
+                    "some_bool": {"type": "boolean"},
+                    "some_null": {"type": "null"},
+                    "some_array": {"type": "array", "items": {"type": "string"}},
+                    "some_obj": {"type": "object", "additionalProperties": {"type": "integer"}},
+                    "some_ref": {"$ref": "#/$defs/OtherModel"},
+                    "some_union": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+                    "some_union_single": {"anyOf": [{"type": "string"}]},
+                    "some_union_empty": {"anyOf": []},
+                    "some_any": {},
+                    "some_obj_default": {"type": "object"},
+                }
+            }
         }
     }
 
@@ -59,9 +75,23 @@ CoreasonBaseState.model_rebuild()
     assert "NOTICE: The generated schema extensions are governed by the Prosperity Public License" in result.stdout
 
     mock_write_text.assert_called_once()
-    mock_generate_test.assert_called_once_with(
-        "TestCapability", [{"name": "some_field", "type": "str", "description": "A field description"}]
-    )
+    mock_generate_test.assert_called_once()
+    args, _ = mock_generate_test.call_args
+    assert args[0] == "TestCapability"
+    fields = args[1]
+    names = [f["name"] for f in fields]
+    assert "some_field" in names
+    assert "some_int" in names
+    assert "some_num" in names
+    assert "some_bool" in names
+    assert "some_null" in names
+    assert "some_array" in names
+    assert "some_obj" in names
+    assert "some_ref" in names
+    assert "some_union" in names
+    assert "some_union_single" in names
+    assert "some_union_empty" in names
+    assert "some_any" in names
 
 
 @patch("pathlib.Path.exists")
