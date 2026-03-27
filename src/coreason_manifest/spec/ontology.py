@@ -11518,14 +11518,6 @@ class EpistemicLedgerState(CoreasonBaseState):
         return self
 
 
-class VectorSearch(CoreasonBaseState):
-    """Performs a vector search across the dataset."""
-
-
-class TestCapability(CoreasonBaseState):
-    """A test capability"""
-
-
 CompositeNodeProfile.model_rebuild()
 WorkflowManifest.model_rebuild()
 StateHydrationManifest.model_rebuild()
@@ -11613,5 +11605,3 @@ LiquidTypeContract.model_rebuild()
 HoareLogicProofReceipt.model_rebuild()
 AsymptoticComplexityReceipt.model_rebuild()
 TeleologicalIsometryReceipt.model_rebuild()
-VectorSearch.model_rebuild()
-TestCapability.model_rebuild()

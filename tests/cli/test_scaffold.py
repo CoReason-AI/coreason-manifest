@@ -25,7 +25,13 @@ def test_class_inject_transformer_resolve_type() -> None:
 @patch("pathlib.Path.read_text")
 @patch("pathlib.Path.exists")
 @patch("builtins.open")
-def test_scaffold_mcp_success(mock_open: MagicMock, mock_exists: MagicMock, mock_read_text: MagicMock, mock_write_text: MagicMock, mock_generate_test: MagicMock) -> None:
+def test_scaffold_mcp_success(
+    mock_open: MagicMock,
+    mock_exists: MagicMock,
+    mock_read_text: MagicMock,
+    mock_write_text: MagicMock,
+    mock_generate_test: MagicMock,
+) -> None:
     mock_exists.return_value = True
 
     # Mock schema
