@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import ast
 import hashlib
-import html
 import ipaddress
 import json
 import math
