@@ -385,9 +385,14 @@ class CoreasonBaseState(BaseModel):
 
     def model_dump_canonical(self) -> bytes:
         """Return a strictly sorted, canonical JSON serialization for cryptographic hashing."""
-        raw_dict = self.model_dump(mode="json", exclude_none=True, by_alias=True)
-        # Topological mapping: Enforces RFC 8785 strict canonical key sorting.
-        return json.dumps(raw_dict, ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode("utf-8")
+        try:
+            return object.__getattribute__(self, "_cached_canonical_dump")  # type: ignore[no-any-return]
+        except AttributeError:
+            raw_dict = self.model_dump(mode="json", exclude_none=True, by_alias=True)
+            # Topological mapping: Enforces RFC 8785 strict canonical key sorting.
+            canonical_dump = json.dumps(raw_dict, ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode("utf-8")
+            object.__setattr__(self, "_cached_canonical_dump", canonical_dump)
+            return canonical_dump
 
 
 T = typing.TypeVar("T")
