@@ -883,6 +883,7 @@ class DynamicLayoutManifest(CoreasonBaseState):
             for node in ast.walk(tree):
                 if not isinstance(node, _TSTRING_AST_ALLOWLIST):
                     raise ValueError(f"Kinetic execution bleed detected: Forbidden AST node {type(node).__name__}")
+            return v
         except SyntaxError:
             pass
 
@@ -892,8 +893,8 @@ class DynamicLayoutManifest(CoreasonBaseState):
             for node in ast.walk(f_tree):
                 if not isinstance(node, _TSTRING_AST_ALLOWLIST):
                     raise ValueError(f"Kinetic execution bleed detected: Forbidden AST node {type(node).__name__}")
-        except SyntaxError:
-            pass
+        except SyntaxError as e:
+            raise ValueError("Invalid syntax in dynamic string") from e
 
         return v
 
