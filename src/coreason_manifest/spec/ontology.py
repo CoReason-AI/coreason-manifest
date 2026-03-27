@@ -390,7 +390,9 @@ class CoreasonBaseState(BaseModel):
         except AttributeError:
             raw_dict = self.model_dump(mode="json", exclude_none=True, by_alias=True)
             # Topological mapping: Enforces RFC 8785 strict canonical key sorting.
-            canonical_dump = json.dumps(raw_dict, ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode("utf-8")
+            canonical_dump = json.dumps(raw_dict, ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode(
+                "utf-8"
+            )
             object.__setattr__(self, "_cached_canonical_dump", canonical_dump)
             return canonical_dump
 
