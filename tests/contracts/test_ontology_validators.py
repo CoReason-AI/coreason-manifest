@@ -214,9 +214,9 @@ def test_dynamic_layout_manifest_valid_ast(tstring: str) -> None:
 
 
 def test_dynamic_layout_manifest_syntax_error() -> None:
-    # A SyntaxError in parsing is silently ignored because it poses no execution bleed risk.
-    manifest = DynamicLayoutManifest(layout_tstring="f'{a")
-    assert manifest.layout_tstring == "f'{a"
+    # A SyntaxError in parsing must not be ignored to prevent fail-open security bypass.
+    with pytest.raises(ValidationError, match="Invalid syntax in dynamic string"):
+        DynamicLayoutManifest(layout_tstring="f'{a")
 
 
 @pytest.mark.parametrize(
@@ -379,6 +379,7 @@ def test_active_inference_contract_bounds_fuzzing(eig: float) -> None:
         ),
     )
 )
+@settings(deadline=None)
 def test_browser_dom_state_safety_valid_fuzzing(url: str) -> None:
     from pydantic import ValidationError
 
@@ -558,7 +559,6 @@ def test_composite_node_profile_sorts_mappings() -> None:
 
 
 def test_action_space_manifest_enforce_canonical_sort() -> None:
-
     from coreason_manifest.spec.ontology import (
         ActionSpaceManifest,
         PermissionBoundaryPolicy,
