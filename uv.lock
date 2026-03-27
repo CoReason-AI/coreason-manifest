@@ -63,7 +63,6 @@ wheels = [
 name = "coreason-manifest"
 source = { editable = "." }
 dependencies = [
-    { name = "hypothesis-jsonschema" },
     { name = "libcst" },
     { name = "pydantic" },
     { name = "typer" },
@@ -74,6 +73,7 @@ dev = [
     { name = "deepdiff" },
     { name = "deptry" },
     { name = "hypothesis" },
+    { name = "hypothesis-jsonschema" },
     { name = "mkdocstrings", extra = ["python"] },
     { name = "mypy" },
     { name = "pre-commit" },
@@ -91,7 +91,6 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "hypothesis-jsonschema", specifier = ">=0.23.0" },
     { name = "libcst", specifier = ">=1.5.0" },
     { name = "pydantic", specifier = ">=2.12.5" },
     { name = "typer", specifier = ">=0.12.0" },
@@ -102,6 +101,7 @@ dev = [
     { name = "deepdiff", specifier = ">=8.6.2" },
     { name = "deptry", specifier = ">=0.23.0" },
     { name = "hypothesis", specifier = ">=6.151.9" },
+    { name = "hypothesis-jsonschema", specifier = ">=0.23.0" },
     { name = "mkdocstrings", extras = ["python"] },
     { name = "mypy", specifier = ">=1.19.1" },
     { name = "pre-commit", specifier = ">=4.5.1" },
