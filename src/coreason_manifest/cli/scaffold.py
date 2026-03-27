@@ -1,11 +1,12 @@
 import json
+from typing import Any
 
 import libcst as cst
 import typer
 
 
 class ClassInjectTransformer(cst.CSTTransformer):
-    def __init__(self, name: str, description: str, fields: list[dict] | None = None):
+    def __init__(self, name: str, description: str, fields: list[dict[str, Any]] | None = None):
         self.name = name
         self.description = description
         self.fields = fields or []
@@ -108,9 +109,10 @@ def mcp(name: str, description: str) -> None:
         typer.echo(f"Could not find {ontology_path}", err=True)
         raise typer.Exit(1)
 
-    def resolve_type(prop: dict) -> str:
+    def resolve_type(prop: dict[str, Any]) -> str:
         if "$ref" in prop:
-            return prop["$ref"].split("/")[-1]
+            val = prop["$ref"]
+            return str(val).split("/")[-1] if isinstance(val, str) else "Any"
 
         if "anyOf" in prop:
             types = [resolve_type(opt) for opt in prop["anyOf"]]

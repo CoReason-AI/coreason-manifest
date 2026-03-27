@@ -1,5 +1,6 @@
 import re
 from pathlib import Path
+from typing import Any
 
 import libcst as cst
 
@@ -9,7 +10,7 @@ def camel_to_snake(name: str) -> str:
     return re.sub("([a-z0-9])([A-Z])", r"\1_\2", name).lower()
 
 
-def generate_test(name: str, fields: list[dict] | None = None) -> None:
+def generate_test(name: str, fields: list[dict[str, Any]] | None = None) -> None:
     fields = fields or []
     snake_case_name = camel_to_snake(name)
     test_file_path = Path(f"tests/fuzzing/test_mcp_{snake_case_name}.py")
@@ -32,12 +33,13 @@ def generate_test(name: str, fields: list[dict] | None = None) -> None:
                     )
                 ]
             ),
-            cst.EmptyLine(),
-            cst.EmptyLine(),
+            cst.SimpleStatementLine(
+                body=[cst.ImportFrom(module=cst.Name("typing"), names=[cst.ImportAlias(name=cst.Name("Any"))])]
+            ),
             cst.FunctionDef(
                 name=cst.Name("get_target_schema"),
                 params=cst.Parameters(),
-                returns=cst.Annotation(annotation=cst.Name("dict")),
+                returns=cst.Annotation(annotation=cst.parse_expression("dict[str, Any]")),
                 body=cst.IndentedBlock(
                     body=[
                         cst.SimpleStatementLine(
@@ -63,8 +65,6 @@ def generate_test(name: str, fields: list[dict] | None = None) -> None:
                     ]
                 ),
             ),
-            cst.EmptyLine(),
-            cst.EmptyLine(),
             cst.FunctionDef(
                 decorators=[
                     cst.Decorator(
@@ -82,7 +82,15 @@ def generate_test(name: str, fields: list[dict] | None = None) -> None:
                     )
                 ],
                 name=cst.Name(f"test_mcp_{snake_case_name}_fuzzing"),
-                params=cst.Parameters(params=[cst.Param(name=cst.Name("instance"))]),
+                params=cst.Parameters(
+                    params=[
+                        cst.Param(
+                            name=cst.Name("instance"),
+                            annotation=cst.Annotation(annotation=cst.parse_expression("dict[str, Any]")),
+                        )
+                    ]
+                ),
+                returns=cst.Annotation(annotation=cst.Name("None")),
                 body=cst.IndentedBlock(
                     body=[
                         cst.SimpleStatementLine(
@@ -127,6 +135,9 @@ def generate_test(name: str, fields: list[dict] | None = None) -> None:
 
     # Inject property boundary assertions
     test_func = module.body[-1]
+    if not isinstance(test_func, cst.FunctionDef) or not isinstance(test_func.body, cst.IndentedBlock):
+        raise TypeError("Expected test_func to be a FunctionDef with an IndentedBlock body")
+
     body_items = list(test_func.body.body)
 
     for field in fields:
