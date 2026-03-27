@@ -220,7 +220,8 @@ def test_dynamic_layout_manifest_syntax_error() -> None:
 
 
 @pytest.mark.parametrize(
-    ("tstring", "bad_node"), [("f'{a()} {b}'", "Call"), ("print('hello')", "Call"), ("import os", "Import")]
+    ("tstring", "bad_node"),
+    [("f'{a()} {b}'", "Call"), ("print('hello')", "Call"), ("import os", "Import"), ("<html>{a()}</html>", "Call")],
 )
 def test_dynamic_layout_manifest_kinetic_bleed(tstring: str, bad_node: str) -> None:
     with pytest.raises(ValidationError, match=rf"Kinetic execution bleed detected: Forbidden AST node {bad_node}"):

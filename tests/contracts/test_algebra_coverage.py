@@ -530,6 +530,8 @@ def test_verify_ast_safety() -> None:
     assert verify_ast_safety("1 + 1")
     with pytest.raises(ValueError, match="Kinetic execution bleed"):
         verify_ast_safety("__import__('os')")
+    with pytest.raises(ValueError, match="Forbidden AST node: Pow"):
+        verify_ast_safety("2 ** 100")
     with pytest.raises(ValueError, match="not valid syntax"):
         verify_ast_safety("invalid syntax +")
 

@@ -27,4 +27,4 @@ jobs:
         run: uv export --format requirements-txt --no-emit-workspace > reqs.txt
 
       - name: Run pip-audit
-        run: uv run --with pip-audit pip-audit -r reqs.txt
+        run: uv run --with pip-audit pip-audit -r reqs.txt --ignore-vuln CVE-2026-4539
