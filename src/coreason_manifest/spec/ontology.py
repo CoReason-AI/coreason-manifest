@@ -1338,25 +1338,25 @@ class RoutingFrontierPolicy(CoreasonBaseState):
                 try:
                     val = int(values["max_latency_ms"])
                     values["max_latency_ms"] = int(max(1, min(val, 86400000)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if "max_cost_magnitude_per_token" in values:
                 try:
                     val = int(values["max_cost_magnitude_per_token"])
                     values["max_cost_magnitude_per_token"] = int(max(1, min(val, 1000000000)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if "min_capability_score" in values:
                 try:
                     val_float = float(values["min_capability_score"])
                     values["min_capability_score"] = float(max(0.0, min(val_float, 1.0)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if values.get("max_carbon_intensity_gco2eq_kwh") is not None:
                 try:
                     val_float = float(values["max_carbon_intensity_gco2eq_kwh"])
                     values["max_carbon_intensity_gco2eq_kwh"] = float(max(0.0, min(val_float, 10000.0)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
         return values
 
@@ -6657,6 +6657,25 @@ type AnyActionSpaceCapability = Annotated[
     ToolManifest | MCPServerManifest | EphemeralNamespacePartitionState, Field(discriminator="type")
 ]
 
+_ILLEGAL_PAYLOAD_KEYS: frozenset[str] = frozenset(
+    {
+        "memory",
+        "context",
+        "system_prompt",
+        "chat_history",
+        "trace_context",
+        "trace_id",
+        "span_id",
+        "parent_span_id",
+        "causal_clock",
+        "state_vector",
+        "read_only_context",
+        "mutable_memory",
+        "is_delta",
+        "envelope",
+    }
+)
+
 
 class ActionSpaceManifest(CoreasonBaseState):
     r"""
@@ -6747,25 +6766,8 @@ class ActionSpaceManifest(CoreasonBaseState):
                         continue
 
                     # The strict list of forbidden keys in any domain payload
-                    illegal_keys = {
-                        "memory",
-                        "context",
-                        "system_prompt",
-                        "chat_history",
-                        "trace_context",
-                        "trace_id",
-                        "span_id",
-                        "parent_span_id",
-                        "causal_clock",
-                        "state_vector",
-                        "read_only_context",
-                        "mutable_memory",
-                        "is_delta",
-                        "envelope",
-                    }
-
                     for key in properties:
-                        if key in illegal_keys:
+                        if key in _ILLEGAL_PAYLOAD_KEYS:
                             raise ValueError(
                                 f"Framework Violation: Tool '{cap.tool_name}' illegaly attempts to "
                                 f"manage execution state by defining '{key}' in its {schema_name}. "
@@ -7014,7 +7016,7 @@ class MarketContract(CoreasonBaseState):
                 try:
                     mc_int = int(mc)
                     sp_int = int(sp)
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             cmc = max(0, min(mc_int, 1000000000))
             if sp_int > cmc:
