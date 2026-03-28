@@ -16,16 +16,20 @@ from pydantic import ValidationError
 from coreason_manifest.spec.ontology import (
     ActivationSteeringContract,
     AdjudicationRubricProfile,
+    AgentNodeProfile,
     CognitiveFormatContract,
     ComputeEngineProfile,
     ComputeRateContract,
+    ComputeTier,
     ConsensusPolicy,
     ConstrainedDecodingPolicy,
     CoreasonBaseState,
     DefeasibleCascadeEvent,
     DynamicLayoutManifest,
     EphemeralNamespacePartitionState,
+    EpistemicSecurity,
     GradingCriterionProfile,
+    HardwareProfile,
     InformationClassificationProfile,
     LatentSmoothingProfile,
     MultimodalTokenAnchorState,
@@ -37,6 +41,7 @@ from coreason_manifest.spec.ontology import (
     SaeLatentPolicy,
     SE3TransformProfile,
     SecureSubSessionState,
+    SecurityProfile,
     ViewportProjectionContract,
     VolumetricBoundingProfile,
 )
@@ -763,3 +768,64 @@ def test_kinematic_delta_manifest_sorting() -> None:
     )
     assert manifest.deltas[0][0] == "node-A"
     assert manifest.deltas[1][0] == "node-B"
+
+
+def test_agent_node_profile_success() -> None:
+    """Test that default values instantiate cleanly without triggering traps."""
+    agent = AgentNodeProfile(description="Test agent")
+    assert agent.hardware.compute_tier == ComputeTier.KINETIC
+    assert agent.hardware.min_vram_gb == 8.0
+    assert agent.security.epistemic_security == EpistemicSecurity.STANDARD
+
+
+def test_agent_node_profile_thermodynamic_paradox() -> None:
+    """Test that KINETIC tier cannot exceed 24.0 GB VRAM."""
+    with pytest.raises(ValueError, match="Thermodynamic Constraint Violated"):
+        AgentNodeProfile(
+            description="Test agent", hardware=HardwareProfile(compute_tier=ComputeTier.KINETIC, min_vram_gb=25.0)
+        )
+
+
+def test_agent_node_profile_sovereign_execution_paradox() -> None:
+    """Test that CONFIDENTIAL workloads must use trusted endpoints only."""
+    with pytest.raises(ValueError, match="Sovereign Execution Violated"):
+        AgentNodeProfile(
+            description="Test agent",
+            hardware=HardwareProfile(provider_whitelist=["vast", "aws"]),
+            security=SecurityProfile(epistemic_security=EpistemicSecurity.CONFIDENTIAL),
+        )
+
+    # Success case for CONFIDENTIAL
+    agent = AgentNodeProfile(
+        description="Test agent",
+        hardware=HardwareProfile(provider_whitelist=["aws", "gcp"]),
+        security=SecurityProfile(epistemic_security=EpistemicSecurity.CONFIDENTIAL),
+    )
+    assert agent.security.epistemic_security == EpistemicSecurity.CONFIDENTIAL
+
+
+def test_sovereign_execution_allows_localhost_and_bare_metal() -> None:
+    """Ensure CONFIDENTIAL workloads can run on local/bare-metal without triggering the paradox."""
+    profile = AgentNodeProfile(
+        description="Secure local ETL agent for proprietary schemas.",
+        hardware=HardwareProfile(provider_whitelist=["localhost", "bare-metal"]),
+        security=SecurityProfile(epistemic_security=EpistemicSecurity.CONFIDENTIAL),
+    )
+    # If the validation passes without raising ValueError, the contract holds.
+    assert profile.security.epistemic_security == EpistemicSecurity.CONFIDENTIAL
+    assert "localhost" in profile.hardware.provider_whitelist
+
+
+def test_agent_node_profile_network_topology_paradox() -> None:
+    """Test that Mixnet routing requires strict network isolation."""
+    with pytest.raises(ValueError, match="Topology Routing Violated"):
+        AgentNodeProfile(
+            description="Test agent", security=SecurityProfile(egress_obfuscation=True, network_isolation=False)
+        )
+
+    # Success case for Mixnet routing
+    agent = AgentNodeProfile(
+        description="Test agent", security=SecurityProfile(egress_obfuscation=True, network_isolation=True)
+    )
+    assert agent.security.egress_obfuscation is True
+    assert agent.security.network_isolation is True

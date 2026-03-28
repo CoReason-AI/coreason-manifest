@@ -80,6 +80,48 @@ To maintain the pristine, mathematically rigorous nature of this ontology, all a
 * **Decentralized Identifiers (DIDs) & SD-JWT:** Globally unique identifiers combined with Selective Disclosure JWTs, allowing agents to prove capabilities without revealing underlying private keys.
 * **Post-Quantum Cryptography (PQC):** The integration of NIST FIPS standard algorithms (e.g., ML-DSA, SLH-DSA) to secure Merkle traces and bilateral SLAs.
 
+### **Hardware & Security Topology**
+
+* **HardwareProfile & Thermodynamic Bounding:** Defines the physical constraints of deployment. KINETIC edge agents are mathematically bounded to 24GB VRAM. ORACLE datacenter agents support >24GB execution.
+* **SecurityProfile & Sovereign Execution:** Encapsulates the strict network and cryptographic perimeter. Demanding CONFIDENTIAL execution mathematically requires routing only to trusted hyperscalers (e.g. AWS, GCP, Azure), structurally rejecting P2P providers.
+
+> **The Swarm of N=1 (Local Execution):**
+> The `coreason-manifest` compiler mathematically models your local machine (`"localhost"`) and manually provisioned servers (`"bare-metal"`) as trusted physical enclaves. You may safely assign `epistemic_security: CONFIDENTIAL` to agents running on `"localhost"` to test sovereign ETL pipelines without triggering the topological paradox compiler.
+
+**Example 1: High-Security Oracle Agent (Datacenter / CONFIDENTIAL)**
+```yaml
+description: "Core Datacenter Aggregator"
+type: "agent"
+hardware:
+  compute_tier: "ORACLE"
+  min_vram_gb: 80.0
+  accelerator_type: "FP8_TENSOR"
+  provider_whitelist:
+    - "aws"
+    - "azure"
+security:
+  epistemic_security: "CONFIDENTIAL"
+  network_isolation: true
+  egress_obfuscation: true
+```
+
+**Example 2: Edge Kinetic Agent (Edge / STANDARD)**
+```yaml
+description: "Edge UI Projection Worker"
+type: "agent"
+hardware:
+  compute_tier: "KINETIC"
+  min_vram_gb: 16.0
+  accelerator_type: "BF16_TENSOR"
+  provider_whitelist:
+    - "vast"
+    - "runpod"
+security:
+  epistemic_security: "STANDARD"
+  network_isolation: false
+  egress_obfuscation: false
+```
+
 ### **Swarm Orchestration & Kinematics**
 
 * **Logarithmic Market Scoring Rule (LMSR):** The mathematical AMM function used to guarantee infinite liquidity and bound maximum loss in algorithmic prediction markets.

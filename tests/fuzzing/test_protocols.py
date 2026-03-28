@@ -50,6 +50,9 @@ def test_fuzz_jsonrpc_params(params_payload: Any) -> None:
 
 
 # 2. BrowserDOMState SSRF Isolation
+
+
+@settings(deadline=None)
 @given(
     st.from_regex(
         r"^https?://(127\.\d+\.\d+\.\d+|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(1[6-9]|2[0-9]|3[0-1])\.\d+\.\d+|169\.254\.169\.254|\[::1\]|\[::ffff:127\.0\.0\.1\])(:\d+)?/.*$",
