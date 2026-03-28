@@ -16,12 +16,17 @@ from hypothesis import HealthCheck, given, settings
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
+    AgentNodeProfile,
     BaseStateEvent,
     BrowserDOMState,
+    ComputeTier,
     DAGTopologyManifest,
+    EpistemicSecurity,
+    HardwareProfile,
     MultimodalTokenAnchorState,
     QuorumPolicy,
     SE3TransformProfile,
+    SecurityProfile,
     StateHydrationManifest,
     SystemNodeProfile,
     TaskAnnouncementIntent,
@@ -256,3 +261,72 @@ def test_temporal_dilation_fuzzing(timestamp: float) -> None:
 def test_id_bombing_fuzzing(massive_id: str) -> None:
     with pytest.raises((ValidationError, ValueError)):
         TaskAnnouncementIntent(task_id=massive_id, required_action_space_id=None, max_budget_magnitude=100)
+
+
+
+
+
+@given(
+    min_vram_gb=st.floats(min_value=24.1, max_value=1000.0, allow_nan=False, allow_infinity=False),
+)
+def test_fuzz_thermodynamic_paradox(min_vram_gb: float) -> None:
+    """
+    Fuzz test to prove the compiler never yields a valid object where KINETIC > 24GB.
+    """
+    with pytest.raises((ValueError, ValidationError), match="Thermodynamic Constraint Violated"):
+        AgentNodeProfile(
+            description="Fuzz test agent",
+            hardware=HardwareProfile(compute_tier=ComputeTier.KINETIC, min_vram_gb=min_vram_gb),
+        )
+
+
+@given(
+    provider_whitelist=st.lists(
+        st.sampled_from(["vast", "runpod", "aws", "gcp", "azure"]),
+        min_size=1,
+    )
+)
+def test_fuzz_sovereign_execution_paradox(provider_whitelist: list[str]) -> None:
+    """
+    Fuzz test to prove the compiler never yields a valid object where CONFIDENTIAL maps to non-trusted endpoints.
+    """
+    trusted_hyperscalers = {"aws", "gcp", "azure"}
+    has_untrusted = not set(provider_whitelist).issubset(trusted_hyperscalers)
+    if has_untrusted:
+        with pytest.raises((ValueError, ValidationError), match="Sovereign Execution Violated"):
+            AgentNodeProfile(
+                description="Fuzz test agent",
+                hardware=HardwareProfile(provider_whitelist=provider_whitelist),
+                security=SecurityProfile(epistemic_security=EpistemicSecurity.CONFIDENTIAL),
+            )
+    else:
+        agent = AgentNodeProfile(
+            description="Fuzz test agent",
+            hardware=HardwareProfile(provider_whitelist=provider_whitelist),
+            security=SecurityProfile(epistemic_security=EpistemicSecurity.CONFIDENTIAL),
+        )
+        assert agent.security.epistemic_security == EpistemicSecurity.CONFIDENTIAL
+        assert agent.hardware.provider_whitelist == sorted(provider_whitelist)
+
+
+@given(
+    egress_obfuscation=st.booleans(),
+    network_isolation=st.booleans(),
+)
+def test_fuzz_network_topology_paradox(egress_obfuscation: bool, network_isolation: bool) -> None:
+    """
+    Fuzz test to prove the compiler never yields a valid object where egress obfuscation is True without network isolation.
+    """
+    if egress_obfuscation and not network_isolation:
+        with pytest.raises((ValueError, ValidationError), match="Topology Routing Violated"):
+            AgentNodeProfile(
+                description="Fuzz test agent",
+                security=SecurityProfile(egress_obfuscation=egress_obfuscation, network_isolation=network_isolation),
+            )
+    else:
+        agent = AgentNodeProfile(
+            description="Fuzz test agent",
+            security=SecurityProfile(egress_obfuscation=egress_obfuscation, network_isolation=network_isolation),
+        )
+        assert agent.security.egress_obfuscation == egress_obfuscation
+        assert agent.security.network_isolation == network_isolation
