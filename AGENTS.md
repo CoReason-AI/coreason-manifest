@@ -85,6 +85,9 @@ To maintain the pristine, mathematically rigorous nature of this ontology, all a
 * **HardwareProfile & Thermodynamic Bounding:** Defines the physical constraints of deployment. KINETIC edge agents are mathematically bounded to 24GB VRAM. ORACLE datacenter agents support >24GB execution.
 * **SecurityProfile & Sovereign Execution:** Encapsulates the strict network and cryptographic perimeter. Demanding CONFIDENTIAL execution mathematically requires routing only to trusted hyperscalers (e.g. AWS, GCP, Azure), structurally rejecting P2P providers.
 
+> **The Swarm of N=1 (Local Execution):**
+> The `coreason-manifest` compiler mathematically models your local machine (`"localhost"`) and manually provisioned servers (`"bare-metal"`) as trusted physical enclaves. You may safely assign `epistemic_security: CONFIDENTIAL` to agents running on `"localhost"` to test sovereign ETL pipelines without triggering the topological paradox compiler.
+
 **Example 1: High-Security Oracle Agent (Datacenter / CONFIDENTIAL)**
 ```yaml
 description: "Core Datacenter Aggregator"

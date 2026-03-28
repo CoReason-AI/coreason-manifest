@@ -279,7 +279,7 @@ def test_fuzz_thermodynamic_paradox(min_vram_gb: float) -> None:
 
 @given(
     provider_whitelist=st.lists(
-        st.sampled_from(["vast", "runpod", "aws", "gcp", "azure"]),
+        st.sampled_from(["vast", "runpod", "aws", "gcp", "azure", "localhost", "bare-metal"]),
         min_size=1,
     )
 )
@@ -287,8 +287,8 @@ def test_fuzz_sovereign_execution_paradox(provider_whitelist: list[str]) -> None
     """
     Fuzz test to prove the compiler never yields a valid object where CONFIDENTIAL maps to non-trusted endpoints.
     """
-    trusted_hyperscalers = {"aws", "gcp", "azure"}
-    has_untrusted = not set(provider_whitelist).issubset(trusted_hyperscalers)
+    trusted_environments = {"aws", "gcp", "azure", "localhost", "bare-metal"}
+    has_untrusted = not set(provider_whitelist).issubset(trusted_environments)
     if has_untrusted:
         with pytest.raises((ValueError, ValidationError), match="Sovereign Execution Violated"):
             AgentNodeProfile(

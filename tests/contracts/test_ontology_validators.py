@@ -804,6 +804,18 @@ def test_agent_node_profile_sovereign_execution_paradox() -> None:
     assert agent.security.epistemic_security == EpistemicSecurity.CONFIDENTIAL
 
 
+def test_sovereign_execution_allows_localhost_and_bare_metal() -> None:
+    """Ensure CONFIDENTIAL workloads can run on local/bare-metal without triggering the paradox."""
+    profile = AgentNodeProfile(
+        description="Secure local ETL agent for proprietary schemas.",
+        hardware=HardwareProfile(provider_whitelist=["localhost", "bare-metal"]),
+        security=SecurityProfile(epistemic_security=EpistemicSecurity.CONFIDENTIAL),
+    )
+    # If the validation passes without raising ValueError, the contract holds.
+    assert profile.security.epistemic_security == EpistemicSecurity.CONFIDENTIAL
+    assert "localhost" in profile.hardware.provider_whitelist
+
+
 def test_agent_node_profile_network_topology_paradox() -> None:
     """Test that Mixnet routing requires strict network isolation."""
     with pytest.raises(ValueError, match="Topology Routing Violated"):

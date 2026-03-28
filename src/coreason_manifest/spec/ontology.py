@@ -9569,12 +9569,17 @@ class AgentNodeProfile(BaseNodeProfile):
             )
 
         # 2. Sovereign Execution Paradox
-        if self.security.epistemic_security == EpistemicSecurity.CONFIDENTIAL:
-            trusted_hyperscalers = {"aws", "gcp", "azure"}
-            if not set(self.hardware.provider_whitelist).issubset(trusted_hyperscalers):
-                raise ValueError(
-                    "Sovereign Execution Violated: CONFIDENTIAL workloads cannot be routed to untrusted peer-to-peer providers."
-                )
+        # Local and bare-metal environments are mathematically treated as sovereign physical enclaves.
+        trusted_environments = {"aws", "gcp", "azure", "localhost", "bare-metal"}
+
+        if self.security.epistemic_security == EpistemicSecurity.CONFIDENTIAL and not set(
+            self.hardware.provider_whitelist
+        ).issubset(trusted_environments):
+            invalid_targets = set(self.hardware.provider_whitelist) - trusted_environments
+            raise ValueError(
+                f"Sovereign Execution Violated: CONFIDENTIAL workloads cannot be routed to "
+                f"untrusted peer-to-peer providers. Invalid targets found: {invalid_targets}"
+            )
 
         # 3. Network Topology Paradox
         if self.security.egress_obfuscation and not self.security.network_isolation:
