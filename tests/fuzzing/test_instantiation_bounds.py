@@ -263,9 +263,6 @@ def test_id_bombing_fuzzing(massive_id: str) -> None:
         TaskAnnouncementIntent(task_id=massive_id, required_action_space_id=None, max_budget_magnitude=100)
 
 
-
-
-
 @given(
     min_vram_gb=st.floats(min_value=24.1, max_value=1000.0, allow_nan=False, allow_infinity=False),
 )

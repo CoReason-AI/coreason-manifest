@@ -770,9 +770,6 @@ def test_kinematic_delta_manifest_sorting() -> None:
     assert manifest.deltas[1][0] == "node-B"
 
 
-
-
-
 def test_agent_node_profile_success() -> None:
     """Test that default values instantiate cleanly without triggering traps."""
     agent = AgentNodeProfile(description="Test agent")
