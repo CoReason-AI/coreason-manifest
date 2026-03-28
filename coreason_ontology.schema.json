@@ -51,6 +51,15 @@
       "title": "ASTGradientReceipt",
       "type": "object"
     },
+    "AcceleratorType": {
+      "enum": [
+        "FP8_TENSOR",
+        "BF16_TENSOR",
+        "CUDA_FP32"
+      ],
+      "title": "AcceleratorType",
+      "type": "string"
+    },
     "ActionSpaceManifest": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the finite, discrete Markov Decision Process (MDP) Action Space and affordance landscape available to a specific execution node. As a ...Manifest suffix, this defines a frozen, N-dimensional coordinate state.\n\nCAUSAL AFFORDANCE: Projects the combined multi-dimensional matrix of capabilities into the agent's context, mathematically dictating which kinetic operations it can initiate via its `transition_matrix`. Optionally enforces kinetic separation.\n\nEPISTEMIC BOUNDS: The `action_space_id` is geometrically constrained to a 128-char CID. A `@model_validator` strictly bounds the topology by enforcing uniqueness across all capability namespaces and ensures deterministic RFC 8785 representation by sorting the transition matrix.\n\nMCP ROUTING TRIGGERS: Markov Decision Process, Action Space, Affordance Theory, State Transition Matrix, Directed Cyclic Graph",
@@ -742,6 +751,14 @@
           "description": "Discriminator for an Agent node.",
           "title": "Type",
           "type": "string"
+        },
+        "hardware": {
+          "$ref": "#/$defs/HardwareProfile",
+          "description": "The physical constraints binding this agent to a specific thermodynamic deployment topology."
+        },
+        "security": {
+          "$ref": "#/$defs/SecurityProfile",
+          "description": "The rigid cryptographic rules dictating the agent's isolation boundaries."
         },
         "logit_steganography": {
           "anyOf": [
@@ -3700,6 +3717,14 @@
       ],
       "title": "ComputeRateContract",
       "type": "object"
+    },
+    "ComputeTier": {
+      "enum": [
+        "KINETIC",
+        "ORACLE"
+      ],
+      "title": "ComputeTier",
+      "type": "string"
     },
     "ConsensusFederationTopologyManifest": {
       "additionalProperties": false,
@@ -6883,6 +6908,14 @@
       "title": "EpistemicScanningPolicy",
       "type": "object"
     },
+    "EpistemicSecurity": {
+      "enum": [
+        "STANDARD",
+        "CONFIDENTIAL"
+      ],
+      "title": "EpistemicSecurity",
+      "type": "string"
+    },
     "EpistemicSeedInjectionPolicy": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Subgraph Injection and Graph Neural Network (GNN)\nneighborhood sampling heuristics. As a ...Policy suffix, this defines rigid\nmathematical boundaries the orchestrator must enforce globally.\n\nCAUSAL AFFORDANCE: Authorizes the algorithmic injection of high-density semantic\nseeds or priors into an existing Knowledge Graph, ensuring topological diversity\nby clustering relationships into strictly bounded neighborhood buckets.\n\nEPISTEMIC BOUNDS: The semantic proximity for neighborhood sampling is\nmathematically clamped by similarity_threshold_alpha (ge=0.0, le=1.0). To\nprevent topological density explosions (hub nodes), the\nrelation_diversity_bucket_size is bounded (gt=0, le=1000000000).\n\nMCP ROUTING TRIGGERS: Subgraph Injection, Graph Neural Networks, Neighborhood\nSampling, Topological Diversity, Semantic Seeding",
@@ -8748,6 +8781,40 @@
         "hardware_signature_blob"
       ],
       "title": "HardwareEnclaveReceipt",
+      "type": "object"
+    },
+    "HardwareProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative, frozen snapshot of the physical hardware boundaries and thermodynamic constraints required to instantiate this node. As a ...Profile suffix, this defines a rigid mathematical boundary.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator's provisioning layer to allocate exact silicon resources (Compute Tier, VRAM, and Accelerator Type) before allowing the node to execute generative operations.\n\nEPISTEMIC BOUNDS: VRAM allocation is physically bounded by min_vram_gb (gt=0.0). The literal enumerations ComputeTier and AcceleratorType mathematically prevent the hallucination of non-existent silicon. The provider_whitelist is deterministically sorted for invariant RFC 8785 hashing.\n\nMCP ROUTING TRIGGERS: Thermodynamic Bounding, VRAM Allocation, Spot Market Routing, Hardware Provisioning, Silicon Constraints",
+      "properties": {
+        "compute_tier": {
+          "$ref": "#/$defs/ComputeTier",
+          "default": "KINETIC",
+          "description": "The discrete architectural boundary of the node (KINETIC for edge/consumer, ORACLE for datacenter)."
+        },
+        "min_vram_gb": {
+          "default": 8.0,
+          "description": "The absolute physical minimum Video RAM required to load this node's latent space.",
+          "exclusiveMinimum": 0.0,
+          "title": "Min Vram Gb",
+          "type": "number"
+        },
+        "accelerator_type": {
+          "$ref": "#/$defs/AcceleratorType",
+          "default": "BF16_TENSOR",
+          "description": "The rigid silicon precision format required to execute this node's neural circuits."
+        },
+        "provider_whitelist": {
+          "description": "The explicit array of cloud infrastructure providers authorized to run this node.",
+          "items": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "title": "Provider Whitelist",
+          "type": "array"
+        }
+      },
+      "title": "HardwareProfile",
       "type": "object"
     },
     "HoareLogicProofReceipt": {
@@ -13392,6 +13459,31 @@
         "description"
       ],
       "title": "SecureSubSessionState",
+      "type": "object"
+    },
+    "SecurityProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative, frozen snapshot of the cryptographic isolation boundaries surrounding this node. As a ...Profile suffix, this defines a rigid mathematical boundary.\n\nCAUSAL AFFORDANCE: Instructs the zero-trust orchestrator to enforce hardware-level Trusted Execution Environments (TEEs) and Mixnet egress routing before authorizing the node to handle sensitive payloads.\n\nEPISTEMIC BOUNDS: The boolean gates (network_isolation, egress_obfuscation) rigidly confine the node's kinetic network reach. The epistemic_security enum mathematically dictates if the host hypervisor is trusted.\n\nMCP ROUTING TRIGGERS: Sovereign Execution, Trusted Execution Environment, Egress Obfuscation, Mixnet Routing, Network Isolation",
+      "properties": {
+        "epistemic_security": {
+          "$ref": "#/$defs/EpistemicSecurity",
+          "default": "STANDARD",
+          "description": "The level of hardware-enforced cryptographic isolation required (STANDARD or CONFIDENTIAL)."
+        },
+        "network_isolation": {
+          "default": false,
+          "description": "The strict Boolean constraint mandating a fully isolated subnet or eBPF mesh.",
+          "title": "Network Isolation",
+          "type": "boolean"
+        },
+        "egress_obfuscation": {
+          "default": false,
+          "description": "The strict Boolean constraint mandating that all outgoing packets be routed through a Sphinx-packet Mixnet.",
+          "title": "Egress Obfuscation",
+          "type": "boolean"
+        }
+      },
+      "title": "SecurityProfile",
       "type": "object"
     },
     "SelfCorrectionPolicy": {

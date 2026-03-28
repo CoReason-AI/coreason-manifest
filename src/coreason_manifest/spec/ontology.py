@@ -96,6 +96,22 @@ type CrossoverMechanismProfile = Literal["uniform_blend", "single_point", "heuri
 _CLEARANCE_MAPPING: dict[str, int] = {"public": 0, "internal": 1, "confidential": 2, "restricted": 3}
 
 
+class ComputeTier(StrEnum):
+    KINETIC = "KINETIC"
+    ORACLE = "ORACLE"
+
+
+class AcceleratorType(StrEnum):
+    FP8_TENSOR = "FP8_TENSOR"
+    BF16_TENSOR = "BF16_TENSOR"
+    CUDA_FP32 = "CUDA_FP32"
+
+
+class EpistemicSecurity(StrEnum):
+    STANDARD = "STANDARD"
+    CONFIDENTIAL = "CONFIDENTIAL"
+
+
 class InformationClassificationProfile(StrEnum):
     """
     AGENT INSTRUCTION: Implements the Bell-LaPadula Model and Lattice-Based Access Control (LBAC), establishing the foundational mathematical axis for Information Flow Control across the distributed swarm.
@@ -6084,6 +6100,66 @@ class InterventionPolicy(CoreasonBaseState):
     )
 
 
+class HardwareProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A declarative, frozen snapshot of the physical hardware boundaries and thermodynamic constraints required to instantiate this node. As a ...Profile suffix, this defines a rigid mathematical boundary.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator's provisioning layer to allocate exact silicon resources (Compute Tier, VRAM, and Accelerator Type) before allowing the node to execute generative operations.
+
+    EPISTEMIC BOUNDS: VRAM allocation is physically bounded by min_vram_gb (gt=0.0). The literal enumerations ComputeTier and AcceleratorType mathematically prevent the hallucination of non-existent silicon. The provider_whitelist is deterministically sorted for invariant RFC 8785 hashing.
+
+    MCP ROUTING TRIGGERS: Thermodynamic Bounding, VRAM Allocation, Spot Market Routing, Hardware Provisioning, Silicon Constraints
+    """
+
+    compute_tier: ComputeTier = Field(
+        default=ComputeTier.KINETIC,
+        description="The discrete architectural boundary of the node (KINETIC for edge/consumer, ORACLE for datacenter).",
+    )
+    min_vram_gb: float = Field(
+        gt=0.0,
+        default=8.0,
+        description="The absolute physical minimum Video RAM required to load this node's latent space.",
+    )
+    accelerator_type: AcceleratorType = Field(
+        default=AcceleratorType.BF16_TENSOR,
+        description="The rigid silicon precision format required to execute this node's neural circuits.",
+    )
+    provider_whitelist: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
+        default_factory=lambda: ["vast", "aws", "gcp", "azure"],
+        description="The explicit array of cloud infrastructure providers authorized to run this node.",
+    )
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "provider_whitelist", sorted(self.provider_whitelist))
+        return self
+
+
+class SecurityProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A declarative, frozen snapshot of the cryptographic isolation boundaries surrounding this node. As a ...Profile suffix, this defines a rigid mathematical boundary.
+
+    CAUSAL AFFORDANCE: Instructs the zero-trust orchestrator to enforce hardware-level Trusted Execution Environments (TEEs) and Mixnet egress routing before authorizing the node to handle sensitive payloads.
+
+    EPISTEMIC BOUNDS: The boolean gates (network_isolation, egress_obfuscation) rigidly confine the node's kinetic network reach. The epistemic_security enum mathematically dictates if the host hypervisor is trusted.
+
+    MCP ROUTING TRIGGERS: Sovereign Execution, Trusted Execution Environment, Egress Obfuscation, Mixnet Routing, Network Isolation
+    """
+
+    epistemic_security: EpistemicSecurity = Field(
+        default=EpistemicSecurity.STANDARD,
+        description="The level of hardware-enforced cryptographic isolation required (STANDARD or CONFIDENTIAL).",
+    )
+    network_isolation: bool = Field(
+        default=False,
+        description="The strict Boolean constraint mandating a fully isolated subnet or eBPF mesh.",
+    )
+    egress_obfuscation: bool = Field(
+        default=False,
+        description="The strict Boolean constraint mandating that all outgoing packets be routed through a Sphinx-packet Mixnet.",
+    )
+
+
 class BaseNodeProfile(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Establishes the Graph Theory topological root structure (vertex) for all execution participants within a decentralized multi-agent graph.
@@ -9384,6 +9460,14 @@ class AgentNodeProfile(BaseNodeProfile):
         description="The semantic boundary defining the objective function of the execution node. [SITD-Gamma: Neurosymbolic Substrate Alignment]",
     )
     type: Literal["agent"] = Field(default="agent", description="Discriminator for an Agent node.")
+    hardware: HardwareProfile = Field(
+        default_factory=HardwareProfile,
+        description="The physical constraints binding this agent to a specific thermodynamic deployment topology.",
+    )
+    security: SecurityProfile = Field(
+        default_factory=SecurityProfile,
+        description="The rigid cryptographic rules dictating the agent's isolation boundaries.",
+    )
     logit_steganography: LogitSteganographyContract | None = Field(
         default=None,
         description="The cryptographic contract forcing this agent to embed an undeniable provenance signature into its generative token stream.",
@@ -9470,6 +9554,39 @@ class AgentNodeProfile(BaseNodeProfile):
     @model_validator(mode="after")
     def _enforce_canonical_sort_peft_adapters(self) -> Self:
         object.__setattr__(self, "peft_adapters", sorted(self.peft_adapters, key=lambda x: x.adapter_id))
+        return self
+
+    @model_validator(mode="after")
+    def enforce_deployment_physics(self) -> Self:
+        """
+        AGENT INSTRUCTION: The Formal Verification Matrix.
+        Enforces Thermodynamic, Sovereign Execution, and Network Topology paradox traps.
+        """
+        # 1. Thermodynamic Paradox
+        if self.hardware.compute_tier == ComputeTier.KINETIC and self.hardware.min_vram_gb > 24.0:
+            raise ValueError(
+                "Thermodynamic Constraint Violated: KINETIC tier cannot exceed 24.0 GB VRAM. Escalate to ORACLE tier."
+            )
+
+        # 2. Sovereign Execution Paradox
+        # Local and bare-metal environments are mathematically treated as sovereign physical enclaves.
+        trusted_environments = {"aws", "gcp", "azure", "localhost", "bare-metal"}
+
+        if self.security.epistemic_security == EpistemicSecurity.CONFIDENTIAL and not set(
+            self.hardware.provider_whitelist
+        ).issubset(trusted_environments):
+            invalid_targets = set(self.hardware.provider_whitelist) - trusted_environments
+            raise ValueError(
+                f"Sovereign Execution Violated: CONFIDENTIAL workloads cannot be routed to "
+                f"untrusted peer-to-peer providers. Invalid targets found: {invalid_targets}"
+            )
+
+        # 3. Network Topology Paradox
+        if self.security.egress_obfuscation and not self.security.network_isolation:
+            raise ValueError(
+                "Topology Routing Violated: Egress Mixnet obfuscation mathematically requires strict Network Isolation to be True."
+            )
+
         return self
 
 
