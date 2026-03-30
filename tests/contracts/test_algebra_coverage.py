@@ -598,6 +598,7 @@ def test_calculate_latent_alignment_errors() -> None:
 @patch("coreason_manifest.utils.algebra.models_json_schema")
 def test_get_ontology_schema_empty(mock_schema: Mock) -> None:
     from coreason_manifest.utils.algebra import _get_ontology_schema_cached
+
     _get_ontology_schema_cached.cache_clear()
     try:
         mock_schema.return_value = (None, {})
