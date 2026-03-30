@@ -13,6 +13,7 @@
 import ast
 import base64
 import copy
+import functools
 import hashlib
 import math
 import struct
@@ -125,8 +126,8 @@ def project_manifest_to_markdown(manifest: WorkflowManifest) -> str:
     return "\n".join(lines)
 
 
-def get_ontology_schema() -> dict[str, Any]:
-    """Dynamically generate the CoReason ontology JSON schema."""
+@functools.lru_cache(maxsize=1)
+def _get_ontology_schema_cached() -> dict[str, Any]:
     models_to_export: list[type[CoreasonBaseState]] = []
 
     for name in sorted(dir(ontology)):
@@ -149,6 +150,11 @@ def get_ontology_schema() -> dict[str, Any]:
     )
 
     return top_level_schema
+
+
+def get_ontology_schema() -> dict[str, Any]:
+    """Dynamically generate the CoReason ontology JSON schema."""
+    return copy.deepcopy(_get_ontology_schema_cached())
 
 
 def validate_payload(step: str, payload_bytes: bytes) -> BaseModel:

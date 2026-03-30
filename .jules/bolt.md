@@ -12,3 +12,7 @@
 ## 2026-03-27 - [Caching Canonical Payload Serialization]
 **Learning:** Pydantic's `model_dump(mode="json")` and `json.dumps()` serialization are inherently expensive, particularly on nested dictionary graphs and classes that undergo constant hashing checks. Since `CoreasonBaseState` strictly enforces `frozen=True` rendering models fully immutable upon creation, the result of `model_dump_canonical()` will never change for the entire lifecycle of an object.
 **Action:** For heavily-hashed base structures where immutability is guaranteed at instantiation (`frozen=True`), cache the canonical byte payload natively using `object.__setattr__(self, "_cached_canonical_dump", canonical_dump)` inside `model_dump_canonical()`. This skips repetitive recursive serializations in subsequent calls, bypassing deep Pydantic validation boundaries on reads.
+
+## 2026-03-30 - Caching Pydantic JSON Schema Generation
+**Learning:** Generating JSON schema dynamically from a large set of Pydantic models using `models_json_schema` is computationally expensive because Pydantic has to perform deep reflection and loop through models each time it is called. When called repeatedly (e.g., in loops or CLI invocations), it creates a severe performance bottleneck.
+**Action:** When a function computes a large schema deterministically from static module contents, decorate it with `@functools.lru_cache(maxsize=1)` so that the massive schema generation only happens once per process, drastically speeding up subsequent retrievals.
