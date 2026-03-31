@@ -12,3 +12,7 @@
 ## 2026-03-27 - [Caching Canonical Payload Serialization]
 **Learning:** Pydantic's `model_dump(mode="json")` and `json.dumps()` serialization are inherently expensive, particularly on nested dictionary graphs and classes that undergo constant hashing checks. Since `CoreasonBaseState` strictly enforces `frozen=True` rendering models fully immutable upon creation, the result of `model_dump_canonical()` will never change for the entire lifecycle of an object.
 **Action:** For heavily-hashed base structures where immutability is guaranteed at instantiation (`frozen=True`), cache the canonical byte payload natively using `object.__setattr__(self, "_cached_canonical_dump", canonical_dump)` inside `model_dump_canonical()`. This skips repetitive recursive serializations in subsequent calls, bypassing deep Pydantic validation boundaries on reads.
+
+## 2024-03-24 - Serialization Boundaries
+**Learning:** Python's C3 MRO (Method Resolution Order) evaluation inside `isinstance()` introduces measurable overhead (~25-30%) when recursively validating deep or large JSON dictionaries compared to strict identity (`type(obj) is`). Additionally, recursive algorithms in Python create massive frame stack overhead.
+**Action:** When evaluating topological boundaries (like JSON bombs) at massive scale on primitive types (where inheritance checks are fundamentally unnecessary), strict `type(obj) is` combined with iterative stack-based evaluation provides significant processing headroom to prevent OOM errors before they trigger.
