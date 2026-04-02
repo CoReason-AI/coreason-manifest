@@ -63,17 +63,20 @@ def _validate_payload_bounds(
 
     val_type = type(value)
     if val_type is dict:
-        for k, v in value.items():
+        value_dict = typing.cast(dict[Any, Any], value)
+        for k, v in value_dict.items():
             if not isinstance(k, str):
                 raise ValueError("Dictionary keys must be strings")
             if len(k) > max_str_len:
                 raise ValueError(f"Dictionary key exceeds max string length of {max_str_len}")
-            _validate_payload_bounds(v, current_depth + 1, state)
+            _validate_payload_bounds(typing.cast(JsonPrimitiveState, v), current_depth + 1, state)
     elif val_type is list:
-        for item in value:
-            _validate_payload_bounds(item, current_depth + 1, state)
+        value_list = typing.cast(list[Any], value)
+        for item in value_list:
+            _validate_payload_bounds(typing.cast(JsonPrimitiveState, item), current_depth + 1, state)
     elif val_type is str:
-        if len(value) > max_str_len:
+        value_str = typing.cast(str, value)
+        if len(value_str) > max_str_len:
             raise ValueError(f"String exceeds max length of {max_str_len}")
     elif val_type not in _PRIMITIVE_TYPES:
         if isinstance(value, dict):
