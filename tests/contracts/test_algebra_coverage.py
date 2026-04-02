@@ -269,6 +269,11 @@ def test_get_ontology_schema() -> None:
     schema = get_ontology_schema()
     assert isinstance(schema, dict)
 
+    # ⚡ Bolt: Verify caching behavior and deepcopy return
+    schema2 = get_ontology_schema()
+    assert schema == schema2
+    assert schema is not schema2
+
 
 def test_validate_payload() -> None:
     with pytest.raises(ValueError, match="Unknown step"):
