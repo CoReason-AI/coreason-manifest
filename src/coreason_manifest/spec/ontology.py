@@ -34,6 +34,8 @@ type JsonPrimitiveState = (
 )
 
 
+_PRIMITIVE_TYPES = frozenset((int, float, bool, str, list, dict, type(None)))
+
 def _validate_payload_bounds(
     value: JsonPrimitiveState, current_depth: int = 0, state: list[int] | None = None
 ) -> JsonPrimitiveState:
@@ -58,21 +60,36 @@ def _validate_payload_bounds(
     if current_depth > max_depth:
         raise ValueError(f"Payload exceeds maximum recursion depth of {max_depth}")
 
-    if isinstance(value, dict):
+    val_type = type(value)
+    if val_type is dict:
         for k, v in value.items():
             if not isinstance(k, str):
                 raise ValueError("Dictionary keys must be strings")
             if len(k) > max_str_len:
                 raise ValueError(f"Dictionary key exceeds max string length of {max_str_len}")
             _validate_payload_bounds(v, current_depth + 1, state)
-    elif isinstance(value, list):
+    elif val_type is list:
         for item in value:
             _validate_payload_bounds(item, current_depth + 1, state)
-    elif isinstance(value, str):
+    elif val_type is str:
         if len(value) > max_str_len:
             raise ValueError(f"String exceeds max length of {max_str_len}")
-    elif value is not None and (not isinstance(value, (int, float, bool))):
-        raise ValueError(f"Payload value must be a valid JSON primitive, got {type(value).__name__}")
+    elif val_type not in _PRIMITIVE_TYPES:
+        if isinstance(value, dict):
+            for k, v in value.items():
+                if not isinstance(k, str):
+                    raise ValueError("Dictionary keys must be strings")
+                if len(k) > max_str_len:
+                    raise ValueError(f"Dictionary key exceeds max string length of {max_str_len}")
+                _validate_payload_bounds(v, current_depth + 1, state)
+        elif isinstance(value, list):
+            for item in value:
+                _validate_payload_bounds(item, current_depth + 1, state)
+        elif isinstance(value, str):
+            if len(value) > max_str_len:
+                raise ValueError(f"String exceeds max length of {max_str_len}")
+        elif value is not None and not isinstance(value, (int, float, bool)):
+            raise ValueError(f"Payload value must be a valid JSON primitive, got {type(value).__name__}")
     return value
 
 
@@ -81,6 +98,11 @@ def _canonicalize_payload(obj: Any) -> Any:
     AGENT INSTRUCTION: Mathematically strips all `None` values recursively from a payload before hashing.
     Extracted to module level to prevent function-object recreation overhead during high-frequency DAG node serialization.
     """
+    obj_type = type(obj)
+    if obj_type is dict:
+        return {k: _canonicalize_payload(v) for k, v in obj.items() if v is not None}
+    if obj_type is list:
+        return [_canonicalize_payload(v) for v in obj]
     if isinstance(obj, dict):
         return {k: _canonicalize_payload(v) for k, v in obj.items() if v is not None}
     if isinstance(obj, list):
