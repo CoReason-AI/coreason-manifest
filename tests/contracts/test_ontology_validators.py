@@ -677,7 +677,7 @@ def test_insight_card_profile_xss_prevention() -> None:
         "[click me](javascr&#105;pt:alert(1))",
         "[click me](javascript%3Aalert(1))",
         "[click me](javascript%3aalert(1))",
-        "[click me](data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==)"
+        "[click me](data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==)",
     ]
 
     for payload in malicious_payloads:
@@ -686,7 +686,9 @@ def test_insight_card_profile_xss_prevention() -> None:
 
     # Note: "<a href='javascript:alert(1)'>click me</a>" is caught by `sanitize_markdown` first
     with pytest.raises(ValidationError, match="HTML tags are prohibited"):
-        InsightCardProfile(panel_id="panel_1", title="Title", markdown_content="<a href='javascript:alert(1)'>click me</a>")
+        InsightCardProfile(
+            panel_id="panel_1", title="Title", markdown_content="<a href='javascript:alert(1)'>click me</a>"
+        )
 
 
 def test_macro_grid_profile_referential_integrity() -> None:
