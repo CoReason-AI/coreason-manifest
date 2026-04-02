@@ -36,6 +36,7 @@ type JsonPrimitiveState = (
 
 _PRIMITIVE_TYPES = frozenset((int, float, bool, str, list, dict, type(None)))
 
+
 def _validate_payload_bounds(
     value: JsonPrimitiveState, current_depth: int = 0, state: list[int] | None = None
 ) -> JsonPrimitiveState:
