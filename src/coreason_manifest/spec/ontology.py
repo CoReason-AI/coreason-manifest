@@ -62,7 +62,8 @@ def _validate_payload_bounds(
     typ = type(value)
     if typ is dict:
         nxt_depth = current_depth + 1
-        for k, v in value.items():
+        val_dict = typing.cast(dict[Any, Any], value)
+        for k, v in val_dict.items():
             if type(k) is not str:
                 raise ValueError("Dictionary keys must be strings")
             if len(k) > 10000:
@@ -70,10 +71,12 @@ def _validate_payload_bounds(
             _validate_payload_bounds(v, nxt_depth, state)
     elif typ is list:
         nxt_depth = current_depth + 1
-        for item in value:
+        val_list = typing.cast(list[Any], value)
+        for item in val_list:
             _validate_payload_bounds(item, nxt_depth, state)
     elif typ is str:
-        if len(value) > 10000:
+        val_str = typing.cast(str, value)
+        if len(val_str) > 10000:
             raise ValueError("String exceeds max length of 10000")
     elif value is not None and typ not in (int, float, bool):
         raise ValueError(f"Payload value must be a valid JSON primitive, got {typ.__name__}")
