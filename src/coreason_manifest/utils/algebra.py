@@ -127,6 +127,7 @@ def project_manifest_to_markdown(manifest: WorkflowManifest) -> str:
 
 _CACHED_ONTOLOGY_SCHEMA: dict[str, Any] | None = None
 
+
 def get_ontology_schema() -> dict[str, Any]:
     """Dynamically generate the CoReason ontology JSON schema."""
     global _CACHED_ONTOLOGY_SCHEMA
