@@ -53,26 +53,26 @@ def _validate_payload_bounds(
     if state[0] > 10000:
         raise ValueError("Payload volume exceeds absolute hardware limit of 10000 nodes (JSON Bomb protection).")
 
-    max_depth = 10
-    max_str_len = 10000
-    if current_depth > max_depth:
-        raise ValueError(f"Payload exceeds maximum recursion depth of {max_depth}")
+    if current_depth > 10:
+        raise ValueError("Payload exceeds maximum recursion depth of 10")
 
-    if isinstance(value, dict):
+    val_type = type(value)
+
+    if val_type is dict:
         for k, v in value.items():
-            if not isinstance(k, str):
+            if type(k) is not str:
                 raise ValueError("Dictionary keys must be strings")
-            if len(k) > max_str_len:
-                raise ValueError(f"Dictionary key exceeds max string length of {max_str_len}")
+            if len(k) > 10000:
+                raise ValueError("Dictionary key exceeds max string length of 10000")
             _validate_payload_bounds(v, current_depth + 1, state)
-    elif isinstance(value, list):
+    elif val_type is list:
         for item in value:
             _validate_payload_bounds(item, current_depth + 1, state)
-    elif isinstance(value, str):
-        if len(value) > max_str_len:
-            raise ValueError(f"String exceeds max length of {max_str_len}")
-    elif value is not None and (not isinstance(value, (int, float, bool))):
-        raise ValueError(f"Payload value must be a valid JSON primitive, got {type(value).__name__}")
+    elif val_type is str:
+        if len(value) > 10000:
+            raise ValueError("String exceeds max length of 10000")
+    elif value is not None and val_type not in (int, float, bool):
+        raise ValueError(f"Payload value must be a valid JSON primitive, got {val_type.__name__}")
     return value
 
 
@@ -81,9 +81,10 @@ def _canonicalize_payload(obj: Any) -> Any:
     AGENT INSTRUCTION: Mathematically strips all `None` values recursively from a payload before hashing.
     Extracted to module level to prevent function-object recreation overhead during high-frequency DAG node serialization.
     """
-    if isinstance(obj, dict):
+    # Use strict type checking (type(obj) is X) instead of isinstance for measurable performance gain in serialization hot paths.
+    if type(obj) is dict:
         return {k: _canonicalize_payload(v) for k, v in obj.items() if v is not None}
-    if isinstance(obj, list):
+    if type(obj) is list:
         return [_canonicalize_payload(v) for v in obj]
     return obj
 
