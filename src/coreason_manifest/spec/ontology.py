@@ -249,6 +249,32 @@ type SpanStatusCodeProfile = Literal["unset", "ok", "error"]
 _BYTES_MAPPING: dict[str, int] = {"float32": 4, "float64": 8, "int8": 1, "uint8": 1, "int32": 4, "int64": 8}
 
 
+# OPTIMIZATION: Moved trusted_environments out of the hot path validation function
+# and converted to a frozenset to prevent O(N) allocation on every execution.
+_TRUSTED_ENVIRONMENTS: frozenset[str] = frozenset({"aws", "gcp", "azure", "localhost", "bare-metal"})
+
+# OPTIMIZATION: Moved illegal_keys out of the hot path validation function
+# and converted to a frozenset to prevent O(N) allocation on every validation loop.
+_ILLEGAL_KEYS: frozenset[str] = frozenset(
+    {
+        "memory",
+        "context",
+        "system_prompt",
+        "chat_history",
+        "trace_context",
+        "trace_id",
+        "span_id",
+        "parent_span_id",
+        "causal_clock",
+        "state_vector",
+        "read_only_context",
+        "mutable_memory",
+        "is_delta",
+        "envelope",
+    }
+)
+
+
 class TensorStructuralFormatProfile(StrEnum):
     """
     AGENT INSTRUCTION: Mathematically aligns abstract Tensor Calculus with rigid Von Neumann Memory Hierarchy limits and IEEE 754 Floating-Point Arithmetic physics.
@@ -6747,25 +6773,8 @@ class ActionSpaceManifest(CoreasonBaseState):
                         continue
 
                     # The strict list of forbidden keys in any domain payload
-                    illegal_keys = {
-                        "memory",
-                        "context",
-                        "system_prompt",
-                        "chat_history",
-                        "trace_context",
-                        "trace_id",
-                        "span_id",
-                        "parent_span_id",
-                        "causal_clock",
-                        "state_vector",
-                        "read_only_context",
-                        "mutable_memory",
-                        "is_delta",
-                        "envelope",
-                    }
-
                     for key in properties:
-                        if key in illegal_keys:
+                        if key in _ILLEGAL_KEYS:
                             raise ValueError(
                                 f"Framework Violation: Tool '{cap.tool_name}' illegaly attempts to "
                                 f"manage execution state by defining '{key}' in its {schema_name}. "
@@ -9570,12 +9579,11 @@ class AgentNodeProfile(BaseNodeProfile):
 
         # 2. Sovereign Execution Paradox
         # Local and bare-metal environments are mathematically treated as sovereign physical enclaves.
-        trusted_environments = {"aws", "gcp", "azure", "localhost", "bare-metal"}
 
         if self.security.epistemic_security == EpistemicSecurity.CONFIDENTIAL and not set(
             self.hardware.provider_whitelist
-        ).issubset(trusted_environments):
-            invalid_targets = set(self.hardware.provider_whitelist) - trusted_environments
+        ).issubset(_TRUSTED_ENVIRONMENTS):
+            invalid_targets = set(self.hardware.provider_whitelist) - _TRUSTED_ENVIRONMENTS
             raise ValueError(
                 f"Sovereign Execution Violated: CONFIDENTIAL workloads cannot be routed to "
                 f"untrusted peer-to-peer providers. Invalid targets found: {invalid_targets}"
