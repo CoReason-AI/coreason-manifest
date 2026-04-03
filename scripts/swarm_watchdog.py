@@ -60,7 +60,8 @@ def main() -> None:
 
     try:
         if source.startswith(("http://", "https://")):
-            with urllib.request.urlopen(source) as response:  # noqa: S310
+            # Security fix: Added timeout to prevent hanging on unresponsive servers
+            with urllib.request.urlopen(source, timeout=10) as response:  # noqa: S310
                 schema_dict = json.loads(response.read().decode("utf-8"))
         else:
             with open(source, encoding="utf-8") as f:
