@@ -269,6 +269,11 @@ def test_get_ontology_schema() -> None:
     schema = get_ontology_schema()
     assert isinstance(schema, dict)
 
+    # ⚡ Bolt: Verify caching behavior and deepcopy return
+    schema2 = get_ontology_schema()
+    assert schema == schema2
+    assert schema is not schema2
+
 
 def test_validate_payload() -> None:
     with pytest.raises(ValueError, match="Unknown step"):
@@ -595,10 +600,20 @@ def test_calculate_latent_alignment_errors() -> None:
         calculate_latent_alignment(v3, v4, pol)
 
 
-@patch("coreason_manifest.utils.algebra.models_json_schema")
-def test_get_ontology_schema_empty(mock_schema: Mock) -> None:
-    mock_schema.return_value = (None, {})
-    assert get_ontology_schema() == {}
+def test_get_ontology_schema_empty() -> None:
+    import coreason_manifest.utils.algebra as algebra
+
+    # Temporarily clear the cache so the mock logic executes
+    original_cache = algebra._CACHED_ONTOLOGY_SCHEMA
+    algebra._CACHED_ONTOLOGY_SCHEMA = None
+
+    try:
+        # Temporarily clear models_to_export condition by mocking the return directly if empty
+        with patch("coreason_manifest.utils.algebra.dir", return_value=[]):
+            assert get_ontology_schema() == {}
+    finally:
+        # Restore the cache
+        algebra._CACHED_ONTOLOGY_SCHEMA = original_cache
 
 
 def test_calculate_latent_alignment_invalid_base64() -> None:
