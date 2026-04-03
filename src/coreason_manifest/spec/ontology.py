@@ -6699,6 +6699,25 @@ type AnyActionSpaceCapability = Annotated[
     ToolManifest | MCPServerManifest | EphemeralNamespacePartitionState, Field(discriminator="type")
 ]
 
+_ILLEGAL_PAYLOAD_KEYS: frozenset[str] = frozenset(
+    {
+        "memory",
+        "context",
+        "system_prompt",
+        "chat_history",
+        "trace_context",
+        "trace_id",
+        "span_id",
+        "parent_span_id",
+        "causal_clock",
+        "state_vector",
+        "read_only_context",
+        "mutable_memory",
+        "is_delta",
+        "envelope",
+    }
+)
+
 
 class ActionSpaceManifest(CoreasonBaseState):
     r"""
@@ -6790,7 +6809,7 @@ class ActionSpaceManifest(CoreasonBaseState):
 
                     # The strict list of forbidden keys in any domain payload
                     for key in properties:
-                        if key in _ILLEGAL_KEYS:
+                        if key in _ILLEGAL_PAYLOAD_KEYS:
                             raise ValueError(
                                 f"Framework Violation: Tool '{cap.tool_name}' illegaly attempts to "
                                 f"manage execution state by defining '{key}' in its {schema_name}. "
