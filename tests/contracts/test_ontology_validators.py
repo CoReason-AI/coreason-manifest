@@ -654,6 +654,43 @@ def test_mcpservermanifest_enforce_did() -> None:
     assert manifest.attestation_receipt.issuer_did == "did:coreason:123"
 
 
+def test_insight_card_profile_xss_prevention() -> None:
+    from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import InsightCardProfile
+
+    # Test that valid links work
+    InsightCardProfile(panel_id="panel_1", title="Title", markdown_content="[click me](https://coreason.ai)")
+
+    malicious_payloads = [
+        "[click me](javascript:alert(1))",
+        "[click me](javascript :alert(1))",
+        "[click me]( javascript:alert(1))",
+        "[click me](\njavascript:alert(1))",
+        "[click me](javascript\n:alert(1))",
+        "[click me](j\na\nv\na\ns\nc\nr\ni\np\nt\n:alert(1))",
+        "[click me](javascript&#58;alert(1))",
+        "[click me](javascript&#x3a;alert(1))",
+        "[click me]( javascript&#58alert(1))",
+        "[click me]( javascript&#x3aalert(1))",
+        "[click me]( javascript&#x3Aalert(1))",
+        "[click me](javascr&#105;pt:alert(1))",
+        "[click me](javascript%3Aalert(1))",
+        "[click me](javascript%3aalert(1))",
+        "[click me](data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==)",
+    ]
+
+    for payload in malicious_payloads:
+        with pytest.raises(ValidationError, match="Malicious executable link scheme detected"):
+            InsightCardProfile(panel_id="panel_1", title="Title", markdown_content=payload)
+
+    # Note: "<a href='javascript:alert(1)'>click me</a>" is caught by `sanitize_markdown` first
+    with pytest.raises(ValidationError, match="HTML tags are prohibited"):
+        InsightCardProfile(
+            panel_id="panel_1", title="Title", markdown_content="<a href='javascript:alert(1)'>click me</a>"
+        )
+
+
 def test_macro_grid_profile_referential_integrity() -> None:
     from pydantic import ValidationError
 
