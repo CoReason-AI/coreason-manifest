@@ -19,7 +19,7 @@ import operator
 import re
 import typing
 import urllib.parse
-from enum import StrEnum
+from enum import Enum, StrEnum
 from typing import Annotated, Any, Literal, Self
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, StringConstraints, field_validator, model_validator
@@ -1482,25 +1482,25 @@ class RoutingFrontierPolicy(CoreasonBaseState):
                 try:
                     val = int(values["max_latency_ms"])
                     values["max_latency_ms"] = int(max(1, min(val, 86400000)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if "max_cost_magnitude_per_token" in values:
                 try:
                     val = int(values["max_cost_magnitude_per_token"])
                     values["max_cost_magnitude_per_token"] = int(max(1, min(val, 1000000000)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if "min_capability_score" in values:
                 try:
                     val_float = float(values["min_capability_score"])
                     values["min_capability_score"] = float(max(0.0, min(val_float, 1.0)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if values.get("max_carbon_intensity_gco2eq_kwh") is not None:
                 try:
                     val_float = float(values["max_carbon_intensity_gco2eq_kwh"])
                     values["max_carbon_intensity_gco2eq_kwh"] = float(max(0.0, min(val_float, 10000.0)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
         return values
 
@@ -1692,6 +1692,21 @@ class ContextualizedSourceEntity(CoreasonBaseState):
         description="Surrounding semantic neighbors. AGENT INSTRUCTION: Topological Exemption applied. Do NOT sort this array, as its chronological/spatial sequence is its mathematical state.",
     )
     source_system_provenance_flag: bool = Field(description="Indicates if the exact upstream origin system is known.")
+
+
+class EpistemicUpsamplingTask(CoreasonBaseState):
+    """
+    Authorizes a connectionist agent to execute an abductive leap, reversing lossy compression by utilizing a contextual envelope to map a generalized artifact to a highly specific ontological node.
+    """
+
+    source_entity: ContextualizedSourceEntity
+    target_ontological_granularity: str = Field(max_length=255)
+    upsampling_confidence_threshold: float = Field(ge=0.0, le=1.0)
+    justification_vectors: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
+        min_length=1,
+        max_length=1000,
+        description="AGENT INSTRUCTION: Topological Exemption applied. Do NOT sort this array, as the chronological sequence of extraction acts as mathematical state.",
+    )
 
 
 class DataFidelityReceipt(CoreasonBaseState):
@@ -7117,7 +7132,7 @@ class MarketContract(CoreasonBaseState):
                 try:
                     mc_int = int(mc)
                     sp_int = int(sp)
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             cmc = max(0, min(mc_int, 1000000000))
             if sp_int > cmc:
@@ -7195,6 +7210,11 @@ class MechanisticAuditContract(CoreasonBaseState):
         return self
 
 
+class DerivationMode(str, Enum):
+    DIRECT_TRANSLATION = "direct_translation"
+    ABDUCTIVE_UPSAMPLING = "abductive_upsampling"
+
+
 class EpistemicProvenanceReceipt(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Establishes a formal Data Provenance anchor, cryptographically locking a semantic state to its exact physical, temporal, or neural genesis block on the Merkle-DAG.
@@ -7230,6 +7250,8 @@ class EpistemicProvenanceReceipt(CoreasonBaseState):
         default=None,
         description="The cryptographic, tamper-evident chain of custody tracing this memory across multiple swarm hops.",
     )
+    derivation_mode: DerivationMode
+    justification_hash: str | None = Field(None, max_length=64)
 
 
 class MultimodalArtifactReceipt(CoreasonBaseState):
@@ -11937,3 +11959,5 @@ class NeurosymbolicInferenceRequest(CoreasonBaseState):
 ContextualizedSourceEntity.model_rebuild()
 DataFidelityReceipt.model_rebuild()
 NeurosymbolicInferenceRequest.model_rebuild()
+
+EpistemicUpsamplingTask.model_rebuild()
