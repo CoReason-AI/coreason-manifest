@@ -7,7 +7,6 @@
 # Commercial use beyond a 30-day trial requires a separate license
 #
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
-
 from typing import Any
 
 import hypothesis.strategies as st
@@ -19,12 +18,18 @@ from coreason_manifest.spec.ontology import (
     AgentNodeProfile,
     BaseStateEvent,
     BrowserDOMState,
+    CognitiveUncertaintyProfile,
     ComputeTier,
+    ContextualizedSourceEntity,
     DAGTopologyManifest,
+    DataFidelityReceipt,
+    EpistemicCompressionSLA,
     EpistemicSecurity,
     HardwareProfile,
     MultimodalTokenAnchorState,
+    NeurosymbolicInferenceRequest,
     QuorumPolicy,
+    RefusalToReasonError,
     SE3TransformProfile,
     SecurityProfile,
     StateHydrationManifest,
@@ -327,3 +332,42 @@ def test_fuzz_network_topology_paradox(egress_obfuscation: bool, network_isolati
         )
         assert agent.security.egress_obfuscation == egress_obfuscation
         assert agent.security.network_isolation == network_isolation
+
+
+
+
+@given(
+    epistemic_gap=st.floats(min_value=0.5, max_value=1.0),
+    min_fidelity_threshold=st.floats(min_value=0.0, max_value=0.49),
+    token_density=st.integers(min_value=0, max_value=5),  # simulating context truncation
+)
+def test_refusal_to_reason_fuzzing(epistemic_gap: float, min_fidelity_threshold: float, token_density: int) -> None:
+    source_entity = ContextualizedSourceEntity(
+        target_string="Discharge",
+        contextual_envelope=[],
+        source_system_provenance_flag=False,
+    )
+    fidelity_receipt = DataFidelityReceipt(
+        contextual_completeness_score=0.0,
+        surrounding_token_density=token_density,
+    )
+    uncertainty_profile = CognitiveUncertaintyProfile(
+        aleatoric_noise_ratio=0.1,
+        epistemic_knowledge_gap=epistemic_gap,
+        semantic_consistency_score=0.5,
+        requires_abductive_escalation=False,
+    )
+    sla = EpistemicCompressionSLA(
+        strict_probability_retention=True,
+        max_allowed_entropy_loss=0.5,
+        required_grounding_density="dense",
+        minimum_fidelity_threshold=min_fidelity_threshold,
+    )
+
+    with pytest.raises(RefusalToReasonError):
+        NeurosymbolicInferenceRequest(
+            source_entity=source_entity,
+            fidelity_receipt=fidelity_receipt,
+            uncertainty_profile=uncertainty_profile,
+            sla=sla,
+        )
