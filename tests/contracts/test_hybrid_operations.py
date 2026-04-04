@@ -10,11 +10,12 @@
 
 
 import pytest
-from pydantic import ValidationError
+from pydantic import AnyUrl, ValidationError
 
 from coreason_manifest.spec.ontology import (
     CognitiveCritiqueProfile,
     ContextualizedSourceEntity,
+    DerivationMode,
     EpistemicProvenanceReceipt,
     InterventionIntent,
     InterventionPolicy,
@@ -22,18 +23,18 @@ from coreason_manifest.spec.ontology import (
 )
 
 
-def test_epistemic_sealing_bounds():
+def test_epistemic_sealing_bounds() -> None:
     with pytest.raises(ValidationError) as exc:
         EpistemicProvenanceReceipt(
             extracted_by="did:coreason:test1",
             source_event_id="test-event-id",
-            derivation_mode="direct_translation",
+            derivation_mode=DerivationMode.DIRECT_TRANSLATION,
             revision_loops_executed=105,
         )
     assert "Input should be less than or equal to 100" in str(exc.value)
 
 
-def test_hotl_telemetry_policy_gate():
+def test_hotl_telemetry_policy_gate() -> None:
     with pytest.raises(ValidationError) as exc:
         InterventionPolicy(trigger="on_start", emit_telemetry_on_revision=True, async_observation_port=None)
     assert (
@@ -45,13 +46,13 @@ def test_hotl_telemetry_policy_gate():
     policy = InterventionPolicy(
         trigger="on_start",
         emit_telemetry_on_revision=True,
-        async_observation_port="wss://telemetry.coreason.ai/hotl",
+        async_observation_port=AnyUrl("wss://telemetry.coreason.ai/hotl"),
     )
     assert policy.emit_telemetry_on_revision is True
     assert str(policy.async_observation_port) == "wss://telemetry.coreason.ai/hotl"
 
 
-def test_terminal_handoff_isomorphism():
+def test_terminal_handoff_isomorphism() -> None:
     source_entity = ContextualizedSourceEntity(
         target_string="test string", contextual_envelope=[], source_system_provenance_flag=False
     )
