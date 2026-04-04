@@ -98,7 +98,6 @@ def _canonicalize_payload(obj: Any) -> Any:
     return obj
 
 
-
 def _validate_ssrf_safety(url: str) -> str:
     """
     AGENT INSTRUCTION: Implements rigorous Network Topology and Server-Side Request Forgery (SSRF) Quarantine logic to guarantee mathematical zero-trust coordinate mapping.

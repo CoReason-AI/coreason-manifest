@@ -57,6 +57,7 @@ def test_http_transport_profile_valid(url: str) -> None:
     profile = HTTPTransportProfile(uri=url)
     assert str(profile.uri) == url
 
+
 @pytest.mark.parametrize(
     "url",
     [
