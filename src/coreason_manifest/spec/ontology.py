@@ -518,7 +518,6 @@ class RefusalToReasonError(Exception):
     """Exception raised when inference is aborted due to severe semantic degradation."""
 
 
-
 class CoreasonBaseState(BaseModel):
     r"""
     AGENT INSTRUCTION: The immutable mathematical bedrock of the Hollow Data Plane, utilizing RFC 8785 Canonical JSON Serialization to guarantee structural determinism across the swarm.

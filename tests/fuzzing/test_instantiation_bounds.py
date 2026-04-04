@@ -334,8 +334,6 @@ def test_fuzz_network_topology_paradox(egress_obfuscation: bool, network_isolati
         assert agent.security.network_isolation == network_isolation
 
 
-
-
 @given(
     epistemic_gap=st.floats(min_value=0.5, max_value=1.0),
     min_fidelity_threshold=st.floats(min_value=0.0, max_value=0.49),

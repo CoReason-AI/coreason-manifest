@@ -156,17 +156,17 @@ def test_neurosymbolic_inference_request_requires_contextualized_entity() -> Non
     with pytest.raises(ValidationError) as exc_info:
         NeurosymbolicInferenceRequest(
             source_entity="Amoxicillin 500mg",  # type: ignore
-            fidelity_receipt={ # type: ignore
+            fidelity_receipt={  # type: ignore
                 "contextual_completeness_score": 0.9,
                 "surrounding_token_density": 10,
             },
-            uncertainty_profile={ # type: ignore
+            uncertainty_profile={  # type: ignore
                 "aleatoric_noise_ratio": 0.05,
                 "epistemic_knowledge_gap": 0.2,
                 "semantic_consistency_score": 0.9,
                 "requires_abductive_escalation": False,
             },
-            sla={ # type: ignore
+            sla={  # type: ignore
                 "strict_probability_retention": True,
                 "max_allowed_entropy_loss": 0.5,
                 "required_grounding_density": "dense",
