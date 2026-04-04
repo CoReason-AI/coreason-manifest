@@ -1694,6 +1694,21 @@ class ContextualizedSourceEntity(CoreasonBaseState):
     source_system_provenance_flag: bool = Field(description="Indicates if the exact upstream origin system is known.")
 
 
+class EpistemicUpsamplingTask(CoreasonBaseState):
+    """
+    Authorizes a connectionist agent to execute an abductive leap, reversing lossy compression by utilizing a contextual envelope to map a generalized artifact to a highly specific ontological node.
+    """
+
+    source_entity: ContextualizedSourceEntity
+    target_ontological_granularity: str = Field(max_length=255)
+    upsampling_confidence_threshold: float = Field(ge=0.0, le=1.0)
+    justification_vectors: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
+        min_length=1,
+        max_length=1000,
+        description="AGENT INSTRUCTION: Topological Exemption applied. Do NOT sort this array, as the chronological sequence of extraction acts as mathematical state.",
+    )
+
+
 class DataFidelityReceipt(CoreasonBaseState):
     """
     Store pre-inference calculations.
@@ -7195,6 +7210,11 @@ class MechanisticAuditContract(CoreasonBaseState):
         return self
 
 
+class DerivationMode(StrEnum):
+    DIRECT_TRANSLATION = "direct_translation"
+    ABDUCTIVE_UPSAMPLING = "abductive_upsampling"
+
+
 class EpistemicProvenanceReceipt(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Establishes a formal Data Provenance anchor, cryptographically locking a semantic state to its exact physical, temporal, or neural genesis block on the Merkle-DAG.
@@ -7230,6 +7250,8 @@ class EpistemicProvenanceReceipt(CoreasonBaseState):
         default=None,
         description="The cryptographic, tamper-evident chain of custody tracing this memory across multiple swarm hops.",
     )
+    derivation_mode: DerivationMode
+    justification_hash: str | None = Field(None, max_length=64)
 
 
 class MultimodalArtifactReceipt(CoreasonBaseState):
@@ -11937,3 +11959,5 @@ class NeurosymbolicInferenceRequest(CoreasonBaseState):
 ContextualizedSourceEntity.model_rebuild()
 DataFidelityReceipt.model_rebuild()
 NeurosymbolicInferenceRequest.model_rebuild()
+
+EpistemicUpsamplingTask.model_rebuild()

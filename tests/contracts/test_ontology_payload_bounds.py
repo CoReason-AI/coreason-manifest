@@ -7,14 +7,18 @@
 # Commercial use beyond a 30-day trial requires a separate license
 #
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
-
 from typing import Any, cast
 
 import hypothesis.strategies as st
 import pytest
 from hypothesis import HealthCheck, given, settings
+from pydantic import ValidationError
 
-from coreason_manifest.spec.ontology import JsonPrimitiveState, StateHydrationManifest, _validate_payload_bounds
+from coreason_manifest.spec.ontology import (
+    JsonPrimitiveState,
+    StateHydrationManifest,
+    _validate_payload_bounds,
+)
 
 # 1. Define the Valid Mathematical Space
 valid_json_st = st.recursive(
@@ -125,7 +129,6 @@ def test_payload_bounds_invalid_type_nested() -> None:
 
 def test_state_vector_memory_bounds() -> None:
     import pytest
-    from pydantic import ValidationError
 
     from coreason_manifest.spec.ontology import StateVectorProfile
 
@@ -148,7 +151,6 @@ def test_state_vector_memory_bounds() -> None:
 
 def test_neurosymbolic_inference_request_requires_contextualized_entity() -> None:
     import pytest
-    from pydantic import ValidationError
 
     from coreason_manifest.spec.ontology import NeurosymbolicInferenceRequest
 

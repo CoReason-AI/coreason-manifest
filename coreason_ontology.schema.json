@@ -5131,6 +5131,14 @@
       "title": "DelegatedCapabilityManifest",
       "type": "object"
     },
+    "DerivationMode": {
+      "enum": [
+        "direct_translation",
+        "abductive_upsampling"
+      ],
+      "title": "DerivationMode",
+      "type": "string"
+    },
     "DifferentiableLogicConstraint": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Bridges the Neurosymbolic divide by mapping discrete Satisfiability Modulo Theories (SMT) or Lean4 logic proofs into continuous, differentiable loss gradients.\n\nCAUSAL AFFORDANCE: Allows the backpropagation engine to apply a continuous, differentiable penalty (relaxation) to the LLM's probability mass when it violates the formal syntactic rules encoded in the `formal_syntax_smt` representation.\n\nEPISTEMIC BOUNDS: The geometric penalty is clamped by `relaxation_epsilon` (`ge=0.0, le=1.0`) to prevent gradient explosion. The logical schema is locked to the 128-char `constraint_id` CID to structurally bound string evaluation scope.\n\nMCP ROUTING TRIGGERS: Satisfiability Modulo Theories, Neurosymbolic Relaxation, Differentiable Theorem Proving, Probabilistic Logic Networks, Continuous Penalty",
@@ -6730,11 +6738,28 @@
           ],
           "default": null,
           "description": "The cryptographic, tamper-evident chain of custody tracing this memory across multiple swarm hops."
+        },
+        "derivation_mode": {
+          "$ref": "#/$defs/DerivationMode"
+        },
+        "justification_hash": {
+          "anyOf": [
+            {
+              "maxLength": 64,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Justification Hash"
         }
       },
       "required": [
         "extracted_by",
-        "source_event_id"
+        "source_event_id",
+        "derivation_mode"
       ],
       "title": "EpistemicProvenanceReceipt",
       "type": "object"
@@ -7197,6 +7222,45 @@
         "compression_sla"
       ],
       "title": "EpistemicTransmutationTask",
+      "type": "object"
+    },
+    "EpistemicUpsamplingTask": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAuthorizes a connectionist agent to execute an abductive leap, reversing lossy compression by utilizing a contextual envelope to map a generalized artifact to a highly specific ontological node.",
+      "properties": {
+        "source_entity": {
+          "$ref": "#/$defs/ContextualizedSourceEntity"
+        },
+        "target_ontological_granularity": {
+          "maxLength": 255,
+          "title": "Target Ontological Granularity",
+          "type": "string"
+        },
+        "upsampling_confidence_threshold": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Upsampling Confidence Threshold",
+          "type": "number"
+        },
+        "justification_vectors": {
+          "description": "AGENT INSTRUCTION: Topological Exemption applied. Do NOT sort this array, as the chronological sequence of extraction acts as mathematical state.",
+          "items": {
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "maxItems": 1000,
+          "minItems": 1,
+          "title": "Justification Vectors",
+          "type": "array"
+        }
+      },
+      "required": [
+        "source_entity",
+        "target_ontological_granularity",
+        "upsampling_confidence_threshold",
+        "justification_vectors"
+      ],
+      "title": "EpistemicUpsamplingTask",
       "type": "object"
     },
     "EscalationContract": {
