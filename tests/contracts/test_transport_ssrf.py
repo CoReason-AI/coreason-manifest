@@ -9,7 +9,7 @@
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
 import pytest
-from pydantic import ValidationError
+from pydantic import HttpUrl, ValidationError
 
 from coreason_manifest.spec.ontology import HTTPTransportProfile, SSETransportProfile
 
@@ -27,7 +27,7 @@ from coreason_manifest.spec.ontology import HTTPTransportProfile, SSETransportPr
 )
 def test_http_transport_profile_ssrf(url: str) -> None:
     with pytest.raises(ValidationError, match=r"SSRF (topological violation|restricted IP) detected"):
-        HTTPTransportProfile(uri=url)
+        HTTPTransportProfile(uri=HttpUrl(url))
 
 
 @pytest.mark.parametrize(
@@ -43,7 +43,7 @@ def test_http_transport_profile_ssrf(url: str) -> None:
 )
 def test_sse_transport_profile_ssrf(url: str) -> None:
     with pytest.raises(ValidationError, match=r"SSRF (topological violation|restricted IP) detected"):
-        SSETransportProfile(uri=url)
+        SSETransportProfile(uri=HttpUrl(url))
 
 
 @pytest.mark.parametrize(
@@ -54,7 +54,7 @@ def test_sse_transport_profile_ssrf(url: str) -> None:
     ],
 )
 def test_http_transport_profile_valid(url: str) -> None:
-    profile = HTTPTransportProfile(uri=url)
+    profile = HTTPTransportProfile(uri=HttpUrl(url))
     assert str(profile.uri) == url
 
 
@@ -66,5 +66,5 @@ def test_http_transport_profile_valid(url: str) -> None:
     ],
 )
 def test_sse_transport_profile_valid(url: str) -> None:
-    profile = SSETransportProfile(uri=url)
+    profile = SSETransportProfile(uri=HttpUrl(url))
     assert str(profile.uri) == url
