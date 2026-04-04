@@ -6691,6 +6691,19 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes a formal Data Provenance anchor, cryptographically locking a semantic state to its exact physical, temporal, or neural genesis block on the Merkle-DAG.\n\nCAUSAL AFFORDANCE: Unlocks deterministic causal tracing and auditability, granting the orchestrator the physical capability to walk the Knowledge Graph backward across multiple swarm hops to the raw multimodal source.\n\nEPISTEMIC BOUNDS: Geometric topology rigidly anchored by the `source_event_id` (128-char CID regex `^[a-zA-Z0-9_.:-]+$`). Spatial and temporal origin physically clamped by the optional multimodal anchor (`MultimodalTokenAnchorState`).\n\nMCP ROUTING TRIGGERS: Data Provenance, Causal Tracing, Epistemic Anchoring, Bijective Mapping, Genesis Block",
       "properties": {
+        "fidelity_receipt_hash": {
+          "description": "Cryptographic pointer back to the DataFidelityReceipt generated at the Input Gate.",
+          "maxLength": 64,
+          "title": "Fidelity Receipt Hash",
+          "type": "string"
+        },
+        "revision_loops_executed": {
+          "description": "Records the exact cycle count the neural model required to pass the verifier.",
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Revision Loops Executed",
+          "type": "integer"
+        },
         "extracted_by": {
           "$ref": "#/$defs/NodeIdentifierState",
           "description": "The Content Identifier (CID) of the agent node that extracted this payload."
@@ -9782,6 +9795,18 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Supervisory Control Theory (Ramadge & Wonham) for Discrete-Event Systems, acting as a formal Mixed-Initiative Control mechanism.\n\nCAUSAL AFFORDANCE: Physically halts the active Directed Acyclic Graph (DAG) traversal or Petri Net reachability loop, preventing the swarm from committing a state transition until an explicit, authorized Pearlian intervention is negotiated by the human supervisor.\n\nEPISTEMIC BOUNDS: Execution suspension is rigorously bounded by the temporal logic of the `adjudication_deadline` (a float representing a UNIX timestamp) and the attached FallbackSLA. The `proposed_action` schema is clamped against deep recursion constraints.\n\nMCP ROUTING TRIGGERS: Supervisory Control Theory, Mixed-Initiative System, Discrete-Event System, Bounded Delay, Pearlian Intervention",
       "properties": {
+        "failure_context": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TerminalCognitiveFailure"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Packages the exact contextual state at the moment of computational failure."
+        },
         "type": {
           "const": "request",
           "default": "request",
@@ -9856,6 +9881,27 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Executes Supervisory Control Theory by embedding\ndeterministic execution hooks (transitions) into the swarm's Petri Net\nlifecycle graph. As a ...Policy suffix, this defines rigid mathematical\nboundaries.\n\nCAUSAL AFFORDANCE: Physically halts the autonomous execution loop (if blocking\nis True, default=True) at the exact topological trigger coordinate\n(LifecycleTriggerEvent), forcing the orchestrator to await an external\nInterventionReceipt before proceeding.\n\nEPISTEMIC BOUNDS: The interruption locus is rigidly confined to the\nLifecycleTriggerEvent literal automaton. The structural mutation permissions\nduring the pause are strictly governed by the optional scope\n(BoundedInterventionScopePolicy | None, default=None).\n\nMCP ROUTING TRIGGERS: Supervisory Control Theory, Petri Net Transition,\nLifecycle Hook, Execution Halting, Mixed-Initiative Interaction",
       "properties": {
+        "async_observation_port": {
+          "anyOf": [
+            {
+              "format": "uri",
+              "maxLength": 2000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The endpoint for emitting non-blocking shadow telemetry.",
+          "title": "Async Observation Port"
+        },
+        "emit_telemetry_on_revision": {
+          "default": false,
+          "description": "The toggle to enable shadow monitoring on revision loops.",
+          "title": "Emit Telemetry On Revision",
+          "type": "boolean"
+        },
         "trigger": {
           "$ref": "#/$defs/LifecycleTriggerEvent",
           "description": "The exact topological lifecycle event that triggers this intervention."
@@ -15848,6 +15894,39 @@
         "state_hash"
       ],
       "title": "TemporalCheckpointState",
+      "type": "object"
+    },
+    "TerminalCognitiveFailure": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nA terminal state object generated when the Proposer-Verifier macro-topology exhausts its max_revision_loops without achieving ontological alignment. Packages the failure state for HITL routing.",
+      "properties": {
+        "source_entity": {
+          "$ref": "#/$defs/ContextualizedSourceEntity"
+        },
+        "last_rejected_hypothesis_hash": {
+          "description": "A pointer to the final abductive guess generated by the Proposer.",
+          "maxLength": 64,
+          "title": "Last Rejected Hypothesis Hash",
+          "type": "string"
+        },
+        "final_critique_schema": {
+          "$ref": "#/$defs/CognitiveCritiqueProfile"
+        },
+        "loops_exhausted": {
+          "description": "The cycle count at the time of failure.",
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Loops Exhausted",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "source_entity",
+        "last_rejected_hypothesis_hash",
+        "final_critique_schema",
+        "loops_exhausted"
+      ],
+      "title": "TerminalCognitiveFailure",
       "type": "object"
     },
     "TensorStructuralFormatProfile": {
