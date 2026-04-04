@@ -27,6 +27,34 @@ def test_bipartite_identity_violation() -> None:
     assert "Proposer and Verifier cannot be the same node" in str(exc_info.value)
 
 
+def test_missing_proposer_in_registry() -> None:
+    nodes: dict[str, Any] = {
+        "did:coreason:system-1": SystemNodeProfile(description="System 1", type="system"),
+    }
+    with pytest.raises(ValidationError) as exc_info:
+        NeurosymbolicVerificationTopologyManifest(
+            nodes=nodes,
+            proposer_node_id="did:coreason:agent-missing",
+            verifier_node_id="did:coreason:system-1",
+            max_revision_loops=10,
+        )
+    assert "Proposer node did:coreason:agent-missing not found" in str(exc_info.value)
+
+
+def test_missing_verifier_in_registry() -> None:
+    nodes: dict[str, Any] = {
+        "did:coreason:agent-1": AgentNodeProfile(description="Agent 1", type="agent"),
+    }
+    with pytest.raises(ValidationError) as exc_info:
+        NeurosymbolicVerificationTopologyManifest(
+            nodes=nodes,
+            proposer_node_id="did:coreason:agent-1",
+            verifier_node_id="did:coreason:system-missing",
+            max_revision_loops=10,
+        )
+    assert "Verifier node did:coreason:system-missing not found" in str(exc_info.value)
+
+
 def test_bipartite_type_violation_both_agents() -> None:
     nodes: dict[str, Any] = {
         "did:coreason:agent-1": AgentNodeProfile(description="Agent 1", type="agent"),
