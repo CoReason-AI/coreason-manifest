@@ -3395,18 +3395,18 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Pearlian Structural Causal Models (SCMs) and Variational Free Energy to mathematically quantify and partition irreducible aleatoric noise from actionable epistemic knowledge gaps.\n\nCAUSAL AFFORDANCE: Unlocks non-monotonic logic via Pearlian do-operators, computing exactly when to trigger a structural abductive escalation or active inference loop via the `requires_abductive_escalation` flag.\n\nEPISTEMIC BOUNDS: Enforces absolute mathematical float boundaries `[ge=0.0, le=1.0]` on `aleatoric_entropy`, `epistemic_uncertainty`, and `semantic_consistency_score`, mathematically preventing probability wave overflow across all three continuous dimensions.\n\nMCP ROUTING TRIGGERS: Structural Causal Models, Active Inference, Variational Free Energy, Aleatoric Entropy, Pearlian Do-Calculus",
       "properties": {
-        "aleatoric_entropy": {
-          "description": "Irreducible ambiguity detected in the observational fields (P(y|x)).",
+        "aleatoric_noise_ratio": {
+          "description": "Measures inherent string ambiguity.",
           "maximum": 1.0,
           "minimum": 0.0,
-          "title": "Aleatoric Entropy",
+          "title": "Aleatoric Noise Ratio",
           "type": "number"
         },
-        "epistemic_uncertainty": {
-          "description": "The causal gap demanding Do-Calculus Interventions (P(y|do(x))).",
+        "epistemic_knowledge_gap": {
+          "description": "Measures missing structural context (U_e).",
           "maximum": 1.0,
           "minimum": 0.0,
-          "title": "Epistemic Uncertainty",
+          "title": "Epistemic Knowledge Gap",
           "type": "number"
         },
         "semantic_consistency_score": {
@@ -3423,8 +3423,8 @@
         }
       },
       "required": [
-        "aleatoric_entropy",
-        "epistemic_uncertainty",
+        "aleatoric_noise_ratio",
+        "epistemic_knowledge_gap",
         "semantic_consistency_score",
         "requires_abductive_escalation"
       ],
@@ -4042,6 +4042,40 @@
         "max_token_budget"
       ],
       "title": "ContextExpansionPolicy",
+      "type": "object"
+    },
+    "ContextualizedSourceEntity": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nReplaces raw baseline string inputs for inference payloads.",
+      "properties": {
+        "target_string": {
+          "description": "The explicit item to map.",
+          "maxLength": 100000,
+          "title": "Target String",
+          "type": "string"
+        },
+        "contextual_envelope": {
+          "description": "Surrounding semantic neighbors. AGENT INSTRUCTION: Topological Exemption applied. Do NOT sort this array, as its chronological/spatial sequence is its mathematical state.",
+          "items": {
+            "maxLength": 100000,
+            "type": "string"
+          },
+          "maxItems": 10000,
+          "title": "Contextual Envelope",
+          "type": "array"
+        },
+        "source_system_provenance_flag": {
+          "description": "Indicates if the exact upstream origin system is known.",
+          "title": "Source System Provenance Flag",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "target_string",
+        "contextual_envelope",
+        "source_system_provenance_flag"
+      ],
+      "title": "ContextualizedSourceEntity",
       "type": "object"
     },
     "ContinuousMutationPolicy": {
@@ -4921,6 +4955,31 @@
         "max_fan_out"
       ],
       "title": "DAGTopologyManifest",
+      "type": "object"
+    },
+    "DataFidelityReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nStore pre-inference calculations.",
+      "properties": {
+        "contextual_completeness_score": {
+          "description": "Represents the density of the contextual envelope.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Contextual Completeness Score",
+          "type": "number"
+        },
+        "surrounding_token_density": {
+          "description": "Count of valid tokens in the contextual_envelope.",
+          "minimum": 0,
+          "title": "Surrounding Token Density",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "contextual_completeness_score",
+        "surrounding_token_density"
+      ],
+      "title": "DataFidelityReceipt",
       "type": "object"
     },
     "DefeasibleAttackEvent": {
@@ -6213,11 +6272,19 @@
           ],
           "title": "Required Grounding Density",
           "type": "string"
+        },
+        "minimum_fidelity_threshold": {
+          "description": "Mathematical boundary condition (epsilon_max).",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Minimum Fidelity Threshold",
+          "type": "number"
         }
       },
       "required": [
         "max_allowed_entropy_loss",
-        "required_grounding_density"
+        "required_grounding_density",
+        "minimum_fidelity_threshold"
       ],
       "title": "EpistemicCompressionSLA",
       "type": "object"
@@ -11560,6 +11627,36 @@
         "timeout_ms"
       ],
       "title": "NeuroSymbolicHandoffContract",
+      "type": "object"
+    },
+    "NeurosymbolicInferenceRequest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nCore inference payload envelope orchestrating the pre-inference gate.",
+      "properties": {
+        "source_entity": {
+          "$ref": "#/$defs/ContextualizedSourceEntity",
+          "description": "The source data to process."
+        },
+        "fidelity_receipt": {
+          "$ref": "#/$defs/DataFidelityReceipt",
+          "description": "Pre-inference completeness calculations."
+        },
+        "uncertainty_profile": {
+          "$ref": "#/$defs/CognitiveUncertaintyProfile",
+          "description": "The uncertainty bounds of the payload."
+        },
+        "sla": {
+          "$ref": "#/$defs/EpistemicCompressionSLA",
+          "description": "The execution constraints and boundaries."
+        }
+      },
+      "required": [
+        "source_entity",
+        "fidelity_receipt",
+        "uncertainty_profile",
+        "sla"
+      ],
+      "title": "NeurosymbolicInferenceRequest",
       "type": "object"
     },
     "NodeIdentifierState": {

@@ -213,7 +213,10 @@ def align_semantic_manifolds(
     require_dense = any(mod in ["raster_image", "tabular_grid"] for mod in target_modalities)
     density: Literal["sparse", "dense", "exhaustive"] = "dense" if require_dense else "sparse"
     sla = EpistemicCompressionSLA(
-        strict_probability_retention=True, max_allowed_entropy_loss=0.01, required_grounding_density=density
+        strict_probability_retention=True,
+        max_allowed_entropy_loss=0.01,
+        required_grounding_density=density,
+        minimum_fidelity_threshold=0.5,
     )
     return EpistemicTransmutationTask(
         task_id=task_id, artifact_event_id=artifact_event_id, target_modalities=target_modalities, compression_sla=sla

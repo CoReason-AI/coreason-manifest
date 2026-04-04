@@ -514,6 +514,10 @@ def _inject_workflow_examples(schema: dict[str, Any]) -> None:
     ]
 
 
+class RefusalToReasonError(ValueError):
+    """Exception raised when inference is aborted due to severe semantic degradation."""
+
+
 class CoreasonBaseState(BaseModel):
     r"""
     AGENT INSTRUCTION: The immutable mathematical bedrock of the Hollow Data Plane, utilizing RFC 8785 Canonical JSON Serialization to guarantee structural determinism across the swarm.
@@ -1677,6 +1681,30 @@ class CognitiveStateProfile(CoreasonBaseState):
     )
 
 
+class ContextualizedSourceEntity(CoreasonBaseState):
+    """
+    Replaces raw baseline string inputs for inference payloads.
+    """
+
+    target_string: str = Field(max_length=100000, description="The explicit item to map.")
+    contextual_envelope: list[Annotated[str, StringConstraints(max_length=100000)]] = Field(
+        max_length=10000,
+        description="Surrounding semantic neighbors. AGENT INSTRUCTION: Topological Exemption applied. Do NOT sort this array, as its chronological/spatial sequence is its mathematical state.",
+    )
+    source_system_provenance_flag: bool = Field(description="Indicates if the exact upstream origin system is known.")
+
+
+class DataFidelityReceipt(CoreasonBaseState):
+    """
+    Store pre-inference calculations.
+    """
+
+    contextual_completeness_score: float = Field(
+        ge=0.0, le=1.0, description="Represents the density of the contextual envelope."
+    )
+    surrounding_token_density: int = Field(ge=0, description="Count of valid tokens in the contextual_envelope.")
+
+
 class CognitiveUncertaintyProfile(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Formalizes Pearlian Structural Causal Models (SCMs) and Variational Free Energy to mathematically quantify and partition irreducible aleatoric noise from actionable epistemic knowledge gaps.
@@ -1689,12 +1717,8 @@ class CognitiveUncertaintyProfile(CoreasonBaseState):
 
     """
 
-    aleatoric_entropy: float = Field(
-        ge=0.0, le=1.0, description="Irreducible ambiguity detected in the observational fields (P(y|x))."
-    )
-    epistemic_uncertainty: float = Field(
-        ge=0.0, le=1.0, description="The causal gap demanding Do-Calculus Interventions (P(y|do(x)))."
-    )
+    aleatoric_noise_ratio: float = Field(ge=0.0, le=1.0, description="Measures inherent string ambiguity.")
+    epistemic_knowledge_gap: float = Field(ge=0.0, le=1.0, description="Measures missing structural context (U_e).")
     semantic_consistency_score: float = Field(
         ge=0.0, le=1.0, description="Counterfactual Geometries representing alternative timeline vectors."
     )
@@ -4441,6 +4465,9 @@ class EpistemicCompressionSLA(CoreasonBaseState):
     )
     required_grounding_density: Literal["sparse", "dense", "exhaustive"] = Field(
         description="Dictates the required granularity of the MultimodalTokenAnchorState (e.g., must the model map every single entity, or just the global claim?)."
+    )
+    minimum_fidelity_threshold: float = Field(
+        ge=0.0, le=1.0, description="Mathematical boundary condition (epsilon_max)."
     )
 
 
@@ -11886,3 +11913,27 @@ LiquidTypeContract.model_rebuild()
 HoareLogicProofReceipt.model_rebuild()
 AsymptoticComplexityReceipt.model_rebuild()
 TeleologicalIsometryReceipt.model_rebuild()
+
+
+class NeurosymbolicInferenceRequest(CoreasonBaseState):
+    """
+    Core inference payload envelope orchestrating the pre-inference gate.
+    """
+
+    source_entity: ContextualizedSourceEntity = Field(description="The source data to process.")
+    fidelity_receipt: DataFidelityReceipt = Field(description="Pre-inference completeness calculations.")
+    uncertainty_profile: CognitiveUncertaintyProfile = Field(description="The uncertainty bounds of the payload.")
+    sla: EpistemicCompressionSLA = Field(description="The execution constraints and boundaries.")
+
+    @model_validator(mode="after")
+    def validate_epistemic_gap(self) -> Self:
+        if self.uncertainty_profile.epistemic_knowledge_gap >= self.sla.minimum_fidelity_threshold:
+            raise RefusalToReasonError(
+                "Inference aborted due to severe semantic degradation. Epistemic gap exceeds SLA."
+            )
+        return self
+
+
+ContextualizedSourceEntity.model_rebuild()
+DataFidelityReceipt.model_rebuild()
+NeurosymbolicInferenceRequest.model_rebuild()

@@ -18,21 +18,26 @@ from coreason_manifest.spec.ontology import (
     AdjudicationRubricProfile,
     AgentNodeProfile,
     CognitiveFormatContract,
+    CognitiveUncertaintyProfile,
     ComputeEngineProfile,
     ComputeRateContract,
     ComputeTier,
     ConsensusPolicy,
     ConstrainedDecodingPolicy,
+    ContextualizedSourceEntity,
     CoreasonBaseState,
+    DataFidelityReceipt,
     DefeasibleCascadeEvent,
     DynamicLayoutManifest,
     EphemeralNamespacePartitionState,
+    EpistemicCompressionSLA,
     EpistemicSecurity,
     GradingCriterionProfile,
     HardwareProfile,
     InformationClassificationProfile,
     LatentSmoothingProfile,
     MultimodalTokenAnchorState,
+    NeurosymbolicInferenceRequest,
     PermissionBoundaryPolicy,
     QuorumPolicy,
     RedactionPolicy,
@@ -866,3 +871,69 @@ def test_agent_node_profile_network_topology_paradox() -> None:
     )
     assert agent.security.egress_obfuscation is True
     assert agent.security.network_isolation is True
+
+
+def test_refusal_to_reason_enforcement() -> None:
+    source_entity = ContextualizedSourceEntity(
+        target_string="Discharge",
+        contextual_envelope=[],
+        source_system_provenance_flag=False,
+    )
+    fidelity_receipt = DataFidelityReceipt(
+        contextual_completeness_score=0.0,
+        surrounding_token_density=0,
+    )
+    uncertainty_profile = CognitiveUncertaintyProfile(
+        aleatoric_noise_ratio=0.1,
+        epistemic_knowledge_gap=0.9,
+        semantic_consistency_score=0.5,
+        requires_abductive_escalation=False,
+    )
+    sla = EpistemicCompressionSLA(
+        strict_probability_retention=True,
+        max_allowed_entropy_loss=0.5,
+        required_grounding_density="dense",
+        minimum_fidelity_threshold=0.5,
+    )
+
+    with pytest.raises(
+        ValidationError, match=r"Inference aborted due to severe semantic degradation. Epistemic gap exceeds SLA."
+    ):
+        NeurosymbolicInferenceRequest(
+            source_entity=source_entity,
+            fidelity_receipt=fidelity_receipt,
+            uncertainty_profile=uncertainty_profile,
+            sla=sla,
+        )
+
+
+def test_successful_epistemic_grounding() -> None:
+    source_entity = ContextualizedSourceEntity(
+        target_string="Amoxicillin 500mg",
+        contextual_envelope=["patient chart", "medication order"],
+        source_system_provenance_flag=True,
+    )
+    fidelity_receipt = DataFidelityReceipt(
+        contextual_completeness_score=0.9,
+        surrounding_token_density=10,
+    )
+    uncertainty_profile = CognitiveUncertaintyProfile(
+        aleatoric_noise_ratio=0.05,
+        epistemic_knowledge_gap=0.2,  # < 0.5
+        semantic_consistency_score=0.9,
+        requires_abductive_escalation=False,
+    )
+    sla = EpistemicCompressionSLA(
+        strict_probability_retention=True,
+        max_allowed_entropy_loss=0.5,
+        required_grounding_density="dense",
+        minimum_fidelity_threshold=0.5,
+    )
+
+    req = NeurosymbolicInferenceRequest(
+        source_entity=source_entity,
+        fidelity_receipt=fidelity_receipt,
+        uncertainty_profile=uncertainty_profile,
+        sla=sla,
+    )
+    assert req.uncertainty_profile.epistemic_knowledge_gap < req.sla.minimum_fidelity_threshold
