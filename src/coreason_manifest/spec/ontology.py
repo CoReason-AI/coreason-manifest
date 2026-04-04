@@ -22,7 +22,7 @@ import urllib.parse
 from enum import StrEnum
 from typing import Annotated, Any, Literal, Self
 
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl, StringConstraints, field_validator, model_validator
+from pydantic import AnyUrl, BaseModel, ConfigDict, Field, HttpUrl, StringConstraints, field_validator, model_validator
 
 type JsonPrimitiveState = (
     str
@@ -512,6 +512,10 @@ def _inject_workflow_examples(schema: dict[str, Any]) -> None:
             },
         }
     ]
+
+
+class RefusalToReasonError(ValueError):
+    """Exception raised when inference is aborted due to severe semantic degradation."""
 
 
 class CoreasonBaseState(BaseModel):
@@ -1677,6 +1681,45 @@ class CognitiveStateProfile(CoreasonBaseState):
     )
 
 
+class ContextualizedSourceEntity(CoreasonBaseState):
+    """
+    Replaces raw baseline string inputs for inference payloads.
+    """
+
+    target_string: str = Field(max_length=100000, description="The explicit item to map.")
+    contextual_envelope: list[Annotated[str, StringConstraints(max_length=100000)]] = Field(
+        max_length=10000,
+        description="Surrounding semantic neighbors. AGENT INSTRUCTION: Topological Exemption applied. Do NOT sort this array, as its chronological/spatial sequence is its mathematical state.",
+    )
+    source_system_provenance_flag: bool = Field(description="Indicates if the exact upstream origin system is known.")
+
+
+class EpistemicUpsamplingTask(CoreasonBaseState):
+    """
+    Authorizes a connectionist agent to execute an abductive leap, reversing lossy compression by utilizing a contextual envelope to map a generalized artifact to a highly specific ontological node.
+    """
+
+    source_entity: ContextualizedSourceEntity
+    target_ontological_granularity: str = Field(max_length=255)
+    upsampling_confidence_threshold: float = Field(ge=0.0, le=1.0)
+    justification_vectors: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
+        min_length=1,
+        max_length=1000,
+        description="AGENT INSTRUCTION: Topological Exemption applied. Do NOT sort this array, as the chronological sequence of extraction acts as mathematical state.",
+    )
+
+
+class DataFidelityReceipt(CoreasonBaseState):
+    """
+    Store pre-inference calculations.
+    """
+
+    contextual_completeness_score: float = Field(
+        ge=0.0, le=1.0, description="Represents the density of the contextual envelope."
+    )
+    surrounding_token_density: int = Field(ge=0, description="Count of valid tokens in the contextual_envelope.")
+
+
 class CognitiveUncertaintyProfile(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Formalizes Pearlian Structural Causal Models (SCMs) and Variational Free Energy to mathematically quantify and partition irreducible aleatoric noise from actionable epistemic knowledge gaps.
@@ -1689,12 +1732,8 @@ class CognitiveUncertaintyProfile(CoreasonBaseState):
 
     """
 
-    aleatoric_entropy: float = Field(
-        ge=0.0, le=1.0, description="Irreducible ambiguity detected in the observational fields (P(y|x))."
-    )
-    epistemic_uncertainty: float = Field(
-        ge=0.0, le=1.0, description="The causal gap demanding Do-Calculus Interventions (P(y|do(x)))."
-    )
+    aleatoric_noise_ratio: float = Field(ge=0.0, le=1.0, description="Measures inherent string ambiguity.")
+    epistemic_knowledge_gap: float = Field(ge=0.0, le=1.0, description="Measures missing structural context (U_e).")
     semantic_consistency_score: float = Field(
         ge=0.0, le=1.0, description="Counterfactual Geometries representing alternative timeline vectors."
     )
@@ -4442,6 +4481,9 @@ class EpistemicCompressionSLA(CoreasonBaseState):
     required_grounding_density: Literal["sparse", "dense", "exhaustive"] = Field(
         description="Dictates the required granularity of the MultimodalTokenAnchorState (e.g., must the model map every single entity, or just the global claim?)."
     )
+    minimum_fidelity_threshold: float = Field(
+        ge=0.0, le=1.0, description="Mathematical boundary condition (epsilon_max)."
+    )
 
 
 class EpistemicPromotionEvent(BaseStateEvent):
@@ -5988,6 +6030,29 @@ type AnyPanelProfile = Annotated[
 ]
 
 
+class TerminalCognitiveFailure(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A terminal state object generated when the Proposer-Verifier macro-topology exhausts its max_revision_loops without achieving ontological alignment. Packages the failure state for HITL routing.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator to halt the active execution wave and physically route the exact contextual state of failure to a human supervisor for manual evaluation.
+
+    EPISTEMIC BOUNDS: The cycle count is mathematically bounded by loops_exhausted (ge=1, le=100). The specific mathematical penalty gradient the proposer failed to resolve is locked via final_critique_schema. The last_rejected_hypothesis_hash is a cryptographically locked string (max_length=64).
+
+    MCP ROUTING TRIGGERS: Proposer-Verifier Macro-Topology, Terminal State, Execution Halting, Human-in-the-Loop Routing, Cognitive Failure Packaging
+    """
+
+    source_entity: ContextualizedSourceEntity = Field(
+        description="The original contextualized input data the system attempted to process."
+    )
+    last_rejected_hypothesis_hash: str = Field(
+        max_length=64, description="A pointer to the final abductive guess generated by the Proposer."
+    )
+    final_critique_schema: CognitiveCritiqueProfile = Field(
+        description="The exact penalty gradient that the Proposer failed to resolve."
+    )
+    loops_exhausted: int = Field(ge=1, le=100, description="The cycle count at the time of failure.")
+
+
 class InterventionIntent(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Implements Supervisory Control Theory (Ramadge & Wonham) for Discrete-Event Systems, acting as a formal Mixed-Initiative Control mechanism.
@@ -6014,6 +6079,9 @@ class InterventionIntent(CoreasonBaseState):
     )
     adjudication_deadline: float = Field(
         ge=0.0, le=253402300799.0, description="The deadline for adjudication, represented as a UNIX timestamp."
+    )
+    failure_context: TerminalCognitiveFailure | None = Field(
+        default=None, description="Packages the exact contextual state at the moment of computational failure."
     )
 
 
@@ -6168,6 +6236,20 @@ class InterventionPolicy(CoreasonBaseState):
         default=True,
         description="If True, the graph execution halts until a verdict is rendered. If False, it is an async observation.",
     )
+    async_observation_port: AnyUrl | None = Field(
+        default=None, max_length=2000, description="The endpoint for emitting non-blocking shadow telemetry."
+    )
+    emit_telemetry_on_revision: bool = Field(
+        default=False, description="The toggle to enable shadow monitoring on revision loops."
+    )
+
+    @model_validator(mode="after")
+    def validate_hotl_configuration(self) -> Self:
+        if self.emit_telemetry_on_revision and not self.async_observation_port:
+            raise ValueError(
+                "HOTL Misconfiguration: Cannot emit shadow telemetry without defining a valid async_observation_port."
+            )
+        return self
 
 
 class HardwareProfile(CoreasonBaseState):
@@ -7168,6 +7250,11 @@ class MechanisticAuditContract(CoreasonBaseState):
         return self
 
 
+class DerivationMode(StrEnum):
+    DIRECT_TRANSLATION = "direct_translation"
+    ABDUCTIVE_UPSAMPLING = "abductive_upsampling"
+
+
 class EpistemicProvenanceReceipt(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Establishes a formal Data Provenance anchor, cryptographically locking a semantic state to its exact physical, temporal, or neural genesis block on the Merkle-DAG.
@@ -7180,6 +7267,17 @@ class EpistemicProvenanceReceipt(CoreasonBaseState):
 
     """
 
+    fidelity_receipt_hash: str | None = Field(
+        default=None,
+        max_length=64,
+        description="Cryptographic pointer back to the DataFidelityReceipt generated at the Input Gate.",
+    )
+    revision_loops_executed: int | None = Field(
+        default=None,
+        ge=0,
+        le=100,
+        description="Records the exact cycle count the neural model required to pass the verifier.",
+    )
     extracted_by: NodeIdentifierState = Field(
         description="The Content Identifier (CID) of the agent node that extracted this payload."
     )
@@ -7203,6 +7301,8 @@ class EpistemicProvenanceReceipt(CoreasonBaseState):
         default=None,
         description="The cryptographic, tamper-evident chain of custody tracing this memory across multiple swarm hops.",
     )
+    derivation_mode: DerivationMode
+    justification_hash: str | None = Field(None, max_length=64)
 
 
 class MultimodalArtifactReceipt(CoreasonBaseState):
@@ -10416,6 +10516,59 @@ class IntentElicitationTopologyManifest(BaseTopologyManifest):
         )
 
 
+class NeurosymbolicVerificationTopologyManifest(BaseTopologyManifest):
+    r"""
+    A Zero-Cost Macro abstraction enforcing a strict Bipartite Graph for Proposer-Verifier loops. Isolates connectionist generation from symbolic validation and bounds cyclic computation.
+    """
+
+    type: Literal["macro_neurosymbolic"] = Field(
+        default="macro_neurosymbolic", description="Discriminator for a macro neurosymbolic loop."
+    )
+    proposer_node_id: str = Field(max_length=255, description="The connectionist agent generating hypotheses.")
+    verifier_node_id: str = Field(max_length=255, description="The deterministic solver evaluating the hypotheses.")
+    max_revision_loops: int = Field(
+        ge=1, le=100, description="The physical execution ceiling to solve the Halting Problem."
+    )
+    critique_schema_id: str | None = Field(
+        default=None, max_length=255, description="A pointer to the penalty gradient structure."
+    )
+
+    @model_validator(mode="after")
+    def validate_bipartite_roles(self) -> Self:
+        if self.proposer_node_id == self.verifier_node_id:
+            raise ValueError("Topological Contradiction: Proposer and Verifier cannot be the same node.")
+
+        if self.proposer_node_id not in self.nodes:
+            raise ValueError(f"Proposer node {self.proposer_node_id} not found in nodes registry.")
+        if self.verifier_node_id not in self.nodes:
+            raise ValueError(f"Verifier node {self.verifier_node_id} not found in nodes registry.")
+
+        proposer = self.nodes[self.proposer_node_id]
+        verifier = self.nodes[self.verifier_node_id]
+
+        # Check instance or type logic
+        if getattr(proposer, "type", None) != "agent":
+            raise ValueError(
+                "Topological Contradiction: The Proposer must be a Connectionist Agent, and the Verifier must be a Deterministic System."
+            )
+        if getattr(verifier, "type", None) != "system":
+            raise ValueError(
+                "Topological Contradiction: The Proposer must be a Connectionist Agent, and the Verifier must be a Deterministic System."
+            )
+
+        return self
+
+    def compile_to_base_topology(self) -> DAGTopologyManifest:
+        edges = [(self.proposer_node_id, self.verifier_node_id), (self.verifier_node_id, self.proposer_node_id)]
+        return DAGTopologyManifest(
+            nodes=self.nodes,
+            allow_cycles=True,
+            edges=edges,
+            max_depth=self.max_revision_loops,
+            max_fan_out=10,  # Add a default fan out if needed, using generic value or copy
+        )
+
+
 type AnyTopologyManifest = Annotated[
     DAGTopologyManifest
     | CouncilTopologyManifest
@@ -10427,7 +10580,8 @@ type AnyTopologyManifest = Annotated[
     | AdversarialMarketTopologyManifest
     | ConsensusFederationTopologyManifest
     | CapabilityForgeTopologyManifest
-    | IntentElicitationTopologyManifest,
+    | IntentElicitationTopologyManifest
+    | NeurosymbolicVerificationTopologyManifest,
     Field(discriminator="type", description="A discriminated union of workflow topologies."),
 ]
 
@@ -11886,3 +12040,29 @@ LiquidTypeContract.model_rebuild()
 HoareLogicProofReceipt.model_rebuild()
 AsymptoticComplexityReceipt.model_rebuild()
 TeleologicalIsometryReceipt.model_rebuild()
+
+
+class NeurosymbolicInferenceRequest(CoreasonBaseState):
+    """
+    Core inference payload envelope orchestrating the pre-inference gate.
+    """
+
+    source_entity: ContextualizedSourceEntity = Field(description="The source data to process.")
+    fidelity_receipt: DataFidelityReceipt = Field(description="Pre-inference completeness calculations.")
+    uncertainty_profile: CognitiveUncertaintyProfile = Field(description="The uncertainty bounds of the payload.")
+    sla: EpistemicCompressionSLA = Field(description="The execution constraints and boundaries.")
+
+    @model_validator(mode="after")
+    def validate_epistemic_gap(self) -> Self:
+        if self.uncertainty_profile.epistemic_knowledge_gap >= self.sla.minimum_fidelity_threshold:
+            raise RefusalToReasonError(
+                "Inference aborted due to severe semantic degradation. Epistemic gap exceeds SLA."
+            )
+        return self
+
+
+ContextualizedSourceEntity.model_rebuild()
+DataFidelityReceipt.model_rebuild()
+NeurosymbolicInferenceRequest.model_rebuild()
+
+EpistemicUpsamplingTask.model_rebuild()

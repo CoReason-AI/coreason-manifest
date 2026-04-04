@@ -101,6 +101,7 @@ def test_multimodal_grounding_density_alignment(visual_modality: Any) -> None:
         strict_probability_retention=True,
         max_allowed_entropy_loss=0.5,
         required_grounding_density="sparse",
+        minimum_fidelity_threshold=0.5,
     )
     with pytest.raises(
         ValidationError,

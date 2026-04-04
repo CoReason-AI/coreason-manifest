@@ -1349,6 +1349,7 @@
           "macro_elicitation": "#/$defs/IntentElicitationTopologyManifest",
           "macro_federation": "#/$defs/ConsensusFederationTopologyManifest",
           "macro_forge": "#/$defs/CapabilityForgeTopologyManifest",
+          "macro_neurosymbolic": "#/$defs/NeurosymbolicVerificationTopologyManifest",
           "smpc": "#/$defs/SMPCTopologyManifest",
           "swarm": "#/$defs/SwarmTopologyManifest"
         },
@@ -1387,6 +1388,9 @@
         },
         {
           "$ref": "#/$defs/IntentElicitationTopologyManifest"
+        },
+        {
+          "$ref": "#/$defs/NeurosymbolicVerificationTopologyManifest"
         }
       ]
     },
@@ -3395,18 +3399,18 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Pearlian Structural Causal Models (SCMs) and Variational Free Energy to mathematically quantify and partition irreducible aleatoric noise from actionable epistemic knowledge gaps.\n\nCAUSAL AFFORDANCE: Unlocks non-monotonic logic via Pearlian do-operators, computing exactly when to trigger a structural abductive escalation or active inference loop via the `requires_abductive_escalation` flag.\n\nEPISTEMIC BOUNDS: Enforces absolute mathematical float boundaries `[ge=0.0, le=1.0]` on `aleatoric_entropy`, `epistemic_uncertainty`, and `semantic_consistency_score`, mathematically preventing probability wave overflow across all three continuous dimensions.\n\nMCP ROUTING TRIGGERS: Structural Causal Models, Active Inference, Variational Free Energy, Aleatoric Entropy, Pearlian Do-Calculus",
       "properties": {
-        "aleatoric_entropy": {
-          "description": "Irreducible ambiguity detected in the observational fields (P(y|x)).",
+        "aleatoric_noise_ratio": {
+          "description": "Measures inherent string ambiguity.",
           "maximum": 1.0,
           "minimum": 0.0,
-          "title": "Aleatoric Entropy",
+          "title": "Aleatoric Noise Ratio",
           "type": "number"
         },
-        "epistemic_uncertainty": {
-          "description": "The causal gap demanding Do-Calculus Interventions (P(y|do(x))).",
+        "epistemic_knowledge_gap": {
+          "description": "Measures missing structural context (U_e).",
           "maximum": 1.0,
           "minimum": 0.0,
-          "title": "Epistemic Uncertainty",
+          "title": "Epistemic Knowledge Gap",
           "type": "number"
         },
         "semantic_consistency_score": {
@@ -3423,8 +3427,8 @@
         }
       },
       "required": [
-        "aleatoric_entropy",
-        "epistemic_uncertainty",
+        "aleatoric_noise_ratio",
+        "epistemic_knowledge_gap",
         "semantic_consistency_score",
         "requires_abductive_escalation"
       ],
@@ -4042,6 +4046,40 @@
         "max_token_budget"
       ],
       "title": "ContextExpansionPolicy",
+      "type": "object"
+    },
+    "ContextualizedSourceEntity": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nReplaces raw baseline string inputs for inference payloads.",
+      "properties": {
+        "target_string": {
+          "description": "The explicit item to map.",
+          "maxLength": 100000,
+          "title": "Target String",
+          "type": "string"
+        },
+        "contextual_envelope": {
+          "description": "Surrounding semantic neighbors. AGENT INSTRUCTION: Topological Exemption applied. Do NOT sort this array, as its chronological/spatial sequence is its mathematical state.",
+          "items": {
+            "maxLength": 100000,
+            "type": "string"
+          },
+          "maxItems": 10000,
+          "title": "Contextual Envelope",
+          "type": "array"
+        },
+        "source_system_provenance_flag": {
+          "description": "Indicates if the exact upstream origin system is known.",
+          "title": "Source System Provenance Flag",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "target_string",
+        "contextual_envelope",
+        "source_system_provenance_flag"
+      ],
+      "title": "ContextualizedSourceEntity",
       "type": "object"
     },
     "ContinuousMutationPolicy": {
@@ -4923,6 +4961,31 @@
       "title": "DAGTopologyManifest",
       "type": "object"
     },
+    "DataFidelityReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nStore pre-inference calculations.",
+      "properties": {
+        "contextual_completeness_score": {
+          "description": "Represents the density of the contextual envelope.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Contextual Completeness Score",
+          "type": "number"
+        },
+        "surrounding_token_density": {
+          "description": "Count of valid tokens in the contextual_envelope.",
+          "minimum": 0,
+          "title": "Surrounding Token Density",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "contextual_completeness_score",
+        "surrounding_token_density"
+      ],
+      "title": "DataFidelityReceipt",
+      "type": "object"
+    },
     "DefeasibleAttackEvent": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes the binary attack relation in Dung's Abstract Argumentation Framework. As an ...Event suffix, this is an append-only, cryptographically frozen historical fact on the Merkle-DAG.\n\nCAUSAL AFFORDANCE: Projects an undercutting or rebutting defeater from a source claim against a target claim. If mathematically validated, it physically triggers a DefeasibleCascadeEvent to sever all downstream nodes relying on the target.\n\nEPISTEMIC BOUNDS: Strictly bounds the attack geometry using AttackVectorProfile enums (`Literal[\"rebuttal\", \"undercutter\", \"underminer\"]`). Source and target mappings are locked to 128-character CIDs, preventing unbounded graph traversals.\n\nMCP ROUTING TRIGGERS: Undercutting Defeater, Dialectical Edge, Truth Maintenance System, Bipartite Mapping, Non-Monotonic Retraction",
@@ -5071,6 +5134,14 @@
       ],
       "title": "DelegatedCapabilityManifest",
       "type": "object"
+    },
+    "DerivationMode": {
+      "enum": [
+        "direct_translation",
+        "abductive_upsampling"
+      ],
+      "title": "DerivationMode",
+      "type": "string"
     },
     "DifferentiableLogicConstraint": {
       "additionalProperties": false,
@@ -6213,11 +6284,19 @@
           ],
           "title": "Required Grounding Density",
           "type": "string"
+        },
+        "minimum_fidelity_threshold": {
+          "description": "Mathematical boundary condition (epsilon_max).",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Minimum Fidelity Threshold",
+          "type": "number"
         }
       },
       "required": [
         "max_allowed_entropy_loss",
-        "required_grounding_density"
+        "required_grounding_density",
+        "minimum_fidelity_threshold"
       ],
       "title": "EpistemicCompressionSLA",
       "type": "object"
@@ -6612,6 +6691,35 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes a formal Data Provenance anchor, cryptographically locking a semantic state to its exact physical, temporal, or neural genesis block on the Merkle-DAG.\n\nCAUSAL AFFORDANCE: Unlocks deterministic causal tracing and auditability, granting the orchestrator the physical capability to walk the Knowledge Graph backward across multiple swarm hops to the raw multimodal source.\n\nEPISTEMIC BOUNDS: Geometric topology rigidly anchored by the `source_event_id` (128-char CID regex `^[a-zA-Z0-9_.:-]+$`). Spatial and temporal origin physically clamped by the optional multimodal anchor (`MultimodalTokenAnchorState`).\n\nMCP ROUTING TRIGGERS: Data Provenance, Causal Tracing, Epistemic Anchoring, Bijective Mapping, Genesis Block",
       "properties": {
+        "fidelity_receipt_hash": {
+          "anyOf": [
+            {
+              "maxLength": 64,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cryptographic pointer back to the DataFidelityReceipt generated at the Input Gate.",
+          "title": "Fidelity Receipt Hash"
+        },
+        "revision_loops_executed": {
+          "anyOf": [
+            {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Records the exact cycle count the neural model required to pass the verifier.",
+          "title": "Revision Loops Executed"
+        },
         "extracted_by": {
           "$ref": "#/$defs/NodeIdentifierState",
           "description": "The Content Identifier (CID) of the agent node that extracted this payload."
@@ -6663,11 +6771,28 @@
           ],
           "default": null,
           "description": "The cryptographic, tamper-evident chain of custody tracing this memory across multiple swarm hops."
+        },
+        "derivation_mode": {
+          "$ref": "#/$defs/DerivationMode"
+        },
+        "justification_hash": {
+          "anyOf": [
+            {
+              "maxLength": 64,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Justification Hash"
         }
       },
       "required": [
         "extracted_by",
-        "source_event_id"
+        "source_event_id",
+        "derivation_mode"
       ],
       "title": "EpistemicProvenanceReceipt",
       "type": "object"
@@ -7130,6 +7255,45 @@
         "compression_sla"
       ],
       "title": "EpistemicTransmutationTask",
+      "type": "object"
+    },
+    "EpistemicUpsamplingTask": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAuthorizes a connectionist agent to execute an abductive leap, reversing lossy compression by utilizing a contextual envelope to map a generalized artifact to a highly specific ontological node.",
+      "properties": {
+        "source_entity": {
+          "$ref": "#/$defs/ContextualizedSourceEntity"
+        },
+        "target_ontological_granularity": {
+          "maxLength": 255,
+          "title": "Target Ontological Granularity",
+          "type": "string"
+        },
+        "upsampling_confidence_threshold": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Upsampling Confidence Threshold",
+          "type": "number"
+        },
+        "justification_vectors": {
+          "description": "AGENT INSTRUCTION: Topological Exemption applied. Do NOT sort this array, as the chronological sequence of extraction acts as mathematical state.",
+          "items": {
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "maxItems": 1000,
+          "minItems": 1,
+          "title": "Justification Vectors",
+          "type": "array"
+        }
+      },
+      "required": [
+        "source_entity",
+        "target_ontological_granularity",
+        "upsampling_confidence_threshold",
+        "justification_vectors"
+      ],
+      "title": "EpistemicUpsamplingTask",
       "type": "object"
     },
     "EscalationContract": {
@@ -9706,6 +9870,18 @@
           "minimum": 0.0,
           "title": "Adjudication Deadline",
           "type": "number"
+        },
+        "failure_context": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TerminalCognitiveFailure"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Packages the exact contextual state at the moment of computational failure."
         }
       },
       "required": [
@@ -9741,6 +9917,28 @@
           "default": true,
           "description": "If True, the graph execution halts until a verdict is rendered. If False, it is an async observation.",
           "title": "Blocking",
+          "type": "boolean"
+        },
+        "async_observation_port": {
+          "anyOf": [
+            {
+              "format": "uri",
+              "maxLength": 2000,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The endpoint for emitting non-blocking shadow telemetry.",
+          "title": "Async Observation Port"
+        },
+        "emit_telemetry_on_revision": {
+          "default": false,
+          "description": "The toggle to enable shadow monitoring on revision loops.",
+          "title": "Emit Telemetry On Revision",
           "type": "boolean"
         }
       },
@@ -11560,6 +11758,187 @@
         "timeout_ms"
       ],
       "title": "NeuroSymbolicHandoffContract",
+      "type": "object"
+    },
+    "NeurosymbolicInferenceRequest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nCore inference payload envelope orchestrating the pre-inference gate.",
+      "properties": {
+        "source_entity": {
+          "$ref": "#/$defs/ContextualizedSourceEntity",
+          "description": "The source data to process."
+        },
+        "fidelity_receipt": {
+          "$ref": "#/$defs/DataFidelityReceipt",
+          "description": "Pre-inference completeness calculations."
+        },
+        "uncertainty_profile": {
+          "$ref": "#/$defs/CognitiveUncertaintyProfile",
+          "description": "The uncertainty bounds of the payload."
+        },
+        "sla": {
+          "$ref": "#/$defs/EpistemicCompressionSLA",
+          "description": "The execution constraints and boundaries."
+        }
+      },
+      "required": [
+        "source_entity",
+        "fidelity_receipt",
+        "uncertainty_profile",
+        "sla"
+      ],
+      "title": "NeurosymbolicInferenceRequest",
+      "type": "object"
+    },
+    "NeurosymbolicVerificationTopologyManifest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nA Zero-Cost Macro abstraction enforcing a strict Bipartite Graph for Proposer-Verifier loops. Isolates connectionist generation from symbolic validation and bounds cyclic computation.",
+      "properties": {
+        "epistemic_enforcement": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TruthMaintenancePolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Ties the topology to the Truth Maintenance layer."
+        },
+        "lifecycle_phase": {
+          "default": "live",
+          "description": "The execution phase of the graph. 'draft' allows incomplete structural state.",
+          "enum": [
+            "draft",
+            "live"
+          ],
+          "title": "Lifecycle Phase",
+          "type": "string"
+        },
+        "architectural_intent": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The AI's declarative rationale for selecting this topology.",
+          "title": "Architectural Intent"
+        },
+        "justification": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cryptographic/audit justification for this topology's configuration.",
+          "title": "Justification"
+        },
+        "nodes": {
+          "additionalProperties": {
+            "$ref": "#/$defs/AnyNodeProfile"
+          },
+          "description": "Flat registry of all nodes in this topology.",
+          "propertyNames": {
+            "$ref": "#/$defs/NodeIdentifierState"
+          },
+          "title": "Nodes",
+          "type": "object"
+        },
+        "shared_state_contract": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StateContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The schema-on-write contract governing the internal state of this topology."
+        },
+        "information_flow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/InformationFlowPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology."
+        },
+        "observability": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ObservabilityLODPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph."
+        },
+        "type": {
+          "const": "macro_neurosymbolic",
+          "default": "macro_neurosymbolic",
+          "description": "Discriminator for a macro neurosymbolic loop.",
+          "title": "Type",
+          "type": "string"
+        },
+        "proposer_node_id": {
+          "description": "The connectionist agent generating hypotheses.",
+          "maxLength": 255,
+          "title": "Proposer Node Id",
+          "type": "string"
+        },
+        "verifier_node_id": {
+          "description": "The deterministic solver evaluating the hypotheses.",
+          "maxLength": 255,
+          "title": "Verifier Node Id",
+          "type": "string"
+        },
+        "max_revision_loops": {
+          "description": "The physical execution ceiling to solve the Halting Problem.",
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Max Revision Loops",
+          "type": "integer"
+        },
+        "critique_schema_id": {
+          "anyOf": [
+            {
+              "maxLength": 255,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A pointer to the penalty gradient structure.",
+          "title": "Critique Schema Id"
+        }
+      },
+      "required": [
+        "nodes",
+        "proposer_node_id",
+        "verifier_node_id",
+        "max_revision_loops"
+      ],
+      "title": "NeurosymbolicVerificationTopologyManifest",
       "type": "object"
     },
     "NodeIdentifierState": {
@@ -15596,6 +15975,41 @@
         "env_variables_hash"
       ],
       "title": "TerminalBufferState",
+      "type": "object"
+    },
+    "TerminalCognitiveFailure": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A terminal state object generated when the Proposer-Verifier macro-topology exhausts its max_revision_loops without achieving ontological alignment. Packages the failure state for HITL routing.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator to halt the active execution wave and physically route the exact contextual state of failure to a human supervisor for manual evaluation.\n\nEPISTEMIC BOUNDS: The cycle count is mathematically bounded by loops_exhausted (ge=1, le=100). The specific mathematical penalty gradient the proposer failed to resolve is locked via final_critique_schema. The last_rejected_hypothesis_hash is a cryptographically locked string (max_length=64).\n\nMCP ROUTING TRIGGERS: Proposer-Verifier Macro-Topology, Terminal State, Execution Halting, Human-in-the-Loop Routing, Cognitive Failure Packaging",
+      "properties": {
+        "source_entity": {
+          "$ref": "#/$defs/ContextualizedSourceEntity",
+          "description": "The original contextualized input data the system attempted to process."
+        },
+        "last_rejected_hypothesis_hash": {
+          "description": "A pointer to the final abductive guess generated by the Proposer.",
+          "maxLength": 64,
+          "title": "Last Rejected Hypothesis Hash",
+          "type": "string"
+        },
+        "final_critique_schema": {
+          "$ref": "#/$defs/CognitiveCritiqueProfile",
+          "description": "The exact penalty gradient that the Proposer failed to resolve."
+        },
+        "loops_exhausted": {
+          "description": "The cycle count at the time of failure.",
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Loops Exhausted",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "source_entity",
+        "last_rejected_hypothesis_hash",
+        "final_critique_schema",
+        "loops_exhausted"
+      ],
+      "title": "TerminalCognitiveFailure",
       "type": "object"
     },
     "TerminalConditionContract": {

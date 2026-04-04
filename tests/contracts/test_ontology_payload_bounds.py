@@ -7,14 +7,18 @@
 # Commercial use beyond a 30-day trial requires a separate license
 #
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
-
 from typing import Any, cast
 
 import hypothesis.strategies as st
 import pytest
 from hypothesis import HealthCheck, given, settings
+from pydantic import ValidationError
 
-from coreason_manifest.spec.ontology import JsonPrimitiveState, StateHydrationManifest, _validate_payload_bounds
+from coreason_manifest.spec.ontology import (
+    JsonPrimitiveState,
+    StateHydrationManifest,
+    _validate_payload_bounds,
+)
 
 # 1. Define the Valid Mathematical Space
 valid_json_st = st.recursive(
@@ -125,7 +129,6 @@ def test_payload_bounds_invalid_type_nested() -> None:
 
 def test_state_vector_memory_bounds() -> None:
     import pytest
-    from pydantic import ValidationError
 
     from coreason_manifest.spec.ontology import StateVectorProfile
 
@@ -144,3 +147,32 @@ def test_state_vector_memory_bounds() -> None:
     with pytest.raises(ValidationError) as exc_info:
         StateVectorProfile(read_only_context=huge_dict)
     assert "Payload volume exceeds absolute hardware limit" in str(exc_info.value)
+
+
+def test_neurosymbolic_inference_request_requires_contextualized_entity() -> None:
+    import pytest
+
+    from coreason_manifest.spec.ontology import NeurosymbolicInferenceRequest
+
+    # Instantiating with bare string instead of ContextualizedSourceEntity
+    with pytest.raises(ValidationError) as exc_info:
+        NeurosymbolicInferenceRequest(
+            source_entity="Amoxicillin 500mg",  # type: ignore
+            fidelity_receipt={  # type: ignore
+                "contextual_completeness_score": 0.9,
+                "surrounding_token_density": 10,
+            },
+            uncertainty_profile={  # type: ignore
+                "aleatoric_noise_ratio": 0.05,
+                "epistemic_knowledge_gap": 0.2,
+                "semantic_consistency_score": 0.9,
+                "requires_abductive_escalation": False,
+            },
+            sla={  # type: ignore
+                "strict_probability_retention": True,
+                "max_allowed_entropy_loss": 0.5,
+                "required_grounding_density": "dense",
+                "minimum_fidelity_threshold": 0.5,
+            },
+        )
+    assert "Input should be a valid dictionary or instance of ContextualizedSourceEntity" in str(exc_info.value)
