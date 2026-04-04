@@ -10465,6 +10465,59 @@ class IntentElicitationTopologyManifest(BaseTopologyManifest):
         )
 
 
+class NeurosymbolicVerificationTopologyManifest(BaseTopologyManifest):
+    r"""
+    A Zero-Cost Macro abstraction enforcing a strict Bipartite Graph for Proposer-Verifier loops. Isolates connectionist generation from symbolic validation and bounds cyclic computation.
+    """
+
+    type: Literal["macro_neurosymbolic"] = Field(
+        default="macro_neurosymbolic", description="Discriminator for a macro neurosymbolic loop."
+    )
+    proposer_node_id: str = Field(max_length=255, description="The connectionist agent generating hypotheses.")
+    verifier_node_id: str = Field(max_length=255, description="The deterministic solver evaluating the hypotheses.")
+    max_revision_loops: int = Field(
+        ge=1, le=100, description="The physical execution ceiling to solve the Halting Problem."
+    )
+    critique_schema_id: str | None = Field(
+        default=None, max_length=255, description="A pointer to the penalty gradient structure."
+    )
+
+    @model_validator(mode="after")
+    def validate_bipartite_roles(self) -> Self:
+        if self.proposer_node_id == self.verifier_node_id:
+            raise ValueError("Topological Contradiction: Proposer and Verifier cannot be the same node.")
+
+        if self.proposer_node_id not in self.nodes:
+            raise ValueError(f"Proposer node {self.proposer_node_id} not found in nodes registry.")
+        if self.verifier_node_id not in self.nodes:
+            raise ValueError(f"Verifier node {self.verifier_node_id} not found in nodes registry.")
+
+        proposer = self.nodes[self.proposer_node_id]
+        verifier = self.nodes[self.verifier_node_id]
+
+        # Check instance or type logic
+        if getattr(proposer, "type", None) != "agent":
+            raise ValueError(
+                "Topological Contradiction: The Proposer must be a Connectionist Agent, and the Verifier must be a Deterministic System."
+            )
+        if getattr(verifier, "type", None) != "system":
+            raise ValueError(
+                "Topological Contradiction: The Proposer must be a Connectionist Agent, and the Verifier must be a Deterministic System."
+            )
+
+        return self
+
+    def compile_to_base_topology(self) -> DAGTopologyManifest:
+        edges = [(self.proposer_node_id, self.verifier_node_id), (self.verifier_node_id, self.proposer_node_id)]
+        return DAGTopologyManifest(
+            nodes=self.nodes,
+            allow_cycles=True,
+            edges=edges,
+            max_depth=self.max_revision_loops,
+            max_fan_out=10,  # Add a default fan out if needed, using generic value or copy
+        )
+
+
 type AnyTopologyManifest = Annotated[
     DAGTopologyManifest
     | CouncilTopologyManifest
@@ -10476,7 +10529,8 @@ type AnyTopologyManifest = Annotated[
     | AdversarialMarketTopologyManifest
     | ConsensusFederationTopologyManifest
     | CapabilityForgeTopologyManifest
-    | IntentElicitationTopologyManifest,
+    | IntentElicitationTopologyManifest
+    | NeurosymbolicVerificationTopologyManifest,
     Field(discriminator="type", description="A discriminated union of workflow topologies."),
 ]
 
