@@ -32,6 +32,7 @@ from coreason_manifest.spec.ontology import (
     EphemeralNamespacePartitionState,
     EpistemicCompressionSLA,
     EpistemicSecurity,
+    EpistemicUpsamplingTask,
     GradingCriterionProfile,
     HardwareProfile,
     InformationClassificationProfile,
@@ -940,7 +941,6 @@ def test_successful_epistemic_grounding() -> None:
 
 
 def test_epistemic_upsampling_instantiation() -> None:
-    from coreason_manifest.spec.ontology import ContextualizedSourceEntity, EpistemicUpsamplingTask
 
     source = ContextualizedSourceEntity(
         target_string="test artifact",
@@ -957,3 +957,47 @@ def test_epistemic_upsampling_instantiation() -> None:
     assert task.upsampling_confidence_threshold == 0.95
     assert len(task.justification_vectors) == 1
     assert task.justification_vectors[0] == "rhinorrhea post-trauma"
+
+
+def test_upsampling_confidence_bounds() -> None:
+    """Prove that an agent cannot hallucinate an overconfident abductive leap."""
+    source = ContextualizedSourceEntity(
+        target_string="test artifact",
+        contextual_envelope=["context A"],
+        source_system_provenance_flag=True,
+    )
+
+    # Test upper bound violation
+    with pytest.raises(ValidationError, match=r"Input should be less than or equal to 1"):
+        EpistemicUpsamplingTask(
+            source_entity=source,
+            target_ontological_granularity="OMOP Level 4",
+            upsampling_confidence_threshold=1.5,
+            justification_vectors=["context A"],
+        )
+
+    # Test lower bound violation
+    with pytest.raises(ValidationError, match=r"Input should be greater than or equal to 0"):
+        EpistemicUpsamplingTask(
+            source_entity=source,
+            target_ontological_granularity="OMOP Level 4",
+            upsampling_confidence_threshold=-0.1,
+            justification_vectors=["context A"],
+        )
+
+
+def test_empty_justification_rejection() -> None:
+    """Prove that the system structurally rejects an evidence-free abductive leap."""
+    source = ContextualizedSourceEntity(
+        target_string="test artifact",
+        contextual_envelope=["context A"],
+        source_system_provenance_flag=True,
+    )
+
+    with pytest.raises(ValidationError, match=r"List should have at least 1 item"):
+        EpistemicUpsamplingTask(
+            source_entity=source,
+            target_ontological_granularity="OMOP Level 4",
+            upsampling_confidence_threshold=0.95,
+            justification_vectors=[],  # Empty evidence vector
+        )

@@ -7,14 +7,18 @@
 # Commercial use beyond a 30-day trial requires a separate license
 #
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
-
 from typing import Any, cast
 
 import hypothesis.strategies as st
 import pytest
 from hypothesis import HealthCheck, given, settings
+from pydantic import ValidationError
 
-from coreason_manifest.spec.ontology import JsonPrimitiveState, StateHydrationManifest, _validate_payload_bounds
+from coreason_manifest.spec.ontology import (
+    JsonPrimitiveState,
+    StateHydrationManifest,
+    _validate_payload_bounds,
+)
 
 # 1. Define the Valid Mathematical Space
 valid_json_st = st.recursive(
@@ -125,7 +129,6 @@ def test_payload_bounds_invalid_type_nested() -> None:
 
 def test_state_vector_memory_bounds() -> None:
     import pytest
-    from pydantic import ValidationError
 
     from coreason_manifest.spec.ontology import StateVectorProfile
 
@@ -148,7 +151,6 @@ def test_state_vector_memory_bounds() -> None:
 
 def test_neurosymbolic_inference_request_requires_contextualized_entity() -> None:
     import pytest
-    from pydantic import ValidationError
 
     from coreason_manifest.spec.ontology import NeurosymbolicInferenceRequest
 
@@ -174,43 +176,3 @@ def test_neurosymbolic_inference_request_requires_contextualized_entity() -> Non
             },
         )
     assert "Input should be a valid dictionary or instance of ContextualizedSourceEntity" in str(exc_info.value)
-
-
-def test_upsampling_confidence_bounds() -> None:
-    import pytest
-    from pydantic import ValidationError
-
-    from coreason_manifest.spec.ontology import ContextualizedSourceEntity, EpistemicUpsamplingTask
-
-    source = ContextualizedSourceEntity(
-        target_string="test artifact", contextual_envelope=[], source_system_provenance_flag=False
-    )
-
-    with pytest.raises(ValidationError) as exc_info:
-        EpistemicUpsamplingTask(
-            source_entity=source,
-            target_ontological_granularity="Level 4",
-            upsampling_confidence_threshold=1.5,
-            justification_vectors=["rhinorrhea post-trauma"],
-        )
-    assert "upsampling_confidence_threshold" in str(exc_info.value)
-
-
-def test_empty_justification_rejection() -> None:
-    import pytest
-    from pydantic import ValidationError
-
-    from coreason_manifest.spec.ontology import ContextualizedSourceEntity, EpistemicUpsamplingTask
-
-    source = ContextualizedSourceEntity(
-        target_string="test artifact", contextual_envelope=[], source_system_provenance_flag=False
-    )
-
-    with pytest.raises(ValidationError) as exc_info:
-        EpistemicUpsamplingTask(
-            source_entity=source,
-            target_ontological_granularity="Level 4",
-            upsampling_confidence_threshold=0.95,
-            justification_vectors=[],
-        )
-    assert "justification_vectors" in str(exc_info.value)
