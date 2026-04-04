@@ -514,7 +514,7 @@ def _inject_workflow_examples(schema: dict[str, Any]) -> None:
     ]
 
 
-class RefusalToReasonError(Exception):
+class RefusalToReasonError(ValueError):
     """Exception raised when inference is aborted due to severe semantic degradation."""
 
 
@@ -1688,7 +1688,8 @@ class ContextualizedSourceEntity(CoreasonBaseState):
 
     target_string: str = Field(max_length=100000, description="The explicit item to map.")
     contextual_envelope: list[Annotated[str, StringConstraints(max_length=100000)]] = Field(
-        max_length=10000, description="Surrounding semantic neighbors."
+        max_length=10000,
+        description="Surrounding semantic neighbors. AGENT INSTRUCTION: Topological Exemption applied. Do NOT sort this array, as its chronological/spatial sequence is its mathematical state.",
     )
     source_system_provenance_flag: bool = Field(description="Indicates if the exact upstream origin system is known.")
 

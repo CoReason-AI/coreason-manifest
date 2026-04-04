@@ -29,7 +29,6 @@ from coreason_manifest.spec.ontology import (
     MultimodalTokenAnchorState,
     NeurosymbolicInferenceRequest,
     QuorumPolicy,
-    RefusalToReasonError,
     SE3TransformProfile,
     SecurityProfile,
     StateHydrationManifest,
@@ -362,7 +361,9 @@ def test_refusal_to_reason_fuzzing(epistemic_gap: float, min_fidelity_threshold:
         minimum_fidelity_threshold=min_fidelity_threshold,
     )
 
-    with pytest.raises(RefusalToReasonError):
+    from pydantic import ValidationError
+
+    with pytest.raises(ValidationError):
         NeurosymbolicInferenceRequest(
             source_entity=source_entity,
             fidelity_receipt=fidelity_receipt,

@@ -4055,7 +4055,7 @@
           "type": "string"
         },
         "contextual_envelope": {
-          "description": "Surrounding semantic neighbors.",
+          "description": "Surrounding semantic neighbors. AGENT INSTRUCTION: Topological Exemption applied. Do NOT sort this array, as its chronological/spatial sequence is its mathematical state.",
           "items": {
             "maxLength": 100000,
             "type": "string"
