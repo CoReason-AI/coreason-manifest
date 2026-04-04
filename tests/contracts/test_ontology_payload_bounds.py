@@ -180,7 +180,8 @@ def test_neurosymbolic_inference_request_requires_contextualized_entity() -> Non
 def test_upsampling_confidence_bounds() -> None:
     import pytest
     from pydantic import ValidationError
-    from coreason_manifest.spec.ontology import EpistemicUpsamplingTask, ContextualizedSourceEntity
+
+    from coreason_manifest.spec.ontology import ContextualizedSourceEntity, EpistemicUpsamplingTask
 
     source = ContextualizedSourceEntity(
         target_string="test artifact",
@@ -200,7 +201,8 @@ def test_upsampling_confidence_bounds() -> None:
 def test_empty_justification_rejection() -> None:
     import pytest
     from pydantic import ValidationError
-    from coreason_manifest.spec.ontology import EpistemicUpsamplingTask, ContextualizedSourceEntity
+
+    from coreason_manifest.spec.ontology import ContextualizedSourceEntity, EpistemicUpsamplingTask
 
     source = ContextualizedSourceEntity(
         target_string="test artifact",

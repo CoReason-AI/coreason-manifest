@@ -941,7 +941,7 @@ def test_successful_epistemic_grounding() -> None:
 
 
 def test_epistemic_upsampling_instantiation() -> None:
-    from coreason_manifest.spec.ontology import EpistemicUpsamplingTask, ContextualizedSourceEntity
+    from coreason_manifest.spec.ontology import ContextualizedSourceEntity, EpistemicUpsamplingTask
 
     source = ContextualizedSourceEntity(
         target_string="test artifact",

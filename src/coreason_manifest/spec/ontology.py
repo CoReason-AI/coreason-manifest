@@ -19,7 +19,7 @@ import operator
 import re
 import typing
 import urllib.parse
-from enum import Enum, StrEnum
+from enum import StrEnum
 from typing import Annotated, Any, Literal, Self
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, StringConstraints, field_validator, model_validator
@@ -7210,7 +7210,7 @@ class MechanisticAuditContract(CoreasonBaseState):
         return self
 
 
-class DerivationMode(str, Enum):
+class DerivationMode(StrEnum):
     DIRECT_TRANSLATION = "direct_translation"
     ABDUCTIVE_UPSAMPLING = "abductive_upsampling"
 
