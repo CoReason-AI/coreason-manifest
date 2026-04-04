@@ -896,8 +896,6 @@ def test_refusal_to_reason_enforcement() -> None:
         minimum_fidelity_threshold=0.5,
     )
 
-    from pydantic import ValidationError
-
     with pytest.raises(
         ValidationError, match=r"Inference aborted due to severe semantic degradation. Epistemic gap exceeds SLA."
     ):
