@@ -11,9 +11,9 @@
 import pytest
 
 from coreason_manifest.spec.ontology import (
-    DerivationMode,
     BeliefMutationEvent,
     DefeasibleCascadeEvent,
+    DerivationMode,
     EpistemicLedgerState,
     EpistemicProvenanceReceipt,
     ObservationEvent,

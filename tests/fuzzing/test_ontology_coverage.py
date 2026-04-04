@@ -14,11 +14,11 @@ from hypothesis import strategies as st
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
-    DerivationMode,
     BilateralSLA,
     BrowserDOMState,
     CrossoverPolicy,
     DAGTopologyManifest,
+    DerivationMode,
     EpistemicProvenanceReceipt,
     EvaluatorOptimizerTopologyManifest,
     EvolutionaryTopologyManifest,
