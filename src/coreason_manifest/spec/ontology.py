@@ -10464,6 +10464,7 @@ class IntentElicitationTopologyManifest(BaseTopologyManifest):
             max_fan_out=10,
         )
 
+
 class NeurosymbolicVerificationTopologyManifest(BaseTopologyManifest):
     r"""
     A Zero-Cost Macro abstraction enforcing a strict Bipartite Graph for Proposer-Verifier loops. Isolates connectionist generation from symbolic validation and bounds cyclic computation.
@@ -10472,12 +10473,8 @@ class NeurosymbolicVerificationTopologyManifest(BaseTopologyManifest):
     type: Literal["macro_neurosymbolic"] = Field(
         default="macro_neurosymbolic", description="Discriminator for a macro neurosymbolic loop."
     )
-    proposer_node_id: str = Field(
-        max_length=255, description="The connectionist agent generating hypotheses."
-    )
-    verifier_node_id: str = Field(
-        max_length=255, description="The deterministic solver evaluating the hypotheses."
-    )
+    proposer_node_id: str = Field(max_length=255, description="The connectionist agent generating hypotheses.")
+    verifier_node_id: str = Field(max_length=255, description="The deterministic solver evaluating the hypotheses.")
     max_revision_loops: int = Field(
         ge=1, le=100, description="The physical execution ceiling to solve the Halting Problem."
     )
@@ -10500,9 +10497,13 @@ class NeurosymbolicVerificationTopologyManifest(BaseTopologyManifest):
 
         # Check instance or type logic
         if getattr(proposer, "type", None) != "agent":
-            raise ValueError("Topological Contradiction: The Proposer must be a Connectionist Agent, and the Verifier must be a Deterministic System.")
+            raise ValueError(
+                "Topological Contradiction: The Proposer must be a Connectionist Agent, and the Verifier must be a Deterministic System."
+            )
         if getattr(verifier, "type", None) != "system":
-            raise ValueError("Topological Contradiction: The Proposer must be a Connectionist Agent, and the Verifier must be a Deterministic System.")
+            raise ValueError(
+                "Topological Contradiction: The Proposer must be a Connectionist Agent, and the Verifier must be a Deterministic System."
+            )
 
         return self
 
@@ -10513,9 +10514,8 @@ class NeurosymbolicVerificationTopologyManifest(BaseTopologyManifest):
             allow_cycles=True,
             edges=edges,
             max_depth=self.max_revision_loops,
-            max_fan_out=10, # Add a default fan out if needed, using generic value or copy
+            max_fan_out=10,  # Add a default fan out if needed, using generic value or copy
         )
-
 
 
 type AnyTopologyManifest = Annotated[

@@ -26,6 +26,7 @@ def test_bipartite_identity_violation() -> None:
     assert "Topological Contradiction" in str(exc_info.value)
     assert "Proposer and Verifier cannot be the same node" in str(exc_info.value)
 
+
 def test_bipartite_type_violation_both_agents() -> None:
     nodes: dict[str, Any] = {
         "did:coreason:agent-1": AgentNodeProfile(description="Agent 1", type="agent"),
@@ -39,7 +40,10 @@ def test_bipartite_type_violation_both_agents() -> None:
             max_revision_loops=10,
         )
     assert "Topological Contradiction" in str(exc_info.value)
-    assert "Proposer must be a Connectionist Agent, and the Verifier must be a Deterministic System" in str(exc_info.value)
+    assert "Proposer must be a Connectionist Agent, and the Verifier must be a Deterministic System" in str(
+        exc_info.value
+    )
+
 
 def test_bipartite_type_violation_both_systems() -> None:
     nodes: dict[str, Any] = {
@@ -55,6 +59,7 @@ def test_bipartite_type_violation_both_systems() -> None:
         )
     assert "Topological Contradiction" in str(exc_info.value)
 
+
 def test_cycle_bound_enforcement_too_high() -> None:
     nodes: dict[str, Any] = {
         "did:coreason:agent-1": AgentNodeProfile(description="Agent 1", type="agent"),
@@ -69,6 +74,7 @@ def test_cycle_bound_enforcement_too_high() -> None:
         )
     assert "100" in str(exc_info.value)
 
+
 def test_cycle_bound_enforcement_too_low() -> None:
     nodes: dict[str, Any] = {
         "did:coreason:agent-1": AgentNodeProfile(description="Agent 1", type="agent"),
@@ -82,6 +88,7 @@ def test_cycle_bound_enforcement_too_low() -> None:
             max_revision_loops=-5,
         )
     assert "1" in str(exc_info.value)
+
 
 def test_successful_compilation() -> None:
     nodes: dict[str, Any] = {

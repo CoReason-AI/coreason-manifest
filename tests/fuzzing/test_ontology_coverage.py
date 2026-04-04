@@ -145,7 +145,9 @@ def test_workflow_manifest_lbac_dominance(
     allowed_classes: list[InformationClassificationProfile], sla_max_class: InformationClassificationProfile
 ) -> None:
     # Setup the required fields for WorkflowManifest
-    prov = EpistemicProvenanceReceipt(extracted_by="did:node:id-1", source_event_id="a" * 64, derivation_mode=DerivationMode.DIRECT_TRANSLATION)
+    prov = EpistemicProvenanceReceipt(
+        extracted_by="did:node:id-1", source_event_id="a" * 64, derivation_mode=DerivationMode.DIRECT_TRANSLATION
+    )
     topology = DAGTopologyManifest(nodes={}, edges=[], max_depth=10, max_fan_out=10)
     sla = BilateralSLA(
         receiving_tenant_id="tenant-x", max_permitted_classification=sla_max_class, liability_limit_magnitude=100
