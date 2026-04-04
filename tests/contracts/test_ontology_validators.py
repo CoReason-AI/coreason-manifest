@@ -18,21 +18,26 @@ from coreason_manifest.spec.ontology import (
     AdjudicationRubricProfile,
     AgentNodeProfile,
     CognitiveFormatContract,
+    CognitiveUncertaintyProfile,
     ComputeEngineProfile,
     ComputeRateContract,
     ComputeTier,
     ConsensusPolicy,
     ConstrainedDecodingPolicy,
+    ContextualizedSourceEntity,
     CoreasonBaseState,
+    DataFidelityReceipt,
     DefeasibleCascadeEvent,
     DynamicLayoutManifest,
     EphemeralNamespacePartitionState,
+    EpistemicCompressionSLA,
     EpistemicSecurity,
     GradingCriterionProfile,
     HardwareProfile,
     InformationClassificationProfile,
     LatentSmoothingProfile,
     MultimodalTokenAnchorState,
+    NeurosymbolicInferenceRequest,
     PermissionBoundaryPolicy,
     QuorumPolicy,
     RedactionPolicy,
@@ -869,16 +874,6 @@ def test_agent_node_profile_network_topology_paradox() -> None:
 
 
 def test_refusal_to_reason_enforcement() -> None:
-    import pytest
-
-    from coreason_manifest.spec.ontology import (
-        CognitiveUncertaintyProfile,
-        ContextualizedSourceEntity,
-        DataFidelityReceipt,
-        EpistemicCompressionSLA,
-        NeurosymbolicInferenceRequest,
-    )
-
     source_entity = ContextualizedSourceEntity(
         target_string="Discharge",
         contextual_envelope=[],
@@ -915,14 +910,6 @@ def test_refusal_to_reason_enforcement() -> None:
 
 
 def test_successful_epistemic_grounding() -> None:
-    from coreason_manifest.spec.ontology import (
-        CognitiveUncertaintyProfile,
-        ContextualizedSourceEntity,
-        DataFidelityReceipt,
-        EpistemicCompressionSLA,
-        NeurosymbolicInferenceRequest,
-    )
-
     source_entity = ContextualizedSourceEntity(
         target_string="Amoxicillin 500mg",
         contextual_envelope=["patient chart", "medication order"],
