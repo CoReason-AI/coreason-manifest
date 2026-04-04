@@ -22,7 +22,7 @@ import urllib.parse
 from enum import StrEnum
 from typing import Annotated, Any, Literal, Self
 
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl, AnyUrl, StringConstraints, field_validator, model_validator
+from pydantic import AnyUrl, BaseModel, ConfigDict, Field, HttpUrl, StringConstraints, field_validator, model_validator
 
 type JsonPrimitiveState = (
     str
@@ -7270,13 +7270,13 @@ class EpistemicProvenanceReceipt(CoreasonBaseState):
     fidelity_receipt_hash: str | None = Field(
         default=None,
         max_length=64,
-        description="Cryptographic pointer back to the DataFidelityReceipt generated at the Input Gate."
+        description="Cryptographic pointer back to the DataFidelityReceipt generated at the Input Gate.",
     )
     revision_loops_executed: int | None = Field(
         default=None,
         ge=0,
         le=100,
-        description="Records the exact cycle count the neural model required to pass the verifier."
+        description="Records the exact cycle count the neural model required to pass the verifier.",
     )
     extracted_by: NodeIdentifierState = Field(
         description="The Content Identifier (CID) of the agent node that extracted this payload."

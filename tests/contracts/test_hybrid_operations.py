@@ -25,16 +25,17 @@ from coreason_manifest.spec.ontology import (
 def test_epistemic_sealing_bounds():
     with pytest.raises(ValidationError) as exc:
         EpistemicProvenanceReceipt(
-            extracted_by="did:coreason:test1", source_event_id="test-event-id", revision_loops_executed=105
+            extracted_by="did:coreason:test1",
+            source_event_id="test-event-id",
+            derivation_mode="direct_translation",
+            revision_loops_executed=105,
         )
     assert "Input should be less than or equal to 100" in str(exc.value)
 
 
 def test_hotl_telemetry_policy_gate():
     with pytest.raises(ValidationError) as exc:
-        InterventionPolicy(
-            trigger="on_start", emit_telemetry_on_revision=True, async_observation_port=None
-        )
+        InterventionPolicy(trigger="on_start", emit_telemetry_on_revision=True, async_observation_port=None)
     assert (
         "HOTL Misconfiguration: Cannot emit shadow telemetry without defining a valid async_observation_port."
         in str(exc.value)
