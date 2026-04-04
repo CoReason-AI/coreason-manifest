@@ -371,8 +371,6 @@ def test_refusal_to_reason_fuzzing(epistemic_gap: float, min_fidelity_threshold:
         )
 
 
-
-
 def test_contextualized_source_entity_lengths() -> None:
     from pydantic import ValidationError
 
