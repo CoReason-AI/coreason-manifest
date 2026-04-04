@@ -939,20 +939,19 @@ def test_successful_epistemic_grounding() -> None:
     assert req.uncertainty_profile.epistemic_knowledge_gap < req.sla.minimum_fidelity_threshold
 
 
-
 def test_epistemic_upsampling_instantiation() -> None:
     from coreason_manifest.spec.ontology import ContextualizedSourceEntity, EpistemicUpsamplingTask
 
     source = ContextualizedSourceEntity(
         target_string="test artifact",
         contextual_envelope=["context A", "context B"],
-        source_system_provenance_flag=True
+        source_system_provenance_flag=True,
     )
     task = EpistemicUpsamplingTask(
         source_entity=source,
         target_ontological_granularity="OMOP Measurement Concept Level 4",
         upsampling_confidence_threshold=0.95,
-        justification_vectors=["rhinorrhea post-trauma"]
+        justification_vectors=["rhinorrhea post-trauma"],
     )
     assert task.target_ontological_granularity == "OMOP Measurement Concept Level 4"
     assert task.upsampling_confidence_threshold == 0.95

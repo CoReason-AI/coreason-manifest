@@ -176,7 +176,6 @@ def test_neurosymbolic_inference_request_requires_contextualized_entity() -> Non
     assert "Input should be a valid dictionary or instance of ContextualizedSourceEntity" in str(exc_info.value)
 
 
-
 def test_upsampling_confidence_bounds() -> None:
     import pytest
     from pydantic import ValidationError
@@ -184,9 +183,7 @@ def test_upsampling_confidence_bounds() -> None:
     from coreason_manifest.spec.ontology import ContextualizedSourceEntity, EpistemicUpsamplingTask
 
     source = ContextualizedSourceEntity(
-        target_string="test artifact",
-        contextual_envelope=[],
-        source_system_provenance_flag=False
+        target_string="test artifact", contextual_envelope=[], source_system_provenance_flag=False
     )
 
     with pytest.raises(ValidationError) as exc_info:
@@ -194,9 +191,10 @@ def test_upsampling_confidence_bounds() -> None:
             source_entity=source,
             target_ontological_granularity="Level 4",
             upsampling_confidence_threshold=1.5,
-            justification_vectors=["rhinorrhea post-trauma"]
+            justification_vectors=["rhinorrhea post-trauma"],
         )
     assert "upsampling_confidence_threshold" in str(exc_info.value)
+
 
 def test_empty_justification_rejection() -> None:
     import pytest
@@ -205,9 +203,7 @@ def test_empty_justification_rejection() -> None:
     from coreason_manifest.spec.ontology import ContextualizedSourceEntity, EpistemicUpsamplingTask
 
     source = ContextualizedSourceEntity(
-        target_string="test artifact",
-        contextual_envelope=[],
-        source_system_provenance_flag=False
+        target_string="test artifact", contextual_envelope=[], source_system_provenance_flag=False
     )
 
     with pytest.raises(ValidationError) as exc_info:
@@ -215,6 +211,6 @@ def test_empty_justification_rejection() -> None:
             source_entity=source,
             target_ontological_granularity="Level 4",
             upsampling_confidence_threshold=0.95,
-            justification_vectors=[]
+            justification_vectors=[],
         )
     assert "justification_vectors" in str(exc_info.value)
