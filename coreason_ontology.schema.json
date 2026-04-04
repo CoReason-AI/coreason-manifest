@@ -4050,14 +4050,17 @@
       "properties": {
         "target_string": {
           "description": "The explicit item to map.",
+          "maxLength": 100000,
           "title": "Target String",
           "type": "string"
         },
         "contextual_envelope": {
           "description": "Surrounding semantic neighbors.",
           "items": {
+            "maxLength": 100000,
             "type": "string"
           },
+          "maxItems": 10000,
           "title": "Contextual Envelope",
           "type": "array"
         },
@@ -4967,6 +4970,7 @@
         },
         "surrounding_token_density": {
           "description": "Count of valid tokens in the contextual_envelope.",
+          "minimum": 0,
           "title": "Surrounding Token Density",
           "type": "integer"
         }
@@ -11627,7 +11631,7 @@
     },
     "NeurosymbolicInferenceRequest": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nCore inference payload envelope.",
+      "description": "CoReason Shared Kernel Ontology\n\nCore inference payload envelope orchestrating the pre-inference gate.",
       "properties": {
         "source_entity": {
           "$ref": "#/$defs/ContextualizedSourceEntity",

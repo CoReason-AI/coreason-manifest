@@ -1686,8 +1686,10 @@ class ContextualizedSourceEntity(CoreasonBaseState):
     Replaces raw baseline string inputs for inference payloads.
     """
 
-    target_string: str = Field(description="The explicit item to map.")
-    contextual_envelope: list[str] = Field(description="Surrounding semantic neighbors.")
+    target_string: str = Field(max_length=100000, description="The explicit item to map.")
+    contextual_envelope: list[Annotated[str, StringConstraints(max_length=100000)]] = Field(
+        max_length=10000, description="Surrounding semantic neighbors."
+    )
     source_system_provenance_flag: bool = Field(description="Indicates if the exact upstream origin system is known.")
 
 
@@ -1699,7 +1701,7 @@ class DataFidelityReceipt(CoreasonBaseState):
     contextual_completeness_score: float = Field(
         ge=0.0, le=1.0, description="Represents the density of the contextual envelope."
     )
-    surrounding_token_density: int = Field(description="Count of valid tokens in the contextual_envelope.")
+    surrounding_token_density: int = Field(ge=0, description="Count of valid tokens in the contextual_envelope.")
 
 
 class CognitiveUncertaintyProfile(CoreasonBaseState):
@@ -11914,7 +11916,7 @@ TeleologicalIsometryReceipt.model_rebuild()
 
 class NeurosymbolicInferenceRequest(CoreasonBaseState):
     """
-    Core inference payload envelope.
+    Core inference payload envelope orchestrating the pre-inference gate.
     """
 
     source_entity: ContextualizedSourceEntity = Field(description="The source data to process.")

@@ -369,3 +369,40 @@ def test_refusal_to_reason_fuzzing(epistemic_gap: float, min_fidelity_threshold:
             uncertainty_profile=uncertainty_profile,
             sla=sla,
         )
+
+
+
+
+def test_contextualized_source_entity_lengths() -> None:
+    from pydantic import ValidationError
+
+    with pytest.raises(ValidationError):
+        ContextualizedSourceEntity(
+            target_string="x" * 100001,
+            contextual_envelope=[],
+            source_system_provenance_flag=False,
+        )
+
+    with pytest.raises(ValidationError):
+        ContextualizedSourceEntity(
+            target_string="Valid",
+            contextual_envelope=["x"] * 10001,
+            source_system_provenance_flag=False,
+        )
+
+    with pytest.raises(ValidationError):
+        ContextualizedSourceEntity(
+            target_string="Valid",
+            contextual_envelope=["x" * 100001],
+            source_system_provenance_flag=False,
+        )
+
+
+def test_data_fidelity_receipt_positive_token_density() -> None:
+    from pydantic import ValidationError
+
+    with pytest.raises(ValidationError):
+        DataFidelityReceipt(
+            contextual_completeness_score=1.0,
+            surrounding_token_density=-1,
+        )
