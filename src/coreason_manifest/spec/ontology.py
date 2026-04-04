@@ -1482,25 +1482,25 @@ class RoutingFrontierPolicy(CoreasonBaseState):
                 try:
                     val = int(values["max_latency_ms"])
                     values["max_latency_ms"] = int(max(1, min(val, 86400000)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if "max_cost_magnitude_per_token" in values:
                 try:
                     val = int(values["max_cost_magnitude_per_token"])
                     values["max_cost_magnitude_per_token"] = int(max(1, min(val, 1000000000)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if "min_capability_score" in values:
                 try:
                     val_float = float(values["min_capability_score"])
                     values["min_capability_score"] = float(max(0.0, min(val_float, 1.0)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if values.get("max_carbon_intensity_gco2eq_kwh") is not None:
                 try:
                     val_float = float(values["max_carbon_intensity_gco2eq_kwh"])
                     values["max_carbon_intensity_gco2eq_kwh"] = float(max(0.0, min(val_float, 10000.0)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
         return values
 
@@ -3930,6 +3930,35 @@ class DimensionalProjectionContract(CoreasonBaseState):
 
 
 type DistributionShapeProfile = Literal["gaussian", "uniform", "beta"]
+
+
+class TopologicalDataAnalysisProfile(CoreasonBaseState):
+    """
+    Quantifies the Persistent Homology of incoming latent manifolds to detect adversarial structural collapse.
+    """
+
+    betti_0_threshold: int = Field(ge=1, description="The minimum number of connected components required to prove manifold continuity.")
+    betti_1_persistence_limit: float = Field(ge=0.0, le=1.0, description="The maximum allowed topological noise (1-dimensional holes). High values indicate adversarial prompt injection or latent sandbagging.")
+    vietoris_rips_max_radius: float = Field(ge=0.0, description="The maximum geometric filtration radius for the simplicial complex.")
+
+
+class ConformalPredictionBounds(CoreasonBaseState):
+    """
+    Establishes rigorous statistical error control over token-probability distributions to bound epistemic uncertainty.
+    """
+
+    confidence_level: float = Field(ge=0.0, le=1.0, default=0.95, description="The 1 - alpha target coverage.")
+    empirical_miscoverage_rate_max: float = Field(ge=0.0, le=1.0, description="The maximum allowed EMR. If exceeded, data is too entropic to safely ingest.")
+    average_prediction_set_size_max: int = Field(ge=1, description="The maximum allowed Average Prediction Set Size (APSS).")
+
+
+class GapPreservationConstraint(CoreasonBaseState):
+    """
+    Mathematically forces the embedding engine to preserve structural distance between heterogeneous modalities during transmutation, preventing over-alignment.
+    """
+
+    min_representation_gap: float = Field(ge=0.0, le=1.0, description="The minimum required distance between distinct concepts during cross-modal projection.")
+    distance_metric: Literal["cosine", "euclidean", "earth_movers"] = Field(description="The mathematical metric applied to measure the gap.")
 
 
 class DistributionProfile(CoreasonBaseState):
@@ -7172,7 +7201,7 @@ class MarketContract(CoreasonBaseState):
                 try:
                     mc_int = int(mc)
                     sp_int = int(sp)
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             cmc = max(0, min(mc_int, 1000000000))
             if sp_int > cmc:
@@ -10959,6 +10988,28 @@ class BeliefMutationEvent(BaseStateEvent):
         return _validate_payload_bounds(v)
 
 
+class FederatedSourceProfile(CoreasonBaseState):
+    """
+    Establishes the quantitative and topological baseline of the incoming data.
+    """
+
+    source_uri: str = Field(max_length=2000)
+    node_cardinality: int = Field(ge=0)
+    edge_cardinality: int = Field(ge=0)
+    tda_profile: TopologicalDataAnalysisProfile
+    conformal_bounds: ConformalPredictionBounds
+
+
+class TransmutationObservationEvent(BaseStateEvent):
+    """
+    Quantifies the incoming exogenous data before transmutation.
+    """
+
+    type: Literal["transmutation_observation"] = Field(default="transmutation_observation")
+    source_profile: FederatedSourceProfile
+    gap_constraint: GapPreservationConstraint
+
+
 class ObservationEvent(BaseStateEvent):
     r"""
     AGENT INSTRUCTION: Formalizes the ingestion of Bayesian Evidence ($E$) by capturing the raw, lossless semantic output from a ToolInvocationEvent or environmental shift.
@@ -11237,6 +11288,21 @@ class EpistemicAxiomVerificationReceipt(BaseStateEvent):
         return self
 
 
+class DoublePushoutRewritingSchema(CoreasonBaseState):
+    """
+    Formalizes algebraic graph transformations (L <- K -> R) to guarantee referential integrity during state mutations via DPO rewriting.
+    """
+
+    production_l: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState]
+    interface_k: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState]
+    replacement_r: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState]
+
+    @field_validator("production_l", "interface_k", "replacement_r", mode="before")
+    @classmethod
+    def enforce_payload_topology(cls, v: Any) -> Any:
+        return _validate_payload_bounds(v)
+
+
 class EpistemicDomainGraphManifest(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Encapsulates Formal Epistemology and Bounded Semilattices to represent a verifiable, collision-free cluster of knowledge. As a ...Manifest suffix, this defines a frozen, N-dimensional coordinate state.
@@ -11250,6 +11316,8 @@ class EpistemicDomainGraphManifest(CoreasonBaseState):
     """
 
     graph_id: str = Field(max_length=128, pattern="^[a-zA-Z0-9_.:-]+$", min_length=1)
+    c_set_schema_hash: str = Field(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$", description="A cryptographic pointer to the Presheaf C-set definition of the schema.")
+    dpo_schemas: list[DoublePushoutRewritingSchema] = Field(default_factory=list, description="Authorized algebraic graph rewriting rules.")
     verified_axioms: list[EpistemicAxiomState] = Field(min_length=1)
 
     @model_validator(mode="after")
@@ -11263,7 +11331,56 @@ class EpistemicDomainGraphManifest(CoreasonBaseState):
             ),
         )
 
+        import json
+
+        object.__setattr__(
+            self,
+            "dpo_schemas",
+            sorted(
+                self.dpo_schemas,
+                key=lambda x: json.dumps(
+                    {
+                        "l": x.production_l,
+                        "k": x.interface_k,
+                        "r": x.replacement_r,
+                    },
+                    sort_keys=True,
+                ),
+            ),
+        )
+
         return self
+
+
+class ParametricCoKleisliMorphism(CoreasonBaseState):
+    """
+    Maps contextualized states of the source category into the target category.
+    """
+
+    source_dialect_keys: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(min_length=1)
+    target_dids: list[NodeIdentifierState] = Field(min_length=1)
+    adjacency_matrix_comonad: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState]
+
+    @field_validator("adjacency_matrix_comonad", mode="before")
+    @classmethod
+    def enforce_payload_topology(cls, v: Any) -> Any:
+        return _validate_payload_bounds(v)
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "source_dialect_keys", sorted(self.source_dialect_keys))
+        object.__setattr__(self, "target_dids", sorted(self.target_dids))
+        return self
+
+
+class EpistemicMappingContract(CoreasonBaseState):
+    """
+    The macroscopic wrapper for semantic crosswalking.
+    """
+
+    contract_id: str = Field(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
+    # Note: mapping_rules is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted. Chronological functor application is critical.
+    mapping_rules: list[ParametricCoKleisliMorphism] = Field(min_length=1)
 
 
 class EpistemicTopologicalProofManifest(CoreasonBaseState):
@@ -11736,6 +11853,7 @@ class DifferentiableLogicConstraint(CoreasonBaseState):
 
 type AnyStateEvent = Annotated[
     ObservationEvent
+    | TransmutationObservationEvent
     | BeliefMutationEvent
     | SystemFaultEvent
     | HypothesisGenerationEvent
@@ -12066,3 +12184,11 @@ DataFidelityReceipt.model_rebuild()
 NeurosymbolicInferenceRequest.model_rebuild()
 
 EpistemicUpsamplingTask.model_rebuild()
+TopologicalDataAnalysisProfile.model_rebuild()
+ConformalPredictionBounds.model_rebuild()
+GapPreservationConstraint.model_rebuild()
+FederatedSourceProfile.model_rebuild()
+TransmutationObservationEvent.model_rebuild()
+DoublePushoutRewritingSchema.model_rebuild()
+ParametricCoKleisliMorphism.model_rebuild()
+EpistemicMappingContract.model_rebuild()
