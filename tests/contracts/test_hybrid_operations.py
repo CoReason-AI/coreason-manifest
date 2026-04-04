@@ -9,7 +9,9 @@
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
 
+import hypothesis.strategies as st
 import pytest
+from hypothesis import given
 from pydantic import AnyUrl, ValidationError
 
 from coreason_manifest.spec.ontology import (
@@ -23,15 +25,27 @@ from coreason_manifest.spec.ontology import (
 )
 
 
-def test_epistemic_sealing_bounds() -> None:
+@given(loops=st.integers(min_value=101))
+def test_epistemic_sealing_bounds(loops: int) -> None:
     with pytest.raises(ValidationError) as exc:
         EpistemicProvenanceReceipt(
             extracted_by="did:coreason:test1",
             source_event_id="test-event-id",
             derivation_mode=DerivationMode.DIRECT_TRANSLATION,
-            revision_loops_executed=105,
+            revision_loops_executed=loops,
         )
     assert "Input should be less than or equal to 100" in str(exc.value)
+
+
+@given(loops=st.integers(min_value=0, max_value=100))
+def test_epistemic_sealing_bounds_valid(loops: int) -> None:
+    receipt = EpistemicProvenanceReceipt(
+        extracted_by="did:coreason:test1",
+        source_event_id="test-event-id",
+        derivation_mode=DerivationMode.DIRECT_TRANSLATION,
+        revision_loops_executed=loops,
+    )
+    assert receipt.revision_loops_executed == loops
 
 
 def test_hotl_telemetry_policy_gate() -> None:
