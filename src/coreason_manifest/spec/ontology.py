@@ -98,6 +98,114 @@ def _canonicalize_payload(obj: Any) -> Any:
     return obj
 
 
+
+def _validate_ssrf_safety(url: str) -> str:
+    """
+    AGENT INSTRUCTION: Implements rigorous Network Topology and Server-Side Request Forgery (SSRF) Quarantine logic to guarantee mathematical zero-trust coordinate mapping.
+
+    CAUSAL AFFORDANCE: Mechanically severs outbound network connections targeting private, reserved, or loopback local infrastructure, pushing complex affine coordinate resolution to the native C-backed IP stack.
+
+    EPISTEMIC BOUNDS: Discards fragile Turing-incomplete string parsing. Explicitly rejects any IP topology that resolves to Bogon space (localhost, link-local, multicast, and private IP ranges) via canonical `ipaddress` parsing.
+
+    MCP ROUTING TRIGGERS: Network Topology, SSRF Quarantine, Bogon Space, Zero-Trust Execution, Lateral Movement Prevention
+    """
+    parsed = urllib.parse.urlparse(url)
+    if parsed.scheme == "file":
+        raise ValueError("SSRF topological violation detected: file:// schema is forbidden")
+    hostname = parsed.hostname
+    if not hostname:
+        if parsed.scheme in ("http", "https"):
+            raise ValueError("SSRF topological violation detected: Invalid hostname in HTTP URI")
+        return url
+
+    hostname_lower = hostname.lower()
+    if hostname_lower in {
+        "localhost",
+        "broadcasthost",
+        "local",
+        "internal",
+        "localtest.me",
+    } or hostname_lower.endswith(
+        (
+            ".local",
+            ".internal",
+            ".arpa",
+            "localhost.localdomain",
+            ".nip.io",
+            ".sslip.io",
+            ".xip.io",
+            ".vcap.me",
+            ".localtest.me",
+        )
+    ):
+        raise ValueError(f"SSRF topological violation detected: {hostname}")
+
+    import ipaddress
+    import socket
+
+    def _parse_obfuscated_ipv4(ip_str: str) -> int | None:
+        parts = ip_str.split(".")
+        if len(parts) > 4:
+            return None
+        parsed = []
+        try:
+            for p in parts:
+                if p.startswith(("0x", "0X")):
+                    parsed.append(int(p, 16))
+                elif p.startswith("0") and len(p) > 1 and all(c in "01234567" for c in p):
+                    parsed.append(int(p, 8))
+                else:
+                    parsed.append(int(p, 10))
+        except ValueError:
+            return None
+        if len(parts) == 1:
+            val = parsed[0]
+        elif len(parts) == 2:
+            val = (parsed[0] << 24) | parsed[1]
+        elif len(parts) == 3:
+            val = (parsed[0] << 24) | (parsed[1] << 16) | parsed[2]
+        else:
+            val = (parsed[0] << 24) | (parsed[1] << 16) | (parsed[2] << 8) | parsed[3]
+        return val if val <= 0xFFFFFFFF else None
+
+    ip: ipaddress.IPv4Address | ipaddress.IPv6Address | None = None
+
+    # Canonical validation of affine coordinate isomorphism for obfuscated IPv4 formats
+    ip_int = _parse_obfuscated_ipv4(hostname_lower)
+    if ip_int is not None:
+        ip = ipaddress.IPv4Address(ip_int)
+    else:
+        hostname_clean = hostname.strip("[]")
+        try:
+            # First try to parse as IP directly (covers IPv6 and standard IPv4 formats)
+            ip = ipaddress.ip_address(hostname_clean)
+        except ValueError:
+            try:
+                # Step 1: Resolve the hostname to an IP address
+                # This prevents bypassing the check via domain names
+                raw_ip = socket.gethostbyname(hostname_clean)
+                ip = ipaddress.ip_address(raw_ip)
+            except (socket.gaierror, ValueError) as e:
+                # Fail-Closed: If resolution fails or IP is invalid, reject the request
+                raise ValueError(f"Security Validation Failed: Unresolvable or invalid host: {hostname}") from e
+
+    if isinstance(ip, ipaddress.IPv6Address) and ip.ipv4_mapped:
+        ip = ip.ipv4_mapped
+
+    if (
+        ip.is_private
+        or ip.is_loopback
+        or ip.is_link_local
+        or ip.is_reserved
+        or ip.is_multicast
+        or getattr(ip, "is_unspecified", False)
+        or not getattr(ip, "is_global", True)
+    ):
+        raise ValueError(f"SSRF restricted IP detected: {hostname}")
+
+    return url
+
+
 type AuctionMechanismProfile = Literal["sealed_bid", "dutch", "vickrey"]
 type CausalIntervalProfile = Literal["strictly_precedes", "overlaps", "contains", "causes", "mitigates"]
 type CrossoverMechanismProfile = Literal["uniform_blend", "single_point", "heuristic"]
@@ -3185,101 +3293,7 @@ class BrowserDOMState(CoreasonBaseState):
 
         MCP ROUTING TRIGGERS: Network Topology, SSRF Quarantine, Bogon Space, Zero-Trust Execution, Lateral Movement Prevention
         """
-        parsed = urllib.parse.urlparse(url)
-        if parsed.scheme == "file":
-            raise ValueError("SSRF topological violation detected: file:// schema is forbidden")
-        hostname = parsed.hostname
-        if not hostname:
-            if parsed.scheme in ("http", "https"):
-                raise ValueError("SSRF topological violation detected: Invalid hostname in HTTP URI")
-            return url
-
-        hostname_lower = hostname.lower()
-        if hostname_lower in {
-            "localhost",
-            "broadcasthost",
-            "local",
-            "internal",
-            "localtest.me",
-        } or hostname_lower.endswith(
-            (
-                ".local",
-                ".internal",
-                ".arpa",
-                "localhost.localdomain",
-                ".nip.io",
-                ".sslip.io",
-                ".xip.io",
-                ".vcap.me",
-                ".localtest.me",
-            )
-        ):
-            raise ValueError(f"SSRF topological violation detected: {hostname}")
-
-        import ipaddress
-        import socket
-
-        def _parse_obfuscated_ipv4(ip_str: str) -> int | None:
-            parts = ip_str.split(".")
-            if len(parts) > 4:
-                return None
-            parsed = []
-            try:
-                for p in parts:
-                    if p.startswith(("0x", "0X")):
-                        parsed.append(int(p, 16))
-                    elif p.startswith("0") and len(p) > 1 and all(c in "01234567" for c in p):
-                        parsed.append(int(p, 8))
-                    else:
-                        parsed.append(int(p, 10))
-            except ValueError:
-                return None
-            if len(parts) == 1:
-                val = parsed[0]
-            elif len(parts) == 2:
-                val = (parsed[0] << 24) | parsed[1]
-            elif len(parts) == 3:
-                val = (parsed[0] << 24) | (parsed[1] << 16) | parsed[2]
-            else:
-                val = (parsed[0] << 24) | (parsed[1] << 16) | (parsed[2] << 8) | parsed[3]
-            return val if val <= 0xFFFFFFFF else None
-
-        ip: ipaddress.IPv4Address | ipaddress.IPv6Address | None = None
-
-        # Canonical validation of affine coordinate isomorphism for obfuscated IPv4 formats
-        ip_int = _parse_obfuscated_ipv4(hostname_lower)
-        if ip_int is not None:
-            ip = ipaddress.IPv4Address(ip_int)
-        else:
-            hostname_clean = hostname.strip("[]")
-            try:
-                # First try to parse as IP directly (covers IPv6 and standard IPv4 formats)
-                ip = ipaddress.ip_address(hostname_clean)
-            except ValueError:
-                try:
-                    # Step 1: Resolve the hostname to an IP address
-                    # This prevents bypassing the check via domain names
-                    raw_ip = socket.gethostbyname(hostname_clean)
-                    ip = ipaddress.ip_address(raw_ip)
-                except (socket.gaierror, ValueError) as e:
-                    # Fail-Closed: If resolution fails or IP is invalid, reject the request
-                    raise ValueError(f"Security Validation Failed: Unresolvable or invalid host: {hostname}") from e
-
-        if isinstance(ip, ipaddress.IPv6Address) and ip.ipv4_mapped:
-            ip = ip.ipv4_mapped
-
-        if (
-            ip.is_private
-            or ip.is_loopback
-            or ip.is_link_local
-            or ip.is_reserved
-            or ip.is_multicast
-            or getattr(ip, "is_unspecified", False)
-            or not getattr(ip, "is_global", True)
-        ):
-            raise ValueError(f"SSRF restricted IP detected: {hostname}")
-
-        return url
+        return _validate_ssrf_safety(url)
 
     viewport_size: tuple[int, int] = Field(
         max_length=1000, description="Capability Perimeters detailing bounding coordinates."
@@ -5559,6 +5573,15 @@ class HTTPTransportProfile(CoreasonBaseState):
     headers: dict[
         Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=2000)]
     ] = Field(default_factory=dict, description="HTTP headers, strictly bounded for zero-trust credentials.")
+
+    @field_validator("uri", mode="after")
+    @classmethod
+    def _enforce_ssrf_quarantine(cls, url: HttpUrl) -> HttpUrl:
+        """
+        AGENT INSTRUCTION: Implements Network Topology and Server-Side Request Forgery (SSRF) Quarantine logic.
+        """
+        _validate_ssrf_safety(str(url))
+        return url
 
     @field_validator("headers", mode="after")
     @classmethod
@@ -7927,6 +7950,15 @@ class SSETransportProfile(CoreasonBaseState):
     headers: dict[
         Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=2000)]
     ] = Field(default_factory=dict, description="HTTP headers, e.g., for authentication.")
+
+    @field_validator("uri", mode="after")
+    @classmethod
+    def _enforce_ssrf_quarantine(cls, url: HttpUrl) -> HttpUrl:
+        """
+        AGENT INSTRUCTION: Implements Network Topology and Server-Side Request Forgery (SSRF) Quarantine logic.
+        """
+        _validate_ssrf_safety(str(url))
+        return url
 
     @field_validator("headers", mode="after")
     @classmethod

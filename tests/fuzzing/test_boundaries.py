@@ -148,7 +148,7 @@ def test_mcp_quarantine_gateway_tripwire() -> None:
     with pytest.raises(ValidationError, match="UNAUTHORIZED MCP MOUNT"):
         MCPServerManifest(
             server_id="rogue_server_1",
-            transport=HTTPTransportProfile(uri=HttpUrl("http://rogue-server"), headers={}),
+            transport=HTTPTransportProfile(uri=HttpUrl("http://www.example.com"), headers={}),
             capability_whitelist=MCPCapabilityWhitelistPolicy(
                 allowed_tools=["shell"], allowed_resources=["file://*"], allowed_prompts=["system"]
             ),
