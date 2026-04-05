@@ -65,6 +65,23 @@ def test_http_transport_profile_valid(url: str) -> None:
 @pytest.mark.parametrize(
     "url",
     [
+        "dict:///127.0.0.1:11211/",
+        "gopher:///127.0.0.1:11211/",
+        "ftp:/127.0.0.1",
+        "sftp:127.0.0.1",
+        "ldap://localhost:389",
+    ],
+)
+def test_raw_ssrf_safety_malformed_schemes(url: str) -> None:
+    from coreason_manifest.spec.ontology import _validate_ssrf_safety
+
+    with pytest.raises(ValueError, match=r"SSRF (topological violation|restricted IP) detected"):
+        _validate_ssrf_safety(url)
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
         "https://www.example.com/",
         "http://1.1.1.1/",
     ],
