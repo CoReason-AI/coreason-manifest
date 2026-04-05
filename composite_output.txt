@@ -1,0 +1,425 @@
+class CompositeNodeProfile(CoreasonBaseState):
+    r"""
+    AGENT INSTRUCTION: Implements a Fractal Graph Abstraction, allowing the recursive encapsulation of entire workflow sub-topologies within a single, unified macroscopic vertex.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator to suspend the parent graph, injecting state variables into the isolated topology (`AnyTopologyManifest`) via `input_mappings`, and extracting terminal output via `output_mappings`.
+
+    EPISTEMIC BOUNDS: The `@model_validator` `_enforce_canonical_sort_mappings` deterministically sorts `input_mappings` by `parent_key` and `output_mappings` by `child_key`, guaranteeing zero-variance RFC 8785 canonical Merkle-DAG hashes across distributed nodes.
+
+    MCP ROUTING TRIGGERS: Fractal Graph Abstraction, Recursive Encapsulation, State Projection, Bijective Mapping, Sub-Topology
+
+    """
+
+    description: str = Field(
+        max_length=2000,
+        description="The semantic boundary defining the objective function or computational perimeter of the execution node.",
+    )
+    architectural_intent: str | None = Field(
+        max_length=2000, default=None, description="The AI's declarative rationale for selecting this node."
+    )
+    justification: str | None = Field(
+        max_length=2000,
+        default=None,
+        description="Cryptographic/audit justification for this node's existence in the graph.",
+    )
+    intervention_policies: list[InterventionPolicy] = Field(
+        default_factory=list,
+        description="The declarative array of proactive oversight hooks bound to this node's lifecycle.",
+    )
+    domain_extensions: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] | None = Field(
+        default=None,
+        description="Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
+    )
+    semantic_zoom: SemanticZoomProfile | None = Field(
+        default=None,
+        description="The mathematical Information Bottleneck thresholds dictating the semantic degradation of this specific node.",
+    )
+    markov_blanket: MarkovBlanketRenderingPolicy | None = Field(
+        default=None, description="The epistemic isolation boundary guarding this agent's internal generative states."
+    )
+    optical_physics: PhysicallyBasedRenderingProfile | None = Field(
+        default=None, description="The strict microfacet BRDF physics governing the visual representation of this node."
+    )
+
+    @field_validator("domain_extensions", mode="before")
+    @classmethod
+    def enforce_payload_topology(cls, v: Any) -> Any:
+        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""
+        return _validate_payload_bounds(v)
+
+
+    type: Literal["composite"] = Field(default="composite", description="Discriminator for a Composite node.")
+    topology: "AnyTopologyManifest" = Field(description="The encapsulated subgraph to execute.")
+    input_mappings: list[InputMappingContract] = Field(
+        default_factory=list, description="Explicit state projection inputs."
+    )
+    output_mappings: list[OutputMappingContract] = Field(
+        default_factory=list, description="Explicit state projection outputs."
+    )
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "input_mappings", sorted(self.input_mappings, key=operator.attrgetter("parent_key")))
+        object.__setattr__(self, "output_mappings", sorted(self.output_mappings, key=operator.attrgetter("child_key")))
+        object.__setattr__(self, "intervention_policies", sorted(self.intervention_policies, key=operator.attrgetter("trigger")))
+        return self
+
+
+class OverrideIntent(CoreasonBaseState):
+    r"""
+    AGENT INSTRUCTION: A Dictatorial Byzantine Fault Resolution mechanism. It is an absolute, zero-trust kinetic override that violently preempts autonomous algorithmic consensus or prediction market resolution.
+
+    CAUSAL AFFORDANCE: Forces an absolute Pearlian do-operator intervention ($do(X=x)$). Physically shatters the active causal chain of the `target_node_id` and forcibly injects the `override_action` payload into the state vector, bypassing decentralized voting.
+
+    EPISTEMIC BOUNDS: The blast radius is strictly confined to the `target_node_id`. The orchestrator must mathematically verify the `authorized_node_id` against the highest-tier W3C DID enterprise clearance before allowing the payload to overwrite the Epistemic Blackboard (`override_action` bounded `max_length=1000`).
+
+    MCP ROUTING TRIGGERS: Dictatorial Override, Byzantine Fault Resolution, Pearlian Intervention, Causal Shattering, Zero-Trust Override
+
+    """
+
+    type: Literal["override"] = Field(default="override", description="The type of the intervention payload.")
+    authorized_node_id: NodeIdentifierState = Field(
+        description="The NodeIdentifierState of the human or agent executing the override."
+    )
+    target_node_id: NodeIdentifierState = Field(description="The NodeIdentifierState being forcefully overridden.")
+    override_action: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
+        max_length=1000, description="The exact payload forcefully injected into the state."
+    )
+    justification: str = Field(
+        max_length=2000, description="Cryptographic audit justification for bypassing algorithmic consensus."
+    )
+
+
+class PeftAdapterContract(CoreasonBaseState):
+    r"""
+    AGENT INSTRUCTION: Implements Low-Rank Adaptation (LoRA) and Matrix Factorization to dynamically project parameter-efficient weight matrices into the base model's computation graph.
+
+    CAUSAL AFFORDANCE: Instructs the inference engine to dynamically hot-swap targeted attention modules via `target_modules`, altering the network's forward-pass physics without mutating the frozen foundation weights.
+
+    EPISTEMIC BOUNDS: VRAM allocation strictly clamped by the intrinsic rank parameter `adapter_rank` (`gt=0, le=65536`), physically preventing petabyte-scale matrix instantiations and OOM faults. `target_modules` array deterministically sorted via `@model_validator`.
+
+    MCP ROUTING TRIGGERS: Low-Rank Adaptation, Matrix Factorization, LoRA, GPU VRAM Allocation, Attention Head Injection
+
+    """
+
+    adapter_id: str = Field(
+        min_length=1,
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        description="Unique identifier for the requested LoRA adapter.",
+    )
+    safetensors_hash: str = Field(
+        min_length=1,
+        max_length=128,
+        pattern="^[a-f0-9]{64}$",
+        description="The SHA-256 hash of the cold-storage adapter weights file ensuring supply-chain zero-trust.",
+    )
+    base_model_hash: str = Field(
+        min_length=1,
+        max_length=128,
+        pattern="^[a-f0-9]{64}$",
+        description="The SHA-256 hash of the exact foundational model this adapter was mathematically trained against.",
+    )
+    adapter_rank: int = Field(
+        le=65536,
+        gt=0,
+        description="The low-rank intrinsic dimension (r) of the update matrices, used by the orchestrator to calculate VRAM cost.",
+    )
+    target_modules: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
+        min_length=1, description="The explicit array of attention head modules to inject (e.g., ['q_proj', 'v_proj'])."
+    )
+    eviction_ttl_seconds: int | None = Field(
+        le=86400,
+        default=None,
+        gt=0,
+        description="The time-to-live before the inference engine forcefully evicts this adapter from the LRU cache.",
+    )
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "target_modules", sorted(self.target_modules))
+        return self
+
+
+class PersistenceCommitReceipt(CoreasonBaseState):
+    r"""
+    AGENT INSTRUCTION: A cryptographically frozen historical fact representing the absolute Write-Ahead Logging (WAL) serialization of an ephemeral state differential to durable cold-storage.
+
+    CAUSAL AFFORDANCE: Commits the internal `committed_state_diff_id` into the macroscopic Apache Iceberg or Delta Lake backing store, yielding a verifiable `lakehouse_snapshot_id` to guarantee Eventual Consistency.
+
+    EPISTEMIC BOUNDS: `lakehouse_snapshot_id` and `committed_state_diff_id` are rigorously clamped by `max_length=128` and a strict CID regex (`^[a-zA-Z0-9_.:-]+$`), mathematically preventing path traversal injections.
+
+    MCP ROUTING TRIGGERS: Event Sourcing, Write-Ahead Logging, Two-Phase Commit, Lakehouse Serialization, State Differential Flush
+
+    """
+
+    event_id: str = Field(
+        min_length=1,
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+    )
+    prior_event_hash: str | None = Field(
+        default=None,
+        pattern="^[a-f0-9]{64}$",
+        min_length=1,
+        max_length=128,
+        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+    )
+    timestamp: float = Field(
+        ge=0.0,
+        le=253402300799.0,
+        description="Causal Ancestry markers required to resolve decentralized event ordering.",
+    )
+
+
+    type: Literal["persistence_commit"] = Field(
+        default="persistence_commit", description="Discriminator type for a persistence commit receipt."
+    )
+    lakehouse_snapshot_id: str = Field(
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        min_length=1,
+        description="The external cryptographic receipt generated by Iceberg/Delta.",
+    )
+    committed_state_diff_id: str = Field(
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        min_length=1,
+        description="The internal StateDifferentialManifest CID that was flushed.",
+    )
+    target_table_uri: Annotated[str, StringConstraints(max_length=2048)] = Field(
+        min_length=1, description="The specific table mutated."
+    )
+
+
+class PredictionMarketState(CoreasonBaseState):
+    r"""
+    AGENT INSTRUCTION: A declarative, frozen snapshot of an Automated Market Maker (AMM) utilizing Robin Hanson's Logarithmic Market Scoring Rule (LMSR) to guarantee infinite liquidity.
+
+    CAUSAL AFFORDANCE: Aggregates `HypothesisStakeReceipt` vectors, allowing the orchestrator to track the shifting probability manifold and trigger market resolution when the AMM reaches the required convergence threshold.
+
+    EPISTEMIC BOUNDS: `current_market_probabilities` is geometrically bounded by `max_length=1000`. `market_id` is restricted to a 128-char CID. `order_book` array is deterministically sorted by `agent_id` via `@model_validator`.
+
+    MCP ROUTING TRIGGERS: Logarithmic Market Scoring Rule, Automated Market Maker, Prediction Market, Infinite Liquidity, Brier Score
+
+    """
+
+    market_id: Annotated[str, StringConstraints(min_length=1)] = Field(
+        min_length=1,
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        description="The deterministic capability pointer representing the prediction market.",
+    )
+    resolution_oracle_condition_id: str = Field(
+        min_length=1,
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        description="The specific FalsificationContract ID whose execution will trigger the market payout.",
+    )
+    lmsr_b_parameter: str = Field(
+        pattern="^\\d+\\.\\d+$",
+        description="The stringified decimal representing the liquidity parameter defining the market depth and max loss for the AMM.",
+        max_length=255,
+    )
+    order_book: list[HypothesisStakeReceipt] = Field(
+        description="The immutable ledger of all stakes placed by the swarm."
+    )
+    current_market_probabilities: dict[
+        Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=255)]
+    ] = Field(
+        max_length=1000,
+        description="Mapping of hypothesis IDs to their current LMSR-calculated market price (probability) as stringified decimals.",
+    )
+
+    @model_validator(mode="before")
+    @classmethod
+    def _clamp_market_probabilities_before(cls, values: Any) -> Any:
+        if isinstance(values, dict) and "current_market_probabilities" in values:
+            probs_dict = values["current_market_probabilities"]
+            if not probs_dict:
+                return values
+
+            keys = list(probs_dict.keys())
+
+            # Convert to numpy array, treating parsing failures as 0.0
+            arr = np.array(
+                [float(probs_dict[k]) if str(probs_dict[k]).replace(".", "", 1).isdigit() else 0.0 for k in keys],
+                dtype=np.float64,
+            )
+
+            # Clamp to probability space
+            arr = np.clip(arr, 0.0, 1.0)
+            total = np.sum(arr)
+
+            # Normalize
+            if total > 0 and not np.isclose(total, 1.0, atol=1e-5):
+                arr = arr / total
+            elif total == 0:
+                # Fallback to uniform distribution
+                arr = np.full_like(arr, 1.0 / len(arr))
+
+            # Reconstruct stringified dictionary
+            values["current_market_probabilities"] = {k: str(v) for k, v in zip(keys, arr, strict=True)}
+        return values
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "order_book", sorted(self.order_book, key=operator.attrgetter("agent_id")))
+        return self
+
+
+class DynamicManifoldProjectionManifest(CoreasonBaseState):
+    r"""
+    AGENT INSTRUCTION: Provides the rendering matrix that translates the swarm's physics into human retinal variables using the Grammar of Graphics and Semantic Zooming.
+
+    CAUSAL AFFORDANCE: Maps N-dimensional capabilities onto the UI plane without breaking semantic causal edges.
+
+    EPISTEMIC BOUNDS: Binds an AST gradient and thermodynamic burn metric, governed by a physical zoom profile limit. Discriminator locked to `Literal["dynamic_manifold"]`.
+
+    MCP ROUTING TRIGGERS: Grammar of Graphics, Retinal Variables, UI Rendering, Semantic Zooming, Dynamic Manifold
+
+    """
+
+    type: Literal["dynamic_manifold"] = Field(
+        default="dynamic_manifold", description="Discriminator for the dynamic manifold projection."
+    )
+    manifest_id: str = Field(
+        min_length=1,
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        description="Unique identifier for this projection.",
+    )
+    active_forge_id: str = Field(
+        min_length=1,
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        description="A pointer to the CapabilityForgeTopologyManifest currently executing.",
+    )
+    ast_gradient_visual_mapping: GrammarPanelProfile = Field(
+        description="Algebraically maps the ASTGradientReceipt loss vectors into a 2D plot."
+    )
+    thermodynamic_burn_mapping: AnyPanelProfile = Field(
+        description="Tracks the KinematicDeltaManifest against the human's allocated_budget_magnitude."
+    )
+    viewport_zoom_profile: SemanticZoomProfile = Field(
+        description="Governs Spectral Graph Coarsening as the human alters their Euclidean distance from the graph."
+    )
+
+
+class PresentationManifest(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: The macroscopic orchestrator envelope binding a deterministic visual
+    manifold (grid: MacroGridProfile) to a specific Supervisory Control Theory cognitive
+    state (intent: AnyPresentationIntent). As a ...Manifest suffix, this defines a frozen,
+    N-dimensional coordinate state.
+
+    CAUSAL AFFORDANCE: Forces the active orchestration loop to suspend or pivot by projecting
+    a human-in-the-loop interaction surface (e.g., Drafting, Adjudication) alongside its
+    visual evidentiary warrants.
+
+    EPISTEMIC BOUNDS: Mathematically binds exactly one AnyPresentationIntent to one
+    MacroGridProfile, preventing asynchronous UI state drift and ensuring the generated grid
+    is causally justified by a verified intent.
+
+    MCP ROUTING TRIGGERS: Supervisory Control Theory, Mixed-Initiative UI, Cognitive State
+    Binding, Structural Manifold Envelope, Human-in-the-Loop
+    """
+
+    intent: AnyPresentationIntent = Field(description="The reason an agent is presenting this data to a human.")
+    grid: MacroGridProfile = Field(description="The grid of panels being presented.")
+    ambient_telemetry: AmbientState | None = Field(
+        default=None, description="Stateless non-blocking telemetry for continuous progress updates."
+    )
+
+
+class EpistemicSOPManifest(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Encodes a macroscopic Petri net or Directed Acyclic Graph (DAG)
+    formalizing standard operating procedures into mathematically traversable state
+    transitions. As a ...Manifest suffix, this defines a frozen, N-dimensional coordinate
+    state.
+
+    CAUSAL AFFORDANCE: Physically bounds the executing agent (target_persona:
+    ProfileIdentifierState) to a deterministic sequence of CognitiveStateProfiles, unlocking
+    the ability for the orchestrator to dynamically evaluate execution via Process Reward
+    Models (prm_evaluations: list[ProcessRewardContract]) at each topological node.
+
+    EPISTEMIC BOUNDS: The cognitive_steps dictionary is constrained to max_length=1000
+    to cap memory footprint. The @model_validator reject_ghost_nodes mathematically enforces
+    referential integrity, guaranteeing that no chronological_flow_edges AND no
+    structural_grammar_hashes point to an undefined state.
+
+    MCP ROUTING TRIGGERS: Petri Net, Directed Acyclic Graph, Process Reward Model,
+    Topological Flow, Referential Integrity
+    """
+
+    sop_id: str = Field(
+        min_length=1,
+        max_length=128,
+        pattern="^[a-zA-Z0-9_.:-]+$",
+        description="A Content Identifier (CID) for the Standard Operating Procedure.",
+    )
+    target_persona: ProfileIdentifierState = Field(
+        description="The deterministic cognitive routing boundary for the persona executing the SOP."
+    )
+    cognitive_steps: dict[Annotated[str, StringConstraints(max_length=255)], CognitiveStateProfile] = Field(
+        max_length=1000, description="Dictionary mapping step_ids to strict causal DAG constraints."
+    )
+    structural_grammar_hashes: dict[Annotated[str, StringConstraints(max_length=255)], str] = Field(
+        description="Dictionary mapping step_ids to SHA-256 hashes of strict Context-Free Grammars or JSON Schemas."
+    )
+    chronological_flow_edges: list[tuple[str, str]] = Field(description="The exact topological flow between step_ids.")
+    # Note: chronological_flow_edges is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
+    prm_evaluations: list["ProcessRewardContract"] = Field(
+        description="The strict array of Process Reward Contracts evaluating the logic."
+        # Note: prm_evaluations is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
+    )
+
+    @model_validator(mode="after")
+    def reject_ghost_nodes(self) -> Self:
+        for source, target in self.chronological_flow_edges:
+            if source not in self.cognitive_steps:
+                raise ValueError(f"Ghost node referenced in chronological_flow_edges source: {source}")
+            if target not in self.cognitive_steps:
+                raise ValueError(f"Ghost node referenced in chronological_flow_edges target: {target}")
+        for step_id in self.structural_grammar_hashes:
+            if step_id not in self.cognitive_steps:
+                raise ValueError(f"Ghost node referenced in structural_grammar_hashes: {step_id}")
+        return self
+
+
+class ProcessRewardContract(CoreasonBaseState):
+    r"""
+    AGENT INSTRUCTION: Enforces the Step-Level Verification heuristics for Process Reward Models (PRMs) during non-monotonic reasoning searches and test-time compute.
+
+    CAUSAL AFFORDANCE: Authorizes the orchestrator to physically prune hallucinating ThoughtBranchState vectors from the LatentScratchpadReceipt if their logit probabilities drop below the viable threshold, emulating rigorous Beam Search pruning.
+
+    EPISTEMIC BOUNDS: Strictly bounds the search space geometry via `pruning_threshold` (`ge=0.0, le=1.0`) and mechanically caps State-Space Explosion through `max_backtracks_allowed` (`ge=0, le=1000000000`).
+
+    MCP ROUTING TRIGGERS: Process Reward Model, Beam Search Pruning, Latent Trajectory, State-Space Explosion, A* Search
+
+    """
+
+    convergence_sla: DynamicConvergenceSLA | None = Field(
+        default=None,
+        description="The dynamic circuit breaker that halts the search when PRM variance converges, preventing VRAM waste.",
+    )
+    pruning_threshold: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="If a ThoughtBranchState's prm_score falls below this threshold, the orchestrator MUST halt its generation.",
+    )
+    max_backtracks_allowed: int = Field(
+        le=1000000000,
+        ge=0,
+        description="The absolute limit on how many times the agent can start a new branch before throwing a SystemFaultEvent.",
+    )
+    evaluator_model_name: str | None = Field(
+        max_length=2000,
+        default=None,
+        description="The specific PRM model used to score the logic (e.g., 'math-prm-v2').",
+    )
+
+
+type QoSClassificationProfile = Literal["critical", "high", "interactive", "background_batch"]

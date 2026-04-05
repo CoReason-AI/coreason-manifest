@@ -14,7 +14,7 @@ import hypothesis.strategies as st
 import pytest
 from hypothesis import HealthCheck, given, settings
 
-from coreason_manifest.spec.ontology import BaseNodeProfile
+from coreason_manifest.spec.ontology import AgentNodeProfile
 
 # 1. Define the Valid Mathematical Space for domain_extensions
 scalar_st = (
@@ -42,7 +42,7 @@ def test_base_node_profile_domain_extensions_fuzz_valid_space(extensions: Any) -
     Mathematically prove that any domain_extensions payload falling UNDER
     the topological tripwires (depth <= 5, key length <= 255) is strictly accepted.
     """
-    node = BaseNodeProfile(
+    node = AgentNodeProfile(
         description="fuzzed node",
         domain_extensions=extensions,
     )
@@ -58,7 +58,7 @@ def test_base_node_profile_domain_extensions_depth_exceeded() -> None:
         deep_dict = {"key": deep_dict}
 
     with pytest.raises(ValueError, match="Payload exceeds maximum recursion depth of 10"):
-        BaseNodeProfile(
+        AgentNodeProfile(
             description="test node",
             domain_extensions=deep_dict,
         )
@@ -66,7 +66,7 @@ def test_base_node_profile_domain_extensions_depth_exceeded() -> None:
 
 def test_base_node_profile_domain_extensions_invalid_keys() -> None:
     with pytest.raises(ValueError, match="Dictionary keys must be strings"):
-        BaseNodeProfile(
+        AgentNodeProfile(
             description="test node",
             domain_extensions={1: "a"},  # type: ignore
         )
@@ -74,7 +74,7 @@ def test_base_node_profile_domain_extensions_invalid_keys() -> None:
 
 def test_base_node_profile_domain_extensions_key_too_long() -> None:
     with pytest.raises(ValueError, match="String should have at most 255 characters"):
-        BaseNodeProfile(
+        AgentNodeProfile(
             description="test node",
             domain_extensions={"a" * 256: "b"},
         )
@@ -85,7 +85,7 @@ def test_base_node_profile_domain_extensions_invalid_leaf() -> None:
         pass
 
     with pytest.raises(ValueError, match="Payload value must be a valid JSON primitive, got CustomObj"):
-        BaseNodeProfile(
+        AgentNodeProfile(
             description="test node",
             domain_extensions={"a": CustomObj()},  # type: ignore
         )
@@ -93,7 +93,7 @@ def test_base_node_profile_domain_extensions_invalid_leaf() -> None:
 
 def test_base_node_profile_domain_extensions_not_dict() -> None:
     with pytest.raises(ValueError, match="Input should be a valid dictionary"):
-        BaseNodeProfile(
+        AgentNodeProfile(
             description="test node",
             domain_extensions=["not a dict"],  # type: ignore
         )
@@ -105,7 +105,7 @@ def test_base_node_profile_domain_extensions_list_depth_exceeded() -> None:
         deep_list = [deep_list]
 
     with pytest.raises(ValueError, match="Payload exceeds maximum recursion depth of 10"):
-        BaseNodeProfile(
+        AgentNodeProfile(
             description="test node",
             domain_extensions={"a": deep_list},
         )

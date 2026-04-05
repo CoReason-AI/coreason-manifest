@@ -16,7 +16,7 @@ from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
     AgentNodeProfile,
-    BaseStateEvent,
+    ObservationEvent,
     BrowserDOMState,
     CognitiveUncertaintyProfile,
     ComputeTier,
@@ -258,7 +258,7 @@ def test_dictionary_bombing_fuzzing(massive_key: str) -> None:
 @given(timestamp=st.one_of(st.floats(max_value=-0.0001), st.floats(min_value=253402300799.1)))
 def test_temporal_dilation_fuzzing(timestamp: float) -> None:
     with pytest.raises((ValidationError, ValueError)):
-        BaseStateEvent(event_id="test_id", timestamp=timestamp)
+        ObservationEvent(payload={}, event_id="test_id", timestamp=timestamp)
 
 
 @given(massive_id=st.text(min_size=129))
