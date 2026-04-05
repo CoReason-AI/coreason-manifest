@@ -12,11 +12,11 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
-    ComputationalMonadProfile,
     ActionSpaceManifest,
+    AlgebraicEffectProfile,
+    ComputationalMonadProfile,
     ExecutionEnvelopeState,
     PermissionBoundaryPolicy,
-    AlgebraicEffectProfile,
     StateVectorProfile,
     ToolManifest,
     TraceContextState,

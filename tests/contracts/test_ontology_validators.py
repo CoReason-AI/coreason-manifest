@@ -14,12 +14,12 @@ from hypothesis import HealthCheck, given, settings
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
-    ComputationalMonadProfile,
     ActivationSteeringContract,
     AdjudicationRubricProfile,
     AgentNodeProfile,
     CognitiveFormatContract,
     CognitiveUncertaintyProfile,
+    ComputationalMonadProfile,
     ComputeEngineProfile,
     ComputeRateContract,
     ComputeTier,
@@ -542,8 +542,7 @@ def test_adjudication_intent_sorting() -> None:
 
 def test_composite_node_profile_sorts_mappings() -> None:
     from coreason_manifest.spec.ontology import (
-    ComputationalMonadProfile,
-        CompositeNodeProfile,
+    CompositeNodeProfile,
         DAGTopologyManifest,
         InputMappingContract,
         OutputMappingContract,
@@ -573,10 +572,9 @@ def test_composite_node_profile_sorts_mappings() -> None:
 
 def test_action_space_manifest_enforce_canonical_sort() -> None:
     from coreason_manifest.spec.ontology import (
-    ComputationalMonadProfile,
         ActionSpaceManifest,
-        PermissionBoundaryPolicy,
         AlgebraicEffectProfile,
+        PermissionBoundaryPolicy,
         ToolManifest,
         TransitionEdgeProfile,
     )
@@ -624,8 +622,7 @@ def test_mcpservermanifest_enforce_did() -> None:
     from pydantic import ValidationError
 
     from coreason_manifest.spec.ontology import (
-    ComputationalMonadProfile,
-        MCPCapabilityWhitelistPolicy,
+    MCPCapabilityWhitelistPolicy,
         MCPServerManifest,
         VerifiableCredentialPresentationReceipt,
     )
@@ -768,8 +765,7 @@ def test_executionspanreceipt_enforce_canonical_sort_events() -> None:
 
 def test_causal_explanation_event_sorts_attributions() -> None:
     from coreason_manifest.spec.ontology import (
-    ComputationalMonadProfile,
-        CausalExplanationEvent,
+    CausalExplanationEvent,
         CollectiveIntelligenceProfile,
         ShapleyAttributionReceipt,
     )

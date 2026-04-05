@@ -16,7 +16,7 @@ import pytest
 from hypothesis import HealthCheck, given, settings
 from pydantic import ValidationError
 
-from coreason_manifest.spec.ontology import ExecutionNodeReceipt, AlgebraicEffectProfile, ComputationalMonadProfile
+from coreason_manifest.spec.ontology import AlgebraicEffectProfile, ComputationalMonadProfile, ExecutionNodeReceipt
 
 
 # 1. Atomic Test: Lineage Validation

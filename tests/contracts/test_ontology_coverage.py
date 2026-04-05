@@ -10,7 +10,7 @@
 
 from typing import Any
 
-from hypothesis import given, settings, HealthCheck
+from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
 from coreason_manifest.spec.ontology import (

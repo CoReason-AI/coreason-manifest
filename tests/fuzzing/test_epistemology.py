@@ -16,8 +16,8 @@ from pydantic import TypeAdapter
 
 from coreason_manifest.spec.ontology import (
     AlgebraicEffectProfile,
-    ComputationalMonadProfile,
     AnyIntent,
+    ComputationalMonadProfile,
     ExecutionNodeReceipt,
     LatentProjectionIntent,
     LatentScratchpadReceipt,

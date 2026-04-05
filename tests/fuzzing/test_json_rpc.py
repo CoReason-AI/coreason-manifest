@@ -16,16 +16,16 @@ from hypothesis import given
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
-    ComputationalMonadProfile,
     ActionSpaceManifest,
+    AlgebraicEffectProfile,
     BoundedJSONRPCIntent,
+    ComputationalMonadProfile,
     ContinuousMutationPolicy,
     EpistemicLedgerState,
     LatentSchemaInferenceIntent,
     LatentScratchpadReceipt,
     MarketContract,
     PermissionBoundaryPolicy,
-    AlgebraicEffectProfile,
     ThoughtBranchState,
     ToolManifest,
 )
