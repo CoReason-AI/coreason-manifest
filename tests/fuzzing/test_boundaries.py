@@ -401,9 +401,10 @@ def test_execution_node_receipt_recursive_payload(params: dict[str, Any]) -> Non
             algebraic_effect_profile=AlgebraicEffectProfile(
                 permitted_monads=[ComputationalMonadProfile.IO],
                 is_referentially_transparent=False,
-                thermodynamic_variance_bound=0.1
-            )
+                thermodynamic_variance_bound=0.1,
+            ),
         )
+
 
 def test_state_hydration_manifest_long_string_quarantine() -> None:
     """Prove that StateHydrationManifest immediately collapses instantiation and raises ValidationError for > 10k strings."""
