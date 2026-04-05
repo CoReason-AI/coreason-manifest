@@ -366,9 +366,6 @@ def verify_ast_safety(payload: str) -> bool:
     return True
 
 
-
-
-
 def apply_state_differential(
     current_state: dict[str, Any], differential: ontology.StateDifferentialManifest
 ) -> dict[str, Any]:
