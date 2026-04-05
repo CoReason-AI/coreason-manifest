@@ -7889,6 +7889,12 @@ class PersistenceCommitReceipt(BaseStateEvent):
         description="The topological time vector tracking causal ancestry, allowing deterministic asynchronous conflict resolution.",
     )
 
+    @field_validator("merkle_clock_vector", mode="before")
+    @classmethod
+    def enforce_payload_topology(cls, v: Any) -> Any:
+        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""
+        return _validate_payload_bounds(v)
+
 
 class PredictionMarketState(CoreasonBaseState):
     r"""
@@ -12448,3 +12454,8 @@ TransmutationDriftEvent.model_rebuild()
 
 MorphologicalExpansionBounds.model_rebuild()
 ProfunctorOpticContract.model_rebuild()
+
+ExecutionNodeReceipt.model_rebuild()
+ToolManifest.model_rebuild()
+DAGTopologyManifest.model_rebuild()
+PersistenceCommitReceipt.model_rebuild()
