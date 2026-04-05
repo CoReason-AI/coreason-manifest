@@ -26,7 +26,10 @@ from coreason_manifest.spec.ontology import HTTPTransportProfile, SSETransportPr
     ],
 )
 def test_http_transport_profile_ssrf(url: str) -> None:
-    with pytest.raises(ValidationError, match=r"SSRF (topological violation|restricted IP) detected"):
+    with pytest.raises(
+        ValidationError,
+        match=r"(SSRF restricted IP detected|SSRF topological violation detected|Security Validation Failed: Unresolvable or invalid host)",
+    ):
         HTTPTransportProfile(uri=HttpUrl(url))
 
 
@@ -42,7 +45,10 @@ def test_http_transport_profile_ssrf(url: str) -> None:
     ],
 )
 def test_sse_transport_profile_ssrf(url: str) -> None:
-    with pytest.raises(ValidationError, match=r"SSRF (topological violation|restricted IP) detected"):
+    with pytest.raises(
+        ValidationError,
+        match=r"(SSRF restricted IP detected|SSRF topological violation detected|Security Validation Failed: Unresolvable or invalid host)",
+    ):
         SSETransportProfile(uri=HttpUrl(url))
 
 

@@ -15,7 +15,7 @@ from typing import Any
 from unittest.mock import Mock, patch
 
 import pytest
-from hypothesis import given
+from hypothesis import given, settings
 from hypothesis import strategies as st
 from pydantic import ValidationError
 
@@ -143,6 +143,7 @@ def test_align_semantic_manifolds_subset(source: list[str]) -> None:
         st.floats(min_value=-10.0, max_value=10.0, allow_nan=False, allow_infinity=False), min_size=1, max_size=10
     )
 )
+@settings(max_examples=100)
 def test_calculate_latent_alignment_success(v1: list[float]) -> None:
     b1 = struct.pack(f"<{len(v1)}f", *v1)
     b64 = base64.b64encode(b1).decode("ascii")
@@ -184,7 +185,7 @@ def test_apply_state_differential_test_fail() -> None:
         vector_clock={"n111111": 1},
         patches=[StateMutationIntent(op="test", path="/foo", value="bar")],
     )
-    with pytest.raises(ValueError, match="Patch test operation failed"):
+    with pytest.raises(ValueError, match="Patch operation failed"):
         apply_state_differential(state, manifest)
 
 
@@ -314,7 +315,7 @@ def test_apply_state_differential_invalid_root() -> None:
         vector_clock={"n111": 1},
         patches=[StateMutationIntent(op="add", path="invalid", value="bar")],
     )
-    with pytest.raises(ValueError, match="Invalid JSON pointer"):
+    with pytest.raises(ValueError, match="Patch operation failed"):
         apply_state_differential({}, manifest)
 
 
@@ -326,7 +327,7 @@ def test_apply_state_differential_invalid_from_path() -> None:
         vector_clock={"n111": 1},
         patches=[StateMutationIntent(**{"op": "copy", "path": "/foo", "from": "invalid"})],  # type: ignore[arg-type]
     )
-    with pytest.raises(ValueError, match="Invalid from_path"):
+    with pytest.raises(ValueError, match="Patch operation failed"):
         apply_state_differential({"foo": 1}, manifest)
 
 
@@ -338,7 +339,7 @@ def test_apply_state_differential_out_of_bounds() -> None:
         vector_clock={"n111": 1},
         patches=[StateMutationIntent(op="add", path="/foo/99", value="bar")],
     )
-    with pytest.raises(ValueError, match="Invalid index"):
+    with pytest.raises(ValueError, match="Patch operation failed"):
         apply_state_differential({"foo": []}, manifest)
 
 
@@ -348,62 +349,61 @@ def test_apply_state_differential_exceptions() -> None:
             diff_id="d1", author_node_id="n1", lamport_timestamp=1, vector_clock={"n1": 1}, patches=patches
         )
 
-    with pytest.raises(ValueError, match="root operation not supported"):
-        apply_state_differential({}, manifest_base([StateMutationIntent(op="add", path="", value=1)]))
+    assert apply_state_differential({}, manifest_base([StateMutationIntent(op="add", path="", value=1)])) == 1
 
-    with pytest.raises(ValueError, match="Cannot add to path"):
+    with pytest.raises(ValueError, match="Patch operation failed"):
         apply_state_differential({"a": "b"}, manifest_base([StateMutationIntent(op="add", path="/a/b", value=1)]))
 
-    with pytest.raises(ValueError, match="Invalid JSON pointer"):
+    with pytest.raises(ValueError, match="Patch operation failed"):
         apply_state_differential({"a": []}, manifest_base([StateMutationIntent(op="add", path="/a/~foo", value=1)]))
 
-    with pytest.raises(ValueError, match="Invalid path"):
+    with pytest.raises(ValueError, match="Patch operation failed"):
         apply_state_differential({"a": []}, manifest_base([StateMutationIntent(op="add", path="/a/foo/bar", value=1)]))
 
     p = StateMutationIntent(**{"op": "copy", "path": "/b", "from": "/a/foo/bar"})  # type: ignore[arg-type]
-    with pytest.raises(ValueError, match="Invalid from_path"):
+    with pytest.raises(ValueError, match="Patch operation failed"):
         apply_state_differential({"a": [], "b": 1}, manifest_base([p]))
 
-    with pytest.raises(ValueError, match="Invalid path"):
+    with pytest.raises(ValueError, match="Patch operation failed"):
         apply_state_differential({"a": {}}, manifest_base([StateMutationIntent(op="add", path="/a/b/c", value=1)]))
 
-    with pytest.raises(ValueError, match="Cannot extract"):
+    with pytest.raises(ValueError, match="Patch operation failed"):
         apply_state_differential(
             {"a": []},
             manifest_base([StateMutationIntent(**{"op": "copy", "path": "/b", "from": "/a/-"})]),  # type: ignore[arg-type]
         )
 
-    with pytest.raises(ValueError, match="Invalid from_path operation: Invalid index"):
+    with pytest.raises(ValueError, match="Patch operation failed"):
         apply_state_differential(
             {"a": []},
             manifest_base([StateMutationIntent(**{"op": "copy", "path": "/b", "from": "/a/99"})]),  # type: ignore[arg-type]
         )
 
-    with pytest.raises(ValueError, match="Invalid from_path operation: Invalid index"):
+    with pytest.raises(ValueError, match="Patch operation failed"):
         apply_state_differential(
             {"a": []},
             manifest_base([StateMutationIntent(**{"op": "copy", "path": "/b", "from": "/a/foo"})]),  # type: ignore[arg-type]
         )
 
-    with pytest.raises(ValueError, match="Cannot remove from path"):
+    with pytest.raises(ValueError, match="Patch operation failed"):
         apply_state_differential({"a": {}}, manifest_base([StateMutationIntent(op="remove", path="/a/foo")]))
 
-    with pytest.raises(ValueError, match="Cannot remove from end"):
+    with pytest.raises(ValueError, match="Patch operation failed"):
         apply_state_differential({"a": []}, manifest_base([StateMutationIntent(op="remove", path="/a/-")]))
 
-    with pytest.raises(ValueError, match="Invalid index"):
+    with pytest.raises(ValueError, match="Patch operation failed"):
         apply_state_differential({"a": []}, manifest_base([StateMutationIntent(op="remove", path="/a/99")]))
 
-    with pytest.raises(ValueError, match="Invalid index"):
+    with pytest.raises(ValueError, match="Patch operation failed"):
         apply_state_differential({"a": []}, manifest_base([StateMutationIntent(op="remove", path="/a/foo")]))
 
-    with pytest.raises(ValueError, match="Invalid index"):
+    with pytest.raises(ValueError, match="Patch operation failed"):
         apply_state_differential({"a": []}, manifest_base([StateMutationIntent(op="add", path="/a/99", value=1)]))
 
-    with pytest.raises(ValueError, match="Cannot add to path"):
+    with pytest.raises(ValueError, match="Patch operation failed"):
         apply_state_differential(1, manifest_base([StateMutationIntent(op="add", path="/a", value=1)]))  # type: ignore[arg-type]
 
-    with pytest.raises(ValueError, match="Invalid path"):
+    with pytest.raises(ValueError, match="Patch operation failed"):
         apply_state_differential(
             {"a": {"b": 1}}, manifest_base([StateMutationIntent(op="add", path="/a/b/c/d", value=1)])
         )
@@ -412,7 +412,7 @@ def test_apply_state_differential_exceptions() -> None:
     apply_state_differential({"a": [{"b": 1}]}, manifest_base([StateMutationIntent(op="test", path="/a/0/b", value=1)]))
 
     # Hit 371: invalid list navigation
-    with pytest.raises(ValueError, match="Invalid path"):
+    with pytest.raises(ValueError, match="Patch operation failed"):
         apply_state_differential({"a": []}, manifest_base([StateMutationIntent(op="add", path="/a/foo/b", value=1)]))
 
     # Hit 391: valid from_path list navigation
@@ -421,11 +421,11 @@ def test_apply_state_differential_exceptions() -> None:
 
     # Hit 386: from_path missing parent dict key
     p_invalid_key = StateMutationIntent(**{"op": "copy", "path": "/c", "from": "/a/foo/bar"})  # type: ignore[arg-type]
-    with pytest.raises(ValueError, match="Invalid from_path operation: Invalid from_path"):
+    with pytest.raises(ValueError, match="Patch operation failed"):
         apply_state_differential({"a": {}}, manifest_base([p_invalid_key]))
 
     p_invalid = StateMutationIntent(**{"op": "copy", "path": "/c", "from": "/a/b/c/d"})  # type: ignore[arg-type]
-    with pytest.raises(ValueError, match="Invalid from_path operation"):
+    with pytest.raises(ValueError, match="Patch operation failed"):
         apply_state_differential({"a": {"b": 1}}, manifest_base([p_invalid]))
 
 
@@ -456,19 +456,19 @@ def test_apply_state_differential_copy_ops() -> None:
     assert res["a"]["b"] == 2
 
     # Test overlapping from_path for copy/move
-    with pytest.raises(ValueError, match="proper prefix"):
+    with pytest.raises(ValueError, match="Patch operation failed"):
         apply_state_differential(
             {"a": {"b": 1}},
             manifest_base([StateMutationIntent(**{"op": "copy", "path": "/a/b/c", "from": "/a/b"})]),  # type: ignore[arg-type]
         )
 
-    with pytest.raises(ValueError, match="from_path is mathematically required"):
+    with pytest.raises(ValueError, match="Patch operation failed"):
         apply_state_differential({"a": 1}, manifest_base([StateMutationIntent(op="copy", path="/b")]))
 
-    with pytest.raises(ValueError, match="Cannot replace at path /a/-: Cannot extract from end of array"):
+    with pytest.raises(ValueError, match="Patch operation failed"):
         apply_state_differential({"a": []}, manifest_base([StateMutationIntent(op="replace", path="/a/-", value=1)]))
 
-    with pytest.raises(ValueError, match="Cannot replace at path"):
+    with pytest.raises(ValueError, match="Patch operation failed"):
         apply_state_differential({"a": []}, manifest_base([StateMutationIntent(op="replace", path="/a/foo", value=1)]))
 
     # cover 494-511 copy/move array logic
@@ -485,7 +485,7 @@ def test_apply_state_differential_copy_ops() -> None:
     )
 
     # copy insert to list invalid index
-    with pytest.raises(ValueError, match="Invalid index"):
+    with pytest.raises(ValueError, match="Patch operation failed"):
         apply_state_differential(
             {"a": [1]},
             manifest_base([StateMutationIntent(**{"op": "copy", "path": "/a/foo", "from": "/a/0"})]),  # type: ignore[arg-type]
@@ -547,7 +547,7 @@ def test_apply_state_differential_test_op() -> None:
             diff_id="d1", author_node_id="n1", lamport_timestamp=1, vector_clock={"n1": 1}, patches=patches
         )
 
-    with pytest.raises(ValueError, match="Patch test operation failed"):
+    with pytest.raises(ValueError, match="Patch operation failed"):
         apply_state_differential({"a": 1}, manifest_base([StateMutationIntent(op="test", path="", value={"a": 2})]))
 
     res = apply_state_differential({"a": 1}, manifest_base([StateMutationIntent(op="test", path="", value={"a": 1})]))

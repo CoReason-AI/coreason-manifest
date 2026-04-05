@@ -47,7 +47,10 @@ def test_browser_dom_state_valid_topology() -> None:
     ],
 )
 def test_browser_dom_state_topological_violations(url: str) -> None:
-    with pytest.raises(ValidationError, match="SSRF topological violation detected"):
+    with pytest.raises(
+        ValidationError,
+        match=r"(SSRF restricted IP detected|SSRF topological violation detected|Security Validation Failed: Unresolvable or invalid host)",
+    ):
         BrowserDOMState(
             current_url=url, viewport_size=(1920, 1080), dom_hash="a" * 64, accessibility_tree_hash="b" * 64
         )
@@ -70,7 +73,9 @@ def test_browser_dom_state_topological_violations(url: str) -> None:
     ],
 )
 def test_browser_dom_state_mathematical_bounds(url: str) -> None:
-    with pytest.raises(ValidationError, match="SSRF restricted IP detected"):
+    with pytest.raises(
+        ValidationError, match=r"(SSRF restricted IP detected|Security Validation Failed: Unresolvable or invalid host)"
+    ):
         BrowserDOMState(
             current_url=url, viewport_size=(1920, 1080), dom_hash="a" * 64, accessibility_tree_hash="b" * 64
         )
@@ -94,7 +99,10 @@ def test_browser_dom_state_fuzz_ipv4_space(ip: ipaddress.IPv4Address) -> None:
         or getattr(ip, "is_unspecified", False)
         or not getattr(ip, "is_global", True)
     ):
-        with pytest.raises(ValidationError, match="SSRF restricted IP detected"):
+        with pytest.raises(
+            ValidationError,
+            match=r"(SSRF restricted IP detected|Security Validation Failed: Unresolvable or invalid host)",
+        ):
             BrowserDOMState(
                 current_url=url, viewport_size=(1024, 768), dom_hash="a" * 64, accessibility_tree_hash="b" * 64
             )

@@ -13,15 +13,19 @@ from __future__ import annotations
 import ast
 import hashlib
 import ipaddress
-import json
 import math
 import operator
 import re
+import socket
 import typing
 import urllib.parse
 from enum import StrEnum
 from typing import Annotated, Any, Literal, Self
 
+import canonicaljson
+import networkx as nx
+import nh3
+import numpy as np
 from pydantic import AnyUrl, BaseModel, ConfigDict, Field, HttpUrl, StringConstraints, field_validator, model_validator
 
 type JsonPrimitiveState = (
@@ -114,86 +118,19 @@ def _validate_ssrf_safety(url: str) -> str:
             raise ValueError("SSRF topological violation detected: Invalid hostname in HTTP URI")
         return url
 
-    hostname_lower = hostname.lower()
-    if hostname_lower in {
-        "localhost",
-        "broadcasthost",
-        "local",
-        "internal",
-        "localtest.me",
-    } or hostname_lower.endswith(
-        (
-            ".local",
-            ".internal",
-            ".arpa",
-            "localhost.localdomain",
-            ".nip.io",
-            ".sslip.io",
-            ".xip.io",
-            ".vcap.me",
-            ".localtest.me",
-        )
-    ):
-        raise ValueError(f"SSRF topological violation detected: {hostname}")
-
-    import ipaddress
-    import socket
-
-    def _parse_obfuscated_ipv4(ip_str: str) -> int | None:
-        parts = ip_str.split(".")
-        if len(parts) > 4:
-            return None
-        parsed = []
-        try:
-            for p in parts:
-                if p.startswith(("0x", "0X")):
-                    parsed.append(int(p, 16))
-                elif p.startswith("0") and len(p) > 1 and all(c in "01234567" for c in p):
-                    parsed.append(int(p, 8))
-                else:
-                    parsed.append(int(p, 10))
-        except ValueError:
-            return None
-        if len(parts) == 1:
-            val = parsed[0]
-        elif len(parts) == 2:
-            val = (parsed[0] << 24) | parsed[1]
-        elif len(parts) == 3:
-            val = (parsed[0] << 24) | (parsed[1] << 16) | parsed[2]
-        else:
-            val = (parsed[0] << 24) | (parsed[1] << 16) | (parsed[2] << 8) | parsed[3]
-        return val if val <= 0xFFFFFFFF else None
-
-    ip: ipaddress.IPv4Address | ipaddress.IPv6Address | None = None
-
-    # Canonical validation of affine coordinate isomorphism for obfuscated IPv4 formats
-    ip_int = _parse_obfuscated_ipv4(hostname_lower)
-    if ip_int is not None:
-        ip = ipaddress.IPv4Address(ip_int)
-    else:
-        hostname_clean = hostname.strip("[]")
-        try:
-            # First try to parse as IP directly (covers IPv6 and standard IPv4 formats)
-            ip = ipaddress.ip_address(hostname_clean)
-        except ValueError:
-            try:
-                # Step 1: Resolve the hostname to an IP address
-                # This prevents bypassing the check via domain names
-                raw_ip = socket.gethostbyname(hostname_clean)
-                ip = ipaddress.ip_address(raw_ip)
-            except (socket.gaierror, ValueError) as e:
-                # Fail-Closed: If resolution fails or IP is invalid, reject the request
-                raise ValueError(f"Security Validation Failed: Unresolvable or invalid host: {hostname}") from e
-
-    if isinstance(ip, ipaddress.IPv6Address) and ip.ipv4_mapped:
-        ip = ip.ipv4_mapped
+    hostname_clean = hostname.strip("[]")
+    try:
+        raw_ip = socket.gethostbyname(hostname_clean)
+        ip = ipaddress.ip_address(raw_ip)
+    except (socket.gaierror, ValueError) as e:
+        raise ValueError(f"Security Validation Failed: Unresolvable or invalid host: {hostname}") from e
 
     if (
         ip.is_private
         or ip.is_loopback
-        or ip.is_link_local
-        or ip.is_reserved
         or ip.is_multicast
+        or getattr(ip, "is_link_local", False)
+        or getattr(ip, "is_reserved", False)
         or getattr(ip, "is_unspecified", False)
         or not getattr(ip, "is_global", True)
     ):
@@ -550,9 +487,7 @@ class CoreasonBaseState(BaseModel):
         except AttributeError:
             raw_dict = self.model_dump(mode="json", exclude_none=True, by_alias=True)
             # Topological mapping: Enforces RFC 8785 strict canonical key sorting.
-            canonical_dump = json.dumps(raw_dict, ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode(
-                "utf-8"
-            )
+            canonical_dump = canonicaljson.encode_canonical_json(raw_dict)
             object.__setattr__(self, "_cached_canonical_dump", canonical_dump)
             return canonical_dump
 
@@ -713,7 +648,7 @@ class SE3TransformProfile(CoreasonBaseState):
     @model_validator(mode="after")
     def enforce_quaternion_normalization(self) -> Self:
         """Mathematically guarantees the quaternion represents a valid 3D rotation."""
-        magnitude = math.sqrt(self.qx**2 + self.qy**2 + self.qz**2 + self.qw**2)
+        magnitude = math.hypot(self.qx, self.qy, self.qz, self.qw)
         if magnitude == 0.0:
             raise ValueError("Topological Violation: Quaternion cannot be a zero vector.")
         if not math.isclose(magnitude, 1.0, abs_tol=1e-3):
@@ -838,9 +773,7 @@ class EpistemicAttentionRay(CoreasonBaseState):
 
     @model_validator(mode="after")
     def validate_unit_vector(self) -> Self:
-        magnitude = math.sqrt(
-            self.direction_unit_vector[0] ** 2 + self.direction_unit_vector[1] ** 2 + self.direction_unit_vector[2] ** 2
-        )
+        magnitude = math.hypot(*self.direction_unit_vector)
         if magnitude == 0.0:
             raise ValueError("Kinematic Violation: Attention Ray direction cannot be a zero vector.")
         if not math.isclose(magnitude, 1.0, abs_tol=1e-3):
@@ -2212,7 +2145,6 @@ class MultimodalTokenAnchorState(CoreasonBaseState):
         """AGENT INSTRUCTION: Enforce mathematical spatial monotonicity."""
         if self.bounding_box is not None:
             x_min, y_min, x_max, y_max = self.bounding_box
-            import math
 
             if math.isnan(x_min) or math.isnan(y_min) or math.isnan(x_max) or math.isnan(y_max):
                 raise ValueError("Spatial bounds cannot be NaN.")
@@ -4067,36 +3999,21 @@ class DocumentLayoutManifest(CoreasonBaseState):
 
     @model_validator(mode="after")
     def verify_dag_and_integrity(self) -> Self:
-        adj: dict[Annotated[str, StringConstraints(max_length=255)], list[str]] = {
-            node_id: [] for node_id in self.blocks
-        }
+
+        graph = nx.DiGraph()
+        for node_id in self.blocks:
+            graph.add_node(node_id)
+
         for source, target in self.chronological_flow_edges:
             if source not in self.blocks:
                 raise ValueError(f"Source block '{source}' does not exist.")
             if target not in self.blocks:
                 raise ValueError(f"Target block '{target}' does not exist.")
-            adj[source].append(target)
-        visited: set[str] = set()
-        recursion_stack: set[str] = set()
-        for start_node in self.blocks:
-            if start_node in visited:
-                continue
-            stack = [(start_node, iter(adj[start_node]))]
-            visited.add(start_node)
-            recursion_stack.add(start_node)
-            while stack:
-                curr, neighbors = stack[-1]
-                try:
-                    neighbor = next(neighbors)
-                    if neighbor not in visited:
-                        visited.add(neighbor)
-                        recursion_stack.add(neighbor)
-                        stack.append((neighbor, iter(adj[neighbor])))
-                    elif neighbor in recursion_stack:
-                        raise ValueError("Reading order contains a cyclical contradiction.")
-                except StopIteration:
-                    recursion_stack.remove(curr)
-                    stack.pop()
+            graph.add_edge(source, target)
+
+        if not nx.is_directed_acyclic_graph(graph):
+            raise ValueError("Reading order contains a cyclical contradiction.")
+
         return self
 
 
@@ -4912,9 +4829,7 @@ class ExecutionNodeReceipt(CoreasonBaseState):
         }
 
         canonical_payload = _canonicalize_payload(payload)
-        json_bytes = json.dumps(canonical_payload, ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode(
-            "utf-8"
-        )
+        json_bytes = canonicaljson.encode_canonical_json(canonical_payload)
         return hashlib.sha256(json_bytes).hexdigest()
 
     @model_validator(mode="after")
@@ -5990,38 +5905,11 @@ class InsightCardProfile(CoreasonBaseState):
         default=None, description="The kinematic constraint anchoring this 2D card to the 3D topology."
     )
 
-    @field_validator("markdown_content")
-    @classmethod
-    def sanitize_markdown(cls, v: str) -> str:
-        """Strictly restrict '<' to mathematical contexts to prevent XSS."""
-        v_lower = v.lower()
-        if re.search("on[a-zA-Z]+\\s*=", v_lower):
-            raise ValueError("Forbidden HTML event handler detected.")
-        if re.search("<[^=\\s\\d]", v):
-            raise ValueError(
-                "HTML tags are prohibited. '<' may only be used as a mathematical operator followed by a space, digit, or '='."
-            )
-        return v
-
     @field_validator("markdown_content", mode="after")
     @classmethod
-    def _prevent_malicious_uri_schemes(cls, v: str) -> str:
-        """AGENT INSTRUCTION: Statically sever XSS vectors embedded in markdown links."""
-        import html
-        import urllib.parse
-
-        # Decode URL encoding first
-        v_unquoted = urllib.parse.unquote(v)
-
-        # Normalize malformed/missing-semicolon HTML entities for colon before unescape
-        v_norm = re.sub(r"&#x3a;?|&#0*58;?", ":", v_unquoted, flags=re.IGNORECASE)
-
-        # Decode HTML entities and strip out all whitespace/control characters to prevent filter bypass
-        v_decoded = html.unescape(v_norm)
-        v_clean = re.sub(r"[\s\x00-\x1f\x7f]+", "", v_decoded)
-        if re.search("\\]\\((javascript|vbscript|data):", v_clean, flags=re.IGNORECASE):
-            raise ValueError("Malicious executable link scheme detected in markdown content")
-        return v
+    def sanitize_markdown(cls, v: str) -> str:
+        """AGENT INSTRUCTION: Delegates XSS and malicious URI sanitization to Mozilla's authoritative Rust-backed ammonia engine."""
+        return nh3.clean(v)
 
 
 type AnyPanelProfile = Annotated[
@@ -7776,30 +7664,31 @@ class PredictionMarketState(CoreasonBaseState):
     @classmethod
     def _clamp_market_probabilities_before(cls, values: Any) -> Any:
         if isinstance(values, dict) and "current_market_probabilities" in values:
-            clamped_probs: dict[str, str] = {}
-            total = 0.0
+            probs_dict = values["current_market_probabilities"]
+            if not probs_dict:
+                return values
 
-            import math
+            keys = list(probs_dict.keys())
 
-            for k, v in values["current_market_probabilities"].items():
-                try:
-                    prob = float(v)
-                except ValueError:
-                    prob = 0.0
+            # Convert to numpy array, treating parsing failures as 0.0
+            arr = np.array(
+                [float(probs_dict[k]) if str(probs_dict[k]).replace(".", "", 1).isdigit() else 0.0 for k in keys],
+                dtype=np.float64,
+            )
 
-                prob = max(0.0, min(prob, 1.0))
-                total += prob
-                clamped_probs[k] = str(prob)
+            # Clamp to probability space
+            arr = np.clip(arr, 0.0, 1.0)
+            total = np.sum(arr)
 
-            if total > 0.0 and not math.isclose(total, 1.0, abs_tol=1e-5):
-                normalized_probs = {k: str(float(v) / total) for k, v in clamped_probs.items()}
-            elif total == 0.0 and clamped_probs:
-                uniform = 1.0 / len(clamped_probs)
-                normalized_probs = {k: str(uniform) for k in clamped_probs}
-            else:
-                normalized_probs = clamped_probs
+            # Normalize
+            if total > 0 and not np.isclose(total, 1.0, atol=1e-5):
+                arr = arr / total
+            elif total == 0:
+                # Fallback to uniform distribution
+                arr = np.full_like(arr, 1.0 / len(arr))
 
-            values["current_market_probabilities"] = normalized_probs
+            # Reconstruct stringified dictionary
+            values["current_market_probabilities"] = {k: str(v) for k, v in zip(keys, arr, strict=True)}
         return values
 
     @model_validator(mode="after")
@@ -10084,47 +9973,27 @@ class DAGTopologyManifest(BaseTopologyManifest):
     def verify_edges_exist_and_compute_bounds(self) -> Self:
         if self.lifecycle_phase == "draft":
             return self
-        adj: dict[NodeIdentifierState, list[NodeIdentifierState]] = {node_id: [] for node_id in self.nodes}
-        in_degree: dict[NodeIdentifierState, int] = dict.fromkeys(self.nodes, 0)
+
+        graph = nx.DiGraph()
+        for node_id in self.nodes:
+            graph.add_node(node_id)
+
         for source, target in self.edges:
             if source not in self.nodes:
                 raise ValueError(f"Edge source '{source}' does not exist in nodes registry.")
             if target not in self.nodes:
                 raise ValueError(f"Edge target '{target}' does not exist in nodes registry.")
-            adj[source].append(target)
-            in_degree[target] += 1
-        for node, neighbors in adj.items():
-            if len(neighbors) > self.max_fan_out:
+            graph.add_edge(source, target)
+
+        for node in graph.nodes:
+            if graph.out_degree(node) > self.max_fan_out:
                 raise ValueError(f"Topological Violation: Node '{node}' exceeds max_fan_out of {self.max_fan_out}.")
+
         if not self.allow_cycles:
-            depth_memo: dict[NodeIdentifierState, int] = {}
-
-            import collections
-
-            # Using Kahn's Algorithm / Iterative topological sort for depth and cycles
-            # We calculate max depth without recursion to avoid stack overflow limits
-
-            queue = collections.deque([n for n in self.nodes if in_degree[n] == 0])
-            for n in queue:
-                depth_memo[n] = 1
-
-            processed_count = 0
-
-            while queue:
-                curr = queue.popleft()
-                processed_count += 1
-                curr_depth = depth_memo[curr]
-
-                for neighbor in adj[curr]:
-                    in_degree[neighbor] -= 1
-                    depth_memo[neighbor] = max(depth_memo.get(neighbor, 1), curr_depth + 1)
-                    if in_degree[neighbor] == 0:
-                        queue.append(neighbor)
-
-            if processed_count != len(self.nodes):
+            if not nx.is_directed_acyclic_graph(graph):
                 raise ValueError("Graph contains cycles but allow_cycles is False.")
 
-            max_calculated_depth = max(depth_memo.values()) if depth_memo else 0
+            max_calculated_depth = nx.dag_longest_path_length(graph) + 1 if graph.nodes else 0
 
             if max_calculated_depth > self.max_depth:
                 raise ValueError(
