@@ -13,7 +13,6 @@ from __future__ import annotations
 import ast
 import hashlib
 import ipaddress
-import json
 import math
 import operator
 import re
@@ -23,7 +22,10 @@ import urllib.parse
 from enum import StrEnum
 from typing import Annotated, Any, Literal, Self
 
+import canonicaljson
 import networkx as nx
+import nh3
+import numpy as np
 from pydantic import AnyUrl, BaseModel, ConfigDict, Field, HttpUrl, StringConstraints, field_validator, model_validator
 
 type JsonPrimitiveState = (
@@ -485,9 +487,7 @@ class CoreasonBaseState(BaseModel):
         except AttributeError:
             raw_dict = self.model_dump(mode="json", exclude_none=True, by_alias=True)
             # Topological mapping: Enforces RFC 8785 strict canonical key sorting.
-            canonical_dump = json.dumps(raw_dict, ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode(
-                "utf-8"
-            )
+            canonical_dump = canonicaljson.encode_canonical_json(raw_dict)
             object.__setattr__(self, "_cached_canonical_dump", canonical_dump)
             return canonical_dump
 
@@ -4829,9 +4829,7 @@ class ExecutionNodeReceipt(CoreasonBaseState):
         }
 
         canonical_payload = _canonicalize_payload(payload)
-        json_bytes = json.dumps(canonical_payload, ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode(
-            "utf-8"
-        )
+        json_bytes = canonicaljson.encode_canonical_json(canonical_payload)
         return hashlib.sha256(json_bytes).hexdigest()
 
     @model_validator(mode="after")
@@ -5907,38 +5905,11 @@ class InsightCardProfile(CoreasonBaseState):
         default=None, description="The kinematic constraint anchoring this 2D card to the 3D topology."
     )
 
-    @field_validator("markdown_content")
-    @classmethod
-    def sanitize_markdown(cls, v: str) -> str:
-        """Strictly restrict '<' to mathematical contexts to prevent XSS."""
-        v_lower = v.lower()
-        if re.search("on[a-zA-Z]+\\s*=", v_lower):
-            raise ValueError("Forbidden HTML event handler detected.")
-        if re.search("<[^=\\s\\d]", v):
-            raise ValueError(
-                "HTML tags are prohibited. '<' may only be used as a mathematical operator followed by a space, digit, or '='."
-            )
-        return v
-
     @field_validator("markdown_content", mode="after")
     @classmethod
-    def _prevent_malicious_uri_schemes(cls, v: str) -> str:
-        """AGENT INSTRUCTION: Statically sever XSS vectors embedded in markdown links."""
-        import html
-        import urllib.parse
-
-        # Decode URL encoding first
-        v_unquoted = urllib.parse.unquote(v)
-
-        # Normalize malformed/missing-semicolon HTML entities for colon before unescape
-        v_norm = re.sub(r"&#x3a;?|&#0*58;?", ":", v_unquoted, flags=re.IGNORECASE)
-
-        # Decode HTML entities and strip out all whitespace/control characters to prevent filter bypass
-        v_decoded = html.unescape(v_norm)
-        v_clean = re.sub(r"[\s\x00-\x1f\x7f]+", "", v_decoded)
-        if re.search("\\]\\((javascript|vbscript|data):", v_clean, flags=re.IGNORECASE):
-            raise ValueError("Malicious executable link scheme detected in markdown content")
-        return v
+    def sanitize_markdown(cls, v: str) -> str:
+        """AGENT INSTRUCTION: Delegates XSS and malicious URI sanitization to Mozilla's authoritative Rust-backed ammonia engine."""
+        return nh3.clean(v)
 
 
 type AnyPanelProfile = Annotated[
@@ -7693,28 +7664,31 @@ class PredictionMarketState(CoreasonBaseState):
     @classmethod
     def _clamp_market_probabilities_before(cls, values: Any) -> Any:
         if isinstance(values, dict) and "current_market_probabilities" in values:
-            clamped_probs: dict[str, str] = {}
-            total = 0.0
+            probs_dict = values["current_market_probabilities"]
+            if not probs_dict:
+                return values
 
-            for k, v in values["current_market_probabilities"].items():
-                try:
-                    prob = float(v)
-                except ValueError:
-                    prob = 0.0
+            keys = list(probs_dict.keys())
 
-                prob = max(0.0, min(prob, 1.0))
-                total += prob
-                clamped_probs[k] = str(prob)
+            # Convert to numpy array, treating parsing failures as 0.0
+            arr = np.array(
+                [float(probs_dict[k]) if str(probs_dict[k]).replace(".", "", 1).isdigit() else 0.0 for k in keys],
+                dtype=np.float64,
+            )
 
-            if total > 0.0 and not math.isclose(total, 1.0, abs_tol=1e-5):
-                normalized_probs = {k: str(float(v) / total) for k, v in clamped_probs.items()}
-            elif total == 0.0 and clamped_probs:
-                uniform = 1.0 / len(clamped_probs)
-                normalized_probs = {k: str(uniform) for k in clamped_probs}
-            else:
-                normalized_probs = clamped_probs
+            # Clamp to probability space
+            arr = np.clip(arr, 0.0, 1.0)
+            total = np.sum(arr)
 
-            values["current_market_probabilities"] = normalized_probs
+            # Normalize
+            if total > 0 and not np.isclose(total, 1.0, atol=1e-5):
+                arr = arr / total
+            elif total == 0:
+                # Fallback to uniform distribution
+                arr = np.full_like(arr, 1.0 / len(arr))
+
+            # Reconstruct stringified dictionary
+            values["current_market_probabilities"] = {k: str(v) for k, v in zip(keys, arr, strict=True)}
         return values
 
     @model_validator(mode="after")

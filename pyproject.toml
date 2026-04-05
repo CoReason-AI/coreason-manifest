@@ -23,6 +23,8 @@ dependencies = [
     "networkx>=3.6",
     "jsonpatch>=1.33",
     "numpy>=2.4",
+    "canonicaljson>=2.0.0",
+    "nh3>=0.2.17",
 ]
 
 [tool.uv]
