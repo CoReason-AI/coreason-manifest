@@ -1,4 +1,3 @@
-import json
 
 from coreason_manifest.spec.ontology import (
     AnyStateEvent,
@@ -25,17 +24,7 @@ def test_epistemic_domain_graph_manifest_dpo_schemas_sort():
         dpo_schemas=[dpo1, dpo2],
     )
 
-    expected = sorted(
-        [dpo1, dpo2],
-        key=lambda x: json.dumps(
-            {
-                "l": x.production_l,
-                "k": x.interface_k,
-                "r": x.replacement_r,
-            },
-            sort_keys=True,
-        ),
-    )
+    expected = sorted([dpo1, dpo2], key=lambda x: x.model_dump_canonical())
 
     assert manifest.dpo_schemas == expected
 
