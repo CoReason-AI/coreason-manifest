@@ -1482,25 +1482,25 @@ class RoutingFrontierPolicy(CoreasonBaseState):
                 try:
                     val = int(values["max_latency_ms"])
                     values["max_latency_ms"] = int(max(1, min(val, 86400000)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if "max_cost_magnitude_per_token" in values:
                 try:
                     val = int(values["max_cost_magnitude_per_token"])
                     values["max_cost_magnitude_per_token"] = int(max(1, min(val, 1000000000)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if "min_capability_score" in values:
                 try:
                     val_float = float(values["min_capability_score"])
                     values["min_capability_score"] = float(max(0.0, min(val_float, 1.0)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if values.get("max_carbon_intensity_gco2eq_kwh") is not None:
                 try:
                     val_float = float(values["max_carbon_intensity_gco2eq_kwh"])
                     values["max_carbon_intensity_gco2eq_kwh"] = float(max(0.0, min(val_float, 10000.0)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
         return values
 
@@ -2270,6 +2270,41 @@ class RollbackIntent(CoreasonBaseState):
     @model_validator(mode="after")
     def _enforce_canonical_sort_invalidated_nodes(self) -> Self:
         object.__setattr__(self, "invalidated_node_ids", sorted(self.invalidated_node_ids))
+        return self
+
+
+class EpistemicTransmutationIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: The kinetic trigger that forces source coordinates through the Functor.
+
+    CAUSAL AFFORDANCE: Executes the structural transformation, generating new target_cids. Domain-specific complexities are safely quarantined inside the domain_payload.
+
+    EPISTEMIC BOUNDS: The domain_payload is strictly routed through the volumetric hardware guillotine to prevent adversarial JSON-bombing during GPU hashing.
+
+    MCP ROUTING TRIGGERS: Category Theory Functor, Morphological Transmutation, Kinetic Orchestration, Zero-Trust Projection
+    """
+    type: Literal["epistemic_transmutation"] = Field(
+        default="epistemic_transmutation", description="Discriminator for the transmutation intent."
+    )
+    source_coordinates: list[Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]] = Field(
+        description="The CIDs of the source geometry."
+    )
+    target_cids: list[Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]] = Field(
+        description="The resulting CIDs in the target domain."
+    )
+    domain_payload: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
+        description="The complex domain-specific payload."
+    )
+
+    @field_validator("domain_payload", mode="before")
+    @classmethod
+    def enforce_payload_topology(cls, v: Any) -> Any:
+        return _validate_payload_bounds(v)
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "source_coordinates", sorted(self.source_coordinates))
+        object.__setattr__(self, "target_cids", sorted(self.target_cids))
         return self
 
 
@@ -5972,6 +6007,7 @@ type AnyPresentationIntent = Annotated[
 type AnyIntent = Annotated[
     InformationalIntent
     | DraftingIntent
+    | EpistemicTransmutationIntent
     | AdjudicationIntent
     | EscalationIntent
     | SemanticDiscoveryIntent
@@ -7219,7 +7255,7 @@ class MarketContract(CoreasonBaseState):
                 try:
                     mc_int = int(mc)
                     sp_int = int(sp)
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             cmc = max(0, min(mc_int, 1000000000))
             if sp_int > cmc:
@@ -11028,6 +11064,24 @@ class TransmutationObservationEvent(BaseStateEvent):
     gap_constraint: GapPreservationConstraint
 
 
+class TransmutationDriftEvent(BaseStateEvent):
+    """
+    AGENT INSTRUCTION: Evaluates the final target state for Quantitative BFT Reconciliation (Conservation of Mass).
+
+    CAUSAL AFFORDANCE: Mechanically ensures the source vector cardinality mathematically aligns with the actual target cardinality as dictated by the Functor.
+
+    EPISTEMIC BOUNDS: Discrepancies trigger a System2RemediationIntent for non-monotonic backtracking.
+    """
+    type: Literal["transmutation_drift"] = Field(
+        default="transmutation_drift", description="Discriminator for transmutation drift."
+    )
+    source_vector_cardinality: int = Field(ge=0, description="The expected cardinality from the source profile.")
+    actual_target_cardinality: int = Field(ge=0, description="The resulting cardinality after functor application.")
+    target_functor_id: str = Field(
+        min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$", description="CID of the TopologicalFunctorContract."
+    )
+
+
 class ObservationEvent(BaseStateEvent):
     r"""
     AGENT INSTRUCTION: Formalizes the ingestion of Bayesian Evidence ($E$) by capturing the raw, lossless semantic output from a ToolInvocationEvent or environmental shift.
@@ -11384,6 +11438,23 @@ class ParametricCoKleisliMorphism(CoreasonBaseState):
         object.__setattr__(self, "source_dialect_keys", sorted(self.source_dialect_keys))
         object.__setattr__(self, "target_dids", sorted(self.target_dids))
         return self
+
+
+class TransformationCardinalityProfile(StrEnum):
+    """Bounds the morphological expansion or contraction of data."""
+
+    ISOMORPHIC = "isomorphic"
+    TOPOLOGICAL_SPLITTING = "topological_splitting"
+    AGGREGATIVE_PROJECTION = "aggregative_projection"
+
+
+class TopologicalFunctorContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Specifies the cardinality_rule bounding the morphological expansion or contraction of data.
+    """
+
+    contract_id: str = Field(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
+    cardinality_rule: TransformationCardinalityProfile = Field(description="Bounds the expansion/contraction mapping geometry.")
 
 
 class EpistemicMappingContract(CoreasonBaseState):
@@ -11867,6 +11938,7 @@ class DifferentiableLogicConstraint(CoreasonBaseState):
 type AnyStateEvent = Annotated[
     ObservationEvent
     | TransmutationObservationEvent
+    | TransmutationDriftEvent
     | BeliefMutationEvent
     | SystemFaultEvent
     | HypothesisGenerationEvent
@@ -12205,3 +12277,6 @@ TransmutationObservationEvent.model_rebuild()
 DoublePushoutRewritingSchema.model_rebuild()
 ParametricCoKleisliMorphism.model_rebuild()
 EpistemicMappingContract.model_rebuild()
+TopologicalFunctorContract.model_rebuild()
+EpistemicTransmutationIntent.model_rebuild()
+TransmutationDriftEvent.model_rebuild()
