@@ -20,6 +20,7 @@ from collections.abc import Sequence
 from typing import Any, Literal, cast
 
 import jsonpatch
+import numpy as np
 from pydantic import BaseModel, ValidationError
 from pydantic.json_schema import models_json_schema
 
@@ -242,7 +243,6 @@ def calculate_latent_alignment(
     """
     A pure algebraic functor to calculate cosine similarity of two vectors.
     """
-    import numpy as np
 
     if v1.model_name != v2.model_name or v1.dimensionality != v2.dimensionality:
         raise ValueError("Topological Contradiction: Vector geometries are incommensurable.")

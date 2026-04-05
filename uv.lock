@@ -95,32 +95,32 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "jsonpatch", specifier = ">=1.33" },
-    { name = "libcst", specifier = ">=1.5.0" },
-    { name = "networkx", specifier = ">=3.0" },
-    { name = "numpy", specifier = ">=2.0.0" },
+    { name = "libcst", specifier = ">=1.8.6" },
+    { name = "networkx", specifier = ">=3.6" },
+    { name = "numpy", specifier = ">=2.4" },
     { name = "pydantic", specifier = ">=2.12.5" },
-    { name = "typer", specifier = ">=0.12.0" },
+    { name = "typer", specifier = ">=0.24.0" },
 ]
 
 [package.metadata.requires-dev]
 dev = [
     { name = "deepdiff", specifier = ">=8.6.2" },
-    { name = "deptry", specifier = ">=0.23.0" },
+    { name = "deptry", specifier = ">=0.24.0" },
     { name = "hypothesis", specifier = ">=6.151.9" },
-    { name = "hypothesis-jsonschema", specifier = ">=0.23.0" },
-    { name = "mkdocstrings", extras = ["python"] },
+    { name = "hypothesis-jsonschema", specifier = ">=0.23.1" },
+    { name = "mkdocstrings", extras = ["python"], specifier = ">=1.0.3" },
     { name = "mypy", specifier = ">=1.19.1" },
     { name = "pre-commit", specifier = ">=4.5.1" },
     { name = "pytest", specifier = ">=9.0.2" },
     { name = "pytest-asyncio", specifier = ">=1.3.0" },
     { name = "pytest-benchmark", specifier = ">=5.2.3" },
     { name = "pytest-cov", specifier = ">=7.0.0" },
-    { name = "pytest-xdist", specifier = ">=3.6.1" },
-    { name = "ruff", specifier = ">=0.14.14" },
+    { name = "pytest-xdist", specifier = ">=3.8.0" },
+    { name = "ruff", specifier = ">=0.15.4" },
     { name = "syrupy", specifier = ">=5.1.0" },
     { name = "types-pyyaml", specifier = ">=6.0.12.20250915" },
     { name = "tzdata", specifier = ">=2025.3" },
-    { name = "zensical" },
+    { name = "zensical", specifier = ">=0.0.26" },
 ]
 
 [[package]]

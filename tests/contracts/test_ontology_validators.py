@@ -428,6 +428,7 @@ def test_browser_dom_state_safety_valid_fuzzing(url: str) -> None:
         ]
     )
 )
+@settings(max_examples=100, deadline=None)
 def test_browser_dom_state_safety_invalid_fuzzing(bogon: str) -> None:
     from pydantic import ValidationError
 

@@ -17,11 +17,13 @@ import json
 import math
 import operator
 import re
+import socket
 import typing
 import urllib.parse
 from enum import StrEnum
 from typing import Annotated, Any, Literal, Self
 
+import networkx as nx
 from pydantic import AnyUrl, BaseModel, ConfigDict, Field, HttpUrl, StringConstraints, field_validator, model_validator
 
 type JsonPrimitiveState = (
@@ -113,8 +115,6 @@ def _validate_ssrf_safety(url: str) -> str:
         if parsed.scheme in ("http", "https"):
             raise ValueError("SSRF topological violation detected: Invalid hostname in HTTP URI")
         return url
-
-    import socket
 
     hostname_clean = hostname.strip("[]")
     try:
@@ -2145,7 +2145,6 @@ class MultimodalTokenAnchorState(CoreasonBaseState):
         """AGENT INSTRUCTION: Enforce mathematical spatial monotonicity."""
         if self.bounding_box is not None:
             x_min, y_min, x_max, y_max = self.bounding_box
-            import math
 
             if math.isnan(x_min) or math.isnan(y_min) or math.isnan(x_max) or math.isnan(y_max):
                 raise ValueError("Spatial bounds cannot be NaN.")
@@ -4000,7 +3999,6 @@ class DocumentLayoutManifest(CoreasonBaseState):
 
     @model_validator(mode="after")
     def verify_dag_and_integrity(self) -> Self:
-        import networkx as nx
 
         graph = nx.DiGraph()
         for node_id in self.blocks:
@@ -7698,8 +7696,6 @@ class PredictionMarketState(CoreasonBaseState):
             clamped_probs: dict[str, str] = {}
             total = 0.0
 
-            import math
-
             for k, v in values["current_market_probabilities"].items():
                 try:
                     prob = float(v)
@@ -10003,8 +9999,6 @@ class DAGTopologyManifest(BaseTopologyManifest):
     def verify_edges_exist_and_compute_bounds(self) -> Self:
         if self.lifecycle_phase == "draft":
             return self
-
-        import networkx as nx
 
         graph = nx.DiGraph()
         for node_id in self.nodes:
