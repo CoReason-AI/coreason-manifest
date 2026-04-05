@@ -391,19 +391,8 @@ def test_execution_node_receipt_recursive_payload(params: dict[str, Any]) -> Non
         return d
 
     deep_payload = build_deep_dict(11)
-    from coreason_manifest.spec.ontology import AlgebraicEffectProfile, ComputationalMonadProfile
-
     with pytest.raises(ValidationError):
-        ExecutionNodeReceipt(
-            request_id="test_id",
-            inputs=deep_payload,
-            outputs={"valid": "output"},
-            algebraic_effect_profile=AlgebraicEffectProfile(
-                permitted_monads=[ComputationalMonadProfile.IO],
-                is_referentially_transparent=False,
-                thermodynamic_variance_bound=0.1,
-            ),
-        )
+        ExecutionNodeReceipt(request_id="test_id", inputs=deep_payload, outputs={"valid": "output"})
 
 
 def test_state_hydration_manifest_long_string_quarantine() -> None:
