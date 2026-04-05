@@ -628,9 +628,6 @@ def test_calculate_latent_alignment_invalid_base64() -> None:
 
     with pytest.raises(ValueError, match=r"Topological Contradiction: Invalid base64 encoding\."):
         calculate_latent_alignment(v_invalid, v_valid, pol)
-import pytest
-from coreason_manifest.utils.algebra import apply_state_differential
-from coreason_manifest.spec.ontology import StateDifferentialManifest, StateMutationIntent
 
 def manifest_base(patches):
     return StateDifferentialManifest(
