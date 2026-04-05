@@ -630,27 +630,27 @@ def test_calculate_latent_alignment_invalid_base64() -> None:
         calculate_latent_alignment(v_invalid, v_valid, pol)
 
 
-def manifest_base(patches):
+def manifest_base(patches: list[Any]) -> StateDifferentialManifest:
     return StateDifferentialManifest(
         diff_id="d1", author_node_id="n1", lamport_timestamp=1, vector_clock={"n1": 1}, patches=patches
     )
 
 
-def test_replace_target_not_dict_or_list():
+def test_replace_target_not_dict_or_list() -> None:
     with pytest.raises(ValueError, match="Target is not dict or list"):
         apply_state_differential({"a": 1}, manifest_base([StateMutationIntent(op="replace", path="/a/b", value=2)]))
 
 
-def test_replace_key_not_found():
+def test_replace_key_not_found() -> None:
     with pytest.raises(ValueError, match="Key not found"):
         apply_state_differential({"a": {}}, manifest_base([StateMutationIntent(op="replace", path="/a/b", value=2)]))
 
 
-def test_replace_index_out_of_bounds():
+def test_replace_index_out_of_bounds() -> None:
     with pytest.raises(ValueError, match="Index out of bounds"):
         apply_state_differential({"a": []}, manifest_base([StateMutationIntent(op="replace", path="/a/0", value=2)]))
 
 
-def test_replace_index_out_of_bounds_negative():
+def test_replace_index_out_of_bounds_negative() -> None:
     with pytest.raises(ValueError, match="Index out of bounds"):
         apply_state_differential({"a": [1]}, manifest_base([StateMutationIntent(op="replace", path="/a/-1", value=2)]))
