@@ -14,6 +14,7 @@ from hypothesis import HealthCheck, given, settings
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
+    ComputationalMonadProfile,
     ActivationSteeringContract,
     AdjudicationRubricProfile,
     AgentNodeProfile,
@@ -541,6 +542,7 @@ def test_adjudication_intent_sorting() -> None:
 
 def test_composite_node_profile_sorts_mappings() -> None:
     from coreason_manifest.spec.ontology import (
+    ComputationalMonadProfile,
         CompositeNodeProfile,
         DAGTopologyManifest,
         InputMappingContract,
@@ -571,9 +573,10 @@ def test_composite_node_profile_sorts_mappings() -> None:
 
 def test_action_space_manifest_enforce_canonical_sort() -> None:
     from coreason_manifest.spec.ontology import (
+    ComputationalMonadProfile,
         ActionSpaceManifest,
         PermissionBoundaryPolicy,
-        SideEffectProfile,
+        AlgebraicEffectProfile,
         ToolManifest,
         TransitionEdgeProfile,
     )
@@ -583,7 +586,7 @@ def test_action_space_manifest_enforce_canonical_sort() -> None:
         tool_name="tool_b",
         description="description",
         input_schema={"type": "object", "properties": {}},
-        side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
+        algebraic_effects=AlgebraicEffectProfile(permitted_monads=[ComputationalMonadProfile.READER], is_referentially_transparent=True, thermodynamic_variance_bound=0.0),
         permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
     )
     tool2 = ToolManifest(
@@ -591,7 +594,7 @@ def test_action_space_manifest_enforce_canonical_sort() -> None:
         tool_name="tool_a",
         description="description 2",
         input_schema={"type": "object", "properties": {}},
-        side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
+        algebraic_effects=AlgebraicEffectProfile(permitted_monads=[ComputationalMonadProfile.READER], is_referentially_transparent=True, thermodynamic_variance_bound=0.0),
         permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
     )
 
@@ -621,6 +624,7 @@ def test_mcpservermanifest_enforce_did() -> None:
     from pydantic import ValidationError
 
     from coreason_manifest.spec.ontology import (
+    ComputationalMonadProfile,
         MCPCapabilityWhitelistPolicy,
         MCPServerManifest,
         VerifiableCredentialPresentationReceipt,
@@ -764,6 +768,7 @@ def test_executionspanreceipt_enforce_canonical_sort_events() -> None:
 
 def test_causal_explanation_event_sorts_attributions() -> None:
     from coreason_manifest.spec.ontology import (
+    ComputationalMonadProfile,
         CausalExplanationEvent,
         CollectiveIntelligenceProfile,
         ShapleyAttributionReceipt,

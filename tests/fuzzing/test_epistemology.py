@@ -15,6 +15,8 @@ from hypothesis import given
 from pydantic import TypeAdapter
 
 from coreason_manifest.spec.ontology import (
+    AlgebraicEffectProfile,
+    ComputationalMonadProfile,
     AnyIntent,
     ExecutionNodeReceipt,
     LatentProjectionIntent,
@@ -38,15 +40,15 @@ def test_tamper_evident_shatter_protocol(inputs: Any, outputs: Any) -> None:
 
     assume(outputs != "tampered_data")
 
-    n1 = ExecutionNodeReceipt(request_id="req_1", inputs=inputs, outputs=outputs, parent_hashes=[])
+    n1 = ExecutionNodeReceipt(request_id="req_1", inputs=inputs, outputs=outputs, parent_hashes=[], algebraic_effect_profile=AlgebraicEffectProfile(permitted_monads=[ComputationalMonadProfile.READER], is_referentially_transparent=True, thermodynamic_variance_bound=0.0))
 
     """AGENT INSTRUCTION: Explicitly assert node_hash is not None for the parent_hashes parameter,
     because mypy thinks it could be None, but ExecutionNodeReceipt sets it to a string."""
     assert n1.node_hash is not None
-    n2 = ExecutionNodeReceipt(request_id="req_2", inputs="hop2", outputs="hop2", parent_hashes=[n1.node_hash])
+    n2 = ExecutionNodeReceipt(request_id="req_2", inputs="hop2", outputs="hop2", parent_hashes=[n1.node_hash], algebraic_effect_profile=AlgebraicEffectProfile(permitted_monads=[ComputationalMonadProfile.READER], is_referentially_transparent=True, thermodynamic_variance_bound=0.0))
 
     assert n2.node_hash is not None
-    n3 = ExecutionNodeReceipt(request_id="req_3", inputs="hop3", outputs="hop3", parent_hashes=[n2.node_hash])
+    n3 = ExecutionNodeReceipt(request_id="req_3", inputs="hop3", outputs="hop3", parent_hashes=[n2.node_hash], algebraic_effect_profile=AlgebraicEffectProfile(permitted_monads=[ComputationalMonadProfile.READER], is_referentially_transparent=True, thermodynamic_variance_bound=0.0))
 
     trace = [n1, n2, n3]
     assert verify_merkle_proof(trace) is True

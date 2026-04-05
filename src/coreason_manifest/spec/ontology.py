@@ -1218,22 +1218,41 @@ class VisualEncodingProfile(CoreasonBaseState):
     scale: ScalePolicy | None = Field(default=None, description="Optional scale override for this specific channel.")
 
 
-class SideEffectProfile(CoreasonBaseState):
-    r"""
-    AGENT INSTRUCTION: Implements Lambda Calculus principles of referential transparency and state isolation by rigidly categorizing tool capabilities.
+class ComputationalMonadProfile(StrEnum):
+    READER = "reader"
+    WRITER = "writer"
+    STATE = "state"
+    IO = "io"
+    EXCEPTION = "exception"
 
-    CAUSAL AFFORDANCE: Instructs the orchestrator's graph traversal engine (e.g., MCTS) whether a tool can be safely re-evaluated concurrently (`is_idempotent`) or if it induces irreversible kinetic entropy (`mutates_state`).
 
-    EPISTEMIC BOUNDS: Constrained entirely to strict Pydantic boolean logic to mathematically sever ambiguity in side-effect classifications, preventing uncontrolled state mutation.
-
-    MCP ROUTING TRIGGERS: Referential Transparency, Lambda Calculus, Idempotence, State Monad, Causal Actuator
-
+class AlgebraicEffectProfile(CoreasonBaseState):
+    """
+    Statically types the exact mathematical monads an execution node is authorized to instantiate, proving referential transparency.
     """
 
-    is_idempotent: bool = Field(
-        description="True if the tool can be safely retried multiple times without altering state beyond the first call."
+    permitted_monads: list[ComputationalMonadProfile] = Field(
+        min_length=1, description="Explicit array of authorized monads."
     )
-    mutates_state: bool = Field(description="True if the tool performs write operations or side-effects.")
+    is_referentially_transparent: bool = Field(
+        description="Mathematical proof flag. True if the node guarantees pure functional execution (identical inputs to identical outputs)."
+    )
+    thermodynamic_variance_bound: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="The mathematically proven limit of temporal/state variance permitted during re-evaluation.",
+    )
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "permitted_monads", sorted(self.permitted_monads))
+        return self
+
+    @model_validator(mode="after")
+    def validate_referential_transparency(self) -> Self:
+        if self.is_referentially_transparent and self.thermodynamic_variance_bound != 0.0:
+            raise ValueError("If referentially transparent, thermodynamic_variance_bound must be exactly 0.0")
+        return self
 
 
 class VerifiableEntropyReceipt(CoreasonBaseState):
@@ -1501,25 +1520,25 @@ class RoutingFrontierPolicy(CoreasonBaseState):
                 try:
                     val = int(values["max_latency_ms"])
                     values["max_latency_ms"] = int(max(1, min(val, 86400000)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if "max_cost_magnitude_per_token" in values:
                 try:
                     val = int(values["max_cost_magnitude_per_token"])
                     values["max_cost_magnitude_per_token"] = int(max(1, min(val, 1000000000)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if "min_capability_score" in values:
                 try:
                     val_float = float(values["min_capability_score"])
                     values["min_capability_score"] = float(max(0.0, min(val_float, 1.0)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if values.get("max_carbon_intensity_gco2eq_kwh") is not None:
                 try:
                     val_float = float(values["max_carbon_intensity_gco2eq_kwh"])
                     values["max_carbon_intensity_gco2eq_kwh"] = float(max(0.0, min(val_float, 10000.0)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
         return values
 
@@ -2709,8 +2728,8 @@ class ToolManifest(CoreasonBaseState):
         max_length=1000,
         description="The strict JSON Schema dictionary defining the pure domain-specific arguments ($T$). The framework orchestrator will automatically wrap this in the ExecutionEnvelopeState at runtime.",
     )
-    side_effects: SideEffectProfile = Field(
-        description="The declarative side-effect and idempotency profile of the tool."
+    algebraic_effects: AlgebraicEffectProfile = Field(
+        description="The declarative monadic bounds of the tool."
     )
     permissions: PermissionBoundaryPolicy = Field(
         description="The zero-trust security boundaries for the tool's execution."
@@ -4983,6 +5002,14 @@ class ExecutionNodeReceipt(CoreasonBaseState):
     outputs: JsonPrimitiveState = Field(
         description="The outputs generated by the execution node. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion."
     )
+    computational_homotopy_hash: str | None = Field(
+        default=None,
+        pattern="^[a-f0-9]{64}$",
+        description="Represents the invariant topological path of the execution.",
+    )
+    algebraic_effect_profile: AlgebraicEffectProfile = Field(
+        description="The exact monadic bounds applied during this specific execution tick."
+    )
 
     @field_validator("inputs", "outputs", mode="before")
     @classmethod
@@ -5022,6 +5049,10 @@ class ExecutionNodeReceipt(CoreasonBaseState):
             "outputs": self.outputs,
             "parent_hashes": self.parent_hashes,
         }
+
+        # HoTT Axiom: Pure functions derive identity solely from inputs/outputs, severing false chronological dependencies to prove homotopy.
+        if self.algebraic_effect_profile.is_referentially_transparent:
+            payload.pop("parent_hashes", None)
 
         canonical_payload = _canonicalize_payload(payload)
         json_bytes = json.dumps(canonical_payload, ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode(
@@ -7285,7 +7316,7 @@ class MarketContract(CoreasonBaseState):
                 try:
                     mc_int = int(mc)
                     sp_int = int(sp)
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             cmc = max(0, min(mc_int, 1000000000))
             if sp_int > cmc:
@@ -7814,6 +7845,14 @@ class PeftAdapterContract(CoreasonBaseState):
         return self
 
 
+class CRDTAlgebraicType(StrEnum):
+    G_COUNTER = "g_counter"
+    PN_COUNTER = "pn_counter"
+    LWW_REGISTER = "lww_register"
+    MV_REGISTER = "mv_register"
+    OR_SET = "orset"
+
+
 class PersistenceCommitReceipt(BaseStateEvent):
     r"""
     AGENT INSTRUCTION: A cryptographically frozen historical fact representing the absolute Write-Ahead Logging (WAL) serialization of an ephemeral state differential to durable cold-storage.
@@ -7843,6 +7882,13 @@ class PersistenceCommitReceipt(BaseStateEvent):
     )
     target_table_uri: Annotated[str, StringConstraints(max_length=2048)] = Field(
         min_length=1, description="The specific table mutated."
+    )
+    crdt_algebraic_type: CRDTAlgebraicType = Field(
+        description="Explicit declaration of the commutative/associative merge logic."
+    )
+    merkle_clock_vector: dict[Annotated[str, StringConstraints(max_length=255)], Annotated[int, Field(ge=0)]] = Field(
+        max_length=1000,
+        description="The topological time vector tracking causal ancestry, allowing deterministic asynchronous conflict resolution.",
     )
 
 
@@ -10155,6 +10201,31 @@ class CouncilTopologyManifest(BaseTopologyManifest):
         return self
 
 
+class ToposSheafValuationContract(CoreasonBaseState):
+    """
+    Evaluates the Heyting algebra truth value of a localized spatial perimeter to prevent epistemic contamination.
+    """
+
+    valuation_id: str = Field(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
+    subgraph_nodes: list[NodeIdentifierState] = Field(
+        min_length=1, description="The specific spatial perimeter being evaluated."
+    )
+    local_truth_value: float = Field(
+        ge=0.0, le=1.0, description="The continuous truth value of the sub-graph."
+    )
+    consistency_proof_hash: str = Field(
+        min_length=1,
+        max_length=128,
+        pattern="^[a-f0-9]{64}$",
+        description="Cryptographic proof that this sub-graph does not contradict the global ontology.",
+    )
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "subgraph_nodes", sorted(self.subgraph_nodes))
+        return self
+
+
 class DAGTopologyManifest(BaseTopologyManifest):
     r"""
     AGENT INSTRUCTION: Formalizes a Directed Acyclic Graph (DAG) for deterministic, chronologically ordered task execution, guaranteeing strict topological sorting of operations.
@@ -10184,12 +10255,19 @@ class DAGTopologyManifest(BaseTopologyManifest):
     speculative_boundaries: list[SpeculativeExecutionBoundary] = Field(
         default_factory=list, description="The deterministic speculative boundaries executing within the DAG."
     )
+    sheaf_valuations: list[ToposSheafValuationContract] = Field(
+        default_factory=list,
+        description="Evaluates the internal consistency of the Topos during concurrent execution.",
+    )
 
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "edges", sorted(self.edges))
         object.__setattr__(
             self, "speculative_boundaries", sorted(self.speculative_boundaries, key=operator.attrgetter("boundary_id"))
+        )
+        object.__setattr__(
+            self, "sheaf_valuations", sorted(self.sheaf_valuations, key=operator.attrgetter("valuation_id"))
         )
         return self
 
@@ -12243,6 +12321,9 @@ class EpistemicLedgerState(CoreasonBaseState):
             raise ValueError("Epistemic Contagion Detected: Quarantined node found in active defeasible claims.")
         return self
 
+
+AlgebraicEffectProfile.model_rebuild()
+ToposSheafValuationContract.model_rebuild()
 
 CompositeNodeProfile.model_rebuild()
 WorkflowManifest.model_rebuild()

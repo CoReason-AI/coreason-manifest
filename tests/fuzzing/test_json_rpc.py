@@ -16,6 +16,7 @@ from hypothesis import given
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
+    ComputationalMonadProfile,
     ActionSpaceManifest,
     BoundedJSONRPCIntent,
     ContinuousMutationPolicy,
@@ -24,7 +25,7 @@ from coreason_manifest.spec.ontology import (
     LatentScratchpadReceipt,
     MarketContract,
     PermissionBoundaryPolicy,
-    SideEffectProfile,
+    AlgebraicEffectProfile,
     ThoughtBranchState,
     ToolManifest,
 )
@@ -117,7 +118,7 @@ def test_action_space_manifest_uniqueness(action_space_id: str, tool_names: list
             tool_name=name,
             input_schema={"type": "object", "properties": {}},
             description="desc",
-            side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
+            algebraic_effects=AlgebraicEffectProfile(permitted_monads=[ComputationalMonadProfile.READER], is_referentially_transparent=True, thermodynamic_variance_bound=0.0),
             permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
         )
         for name in tool_names

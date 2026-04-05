@@ -1,0 +1,52 @@
+--- src/coreason_manifest/spec/ontology.py
++++ src/coreason_manifest/spec/ontology.py
+@@ -1220,18 +1220,29 @@
+     scale: ScalePolicy | None = Field(default=None, description="Optional scale override for this specific channel.")
+
+
+-class SideEffectProfile(CoreasonBaseState):
+-    r"""
+-    AGENT INSTRUCTION: Implements Lambda Calculus principles of referential transparency and state isolation by rigidly categorizing tool capabilities.
+-
+-    CAUSAL AFFORDANCE: Instructs the orchestrator's graph traversal engine (e.g., MCTS) whether a tool can be safely re-evaluated concurrently (`is_idempotent`) or if it induces irreversible kinetic entropy (`mutates_state`).
+-
+-    EPISTEMIC BOUNDS: Constrained entirely to strict Pydantic boolean logic to mathematically sever ambiguity in side-effect classifications, preventing uncontrolled state mutation.
+-
+-    MCP ROUTING TRIGGERS: Referential Transparency, Lambda Calculus, Idempotence, State Monad, Causal Actuator
+-
+-    """
+-
+-    is_idempotent: bool = Field(
+-        description="True if the tool can be safely retried multiple times without altering state beyond the first call."
+-    )
+-    mutates_state: bool = Field(description="True if the tool performs write operations or side-effects.")
++class ComputationalMonadProfile(StrEnum):
++    READER = "reader"
++    WRITER = "writer"
++    STATE = "state"
++    IO = "io"
++    EXCEPTION = "exception"
++
++
++class AlgebraicEffectProfile(CoreasonBaseState):
++    r"""
++    Statically types the exact mathematical monads an execution node is authorized to instantiate, proving referential transparency.
++    """
++
++    permitted_monads: list[ComputationalMonadProfile] = Field(min_length=1, description="Explicit array of authorized monads.")
++    is_referentially_transparent: bool = Field(description="Mathematical proof flag. True if the node guarantees pure functional execution (identical inputs to identical outputs).")
++    thermodynamic_variance_bound: float = Field(ge=0.0, le=1.0, description="The mathematically proven limit of temporal/state variance permitted during re-evaluation.")
++
++    @model_validator(mode="after")
++    def _enforce_canonical_sort(self) -> Self:
++        object.__setattr__(self, "permitted_monads", sorted(self.permitted_monads, key=lambda m: m.value))
++        return self
++
++    @model_validator(mode="after")
++    def validate_referential_transparency(self) -> Self:
++        if self.is_referentially_transparent and self.thermodynamic_variance_bound != 0.0:
++            raise ValueError("If referentially transparent, thermodynamic_variance_bound must be exactly 0.0")
++        return self
+
+
+ class VerifiableEntropyReceipt(CoreasonBaseState):

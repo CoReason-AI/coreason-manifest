@@ -10,7 +10,7 @@
 
 from typing import Any
 
-from hypothesis import given
+from hypothesis import given, settings, HealthCheck
 from hypothesis import strategies as st
 
 from coreason_manifest.spec.ontology import (
@@ -163,6 +163,7 @@ def test_transmutation_observation_event_in_any_state_event_2(
     target_hash=st.from_regex(r"^[a-f0-9]{64}$", fullmatch=True),
     cardinality_rule=st.sampled_from(list(TransformationCardinalityProfile)),
 )
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_topological_functor_contract(
     contract_id: str, source_hash: str, target_hash: str, cardinality_rule: TransformationCardinalityProfile
 ) -> None:

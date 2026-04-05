@@ -12,10 +12,11 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
+    ComputationalMonadProfile,
     ActionSpaceManifest,
     PermissionBoundaryPolicy,
     SemanticDiscoveryIntent,
-    SideEffectProfile,
+    AlgebraicEffectProfile,
     ToolManifest,
     TransitionEdgeProfile,
 )
@@ -56,7 +57,7 @@ def test_dynamic_ghost_node_and_canonical_sorting() -> None:
         tool_name="tool_A",
         description="Tool A",
         input_schema={"type": "object", "properties": {"input": {"type": "string"}}},
-        side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
+        algebraic_effects=AlgebraicEffectProfile(permitted_monads=[ComputationalMonadProfile.READER], is_referentially_transparent=True, thermodynamic_variance_bound=0.0),
         permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
     )
 

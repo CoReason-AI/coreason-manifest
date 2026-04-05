@@ -12,10 +12,11 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
+    ComputationalMonadProfile,
     ActionSpaceManifest,
     ExecutionEnvelopeState,
     PermissionBoundaryPolicy,
-    SideEffectProfile,
+    AlgebraicEffectProfile,
     StateVectorProfile,
     ToolManifest,
     TraceContextState,
@@ -96,7 +97,7 @@ def test_action_space_manifest_rejects_custom_state() -> None:
                     tool_name="test_tool",
                     description="test tool",
                     input_schema={"type": "object", "properties": {"system_prompt": {"type": "string"}}},
-                    side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
+                    algebraic_effects=AlgebraicEffectProfile(permitted_monads=[ComputationalMonadProfile.READER], is_referentially_transparent=True, thermodynamic_variance_bound=0.0),
                     permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
                 )
             },
@@ -114,7 +115,7 @@ def test_action_space_manifest_rejects_custom_state() -> None:
                 tool_name="test_tool_2",
                 description="test tool 2",
                 input_schema={"type": "object", "properties": {"sql_query": {"type": "string"}}},
-                side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
+                algebraic_effects=AlgebraicEffectProfile(permitted_monads=[ComputationalMonadProfile.READER], is_referentially_transparent=True, thermodynamic_variance_bound=0.0),
                 permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
             )
         },
