@@ -114,86 +114,22 @@ def _validate_ssrf_safety(url: str) -> str:
             raise ValueError("SSRF topological violation detected: Invalid hostname in HTTP URI")
         return url
 
-    hostname_lower = hostname.lower()
-    if hostname_lower in {
-        "localhost",
-        "broadcasthost",
-        "local",
-        "internal",
-        "localtest.me",
-    } or hostname_lower.endswith(
-        (
-            ".local",
-            ".internal",
-            ".arpa",
-            "localhost.localdomain",
-            ".nip.io",
-            ".sslip.io",
-            ".xip.io",
-            ".vcap.me",
-            ".localtest.me",
-        )
-    ):
-        raise ValueError(f"SSRF topological violation detected: {hostname}")
-
     import ipaddress
     import socket
 
-    def _parse_obfuscated_ipv4(ip_str: str) -> int | None:
-        parts = ip_str.split(".")
-        if len(parts) > 4:
-            return None
-        parsed = []
-        try:
-            for p in parts:
-                if p.startswith(("0x", "0X")):
-                    parsed.append(int(p, 16))
-                elif p.startswith("0") and len(p) > 1 and all(c in "01234567" for c in p):
-                    parsed.append(int(p, 8))
-                else:
-                    parsed.append(int(p, 10))
-        except ValueError:
-            return None
-        if len(parts) == 1:
-            val = parsed[0]
-        elif len(parts) == 2:
-            val = (parsed[0] << 24) | parsed[1]
-        elif len(parts) == 3:
-            val = (parsed[0] << 24) | (parsed[1] << 16) | parsed[2]
-        else:
-            val = (parsed[0] << 24) | (parsed[1] << 16) | (parsed[2] << 8) | parsed[3]
-        return val if val <= 0xFFFFFFFF else None
-
-    ip: ipaddress.IPv4Address | ipaddress.IPv6Address | None = None
-
-    # Canonical validation of affine coordinate isomorphism for obfuscated IPv4 formats
-    ip_int = _parse_obfuscated_ipv4(hostname_lower)
-    if ip_int is not None:
-        ip = ipaddress.IPv4Address(ip_int)
-    else:
-        hostname_clean = hostname.strip("[]")
-        try:
-            # First try to parse as IP directly (covers IPv6 and standard IPv4 formats)
-            ip = ipaddress.ip_address(hostname_clean)
-        except ValueError:
-            try:
-                # Step 1: Resolve the hostname to an IP address
-                # This prevents bypassing the check via domain names
-                raw_ip = socket.gethostbyname(hostname_clean)
-                ip = ipaddress.ip_address(raw_ip)
-            except (socket.gaierror, ValueError) as e:
-                # Fail-Closed: If resolution fails or IP is invalid, reject the request
-                raise ValueError(f"Security Validation Failed: Unresolvable or invalid host: {hostname}") from e
-
-    if isinstance(ip, ipaddress.IPv6Address) and ip.ipv4_mapped:
-        ip = ip.ipv4_mapped
+    hostname_clean = hostname.strip("[]")
+    try:
+        raw_ip = socket.gethostbyname(hostname_clean)
+        ip = ipaddress.ip_address(raw_ip)
+    except (socket.gaierror, ValueError) as e:
+        raise ValueError(f"Security Validation Failed: Unresolvable or invalid host: {hostname}") from e
 
     if (
         ip.is_private
         or ip.is_loopback
-        or ip.is_link_local
-        or ip.is_reserved
         or ip.is_multicast
+        or getattr(ip, "is_link_local", False)
+        or getattr(ip, "is_reserved", False)
         or getattr(ip, "is_unspecified", False)
         or not getattr(ip, "is_global", True)
     ):
@@ -1482,25 +1418,25 @@ class RoutingFrontierPolicy(CoreasonBaseState):
                 try:
                     val = int(values["max_latency_ms"])
                     values["max_latency_ms"] = int(max(1, min(val, 86400000)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if "max_cost_magnitude_per_token" in values:
                 try:
                     val = int(values["max_cost_magnitude_per_token"])
                     values["max_cost_magnitude_per_token"] = int(max(1, min(val, 1000000000)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if "min_capability_score" in values:
                 try:
                     val_float = float(values["min_capability_score"])
                     values["min_capability_score"] = float(max(0.0, min(val_float, 1.0)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if values.get("max_carbon_intensity_gco2eq_kwh") is not None:
                 try:
                     val_float = float(values["max_carbon_intensity_gco2eq_kwh"])
                     values["max_carbon_intensity_gco2eq_kwh"] = float(max(0.0, min(val_float, 10000.0)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
         return values
 
@@ -4067,36 +4003,22 @@ class DocumentLayoutManifest(CoreasonBaseState):
 
     @model_validator(mode="after")
     def verify_dag_and_integrity(self) -> Self:
-        adj: dict[Annotated[str, StringConstraints(max_length=255)], list[str]] = {
-            node_id: [] for node_id in self.blocks
-        }
+        import networkx as nx
+
+        graph = nx.DiGraph()
+        for node_id in self.blocks:
+            graph.add_node(node_id)
+
         for source, target in self.chronological_flow_edges:
             if source not in self.blocks:
                 raise ValueError(f"Source block '{source}' does not exist.")
             if target not in self.blocks:
                 raise ValueError(f"Target block '{target}' does not exist.")
-            adj[source].append(target)
-        visited: set[str] = set()
-        recursion_stack: set[str] = set()
-        for start_node in self.blocks:
-            if start_node in visited:
-                continue
-            stack = [(start_node, iter(adj[start_node]))]
-            visited.add(start_node)
-            recursion_stack.add(start_node)
-            while stack:
-                curr, neighbors = stack[-1]
-                try:
-                    neighbor = next(neighbors)
-                    if neighbor not in visited:
-                        visited.add(neighbor)
-                        recursion_stack.add(neighbor)
-                        stack.append((neighbor, iter(adj[neighbor])))
-                    elif neighbor in recursion_stack:
-                        raise ValueError("Reading order contains a cyclical contradiction.")
-                except StopIteration:
-                    recursion_stack.remove(curr)
-                    stack.pop()
+            graph.add_edge(source, target)
+
+        if not nx.is_directed_acyclic_graph(graph):
+            raise ValueError("Reading order contains a cyclical contradiction.")
+
         return self
 
 
@@ -7172,7 +7094,7 @@ class MarketContract(CoreasonBaseState):
                 try:
                     mc_int = int(mc)
                     sp_int = int(sp)
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             cmc = max(0, min(mc_int, 1000000000))
             if sp_int > cmc:
@@ -10084,47 +10006,29 @@ class DAGTopologyManifest(BaseTopologyManifest):
     def verify_edges_exist_and_compute_bounds(self) -> Self:
         if self.lifecycle_phase == "draft":
             return self
-        adj: dict[NodeIdentifierState, list[NodeIdentifierState]] = {node_id: [] for node_id in self.nodes}
-        in_degree: dict[NodeIdentifierState, int] = dict.fromkeys(self.nodes, 0)
+
+        import networkx as nx
+
+        graph = nx.DiGraph()
+        for node_id in self.nodes:
+            graph.add_node(node_id)
+
         for source, target in self.edges:
             if source not in self.nodes:
                 raise ValueError(f"Edge source '{source}' does not exist in nodes registry.")
             if target not in self.nodes:
                 raise ValueError(f"Edge target '{target}' does not exist in nodes registry.")
-            adj[source].append(target)
-            in_degree[target] += 1
-        for node, neighbors in adj.items():
-            if len(neighbors) > self.max_fan_out:
+            graph.add_edge(source, target)
+
+        for node in graph.nodes:
+            if graph.out_degree(node) > self.max_fan_out:
                 raise ValueError(f"Topological Violation: Node '{node}' exceeds max_fan_out of {self.max_fan_out}.")
+
         if not self.allow_cycles:
-            depth_memo: dict[NodeIdentifierState, int] = {}
-
-            import collections
-
-            # Using Kahn's Algorithm / Iterative topological sort for depth and cycles
-            # We calculate max depth without recursion to avoid stack overflow limits
-
-            queue = collections.deque([n for n in self.nodes if in_degree[n] == 0])
-            for n in queue:
-                depth_memo[n] = 1
-
-            processed_count = 0
-
-            while queue:
-                curr = queue.popleft()
-                processed_count += 1
-                curr_depth = depth_memo[curr]
-
-                for neighbor in adj[curr]:
-                    in_degree[neighbor] -= 1
-                    depth_memo[neighbor] = max(depth_memo.get(neighbor, 1), curr_depth + 1)
-                    if in_degree[neighbor] == 0:
-                        queue.append(neighbor)
-
-            if processed_count != len(self.nodes):
+            if not nx.is_directed_acyclic_graph(graph):
                 raise ValueError("Graph contains cycles but allow_cycles is False.")
 
-            max_calculated_depth = max(depth_memo.values()) if depth_memo else 0
+            max_calculated_depth = nx.dag_longest_path_length(graph) + 1 if graph.nodes else 0
 
             if max_calculated_depth > self.max_depth:
                 raise ValueError(

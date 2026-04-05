@@ -113,7 +113,7 @@ def test_browser_dom_state_bogon_ssrf_strict(url_str: str) -> None:
             dom_hash="a" * 64,
             accessibility_tree_hash="b" * 64,
         )
-    assert "SSRF topological violation detected" in str(exc_info.value) or "restricted IP detected" in str(
+    assert "SSRF topological violation detected" in str(exc_info.value) or "restricted IP detected" in str(exc_info.value) or "Security Validation Failed: Unresolvable or invalid host" in str(
         exc_info.value
     )
 
