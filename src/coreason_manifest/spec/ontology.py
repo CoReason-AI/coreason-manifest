@@ -1482,25 +1482,25 @@ class RoutingFrontierPolicy(CoreasonBaseState):
                 try:
                     val = int(values["max_latency_ms"])
                     values["max_latency_ms"] = int(max(1, min(val, 86400000)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if "max_cost_magnitude_per_token" in values:
                 try:
                     val = int(values["max_cost_magnitude_per_token"])
                     values["max_cost_magnitude_per_token"] = int(max(1, min(val, 1000000000)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if "min_capability_score" in values:
                 try:
                     val_float = float(values["min_capability_score"])
                     values["min_capability_score"] = float(max(0.0, min(val_float, 1.0)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if values.get("max_carbon_intensity_gco2eq_kwh") is not None:
                 try:
                     val_float = float(values["max_carbon_intensity_gco2eq_kwh"])
                     values["max_carbon_intensity_gco2eq_kwh"] = float(max(0.0, min(val_float, 10000.0)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
         return values
 
@@ -2287,11 +2287,17 @@ class EpistemicTransmutationIntent(CoreasonBaseState):
     type: Literal["epistemic_transmutation"] = Field(
         default="epistemic_transmutation", description="Discriminator for the transmutation intent."
     )
+    functor_contract_id: str = Field(
+        min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$", description="Permanently binds kinetic execution to the mathematical blueprint."
+    )
     source_coordinates: list[
         Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
     ] = Field(description="The CIDs of the source geometry.")
     target_cids: list[Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]] = (
         Field(description="The resulting CIDs in the target domain.")
+    )
+    flattening_policy: "GraphFlatteningPolicy | None" = Field(
+        default=None, description="If the downstream target requires low-dimensional analytical projection, this triggers immediate dimensionality reduction."
     )
     domain_payload: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
         description="The complex domain-specific payload."
@@ -7256,7 +7262,7 @@ class MarketContract(CoreasonBaseState):
                 try:
                     mc_int = int(mc)
                     sp_int = int(sp)
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             cmc = max(0, min(mc_int, 1000000000))
             if sp_int > cmc:
@@ -11421,12 +11427,28 @@ class EpistemicDomainGraphManifest(CoreasonBaseState):
         return self
 
 
+class ProfunctorOpticType(StrEnum):
+    LENS = "lens"
+    PRISM = "prism"
+    TRAVERSAL = "traversal"
+
+
+class ProfunctorOpticContract(CoreasonBaseState):
+    """
+    A strictly typed algebraic bridge extracting a covariant output and injecting it into a contravariant input.
+    """
+    optic_type: ProfunctorOpticType
+    source_focus_pointer: str = Field(max_length=2000, description="The exact RFC 6902 JSON Pointer extracting data from the source manifold.")
+    target_injection_pointer: str = Field(max_length=2000, description="The exact RFC 6902 JSON Pointer injecting data into the target manifold.")
+
+
 class ParametricCoKleisliMorphism(CoreasonBaseState):
     """
     Maps contextualized states of the source category into the target category.
     """
 
-    source_dialect_keys: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(min_length=1)
+    # Note: optic_mappings is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted. Optic composition is non-commutative.
+    optic_mappings: list[ProfunctorOpticContract] = Field(min_length=1)
     target_dids: list[NodeIdentifierState] = Field(min_length=1)
     adjacency_matrix_comonad: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState]
 
@@ -11437,7 +11459,6 @@ class ParametricCoKleisliMorphism(CoreasonBaseState):
 
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
-        object.__setattr__(self, "source_dialect_keys", sorted(self.source_dialect_keys))
         object.__setattr__(self, "target_dids", sorted(self.target_dids))
         return self
 
@@ -11445,9 +11466,18 @@ class ParametricCoKleisliMorphism(CoreasonBaseState):
 class TransformationCardinalityProfile(StrEnum):
     """Bounds the morphological expansion or contraction of data."""
 
-    ISOMORPHIC = "isomorphic"
-    TOPOLOGICAL_SPLITTING = "topological_splitting"
-    AGGREGATIVE_PROJECTION = "aggregative_projection"
+    ISOMORPHIC_PULLBACK = "isomorphic_pullback"
+    LEFT_KAN_EXTENSION = "left_kan_extension"
+    RIGHT_KAN_EXTENSION = "right_kan_extension"
+
+
+class MorphologicalExpansionBounds(CoreasonBaseState):
+    """
+    The hardware guillotine for topological splitting to prevent exponential state-space/VRAM explosion during 1:N Left Kan Extensions.
+    """
+
+    max_fan_out: int = Field(ge=1, le=1000, description="The absolute physical limit of new nodes generated from a single source node.")
+    entropy_preservation_threshold: float = Field(ge=0.0, le=1.0, description="Ensures the morphological split does not hallucinate new Shannon information.")
 
 
 class TopologicalFunctorContract(CoreasonBaseState):
@@ -11456,9 +11486,18 @@ class TopologicalFunctorContract(CoreasonBaseState):
     """
 
     contract_id: str = Field(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
+    source_schema_hash: str = Field(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$", description="SHA-256 pointer to the origin C-set or JSON schema.")
+    target_schema_hash: str = Field(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$", description="SHA-256 pointer to the target Universal Ontology.")
     cardinality_rule: TransformationCardinalityProfile = Field(
         description="Bounds the expansion/contraction mapping geometry."
     )
+    expansion_bounds: MorphologicalExpansionBounds | None = Field(default=None)
+
+    @model_validator(mode="after")
+    def validate_expansion_bounds(self) -> Self:
+        if self.cardinality_rule == TransformationCardinalityProfile.LEFT_KAN_EXTENSION and self.expansion_bounds is None:
+            raise ValueError("expansion_bounds MUST be instantiated when cardinality_rule is LEFT_KAN_EXTENSION.")
+        return self
 
 
 class EpistemicMappingContract(CoreasonBaseState):
@@ -12284,3 +12323,6 @@ EpistemicMappingContract.model_rebuild()
 TopologicalFunctorContract.model_rebuild()
 EpistemicTransmutationIntent.model_rebuild()
 TransmutationDriftEvent.model_rebuild()
+
+MorphologicalExpansionBounds.model_rebuild()
+ProfunctorOpticContract.model_rebuild()
