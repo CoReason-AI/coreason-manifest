@@ -1254,13 +1254,21 @@
           "persistence_commit": "#/$defs/PersistenceCommitReceipt",
           "system_fault": "#/$defs/SystemFaultEvent",
           "token_burn": "#/$defs/TokenBurnReceipt",
-          "tool_invocation": "#/$defs/ToolInvocationEvent"
+          "tool_invocation": "#/$defs/ToolInvocationEvent",
+          "transmutation_drift": "#/$defs/TransmutationDriftEvent",
+          "transmutation_observation": "#/$defs/TransmutationObservationEvent"
         },
         "propertyName": "type"
       },
       "oneOf": [
         {
           "$ref": "#/$defs/ObservationEvent"
+        },
+        {
+          "$ref": "#/$defs/TransmutationObservationEvent"
+        },
+        {
+          "$ref": "#/$defs/TransmutationDriftEvent"
         },
         {
           "$ref": "#/$defs/BeliefMutationEvent"
@@ -3730,6 +3738,39 @@
       "title": "ComputeTier",
       "type": "string"
     },
+    "ConformalPredictionBounds": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nEstablishes rigorous statistical error control over token-probability distributions to bound epistemic uncertainty.",
+      "properties": {
+        "confidence_level": {
+          "default": 0.95,
+          "description": "The 1 - alpha target coverage.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Confidence Level",
+          "type": "number"
+        },
+        "empirical_miscoverage_rate_max": {
+          "description": "The maximum allowed EMR. If exceeded, data is too entropic to safely ingest.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Empirical Miscoverage Rate Max",
+          "type": "number"
+        },
+        "average_prediction_set_size_max": {
+          "description": "The maximum allowed Average Prediction Set Size (APSS).",
+          "minimum": 1,
+          "title": "Average Prediction Set Size Max",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "empirical_miscoverage_rate_max",
+        "average_prediction_set_size_max"
+      ],
+      "title": "ConformalPredictionBounds",
+      "type": "object"
+    },
     "ConsensusFederationTopologyManifest": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A Zero-Cost Macro abstraction that deterministically projects a Practical Byzantine Fault Tolerance (pBFT) consensus ring into a multi-agent workflow. As a ...Manifest suffix, this defines a frozen coordinate of a topological structure.\n\nCAUSAL AFFORDANCE: Unrolls into a base CouncilTopologyManifest, enforcing strict quorum rules and sequential adjudication to guarantee ledger alignment and truth maintenance across a decentralized, zero-trust swarm.\n\nEPISTEMIC BOUNDS: Mathematically ensures Byzantine security by requiring a minimum of 3 participant_ids. The adjudicator_id is physically isolated from the voting pool via the verify_adjudicator_isolation hook. The participant_ids array is deterministically sorted for invariant hashing.\n\nMCP ROUTING TRIGGERS: Practical Byzantine Fault Tolerance, pBFT, Distributed Consensus, Sybil Resistance, Macro Abstraction",
@@ -5543,6 +5584,49 @@
       "title": "DocumentLayoutRegionState",
       "type": "object"
     },
+    "DoublePushoutRewritingSchema": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nFormalizes algebraic graph transformations (L <- K -> R) to guarantee referential integrity during state mutations via DPO rewriting.",
+      "properties": {
+        "production_l": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonPrimitiveState"
+          },
+          "propertyNames": {
+            "maxLength": 255
+          },
+          "title": "Production L",
+          "type": "object"
+        },
+        "interface_k": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonPrimitiveState"
+          },
+          "propertyNames": {
+            "maxLength": 255
+          },
+          "title": "Interface K",
+          "type": "object"
+        },
+        "replacement_r": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonPrimitiveState"
+          },
+          "propertyNames": {
+            "maxLength": 255
+          },
+          "title": "Replacement R",
+          "type": "object"
+        }
+      },
+      "required": [
+        "production_l",
+        "interface_k",
+        "replacement_r"
+      ],
+      "title": "DoublePushoutRewritingSchema",
+      "type": "object"
+    },
     "DraftingIntent": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Fristonian Active Inference to minimize Expected Free Energy. Triggered when the swarm detects a catastrophic Epistemic Gap and lacks the structural parameters necessary to reduce Shannon Entropy autonomously.\n\nCAUSAL AFFORDANCE: Emits a structural query to an external human oracle to explicitly solicit data. It suspends autonomous trajectory generation until the missing semantic dimensions are actively projected back into the working memory partition.\n\nEPISTEMIC BOUNDS: The human's unstructured cognitive entropy is aggressively forced through a mathematical funnel via the `resolution_schema`. This schema is volumetrically clamped by the `enforce_payload_topology` hook to prevent AST explosion during input parsing.\n\nMCP ROUTING TRIGGERS: Active Inference, Expected Free Energy, Shannon Entropy Reduction, Zero-Shot Elicitation, Epistemic Gap",
@@ -6341,6 +6425,22 @@
           "title": "Graph Id",
           "type": "string"
         },
+        "c_set_schema_hash": {
+          "description": "A cryptographic pointer to the Presheaf C-set definition of the schema.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "C Set Schema Hash",
+          "type": "string"
+        },
+        "dpo_schemas": {
+          "description": "Authorized algebraic graph rewriting rules.",
+          "items": {
+            "$ref": "#/$defs/DoublePushoutRewritingSchema"
+          },
+          "title": "Dpo Schemas",
+          "type": "array"
+        },
         "verified_axioms": {
           "items": {
             "$ref": "#/$defs/EpistemicAxiomState"
@@ -6352,6 +6452,7 @@
       },
       "required": [
         "graph_id",
+        "c_set_schema_hash",
         "verified_axioms"
       ],
       "title": "EpistemicDomainGraphManifest",
@@ -6608,6 +6709,33 @@
         "history"
       ],
       "title": "EpistemicLedgerState",
+      "type": "object"
+    },
+    "EpistemicMappingContract": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nThe macroscopic wrapper for semantic crosswalking.",
+      "properties": {
+        "contract_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Contract Id",
+          "type": "string"
+        },
+        "mapping_rules": {
+          "items": {
+            "$ref": "#/$defs/ParametricCoKleisliMorphism"
+          },
+          "minItems": 1,
+          "title": "Mapping Rules",
+          "type": "array"
+        }
+      },
+      "required": [
+        "contract_id",
+        "mapping_rules"
+      ],
+      "title": "EpistemicMappingContract",
       "type": "object"
     },
     "EpistemicPromotionEvent": {
@@ -7190,6 +7318,59 @@
         "axiomatic_chain"
       ],
       "title": "EpistemicTopologicalProofManifest",
+      "type": "object"
+    },
+    "EpistemicTransmutationIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The kinetic trigger that forces source coordinates through the Functor.\n\nCAUSAL AFFORDANCE: Executes the structural transformation, generating new target_cids. Domain-specific complexities are safely quarantined inside the domain_payload.\n\nEPISTEMIC BOUNDS: The domain_payload is strictly routed through the volumetric hardware guillotine to prevent adversarial JSON-bombing during GPU hashing.\n\nMCP ROUTING TRIGGERS: Category Theory Functor, Morphological Transmutation, Kinetic Orchestration, Zero-Trust Projection",
+      "properties": {
+        "type": {
+          "const": "epistemic_transmutation",
+          "default": "epistemic_transmutation",
+          "description": "Discriminator for the transmutation intent.",
+          "title": "Type",
+          "type": "string"
+        },
+        "source_coordinates": {
+          "description": "The CIDs of the source geometry.",
+          "items": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[a-zA-Z0-9_.:-]+$",
+            "type": "string"
+          },
+          "title": "Source Coordinates",
+          "type": "array"
+        },
+        "target_cids": {
+          "description": "The resulting CIDs in the target domain.",
+          "items": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[a-zA-Z0-9_.:-]+$",
+            "type": "string"
+          },
+          "title": "Target Cids",
+          "type": "array"
+        },
+        "domain_payload": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonPrimitiveState"
+          },
+          "description": "The complex domain-specific payload.",
+          "propertyNames": {
+            "maxLength": 255
+          },
+          "title": "Domain Payload",
+          "type": "object"
+        }
+      },
+      "required": [
+        "source_coordinates",
+        "target_cids",
+        "domain_payload"
+      ],
+      "title": "EpistemicTransmutationIntent",
       "type": "object"
     },
     "EpistemicTransmutationTask": {
@@ -8407,6 +8588,42 @@
       "title": "FederatedPeftContract",
       "type": "object"
     },
+    "FederatedSourceProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nEstablishes the quantitative and topological baseline of the incoming data.",
+      "properties": {
+        "source_uri": {
+          "maxLength": 2000,
+          "title": "Source Uri",
+          "type": "string"
+        },
+        "node_cardinality": {
+          "minimum": 0,
+          "title": "Node Cardinality",
+          "type": "integer"
+        },
+        "edge_cardinality": {
+          "minimum": 0,
+          "title": "Edge Cardinality",
+          "type": "integer"
+        },
+        "tda_profile": {
+          "$ref": "#/$defs/TopologicalDataAnalysisProfile"
+        },
+        "conformal_bounds": {
+          "$ref": "#/$defs/ConformalPredictionBounds"
+        }
+      },
+      "required": [
+        "source_uri",
+        "node_cardinality",
+        "edge_cardinality",
+        "tda_profile",
+        "conformal_bounds"
+      ],
+      "title": "FederatedSourceProfile",
+      "type": "object"
+    },
     "FederatedStateSnapshot": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes a Distributed Systems Theory cryptographic\npartition, mapping an external swarm's execution state into a localized,\nsandboxed coordinate. As a ...Snapshot suffix, this is a frozen N-dimensional\ncoordinate of ephemeral context.\n\nCAUSAL AFFORDANCE: Exposes the topological footprint of an exogenous network\nto the local orchestrator, authorizing cross-boundary telemetry and capability\nexchange without merging underlying working contexts.\n\nEPISTEMIC BOUNDS: The coordinate is restricted by the optional topology_id\n(str | None, default=None, 128-char CID regex ^[a-zA-Z0-9_.:-]+$),\nmathematically severing unauthorized topological mutations.\n\nMCP ROUTING TRIGGERS: Distributed Systems Theory, Federated Namespace,\nZero-Trust Architecture, Cross-Swarm Federation, Sandbox Partition",
@@ -8496,6 +8713,35 @@
         "compiled_proof_hash"
       ],
       "title": "FormalVerificationContract",
+      "type": "object"
+    },
+    "GapPreservationConstraint": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nMathematically forces the embedding engine to preserve structural distance between heterogeneous modalities during transmutation, preventing over-alignment.",
+      "properties": {
+        "min_representation_gap": {
+          "description": "The minimum required distance between distinct concepts during cross-modal projection.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Min Representation Gap",
+          "type": "number"
+        },
+        "distance_metric": {
+          "description": "The mathematical metric applied to measure the gap.",
+          "enum": [
+            "cosine",
+            "euclidean",
+            "earth_movers"
+          ],
+          "title": "Distance Metric",
+          "type": "string"
+        }
+      },
+      "required": [
+        "min_representation_gap",
+        "distance_metric"
+      ],
+      "title": "GapPreservationConstraint",
       "type": "object"
     },
     "GenerativeManifoldSLA": {
@@ -12464,6 +12710,46 @@
         "justification"
       ],
       "title": "OverrideIntent",
+      "type": "object"
+    },
+    "ParametricCoKleisliMorphism": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nMaps contextualized states of the source category into the target category.",
+      "properties": {
+        "source_dialect_keys": {
+          "items": {
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Source Dialect Keys",
+          "type": "array"
+        },
+        "target_dids": {
+          "items": {
+            "$ref": "#/$defs/NodeIdentifierState"
+          },
+          "minItems": 1,
+          "title": "Target Dids",
+          "type": "array"
+        },
+        "adjacency_matrix_comonad": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonPrimitiveState"
+          },
+          "propertyNames": {
+            "maxLength": 255
+          },
+          "title": "Adjacency Matrix Comonad",
+          "type": "object"
+        }
+      },
+      "required": [
+        "source_dialect_keys",
+        "target_dids",
+        "adjacency_matrix_comonad"
+      ],
+      "title": "ParametricCoKleisliMorphism",
       "type": "object"
     },
     "PatchOperationProfile": {
@@ -16438,6 +16724,61 @@
       "title": "ToolManifest",
       "type": "object"
     },
+    "TopologicalDataAnalysisProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nQuantifies the Persistent Homology of incoming latent manifolds to detect adversarial structural collapse.",
+      "properties": {
+        "betti_0_threshold": {
+          "description": "The minimum number of connected components required to prove manifold continuity.",
+          "minimum": 1,
+          "title": "Betti 0 Threshold",
+          "type": "integer"
+        },
+        "betti_1_persistence_limit": {
+          "description": "The maximum allowed topological noise (1-dimensional holes). High values indicate adversarial prompt injection or latent sandbagging.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Betti 1 Persistence Limit",
+          "type": "number"
+        },
+        "vietoris_rips_max_radius": {
+          "description": "The maximum geometric filtration radius for the simplicial complex.",
+          "minimum": 0.0,
+          "title": "Vietoris Rips Max Radius",
+          "type": "number"
+        }
+      },
+      "required": [
+        "betti_0_threshold",
+        "betti_1_persistence_limit",
+        "vietoris_rips_max_radius"
+      ],
+      "title": "TopologicalDataAnalysisProfile",
+      "type": "object"
+    },
+    "TopologicalFunctorContract": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Specifies the cardinality_rule bounding the morphological expansion or contraction of data.",
+      "properties": {
+        "contract_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Contract Id",
+          "type": "string"
+        },
+        "cardinality_rule": {
+          "$ref": "#/$defs/TransformationCardinalityProfile",
+          "description": "Bounds the expansion/contraction mapping geometry."
+        }
+      },
+      "required": [
+        "contract_id",
+        "cardinality_rule"
+      ],
+      "title": "TopologicalFunctorContract",
+      "type": "object"
+    },
     "TopologicalRetrievalContract": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the rigid traversal perimeters for Graph Convolutional Network\n(GCN) or Random Walk with Restart (RWR) operations across the Causal DAG. As a ...Contract\nsuffix, this object defines rigid mathematical boundaries that the orchestrator must\nenforce globally.\n\nCAUSAL AFFORDANCE: Restricts graph hopping algorithms to explicit Pearlian edge types\n(Literal[\"causes\", \"confounds\", \"correlates_with\", \"undirected\"]), mathematically\npreventing epistemic drift and hallucination during deep multi-hop retrieval.\n\nEPISTEMIC BOUNDS: Bounded recursively by max_hop_depth (ge=1, le=1000000000). The\n@model_validator physically enforces deterministic sorting of\nallowed_causal_relationships (min_length=1) to guarantee RFC 8785 canonical hashing.\nGeometric distance preservation is toggled via enforce_isometry (default=True).\n\nMCP ROUTING TRIGGERS: Directed Acyclic Graph, Pearlian Traversal, Isometry Preservation,\nRandom Walk with Restart",
@@ -16598,6 +16939,16 @@
       "title": "TraceExportManifest",
       "type": "object"
     },
+    "TransformationCardinalityProfile": {
+      "description": "Bounds the morphological expansion or contraction of data.",
+      "enum": [
+        "isomorphic",
+        "topological_splitting",
+        "aggregative_projection"
+      ],
+      "title": "TransformationCardinalityProfile",
+      "type": "string"
+    },
     "TransitionEdgeProfile": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents a directed acyclic Markov edge for traversing the Action Space topology. As a ...Profile suffix, this is a declarative, frozen snapshot of a routing geometry.\n\nCAUSAL AFFORDANCE: Unlocks stochastic pathfinding and graph traversal by projecting a probabilistic weight and thermodynamic cost required to advance to the next state node in the DCG.\n\nEPISTEMIC BOUNDS: The semantic path relies on `target_node_id` (max_length=255). Mathematical optimization is bounded by `probability_weight` (ge=0.0, le=1.0) and `compute_weight_magnitude` (ge=0).\n\nMCP ROUTING TRIGGERS: Markov Decision Process, Acyclic Edge, Stochastic Routing, Transition Probability, Directed Graph",
@@ -16672,6 +17023,136 @@
         "compute_weight_magnitude"
       ],
       "title": "TransitionEdgeProfile",
+      "type": "object"
+    },
+    "TransmutationDriftEvent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Evaluates the final target state for Quantitative BFT Reconciliation (Conservation of Mass).\n\nCAUSAL AFFORDANCE: Mechanically ensures the source vector cardinality mathematically aligns with the actual target cardinality as dictated by the Functor.\n\nEPISTEMIC BOUNDS: Discrepancies trigger a System2RemediationIntent for non-monotonic backtracking.",
+      "properties": {
+        "event_id": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "type": {
+          "const": "transmutation_drift",
+          "default": "transmutation_drift",
+          "description": "Discriminator for transmutation drift.",
+          "title": "Type",
+          "type": "string"
+        },
+        "source_vector_cardinality": {
+          "description": "The expected cardinality from the source profile.",
+          "minimum": 0,
+          "title": "Source Vector Cardinality",
+          "type": "integer"
+        },
+        "actual_target_cardinality": {
+          "description": "The resulting cardinality after functor application.",
+          "minimum": 0,
+          "title": "Actual Target Cardinality",
+          "type": "integer"
+        },
+        "target_functor_id": {
+          "description": "CID of the TopologicalFunctorContract.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Target Functor Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "event_id",
+        "timestamp",
+        "source_vector_cardinality",
+        "actual_target_cardinality",
+        "target_functor_id"
+      ],
+      "title": "TransmutationDriftEvent",
+      "type": "object"
+    },
+    "TransmutationObservationEvent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nQuantifies the incoming exogenous data before transmutation.",
+      "properties": {
+        "event_id": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "type": {
+          "const": "transmutation_observation",
+          "default": "transmutation_observation",
+          "title": "Type",
+          "type": "string"
+        },
+        "source_profile": {
+          "$ref": "#/$defs/FederatedSourceProfile"
+        },
+        "gap_constraint": {
+          "$ref": "#/$defs/GapPreservationConstraint"
+        }
+      },
+      "required": [
+        "event_id",
+        "timestamp",
+        "source_profile",
+        "gap_constraint"
+      ],
+      "title": "TransmutationObservationEvent",
       "type": "object"
     },
     "TruthMaintenancePolicy": {

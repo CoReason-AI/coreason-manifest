@@ -8,15 +8,10 @@
 #
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
-from __future__ import annotations
+import json
 
-import typer
+dpo1 = {"l": {"a": "b"}, "k": {}, "r": {}}
+dpo2 = {"l": {"b": "a"}, "k": {}, "r": {}}
 
-from coreason_manifest.cli.scaffold import app as scaffold_app
-
-app = typer.Typer(help="The Meta-Engineering CLI")
-
-app.add_typer(scaffold_app, name="scaffold", help="AST-Driven Ontological Scaffolding")
-
-if __name__ == "__main__":
-    app()
+print(json.dumps(dpo1, sort_keys=True))
+print(json.dumps(dpo2, sort_keys=True))
