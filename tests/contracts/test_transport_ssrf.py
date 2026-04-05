@@ -23,6 +23,8 @@ from coreason_manifest.spec.ontology import HTTPTransportProfile, SSETransportPr
         "http://169.254.169.254/",
         "http://192.168.1.1/",
         "http://localtest.me/",
+        "http:127.0.0.1",
+        "http:/127.0.0.1",
     ],
 )
 def test_http_transport_profile_ssrf(url: str) -> None:
@@ -39,6 +41,8 @@ def test_http_transport_profile_ssrf(url: str) -> None:
         "http://169.254.169.254/",
         "http://192.168.1.1/",
         "http://localtest.me/",
+        "http:127.0.0.1",
+        "http:/127.0.0.1",
     ],
 )
 def test_sse_transport_profile_ssrf(url: str) -> None:
@@ -56,6 +60,23 @@ def test_sse_transport_profile_ssrf(url: str) -> None:
 def test_http_transport_profile_valid(url: str) -> None:
     profile = HTTPTransportProfile(uri=HttpUrl(url))
     assert str(profile.uri) == url
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "dict:///127.0.0.1:11211/",
+        "gopher:///127.0.0.1:11211/",
+        "ftp:/127.0.0.1",
+        "sftp:127.0.0.1",
+        "ldap://localhost:389",
+    ],
+)
+def test_raw_ssrf_safety_malformed_schemes(url: str) -> None:
+    from coreason_manifest.spec.ontology import _validate_ssrf_safety
+
+    with pytest.raises(ValueError, match=r"SSRF (topological violation|restricted IP) detected"):
+        _validate_ssrf_safety(url)
 
 
 @pytest.mark.parametrize(

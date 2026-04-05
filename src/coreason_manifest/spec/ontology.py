@@ -109,6 +109,25 @@ def _validate_ssrf_safety(url: str) -> str:
     if parsed.scheme == "file":
         raise ValueError("SSRF topological violation detected: file:// schema is forbidden")
     hostname = parsed.hostname
+
+    if not hostname and parsed.scheme in (
+        "http",
+        "https",
+        "ftp",
+        "sftp",
+        "dict",
+        "gopher",
+        "ldap",
+        "redis",
+        "wss",
+        "ws",
+    ):
+        path = parsed.path.lstrip("/")
+        if path:
+            fallback_url = f"//{path}"
+            fallback_parsed = urllib.parse.urlparse(fallback_url)
+            hostname = fallback_parsed.hostname
+
     if not hostname:
         if parsed.scheme in ("http", "https"):
             raise ValueError("SSRF topological violation detected: Invalid hostname in HTTP URI")
