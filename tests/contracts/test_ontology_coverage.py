@@ -23,7 +23,10 @@ from coreason_manifest.spec.ontology import (
     EpistemicTransmutationIntent,
     FederatedSourceProfile,
     GapPreservationConstraint,
+    MorphologicalExpansionBounds,
     ParametricCoKleisliMorphism,
+    ProfunctorOpticContract,
+    ProfunctorOpticType,
     TopologicalDataAnalysisProfile,
     TopologicalFunctorContract,
     TransformationCardinalityProfile,
@@ -58,8 +61,6 @@ def test_epistemic_domain_graph_manifest_dpo_schemas_sort(
 
     assert manifest.dpo_schemas == expected
 
-
-from coreason_manifest.spec.ontology import ProfunctorOpticContract, ProfunctorOpticType
 
 @given(
     target_dids=st.lists(st.from_regex(r"^did:[a-z0-9]+:[a-zA-Z0-9.\-_:]+$", fullmatch=True), min_size=1, max_size=10),
@@ -153,8 +154,6 @@ def test_transmutation_observation_event_in_any_state_event_2(
     assert len(ledger.history) == 1
     assert isinstance(ledger.history[0], TransmutationObservationEvent)
 
-
-from coreason_manifest.spec.ontology import MorphologicalExpansionBounds
 
 @given(
     contract_id=st.from_regex(r"^[a-zA-Z0-9_.:-]+$", fullmatch=True),
