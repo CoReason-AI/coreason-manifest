@@ -648,7 +648,7 @@ class SE3TransformProfile(CoreasonBaseState):
     @model_validator(mode="after")
     def enforce_quaternion_normalization(self) -> Self:
         """Mathematically guarantees the quaternion represents a valid 3D rotation."""
-        magnitude = math.sqrt(self.qx**2 + self.qy**2 + self.qz**2 + self.qw**2)
+        magnitude = math.hypot(self.qx, self.qy, self.qz, self.qw)
         if magnitude == 0.0:
             raise ValueError("Topological Violation: Quaternion cannot be a zero vector.")
         if not math.isclose(magnitude, 1.0, abs_tol=1e-3):
@@ -773,9 +773,7 @@ class EpistemicAttentionRay(CoreasonBaseState):
 
     @model_validator(mode="after")
     def validate_unit_vector(self) -> Self:
-        magnitude = math.sqrt(
-            self.direction_unit_vector[0] ** 2 + self.direction_unit_vector[1] ** 2 + self.direction_unit_vector[2] ** 2
-        )
+        magnitude = math.hypot(*self.direction_unit_vector)
         if magnitude == 0.0:
             raise ValueError("Kinematic Violation: Attention Ray direction cannot be a zero vector.")
         if not math.isclose(magnitude, 1.0, abs_tol=1e-3):

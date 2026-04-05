@@ -22,6 +22,7 @@ dependencies = [
     "libcst>=1.5.0",
     "networkx>=3.0",
     "jsonpatch>=1.33",
+    "numpy>=2.0.0",
 ]
 
 [tool.uv]

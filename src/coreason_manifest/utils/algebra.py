@@ -15,7 +15,6 @@ import base64
 import copy
 import hashlib
 import math
-import struct
 import typing
 from collections.abc import Sequence
 from typing import Any, Literal, cast
@@ -243,6 +242,8 @@ def calculate_latent_alignment(
     """
     A pure algebraic functor to calculate cosine similarity of two vectors.
     """
+    import numpy as np
+
     if v1.model_name != v2.model_name or v1.dimensionality != v2.dimensionality:
         raise ValueError("Topological Contradiction: Vector geometries are incommensurable.")
 
@@ -252,34 +253,14 @@ def calculate_latent_alignment(
     except Exception as e:
         raise ValueError("Topological Contradiction: Invalid base64 encoding.") from e
 
-    try:
-        vec1 = struct.unpack(f"<{v1.dimensionality}f", b1)
-        vec2 = struct.unpack(f"<{v2.dimensionality}f", b2)
-    except struct.error as e:
-        raise ValueError("Byte length does not match declared dimensionality.") from e
+    arr1 = np.frombuffer(b1, dtype=np.float32)
+    arr2 = np.frombuffer(b2, dtype=np.float32)
 
-    try:
-        dot_product = math.fsum(a * b for a, b in zip(vec1, vec2, strict=True))
-        mag1_sq = math.fsum(x * x for x in vec1)
-        mag2_sq = math.fsum(x * x for x in vec2)
-    except (OverflowError, ValueError) as e:
-        raise ValueError("Catastrophic loss of precision or overflow in vector calculation.") from e
+    if len(arr1) != v1.dimensionality or len(arr2) != v2.dimensionality:
+        raise ValueError("Byte length does not match declared dimensionality.")
 
-    if (
-        mag1_sq < 0
-        or mag2_sq < 0
-        or math.isinf(mag1_sq)
-        or math.isinf(mag2_sq)
-        or math.isnan(mag1_sq)
-        or math.isnan(mag2_sq)
-        or math.isinf(dot_product)
-    ):
-        raise ValueError("Catastrophic loss of precision or overflow in vector calculation.")
-
-    mag1 = math.sqrt(mag1_sq)
-    mag2 = math.sqrt(mag2_sq)
-
-    similarity = 0.0 if mag1 == 0.0 or mag2 == 0.0 else dot_product / (mag1 * mag2)
+    mag1, mag2 = np.linalg.norm(arr1), np.linalg.norm(arr2)
+    similarity = 0.0 if mag1 == 0.0 or mag2 == 0.0 else float(np.dot(arr1, arr2) / (mag1 * mag2))
 
     if math.isnan(similarity):
         similarity = 0.0

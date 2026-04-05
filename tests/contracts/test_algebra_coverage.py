@@ -15,7 +15,7 @@ from typing import Any
 from unittest.mock import Mock, patch
 
 import pytest
-from hypothesis import given
+from hypothesis import given, settings
 from hypothesis import strategies as st
 from pydantic import ValidationError
 
@@ -143,6 +143,7 @@ def test_align_semantic_manifolds_subset(source: list[str]) -> None:
         st.floats(min_value=-10.0, max_value=10.0, allow_nan=False, allow_infinity=False), min_size=1, max_size=10
     )
 )
+@settings(max_examples=100)
 def test_calculate_latent_alignment_success(v1: list[float]) -> None:
     b1 = struct.pack(f"<{len(v1)}f", *v1)
     b64 = base64.b64encode(b1).decode("ascii")
