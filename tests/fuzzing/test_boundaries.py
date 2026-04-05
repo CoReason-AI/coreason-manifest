@@ -18,8 +18,10 @@ from hypothesis import HealthCheck, given, settings
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
+    AlgebraicEffectProfile,
     BoundedJSONRPCIntent,
     BrowserDOMState,
+    ComputationalMonadProfile,
     ConstitutionalPolicy,
     ContinuousMutationPolicy,
     DocumentLayoutRegionState,
@@ -392,7 +394,16 @@ def test_execution_node_receipt_recursive_payload(params: dict[str, Any]) -> Non
 
     deep_payload = build_deep_dict(11)
     with pytest.raises(ValidationError):
-        ExecutionNodeReceipt(request_id="test_id", inputs=deep_payload, outputs={"valid": "output"})
+        ExecutionNodeReceipt(
+            request_id="test_id",
+            inputs=deep_payload,
+            outputs={"valid": "output"},
+            algebraic_effect_profile=AlgebraicEffectProfile(
+                permitted_monads=[ComputationalMonadProfile.READER],
+                is_referentially_transparent=True,
+                thermodynamic_variance_bound=0.0,
+            ),
+        )
 
 
 def test_state_hydration_manifest_long_string_quarantine() -> None:
