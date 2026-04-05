@@ -114,7 +114,6 @@ def _validate_ssrf_safety(url: str) -> str:
             raise ValueError("SSRF topological violation detected: Invalid hostname in HTTP URI")
         return url
 
-    import ipaddress
     import socket
 
     hostname_clean = hostname.strip("[]")

@@ -20,6 +20,7 @@ import typing
 from collections.abc import Sequence
 from typing import Any, Literal, cast
 
+import jsonpatch
 from pydantic import BaseModel, ValidationError
 from pydantic.json_schema import models_json_schema
 
@@ -365,7 +366,8 @@ def verify_ast_safety(payload: str) -> bool:
     return True
 
 
-import jsonpatch
+
+
 
 def apply_state_differential(
     current_state: dict[str, Any], differential: ontology.StateDifferentialManifest
