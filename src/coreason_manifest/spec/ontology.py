@@ -1520,25 +1520,25 @@ class RoutingFrontierPolicy(CoreasonBaseState):
                 try:
                     val = int(values["max_latency_ms"])
                     values["max_latency_ms"] = int(max(1, min(val, 86400000)))
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
             if "max_cost_magnitude_per_token" in values:
                 try:
                     val = int(values["max_cost_magnitude_per_token"])
                     values["max_cost_magnitude_per_token"] = int(max(1, min(val, 1000000000)))
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
             if "min_capability_score" in values:
                 try:
                     val_float = float(values["min_capability_score"])
                     values["min_capability_score"] = float(max(0.0, min(val_float, 1.0)))
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
             if values.get("max_carbon_intensity_gco2eq_kwh") is not None:
                 try:
                     val_float = float(values["max_carbon_intensity_gco2eq_kwh"])
                     values["max_carbon_intensity_gco2eq_kwh"] = float(max(0.0, min(val_float, 10000.0)))
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
         return values
 
@@ -2728,9 +2728,7 @@ class ToolManifest(CoreasonBaseState):
         max_length=1000,
         description="The strict JSON Schema dictionary defining the pure domain-specific arguments ($T$). The framework orchestrator will automatically wrap this in the ExecutionEnvelopeState at runtime.",
     )
-    algebraic_effects: AlgebraicEffectProfile = Field(
-        description="The declarative monadic bounds of the tool."
-    )
+    algebraic_effects: AlgebraicEffectProfile = Field(description="The declarative monadic bounds of the tool.")
     permissions: PermissionBoundaryPolicy = Field(
         description="The zero-trust security boundaries for the tool's execution."
     )
@@ -7316,7 +7314,7 @@ class MarketContract(CoreasonBaseState):
                 try:
                     mc_int = int(mc)
                     sp_int = int(sp)
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
             cmc = max(0, min(mc_int, 1000000000))
             if sp_int > cmc:
@@ -10210,9 +10208,7 @@ class ToposSheafValuationContract(CoreasonBaseState):
     subgraph_nodes: list[NodeIdentifierState] = Field(
         min_length=1, description="The specific spatial perimeter being evaluated."
     )
-    local_truth_value: float = Field(
-        ge=0.0, le=1.0, description="The continuous truth value of the sub-graph."
-    )
+    local_truth_value: float = Field(ge=0.0, le=1.0, description="The continuous truth value of the sub-graph.")
     consistency_proof_hash: str = Field(
         min_length=1,
         max_length=128,

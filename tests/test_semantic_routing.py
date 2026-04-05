@@ -57,7 +57,11 @@ def test_dynamic_ghost_node_and_canonical_sorting() -> None:
         tool_name="tool_A",
         description="Tool A",
         input_schema={"type": "object", "properties": {"input": {"type": "string"}}},
-        algebraic_effects=AlgebraicEffectProfile(permitted_monads=[ComputationalMonadProfile.READER], is_referentially_transparent=True, thermodynamic_variance_bound=0.0),
+        algebraic_effects=AlgebraicEffectProfile(
+            permitted_monads=[ComputationalMonadProfile.READER],
+            is_referentially_transparent=True,
+            thermodynamic_variance_bound=0.0,
+        ),
         permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
     )
 

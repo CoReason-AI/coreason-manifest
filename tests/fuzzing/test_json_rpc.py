@@ -118,7 +118,11 @@ def test_action_space_manifest_uniqueness(action_space_id: str, tool_names: list
             tool_name=name,
             input_schema={"type": "object", "properties": {}},
             description="desc",
-            algebraic_effects=AlgebraicEffectProfile(permitted_monads=[ComputationalMonadProfile.READER], is_referentially_transparent=True, thermodynamic_variance_bound=0.0),
+            algebraic_effects=AlgebraicEffectProfile(
+                permitted_monads=[ComputationalMonadProfile.READER],
+                is_referentially_transparent=True,
+                thermodynamic_variance_bound=0.0,
+            ),
             permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
         )
         for name in tool_names

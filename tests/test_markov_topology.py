@@ -61,7 +61,11 @@ def test_action_space_dcg_compilation() -> None:
         tool_name="tool_A",
         description="Tool A",
         input_schema={"type": "object", "properties": {"input": {"type": "string"}}},
-        algebraic_effects=AlgebraicEffectProfile(permitted_monads=[ComputationalMonadProfile.READER], is_referentially_transparent=True, thermodynamic_variance_bound=0.0),
+        algebraic_effects=AlgebraicEffectProfile(
+            permitted_monads=[ComputationalMonadProfile.READER],
+            is_referentially_transparent=True,
+            thermodynamic_variance_bound=0.0,
+        ),
         permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
     )
 
@@ -70,7 +74,11 @@ def test_action_space_dcg_compilation() -> None:
         tool_name="tool_B",
         description="Tool B",
         input_schema={"type": "object", "properties": {"input": {"type": "string"}}},
-        algebraic_effects=AlgebraicEffectProfile(permitted_monads=[ComputationalMonadProfile.READER], is_referentially_transparent=True, thermodynamic_variance_bound=0.0),
+        algebraic_effects=AlgebraicEffectProfile(
+            permitted_monads=[ComputationalMonadProfile.READER],
+            is_referentially_transparent=True,
+            thermodynamic_variance_bound=0.0,
+        ),
         permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
     )
 
@@ -112,7 +120,11 @@ def test_action_space_ghost_edge_prevention() -> None:
         tool_name="tool_A",
         description="Tool A",
         input_schema={"type": "object", "properties": {"input": {"type": "string"}}},
-        algebraic_effects=AlgebraicEffectProfile(permitted_monads=[ComputationalMonadProfile.READER], is_referentially_transparent=True, thermodynamic_variance_bound=0.0),
+        algebraic_effects=AlgebraicEffectProfile(
+            permitted_monads=[ComputationalMonadProfile.READER],
+            is_referentially_transparent=True,
+            thermodynamic_variance_bound=0.0,
+        ),
         permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
     )
 

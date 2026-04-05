@@ -97,7 +97,11 @@ def test_action_space_manifest_rejects_custom_state() -> None:
                     tool_name="test_tool",
                     description="test tool",
                     input_schema={"type": "object", "properties": {"system_prompt": {"type": "string"}}},
-                    algebraic_effects=AlgebraicEffectProfile(permitted_monads=[ComputationalMonadProfile.READER], is_referentially_transparent=True, thermodynamic_variance_bound=0.0),
+                    algebraic_effects=AlgebraicEffectProfile(
+                        permitted_monads=[ComputationalMonadProfile.READER],
+                        is_referentially_transparent=True,
+                        thermodynamic_variance_bound=0.0,
+                    ),
                     permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
                 )
             },
@@ -115,7 +119,11 @@ def test_action_space_manifest_rejects_custom_state() -> None:
                 tool_name="test_tool_2",
                 description="test tool 2",
                 input_schema={"type": "object", "properties": {"sql_query": {"type": "string"}}},
-                algebraic_effects=AlgebraicEffectProfile(permitted_monads=[ComputationalMonadProfile.READER], is_referentially_transparent=True, thermodynamic_variance_bound=0.0),
+                algebraic_effects=AlgebraicEffectProfile(
+                    permitted_monads=[ComputationalMonadProfile.READER],
+                    is_referentially_transparent=True,
+                    thermodynamic_variance_bound=0.0,
+                ),
                 permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
             )
         },

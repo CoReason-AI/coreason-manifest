@@ -23,7 +23,18 @@ from coreason_manifest.spec.ontology import AlgebraicEffectProfile, Computationa
 def test_execution_node_receipt_orphaned_lineage() -> None:
     """Prove the receipt structurally rejects orphaned lineages."""
     with pytest.raises(ValidationError, match="Orphaned Lineage"):
-        ExecutionNodeReceipt(request_id="req-1", parent_request_id="req-0", root_request_id=None, inputs={}, outputs={}, algebraic_effect_profile=AlgebraicEffectProfile(permitted_monads=[ComputationalMonadProfile.READER], is_referentially_transparent=True, thermodynamic_variance_bound=0.0))
+        ExecutionNodeReceipt(
+            request_id="req-1",
+            parent_request_id="req-0",
+            root_request_id=None,
+            inputs={},
+            outputs={},
+            algebraic_effect_profile=AlgebraicEffectProfile(
+                permitted_monads=[ComputationalMonadProfile.READER],
+                is_referentially_transparent=True,
+                thermodynamic_variance_bound=0.0,
+            ),
+        )
 
 
 # 2. Define the Valid Mathematical Space for Payloads
@@ -44,7 +55,15 @@ def test_execution_node_receipt_hash_determinism(payload: Any) -> None:
     """
     # Base node instantiation
     node_1 = ExecutionNodeReceipt(
-        request_id="req-hash-test", inputs=payload, outputs=payload, parent_hashes=["hashA", "hashB"], algebraic_effect_profile=AlgebraicEffectProfile(permitted_monads=[ComputationalMonadProfile.READER], is_referentially_transparent=True, thermodynamic_variance_bound=0.0)
+        request_id="req-hash-test",
+        inputs=payload,
+        outputs=payload,
+        parent_hashes=["hashA", "hashB"],
+        algebraic_effect_profile=AlgebraicEffectProfile(
+            permitted_monads=[ComputationalMonadProfile.READER],
+            is_referentially_transparent=True,
+            thermodynamic_variance_bound=0.0,
+        ),
     )
 
     # Create a semantically identical node by dumping/loading
@@ -54,7 +73,12 @@ def test_execution_node_receipt_hash_determinism(payload: Any) -> None:
         request_id="req-hash-test",
         inputs=scrambled_payload,
         outputs=scrambled_payload,
-        parent_hashes=["hashA", "hashB"], algebraic_effect_profile=AlgebraicEffectProfile(permitted_monads=[ComputationalMonadProfile.READER], is_referentially_transparent=True, thermodynamic_variance_bound=0.0),
+        parent_hashes=["hashA", "hashB"],
+        algebraic_effect_profile=AlgebraicEffectProfile(
+            permitted_monads=[ComputationalMonadProfile.READER],
+            is_referentially_transparent=True,
+            thermodynamic_variance_bound=0.0,
+        ),
     )
 
     assert node_1.node_hash == node_2.node_hash
