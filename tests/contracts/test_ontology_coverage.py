@@ -1,3 +1,15 @@
+# Copyright (c) 2026 CoReason, Inc
+#
+# This software is proprietary and dual-licensed
+# Licensed under the Prosperity Public License 3.0 (the "License")
+# A copy of the license is available at <https://prosperitylicense.com/versions/3.0.0>
+# For details, see the LICENSE file
+# Commercial use beyond a 30-day trial requires a separate license
+#
+# Source Code: <https://github.com/CoReason-AI/coreason-manifest>
+
+from typing import Any
+
 from hypothesis import given
 from hypothesis import strategies as st
 
@@ -5,6 +17,7 @@ from coreason_manifest.spec.ontology import (
     AnyStateEvent,
     ConformalPredictionBounds,
     DoublePushoutRewritingSchema,
+    EpistemicAxiomState,
     EpistemicDomainGraphManifest,
     EpistemicMappingContract,
     EpistemicTransmutationIntent,
@@ -28,8 +41,8 @@ from coreason_manifest.spec.ontology import (
 def test_epistemic_domain_graph_manifest_dpo_schemas_sort(
     l_keys: list[str], l_vals: list[int], k_keys: list[str], k_vals: list[int]
 ) -> None:
-    l_dict = dict(zip(l_keys, l_vals, strict=False))
-    k_dict = dict(zip(k_keys, k_vals, strict=False))
+    l_dict: dict[str, Any] = dict(zip(l_keys, l_vals, strict=False))
+    k_dict: dict[str, Any] = dict(zip(k_keys, k_vals, strict=False))
 
     dpo1 = DoublePushoutRewritingSchema(production_l=l_dict, interface_k=k_dict, replacement_r={})
     dpo2 = DoublePushoutRewritingSchema(production_l=k_dict, interface_k=l_dict, replacement_r={})
@@ -37,7 +50,7 @@ def test_epistemic_domain_graph_manifest_dpo_schemas_sort(
     manifest = EpistemicDomainGraphManifest(
         graph_id="g1",
         c_set_schema_hash="0" * 64,
-        verified_axioms=[{"source_concept_id": "a", "directed_edge_type": "b", "target_concept_id": "c"}],
+        verified_axioms=[EpistemicAxiomState(source_concept_id="a", directed_edge_type="b", target_concept_id="c")],
         dpo_schemas=[dpo1, dpo2],
     )
 

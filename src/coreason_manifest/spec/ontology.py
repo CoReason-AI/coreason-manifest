@@ -1482,25 +1482,25 @@ class RoutingFrontierPolicy(CoreasonBaseState):
                 try:
                     val = int(values["max_latency_ms"])
                     values["max_latency_ms"] = int(max(1, min(val, 86400000)))
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
             if "max_cost_magnitude_per_token" in values:
                 try:
                     val = int(values["max_cost_magnitude_per_token"])
                     values["max_cost_magnitude_per_token"] = int(max(1, min(val, 1000000000)))
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
             if "min_capability_score" in values:
                 try:
                     val_float = float(values["min_capability_score"])
                     values["min_capability_score"] = float(max(0.0, min(val_float, 1.0)))
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
             if values.get("max_carbon_intensity_gco2eq_kwh") is not None:
                 try:
                     val_float = float(values["max_carbon_intensity_gco2eq_kwh"])
                     values["max_carbon_intensity_gco2eq_kwh"] = float(max(0.0, min(val_float, 10000.0)))
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
         return values
 
@@ -2283,14 +2283,15 @@ class EpistemicTransmutationIntent(CoreasonBaseState):
 
     MCP ROUTING TRIGGERS: Category Theory Functor, Morphological Transmutation, Kinetic Orchestration, Zero-Trust Projection
     """
+
     type: Literal["epistemic_transmutation"] = Field(
         default="epistemic_transmutation", description="Discriminator for the transmutation intent."
     )
-    source_coordinates: list[Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]] = Field(
-        description="The CIDs of the source geometry."
-    )
-    target_cids: list[Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]] = Field(
-        description="The resulting CIDs in the target domain."
+    source_coordinates: list[
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    ] = Field(description="The CIDs of the source geometry.")
+    target_cids: list[Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]] = (
+        Field(description="The resulting CIDs in the target domain.")
     )
     domain_payload: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
         description="The complex domain-specific payload."
@@ -7255,7 +7256,7 @@ class MarketContract(CoreasonBaseState):
                 try:
                     mc_int = int(mc)
                     sp_int = int(sp)
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
             cmc = max(0, min(mc_int, 1000000000))
             if sp_int > cmc:
@@ -11072,6 +11073,7 @@ class TransmutationDriftEvent(BaseStateEvent):
 
     EPISTEMIC BOUNDS: Discrepancies trigger a System2RemediationIntent for non-monotonic backtracking.
     """
+
     type: Literal["transmutation_drift"] = Field(
         default="transmutation_drift", description="Discriminator for transmutation drift."
     )
@@ -11454,7 +11456,9 @@ class TopologicalFunctorContract(CoreasonBaseState):
     """
 
     contract_id: str = Field(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
-    cardinality_rule: TransformationCardinalityProfile = Field(description="Bounds the expansion/contraction mapping geometry.")
+    cardinality_rule: TransformationCardinalityProfile = Field(
+        description="Bounds the expansion/contraction mapping geometry."
+    )
 
 
 class EpistemicMappingContract(CoreasonBaseState):
