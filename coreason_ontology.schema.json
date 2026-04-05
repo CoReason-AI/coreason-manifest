@@ -7331,6 +7331,14 @@
           "title": "Type",
           "type": "string"
         },
+        "functor_contract_id": {
+          "description": "Permanently binds kinetic execution to the mathematical blueprint.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Functor Contract Id",
+          "type": "string"
+        },
         "source_coordinates": {
           "description": "The CIDs of the source geometry.",
           "items": {
@@ -7353,6 +7361,18 @@
           "title": "Target Cids",
           "type": "array"
         },
+        "flattening_policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GraphFlatteningPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "If the downstream target requires low-dimensional analytical projection, this triggers immediate dimensionality reduction."
+        },
         "domain_payload": {
           "additionalProperties": {
             "$ref": "#/$defs/JsonPrimitiveState"
@@ -7366,6 +7386,7 @@
         }
       },
       "required": [
+        "functor_contract_id",
         "source_coordinates",
         "target_cids",
         "domain_payload"
@@ -11683,6 +11704,32 @@
       "title": "MemoizedNodeProfile",
       "type": "object"
     },
+    "MorphologicalExpansionBounds": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nThe hardware guillotine for topological splitting to prevent exponential state-space/VRAM explosion during 1:N Left Kan Extensions.",
+      "properties": {
+        "max_fan_out": {
+          "description": "The absolute physical limit of new nodes generated from a single source node.",
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Max Fan Out",
+          "type": "integer"
+        },
+        "entropy_preservation_threshold": {
+          "description": "Ensures the morphological split does not hallucinate new Shannon information.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Entropy Preservation Threshold",
+          "type": "number"
+        }
+      },
+      "required": [
+        "max_fan_out",
+        "entropy_preservation_threshold"
+      ],
+      "title": "MorphologicalExpansionBounds",
+      "type": "object"
+    },
     "MultimodalArtifactReceipt": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes the formal Genesis Block within the Merkle-DAG for unstructured data ingestion, acting as the absolute origin vector for downstream knowledge extraction.\n\nCAUSAL AFFORDANCE: Triggers the neurosymbolic ingestion pipeline, mechanically anchoring the raw byte stream to a verified temporal coordinate so subsequent transmutations can deterministically prove chain of custody.\n\nEPISTEMIC BOUNDS: Enforces a physical boundary on causality via `temporal_ingest_timestamp`. Data integrity mathematically locked by `byte_stream_hash`, mandating a strict SHA-256 regex (`^[a-f0-9]{64}$`).\n\nMCP ROUTING TRIGGERS: Genesis Block, Merkle-DAG, Content Addressable Storage, Cryptographic Anchoring, Unstructured Ingestion",
@@ -12716,13 +12763,12 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nMaps contextualized states of the source category into the target category.",
       "properties": {
-        "source_dialect_keys": {
+        "optic_mappings": {
           "items": {
-            "maxLength": 2000,
-            "type": "string"
+            "$ref": "#/$defs/ProfunctorOpticContract"
           },
           "minItems": 1,
-          "title": "Source Dialect Keys",
+          "title": "Optic Mappings",
           "type": "array"
         },
         "target_dids": {
@@ -12745,7 +12791,7 @@
         }
       },
       "required": [
-        "source_dialect_keys",
+        "optic_mappings",
         "target_dids",
         "adjacency_matrix_comonad"
       ],
@@ -13301,6 +13347,43 @@
       "maxLength": 128,
       "minLength": 1,
       "pattern": "^[a-zA-Z0-9_-]+$",
+      "type": "string"
+    },
+    "ProfunctorOpticContract": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nA strictly typed algebraic bridge extracting a covariant output and injecting it into a contravariant input.",
+      "properties": {
+        "optic_type": {
+          "$ref": "#/$defs/ProfunctorOpticType"
+        },
+        "source_focus_pointer": {
+          "description": "The exact RFC 6902 JSON Pointer extracting data from the source manifold.",
+          "maxLength": 2000,
+          "title": "Source Focus Pointer",
+          "type": "string"
+        },
+        "target_injection_pointer": {
+          "description": "The exact RFC 6902 JSON Pointer injecting data into the target manifold.",
+          "maxLength": 2000,
+          "title": "Target Injection Pointer",
+          "type": "string"
+        }
+      },
+      "required": [
+        "optic_type",
+        "source_focus_pointer",
+        "target_injection_pointer"
+      ],
+      "title": "ProfunctorOpticContract",
+      "type": "object"
+    },
+    "ProfunctorOpticType": {
+      "enum": [
+        "lens",
+        "prism",
+        "traversal"
+      ],
+      "title": "ProfunctorOpticType",
       "type": "string"
     },
     "QoSClassificationProfile": {
@@ -16767,13 +16850,42 @@
           "title": "Contract Id",
           "type": "string"
         },
+        "source_schema_hash": {
+          "description": "SHA-256 pointer to the origin C-set or JSON schema.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Source Schema Hash",
+          "type": "string"
+        },
+        "target_schema_hash": {
+          "description": "SHA-256 pointer to the target Universal Ontology.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Target Schema Hash",
+          "type": "string"
+        },
         "cardinality_rule": {
           "$ref": "#/$defs/TransformationCardinalityProfile",
           "description": "Bounds the expansion/contraction mapping geometry."
+        },
+        "expansion_bounds": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MorphologicalExpansionBounds"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         }
       },
       "required": [
         "contract_id",
+        "source_schema_hash",
+        "target_schema_hash",
         "cardinality_rule"
       ],
       "title": "TopologicalFunctorContract",
@@ -16942,9 +17054,9 @@
     "TransformationCardinalityProfile": {
       "description": "Bounds the morphological expansion or contraction of data.",
       "enum": [
-        "isomorphic",
-        "topological_splitting",
-        "aggregative_projection"
+        "isomorphic_pullback",
+        "left_kan_extension",
+        "right_kan_extension"
       ],
       "title": "TransformationCardinalityProfile",
       "type": "string"

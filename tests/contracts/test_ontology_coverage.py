@@ -66,7 +66,9 @@ def test_epistemic_domain_graph_manifest_dpo_schemas_sort(
     target_dids=st.lists(st.from_regex(r"^did:[a-z0-9]+:[a-zA-Z0-9.\-_:]+$", fullmatch=True), min_size=1, max_size=10),
 )
 def test_parametric_cokleisli_morphism_sort(target_dids: list[str]) -> None:
-    optic = ProfunctorOpticContract(optic_type=ProfunctorOpticType.LENS, source_focus_pointer="/a", target_injection_pointer="/b")
+    optic = ProfunctorOpticContract(
+        optic_type=ProfunctorOpticType.LENS, source_focus_pointer="/a", target_injection_pointer="/b"
+    )
     morph = ParametricCoKleisliMorphism(
         optic_mappings=[optic],
         target_dids=target_dids,
@@ -81,10 +83,10 @@ def test_parametric_cokleisli_morphism_sort(target_dids: list[str]) -> None:
     target_dids=st.lists(st.from_regex(r"^did:[a-z0-9]+:[a-zA-Z0-9.\-_:]+$", fullmatch=True), min_size=1, max_size=5),
 )
 def test_epistemic_mapping_contract(target_dids: list[str]) -> None:
-    optic = ProfunctorOpticContract(optic_type=ProfunctorOpticType.LENS, source_focus_pointer="/a", target_injection_pointer="/b")
-    morph = ParametricCoKleisliMorphism(
-        optic_mappings=[optic], target_dids=target_dids, adjacency_matrix_comonad={}
+    optic = ProfunctorOpticContract(
+        optic_type=ProfunctorOpticType.LENS, source_focus_pointer="/a", target_injection_pointer="/b"
     )
+    morph = ParametricCoKleisliMorphism(optic_mappings=[optic], target_dids=target_dids, adjacency_matrix_comonad={})
     contract = EpistemicMappingContract(contract_id="c1", mapping_rules=[morph])
     assert contract.mapping_rules == [morph]
 
@@ -161,13 +163,21 @@ def test_transmutation_observation_event_in_any_state_event_2(
     target_hash=st.from_regex(r"^[a-f0-9]{64}$", fullmatch=True),
     cardinality_rule=st.sampled_from(list(TransformationCardinalityProfile)),
 )
-def test_topological_functor_contract(contract_id: str, source_hash: str, target_hash: str, cardinality_rule: TransformationCardinalityProfile) -> None:
+def test_topological_functor_contract(
+    contract_id: str, source_hash: str, target_hash: str, cardinality_rule: TransformationCardinalityProfile
+) -> None:
     if cardinality_rule == TransformationCardinalityProfile.LEFT_KAN_EXTENSION:
         expansion_bounds = MorphologicalExpansionBounds(max_fan_out=10, entropy_preservation_threshold=0.5)
     else:
         expansion_bounds = None
 
-    contract = TopologicalFunctorContract(contract_id=contract_id, source_schema_hash=source_hash, target_schema_hash=target_hash, cardinality_rule=cardinality_rule, expansion_bounds=expansion_bounds)
+    contract = TopologicalFunctorContract(
+        contract_id=contract_id,
+        source_schema_hash=source_hash,
+        target_schema_hash=target_hash,
+        cardinality_rule=cardinality_rule,
+        expansion_bounds=expansion_bounds,
+    )
     assert contract.contract_id == contract_id
     assert contract.cardinality_rule == cardinality_rule
 
@@ -183,7 +193,10 @@ def test_epistemic_transmutation_intent(
     functor_contract_id: str, source_coords: list[str], target_cids: list[str], payload_key: str, payload_val: str
 ) -> None:
     intent = EpistemicTransmutationIntent(
-        functor_contract_id=functor_contract_id, source_coordinates=source_coords, target_cids=target_cids, domain_payload={payload_key: payload_val}
+        functor_contract_id=functor_contract_id,
+        source_coordinates=source_coords,
+        target_cids=target_cids,
+        domain_payload={payload_key: payload_val},
     )
     assert intent.source_coordinates == sorted(source_coords)
     assert intent.target_cids == sorted(target_cids)
