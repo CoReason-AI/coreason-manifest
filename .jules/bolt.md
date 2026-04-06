@@ -20,3 +20,6 @@
 ## 2026-03-28 - [operator.attrgetter for C-level Sort Keys]
 **Learning:** In heavily hashed immutable models using Pydantic, the `_enforce_canonical_sort` validator executes frequently. Using `lambda x: x.property` introduces significant Python function call overhead per element. Replacing `lambda` with `operator.attrgetter('property')` runs entirely in C, yielding a measurable 20-30% performance improvement on large collections.
 **Action:** Always prefer `operator.attrgetter` over lambda functions for sort keys in hot loops or heavily repeated Pydantic model validation steps to guarantee optimal serialization throughput.
+## 2026-03-29 - [Safe application of C-level sort operators]
+**Learning:** While `operator.attrgetter` and `operator.itemgetter` are C-level optimizations that can replace slow lambdas, replacing `lambda x: str(x.value)` with `operator.attrgetter("value")` is dangerous. It changes the sorting logic from sorting by string representation to sorting by the raw value itself. This can cause TypeErrors or change the intended sort order.
+**Action:** When converting lambdas to `operator` functions for performance, ensure the sorting semantics (like type casting) are strictly preserved. Do not convert lambdas that perform type casting (like `str()`) into pure attribute getters.
