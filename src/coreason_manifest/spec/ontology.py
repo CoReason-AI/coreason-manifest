@@ -8600,7 +8600,7 @@ class System2RemediationIntent(CoreasonBaseState):
         return self
 
 
-class TamperFaultEvent(ValueError):
+class TamperFaultEvent(ValueError):  # noqa: N818
     """Raised when an execution trace has been tampered with or is topologically invalid."""
 
 
