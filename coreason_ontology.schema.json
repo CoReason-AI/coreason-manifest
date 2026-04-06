@@ -2,29 +2,29 @@
   "$defs": {
     "ASTGradientReceipt": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Replace unstructured string tracebacks with deterministic, high-dimensional loss vectors for automated code repair.",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes syntactic failure geometries, replacing unstructured tracebacks with deterministic, high-dimensional loss vectors.\n\n    CAUSAL AFFORDANCE: Executes deterministic code repair strategies by supplying the generative optimization mechanism with precise structural node pointers indicating syntax fractures.\n\n    EPISTEMIC BOUNDS: Bounded structurally via a 128-char compilation ID and precise AST string pointers clamped to 2000 chars. Vector magnitudes define the specific error distance.\n\n    MCP ROUTING TRIGGERS: AST Pointer, Generative Repair, Syntax Falsification, High-Dimensional Loss, Structural Gradient",
       "properties": {
         "compilation_attempt_id": {
-          "description": "Cryptographic anchor to the failed compile execution.",
+          "description": "The deterministic cryptographic coordinate linking the failure geometry to the execution timeline.",
           "maxLength": 128,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Compilation Attempt Id",
           "type": "string"
         },
         "ast_node_pointer": {
-          "description": "The exact RFC 6902 JSON Pointer or AST path where the syntax fractured.",
+          "description": "The absolute structural RFC 6902 JSON Pointer or AST coordinate marking the physical syntax fracture.",
           "maxLength": 2000,
           "title": "Ast Node Pointer",
           "type": "string"
         },
         "expected_type_geometry": {
-          "description": "The formal covariant requirement.",
+          "description": "The explicit structural definition of the mathematical covariant bound requirement.",
           "maxLength": 2000,
           "title": "Expected Type Geometry",
           "type": "string"
         },
         "actual_type_geometry": {
-          "description": "The invalid contravariant state provided.",
+          "description": "The physical contravariant type string encountered at the structural fracture point.",
           "maxLength": 2000,
           "title": "Actual Type Geometry",
           "type": "string"
@@ -39,7 +39,7 @@
             }
           ],
           "default": null,
-          "description": "The dense vector embedding of the semantic error for vector-math remediation."
+          "description": "The mathematically defined multi-dimensional vector encoding the syntactic divergence."
         }
       },
       "required": [
@@ -1413,17 +1413,17 @@
     },
     "AsymptoticComplexityReceipt": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Automatically infer Big-O asymptotic complexity via Monte Carlo fuzzing to populate Markov transition costs.",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Big-O asymptotic complexity via Monte Carlo fuzzing to populate deterministic Markov transition costs.\n\n    CAUSAL AFFORDANCE: Dynamically allocates topological routing metrics, allowing the swarm to economically bound latency and VRAM before calling a tool.\n\n    EPISTEMIC BOUNDS: The asymptotic classification space is severely bounded via explicit Literals. Peak bytes and CPU constraints enforce hard integer clamping against memory exhaustion.\n\n    MCP ROUTING TRIGGERS: Asymptotic Complexity, Big-O Notation, Monte Carlo Fuzzing, Markov Transition Costs, Computational Budget",
       "properties": {
         "capability_id": {
-          "description": "The forged tool being profiled.",
+          "description": "The exact 128-char physical DID referencing the algorithmic payload evaluated.",
           "maxLength": 128,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Capability Id",
           "type": "string"
         },
         "time_complexity_class": {
-          "description": "The mathematically inferred compute curve.",
+          "description": "The formal Big-O mathematical class mathematically bounding temporal execution limits.",
           "enum": [
             "O(1)",
             "O(log N)",
@@ -1436,7 +1436,7 @@
           "type": "string"
         },
         "space_complexity_class": {
-          "description": "The inferred memory allocation curve.",
+          "description": "The formal Big-O mathematical class representing the asymptotic structural memory geometry.",
           "enum": [
             "O(1)",
             "O(log N)",
@@ -1447,14 +1447,14 @@
           "type": "string"
         },
         "peak_vram_bytes": {
-          "description": "Absolute thermodynamic memory ceiling detected.",
+          "description": "The strict absolute integer measurement bounding thermodynamic memory allocations.",
           "maximum": 100000000000,
           "minimum": 0,
           "title": "Peak Vram Bytes",
           "type": "integer"
         },
         "simulated_cpu_cycles": {
-          "description": "Empirical cycle burn used to establish compute_weight_magnitude.",
+          "description": "The empirical cyclic integer threshold capturing the magnitude of the compute vector.",
           "maximum": 100000000000,
           "minimum": 0,
           "title": "Simulated Cpu Cycles",
@@ -3784,16 +3784,16 @@
     },
     "ContextualizedSourceEntity": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nReplaces raw baseline string inputs for inference payloads.",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Projects a semantically unified spatial token footprint representing the strictly bounded source projection.\n\n    CAUSAL AFFORDANCE: Authorizes downstream parsing tasks to isolate exact dimensional target strings while strictly maintaining chronological relationships via the topological envelope.\n\n    EPISTEMIC BOUNDS: Limits structural explosion by constraining target sequences and contextual items mathematically to max_length=100000. Contains a strict topological exemption preventing array sorting.\n\n    MCP ROUTING TRIGGERS: Semantic Envelope, Contextual Projection, Spatial Token Footprint, Source Entity, Topos Sorting",
       "properties": {
         "target_string": {
-          "description": "The explicit item to map.",
+          "description": "The strictly bounded, un-redacted 1D string projection of the semantic artifact undergoing evaluation.",
           "maxLength": 100000,
           "title": "Target String",
           "type": "string"
         },
         "contextual_envelope": {
-          "description": "Surrounding semantic neighbors. AGENT INSTRUCTION: Topological Exemption applied. Do NOT sort this array, as its chronological/spatial sequence is its mathematical state.",
+          "description": "The strictly bounded array of adjacent token clusters forming the semantic proximity matrix. AGENT INSTRUCTION: Topological Exemption applied. Do NOT sort this array, as its chronological/spatial sequence is its mathematical state.",
           "items": {
             "maxLength": 100000,
             "type": "string"
@@ -3803,7 +3803,7 @@
           "type": "array"
         },
         "source_system_provenance_flag": {
-          "description": "Indicates if the exact upstream origin system is known.",
+          "description": "The mathematical boolean boundary indicating strict physical provenance to an external host.",
           "title": "Source System Provenance Flag",
           "type": "boolean"
         }
@@ -4697,17 +4697,17 @@
     },
     "DataFidelityReceipt": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nStore pre-inference calculations.",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Mathematically computes and stores the pre-inference structural density calculations of the context.\n\n    CAUSAL AFFORDANCE: Exposes the exact physical fidelity of a data block, permitting the orchestrator to dynamically drop packets that fall below algorithmic probability thresholds.\n\n    EPISTEMIC BOUNDS: Contextual completeness is geometrically restricted to a continuous float bounding the probability space [0.0, 1.0]. Surrounding token limits are clamped at absolute integers >= 0.\n\n    MCP ROUTING TRIGGERS: Data Fidelity, Density Calculation, Probability Space, Pre-Inference Validation, Completeness Score",
       "properties": {
         "contextual_completeness_score": {
-          "description": "Represents the density of the contextual envelope.",
+          "description": "The continuous normalized float measuring the mathematical density of the contextual semantic envelope.",
           "maximum": 1.0,
           "minimum": 0.0,
           "title": "Contextual Completeness Score",
           "type": "number"
         },
         "surrounding_token_density": {
-          "description": "Count of valid tokens in the contextual_envelope.",
+          "description": "The absolute integer boundary tracking valid structural tokens mathematically bounding the contextual_envelope.",
           "minimum": 0,
           "title": "Surrounding Token Density",
           "type": "integer"
@@ -6993,24 +6993,27 @@
     },
     "EpistemicUpsamplingTask": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAuthorizes a connectionist agent to execute an abductive leap, reversing lossy compression by utilizing a contextual envelope to map a generalized artifact to a highly specific ontological node.",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Authorizes a connectionist agent to execute an abductive leap, reversing lossy compression via context.\n\n    CAUSAL AFFORDANCE: Unlocks generative projection mapping by allowing an agent to expand a generalized node into highly specific ontology dimensions based on contextual vectors.\n\n    EPISTEMIC BOUNDS: The confidence of the upsampling projection is clamped tightly between 0.0 and 1.0. Justification arrays enforce maximum structural lengths and explicitly declare Topological Exemptions against array sort.\n\n    MCP ROUTING TRIGGERS: Abductive Leap, Epistemic Upsampling, Lossy Compression Reversal, Vector Expansion, Connectionist Grounding",
       "properties": {
         "source_entity": {
-          "$ref": "#/$defs/ContextualizedSourceEntity"
+          "$ref": "#/$defs/ContextualizedSourceEntity",
+          "description": "The specific source contextualized entity subject to topological upsampling."
         },
         "target_ontological_granularity": {
+          "description": "The explicitly declared target node classification or structural grain.",
           "maxLength": 255,
           "title": "Target Ontological Granularity",
           "type": "string"
         },
         "upsampling_confidence_threshold": {
+          "description": "The minimum acceptable certainty probability required to project the upsampled node.",
           "maximum": 1.0,
           "minimum": 0.0,
           "title": "Upsampling Confidence Threshold",
           "type": "number"
         },
         "justification_vectors": {
-          "description": "AGENT INSTRUCTION: Topological Exemption applied. Do NOT sort this array, as the chronological sequence of extraction acts as mathematical state.",
+          "description": "The strictly ordered matrix of reasoning paths mathematically justifying the topological expansion. AGENT INSTRUCTION: Topological Exemption applied. Do NOT sort this array, as the chronological sequence of extraction acts as mathematical state.",
           "items": {
             "maxLength": 2000,
             "type": "string"
@@ -7524,7 +7527,7 @@
     },
     "ExecutionEnvelopeState": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements the mathematical Reader/Writer/State (RWS) Monad, completely enveloping execution inside pure functions.\n\nCAUSAL AFFORDANCE: The envelope functor that maps a pure value into a computational context.\n\nEPISTEMIC BOUNDS: Strictly prevents external keys. Must consist solely of trace_context, state_vector, and payload.",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements the mathematical Reader/Writer/State (RWS) Monad, completely enveloping execution inside pure functions.\n\n    CAUSAL AFFORDANCE: Acts as the envelope functor that strictly maps a pure value into a bounded computational context.\n\n    EPISTEMIC BOUNDS: The execution configuration absolutely forbids external keys via extra=forbid and isolates strictly to trace, state, and payload variables.\n\n    MCP ROUTING TRIGGERS: Reader Writer State Monad, Pure Functions, Envelope Functor, Execution Context, Algebraic Structures",
       "properties": {
         "trace_context": {
           "$ref": "#/$defs/TraceContextState",
@@ -8717,17 +8720,17 @@
     },
     "HoareLogicProofReceipt": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Replace unit tests with mathematical proofs of state bounds prior to capability deployment.",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Hoare Logic to provide cryptographic proof of algorithmic preconditions and postconditions prior to capability execution.\n\n    CAUSAL AFFORDANCE: Instructs the orchestrator's verification engine to validate the formal proof geometry prior to allocating swarm budget to a generated tool or component.\n\n    EPISTEMIC BOUNDS: Strictly relies on arrays of LiquidTypeContracts, demanding at least one pre-bound and post-bound. Formal systems are strictly bounded by a Literal automaton constraint.\n\n    MCP ROUTING TRIGGERS: Hoare Logic, Automated Theorem Proving, Preconditions Postconditions, Formal Verification, Cryptographic Proof",
       "properties": {
         "capability_id": {
-          "description": "The forged tool being verified.",
+          "description": "The 128-char DID boundary physically binding this proof to the target executable matrix.",
           "maxLength": 128,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Capability Id",
           "type": "string"
         },
         "preconditions": {
-          "description": "The P bounds.",
+          "description": "The strictly bounded array of foundational LiquidTypeContracts representing the P state geometry.",
           "items": {
             "$ref": "#/$defs/LiquidTypeContract"
           },
@@ -8736,7 +8739,7 @@
           "type": "array"
         },
         "postconditions": {
-          "description": "The Q bounds.",
+          "description": "The strictly bounded array of subsequent LiquidTypeContracts representing the Q state geometry.",
           "items": {
             "$ref": "#/$defs/LiquidTypeContract"
           },
@@ -8745,7 +8748,7 @@
           "type": "array"
         },
         "proof_system": {
-          "description": "The proof system used to mathematically prove bounds.",
+          "description": "The strict mathematical automaton engine responsible for evaluating the structural boundary.",
           "enum": [
             "lean4",
             "coq",
@@ -8756,7 +8759,7 @@
           "type": "string"
         },
         "verified_theorem_hash": {
-          "description": "Cryptographic proof.",
+          "description": "The absolute cryptographic SHA-256 hash mathematically proving formal state verification.",
           "maxLength": 128,
           "pattern": "^[a-f0-9]{64}$",
           "title": "Verified Theorem Hash",
@@ -10414,16 +10417,16 @@
     },
     "LiquidTypeContract": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Mathematically bounds a specific target property.",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Mathematically bounds a specific target property using strict Liquid Type (Refinement Type) declarations.\n\n    CAUSAL AFFORDANCE: Establishes a definitive algebraic constraint against an instantiated variable, forcing the formal verifier to evaluate conditions mathematically prior to downstream deployment.\n\n    EPISTEMIC BOUNDS: Bounding variables and mathematical predicates are rigidly clamped to a maximum string geometry of 2000 characters to prevent polynomial regex execution attacks.\n\n    MCP ROUTING TRIGGERS: Liquid Types, Refinement Types, Algebraic Constraint, Mathematical Predicate, Bounded Property",
       "properties": {
         "target_property": {
-          "description": "The specific variable or schema key being bounded.",
+          "description": "The specific localized node schema key undergoing rigorous mathematical bounding.",
           "maxLength": 2000,
           "title": "Target Property",
           "type": "string"
         },
         "mathematical_predicate": {
-          "description": "The formal algebraic constraint (e.g., x > 0 and x < 100).",
+          "description": "The formal algebraic representation vector utilized to define physical bounds (e.g., x > 0 and x < 100).",
           "maxLength": 2000,
           "title": "Mathematical Predicate",
           "type": "string"
@@ -11497,23 +11500,23 @@
     },
     "NeurosymbolicInferenceRequest": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nCore inference payload envelope orchestrating the pre-inference gate.",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Orchestrates the core execution payload boundary, acting as the structural pre-inference gate for neurosymbolic probability.\n\n    CAUSAL AFFORDANCE: Empowers the routing engine to sever execution prior to LLM generation if the structural certainty SLA evaluates beyond acceptable mathematical variance boundaries.\n\n    EPISTEMIC BOUNDS: Mandates exact nesting of deterministic fidelity and uncertainty profiles. The pre-flight validator mathematically terminates evaluation if epistemic degradation breaches the SLA limit.\n\n    MCP ROUTING TRIGGERS: Pre-Inference Gate, Neurosymbolic Request, Probability Envelope, SLA Enforcement, Inference Termination",
       "properties": {
         "source_entity": {
           "$ref": "#/$defs/ContextualizedSourceEntity",
-          "description": "The source data to process."
+          "description": "The structurally isolated 1D boundary representing the semantic payload injected into the context window."
         },
         "fidelity_receipt": {
           "$ref": "#/$defs/DataFidelityReceipt",
-          "description": "Pre-inference completeness calculations."
+          "description": "The immutable scalar matrix capturing pre-inference mathematical contextual completeness."
         },
         "uncertainty_profile": {
           "$ref": "#/$defs/CognitiveUncertaintyProfile",
-          "description": "The uncertainty bounds of the payload."
+          "description": "The rigid matrix evaluating probabilistic uncertainty vectors bounding the initial request state."
         },
         "sla": {
           "$ref": "#/$defs/EpistemicCompressionSLA",
-          "description": "The execution constraints and boundaries."
+          "description": "The mathematical structural boundaries defining acceptable epistemic loss perimeters."
         }
       },
       "required": [
@@ -14593,7 +14596,7 @@
     },
     "StateVectorProfile": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Labeled Transition System (LTS) Determinism.\n\nCAUSAL AFFORDANCE: Forces all hidden LLM contexts into an explicitly typed data structure,\nmaking the agent a Markov Process with Full Observability.\n\nEPISTEMIC BOUNDS: Bounded dictionary mapping of explicit schemas or primitives for both read and write state.",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Labeled Transition System (LTS) Determinism to track continuous agent Markov states.\n\n    CAUSAL AFFORDANCE: Forces all hidden LLM contexts into an explicitly typed data structure, making the agent a Markov Process with Full Observability.\n\n    EPISTEMIC BOUNDS: Memory boundaries are strictly mapped to maximum recursive depth topologies to prevent hardware CPU/VRAM exhaustion via the _validate_payload_bounds orchestrator.\n\n    MCP ROUTING TRIGGERS: Labeled Transition System, Markov Process, Full Observability, State Vector, Memory Boundary",
       "properties": {
         "read_only_context": {
           "additionalProperties": {
@@ -15524,10 +15527,10 @@
     },
     "TeleologicalIsometryReceipt": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Mathematically prove the deployed code actually satisfies the original epistemic deficit vector.",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Teleological Isometry by measuring the exact mathematical alignment between a stated generative deficit and the empirical behavior of a forged tool.\n\n    CAUSAL AFFORDANCE: Approves or severs the final node promotion. If the cosine similarity bounds fall below the threshold, the orchestrator triggers an immediate rollback logic.\n\n    EPISTEMIC BOUNDS: Evaluated via deterministic cosine similarity constraints measuring between -1.0 and 1.0. The validator explicitly modifies the Boolean passing state if the float threshold isn't met.\n\n    MCP ROUTING TRIGGERS: Teleological Isometry, Tool Forging Validation, Cosine Similarity, Generative Deficit, Empirical Behavior",
       "properties": {
         "source_intent_id": {
-          "description": "Pointer to the originating SemanticDiscoveryIntent.",
+          "description": "The structural 128-char DID boundary pointing to the foundational semantic deficit vector.",
           "maxLength": 128,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Source Intent Id",
@@ -15535,21 +15538,21 @@
         },
         "target_intent_vector": {
           "$ref": "#/$defs/VectorEmbeddingState",
-          "description": "The original deficit space."
+          "description": "The dense mathematical representation of the initial multi-dimensional epistemic deficit."
         },
         "forged_output_vector": {
           "$ref": "#/$defs/VectorEmbeddingState",
-          "description": "The empirical behavioral output space of the forged tool."
+          "description": "The mathematical behavioral state measured after evaluating the executed node structure."
         },
         "measured_cosine_similarity": {
-          "description": "The measured cosine similarity.",
+          "description": "The deterministic cosine similarity scalar bounded within the normalized [-1.0, 1.0] mathematical range.",
           "maximum": 1.0,
           "minimum": -1.0,
           "title": "Measured Cosine Similarity",
           "type": "number"
         },
         "alignment_threshold_passed": {
-          "description": "Whether the threshold was passed.",
+          "description": "The absolute Boolean threshold indicating structural compliance.",
           "title": "Alignment Threshold Passed",
           "type": "boolean"
         }
@@ -16257,7 +16260,7 @@
     },
     "TraceContextState": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Distributed Causality using Vector Clocks and rho-calculus.\n\nCAUSAL AFFORDANCE: Acts as a Causal Graph Identifier, ensuring deterministic traceability\nand state boundary enforcement without relying on hidden states.\n\nEPISTEMIC BOUNDS: Relies on ULID or UUIDv7 string identifiers for strict topological ordering.",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Distributed Causality using Vector Clocks and rho-calculus. It forms the foundational causality boundary.\n\n    CAUSAL AFFORDANCE: Acts as a Causal Graph Identifier, ensuring deterministic traceability and state boundary enforcement without relying on hidden states.\n\n    EPISTEMIC BOUNDS: Relies on ULID or UUIDv7 string identifiers for strict topological ordering, bounded by 26-36 chars. Causal clocks enforce ge=0 budget decay boundaries.\n\n    MCP ROUTING TRIGGERS: Distributed Causality, Vector Clocks, Trace Context, Topological Ordering, Causal Graph",
       "properties": {
         "trace_id": {
           "description": "Globally unique ID generated once at the root user prompt. Must be a ULID or UUIDv7.",

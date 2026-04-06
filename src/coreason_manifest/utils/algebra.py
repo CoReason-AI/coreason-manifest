@@ -135,9 +135,6 @@ def get_ontology_schema() -> dict[str, Any]:
     if _CACHED_ONTOLOGY_SCHEMA is not None:
         return copy.deepcopy(_CACHED_ONTOLOGY_SCHEMA)
 
-    # ⚡ Bolt: Cache ontology schema generation to prevent massive O(N) Pydantic graph traversal on every call.
-    # Generating models_json_schema for 100+ nested models takes >300ms. Caching drops this to ~0.0003ms.
-
     models_to_export: list[type[CoreasonBaseState]] = []
 
     for name in sorted(dir(ontology)):
@@ -265,7 +262,6 @@ def calculate_latent_alignment(
     if math.isnan(similarity):
         similarity = 0.0
 
-    # Float precision clamp
     if similarity > 1.0:
         similarity = 1.0
     elif similarity < -1.0:
