@@ -116,6 +116,15 @@ def _validate_ssrf_safety(url: str) -> str:
         return url
 
     hostname_clean = hostname.strip("[]")
+
+    try:
+        ipaddress.ip_address(hostname_clean)
+    except ValueError:
+        if re.match(r"^(0x[0-9a-fA-F.]+|[0-9.]+)$", hostname_clean) and not hostname_clean.isdigit():
+            raise ValueError(f"SSRF restricted IP detected: {hostname}") from None
+        if hostname_clean.isdigit():
+            raise ValueError(f"SSRF restricted IP detected: {hostname}") from None
+
     try:
         raw_ip = socket.gethostbyname(hostname_clean)
         ip = ipaddress.ip_address(raw_ip)
@@ -131,7 +140,7 @@ def _validate_ssrf_safety(url: str) -> str:
         or getattr(ip, "is_unspecified", False)
         or not getattr(ip, "is_global", True)
     ):
-        raise ValueError(f"SSRF restricted IP detected: {hostname}")
+        raise ValueError(f"SSRF restricted IP detected: {hostname}") from None
 
     return url
 
