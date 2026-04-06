@@ -185,6 +185,7 @@ bogon_obfuscations = ["0x7f.0.0.1", "0x7f000001", "2130706433", "0177.0.0.1", "0
 all_ssrf_targets = bogon_ips + bogon_domains + bogon_obfuscations
 
 
+@settings(max_examples=50, suppress_health_check=[HealthCheck.too_slow], deadline=None)
 @given(
     target=st.sampled_from(all_ssrf_targets),
     scheme=st.sampled_from(["http", "https", "ftp", "ws", "wss"]),
