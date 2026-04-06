@@ -3898,8 +3898,8 @@ class DocumentLayoutManifest(CoreasonBaseState):
     )
     chronological_flow_edges: list[tuple[str, str]] = Field(
         default_factory=list,
-        # Note: chronological_flow_edges is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
         description="Directed edges defining the topological sort (chronological flow) of the document.",
+        # Note: chronological_flow_edges is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     )
 
     @model_validator(mode="after")
@@ -8166,7 +8166,10 @@ class ExecutionSpanReceipt(CoreasonBaseState):
     )
     status: SpanStatusCodeProfile = Field(default="unset", description="The execution health flag.")
     events: list[SpanEvent] = Field(
-        default_factory=list, max_length=10000, description="Structured log records emitted during the span."
+        default_factory=list,
+        max_length=10000,
+        description="Structured log records emitted during the span.",
+        # Note: events is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     )
 
     @model_validator(mode="after")
