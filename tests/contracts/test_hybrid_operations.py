@@ -8,7 +8,6 @@
 #
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
-
 import hypothesis.strategies as st
 import pytest
 from hypothesis import given

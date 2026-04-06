@@ -7,6 +7,7 @@
 # Commercial use beyond a 30-day trial requires a separate license
 #
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
+
 from typing import Any
 
 import hypothesis.strategies as st
