@@ -648,12 +648,6 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements a stochastic actor traversing a Partially Observable Markov Decision Process (POMDP). It establishes the cognitive and physical constraints for autonomous swarm participants.\n\nCAUSAL AFFORDANCE: Authorizes the orchestrator to instantiate an independent generative trajectory capable of active inference, Representation Engineering (RepE) steering via `baseline_cognitive_state`, and non-monotonic test-time compute escalation via `escalation_policy`.\n\nEPISTEMIC BOUNDS: The node's operational variance is physically bounded by its thermodynamic Spot-Market budget (`compute_frontier`). The `@model_validator` deterministically sorts `peft_adapters` by `adapter_id` for RFC 8785 canonical hashing. Type is strictly locked to `Literal[\"agent\"]`.\n\nMCP ROUTING TRIGGERS: POMDP, Stochastic Actor, Active Inference, Representation Engineering, Policy Gradient",
       "properties": {
-        "description": {
-          "description": "The semantic boundary defining the objective function of the execution node. [SITD-Gamma: Neurosymbolic Substrate Alignment]",
-          "maxLength": 2000,
-          "title": "Description",
-          "type": "string"
-        },
         "architectural_intent": {
           "anyOf": [
             {
@@ -744,6 +738,12 @@
           ],
           "default": null,
           "description": "The strict microfacet BRDF physics governing the visual representation of this node."
+        },
+        "description": {
+          "description": "The semantic boundary defining the objective function of the execution node. [SITD-Gamma: Neurosymbolic Substrate Alignment]",
+          "maxLength": 2000,
+          "title": "Description",
+          "type": "string"
         },
         "type": {
           "const": "agent",
@@ -1771,272 +1771,6 @@
         "epistemic_disposition"
       ],
       "title": "BargeInInterruptEvent",
-      "type": "object"
-    },
-    "BaseIntent": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes the foundational polymorphic root for\nHuman-in-the-Loop (HITL) Supervisory Control Theory. As a base Intent\nsuffix, this object acts as an authorized trigger for out-of-band\ncommunication.\n\nCAUSAL AFFORDANCE: Provides the baseline causal graph bridging required for\nthe orchestrator to emit non-kinetic UI updates and presentation envelopes\nacross the network.\n\nEPISTEMIC BOUNDS: Inherits absolute structural rigidity and RFC 8785\ncanonical hashing from CoreasonBaseState, ensuring all derived presentation\nintents are mathematically immutable upon instantiation.\n\nMCP ROUTING TRIGGERS: Supervisory Control Theory, Polymorphic Intent, HITL\nBoundary, Out-of-Band Signal",
-      "properties": {},
-      "title": "BaseIntent",
-      "type": "object"
-    },
-    "BaseNodeProfile": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes the Graph Theory topological root structure (vertex) for all execution participants within a decentralized multi-agent graph.\n\nCAUSAL AFFORDANCE: Defines the foundational perimeter (objective function) of a participant, enabling the orchestrator to inject proactive oversight hooks (`intervention_policies`) across the node's lifecycle.\n\nEPISTEMIC BOUNDS: The semantic boundary is physically constrained by `description` (`max_length=2000`). The `domain_extensions` payload is volumetrically bounded by the `enforce_payload_topology` hook to an absolute $O(N)$ node limit, replacing the vulnerable recursive depth limit of 5 to definitively prevent JSON-bomb memory leaks.\n\nMCP ROUTING TRIGGERS: Graph Theory, Topological Vertex, Subgraph Node, Lifecycle Hook, JSON-Bomb Prevention",
-      "properties": {
-        "description": {
-          "description": "The semantic boundary defining the objective function or computational perimeter of the execution node.",
-          "maxLength": 2000,
-          "title": "Description",
-          "type": "string"
-        },
-        "architectural_intent": {
-          "anyOf": [
-            {
-              "maxLength": 2000,
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The AI's declarative rationale for selecting this node.",
-          "title": "Architectural Intent"
-        },
-        "justification": {
-          "anyOf": [
-            {
-              "maxLength": 2000,
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Cryptographic/audit justification for this node's existence in the graph.",
-          "title": "Justification"
-        },
-        "intervention_policies": {
-          "description": "The declarative array of proactive oversight hooks bound to this node's lifecycle.",
-          "items": {
-            "$ref": "#/$defs/InterventionPolicy"
-          },
-          "title": "Intervention Policies",
-          "type": "array"
-        },
-        "domain_extensions": {
-          "anyOf": [
-            {
-              "additionalProperties": {
-                "$ref": "#/$defs/JsonPrimitiveState"
-              },
-              "propertyNames": {
-                "maxLength": 255
-              },
-              "type": "object"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
-          "title": "Domain Extensions"
-        },
-        "semantic_zoom": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/SemanticZoomProfile"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The mathematical Information Bottleneck thresholds dictating the semantic degradation of this specific node."
-        },
-        "markov_blanket": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/MarkovBlanketRenderingPolicy"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The epistemic isolation boundary guarding this agent's internal generative states."
-        },
-        "optical_physics": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/PhysicallyBasedRenderingProfile"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The strict microfacet BRDF physics governing the visual representation of this node."
-        }
-      },
-      "required": [
-        "description"
-      ],
-      "title": "BaseNodeProfile",
-      "type": "object"
-    },
-    "BaseStateEvent": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes the foundational topological root for all temporal occurrences in Event Sourcing, utilizing a Merkle-DAG to permanently freeze chronological facts.\n\nCAUSAL AFFORDANCE: Provides the baseline causal graph tracking required for the orchestrator to append new N-dimensional coordinate state diffs without mutating historical truth.\n\nEPISTEMIC BOUNDS: Chronological reality is strictly clamped by `timestamp` (`ge=0.0, le=253402300799.0`). The geometric anchor `event_id` is locked to a 128-char CID regex. Optional `prior_event_hash` anchors the Merkle chain.\n\nMCP ROUTING TRIGGERS: Event Sourcing, Merkle-DAG, Temporal Coordinate, Cryptographic Lineage, Append-Only Ledger",
-      "properties": {
-        "event_id": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
-          "maxLength": 128,
-          "minLength": 1,
-          "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Event Id",
-          "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
-          "title": "Prior Event Hash"
-        },
-        "timestamp": {
-          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
-          "maximum": 253402300799.0,
-          "minimum": 0.0,
-          "title": "Timestamp",
-          "type": "number"
-        }
-      },
-      "required": [
-        "event_id",
-        "timestamp"
-      ],
-      "title": "BaseStateEvent",
-      "type": "object"
-    },
-    "BaseTopologyManifest": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the abstract algebraic baseline and Markov Blanket for all execution subgraphs, establishing the structural and epistemic perimeters for a localized swarm.\n\nCAUSAL AFFORDANCE: Projects overarching schema-on-write contracts (`shared_state_contract`) and zero-trust Payload Loss Prevention (`information_flow`) across all connected nodes, ensuring inherited alignment. The `observability` policy binds distributed tracing.\n\nEPISTEMIC BOUNDS: Epistemic enforcement constraints (`TruthMaintenancePolicy`) are bound hierarchically via pointer delegation, preserving Category Theory invariants. The `nodes` attribute is strictly typed as a dictionary mapping `NodeIdentifierState` to polymorphic `AnyNodeProfile` identities.\n\nMCP ROUTING TRIGGERS: Topological Manifold, Markov Blanket, Subgraph Abstraction, Execution Base, Structural Isolation",
-      "properties": {
-        "epistemic_enforcement": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/TruthMaintenancePolicy"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Ties the topology to the Truth Maintenance layer."
-        },
-        "lifecycle_phase": {
-          "default": "live",
-          "description": "The execution phase of the graph. 'draft' allows incomplete structural state.",
-          "enum": [
-            "draft",
-            "live"
-          ],
-          "title": "Lifecycle Phase",
-          "type": "string"
-        },
-        "architectural_intent": {
-          "anyOf": [
-            {
-              "maxLength": 2000,
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The AI's declarative rationale for selecting this topology.",
-          "title": "Architectural Intent"
-        },
-        "justification": {
-          "anyOf": [
-            {
-              "maxLength": 2000,
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Cryptographic/audit justification for this topology's configuration.",
-          "title": "Justification"
-        },
-        "nodes": {
-          "additionalProperties": {
-            "$ref": "#/$defs/AnyNodeProfile"
-          },
-          "description": "Flat registry of all nodes in this topology.",
-          "propertyNames": {
-            "$ref": "#/$defs/NodeIdentifierState"
-          },
-          "title": "Nodes",
-          "type": "object"
-        },
-        "shared_state_contract": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/StateContract"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The schema-on-write contract governing the internal state of this topology."
-        },
-        "information_flow": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/InformationFlowPolicy"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology."
-        },
-        "observability": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/ObservabilityLODPolicy"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph."
-        }
-      },
-      "required": [
-        "nodes"
-      ],
-      "title": "BaseTopologyManifest",
       "type": "object"
     },
     "BeliefMutationEvent": {
@@ -10154,6 +9888,7 @@
     "JsonPrimitiveState": {
       "anyOf": [
         {
+          "maxLength": 10000,
           "type": "string"
         },
         {
@@ -15318,7 +15053,7 @@
     },
     "SystemFaultEvent": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Acts as a structural terminal state mapping a Byzantine Fault or catastrophic topological execution collapse within the distributed system.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator's circuit breakers to completely sever the active execution branch and quarantine the associated probability wave, preventing failure contagion.\n\nEPISTEMIC BOUNDS: Inherits strict temporal and spatial bounds from BaseStateEvent. Its semantic geometry is permanently constrained to the strict Literal automaton `[\"system_fault\"]`.\n\nMCP ROUTING TRIGGERS: Byzantine Fault Tolerance, Circuit Breaker, Terminal State, Execution Collapse, Fault Isolation",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Acts as a structural terminal state mapping a Byzantine Fault or catastrophic topological execution collapse within the distributed system.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator's circuit breakers to completely sever the active execution branch and quarantine the associated probability wave, preventing failure contagion.\n\nEPISTEMIC BOUNDS: Inherits strict temporal and spatial bounds from CoreasonBaseState. Its semantic geometry is permanently constrained to the strict Literal automaton `[\"system_fault\"]`.\n\nMCP ROUTING TRIGGERS: Byzantine Fault Tolerance, Circuit Breaker, Terminal State, Execution Collapse, Fault Isolation",
       "properties": {
         "event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
@@ -15368,7 +15103,7 @@
     },
     "SystemNodeProfile": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Encapsulates pure functional logic (Lambda Calculus) and Finite State Machine (FSM) mechanics to represent a completely deterministic, side-effect-free system capability.\n\nCAUSAL AFFORDANCE: Executes rigid, zero-variance procedural logic without invoking the expensive stochastic policy gradients required by foundational LLM models.\n\nEPISTEMIC BOUNDS: This node defines NO additional fields beyond inherited `BaseNodeProfile` constraints, including the rigorous `domain_extensions` volumetric depth limits. The type discriminator is locked to `Literal[\"system\"]`.\n\nMCP ROUTING TRIGGERS: Lambda Calculus, Finite State Machine, Referential Transparency, Deterministic Execution, Zero Variance",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Encapsulates pure functional logic (Lambda Calculus) and Finite State Machine (FSM) mechanics to represent a completely deterministic, side-effect-free system capability.\n\nCAUSAL AFFORDANCE: Executes rigid, zero-variance procedural logic without invoking the expensive stochastic policy gradients required by foundational LLM models.\n\nEPISTEMIC BOUNDS: This node defines NO additional fields beyond inherited `CoreasonBaseState` constraints, including the rigorous `domain_extensions` volumetric depth limits. The type discriminator is locked to `Literal[\"system\"]`.\n\nMCP ROUTING TRIGGERS: Lambda Calculus, Finite State Machine, Referential Transparency, Deterministic Execution, Zero Variance",
       "properties": {
         "description": {
           "description": "The semantic boundary defining the objective function or computational perimeter of the execution node.",

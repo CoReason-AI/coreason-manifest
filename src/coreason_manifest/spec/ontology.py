@@ -29,13 +29,13 @@ import numpy as np
 from pydantic import AnyUrl, BaseModel, ConfigDict, Field, HttpUrl, StringConstraints, field_validator, model_validator
 
 type JsonPrimitiveState = (
-    str
+    Annotated[str, StringConstraints(max_length=10000)]
     | int
     | float
     | bool
     | None
-    | list[JsonPrimitiveState]
-    | dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState]
+    | list["JsonPrimitiveState"]
+    | dict[Annotated[str, StringConstraints(max_length=255)], "JsonPrimitiveState"]
 )
 
 
@@ -279,8 +279,8 @@ class RiskLevelPolicy(StrEnum):
 type SanitizationActionIntent = Literal["redact", "hash", "drop_event", "trigger_quarantine"]
 type SemanticVersionState = Annotated[
     str,
+    StringConstraints(pattern="^\\d+\\.\\d+\\.\\d+$"),
     Field(
-        pattern="^\\d+\\.\\d+\\.\\d+$",
         description="An Immutable structural checkpoint.",
         examples=["1.0.0", "0.1.0", "2.12.5"],
     ),
@@ -8823,7 +8823,6 @@ class AgentNodeProfile(CoreasonBaseState):
 
     """
 
-    description: Annotated[str, StringConstraints(max_length=2000)] = Field(description="The semantic boundary defining the objective function or computational perimeter of the execution node.")
     architectural_intent: Annotated[str, StringConstraints(max_length=2000)] | None = Field(default=None, description="The AI's declarative rationale for selecting this node.")
     justification: Annotated[str, StringConstraints(max_length=2000)] | None = Field(default=None,
         description="Cryptographic/audit justification for this node's existence in the graph.")
