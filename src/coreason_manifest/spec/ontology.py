@@ -61,9 +61,6 @@ def _validate_payload_bounds(
     if current_depth > 10:
         raise ValueError("Payload exceeds maximum recursion depth of 10")
 
-    # ⚡ Bolt: Using `type(value) is ...` rather than `isinstance()` bypasses the function overhead
-    # and method resolution order checks for a ~25% speedup in high-frequency deep traversals.
-    # Safe here because payloads from Pydantic `model_dump(mode="json")` only contain exact primitives.
     typ = type(value)
     if typ is dict:
         nxt_depth = current_depth + 1
@@ -90,7 +87,7 @@ def _canonicalize_payload(obj: Any) -> Any:
     AGENT INSTRUCTION: Mathematically strips all `None` values recursively from a payload before hashing.
     Extracted to module level to prevent function-object recreation overhead during high-frequency DAG node serialization.
     """
-    # ⚡ Bolt: Using `type(obj) is ...` rather than `isinstance()` for performance in this hot recursive loop.
+
     typ = type(obj)
     if typ is dict:
         return {k: _canonicalize_payload(v) for k, v in obj.items() if v is not None}
@@ -297,12 +294,9 @@ type SpanStatusCodeProfile = Literal["unset", "ok", "error"]
 _BYTES_MAPPING: dict[str, int] = {"float32": 4, "float64": 8, "int8": 1, "uint8": 1, "int32": 4, "int64": 8}
 
 
-# OPTIMIZATION: Moved trusted_environments out of the hot path validation function
-# and converted to a frozenset to prevent O(N) allocation on every execution.
 _TRUSTED_ENVIRONMENTS: frozenset[str] = frozenset({"aws", "gcp", "azure", "localhost", "bare-metal"})
 
-# OPTIMIZATION: Moved illegal_keys out of the hot path validation function
-# and converted to a frozenset to prevent O(N) allocation on every validation loop.
+
 _ILLEGAL_KEYS: frozenset[str] = frozenset(
     {
         "memory",
@@ -479,7 +473,7 @@ class CoreasonBaseState(BaseModel):
             return object.__getattribute__(self, "_cached_canonical_dump")  # type: ignore[no-any-return]
         except AttributeError:
             raw_dict = self.model_dump(mode="json", exclude_none=True, by_alias=True)
-            # Topological mapping: Enforces RFC 8785 strict canonical key sorting.
+
             canonical_dump = canonicaljson.encode_canonical_json(raw_dict)
             object.__setattr__(self, "_cached_canonical_dump", canonical_dump)
             return canonical_dump
@@ -489,13 +483,14 @@ T = typing.TypeVar("T")
 
 
 class TraceContextState(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Implements Distributed Causality using Vector Clocks and rho-calculus.
+    r"""
+    AGENT INSTRUCTION: Implements Distributed Causality using Vector Clocks and rho-calculus. It forms the foundational causality boundary.
 
-    CAUSAL AFFORDANCE: Acts as a Causal Graph Identifier, ensuring deterministic traceability
-    and state boundary enforcement without relying on hidden states.
+        CAUSAL AFFORDANCE: Acts as a Causal Graph Identifier, ensuring deterministic traceability and state boundary enforcement without relying on hidden states.
 
-    EPISTEMIC BOUNDS: Relies on ULID or UUIDv7 string identifiers for strict topological ordering.
+        EPISTEMIC BOUNDS: Relies on ULID or UUIDv7 string identifiers for strict topological ordering, bounded by 26-36 chars. Causal clocks enforce ge=0 budget decay boundaries.
+
+        MCP ROUTING TRIGGERS: Distributed Causality, Vector Clocks, Trace Context, Topological Ordering, Causal Graph
     """
 
     trace_id: Annotated[
@@ -542,13 +537,14 @@ class TraceContextState(CoreasonBaseState):
 
 
 class StateVectorProfile(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Implements Labeled Transition System (LTS) Determinism.
+    r"""
+    AGENT INSTRUCTION: Implements Labeled Transition System (LTS) Determinism to track continuous agent Markov states.
 
-    CAUSAL AFFORDANCE: Forces all hidden LLM contexts into an explicitly typed data structure,
-    making the agent a Markov Process with Full Observability.
+        CAUSAL AFFORDANCE: Forces all hidden LLM contexts into an explicitly typed data structure, making the agent a Markov Process with Full Observability.
 
-    EPISTEMIC BOUNDS: Bounded dictionary mapping of explicit schemas or primitives for both read and write state.
+        EPISTEMIC BOUNDS: Memory boundaries are strictly mapped to maximum recursive depth topologies to prevent hardware CPU/VRAM exhaustion via the _validate_payload_bounds orchestrator.
+
+        MCP ROUTING TRIGGERS: Labeled Transition System, Markov Process, Full Observability, State Vector, Memory Boundary
     """
 
     read_only_context: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
@@ -574,12 +570,14 @@ class StateVectorProfile(CoreasonBaseState):
 
 
 class ExecutionEnvelopeState[T](CoreasonBaseState):
-    """
+    r"""
     AGENT INSTRUCTION: Implements the mathematical Reader/Writer/State (RWS) Monad, completely enveloping execution inside pure functions.
 
-    CAUSAL AFFORDANCE: The envelope functor that maps a pure value into a computational context.
+        CAUSAL AFFORDANCE: Acts as the envelope functor that strictly maps a pure value into a bounded computational context.
 
-    EPISTEMIC BOUNDS: Strictly prevents external keys. Must consist solely of trace_context, state_vector, and payload.
+        EPISTEMIC BOUNDS: The execution configuration absolutely forbids external keys via extra=forbid and isolates strictly to trace, state, and payload variables.
+
+        MCP ROUTING TRIGGERS: Reader Writer State Monad, Pure Functions, Envelope Functor, Execution Context, Algebraic Structures
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -847,22 +845,22 @@ class KinematicDeltaManifest(CoreasonBaseState):
     )
     deltas: list[
         tuple[
-            Annotated[str, StringConstraints(max_length=128)],  # node_id
-            float,
-            float,
-            float,  # x, y, z
+            Annotated[str, StringConstraints(max_length=128)],
             float,
             float,
             float,
-            float,  # qx, qy, qz, qw
-            float,
-            float,  # scale, opacity
             float,
             float,
-            float,  # v_x, v_y, v_z (linear velocity)
             float,
             float,
-            float,  # w_x, w_y, w_z (angular velocity)
+            float,
+            float,
+            float,
+            float,
+            float,
+            float,
+            float,
+            float,
         ]
     ] = Field(
         description="The strictly typed contiguous memory block of 16-element kinematic tuples, embedding first-order temporal derivatives for continuous Hermite Spline interpolation."
@@ -1090,9 +1088,6 @@ class ScalePolicy(CoreasonBaseState):
         if self.domain_min is not None and self.domain_max is not None and self.domain_min > self.domain_max:
             raise ValueError("domain_min cannot be greater than domain_max.")
 
-        # Test zero or subnormal scales for division by zero risk or floating infinity failures.
-        # Specifically, for ScalePolicy, if we map zero values, etc.
-        # No specific bounds enforced by the requirements on scale other than domains shouldn't cross or zero magnitude ranges?
         if (
             self.domain_min is not None
             and self.domain_max is not None
@@ -1101,7 +1096,6 @@ class ScalePolicy(CoreasonBaseState):
         ):
             raise ValueError("Scale domain length cannot be zero for continuous mappings.")
 
-        # for log type, domain bounds must be strictly positive
         if self.type == "log":
             if self.domain_min is not None and self.domain_min <= 0:
                 raise ValueError("domain_min must be strictly positive for logarithmic scales.")
@@ -1604,42 +1598,77 @@ class CognitiveStateProfile(CoreasonBaseState):
 
 
 class ContextualizedSourceEntity(CoreasonBaseState):
-    """
-    Replaces raw baseline string inputs for inference payloads.
+    r"""
+    AGENT INSTRUCTION: Projects a semantically unified spatial token footprint representing the strictly bounded source projection.
+
+        CAUSAL AFFORDANCE: Authorizes downstream parsing tasks to isolate exact dimensional target strings while strictly maintaining chronological relationships via the topological envelope.
+
+        EPISTEMIC BOUNDS: Limits structural explosion by constraining target sequences and contextual items mathematically to max_length=100000. Contains a strict topological exemption preventing array sorting.
+
+        MCP ROUTING TRIGGERS: Semantic Envelope, Contextual Projection, Spatial Token Footprint, Source Entity, Topos Sorting
     """
 
-    target_string: Annotated[str, StringConstraints(max_length=100000)] = Field(description="The explicit item to map.")
+    target_string: Annotated[str, StringConstraints(max_length=100000)] = Field(
+        description="The strictly bounded, un-redacted 1D string projection of the semantic artifact undergoing evaluation."
+    )
     contextual_envelope: list[Annotated[str, StringConstraints(max_length=100000)]] = Field(
         max_length=10000,
-        description="Surrounding semantic neighbors. AGENT INSTRUCTION: Topological Exemption applied. Do NOT sort this array, as its chronological/spatial sequence is its mathematical state.",
+        description="The strictly bounded array of adjacent token clusters forming the semantic proximity matrix. AGENT INSTRUCTION: Topological Exemption applied. Do NOT sort this array, as its chronological/spatial sequence is its mathematical state.",
     )
-    source_system_provenance_flag: bool = Field(description="Indicates if the exact upstream origin system is known.")
+    source_system_provenance_flag: bool = Field(
+        description="The mathematical boolean boundary indicating strict physical provenance to an external host."
+    )
 
 
 class EpistemicUpsamplingTask(CoreasonBaseState):
-    """
-    Authorizes a connectionist agent to execute an abductive leap, reversing lossy compression by utilizing a contextual envelope to map a generalized artifact to a highly specific ontological node.
+    r"""
+    AGENT INSTRUCTION: Authorizes a connectionist agent to execute an abductive leap, reversing lossy compression via context.
+
+        CAUSAL AFFORDANCE: Unlocks generative projection mapping by allowing an agent to expand a generalized node into highly specific ontology dimensions based on contextual vectors.
+
+        EPISTEMIC BOUNDS: The confidence of the upsampling projection is clamped tightly between 0.0 and 1.0. Justification arrays enforce maximum structural lengths and explicitly declare Topological Exemptions against array sort.
+
+        MCP ROUTING TRIGGERS: Abductive Leap, Epistemic Upsampling, Lossy Compression Reversal, Vector Expansion, Connectionist Grounding
     """
 
-    source_entity: ContextualizedSourceEntity
-    target_ontological_granularity: Annotated[str, StringConstraints(max_length=255)] = Field()
-    upsampling_confidence_threshold: float = Field(ge=0.0, le=1.0)
+    source_entity: ContextualizedSourceEntity = Field(
+        description="The specific source contextualized entity subject to topological upsampling."
+    )
+    target_ontological_granularity: Annotated[str, StringConstraints(max_length=255)] = Field(
+        description="The explicitly declared target node classification or structural grain."
+    )
+    upsampling_confidence_threshold: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="The minimum acceptable certainty probability required to project the upsampled node.",
+    )
     justification_vectors: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
         min_length=1,
         max_length=1000,
-        description="AGENT INSTRUCTION: Topological Exemption applied. Do NOT sort this array, as the chronological sequence of extraction acts as mathematical state.",
+        description="The strictly ordered matrix of reasoning paths mathematically justifying the topological expansion. AGENT INSTRUCTION: Topological Exemption applied. Do NOT sort this array, as the chronological sequence of extraction acts as mathematical state.",
     )
 
 
 class DataFidelityReceipt(CoreasonBaseState):
-    """
-    Store pre-inference calculations.
+    r"""
+    AGENT INSTRUCTION: Mathematically computes and stores the pre-inference structural density calculations of the context.
+
+        CAUSAL AFFORDANCE: Exposes the exact physical fidelity of a data block, permitting the orchestrator to dynamically drop packets that fall below algorithmic probability thresholds.
+
+        EPISTEMIC BOUNDS: Contextual completeness is geometrically restricted to a continuous float bounding the probability space [0.0, 1.0]. Surrounding token limits are clamped at absolute integers >= 0.
+
+        MCP ROUTING TRIGGERS: Data Fidelity, Density Calculation, Probability Space, Pre-Inference Validation, Completeness Score
     """
 
     contextual_completeness_score: float = Field(
-        ge=0.0, le=1.0, description="Represents the density of the contextual envelope."
+        ge=0.0,
+        le=1.0,
+        description="The continuous normalized float measuring the mathematical density of the contextual semantic envelope.",
     )
-    surrounding_token_density: int = Field(ge=0, description="Count of valid tokens in the contextual_envelope.")
+    surrounding_token_density: int = Field(
+        ge=0,
+        description="The absolute integer boundary tracking valid structural tokens mathematically bounding the contextual_envelope.",
+    )
 
 
 class CognitiveUncertaintyProfile(CoreasonBaseState):
@@ -6639,7 +6668,7 @@ class ActionSpaceManifest(CoreasonBaseState):
 
     @model_validator(mode="after")
     def _enforce_structural_integrity(self) -> Self:
-        # Ghost Node Prevention
+
         if self.entry_point_id not in self.capabilities:
             raise ValueError(f"entry_point_id '{self.entry_point_id}' not found in capabilities.")
 
@@ -6652,7 +6681,6 @@ class ActionSpaceManifest(CoreasonBaseState):
                         f"Target node '{edge.target_node_id}' in edge from '{source_id}' not found in capabilities."
                     )
 
-        # Matrix Canonical Sorting
         def edge_sort_key(edge: AnyTransitionEdge) -> str:
             if edge.target_node_id is not None:
                 return edge.target_node_id
@@ -6696,7 +6724,6 @@ class ActionSpaceManifest(CoreasonBaseState):
                     if not isinstance(properties, dict):
                         continue
 
-                    # The strict list of forbidden keys in any domain payload
                     for key in properties:
                         if key in _ILLEGAL_PAYLOAD_KEYS:
                             raise ValueError(
@@ -7569,24 +7596,19 @@ class PredictionMarketState(CoreasonBaseState):
 
             keys = list(probs_dict.keys())
 
-            # Convert to numpy array, treating parsing failures as 0.0
             arr = np.array(
                 [float(probs_dict[k]) if str(probs_dict[k]).replace(".", "", 1).isdigit() else 0.0 for k in keys],
                 dtype=np.float64,
             )
 
-            # Clamp to probability space
             arr = np.clip(arr, 0.0, 1.0)
             total = np.sum(arr)
 
-            # Normalize
             if total > 0 and not np.isclose(total, 1.0, atol=1e-5):
                 arr = arr / total
             elif total == 0:
-                # Fallback to uniform distribution
                 arr = np.full_like(arr, 1.0 / len(arr))
 
-            # Reconstruct stringified dictionary
             values["current_market_probabilities"] = {k: str(v) for k, v in zip(keys, arr, strict=True)}
         return values
 
@@ -8578,7 +8600,7 @@ class System2RemediationIntent(CoreasonBaseState):
         return self
 
 
-class TamperFaultEvent(ValueError):  # noqa: N818
+class TamperFaultEvent(ValueError):
     """Raised when an execution trace has been tampered with or is topologically invalid."""
 
 
@@ -8966,33 +8988,49 @@ class UtilityJustificationGraphReceipt(CoreasonBaseState):
 
 
 class LiquidTypeContract(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Mathematically bounds a specific target property.
+    r"""
+    AGENT INSTRUCTION: Mathematically bounds a specific target property using strict Liquid Type (Refinement Type) declarations.
+
+        CAUSAL AFFORDANCE: Establishes a definitive algebraic constraint against an instantiated variable, forcing the formal verifier to evaluate conditions mathematically prior to downstream deployment.
+
+        EPISTEMIC BOUNDS: Bounding variables and mathematical predicates are rigidly clamped to a maximum string geometry of 2000 characters to prevent polynomial regex execution attacks.
+
+        MCP ROUTING TRIGGERS: Liquid Types, Refinement Types, Algebraic Constraint, Mathematical Predicate, Bounded Property
     """
 
     target_property: Annotated[str, StringConstraints(max_length=2000)] = Field(
-        description="The specific variable or schema key being bounded."
+        description="The specific localized node schema key undergoing rigorous mathematical bounding."
     )
     mathematical_predicate: Annotated[str, StringConstraints(max_length=2000)] = Field(
-        description="The formal algebraic constraint (e.g., x > 0 and x < 100)."
+        description="The formal algebraic representation vector utilized to define physical bounds (e.g., x > 0 and x < 100)."
     )
 
 
 class HoareLogicProofReceipt(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Replace unit tests with mathematical proofs of state bounds prior to capability deployment.
+    r"""
+    AGENT INSTRUCTION: Formalizes Hoare Logic to provide cryptographic proof of algorithmic preconditions and postconditions prior to capability execution.
+
+        CAUSAL AFFORDANCE: Instructs the orchestrator's verification engine to validate the formal proof geometry prior to allocating swarm budget to a generated tool or component.
+
+        EPISTEMIC BOUNDS: Strictly relies on arrays of LiquidTypeContracts, demanding at least one pre-bound and post-bound. Formal systems are strictly bounded by a Literal automaton constraint.
+
+        MCP ROUTING TRIGGERS: Hoare Logic, Automated Theorem Proving, Preconditions Postconditions, Formal Verification, Cryptographic Proof
     """
 
     capability_id: Annotated[str, StringConstraints(max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="The forged tool being verified."
+        description="The 128-char DID boundary physically binding this proof to the target executable matrix."
     )
-    preconditions: Annotated[list[LiquidTypeContract], Field(min_length=1)] = Field(description="The P bounds.")
-    postconditions: Annotated[list[LiquidTypeContract], Field(min_length=1)] = Field(description="The Q bounds.")
+    preconditions: Annotated[list[LiquidTypeContract], Field(min_length=1)] = Field(
+        description="The strictly bounded array of foundational LiquidTypeContracts representing the P state geometry."
+    )
+    postconditions: Annotated[list[LiquidTypeContract], Field(min_length=1)] = Field(
+        description="The strictly bounded array of subsequent LiquidTypeContracts representing the Q state geometry."
+    )
     proof_system: Literal["lean4", "coq", "z3", "tla_plus"] = Field(
-        description="The proof system used to mathematically prove bounds."
+        description="The strict mathematical automaton engine responsible for evaluating the structural boundary."
     )
     verified_theorem_hash: Annotated[str, StringConstraints(max_length=128, pattern="^[a-f0-9]{64}$")] = Field(
-        description="Cryptographic proof."
+        description="The absolute cryptographic SHA-256 hash mathematically proving formal state verification."
     )
 
     @model_validator(mode="after")
@@ -9007,62 +9045,94 @@ class HoareLogicProofReceipt(CoreasonBaseState):
 
 
 class AsymptoticComplexityReceipt(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Automatically infer Big-O asymptotic complexity via Monte Carlo fuzzing to populate Markov transition costs.
+    r"""
+    AGENT INSTRUCTION: Formalizes Big-O asymptotic complexity via Monte Carlo fuzzing to populate deterministic Markov transition costs.
+
+        CAUSAL AFFORDANCE: Dynamically allocates topological routing metrics, allowing the swarm to economically bound latency and VRAM before calling a tool.
+
+        EPISTEMIC BOUNDS: The asymptotic classification space is severely bounded via explicit Literals. Peak bytes and CPU constraints enforce hard integer clamping against memory exhaustion.
+
+        MCP ROUTING TRIGGERS: Asymptotic Complexity, Big-O Notation, Monte Carlo Fuzzing, Markov Transition Costs, Computational Budget
     """
 
     capability_id: Annotated[str, StringConstraints(max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="The forged tool being profiled."
+        description="The exact 128-char physical DID referencing the algorithmic payload evaluated."
     )
     time_complexity_class: Literal["O(1)", "O(log N)", "O(N)", "O(N log N)", "O(N^2)", "O(2^N)"] = Field(
-        description="The mathematically inferred compute curve."
+        description="The formal Big-O mathematical class mathematically bounding temporal execution limits."
     )
     space_complexity_class: Literal["O(1)", "O(log N)", "O(N)", "O(N^2)"] = Field(
-        description="The inferred memory allocation curve."
+        description="The formal Big-O mathematical class representing the asymptotic structural memory geometry."
     )
-    peak_vram_bytes: int = Field(ge=0, le=100000000000, description="Absolute thermodynamic memory ceiling detected.")
+    peak_vram_bytes: int = Field(
+        ge=0,
+        le=100000000000,
+        description="The strict absolute integer measurement bounding thermodynamic memory allocations.",
+    )
     simulated_cpu_cycles: int = Field(
-        ge=0, le=100000000000, description="Empirical cycle burn used to establish compute_weight_magnitude."
+        ge=0,
+        le=100000000000,
+        description="The empirical cyclic integer threshold capturing the magnitude of the compute vector.",
     )
 
 
 class ASTGradientReceipt(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Replace unstructured string tracebacks with deterministic, high-dimensional loss vectors for automated code repair.
+    r"""
+    AGENT INSTRUCTION: Formalizes syntactic failure geometries, replacing unstructured tracebacks with deterministic, high-dimensional loss vectors.
+
+        CAUSAL AFFORDANCE: Executes deterministic code repair strategies by supplying the generative optimization mechanism with precise structural node pointers indicating syntax fractures.
+
+        EPISTEMIC BOUNDS: Bounded structurally via a 128-char compilation ID and precise AST string pointers clamped to 2000 chars. Vector magnitudes define the specific error distance.
+
+        MCP ROUTING TRIGGERS: AST Pointer, Generative Repair, Syntax Falsification, High-Dimensional Loss, Structural Gradient
     """
 
     compilation_attempt_id: Annotated[str, StringConstraints(max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="Cryptographic anchor to the failed compile execution."
+        description="The deterministic cryptographic coordinate linking the failure geometry to the execution timeline."
     )
     ast_node_pointer: Annotated[str, StringConstraints(max_length=2000)] = Field(
-        description="The exact RFC 6902 JSON Pointer or AST path where the syntax fractured."
+        description="The absolute structural RFC 6902 JSON Pointer or AST coordinate marking the physical syntax fracture."
     )
     expected_type_geometry: Annotated[str, StringConstraints(max_length=2000)] = Field(
-        description="The formal covariant requirement."
+        description="The explicit structural definition of the mathematical covariant bound requirement."
     )
     actual_type_geometry: Annotated[str, StringConstraints(max_length=2000)] = Field(
-        description="The invalid contravariant state provided."
+        description="The physical contravariant type string encountered at the structural fracture point."
     )
     structural_loss_vector: VectorEmbeddingState | None = Field(
         default=None,
-        description="The dense vector embedding of the semantic error for vector-math remediation.",
+        description="The mathematically defined multi-dimensional vector encoding the syntactic divergence.",
     )
 
 
 class TeleologicalIsometryReceipt(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Mathematically prove the deployed code actually satisfies the original epistemic deficit vector.
+    r"""
+    AGENT INSTRUCTION: Formalizes Teleological Isometry by measuring the exact mathematical alignment between a stated generative deficit and the empirical behavior of a forged tool.
+
+        CAUSAL AFFORDANCE: Approves or severs the final node promotion. If the cosine similarity bounds fall below the threshold, the orchestrator triggers an immediate rollback logic.
+
+        EPISTEMIC BOUNDS: Evaluated via deterministic cosine similarity constraints measuring between -1.0 and 1.0. The validator explicitly modifies the Boolean passing state if the float threshold isn't met.
+
+        MCP ROUTING TRIGGERS: Teleological Isometry, Tool Forging Validation, Cosine Similarity, Generative Deficit, Empirical Behavior
     """
 
     source_intent_id: Annotated[str, StringConstraints(max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="Pointer to the originating SemanticDiscoveryIntent."
+        description="The structural 128-char DID boundary pointing to the foundational semantic deficit vector."
     )
-    target_intent_vector: VectorEmbeddingState = Field(description="The original deficit space.")
+    target_intent_vector: VectorEmbeddingState = Field(
+        description="The dense mathematical representation of the initial multi-dimensional epistemic deficit."
+    )
     forged_output_vector: VectorEmbeddingState = Field(
-        description="The empirical behavioral output space of the forged tool."
+        description="The mathematical behavioral state measured after evaluating the executed node structure."
     )
-    measured_cosine_similarity: float = Field(ge=-1.0, le=1.0, description="The measured cosine similarity.")
-    alignment_threshold_passed: bool = Field(description="Whether the threshold was passed.")
+    measured_cosine_similarity: float = Field(
+        ge=-1.0,
+        le=1.0,
+        description="The deterministic cosine similarity scalar bounded within the normalized [-1.0, 1.0] mathematical range.",
+    )
+    alignment_threshold_passed: bool = Field(
+        description="The absolute Boolean threshold indicating structural compliance."
+    )
 
     @model_validator(mode="after")
     def enforce_teleological_alignment(self) -> Self:
@@ -9556,14 +9626,11 @@ class AgentNodeProfile(CoreasonBaseState):
         AGENT INSTRUCTION: The Formal Verification Matrix.
         Enforces Thermodynamic, Sovereign Execution, and Network Topology paradox traps.
         """
-        # 1. Thermodynamic Paradox
+
         if self.hardware.compute_tier == ComputeTier.KINETIC and self.hardware.min_vram_gb > 24.0:
             raise ValueError(
                 "Thermodynamic Constraint Violated: KINETIC tier cannot exceed 24.0 GB VRAM. Escalate to ORACLE tier."
             )
-
-        # 2. Sovereign Execution Paradox
-        # Local and bare-metal environments are mathematically treated as sovereign physical enclaves.
 
         if self.security.epistemic_security == EpistemicSecurity.CONFIDENTIAL and not set(
             self.hardware.provider_whitelist
@@ -9574,7 +9641,6 @@ class AgentNodeProfile(CoreasonBaseState):
                 f"untrusted peer-to-peer providers. Invalid targets found: {invalid_targets}"
             )
 
-        # 3. Network Topology Paradox
         if self.security.egress_obfuscation and not self.security.network_isolation:
             raise ValueError(
                 "Topology Routing Violated: Egress Mixnet obfuscation mathematically requires strict Network Isolation to be True."
@@ -10527,7 +10593,6 @@ class NeurosymbolicVerificationTopologyManifest(CoreasonBaseState):
         proposer = self.nodes[self.proposer_node_id]
         verifier = self.nodes[self.verifier_node_id]
 
-        # Check instance or type logic
         if getattr(proposer, "type", None) != "agent":
             raise ValueError(
                 "Topological Contradiction: The Proposer must be a Connectionist Agent, and the Verifier must be a Deterministic System."
@@ -10546,7 +10611,7 @@ class NeurosymbolicVerificationTopologyManifest(CoreasonBaseState):
             allow_cycles=True,
             edges=edges,
             max_depth=self.max_revision_loops,
-            max_fan_out=10,  # Add a default fan out if needed, using generic value or copy
+            max_fan_out=10,
         )
 
 
@@ -11981,7 +12046,6 @@ class EpistemicLedgerState(CoreasonBaseState):
     def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "history", sorted(self.history, key=operator.attrgetter("timestamp")))
 
-        # Validate epistemic consistency: A child's logical state cannot precede its parent's state.
         event_times = {event.event_id: event.timestamp for event in self.history}
         for event in self.history:
             if hasattr(event, "causal_attributions") and event.causal_attributions:
@@ -12109,14 +12173,28 @@ TeleologicalIsometryReceipt.model_rebuild()
 
 
 class NeurosymbolicInferenceRequest(CoreasonBaseState):
-    """
-    Core inference payload envelope orchestrating the pre-inference gate.
+    r"""
+    AGENT INSTRUCTION: Orchestrates the core execution payload boundary, acting as the structural pre-inference gate for neurosymbolic probability.
+
+        CAUSAL AFFORDANCE: Empowers the routing engine to sever execution prior to LLM generation if the structural certainty SLA evaluates beyond acceptable mathematical variance boundaries.
+
+        EPISTEMIC BOUNDS: Mandates exact nesting of deterministic fidelity and uncertainty profiles. The pre-flight validator mathematically terminates evaluation if epistemic degradation breaches the SLA limit.
+
+        MCP ROUTING TRIGGERS: Pre-Inference Gate, Neurosymbolic Request, Probability Envelope, SLA Enforcement, Inference Termination
     """
 
-    source_entity: ContextualizedSourceEntity = Field(description="The source data to process.")
-    fidelity_receipt: DataFidelityReceipt = Field(description="Pre-inference completeness calculations.")
-    uncertainty_profile: CognitiveUncertaintyProfile = Field(description="The uncertainty bounds of the payload.")
-    sla: EpistemicCompressionSLA = Field(description="The execution constraints and boundaries.")
+    source_entity: ContextualizedSourceEntity = Field(
+        description="The structurally isolated 1D boundary representing the semantic payload injected into the context window."
+    )
+    fidelity_receipt: DataFidelityReceipt = Field(
+        description="The immutable scalar matrix capturing pre-inference mathematical contextual completeness."
+    )
+    uncertainty_profile: CognitiveUncertaintyProfile = Field(
+        description="The rigid matrix evaluating probabilistic uncertainty vectors bounding the initial request state."
+    )
+    sla: EpistemicCompressionSLA = Field(
+        description="The mathematical structural boundaries defining acceptable epistemic loss perimeters."
+    )
 
     @model_validator(mode="after")
     def validate_epistemic_gap(self) -> Self:
