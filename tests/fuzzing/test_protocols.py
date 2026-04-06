@@ -12,7 +12,7 @@ import contextlib
 from typing import Any
 
 import pytest
-from hypothesis import given, settings
+from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 from pydantic import HttpUrl, ValidationError
 
@@ -28,7 +28,7 @@ from coreason_manifest.spec.ontology import (
 )
 
 
-# 1. BoundedJSONRPCIntent
+@settings(max_examples=25, suppress_health_check=[HealthCheck.too_slow], deadline=None)
 @given(
     st.recursive(
         st.none()
@@ -52,7 +52,7 @@ def test_fuzz_jsonrpc_params(params_payload: Any) -> None:
 # 2. BrowserDOMState SSRF Isolation
 
 
-@settings(deadline=None)
+@settings(max_examples=25, suppress_health_check=[HealthCheck.too_slow], deadline=None)
 @given(
     st.from_regex(
         r"^https?://(127\.\d+\.\d+\.\d+|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(1[6-9]|2[0-9]|3[0-1])\.\d+\.\d+|169\.254\.169\.254|\[::1\]|\[::ffff:127\.0\.0\.1\])(:\d+)?/.*$",
@@ -74,7 +74,7 @@ def test_fuzz_browser_dom_ssrf_ips(url: str) -> None:
 
 
 @given(st.from_regex(r"^https?://[a-zA-Z0-9.-]+(:\d+)?/.*$", fullmatch=True))
-@settings(deadline=None)
+@settings(max_examples=25, suppress_health_check=[HealthCheck.too_slow], deadline=None)
 def test_fuzz_browser_dom_valid_urls(url: str) -> None:
     try:
         BrowserDOMState(

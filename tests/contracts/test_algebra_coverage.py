@@ -11,7 +11,7 @@
 import base64
 import contextlib
 import struct
-from typing import Any
+from typing import Any, cast
 from unittest.mock import Mock, patch
 
 import pytest
@@ -349,7 +349,9 @@ def test_apply_state_differential_exceptions() -> None:
             diff_id="d1", author_node_id="n1", lamport_timestamp=1, vector_clock={"n1": 1}, patches=patches
         )
 
-    assert apply_state_differential({}, manifest_base([StateMutationIntent(op="add", path="", value=1)])) == 1
+    assert (
+        cast("Any", apply_state_differential({}, manifest_base([StateMutationIntent(op="add", path="", value=1)]))) == 1
+    )
 
     with pytest.raises(ValueError, match="Patch operation failed"):
         apply_state_differential({"a": "b"}, manifest_base([StateMutationIntent(op="add", path="/a/b", value=1)]))

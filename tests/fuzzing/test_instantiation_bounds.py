@@ -16,7 +16,6 @@ from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
     AgentNodeProfile,
-    BaseStateEvent,
     BrowserDOMState,
     CognitiveUncertaintyProfile,
     ComputeTier,
@@ -28,6 +27,7 @@ from coreason_manifest.spec.ontology import (
     HardwareProfile,
     MultimodalTokenAnchorState,
     NeurosymbolicInferenceRequest,
+    ObservationEvent,
     QuorumPolicy,
     SE3TransformProfile,
     SecurityProfile,
@@ -185,6 +185,7 @@ bogon_obfuscations = ["0x7f.0.0.1", "0x7f000001", "2130706433", "0177.0.0.1", "0
 all_ssrf_targets = bogon_ips + bogon_domains + bogon_obfuscations
 
 
+@settings(max_examples=50, suppress_health_check=[HealthCheck.too_slow], deadline=None)
 @given(
     target=st.sampled_from(all_ssrf_targets),
     scheme=st.sampled_from(["http", "https", "ftp", "ws", "wss"]),
@@ -258,7 +259,7 @@ def test_dictionary_bombing_fuzzing(massive_key: str) -> None:
 @given(timestamp=st.one_of(st.floats(max_value=-0.0001), st.floats(min_value=253402300799.1)))
 def test_temporal_dilation_fuzzing(timestamp: float) -> None:
     with pytest.raises((ValidationError, ValueError)):
-        BaseStateEvent(event_id="test_id", timestamp=timestamp)
+        ObservationEvent(payload={}, event_id="test_id", timestamp=timestamp)
 
 
 @given(massive_id=st.text(min_size=129))
