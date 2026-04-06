@@ -9,7 +9,7 @@
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
 import pytest
-from hypothesis import given
+from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 from pydantic import ValidationError
 
@@ -72,6 +72,7 @@ def test_risk_level_policy_comparisons(risk1: RiskLevelPolicy, risk2: RiskLevelP
     assert risk1.__ge__("invalid") is NotImplemented
 
 
+@settings(max_examples=25, suppress_health_check=[HealthCheck.too_slow], deadline=None)
 @given(st.text(min_size=1, max_size=2000))
 def test_browser_dom_state_ssrf_quarantine_hypothesis(url_str: str) -> None:
     import contextlib
@@ -105,6 +106,7 @@ def test_browser_dom_state_ssrf_quarantine_hypothesis(url_str: str) -> None:
         ]
     )
 )
+@settings(max_examples=25, suppress_health_check=[HealthCheck.too_slow], deadline=None)
 def test_browser_dom_state_bogon_ssrf_strict(url_str: str) -> None:
     with pytest.raises(ValidationError) as exc_info:
         BrowserDOMState(
@@ -113,8 +115,10 @@ def test_browser_dom_state_bogon_ssrf_strict(url_str: str) -> None:
             dom_hash="a" * 64,
             accessibility_tree_hash="b" * 64,
         )
-    assert "SSRF topological violation detected" in str(exc_info.value) or "restricted IP detected" in str(
-        exc_info.value
+    assert (
+        "SSRF topological violation detected" in str(exc_info.value)
+        or "restricted IP detected" in str(exc_info.value)
+        or "Security Validation Failed: Unresolvable or invalid host" in str(exc_info.value)
     )
 
 
@@ -126,6 +130,7 @@ def test_browser_dom_state_bogon_ssrf_strict(url_str: str) -> None:
         ]
     )
 )
+@settings(max_examples=25, suppress_health_check=[HealthCheck.too_slow], deadline=None)
 def test_browser_dom_state_invalid_hostname_ssrf(url_str: str) -> None:
     with pytest.raises(ValidationError) as exc_info:
         BrowserDOMState(

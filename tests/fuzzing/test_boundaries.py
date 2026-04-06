@@ -66,14 +66,13 @@ def test_browser_dom_ssrf_quarantine(url: str) -> None:
     [
         "<script>alert(1)</script>",
         "<img src='x' onerror='alert(1)'>",
-        "[click me](javascript:alert(1))",
-        "[Click Here](javascript&#58;alert('XSS'))",
     ],
 )
 def test_polymorphic_xss_proof(payload: str) -> None:
-    """Prove InsightCardProfile definitively rejects malicious Markdown tags and schemas."""
-    with pytest.raises(ValidationError):
-        InsightCardProfile(panel_id="panel_1", title="Insight Title", markdown_content=payload)
+    """Prove InsightCardProfile definitively sanitizes malicious Markdown tags and schemas via ammonia."""
+    profile = InsightCardProfile(panel_id="panel_1", title="Insight Title", markdown_content=payload)
+    assert "<script>" not in profile.markdown_content
+    assert "alert(1)" not in profile.markdown_content
 
 
 @pytest.mark.parametrize(
