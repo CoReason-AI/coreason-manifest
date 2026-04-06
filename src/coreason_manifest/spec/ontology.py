@@ -6019,7 +6019,7 @@ class InsightCardProfile(CoreasonBaseState):
         # Decode HTML entities and strip out all whitespace/control characters to prevent filter bypass
         v_decoded = html.unescape(v_norm)
         v_clean = re.sub(r"[\s\x00-\x1f\x7f]+", "", v_decoded)
-        if re.search("\\]\\((javascript|vbscript|data):", v_clean, flags=re.IGNORECASE):
+        if re.search(r"\][\(:]\s*(javascript|vbscript|data):", v_clean, flags=re.IGNORECASE):
             raise ValueError("Malicious executable link scheme detected in markdown content")
         return v
 
