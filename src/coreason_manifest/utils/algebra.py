@@ -19,7 +19,7 @@ import typing
 from collections.abc import Sequence
 from typing import Any, Literal, cast
 
-import jsonpatch
+import jsonpatch  # type: ignore[import-untyped]
 import numpy as np
 from pydantic import BaseModel, ValidationError
 from pydantic.json_schema import models_json_schema
@@ -352,6 +352,6 @@ def apply_state_differential(
 ) -> dict[str, Any]:
     patch_list = [patch.model_dump(exclude_none=True, by_alias=True) for patch in differential.patches]
     try:
-        return jsonpatch.apply_patch(current_state, patch_list)
+        return cast("dict[str, Any]", jsonpatch.apply_patch(current_state, patch_list))
     except (jsonpatch.JsonPatchException, jsonpatch.JsonPointerException, TypeError) as e:
         raise ValueError(f"Patch operation failed: {e}") from e

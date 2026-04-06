@@ -23,7 +23,7 @@ from enum import StrEnum
 from typing import Annotated, Any, Literal, Self
 
 import canonicaljson
-import networkx as nx
+import networkx as nx  # type: ignore[import-untyped]
 import nh3
 import numpy as np
 from pydantic import AnyUrl, BaseModel, ConfigDict, Field, HttpUrl, StringConstraints, field_validator, model_validator
