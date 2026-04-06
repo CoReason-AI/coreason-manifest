@@ -16,7 +16,6 @@ from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
     AgentNodeProfile,
-    ObservationEvent,
     BrowserDOMState,
     CognitiveUncertaintyProfile,
     ComputeTier,
@@ -28,6 +27,7 @@ from coreason_manifest.spec.ontology import (
     HardwareProfile,
     MultimodalTokenAnchorState,
     NeurosymbolicInferenceRequest,
+    ObservationEvent,
     QuorumPolicy,
     SE3TransformProfile,
     SecurityProfile,
