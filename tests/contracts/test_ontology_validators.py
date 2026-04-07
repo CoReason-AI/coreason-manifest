@@ -456,14 +456,14 @@ def test_defeasible_cascade_event_sorting() -> None:
         cascade_id="c1",
         root_falsified_event_id="e1",
         propagated_decay_factor=0.5,
-        quarantined_event_ids=["z", "a", "x"],
+        quarantined_event_cids=["z", "a", "x"],
     )
-    assert event.quarantined_event_ids == ["a", "x", "z"]
+    assert event.quarantined_event_cids == ["a", "x", "z"]
 
 
 def test_rollback_intent_sorting() -> None:
-    intent = RollbackIntent(request_id="r1", target_event_id="e1", invalidated_node_ids=["node_c", "node_a", "node_b"])
-    assert intent.invalidated_node_ids == ["node_a", "node_b", "node_c"]
+    intent = RollbackIntent(request_id="r1", target_event_id="e1", invalidated_node_cids=["node_c", "node_a", "node_b"])
+    assert intent.invalidated_node_cids == ["node_a", "node_b", "node_c"]
 
 
 def test_multimodal_token_anchor_state_sorting() -> None:
@@ -604,10 +604,16 @@ def test_action_space_manifest_enforce_canonical_sort() -> None:
         transition_matrix={
             "tool_b": [
                 TransitionEdgeProfile(
-                    edge_type="acyclic", target_node_id="tool_b", probability_weight=0.5, compute_weight_magnitude=1
+                    topology_class="acyclic",
+                    target_node_id="tool_b",
+                    probability_weight=0.5,
+                    compute_weight_magnitude=1,
                 ),
                 TransitionEdgeProfile(
-                    edge_type="acyclic", target_node_id="tool_a", probability_weight=0.5, compute_weight_magnitude=1
+                    topology_class="acyclic",
+                    target_node_id="tool_a",
+                    probability_weight=0.5,
+                    compute_weight_magnitude=1,
                 ),
             ],
             "tool_a": [],

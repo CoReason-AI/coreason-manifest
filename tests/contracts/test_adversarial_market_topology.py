@@ -62,8 +62,8 @@ def test_adversarial_market_compile_fuzzing(topology_data: dict[str, Any]) -> No
     """
     manifest = AdversarialMarketTopologyManifest(
         adjudicator_id=topology_data["adjudicator_id"],
-        blue_team_ids=topology_data["blue_team"],
-        red_team_ids=topology_data["red_team"],
+        blue_team_cids=topology_data["blue_team"],
+        red_team_cids=topology_data["red_team"],
         market_rules=topology_data["market_rules"],
     )
 

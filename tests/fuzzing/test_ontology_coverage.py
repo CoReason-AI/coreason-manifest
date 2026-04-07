@@ -191,9 +191,9 @@ def test_smpc_topology_manifest_sorting(participant_ids: list[str]) -> None:
         nodes={},
         smpc_protocol="garbled_circuits",
         joint_function_uri="https://example.com/circuit",
-        participant_node_ids=dids,
+        participant_node_cids=dids,
     )
-    assert manifest.participant_node_ids == sorted(dids)
+    assert manifest.participant_node_cids == sorted(dids)
 
 
 @given(st.sampled_from([("did:node:gen1", "did:node:gen1"), ("did:node:eval1", "did:node:gen1")]))

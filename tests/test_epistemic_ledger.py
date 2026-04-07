@@ -30,7 +30,7 @@ def test_sybil_resistance() -> None:
 
 
 def test_defeasible_quarantine() -> None:
-    # Write a Pytest proving that an EpistemicLedgerState crashes if a key in defeasible_claims is also listed in the quarantined_event_ids of an active cascade.
+    # Write a Pytest proving that an EpistemicLedgerState crashes if a key in defeasible_claims is also listed in the quarantined_event_cids of an active cascade.
 
     with pytest.raises(
         ValueError, match=r"Epistemic Contagion Detected: Quarantined node found in active defeasible claims\."
@@ -54,7 +54,7 @@ def test_defeasible_quarantine() -> None:
                     cascade_id="cascade1",
                     root_falsified_event_id="root_event",
                     propagated_decay_factor=0.5,
-                    quarantined_event_ids=["claim1"],
+                    quarantined_event_cids=["claim1"],
                 )
             ],
         )

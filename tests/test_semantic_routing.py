@@ -24,7 +24,7 @@ from coreason_manifest.spec.ontology import (
 def test_transition_edge_xor_validation() -> None:
     # Test valid target_node_id only
     TransitionEdgeProfile(
-        edge_type="acyclic", target_node_id="tool_A", probability_weight=1.0, compute_weight_magnitude=5
+        topology_class="acyclic", target_node_id="tool_A", probability_weight=1.0, compute_weight_magnitude=5
     )
 
     # Test valid target_intent only
@@ -33,12 +33,14 @@ def test_transition_edge_xor_validation() -> None:
         min_isometry_score=0.9,
         query_vector={"vector_base64": "dummy", "dimensionality": 128, "model_name": "test-model"},  # type: ignore[arg-type]
     )
-    TransitionEdgeProfile(edge_type="acyclic", target_intent=intent, probability_weight=1.0, compute_weight_magnitude=5)
+    TransitionEdgeProfile(
+        topology_class="acyclic", target_intent=intent, probability_weight=1.0, compute_weight_magnitude=5
+    )
 
     # Test invalid both
     with pytest.raises(ValidationError, match="Exactly one of target_node_id or target_intent must be populated"):
         TransitionEdgeProfile(
-            edge_type="acyclic",
+            topology_class="acyclic",
             target_node_id="tool_A",
             target_intent=intent,
             probability_weight=1.0,
@@ -47,7 +49,7 @@ def test_transition_edge_xor_validation() -> None:
 
     # Test invalid neither
     with pytest.raises(ValidationError, match="Exactly one of target_node_id or target_intent must be populated"):
-        TransitionEdgeProfile(edge_type="acyclic", probability_weight=1.0, compute_weight_magnitude=5)
+        TransitionEdgeProfile(topology_class="acyclic", probability_weight=1.0, compute_weight_magnitude=5)
 
 
 def test_dynamic_ghost_node_and_canonical_sorting() -> None:
@@ -74,10 +76,10 @@ def test_dynamic_ghost_node_and_canonical_sorting() -> None:
     )
 
     edge1 = TransitionEdgeProfile(
-        edge_type="acyclic", target_intent=intent2, probability_weight=1.0, compute_weight_magnitude=5
+        topology_class="acyclic", target_intent=intent2, probability_weight=1.0, compute_weight_magnitude=5
     )
     edge2 = TransitionEdgeProfile(
-        edge_type="acyclic", target_intent=intent1, probability_weight=1.0, compute_weight_magnitude=5
+        topology_class="acyclic", target_intent=intent1, probability_weight=1.0, compute_weight_magnitude=5
     )
 
     asm = ActionSpaceManifest(

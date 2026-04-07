@@ -759,7 +759,7 @@ class EpistemicAttentionRay(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Broadcasts a non-kinetic 'cursor presence' to the swarm. The orchestrator calculates the dot product between this vector and surrounding nodes, identifying the exact topological vertices the observer is currently evaluating.
 
-    EPISTEMIC BOUNDS: The `direction_unit_vector` is mathematically normalized to exactly 1.0 via `@model_validator` to prevent raycast scalar explosions. To mitigate $O(N^2)$ intersection complexity, the `intersected_node_ids` array is strictly capped at `max_length=100` and deterministically sorted.
+    EPISTEMIC BOUNDS: The `direction_unit_vector` is mathematically normalized to exactly 1.0 via `@model_validator` to prevent raycast scalar explosions. To mitigate $O(N^2)$ intersection complexity, the `intersected_node_cids` array is strictly capped at `max_length=100` and deterministically sorted.
 
     MCP ROUTING TRIGGERS: Spatial Raycasting, Joint Attention, Cognitive Frustum Intersection, Vector Math, Gaze Tracking
 
@@ -771,7 +771,7 @@ class EpistemicAttentionRay(CoreasonBaseState):
     direction_unit_vector: tuple[float, float, float] = Field(
         description="The strictly normalized 3D directional vector representing the angle of gaze."
     )
-    intersected_node_ids: list[NodeIdentifierState] = Field(
+    intersected_node_cids: list[NodeIdentifierState] = Field(
         default_factory=list,
         max_length=100,
         description="The array of topological vertices mathematically pierced by this attention ray.",
@@ -790,7 +790,7 @@ class EpistemicAttentionRay(CoreasonBaseState):
 
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
-        object.__setattr__(self, "intersected_node_ids", sorted(self.intersected_node_ids))
+        object.__setattr__(self, "intersected_node_cids", sorted(self.intersected_node_cids))
         return self
 
 
@@ -2059,9 +2059,9 @@ class DefeasibleCascadeEvent(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Executes Jon Doyle's Truth Maintenance System (TMS) protocol. As an ...Event suffix, this is an append-only coordinate on the Merkle-DAG representing the active propagation of belief retraction.
 
-    CAUSAL AFFORDANCE: Applies a Pearlian do-operator to mathematically zero-out the probability mass of the `quarantined_event_ids` subgraph, physically halting all execution branches dependent on the `root_falsified_event_id` to prevent epistemic contagion.
+    CAUSAL AFFORDANCE: Applies a Pearlian do-operator to mathematically zero-out the probability mass of the `quarantined_event_cids` subgraph, physically halting all execution branches dependent on the `root_falsified_event_id` to prevent epistemic contagion.
 
-    EPISTEMIC BOUNDS: The Shannon Entropy reduction across edges is strictly clamped by `propagated_decay_factor` (`ge=0.0, le=1.0`). Deterministic alignment is guaranteed by a `@model_validator` that physically sorts the `quarantined_event_ids` array. A second validator mathematically rejects root events appearing in quarantine (`reject_root_in_quarantine`).
+    EPISTEMIC BOUNDS: The Shannon Entropy reduction across edges is strictly clamped by `propagated_decay_factor` (`ge=0.0, le=1.0`). Deterministic alignment is guaranteed by a `@model_validator` that physically sorts the `quarantined_event_cids` array. A second validator mathematically rejects root events appearing in quarantine (`reject_root_in_quarantine`).
 
     MCP ROUTING TRIGGERS: Jon Doyle TMS, Epistemic Contagion, Belief Retraction, Shannon Entropy Penalty, Graph Quarantine
 
@@ -2078,7 +2078,7 @@ class DefeasibleCascadeEvent(CoreasonBaseState):
     propagated_decay_factor: float = Field(
         ge=0.0, le=1.0, description="The calculated Entropy Penalty applied to this specific subgraph."
     )
-    quarantined_event_ids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
+    quarantined_event_cids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
         min_length=1,
         description="The strict array of downstream event Content Identifiers (CIDs) isolated and muted by this cascade to prevent Epistemic Contagion.",
     )
@@ -2089,13 +2089,13 @@ class DefeasibleCascadeEvent(CoreasonBaseState):
 
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
-        object.__setattr__(self, "quarantined_event_ids", sorted(self.quarantined_event_ids))
+        object.__setattr__(self, "quarantined_event_cids", sorted(self.quarantined_event_cids))
         return self
 
     @model_validator(mode="after")
     def reject_root_in_quarantine(self) -> Self:
-        if self.root_falsified_event_id in self.quarantined_event_ids:
-            raise ValueError("Epistemic paradox: root_falsified_event_id cannot be in quarantined_event_ids.")
+        if self.root_falsified_event_id in self.quarantined_event_cids:
+            raise ValueError("Epistemic paradox: root_falsified_event_id cannot be in quarantined_event_cids.")
         return self
 
 
@@ -2182,11 +2182,11 @@ class RollbackIntent(CoreasonBaseState):
     Merkle root. As an ...Intent suffix, the LLM may execute non-monotonic reasoning here.
 
     CAUSAL AFFORDANCE: Forces the orchestrator to execute a Pearlian do-operator intervention
-    ($do(X=x)$), flushing all invalidated_node_ids from the active context and restoring the
+    ($do(X=x)$), flushing all invalidated_node_cids from the active context and restoring the
     topology to the target_event_id coordinate.
 
     EPISTEMIC BOUNDS: Deterministic execution is mathematically guaranteed by the
-    @model_validator which strictly alphabetizes invalidated_node_ids via sorted() prior to
+    @model_validator which strictly alphabetizes invalidated_node_cids via sorted() prior to
     RFC 8785 canonical hashing, preventing Byzantine replay divergence.
 
     MCP ROUTING TRIGGERS: Pearlian Counterfactual, Causal Reversal, State Vector Rollback,
@@ -2201,14 +2201,14 @@ class RollbackIntent(CoreasonBaseState):
             description="The Content Identifier (CID) of the corrupted event in the EpistemicLedgerState to revert to.",
         )
     )
-    invalidated_node_ids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
+    invalidated_node_cids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
         default_factory=list,
         description="The strict array of nodes whose operational histories are causally tainted and must be flushed.",
     )
 
     @model_validator(mode="after")
     def _enforce_canonical_sort_invalidated_nodes(self) -> Self:
-        object.__setattr__(self, "invalidated_node_ids", sorted(self.invalidated_node_ids))
+        object.__setattr__(self, "invalidated_node_cids", sorted(self.invalidated_node_cids))
         return self
 
 
@@ -4326,7 +4326,7 @@ class EpistemicPromotionEvent(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Emits a permanent Merkle-DAG coordinate (`crystallized_semantic_node_id`) that downstream agents can zero-shot reference, severing the need to reload raw source logs into active context.
 
-    EPISTEMIC BOUNDS: Mathematical chain of custody bound to the strictly sorted array of `source_episodic_event_ids`. Token efficiency proven by `compression_ratio` float (`le=1.0`) guaranteeing Shannon Entropy reduction.
+    EPISTEMIC BOUNDS: Mathematical chain of custody bound to the strictly sorted array of `source_episodic_event_cids`. Token efficiency proven by `compression_ratio` float (`le=1.0`) guaranteeing Shannon Entropy reduction.
 
     MCP ROUTING TRIGGERS: Hippocampal Consolidation, Knowledge Distillation, Semantic Memory, Shannon Entropy Compression, Epistemic Promotion
 
@@ -4350,7 +4350,7 @@ class EpistemicPromotionEvent(CoreasonBaseState):
     type: Literal["epistemic_promotion"] = Field(
         default="epistemic_promotion", description="Discriminator type for an epistemic promotion event."
     )
-    source_episodic_event_ids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
+    source_episodic_event_cids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
         description="The strict array of CIDs (Content Identifiers) representing the raw logs being compressed and archived."
     )
     crystallized_semantic_node_id: Annotated[
@@ -4365,7 +4365,7 @@ class EpistemicPromotionEvent(CoreasonBaseState):
 
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
-        object.__setattr__(self, "source_episodic_event_ids", sorted(self.source_episodic_event_ids))
+        object.__setattr__(self, "source_episodic_event_cids", sorted(self.source_episodic_event_cids))
         return self
 
 
@@ -4998,9 +4998,9 @@ class DelegatedCapabilityManifest(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Implements Macaroons and Decentralized Identifiers (DIDs) to construct a verifiable delegation chain of authority from a human principal to an autonomous agent.
 
-    CAUSAL AFFORDANCE: Empowers the `delegate_agent_did` to invoke the explicitly whitelisted `allowed_tool_ids`, acting as a cryptographic proxy for the `principal_did`. The `cryptographic_signature` proves the delegation chain.
+    CAUSAL AFFORDANCE: Empowers the `delegate_agent_did` to invoke the explicitly whitelisted `allowed_tool_cids`, acting as a cryptographic proxy for the `principal_did`. The `cryptographic_signature` proves the delegation chain.
 
-    EPISTEMIC BOUNDS: The delegation's temporal geometry is physically bounded by `expiration_timestamp` (`ge=0.0, le=253402300799.0`). The `capability_id` is a 128-char CID anchor. The `allowed_tool_ids` array is deterministically sorted by `@model_validator` for RFC 8785 canonical hashing.
+    EPISTEMIC BOUNDS: The delegation's temporal geometry is physically bounded by `expiration_timestamp` (`ge=0.0, le=253402300799.0`). The `capability_id` is a 128-char CID anchor. The `allowed_tool_cids` array is deterministically sorted by `@model_validator` for RFC 8785 canonical hashing.
 
     MCP ROUTING TRIGGERS: Macaroons, Delegation Chain, Public Key Infrastructure, Object Capability Model, Decentralized Identifiers
 
@@ -5015,7 +5015,7 @@ class DelegatedCapabilityManifest(CoreasonBaseState):
     delegate_agent_did: NodeIdentifierState = Field(
         description="The DID representing the autonomous actor receiving authority."
     )
-    allowed_tool_ids: list[ToolIdentifierState] = Field(
+    allowed_tool_cids: list[ToolIdentifierState] = Field(
         description="The strictly bounded set of ToolIdentifiers this delegation permits."
     )
     expiration_timestamp: float = Field(
@@ -5027,7 +5027,7 @@ class DelegatedCapabilityManifest(CoreasonBaseState):
 
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
-        object.__setattr__(self, "allowed_tool_ids", sorted(self.allowed_tool_ids))
+        object.__setattr__(self, "allowed_tool_cids", sorted(self.allowed_tool_cids))
         return self
 
 
@@ -5562,7 +5562,7 @@ class TaxonomicNodeState(CoreasonBaseState):
     spaces without consuming excessive context window tokens.
 
     EPISTEMIC BOUNDS: Spatial geometry is locked via node_id (a strictly typed 128-character
-    CID). The children_node_ids array is deterministically sorted, and the leaf_provenance
+    CID). The children_node_cids array is deterministically sorted, and the leaf_provenance
     array is sorted by source_event_id, both via @model_validator to guarantee invariant
     RFC 8785 canonical hashing.
 
@@ -5576,7 +5576,7 @@ class TaxonomicNodeState(CoreasonBaseState):
     semantic_label: Annotated[str, StringConstraints(max_length=2000)] = Field(
         description="The human-legible, dynamically synthesized categorical label (e.g., 'High Risk Policies').",
     )
-    children_node_ids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
+    children_node_cids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
         default_factory=list, description="Explicit array of child node CIDs to enforce the Directed Acyclic Graph."
     )
     leaf_provenance: list["EpistemicProvenanceReceipt"] = Field(
@@ -5590,7 +5590,7 @@ class TaxonomicNodeState(CoreasonBaseState):
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
         """Mathematically sort arrays to guarantee deterministic canonical hashing."""
-        object.__setattr__(self, "children_node_ids", sorted(self.children_node_ids))
+        object.__setattr__(self, "children_node_cids", sorted(self.children_node_cids))
         object.__setattr__(
             self, "leaf_provenance", sorted(self.leaf_provenance, key=operator.attrgetter("source_event_id"))
         )
@@ -6531,7 +6531,7 @@ class TransitionEdgeProfile(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Markov Decision Process, Acyclic Edge, Stochastic Routing, Transition Probability, Directed Graph
     """
 
-    edge_type: Literal["acyclic"] = Field(default="acyclic", description="Discriminator type for an acyclic edge.")
+    topology_class: Literal["acyclic"] = Field(default="acyclic", description="Discriminator type for an acyclic edge.")
     target_node_id: Annotated[str, StringConstraints(max_length=255)] | None = Field(
         default=None, description="The coinductive pointer to the destination capability."
     )
@@ -6575,7 +6575,7 @@ class CyclicEdgeProfile(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Markov Decision Process, Cyclic Edge, Bellman Equation, Thermodynamic Discounting, Recursive Traversal
     """
 
-    edge_type: Literal["cyclic"] = Field(default="cyclic", description="Discriminator type for a cyclic edge.")
+    topology_class: Literal["cyclic"] = Field(default="cyclic", description="Discriminator type for a cyclic edge.")
     target_node_id: Annotated[str, StringConstraints(max_length=255)] | None = Field(
         default=None, description="The coinductive pointer to the destination capability."
     )
@@ -6622,7 +6622,7 @@ class CyclicEdgeProfile(CoreasonBaseState):
         return self
 
 
-type AnyTransitionEdge = Annotated[TransitionEdgeProfile | CyclicEdgeProfile, Field(discriminator="edge_type")]
+type AnyTransitionEdge = Annotated[TransitionEdgeProfile | CyclicEdgeProfile, Field(discriminator="topology_class")]
 
 
 type AnyActionSpaceCapability = Annotated[
@@ -6982,7 +6982,7 @@ class MarketResolutionState(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Represents the definitive collapse of the LMSR market superposition into a crystallized `payout_distribution` using Strictly Proper Scoring Rules (e.g., Brier scores).
 
-    CAUSAL AFFORDANCE: Instructs the orchestrator to definitively allocate compute magnitudes to the `winning_hypothesis_id` and flush `falsified_hypothesis_ids` from the active context via a Defeasible Cascade.
+    CAUSAL AFFORDANCE: Instructs the orchestrator to definitively allocate compute magnitudes to the `winning_hypothesis_id` and flush `falsified_hypothesis_cids` from the active context via a Defeasible Cascade.
 
     EPISTEMIC BOUNDS: Enforces a strictly bounded `payout_distribution` dictionary mapping W3C DIDs to non-negative integers (`ge=0`), with deterministic RFC 8785 array sorting applied to the falsified hypotheses.
 
@@ -6996,7 +6996,7 @@ class MarketResolutionState(CoreasonBaseState):
     winning_hypothesis_id: Annotated[
         str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
     ] = Field(description="The hypothesis ID that was verified.")
-    falsified_hypothesis_ids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
+    falsified_hypothesis_cids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
         max_length=1000, description="The hypothesis IDs that were falsified."
     )
     payout_distribution: dict[Annotated[str, StringConstraints(max_length=255)], Annotated[int, Field(ge=0)]] = Field(
@@ -7005,7 +7005,7 @@ class MarketResolutionState(CoreasonBaseState):
 
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
-        object.__setattr__(self, "falsified_hypothesis_ids", sorted(self.falsified_hypothesis_ids))
+        object.__setattr__(self, "falsified_hypothesis_cids", sorted(self.falsified_hypothesis_cids))
         return self
 
 
@@ -7326,7 +7326,7 @@ class OntologicalHandshakeReceipt(CoreasonBaseState):
     final verdict.
 
     EPISTEMIC BOUNDS: Semantic isometry is quantified via measured_cosine_similarity, strictly
-    clamped between [ge=-1.0, le=1.0]. The participant_node_ids array (min_length=2) is
+    clamped between [ge=-1.0, le=1.0]. The participant_node_cids array (min_length=2) is
     deterministically sorted via @model_validator to prevent Byzantine replay anomalies
     during cross-swarm Merkle hashing.
 
@@ -7337,7 +7337,7 @@ class OntologicalHandshakeReceipt(CoreasonBaseState):
     handshake_id: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
         description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this protocol handshake to the Merkle-DAG.",
     )
-    participant_node_ids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
+    participant_node_cids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
         max_length=250, min_length=2, description="The agents establishing semantic alignment."
     )
     measured_cosine_similarity: float = Field(
@@ -7356,7 +7356,7 @@ class OntologicalHandshakeReceipt(CoreasonBaseState):
 
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
-        object.__setattr__(self, "participant_node_ids", sorted(self.participant_node_ids))
+        object.__setattr__(self, "participant_node_cids", sorted(self.participant_node_cids))
         return self
 
 
@@ -10172,7 +10172,7 @@ class SMPCTopologyManifest(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Authorizes the decentralized orchestrator to route zero-trust traffic via specific mathematical logic (`garbled_circuits`, `secret_sharing`, `oblivious_transfer`), allowing mutually distrustful agents to synthesize a shared output.
 
-    EPISTEMIC BOUNDS: The topology physically mandates a minimum of two participants (`participant_node_ids` `min_length=2`) to satisfy the multi-party invariant. The `joint_function_uri` is bounded to `max_length=2000`. Nodes are deterministically sorted.
+    EPISTEMIC BOUNDS: The topology physically mandates a minimum of two participants (`participant_node_cids` `min_length=2`) to satisfy the multi-party invariant. The `joint_function_uri` is bounded to `max_length=2000`. Nodes are deterministically sorted.
 
     MCP ROUTING TRIGGERS: Secure Multi-Party Computation, Garbled Circuits, Secret Sharing, Oblivious Transfer, Zero-Trust Cryptography
 
@@ -10210,7 +10210,7 @@ class SMPCTopologyManifest(CoreasonBaseState):
     joint_function_uri: Annotated[str, StringConstraints(max_length=2000)] = Field(
         description="The URI or hash pointing to the exact math circuit or polynomial function the ring will collaboratively compute."
     )
-    participant_node_ids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
+    participant_node_cids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
         min_length=2,
         description="The strict ordered array of NodeIdentifierStates participating in the Secure Multi-Party Computation ring.",
     )
@@ -10221,8 +10221,8 @@ class SMPCTopologyManifest(CoreasonBaseState):
 
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
-        if getattr(self, "participant_node_ids", None) is not None:
-            object.__setattr__(self, "participant_node_ids", sorted(self.participant_node_ids))
+        if getattr(self, "participant_node_cids", None) is not None:
+            object.__setattr__(self, "participant_node_cids", sorted(self.participant_node_cids))
         return self
 
 
@@ -10306,7 +10306,7 @@ class AdversarialMarketTopologyManifest(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Deterministically compiles into a fully bounded Council topology, forcing the generative router to evaluate claims through adversarial debate before the orchestrator resolves equilibrium via the designated market rules.
 
-    EPISTEMIC BOUNDS: The @model_validator verify_disjoint_sets mathematically guarantees that blue_team_ids, red_team_ids, and the adjudicator_id are strictly disjoint to prevent self-dealing or topological paradoxes. Arrays are deterministically sorted to preserve RFC 8785 canonical hashes.
+    EPISTEMIC BOUNDS: The @model_validator verify_disjoint_sets mathematically guarantees that blue_team_cids, red_team_cids, and the adjudicator_id are strictly disjoint to prevent self-dealing or topological paradoxes. Arrays are deterministically sorted to preserve RFC 8785 canonical hashes.
 
     MCP ROUTING TRIGGERS: Zero-Sum Minimax Game, Red Team vs Blue Team, Macro Abstraction, Generative Adversarial Networks, Topological Compilation
     """
@@ -10314,8 +10314,8 @@ class AdversarialMarketTopologyManifest(CoreasonBaseState):
     type: Literal["macro_adversarial"] = Field(
         default="macro_adversarial", description="Discriminator for adversarial macro."
     )
-    blue_team_ids: list[NodeIdentifierState] = Field(min_length=1, description="Nodes assigned to the Blue Team.")
-    red_team_ids: list[NodeIdentifierState] = Field(min_length=1, description="Nodes assigned to the Red Team.")
+    blue_team_cids: list[NodeIdentifierState] = Field(min_length=1, description="Nodes assigned to the Blue Team.")
+    red_team_cids: list[NodeIdentifierState] = Field(min_length=1, description="Nodes assigned to the Red Team.")
     adjudicator_id: NodeIdentifierState = Field(
         description="The neutral node responsible for synthesizing the market resolution."
     )
@@ -10323,8 +10323,8 @@ class AdversarialMarketTopologyManifest(CoreasonBaseState):
 
     @model_validator(mode="after")
     def verify_disjoint_sets(self) -> Self:
-        blue_set = set(self.blue_team_ids)
-        red_set = set(self.red_team_ids)
+        blue_set = set(self.blue_team_cids)
+        red_set = set(self.red_team_cids)
         if blue_set.intersection(red_set):
             raise ValueError("Topological Contradiction: A node cannot exist in both the Blue and Red teams.")
         if self.adjudicator_id in blue_set or self.adjudicator_id in red_set:
@@ -10333,8 +10333,8 @@ class AdversarialMarketTopologyManifest(CoreasonBaseState):
 
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
-        object.__setattr__(self, "blue_team_ids", sorted(self.blue_team_ids))
-        object.__setattr__(self, "red_team_ids", sorted(self.red_team_ids))
+        object.__setattr__(self, "blue_team_cids", sorted(self.blue_team_cids))
+        object.__setattr__(self, "red_team_cids", sorted(self.red_team_cids))
         return self
 
     def compile_to_base_topology(self) -> CouncilTopologyManifest:
@@ -10342,9 +10342,9 @@ class AdversarialMarketTopologyManifest(CoreasonBaseState):
         nodes: dict[NodeIdentifierState, AnyNodeProfile] = {
             self.adjudicator_id: SystemNodeProfile(description="Synthesizing Adjudicator")
         }
-        for node_id in self.blue_team_ids:
+        for node_id in self.blue_team_cids:
             nodes[node_id] = SystemNodeProfile(description="Blue Team Member")
-        for node_id in self.red_team_ids:
+        for node_id in self.red_team_cids:
             nodes[node_id] = SystemNodeProfile(description="Red Team Member")
         consensus = ConsensusPolicy(strategy="prediction_market", prediction_market_rules=self.market_rules)
         return CouncilTopologyManifest(nodes=nodes, adjudicator_id=self.adjudicator_id, consensus_policy=consensus)
@@ -10356,7 +10356,7 @@ class ConsensusFederationTopologyManifest(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Unrolls into a base CouncilTopologyManifest, enforcing strict quorum rules and sequential adjudication to guarantee ledger alignment and truth maintenance across a decentralized, zero-trust swarm.
 
-    EPISTEMIC BOUNDS: Mathematically ensures Byzantine security by requiring a minimum of 3 participant_ids. The adjudicator_id is physically isolated from the voting pool via the verify_adjudicator_isolation hook. The participant_ids array is deterministically sorted for invariant hashing.
+    EPISTEMIC BOUNDS: Mathematically ensures Byzantine security by requiring a minimum of 3 participant_cids. The adjudicator_id is physically isolated from the voting pool via the verify_adjudicator_isolation hook. The participant_cids array is deterministically sorted for invariant hashing.
 
     MCP ROUTING TRIGGERS: Practical Byzantine Fault Tolerance, pBFT, Distributed Consensus, Sybil Resistance, Macro Abstraction
     """
@@ -10364,26 +10364,26 @@ class ConsensusFederationTopologyManifest(CoreasonBaseState):
     type: Literal["macro_federation"] = Field(
         default="macro_federation", description="Discriminator for federation macro."
     )
-    participant_ids: list[NodeIdentifierState] = Field(min_length=3, description="The nodes forming the PBFT ring.")
+    participant_cids: list[NodeIdentifierState] = Field(min_length=3, description="The nodes forming the PBFT ring.")
     adjudicator_id: NodeIdentifierState = Field(description="The orchestrating sequencer for the PBFT consensus.")
     quorum_rules: QuorumPolicy = Field(description="The strict BFT tolerance bounds.")
 
     @model_validator(mode="after")
     def verify_adjudicator_isolation(self) -> Self:
-        if self.adjudicator_id in self.participant_ids:
+        if self.adjudicator_id in self.participant_cids:
             raise ValueError("Topological Contradiction: Adjudicator cannot act as a voting participant.")
         return self
 
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
-        object.__setattr__(self, "participant_ids", sorted(self.participant_ids))
+        object.__setattr__(self, "participant_cids", sorted(self.participant_cids))
         return self
 
     def compile_to_base_topology(self) -> CouncilTopologyManifest:
         nodes: dict[NodeIdentifierState, AnyNodeProfile] = {
             self.adjudicator_id: SystemNodeProfile(description="PBFT Sequencer")
         }
-        for node_id in self.participant_ids:
+        for node_id in self.participant_cids:
             nodes[node_id] = SystemNodeProfile(description="PBFT Participant")
         return CouncilTopologyManifest(
             nodes=nodes,
@@ -12085,7 +12085,7 @@ class EpistemicLedgerState(CoreasonBaseState):
     def enforce_defeasible_quarantine(self) -> Self:
         quarantined_ids: set[str] = set()
         for cascade in self.active_cascades:
-            quarantined_ids.update(cascade.quarantined_event_ids)
+            quarantined_ids.update(cascade.quarantined_event_cids)
 
         intersection = quarantined_ids.intersection(self.defeasible_claims.keys())
         if len(intersection) > 0:

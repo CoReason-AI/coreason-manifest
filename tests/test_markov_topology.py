@@ -26,7 +26,7 @@ def test_cyclic_edge_infinite_loop_guillotine() -> None:
     # Test that discount_factor=1.0 and max_causal_depth=None raises ValueError
     with pytest.raises(ValidationError, match="Un-haltable infinite loop detected"):
         CyclicEdgeProfile(
-            edge_type="cyclic",
+            topology_class="cyclic",
             target_node_id="tool_A",
             probability_weight=1.0,
             compute_weight_magnitude=10,
@@ -36,7 +36,7 @@ def test_cyclic_edge_infinite_loop_guillotine() -> None:
 
     # Test valid CyclicEdgeProfile
     CyclicEdgeProfile(
-        edge_type="cyclic",
+        topology_class="cyclic",
         target_node_id="tool_A",
         probability_weight=1.0,
         compute_weight_magnitude=10,
@@ -45,7 +45,7 @@ def test_cyclic_edge_infinite_loop_guillotine() -> None:
     )
 
     CyclicEdgeProfile(
-        edge_type="cyclic",
+        topology_class="cyclic",
         target_node_id="tool_A",
         probability_weight=1.0,
         compute_weight_magnitude=10,
@@ -84,12 +84,15 @@ def test_action_space_dcg_compilation() -> None:
         transition_matrix={
             "tool_A": [
                 TransitionEdgeProfile(
-                    edge_type="acyclic", target_node_id="tool_B", probability_weight=1.0, compute_weight_magnitude=5
+                    topology_class="acyclic",
+                    target_node_id="tool_B",
+                    probability_weight=1.0,
+                    compute_weight_magnitude=5,
                 )
             ],
             "tool_B": [
                 CyclicEdgeProfile(
-                    edge_type="cyclic",
+                    topology_class="cyclic",
                     target_node_id="tool_A",
                     probability_weight=1.0,
                     compute_weight_magnitude=5,
@@ -124,7 +127,10 @@ def test_action_space_ghost_edge_prevention() -> None:
             transition_matrix={
                 "tool_A": [
                     TransitionEdgeProfile(
-                        edge_type="acyclic", target_node_id="tool_C", probability_weight=1.0, compute_weight_magnitude=5
+                        topology_class="acyclic",
+                        target_node_id="tool_C",
+                        probability_weight=1.0,
+                        compute_weight_magnitude=5,
                     )
                 ]
             },
@@ -143,7 +149,7 @@ def test_action_space_ghost_edge_prevention() -> None:
 def test_discount_factor_bounds() -> None:
     with pytest.raises(ValidationError, match="discount_factor"):
         CyclicEdgeProfile(
-            edge_type="cyclic",
+            topology_class="cyclic",
             target_node_id="tool_A",
             probability_weight=1.0,
             compute_weight_magnitude=10,
