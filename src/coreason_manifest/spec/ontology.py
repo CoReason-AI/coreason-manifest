@@ -820,6 +820,10 @@ class EpistemicAttentionRay(CoreasonBaseState):
         max_length=100,
         description="The array of topological vertices mathematically pierced by this attention ray.",
     )
+    hardware_gaze_signature: Annotated[str, StringConstraints(max_length=8192)] | None = Field(
+        default=None,
+        description="Hardware-backed cryptographic proof of human eye-tracking from a Trusted Execution Environment (TEE), preventing bot-driven attention spoofing.",
+    )
 
     @model_validator(mode="after")
     def validate_unit_vector(self) -> Self:
@@ -857,6 +861,10 @@ class VolumetricPartitionSubscription(CoreasonBaseState):
         ge=1,
         le=86400000,
         description="The exact Time-To-Live in milliseconds before the orchestrator forcibly drops the telemetry stream to prevent zombie subscriptions.",
+    )
+    optical_hardware_constraint_proof: typing.Union["ZeroKnowledgeReceipt", None] = Field(  # noqa: UP007
+        default=None,
+        description="zk-SNARK proof that the requested spatial volume mathematically intersects with and does not exceed the physical rendering frustum of the client's authenticated optical hardware.",
     )
 
 
@@ -1038,6 +1046,33 @@ class DynamicLayoutManifest(CoreasonBaseState):
     layout_tstring: Annotated[str, StringConstraints(max_length=2000)] = Field(
         description="A Python 3.14 t-string template definition for dynamic UI grid evaluation."
     )
+    max_ast_node_budget: int = Field(
+        ge=1,
+        le=500,
+        default=100,
+        description="The absolute physical limit on the number of Abstract Syntax Tree nodes allowed in the layout template, preventing UI Layout Bombing.",
+    )
+
+    @model_validator(mode="after")
+    def enforce_ast_thermodynamic_gas_limit(self) -> Self:
+        try:
+            tree = ast.parse(self.layout_tstring, mode="exec")
+            node_count = sum(1 for _ in ast.walk(tree))
+            if node_count > self.max_ast_node_budget:
+                raise ValueError("AST Complexity Overload")
+        except SyntaxError:
+            pass
+
+        v_escaped = self.layout_tstring.replace("'''", "\\'\\'\\'")
+        try:
+            f_tree = ast.parse(f"f'''{v_escaped}'''", mode="eval")
+            node_count = sum(1 for _ in ast.walk(f_tree))
+            if node_count > self.max_ast_node_budget:
+                raise ValueError("AST Complexity Overload")
+        except SyntaxError:
+            pass
+
+        return self
 
     @field_validator("layout_tstring", mode="after")
     @classmethod
@@ -9998,6 +10033,19 @@ class ObservabilityLODPolicy(CoreasonBaseState):
         default_factory=list,
         description="The array of Area of Interest perimeters dictating spatial telemetry isolation.",
     )
+    foveated_privacy_epsilon: float | None = Field(
+        default=None,
+        ge=0.0,
+        description=r"The Laplacian noise parameter ($\epsilon$) injected into the spatial telemetry for nodes residing in the meso and macro distance thresholds, preventing reverse-engineering of exact swarm weights.",
+    )
+
+    @model_validator(mode="after")
+    def enforce_differential_privacy_bounds(self) -> Self:
+        if self.foveated_privacy_epsilon is not None and not self.spectral_coarsening_active:
+            raise ValueError(
+                "Topological Contradiction: Cannot apply differential privacy to an uncoarsened, raw graph. spectral_coarsening_active must be True."
+            )
+        return self
 
     @model_validator(mode="after")
     def _enforce_canonical_sort_subscriptions(self) -> Self:
@@ -12429,3 +12477,4 @@ DataFidelityReceipt.model_rebuild()
 NeurosymbolicInferenceRequest.model_rebuild()
 
 EpistemicUpsamplingTask.model_rebuild()
+VolumetricPartitionSubscription.model_rebuild()
