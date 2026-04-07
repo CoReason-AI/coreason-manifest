@@ -79,7 +79,7 @@ def test_json_rpc_intent_max_dict_keys() -> None:
 def test_json_rpc_intent_max_dict_key_length() -> None:
     params: dict[str, Any] = {"k" * 10001: "value"}
 
-    with pytest.raises(ValidationError, match="Dictionary key exceeds max string length of 10000"):
+    with pytest.raises(ValidationError, match="Volumetric Boundary Breach: Dictionary key string geometry exceeds absolute maximum topological length of 10000."):
         BoundedJSONRPCIntent(jsonrpc="2.0", method="test_method", params=params, id=1)
 
 

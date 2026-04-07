@@ -66,9 +66,13 @@ def _validate_payload_bounds(
         nxt_depth = current_depth + 1
         for k, v in value.items():  # type: ignore
             if type(k) is not str:
-                raise ValueError("Dictionary keys must be strings")
+                raise ValueError(
+                    "Structural Constraint Violation: Dictionary key manifold strictly requires string geometry."
+                )
             if len(k) > 10000:
-                raise ValueError("Dictionary key exceeds max string length of 10000")
+                raise ValueError(
+                    "Volumetric Boundary Breach: Dictionary key string geometry exceeds absolute maximum topological length of 10000."
+                )
             _validate_payload_bounds(v, nxt_depth, state)
     elif typ is list:
         nxt_depth = current_depth + 1
@@ -534,7 +538,9 @@ class TraceContextState(CoreasonBaseState):
         default=None, description="The span_cid of the caller. If null, this node is the mathematically proven root."
     )
     causal_clock: int = Field(
-        default=0, ge=0, description="Tracks the recursion depth/vector clock required for compute budget decay."
+        default=0,
+        ge=0,
+        description="The absolute integer boundary defining the temporal vector clock and recursion depth for thermodynamic compute budget decay.",
     )
 
     @model_validator(mode="after")
@@ -660,7 +666,12 @@ class SE3TransformProfile(CoreasonBaseState):
     y: float = Field(description="Translation along the Y-axis relative to the reference frame.")
     z: float = Field(description="Translation along the Z-axis relative to the reference frame.")
 
-    qx: float = Field(ge=-1.0, le=1.0, default=0.0, description="The i component of the rotation quaternion.")
+    qx: float = Field(
+        ge=-1.0,
+        le=1.0,
+        default=0.0,
+        description="The rigidly bounded imaginary (i) vector scalar of the Hamiltonian rotation quaternion.",
+    )
     qy: float = Field(ge=-1.0, le=1.0, default=0.0, description="The j component of the rotation quaternion.")
     qz: float = Field(ge=-1.0, le=1.0, default=0.0, description="The k component of the rotation quaternion.")
     qw: float = Field(ge=-1.0, le=1.0, default=1.0, description="The real (scalar) part of the rotation quaternion.")
@@ -4036,7 +4047,8 @@ class DocumentLayoutManifest(CoreasonBaseState):
     """
 
     blocks: dict[Annotated[str, StringConstraints(max_length=255)], DocumentLayoutRegionState] = Field(
-        max_length=1000, description="Dictionary mapping block_ids to their strict spatial definitions."
+        max_length=1000,
+        description="The strictly bounded mathematical projection matrix linking topological block identifiers to their absolute 2D spatial geometries.",
     )
     chronological_flow_edges: list[tuple[str, str]] = Field(
         default_factory=list,

@@ -103,12 +103,12 @@ def test_validate_payload_bounds_invalid_type() -> None:
 
 
 def test_validate_payload_bounds_invalid_dict_key() -> None:
-    with pytest.raises(ValueError, match="Dictionary keys must be strings"):
+    with pytest.raises(ValueError, match="Structural Constraint Violation: Dictionary key manifold strictly requires string geometry."):
         _validate_payload_bounds({1: "test"})  # type: ignore[dict-item]
 
 
 def test_validate_payload_bounds_invalid_dict_key_length() -> None:
-    with pytest.raises(ValueError, match="Dictionary key exceeds max string length"):
+    with pytest.raises(ValueError, match="Volumetric Boundary Breach: Dictionary key string geometry exceeds absolute maximum topological length of 10000."):
         _validate_payload_bounds({"a" * 10001: "test"})
 
 
