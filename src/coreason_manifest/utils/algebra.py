@@ -91,11 +91,11 @@ def project_manifest_to_markdown(manifest: WorkflowManifest) -> str:
         "",
         "## Workflow Identification",
         f"- **Manifest Version:** {manifest.manifest_version}",
-        f"- **Tenant ID:** {manifest.tenant_id or 'Unbound'}",
-        f"- **Session ID:** {manifest.session_id or 'Unbound'}",
+        f"- **Tenant ID:** {manifest.tenant_cid or 'Unbound'}",
+        f"- **Session ID:** {manifest.session_cid or 'Unbound'}",
         "",
         "## Root Topology",
-        f"- **Type:** `{manifest.topology.type}`",
+        f"- **Type:** `{manifest.topology.classification}`",
     ]
 
     if getattr(manifest.topology, "architectural_intent", None):
@@ -243,7 +243,7 @@ def calculate_latent_alignment(
     A pure algebraic functor to calculate cosine similarity of two vectors.
     """
 
-    if v1.model_name != v2.model_name or v1.dimensionality != v2.dimensionality:
+    if v1.neural_matrix_name != v2.neural_matrix_name or v1.dimensionality != v2.dimensionality:
         raise ValueError("Topological Contradiction: Vector geometries are incommensurable.")
 
     try:
@@ -298,7 +298,7 @@ def verify_merkle_proof(trace: list[ExecutionNodeReceipt]) -> bool:
         node_map[node.node_hash] = node
     for node in trace:
         if node.generate_node_hash() != node.node_hash:
-            raise TamperFaultEvent(f"Node hash mismatch for request {node.request_id}")
+            raise TamperFaultEvent(f"Node hash mismatch for request {node.request_cid}")
         for parent_hash in node.parent_hashes:
             if parent_hash not in node_map:
                 raise TamperFaultEvent(f"Missing parent hash {parent_hash} in trace")

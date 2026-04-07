@@ -72,8 +72,8 @@ def test_calculate_latent_alignment(vec1_list: list[float], vec2_list: list[floa
     b1 = base64.b64encode(struct.pack(f"<{dim}f", *vec1_list)).decode()
     b2 = base64.b64encode(struct.pack(f"<{dim}f", *vec2_list)).decode()
 
-    v1 = VectorEmbeddingState(vector_base64=b1, dimensionality=dim, model_name="model1")
-    v2 = VectorEmbeddingState(vector_base64=b2, dimensionality=dim, model_name="model1")
+    v1 = VectorEmbeddingState(vector_base64=b1, dimensionality=dim, neural_matrix_name="model1")
+    v2 = VectorEmbeddingState(vector_base64=b2, dimensionality=dim, neural_matrix_name="model1")
     policy = OntologicalAlignmentPolicy(min_cosine_similarity=min_similarity, require_isometry_proof=False)
 
     import math
@@ -131,8 +131,8 @@ def test_apply_state_differential(
     # We will use st.builds to make a manifest
     try:
         manifest = StateDifferentialManifest(
-            diff_id="test",
-            author_node_id="test",
+            diff_cid="test",
+            author_node_cid="test",
             lamport_timestamp=0,
             vector_clock={"test": 0},
             patches=[StateMutationIntent(op=op, path=path, value=value, **({"from": from_path} if from_path else {}))],

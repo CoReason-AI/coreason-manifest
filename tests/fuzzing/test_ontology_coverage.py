@@ -19,11 +19,11 @@ from coreason_manifest.spec.ontology import (
     CrossoverPolicy,
     DAGTopologyManifest,
     DerivationMode,
+    EpistemicClassificationProfile,
     EpistemicProvenanceReceipt,
     EvaluatorOptimizerTopologyManifest,
     EvolutionaryTopologyManifest,
     FitnessObjectiveProfile,
-    InformationClassificationProfile,
     MutationPolicy,
     RiskLevelPolicy,
     SMPCTopologyManifest,
@@ -32,9 +32,9 @@ from coreason_manifest.spec.ontology import (
 )
 
 
-@given(st.sampled_from(list(InformationClassificationProfile)), st.sampled_from(list(InformationClassificationProfile)))
+@given(st.sampled_from(list(EpistemicClassificationProfile)), st.sampled_from(list(EpistemicClassificationProfile)))
 def test_information_classification_profile_comparisons(
-    prof1: InformationClassificationProfile, prof2: InformationClassificationProfile
+    prof1: EpistemicClassificationProfile, prof2: EpistemicClassificationProfile
 ) -> None:
     # Test __lt__
     assert (prof1 < prof2) == (prof1.clearance_level < prof2.clearance_level)
@@ -143,11 +143,11 @@ def test_browser_dom_state_invalid_hostname_ssrf(url_str: str) -> None:
 
 
 @given(
-    st.lists(st.sampled_from(list(InformationClassificationProfile)), min_size=1, max_size=4),
-    st.sampled_from(list(InformationClassificationProfile)),
+    st.lists(st.sampled_from(list(EpistemicClassificationProfile)), min_size=1, max_size=4),
+    st.sampled_from(list(EpistemicClassificationProfile)),
 )
 def test_workflow_manifest_lbac_dominance(
-    allowed_classes: list[InformationClassificationProfile], sla_max_class: InformationClassificationProfile
+    allowed_classes: list[EpistemicClassificationProfile], sla_max_class: EpistemicClassificationProfile
 ) -> None:
     # Setup the required fields for WorkflowManifest
     prov = EpistemicProvenanceReceipt(
@@ -155,7 +155,7 @@ def test_workflow_manifest_lbac_dominance(
     )
     topology = DAGTopologyManifest(nodes={}, edges=[], max_depth=10, max_fan_out=10)
     sla = BilateralSLA(
-        receiving_tenant_id="tenant-x", max_permitted_classification=sla_max_class, liability_limit_magnitude=100
+        receiving_tenant_cid="tenant-x", max_permitted_classification=sla_max_class, liability_limit_magnitude=100
     )
 
     max_local_clearance = max(prof.clearance_level for prof in allowed_classes)
@@ -166,7 +166,7 @@ def test_workflow_manifest_lbac_dominance(
                 genesis_provenance=prov,
                 manifest_version="1.0.0",
                 topology=topology,
-                allowed_information_classifications=allowed_classes,
+                allowed_epistemic_classifications=allowed_classes,
                 federated_sla=sla,
             )
         assert "LBAC Boundary Breach" in str(exc_info.value)
@@ -175,12 +175,12 @@ def test_workflow_manifest_lbac_dominance(
             genesis_provenance=prov,
             manifest_version="1.0.0",
             topology=topology,
-            allowed_information_classifications=allowed_classes,
+            allowed_epistemic_classifications=allowed_classes,
             federated_sla=sla,
         )
-        assert manifest.allowed_information_classifications is not None
+        assert manifest.allowed_epistemic_classifications is not None
         # Assert sorting works
-        assert sorted(allowed_classes, key=lambda x: str(x.value)) == manifest.allowed_information_classifications
+        assert sorted(allowed_classes, key=lambda x: str(x.value)) == manifest.allowed_epistemic_classifications
 
 
 @given(st.lists(st.text(min_size=1, max_size=128), min_size=2, max_size=10, unique=True))
@@ -206,7 +206,7 @@ def test_evaluator_optimizer_bipartite_nodes(nodes_pair: tuple[str, str]) -> Non
 
     with pytest.raises(ValidationError) as exc_info:
         EvaluatorOptimizerTopologyManifest(
-            nodes=nodes, generator_node_id=gen_id, evaluator_node_id=eval_id, max_revision_loops=5
+            nodes=nodes, generator_node_cid=gen_id, evaluator_node_cid=eval_id, max_revision_loops=5
         )
 
     # If they are the same, it fails the "cannot be the same node" or "not found"

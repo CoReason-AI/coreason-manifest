@@ -24,11 +24,11 @@ from coreason_manifest.spec.ontology import (
     ContinuousMutationPolicy,
     DocumentLayoutRegionState,
     DynamicLayoutManifest,
+    EpistemicClassificationProfile,
     EpistemicCompressionSLA,
     EpistemicTransmutationTask,
     ExecutionNodeReceipt,
     GlobalGovernancePolicy,
-    InformationClassificationProfile,
     InsightCardProfile,
     MultimodalTokenAnchorState,
     NDimensionalTensorManifest,
@@ -223,15 +223,15 @@ def test_semantic_slicing_epistemic_bounds() -> None:
     # 1. Prove OOM/Zero-Token starvation rejection
     with pytest.raises(ValidationError, match="greater_than"):
         SemanticSlicingPolicy(
-            permitted_classification_tiers=[InformationClassificationProfile.PUBLIC], context_window_token_ceiling=0
+            permitted_classification_tiers=[EpistemicClassificationProfile.PUBLIC], context_window_token_ceiling=0
         )
 
     # 2. Prove Cryptographic Determinism (Sorting)
     policy = SemanticSlicingPolicy(
         permitted_classification_tiers=[
-            InformationClassificationProfile.RESTRICTED,
-            InformationClassificationProfile.INTERNAL,
-            InformationClassificationProfile.PUBLIC,
+            EpistemicClassificationProfile.RESTRICTED,
+            EpistemicClassificationProfile.INTERNAL,
+            EpistemicClassificationProfile.PUBLIC,
         ],
         required_semantic_labels=["Zeta", "Alpha", "Gamma"],
         context_window_token_ceiling=4096,
@@ -239,9 +239,9 @@ def test_semantic_slicing_epistemic_bounds() -> None:
 
     assert policy.required_semantic_labels == ["Alpha", "Gamma", "Zeta"]
     assert policy.permitted_classification_tiers == [
-        InformationClassificationProfile.INTERNAL,
-        InformationClassificationProfile.PUBLIC,
-        InformationClassificationProfile.RESTRICTED,
+        EpistemicClassificationProfile.INTERNAL,
+        EpistemicClassificationProfile.PUBLIC,
+        EpistemicClassificationProfile.RESTRICTED,
     ]
 
 
@@ -391,7 +391,7 @@ def test_execution_node_receipt_recursive_payload(params: dict[str, Any]) -> Non
 
     deep_payload = build_deep_dict(11)
     with pytest.raises(ValidationError):
-        ExecutionNodeReceipt(request_id="test_id", inputs=deep_payload, outputs={"valid": "output"})
+        ExecutionNodeReceipt(request_cid="test_id", inputs=deep_payload, outputs={"valid": "output"})
 
 
 def test_state_hydration_manifest_long_string_quarantine() -> None:
@@ -413,7 +413,7 @@ def test_state_hydration_manifest_long_string_quarantine() -> None:
     extents_z=st.floats(min_value=-1.0, max_value=2.0),
 )
 def test_volumetric_bounding_profile_all_floats(extents_x: float, extents_y: float, extents_z: float) -> None:
-    transform = SE3TransformProfile(reference_frame_id="frame", x=0, y=0, z=0)
+    transform = SE3TransformProfile(reference_frame_cid="frame", x=0, y=0, z=0)
     valid = extents_x >= 0.0 and extents_y >= 0.0 and extents_z >= 0.0 and extents_x * extents_y * extents_z > 0.0
 
     if valid:
@@ -493,24 +493,24 @@ def test_scale_policy(type_val: Any, domain_min: float | None, domain_max: float
             valid = False
 
     if valid:
-        ScalePolicy(type=type_val, domain_min=domain_min, domain_max=domain_max)
+        ScalePolicy(classification=type_val, domain_min=domain_min, domain_max=domain_max)
     else:
         with pytest.raises((ValueError, ValidationError)):
-            ScalePolicy(type=type_val, domain_min=domain_min, domain_max=domain_max)
+            ScalePolicy(classification=type_val, domain_min=domain_min, domain_max=domain_max)
 
 
 # --- NDimensionalTensorManifest ---
 @given(
     shape=st.lists(st.integers(min_value=-1, max_value=10), min_size=0, max_size=5),
-    structural_type=st.sampled_from(list(TensorStructuralFormatProfile)),
+    structural_classification=st.sampled_from(list(TensorStructuralFormatProfile)),
 )
-def test_ndimensional_tensor_manifest(shape: list[int], structural_type: Any) -> None:
+def test_ndimensional_tensor_manifest(shape: list[int], structural_classification: Any) -> None:
     valid = True
     if len(shape) < 1 or any(dim <= 0 for dim in shape):
         valid = False
 
     if valid:
-        bytes_per_element = structural_type.bytes_per_element
+        bytes_per_element = structural_classification.bytes_per_element
         vram_footprint_bytes = math.prod(shape) * bytes_per_element
     else:
         vram_footprint_bytes = 10
@@ -521,7 +521,7 @@ def test_ndimensional_tensor_manifest(shape: list[int], structural_type: Any) ->
     if valid:
         NDimensionalTensorManifest(
             shape=tuple(shape),
-            structural_type=structural_type,
+            structural_classification=structural_classification,
             vram_footprint_bytes=vram_footprint_bytes,
             merkle_root=merkle_root,
             storage_uri=storage_uri,
@@ -530,7 +530,7 @@ def test_ndimensional_tensor_manifest(shape: list[int], structural_type: Any) ->
         with pytest.raises((ValueError, ValidationError)):
             NDimensionalTensorManifest(
                 shape=tuple(shape),
-                structural_type=structural_type,
+                structural_classification=structural_classification,
                 vram_footprint_bytes=vram_footprint_bytes,
                 merkle_root=merkle_root,
                 storage_uri=storage_uri,
@@ -539,7 +539,7 @@ def test_ndimensional_tensor_manifest(shape: list[int], structural_type: Any) ->
 
 # --- DocumentLayoutRegionState ---
 @given(
-    block_id=st.text(
+    block_cid=st.text(
         min_size=1, max_size=128, alphabet=st.characters(whitelist_categories=("L", "N"), whitelist_characters="_.:-")
     ),
     block_type=st.sampled_from(["header", "paragraph", "figure", "table", "footnote", "caption", "equation"]),
@@ -547,9 +547,9 @@ def test_ndimensional_tensor_manifest(shape: list[int], structural_type: Any) ->
     token_span_end=st.integers(min_value=101, max_value=200),
 )
 def test_document_layout_region_state(
-    block_id: str, block_type: Any, token_span_start: int, token_span_end: int
+    block_cid: str, block_type: Any, token_span_start: int, token_span_end: int
 ) -> None:
     anchor = MultimodalTokenAnchorState(token_span_start=token_span_start, token_span_end=token_span_end)
 
     with contextlib.suppress(ValueError, ValidationError):
-        DocumentLayoutRegionState(block_id=block_id, block_type=block_type, anchor=anchor)
+        DocumentLayoutRegionState(block_cid=block_cid, block_classification=block_type, anchor=anchor)

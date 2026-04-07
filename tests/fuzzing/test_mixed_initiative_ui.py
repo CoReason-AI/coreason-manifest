@@ -27,19 +27,19 @@ def test_fractional_grid_topology_contradiction(column_weights: list[float]) -> 
     # Valid dummy panels so we don't trigger missing required fields or invalid panel validation
     panels: Any = [
         {
-            "type": "insight_card",
+            "classification": "insight_card",
             "panel_cid": "p1",
             "title": "Title 1",
             "markdown_content": "Content 1",
         },
-        {"type": "insight_card", "panel_cid": "p2", "title": "Title 2", "markdown_content": "Content 2"},
-        {"type": "insight_card", "panel_cid": "p3", "title": "Title 3", "markdown_content": "Content 3"},
-        {"type": "insight_card", "panel_cid": "p4", "title": "Title 4", "markdown_content": "Content 4"},
-        {"type": "insight_card", "panel_cid": "p5", "title": "Title 5", "markdown_content": "Content 5"},
-        {"type": "insight_card", "panel_cid": "p6", "title": "Title 6", "markdown_content": "Content 6"},
-        {"type": "insight_card", "panel_cid": "p7", "title": "Title 7", "markdown_content": "Content 7"},
-        {"type": "insight_card", "panel_cid": "p8", "title": "Title 8", "markdown_content": "Content 8"},
-        {"type": "insight_card", "panel_cid": "p9", "title": "Title 9", "markdown_content": "Content 9"},
+        {"classification": "insight_card", "panel_cid": "p2", "title": "Title 2", "markdown_content": "Content 2"},
+        {"classification": "insight_card", "panel_cid": "p3", "title": "Title 3", "markdown_content": "Content 3"},
+        {"classification": "insight_card", "panel_cid": "p4", "title": "Title 4", "markdown_content": "Content 4"},
+        {"classification": "insight_card", "panel_cid": "p5", "title": "Title 5", "markdown_content": "Content 5"},
+        {"classification": "insight_card", "panel_cid": "p6", "title": "Title 6", "markdown_content": "Content 6"},
+        {"classification": "insight_card", "panel_cid": "p7", "title": "Title 7", "markdown_content": "Content 7"},
+        {"classification": "insight_card", "panel_cid": "p8", "title": "Title 8", "markdown_content": "Content 8"},
+        {"classification": "insight_card", "panel_cid": "p9", "title": "Title 9", "markdown_content": "Content 9"},
     ]
 
     # First check column failure
@@ -75,7 +75,7 @@ def test_entropic_telemetry_bounds(invalid_entropy: float) -> None:
 def test_focal_plane_integrity(invalid_focal_depth: float) -> None:
     # Dummy mock objects for PresentationManifest to ensure we don't fail other fields' validations first
     valid_intent: Any = {
-        "type": "drafting_intent",
+        "classification": "drafting_intent",
         "description": "Mock drafting intent",
         "target_audience": "human_supervisor",
         "proposed_schemas": [],

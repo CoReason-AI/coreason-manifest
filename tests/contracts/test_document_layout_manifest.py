@@ -29,12 +29,12 @@ def build_anchor() -> MultimodalTokenAnchorState:
         token_span_end=10,
         visual_patch_hashes=[],
         bounding_box=(0.0, 0.0, 1.0, 1.0),
-        block_type="paragraph",
+        block_classification="paragraph",
     )
 
 
-def build_block(block_id: str) -> DocumentLayoutRegionState:
-    return DocumentLayoutRegionState(block_id=block_id, block_type="paragraph", anchor=build_anchor())
+def build_block(block_cid: str) -> DocumentLayoutRegionState:
+    return DocumentLayoutRegionState(block_cid=block_cid, block_classification="paragraph", anchor=build_anchor())
 
 
 # 2. Atomic Parameterized Tests for Referential Integrity (Ghost Nodes)

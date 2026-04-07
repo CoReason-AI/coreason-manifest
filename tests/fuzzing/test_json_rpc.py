@@ -113,7 +113,7 @@ def test_latent_scratchpad_receipt_referential_integrity(
 def test_action_space_manifest_uniqueness(action_space_cid: str, tool_names: list[str]) -> None:
     native_tools = {
         name: ToolManifest(
-            type="native_tool",
+            classification="native_tool",
             tool_name=name,
             input_schema={"type": "object", "properties": {}},
             description="desc",
