@@ -621,6 +621,24 @@ class SpatialReferenceFrameManifest(CoreasonBaseState):
     )
 
 
+class KinematicDerivativeTensor(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Kinematic Derivatives, Hermite Spline Extrapolation, Continuous Collision Detection, Newtonian Mechanics
+    CAUSAL AFFORDANCE: Kinematic Derivatives, Hermite Spline Extrapolation, Continuous Collision Detection, Newtonian Mechanics
+    EPISTEMIC BOUNDS: Kinematic Derivatives, Hermite Spline Extrapolation, Continuous Collision Detection, Newtonian Mechanics
+    MCP ROUTING TRIGGERS: Kinematic Derivatives, Hermite Spline Extrapolation, Continuous Collision Detection, Newtonian Mechanics
+    """
+
+    linear_velocity: tuple[float, float, float] = Field(description="The 3D Euclidean velocity vector.")
+    # Note: linear_velocity is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
+    angular_velocity: tuple[float, float, float] = Field(description="The 3D rotational velocity vector.")
+    # Note: angular_velocity is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
+    linear_acceleration: tuple[float, float, float] = Field(description="The 3D Euclidean acceleration vector.")
+    # Note: linear_acceleration is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
+    angular_acceleration: tuple[float, float, float] = Field(description="The 3D rotational acceleration vector.")
+    # Note: angular_acceleration is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
+
+
 class SE3TransformProfile(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Represents a strict rigid-body transformation within the Special Euclidean group SE(3). Projects an absolute mathematical coordinate encompassing both translation ($\mathbb{R}^3$) and rotation ($S^3$).
@@ -650,6 +668,14 @@ class SE3TransformProfile(CoreasonBaseState):
     scale: float = Field(
         ge=0.0001, le=10000.0, default=1.0, description="Strictly positive uniform volumetric scaling factor."
     )
+    kinematic_derivatives: KinematicDerivativeTensor | None = Field(
+        default=None, description="Tensors governing continuous momentum and velocity."
+    )
+    dual_quaternion_motor: tuple[float, float, float, float, float, float, float, float] | None = Field(
+        default=None,
+        description="The 8-dimensional Clifford Algebra motor for mathematically flawless ScLERP interpolation.",
+    )
+    # Note: dual_quaternion_motor is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
 
     @model_validator(mode="after")
     def enforce_quaternion_normalization(self) -> Self:
@@ -689,6 +715,24 @@ class VolumetricBoundingProfile(CoreasonBaseState):
         if self.extents_x * self.extents_y * self.extents_z == 0.0:
             raise ValueError("Topological Violation: Volumetric space must have 3D magnitude strictly greater than 0.")
         return self
+
+
+class GaussianSplattingProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Neural Radiance Fields, 3D Gaussian Splatting, Spherical Harmonics, Volumetric Rendering, Covariance Matrix
+    CAUSAL AFFORDANCE: Neural Radiance Fields, 3D Gaussian Splatting, Spherical Harmonics, Volumetric Rendering, Covariance Matrix
+    EPISTEMIC BOUNDS: Neural Radiance Fields, 3D Gaussian Splatting, Spherical Harmonics, Volumetric Rendering, Covariance Matrix
+    MCP ROUTING TRIGGERS: Neural Radiance Fields, 3D Gaussian Splatting, Spherical Harmonics, Volumetric Rendering, Covariance Matrix
+    """
+
+    spherical_harmonics_degree: int = Field(
+        ge=0, le=3, description="Capped at 3 to physically prevent VRAM explosion during WebGL rasterization."
+    )
+    covariance_scale: tuple[float, float, float] = Field(
+        description="The 3D anisotropic scaling vector of the Gaussian ellipsoid."
+    )
+    # Note: covariance_scale is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
+    opacity_alpha: float = Field(ge=0.0, le=1.0, description="The alpha transmittance scalar of the splat.")
 
 
 class ViewportProjectionContract(CoreasonBaseState):
@@ -776,6 +820,10 @@ class EpistemicAttentionRay(CoreasonBaseState):
         max_length=100,
         description="The array of topological vertices mathematically pierced by this attention ray.",
     )
+    hardware_gaze_signature: Annotated[str, StringConstraints(max_length=8192)] | None = Field(
+        default=None,
+        description="Hardware-backed cryptographic proof of human eye-tracking from a Trusted Execution Environment (TEE), preventing bot-driven attention spoofing.",
+    )
 
     @model_validator(mode="after")
     def validate_unit_vector(self) -> Self:
@@ -813,6 +861,10 @@ class VolumetricPartitionSubscription(CoreasonBaseState):
         ge=1,
         le=86400000,
         description="The exact Time-To-Live in milliseconds before the orchestrator forcibly drops the telemetry stream to prevent zombie subscriptions.",
+    )
+    optical_hardware_constraint_proof: typing.Union["ZeroKnowledgeReceipt", None] = Field(  # noqa: UP007
+        default=None,
+        description="zk-SNARK proof that the requested spatial volume mathematically intersects with and does not exceed the physical rendering frustum of the client's authenticated optical hardware.",
     )
 
 
@@ -910,6 +962,18 @@ class SpatialBillboardContract(CoreasonBaseState):
         default=1.0,
         description="Controls orthographic size invariance; scaling the matrix inversely to camera distance.",
     )
+    spherical_cylindrical_lock: Literal["spherical", "cylindrical_y", "none"] = Field(
+        default="spherical",
+        description="Dictates whether the UI panel rotates freely on all axes (spherical) or locks to the Y-axis (cylindrical).",
+    )
+
+    @model_validator(mode="after")
+    def enforce_billboard_matrix(self) -> Self:
+        if self.spherical_cylindrical_lock == "none" and self.distance_scaling_factor != 0.0:
+            raise ValueError(
+                "Topological Violation: if spherical_cylindrical_lock is 'none', distance_scaling_factor MUST be 0.0."
+            )
+        return self
 
 
 class VolumetricEdgeProfile(CoreasonBaseState):
@@ -918,13 +982,13 @@ class VolumetricEdgeProfile(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Instructs the spatial rendering engine to compute C1-continuous parametric splines between discrete nodes, translating abstract logical edges into physical volumetric manifolds.
 
-    EPISTEMIC BOUNDS: Curve geometry is locked to the Literal automaton `["straight", "bezier", "catmull_rom"]`. Thermodynamic token velocity is clamped by `flow_velocity` (`ge=0.0, le=100.0`). Spline rigidity (`tension`) is bounded `[0.0, 1.0]`.
+    EPISTEMIC BOUNDS: Curve geometry is locked to the Literal automaton `["straight", "bezier", "catmull_rom", "riemannian_geodesic"]`. Thermodynamic token velocity is clamped by `flow_velocity` (`ge=0.0, le=100.0`). Spline rigidity (`tension`) is bounded `[0.0, 1.0]`.
 
     MCP ROUTING TRIGGERS: Parametric Spline Interpolation, Catmull-Rom, Bezier Geometry, C1 Continuity, Volumetric Edge
 
     """
 
-    curve_type: Literal["straight", "bezier", "catmull_rom"] = Field(
+    curve_type: Literal["straight", "bezier", "catmull_rom", "riemannian_geodesic"] = Field(
         description="The mathematical spline geometry used to interpolate the space between vertices."
     )
     tension: float = Field(
@@ -939,6 +1003,20 @@ class VolumetricEdgeProfile(CoreasonBaseState):
     edge_thickness: float = Field(
         ge=0.01, le=10.0, default=0.1, description="The physical volumetric width of the connection manifold in meters."
     )
+    spatial_repulsion_scalar: float = Field(
+        ge=0.0,
+        le=100.0,
+        default=0.0,
+        description="The mathematical gravity or repulsion field the edge asserts to avoid intersecting with volumetric bounding cages.",
+    )
+
+    @model_validator(mode="after")
+    def enforce_geodesic_physics(self) -> Self:
+        if self.curve_type == "riemannian_geodesic" and self.spatial_repulsion_scalar <= 0.0:
+            raise ValueError(
+                "Topological Violation: riemannian_geodesic must have spatial_repulsion_scalar strictly greater than 0.0."
+            )
+        return self
 
 
 _TSTRING_AST_ALLOWLIST: tuple[type, ...] = (
@@ -968,6 +1046,33 @@ class DynamicLayoutManifest(CoreasonBaseState):
     layout_tstring: Annotated[str, StringConstraints(max_length=2000)] = Field(
         description="A Python 3.14 t-string template definition for dynamic UI grid evaluation."
     )
+    max_ast_node_budget: int = Field(
+        ge=1,
+        le=500,
+        default=100,
+        description="The absolute physical limit on the number of Abstract Syntax Tree nodes allowed in the layout template, preventing UI Layout Bombing.",
+    )
+
+    @model_validator(mode="after")
+    def enforce_ast_thermodynamic_gas_limit(self) -> Self:
+        try:
+            tree = ast.parse(self.layout_tstring, mode="exec")
+            node_count = sum(1 for _ in ast.walk(tree))
+            if node_count > self.max_ast_node_budget:
+                raise ValueError("AST Complexity Overload")
+        except SyntaxError:
+            pass
+
+        v_escaped = self.layout_tstring.replace("'''", "\\'\\'\\'")
+        try:
+            f_tree = ast.parse(f"f'''{v_escaped}'''", mode="eval")
+            node_count = sum(1 for _ in ast.walk(f_tree))
+            if node_count > self.max_ast_node_budget:
+                raise ValueError("AST Complexity Overload")
+        except SyntaxError:
+            pass
+
+        return self
 
     @field_validator("layout_tstring", mode="after")
     @classmethod
@@ -2297,6 +2402,23 @@ class StateDifferentialManifest(CoreasonBaseState):
     )
 
 
+class CoalgebraicHydrationPolicy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Defines the limits of infinite graph unfolding to protect UI VRAM when pulling from the EpistemicLedgerState.
+    CAUSAL AFFORDANCE: Instructs the orchestrator's deserialization engine to halt graph traversal at a specific recursion depth, replacing raw objects with cryptographic pointers.
+    EPISTEMIC BOUNDS: The `max_unfold_depth` strictly bounds the DAG traversal depth (`ge=1, le=100`). `lazy_fetch_timeout_ms` prevents infinite halting (`ge=1, le=60000`). `truncation_strategy` is constrained to a Literal.
+    MCP ROUTING TRIGGERS: Coalgebraic Unfolding, Lazy Evaluation, State-Space Bounding, VRAM Exhaustion Prevention
+    """
+
+    max_unfold_depth: int = Field(ge=1, le=100, description="Absolute recursive depth limit for DAG deserialization.")
+    lazy_fetch_timeout_ms: int = Field(
+        ge=1, le=60000, description="Temporal guillotine for resolving cryptographic pointers."
+    )
+    truncation_strategy: Literal["hash_pointer", "nullify", "scalar_summary"] = Field(
+        description="Dictates how the orchestrator caps the state when max_unfold_depth is reached."
+    )
+
+
 class StateHydrationManifest(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Manages the Epistemic Hydration of an agent's active context
@@ -2327,6 +2449,9 @@ class StateHydrationManifest(CoreasonBaseState):
     )
     working_context_variables: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
         description="A strictly typed dictionary for ephemeral context variables injected at runtime. AGENT INSTRUCTION: This matrix is deterministically sorted by CoreasonBaseState natively. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion."
+    )
+    unfolding_policy: CoalgebraicHydrationPolicy | None = Field(
+        default=None, description="The mathematical bounds for lazy state unfolding."
     )
 
     @field_validator("working_context_variables", mode="before")
@@ -2866,7 +2991,7 @@ class AmbientState(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Emits an ephemeral, 1D representation of the active probability distribution and execution progress to the external UI plane without halting the underlying generative trajectory.
 
-    EPISTEMIC BOUNDS: Semantic `status_message` structurally clamped to `max_length=2000`. The continuous `progress` metric bounded by float limits (`le=1000000000.0`) allowing it to represent 0.0-1.0 ratios or exact token counts.
+    EPISTEMIC BOUNDS: Semantic `status_message` structurally clamped to `max_length=2000`. The continuous `progress` metric bounded by float limits (`le=1000000000.0`) allowing it to represent 0.0-1.0 ratios or exact token counts. The `thermodynamic_burn_rate` is physically bounded (`ge=0.0`), and `epistemic_entropy_score` is normalized (`ge=0.0, le=1.0`).
 
     MCP ROUTING TRIGGERS: Markov Blanket, Ephemeral Projection, Continuous Observability, Kinetic Execution State, UI Telemetry
 
@@ -2877,6 +3002,17 @@ class AmbientState(CoreasonBaseState):
     )
     progress: float | None = Field(
         le=1000000000.0, default=None, description="The progress ratio from 0.0 to 1.0, or None if indeterminate."
+    )
+    thermodynamic_burn_rate: float | None = Field(
+        default=None,
+        ge=0.0,
+        description="The instantaneous token compute cost velocity, mapped to UI emission intensity.",
+    )
+    epistemic_entropy_score: float | None = Field(
+        default=None,
+        ge=0.0,
+        le=1.0,
+        description="The normalized Shannon Entropy of the active execution, mapped to UI color gradients (e.g., high entropy = amber warning).",
     )
 
 
@@ -5360,7 +5496,7 @@ class GrammarPanelProfile(CoreasonBaseState):
         default=None, description="The kinematic constraint anchoring this 2D panel to the 3D topology."
     )
     mark: Literal["point", "line", "area", "bar", "rect", "arc"] = Field(
-        le=1000000000, description="The geometric shape used to represent the matrix."
+        description="The geometric shape used to represent the matrix."
     )
     encodings: list[VisualEncodingProfile] = Field(description="The mapping of structural fields to visual channels.")
     facet: FacetMatrixProfile | None = Field(default=None, description="Optional faceting matrix for small multiples.")
@@ -6115,6 +6251,9 @@ class HumanNodeProfile(CoreasonBaseState):
     optical_physics: PhysicallyBasedRenderingProfile | None = Field(
         default=None, description="The strict microfacet BRDF physics governing the visual representation of this node."
     )
+    neural_optics: GaussianSplattingProfile | None = Field(
+        default=None, description="The volumetric Gaussian Splatting configuration for non-polygonal rendering."
+    )
 
     @field_validator("domain_extensions", mode="before")
     @classmethod
@@ -6178,6 +6317,9 @@ class MemoizedNodeProfile(CoreasonBaseState):
     optical_physics: PhysicallyBasedRenderingProfile | None = Field(
         default=None, description="The strict microfacet BRDF physics governing the visual representation of this node."
     )
+    neural_optics: GaussianSplattingProfile | None = Field(
+        default=None, description="The volumetric Gaussian Splatting configuration for non-polygonal rendering."
+    )
 
     @field_validator("domain_extensions", mode="before")
     @classmethod
@@ -6239,6 +6381,9 @@ class SystemNodeProfile(CoreasonBaseState):
     )
     optical_physics: PhysicallyBasedRenderingProfile | None = Field(
         default=None, description="The strict microfacet BRDF physics governing the visual representation of this node."
+    )
+    neural_optics: GaussianSplattingProfile | None = Field(
+        default=None, description="The volumetric Gaussian Splatting configuration for non-polygonal rendering."
     )
 
     @field_validator("domain_extensions", mode="before")
@@ -6319,6 +6464,23 @@ class MCPCapabilityWhitelistPolicy(CoreasonBaseState):
         return self
 
 
+class OpticalMappingContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Guarantee isomorphic data translation from untrusted MCP payloads into the swarm's working memory.
+    CAUSAL AFFORDANCE: Verifies that the geometric shape of the payload perfectly satisfies the expected contravariant input of the target node without executing procedural mapping code.
+    EPISTEMIC BOUNDS: The `lens_source_pointer` and `prism_target_pointer` mathematically lock to max_length=2000. `strict_isomorphism` forbids type coercion.
+    MCP ROUTING TRIGGERS: Category Theory, Profunctor Optics, Lens, Prism, Isomorphic State Synchronization
+    """
+
+    lens_source_pointer: Annotated[str, StringConstraints(max_length=2000)] = Field(
+        description="RFC 6902 JSON Pointer extracting exogenous data."
+    )
+    prism_target_pointer: Annotated[str, StringConstraints(max_length=2000)] = Field(
+        description="RFC 6902 JSON Pointer for exact injection coordinate."
+    )
+    strict_isomorphism: bool = Field(default=True, description="If true, mathematically forbids type coercion.")
+
+
 class MCPServerManifest(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Represents a cryptographically verifiable Distributed RPC substrate mapping within the Actor Model, binding an external Model Context Protocol (MCP) manifold into the swarm's local topology under strict Object-Capability (OCap) rules.
@@ -6354,6 +6516,19 @@ class MCPServerManifest(CoreasonBaseState):
     attestation_receipt: VerifiableCredentialPresentationReceipt = Field(
         description="Cryptographic proof of identity and authorization for the external server."
     )
+    state_synchronization_optics: list[OpticalMappingContract] = Field(
+        default_factory=list,
+        description="Profunctor mappings for side-effect-free state synchronization.",
+    )
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort_optics(self) -> Self:
+        object.__setattr__(
+            self,
+            "state_synchronization_optics",
+            sorted(self.state_synchronization_optics, key=operator.attrgetter("lens_source_pointer")),
+        )
+        return self
 
     @model_validator(mode="after")
     def enforce_coreason_did_authority(self) -> Self:
@@ -6821,23 +6996,25 @@ class OntologicalSurfaceProjectionManifest(CoreasonBaseState):
 
 class MCPClientIntent(BoundedJSONRPCIntent):
     """
-    AGENT INSTRUCTION: An inherited JSON-RPC 2.0 substrate specifically binding Model
-    Context Protocol (MCP) client intent emissions to the frontend UI. As an ...Intent
-    suffix, this represents an authorized kinetic execution trigger.
-
-    CAUSAL AFFORDANCE: Executes an exact semantic signal (Literal["mcp.ui.emit_intent"])
-    to bubble internal agent states (like drafting or adjudication) to the human
-    operator.
-
-    EPISTEMIC BOUNDS: Inherits all recursive depth bounds from BoundedJSONRPCIntent and
-    mathematically clamps the method space to a singular Literal["mcp.ui.emit_intent"]
-    to prevent execution drift.
-
-    MCP ROUTING TRIGGERS: Model Context Protocol, Intent Bubbling, Human-in-the-Loop,
-    Semantic Signaling, Method Clamping
+    AGENT INSTRUCTION: An inherited JSON-RPC 2.0 substrate specifically binding Model Context Protocol (MCP) client intent emissions to the frontend UI. As an ...Intent suffix, this represents an authorized kinetic execution trigger.
+    CAUSAL AFFORDANCE: Executes an exact semantic signal (Literal["mcp.ui.emit_intent"]) to bubble internal agent states (like drafting or adjudication) to the human operator.
+    EPISTEMIC BOUNDS: Inherits all recursive depth bounds from BoundedJSONRPCIntent and mathematically clamps the method space to a singular Literal["mcp.ui.emit_intent"] to prevent execution drift.
+    MCP ROUTING TRIGGERS: Model Context Protocol, Intent Bubbling, Human-in-the-Loop, Semantic Signaling, Method Clamping
     """
 
-    method: Literal["mcp.ui.emit_intent"] = Field(..., le=1000000000, description="Method for intent bubbling.")
+    method: Literal["mcp.ui.emit_intent"] = Field(..., description="Method for intent bubbling.")
+    holographic_projection: "DynamicManifoldProjectionManifest | None" = Field(
+        default=None,
+        description="The mathematically pre-calculated view manifold tailored to the observer's frustum.",
+    )
+
+    @model_validator(mode="after")
+    def _enforce_holographic_resolution(self) -> Self:
+        if self.method == "mcp.ui.emit_intent" and self.holographic_projection is None:
+            raise ValueError(
+                "Holographic Projection Violation: Holographic projection must not be None when emitting intent."
+            )
+        return self
 
 
 class MCPPromptReferenceState(CoreasonBaseState):
@@ -6911,7 +7088,7 @@ class MacroGridProfile(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Translates abstract UI panels into fixed 2D matrices (`layout_matrix`), forcing spatial determinism on the frontend rendering engine.
 
-    EPISTEMIC BOUNDS: A strictly bounded `@model_validator` executes a referential integrity sweep, mathematically guaranteeing that every panel ID referenced in the `layout_matrix` (`max_length=1000`) corresponds to a verified object in the `panels` array, physically severing Ghost Panel hallucinations.
+    EPISTEMIC BOUNDS: A strictly bounded `@model_validator` executes a referential integrity sweep, mathematically guaranteeing that every panel ID referenced in the `layout_matrix` (`max_length=1000`) corresponds to a verified object in the `panels` array, physically severing Ghost Panel hallucinations. The `@model_validator` `verify_matrix_dimensions` mathematically forces `column_fractional_weights` and `row_fractional_weights` to perfectly match the Cartesian topology.
 
     MCP ROUTING TRIGGERS: Cartesian Coordinate System, Small Multiples, Spatial Topology, Referential Integrity, Layout Matrix
 
@@ -6922,10 +7099,35 @@ class MacroGridProfile(CoreasonBaseState):
         max_length=1000,
         description="A matrix defining the layout structure, using panel IDs.",
     )
+    column_fractional_weights: list[float] = Field(
+        default_factory=list, description="Euclidean fractional weights for column partitioning."
+    )
+    # Note: column_fractional_weights is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
+    row_fractional_weights: list[float] = Field(
+        default_factory=list, description="Euclidean fractional weights for row partitioning."
+    )
+    # Note: row_fractional_weights is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     panels: list[AnyPanelProfile] = Field(
         description="The ordered array of topological UI panels physically rendered in the grid."
         # Note: panels is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     )
+
+    @model_validator(mode="after")
+    def verify_matrix_dimensions(self) -> Self:
+        """Mathematically assert spatial fractional grid perfectly matches the Cartesian matrix geometry."""
+        if self.row_fractional_weights and len(self.row_fractional_weights) != len(self.layout_matrix):
+            raise ValueError(
+                "Topological Contradiction: row_fractional_weights length does not match the number of rows in layout_matrix."
+            )
+        if (
+            self.column_fractional_weights
+            and self.layout_matrix
+            and len(self.column_fractional_weights) != len(self.layout_matrix[0])
+        ):
+            raise ValueError(
+                "Topological Contradiction: column_fractional_weights length does not match the number of columns in layout_matrix."
+            )
+        return self
 
     @model_validator(mode="after")
     def verify_referential_integrity(self) -> Self:
@@ -7437,6 +7639,9 @@ class CompositeNodeProfile(CoreasonBaseState):
     optical_physics: PhysicallyBasedRenderingProfile | None = Field(
         default=None, description="The strict microfacet BRDF physics governing the visual representation of this node."
     )
+    neural_optics: GaussianSplattingProfile | None = Field(
+        default=None, description="The volumetric Gaussian Splatting configuration for non-polygonal rendering."
+    )
 
     @field_validator("domain_extensions", mode="before")
     @classmethod
@@ -7682,7 +7887,8 @@ class PresentationManifest(CoreasonBaseState):
 
     EPISTEMIC BOUNDS: Mathematically binds exactly one AnyPresentationIntent to one
     MacroGridProfile, preventing asynchronous UI state drift and ensuring the generated grid
-    is causally justified by a verified intent.
+    is causally justified by a verified intent. The focal_depth_meters is strictly clamped
+    (ge=0.1, le=100.0) to physically intercept the observer's optical plane at a safe depth.
 
     MCP ROUTING TRIGGERS: Supervisory Control Theory, Mixed-Initiative UI, Cognitive State
     Binding, Structural Manifold Envelope, Human-in-the-Loop
@@ -7692,6 +7898,12 @@ class PresentationManifest(CoreasonBaseState):
     grid: MacroGridProfile = Field(description="The grid of panels being presented.")
     ambient_telemetry: AmbientState | None = Field(
         default=None, description="Stateless non-blocking telemetry for continuous progress updates."
+    )
+    focal_depth_meters: float = Field(
+        ge=0.1,
+        le=100.0,
+        default=1.0,
+        description="The absolute Z-axis physical distance to lock the Presentation UI relative to the observer's optical center, resolving vergence-accommodation conflicts.",
     )
 
 
@@ -9532,6 +9744,9 @@ class AgentNodeProfile(CoreasonBaseState):
     optical_physics: PhysicallyBasedRenderingProfile | None = Field(
         default=None, description="The strict microfacet BRDF physics governing the visual representation of this node."
     )
+    neural_optics: GaussianSplattingProfile | None = Field(
+        default=None, description="The volumetric Gaussian Splatting configuration for non-polygonal rendering."
+    )
 
     @field_validator("domain_extensions", mode="before")
     @classmethod
@@ -9742,16 +9957,9 @@ class MarkovBlanketRenderingPolicy(CoreasonBaseState):
 
 class TelemetryBackpressureContract(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Formalizes the Observer Effect to dynamically modulate the thermodynamic flow
-    of network egress based on the observer's spatial view frustum.
-
-    CAUSAL AFFORDANCE: Instructs the orchestrator's telemetry manifold to aggressively shed
-    bandwidth load by calculating the dot product of topology nodes against the observer's focal
-    vector. It starves occluded or peripheral subgraphs of kinematic updates to preserve system liveness.
-
-    EPISTEMIC BOUNDS: Temporal refresh velocities are strictly clamped to physical Hertz frequencies.
-    The mathematical invariant guarantees that flow rate monotonically increases as nodes approach the focal center.
-
+    AGENT INSTRUCTION: Formalizes the Observer Effect to dynamically modulate the thermodynamic flow of network egress based on the observer's spatial view frustum.
+    CAUSAL AFFORDANCE: Instructs the orchestrator's telemetry manifold to aggressively shed bandwidth load by calculating the dot product of topology nodes against the observer's focal vector. It starves occluded or peripheral subgraphs of kinematic updates to preserve system liveness.
+    EPISTEMIC BOUNDS: Temporal refresh velocities are strictly clamped to physical Hertz frequencies. The mathematical invariant guarantees that flow rate monotonically increases as nodes approach the focal center.
     MCP ROUTING TRIGGERS: Observer Effect, Frustum Culling, Thermodynamic Flow Control, Telemetry Backpressure, Spatial Masking
     """
 
@@ -9769,6 +9977,20 @@ class TelemetryBackpressureContract(CoreasonBaseState):
         default=0,
         description="The starvation rate (Hz) for topologies failing the depth test or falling outside clipping planes.",
     )
+    epsilon_derivative_threshold: float = Field(
+        ge=0.0,
+        le=1000.0,
+        default=0.0,
+        description="Minimum spatial or state magnitude delta required to authorize network egress.",
+    )
+
+    @model_validator(mode="after")
+    def enforce_epsilon_velocity_bounds(self) -> Self:
+        if self.epsilon_derivative_threshold == 0.0 and self.focal_refresh_rate_hz > 60:
+            raise ValueError(
+                "Thermodynamic Violation: Unthrottled infinite stream saturation (epsilon 0.0) is mathematically forbidden at frequencies > 60Hz."
+            )
+        return self
 
     @model_validator(mode="after")
     def enforce_velocity_gradient(self) -> Self:
@@ -9811,6 +10033,19 @@ class ObservabilityLODPolicy(CoreasonBaseState):
         default_factory=list,
         description="The array of Area of Interest perimeters dictating spatial telemetry isolation.",
     )
+    foveated_privacy_epsilon: float | None = Field(
+        default=None,
+        ge=0.0,
+        description=r"The Laplacian noise parameter ($\epsilon$) injected into the spatial telemetry for nodes residing in the meso and macro distance thresholds, preventing reverse-engineering of exact swarm weights.",
+    )
+
+    @model_validator(mode="after")
+    def enforce_differential_privacy_bounds(self) -> Self:
+        if self.foveated_privacy_epsilon is not None and not self.spectral_coarsening_active:
+            raise ValueError(
+                "Topological Contradiction: Cannot apply differential privacy to an uncoarsened, raw graph. spectral_coarsening_active must be True."
+            )
+        return self
 
     @model_validator(mode="after")
     def _enforce_canonical_sort_subscriptions(self) -> Self:
@@ -10743,7 +10978,8 @@ class WetwareAttestationContract(CoreasonBaseState):
     EPISTEMIC BOUNDS: Physically binds the signature to a specific Merkle-DAG
     coordinate via dag_node_nonce (UUID), strictly preventing cryptographic Replay
     Attacks. The cryptographic_payload is restricted by regex
-    (^[A-Za-z0-9+/=_-]+$) to prevent injection anomalies.
+    (^[A-Za-z0-9+/=_-]+$) to prevent injection anomalies. The liveness_challenge_hash
+    is tightly bounded to SHA-256 (^[a-f0-9]{64}$) to prove real-time human presence.
 
     MCP ROUTING TRIGGERS: WebAuthn, FIDO2, Cryptographic Nonce, Replay Attack
     Prevention, Wetware Entropy
@@ -10765,6 +11001,11 @@ class WetwareAttestationContract(CoreasonBaseState):
             ..., description="The cryptographic nonce tightly binding this signature to the specific Merkle-DAG node."
         )
     )
+    liveness_challenge_hash: Annotated[
+        str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")
+    ] = Field(
+        description="The SHA-256 hash of the dynamic, temporally bound challenge emitted by the orchestrator to guarantee real-time human presence."
+    )
 
 
 class InterventionReceipt(CoreasonBaseState):
@@ -10779,7 +11020,8 @@ class InterventionReceipt(CoreasonBaseState):
 
     EPISTEMIC BOUNDS: Mathematically locked against Replay Attacks via the intervention_request_id
     (a UUID cryptographic nonce). The @model_validator physically guarantees that if a WetwareAttestationContract
-    is present, its internal DAG node nonce must perfectly match the request ID, preventing signature laundering.
+    is present, its internal DAG node nonce must perfectly match the request ID, preventing signature laundering,
+    and mathematically linking the human's signature to the liveness_challenge_hash challenge.
 
     MCP ROUTING TRIGGERS: Cryptographic Nonce, State Resumption, Replay Attack Prevention, Wetware Attestation, Liveness Resolution
     """
@@ -10803,7 +11045,10 @@ class InterventionReceipt(CoreasonBaseState):
     def verify_attestation_nonce(self) -> "InterventionReceipt":
         """
         Mathematically guarantees that if a cryptographic signature is presented,
-        it cannot be a replay attack from a different node in the DAG.
+        it cannot be a replay attack from a different node in the DAG. Also asserts that
+        if self.attestation is provided, it carries the liveness_challenge_hash,
+        mathematically linking the human's hardware-backed signature to the
+        orchestrator's real-time challenge alongside verifying dag_node_nonce.
         """
         if self.attestation is not None and self.attestation.dag_node_nonce != self.intervention_request_id:
             raise ValueError(
@@ -12158,6 +12403,7 @@ EpistemicLedgerState.model_rebuild()
 PresentationManifest.model_rebuild()
 DynamicManifoldProjectionManifest.model_rebuild()
 ObservationEvent.model_rebuild()
+MCPClientIntent.model_rebuild()
 OntologicalHandshakeReceipt.model_rebuild()
 
 ManifestViolationReceipt.model_rebuild()
@@ -12172,6 +12418,8 @@ PhysicallyBasedRenderingProfile.model_rebuild()
 KinematicDeltaManifest.model_rebuild()
 SpatialBillboardContract.model_rebuild()
 VolumetricEdgeProfile.model_rebuild()
+GaussianSplattingProfile.model_rebuild()
+KinematicDerivativeTensor.model_rebuild()
 SemanticZoomProfile.model_rebuild()
 MarkovBlanketRenderingPolicy.model_rebuild()
 TelemetryBackpressureContract.model_rebuild()
@@ -12229,3 +12477,4 @@ DataFidelityReceipt.model_rebuild()
 NeurosymbolicInferenceRequest.model_rebuild()
 
 EpistemicUpsamplingTask.model_rebuild()
+VolumetricPartitionSubscription.model_rebuild()
