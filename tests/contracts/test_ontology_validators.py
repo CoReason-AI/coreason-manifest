@@ -26,11 +26,11 @@ from coreason_manifest.spec.ontology import (
     ConstrainedDecodingPolicy,
     ContextualizedSourceEntity,
     CoreasonBaseState,
+    DataFidelityReceipt,
     DefeasibleCascadeEvent,
     DynamicLayoutManifest,
     EphemeralNamespacePartitionState,
     EpistemicCompressionSLA,
-    EpistemicFidelityReceipt,
     EpistemicSecurity,
     EpistemicUpsamplingTask,
     GradingCriterionProfile,
@@ -878,7 +878,7 @@ def test_refusal_to_reason_enforcement() -> None:
         contextual_envelope=[],
         source_system_provenance_flag=False,
     )
-    fidelity_receipt = EpistemicFidelityReceipt(
+    fidelity_receipt = DataFidelityReceipt(
         contextual_completeness_score=0.0,
         surrounding_token_density=0,
     )
@@ -912,7 +912,7 @@ def test_successful_epistemic_grounding() -> None:
         contextual_envelope=["patient chart", "medication order"],
         source_system_provenance_flag=True,
     )
-    fidelity_receipt = EpistemicFidelityReceipt(
+    fidelity_receipt = DataFidelityReceipt(
         contextual_completeness_score=0.9,
         surrounding_token_density=10,
     )

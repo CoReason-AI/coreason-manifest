@@ -22,8 +22,8 @@ from coreason_manifest.spec.ontology import (
     ComputeTier,
     ContextualizedSourceEntity,
     DAGTopologyManifest,
+    DataFidelityReceipt,
     EpistemicCompressionSLA,
-    EpistemicFidelityReceipt,
     EpistemicSecurity,
     HardwareProfile,
     MultimodalTokenAnchorState,
@@ -346,7 +346,7 @@ def test_refusal_to_reason_fuzzing(epistemic_gap: float, min_fidelity_threshold:
         contextual_envelope=[],
         source_system_provenance_flag=False,
     )
-    fidelity_receipt = EpistemicFidelityReceipt(
+    fidelity_receipt = DataFidelityReceipt(
         contextual_completeness_score=0.0,
         surrounding_token_density=token_density,
     )
@@ -403,7 +403,7 @@ def test_data_fidelity_receipt_positive_token_density() -> None:
     from pydantic import ValidationError
 
     with pytest.raises(ValidationError):
-        EpistemicFidelityReceipt(
+        DataFidelityReceipt(
             contextual_completeness_score=1.0,
             surrounding_token_density=-1,
         )
