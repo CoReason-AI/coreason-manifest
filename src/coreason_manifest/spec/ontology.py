@@ -621,6 +621,24 @@ class SpatialReferenceFrameManifest(CoreasonBaseState):
     )
 
 
+class KinematicDerivativeTensor(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Kinematic Derivatives, Hermite Spline Extrapolation, Continuous Collision Detection, Newtonian Mechanics
+    CAUSAL AFFORDANCE: Kinematic Derivatives, Hermite Spline Extrapolation, Continuous Collision Detection, Newtonian Mechanics
+    EPISTEMIC BOUNDS: Kinematic Derivatives, Hermite Spline Extrapolation, Continuous Collision Detection, Newtonian Mechanics
+    MCP ROUTING TRIGGERS: Kinematic Derivatives, Hermite Spline Extrapolation, Continuous Collision Detection, Newtonian Mechanics
+    """
+
+    linear_velocity: tuple[float, float, float] = Field(description="The 3D Euclidean velocity vector.")
+    # Note: linear_velocity is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
+    angular_velocity: tuple[float, float, float] = Field(description="The 3D rotational velocity vector.")
+    # Note: angular_velocity is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
+    linear_acceleration: tuple[float, float, float] = Field(description="The 3D Euclidean acceleration vector.")
+    # Note: linear_acceleration is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
+    angular_acceleration: tuple[float, float, float] = Field(description="The 3D rotational acceleration vector.")
+    # Note: angular_acceleration is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
+
+
 class SE3TransformProfile(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Represents a strict rigid-body transformation within the Special Euclidean group SE(3). Projects an absolute mathematical coordinate encompassing both translation ($\mathbb{R}^3$) and rotation ($S^3$).
@@ -650,6 +668,14 @@ class SE3TransformProfile(CoreasonBaseState):
     scale: float = Field(
         ge=0.0001, le=10000.0, default=1.0, description="Strictly positive uniform volumetric scaling factor."
     )
+    kinematic_derivatives: KinematicDerivativeTensor | None = Field(
+        default=None, description="Tensors governing continuous momentum and velocity."
+    )
+    dual_quaternion_motor: tuple[float, float, float, float, float, float, float, float] | None = Field(
+        default=None,
+        description="The 8-dimensional Clifford Algebra motor for mathematically flawless ScLERP interpolation.",
+    )
+    # Note: dual_quaternion_motor is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
 
     @model_validator(mode="after")
     def enforce_quaternion_normalization(self) -> Self:
@@ -689,6 +715,24 @@ class VolumetricBoundingProfile(CoreasonBaseState):
         if self.extents_x * self.extents_y * self.extents_z == 0.0:
             raise ValueError("Topological Violation: Volumetric space must have 3D magnitude strictly greater than 0.")
         return self
+
+
+class GaussianSplattingProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Neural Radiance Fields, 3D Gaussian Splatting, Spherical Harmonics, Volumetric Rendering, Covariance Matrix
+    CAUSAL AFFORDANCE: Neural Radiance Fields, 3D Gaussian Splatting, Spherical Harmonics, Volumetric Rendering, Covariance Matrix
+    EPISTEMIC BOUNDS: Neural Radiance Fields, 3D Gaussian Splatting, Spherical Harmonics, Volumetric Rendering, Covariance Matrix
+    MCP ROUTING TRIGGERS: Neural Radiance Fields, 3D Gaussian Splatting, Spherical Harmonics, Volumetric Rendering, Covariance Matrix
+    """
+
+    spherical_harmonics_degree: int = Field(
+        ge=0, le=3, description="Capped at 3 to physically prevent VRAM explosion during WebGL rasterization."
+    )
+    covariance_scale: tuple[float, float, float] = Field(
+        description="The 3D anisotropic scaling vector of the Gaussian ellipsoid."
+    )
+    # Note: covariance_scale is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
+    opacity_alpha: float = Field(ge=0.0, le=1.0, description="The alpha transmittance scalar of the splat.")
 
 
 class ViewportProjectionContract(CoreasonBaseState):
@@ -910,6 +954,18 @@ class SpatialBillboardContract(CoreasonBaseState):
         default=1.0,
         description="Controls orthographic size invariance; scaling the matrix inversely to camera distance.",
     )
+    spherical_cylindrical_lock: Literal["spherical", "cylindrical_y", "none"] = Field(
+        default="spherical",
+        description="Dictates whether the UI panel rotates freely on all axes (spherical) or locks to the Y-axis (cylindrical).",
+    )
+
+    @model_validator(mode="after")
+    def enforce_billboard_matrix(self) -> Self:
+        if self.spherical_cylindrical_lock == "none" and self.distance_scaling_factor != 0.0:
+            raise ValueError(
+                "Topological Violation: if spherical_cylindrical_lock is 'none', distance_scaling_factor MUST be 0.0."
+            )
+        return self
 
 
 class VolumetricEdgeProfile(CoreasonBaseState):
@@ -918,13 +974,13 @@ class VolumetricEdgeProfile(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Instructs the spatial rendering engine to compute C1-continuous parametric splines between discrete nodes, translating abstract logical edges into physical volumetric manifolds.
 
-    EPISTEMIC BOUNDS: Curve geometry is locked to the Literal automaton `["straight", "bezier", "catmull_rom"]`. Thermodynamic token velocity is clamped by `flow_velocity` (`ge=0.0, le=100.0`). Spline rigidity (`tension`) is bounded `[0.0, 1.0]`.
+    EPISTEMIC BOUNDS: Curve geometry is locked to the Literal automaton `["straight", "bezier", "catmull_rom", "riemannian_geodesic"]`. Thermodynamic token velocity is clamped by `flow_velocity` (`ge=0.0, le=100.0`). Spline rigidity (`tension`) is bounded `[0.0, 1.0]`.
 
     MCP ROUTING TRIGGERS: Parametric Spline Interpolation, Catmull-Rom, Bezier Geometry, C1 Continuity, Volumetric Edge
 
     """
 
-    curve_type: Literal["straight", "bezier", "catmull_rom"] = Field(
+    curve_type: Literal["straight", "bezier", "catmull_rom", "riemannian_geodesic"] = Field(
         description="The mathematical spline geometry used to interpolate the space between vertices."
     )
     tension: float = Field(
@@ -939,6 +995,20 @@ class VolumetricEdgeProfile(CoreasonBaseState):
     edge_thickness: float = Field(
         ge=0.01, le=10.0, default=0.1, description="The physical volumetric width of the connection manifold in meters."
     )
+    spatial_repulsion_scalar: float = Field(
+        ge=0.0,
+        le=100.0,
+        default=0.0,
+        description="The mathematical gravity or repulsion field the edge asserts to avoid intersecting with volumetric bounding cages.",
+    )
+
+    @model_validator(mode="after")
+    def enforce_geodesic_physics(self) -> Self:
+        if self.curve_type == "riemannian_geodesic" and self.spatial_repulsion_scalar <= 0.0:
+            raise ValueError(
+                "Topological Violation: riemannian_geodesic must have spatial_repulsion_scalar strictly greater than 0.0."
+            )
+        return self
 
 
 _TSTRING_AST_ALLOWLIST: tuple[type, ...] = (
@@ -6135,6 +6205,9 @@ class HumanNodeProfile(CoreasonBaseState):
     optical_physics: PhysicallyBasedRenderingProfile | None = Field(
         default=None, description="The strict microfacet BRDF physics governing the visual representation of this node."
     )
+    neural_optics: GaussianSplattingProfile | None = Field(
+        default=None, description="The volumetric Gaussian Splatting configuration for non-polygonal rendering."
+    )
 
     @field_validator("domain_extensions", mode="before")
     @classmethod
@@ -6198,6 +6271,9 @@ class MemoizedNodeProfile(CoreasonBaseState):
     optical_physics: PhysicallyBasedRenderingProfile | None = Field(
         default=None, description="The strict microfacet BRDF physics governing the visual representation of this node."
     )
+    neural_optics: GaussianSplattingProfile | None = Field(
+        default=None, description="The volumetric Gaussian Splatting configuration for non-polygonal rendering."
+    )
 
     @field_validator("domain_extensions", mode="before")
     @classmethod
@@ -6259,6 +6335,9 @@ class SystemNodeProfile(CoreasonBaseState):
     )
     optical_physics: PhysicallyBasedRenderingProfile | None = Field(
         default=None, description="The strict microfacet BRDF physics governing the visual representation of this node."
+    )
+    neural_optics: GaussianSplattingProfile | None = Field(
+        default=None, description="The volumetric Gaussian Splatting configuration for non-polygonal rendering."
     )
 
     @field_validator("domain_extensions", mode="before")
@@ -7488,6 +7567,9 @@ class CompositeNodeProfile(CoreasonBaseState):
     )
     optical_physics: PhysicallyBasedRenderingProfile | None = Field(
         default=None, description="The strict microfacet BRDF physics governing the visual representation of this node."
+    )
+    neural_optics: GaussianSplattingProfile | None = Field(
+        default=None, description="The volumetric Gaussian Splatting configuration for non-polygonal rendering."
     )
 
     @field_validator("domain_extensions", mode="before")
@@ -9583,6 +9665,9 @@ class AgentNodeProfile(CoreasonBaseState):
     )
     optical_physics: PhysicallyBasedRenderingProfile | None = Field(
         default=None, description="The strict microfacet BRDF physics governing the visual representation of this node."
+    )
+    neural_optics: GaussianSplattingProfile | None = Field(
+        default=None, description="The volumetric Gaussian Splatting configuration for non-polygonal rendering."
     )
 
     @field_validator("domain_extensions", mode="before")
@@ -12232,6 +12317,8 @@ PhysicallyBasedRenderingProfile.model_rebuild()
 KinematicDeltaManifest.model_rebuild()
 SpatialBillboardContract.model_rebuild()
 VolumetricEdgeProfile.model_rebuild()
+GaussianSplattingProfile.model_rebuild()
+KinematicDerivativeTensor.model_rebuild()
 SemanticZoomProfile.model_rebuild()
 MarkovBlanketRenderingPolicy.model_rebuild()
 TelemetryBackpressureContract.model_rebuild()
