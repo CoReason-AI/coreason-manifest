@@ -15,7 +15,10 @@ from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
     CoalgebraicHydrationPolicy,
+    DynamicManifoldProjectionManifest,
+    GrammarPanelProfile,
     MCPClientIntent,
+    SemanticZoomProfile,
     TelemetryBackpressureContract,
 )
 
@@ -99,31 +102,28 @@ def test_holographic_resolution_pass() -> None:
         jsonrpc="2.0",
         id="req-123",
         method="mcp.ui.emit_intent",
-        holographic_projection={  # type: ignore[arg-type]
-            "type": "dynamic_manifold",
-            "manifest_id": "mani-123",
-            "active_forge_id": "node-1",
-            "ast_gradient_visual_mapping": {
-                "panel_cid": "panel-124",
-                "type": "grammar",
-                "title": "Title",
-                "ledger_source_id": "node-123",
-                "mark": "point",
-                "encodings": [],
-            },
-            "thermodynamic_burn_mapping": {
-                "panel_cid": "panel-123",
-                "type": "grammar",
-                "title": "Title",
-                "ledger_source_id": "node-123",
-                "mark": "point",
-                "encodings": [],
-            },
-            "viewport_zoom_profile": {
-                "macro_distance_threshold": 100.0,
-                "meso_distance_threshold": 50.0,
-                "micro_distance_threshold": 10.0,
-            },
-        },
+        holographic_projection=DynamicManifoldProjectionManifest(
+            manifest_id="mani-123",
+            active_forge_id="node-1",
+            ast_gradient_visual_mapping=GrammarPanelProfile(
+                panel_cid="panel-124",
+                title="Title",
+                ledger_source_id="node-123",
+                mark="point",
+                encodings=[],
+            ),
+            thermodynamic_burn_mapping=GrammarPanelProfile(
+                panel_cid="panel-123",
+                title="Title",
+                ledger_source_id="node-123",
+                mark="point",
+                encodings=[],
+            ),
+            viewport_zoom_profile=SemanticZoomProfile(
+                macro_distance_threshold=100.0,
+                meso_distance_threshold=50.0,
+                micro_distance_threshold=10.0,
+            ),
+        ),
     )
     assert intent.holographic_projection is not None
