@@ -25,12 +25,12 @@ def test_sybil_resistance() -> None:
     # Write a Pytest asserting that a BeliefMutationEvent fails validation if quorum_signatures contains duplicate strings.
     with pytest.raises(ValueError, match=r"Sybil Attack Detected: Duplicate signatures found in quorum\."):
         BeliefMutationEvent(
-            event_id="test-event-1", timestamp=0.0, payload={}, quorum_signatures=["sig1", "sig2", "sig1"]
+            event_cid="test-event-1", timestamp=0.0, payload={}, quorum_signatures=["sig1", "sig2", "sig1"]
         )
 
 
 def test_defeasible_quarantine() -> None:
-    # Write a Pytest proving that an EpistemicLedgerState crashes if a key in defeasible_claims is also listed in the quarantined_event_ids of an active cascade.
+    # Write a Pytest proving that an EpistemicLedgerState crashes if a key in defeasible_claims is also listed in the quarantined_event_cids of an active cascade.
 
     with pytest.raises(
         ValueError, match=r"Epistemic Contagion Detected: Quarantined node found in active defeasible claims\."
@@ -39,11 +39,11 @@ def test_defeasible_quarantine() -> None:
             history=[],
             defeasible_claims={
                 "claim1": SemanticNodeState(
-                    node_id="claim1",
+                    node_cid="claim1",
                     label="test",
                     text_chunk="test",
                     provenance=EpistemicProvenanceReceipt(
-                        source_event_id="test_event",
+                        source_event_cid="test_event",
                         extracted_by="did:coreason:agent-1",
                         derivation_mode=DerivationMode.DIRECT_TRANSLATION,
                     ),
@@ -54,7 +54,7 @@ def test_defeasible_quarantine() -> None:
                     cascade_id="cascade1",
                     root_falsified_event_id="root_event",
                     propagated_decay_factor=0.5,
-                    quarantined_event_ids=["claim1"],
+                    quarantined_event_cids=["claim1"],
                 )
             ],
         )
@@ -66,7 +66,7 @@ def test_merkle_chain() -> None:
     with pytest.raises(ValueError, match="Merkle Chain Broken: Event missing prior_event_hash"):
         EpistemicLedgerState(
             history=[
-                ObservationEvent(event_id="event1", timestamp=1.0, payload={}),
-                ObservationEvent(event_id="event2", timestamp=2.0, payload={}, prior_event_hash=None),
+                ObservationEvent(event_cid="event1", timestamp=1.0, payload={}),
+                ObservationEvent(event_cid="event2", timestamp=2.0, payload={}, prior_event_hash=None),
             ]
         )

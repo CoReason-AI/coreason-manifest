@@ -70,7 +70,7 @@ def test_browser_dom_ssrf_quarantine(url: str) -> None:
 )
 def test_polymorphic_xss_proof(payload: str) -> None:
     """Prove InsightCardProfile definitively sanitizes malicious Markdown tags and schemas via ammonia."""
-    profile = InsightCardProfile(panel_id="panel_1", title="Insight Title", markdown_content=payload)
+    profile = InsightCardProfile(panel_cid="panel_1", title="Insight Title", markdown_content=payload)
     assert "<script>" not in profile.markdown_content
     assert "alert(1)" not in profile.markdown_content
 
@@ -107,7 +107,7 @@ def test_multimodal_grounding_density_alignment(visual_modality: Any) -> None:
         match=r"Epistemic safety violation: Visual or tabular modalities require strict spatial tracking\.",
     ):
         EpistemicTransmutationTask(
-            task_id="task_visual_test",
+            task_cid="task_visual_test",
             artifact_event_id="artifact_1",
             target_modalities=[visual_modality],
             compression_sla=compression_sla,
@@ -117,7 +117,7 @@ def test_multimodal_grounding_density_alignment(visual_modality: Any) -> None:
 def test_epistemic_license_enforcement() -> None:
     """Prove that instantiating GlobalGovernancePolicy with invalid mandatory_license_rule triggers ValidationError."""
     invalid_license = ConstitutionalPolicy(
-        rule_id="MIT_LICENSE", severity="low", description="test", forbidden_intents=[]
+        rule_cid="MIT_LICENSE", severity="low", description="test", forbidden_intents=[]
     )
     with pytest.raises(ValidationError, match="CRITICAL LICENSE VIOLATION"):
         GlobalGovernancePolicy(
@@ -147,10 +147,10 @@ def test_mcp_quarantine_gateway_tripwire() -> None:
 
     with pytest.raises(ValidationError, match="UNAUTHORIZED MCP MOUNT"):
         MCPServerManifest(
-            server_id="rogue_server_1",
+            server_cid="rogue_server_1",
             transport=HTTPTransportProfile(uri=HttpUrl("http://www.example.com"), headers={}),
             capability_whitelist=MCPCapabilityWhitelistPolicy(
-                allowed_tools=["shell"], allowed_resources=["file://*"], allowed_prompts=["system"]
+                authorized_capability_array=["shell"], allowed_resources=["file://*"], allowed_prompts=["system"]
             ),
             attestation_receipt=receipt,
         )
@@ -161,7 +161,7 @@ def test_tool_invocation_cryptographic_starvation() -> None:
 
     with pytest.raises(ValidationError):
         ToolInvocationEvent(
-            event_id="test_event",
+            event_cid="test_event",
             timestamp=1234567890.0,
             tool_name="test_tool",
             parameters={},
@@ -189,11 +189,11 @@ def test_mcp_quarantine_gateway_authorized_mount() -> None:
 
     # This must instantiate cleanly without raising a ValidationError
     manifest = MCPServerManifest(
-        server_id="server_1",
+        server_cid="server_1",
         transport=StdioTransportProfile(command="stdio://coreason-mcp", args=[]),
         binary_hash="a" * 64,
         capability_whitelist=MCPCapabilityWhitelistPolicy(
-            allowed_tools=["fetch"], allowed_resources=[], allowed_prompts=[]
+            authorized_capability_array=["fetch"], allowed_resources=[], allowed_prompts=[]
         ),
         attestation_receipt=valid_receipt,
     )
@@ -208,7 +208,7 @@ def test_kinetic_separation_canonical_sort() -> None:
     chaotic_clusters = [["mcp://server-b", "mcp://server-a"], ["tool-z", "tool-x", "tool-y"]]
 
     policy = KineticSeparationPolicy(
-        policy_id="test_bipartite_01",
+        policy_cid="test_bipartite_01",
         mutually_exclusive_clusters=chaotic_clusters,
         enforcement_action="halt_and_quarantine",
     )
@@ -249,14 +249,14 @@ def test_procedural_manifold_deterministic_sort() -> None:
     """Prove that OntologicalSurfaceProjectionManifest deterministically sorts available_procedural_manifolds."""
     from coreason_manifest.spec.ontology import OntologicalSurfaceProjectionManifest, ProceduralMetadataManifest
 
-    m1 = ProceduralMetadataManifest(metadata_id="zeta_01", target_sop_id="sop_1", trigger_description="Zeta SOP")
-    m2 = ProceduralMetadataManifest(metadata_id="alpha_02", target_sop_id="sop_2", trigger_description="Alpha SOP")
+    m1 = ProceduralMetadataManifest(metadata_cid="zeta_01", target_sop_id="sop_1", trigger_description="Zeta SOP")
+    m2 = ProceduralMetadataManifest(metadata_cid="alpha_02", target_sop_id="sop_2", trigger_description="Alpha SOP")
 
-    projection = OntologicalSurfaceProjectionManifest(projection_id="proj_1", available_procedural_manifolds=[m1, m2])
+    projection = OntologicalSurfaceProjectionManifest(projection_cid="proj_1", available_procedural_manifolds=[m1, m2])
 
-    # Assert the array was mathematically sorted by metadata_id
-    assert projection.available_procedural_manifolds[0].metadata_id == "alpha_02"
-    assert projection.available_procedural_manifolds[1].metadata_id == "zeta_01"
+    # Assert the array was mathematically sorted by metadata_cid
+    assert projection.available_procedural_manifolds[0].metadata_cid == "alpha_02"
+    assert projection.available_procedural_manifolds[1].metadata_cid == "zeta_01"
 
 
 @given(
