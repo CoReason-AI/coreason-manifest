@@ -739,6 +739,18 @@
           "default": null,
           "description": "The strict microfacet BRDF physics governing the visual representation of this node."
         },
+        "neural_optics": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GaussianSplattingProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The volumetric Gaussian Splatting configuration for non-polygonal rendering."
+        },
         "description": {
           "description": "The semantic boundary defining the objective function of the execution node. [SITD-Gamma: Neurosymbolic Substrate Alignment]",
           "maxLength": 2000,
@@ -3348,6 +3360,18 @@
           ],
           "default": null,
           "description": "The strict microfacet BRDF physics governing the visual representation of this node."
+        },
+        "neural_optics": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GaussianSplattingProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The volumetric Gaussian Splatting configuration for non-polygonal rendering."
         },
         "type": {
           "const": "composite",
@@ -8284,6 +8308,51 @@
       "title": "FormalVerificationContract",
       "type": "object"
     },
+    "GaussianSplattingProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Neural Radiance Fields, 3D Gaussian Splatting, Spherical Harmonics, Volumetric Rendering, Covariance Matrix\nCAUSAL AFFORDANCE: Neural Radiance Fields, 3D Gaussian Splatting, Spherical Harmonics, Volumetric Rendering, Covariance Matrix\nEPISTEMIC BOUNDS: Neural Radiance Fields, 3D Gaussian Splatting, Spherical Harmonics, Volumetric Rendering, Covariance Matrix\nMCP ROUTING TRIGGERS: Neural Radiance Fields, 3D Gaussian Splatting, Spherical Harmonics, Volumetric Rendering, Covariance Matrix",
+      "properties": {
+        "spherical_harmonics_degree": {
+          "description": "Capped at 3 to physically prevent VRAM explosion during WebGL rasterization.",
+          "maximum": 3,
+          "minimum": 0,
+          "title": "Spherical Harmonics Degree",
+          "type": "integer"
+        },
+        "covariance_scale": {
+          "description": "The 3D anisotropic scaling vector of the Gaussian ellipsoid.",
+          "maxItems": 3,
+          "minItems": 3,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Covariance Scale",
+          "type": "array"
+        },
+        "opacity_alpha": {
+          "description": "The alpha transmittance scalar of the splat.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Opacity Alpha",
+          "type": "number"
+        }
+      },
+      "required": [
+        "spherical_harmonics_degree",
+        "covariance_scale",
+        "opacity_alpha"
+      ],
+      "title": "GaussianSplattingProfile",
+      "type": "object"
+    },
     "GenerativeManifoldSLA": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Ergodic Theory and Branching Factor Analysis to\nrigorously bound the topological expansion of synthetic or fractal graphs. As\nan ...SLA suffix, this enforces rigid mathematical boundaries globally.\n\nCAUSAL AFFORDANCE: Acts as a physical gas limit on generative expansion,\nauthorizing the orchestrator to cull recursive encapsulation before it induces\nstate-space explosion or GPU VRAM exhaustion.\n\nEPISTEMIC BOUNDS: Mathematically clamps geometric explosion via the\n@model_validator enforce_geometric_bounds, guaranteeing\nmax_node_fanout ** max_topological_depth <= 1000. Both max_topological_depth\nand max_node_fanout are strictly positive (ge=1, le=1000000000). Synthetic\ntoken economy is capped by max_synthetic_tokens (ge=1, le=1000000000).\n\nMCP ROUTING TRIGGERS: Ergodic Theory, Branching Factor Analysis, State-Space\nExplosion, Fractal Graph Bounding, Gas Limit",
@@ -8999,6 +9068,18 @@
           ],
           "default": null,
           "description": "The strict microfacet BRDF physics governing the visual representation of this node."
+        },
+        "neural_optics": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GaussianSplattingProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The volumetric Gaussian Splatting configuration for non-polygonal rendering."
         },
         "type": {
           "const": "human",
@@ -10050,6 +10131,92 @@
         "deltas"
       ],
       "title": "KinematicDeltaManifest",
+      "type": "object"
+    },
+    "KinematicDerivativeTensor": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Kinematic Derivatives, Hermite Spline Extrapolation, Continuous Collision Detection, Newtonian Mechanics\nCAUSAL AFFORDANCE: Kinematic Derivatives, Hermite Spline Extrapolation, Continuous Collision Detection, Newtonian Mechanics\nEPISTEMIC BOUNDS: Kinematic Derivatives, Hermite Spline Extrapolation, Continuous Collision Detection, Newtonian Mechanics\nMCP ROUTING TRIGGERS: Kinematic Derivatives, Hermite Spline Extrapolation, Continuous Collision Detection, Newtonian Mechanics",
+      "properties": {
+        "linear_velocity": {
+          "description": "The 3D Euclidean velocity vector.",
+          "maxItems": 3,
+          "minItems": 3,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Linear Velocity",
+          "type": "array"
+        },
+        "angular_velocity": {
+          "description": "The 3D rotational velocity vector.",
+          "maxItems": 3,
+          "minItems": 3,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Angular Velocity",
+          "type": "array"
+        },
+        "linear_acceleration": {
+          "description": "The 3D Euclidean acceleration vector.",
+          "maxItems": 3,
+          "minItems": 3,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Linear Acceleration",
+          "type": "array"
+        },
+        "angular_acceleration": {
+          "description": "The 3D rotational acceleration vector.",
+          "maxItems": 3,
+          "minItems": 3,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Angular Acceleration",
+          "type": "array"
+        }
+      },
+      "required": [
+        "linear_velocity",
+        "angular_velocity",
+        "linear_acceleration",
+        "angular_acceleration"
+      ],
+      "title": "KinematicDerivativeTensor",
       "type": "object"
     },
     "KinematicNoiseProfile": {
@@ -11209,6 +11376,18 @@
           ],
           "default": null,
           "description": "The strict microfacet BRDF physics governing the visual representation of this node."
+        },
+        "neural_optics": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GaussianSplattingProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The volumetric Gaussian Splatting configuration for non-polygonal rendering."
         },
         "type": {
           "const": "memoized",
@@ -13215,6 +13394,59 @@
           "minimum": 0.0001,
           "title": "Scale",
           "type": "number"
+        },
+        "kinematic_derivatives": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/KinematicDerivativeTensor"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Tensors governing continuous momentum and velocity."
+        },
+        "dual_quaternion_motor": {
+          "anyOf": [
+            {
+              "maxItems": 8,
+              "minItems": 8,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The 8-dimensional Clifford Algebra motor for mathematically flawless ScLERP interpolation.",
+          "title": "Dual Quaternion Motor"
         }
       },
       "required": [
@@ -14300,6 +14532,17 @@
           "minimum": 0.0,
           "title": "Distance Scaling Factor",
           "type": "number"
+        },
+        "spherical_cylindrical_lock": {
+          "default": "spherical",
+          "description": "Dictates whether the UI panel rotates freely on all axes (spherical) or locks to the Y-axis (cylindrical).",
+          "enum": [
+            "spherical",
+            "cylindrical_y",
+            "none"
+          ],
+          "title": "Spherical Cylindrical Lock",
+          "type": "string"
         }
       },
       "required": [
@@ -15313,6 +15556,18 @@
           ],
           "default": null,
           "description": "The strict microfacet BRDF physics governing the visual representation of this node."
+        },
+        "neural_optics": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GaussianSplattingProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The volumetric Gaussian Splatting configuration for non-polygonal rendering."
         },
         "type": {
           "const": "system",
@@ -16868,14 +17123,15 @@
     },
     "VolumetricEdgeProfile": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes the geometric curve and token flow thermodynamics between topological vertices.\n\nCAUSAL AFFORDANCE: Instructs the spatial rendering engine to compute C1-continuous parametric splines between discrete nodes, translating abstract logical edges into physical volumetric manifolds.\n\nEPISTEMIC BOUNDS: Curve geometry is locked to the Literal automaton `[\"straight\", \"bezier\", \"catmull_rom\"]`. Thermodynamic token velocity is clamped by `flow_velocity` (`ge=0.0, le=100.0`). Spline rigidity (`tension`) is bounded `[0.0, 1.0]`.\n\nMCP ROUTING TRIGGERS: Parametric Spline Interpolation, Catmull-Rom, Bezier Geometry, C1 Continuity, Volumetric Edge",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes the geometric curve and token flow thermodynamics between topological vertices.\n\nCAUSAL AFFORDANCE: Instructs the spatial rendering engine to compute C1-continuous parametric splines between discrete nodes, translating abstract logical edges into physical volumetric manifolds.\n\nEPISTEMIC BOUNDS: Curve geometry is locked to the Literal automaton `[\"straight\", \"bezier\", \"catmull_rom\", \"riemannian_geodesic\"]`. Thermodynamic token velocity is clamped by `flow_velocity` (`ge=0.0, le=100.0`). Spline rigidity (`tension`) is bounded `[0.0, 1.0]`.\n\nMCP ROUTING TRIGGERS: Parametric Spline Interpolation, Catmull-Rom, Bezier Geometry, C1 Continuity, Volumetric Edge",
       "properties": {
         "curve_type": {
           "description": "The mathematical spline geometry used to interpolate the space between vertices.",
           "enum": [
             "straight",
             "bezier",
-            "catmull_rom"
+            "catmull_rom",
+            "riemannian_geodesic"
           ],
           "title": "Curve Type",
           "type": "string"
@@ -16902,6 +17158,14 @@
           "maximum": 10.0,
           "minimum": 0.01,
           "title": "Edge Thickness",
+          "type": "number"
+        },
+        "spatial_repulsion_scalar": {
+          "default": 0.0,
+          "description": "The mathematical gravity or repulsion field the edge asserts to avoid intersecting with volumetric bounding cages.",
+          "maximum": 100.0,
+          "minimum": 0.0,
+          "title": "Spatial Repulsion Scalar",
           "type": "number"
         }
       },
