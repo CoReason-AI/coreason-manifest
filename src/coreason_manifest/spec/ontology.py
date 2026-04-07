@@ -877,7 +877,7 @@ class KinematicDeltaManifest(CoreasonBaseState):
 
     @model_validator(mode="after")
     def _enforce_canonical_sort_deltas(self) -> Self:
-        object.__setattr__(self, "deltas", sorted(self.deltas, key=lambda d: d[0]))
+        object.__setattr__(self, "deltas", sorted(self.deltas, key=operator.itemgetter(0)))
         return self
 
 
@@ -9807,10 +9807,10 @@ class ObservabilityLODPolicy(CoreasonBaseState):
             "active_spatial_subscriptions",
             sorted(
                 self.active_spatial_subscriptions,
-                key=lambda x: (
-                    x.partition_boundary.center_transform.x,
-                    x.partition_boundary.center_transform.y,
-                    x.partition_boundary.center_transform.z,
+                key=operator.attrgetter(
+                    "partition_boundary.center_transform.x",
+                    "partition_boundary.center_transform.y",
+                    "partition_boundary.center_transform.z",
                 ),
             ),
         )
