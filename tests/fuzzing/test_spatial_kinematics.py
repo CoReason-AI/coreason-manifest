@@ -46,8 +46,11 @@ def test_gaussian_splatting_vram_bounds(
     tension=st.floats(min_value=0.0, max_value=1.0),
     flow_velocity=st.floats(min_value=0.0, max_value=100.0),
     edge_thickness=st.floats(min_value=0.01, max_value=10.0),
+    spatial_repulsion_scalar=st.floats(min_value=0.01, max_value=100.0),
 )
-def test_riemannian_geodesic_repulsion(tension: float, flow_velocity: float, edge_thickness: float) -> None:
+def test_riemannian_geodesic_repulsion(
+    tension: float, flow_velocity: float, edge_thickness: float, spatial_repulsion_scalar: float
+) -> None:
     with pytest.raises(ValidationError):
         VolumetricEdgeProfile(
             curve_type="riemannian_geodesic",
@@ -56,6 +59,15 @@ def test_riemannian_geodesic_repulsion(tension: float, flow_velocity: float, edg
             edge_thickness=edge_thickness,
             spatial_repulsion_scalar=0.0,
         )
+
+    # Valid case
+    VolumetricEdgeProfile(
+        curve_type="riemannian_geodesic",
+        tension=tension,
+        flow_velocity=flow_velocity,
+        edge_thickness=edge_thickness,
+        spatial_repulsion_scalar=spatial_repulsion_scalar,
+    )
 
 
 @given(
@@ -78,3 +90,12 @@ def test_billboard_shearing_lock(
             distance_scaling_factor=distance_scaling_factor,
             spherical_cylindrical_lock="none",
         )
+
+    # Valid case
+    SpatialBillboardContract(
+        anchoring_node_id=anchoring_node_id,
+        always_face_camera=always_face_camera,
+        occlude_behind_meshes=occlude_behind_meshes,
+        distance_scaling_factor=0.0,
+        spherical_cylindrical_lock="none",
+    )
