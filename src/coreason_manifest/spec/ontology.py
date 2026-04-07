@@ -2956,7 +2956,7 @@ class AmbientState(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Emits an ephemeral, 1D representation of the active probability distribution and execution progress to the external UI plane without halting the underlying generative trajectory.
 
-    EPISTEMIC BOUNDS: Semantic `status_message` structurally clamped to `max_length=2000`. The continuous `progress` metric bounded by float limits (`le=1000000000.0`) allowing it to represent 0.0-1.0 ratios or exact token counts.
+    EPISTEMIC BOUNDS: Semantic `status_message` structurally clamped to `max_length=2000`. The continuous `progress` metric bounded by float limits (`le=1000000000.0`) allowing it to represent 0.0-1.0 ratios or exact token counts. The `thermodynamic_burn_rate` is physically bounded (`ge=0.0`), and `epistemic_entropy_score` is normalized (`ge=0.0, le=1.0`).
 
     MCP ROUTING TRIGGERS: Markov Blanket, Ephemeral Projection, Continuous Observability, Kinetic Execution State, UI Telemetry
 
@@ -2967,6 +2967,17 @@ class AmbientState(CoreasonBaseState):
     )
     progress: float | None = Field(
         le=1000000000.0, default=None, description="The progress ratio from 0.0 to 1.0, or None if indeterminate."
+    )
+    thermodynamic_burn_rate: float | None = Field(
+        default=None,
+        ge=0.0,
+        description="The instantaneous token compute cost velocity, mapped to UI emission intensity.",
+    )
+    epistemic_entropy_score: float | None = Field(
+        default=None,
+        ge=0.0,
+        le=1.0,
+        description="The normalized Shannon Entropy of the active execution, mapped to UI color gradients (e.g., high entropy = amber warning).",
     )
 
 
@@ -7042,7 +7053,7 @@ class MacroGridProfile(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Translates abstract UI panels into fixed 2D matrices (`layout_matrix`), forcing spatial determinism on the frontend rendering engine.
 
-    EPISTEMIC BOUNDS: A strictly bounded `@model_validator` executes a referential integrity sweep, mathematically guaranteeing that every panel ID referenced in the `layout_matrix` (`max_length=1000`) corresponds to a verified object in the `panels` array, physically severing Ghost Panel hallucinations.
+    EPISTEMIC BOUNDS: A strictly bounded `@model_validator` executes a referential integrity sweep, mathematically guaranteeing that every panel ID referenced in the `layout_matrix` (`max_length=1000`) corresponds to a verified object in the `panels` array, physically severing Ghost Panel hallucinations. The `@model_validator` `verify_matrix_dimensions` mathematically forces `column_fractional_weights` and `row_fractional_weights` to perfectly match the Cartesian topology.
 
     MCP ROUTING TRIGGERS: Cartesian Coordinate System, Small Multiples, Spatial Topology, Referential Integrity, Layout Matrix
 
@@ -7053,10 +7064,31 @@ class MacroGridProfile(CoreasonBaseState):
         max_length=1000,
         description="A matrix defining the layout structure, using panel IDs.",
     )
+    column_fractional_weights: list[float] = Field(
+        default_factory=list, description="Euclidean fractional weights for column partitioning."
+    )
+    # Note: column_fractional_weights is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
+    row_fractional_weights: list[float] = Field(
+        default_factory=list, description="Euclidean fractional weights for row partitioning."
+    )
+    # Note: row_fractional_weights is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     panels: list[AnyPanelProfile] = Field(
         description="The ordered array of topological UI panels physically rendered in the grid."
         # Note: panels is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     )
+
+    @model_validator(mode="after")
+    def verify_matrix_dimensions(self) -> Self:
+        """Mathematically assert spatial fractional grid perfectly matches the Cartesian matrix geometry."""
+        if self.row_fractional_weights and len(self.row_fractional_weights) != len(self.layout_matrix):
+            raise ValueError(
+                "Topological Contradiction: row_fractional_weights length does not match the number of rows in layout_matrix."
+            )
+        if self.column_fractional_weights and self.layout_matrix and len(self.column_fractional_weights) != len(self.layout_matrix[0]):
+            raise ValueError(
+                "Topological Contradiction: column_fractional_weights length does not match the number of columns in layout_matrix."
+            )
+        return self
 
     @model_validator(mode="after")
     def verify_referential_integrity(self) -> Self:
@@ -7816,7 +7848,8 @@ class PresentationManifest(CoreasonBaseState):
 
     EPISTEMIC BOUNDS: Mathematically binds exactly one AnyPresentationIntent to one
     MacroGridProfile, preventing asynchronous UI state drift and ensuring the generated grid
-    is causally justified by a verified intent.
+    is causally justified by a verified intent. The focal_depth_meters is strictly clamped
+    (ge=0.1, le=100.0) to physically intercept the observer's optical plane at a safe depth.
 
     MCP ROUTING TRIGGERS: Supervisory Control Theory, Mixed-Initiative UI, Cognitive State
     Binding, Structural Manifold Envelope, Human-in-the-Loop
@@ -7826,6 +7859,12 @@ class PresentationManifest(CoreasonBaseState):
     grid: MacroGridProfile = Field(description="The grid of panels being presented.")
     ambient_telemetry: AmbientState | None = Field(
         default=None, description="Stateless non-blocking telemetry for continuous progress updates."
+    )
+    focal_depth_meters: float = Field(
+        ge=0.1,
+        le=100.0,
+        default=1.0,
+        description="The absolute Z-axis physical distance to lock the Presentation UI relative to the observer's optical center, resolving vergence-accommodation conflicts.",
     )
 
 
@@ -10887,7 +10926,8 @@ class WetwareAttestationContract(CoreasonBaseState):
     EPISTEMIC BOUNDS: Physically binds the signature to a specific Merkle-DAG
     coordinate via dag_node_nonce (UUID), strictly preventing cryptographic Replay
     Attacks. The cryptographic_payload is restricted by regex
-    (^[A-Za-z0-9+/=_-]+$) to prevent injection anomalies.
+    (^[A-Za-z0-9+/=_-]+$) to prevent injection anomalies. The liveness_challenge_hash
+    is tightly bounded to SHA-256 (^[a-f0-9]{64}$) to prove real-time human presence.
 
     MCP ROUTING TRIGGERS: WebAuthn, FIDO2, Cryptographic Nonce, Replay Attack
     Prevention, Wetware Entropy
@@ -10909,6 +10949,11 @@ class WetwareAttestationContract(CoreasonBaseState):
             ..., description="The cryptographic nonce tightly binding this signature to the specific Merkle-DAG node."
         )
     )
+    liveness_challenge_hash: Annotated[
+        str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")
+    ] = Field(
+        description="The SHA-256 hash of the dynamic, temporally bound challenge emitted by the orchestrator to guarantee real-time human presence."
+    )
 
 
 class InterventionReceipt(CoreasonBaseState):
@@ -10923,7 +10968,8 @@ class InterventionReceipt(CoreasonBaseState):
 
     EPISTEMIC BOUNDS: Mathematically locked against Replay Attacks via the intervention_request_id
     (a UUID cryptographic nonce). The @model_validator physically guarantees that if a WetwareAttestationContract
-    is present, its internal DAG node nonce must perfectly match the request ID, preventing signature laundering.
+    is present, its internal DAG node nonce must perfectly match the request ID, preventing signature laundering,
+    and mathematically linking the human's signature to the liveness_challenge_hash challenge.
 
     MCP ROUTING TRIGGERS: Cryptographic Nonce, State Resumption, Replay Attack Prevention, Wetware Attestation, Liveness Resolution
     """
@@ -10947,7 +10993,10 @@ class InterventionReceipt(CoreasonBaseState):
     def verify_attestation_nonce(self) -> "InterventionReceipt":
         """
         Mathematically guarantees that if a cryptographic signature is presented,
-        it cannot be a replay attack from a different node in the DAG.
+        it cannot be a replay attack from a different node in the DAG. Also asserts that
+        if self.attestation is provided, it carries the liveness_challenge_hash,
+        mathematically linking the human's hardware-backed signature to the
+        orchestrator's real-time challenge alongside verifying dag_node_nonce.
         """
         if self.attestation is not None and self.attestation.dag_node_nonce != self.intervention_request_id:
             raise ValueError(
