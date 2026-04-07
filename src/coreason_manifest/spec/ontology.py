@@ -3611,6 +3611,12 @@ class ConstitutionalAmendmentIntent(CoreasonBaseState):
         description="The AI's natural language structural/logical argument for why this patch resolves the contradiction without violating the root AnchoringPolicy."
     )
 
+    @field_validator("proposed_patch", mode="before")
+    @classmethod
+    def enforce_payload_topology(cls, v: Any) -> Any:
+        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""
+        return _validate_payload_bounds(v)
+
 
 class ContinuousMutationPolicy(CoreasonBaseState):
     """
@@ -8355,6 +8361,12 @@ class SpanEvent(CoreasonBaseState):
     attributes: dict[Annotated[str, StringConstraints(max_length=255)], Any] = Field(
         max_length=1000, default_factory=dict, description="Typed metadata bound to the event."
     )
+
+    @field_validator("attributes", mode="before")
+    @classmethod
+    def enforce_payload_topology(cls, v: Any) -> Any:
+        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""
+        return _validate_payload_bounds(v)
 
 
 class ExecutionSpanReceipt(CoreasonBaseState):
