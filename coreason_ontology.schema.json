@@ -2661,6 +2661,43 @@
       "title": "CircuitBreakerEvent",
       "type": "object"
     },
+    "CoalgebraicHydrationPolicy": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the limits of infinite graph unfolding to protect UI VRAM when pulling from the EpistemicLedgerState.\nCAUSAL AFFORDANCE: Instructs the orchestrator's deserialization engine to halt graph traversal at a specific recursion depth, replacing raw objects with cryptographic pointers.\nEPISTEMIC BOUNDS: The `max_unfold_depth` strictly bounds the DAG traversal depth (`ge=1, le=100`). `lazy_fetch_timeout_ms` prevents infinite halting (`ge=1, le=60000`). `truncation_strategy` is constrained to a Literal.\nMCP ROUTING TRIGGERS: Coalgebraic Unfolding, Lazy Evaluation, State-Space Bounding, VRAM Exhaustion Prevention",
+      "properties": {
+        "max_unfold_depth": {
+          "description": "Absolute recursive depth limit for DAG deserialization.",
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Max Unfold Depth",
+          "type": "integer"
+        },
+        "lazy_fetch_timeout_ms": {
+          "description": "Temporal guillotine for resolving cryptographic pointers.",
+          "maximum": 60000,
+          "minimum": 1,
+          "title": "Lazy Fetch Timeout Ms",
+          "type": "integer"
+        },
+        "truncation_strategy": {
+          "description": "Dictates how the orchestrator caps the state when max_unfold_depth is reached.",
+          "enum": [
+            "hash_pointer",
+            "nullify",
+            "scalar_summary"
+          ],
+          "title": "Truncation Strategy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "max_unfold_depth",
+        "lazy_fetch_timeout_ms",
+        "truncation_strategy"
+      ],
+      "title": "CoalgebraicHydrationPolicy",
+      "type": "object"
+    },
     "CognitiveCritiqueProfile": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Step-Level Verification via Process Reward Models (PRMs) to evaluate and critique intermediate steps in non-monotonic reasoning trees.\n\nCAUSAL AFFORDANCE: Injects a dense latent supervision vector (`logical_flaw_embedding`) to mathematically repel the generative trajectory away from hallucinated or logically flawed probability manifolds during test-time compute.\n\nEPISTEMIC BOUNDS: Penalization magnitude strictly clamped by `epistemic_penalty_scalar` (`ge=0.0, le=1.0`) to prevent gradient explosion. Target is cryptographically locked via `reasoning_trace_hash` (SHA-256 pattern `^[a-f0-9]{64}$`).\n\nMCP ROUTING TRIGGERS: Process Reward Model, Step-Level Verification, Representation Engineering, Latent Repulsion, Test-Time Supervision",
@@ -8548,7 +8585,6 @@
             "rect",
             "arc"
           ],
-          "le": 1000000000,
           "title": "Mark",
           "type": "string"
         },
@@ -10591,7 +10627,7 @@
     },
     "MCPClientIntent": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: An inherited JSON-RPC 2.0 substrate specifically binding Model\nContext Protocol (MCP) client intent emissions to the frontend UI. As an ...Intent\nsuffix, this represents an authorized kinetic execution trigger.\n\nCAUSAL AFFORDANCE: Executes an exact semantic signal (Literal[\"mcp.ui.emit_intent\"])\nto bubble internal agent states (like drafting or adjudication) to the human\noperator.\n\nEPISTEMIC BOUNDS: Inherits all recursive depth bounds from BoundedJSONRPCIntent and\nmathematically clamps the method space to a singular Literal[\"mcp.ui.emit_intent\"]\nto prevent execution drift.\n\nMCP ROUTING TRIGGERS: Model Context Protocol, Intent Bubbling, Human-in-the-Loop,\nSemantic Signaling, Method Clamping",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: An inherited JSON-RPC 2.0 substrate specifically binding Model Context Protocol (MCP) client intent emissions to the frontend UI. As an ...Intent suffix, this represents an authorized kinetic execution trigger.\nCAUSAL AFFORDANCE: Executes an exact semantic signal (Literal[\"mcp.ui.emit_intent\"]) to bubble internal agent states (like drafting or adjudication) to the human operator.\nEPISTEMIC BOUNDS: Inherits all recursive depth bounds from BoundedJSONRPCIntent and mathematically clamps the method space to a singular Literal[\"mcp.ui.emit_intent\"] to prevent execution drift.\nMCP ROUTING TRIGGERS: Model Context Protocol, Intent Bubbling, Human-in-the-Loop, Semantic Signaling, Method Clamping",
       "properties": {
         "jsonrpc": {
           "const": "2.0",
@@ -10602,7 +10638,6 @@
         "method": {
           "const": "mcp.ui.emit_intent",
           "description": "Method for intent bubbling.",
-          "le": 1000000000,
           "title": "Method",
           "type": "string"
         },
@@ -10645,6 +10680,18 @@
           "default": null,
           "description": "Unique request identifier.",
           "title": "Id"
+        },
+        "holographic_projection": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DynamicManifoldProjectionManifest"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematically pre-calculated view manifold tailored to the observer's frustum."
         }
       },
       "required": [
@@ -10809,6 +10856,14 @@
         "attestation_receipt": {
           "$ref": "#/$defs/VerifiableCredentialPresentationReceipt",
           "description": "Cryptographic proof of identity and authorization for the external server."
+        },
+        "state_synchronization_optics": {
+          "description": "Profunctor mappings for side-effect-free state synchronization.",
+          "items": {
+            "$ref": "#/$defs/OpticalMappingContract"
+          },
+          "title": "State Synchronization Optics",
+          "type": "array"
         }
       },
       "required": [
@@ -12136,6 +12191,36 @@
         "projection_cid"
       ],
       "title": "OntologicalSurfaceProjectionManifest",
+      "type": "object"
+    },
+    "OpticalMappingContract": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Guarantee isomorphic data translation from untrusted MCP payloads into the swarm's working memory.\nCAUSAL AFFORDANCE: Verifies that the geometric shape of the payload perfectly satisfies the expected contravariant input of the target node without executing procedural mapping code.\nEPISTEMIC BOUNDS: The `lens_source_pointer` and `prism_target_pointer` mathematically lock to max_length=2000. `strict_isomorphism` forbids type coercion.\nMCP ROUTING TRIGGERS: Category Theory, Profunctor Optics, Lens, Prism, Isomorphic State Synchronization",
+      "properties": {
+        "lens_source_pointer": {
+          "description": "RFC 6902 JSON Pointer extracting exogenous data.",
+          "maxLength": 2000,
+          "title": "Lens Source Pointer",
+          "type": "string"
+        },
+        "prism_target_pointer": {
+          "description": "RFC 6902 JSON Pointer for exact injection coordinate.",
+          "maxLength": 2000,
+          "title": "Prism Target Pointer",
+          "type": "string"
+        },
+        "strict_isomorphism": {
+          "default": true,
+          "description": "If true, mathematically forbids type coercion.",
+          "title": "Strict Isomorphism",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "lens_source_pointer",
+        "prism_target_pointer"
+      ],
+      "title": "OpticalMappingContract",
       "type": "object"
     },
     "OptimizationDirectionProfile": {
@@ -14548,6 +14633,18 @@
           "title": "Working Context Variables",
           "type": "object"
         },
+        "unfolding_policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CoalgebraicHydrationPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematical bounds for lazy state unfolding."
+        },
         "max_retained_tokens": {
           "description": "An integer representing the physical limit of the context window.",
           "exclusiveMinimum": 0,
@@ -15466,7 +15563,7 @@
     },
     "TelemetryBackpressureContract": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes the Observer Effect to dynamically modulate the thermodynamic flow\nof network egress based on the observer's spatial view frustum.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator's telemetry manifold to aggressively shed\nbandwidth load by calculating the dot product of topology nodes against the observer's focal\nvector. It starves occluded or peripheral subgraphs of kinematic updates to preserve system liveness.\n\nEPISTEMIC BOUNDS: Temporal refresh velocities are strictly clamped to physical Hertz frequencies.\nThe mathematical invariant guarantees that flow rate monotonically increases as nodes approach the focal center.\n\nMCP ROUTING TRIGGERS: Observer Effect, Frustum Culling, Thermodynamic Flow Control, Telemetry Backpressure, Spatial Masking",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes the Observer Effect to dynamically modulate the thermodynamic flow of network egress based on the observer's spatial view frustum.\nCAUSAL AFFORDANCE: Instructs the orchestrator's telemetry manifold to aggressively shed bandwidth load by calculating the dot product of topology nodes against the observer's focal vector. It starves occluded or peripheral subgraphs of kinematic updates to preserve system liveness.\nEPISTEMIC BOUNDS: Temporal refresh velocities are strictly clamped to physical Hertz frequencies. The mathematical invariant guarantees that flow rate monotonically increases as nodes approach the focal center.\nMCP ROUTING TRIGGERS: Observer Effect, Frustum Culling, Thermodynamic Flow Control, Telemetry Backpressure, Spatial Masking",
       "properties": {
         "focal_refresh_rate_hz": {
           "description": "The high-velocity telemetry budget (Hz) allocated exclusively to topologies intersecting the center of the observer's view frustum.",
@@ -15489,6 +15586,14 @@
           "minimum": 0,
           "title": "Occluded Refresh Rate Hz",
           "type": "integer"
+        },
+        "epsilon_derivative_threshold": {
+          "default": 0.0,
+          "description": "Minimum spatial or state magnitude delta required to authorize network egress.",
+          "maximum": 1000.0,
+          "minimum": 0.0,
+          "title": "Epsilon Derivative Threshold",
+          "type": "number"
         }
       },
       "required": [
