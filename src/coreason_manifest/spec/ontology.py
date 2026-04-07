@@ -66,9 +66,13 @@ def _validate_payload_bounds(
         nxt_depth = current_depth + 1
         for k, v in value.items():  # type: ignore
             if type(k) is not str:
-                raise ValueError("Dictionary keys must be strings")
+                raise ValueError(
+                    "Structural Constraint Violation: Dictionary key manifold strictly requires string geometry."
+                )
             if len(k) > 10000:
-                raise ValueError("Dictionary key exceeds max string length of 10000")
+                raise ValueError(
+                    "Volumetric Boundary Breach: Dictionary key string geometry exceeds absolute maximum topological length of 10000."
+                )
             _validate_payload_bounds(v, nxt_depth, state)
     elif typ is list:
         nxt_depth = current_depth + 1
@@ -534,7 +538,9 @@ class TraceContextState(CoreasonBaseState):
         default=None, description="The span_cid of the caller. If null, this node is the mathematically proven root."
     )
     causal_clock: int = Field(
-        default=0, ge=0, description="Tracks the recursion depth/vector clock required for compute budget decay."
+        default=0,
+        ge=0,
+        description="The absolute integer boundary defining the temporal vector clock and recursion depth for thermodynamic compute budget decay.",
     )
 
     @model_validator(mode="after")
@@ -660,7 +666,12 @@ class SE3TransformProfile(CoreasonBaseState):
     y: float = Field(description="Translation along the Y-axis relative to the reference frame.")
     z: float = Field(description="Translation along the Z-axis relative to the reference frame.")
 
-    qx: float = Field(ge=-1.0, le=1.0, default=0.0, description="The i component of the rotation quaternion.")
+    qx: float = Field(
+        ge=-1.0,
+        le=1.0,
+        default=0.0,
+        description="The rigidly bounded imaginary (i) vector scalar of the Hamiltonian rotation quaternion.",
+    )
     qy: float = Field(ge=-1.0, le=1.0, default=0.0, description="The j component of the rotation quaternion.")
     qz: float = Field(ge=-1.0, le=1.0, default=0.0, description="The k component of the rotation quaternion.")
     qw: float = Field(ge=-1.0, le=1.0, default=1.0, description="The real (scalar) part of the rotation quaternion.")
@@ -2652,7 +2663,7 @@ class EphemeralNamespacePartitionState(CoreasonBaseState):
         return self
 
 
-class SpatialToolManifest(CoreasonBaseState):
+class ToolManifest(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Defines the discrete formalization of a Gibsonian Affordance within the agent's Reinforcement Learning Action Space ($A$). As a ...Manifest suffix, this is a declarative, frozen N-dimensional coordinate of a capability.
 
@@ -2694,7 +2705,7 @@ class SpatialToolManifest(CoreasonBaseState):
     )
 
 
-class FederatedBilateralSLA(CoreasonBaseState):
+class BilateralSLA(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Defines the zero-trust structural boundary for multi-tenant federation,
     securing cross-boundary graph traversal against Shor's algorithm via an optional
@@ -2801,7 +2812,7 @@ class ActiveInferenceContract(CoreasonBaseState):
         str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
     ] = Field(description="The specific FalsificationContract being tested.")
     selected_tool_name: Annotated[str, StringConstraints(max_length=2000)] = Field(
-        description="The exact tool from the CognitiveActionSpaceManifest allocated for this experiment."
+        description="The exact tool from the ActionSpaceManifest allocated for this experiment."
     )
     expected_information_gain: float = Field(
         ge=0.0,
@@ -3162,7 +3173,7 @@ class BackpressurePolicy(CoreasonBaseState):
         le=1000000000,
         default=None,
         gt=0,
-        description="The mathematical integer ceiling to prevent Sybil-like parallel mutations against the CognitiveActionSpaceManifest.",
+        description="The mathematical integer ceiling to prevent Sybil-like parallel mutations against the ActionSpaceManifest.",
     )
 
 
@@ -3721,7 +3732,7 @@ class CrossSwarmHandshakeState(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Transitions the federated network from a proposed capability swap into
     an active OntologicalHandshakeReceipt, forcing the execution of the strict offered_sla
-    (FederatedBilateralSLA).
+    (BilateralSLA).
 
     EPISTEMIC BOUNDS: Cryptographically bounded by handshake_id (CID regex
     ^[a-zA-Z0-9_.:-]+$). The negotiation lifecycle is physically constrained to the strict
@@ -3741,7 +3752,7 @@ class CrossSwarmHandshakeState(CoreasonBaseState):
     receiving_tenant_id: Annotated[
         str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
     ] = Field(description="The enterprise DID receiving the connection.")
-    offered_sla: FederatedBilateralSLA = Field(description="The initial structural/data boundary proposed.")
+    offered_sla: BilateralSLA = Field(description="The initial structural/data boundary proposed.")
     status: Literal["proposed", "negotiating", "aligned", "rejected"] = Field(
         default="proposed", description="The current status of the handshake."
     )
@@ -4036,7 +4047,8 @@ class DocumentLayoutManifest(CoreasonBaseState):
     """
 
     blocks: dict[Annotated[str, StringConstraints(max_length=255)], DocumentLayoutRegionState] = Field(
-        max_length=1000, description="Dictionary mapping block_ids to their strict spatial definitions."
+        max_length=1000,
+        description="The strictly bounded mathematical projection matrix linking topological block identifiers to their absolute 2D spatial geometries.",
     )
     chronological_flow_edges: list[tuple[str, str]] = Field(
         default_factory=list,
@@ -4978,7 +4990,7 @@ class FalsificationContract(CoreasonBaseState):
     )
     required_tool_name: Annotated[str, StringConstraints(max_length=2000)] | None = Field(
         default=None,
-        description="The specific CognitiveActionSpaceManifest tool required to test this condition (e.g., 'sql_query_db').",
+        description="The specific ActionSpaceManifest tool required to test this condition (e.g., 'sql_query_db').",
     )
     falsifying_observation_signature: Annotated[str, StringConstraints(max_length=2000)] = Field(
         description="The expected data schema or regex pattern that, if returned by the tool, kills the hypothesis."
@@ -5032,7 +5044,7 @@ class FederatedCapabilityAttestationReceipt(CoreasonBaseState):
     authorized_session: SecureSubSessionState = Field(
         description="The isolated state partition granted to the agent for this connection."
     )
-    governing_sla: FederatedBilateralSLA = Field(
+    governing_sla: BilateralSLA = Field(
         description="The structural and physical boundary constraints for querying this target."
     )
 
@@ -6158,7 +6170,7 @@ class InterventionPolicy(CoreasonBaseState):
         return self
 
 
-class SpatialHardwareProfile(CoreasonBaseState):
+class HardwareProfile(CoreasonBaseState):
     """
     AGENT INSTRUCTION: A declarative, frozen snapshot of the physical hardware boundaries and thermodynamic constraints required to instantiate this node. As a ...Profile suffix, this defines a rigid mathematical boundary.
 
@@ -6193,7 +6205,7 @@ class SpatialHardwareProfile(CoreasonBaseState):
         return self
 
 
-class EpistemicSecurityProfile(CoreasonBaseState):
+class SecurityProfile(CoreasonBaseState):
     """
     AGENT INSTRUCTION: A declarative, frozen snapshot of the cryptographic isolation boundaries surrounding this node. As a ...Profile suffix, this defines a rigid mathematical boundary.
 
@@ -6218,7 +6230,7 @@ class EpistemicSecurityProfile(CoreasonBaseState):
     )
 
 
-class CognitiveHumanNodeProfile(CoreasonBaseState):
+class HumanNodeProfile(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Formalizes Supervisory Control Theory within the causal DAG, instantiating an out-of-band Oracle node for Mixed-Initiative truth resolution.
 
@@ -6349,7 +6361,7 @@ class MemoizedNodeProfile(CoreasonBaseState):
         return self
 
 
-class CognitiveSystemNodeProfile(CoreasonBaseState):
+class SystemNodeProfile(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Encapsulates pure functional logic (Lambda Calculus) and Finite State Machine (FSM) mechanics to represent a completely deterministic, side-effect-free system capability.
 
@@ -6438,7 +6450,7 @@ class MCPCapabilityWhitelistPolicy(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Formalizes a Lattice-Based Access Control (LBAC) and Zero-Trust Architecture perimeter, restricting JSON-RPC capability mounts from foreign subgraphs.
 
-    CAUSAL AFFORDANCE: Acts as a structural firewall that physically prevents the orchestrator from binding unauthorized external tools, resources, or prompts into the active agent's CognitiveActionSpaceManifest.
+    CAUSAL AFFORDANCE: Acts as a structural firewall that physically prevents the orchestrator from binding unauthorized external tools, resources, or prompts into the active agent's ActionSpaceManifest.
 
     EPISTEMIC BOUNDS: The boundary is geometrically enforced via `StringConstraints` (`max_length=2000` for `authorized_capability_array`, `allowed_resources`, `allowed_prompts`). The `@model_validator` strictly sorts all arrays alphabetically to mathematically guarantee RFC 8785 Canonical Hashing.
 
@@ -6807,7 +6819,7 @@ type AnyTransitionEdge = Annotated[TransitionEdgeProfile | CyclicEdgeProfile, Fi
 
 
 type AnyActionSpaceCapability = Annotated[
-    SpatialToolManifest | MCPServerManifest | EphemeralNamespacePartitionState, Field(discriminator="type")
+    ToolManifest | MCPServerManifest | EphemeralNamespacePartitionState, Field(discriminator="type")
 ]
 
 _ILLEGAL_PAYLOAD_KEYS: frozenset[str] = frozenset(
@@ -6830,7 +6842,7 @@ _ILLEGAL_PAYLOAD_KEYS: frozenset[str] = frozenset(
 )
 
 
-class CognitiveActionSpaceManifest(CoreasonBaseState):
+class ActionSpaceManifest(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Defines the finite, discrete Markov Decision Process (MDP) Action Space and affordance landscape available to a specific execution node. As a ...Manifest suffix, this defines a frozen, N-dimensional coordinate state.
 
@@ -6897,7 +6909,7 @@ class CognitiveActionSpaceManifest(CoreasonBaseState):
     @model_validator(mode="after")
     def _prevent_custom_state_management(self) -> Self:
         """
-        DE NOVO AGENT INSTRUCTION: In a native framework, the SpatialToolManifest's schemas
+        DE NOVO AGENT INSTRUCTION: In a native framework, the ToolManifest's schemas
         represent ONLY the pure domain payload (T). The ExecutionEnvelopeState (trace, state)
         is implicitly wrapped by the orchestrator at runtime.
         We only need to verify the domain payload doesn't illegally attempt to manage state
@@ -6969,7 +6981,7 @@ class OntologicalSurfaceProjectionManifest(CoreasonBaseState):
     projection_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
         Field(description="A cryptographic Lineage Watermark bounding this specific capability set.")
     )
-    action_spaces: list[CognitiveActionSpaceManifest] = Field(
+    action_spaces: list[ActionSpaceManifest] = Field(
         default_factory=list, description="The full, machine-readable declaration of accessible tools and MCP servers."
     )
     supported_personas: list[ProfileCIDState] = Field(
@@ -8942,7 +8954,7 @@ type TelemetryContextProfile = dict[
 ]
 
 
-class EpistemicLogEvent(CoreasonBaseState):
+class LogEvent(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Defines a purely out-of-band semantic logging vector, structurally isolated from the rigorous causal constraints of the Dapper trace tree.
 
@@ -9100,7 +9112,7 @@ class ToolInvocationEvent(CoreasonBaseState):
         default="tool_invocation", description="Discriminator type for a tool invocation event."
     )
     tool_name: Annotated[str, StringConstraints(max_length=2000)] = Field(
-        description="The exact tool targeted in the CognitiveActionSpaceManifest."
+        description="The exact tool targeted in the ActionSpaceManifest."
     )
     parameters: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
         max_length=1000,
@@ -9720,7 +9732,7 @@ class AgentAttestationReceipt(CoreasonBaseState):
         return self
 
 
-class CognitiveAgentNodeProfile(CoreasonBaseState):
+class AgentNodeProfile(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Implements a stochastic actor traversing a Partially Observable Markov Decision Process (POMDP). It establishes the cognitive and physical constraints for autonomous swarm participants.
 
@@ -9770,12 +9782,12 @@ class CognitiveAgentNodeProfile(CoreasonBaseState):
         description="The semantic boundary defining the objective function of the execution node. [SITD-Gamma: Neurosymbolic Substrate Alignment]"
     )
     type: Literal["agent"] = Field(default="agent", description="Discriminator for an Agent node.")
-    hardware: SpatialHardwareProfile = Field(
-        default_factory=SpatialHardwareProfile,
+    hardware: HardwareProfile = Field(
+        default_factory=HardwareProfile,
         description="The physical constraints binding this agent to a specific thermodynamic deployment topology.",
     )
-    security: EpistemicSecurityProfile = Field(
-        default_factory=EpistemicSecurityProfile,
+    security: SecurityProfile = Field(
+        default_factory=SecurityProfile,
         description="The rigid cryptographic rules dictating the agent's isolation boundaries.",
     )
     logit_steganography: LogitSteganographyContract | None = Field(
@@ -9800,7 +9812,7 @@ class CognitiveAgentNodeProfile(CoreasonBaseState):
         Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] | None
     ) = Field(
         default=None,
-        description="The globally unique decentralized identifier (DID) anchoring the specific CognitiveActionSpaceManifest (curated tool environment) bound to this agent.",
+        description="The globally unique decentralized identifier (DID) anchoring the specific ActionSpaceManifest (curated tool environment) bound to this agent.",
     )
     secure_sub_session: SecureSubSessionState | None = Field(
         default=None,
@@ -9898,11 +9910,7 @@ class CognitiveAgentNodeProfile(CoreasonBaseState):
 
 
 type AnyNodeProfile = Annotated[
-    CognitiveAgentNodeProfile
-    | CognitiveHumanNodeProfile
-    | CognitiveSystemNodeProfile
-    | CompositeNodeProfile
-    | MemoizedNodeProfile,
+    AgentNodeProfile | HumanNodeProfile | SystemNodeProfile | CompositeNodeProfile | MemoizedNodeProfile,
     Field(discriminator="type", description="A discriminated union of all valid workflow nodes."),
 ]
 
@@ -10603,12 +10611,12 @@ class AdversarialMarketTopologyManifest(CoreasonBaseState):
     def compile_to_base_topology(self) -> CouncilTopologyManifest:
         """Deterministically unwraps the macro into a rigid CouncilTopologyManifest."""
         nodes: dict[NodeCIDState, AnyNodeProfile] = {
-            self.adjudicator_id: CognitiveSystemNodeProfile(description="Synthesizing Adjudicator")
+            self.adjudicator_id: SystemNodeProfile(description="Synthesizing Adjudicator")
         }
         for node_cid in self.blue_team_cids:
-            nodes[node_cid] = CognitiveSystemNodeProfile(description="Blue Team Member")
+            nodes[node_cid] = SystemNodeProfile(description="Blue Team Member")
         for node_cid in self.red_team_cids:
-            nodes[node_cid] = CognitiveSystemNodeProfile(description="Red Team Member")
+            nodes[node_cid] = SystemNodeProfile(description="Red Team Member")
         consensus = ConsensusPolicy(strategy="prediction_market", prediction_market_rules=self.market_rules)
         return CouncilTopologyManifest(nodes=nodes, adjudicator_id=self.adjudicator_id, consensus_policy=consensus)
 
@@ -10644,10 +10652,10 @@ class ConsensusFederationTopologyManifest(CoreasonBaseState):
 
     def compile_to_base_topology(self) -> CouncilTopologyManifest:
         nodes: dict[NodeCIDState, AnyNodeProfile] = {
-            self.adjudicator_id: CognitiveSystemNodeProfile(description="PBFT Sequencer")
+            self.adjudicator_id: SystemNodeProfile(description="PBFT Sequencer")
         }
         for node_cid in self.participant_cids:
-            nodes[node_cid] = CognitiveSystemNodeProfile(description="PBFT Participant")
+            nodes[node_cid] = SystemNodeProfile(description="PBFT Participant")
         return CouncilTopologyManifest(
             nodes=nodes,
             adjudicator_id=self.adjudicator_id,
@@ -10698,9 +10706,9 @@ class CapabilityForgeTopologyManifest(CoreasonBaseState):
     def compile_to_base_topology(self) -> DAGTopologyManifest:
         """Deterministically unwraps the macro into a rigid DAGTopologyManifest."""
         nodes: dict[NodeCIDState, AnyNodeProfile] = {
-            self.generator_node_id: CognitiveAgentNodeProfile(description="Generator Node"),
-            self.formal_verifier_id: CognitiveSystemNodeProfile(description="Formal Verifier Node"),
-            self.fuzzing_engine_id: CognitiveSystemNodeProfile(description="Fuzzing Engine Node"),
+            self.generator_node_id: AgentNodeProfile(description="Generator Node"),
+            self.formal_verifier_id: SystemNodeProfile(description="Formal Verifier Node"),
+            self.fuzzing_engine_id: SystemNodeProfile(description="Fuzzing Engine Node"),
         }
         edges = [
             (self.generator_node_id, self.formal_verifier_id),
@@ -10708,7 +10716,7 @@ class CapabilityForgeTopologyManifest(CoreasonBaseState):
         ]
 
         if self.human_supervisor_id is not None:
-            nodes[self.human_supervisor_id] = CognitiveHumanNodeProfile(
+            nodes[self.human_supervisor_id] = HumanNodeProfile(
                 description="Forge HITL Supervisor", required_attestation="fido2_webauthn"
             )
             edges.append((self.fuzzing_engine_id, self.human_supervisor_id))
@@ -10778,14 +10786,14 @@ class IntentElicitationTopologyManifest(CoreasonBaseState):
     def compile_to_base_topology(self) -> DAGTopologyManifest:
         """Deterministically unwraps the macro into a cyclic DAGTopologyManifest."""
         nodes: dict[NodeCIDState, AnyNodeProfile] = {
-            self.transmuter_node_id: CognitiveSystemNodeProfile(description="Multimodal Transmuter"),
-            self.scanner_node_id: CognitiveAgentNodeProfile(
+            self.transmuter_node_id: SystemNodeProfile(description="Multimodal Transmuter"),
+            self.scanner_node_id: AgentNodeProfile(
                 description="Metacognitive Entropy Scanner",
                 epistemic_policy=EpistemicScanningPolicy(
                     active=True, dissonance_threshold=0.1, action_on_gap="clarify"
                 ),
             ),
-            self.human_oracle_id: CognitiveHumanNodeProfile(
+            self.human_oracle_id: HumanNodeProfile(
                 description="Elicitation Oracle", required_attestation="fido2_webauthn"
             ),
         }
@@ -10942,7 +10950,7 @@ class WorkflowManifest(CoreasonBaseState):
     federated_discovery: FederatedDiscoveryManifest | None = Field(
         default=None, description="The broadcast protocol for B2B multi-swarm discovery."
     )
-    federated_sla: FederatedBilateralSLA | None = Field(
+    federated_sla: BilateralSLA | None = Field(
         default=None,
         description="The B2B Service Level Agreement contract that must be mathematically satisfied before multi-tenant graph coupling.",
     )
@@ -12399,7 +12407,7 @@ ConstrainedDecodingPolicy.model_rebuild()
 CognitiveFormatContract.model_rebuild()
 EpistemicRewardModelPolicy.model_rebuild()
 CognitiveRewardEvaluationReceipt.model_rebuild()
-CognitiveAgentNodeProfile.model_rebuild()
+AgentNodeProfile.model_rebuild()
 CognitiveDetailedBalanceContract.model_rebuild()
 EpistemicFlowStateReceipt.model_rebuild()
 TopologicalRewardContract.model_rebuild()
@@ -12447,7 +12455,7 @@ ContinuousSpatialMutationIntent.model_rebuild()
 TerminalConditionContract.model_rebuild()
 TransitionEdgeProfile.model_rebuild()
 CyclicEdgeProfile.model_rebuild()
-CognitiveActionSpaceManifest.model_rebuild()
+ActionSpaceManifest.model_rebuild()
 ASTGradientReceipt.model_rebuild()
 LiquidTypeContract.model_rebuild()
 HoareLogicProofReceipt.model_rebuild()

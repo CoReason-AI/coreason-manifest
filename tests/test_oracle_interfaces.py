@@ -12,10 +12,10 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
+    AgentNodeProfile,
     CapabilityForgeTopologyManifest,
-    CognitiveAgentNodeProfile,
-    CognitiveHumanNodeProfile,
     HumanDirectiveIntent,
+    HumanNodeProfile,
     IntentElicitationTopologyManifest,
     SemanticDiscoveryIntent,
     VectorEmbeddingState,
@@ -79,7 +79,7 @@ def test_capability_forge_topology_manifest_with_human_supervisor() -> None:
     assert ("did:coreason:sys-fuzz", "did:coreason:human-1") in dag.edges
     assert "did:coreason:human-1" in dag.nodes
     human_node = dag.nodes["did:coreason:human-1"]
-    assert isinstance(human_node, CognitiveHumanNodeProfile)
+    assert isinstance(human_node, HumanNodeProfile)
     assert human_node.description == "Forge HITL Supervisor"
     assert human_node.required_attestation == "fido2_webauthn"
 
@@ -103,6 +103,6 @@ def test_intent_elicitation_macro_compilation() -> None:
     assert dag.allow_cycles is True
 
     scanner_node = dag.nodes["did:coreason:agent-scanner"]
-    assert isinstance(scanner_node, CognitiveAgentNodeProfile)
+    assert isinstance(scanner_node, AgentNodeProfile)
     assert scanner_node.epistemic_policy is not None
     assert scanner_node.epistemic_policy.action_on_gap == "clarify"
