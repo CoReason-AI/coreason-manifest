@@ -2297,6 +2297,28 @@ class StateDifferentialManifest(CoreasonBaseState):
     )
 
 
+class CoalgebraicHydrationPolicy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Defines the limits of infinite graph unfolding to protect UI VRAM when pulling from the EpistemicLedgerState.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator's deserialization engine to halt graph traversal at a specific recursion depth, replacing raw objects with cryptographic pointers.
+
+    EPISTEMIC BOUNDS: The `max_unfold_depth` strictly bounds the DAG traversal depth (`ge=1, le=100`). `lazy_fetch_timeout_ms` prevents infinite halting (`ge=1, le=60000`). `truncation_strategy` is constrained to a Literal.
+
+    MCP ROUTING TRIGGERS: Coalgebraic Unfolding, Lazy Evaluation, State-Space Bounding, VRAM Exhaustion Prevention
+    """
+
+    max_unfold_depth: int = Field(
+        ge=1, le=100, description="Absolute recursive depth limit for DAG deserialization."
+    )
+    lazy_fetch_timeout_ms: int = Field(
+        ge=1, le=60000, description="Temporal guillotine for resolving cryptographic pointers."
+    )
+    truncation_strategy: Literal["hash_pointer", "nullify", "scalar_summary"] = Field(
+        description="Dictates how the orchestrator caps the state when max_unfold_depth is reached."
+    )
+
+
 class StateHydrationManifest(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Manages the Epistemic Hydration of an agent's active context
@@ -2327,6 +2349,9 @@ class StateHydrationManifest(CoreasonBaseState):
     )
     working_context_variables: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
         description="A strictly typed dictionary for ephemeral context variables injected at runtime. AGENT INSTRUCTION: This matrix is deterministically sorted by CoreasonBaseState natively. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion."
+    )
+    unfolding_policy: CoalgebraicHydrationPolicy | None = Field(
+        default=None, description="The mathematical bounds for lazy state unfolding."
     )
 
     @field_validator("working_context_variables", mode="before")
@@ -6319,6 +6344,28 @@ class MCPCapabilityWhitelistPolicy(CoreasonBaseState):
         return self
 
 
+class OpticalMappingContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Guarantee isomorphic data translation from untrusted MCP payloads into the swarm's working memory.
+
+    CAUSAL AFFORDANCE: Verifies that the geometric shape of the payload perfectly satisfies the expected contravariant input of the target node without executing procedural mapping code.
+
+    EPISTEMIC BOUNDS: The `lens_source_pointer` and `prism_target_pointer` mathematically lock to max_length=2000. `strict_isomorphism` forbids type coercion.
+
+    MCP ROUTING TRIGGERS: Category Theory, Profunctor Optics, Lens, Prism, Isomorphic State Synchronization
+    """
+
+    lens_source_pointer: Annotated[str, StringConstraints(max_length=2000)] = Field(
+        description="RFC 6902 JSON Pointer extracting exogenous data."
+    )
+    prism_target_pointer: Annotated[str, StringConstraints(max_length=2000)] = Field(
+        description="RFC 6902 JSON Pointer for exact injection coordinate."
+    )
+    strict_isomorphism: bool = Field(
+        default=True, description="If true, mathematically forbids type coercion."
+    )
+
+
 class MCPServerManifest(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Represents a cryptographically verifiable Distributed RPC substrate mapping within the Actor Model, binding an external Model Context Protocol (MCP) manifold into the swarm's local topology under strict Object-Capability (OCap) rules.
@@ -6354,6 +6401,15 @@ class MCPServerManifest(CoreasonBaseState):
     attestation_receipt: VerifiableCredentialPresentationReceipt = Field(
         description="Cryptographic proof of identity and authorization for the external server."
     )
+    state_synchronization_optics: list[OpticalMappingContract] = Field(
+        default_factory=list,
+        description="Profunctor mappings for side-effect-free state synchronization.",
+    )
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort_optics(self) -> Self:
+        object.__setattr__(self, "state_synchronization_optics", sorted(self.state_synchronization_optics, key=operator.attrgetter("lens_source_pointer")))
+        return self
 
     @model_validator(mode="after")
     def enforce_coreason_did_authority(self) -> Self:
@@ -6838,6 +6894,16 @@ class MCPClientIntent(BoundedJSONRPCIntent):
     """
 
     method: Literal["mcp.ui.emit_intent"] = Field(..., le=1000000000, description="Method for intent bubbling.")
+    holographic_projection: "DynamicManifoldProjectionManifest | None" = Field(
+        default=None,
+        description="The mathematically pre-calculated view manifold tailored to the observer's frustum.",
+    )
+
+    @model_validator(mode="after")
+    def _enforce_holographic_resolution(self) -> Self:
+        if self.method == "mcp.ui.emit_intent" and self.holographic_projection is None:
+            raise ValueError("Holographic Projection Violation: Holographic projection must not be None when emitting intent.")
+        return self
 
 
 class MCPPromptReferenceState(CoreasonBaseState):
@@ -9769,6 +9835,20 @@ class TelemetryBackpressureContract(CoreasonBaseState):
         default=0,
         description="The starvation rate (Hz) for topologies failing the depth test or falling outside clipping planes.",
     )
+    epsilon_derivative_threshold: float = Field(
+        ge=0.0,
+        le=1000.0,
+        default=0.0,
+        description="Minimum spatial or state magnitude delta required to authorize network egress.",
+    )
+
+    @model_validator(mode="after")
+    def enforce_epsilon_velocity_bounds(self) -> Self:
+        if self.epsilon_derivative_threshold == 0.0 and self.focal_refresh_rate_hz > 60:
+            raise ValueError(
+                "Thermodynamic Violation: Unthrottled infinite stream saturation (epsilon 0.0) is mathematically forbidden at frequencies > 60Hz."
+            )
+        return self
 
     @model_validator(mode="after")
     def enforce_velocity_gradient(self) -> Self:
@@ -12158,6 +12238,7 @@ EpistemicLedgerState.model_rebuild()
 PresentationManifest.model_rebuild()
 DynamicManifoldProjectionManifest.model_rebuild()
 ObservationEvent.model_rebuild()
+MCPClientIntent.model_rebuild()
 OntologicalHandshakeReceipt.model_rebuild()
 
 ManifestViolationReceipt.model_rebuild()
