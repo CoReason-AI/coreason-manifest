@@ -12,6 +12,7 @@ from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import ValidationError
 
+from typing import Any
 from coreason_manifest.spec.ontology import AmbientState, MacroGridProfile, PresentationManifest
 
 
@@ -19,10 +20,10 @@ from coreason_manifest.spec.ontology import AmbientState, MacroGridProfile, Pres
     st.lists(st.floats(allow_nan=False, allow_infinity=False), min_size=2, max_size=2)
     | st.lists(st.floats(allow_nan=False, allow_infinity=False), min_size=4, max_size=4)
 )
-def test_fractional_grid_topology_contradiction(column_weights):
+def test_fractional_grid_topology_contradiction(column_weights: list[float]) -> None:
     layout_matrix = [["p1", "p2", "p3"], ["p4", "p5", "p6"], ["p7", "p8", "p9"]]
     # Valid dummy panels so we don't trigger missing required fields or invalid panel validation
-    panels = [
+    panels: Any = [
         {
             "type": "insight_card",
             "panel_cid": "p1",
@@ -49,7 +50,7 @@ def test_fractional_grid_topology_contradiction(column_weights):
 
 
 @given(st.floats(max_value=-0.01) | st.floats(min_value=1.01))
-def test_entropic_telemetry_bounds(invalid_entropy):
+def test_entropic_telemetry_bounds(invalid_entropy: float) -> None:
     try:
         AmbientState(status_message="test", epistemic_entropy_score=invalid_entropy)
     except ValidationError:
@@ -59,16 +60,16 @@ def test_entropic_telemetry_bounds(invalid_entropy):
 
 
 @given(st.floats(max_value=0.0) | st.floats(min_value=100.01))
-def test_focal_plane_integrity(invalid_focal_depth):
+def test_focal_plane_integrity(invalid_focal_depth: float) -> None:
     # Dummy mock objects for PresentationManifest to ensure we don't fail other fields' validations first
-    valid_intent = {
+    valid_intent: Any = {
         "type": "drafting_intent",
         "description": "Mock drafting intent",
         "target_audience": "human_supervisor",
         "proposed_schemas": [],
         "draft_urgency_level": "standard",
     }
-    valid_grid = {"layout_matrix": [], "panels": []}
+    valid_grid: Any = {"layout_matrix": [], "panels": []}
 
     try:
         PresentationManifest(
