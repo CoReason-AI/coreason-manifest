@@ -15,12 +15,12 @@ from pydantic import AnyUrl, ValidationError
 
 from coreason_manifest.spec.ontology import (
     CognitiveCritiqueProfile,
+    CognitiveFailureEvent,
     ContextualizedSourceEntity,
     DerivationMode,
     EpistemicProvenanceReceipt,
     InterventionIntent,
     InterventionPolicy,
-    CognitiveFailureEvent,
 )
 
 
