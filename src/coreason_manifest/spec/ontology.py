@@ -3599,6 +3599,12 @@ class ConstitutionalAmendmentIntent(CoreasonBaseState):
     type: Literal["constitutional_amendment"] = Field(
         default="constitutional_amendment", description="The strict discriminator for this intervention payload."
     )
+    @field_validator("proposed_patch", mode="before")
+    @classmethod
+    def enforce_payload_topology(cls, v: Any) -> Any:
+        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""
+        return _validate_payload_bounds(v)
+
     drift_event_id: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
         Field(
             description="The globally unique decentralized identifier (DID) anchoring the NormativeDriftEvent that justified triggering this proposal.",
@@ -8347,6 +8353,12 @@ class SpanEvent(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Span Annotation, Point-in-Time Event, Micro-State Logging, OpenTelemetry, Telemetry Serialization
 
     """
+
+    @field_validator("attributes", mode="before")
+    @classmethod
+    def enforce_payload_topology(cls, v: Any) -> Any:
+        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""
+        return _validate_payload_bounds(v)
 
     name: Annotated[str, StringConstraints(max_length=2000)] = Field(description="The semantic name of the event.")
     timestamp_unix_nano: int = Field(
