@@ -7084,7 +7084,11 @@ class MacroGridProfile(CoreasonBaseState):
             raise ValueError(
                 "Topological Contradiction: row_fractional_weights length does not match the number of rows in layout_matrix."
             )
-        if self.column_fractional_weights and self.layout_matrix and len(self.column_fractional_weights) != len(self.layout_matrix[0]):
+        if (
+            self.column_fractional_weights
+            and self.layout_matrix
+            and len(self.column_fractional_weights) != len(self.layout_matrix[0])
+        ):
             raise ValueError(
                 "Topological Contradiction: column_fractional_weights length does not match the number of columns in layout_matrix."
             )
