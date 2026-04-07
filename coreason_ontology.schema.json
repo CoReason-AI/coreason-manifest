@@ -5470,6 +5470,14 @@
           "maxLength": 2000,
           "title": "Layout Tstring",
           "type": "string"
+        },
+        "max_ast_node_budget": {
+          "default": 100,
+          "description": "The absolute physical limit on the number of Abstract Syntax Tree nodes allowed in the layout template, preventing UI Layout Bombing.",
+          "maximum": 500,
+          "minimum": 1,
+          "title": "Max Ast Node Budget",
+          "type": "integer"
         }
       },
       "required": [
@@ -5945,6 +5953,20 @@
           "maxItems": 100,
           "title": "Intersected Node Cids",
           "type": "array"
+        },
+        "hardware_gaze_signature": {
+          "anyOf": [
+            {
+              "maxLength": 8192,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Hardware-backed cryptographic proof of human eye-tracking from a Trusted Execution Environment (TEE), preventing bot-driven attention spoofing.",
+          "title": "Hardware Gaze Signature"
         }
       },
       "required": [
@@ -12079,6 +12101,20 @@
           },
           "title": "Active Spatial Subscriptions",
           "type": "array"
+        },
+        "foveated_privacy_epsilon": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The Laplacian noise parameter ($\\epsilon$) injected into the spatial telemetry for nodes residing in the meso and macro distance thresholds, preventing reverse-engineering of exact swarm weights.",
+          "title": "Foveated Privacy Epsilon"
         }
       },
       "required": [
@@ -17242,6 +17278,18 @@
           "minimum": 1,
           "title": "Subscription Ttl Ms",
           "type": "integer"
+        },
+        "optical_hardware_constraint_proof": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ZeroKnowledgeReceipt"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "zk-SNARK proof that the requested spatial volume mathematically intersects with and does not exceed the physical rendering frustum of the client's authenticated optical hardware."
         }
       },
       "required": [

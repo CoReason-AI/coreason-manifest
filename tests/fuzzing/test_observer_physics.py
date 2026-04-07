@@ -20,7 +20,7 @@ from coreason_manifest.spec.ontology import (
 
 
 @given(layout_tstring=st.just("f'''{" + "{{" * 200 + "1" + "}}" * 200 + "}'''"))
-def test_ast_thermodynamic_gas_limits(layout_tstring: str):
+def test_ast_thermodynamic_gas_limits(layout_tstring: str) -> None:
     """
     Fuzz DynamicLayoutManifest to trigger AST Complexity Overload.
     """
@@ -33,7 +33,7 @@ def test_ast_thermodynamic_gas_limits(layout_tstring: str):
 
 
 @given(foveated_privacy_epsilon=st.floats(min_value=0.0, max_value=100.0))
-def test_differential_privacy_interlocks(foveated_privacy_epsilon: float):
+def test_differential_privacy_interlocks(foveated_privacy_epsilon: float) -> None:
     """
     Fuzz ObservabilityLODPolicy to trigger validation error when applying
     differential privacy to an uncoarsened graph.
@@ -52,7 +52,7 @@ def test_differential_privacy_interlocks(foveated_privacy_epsilon: float):
     assert "Topological Contradiction" in str(exc_info.value)
 
 
-def test_biometric_signature_bounding():
+def test_biometric_signature_bounding() -> None:
     """
     Test EpistemicAttentionRay to trigger validation error when biometric
     signature string exceeds length limit.
