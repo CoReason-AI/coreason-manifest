@@ -96,10 +96,7 @@ def test_payload_bounds_dict_key_length_exceeded() -> None:
     large_key = "a" * 10001
     bad_dict: dict[str, Any] = {large_key: "value"}
 
-    with pytest.raises(
-        ValueError,
-        match=r"Volumetric Boundary Breach: Dictionary key string geometry exceeds absolute maximum topological length of 10000\.",
-    ):
+    with pytest.raises(ValueError, match="Dictionary key exceeds max string length of 10000"):
         _validate_payload_bounds(cast("JsonPrimitiveState", bad_dict))
 
 
@@ -107,10 +104,7 @@ def test_payload_bounds_dict_key_not_string() -> None:
     # JSON standard allows only string keys for dictionaries
     bad_dict: dict[Any, Any] = {42: "value"}
 
-    with pytest.raises(
-        ValueError,
-        match=r"Structural Constraint Violation: Dictionary key manifold strictly requires string geometry\.",
-    ):
+    with pytest.raises(ValueError, match="Dictionary keys must be strings"):
         _validate_payload_bounds(cast("JsonPrimitiveState", bad_dict))
 
 

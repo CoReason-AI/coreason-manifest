@@ -65,10 +65,7 @@ def test_base_node_profile_domain_extensions_depth_exceeded() -> None:
 
 
 def test_base_node_profile_domain_extensions_invalid_keys() -> None:
-    with pytest.raises(
-        ValueError,
-        match=r"Structural Constraint Violation: Dictionary key manifold strictly requires string geometry\.",
-    ):
+    with pytest.raises(ValueError, match="Dictionary keys must be strings"):
         AgentNodeProfile(
             description="test node",
             domain_extensions={1: "a"},  # type: ignore
