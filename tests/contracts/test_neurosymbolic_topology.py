@@ -23,7 +23,7 @@ from coreason_manifest.spec.ontology import (
 def test_bipartite_identity_violation() -> None:
     # Setup standard agent and system
     nodes: dict[str, Any] = {
-        "did:coreason:node-1": AgentNodeProfile(description="Test Proposer", type="agent"),
+        "did:coreason:node-1": AgentNodeProfile(description="Test Proposer", manifold_category="agent"),
     }
 
     with pytest.raises(ValidationError) as exc_info:
@@ -39,7 +39,7 @@ def test_bipartite_identity_violation() -> None:
 
 def test_missing_proposer_in_registry() -> None:
     nodes: dict[str, Any] = {
-        "did:coreason:system-1": SystemNodeProfile(description="System 1", type="system"),
+        "did:coreason:system-1": SystemNodeProfile(description="System 1", manifold_category="system"),
     }
     with pytest.raises(ValidationError) as exc_info:
         NeurosymbolicVerificationTopologyManifest(
@@ -53,7 +53,7 @@ def test_missing_proposer_in_registry() -> None:
 
 def test_missing_verifier_in_registry() -> None:
     nodes: dict[str, Any] = {
-        "did:coreason:agent-1": AgentNodeProfile(description="Agent 1", type="agent"),
+        "did:coreason:agent-1": AgentNodeProfile(description="Agent 1", manifold_category="agent"),
     }
     with pytest.raises(ValidationError) as exc_info:
         NeurosymbolicVerificationTopologyManifest(
@@ -67,8 +67,8 @@ def test_missing_verifier_in_registry() -> None:
 
 def test_bipartite_type_violation_both_agents() -> None:
     nodes: dict[str, Any] = {
-        "did:coreason:agent-1": AgentNodeProfile(description="Agent 1", type="agent"),
-        "did:coreason:agent-2": AgentNodeProfile(description="Agent 2", type="agent"),
+        "did:coreason:agent-1": AgentNodeProfile(description="Agent 1", manifold_category="agent"),
+        "did:coreason:agent-2": AgentNodeProfile(description="Agent 2", manifold_category="agent"),
     }
     with pytest.raises(ValidationError) as exc_info:
         NeurosymbolicVerificationTopologyManifest(
@@ -85,8 +85,8 @@ def test_bipartite_type_violation_both_agents() -> None:
 
 def test_bipartite_type_violation_both_systems() -> None:
     nodes: dict[str, Any] = {
-        "did:coreason:system-1": SystemNodeProfile(description="System 1", type="system"),
-        "did:coreason:system-2": SystemNodeProfile(description="System 2", type="system"),
+        "did:coreason:system-1": SystemNodeProfile(description="System 1", manifold_category="system"),
+        "did:coreason:system-2": SystemNodeProfile(description="System 2", manifold_category="system"),
     }
     with pytest.raises(ValidationError) as exc_info:
         NeurosymbolicVerificationTopologyManifest(
@@ -100,8 +100,8 @@ def test_bipartite_type_violation_both_systems() -> None:
 
 def test_cycle_bound_enforcement_too_high() -> None:
     nodes: dict[str, Any] = {
-        "did:coreason:agent-1": AgentNodeProfile(description="Agent 1", type="agent"),
-        "did:coreason:system-1": SystemNodeProfile(description="System 1", type="system"),
+        "did:coreason:agent-1": AgentNodeProfile(description="Agent 1", manifold_category="agent"),
+        "did:coreason:system-1": SystemNodeProfile(description="System 1", manifold_category="system"),
     }
     with pytest.raises(ValidationError) as exc_info:
         NeurosymbolicVerificationTopologyManifest(
@@ -115,8 +115,8 @@ def test_cycle_bound_enforcement_too_high() -> None:
 
 def test_cycle_bound_enforcement_too_low() -> None:
     nodes: dict[str, Any] = {
-        "did:coreason:agent-1": AgentNodeProfile(description="Agent 1", type="agent"),
-        "did:coreason:system-1": SystemNodeProfile(description="System 1", type="system"),
+        "did:coreason:agent-1": AgentNodeProfile(description="Agent 1", manifold_category="agent"),
+        "did:coreason:system-1": SystemNodeProfile(description="System 1", manifold_category="system"),
     }
     with pytest.raises(ValidationError) as exc_info:
         NeurosymbolicVerificationTopologyManifest(
@@ -130,8 +130,8 @@ def test_cycle_bound_enforcement_too_low() -> None:
 
 def test_successful_compilation() -> None:
     nodes: dict[str, Any] = {
-        "did:coreason:agent-1": AgentNodeProfile(description="Agent 1", type="agent"),
-        "did:coreason:system-1": SystemNodeProfile(description="System 1", type="system"),
+        "did:coreason:agent-1": AgentNodeProfile(description="Agent 1", manifold_category="agent"),
+        "did:coreason:system-1": SystemNodeProfile(description="System 1", manifold_category="system"),
     }
     macro = NeurosymbolicVerificationTopologyManifest(
         nodes=nodes,
@@ -141,7 +141,7 @@ def test_successful_compilation() -> None:
     )
 
     dag = macro.compile_to_base_topology()
-    assert dag.type == "dag"
+    assert dag.manifold_category == "dag"
     assert dag.allow_cycles is True
     assert dag.max_depth == 42
     # Verify the edges exactly match the bidirectional Proposer-Verifier loop

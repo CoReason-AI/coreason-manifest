@@ -21,15 +21,15 @@ from coreason_manifest.spec.ontology import (
     EpistemicLedgerState,
     OntologicalAlignmentPolicy,
     StateDifferentialManifest,
-    StateMutationIntent,
+    StateTransmutationIntent,
     TamperFaultEvent,
     TokenBurnReceipt,
     VectorEmbeddingState,
 )
 from coreason_manifest.utils.algebra import (
-    apply_state_differential,
     calculate_latent_alignment,
     calculate_remaining_compute,
+    transmute_state_differential,
 )
 
 
@@ -38,11 +38,11 @@ from coreason_manifest.utils.algebra import (
     st.lists(
         st.builds(
             TokenBurnReceipt,
-            event_id=st.from_regex(r"^[a-zA-Z0-9_.:-]+$", fullmatch=True),
+            event_cid=st.from_regex(r"^[a-zA-Z0-9_.:-]+$", fullmatch=True),
             prior_event_hash=st.from_regex(r"^[a-f0-9]{64}$", fullmatch=True),
             timestamp=st.floats(min_value=0.0, max_value=253402300799.0),
             burn_magnitude=st.integers(min_value=0, max_value=10000),
-            tool_invocation_id=st.from_regex(r"^[a-zA-Z0-9_.:-]+$", fullmatch=True),
+            tool_invocation_cid=st.from_regex(r"^[a-zA-Z0-9_.:-]+$", fullmatch=True),
         ),
         max_size=10,
     ),
@@ -135,7 +135,9 @@ def test_apply_state_differential(
             author_node_id="test",
             lamport_timestamp=0,
             vector_clock={"test": 0},
-            patches=[StateMutationIntent(op=op, path=path, value=value, **({"from": from_path} if from_path else {}))],
+            patches=[
+                StateTransmutationIntent(op=op, path=path, value=value, **({"from": from_path} if from_path else {}))
+            ],
         )
     except ValidationError:
         return  # invalid manifest built
@@ -143,4 +145,4 @@ def test_apply_state_differential(
     import contextlib
 
     with contextlib.suppress(ValueError):
-        apply_state_differential(base_state, manifest)
+        transmute_state_differential(base_state, manifest)

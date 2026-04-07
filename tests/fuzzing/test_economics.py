@@ -45,7 +45,7 @@ def test_market_contract(minimum_collateral: int, slashing_penalty: int) -> None
 def test_prediction_market_state(probs: list[float]) -> None:
     probs_dict = {f"h{i}": str(p) for i, p in enumerate(probs)}
     pms = PredictionMarketState(
-        market_id="m1",
+        market_cid="m1",
         resolution_oracle_condition_id="c1",
         lmsr_b_parameter="1.5",
         order_book=[],
@@ -70,9 +70,9 @@ def test_compute_provisioning_intent(max_budget: int) -> None:
 )
 def test_token_burn_receipt(burn: int, inp: int, out: int) -> None:
     tbr = TokenBurnReceipt(
-        event_id="e1",
+        event_cid="e1",
         timestamp=100.0,
-        tool_invocation_id="t1",
+        tool_invocation_cid="t1",
         input_tokens=inp,
         output_tokens=out,
         burn_magnitude=burn,

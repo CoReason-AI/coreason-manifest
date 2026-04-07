@@ -50,12 +50,12 @@ def test_scaffold_mcp_success(
             "TestCapability": {
                 "properties": {
                     "some_field": {"type": "string", "description": "A field description"},
-                    "some_int": {"type": "integer"},
-                    "some_num": {"type": "number"},
-                    "some_bool": {"type": "boolean"},
+                    "some_int": {"manifold_category": "integer"},
+                    "some_num": {"manifold_category": "number"},
+                    "some_bool": {"manifold_category": "boolean"},
                     "some_null": {"type": "null"},
                     "some_array": {"type": "array", "items": {"type": "string"}},
-                    "some_obj": {"type": "object", "additionalProperties": {"type": "integer"}},
+                    "some_obj": {"type": "object", "additionalProperties": {"manifold_category": "integer"}},
                     "some_ref": {"$ref": "#/$defs/OtherModel"},
                     "some_union": {"anyOf": [{"type": "string"}, {"type": "null"}]},
                     "some_union_single": {"anyOf": [{"type": "string"}]},
@@ -118,8 +118,8 @@ def test_test_bootstrapper(mock_write_text: MagicMock) -> None:
     from coreason_manifest.cli.test_bootstrapper import generate_test
 
     fields = [
-        {"name": "some_int", "type": "int", "minimum": 0, "maximum": 10},
-        {"name": "some_float", "type": "float", "exclusiveMinimum": 0.0, "exclusiveMaximum": 1.0},
+        {"name": "some_int", "manifold_category": "int", "minimum": 0, "maximum": 10},
+        {"name": "some_float", "manifold_category": "float", "exclusiveMinimum": 0.0, "exclusiveMaximum": 1.0},
     ]
 
     generate_test("TestCapability", fields)

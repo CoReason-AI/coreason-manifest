@@ -22,14 +22,14 @@ from coreason_manifest.spec.ontology import (
 
 
 def test_transition_edge_xor_validation() -> None:
-    # Test valid target_node_id only
+    # Test valid target_node_cid only
     TransitionEdgeProfile(
-        topology_class="acyclic", target_node_id="tool_A", probability_weight=1.0, compute_weight_magnitude=5
+        topology_class="acyclic", target_node_cid="tool_A", probability_weight=1.0, compute_weight_magnitude=5
     )
 
     # Test valid target_intent only
     intent = SemanticDiscoveryIntent(
-        required_structural_types=["ToolManifest"],
+        required_structural_manifold_categorys=["ToolManifest"],
         min_isometry_score=0.9,
         query_vector={"vector_base64": "dummy", "dimensionality": 128, "model_name": "test-model"},  # type: ignore[arg-type]
     )
@@ -38,23 +38,23 @@ def test_transition_edge_xor_validation() -> None:
     )
 
     # Test invalid both
-    with pytest.raises(ValidationError, match="Exactly one of target_node_id or target_intent must be populated"):
+    with pytest.raises(ValidationError, match="Exactly one of target_node_cid or target_intent must be populated"):
         TransitionEdgeProfile(
             topology_class="acyclic",
-            target_node_id="tool_A",
+            target_node_cid="tool_A",
             target_intent=intent,
             probability_weight=1.0,
             compute_weight_magnitude=5,
         )
 
     # Test invalid neither
-    with pytest.raises(ValidationError, match="Exactly one of target_node_id or target_intent must be populated"):
+    with pytest.raises(ValidationError, match="Exactly one of target_node_cid or target_intent must be populated"):
         TransitionEdgeProfile(topology_class="acyclic", probability_weight=1.0, compute_weight_magnitude=5)
 
 
 def test_dynamic_ghost_node_and_canonical_sorting() -> None:
     tool_a = ToolManifest(
-        type="native_tool",
+        manifold_category="native_tool",
         tool_name="tool_A",
         description="Tool A",
         input_schema={"type": "object", "properties": {"input": {"type": "string"}}},
@@ -64,13 +64,13 @@ def test_dynamic_ghost_node_and_canonical_sorting() -> None:
 
     # Intent 1 should sort first (min_isometry_score 0.8 < 0.9)
     intent1 = SemanticDiscoveryIntent(
-        required_structural_types=["ToolManifest"],
+        required_structural_manifold_categorys=["ToolManifest"],
         min_isometry_score=0.8,
         query_vector={"vector_base64": "dummy", "dimensionality": 128, "model_name": "test-model"},  # type: ignore[arg-type]
     )
     # Intent 2 should sort second
     intent2 = SemanticDiscoveryIntent(
-        required_structural_types=["ToolManifest"],
+        required_structural_manifold_categorys=["ToolManifest"],
         min_isometry_score=0.9,
         query_vector={"vector_base64": "dummy", "dimensionality": 128, "model_name": "test-model"},  # type: ignore[arg-type]
     )
@@ -83,8 +83,8 @@ def test_dynamic_ghost_node_and_canonical_sorting() -> None:
     )
 
     asm = ActionSpaceManifest(
-        action_space_id="test_dynamic_edges",
-        entry_point_id="tool_A",
+        action_space_cid="test_dynamic_edges",
+        entry_point_cid="tool_A",
         capabilities={"tool_A": tool_a},
         transition_matrix={"tool_A": [edge1, edge2]},
     )

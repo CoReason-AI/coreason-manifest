@@ -20,11 +20,11 @@ from hypothesis import strategies as st
 from coreason_manifest.spec.ontology import (
     OntologicalAlignmentPolicy,
     StateDifferentialManifest,
-    StateMutationIntent,
+    StateTransmutationIntent,
     TamperFaultEvent,
     VectorEmbeddingState,
 )
-from coreason_manifest.utils.algebra import apply_state_differential, calculate_latent_alignment
+from coreason_manifest.utils.algebra import calculate_latent_alignment, transmute_state_differential
 
 
 @st.composite
@@ -37,7 +37,7 @@ def json_path_st(draw: st.DrawFn) -> str:
 
 
 @st.composite
-def state_mutation_intent_st(draw: st.DrawFn) -> StateMutationIntent:
+def state_mutation_intent_st(draw: st.DrawFn) -> StateTransmutationIntent:
     op = draw(st.sampled_from(["add", "remove", "replace", "copy", "move", "test"]))
     path = draw(json_path_st())
     from_path = draw(json_path_st()) if op in ("copy", "move") else None
@@ -55,13 +55,13 @@ def state_mutation_intent_st(draw: st.DrawFn) -> StateMutationIntent:
         )
 
     if from_path is not None:
-        return StateMutationIntent.model_construct(
+        return StateTransmutationIntent.model_construct(
             op=cast("Any", op),
             path=path,
             value=value,
             from_path=from_path,
         )
-    return StateMutationIntent.model_construct(
+    return StateTransmutationIntent.model_construct(
         op=cast("Any", op),
         path=path,
         value=value,
@@ -76,14 +76,14 @@ def state_mutation_intent_st(draw: st.DrawFn) -> StateMutationIntent:
     st.lists(state_mutation_intent_st(), min_size=1, max_size=50),
 )
 @settings(max_examples=1000, deadline=None)
-def test_apply_state_differential_fuzz(base_state: dict[str, Any], patches: list[StateMutationIntent]) -> None:
+def test_apply_state_differential_fuzz(base_state: dict[str, Any], patches: list[StateTransmutationIntent]) -> None:
     manifest = StateDifferentialManifest(
         diff_id="a" * 128, author_node_id="a" * 128, lamport_timestamp=1, vector_clock={}, patches=patches
     )
 
     original_state = copy.deepcopy(base_state)
     try:
-        _ = apply_state_differential(base_state, manifest)
+        _ = transmute_state_differential(base_state, manifest)
         assert base_state == original_state
     except ValueError:
         assert base_state == original_state

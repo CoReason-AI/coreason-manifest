@@ -26,7 +26,6 @@ from coreason_manifest.spec.ontology import (
     ConstrainedDecodingPolicy,
     ContextualizedSourceEntity,
     CoreasonBaseState,
-    DataFidelityReceipt,
     DefeasibleCascadeEvent,
     DynamicLayoutManifest,
     EphemeralNamespacePartitionState,
@@ -36,6 +35,7 @@ from coreason_manifest.spec.ontology import (
     GradingCriterionProfile,
     HardwareProfile,
     InformationClassificationProfile,
+    InformationDensityReceipt,
     LatentSmoothingProfile,
     MultimodalTokenAnchorState,
     NeurosymbolicInferenceRequest,
@@ -84,7 +84,7 @@ def test_coreason_base_state_hash() -> None:
 @settings(max_examples=100, suppress_health_check=[HealthCheck.too_slow])
 def test_spatial_bounds_fuzzing(extents_x: float, extents_y: float, extents_z: float) -> None:
     """Mathematically prove the 3D plane logic strictly rejects impossible Euclidean geometries."""
-    transform = SE3TransformProfile(reference_frame_id="frame", x=0, y=0, z=0)
+    transform = SE3TransformProfile(reference_frame_cid="frame", x=0, y=0, z=0)
     if extents_x * extents_y * extents_z == 0.0:
         with pytest.raises(ValidationError, match=r"strictly greater than 0"):
             VolumetricBoundingProfile(
@@ -100,31 +100,31 @@ def test_spatial_bounds_fuzzing(extents_x: float, extents_y: float, extents_z: f
 def test_se3_transform_quaternion_validation() -> None:
     # Magnitude 0.0
     with pytest.raises(ValidationError, match="Quaternion cannot be a zero vector"):
-        SE3TransformProfile(reference_frame_id="frame", x=0, y=0, z=0, qx=0.0, qy=0.0, qz=0.0, qw=0.0)
+        SE3TransformProfile(reference_frame_cid="frame", x=0, y=0, z=0, qx=0.0, qy=0.0, qz=0.0, qw=0.0)
 
     # Not normalized
     with pytest.raises(ValidationError, match="Quaternion magnitude is"):
-        SE3TransformProfile(reference_frame_id="frame", x=0, y=0, z=0, qx=1.0, qy=1.0, qz=1.0, qw=1.0)
+        SE3TransformProfile(reference_frame_cid="frame", x=0, y=0, z=0, qx=1.0, qy=1.0, qz=1.0, qw=1.0)
 
 
 def test_viewport_projection_validation() -> None:
     # Clipping plane near >= far
     with pytest.raises(ValidationError, match=r"clipping_plane_near must be strictly less than clipping_plane_far\."):
         ViewportProjectionContract(
-            projection_type="perspective", clipping_plane_near=0.5, clipping_plane_far=0.1, field_of_view_degrees=90.0
+            projection_manifold_category="perspective", clipping_plane_near=0.5, clipping_plane_far=0.1, field_of_view_degrees=90.0
         )
 
     # Perspective without FOV
     with pytest.raises(
         ValidationError, match=r"Perspective projection mathematically requires field_of_view_degrees\."
     ):
-        ViewportProjectionContract(projection_type="perspective", clipping_plane_near=0.1, clipping_plane_far=10.0)
+        ViewportProjectionContract(projection_manifold_category="perspective", clipping_plane_near=0.1, clipping_plane_far=10.0)
 
     # Valid configurations
     ViewportProjectionContract(
-        projection_type="perspective", clipping_plane_near=0.1, clipping_plane_far=10.0, field_of_view_degrees=90.0
+        projection_manifold_category="perspective", clipping_plane_near=0.1, clipping_plane_far=10.0, field_of_view_degrees=90.0
     )
-    ViewportProjectionContract(projection_type="orthographic", clipping_plane_near=0.1, clipping_plane_far=10.0)
+    ViewportProjectionContract(projection_manifold_category="orthographic", clipping_plane_near=0.1, clipping_plane_far=10.0)
 
 
 # --- 3. Byzantine Fault Tolerance Fuzzing ---
@@ -288,16 +288,16 @@ def test_activation_steering_contract_sorting() -> None:
 
 
 def test_adjudication_rubric_profile_sorting() -> None:
-    c1 = GradingCriterionProfile(criterion_id="c_beta", description="Beta criterion", weight=10.0)
-    c2 = GradingCriterionProfile(criterion_id="c_alpha", description="Alpha criterion", weight=5.0)
-    rubric = AdjudicationRubricProfile(rubric_id="rubric1", criteria=[c1, c2], passing_threshold=15.0)
-    assert rubric.criteria[0].criterion_id == "c_alpha"
-    assert rubric.criteria[1].criterion_id == "c_beta"
+    c1 = GradingCriterionProfile(criterion_cid="c_beta", description="Beta criterion", weight=10.0)
+    c2 = GradingCriterionProfile(criterion_cid="c_alpha", description="Alpha criterion", weight=5.0)
+    rubric = AdjudicationRubricProfile(rubric_cid="rubric1", criteria=[c1, c2], passing_threshold=15.0)
+    assert rubric.criteria[0].criterion_cid == "c_alpha"
+    assert rubric.criteria[1].criterion_cid == "c_beta"
 
 
 def test_redaction_policy_sorting() -> None:
     policy = RedactionPolicy(
-        rule_id="r1",
+        rule_cid="r1",
         classification=InformationClassificationProfile.PUBLIC,
         target_pattern="email",
         target_regex_pattern=".*",
@@ -363,18 +363,18 @@ def test_active_inference_contract_bounds_fuzzing(eig: float) -> None:
     if eig < 0.0 or eig > 1.0:
         with pytest.raises(ValidationError, match=r"Input should be"):
             ActiveInferenceContract(
-                task_id="task_1",
-                target_hypothesis_id="hyp_1",
-                target_condition_id="cond_1",
+                task_cid="task_1",
+                target_hypothesis_cid="hyp_1",
+                target_condition_cid="cond_1",
                 selected_tool_name="tool_1",
                 expected_information_gain=eig,
                 execution_cost_budget_magnitude=100,
             )
     else:
         contract = ActiveInferenceContract(
-            task_id="task_1",
-            target_hypothesis_id="hyp_1",
-            target_condition_id="cond_1",
+            task_cid="task_1",
+            target_hypothesis_cid="hyp_1",
+            target_condition_cid="cond_1",
             selected_tool_name="tool_1",
             expected_information_gain=eig,
             execution_cost_budget_magnitude=100,
@@ -473,7 +473,7 @@ def test_multimodal_token_anchor_state_sorting() -> None:
 
 def test_secure_sub_session_state_sorting() -> None:
     state = SecureSubSessionState(
-        session_id="session1",
+        session_cid="session1",
         allowed_vault_keys=["vault_z", "vault_a", "vault_m"],
         max_ttl_seconds=3600,
         description="test session",
@@ -486,7 +486,7 @@ def test_ephemeral_namespace_partition_state_sorting() -> None:
     hash_b = "b" * 64
     hash_c = "c" * 64
     state = EphemeralNamespacePartitionState(
-        partition_id="part1",
+        partition_cid="part1",
         execution_runtime="wasm32-wasi",
         authorized_bytecode_hashes=[hash_c, hash_a, hash_b],
         max_ttl_seconds=3600,
@@ -498,7 +498,7 @@ def test_ephemeral_namespace_partition_state_sorting() -> None:
 def test_ephemeral_namespace_partition_state_invalid_hash() -> None:
     with pytest.raises(ValidationError, match=r"Invalid SHA-256 hash in whitelist: invalid_hash"):
         EphemeralNamespacePartitionState(
-            partition_id="part1",
+            partition_cid="part1",
             execution_runtime="wasm32-wasi",
             authorized_bytecode_hashes=["invalid_hash"],
             max_ttl_seconds=3600,
@@ -510,7 +510,7 @@ def test_bilateral_sla_sorting() -> None:
     from coreason_manifest.spec.ontology import BilateralSLA, InformationClassificationProfile
 
     sla = BilateralSLA(
-        receiving_tenant_id="tenant-a",
+        receiving_tenant_cid="tenant-a",
         max_permitted_classification=InformationClassificationProfile.PUBLIC,
         liability_limit_magnitude=1000,
         permitted_geographic_regions=["us-west", "eu-central", "ap-south"],
@@ -580,7 +580,7 @@ def test_action_space_manifest_enforce_canonical_sort() -> None:
     )
 
     tool1 = ToolManifest(
-        type="native_tool",
+        manifold_category="native_tool",
         tool_name="tool_b",
         description="description",
         input_schema={"type": "object", "properties": {}},
@@ -588,7 +588,7 @@ def test_action_space_manifest_enforce_canonical_sort() -> None:
         permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
     )
     tool2 = ToolManifest(
-        type="native_tool",
+        manifold_category="native_tool",
         tool_name="tool_a",
         description="description 2",
         input_schema={"type": "object", "properties": {}},
@@ -598,20 +598,20 @@ def test_action_space_manifest_enforce_canonical_sort() -> None:
 
     # Valid manifest
     manifest = ActionSpaceManifest(
-        action_space_id="space_1",
-        entry_point_id="tool_b",
+        action_space_cid="space_1",
+        entry_point_cid="tool_b",
         capabilities={"tool_a": tool2, "tool_b": tool1},
         transition_matrix={
             "tool_b": [
                 TransitionEdgeProfile(
                     topology_class="acyclic",
-                    target_node_id="tool_b",
+                    target_node_cid="tool_b",
                     probability_weight=0.5,
                     compute_weight_magnitude=1,
                 ),
                 TransitionEdgeProfile(
                     topology_class="acyclic",
-                    target_node_id="tool_a",
+                    target_node_cid="tool_a",
                     probability_weight=0.5,
                     compute_weight_magnitude=1,
                 ),
@@ -620,8 +620,8 @@ def test_action_space_manifest_enforce_canonical_sort() -> None:
         },
     )
     # Check canonical sorting of edges
-    assert manifest.transition_matrix["tool_b"][0].target_node_id == "tool_a"
-    assert manifest.transition_matrix["tool_b"][1].target_node_id == "tool_b"
+    assert manifest.transition_matrix["tool_b"][0].target_node_cid == "tool_a"
+    assert manifest.transition_matrix["tool_b"][1].target_node_cid == "tool_b"
 
 
 def test_mcpservermanifest_enforce_did() -> None:
@@ -645,7 +645,7 @@ def test_mcpservermanifest_enforce_did() -> None:
         ValidationError, match=r"UNAUTHORIZED MCP MOUNT: The presented Verifiable Credential is not signed"
     ):
         MCPServerManifest(
-            server_id="server_1",
+            server_cid="server_1",
             transport=StdioTransportProfile(command="cmd", args=[]),
             capability_whitelist=MCPCapabilityWhitelistPolicy(),
             attestation_receipt=vc_invalid,
@@ -658,7 +658,7 @@ def test_mcpservermanifest_enforce_did() -> None:
         authorization_claims={},
     )
     manifest = MCPServerManifest(
-        server_id="server_1",
+        server_cid="server_1",
         transport=StdioTransportProfile(command="cmd", args=[]),
         binary_hash="a" * 64,
         capability_whitelist=MCPCapabilityWhitelistPolicy(),
@@ -672,7 +672,7 @@ def test_insight_card_profile_xss_prevention() -> None:
     from coreason_manifest.spec.ontology import InsightCardProfile
 
     # Test that valid links work
-    InsightCardProfile(panel_id="panel_1", title="Title", markdown_content="[click me](https://coreason.ai)")
+    InsightCardProfile(panel_cid="panel_1", title="Title", markdown_content="[click me](https://coreason.ai)")
 
     malicious_payloads = [
         "<script>alert(1)</script>",
@@ -680,13 +680,13 @@ def test_insight_card_profile_xss_prevention() -> None:
     ]
 
     for payload in malicious_payloads:
-        profile = InsightCardProfile(panel_id="panel_1", title="Title", markdown_content=payload)
+        profile = InsightCardProfile(panel_cid="panel_1", title="Title", markdown_content=payload)
         assert "<script>" not in profile.markdown_content
         assert "alert(1)" not in profile.markdown_content
 
     # Note: "<a href='javascript:alert(1)'>click me</a>" is caught by `sanitize_markdown` first
     profile = InsightCardProfile(
-        panel_id="panel_1", title="Title", markdown_content="<a href='javascript:alert(1)'>click me</a>"
+        panel_cid="panel_1", title="Title", markdown_content="<a href='javascript:alert(1)'>click me</a>"
     )
     assert "javascript:alert" not in profile.markdown_content
 
@@ -696,7 +696,7 @@ def test_macro_grid_profile_referential_integrity() -> None:
 
     from coreason_manifest.spec.ontology import InsightCardProfile, MacroGridProfile
 
-    panel = InsightCardProfile(panel_id="panel_1", title="Title", markdown_content="Content")
+    panel = InsightCardProfile(panel_cid="panel_1", title="Title", markdown_content="Content")
     with pytest.raises(ValidationError, match=r"Ghost Panel referenced in layout_matrix"):
         MacroGridProfile(layout_matrix=[["panel_1", "panel_2"]], panels=[panel])
 
@@ -747,7 +747,11 @@ def test_executionspanreceipt_enforce_canonical_sort_events() -> None:
     event3 = SpanEvent(name="event_c", timestamp_unix_nano=1500)
 
     receipt = ExecutionSpanReceipt(
-        trace_id="trace_1", span_id="span_1", name="span_name", start_time_unix_nano=0, events=[event1, event2, event3]
+        trace_pointer="trace_1",
+        span_coordinate="span_1",
+        name="span_name",
+        start_time_unix_nano=0,
+        events=[event1, event2, event3],
     )
 
     # events should be sorted by timestamp_unix_nano
@@ -766,7 +770,7 @@ def test_causal_explanation_event_sorts_attributions() -> None:
     ci_profile = CollectiveIntelligenceProfile(synergy_index=0.8, coordination_score=0.9, information_integration=0.7)
 
     receipt_b = ShapleyAttributionReceipt(
-        target_node_id="did:coreason:node-b",
+        target_node_cid="did:coreason:node-b",
         causal_attribution_score=0.4,
         normalized_contribution_percentage=0.4,
         confidence_interval_lower=0.3,
@@ -774,7 +778,7 @@ def test_causal_explanation_event_sorts_attributions() -> None:
     )
 
     receipt_a = ShapleyAttributionReceipt(
-        target_node_id="did:coreason:node-a",
+        target_node_cid="did:coreason:node-a",
         causal_attribution_score=0.6,
         normalized_contribution_percentage=0.6,
         confidence_interval_lower=0.5,
@@ -782,22 +786,22 @@ def test_causal_explanation_event_sorts_attributions() -> None:
     )
 
     event = CausalExplanationEvent(
-        event_id="test_event_1",
+        event_cid="test_event_1",
         timestamp=123456.0,
         target_outcome_event_id="test_outcome_1",
         collective_intelligence=ci_profile,
         agent_attributions=[receipt_b, receipt_a],
     )
 
-    assert event.agent_attributions[0].target_node_id == "did:coreason:node-a"
-    assert event.agent_attributions[1].target_node_id == "did:coreason:node-b"
+    assert event.agent_attributions[0].target_node_cid == "did:coreason:node-a"
+    assert event.agent_attributions[1].target_node_cid == "did:coreason:node-b"
 
 
 def test_kinematic_delta_manifest_sorting() -> None:
     from coreason_manifest.spec.ontology import KinematicDeltaManifest
 
     manifest = KinematicDeltaManifest(
-        stream_id="stream-123",
+        stream_cid="stream-123",
         deltas=[
             ("node-B", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
             ("node-A", 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
@@ -874,7 +878,7 @@ def test_refusal_to_reason_enforcement() -> None:
         contextual_envelope=[],
         source_system_provenance_flag=False,
     )
-    fidelity_receipt = DataFidelityReceipt(
+    fidelity_receipt = InformationDensityReceipt(
         contextual_completeness_score=0.0,
         surrounding_token_density=0,
     )
@@ -908,7 +912,7 @@ def test_successful_epistemic_grounding() -> None:
         contextual_envelope=["patient chart", "medication order"],
         source_system_provenance_flag=True,
     )
-    fidelity_receipt = DataFidelityReceipt(
+    fidelity_receipt = InformationDensityReceipt(
         contextual_completeness_score=0.9,
         surrounding_token_density=10,
     )

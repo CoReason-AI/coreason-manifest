@@ -69,15 +69,15 @@ def test_capability_forge_topology_compile() -> None:
     intent = SemanticDiscoveryIntent(
         query_vector=VectorEmbeddingState(vector_base64="abc", dimensionality=10, model_name="test-model"),
         min_isometry_score=0.9,
-        required_structural_types=["test"],
+        required_structural_manifold_categorys=["test"],
     )
     # The CapabilityForgeTopologyManifest extends BaseTopologyManifest, which requires 'nodes' by default.
     # To pass validation without supplying raw nodes on creation, we supply an empty dict
     manifest = CapabilityForgeTopologyManifest(
         target_epistemic_deficit=intent,
-        generator_node_id="did:coreason:agent-1",
-        formal_verifier_id="did:coreason:system-1",
-        fuzzing_engine_id="did:coreason:system-2",
+        generator_node_cid="did:coreason:agent-1",
+        formal_verifier_cid="did:coreason:system-1",
+        fuzzing_engine_cid="did:coreason:system-2",
         nodes={},
     )
 

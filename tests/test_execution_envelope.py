@@ -24,32 +24,35 @@ from coreason_manifest.spec.ontology import (
 
 def test_causal_integrity() -> None:
     a = TraceContextState(
-        trace_id="01HVK1Z5B7G6V5G8S8A2G1Z5B7", span_id="01HVK1Z5B7G6V5G8S8A2G1Z5B8", parent_span_id=None, causal_clock=0
+        trace_pointer="01HVK1Z5B7G6V5G8S8A2G1Z5B7",
+        span_coordinate="01HVK1Z5B7G6V5G8S8A2G1Z5B8",
+        parent_span_coordinate=None,
+        causal_clock=0,
     )
 
     b = TraceContextState(
-        trace_id=a.trace_id,
-        span_id="01HVK1Z5B7G6V5G8S8A2G1Z5B9",
-        parent_span_id=a.span_id,
+        trace_pointer=a.trace_pointer,
+        span_coordinate="01HVK1Z5B7G6V5G8S8A2G1Z5B9",
+        parent_span_coordinate=a.span_coordinate,
         causal_clock=a.causal_clock + 1,
     )
 
     c = TraceContextState(
-        trace_id=a.trace_id,
-        span_id="01HVK1Z5B7G6V5G8S8A2G1Z5BA",
-        parent_span_id=b.span_id,
+        trace_pointer=a.trace_pointer,
+        span_coordinate="01HVK1Z5B7G6V5G8S8A2G1Z5BA",
+        parent_span_coordinate=b.span_coordinate,
         causal_clock=b.causal_clock + 1,
     )
 
-    assert c.trace_id == a.trace_id
+    assert c.trace_pointer == a.trace_pointer
     assert c.causal_clock == a.causal_clock + 2
 
     # Prevent superficial infinite self-pointers
     with pytest.raises(ValidationError):
         TraceContextState(
-            trace_id="01HVK1Z5B7G6V5G8S8A2G1Z5B7",
-            span_id="01HVK1Z5B7G6V5G8S8A2G1Z5B8",
-            parent_span_id="01HVK1Z5B7G6V5G8S8A2G1Z5B8",
+            trace_pointer="01HVK1Z5B7G6V5G8S8A2G1Z5B7",
+            span_coordinate="01HVK1Z5B7G6V5G8S8A2G1Z5B8",
+            parent_span_coordinate="01HVK1Z5B7G6V5G8S8A2G1Z5B8",
             causal_clock=0,
         )
 
@@ -59,7 +62,7 @@ def test_pure_function() -> None:
     with pytest.raises(ValidationError):
         ExecutionEnvelopeState(
             trace_context=TraceContextState(
-                trace_id="01HVK1Z5B7G6V5G8S8A2G1Z5B7", span_id="01HVK1Z5B7G6V5G8S8A2G1Z5B8"
+                trace_pointer="01HVK1Z5B7G6V5G8S8A2G1Z5B7", span_coordinate="01HVK1Z5B7G6V5G8S8A2G1Z5B8"
             ),
             state_vector=StateVectorProfile(),
             payload={"test": "data"},
@@ -69,7 +72,7 @@ def test_pure_function() -> None:
     with pytest.raises(ValidationError):
         ExecutionEnvelopeState(
             trace_context=TraceContextState(
-                trace_id="01HVK1Z5B7G6V5G8S8A2G1Z5B7", span_id="01HVK1Z5B7G6V5G8S8A2G1Z5B8"
+                trace_pointer="01HVK1Z5B7G6V5G8S8A2G1Z5B7", span_coordinate="01HVK1Z5B7G6V5G8S8A2G1Z5B8"
             ),
             state_vector=StateVectorProfile(),
             payload={"test": "data"},
@@ -78,21 +81,21 @@ def test_pure_function() -> None:
 
 
 def test_delta_state() -> None:
-    # Assert that a StateVectorProfile with is_delta=True passes validation even if mandatory mutable_memory keys are omitted (it can be None or empty)
+    # Assert that a StateVectorProfile with is_delta=True passes validation even if mandatory mutable_scratchpad_partition keys are omitted (it can be None or empty)
     s = StateVectorProfile(is_delta=True)
     assert s.is_delta is True
-    assert s.mutable_memory is None
+    assert s.mutable_scratchpad_partition is None
 
 
 def test_action_space_manifest_rejects_custom_state() -> None:
     with pytest.raises(ValidationError) as excinfo:
         ActionSpaceManifest(
-            action_space_id="test_id",
-            entry_point_id="test_tool",
+            action_space_cid="test_id",
+            entry_point_cid="test_tool",
             transition_matrix={"test_tool": []},
             capabilities={
                 "test_tool": ToolManifest(
-                    type="native_tool",
+                    manifold_category="native_tool",
                     tool_name="test_tool",
                     description="test tool",
                     input_schema={"type": "object", "properties": {"system_prompt": {"type": "string"}}},
@@ -105,12 +108,12 @@ def test_action_space_manifest_rejects_custom_state() -> None:
 
     # Should pass cleanly without any exceptions.
     ActionSpaceManifest(
-        action_space_id="test_id_2",
-        entry_point_id="test_tool_2",
+        action_space_cid="test_id_2",
+        entry_point_cid="test_tool_2",
         transition_matrix={"test_tool_2": []},
         capabilities={
             "test_tool_2": ToolManifest(
-                type="native_tool",
+                manifold_category="native_tool",
                 tool_name="test_tool_2",
                 description="test tool 2",
                 input_schema={"type": "object", "properties": {"sql_query": {"type": "string"}}},
@@ -128,8 +131,8 @@ def test_state_vector_memory_bounds() -> None:
     from coreason_manifest.spec.ontology import StateVectorProfile
 
     # It should pass with small valid dictionaries
-    s = StateVectorProfile(mutable_memory={"test": "abc"}, read_only_context={"rules": "abc"})
-    assert s.mutable_memory == {"test": "abc"}
+    s = StateVectorProfile(mutable_scratchpad_partition={"test": "abc"}, read_only_context={"rules": "abc"})
+    assert s.mutable_scratchpad_partition == {"test": "abc"}
     assert s.read_only_context == {"rules": "abc"}
 
     # It should fail with huge payloads exceeding nodes
@@ -140,7 +143,7 @@ def test_state_vector_memory_bounds() -> None:
         huge_dict[f"key_{i}"] = i
 
     with pytest.raises(ValidationError) as exc_info:
-        StateVectorProfile(mutable_memory=huge_dict)
+        StateVectorProfile(mutable_scratchpad_partition=huge_dict)
     assert "Payload volume exceeds absolute hardware limit" in str(exc_info.value)
 
     with pytest.raises(ValidationError) as exc_info:

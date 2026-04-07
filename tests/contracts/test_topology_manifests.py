@@ -113,7 +113,7 @@ def test_dag_topology_self_loop_cycle_detection() -> None:
 def test_council_topology_missing_adjudicator() -> None:
     nodes: dict[str, AnyNodeProfile] = {"did:web:n1": SystemNodeProfile(description="W1")}
     with pytest.raises(ValidationError, match=r"Adjudicator ID 'did:web:adj' is not in nodes registry"):
-        CouncilTopologyManifest(adjudicator_id="did:web:adj", nodes=nodes)
+        CouncilTopologyManifest(adjudicator_cid="did:web:adj", nodes=nodes)
 
 
 def test_council_topology_unfunded_slashing_none() -> None:
@@ -128,7 +128,7 @@ def test_council_topology_unfunded_slashing_none() -> None:
 
     with pytest.raises(ValidationError, match=r"PBFT with slash_escrow requires a funded council_escrow"):
         CouncilTopologyManifest(
-            adjudicator_id="did:web:adj", nodes=nodes, consensus_policy=consensus, council_escrow=None
+            adjudicator_cid="did:web:adj", nodes=nodes, consensus_policy=consensus, council_escrow=None
         )
 
 
@@ -147,7 +147,7 @@ def test_council_topology_unfunded_slashing_zero() -> None:
 
     with pytest.raises(ValidationError, match=r"PBFT with slash_escrow requires a funded council_escrow"):
         CouncilTopologyManifest(
-            adjudicator_id="did:web:adj", nodes=nodes, consensus_policy=consensus, council_escrow=escrow
+            adjudicator_cid="did:web:adj", nodes=nodes, consensus_policy=consensus, council_escrow=escrow
         )
 
 
@@ -165,14 +165,14 @@ def test_task_award_escrow_bounds(cleared_price: int, locked_amount: int) -> Non
     if locked_amount > cleared_price:
         with pytest.raises(ValidationError, match=r"Escrow locked amount cannot exceed the total cleared price"):
             TaskAwardReceipt(
-                task_id="t1",
+                task_cid="t1",
                 awarded_syndicate={"did:web:n1": cleared_price},
                 cleared_price_magnitude=cleared_price,
                 escrow=escrow,
             )
     else:
         receipt = TaskAwardReceipt(
-            task_id="t1",
+            task_cid="t1",
             awarded_syndicate={"did:web:n1": cleared_price},
             cleared_price_magnitude=cleared_price,
             escrow=escrow,

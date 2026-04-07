@@ -64,17 +64,17 @@ def test_tamper_evident_shatter_protocol(inputs: Any, outputs: Any) -> None:
 
 def test_latent_scratchpad_trace_sorting_determinism() -> None:
     """Prove that object arrays are deterministically sorted by their specific lambda key."""
-    b1 = ThoughtBranchState(branch_id="branch_Z", latent_content_hash="a" * 64)
-    b2 = ThoughtBranchState(branch_id="branch_A", latent_content_hash="b" * 64)
+    b1 = ThoughtBranchState(branch_cid="branch_Z", latent_content_hash="a" * 64)
+    b2 = ThoughtBranchState(branch_cid="branch_A", latent_content_hash="b" * 64)
 
     trace = LatentScratchpadReceipt(
-        trace_id="trace_1",
+        trace_pointer="trace_1",
         explored_branches=[b1, b2],
         discarded_branches=["branch_Z", "branch_A"],
         total_latent_tokens=100,
     )
     assert trace.discarded_branches == ["branch_A", "branch_Z"]
-    assert trace.explored_branches[0].branch_id == "branch_A"
+    assert trace.explored_branches[0].branch_cid == "branch_A"
 
 
 @st.composite
@@ -115,7 +115,7 @@ def draw_latent_projection_intent(draw: st.DrawFn) -> dict[str, Any]:
     )
 
     return {
-        "type": "latent_projection",
+        "manifold_category": "latent_projection",
         "synthetic_target_vector": draw(vector_embedding_st),
         "top_k_candidates": draw(st.integers(min_value=1)),
         "min_isometry_score": draw(st.floats(min_value=-1.0, max_value=1.0, allow_nan=False, allow_infinity=False)),

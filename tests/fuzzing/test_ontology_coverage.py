@@ -151,11 +151,11 @@ def test_workflow_manifest_lbac_dominance(
 ) -> None:
     # Setup the required fields for WorkflowManifest
     prov = EpistemicProvenanceReceipt(
-        extracted_by="did:node:id-1", source_event_id="a" * 64, derivation_mode=DerivationMode.DIRECT_TRANSLATION
+        extracted_by="did:node:id-1", source_event_cid="a" * 64, derivation_mode=DerivationMode.DIRECT_TRANSLATION
     )
     topology = DAGTopologyManifest(nodes={}, edges=[], max_depth=10, max_fan_out=10)
     sla = BilateralSLA(
-        receiving_tenant_id="tenant-x", max_permitted_classification=sla_max_class, liability_limit_magnitude=100
+        receiving_tenant_cid="tenant-x", max_permitted_classification=sla_max_class, liability_limit_magnitude=100
     )
 
     max_local_clearance = max(prof.clearance_level for prof in allowed_classes)
@@ -206,7 +206,7 @@ def test_evaluator_optimizer_bipartite_nodes(nodes_pair: tuple[str, str]) -> Non
 
     with pytest.raises(ValidationError) as exc_info:
         EvaluatorOptimizerTopologyManifest(
-            nodes=nodes, generator_node_id=gen_id, evaluator_node_id=eval_id, max_revision_loops=5
+            nodes=nodes, generator_node_cid=gen_id, evaluator_node_cid=eval_id, max_revision_loops=5
         )
 
     # If they are the same, it fails the "cannot be the same node" or "not found"

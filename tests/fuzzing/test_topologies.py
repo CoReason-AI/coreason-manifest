@@ -65,7 +65,7 @@ def test_adversarial_market_disjoint_failure() -> None:
         AdversarialMarketTopologyManifest(
             blue_team_cids=["did:web:agent_a"],
             red_team_cids=["did:web:agent_a"],
-            adjudicator_id="did:web:adj",
+            adjudicator_cid="did:web:adj",
             market_rules=policy,
         )
 
@@ -83,7 +83,7 @@ def test_council_topology_byzantine_slash_requires_escrow() -> None:
     with pytest.raises(ValidationError, match="PBFT with slash_escrow requires a funded council_escrow"):
         CouncilTopologyManifest(
             nodes=nodes,
-            adjudicator_id="did:web:node_1",
+            adjudicator_cid="did:web:node_1",
             consensus_policy=ConsensusPolicy(strategy="pbft", quorum_rules=quorum),
         )
 
@@ -105,7 +105,7 @@ def test_semantic_discovery_isometry_bounds(min_isometry_score: float) -> None:
     vector = VectorEmbeddingState(vector_base64="aGVsbG8=", dimensionality=10, model_name="test-model")
     with pytest.raises(ValidationError):
         SemanticDiscoveryIntent(
-            query_vector=vector, min_isometry_score=min_isometry_score, required_structural_types=["read_only"]
+            query_vector=vector, min_isometry_score=min_isometry_score, required_structural_manifold_categorys=["read_only"]
         )
 
 
@@ -147,15 +147,15 @@ def test_epistemic_sop_ghost_node_rejection(
 )
 def test_dag_topology_cycles_and_bounds_fuzz(edges: list[tuple[str, str]]) -> None:
     edges_formatted = [("did:core:" + e[0], "did:core:" + e[1]) for e in edges]
-    nodes: Any = {e[0]: {"type": "agent", "description": "desc"} for e in edges_formatted} | {
-        e[1]: {"type": "agent", "description": "desc"} for e in edges_formatted
+    nodes: Any = {e[0]: {"manifold_category": "agent", "description": "desc"} for e in edges_formatted} | {
+        e[1]: {"manifold_category": "agent", "description": "desc"} for e in edges_formatted
     }
 
     # We enforce constraints to trigger specific ValueErrors if they breach the limit.
     # Otherwise, it should instantiate without error.
     try:
         DAGTopologyManifest(
-            type="dag", nodes=nodes, edges=edges_formatted, max_depth=5, max_fan_out=5, allow_cycles=False
+            manifold_category="dag", nodes=nodes, edges=edges_formatted, max_depth=5, max_fan_out=5, allow_cycles=False
         )
         # If it succeeds, it must be valid.
     except ValueError as e:
@@ -175,7 +175,7 @@ def test_dag_topology_cycles_and_bounds_fuzz(edges: list[tuple[str, str]]) -> No
 @given(
     nodes_dict=st.dictionaries(
         keys=st.text(min_size=7, alphabet="abcdefg01234_-").map(lambda x: "did:core:" + x),
-        values=st.just({"type": "agent", "description": "desc"}),
+        values=st.just({"manifold_category": "agent", "description": "desc"}),
         min_size=1,
         max_size=50,
     ),
@@ -187,7 +187,7 @@ def test_swarm_topology_constraints_fuzz(
 ) -> None:
     try:
         SwarmTopologyManifest(
-            type="swarm",
+            manifold_category="swarm",
             nodes=nodes_dict,
             spawning_threshold=spawning_threshold,
             max_concurrent_agents=max_concurrent_agents,
@@ -240,11 +240,11 @@ def test_defeasible_cascade_logic_fuzz(cascade_id: str, root: str, quarantined: 
 @given(
     source=st.text(min_size=1, max_size=100),
     target=st.text(min_size=1, max_size=100),
-    edge_type=st.sampled_from(["direct_cause", "confounder", "collider", "mediator"]),
+    edge_manifold_category=st.sampled_from(["direct_cause", "confounder", "collider", "mediator"]),
 )
-def test_causal_directed_edge_state_fuzz(source: str, target: str, edge_type: Any) -> None:
+def test_causal_directed_edge_state_fuzz(source: str, target: str, edge_manifold_category: Any) -> None:
     try:
-        CausalDirectedEdgeState(source_variable=source, target_variable=target, edge_type=edge_type)
+        CausalDirectedEdgeState(source_variable=source, target_variable=target, edge_manifold_category=edge_manifold_category)
         if source == target:
             pytest.fail("CausalDirectedEdgeState failed to reject self-referential edge")
     except ValueError as e:
@@ -261,7 +261,7 @@ def test_causal_directed_edge_state_fuzz(source: str, target: str, edge_type: An
     history=st.lists(
         st.builds(
             ObservationEvent,
-            event_id=st.text(min_size=1, max_size=128, alphabet="abcdefg01234_-"),
+            event_cid=st.text(min_size=1, max_size=128, alphabet="abcdefg01234_-"),
             timestamp=st.floats(min_value=0.0, max_value=253402300799.0),
             payload=st.dictionaries(st.text(min_size=1, max_size=20), st.text(max_size=20), max_size=5),
         ),

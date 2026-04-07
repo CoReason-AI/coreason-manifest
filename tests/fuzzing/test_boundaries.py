@@ -70,7 +70,7 @@ def test_browser_dom_ssrf_quarantine(url: str) -> None:
 )
 def test_polymorphic_xss_proof(payload: str) -> None:
     """Prove InsightCardProfile definitively sanitizes malicious Markdown tags and schemas via ammonia."""
-    profile = InsightCardProfile(panel_id="panel_1", title="Insight Title", markdown_content=payload)
+    profile = InsightCardProfile(panel_cid="panel_1", title="Insight Title", markdown_content=payload)
     assert "<script>" not in profile.markdown_content
     assert "alert(1)" not in profile.markdown_content
 
@@ -107,7 +107,7 @@ def test_multimodal_grounding_density_alignment(visual_modality: Any) -> None:
         match=r"Epistemic safety violation: Visual or tabular modalities require strict spatial tracking\.",
     ):
         EpistemicTransmutationTask(
-            task_id="task_visual_test",
+            task_cid="task_visual_test",
             artifact_event_id="artifact_1",
             target_modalities=[visual_modality],
             compression_sla=compression_sla,
@@ -117,7 +117,7 @@ def test_multimodal_grounding_density_alignment(visual_modality: Any) -> None:
 def test_epistemic_license_enforcement() -> None:
     """Prove that instantiating GlobalGovernancePolicy with invalid mandatory_license_rule triggers ValidationError."""
     invalid_license = ConstitutionalPolicy(
-        rule_id="MIT_LICENSE", severity="low", description="test", forbidden_intents=[]
+        rule_cid="MIT_LICENSE", severity="low", description="test", forbidden_intents=[]
     )
     with pytest.raises(ValidationError, match="CRITICAL LICENSE VIOLATION"):
         GlobalGovernancePolicy(
@@ -147,10 +147,10 @@ def test_mcp_quarantine_gateway_tripwire() -> None:
 
     with pytest.raises(ValidationError, match="UNAUTHORIZED MCP MOUNT"):
         MCPServerManifest(
-            server_id="rogue_server_1",
+            server_cid="rogue_server_1",
             transport=HTTPTransportProfile(uri=HttpUrl("http://www.example.com"), headers={}),
             capability_whitelist=MCPCapabilityWhitelistPolicy(
-                allowed_tools=["shell"], allowed_resources=["file://*"], allowed_prompts=["system"]
+                authorized_capability_array=["shell"], allowed_resources=["file://*"], allowed_prompts=["system"]
             ),
             attestation_receipt=receipt,
         )
@@ -161,7 +161,7 @@ def test_tool_invocation_cryptographic_starvation() -> None:
 
     with pytest.raises(ValidationError):
         ToolInvocationEvent(
-            event_id="test_event",
+            event_cid="test_event",
             timestamp=1234567890.0,
             tool_name="test_tool",
             parameters={},
@@ -189,11 +189,11 @@ def test_mcp_quarantine_gateway_authorized_mount() -> None:
 
     # This must instantiate cleanly without raising a ValidationError
     manifest = MCPServerManifest(
-        server_id="server_1",
+        server_cid="server_1",
         transport=StdioTransportProfile(command="stdio://coreason-mcp", args=[]),
         binary_hash="a" * 64,
         capability_whitelist=MCPCapabilityWhitelistPolicy(
-            allowed_tools=["fetch"], allowed_resources=[], allowed_prompts=[]
+            authorized_capability_array=["fetch"], allowed_resources=[], allowed_prompts=[]
         ),
         attestation_receipt=valid_receipt,
     )
@@ -208,7 +208,7 @@ def test_kinetic_separation_canonical_sort() -> None:
     chaotic_clusters = [["mcp://server-b", "mcp://server-a"], ["tool-z", "tool-x", "tool-y"]]
 
     policy = KineticSeparationPolicy(
-        policy_id="test_bipartite_01",
+        policy_cid="test_bipartite_01",
         mutually_exclusive_clusters=chaotic_clusters,
         enforcement_action="halt_and_quarantine",
     )
@@ -249,14 +249,14 @@ def test_procedural_manifold_deterministic_sort() -> None:
     """Prove that OntologicalSurfaceProjectionManifest deterministically sorts available_procedural_manifolds."""
     from coreason_manifest.spec.ontology import OntologicalSurfaceProjectionManifest, ProceduralMetadataManifest
 
-    m1 = ProceduralMetadataManifest(metadata_id="zeta_01", target_sop_id="sop_1", trigger_description="Zeta SOP")
-    m2 = ProceduralMetadataManifest(metadata_id="alpha_02", target_sop_id="sop_2", trigger_description="Alpha SOP")
+    m1 = ProceduralMetadataManifest(metadata_cid="zeta_01", target_sop_cid="sop_1", trigger_description="Zeta SOP")
+    m2 = ProceduralMetadataManifest(metadata_cid="alpha_02", target_sop_cid="sop_2", trigger_description="Alpha SOP")
 
-    projection = OntologicalSurfaceProjectionManifest(projection_id="proj_1", available_procedural_manifolds=[m1, m2])
+    projection = OntologicalSurfaceProjectionManifest(projection_cid="proj_1", available_procedural_manifolds=[m1, m2])
 
-    # Assert the array was mathematically sorted by metadata_id
-    assert projection.available_procedural_manifolds[0].metadata_id == "alpha_02"
-    assert projection.available_procedural_manifolds[1].metadata_id == "zeta_01"
+    # Assert the array was mathematically sorted by metadata_cid
+    assert projection.available_procedural_manifolds[0].metadata_cid == "alpha_02"
+    assert projection.available_procedural_manifolds[1].metadata_cid == "zeta_01"
 
 
 @given(
@@ -370,7 +370,7 @@ def test_peft_adapter_rank_upper_bound() -> None:
 
     with pytest.raises(ValidationError):
         PeftAdapterContract(
-            adapter_id="test_adapter",
+            adapter_cid="test_adapter",
             safetensors_hash="a" * 64,
             base_model_hash="b" * 64,
             adapter_rank=65537,
@@ -413,7 +413,7 @@ def test_state_hydration_manifest_long_string_quarantine() -> None:
     extents_z=st.floats(min_value=-1.0, max_value=2.0),
 )
 def test_volumetric_bounding_profile_all_floats(extents_x: float, extents_y: float, extents_z: float) -> None:
-    transform = SE3TransformProfile(reference_frame_id="frame", x=0, y=0, z=0)
+    transform = SE3TransformProfile(reference_frame_cid="frame", x=0, y=0, z=0)
     valid = extents_x >= 0.0 and extents_y >= 0.0 and extents_z >= 0.0 and extents_x * extents_y * extents_z > 0.0
 
     if valid:
@@ -493,24 +493,24 @@ def test_scale_policy(type_val: Any, domain_min: float | None, domain_max: float
             valid = False
 
     if valid:
-        ScalePolicy(type=type_val, domain_min=domain_min, domain_max=domain_max)
+        ScalePolicy(manifold_category=type_val, domain_min=domain_min, domain_max=domain_max)
     else:
         with pytest.raises((ValueError, ValidationError)):
-            ScalePolicy(type=type_val, domain_min=domain_min, domain_max=domain_max)
+            ScalePolicy(manifold_category=type_val, domain_min=domain_min, domain_max=domain_max)
 
 
 # --- NDimensionalTensorManifest ---
 @given(
     shape=st.lists(st.integers(min_value=-1, max_value=10), min_size=0, max_size=5),
-    structural_type=st.sampled_from(list(TensorStructuralFormatProfile)),
+    structural_manifold_category=st.sampled_from(list(TensorStructuralFormatProfile)),
 )
-def test_ndimensional_tensor_manifest(shape: list[int], structural_type: Any) -> None:
+def test_ndimensional_tensor_manifest(shape: list[int], structural_manifold_category: Any) -> None:
     valid = True
     if len(shape) < 1 or any(dim <= 0 for dim in shape):
         valid = False
 
     if valid:
-        bytes_per_element = structural_type.bytes_per_element
+        bytes_per_element = structural_manifold_category.bytes_per_element
         vram_footprint_bytes = math.prod(shape) * bytes_per_element
     else:
         vram_footprint_bytes = 10
@@ -521,7 +521,7 @@ def test_ndimensional_tensor_manifest(shape: list[int], structural_type: Any) ->
     if valid:
         NDimensionalTensorManifest(
             shape=tuple(shape),
-            structural_type=structural_type,
+            structural_manifold_category=structural_manifold_category,
             vram_footprint_bytes=vram_footprint_bytes,
             merkle_root=merkle_root,
             storage_uri=storage_uri,
@@ -530,7 +530,7 @@ def test_ndimensional_tensor_manifest(shape: list[int], structural_type: Any) ->
         with pytest.raises((ValueError, ValidationError)):
             NDimensionalTensorManifest(
                 shape=tuple(shape),
-                structural_type=structural_type,
+                structural_manifold_category=structural_manifold_category,
                 vram_footprint_bytes=vram_footprint_bytes,
                 merkle_root=merkle_root,
                 storage_uri=storage_uri,
@@ -539,17 +539,17 @@ def test_ndimensional_tensor_manifest(shape: list[int], structural_type: Any) ->
 
 # --- DocumentLayoutRegionState ---
 @given(
-    block_id=st.text(
+    block_cid=st.text(
         min_size=1, max_size=128, alphabet=st.characters(whitelist_categories=("L", "N"), whitelist_characters="_.:-")
     ),
-    block_type=st.sampled_from(["header", "paragraph", "figure", "table", "footnote", "caption", "equation"]),
+    block_manifold_category=st.sampled_from(["header", "paragraph", "figure", "table", "footnote", "caption", "equation"]),
     token_span_start=st.integers(min_value=0, max_value=100),
     token_span_end=st.integers(min_value=101, max_value=200),
 )
 def test_document_layout_region_state(
-    block_id: str, block_type: Any, token_span_start: int, token_span_end: int
+    block_cid: str, block_manifold_category: Any, token_span_start: int, token_span_end: int
 ) -> None:
     anchor = MultimodalTokenAnchorState(token_span_start=token_span_start, token_span_end=token_span_end)
 
     with contextlib.suppress(ValueError, ValidationError):
-        DocumentLayoutRegionState(block_id=block_id, block_type=block_type, anchor=anchor)
+        DocumentLayoutRegionState(block_cid=block_cid, block_manifold_category=block_manifold_category, anchor=anchor)
