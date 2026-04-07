@@ -220,13 +220,13 @@ def test_defeasible_cascade_logic_fuzz(cascade_id: str, root: str, quarantined: 
             quarantined_event_cids=quarantined,
         )
         if root in quarantined:
-            pytest.fail("DefeasibleCascadeEvent failed to reject root_falsified_event_cid in quarantined_event_cids")
+            pytest.fail("DefeasibleCascadeEvent failed to reject root_falsified_event_id in quarantined_event_cids")
         if decay < 0.0 or decay > 1.0:
             pytest.fail("DefeasibleCascadeEvent failed to reject out-of-bounds decay factor")
     except ValueError as e:
         err_str = str(e).lower()
         if (
-            "root_falsified_event_cid cannot be in quarantined_event_cids" in err_str
+            "root_falsified_event_id cannot be in quarantined_event_cids" in err_str
             or "propagated_decay_factor" in err_str
         ):
             pass  # Expected

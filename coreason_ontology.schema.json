@@ -423,7 +423,7 @@
     },
     "AdversarialMarketTopologyManifest": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A Zero-Cost Macro abstraction that mathematically projects a Zero-Sum Minimax game into a rigid Red/Blue team CouncilTopologyManifest. As a ...Manifest suffix, this defines a frozen coordinate of a topological structure.\n\nCAUSAL AFFORDANCE: Deterministically compiles into a fully bounded Council topology, forcing the generative router to evaluate claims through adversarial debate before the orchestrator resolves equilibrium via the designated market rules.\n\nEPISTEMIC BOUNDS: The @model_validator verify_disjoint_sets mathematically guarantees that blue_team_ids, red_team_ids, and the adjudicator_id are strictly disjoint to prevent self-dealing or topological paradoxes. Arrays are deterministically sorted to preserve RFC 8785 canonical hashes.\n\nMCP ROUTING TRIGGERS: Zero-Sum Minimax Game, Red Team vs Blue Team, Macro Abstraction, Generative Adversarial Networks, Topological Compilation",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A Zero-Cost Macro abstraction that mathematically projects a Zero-Sum Minimax game into a rigid Red/Blue team CouncilTopologyManifest. As a ...Manifest suffix, this defines a frozen coordinate of a topological structure.\n\nCAUSAL AFFORDANCE: Deterministically compiles into a fully bounded Council topology, forcing the generative router to evaluate claims through adversarial debate before the orchestrator resolves equilibrium via the designated market rules.\n\nEPISTEMIC BOUNDS: The @model_validator verify_disjoint_sets mathematically guarantees that blue_team_cids, red_team_cids, and the adjudicator_id are strictly disjoint to prevent self-dealing or topological paradoxes. Arrays are deterministically sorted to preserve RFC 8785 canonical hashes.\n\nMCP ROUTING TRIGGERS: Zero-Sum Minimax Game, Red Team vs Blue Team, Macro Abstraction, Generative Adversarial Networks, Topological Compilation",
       "properties": {
         "type": {
           "const": "macro_adversarial",
@@ -432,22 +432,22 @@
           "title": "Type",
           "type": "string"
         },
-        "blue_team_ids": {
+        "blue_team_cids": {
           "description": "Nodes assigned to the Blue Team.",
           "items": {
             "$ref": "#/$defs/NodeIdentifierState"
           },
           "minItems": 1,
-          "title": "Blue Team Ids",
+          "title": "Blue Team Cids",
           "type": "array"
         },
-        "red_team_ids": {
+        "red_team_cids": {
           "description": "Nodes assigned to the Red Team.",
           "items": {
             "$ref": "#/$defs/NodeIdentifierState"
           },
           "minItems": 1,
-          "title": "Red Team Ids",
+          "title": "Red Team Cids",
           "type": "array"
         },
         "adjudicator_id": {
@@ -460,8 +460,8 @@
         }
       },
       "required": [
-        "blue_team_ids",
-        "red_team_ids",
+        "blue_team_cids",
+        "red_team_cids",
         "adjudicator_id",
         "market_rules"
       ],
@@ -1400,7 +1400,7 @@
           "acyclic": "#/$defs/TransitionEdgeProfile",
           "cyclic": "#/$defs/CyclicEdgeProfile"
         },
-        "propertyName": "edge_type"
+        "propertyName": "topology_class"
       },
       "oneOf": [
         {
@@ -3466,7 +3466,7 @@
     },
     "ConsensusFederationTopologyManifest": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A Zero-Cost Macro abstraction that deterministically projects a Practical Byzantine Fault Tolerance (pBFT) consensus ring into a multi-agent workflow. As a ...Manifest suffix, this defines a frozen coordinate of a topological structure.\n\nCAUSAL AFFORDANCE: Unrolls into a base CouncilTopologyManifest, enforcing strict quorum rules and sequential adjudication to guarantee ledger alignment and truth maintenance across a decentralized, zero-trust swarm.\n\nEPISTEMIC BOUNDS: Mathematically ensures Byzantine security by requiring a minimum of 3 participant_ids. The adjudicator_id is physically isolated from the voting pool via the verify_adjudicator_isolation hook. The participant_ids array is deterministically sorted for invariant hashing.\n\nMCP ROUTING TRIGGERS: Practical Byzantine Fault Tolerance, pBFT, Distributed Consensus, Sybil Resistance, Macro Abstraction",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A Zero-Cost Macro abstraction that deterministically projects a Practical Byzantine Fault Tolerance (pBFT) consensus ring into a multi-agent workflow. As a ...Manifest suffix, this defines a frozen coordinate of a topological structure.\n\nCAUSAL AFFORDANCE: Unrolls into a base CouncilTopologyManifest, enforcing strict quorum rules and sequential adjudication to guarantee ledger alignment and truth maintenance across a decentralized, zero-trust swarm.\n\nEPISTEMIC BOUNDS: Mathematically ensures Byzantine security by requiring a minimum of 3 participant_cids. The adjudicator_id is physically isolated from the voting pool via the verify_adjudicator_isolation hook. The participant_cids array is deterministically sorted for invariant hashing.\n\nMCP ROUTING TRIGGERS: Practical Byzantine Fault Tolerance, pBFT, Distributed Consensus, Sybil Resistance, Macro Abstraction",
       "properties": {
         "type": {
           "const": "macro_federation",
@@ -3475,13 +3475,13 @@
           "title": "Type",
           "type": "string"
         },
-        "participant_ids": {
+        "participant_cids": {
           "description": "The nodes forming the PBFT ring.",
           "items": {
             "$ref": "#/$defs/NodeIdentifierState"
           },
           "minItems": 3,
-          "title": "Participant Ids",
+          "title": "Participant Cids",
           "type": "array"
         },
         "adjudicator_id": {
@@ -3494,7 +3494,7 @@
         }
       },
       "required": [
-        "participant_ids",
+        "participant_cids",
         "adjudicator_id",
         "quorum_rules"
       ],
@@ -4404,11 +4404,11 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents a self-referential or cyclic Markov edge for deep recursive execution, utilizing Thermodynamic Discounting to prevent infinite loops. As a ...Profile suffix, this is a declarative, frozen snapshot of a routing geometry.\n\nCAUSAL AFFORDANCE: Authorizes recursive tool calls or non-monotonic backward execution. The orchestrator must apply the Bellman `discount_factor` to the compute budget during each traversal loop.\n\nEPISTEMIC BOUNDS: Structural repetition is checked by applying a geometric decay factor (`discount_factor` ge=0.0, le=1.0). An `@model_validator` mathematically prevents un-haltable infinite recursion if the `discount_factor` equals 1.0 without a strict `max_causal_depth` explicitly defined in the `terminal_condition`.\n\nMCP ROUTING TRIGGERS: Markov Decision Process, Cyclic Edge, Bellman Equation, Thermodynamic Discounting, Recursive Traversal",
       "properties": {
-        "edge_type": {
+        "topology_class": {
           "const": "cyclic",
           "default": "cyclic",
           "description": "Discriminator type for a cyclic edge.",
-          "title": "Edge Type",
+          "title": "Topology Class",
           "type": "string"
         },
         "target_node_id": {
@@ -4764,7 +4764,7 @@
     },
     "DefeasibleCascadeEvent": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Executes Jon Doyle's Truth Maintenance System (TMS) protocol. As an ...Event suffix, this is an append-only coordinate on the Merkle-DAG representing the active propagation of belief retraction.\n\nCAUSAL AFFORDANCE: Applies a Pearlian do-operator to mathematically zero-out the probability mass of the `quarantined_event_ids` subgraph, physically halting all execution branches dependent on the `root_falsified_event_id` to prevent epistemic contagion.\n\nEPISTEMIC BOUNDS: The Shannon Entropy reduction across edges is strictly clamped by `propagated_decay_factor` (`ge=0.0, le=1.0`). Deterministic alignment is guaranteed by a `@model_validator` that physically sorts the `quarantined_event_ids` array. A second validator mathematically rejects root events appearing in quarantine (`reject_root_in_quarantine`).\n\nMCP ROUTING TRIGGERS: Jon Doyle TMS, Epistemic Contagion, Belief Retraction, Shannon Entropy Penalty, Graph Quarantine",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Executes Jon Doyle's Truth Maintenance System (TMS) protocol. As an ...Event suffix, this is an append-only coordinate on the Merkle-DAG representing the active propagation of belief retraction.\n\nCAUSAL AFFORDANCE: Applies a Pearlian do-operator to mathematically zero-out the probability mass of the `quarantined_event_cids` subgraph, physically halting all execution branches dependent on the `root_falsified_event_id` to prevent epistemic contagion.\n\nEPISTEMIC BOUNDS: The Shannon Entropy reduction across edges is strictly clamped by `propagated_decay_factor` (`ge=0.0, le=1.0`). Deterministic alignment is guaranteed by a `@model_validator` that physically sorts the `quarantined_event_cids` array. A second validator mathematically rejects root events appearing in quarantine (`reject_root_in_quarantine`).\n\nMCP ROUTING TRIGGERS: Jon Doyle TMS, Epistemic Contagion, Belief Retraction, Shannon Entropy Penalty, Graph Quarantine",
       "properties": {
         "cascade_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this automated truth maintenance operation.",
@@ -4789,7 +4789,7 @@
           "title": "Propagated Decay Factor",
           "type": "number"
         },
-        "quarantined_event_ids": {
+        "quarantined_event_cids": {
           "description": "The strict array of downstream event Content Identifiers (CIDs) isolated and muted by this cascade to prevent Epistemic Contagion.",
           "items": {
             "maxLength": 128,
@@ -4797,7 +4797,7 @@
             "type": "string"
           },
           "minItems": 1,
-          "title": "Quarantined Event Ids",
+          "title": "Quarantined Event Cids",
           "type": "array"
         },
         "cross_boundary_quarantine_issued": {
@@ -4811,14 +4811,14 @@
         "cascade_id",
         "root_falsified_event_id",
         "propagated_decay_factor",
-        "quarantined_event_ids"
+        "quarantined_event_cids"
       ],
       "title": "DefeasibleCascadeEvent",
       "type": "object"
     },
     "DelegatedCapabilityManifest": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Macaroons and Decentralized Identifiers (DIDs) to construct a verifiable delegation chain of authority from a human principal to an autonomous agent.\n\nCAUSAL AFFORDANCE: Empowers the `delegate_agent_did` to invoke the explicitly whitelisted `allowed_tool_ids`, acting as a cryptographic proxy for the `principal_did`. The `cryptographic_signature` proves the delegation chain.\n\nEPISTEMIC BOUNDS: The delegation's temporal geometry is physically bounded by `expiration_timestamp` (`ge=0.0, le=253402300799.0`). The `capability_id` is a 128-char CID anchor. The `allowed_tool_ids` array is deterministically sorted by `@model_validator` for RFC 8785 canonical hashing.\n\nMCP ROUTING TRIGGERS: Macaroons, Delegation Chain, Public Key Infrastructure, Object Capability Model, Decentralized Identifiers",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Macaroons and Decentralized Identifiers (DIDs) to construct a verifiable delegation chain of authority from a human principal to an autonomous agent.\n\nCAUSAL AFFORDANCE: Empowers the `delegate_agent_did` to invoke the explicitly whitelisted `allowed_tool_cids`, acting as a cryptographic proxy for the `principal_did`. The `cryptographic_signature` proves the delegation chain.\n\nEPISTEMIC BOUNDS: The delegation's temporal geometry is physically bounded by `expiration_timestamp` (`ge=0.0, le=253402300799.0`). The `capability_id` is a 128-char CID anchor. The `allowed_tool_cids` array is deterministically sorted by `@model_validator` for RFC 8785 canonical hashing.\n\nMCP ROUTING TRIGGERS: Macaroons, Delegation Chain, Public Key Infrastructure, Object Capability Model, Decentralized Identifiers",
       "properties": {
         "capability_id": {
           "description": "A string CID for the delegated capability.",
@@ -4836,12 +4836,12 @@
           "$ref": "#/$defs/NodeIdentifierState",
           "description": "The DID representing the autonomous actor receiving authority."
         },
-        "allowed_tool_ids": {
+        "allowed_tool_cids": {
           "description": "The strictly bounded set of ToolIdentifiers this delegation permits.",
           "items": {
             "$ref": "#/$defs/ToolIdentifierState"
           },
-          "title": "Allowed Tool Ids",
+          "title": "Allowed Tool Cids",
           "type": "array"
         },
         "expiration_timestamp": {
@@ -4862,7 +4862,7 @@
         "capability_id",
         "principal_did",
         "delegate_agent_did",
-        "allowed_tool_ids",
+        "allowed_tool_cids",
         "expiration_timestamp",
         "cryptographic_signature"
       ],
@@ -5811,7 +5811,7 @@
     },
     "EpistemicAttentionRay": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Joint Attention and Gaze Raycasting across the distributed topology. Projects a continuous vector from an observer's optical center to indicate cognitive focus prior to physical mutation.\n\nCAUSAL AFFORDANCE: Broadcasts a non-kinetic 'cursor presence' to the swarm. The orchestrator calculates the dot product between this vector and surrounding nodes, identifying the exact topological vertices the observer is currently evaluating.\n\nEPISTEMIC BOUNDS: The `direction_unit_vector` is mathematically normalized to exactly 1.0 via `@model_validator` to prevent raycast scalar explosions. To mitigate $O(N^2)$ intersection complexity, the `intersected_node_ids` array is strictly capped at `max_length=100` and deterministically sorted.\n\nMCP ROUTING TRIGGERS: Spatial Raycasting, Joint Attention, Cognitive Frustum Intersection, Vector Math, Gaze Tracking",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Joint Attention and Gaze Raycasting across the distributed topology. Projects a continuous vector from an observer's optical center to indicate cognitive focus prior to physical mutation.\n\nCAUSAL AFFORDANCE: Broadcasts a non-kinetic 'cursor presence' to the swarm. The orchestrator calculates the dot product between this vector and surrounding nodes, identifying the exact topological vertices the observer is currently evaluating.\n\nEPISTEMIC BOUNDS: The `direction_unit_vector` is mathematically normalized to exactly 1.0 via `@model_validator` to prevent raycast scalar explosions. To mitigate $O(N^2)$ intersection complexity, the `intersected_node_cids` array is strictly capped at `max_length=100` and deterministically sorted.\n\nMCP ROUTING TRIGGERS: Spatial Raycasting, Joint Attention, Cognitive Frustum Intersection, Vector Math, Gaze Tracking",
       "properties": {
         "origin": {
           "$ref": "#/$defs/SE3TransformProfile",
@@ -5835,13 +5835,13 @@
           "title": "Direction Unit Vector",
           "type": "array"
         },
-        "intersected_node_ids": {
+        "intersected_node_cids": {
           "description": "The array of topological vertices mathematically pierced by this attention ray.",
           "items": {
             "$ref": "#/$defs/NodeIdentifierState"
           },
           "maxItems": 100,
-          "title": "Intersected Node Ids",
+          "title": "Intersected Node Cids",
           "type": "array"
         }
       },
@@ -6346,7 +6346,7 @@
     },
     "EpistemicPromotionEvent": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents Hippocampal-Neocortical Consolidation, proving the successful extraction and transfer of generalized knowledge from short-term episodic traces into the permanent semantic graph.\n\nCAUSAL AFFORDANCE: Emits a permanent Merkle-DAG coordinate (`crystallized_semantic_node_id`) that downstream agents can zero-shot reference, severing the need to reload raw source logs into active context.\n\nEPISTEMIC BOUNDS: Mathematical chain of custody bound to the strictly sorted array of `source_episodic_event_ids`. Token efficiency proven by `compression_ratio` float (`le=1.0`) guaranteeing Shannon Entropy reduction.\n\nMCP ROUTING TRIGGERS: Hippocampal Consolidation, Knowledge Distillation, Semantic Memory, Shannon Entropy Compression, Epistemic Promotion",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents Hippocampal-Neocortical Consolidation, proving the successful extraction and transfer of generalized knowledge from short-term episodic traces into the permanent semantic graph.\n\nCAUSAL AFFORDANCE: Emits a permanent Merkle-DAG coordinate (`crystallized_semantic_node_id`) that downstream agents can zero-shot reference, severing the need to reload raw source logs into active context.\n\nEPISTEMIC BOUNDS: Mathematical chain of custody bound to the strictly sorted array of `source_episodic_event_cids`. Token efficiency proven by `compression_ratio` float (`le=1.0`) guaranteeing Shannon Entropy reduction.\n\nMCP ROUTING TRIGGERS: Hippocampal Consolidation, Knowledge Distillation, Semantic Memory, Shannon Entropy Compression, Epistemic Promotion",
       "properties": {
         "event_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
@@ -6386,14 +6386,14 @@
           "title": "Type",
           "type": "string"
         },
-        "source_episodic_event_ids": {
+        "source_episodic_event_cids": {
           "description": "The strict array of CIDs (Content Identifiers) representing the raw logs being compressed and archived.",
           "items": {
             "maxLength": 128,
             "minLength": 1,
             "type": "string"
           },
-          "title": "Source Episodic Event Ids",
+          "title": "Source Episodic Event Cids",
           "type": "array"
         },
         "crystallized_semantic_node_id": {
@@ -6414,7 +6414,7 @@
       "required": [
         "event_id",
         "timestamp",
-        "source_episodic_event_ids",
+        "source_episodic_event_cids",
         "crystallized_semantic_node_id",
         "compression_ratio"
       ],
@@ -10912,7 +10912,7 @@
     },
     "MarketResolutionState": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents the definitive collapse of the LMSR market superposition into a crystallized `payout_distribution` using Strictly Proper Scoring Rules (e.g., Brier scores).\n\nCAUSAL AFFORDANCE: Instructs the orchestrator to definitively allocate compute magnitudes to the `winning_hypothesis_id` and flush `falsified_hypothesis_ids` from the active context via a Defeasible Cascade.\n\nEPISTEMIC BOUNDS: Enforces a strictly bounded `payout_distribution` dictionary mapping W3C DIDs to non-negative integers (`ge=0`), with deterministic RFC 8785 array sorting applied to the falsified hypotheses.\n\nMCP ROUTING TRIGGERS: Brier Scoring, Market Settlement, Probability Wave Collapse, Truth Crystallization",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents the definitive collapse of the LMSR market superposition into a crystallized `payout_distribution` using Strictly Proper Scoring Rules (e.g., Brier scores).\n\nCAUSAL AFFORDANCE: Instructs the orchestrator to definitively allocate compute magnitudes to the `winning_hypothesis_id` and flush `falsified_hypothesis_cids` from the active context via a Defeasible Cascade.\n\nEPISTEMIC BOUNDS: Enforces a strictly bounded `payout_distribution` dictionary mapping W3C DIDs to non-negative integers (`ge=0`), with deterministic RFC 8785 array sorting applied to the falsified hypotheses.\n\nMCP ROUTING TRIGGERS: Brier Scoring, Market Settlement, Probability Wave Collapse, Truth Crystallization",
       "properties": {
         "market_id": {
           "description": "The deterministic capability pointer representing the prediction market.",
@@ -10929,7 +10929,7 @@
           "title": "Winning Hypothesis Id",
           "type": "string"
         },
-        "falsified_hypothesis_ids": {
+        "falsified_hypothesis_cids": {
           "description": "The hypothesis IDs that were falsified.",
           "items": {
             "maxLength": 128,
@@ -10937,7 +10937,7 @@
             "type": "string"
           },
           "maxItems": 1000,
-          "title": "Falsified Hypothesis Ids",
+          "title": "Falsified Hypothesis Cids",
           "type": "array"
         },
         "payout_distribution": {
@@ -10956,7 +10956,7 @@
       "required": [
         "market_id",
         "winning_hypothesis_id",
-        "falsified_hypothesis_ids",
+        "falsified_hypothesis_cids",
         "payout_distribution"
       ],
       "title": "MarketResolutionState",
@@ -12009,7 +12009,7 @@
     },
     "OntologicalHandshakeReceipt": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact representing the absolute\nmathematical alignment of two swarms' latent vector spaces prior to establishing a shared\nepistemic blackboard. As a ...Receipt suffix, this is an append-only coordinate on the\nMerkle-DAG that the LLM must never hallucinate a mutation to.\n\nCAUSAL AFFORDANCE: Authorizes the physical bridging of two independent N-dimensional\nsemantic spaces. If native geometries are incommensurable, it structurally demands the\napplication of a DimensionalProjectionContract (applied_projection). The alignment_status\nLiteral [\"aligned\", \"projected\", \"fallback_triggered\", \"incommensurable\"] records the\nfinal verdict.\n\nEPISTEMIC BOUNDS: Semantic isometry is quantified via measured_cosine_similarity, strictly\nclamped between [ge=-1.0, le=1.0]. The participant_node_ids array (min_length=2) is\ndeterministically sorted via @model_validator to prevent Byzantine replay anomalies\nduring cross-swarm Merkle hashing.\n\nMCP ROUTING TRIGGERS: Earth Mover's Distance, Cosine Similarity, Vector Space Isometry,\nLatent Alignment, Holographic Graph Projection",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact representing the absolute\nmathematical alignment of two swarms' latent vector spaces prior to establishing a shared\nepistemic blackboard. As a ...Receipt suffix, this is an append-only coordinate on the\nMerkle-DAG that the LLM must never hallucinate a mutation to.\n\nCAUSAL AFFORDANCE: Authorizes the physical bridging of two independent N-dimensional\nsemantic spaces. If native geometries are incommensurable, it structurally demands the\napplication of a DimensionalProjectionContract (applied_projection). The alignment_status\nLiteral [\"aligned\", \"projected\", \"fallback_triggered\", \"incommensurable\"] records the\nfinal verdict.\n\nEPISTEMIC BOUNDS: Semantic isometry is quantified via measured_cosine_similarity, strictly\nclamped between [ge=-1.0, le=1.0]. The participant_node_cids array (min_length=2) is\ndeterministically sorted via @model_validator to prevent Byzantine replay anomalies\nduring cross-swarm Merkle hashing.\n\nMCP ROUTING TRIGGERS: Earth Mover's Distance, Cosine Similarity, Vector Space Isometry,\nLatent Alignment, Holographic Graph Projection",
       "properties": {
         "handshake_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this protocol handshake to the Merkle-DAG.",
@@ -12019,7 +12019,7 @@
           "title": "Handshake Id",
           "type": "string"
         },
-        "participant_node_ids": {
+        "participant_node_cids": {
           "description": "The agents establishing semantic alignment.",
           "items": {
             "maxLength": 128,
@@ -12028,7 +12028,7 @@
           },
           "maxItems": 250,
           "minItems": 2,
-          "title": "Participant Node Ids",
+          "title": "Participant Node Cids",
           "type": "array"
         },
         "measured_cosine_similarity": {
@@ -12076,7 +12076,7 @@
       },
       "required": [
         "handshake_id",
-        "participant_node_ids",
+        "participant_node_cids",
         "measured_cosine_similarity",
         "alignment_status"
       ],
@@ -12954,7 +12954,7 @@
     },
     "RollbackIntent": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A kinetic execution trigger initiating a macroscopic Pearlian\ncounterfactual reversal, mathematically rewinding the state vector to a pristine historical\nMerkle root. As an ...Intent suffix, the LLM may execute non-monotonic reasoning here.\n\nCAUSAL AFFORDANCE: Forces the orchestrator to execute a Pearlian do-operator intervention\n($do(X=x)$), flushing all invalidated_node_ids from the active context and restoring the\ntopology to the target_event_id coordinate.\n\nEPISTEMIC BOUNDS: Deterministic execution is mathematically guaranteed by the\n@model_validator which strictly alphabetizes invalidated_node_ids via sorted() prior to\nRFC 8785 canonical hashing, preventing Byzantine replay divergence.\n\nMCP ROUTING TRIGGERS: Pearlian Counterfactual, Causal Reversal, State Vector Rollback,\nTemporal Negation, Topological Falsification",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A kinetic execution trigger initiating a macroscopic Pearlian\ncounterfactual reversal, mathematically rewinding the state vector to a pristine historical\nMerkle root. As an ...Intent suffix, the LLM may execute non-monotonic reasoning here.\n\nCAUSAL AFFORDANCE: Forces the orchestrator to execute a Pearlian do-operator intervention\n($do(X=x)$), flushing all invalidated_node_cids from the active context and restoring the\ntopology to the target_event_id coordinate.\n\nEPISTEMIC BOUNDS: Deterministic execution is mathematically guaranteed by the\n@model_validator which strictly alphabetizes invalidated_node_cids via sorted() prior to\nRFC 8785 canonical hashing, preventing Byzantine replay divergence.\n\nMCP ROUTING TRIGGERS: Pearlian Counterfactual, Causal Reversal, State Vector Rollback,\nTemporal Negation, Topological Falsification",
       "properties": {
         "request_id": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the causal rollback operation.",
@@ -12972,14 +12972,14 @@
           "title": "Target Event Id",
           "type": "string"
         },
-        "invalidated_node_ids": {
+        "invalidated_node_cids": {
           "description": "The strict array of nodes whose operational histories are causally tainted and must be flushed.",
           "items": {
             "maxLength": 128,
             "minLength": 1,
             "type": "string"
           },
-          "title": "Invalidated Node Ids",
+          "title": "Invalidated Node Cids",
           "type": "array"
         }
       },
@@ -13131,7 +13131,7 @@
     },
     "SMPCTopologyManifest": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative, frozen snapshot establishing a Secure Multi-Party Computation (SMPC) ring, leveraging cryptographic privacy-preserving protocols to evaluate a joint function over decentralized inputs.\n\nCAUSAL AFFORDANCE: Authorizes the decentralized orchestrator to route zero-trust traffic via specific mathematical logic (`garbled_circuits`, `secret_sharing`, `oblivious_transfer`), allowing mutually distrustful agents to synthesize a shared output.\n\nEPISTEMIC BOUNDS: The topology physically mandates a minimum of two participants (`participant_node_ids` `min_length=2`) to satisfy the multi-party invariant. The `joint_function_uri` is bounded to `max_length=2000`. Nodes are deterministically sorted.\n\nMCP ROUTING TRIGGERS: Secure Multi-Party Computation, Garbled Circuits, Secret Sharing, Oblivious Transfer, Zero-Trust Cryptography",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative, frozen snapshot establishing a Secure Multi-Party Computation (SMPC) ring, leveraging cryptographic privacy-preserving protocols to evaluate a joint function over decentralized inputs.\n\nCAUSAL AFFORDANCE: Authorizes the decentralized orchestrator to route zero-trust traffic via specific mathematical logic (`garbled_circuits`, `secret_sharing`, `oblivious_transfer`), allowing mutually distrustful agents to synthesize a shared output.\n\nEPISTEMIC BOUNDS: The topology physically mandates a minimum of two participants (`participant_node_cids` `min_length=2`) to satisfy the multi-party invariant. The `joint_function_uri` is bounded to `max_length=2000`. Nodes are deterministically sorted.\n\nMCP ROUTING TRIGGERS: Secure Multi-Party Computation, Garbled Circuits, Secret Sharing, Oblivious Transfer, Zero-Trust Cryptography",
       "properties": {
         "epistemic_enforcement": {
           "anyOf": [
@@ -13253,7 +13253,7 @@
           "title": "Joint Function Uri",
           "type": "string"
         },
-        "participant_node_ids": {
+        "participant_node_cids": {
           "description": "The strict ordered array of NodeIdentifierStates participating in the Secure Multi-Party Computation ring.",
           "items": {
             "maxLength": 128,
@@ -13261,7 +13261,7 @@
             "type": "string"
           },
           "minItems": 2,
-          "title": "Participant Node Ids",
+          "title": "Participant Node Cids",
           "type": "array"
         },
         "ontological_alignment": {
@@ -13281,7 +13281,7 @@
         "nodes",
         "smpc_protocol",
         "joint_function_uri",
-        "participant_node_ids"
+        "participant_node_cids"
       ],
       "title": "SMPCTopologyManifest",
       "type": "object"
@@ -15314,7 +15314,7 @@
     },
     "TaxonomicNodeState": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Hierarchical Agglomerative Clustering to project continuous,\ndense latent vector spaces into a deterministic, discrete N-ary tree structure. As a\n...State suffix, this is a declarative, frozen snapshot of a specific geometric coordinate.\n\nCAUSAL AFFORDANCE: Establishes a strictly bounded, navigable spatial coordinate within\nthe Virtual File System (VFS), allowing agents to traverse high-dimensional semantic\nspaces without consuming excessive context window tokens.\n\nEPISTEMIC BOUNDS: Spatial geometry is locked via node_id (a strictly typed 128-character\nCID). The children_node_ids array is deterministically sorted, and the leaf_provenance\narray is sorted by source_event_id, both via @model_validator to guarantee invariant\nRFC 8785 canonical hashing.\n\nMCP ROUTING TRIGGERS: Dimensionality Reduction, Hierarchical Clustering, N-ary Tree,\nVirtual File System, Semantic Coordinate",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Hierarchical Agglomerative Clustering to project continuous,\ndense latent vector spaces into a deterministic, discrete N-ary tree structure. As a\n...State suffix, this is a declarative, frozen snapshot of a specific geometric coordinate.\n\nCAUSAL AFFORDANCE: Establishes a strictly bounded, navigable spatial coordinate within\nthe Virtual File System (VFS), allowing agents to traverse high-dimensional semantic\nspaces without consuming excessive context window tokens.\n\nEPISTEMIC BOUNDS: Spatial geometry is locked via node_id (a strictly typed 128-character\nCID). The children_node_cids array is deterministically sorted, and the leaf_provenance\narray is sorted by source_event_id, both via @model_validator to guarantee invariant\nRFC 8785 canonical hashing.\n\nMCP ROUTING TRIGGERS: Dimensionality Reduction, Hierarchical Clustering, N-ary Tree,\nVirtual File System, Semantic Coordinate",
       "properties": {
         "node_id": {
           "description": "A Content Identifier (CID) bounding this specific taxonomic coordinate.",
@@ -15330,14 +15330,14 @@
           "title": "Semantic Label",
           "type": "string"
         },
-        "children_node_ids": {
+        "children_node_cids": {
           "description": "Explicit array of child node CIDs to enforce the Directed Acyclic Graph.",
           "items": {
             "maxLength": 128,
             "minLength": 1,
             "type": "string"
           },
-          "title": "Children Node Ids",
+          "title": "Children Node Cids",
           "type": "array"
         },
         "leaf_provenance": {
@@ -16340,11 +16340,11 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents a directed acyclic Markov edge for traversing the Action Space topology. As a ...Profile suffix, this is a declarative, frozen snapshot of a routing geometry.\n\nCAUSAL AFFORDANCE: Unlocks stochastic pathfinding and graph traversal by projecting a probabilistic weight and thermodynamic cost required to advance to the next state node in the DCG.\n\nEPISTEMIC BOUNDS: The semantic path relies on `target_node_id` (max_length=255). Mathematical optimization is bounded by `probability_weight` (ge=0.0, le=1.0) and `compute_weight_magnitude` (ge=0).\n\nMCP ROUTING TRIGGERS: Markov Decision Process, Acyclic Edge, Stochastic Routing, Transition Probability, Directed Graph",
       "properties": {
-        "edge_type": {
+        "topology_class": {
           "const": "acyclic",
           "default": "acyclic",
           "description": "Discriminator type for an acyclic edge.",
-          "title": "Edge Type",
+          "title": "Topology Class",
           "type": "string"
         },
         "target_node_id": {
