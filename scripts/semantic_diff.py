@@ -9,13 +9,12 @@
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
 import json
-from typing import Any
 import subprocess
 import sys
 from pathlib import Path
 
 
-def get_head_schema() -> dict[str, Any]:
+def get_head_schema() -> dict:
     try:
         output = subprocess.check_output(
             ["git", "show", "HEAD~1:coreason_ontology.schema.json"],  # noqa: S607
@@ -28,7 +27,7 @@ def get_head_schema() -> dict[str, Any]:
         return {}
 
 
-def get_current_schema() -> dict[str, Any]:
+def get_current_schema() -> dict:
     path = Path("coreason_ontology.schema.json")
     if not path.exists():
         return {}
@@ -36,7 +35,7 @@ def get_current_schema() -> dict[str, Any]:
         return json.load(f)
 
 
-def check_for_breaking_changes(old_schema: dict[str, Any], new_schema: dict[str, Any]) -> list[str]:
+def check_for_breaking_changes(old_schema: dict, new_schema: dict) -> list[str]:
     old_defs = old_schema.get("$defs", {})
     new_defs = new_schema.get("$defs", {})
 

@@ -2402,7 +2402,7 @@ class StateDifferentialManifest(CoreasonBaseState):
     )
 
 
-class EpistemicHydrationPolicy(CoreasonBaseState):
+class CoalgebraicHydrationPolicy(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Defines the limits of infinite graph unfolding to protect UI VRAM when pulling from the EpistemicLedgerState.
     CAUSAL AFFORDANCE: Instructs the orchestrator's deserialization engine to halt graph traversal at a specific recursion depth, replacing raw objects with cryptographic pointers.
@@ -2450,7 +2450,7 @@ class StateHydrationManifest(CoreasonBaseState):
     working_context_variables: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
         description="A strictly typed dictionary for ephemeral context variables injected at runtime. AGENT INSTRUCTION: This matrix is deterministically sorted by CoreasonBaseState natively. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion."
     )
-    unfolding_policy: EpistemicHydrationPolicy | None = Field(
+    unfolding_policy: CoalgebraicHydrationPolicy | None = Field(
         default=None, description="The mathematical bounds for lazy state unfolding."
     )
 
