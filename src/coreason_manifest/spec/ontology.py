@@ -2308,9 +2308,7 @@ class CoalgebraicHydrationPolicy(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Coalgebraic Unfolding, Lazy Evaluation, State-Space Bounding, VRAM Exhaustion Prevention
     """
 
-    max_unfold_depth: int = Field(
-        ge=1, le=100, description="Absolute recursive depth limit for DAG deserialization."
-    )
+    max_unfold_depth: int = Field(ge=1, le=100, description="Absolute recursive depth limit for DAG deserialization.")
     lazy_fetch_timeout_ms: int = Field(
         ge=1, le=60000, description="Temporal guillotine for resolving cryptographic pointers."
     )
@@ -6361,9 +6359,7 @@ class OpticalMappingContract(CoreasonBaseState):
     prism_target_pointer: Annotated[str, StringConstraints(max_length=2000)] = Field(
         description="RFC 6902 JSON Pointer for exact injection coordinate."
     )
-    strict_isomorphism: bool = Field(
-        default=True, description="If true, mathematically forbids type coercion."
-    )
+    strict_isomorphism: bool = Field(default=True, description="If true, mathematically forbids type coercion.")
 
 
 class MCPServerManifest(CoreasonBaseState):
@@ -6408,7 +6404,11 @@ class MCPServerManifest(CoreasonBaseState):
 
     @model_validator(mode="after")
     def _enforce_canonical_sort_optics(self) -> Self:
-        object.__setattr__(self, "state_synchronization_optics", sorted(self.state_synchronization_optics, key=operator.attrgetter("lens_source_pointer")))
+        object.__setattr__(
+            self,
+            "state_synchronization_optics",
+            sorted(self.state_synchronization_optics, key=operator.attrgetter("lens_source_pointer")),
+        )
         return self
 
     @model_validator(mode="after")
@@ -6902,7 +6902,9 @@ class MCPClientIntent(BoundedJSONRPCIntent):
     @model_validator(mode="after")
     def _enforce_holographic_resolution(self) -> Self:
         if self.method == "mcp.ui.emit_intent" and self.holographic_projection is None:
-            raise ValueError("Holographic Projection Violation: Holographic projection must not be None when emitting intent.")
+            raise ValueError(
+                "Holographic Projection Violation: Holographic projection must not be None when emitting intent."
+            )
         return self
 
 
