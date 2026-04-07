@@ -5270,7 +5270,7 @@
           "additionalProperties": {
             "$ref": "#/$defs/DocumentLayoutRegionState"
           },
-          "description": "Dictionary mapping block_ids to their strict spatial definitions.",
+          "description": "The strictly bounded mathematical projection matrix linking topological block identifiers to their absolute 2D spatial geometries.",
           "maxProperties": 1000,
           "propertyNames": {
             "maxLength": 255
@@ -13446,7 +13446,7 @@
         },
         "qx": {
           "default": 0.0,
-          "description": "The i component of the rotation quaternion.",
+          "description": "The rigidly bounded imaginary (i) vector scalar of the Hamiltonian rotation quaternion.",
           "maximum": 1.0,
           "minimum": -1.0,
           "title": "Qx",
@@ -16746,7 +16746,7 @@
         },
         "causal_clock": {
           "default": 0,
-          "description": "Tracks the recursion depth/vector clock required for compute budget decay.",
+          "description": "The absolute integer boundary defining the temporal vector clock and recursion depth for thermodynamic compute budget decay.",
           "minimum": 0,
           "title": "Causal Clock",
           "type": "integer"
