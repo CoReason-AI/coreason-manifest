@@ -2702,7 +2702,7 @@
       "title": "CircuitBreakerEvent",
       "type": "object"
     },
-    "CoalgebraicHydrationPolicy": {
+    "EpistemicHydrationPolicy": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the limits of infinite graph unfolding to protect UI VRAM when pulling from the EpistemicLedgerState.\nCAUSAL AFFORDANCE: Instructs the orchestrator's deserialization engine to halt graph traversal at a specific recursion depth, replacing raw objects with cryptographic pointers.\nEPISTEMIC BOUNDS: The `max_unfold_depth` strictly bounds the DAG traversal depth (`ge=1, le=100`). `lazy_fetch_timeout_ms` prevents infinite halting (`ge=1, le=60000`). `truncation_strategy` is constrained to a Literal.\nMCP ROUTING TRIGGERS: Coalgebraic Unfolding, Lazy Evaluation, State-Space Bounding, VRAM Exhaustion Prevention",
       "properties": {
@@ -2736,7 +2736,7 @@
         "lazy_fetch_timeout_ms",
         "truncation_strategy"
       ],
-      "title": "CoalgebraicHydrationPolicy",
+      "title": "EpistemicHydrationPolicy",
       "type": "object"
     },
     "CognitiveCritiqueProfile": {
@@ -14968,7 +14968,7 @@
         "unfolding_policy": {
           "anyOf": [
             {
-              "$ref": "#/$defs/CoalgebraicHydrationPolicy"
+              "$ref": "#/$defs/EpistemicHydrationPolicy"
             },
             {
               "type": "null"
