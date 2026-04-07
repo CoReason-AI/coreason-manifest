@@ -19,12 +19,12 @@ from coreason_manifest.spec.ontology import (
     AgentNodeProfile,
     BrowserDOMState,
     CognitiveUncertaintyProfile,
-    ComputeTier,
+    ComputeTierProfile,
     ContextualizedSourceEntity,
     DAGTopologyManifest,
     DataFidelityReceipt,
     EpistemicCompressionSLA,
-    EpistemicSecurity,
+    EpistemicSecurityProfile,
     HardwareProfile,
     MultimodalTokenAnchorState,
     NeurosymbolicInferenceRequest,
@@ -279,7 +279,7 @@ def test_fuzz_thermodynamic_paradox(min_vram_gb: float) -> None:
     with pytest.raises((ValueError, ValidationError), match="Thermodynamic Constraint Violated"):
         AgentNodeProfile(
             description="Fuzz test agent",
-            hardware=HardwareProfile(compute_tier=ComputeTier.KINETIC, min_vram_gb=min_vram_gb),
+            hardware=HardwareProfile(compute_tier=ComputeTierProfile.KINETIC, min_vram_gb=min_vram_gb),
         )
 
 
@@ -300,15 +300,15 @@ def test_fuzz_sovereign_execution_paradox(provider_whitelist: list[str]) -> None
             AgentNodeProfile(
                 description="Fuzz test agent",
                 hardware=HardwareProfile(provider_whitelist=provider_whitelist),
-                security=SecurityProfile(epistemic_security=EpistemicSecurity.CONFIDENTIAL),
+                security=SecurityProfile(epistemic_security=EpistemicSecurityProfile.CONFIDENTIAL),
             )
     else:
         agent = AgentNodeProfile(
             description="Fuzz test agent",
             hardware=HardwareProfile(provider_whitelist=provider_whitelist),
-            security=SecurityProfile(epistemic_security=EpistemicSecurity.CONFIDENTIAL),
+            security=SecurityProfile(epistemic_security=EpistemicSecurityProfile.CONFIDENTIAL),
         )
-        assert agent.security.epistemic_security == EpistemicSecurity.CONFIDENTIAL
+        assert agent.security.epistemic_security == EpistemicSecurityProfile.CONFIDENTIAL
         assert agent.hardware.provider_whitelist == sorted(provider_whitelist)
 
 
