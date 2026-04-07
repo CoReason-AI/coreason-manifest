@@ -16,8 +16,9 @@ from hypothesis import HealthCheck, given, settings
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
-    AgentNodeProfile,
     BrowserDOMState,
+    CognitiveAgentNodeProfile,
+    CognitiveSystemNodeProfile,
     CognitiveUncertaintyProfile,
     ComputeTier,
     ContextualizedSourceEntity,
@@ -25,22 +26,21 @@ from coreason_manifest.spec.ontology import (
     DataFidelityReceipt,
     EpistemicCompressionSLA,
     EpistemicSecurity,
-    HardwareProfile,
+    EpistemicSecurityProfile,
     MultimodalTokenAnchorState,
     NeurosymbolicInferenceRequest,
     ObservationEvent,
     QuorumPolicy,
     SE3TransformProfile,
-    SecurityProfile,
+    SpatialHardwareProfile,
     StateHydrationManifest,
-    SystemNodeProfile,
     TaskAnnouncementIntent,
     TaxonomicRoutingPolicy,
     VolumetricBoundingProfile,
 )
 
 valid_node_id_st = st.from_regex(r"^did:[a-z0-9]+:[a-zA-Z0-9.\-_:]+$", fullmatch=True)
-node_st = st.builds(SystemNodeProfile, description=st.text())
+node_st = st.builds(CognitiveSystemNodeProfile, description=st.text())
 
 
 @st.composite
@@ -277,9 +277,9 @@ def test_fuzz_thermodynamic_paradox(min_vram_gb: float) -> None:
     Fuzz test to prove the compiler never yields a valid object where KINETIC > 24GB.
     """
     with pytest.raises((ValueError, ValidationError), match="Thermodynamic Constraint Violated"):
-        AgentNodeProfile(
+        CognitiveAgentNodeProfile(
             description="Fuzz test agent",
-            hardware=HardwareProfile(compute_tier=ComputeTier.KINETIC, min_vram_gb=min_vram_gb),
+            hardware=SpatialHardwareProfile(compute_tier=ComputeTier.KINETIC, min_vram_gb=min_vram_gb),
         )
 
 
@@ -297,16 +297,16 @@ def test_fuzz_sovereign_execution_paradox(provider_whitelist: list[str]) -> None
     has_untrusted = not set(provider_whitelist).issubset(trusted_environments)
     if has_untrusted:
         with pytest.raises((ValueError, ValidationError), match="Sovereign Execution Violated"):
-            AgentNodeProfile(
+            CognitiveAgentNodeProfile(
                 description="Fuzz test agent",
-                hardware=HardwareProfile(provider_whitelist=provider_whitelist),
-                security=SecurityProfile(epistemic_security=EpistemicSecurity.CONFIDENTIAL),
+                hardware=SpatialHardwareProfile(provider_whitelist=provider_whitelist),
+                security=EpistemicSecurityProfile(epistemic_security=EpistemicSecurity.CONFIDENTIAL),
             )
     else:
-        agent = AgentNodeProfile(
+        agent = CognitiveAgentNodeProfile(
             description="Fuzz test agent",
-            hardware=HardwareProfile(provider_whitelist=provider_whitelist),
-            security=SecurityProfile(epistemic_security=EpistemicSecurity.CONFIDENTIAL),
+            hardware=SpatialHardwareProfile(provider_whitelist=provider_whitelist),
+            security=EpistemicSecurityProfile(epistemic_security=EpistemicSecurity.CONFIDENTIAL),
         )
         assert agent.security.epistemic_security == EpistemicSecurity.CONFIDENTIAL
         assert agent.hardware.provider_whitelist == sorted(provider_whitelist)
@@ -322,14 +322,18 @@ def test_fuzz_network_topology_paradox(egress_obfuscation: bool, network_isolati
     """
     if egress_obfuscation and not network_isolation:
         with pytest.raises((ValueError, ValidationError), match="Topology Routing Violated"):
-            AgentNodeProfile(
+            CognitiveAgentNodeProfile(
                 description="Fuzz test agent",
-                security=SecurityProfile(egress_obfuscation=egress_obfuscation, network_isolation=network_isolation),
+                security=EpistemicSecurityProfile(
+                    egress_obfuscation=egress_obfuscation, network_isolation=network_isolation
+                ),
             )
     else:
-        agent = AgentNodeProfile(
+        agent = CognitiveAgentNodeProfile(
             description="Fuzz test agent",
-            security=SecurityProfile(egress_obfuscation=egress_obfuscation, network_isolation=network_isolation),
+            security=EpistemicSecurityProfile(
+                egress_obfuscation=egress_obfuscation, network_isolation=network_isolation
+            ),
         )
         assert agent.security.egress_obfuscation == egress_obfuscation
         assert agent.security.network_isolation == network_isolation

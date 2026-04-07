@@ -16,8 +16,8 @@ from hypothesis import given
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
-    ActionSpaceManifest,
     BoundedJSONRPCIntent,
+    CognitiveActionSpaceManifest,
     ContinuousMutationPolicy,
     EpistemicLedgerState,
     LatentSchemaInferenceIntent,
@@ -25,8 +25,8 @@ from coreason_manifest.spec.ontology import (
     MarketContract,
     PermissionBoundaryPolicy,
     SideEffectProfile,
+    SpatialToolManifest,
     ThoughtBranchState,
-    ToolManifest,
 )
 
 # Define a recursive strategy to simulate valid JSON payload topologies
@@ -112,7 +112,7 @@ def test_latent_scratchpad_receipt_referential_integrity(
 )
 def test_action_space_manifest_uniqueness(action_space_cid: str, tool_names: list[str]) -> None:
     native_tools = {
-        name: ToolManifest(
+        name: SpatialToolManifest(
             type="native_tool",
             tool_name=name,
             input_schema={"type": "object", "properties": {}},
@@ -122,7 +122,7 @@ def test_action_space_manifest_uniqueness(action_space_cid: str, tool_names: lis
         )
         for name in tool_names
     }
-    manifest = ActionSpaceManifest(
+    manifest = CognitiveActionSpaceManifest(
         action_space_cid=action_space_cid,
         capabilities=native_tools,  # type: ignore[arg-type]
         entry_point_cid=tool_names[0],

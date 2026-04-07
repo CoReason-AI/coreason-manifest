@@ -12,12 +12,12 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
-    ActionSpaceManifest,
+    CognitiveActionSpaceManifest,
     CyclicEdgeProfile,
     PermissionBoundaryPolicy,
     SideEffectProfile,
+    SpatialToolManifest,
     TerminalConditionContract,
-    ToolManifest,
     TransitionEdgeProfile,
 )
 
@@ -55,7 +55,7 @@ def test_cyclic_edge_infinite_loop_guillotine() -> None:
 
 
 def test_action_space_dcg_compilation() -> None:
-    tool_a = ToolManifest(
+    tool_a = SpatialToolManifest(
         type="native_tool",
         tool_name="tool_A",
         description="Tool A",
@@ -64,7 +64,7 @@ def test_action_space_dcg_compilation() -> None:
         permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
     )
 
-    tool_b = ToolManifest(
+    tool_b = SpatialToolManifest(
         type="native_tool",
         tool_name="tool_B",
         description="Tool B",
@@ -74,7 +74,7 @@ def test_action_space_dcg_compilation() -> None:
     )
 
     # Coinductive Validation Test (No RecursionError)
-    asm = ActionSpaceManifest(
+    asm = CognitiveActionSpaceManifest(
         action_space_cid="test_dcg",
         entry_point_cid="tool_A",
         capabilities={
@@ -109,7 +109,7 @@ def test_action_space_dcg_compilation() -> None:
 
 
 def test_action_space_ghost_edge_prevention() -> None:
-    tool_a = ToolManifest(
+    tool_a = SpatialToolManifest(
         type="native_tool",
         tool_name="tool_A",
         description="Tool A",
@@ -120,7 +120,7 @@ def test_action_space_ghost_edge_prevention() -> None:
 
     # Missing tool_C in capabilities
     with pytest.raises(ValidationError, match="not found in capabilities"):
-        ActionSpaceManifest(
+        CognitiveActionSpaceManifest(
             action_space_cid="test_ghost_edge",
             entry_point_cid="tool_A",
             capabilities={"tool_A": tool_a},
@@ -138,7 +138,7 @@ def test_action_space_ghost_edge_prevention() -> None:
 
     # Missing entry_point_cid in capabilities
     with pytest.raises(ValidationError, match="not found in capabilities"):
-        ActionSpaceManifest(
+        CognitiveActionSpaceManifest(
             action_space_cid="test_ghost_edge",
             entry_point_cid="tool_B",
             capabilities={"tool_A": tool_a},

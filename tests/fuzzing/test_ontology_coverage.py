@@ -14,20 +14,20 @@ from hypothesis import strategies as st
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
-    BilateralSLA,
     BrowserDOMState,
+    CognitiveSystemNodeProfile,
     CrossoverPolicy,
     DAGTopologyManifest,
     DerivationMode,
     EpistemicProvenanceReceipt,
     EvaluatorOptimizerTopologyManifest,
     EvolutionaryTopologyManifest,
+    FederatedBilateralSLA,
     FitnessObjectiveProfile,
     InformationClassificationProfile,
     MutationPolicy,
     RiskLevelPolicy,
     SMPCTopologyManifest,
-    SystemNodeProfile,
     WorkflowManifest,
 )
 
@@ -154,7 +154,7 @@ def test_workflow_manifest_lbac_dominance(
         extracted_by="did:node:id-1", source_event_cid="a" * 64, derivation_mode=DerivationMode.DIRECT_TRANSLATION
     )
     topology = DAGTopologyManifest(nodes={}, edges=[], max_depth=10, max_fan_out=10)
-    sla = BilateralSLA(
+    sla = FederatedBilateralSLA(
         receiving_tenant_id="tenant-x", max_permitted_classification=sla_max_class, liability_limit_magnitude=100
     )
 
@@ -202,7 +202,7 @@ def test_evaluator_optimizer_bipartite_nodes(nodes_pair: tuple[str, str]) -> Non
     # Populate the nodes dict with the gen_id only
     from coreason_manifest.spec.ontology import AnyNodeProfile
 
-    nodes: dict[str, AnyNodeProfile] = {gen_id: SystemNodeProfile(description="desc")}
+    nodes: dict[str, AnyNodeProfile] = {gen_id: CognitiveSystemNodeProfile(description="desc")}
 
     with pytest.raises(ValidationError) as exc_info:
         EvaluatorOptimizerTopologyManifest(

@@ -60,72 +60,6 @@
       "title": "AcceleratorType",
       "type": "string"
     },
-    "ActionSpaceManifest": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the finite, discrete Markov Decision Process (MDP) Action Space and affordance landscape available to a specific execution node. As a ...Manifest suffix, this defines a frozen, N-dimensional coordinate state.\n\nCAUSAL AFFORDANCE: Projects the combined multi-dimensional matrix of capabilities into the agent's context, mathematically dictating which kinetic operations it can initiate via its `transition_matrix`. Optionally enforces kinetic separation.\n\nEPISTEMIC BOUNDS: The `action_space_cid` is geometrically constrained to a 128-char CID. A `@model_validator` strictly bounds the topology by enforcing uniqueness across all capability namespaces and ensures deterministic RFC 8785 representation by sorting the transition matrix.\n\nMCP ROUTING TRIGGERS: Markov Decision Process, Action Space, Affordance Theory, State Transition Matrix, Directed Cyclic Graph",
-      "properties": {
-        "action_space_cid": {
-          "description": "The unique identifier for this curated environment of tools.",
-          "maxLength": 128,
-          "minLength": 1,
-          "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Action Space Cid",
-          "type": "string"
-        },
-        "capabilities": {
-          "additionalProperties": {
-            "$ref": "#/$defs/AnyActionSpaceCapability"
-          },
-          "description": "The State Space (S) of the MDP, indexed by their unique capability CIDs.",
-          "maxProperties": 500,
-          "propertyNames": {
-            "maxLength": 255
-          },
-          "title": "Capabilities",
-          "type": "object"
-        },
-        "transition_matrix": {
-          "additionalProperties": {
-            "items": {
-              "$ref": "#/$defs/AnyTransitionEdge"
-            },
-            "type": "array"
-          },
-          "description": "The Stochastic Transition Matrix (P).",
-          "maxProperties": 500,
-          "propertyNames": {
-            "maxLength": 255
-          },
-          "title": "Transition Matrix",
-          "type": "object"
-        },
-        "entry_point_cid": {
-          "description": "Defines the initial state (S_0) of the MDP.",
-          "title": "Entry Point Cid",
-          "type": "string"
-        },
-        "kinetic_separation": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/KineticSeparationPolicy"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The bipartite graph constraint preventing toxic tool combinations."
-        }
-      },
-      "required": [
-        "action_space_cid",
-        "capabilities",
-        "transition_matrix",
-        "entry_point_cid"
-      ],
-      "title": "ActionSpaceManifest",
-      "type": "object"
-    },
     "ActivationSteeringContract": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes a hardware-level Representation Engineering (RepE) directive to mechanically manipulate latent dimensions via forward-pass tensor injection.\n\nCAUSAL AFFORDANCE: Physically forces an additive, ablation, or clamping operation onto the model's residual stream at specific `injection_layers`, steering the generator away from unstable hallucination geometries prior to token projection.\n\nEPISTEMIC BOUNDS: Cryptographically locked by `steering_vector_hash` (SHA-256 pattern `^[a-f0-9]{64}$`). `scaling_factor` is bounded above (`le=100.0`) but unbounded below, permitting negative magnitudes for ablation. The `@model_validator` deterministically sorts `injection_layers` (each `ge=0`).\n\nMCP ROUTING TRIGGERS: Representation Engineering, RepE, Activation Steering, Residual Stream Ablation, Concept Vectors",
@@ -203,7 +137,7 @@
           "type": "string"
         },
         "selected_tool_name": {
-          "description": "The exact tool from the ActionSpaceManifest allocated for this experiment.",
+          "description": "The exact tool from the CognitiveActionSpaceManifest allocated for this experiment.",
           "maxLength": 2000,
           "title": "Selected Tool Name",
           "type": "string"
@@ -644,405 +578,6 @@
       "title": "AgentBidIntent",
       "type": "object"
     },
-    "AgentNodeProfile": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements a stochastic actor traversing a Partially Observable Markov Decision Process (POMDP). It establishes the cognitive and physical constraints for autonomous swarm participants.\n\nCAUSAL AFFORDANCE: Authorizes the orchestrator to instantiate an independent generative trajectory capable of active inference, Representation Engineering (RepE) steering via `baseline_cognitive_state`, and non-monotonic test-time compute escalation via `escalation_policy`.\n\nEPISTEMIC BOUNDS: The node's operational variance is physically bounded by its thermodynamic Spot-Market budget (`compute_frontier`). The `@model_validator` deterministically sorts `peft_adapters` by `adapter_id` for RFC 8785 canonical hashing. Type is strictly locked to `Literal[\"agent\"]`.\n\nMCP ROUTING TRIGGERS: POMDP, Stochastic Actor, Active Inference, Representation Engineering, Policy Gradient",
-      "properties": {
-        "architectural_intent": {
-          "anyOf": [
-            {
-              "maxLength": 2000,
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The AI's declarative rationale for selecting this node.",
-          "title": "Architectural Intent"
-        },
-        "justification": {
-          "anyOf": [
-            {
-              "maxLength": 2000,
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Cryptographic/audit justification for this node's existence in the graph.",
-          "title": "Justification"
-        },
-        "intervention_policies": {
-          "description": "The declarative array of proactive oversight hooks bound to this node's lifecycle.",
-          "items": {
-            "$ref": "#/$defs/InterventionPolicy"
-          },
-          "title": "Intervention Policies",
-          "type": "array"
-        },
-        "domain_extensions": {
-          "anyOf": [
-            {
-              "additionalProperties": {
-                "$ref": "#/$defs/JsonPrimitiveState"
-              },
-              "propertyNames": {
-                "maxLength": 255
-              },
-              "type": "object"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
-          "title": "Domain Extensions"
-        },
-        "semantic_zoom": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/SemanticZoomProfile"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The mathematical Information Bottleneck thresholds dictating the semantic degradation of this specific node."
-        },
-        "markov_blanket": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/MarkovBlanketRenderingPolicy"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The epistemic isolation boundary guarding this agent's internal generative states."
-        },
-        "optical_physics": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/PhysicallyBasedRenderingProfile"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The strict microfacet BRDF physics governing the visual representation of this node."
-        },
-        "neural_optics": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/GaussianSplattingProfile"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The volumetric Gaussian Splatting configuration for non-polygonal rendering."
-        },
-        "description": {
-          "description": "The semantic boundary defining the objective function of the execution node. [SITD-Gamma: Neurosymbolic Substrate Alignment]",
-          "maxLength": 2000,
-          "title": "Description",
-          "type": "string"
-        },
-        "type": {
-          "const": "agent",
-          "default": "agent",
-          "description": "Discriminator for an Agent node.",
-          "title": "Type",
-          "type": "string"
-        },
-        "hardware": {
-          "$ref": "#/$defs/HardwareProfile",
-          "description": "The physical constraints binding this agent to a specific thermodynamic deployment topology."
-        },
-        "security": {
-          "$ref": "#/$defs/SecurityProfile",
-          "description": "The rigid cryptographic rules dictating the agent's isolation boundaries."
-        },
-        "logit_steganography": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/LogitSteganographyContract"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The cryptographic contract forcing this agent to embed an undeniable provenance signature into its generative token stream."
-        },
-        "active_attention_ray": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/EpistemicAttentionRay"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The continuous spatial vector representing the agent's localized cognitive focus prior to kinetic actuation."
-        },
-        "compute_frontier": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/RoutingFrontierPolicy"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The dynamic spot-market compute requirements for this agent."
-        },
-        "peft_adapters": {
-          "description": "The declarative array of ephemeral PEFT/LoRA weights required to be hot-swapped during this agent's execution.",
-          "items": {
-            "$ref": "#/$defs/PeftAdapterContract"
-          },
-          "title": "Peft Adapters",
-          "type": "array"
-        },
-        "agent_attestation": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/AgentAttestationReceipt"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The cryptographic identity passport and AI-BOM for the agent."
-        },
-        "action_space_cid": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-zA-Z0-9_.:-]+$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The globally unique decentralized identifier (DID) anchoring the specific ActionSpaceManifest (curated tool environment) bound to this agent.",
-          "title": "Action Space Cid"
-        },
-        "secure_sub_session": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/SecureSubSessionState"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Declarative boundary for handling unredacted secrets within a temporarily isolated state partition."
-        },
-        "baseline_cognitive_state": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/CognitiveStateProfile"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The default biochemical 'mood' simulated for this agent via Representation Engineering."
-        },
-        "reflex_policy": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/System1ReflexPolicy"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The policy governing System 1 reflex actions."
-        },
-        "epistemic_policy": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/EpistemicScanningPolicy"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The policy governing epistemic scanning."
-        },
-        "correction_policy": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/SelfCorrectionPolicy"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The policy governing self-correction loops."
-        },
-        "escalation_policy": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/EscalationContract"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The mathematical boundary authorizing the agent to spin up Test-Time Compute."
-        },
-        "prm_policy": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/ProcessRewardContract"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The ruleset governing how intermediate thoughts are scored and pruned."
-        },
-        "active_inference_policy": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/ActiveInferenceContract"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The formal contract demanding mathematical proof of Expected Information Gain before authorizing tool execution."
-        },
-        "analogical_policy": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/AnalogicalMappingTask"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The formal contract forcing the agent to execute cross-domain lateral thinking."
-        },
-        "interventional_policy": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/InterventionalCausalTask"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The formal contract authorizing the agent to mutate variables to prove Pearlian causation."
-        },
-        "symbolic_handoff_policy": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/NeuroSymbolicHandoffContract"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The API-like contract allowing the agent to offload rigid logic to deterministic CPU solvers."
-        },
-        "audit_policy": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/MechanisticAuditContract"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The adaptive trigger policy for executing deep mechanistic interpretability brain-scans on this agent."
-        },
-        "anchoring_policy": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/AnchoringPolicy"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The declarative contract mathematically binding this agent to a core altruistic objective."
-        },
-        "grpo_reward_policy": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/EpistemicRewardModelPolicy"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The RL post-training contract forcing the agent to evaluate traces against an implicit graph reward."
-        },
-        "emulation_profile": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/AdversarialEmulationProfile"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The adversarial emulation geometry composing kinematic noise and environmental spoofing for anti-bot trajectory evasion."
-        },
-        "gflownet_balance_policy": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/CognitiveDetailedBalanceContract"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Authorizes trajectory balance optimization during non-monotonic reasoning."
-        }
-      },
-      "required": [
-        "description"
-      ],
-      "title": "AgentNodeProfile",
-      "type": "object"
-    },
     "AmbientState": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Acts as a unidirectional telemetry pipeline projecting internal swarm kinematics across the Markov Blanket without inducing causal feedback loops.\n\nCAUSAL AFFORDANCE: Emits an ephemeral, 1D representation of the active probability distribution and execution progress to the external UI plane without halting the underlying generative trajectory.\n\nEPISTEMIC BOUNDS: Semantic `status_message` structurally clamped to `max_length=2000`. The continuous `progress` metric bounded by float limits (`le=1000000000.0`) allowing it to represent 0.0-1.0 ratios or exact token counts. The `thermodynamic_burn_rate` is physically bounded (`ge=0.0`), and `epistemic_entropy_score` is normalized (`ge=0.0, le=1.0`).\n\nMCP ROUTING TRIGGERS: Markov Blanket, Ephemeral Projection, Continuous Observability, Kinetic Execution State, UI Telemetry",
@@ -1184,13 +719,13 @@
         "mapping": {
           "ephemeral_partition": "#/$defs/EphemeralNamespacePartitionState",
           "mcp_server": "#/$defs/MCPServerManifest",
-          "native_tool": "#/$defs/ToolManifest"
+          "native_tool": "#/$defs/SpatialToolManifest"
         },
         "propertyName": "type"
       },
       "oneOf": [
         {
-          "$ref": "#/$defs/ToolManifest"
+          "$ref": "#/$defs/SpatialToolManifest"
         },
         {
           "$ref": "#/$defs/MCPServerManifest"
@@ -1204,23 +739,23 @@
       "description": "A discriminated union of all valid workflow nodes.",
       "discriminator": {
         "mapping": {
-          "agent": "#/$defs/AgentNodeProfile",
+          "agent": "#/$defs/CognitiveAgentNodeProfile",
           "composite": "#/$defs/CompositeNodeProfile",
-          "human": "#/$defs/HumanNodeProfile",
+          "human": "#/$defs/CognitiveHumanNodeProfile",
           "memoized": "#/$defs/MemoizedNodeProfile",
-          "system": "#/$defs/SystemNodeProfile"
+          "system": "#/$defs/CognitiveSystemNodeProfile"
         },
         "propertyName": "type"
       },
       "oneOf": [
         {
-          "$ref": "#/$defs/AgentNodeProfile"
+          "$ref": "#/$defs/CognitiveAgentNodeProfile"
         },
         {
-          "$ref": "#/$defs/HumanNodeProfile"
+          "$ref": "#/$defs/CognitiveHumanNodeProfile"
         },
         {
-          "$ref": "#/$defs/SystemNodeProfile"
+          "$ref": "#/$defs/CognitiveSystemNodeProfile"
         },
         {
           "$ref": "#/$defs/CompositeNodeProfile"
@@ -1695,7 +1230,7 @@
             }
           ],
           "default": null,
-          "description": "The mathematical integer ceiling to prevent Sybil-like parallel mutations against the ActionSpaceManifest.",
+          "description": "The mathematical integer ceiling to prevent Sybil-like parallel mutations against the CognitiveActionSpaceManifest.",
           "title": "Max Concurrent Tool Invocations"
         }
       },
@@ -1963,74 +1498,6 @@
         "payload"
       ],
       "title": "BeliefMutationEvent",
-      "type": "object"
-    },
-    "BilateralSLA": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the zero-trust structural boundary for multi-tenant federation,\nsecuring cross-boundary graph traversal against Shor's algorithm via an optional\nPostQuantumSignatureReceipt. As an ...SLA suffix, this object enforces rigid mathematical\nboundaries that the orchestrator must respect globally.\n\nCAUSAL AFFORDANCE: Unlocks cross-swarm graph bridging by enforcing strict liability,\nphysical location routing, semantic data classification constraints via\nmax_permitted_classification, and ESG carbon intensity limits.\n\nEPISTEMIC BOUNDS: Economically constrained by liability_limit_magnitude (ge=0,\nle=1000000000). ESG limits physically bind the node grid to the optional\nmax_permitted_grid_carbon_intensity (ge=0.0, le=10000.0). The permitted_geographic_regions\narray is deterministically sorted via @model_validator for RFC 8785 canonical hashing.\n\nMCP ROUTING TRIGGERS: Zero-Trust Architecture, Post-Quantum Cryptography, Federated\nLearning, Bilateral SLA, Data Residency",
-      "properties": {
-        "receiving_tenant_id": {
-          "description": "The strict enterprise identifier of the foreign B2B tenant receiving this payload.",
-          "maxLength": 255,
-          "minLength": 1,
-          "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Receiving Tenant Id",
-          "type": "string"
-        },
-        "max_permitted_classification": {
-          "$ref": "#/$defs/InformationClassificationProfile",
-          "description": "The absolute highest semantic sensitivity allowed to cross this federated boundary."
-        },
-        "liability_limit_magnitude": {
-          "description": "The strict magnitude cap on cross-tenant economic liability.",
-          "maximum": 1000000000,
-          "minimum": 0,
-          "title": "Liability Limit Magnitude",
-          "type": "integer"
-        },
-        "permitted_geographic_regions": {
-          "description": "Explicit whitelist of geographic regions or cloud enclaves where execution is structurally permitted (Payload Residency Pinning).",
-          "items": {
-            "maxLength": 255,
-            "type": "string"
-          },
-          "title": "Permitted Geographic Regions",
-          "type": "array"
-        },
-        "max_permitted_grid_carbon_intensity": {
-          "anyOf": [
-            {
-              "maximum": 10000.0,
-              "minimum": 0.0,
-              "type": "number"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Absolute structural ESG mandate. The execution graph will quarantine any federated node operating on a grid exceeding this gCO2eq/kWh threshold.",
-          "title": "Max Permitted Grid Carbon Intensity"
-        },
-        "pq_signature": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/PostQuantumSignatureReceipt"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The quantum-resistant signature securing the multi-tenant structural boundary."
-        }
-      },
-      "required": [
-        "receiving_tenant_id",
-        "max_permitted_classification",
-        "liability_limit_magnitude"
-      ],
-      "title": "BilateralSLA",
       "type": "object"
     },
     "BoundedInterventionScopePolicy": {
@@ -2702,6 +2169,471 @@
       "title": "CircuitBreakerEvent",
       "type": "object"
     },
+    "CognitiveActionSpaceManifest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the finite, discrete Markov Decision Process (MDP) Action Space and affordance landscape available to a specific execution node. As a ...Manifest suffix, this defines a frozen, N-dimensional coordinate state.\n\nCAUSAL AFFORDANCE: Projects the combined multi-dimensional matrix of capabilities into the agent's context, mathematically dictating which kinetic operations it can initiate via its `transition_matrix`. Optionally enforces kinetic separation.\n\nEPISTEMIC BOUNDS: The `action_space_cid` is geometrically constrained to a 128-char CID. A `@model_validator` strictly bounds the topology by enforcing uniqueness across all capability namespaces and ensures deterministic RFC 8785 representation by sorting the transition matrix.\n\nMCP ROUTING TRIGGERS: Markov Decision Process, Action Space, Affordance Theory, State Transition Matrix, Directed Cyclic Graph",
+      "properties": {
+        "action_space_cid": {
+          "description": "The unique identifier for this curated environment of tools.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Action Space Cid",
+          "type": "string"
+        },
+        "capabilities": {
+          "additionalProperties": {
+            "$ref": "#/$defs/AnyActionSpaceCapability"
+          },
+          "description": "The State Space (S) of the MDP, indexed by their unique capability CIDs.",
+          "maxProperties": 500,
+          "propertyNames": {
+            "maxLength": 255
+          },
+          "title": "Capabilities",
+          "type": "object"
+        },
+        "transition_matrix": {
+          "additionalProperties": {
+            "items": {
+              "$ref": "#/$defs/AnyTransitionEdge"
+            },
+            "type": "array"
+          },
+          "description": "The Stochastic Transition Matrix (P).",
+          "maxProperties": 500,
+          "propertyNames": {
+            "maxLength": 255
+          },
+          "title": "Transition Matrix",
+          "type": "object"
+        },
+        "entry_point_cid": {
+          "description": "Defines the initial state (S_0) of the MDP.",
+          "title": "Entry Point Cid",
+          "type": "string"
+        },
+        "kinetic_separation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/KineticSeparationPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The bipartite graph constraint preventing toxic tool combinations."
+        }
+      },
+      "required": [
+        "action_space_cid",
+        "capabilities",
+        "transition_matrix",
+        "entry_point_cid"
+      ],
+      "title": "CognitiveActionSpaceManifest",
+      "type": "object"
+    },
+    "CognitiveAgentNodeProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements a stochastic actor traversing a Partially Observable Markov Decision Process (POMDP). It establishes the cognitive and physical constraints for autonomous swarm participants.\n\nCAUSAL AFFORDANCE: Authorizes the orchestrator to instantiate an independent generative trajectory capable of active inference, Representation Engineering (RepE) steering via `baseline_cognitive_state`, and non-monotonic test-time compute escalation via `escalation_policy`.\n\nEPISTEMIC BOUNDS: The node's operational variance is physically bounded by its thermodynamic Spot-Market budget (`compute_frontier`). The `@model_validator` deterministically sorts `peft_adapters` by `adapter_id` for RFC 8785 canonical hashing. Type is strictly locked to `Literal[\"agent\"]`.\n\nMCP ROUTING TRIGGERS: POMDP, Stochastic Actor, Active Inference, Representation Engineering, Policy Gradient",
+      "properties": {
+        "architectural_intent": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The AI's declarative rationale for selecting this node.",
+          "title": "Architectural Intent"
+        },
+        "justification": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cryptographic/audit justification for this node's existence in the graph.",
+          "title": "Justification"
+        },
+        "intervention_policies": {
+          "description": "The declarative array of proactive oversight hooks bound to this node's lifecycle.",
+          "items": {
+            "$ref": "#/$defs/InterventionPolicy"
+          },
+          "title": "Intervention Policies",
+          "type": "array"
+        },
+        "domain_extensions": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/JsonPrimitiveState"
+              },
+              "propertyNames": {
+                "maxLength": 255
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
+          "title": "Domain Extensions"
+        },
+        "semantic_zoom": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SemanticZoomProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematical Information Bottleneck thresholds dictating the semantic degradation of this specific node."
+        },
+        "markov_blanket": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MarkovBlanketRenderingPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The epistemic isolation boundary guarding this agent's internal generative states."
+        },
+        "optical_physics": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PhysicallyBasedRenderingProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The strict microfacet BRDF physics governing the visual representation of this node."
+        },
+        "neural_optics": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GaussianSplattingProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The volumetric Gaussian Splatting configuration for non-polygonal rendering."
+        },
+        "description": {
+          "description": "The semantic boundary defining the objective function of the execution node. [SITD-Gamma: Neurosymbolic Substrate Alignment]",
+          "maxLength": 2000,
+          "title": "Description",
+          "type": "string"
+        },
+        "type": {
+          "const": "agent",
+          "default": "agent",
+          "description": "Discriminator for an Agent node.",
+          "title": "Type",
+          "type": "string"
+        },
+        "hardware": {
+          "$ref": "#/$defs/SpatialHardwareProfile",
+          "description": "The physical constraints binding this agent to a specific thermodynamic deployment topology."
+        },
+        "security": {
+          "$ref": "#/$defs/EpistemicSecurityProfile",
+          "description": "The rigid cryptographic rules dictating the agent's isolation boundaries."
+        },
+        "logit_steganography": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LogitSteganographyContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The cryptographic contract forcing this agent to embed an undeniable provenance signature into its generative token stream."
+        },
+        "active_attention_ray": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EpistemicAttentionRay"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The continuous spatial vector representing the agent's localized cognitive focus prior to kinetic actuation."
+        },
+        "compute_frontier": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RoutingFrontierPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The dynamic spot-market compute requirements for this agent."
+        },
+        "peft_adapters": {
+          "description": "The declarative array of ephemeral PEFT/LoRA weights required to be hot-swapped during this agent's execution.",
+          "items": {
+            "$ref": "#/$defs/PeftAdapterContract"
+          },
+          "title": "Peft Adapters",
+          "type": "array"
+        },
+        "agent_attestation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AgentAttestationReceipt"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The cryptographic identity passport and AI-BOM for the agent."
+        },
+        "action_space_cid": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9_.:-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The globally unique decentralized identifier (DID) anchoring the specific CognitiveActionSpaceManifest (curated tool environment) bound to this agent.",
+          "title": "Action Space Cid"
+        },
+        "secure_sub_session": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SecureSubSessionState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Declarative boundary for handling unredacted secrets within a temporarily isolated state partition."
+        },
+        "baseline_cognitive_state": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CognitiveStateProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The default biochemical 'mood' simulated for this agent via Representation Engineering."
+        },
+        "reflex_policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/System1ReflexPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The policy governing System 1 reflex actions."
+        },
+        "epistemic_policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EpistemicScanningPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The policy governing epistemic scanning."
+        },
+        "correction_policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SelfCorrectionPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The policy governing self-correction loops."
+        },
+        "escalation_policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EscalationContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematical boundary authorizing the agent to spin up Test-Time Compute."
+        },
+        "prm_policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ProcessRewardContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The ruleset governing how intermediate thoughts are scored and pruned."
+        },
+        "active_inference_policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ActiveInferenceContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The formal contract demanding mathematical proof of Expected Information Gain before authorizing tool execution."
+        },
+        "analogical_policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AnalogicalMappingTask"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The formal contract forcing the agent to execute cross-domain lateral thinking."
+        },
+        "interventional_policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/InterventionalCausalTask"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The formal contract authorizing the agent to mutate variables to prove Pearlian causation."
+        },
+        "symbolic_handoff_policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NeuroSymbolicHandoffContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The API-like contract allowing the agent to offload rigid logic to deterministic CPU solvers."
+        },
+        "audit_policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MechanisticAuditContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The adaptive trigger policy for executing deep mechanistic interpretability brain-scans on this agent."
+        },
+        "anchoring_policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AnchoringPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The declarative contract mathematically binding this agent to a core altruistic objective."
+        },
+        "grpo_reward_policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EpistemicRewardModelPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The RL post-training contract forcing the agent to evaluate traces against an implicit graph reward."
+        },
+        "emulation_profile": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AdversarialEmulationProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The adversarial emulation geometry composing kinematic noise and environmental spoofing for anti-bot trajectory evasion."
+        },
+        "gflownet_balance_policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CognitiveDetailedBalanceContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Authorizes trajectory balance optimization during non-monotonic reasoning."
+        }
+      },
+      "required": [
+        "description"
+      ],
+      "title": "CognitiveAgentNodeProfile",
+      "type": "object"
+    },
     "CognitiveCritiqueProfile": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Step-Level Verification via Process Reward Models (PRMs) to evaluate and critique intermediate steps in non-monotonic reasoning trees.\n\nCAUSAL AFFORDANCE: Injects a dense latent supervision vector (`logical_flaw_embedding`) to mathematically repel the generative trajectory away from hallucinated or logically flawed probability manifolds during test-time compute.\n\nEPISTEMIC BOUNDS: Penalization magnitude strictly clamped by `epistemic_penalty_scalar` (`ge=0.0, le=1.0`) to prevent gradient explosion. Target is cryptographically locked via `reasoning_trace_hash` (SHA-256 pattern `^[a-f0-9]{64}$`).\n\nMCP ROUTING TRIGGERS: Process Reward Model, Step-Level Verification, Representation Engineering, Latent Repulsion, Test-Time Supervision",
@@ -2833,6 +2765,150 @@
         "decoding_policy"
       ],
       "title": "CognitiveFormatContract",
+      "type": "object"
+    },
+    "CognitiveHumanNodeProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Supervisory Control Theory within the causal DAG, instantiating an out-of-band Oracle node for Mixed-Initiative truth resolution.\n\nCAUSAL AFFORDANCE: Physically halts the continuous multi-agent generation loop, forcing the probability wave to suspend until external wetware (human) entropy is safely injected into the topological state.\n\nEPISTEMIC BOUNDS: To mathematically satisfy Byzantine Fault Tolerance (BFT), the `required_attestation` is mandatory. The orchestrator MUST NOT resolve this node without a cryptographically matching `WetwareAttestationContract`, verifying the human operator and preventing Sybil attacks.\n\nMCP ROUTING TRIGGERS: Supervisory Control Theory, Oracle Node, Mixed-Initiative, Proof of Humanity, Out-of-Band Entropy",
+      "properties": {
+        "description": {
+          "description": "The semantic boundary defining the objective function or computational perimeter of the execution node.",
+          "maxLength": 2000,
+          "title": "Description",
+          "type": "string"
+        },
+        "architectural_intent": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The AI's declarative rationale for selecting this node.",
+          "title": "Architectural Intent"
+        },
+        "justification": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cryptographic/audit justification for this node's existence in the graph.",
+          "title": "Justification"
+        },
+        "intervention_policies": {
+          "description": "The declarative array of proactive oversight hooks bound to this node's lifecycle.",
+          "items": {
+            "$ref": "#/$defs/InterventionPolicy"
+          },
+          "title": "Intervention Policies",
+          "type": "array"
+        },
+        "domain_extensions": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/JsonPrimitiveState"
+              },
+              "propertyNames": {
+                "maxLength": 255
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
+          "title": "Domain Extensions"
+        },
+        "semantic_zoom": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SemanticZoomProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematical Information Bottleneck thresholds dictating the semantic degradation of this specific node."
+        },
+        "markov_blanket": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MarkovBlanketRenderingPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The epistemic isolation boundary guarding this agent's internal generative states."
+        },
+        "optical_physics": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PhysicallyBasedRenderingProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The strict microfacet BRDF physics governing the visual representation of this node."
+        },
+        "neural_optics": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GaussianSplattingProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The volumetric Gaussian Splatting configuration for non-polygonal rendering."
+        },
+        "type": {
+          "const": "human",
+          "default": "human",
+          "description": "Discriminator for a Human node.",
+          "title": "Type",
+          "type": "string"
+        },
+        "required_attestation": {
+          "$ref": "#/$defs/AttestationMechanismProfile",
+          "description": "The mandatory cryptographic attestation required to verify the human operator's identity."
+        },
+        "active_attention_ray": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EpistemicAttentionRay"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The continuous spatial vector representing the human operator's localized cognitive focus."
+        }
+      },
+      "required": [
+        "description",
+        "required_attestation"
+      ],
+      "title": "CognitiveHumanNodeProfile",
       "type": "object"
     },
     "CognitivePredictionReceipt": {
@@ -3171,6 +3247,133 @@
         "divergence_tolerance"
       ],
       "title": "CognitiveStateProfile",
+      "type": "object"
+    },
+    "CognitiveSystemNodeProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Encapsulates pure functional logic (Lambda Calculus) and Finite State Machine (FSM) mechanics to represent a completely deterministic, side-effect-free system capability.\n\nCAUSAL AFFORDANCE: Executes rigid, zero-variance procedural logic without invoking the expensive stochastic policy gradients required by foundational LLM models.\n\nEPISTEMIC BOUNDS: This node defines NO additional fields beyond inherited `CoreasonBaseState` constraints, including the rigorous `domain_extensions` volumetric depth limits. The type discriminator is locked to `Literal[\"system\"]`.\n\nMCP ROUTING TRIGGERS: Lambda Calculus, Finite State Machine, Referential Transparency, Deterministic Execution, Zero Variance",
+      "properties": {
+        "description": {
+          "description": "The semantic boundary defining the objective function or computational perimeter of the execution node.",
+          "maxLength": 2000,
+          "title": "Description",
+          "type": "string"
+        },
+        "architectural_intent": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The AI's declarative rationale for selecting this node.",
+          "title": "Architectural Intent"
+        },
+        "justification": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cryptographic/audit justification for this node's existence in the graph.",
+          "title": "Justification"
+        },
+        "intervention_policies": {
+          "description": "The declarative array of proactive oversight hooks bound to this node's lifecycle.",
+          "items": {
+            "$ref": "#/$defs/InterventionPolicy"
+          },
+          "title": "Intervention Policies",
+          "type": "array"
+        },
+        "domain_extensions": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/JsonPrimitiveState"
+              },
+              "propertyNames": {
+                "maxLength": 255
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
+          "title": "Domain Extensions"
+        },
+        "semantic_zoom": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SemanticZoomProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematical Information Bottleneck thresholds dictating the semantic degradation of this specific node."
+        },
+        "markov_blanket": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MarkovBlanketRenderingPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The epistemic isolation boundary guarding this agent's internal generative states."
+        },
+        "optical_physics": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PhysicallyBasedRenderingProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The strict microfacet BRDF physics governing the visual representation of this node."
+        },
+        "neural_optics": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GaussianSplattingProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The volumetric Gaussian Splatting configuration for non-polygonal rendering."
+        },
+        "type": {
+          "const": "system",
+          "default": "system",
+          "description": "Discriminator for a System node.",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "description"
+      ],
+      "title": "CognitiveSystemNodeProfile",
       "type": "object"
     },
     "CognitiveTierProfile": {
@@ -4264,7 +4467,7 @@
     },
     "CrossSwarmHandshakeState": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Tracks the non-monotonic state transition of a Byzantine-tolerant B2B\nnegotiation between two distinct enterprise tenant CID identifiers (initiating_tenant_id\nand receiving_tenant_id). As a ...State suffix, this is a declarative, frozen snapshot of\nN-dimensional geometry at a specific point in time.\n\nCAUSAL AFFORDANCE: Transitions the federated network from a proposed capability swap into\nan active OntologicalHandshakeReceipt, forcing the execution of the strict offered_sla\n(BilateralSLA).\n\nEPISTEMIC BOUNDS: Cryptographically bounded by handshake_id (CID regex\n^[a-zA-Z0-9_.:-]+$). The negotiation lifecycle is physically constrained to the strict\nLiteral automaton [\"proposed\", \"negotiating\", \"aligned\", \"rejected\"] via FSM Logit\nMasking, preventing execution deadlocks.\n\nMCP ROUTING TRIGGERS: Byzantine-Tolerant Negotiation, Zero-Trust Handshake, Finite State\nMachine, Cross-Tenant Federation, Asynchronous B2B",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Tracks the non-monotonic state transition of a Byzantine-tolerant B2B\nnegotiation between two distinct enterprise tenant CID identifiers (initiating_tenant_id\nand receiving_tenant_id). As a ...State suffix, this is a declarative, frozen snapshot of\nN-dimensional geometry at a specific point in time.\n\nCAUSAL AFFORDANCE: Transitions the federated network from a proposed capability swap into\nan active OntologicalHandshakeReceipt, forcing the execution of the strict offered_sla\n(FederatedBilateralSLA).\n\nEPISTEMIC BOUNDS: Cryptographically bounded by handshake_id (CID regex\n^[a-zA-Z0-9_.:-]+$). The negotiation lifecycle is physically constrained to the strict\nLiteral automaton [\"proposed\", \"negotiating\", \"aligned\", \"rejected\"] via FSM Logit\nMasking, preventing execution deadlocks.\n\nMCP ROUTING TRIGGERS: Byzantine-Tolerant Negotiation, Zero-Trust Handshake, Finite State\nMachine, Cross-Tenant Federation, Asynchronous B2B",
       "properties": {
         "handshake_id": {
           "description": "Unique identifier for this B2B negotiation.",
@@ -4291,7 +4494,7 @@
           "type": "string"
         },
         "offered_sla": {
-          "$ref": "#/$defs/BilateralSLA",
+          "$ref": "#/$defs/FederatedBilateralSLA",
           "description": "The initial structural/data boundary proposed."
         },
         "status": {
@@ -6468,6 +6671,48 @@
       "title": "EpistemicLedgerState",
       "type": "object"
     },
+    "EpistemicLogEvent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines a purely out-of-band semantic logging vector, structurally isolated from the rigorous causal constraints of the Dapper trace tree.\n\nCAUSAL AFFORDANCE: Emits asynchronous telemetry for human-in-the-loop debugging or peripheral auditing without mutating the active Epistemic Ledger's topological state.\n\nEPISTEMIC BOUNDS: Temporal reality clamped by `timestamp`. Severity strictly masked by a Literal automaton `[\"DEBUG\", \"INFO\", \"WARNING\", \"ERROR\", \"CRITICAL\"]`. Message bounded to `max_length=2000`.\n\nMCP ROUTING TRIGGERS: Out-of-Band Telemetry, Asynchronous Logging, Severity Masking, Peripheral Audit, Ephemeral Context",
+      "properties": {
+        "timestamp": {
+          "description": "The UNIX timestamp of the log event.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "level": {
+          "description": "The severity level of the log event.",
+          "enum": [
+            "DEBUG",
+            "INFO",
+            "WARNING",
+            "ERROR",
+            "CRITICAL"
+          ],
+          "title": "Level",
+          "type": "string"
+        },
+        "message": {
+          "description": "The primary log message.",
+          "maxLength": 2000,
+          "title": "Message",
+          "type": "string"
+        },
+        "context_profile": {
+          "$ref": "#/$defs/TelemetryContextProfile",
+          "description": "Contextual key-value metadata associated with the event."
+        }
+      },
+      "required": [
+        "timestamp",
+        "level",
+        "message"
+      ],
+      "title": "EpistemicLogEvent",
+      "type": "object"
+    },
     "EpistemicPromotionEvent": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents Hippocampal-Neocortical Consolidation, proving the successful extraction and transfer of generalized knowledge from short-term episodic traces into the permanent semantic graph.\n\nCAUSAL AFFORDANCE: Emits a permanent Merkle-DAG coordinate (`crystallized_semantic_node_id`) that downstream agents can zero-shot reference, severing the need to reload raw source logs into active context.\n\nEPISTEMIC BOUNDS: Mathematical chain of custody bound to the strictly sorted array of `source_episodic_event_cids`. Token efficiency proven by `compression_ratio` float (`le=1.0`) guaranteeing Shannon Entropy reduction.\n\nMCP ROUTING TRIGGERS: Hippocampal Consolidation, Knowledge Distillation, Semantic Memory, Shannon Entropy Compression, Epistemic Promotion",
@@ -6898,6 +7143,31 @@
       ],
       "title": "EpistemicSecurity",
       "type": "string"
+    },
+    "EpistemicSecurityProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative, frozen snapshot of the cryptographic isolation boundaries surrounding this node. As a ...Profile suffix, this defines a rigid mathematical boundary.\n\nCAUSAL AFFORDANCE: Instructs the zero-trust orchestrator to enforce hardware-level Trusted Execution Environments (TEEs) and Mixnet egress routing before authorizing the node to handle sensitive payloads.\n\nEPISTEMIC BOUNDS: The boolean gates (network_isolation, egress_obfuscation) rigidly confine the node's kinetic network reach. The epistemic_security enum mathematically dictates if the host hypervisor is trusted.\n\nMCP ROUTING TRIGGERS: Sovereign Execution, Trusted Execution Environment, Egress Obfuscation, Mixnet Routing, Network Isolation",
+      "properties": {
+        "epistemic_security": {
+          "$ref": "#/$defs/EpistemicSecurity",
+          "default": "STANDARD",
+          "description": "The level of hardware-enforced cryptographic isolation required (STANDARD or CONFIDENTIAL)."
+        },
+        "network_isolation": {
+          "default": false,
+          "description": "The strict Boolean constraint mandating a fully isolated subnet or eBPF mesh.",
+          "title": "Network Isolation",
+          "type": "boolean"
+        },
+        "egress_obfuscation": {
+          "default": false,
+          "description": "The strict Boolean constraint mandating that all outgoing packets be routed through a Sphinx-packet Mixnet.",
+          "title": "Egress Obfuscation",
+          "type": "boolean"
+        }
+      },
+      "title": "EpistemicSecurityProfile",
+      "type": "object"
     },
     "EpistemicSeedInjectionPolicy": {
       "additionalProperties": false,
@@ -8090,7 +8360,7 @@
             }
           ],
           "default": null,
-          "description": "The specific ActionSpaceManifest tool required to test this condition (e.g., 'sql_query_db').",
+          "description": "The specific CognitiveActionSpaceManifest tool required to test this condition (e.g., 'sql_query_db').",
           "title": "Required Tool Name"
         },
         "falsifying_observation_signature": {
@@ -8159,6 +8429,74 @@
       "title": "FaultInjectionProfile",
       "type": "object"
     },
+    "FederatedBilateralSLA": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the zero-trust structural boundary for multi-tenant federation,\nsecuring cross-boundary graph traversal against Shor's algorithm via an optional\nPostQuantumSignatureReceipt. As an ...SLA suffix, this object enforces rigid mathematical\nboundaries that the orchestrator must respect globally.\n\nCAUSAL AFFORDANCE: Unlocks cross-swarm graph bridging by enforcing strict liability,\nphysical location routing, semantic data classification constraints via\nmax_permitted_classification, and ESG carbon intensity limits.\n\nEPISTEMIC BOUNDS: Economically constrained by liability_limit_magnitude (ge=0,\nle=1000000000). ESG limits physically bind the node grid to the optional\nmax_permitted_grid_carbon_intensity (ge=0.0, le=10000.0). The permitted_geographic_regions\narray is deterministically sorted via @model_validator for RFC 8785 canonical hashing.\n\nMCP ROUTING TRIGGERS: Zero-Trust Architecture, Post-Quantum Cryptography, Federated\nLearning, Bilateral SLA, Data Residency",
+      "properties": {
+        "receiving_tenant_id": {
+          "description": "The strict enterprise identifier of the foreign B2B tenant receiving this payload.",
+          "maxLength": 255,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Receiving Tenant Id",
+          "type": "string"
+        },
+        "max_permitted_classification": {
+          "$ref": "#/$defs/InformationClassificationProfile",
+          "description": "The absolute highest semantic sensitivity allowed to cross this federated boundary."
+        },
+        "liability_limit_magnitude": {
+          "description": "The strict magnitude cap on cross-tenant economic liability.",
+          "maximum": 1000000000,
+          "minimum": 0,
+          "title": "Liability Limit Magnitude",
+          "type": "integer"
+        },
+        "permitted_geographic_regions": {
+          "description": "Explicit whitelist of geographic regions or cloud enclaves where execution is structurally permitted (Payload Residency Pinning).",
+          "items": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "title": "Permitted Geographic Regions",
+          "type": "array"
+        },
+        "max_permitted_grid_carbon_intensity": {
+          "anyOf": [
+            {
+              "maximum": 10000.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Absolute structural ESG mandate. The execution graph will quarantine any federated node operating on a grid exceeding this gCO2eq/kWh threshold.",
+          "title": "Max Permitted Grid Carbon Intensity"
+        },
+        "pq_signature": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PostQuantumSignatureReceipt"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The quantum-resistant signature securing the multi-tenant structural boundary."
+        }
+      },
+      "required": [
+        "receiving_tenant_id",
+        "max_permitted_classification",
+        "liability_limit_magnitude"
+      ],
+      "title": "FederatedBilateralSLA",
+      "type": "object"
+    },
     "FederatedCapabilityAttestationReceipt": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: An immutable cryptographic receipt representing an Object Capability (OCap) grant within a Federated Identity Management (FIM) framework.\n\nCAUSAL AFFORDANCE: Unlocks cross-domain graph traversal, cryptographically proving to the target topology that the swarm agent is authorized to establish an active connection governed by the SLA.\n\nEPISTEMIC BOUNDS: Locked to a 128-char `attestation_cid`. The `@model_validator` `enforce_restricted_vault_locks` mathematically enforces cross-schema invariants: if `governing_sla.max_permitted_classification` is 'restricted', the `authorized_session` MUST contain explicit `allowed_vault_keys`.\n\nMCP ROUTING TRIGGERS: Object Capability Model, Federated Identity Management, Cross-Domain Federation, Capability Attestation, Zero-Trust Execution",
@@ -8180,7 +8518,7 @@
           "description": "The isolated state partition granted to the agent for this connection."
         },
         "governing_sla": {
-          "$ref": "#/$defs/BilateralSLA",
+          "$ref": "#/$defs/FederatedBilateralSLA",
           "description": "The structural and physical boundary constraints for querying this target."
         }
       },
@@ -8852,40 +9190,6 @@
       "title": "HardwareEnclaveReceipt",
       "type": "object"
     },
-    "HardwareProfile": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative, frozen snapshot of the physical hardware boundaries and thermodynamic constraints required to instantiate this node. As a ...Profile suffix, this defines a rigid mathematical boundary.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator's provisioning layer to allocate exact silicon resources (Compute Tier, VRAM, and Accelerator Type) before allowing the node to execute generative operations.\n\nEPISTEMIC BOUNDS: VRAM allocation is physically bounded by min_vram_gb (gt=0.0). The literal enumerations ComputeTier and AcceleratorType mathematically prevent the hallucination of non-existent silicon. The provider_whitelist is deterministically sorted for invariant RFC 8785 hashing.\n\nMCP ROUTING TRIGGERS: Thermodynamic Bounding, VRAM Allocation, Spot Market Routing, Hardware Provisioning, Silicon Constraints",
-      "properties": {
-        "compute_tier": {
-          "$ref": "#/$defs/ComputeTier",
-          "default": "KINETIC",
-          "description": "The discrete architectural boundary of the node (KINETIC for edge/consumer, ORACLE for datacenter)."
-        },
-        "min_vram_gb": {
-          "default": 8.0,
-          "description": "The absolute physical minimum Video RAM required to load this node's latent space.",
-          "exclusiveMinimum": 0.0,
-          "title": "Min Vram Gb",
-          "type": "number"
-        },
-        "accelerator_type": {
-          "$ref": "#/$defs/AcceleratorType",
-          "default": "BF16_TENSOR",
-          "description": "The rigid silicon precision format required to execute this node's neural circuits."
-        },
-        "provider_whitelist": {
-          "description": "The explicit array of cloud infrastructure providers authorized to run this node.",
-          "items": {
-            "maxLength": 255,
-            "type": "string"
-          },
-          "title": "Provider Whitelist",
-          "type": "array"
-        }
-      },
-      "title": "HardwareProfile",
-      "type": "object"
-    },
     "HoareLogicProofReceipt": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Hoare Logic to provide cryptographic proof of algorithmic preconditions and postconditions prior to capability execution.\n\n    CAUSAL AFFORDANCE: Instructs the orchestrator's verification engine to validate the formal proof geometry prior to allocating swarm budget to a generated tool or component.\n\n    EPISTEMIC BOUNDS: Strictly relies on arrays of LiquidTypeContracts, demanding at least one pre-bound and post-bound. Formal systems are strictly bounded by a Literal automaton constraint.\n\n    MCP ROUTING TRIGGERS: Hoare Logic, Automated Theorem Proving, Preconditions Postconditions, Formal Verification, Cryptographic Proof",
@@ -9017,150 +9321,6 @@
         "target_qos"
       ],
       "title": "HumanDirectiveIntent",
-      "type": "object"
-    },
-    "HumanNodeProfile": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Supervisory Control Theory within the causal DAG, instantiating an out-of-band Oracle node for Mixed-Initiative truth resolution.\n\nCAUSAL AFFORDANCE: Physically halts the continuous multi-agent generation loop, forcing the probability wave to suspend until external wetware (human) entropy is safely injected into the topological state.\n\nEPISTEMIC BOUNDS: To mathematically satisfy Byzantine Fault Tolerance (BFT), the `required_attestation` is mandatory. The orchestrator MUST NOT resolve this node without a cryptographically matching `WetwareAttestationContract`, verifying the human operator and preventing Sybil attacks.\n\nMCP ROUTING TRIGGERS: Supervisory Control Theory, Oracle Node, Mixed-Initiative, Proof of Humanity, Out-of-Band Entropy",
-      "properties": {
-        "description": {
-          "description": "The semantic boundary defining the objective function or computational perimeter of the execution node.",
-          "maxLength": 2000,
-          "title": "Description",
-          "type": "string"
-        },
-        "architectural_intent": {
-          "anyOf": [
-            {
-              "maxLength": 2000,
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The AI's declarative rationale for selecting this node.",
-          "title": "Architectural Intent"
-        },
-        "justification": {
-          "anyOf": [
-            {
-              "maxLength": 2000,
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Cryptographic/audit justification for this node's existence in the graph.",
-          "title": "Justification"
-        },
-        "intervention_policies": {
-          "description": "The declarative array of proactive oversight hooks bound to this node's lifecycle.",
-          "items": {
-            "$ref": "#/$defs/InterventionPolicy"
-          },
-          "title": "Intervention Policies",
-          "type": "array"
-        },
-        "domain_extensions": {
-          "anyOf": [
-            {
-              "additionalProperties": {
-                "$ref": "#/$defs/JsonPrimitiveState"
-              },
-              "propertyNames": {
-                "maxLength": 255
-              },
-              "type": "object"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
-          "title": "Domain Extensions"
-        },
-        "semantic_zoom": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/SemanticZoomProfile"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The mathematical Information Bottleneck thresholds dictating the semantic degradation of this specific node."
-        },
-        "markov_blanket": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/MarkovBlanketRenderingPolicy"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The epistemic isolation boundary guarding this agent's internal generative states."
-        },
-        "optical_physics": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/PhysicallyBasedRenderingProfile"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The strict microfacet BRDF physics governing the visual representation of this node."
-        },
-        "neural_optics": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/GaussianSplattingProfile"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The volumetric Gaussian Splatting configuration for non-polygonal rendering."
-        },
-        "type": {
-          "const": "human",
-          "default": "human",
-          "description": "Discriminator for a Human node.",
-          "title": "Type",
-          "type": "string"
-        },
-        "required_attestation": {
-          "$ref": "#/$defs/AttestationMechanismProfile",
-          "description": "The mandatory cryptographic attestation required to verify the human operator's identity."
-        },
-        "active_attention_ray": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/EpistemicAttentionRay"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The continuous spatial vector representing the human operator's localized cognitive focus."
-        }
-      },
-      "required": [
-        "description",
-        "required_attestation"
-      ],
-      "title": "HumanNodeProfile",
       "type": "object"
     },
     "HypothesisGenerationEvent": {
@@ -10705,48 +10865,6 @@
       "title": "LiquidTypeContract",
       "type": "object"
     },
-    "LogEvent": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines a purely out-of-band semantic logging vector, structurally isolated from the rigorous causal constraints of the Dapper trace tree.\n\nCAUSAL AFFORDANCE: Emits asynchronous telemetry for human-in-the-loop debugging or peripheral auditing without mutating the active Epistemic Ledger's topological state.\n\nEPISTEMIC BOUNDS: Temporal reality clamped by `timestamp`. Severity strictly masked by a Literal automaton `[\"DEBUG\", \"INFO\", \"WARNING\", \"ERROR\", \"CRITICAL\"]`. Message bounded to `max_length=2000`.\n\nMCP ROUTING TRIGGERS: Out-of-Band Telemetry, Asynchronous Logging, Severity Masking, Peripheral Audit, Ephemeral Context",
-      "properties": {
-        "timestamp": {
-          "description": "The UNIX timestamp of the log event.",
-          "maximum": 253402300799.0,
-          "minimum": 0.0,
-          "title": "Timestamp",
-          "type": "number"
-        },
-        "level": {
-          "description": "The severity level of the log event.",
-          "enum": [
-            "DEBUG",
-            "INFO",
-            "WARNING",
-            "ERROR",
-            "CRITICAL"
-          ],
-          "title": "Level",
-          "type": "string"
-        },
-        "message": {
-          "description": "The primary log message.",
-          "maxLength": 2000,
-          "title": "Message",
-          "type": "string"
-        },
-        "context_profile": {
-          "$ref": "#/$defs/TelemetryContextProfile",
-          "description": "Contextual key-value metadata associated with the event."
-        }
-      },
-      "required": [
-        "timestamp",
-        "level",
-        "message"
-      ],
-      "title": "LogEvent",
-      "type": "object"
-    },
     "LogitSteganographyContract": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographic mandate for neural watermarking. Uses a Pseudo-Random Function (PRF) seeded by previous token context to deterministically split the vocabulary during Gumbel-Softmax sampling.\n\nCAUSAL AFFORDANCE: Physically manipulates the LLM's residual stream logit distribution just before the final softmax activation, embedding an undeniable, high-entropy Shannon information signature directly into the generated text without degrading model perplexity.\n\nEPISTEMIC BOUNDS: Injection is mathematically clamped by `watermark_strength_delta` (`gt=0.0, le=1.0`). Resistance to cropping attacks is geometrically enforced by `context_history_window` (`ge=0, le=1000000000`). Information density is bounded by `target_bits_per_token` (`gt=0.0, le=1000000000.0`). Locked by `prf_seed_hash` (SHA-256).\n\nMCP ROUTING TRIGGERS: Logit Steganography, Gumbel-Softmax Watermarking, Pseudo-Random Function, Shannon Entropy, Provenance Tracking",
@@ -10801,7 +10919,7 @@
     },
     "MCPCapabilityWhitelistPolicy": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes a Lattice-Based Access Control (LBAC) and Zero-Trust Architecture perimeter, restricting JSON-RPC capability mounts from foreign subgraphs.\n\nCAUSAL AFFORDANCE: Acts as a structural firewall that physically prevents the orchestrator from binding unauthorized external tools, resources, or prompts into the active agent's ActionSpaceManifest.\n\nEPISTEMIC BOUNDS: The boundary is geometrically enforced via `StringConstraints` (`max_length=2000` for `authorized_capability_array`, `allowed_resources`, `allowed_prompts`). The `@model_validator` strictly sorts all arrays alphabetically to mathematically guarantee RFC 8785 Canonical Hashing.\n\nMCP ROUTING TRIGGERS: Zero-Trust Architecture, Lattice-Based Access Control, Least Privilege, RPC Firewall, Bipartite Partitioning",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes a Lattice-Based Access Control (LBAC) and Zero-Trust Architecture perimeter, restricting JSON-RPC capability mounts from foreign subgraphs.\n\nCAUSAL AFFORDANCE: Acts as a structural firewall that physically prevents the orchestrator from binding unauthorized external tools, resources, or prompts into the active agent's CognitiveActionSpaceManifest.\n\nEPISTEMIC BOUNDS: The boundary is geometrically enforced via `StringConstraints` (`max_length=2000` for `authorized_capability_array`, `allowed_resources`, `allowed_prompts`). The `@model_validator` strictly sorts all arrays alphabetically to mathematically guarantee RFC 8785 Canonical Hashing.\n\nMCP ROUTING TRIGGERS: Zero-Trust Architecture, Lattice-Based Access Control, Least Privilege, RPC Firewall, Bipartite Partitioning",
       "properties": {
         "authorized_capability_array": {
           "description": "The explicit whitelist of function names the node is allowed to call.",
@@ -12425,7 +12543,7 @@
         "action_spaces": {
           "description": "The full, machine-readable declaration of accessible tools and MCP servers.",
           "items": {
-            "$ref": "#/$defs/ActionSpaceManifest"
+            "$ref": "#/$defs/CognitiveActionSpaceManifest"
           },
           "title": "Action Spaces",
           "type": "array"
@@ -13996,31 +14114,6 @@
       "title": "SecureSubSessionState",
       "type": "object"
     },
-    "SecurityProfile": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative, frozen snapshot of the cryptographic isolation boundaries surrounding this node. As a ...Profile suffix, this defines a rigid mathematical boundary.\n\nCAUSAL AFFORDANCE: Instructs the zero-trust orchestrator to enforce hardware-level Trusted Execution Environments (TEEs) and Mixnet egress routing before authorizing the node to handle sensitive payloads.\n\nEPISTEMIC BOUNDS: The boolean gates (network_isolation, egress_obfuscation) rigidly confine the node's kinetic network reach. The epistemic_security enum mathematically dictates if the host hypervisor is trusted.\n\nMCP ROUTING TRIGGERS: Sovereign Execution, Trusted Execution Environment, Egress Obfuscation, Mixnet Routing, Network Isolation",
-      "properties": {
-        "epistemic_security": {
-          "$ref": "#/$defs/EpistemicSecurity",
-          "default": "STANDARD",
-          "description": "The level of hardware-enforced cryptographic isolation required (STANDARD or CONFIDENTIAL)."
-        },
-        "network_isolation": {
-          "default": false,
-          "description": "The strict Boolean constraint mandating a fully isolated subnet or eBPF mesh.",
-          "title": "Network Isolation",
-          "type": "boolean"
-        },
-        "egress_obfuscation": {
-          "default": false,
-          "description": "The strict Boolean constraint mandating that all outgoing packets be routed through a Sphinx-packet Mixnet.",
-          "title": "Egress Obfuscation",
-          "type": "boolean"
-        }
-      },
-      "title": "SecurityProfile",
-      "type": "object"
-    },
     "SelfCorrectionPolicy": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Acts as the System 2 executive controller, utilizing Non-Monotonic\nLogic and iterative backtracking to mathematically resolve structural, semantic, or\nkinetic execution errors. As a ...Policy suffix, this object defines rigid mathematical\nboundaries that the orchestrator must enforce globally.\n\nCAUSAL AFFORDANCE: Authorizes the orchestrator to physically rewind the causal DAG and\nretry generation paths via an Actor-Critic refinement loop when a System 1 failure or\nepistemic gap is detected.\n\nEPISTEMIC BOUNDS: Mathematically prevents infinite compute burn (State-Space Explosion)\nby strictly capping max_loops (ge=0, le=50). The rollback_on_failure boolean serves as\na physical fail-safe, forcing a deterministic reversion to the last pristine Merkle root\nif the loop ceiling is breached.\n\nMCP ROUTING TRIGGERS: Non-Monotonic Logic, Actor-Critic Refinement, System 2 Executive,\nBacktracking Search, State-Space Explosion Prevention",
@@ -14640,6 +14733,40 @@
       "title": "SpatialBillboardContract",
       "type": "object"
     },
+    "SpatialHardwareProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative, frozen snapshot of the physical hardware boundaries and thermodynamic constraints required to instantiate this node. As a ...Profile suffix, this defines a rigid mathematical boundary.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator's provisioning layer to allocate exact silicon resources (Compute Tier, VRAM, and Accelerator Type) before allowing the node to execute generative operations.\n\nEPISTEMIC BOUNDS: VRAM allocation is physically bounded by min_vram_gb (gt=0.0). The literal enumerations ComputeTier and AcceleratorType mathematically prevent the hallucination of non-existent silicon. The provider_whitelist is deterministically sorted for invariant RFC 8785 hashing.\n\nMCP ROUTING TRIGGERS: Thermodynamic Bounding, VRAM Allocation, Spot Market Routing, Hardware Provisioning, Silicon Constraints",
+      "properties": {
+        "compute_tier": {
+          "$ref": "#/$defs/ComputeTier",
+          "default": "KINETIC",
+          "description": "The discrete architectural boundary of the node (KINETIC for edge/consumer, ORACLE for datacenter)."
+        },
+        "min_vram_gb": {
+          "default": 8.0,
+          "description": "The absolute physical minimum Video RAM required to load this node's latent space.",
+          "exclusiveMinimum": 0.0,
+          "title": "Min Vram Gb",
+          "type": "number"
+        },
+        "accelerator_type": {
+          "$ref": "#/$defs/AcceleratorType",
+          "default": "BF16_TENSOR",
+          "description": "The rigid silicon precision format required to execute this node's neural circuits."
+        },
+        "provider_whitelist": {
+          "description": "The explicit array of cloud infrastructure providers authorized to run this node.",
+          "items": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "title": "Provider Whitelist",
+          "type": "array"
+        }
+      },
+      "title": "SpatialHardwareProfile",
+      "type": "object"
+    },
     "SpatialKinematicActionIntent": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Employs Mathematical Kinematics and Fitts's Law to project precise, non-linear physical interactions across an exogenous UI manifold.\n\nCAUSAL AFFORDANCE: Authorizes the translation of latent spatial targets into OS-level actuation, utilizing bezier_control_points to construct continuous polynomial trajectories that simulate human motor control and bypass bot-evasive heuristics.\n\nEPISTEMIC BOUNDS: Spatial execution is clamped to SE3 dimensional boundaries via the nested SE3TransformProfile. Execution liveness is temporally guillotined by trajectory_duration_ms (le=86400000).\n\nMCP ROUTING TRIGGERS: Mathematical Kinematics, Bezier Geometry, Fitts's Law, OS-Level Actuation, Non-Linear Trajectory",
@@ -14756,6 +14883,98 @@
         "anchor_protocol"
       ],
       "title": "SpatialReferenceFrameManifest",
+      "type": "object"
+    },
+    "SpatialToolManifest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the discrete formalization of a Gibsonian Affordance within the agent's Reinforcement Learning Action Space ($A$). As a ...Manifest suffix, this is a declarative, frozen N-dimensional coordinate of a capability.\n\nCAUSAL AFFORDANCE: Unlocks a specific, localized Pearlian Do-Operator intervention ($do(X=x)$) mapped to an external kinetic capability. Governed by side_effects, permissions, and an optional execution SLA.\n\nEPISTEMIC BOUNDS: The operational perimeter is rigidly confined by `input_schema` and `output_schema` (dictionaries bounded to `max_length=1000` properties). The `is_preemptible` boolean (default=False) establishes a physical Halting Problem limit by authorizing the orchestrator to abort execution mid-flight.\n\nMCP ROUTING TRIGGERS: Gibsonian Affordance, MDP Action Space, Pearlian Do-Operator, Capability-Based Security, Halting Problem",
+      "properties": {
+        "type": {
+          "const": "native_tool",
+          "default": "native_tool",
+          "description": "Discriminator type for a native tool.",
+          "title": "Type",
+          "type": "string"
+        },
+        "tool_name": {
+          "description": "The deterministically bounded structural identifier mapping this capability within the zero-trust manifold.",
+          "maxLength": 2000,
+          "title": "Tool Name",
+          "type": "string"
+        },
+        "description": {
+          "description": "The mathematically bounded semantic projection defining the tool's causal affordances.",
+          "maxLength": 2000,
+          "title": "Description",
+          "type": "string"
+        },
+        "input_schema": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonPrimitiveState"
+          },
+          "description": "The strict JSON Schema dictionary defining the pure domain-specific arguments ($T$). The framework orchestrator will automatically wrap this in the ExecutionEnvelopeState at runtime.",
+          "maxProperties": 1000,
+          "propertyNames": {
+            "maxLength": 255
+          },
+          "title": "Input Schema",
+          "type": "object"
+        },
+        "output_schema": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/JsonPrimitiveState"
+              },
+              "maxProperties": 1000,
+              "propertyNames": {
+                "maxLength": 255
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The strict JSON Schema dictionary defining the pure domain-specific arguments ($T$). The framework orchestrator will automatically wrap this in the ExecutionEnvelopeState at runtime.",
+          "title": "Output Schema"
+        },
+        "side_effects": {
+          "$ref": "#/$defs/SideEffectProfile",
+          "description": "The declarative side-effect and idempotency profile of the tool."
+        },
+        "permissions": {
+          "$ref": "#/$defs/PermissionBoundaryPolicy",
+          "description": "The zero-trust security boundaries for the tool's execution."
+        },
+        "sla": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ExecutionSLA"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Execution limits for the tool."
+        },
+        "is_preemptible": {
+          "default": false,
+          "description": "If True, the orchestrator is authorized to send a SIGINT to abort this tool's execution mid-flight if a BargeInInterruptEvent occurs.",
+          "title": "Is Preemptible",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "tool_name",
+        "description",
+        "input_schema",
+        "side_effects",
+        "permissions"
+      ],
+      "title": "SpatialToolManifest",
       "type": "object"
     },
     "SpeculativeExecutionBoundary": {
@@ -15543,133 +15762,6 @@
         "timestamp"
       ],
       "title": "SystemFaultEvent",
-      "type": "object"
-    },
-    "SystemNodeProfile": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Encapsulates pure functional logic (Lambda Calculus) and Finite State Machine (FSM) mechanics to represent a completely deterministic, side-effect-free system capability.\n\nCAUSAL AFFORDANCE: Executes rigid, zero-variance procedural logic without invoking the expensive stochastic policy gradients required by foundational LLM models.\n\nEPISTEMIC BOUNDS: This node defines NO additional fields beyond inherited `CoreasonBaseState` constraints, including the rigorous `domain_extensions` volumetric depth limits. The type discriminator is locked to `Literal[\"system\"]`.\n\nMCP ROUTING TRIGGERS: Lambda Calculus, Finite State Machine, Referential Transparency, Deterministic Execution, Zero Variance",
-      "properties": {
-        "description": {
-          "description": "The semantic boundary defining the objective function or computational perimeter of the execution node.",
-          "maxLength": 2000,
-          "title": "Description",
-          "type": "string"
-        },
-        "architectural_intent": {
-          "anyOf": [
-            {
-              "maxLength": 2000,
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The AI's declarative rationale for selecting this node.",
-          "title": "Architectural Intent"
-        },
-        "justification": {
-          "anyOf": [
-            {
-              "maxLength": 2000,
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Cryptographic/audit justification for this node's existence in the graph.",
-          "title": "Justification"
-        },
-        "intervention_policies": {
-          "description": "The declarative array of proactive oversight hooks bound to this node's lifecycle.",
-          "items": {
-            "$ref": "#/$defs/InterventionPolicy"
-          },
-          "title": "Intervention Policies",
-          "type": "array"
-        },
-        "domain_extensions": {
-          "anyOf": [
-            {
-              "additionalProperties": {
-                "$ref": "#/$defs/JsonPrimitiveState"
-              },
-              "propertyNames": {
-                "maxLength": 255
-              },
-              "type": "object"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
-          "title": "Domain Extensions"
-        },
-        "semantic_zoom": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/SemanticZoomProfile"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The mathematical Information Bottleneck thresholds dictating the semantic degradation of this specific node."
-        },
-        "markov_blanket": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/MarkovBlanketRenderingPolicy"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The epistemic isolation boundary guarding this agent's internal generative states."
-        },
-        "optical_physics": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/PhysicallyBasedRenderingProfile"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The strict microfacet BRDF physics governing the visual representation of this node."
-        },
-        "neural_optics": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/GaussianSplattingProfile"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The volumetric Gaussian Splatting configuration for non-polygonal rendering."
-        },
-        "type": {
-          "const": "system",
-          "default": "system",
-          "description": "Discriminator for a System node.",
-          "title": "Type",
-          "type": "string"
-        }
-      },
-      "required": [
-        "description"
-      ],
-      "title": "SystemNodeProfile",
       "type": "object"
     },
     "TaskAnnouncementIntent": {
@@ -16490,7 +16582,7 @@
           "type": "string"
         },
         "tool_name": {
-          "description": "The exact tool targeted in the ActionSpaceManifest.",
+          "description": "The exact tool targeted in the CognitiveActionSpaceManifest.",
           "maxLength": 2000,
           "title": "Tool Name",
           "type": "string"
@@ -16532,98 +16624,6 @@
         "zk_proof"
       ],
       "title": "ToolInvocationEvent",
-      "type": "object"
-    },
-    "ToolManifest": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the discrete formalization of a Gibsonian Affordance within the agent's Reinforcement Learning Action Space ($A$). As a ...Manifest suffix, this is a declarative, frozen N-dimensional coordinate of a capability.\n\nCAUSAL AFFORDANCE: Unlocks a specific, localized Pearlian Do-Operator intervention ($do(X=x)$) mapped to an external kinetic capability. Governed by side_effects, permissions, and an optional execution SLA.\n\nEPISTEMIC BOUNDS: The operational perimeter is rigidly confined by `input_schema` and `output_schema` (dictionaries bounded to `max_length=1000` properties). The `is_preemptible` boolean (default=False) establishes a physical Halting Problem limit by authorizing the orchestrator to abort execution mid-flight.\n\nMCP ROUTING TRIGGERS: Gibsonian Affordance, MDP Action Space, Pearlian Do-Operator, Capability-Based Security, Halting Problem",
-      "properties": {
-        "type": {
-          "const": "native_tool",
-          "default": "native_tool",
-          "description": "Discriminator type for a native tool.",
-          "title": "Type",
-          "type": "string"
-        },
-        "tool_name": {
-          "description": "The deterministically bounded structural identifier mapping this capability within the zero-trust manifold.",
-          "maxLength": 2000,
-          "title": "Tool Name",
-          "type": "string"
-        },
-        "description": {
-          "description": "The mathematically bounded semantic projection defining the tool's causal affordances.",
-          "maxLength": 2000,
-          "title": "Description",
-          "type": "string"
-        },
-        "input_schema": {
-          "additionalProperties": {
-            "$ref": "#/$defs/JsonPrimitiveState"
-          },
-          "description": "The strict JSON Schema dictionary defining the pure domain-specific arguments ($T$). The framework orchestrator will automatically wrap this in the ExecutionEnvelopeState at runtime.",
-          "maxProperties": 1000,
-          "propertyNames": {
-            "maxLength": 255
-          },
-          "title": "Input Schema",
-          "type": "object"
-        },
-        "output_schema": {
-          "anyOf": [
-            {
-              "additionalProperties": {
-                "$ref": "#/$defs/JsonPrimitiveState"
-              },
-              "maxProperties": 1000,
-              "propertyNames": {
-                "maxLength": 255
-              },
-              "type": "object"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The strict JSON Schema dictionary defining the pure domain-specific arguments ($T$). The framework orchestrator will automatically wrap this in the ExecutionEnvelopeState at runtime.",
-          "title": "Output Schema"
-        },
-        "side_effects": {
-          "$ref": "#/$defs/SideEffectProfile",
-          "description": "The declarative side-effect and idempotency profile of the tool."
-        },
-        "permissions": {
-          "$ref": "#/$defs/PermissionBoundaryPolicy",
-          "description": "The zero-trust security boundaries for the tool's execution."
-        },
-        "sla": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/ExecutionSLA"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Execution limits for the tool."
-        },
-        "is_preemptible": {
-          "default": false,
-          "description": "If True, the orchestrator is authorized to send a SIGINT to abort this tool's execution mid-flight if a BargeInInterruptEvent occurs.",
-          "title": "Is Preemptible",
-          "type": "boolean"
-        }
-      },
-      "required": [
-        "tool_name",
-        "description",
-        "input_schema",
-        "side_effects",
-        "permissions"
-      ],
-      "title": "ToolManifest",
       "type": "object"
     },
     "TopologicalRetrievalContract": {
@@ -17472,7 +17472,7 @@
         "federated_sla": {
           "anyOf": [
             {
-              "$ref": "#/$defs/BilateralSLA"
+              "$ref": "#/$defs/FederatedBilateralSLA"
             },
             {
               "type": "null"
