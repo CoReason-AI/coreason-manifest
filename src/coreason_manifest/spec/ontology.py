@@ -3599,6 +3599,7 @@ class ConstitutionalAmendmentIntent(CoreasonBaseState):
     type: Literal["constitutional_amendment"] = Field(
         default="constitutional_amendment", description="The strict discriminator for this intervention payload."
     )
+
     @field_validator("proposed_patch", mode="before")
     @classmethod
     def enforce_payload_topology(cls, v: Any) -> Any:
