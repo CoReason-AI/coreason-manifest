@@ -1045,7 +1045,7 @@
     },
     "AmbientState": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Acts as a unidirectional telemetry pipeline projecting internal swarm kinematics across the Markov Blanket without inducing causal feedback loops.\n\nCAUSAL AFFORDANCE: Emits an ephemeral, 1D representation of the active probability distribution and execution progress to the external UI plane without halting the underlying generative trajectory.\n\nEPISTEMIC BOUNDS: Semantic `status_message` structurally clamped to `max_length=2000`. The continuous `progress` metric bounded by float limits (`le=1000000000.0`) allowing it to represent 0.0-1.0 ratios or exact token counts.\n\nMCP ROUTING TRIGGERS: Markov Blanket, Ephemeral Projection, Continuous Observability, Kinetic Execution State, UI Telemetry",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Acts as a unidirectional telemetry pipeline projecting internal swarm kinematics across the Markov Blanket without inducing causal feedback loops.\n\nCAUSAL AFFORDANCE: Emits an ephemeral, 1D representation of the active probability distribution and execution progress to the external UI plane without halting the underlying generative trajectory.\n\nEPISTEMIC BOUNDS: Semantic `status_message` structurally clamped to `max_length=2000`. The continuous `progress` metric bounded by float limits (`le=1000000000.0`) allowing it to represent 0.0-1.0 ratios or exact token counts. The `thermodynamic_burn_rate` is physically bounded (`ge=0.0`), and `epistemic_entropy_score` is normalized (`ge=0.0, le=1.0`).\n\nMCP ROUTING TRIGGERS: Markov Blanket, Ephemeral Projection, Continuous Observability, Kinetic Execution State, UI Telemetry",
       "properties": {
         "status_message": {
           "description": "The semantic 1D string projection representing the active kinetic execution state.",
@@ -1066,6 +1066,35 @@
           "default": null,
           "description": "The progress ratio from 0.0 to 1.0, or None if indeterminate.",
           "title": "Progress"
+        },
+        "thermodynamic_burn_rate": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The instantaneous token compute cost velocity, mapped to UI emission intensity.",
+          "title": "Thermodynamic Burn Rate"
+        },
+        "epistemic_entropy_score": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The normalized Shannon Entropy of the active execution, mapped to UI color gradients (e.g., high entropy = amber warning).",
+          "title": "Epistemic Entropy Score"
         }
       },
       "required": [
@@ -9816,7 +9845,7 @@
     },
     "InterventionReceipt": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: InterventionReceipt is a cryptographically frozen historical fact representing\nthe resolution of a Mixed-Initiative pause. It acts as the mathematical key that unlocks a suspended\nstate partition.\n\nCAUSAL AFFORDANCE: Collapses the halted superposition of the DAG, physically re-activating the\nexecution thread and authorizing the orchestrator to commit the human-approved state mutation to\nthe Epistemic Ledger.\n\nEPISTEMIC BOUNDS: Mathematically locked against Replay Attacks via the intervention_request_id\n(a UUID cryptographic nonce). The @model_validator physically guarantees that if a WetwareAttestationContract\nis present, its internal DAG node nonce must perfectly match the request ID, preventing signature laundering.\n\nMCP ROUTING TRIGGERS: Cryptographic Nonce, State Resumption, Replay Attack Prevention, Wetware Attestation, Liveness Resolution",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: InterventionReceipt is a cryptographically frozen historical fact representing\nthe resolution of a Mixed-Initiative pause. It acts as the mathematical key that unlocks a suspended\nstate partition.\n\nCAUSAL AFFORDANCE: Collapses the halted superposition of the DAG, physically re-activating the\nexecution thread and authorizing the orchestrator to commit the human-approved state mutation to\nthe Epistemic Ledger.\n\nEPISTEMIC BOUNDS: Mathematically locked against Replay Attacks via the intervention_request_id\n(a UUID cryptographic nonce). The @model_validator physically guarantees that if a WetwareAttestationContract\nis present, its internal DAG node nonce must perfectly match the request ID, preventing signature laundering,\nand mathematically linking the human's signature to the liveness_challenge_hash challenge.\n\nMCP ROUTING TRIGGERS: Cryptographic Nonce, State Resumption, Replay Attack Prevention, Wetware Attestation, Liveness Resolution",
       "properties": {
         "type": {
           "const": "verdict",
@@ -11057,7 +11086,7 @@
     },
     "MacroGridProfile": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Acts as a Cartesian topological coordinator based on Edward Tufte's Small Multiples, organizing multiple discrete visual artifacts into a unified grid configuration.\n\nCAUSAL AFFORDANCE: Translates abstract UI panels into fixed 2D matrices (`layout_matrix`), forcing spatial determinism on the frontend rendering engine.\n\nEPISTEMIC BOUNDS: A strictly bounded `@model_validator` executes a referential integrity sweep, mathematically guaranteeing that every panel ID referenced in the `layout_matrix` (`max_length=1000`) corresponds to a verified object in the `panels` array, physically severing Ghost Panel hallucinations.\n\nMCP ROUTING TRIGGERS: Cartesian Coordinate System, Small Multiples, Spatial Topology, Referential Integrity, Layout Matrix",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Acts as a Cartesian topological coordinator based on Edward Tufte's Small Multiples, organizing multiple discrete visual artifacts into a unified grid configuration.\n\nCAUSAL AFFORDANCE: Translates abstract UI panels into fixed 2D matrices (`layout_matrix`), forcing spatial determinism on the frontend rendering engine.\n\nEPISTEMIC BOUNDS: A strictly bounded `@model_validator` executes a referential integrity sweep, mathematically guaranteeing that every panel ID referenced in the `layout_matrix` (`max_length=1000`) corresponds to a verified object in the `panels` array, physically severing Ghost Panel hallucinations. The `@model_validator` `verify_matrix_dimensions` mathematically forces `column_fractional_weights` and `row_fractional_weights` to perfectly match the Cartesian topology.\n\nMCP ROUTING TRIGGERS: Cartesian Coordinate System, Small Multiples, Spatial Topology, Referential Integrity, Layout Matrix",
       "properties": {
         "layout_matrix": {
           "description": "A matrix defining the layout structure, using panel IDs.",
@@ -11070,6 +11099,22 @@
           },
           "maxItems": 1000,
           "title": "Layout Matrix",
+          "type": "array"
+        },
+        "column_fractional_weights": {
+          "description": "Euclidean fractional weights for column partitioning.",
+          "items": {
+            "type": "number"
+          },
+          "title": "Column Fractional Weights",
+          "type": "array"
+        },
+        "row_fractional_weights": {
+          "description": "Euclidean fractional weights for row partitioning.",
+          "items": {
+            "type": "number"
+          },
+          "title": "Row Fractional Weights",
           "type": "array"
         },
         "panels": {
@@ -12891,7 +12936,7 @@
     },
     "PresentationManifest": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The macroscopic orchestrator envelope binding a deterministic visual\nmanifold (grid: MacroGridProfile) to a specific Supervisory Control Theory cognitive\nstate (intent: AnyPresentationIntent). As a ...Manifest suffix, this defines a frozen,\nN-dimensional coordinate state.\n\nCAUSAL AFFORDANCE: Forces the active orchestration loop to suspend or pivot by projecting\na human-in-the-loop interaction surface (e.g., Drafting, Adjudication) alongside its\nvisual evidentiary warrants.\n\nEPISTEMIC BOUNDS: Mathematically binds exactly one AnyPresentationIntent to one\nMacroGridProfile, preventing asynchronous UI state drift and ensuring the generated grid\nis causally justified by a verified intent.\n\nMCP ROUTING TRIGGERS: Supervisory Control Theory, Mixed-Initiative UI, Cognitive State\nBinding, Structural Manifold Envelope, Human-in-the-Loop",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The macroscopic orchestrator envelope binding a deterministic visual\nmanifold (grid: MacroGridProfile) to a specific Supervisory Control Theory cognitive\nstate (intent: AnyPresentationIntent). As a ...Manifest suffix, this defines a frozen,\nN-dimensional coordinate state.\n\nCAUSAL AFFORDANCE: Forces the active orchestration loop to suspend or pivot by projecting\na human-in-the-loop interaction surface (e.g., Drafting, Adjudication) alongside its\nvisual evidentiary warrants.\n\nEPISTEMIC BOUNDS: Mathematically binds exactly one AnyPresentationIntent to one\nMacroGridProfile, preventing asynchronous UI state drift and ensuring the generated grid\nis causally justified by a verified intent. The focal_depth_meters is strictly clamped\n(ge=0.1, le=100.0) to physically intercept the observer's optical plane at a safe depth.\n\nMCP ROUTING TRIGGERS: Supervisory Control Theory, Mixed-Initiative UI, Cognitive State\nBinding, Structural Manifold Envelope, Human-in-the-Loop",
       "properties": {
         "intent": {
           "$ref": "#/$defs/AnyPresentationIntent",
@@ -12912,6 +12957,14 @@
           ],
           "default": null,
           "description": "Stateless non-blocking telemetry for continuous progress updates."
+        },
+        "focal_depth_meters": {
+          "default": 1.0,
+          "description": "The absolute Z-axis physical distance to lock the Presentation UI relative to the observer's optical center, resolving vergence-accommodation conflicts.",
+          "maximum": 100.0,
+          "minimum": 0.1,
+          "title": "Focal Depth Meters",
+          "type": "number"
         }
       },
       "required": [
@@ -17200,7 +17253,7 @@
     },
     "WetwareAttestationContract": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Hardware-Backed Human-in-the-Loop (HITL)\nauthentication, utilizing FIDO2/WebAuthn or Post-Quantum physical security\nkeys to verify human intent. As a ...Contract suffix, this enforces rigid\nmathematical boundaries globally.\n\nCAUSAL AFFORDANCE: Translates physical human entropy (e.g., a biometric tap or\nhardware key touch) into a definitive mathematical signature via mechanism\n(AttestationMechanismProfile), authorizing the orchestrator to break a\nMixed-Initiative execution halt. The did_subject (DID pattern\n^did:[a-z0-9]+:.*$) anchors the human identity.\n\nEPISTEMIC BOUNDS: Physically binds the signature to a specific Merkle-DAG\ncoordinate via dag_node_nonce (UUID), strictly preventing cryptographic Replay\nAttacks. The cryptographic_payload is restricted by regex\n(^[A-Za-z0-9+/=_-]+$) to prevent injection anomalies.\n\nMCP ROUTING TRIGGERS: WebAuthn, FIDO2, Cryptographic Nonce, Replay Attack\nPrevention, Wetware Entropy",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Hardware-Backed Human-in-the-Loop (HITL)\nauthentication, utilizing FIDO2/WebAuthn or Post-Quantum physical security\nkeys to verify human intent. As a ...Contract suffix, this enforces rigid\nmathematical boundaries globally.\n\nCAUSAL AFFORDANCE: Translates physical human entropy (e.g., a biometric tap or\nhardware key touch) into a definitive mathematical signature via mechanism\n(AttestationMechanismProfile), authorizing the orchestrator to break a\nMixed-Initiative execution halt. The did_subject (DID pattern\n^did:[a-z0-9]+:.*$) anchors the human identity.\n\nEPISTEMIC BOUNDS: Physically binds the signature to a specific Merkle-DAG\ncoordinate via dag_node_nonce (UUID), strictly preventing cryptographic Replay\nAttacks. The cryptographic_payload is restricted by regex\n(^[A-Za-z0-9+/=_-]+$) to prevent injection anomalies. The liveness_challenge_hash\nis tightly bounded to SHA-256 (^[a-f0-9]{64}$) to prove real-time human presence.\n\nMCP ROUTING TRIGGERS: WebAuthn, FIDO2, Cryptographic Nonce, Replay Attack\nPrevention, Wetware Entropy",
       "properties": {
         "mechanism": {
           "$ref": "#/$defs/AttestationMechanismProfile",
@@ -17227,13 +17280,22 @@
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Dag Node Nonce",
           "type": "string"
+        },
+        "liveness_challenge_hash": {
+          "description": "The SHA-256 hash of the dynamic, temporally bound challenge emitted by the orchestrator to guarantee real-time human presence.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Liveness Challenge Hash",
+          "type": "string"
         }
       },
       "required": [
         "mechanism",
         "did_subject",
         "cryptographic_payload",
-        "dag_node_nonce"
+        "dag_node_nonce",
+        "liveness_challenge_hash"
       ],
       "title": "WetwareAttestationContract",
       "type": "object"
