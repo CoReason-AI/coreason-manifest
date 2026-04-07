@@ -862,7 +862,7 @@ class VolumetricPartitionSubscription(CoreasonBaseState):
         le=86400000,
         description="The exact Time-To-Live in milliseconds before the orchestrator forcibly drops the telemetry stream to prevent zombie subscriptions.",
     )
-    optical_hardware_constraint_proof: ZeroKnowledgeReceipt | None = Field(
+    optical_hardware_constraint_proof: typing.Union["ZeroKnowledgeReceipt", None] = Field(  # noqa: UP007
         default=None,
         description="zk-SNARK proof that the requested spatial volume mathematically intersects with and does not exceed the physical rendering frustum of the client's authenticated optical hardware.",
     )

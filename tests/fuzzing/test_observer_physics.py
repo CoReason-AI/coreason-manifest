@@ -60,12 +60,9 @@ def test_biometric_signature_bounding(hardware_gaze_signature: str) -> None:
     """
     with pytest.raises(ValidationError) as exc_info:
         EpistemicAttentionRay(
-            origin=SE3TransformProfile(
-                reference_frame_id="frame-123",
-                x=0.0, y=0.0, z=0.0
-            ),
+            origin=SE3TransformProfile(reference_frame_id="frame-123", x=0.0, y=0.0, z=0.0),
             direction_unit_vector=(1.0, 0.0, 0.0),
-            hardware_gaze_signature=hardware_gaze_signature
+            hardware_gaze_signature=hardware_gaze_signature,
         )
     assert "String should have at most 8192 characters" in str(exc_info.value)
 
