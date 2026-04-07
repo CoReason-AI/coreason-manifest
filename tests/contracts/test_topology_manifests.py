@@ -15,7 +15,6 @@ from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
     AnyNodeProfile,
-    CognitiveSystemNodeProfile,
     ConsensusPolicy,
     CouncilTopologyManifest,
     DAGTopologyManifest,
@@ -23,6 +22,7 @@ from coreason_manifest.spec.ontology import (
     MarketContract,
     MultimodalTokenAnchorState,
     QuorumPolicy,
+    SystemNodeProfile,
     TaskAwardReceipt,
 )
 
@@ -92,9 +92,9 @@ def test_multimodal_anchor_2d_atomic_invalid(box: tuple[float, float, float, flo
 def test_dag_topology_atomic_invalid_edges(edges: list[tuple[str, str]], match_str: str) -> None:
     """Prove specific ghost nodes and cyclic dependencies collapse the instantiation."""
     nodes: dict[str, AnyNodeProfile] = {
-        "did:web:n1": CognitiveSystemNodeProfile(description="W1"),
-        "did:web:n2": CognitiveSystemNodeProfile(description="W2"),
-        "did:web:n3": CognitiveSystemNodeProfile(description="W3"),
+        "did:web:n1": SystemNodeProfile(description="W1"),
+        "did:web:n2": SystemNodeProfile(description="W2"),
+        "did:web:n3": SystemNodeProfile(description="W3"),
     }
     with pytest.raises(ValidationError, match=match_str):
         DAGTopologyManifest(nodes=nodes, edges=edges, max_depth=10, max_fan_out=10)
@@ -103,7 +103,7 @@ def test_dag_topology_atomic_invalid_edges(edges: list[tuple[str, str]], match_s
 def test_dag_topology_self_loop_cycle_detection() -> None:
     """Prove a self-loop in an isolated component (no roots) is detected by the guard."""
     nodes: dict[str, AnyNodeProfile] = {
-        "did:web:n1": CognitiveSystemNodeProfile(description="W1"),
+        "did:web:n1": SystemNodeProfile(description="W1"),
     }
     with pytest.raises(ValidationError, match=r"Graph contains cycles"):
         DAGTopologyManifest(nodes=nodes, edges=[("did:web:n1", "did:web:n1")], max_depth=10, max_fan_out=10)
@@ -111,13 +111,13 @@ def test_dag_topology_self_loop_cycle_detection() -> None:
 
 # --- 4. Council Topology Atomicity ---
 def test_council_topology_missing_adjudicator() -> None:
-    nodes: dict[str, AnyNodeProfile] = {"did:web:n1": CognitiveSystemNodeProfile(description="W1")}
+    nodes: dict[str, AnyNodeProfile] = {"did:web:n1": SystemNodeProfile(description="W1")}
     with pytest.raises(ValidationError, match=r"Adjudicator ID 'did:web:adj' is not in nodes registry"):
         CouncilTopologyManifest(adjudicator_id="did:web:adj", nodes=nodes)
 
 
 def test_council_topology_unfunded_slashing_none() -> None:
-    nodes: dict[str, AnyNodeProfile] = {"did:web:adj": CognitiveSystemNodeProfile(description="Adj")}
+    nodes: dict[str, AnyNodeProfile] = {"did:web:adj": SystemNodeProfile(description="Adj")}
     quorum = QuorumPolicy(
         max_tolerable_faults=1,
         min_quorum_size=4,
@@ -133,7 +133,7 @@ def test_council_topology_unfunded_slashing_none() -> None:
 
 
 def test_council_topology_unfunded_slashing_zero() -> None:
-    nodes: dict[str, AnyNodeProfile] = {"did:web:adj": CognitiveSystemNodeProfile(description="Adj")}
+    nodes: dict[str, AnyNodeProfile] = {"did:web:adj": SystemNodeProfile(description="Adj")}
     quorum = QuorumPolicy(
         max_tolerable_faults=1,
         min_quorum_size=4,
