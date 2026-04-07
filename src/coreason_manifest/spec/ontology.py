@@ -1514,25 +1514,25 @@ class RoutingFrontierPolicy(CoreasonBaseState):
                 try:
                     val = int(values["max_latency_ms"])
                     values["max_latency_ms"] = int(max(1, min(val, 86400000)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if "max_cost_magnitude_per_token" in values:
                 try:
                     val = int(values["max_cost_magnitude_per_token"])
                     values["max_cost_magnitude_per_token"] = int(max(1, min(val, 1000000000)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if "min_capability_score" in values:
                 try:
                     val_float = float(values["min_capability_score"])
                     values["min_capability_score"] = float(max(0.0, min(val_float, 1.0)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if values.get("max_carbon_intensity_gco2eq_kwh") is not None:
                 try:
                     val_float = float(values["max_carbon_intensity_gco2eq_kwh"])
                     values["max_carbon_intensity_gco2eq_kwh"] = float(max(0.0, min(val_float, 10000.0)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
         return values
 
@@ -6152,6 +6152,22 @@ class InterventionPolicy(CoreasonBaseState):
         return self
 
 
+class FederatedSourceProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Defines a declarative, frozen snapshot of the exogenous data's physical geometry to calculate thermodynamic compute limits prior to ingestion.
+
+    CAUSAL AFFORDANCE: Provides the orchestrator with the exact Cartesian limits of the incoming payload, enabling pre-flight VRAM allocation and preventing buffer overflows.
+
+    EPISTEMIC BOUNDS: Physical graph size is mathematically clamped by `node_cardinality` and `edge_cardinality` (both `ge=0`, `le=1000000000`). Semantic origin is restricted by `source_dialect_identifier` (`max_length=2000`).
+
+    MCP ROUTING TRIGGERS: Information Bottleneck, Minimum Description Length, Volumetric Bounding, Pre-Flight Allocation, Topological Profiling
+    """
+
+    node_cardinality: int = Field(ge=0, le=1000000000, description="The exact count of discrete semantic vertices in the source manifold.")
+    edge_cardinality: int = Field(ge=0, le=1000000000, description="The exact count of topological relationships in the source manifold.")
+    source_dialect_identifier: Annotated[str, StringConstraints(max_length=2000)] = Field(description="The semantic origin, denoting the external schema or namespace.")
+
+
 class HardwareProfile(CoreasonBaseState):
     """
     AGENT INSTRUCTION: A declarative, frozen snapshot of the physical hardware boundaries and thermodynamic constraints required to instantiate this node. As a ...Profile suffix, this defines a rigid mathematical boundary.
@@ -6461,6 +6477,30 @@ class MCPCapabilityWhitelistPolicy(CoreasonBaseState):
         object.__setattr__(self, "allowed_resources", sorted(self.allowed_resources))
         object.__setattr__(self, "allowed_prompts", sorted(self.allowed_prompts))
         object.__setattr__(self, "required_licenses", sorted(self.required_licenses))
+        return self
+
+
+class EpistemicMappingContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Establishes the Category Theory ruleset bridging high-entropy source keys to zero-entropy Universal Targets (W3C DIDs).
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator's state projection engine on how to execute sequential, side-effect-free data translation between disjoint ontological categories.
+
+    EPISTEMIC BOUNDS: The `mapping_contract_id` is geometrically constrained to a 128-char CID. `source_dialect_keys` and `target_dids` are deterministically sorted via `@model_validator`. `mapping_rules` asserts a Topological Exemption to preserve chronological translation logic.
+
+    MCP ROUTING TRIGGERS: Category Theory, Profunctor Optics, Semantic Harmonization, Topological Exemption, Bijective Mapping
+    """
+
+    mapping_contract_id: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    source_dialect_keys: list[Annotated[str, StringConstraints(max_length=255)]] = Field(max_length=10000)
+    target_dids: list[NodeCIDState] = Field(max_length=10000)
+    mapping_rules: list[dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState]] = Field(max_length=10000)
+    # Note: mapping_rules is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "source_dialect_keys", sorted(self.source_dialect_keys))
+        object.__setattr__(self, "target_dids", sorted(self.target_dids))
         return self
 
 
@@ -7169,7 +7209,7 @@ class MarketContract(CoreasonBaseState):
                 try:
                     mc_int = int(mc)
                     sp_int = int(sp)
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             cmc = max(0, min(mc_int, 1000000000))
             if sp_int > cmc:
@@ -12131,8 +12171,28 @@ class DifferentiableLogicConstraint(CoreasonBaseState):
     )
 
 
+class TransmutationObservationEvent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A cryptographically frozen historical fact representing the measurement of exogenous source entropy onto the Epistemic Ledger. Acts as a passive, non-mutative execution assessing exogenous geometry.
+
+    CAUSAL AFFORDANCE: Commits the volumetric constraints of the source data to the ledger without triggering kinetic mutations, authorizing downstream agents to prepare the Functor.
+
+    EPISTEMIC BOUNDS: Cryptographically anchors the payload via `exogenous_manifold_hash` (SHA-256 pattern `^[a-f0-9]{64}$`). Topologically bounded by the nested `source_profile`. Inherits temporal clamping from base event properties.
+
+    MCP ROUTING TRIGGERS: Epistemic Freezing, Merkle-DAG Coordinate, Exogenous Entropy Measurement, Zero-Trust Ingestion, Genesis Block
+    """
+
+    event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    prior_event_hash: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None = Field(default=None)
+    timestamp: float = Field(ge=0.0, le=253402300799.0)
+    type: Literal["transmutation_observation"] = Field(default="transmutation_observation")
+    source_profile: FederatedSourceProfile
+    exogenous_manifold_hash: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] = Field(description="The unforgeable SHA-256 fingerprint of the raw source data.")
+
+
 type AnyStateEvent = Annotated[
     ObservationEvent
+    | TransmutationObservationEvent
     | BeliefMutationEvent
     | SystemFaultEvent
     | HypothesisGenerationEvent
@@ -12478,3 +12538,6 @@ NeurosymbolicInferenceRequest.model_rebuild()
 
 EpistemicUpsamplingTask.model_rebuild()
 VolumetricPartitionSubscription.model_rebuild()
+FederatedSourceProfile.model_rebuild()
+TransmutationObservationEvent.model_rebuild()
+EpistemicMappingContract.model_rebuild()
