@@ -24,7 +24,7 @@ from coreason_manifest.spec.ontology import (
     TamperFaultEvent,
     VectorEmbeddingState,
 )
-from coreason_manifest.utils.algebra import apply_state_differential, calculate_latent_alignment
+from coreason_manifest.utils.algebra import calculate_latent_alignment, transmute_state_differential
 
 
 @st.composite
@@ -83,7 +83,7 @@ def test_apply_state_differential_fuzz(base_state: dict[str, Any], patches: list
 
     original_state = copy.deepcopy(base_state)
     try:
-        _ = apply_state_differential(base_state, manifest)
+        _ = transmute_state_differential(base_state, manifest)
         assert base_state == original_state
     except ValueError:
         assert base_state == original_state

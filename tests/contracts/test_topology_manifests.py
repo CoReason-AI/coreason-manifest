@@ -165,14 +165,14 @@ def test_task_award_escrow_bounds(cleared_price: int, locked_amount: int) -> Non
     if locked_amount > cleared_price:
         with pytest.raises(ValidationError, match=r"Escrow locked amount cannot exceed the total cleared price"):
             TaskAwardReceipt(
-                task_id="t1",
+                task_cid="t1",
                 awarded_syndicate={"did:web:n1": cleared_price},
                 cleared_price_magnitude=cleared_price,
                 escrow=escrow,
             )
     else:
         receipt = TaskAwardReceipt(
-            task_id="t1",
+            task_cid="t1",
             awarded_syndicate={"did:web:n1": cleared_price},
             cleared_price_magnitude=cleared_price,
             escrow=escrow,

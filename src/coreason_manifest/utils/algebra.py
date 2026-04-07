@@ -66,9 +66,9 @@ def project_manifest_to_mermaid(manifest: DynamicRoutingManifest) -> str:
         lines.append(f"    subgraph {modality}")
 
         if modality in manifest.active_subgraphs:
-            for node_id in manifest.active_subgraphs[modality]:
-                safe_id = node_id.replace(":", "_").replace("-", "_").replace(".", "_")
-                lines.append(f"        {safe_id}[{node_id}]:::active")
+            for node_cid in manifest.active_subgraphs[modality]:
+                safe_id = node_cid.replace(":", "_").replace("-", "_").replace(".", "_")
+                lines.append(f"        {safe_id}[{node_cid}]:::active")
                 lines.append(f"        {safe_root_id} --> {safe_id}")
 
         lines.append("    end")
@@ -107,8 +107,8 @@ def project_manifest_to_markdown(manifest: WorkflowManifest) -> str:
     lines.append("## Node Ledger & Personas")
 
     if hasattr(manifest.topology, "nodes"):
-        for node_id, node in getattr(manifest.topology, "nodes", {}).items():
-            lines.append(f"### Node: `{node_id}`")
+        for node_cid, node in getattr(manifest.topology, "nodes", {}).items():
+            lines.append(f"### Node: `{node_cid}`")
             lines.append(f"- **Type:** `{node.type}`")
             lines.append(f"- **Description:** {node.description}")
 
@@ -160,7 +160,7 @@ def get_ontology_schema() -> dict[str, Any]:
     return copy.deepcopy(top_level_schema)
 
 
-def validate_payload(step: str, payload_bytes: bytes) -> BaseModel:
+def verify_manifold_bounds(step: str, payload_bytes: bytes) -> BaseModel:
     """Validate a payload against the designated ontology step model.
 
     Raises:
@@ -174,7 +174,9 @@ def validate_payload(step: str, payload_bytes: bytes) -> BaseModel:
     return target_schema.model_validate_json(payload_bytes)
 
 
-def generate_correction_prompt(error: ValidationError, target_node_id: str, fault_id: str) -> System2RemediationIntent:
+def synthesize_remediation_intent(
+    error: ValidationError, target_node_cid: str, fault_cid: str
+) -> System2RemediationIntent:
     """
     Pure functional adapter. Maps a raw Pythonic pydantic.ValidationError into a
     language-model-legible System2RemediationIntent without triggering runtime side effects.
@@ -191,11 +193,11 @@ def generate_correction_prompt(error: ValidationError, target_node_id: str, faul
             ManifestViolationReceipt(failing_pointer=loc_path, violation_type=err_type, diagnostic_message=msg)
         )
 
-    return System2RemediationIntent(fault_id=fault_id, target_node_id=target_node_id, violation_receipts=receipts)
+    return System2RemediationIntent(fault_cid=fault_cid, target_node_cid=target_node_cid, violation_receipts=receipts)
 
 
 def align_semantic_manifolds(
-    task_id: str,
+    task_cid: str,
     source_modalities: list[str],
     target_modalities: list[Literal["text", "raster_image", "vector_graphics", "tabular_grid", "n_dimensional_tensor"]],
     artifact_event_id: str,
@@ -217,7 +219,7 @@ def align_semantic_manifolds(
         minimum_fidelity_threshold=0.5,
     )
     return EpistemicTransmutationTask(
-        task_id=task_id, artifact_event_id=artifact_event_id, target_modalities=target_modalities, compression_sla=sla
+        task_cid=task_cid, artifact_event_id=artifact_event_id, target_modalities=target_modalities, compression_sla=sla
     )
 
 
@@ -343,7 +345,7 @@ def verify_ast_safety(payload: str) -> bool:
     return True
 
 
-def apply_state_differential(
+def transmute_state_differential(
     current_state: dict[str, Any], differential: ontology.StateDifferentialManifest
 ) -> dict[str, Any]:
     patch_list = [patch.model_dump(exclude_none=True, by_alias=True) for patch in differential.patches]
