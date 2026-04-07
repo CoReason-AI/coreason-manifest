@@ -2661,6 +2661,43 @@
       "title": "CircuitBreakerEvent",
       "type": "object"
     },
+    "CoalgebraicHydrationPolicy": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the limits of infinite graph unfolding to protect UI VRAM when pulling from the EpistemicLedgerState.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator's deserialization engine to halt graph traversal at a specific recursion depth, replacing raw objects with cryptographic pointers.\n\nEPISTEMIC BOUNDS: The `max_unfold_depth` strictly bounds the DAG traversal depth (`ge=1, le=100`). `lazy_fetch_timeout_ms` prevents infinite halting (`ge=1, le=60000`). `truncation_strategy` is constrained to a Literal.\n\nMCP ROUTING TRIGGERS: Coalgebraic Unfolding, Lazy Evaluation, State-Space Bounding, VRAM Exhaustion Prevention",
+      "properties": {
+        "max_unfold_depth": {
+          "description": "Absolute recursive depth limit for DAG deserialization.",
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Max Unfold Depth",
+          "type": "integer"
+        },
+        "lazy_fetch_timeout_ms": {
+          "description": "Temporal guillotine for resolving cryptographic pointers.",
+          "maximum": 60000,
+          "minimum": 1,
+          "title": "Lazy Fetch Timeout Ms",
+          "type": "integer"
+        },
+        "truncation_strategy": {
+          "description": "Dictates how the orchestrator caps the state when max_unfold_depth is reached.",
+          "enum": [
+            "hash_pointer",
+            "nullify",
+            "scalar_summary"
+          ],
+          "title": "Truncation Strategy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "max_unfold_depth",
+        "lazy_fetch_timeout_ms",
+        "truncation_strategy"
+      ],
+      "title": "CoalgebraicHydrationPolicy",
+      "type": "object"
+    },
     "CognitiveCritiqueProfile": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Step-Level Verification via Process Reward Models (PRMs) to evaluate and critique intermediate steps in non-monotonic reasoning trees.\n\nCAUSAL AFFORDANCE: Injects a dense latent supervision vector (`logical_flaw_embedding`) to mathematically repel the generative trajectory away from hallucinated or logically flawed probability manifolds during test-time compute.\n\nEPISTEMIC BOUNDS: Penalization magnitude strictly clamped by `epistemic_penalty_scalar` (`ge=0.0, le=1.0`) to prevent gradient explosion. Target is cryptographically locked via `reasoning_trace_hash` (SHA-256 pattern `^[a-f0-9]{64}$`).\n\nMCP ROUTING TRIGGERS: Process Reward Model, Step-Level Verification, Representation Engineering, Latent Repulsion, Test-Time Supervision",
@@ -10645,6 +10682,18 @@
           "default": null,
           "description": "Unique request identifier.",
           "title": "Id"
+        },
+        "holographic_projection": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DynamicManifoldProjectionManifest"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematically pre-calculated view manifold tailored to the observer's frustum."
         }
       },
       "required": [
@@ -10809,6 +10858,14 @@
         "attestation_receipt": {
           "$ref": "#/$defs/VerifiableCredentialPresentationReceipt",
           "description": "Cryptographic proof of identity and authorization for the external server."
+        },
+        "state_synchronization_optics": {
+          "description": "Profunctor mappings for side-effect-free state synchronization.",
+          "items": {
+            "$ref": "#/$defs/OpticalMappingContract"
+          },
+          "title": "State Synchronization Optics",
+          "type": "array"
         }
       },
       "required": [
@@ -12136,6 +12193,36 @@
         "projection_cid"
       ],
       "title": "OntologicalSurfaceProjectionManifest",
+      "type": "object"
+    },
+    "OpticalMappingContract": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Guarantee isomorphic data translation from untrusted MCP payloads into the swarm's working memory.\n\nCAUSAL AFFORDANCE: Verifies that the geometric shape of the payload perfectly satisfies the expected contravariant input of the target node without executing procedural mapping code.\n\nEPISTEMIC BOUNDS: The `lens_source_pointer` and `prism_target_pointer` mathematically lock to max_length=2000. `strict_isomorphism` forbids type coercion.\n\nMCP ROUTING TRIGGERS: Category Theory, Profunctor Optics, Lens, Prism, Isomorphic State Synchronization",
+      "properties": {
+        "lens_source_pointer": {
+          "description": "RFC 6902 JSON Pointer extracting exogenous data.",
+          "maxLength": 2000,
+          "title": "Lens Source Pointer",
+          "type": "string"
+        },
+        "prism_target_pointer": {
+          "description": "RFC 6902 JSON Pointer for exact injection coordinate.",
+          "maxLength": 2000,
+          "title": "Prism Target Pointer",
+          "type": "string"
+        },
+        "strict_isomorphism": {
+          "default": true,
+          "description": "If true, mathematically forbids type coercion.",
+          "title": "Strict Isomorphism",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "lens_source_pointer",
+        "prism_target_pointer"
+      ],
+      "title": "OpticalMappingContract",
       "type": "object"
     },
     "OptimizationDirectionProfile": {
@@ -14548,6 +14635,18 @@
           "title": "Working Context Variables",
           "type": "object"
         },
+        "unfolding_policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CoalgebraicHydrationPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematical bounds for lazy state unfolding."
+        },
         "max_retained_tokens": {
           "description": "An integer representing the physical limit of the context window.",
           "exclusiveMinimum": 0,
@@ -15489,6 +15588,14 @@
           "minimum": 0,
           "title": "Occluded Refresh Rate Hz",
           "type": "integer"
+        },
+        "epsilon_derivative_threshold": {
+          "default": 0.0,
+          "description": "Minimum spatial or state magnitude delta required to authorize network egress.",
+          "maximum": 1000.0,
+          "minimum": 0.0,
+          "title": "Epsilon Derivative Threshold",
+          "type": "number"
         }
       },
       "required": [
