@@ -15,14 +15,6 @@ features = [
 
 [project.plugins.search]
 
-[project.plugins.mkdocstrings]
-[project.plugins.mkdocstrings.handlers.python]
-paths = ["src/"]
-[project.plugins.mkdocstrings.handlers.python.options]
-show_root_heading = true
-show_bases = true
-show_signature_annotations = true
-
 [project.markdown_extensions.pymdownx.superfences]
 
 [project.markdown_extensions.pymdownx.tabbed]
