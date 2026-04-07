@@ -1,7 +1,5 @@
-import pytest
-from pydantic import ValidationError
+from coreason_manifest.spec.ontology import EpistemicMappingContract
 
-from coreason_manifest.spec.ontology import EpistemicMappingContract, NodeCIDState
 
 def test_epistemic_mapping_contract_canonical_sort() -> None:
     contract = EpistemicMappingContract(
@@ -11,7 +9,7 @@ def test_epistemic_mapping_contract_canonical_sort() -> None:
         mapping_rules=[
             {"rule2": 2},
             {"rule1": 1},
-        ]
+        ],
     )
 
     # Ensure source_dialect_keys is sorted
