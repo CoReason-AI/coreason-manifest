@@ -15,9 +15,9 @@ from hypothesis import HealthCheck, given, settings
 
 from coreason_manifest.spec.ontology import (
     AdversarialMarketTopologyManifest,
+    CognitiveSystemNodeProfile,
     CouncilTopologyManifest,
     PredictionMarketPolicy,
-    SystemNodeProfile,
 )
 
 # W3C DID specification regex from NodeCIDState
@@ -79,7 +79,7 @@ def test_adversarial_market_compile_fuzzing(topology_data: dict[str, Any]) -> No
 
     # Assert exact node mapping and ontological injection
     assert topology_data["adjudicator_id"] in compiled.nodes
-    assert isinstance(compiled.nodes[topology_data["adjudicator_id"]], SystemNodeProfile)
+    assert isinstance(compiled.nodes[topology_data["adjudicator_id"]], CognitiveSystemNodeProfile)
     assert compiled.nodes[topology_data["adjudicator_id"]].description == "Synthesizing Adjudicator"
 
     for node_cid in topology_data["blue_team"]:

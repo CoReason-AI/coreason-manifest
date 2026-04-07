@@ -18,6 +18,7 @@ from pydantic import ValidationError
 from coreason_manifest.spec.ontology import (
     AdversarialMarketTopologyManifest,
     CausalDirectedEdgeState,
+    CognitiveSystemNodeProfile,
     ConsensusPolicy,
     CouncilTopologyManifest,
     DAGTopologyManifest,
@@ -30,12 +31,11 @@ from coreason_manifest.spec.ontology import (
     QuorumPolicy,
     SemanticDiscoveryIntent,
     SwarmTopologyManifest,
-    SystemNodeProfile,
     VectorEmbeddingState,
 )
 
 valid_node_id_st = st.from_regex(r"^did:[a-z0-9]+:[a-zA-Z0-9.\-_:]+$", fullmatch=True)
-node_st = st.builds(SystemNodeProfile, description=st.text())
+node_st = st.builds(CognitiveSystemNodeProfile, description=st.text())
 
 
 @st.composite
@@ -72,7 +72,7 @@ def test_adversarial_market_disjoint_failure() -> None:
 
 def test_council_topology_byzantine_slash_requires_escrow() -> None:
     """Prove that CouncilTopologyManifest strictly requires a funded escrow when PBFT slashing is enabled."""
-    nodes: dict[str, Any] = {"did:web:node_1": SystemNodeProfile(description="The Oracle")}
+    nodes: dict[str, Any] = {"did:web:node_1": CognitiveSystemNodeProfile(description="The Oracle")}
     quorum = QuorumPolicy(
         max_tolerable_faults=1,
         min_quorum_size=4,
