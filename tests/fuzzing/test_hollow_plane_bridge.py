@@ -13,22 +13,117 @@ from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import ValidationError
 
-from coreason_manifest.spec.ontology import CoalgebraicHydrationPolicy
+from coreason_manifest.spec.ontology import (
+    CoalgebraicHydrationPolicy,
+    MCPClientIntent,
+    TelemetryBackpressureContract,
+)
 
 
 @given(
-    kwargs=st.builds(
-        dict,
-        max_unfold_depth=st.integers(max_value=0) | st.integers(min_value=101),
-        lazy_fetch_timeout_ms=st.integers(min_value=1, max_value=60000),
-        truncation_strategy=st.sampled_from(["hash_pointer", "nullify", "scalar_summary"]),
-    )
+    max_unfold_depth=st.integers(max_value=0) | st.integers(min_value=101),
+    lazy_fetch_timeout_ms=st.integers(min_value=1, max_value=60000),
+    truncation_strategy=st.sampled_from(["hash_pointer", "nullify", "scalar_summary"]),
 )
-def test_coalgebraic_hydration_policy_bounds(kwargs: dict[str, int | str]) -> None:
+def test_coalgebraic_hydration_policy_max_depth_bounds(
+    max_unfold_depth: int, lazy_fetch_timeout_ms: int, truncation_strategy: str
+) -> None:
     """
     Test that initializing CoalgebraicHydrationPolicy with an invalid max_unfold_depth raises a ValidationError.
     """
     with pytest.raises(ValidationError) as excinfo:
-        CoalgebraicHydrationPolicy(**kwargs)  # type: ignore
+        CoalgebraicHydrationPolicy(
+            max_unfold_depth=max_unfold_depth,
+            lazy_fetch_timeout_ms=lazy_fetch_timeout_ms,
+            truncation_strategy=truncation_strategy,  # type: ignore[arg-type]
+        )
 
     assert "max_unfold_depth" in str(excinfo.value)
+
+
+@given(
+    max_unfold_depth=st.integers(min_value=1, max_value=100),
+    lazy_fetch_timeout_ms=st.integers(max_value=0) | st.integers(min_value=60001),
+    truncation_strategy=st.sampled_from(["hash_pointer", "nullify", "scalar_summary"]),
+)
+def test_coalgebraic_hydration_policy_timeout_bounds(
+    max_unfold_depth: int, lazy_fetch_timeout_ms: int, truncation_strategy: str
+) -> None:
+    """
+    Test that initializing CoalgebraicHydrationPolicy with an invalid lazy_fetch_timeout_ms raises a ValidationError.
+    """
+    with pytest.raises(ValidationError) as excinfo:
+        CoalgebraicHydrationPolicy(
+            max_unfold_depth=max_unfold_depth,
+            lazy_fetch_timeout_ms=lazy_fetch_timeout_ms,
+            truncation_strategy=truncation_strategy,  # type: ignore[arg-type]
+        )
+
+    assert "lazy_fetch_timeout_ms" in str(excinfo.value)
+
+
+def test_epsilon_velocity_bounds_validation() -> None:
+    # focal_refresh_rate_hz must be > 60 when epsilon_derivative_threshold == 0.0 to raise error
+    with pytest.raises(ValidationError) as excinfo:
+        TelemetryBackpressureContract(
+            focal_refresh_rate_hz=120,
+            peripheral_refresh_rate_hz=60,
+            occluded_refresh_rate_hz=0,
+            epsilon_derivative_threshold=0.0,
+        )
+    assert "Thermodynamic Violation" in str(excinfo.value)
+
+
+def test_epsilon_velocity_bounds_pass() -> None:
+    # focal_refresh_rate_hz <= 60 when epsilon_derivative_threshold == 0.0 should pass
+    contract = TelemetryBackpressureContract(
+        focal_refresh_rate_hz=60,
+        peripheral_refresh_rate_hz=30,
+        occluded_refresh_rate_hz=0,
+        epsilon_derivative_threshold=0.0,
+    )
+    assert contract.focal_refresh_rate_hz == 60
+
+
+def test_holographic_resolution_validation() -> None:
+    with pytest.raises(ValidationError) as excinfo:
+        MCPClientIntent(jsonrpc="2.0", id="req-123", method="mcp.ui.emit_intent", holographic_projection=None)
+    assert "Holographic Projection Violation" in str(excinfo.value)
+
+
+def test_holographic_resolution_pass() -> None:
+    # Valid intent if not "mcp.ui.emit_intent"
+    # Actually the only valid method for MCPClientIntent is "mcp.ui.emit_intent"
+    # So we construct a full holographic_projection dummy to pass validation
+    intent = MCPClientIntent(
+        jsonrpc="2.0",
+        id="req-123",
+        method="mcp.ui.emit_intent",
+        holographic_projection={  # type: ignore[arg-type]
+            "type": "dynamic_manifold",
+            "manifest_id": "mani-123",
+            "active_forge_id": "node-1",
+            "ast_gradient_visual_mapping": {
+                "panel_cid": "panel-124",
+                "type": "grammar",
+                "title": "Title",
+                "ledger_source_id": "node-123",
+                "mark": "point",
+                "encodings": [],
+            },
+            "thermodynamic_burn_mapping": {
+                "panel_cid": "panel-123",
+                "type": "grammar",
+                "title": "Title",
+                "ledger_source_id": "node-123",
+                "mark": "point",
+                "encodings": [],
+            },
+            "viewport_zoom_profile": {
+                "macro_distance_threshold": 100.0,
+                "meso_distance_threshold": 50.0,
+                "micro_distance_threshold": 10.0,
+            },
+        },
+    )
+    assert intent.holographic_projection is not None

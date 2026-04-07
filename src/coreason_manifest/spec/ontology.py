@@ -2300,11 +2300,8 @@ class StateDifferentialManifest(CoreasonBaseState):
 class CoalgebraicHydrationPolicy(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Defines the limits of infinite graph unfolding to protect UI VRAM when pulling from the EpistemicLedgerState.
-
     CAUSAL AFFORDANCE: Instructs the orchestrator's deserialization engine to halt graph traversal at a specific recursion depth, replacing raw objects with cryptographic pointers.
-
     EPISTEMIC BOUNDS: The `max_unfold_depth` strictly bounds the DAG traversal depth (`ge=1, le=100`). `lazy_fetch_timeout_ms` prevents infinite halting (`ge=1, le=60000`). `truncation_strategy` is constrained to a Literal.
-
     MCP ROUTING TRIGGERS: Coalgebraic Unfolding, Lazy Evaluation, State-Space Bounding, VRAM Exhaustion Prevention
     """
 
@@ -5383,7 +5380,7 @@ class GrammarPanelProfile(CoreasonBaseState):
         default=None, description="The kinematic constraint anchoring this 2D panel to the 3D topology."
     )
     mark: Literal["point", "line", "area", "bar", "rect", "arc"] = Field(
-        le=1000000000, description="The geometric shape used to represent the matrix."
+        description="The geometric shape used to represent the matrix."
     )
     encodings: list[VisualEncodingProfile] = Field(description="The mapping of structural fields to visual channels.")
     facet: FacetMatrixProfile | None = Field(default=None, description="Optional faceting matrix for small multiples.")
@@ -6345,11 +6342,8 @@ class MCPCapabilityWhitelistPolicy(CoreasonBaseState):
 class OpticalMappingContract(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Guarantee isomorphic data translation from untrusted MCP payloads into the swarm's working memory.
-
     CAUSAL AFFORDANCE: Verifies that the geometric shape of the payload perfectly satisfies the expected contravariant input of the target node without executing procedural mapping code.
-
     EPISTEMIC BOUNDS: The `lens_source_pointer` and `prism_target_pointer` mathematically lock to max_length=2000. `strict_isomorphism` forbids type coercion.
-
     MCP ROUTING TRIGGERS: Category Theory, Profunctor Optics, Lens, Prism, Isomorphic State Synchronization
     """
 
@@ -6877,23 +6871,13 @@ class OntologicalSurfaceProjectionManifest(CoreasonBaseState):
 
 class MCPClientIntent(BoundedJSONRPCIntent):
     """
-    AGENT INSTRUCTION: An inherited JSON-RPC 2.0 substrate specifically binding Model
-    Context Protocol (MCP) client intent emissions to the frontend UI. As an ...Intent
-    suffix, this represents an authorized kinetic execution trigger.
-
-    CAUSAL AFFORDANCE: Executes an exact semantic signal (Literal["mcp.ui.emit_intent"])
-    to bubble internal agent states (like drafting or adjudication) to the human
-    operator.
-
-    EPISTEMIC BOUNDS: Inherits all recursive depth bounds from BoundedJSONRPCIntent and
-    mathematically clamps the method space to a singular Literal["mcp.ui.emit_intent"]
-    to prevent execution drift.
-
-    MCP ROUTING TRIGGERS: Model Context Protocol, Intent Bubbling, Human-in-the-Loop,
-    Semantic Signaling, Method Clamping
+    AGENT INSTRUCTION: An inherited JSON-RPC 2.0 substrate specifically binding Model Context Protocol (MCP) client intent emissions to the frontend UI. As an ...Intent suffix, this represents an authorized kinetic execution trigger.
+    CAUSAL AFFORDANCE: Executes an exact semantic signal (Literal["mcp.ui.emit_intent"]) to bubble internal agent states (like drafting or adjudication) to the human operator.
+    EPISTEMIC BOUNDS: Inherits all recursive depth bounds from BoundedJSONRPCIntent and mathematically clamps the method space to a singular Literal["mcp.ui.emit_intent"] to prevent execution drift.
+    MCP ROUTING TRIGGERS: Model Context Protocol, Intent Bubbling, Human-in-the-Loop, Semantic Signaling, Method Clamping
     """
 
-    method: Literal["mcp.ui.emit_intent"] = Field(..., le=1000000000, description="Method for intent bubbling.")
+    method: Literal["mcp.ui.emit_intent"] = Field(..., description="Method for intent bubbling.")
     holographic_projection: "DynamicManifoldProjectionManifest | None" = Field(
         default=None,
         description="The mathematically pre-calculated view manifold tailored to the observer's frustum.",
@@ -9810,16 +9794,9 @@ class MarkovBlanketRenderingPolicy(CoreasonBaseState):
 
 class TelemetryBackpressureContract(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Formalizes the Observer Effect to dynamically modulate the thermodynamic flow
-    of network egress based on the observer's spatial view frustum.
-
-    CAUSAL AFFORDANCE: Instructs the orchestrator's telemetry manifold to aggressively shed
-    bandwidth load by calculating the dot product of topology nodes against the observer's focal
-    vector. It starves occluded or peripheral subgraphs of kinematic updates to preserve system liveness.
-
-    EPISTEMIC BOUNDS: Temporal refresh velocities are strictly clamped to physical Hertz frequencies.
-    The mathematical invariant guarantees that flow rate monotonically increases as nodes approach the focal center.
-
+    AGENT INSTRUCTION: Formalizes the Observer Effect to dynamically modulate the thermodynamic flow of network egress based on the observer's spatial view frustum.
+    CAUSAL AFFORDANCE: Instructs the orchestrator's telemetry manifold to aggressively shed bandwidth load by calculating the dot product of topology nodes against the observer's focal vector. It starves occluded or peripheral subgraphs of kinematic updates to preserve system liveness.
+    EPISTEMIC BOUNDS: Temporal refresh velocities are strictly clamped to physical Hertz frequencies. The mathematical invariant guarantees that flow rate monotonically increases as nodes approach the focal center.
     MCP ROUTING TRIGGERS: Observer Effect, Frustum Culling, Thermodynamic Flow Control, Telemetry Backpressure, Spatial Masking
     """
 
