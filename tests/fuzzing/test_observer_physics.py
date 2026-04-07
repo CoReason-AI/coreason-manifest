@@ -75,14 +75,15 @@ def test_ast_thermodynamic_gas_valid_eval() -> None:
     assert manifest.max_ast_node_budget == 500
 
 
-def test_ast_thermodynamic_gas_invalid_syntax() -> None:
+@given(depth=st.integers(min_value=200, max_value=400))
+def test_ast_thermodynamic_gas_invalid_syntax(depth: int) -> None:
     """
     Test that invalid syntax passes the AST nodes check (handled by base validation instead)
-    but we just want to hit the `except SyntaxError: pass` block for the f-string eval.
+    but we just want to hit the `except SyntaxError: pass` block for the first block.
     """
-    # This string has unclosed quotes, so ast.parse fails both times.
+    layout_tstring = f"1 + {'+' * depth}"
     with contextlib.suppress(ValidationError):
-        DynamicLayoutManifest(layout_tstring="f'{1 + 1", max_ast_node_budget=500)
+        DynamicLayoutManifest(layout_tstring=layout_tstring, max_ast_node_budget=500)
 
 
 def test_differential_privacy_valid() -> None:
