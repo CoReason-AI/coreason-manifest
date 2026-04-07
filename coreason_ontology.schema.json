@@ -1295,7 +1295,8 @@
           "persistence_commit": "#/$defs/PersistenceCommitReceipt",
           "system_fault": "#/$defs/SystemFaultEvent",
           "token_burn": "#/$defs/TokenBurnReceipt",
-          "tool_invocation": "#/$defs/ToolInvocationEvent"
+          "tool_invocation": "#/$defs/ToolInvocationEvent",
+          "transmutation_observation": "#/$defs/TransmutationObservationEvent"
         },
         "propertyName": "type"
       },
@@ -1356,6 +1357,9 @@
         },
         {
           "$ref": "#/$defs/IntentClassificationReceipt"
+        },
+        {
+          "$ref": "#/$defs/TransmutationObservationEvent"
         }
       ]
     },
@@ -6468,6 +6472,52 @@
       "title": "EpistemicLedgerState",
       "type": "object"
     },
+    "EpistemicMappingContract": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Homotopy Type Theory (HoTT) and Profunctor Optics to establish a rigid mathematical bridge between a high-entropy source dialect and a universal target ontology. As a ...Contract suffix, this defines a rigid mathematical boundary.\n\nCAUSAL AFFORDANCE: Authorizes the translation engine to map external geometries into the swarm's Hollow Data Plane without executing arbitrary procedural code. It relies exclusively on deterministic Lens and Prism compositions.\n\nEPISTEMIC BOUNDS: The source_dialect_keys and target_dids arrays are deterministically sorted by the @model_validator to prevent Byzantine Hash poisoning. The optical_mapping_sequence explicitly invokes the Topological Exemption, physically preserving the chronological execution order of the crosswalk.\n\nMCP ROUTING TRIGGERS: Homotopy Type Theory, Profunctor Optics, Univalent Foundations, Semantic Crosswalking, Latent Isomorphism",
+      "properties": {
+        "contract_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Contract Cid",
+          "type": "string"
+        },
+        "source_dialect_keys": {
+          "description": "The explicit array of incoming exogenous dimensions or properties.",
+          "items": {
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "title": "Source Dialect Keys",
+          "type": "array"
+        },
+        "target_dids": {
+          "description": "The mathematically verified universal coordinates (W3C DIDs) acting as the target ontology.",
+          "items": {
+            "$ref": "#/$defs/NodeCIDState"
+          },
+          "title": "Target Dids",
+          "type": "array"
+        },
+        "optical_mapping_sequence": {
+          "description": "The chronological sequence of Profunctor Optics (Lenses and Prisms) used to safely bridge the data.",
+          "items": {
+            "$ref": "#/$defs/OpticalMappingContract"
+          },
+          "title": "Optical Mapping Sequence",
+          "type": "array"
+        }
+      },
+      "required": [
+        "contract_cid",
+        "source_dialect_keys",
+        "target_dids",
+        "optical_mapping_sequence"
+      ],
+      "title": "EpistemicMappingContract",
+      "type": "object"
+    },
     "EpistemicPromotionEvent": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents Hippocampal-Neocortical Consolidation, proving the successful extraction and transfer of generalized knowledge from short-term episodic traces into the permanent semantic graph.\n\nCAUSAL AFFORDANCE: Emits a permanent Merkle-DAG coordinate (`crystallized_semantic_node_id`) that downstream agents can zero-shot reference, severing the need to reload raw source logs into active context.\n\nEPISTEMIC BOUNDS: Mathematical chain of custody bound to the strictly sorted array of `source_episodic_event_cids`. Token efficiency proven by `compression_ratio` float (`le=1.0`) guaranteeing Shannon Entropy reduction.\n\nMCP ROUTING TRIGGERS: Hippocampal Consolidation, Knowledge Distillation, Semantic Memory, Shannon Entropy Compression, Epistemic Promotion",
@@ -8266,6 +8316,47 @@
         "cache_priority_weight"
       ],
       "title": "FederatedPeftContract",
+      "type": "object"
+    },
+    "FederatedSourceProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative, frozen snapshot utilizing Topological Data Analysis (TDA) to quantify the shape and entropy of an exogenous data manifold prior to kinetic processing. As a ...Profile suffix, this defines a rigid mathematical boundary.\n\nCAUSAL AFFORDANCE: Authorizes the orchestrator to preemptively calculate the thermodynamic compute budget (VRAM footprint and token limits) required to load the payload, bypassing execution if the volume exceeds hardware constraints.\n\nEPISTEMIC BOUNDS: Spatial geometry is rigidly clamped by manifold_cardinality_nodes and manifold_cardinality_edges (ge=0, le=1000000000). The @model_validator validate_simplicial_geometry mathematically prevents the instantiation of impossible topologies (edges existing without nodes).\n\nMCP ROUTING TRIGGERS: Topological Data Analysis, Betti Numbers, Shannon Entropy, Exogenous Manifold, Simplicial Complex",
+      "properties": {
+        "exogenous_dialect_uri": {
+          "description": "The URI or structural pointer to the exogenous schema dialect.",
+          "maxLength": 2048,
+          "title": "Exogenous Dialect Uri",
+          "type": "string"
+        },
+        "manifold_cardinality_nodes": {
+          "description": "The absolute count of 0-simplices (entities/rows) in the source manifold.",
+          "maximum": 1000000000,
+          "minimum": 0,
+          "title": "Manifold Cardinality Nodes",
+          "type": "integer"
+        },
+        "manifold_cardinality_edges": {
+          "description": "The absolute count of 1-simplices (relationships/foreign keys) in the source manifold.",
+          "maximum": 1000000000,
+          "minimum": 0,
+          "title": "Manifold Cardinality Edges",
+          "type": "integer"
+        },
+        "shannon_entropy_index": {
+          "description": "A normalized scalar measuring the aleatoric noise (unstructured fields, nulls) within the payload.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Shannon Entropy Index",
+          "type": "number"
+        }
+      },
+      "required": [
+        "exogenous_dialect_uri",
+        "manifold_cardinality_nodes",
+        "manifold_cardinality_edges",
+        "shannon_entropy_index"
+      ],
+      "title": "FederatedSourceProfile",
       "type": "object"
     },
     "FederatedStateSnapshot": {
@@ -16860,6 +16951,65 @@
         "compute_weight_magnitude"
       ],
       "title": "TransitionEdgeProfile",
+      "type": "object"
+    },
+    "TransmutationObservationEvent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact recording the passive assessment and topological profiling of an exogenous dataset prior to kinetic mutation. As an ...Event suffix, this is an append-only coordinate on the Merkle-DAG.\n\nCAUSAL AFFORDANCE: Injects the verified exogenous structural profile into the EpistemicLedgerState, allowing the orchestrator to determine if the bayesian_surprise_score requires the escalation of Test-Time Compute (System 2) to resolve semantic ambiguity.\n\nEPISTEMIC BOUNDS: The bayesian_surprise_score is strictly clamped to a continuous float space (ge=0.0, le=1.0). Topologically anchored to the event_cid (128-char CID regex).\n\nMCP ROUTING TRIGGERS: Source Entropy Measurement, Passive Profiling, Kullback-Leibler Divergence, Epistemic Baseline, Bayesian Surprise",
+      "properties": {
+        "event_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "type": {
+          "const": "transmutation_observation",
+          "default": "transmutation_observation",
+          "title": "Type",
+          "type": "string"
+        },
+        "observed_manifold": {
+          "$ref": "#/$defs/FederatedSourceProfile",
+          "description": "The quantified geometric measurement of the exogenous dataset."
+        },
+        "bayesian_surprise_score": {
+          "description": "The Kullback-Leibler divergence between the new exogenous manifold and the swarm's existing baseline.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Bayesian Surprise Score",
+          "type": "number"
+        }
+      },
+      "required": [
+        "event_cid",
+        "timestamp",
+        "observed_manifold",
+        "bayesian_surprise_score"
+      ],
+      "title": "TransmutationObservationEvent",
       "type": "object"
     },
     "TruthMaintenancePolicy": {
