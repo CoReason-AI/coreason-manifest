@@ -16,7 +16,7 @@ from pydantic import ValidationError
 from coreason_manifest.spec.ontology import (
     ActivationSteeringContract,
     AdjudicationRubricProfile,
-    AgentNodeProfile,
+    CognitiveAgentNodeProfile,
     CognitiveFormatContract,
     CognitiveUncertaintyProfile,
     ComputeEngineProfile,
@@ -32,9 +32,9 @@ from coreason_manifest.spec.ontology import (
     EphemeralNamespacePartitionState,
     EpistemicCompressionSLA,
     EpistemicSecurity,
+    EpistemicSecurityProfile,
     EpistemicUpsamplingTask,
     GradingCriterionProfile,
-    HardwareProfile,
     InformationClassificationProfile,
     LatentSmoothingProfile,
     MultimodalTokenAnchorState,
@@ -47,7 +47,7 @@ from coreason_manifest.spec.ontology import (
     SaeLatentPolicy,
     SE3TransformProfile,
     SecureSubSessionState,
-    SecurityProfile,
+    SpatialHardwareProfile,
     ViewportProjectionContract,
     VolumetricBoundingProfile,
 )
@@ -507,9 +507,9 @@ def test_ephemeral_namespace_partition_state_invalid_hash() -> None:
 
 
 def test_bilateral_sla_sorting() -> None:
-    from coreason_manifest.spec.ontology import BilateralSLA, InformationClassificationProfile
+    from coreason_manifest.spec.ontology import FederatedBilateralSLA, InformationClassificationProfile
 
-    sla = BilateralSLA(
+    sla = FederatedBilateralSLA(
         receiving_tenant_id="tenant-a",
         max_permitted_classification=InformationClassificationProfile.PUBLIC,
         liability_limit_magnitude=1000,
@@ -542,15 +542,15 @@ def test_adjudication_intent_sorting() -> None:
 
 def test_composite_node_profile_sorts_mappings() -> None:
     from coreason_manifest.spec.ontology import (
+        CognitiveSystemNodeProfile,
         CompositeNodeProfile,
         DAGTopologyManifest,
         InputMappingContract,
         OutputMappingContract,
-        SystemNodeProfile,
     )
 
     topology = DAGTopologyManifest(
-        nodes={"did:example:1": SystemNodeProfile(description="desc")}, edges=[], max_depth=10, max_fan_out=10
+        nodes={"did:example:1": CognitiveSystemNodeProfile(description="desc")}, edges=[], max_depth=10, max_fan_out=10
     )
     in_map1 = InputMappingContract(parent_key="b", child_key="c1")
     in_map2 = InputMappingContract(parent_key="a", child_key="c2")
@@ -572,14 +572,14 @@ def test_composite_node_profile_sorts_mappings() -> None:
 
 def test_action_space_manifest_enforce_canonical_sort() -> None:
     from coreason_manifest.spec.ontology import (
-        ActionSpaceManifest,
+        CognitiveActionSpaceManifest,
         PermissionBoundaryPolicy,
         SideEffectProfile,
-        ToolManifest,
+        SpatialToolManifest,
         TransitionEdgeProfile,
     )
 
-    tool1 = ToolManifest(
+    tool1 = SpatialToolManifest(
         type="native_tool",
         tool_name="tool_b",
         description="description",
@@ -587,7 +587,7 @@ def test_action_space_manifest_enforce_canonical_sort() -> None:
         side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
         permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
     )
-    tool2 = ToolManifest(
+    tool2 = SpatialToolManifest(
         type="native_tool",
         tool_name="tool_a",
         description="description 2",
@@ -597,7 +597,7 @@ def test_action_space_manifest_enforce_canonical_sort() -> None:
     )
 
     # Valid manifest
-    manifest = ActionSpaceManifest(
+    manifest = CognitiveActionSpaceManifest(
         action_space_cid="space_1",
         entry_point_cid="tool_b",
         capabilities={"tool_a": tool2, "tool_b": tool1},
@@ -813,7 +813,7 @@ def test_kinematic_delta_manifest_sorting() -> None:
 
 def test_agent_node_profile_success() -> None:
     """Test that default values instantiate cleanly without triggering traps."""
-    agent = AgentNodeProfile(description="Test agent")
+    agent = CognitiveAgentNodeProfile(description="Test agent")
     assert agent.hardware.compute_tier == ComputeTier.KINETIC
     assert agent.hardware.min_vram_gb == 8.0
     assert agent.security.epistemic_security == EpistemicSecurity.STANDARD
@@ -822,35 +822,36 @@ def test_agent_node_profile_success() -> None:
 def test_agent_node_profile_thermodynamic_paradox() -> None:
     """Test that KINETIC tier cannot exceed 24.0 GB VRAM."""
     with pytest.raises(ValueError, match="Thermodynamic Constraint Violated"):
-        AgentNodeProfile(
-            description="Test agent", hardware=HardwareProfile(compute_tier=ComputeTier.KINETIC, min_vram_gb=25.0)
+        CognitiveAgentNodeProfile(
+            description="Test agent",
+            hardware=SpatialHardwareProfile(compute_tier=ComputeTier.KINETIC, min_vram_gb=25.0),
         )
 
 
 def test_agent_node_profile_sovereign_execution_paradox() -> None:
     """Test that CONFIDENTIAL workloads must use trusted endpoints only."""
     with pytest.raises(ValueError, match="Sovereign Execution Violated"):
-        AgentNodeProfile(
+        CognitiveAgentNodeProfile(
             description="Test agent",
-            hardware=HardwareProfile(provider_whitelist=["vast", "aws"]),
-            security=SecurityProfile(epistemic_security=EpistemicSecurity.CONFIDENTIAL),
+            hardware=SpatialHardwareProfile(provider_whitelist=["vast", "aws"]),
+            security=EpistemicSecurityProfile(epistemic_security=EpistemicSecurity.CONFIDENTIAL),
         )
 
     # Success case for CONFIDENTIAL
-    agent = AgentNodeProfile(
+    agent = CognitiveAgentNodeProfile(
         description="Test agent",
-        hardware=HardwareProfile(provider_whitelist=["aws", "gcp"]),
-        security=SecurityProfile(epistemic_security=EpistemicSecurity.CONFIDENTIAL),
+        hardware=SpatialHardwareProfile(provider_whitelist=["aws", "gcp"]),
+        security=EpistemicSecurityProfile(epistemic_security=EpistemicSecurity.CONFIDENTIAL),
     )
     assert agent.security.epistemic_security == EpistemicSecurity.CONFIDENTIAL
 
 
 def test_sovereign_execution_allows_localhost_and_bare_metal() -> None:
     """Ensure CONFIDENTIAL workloads can run on local/bare-metal without triggering the paradox."""
-    profile = AgentNodeProfile(
+    profile = CognitiveAgentNodeProfile(
         description="Secure local ETL agent for proprietary schemas.",
-        hardware=HardwareProfile(provider_whitelist=["localhost", "bare-metal"]),
-        security=SecurityProfile(epistemic_security=EpistemicSecurity.CONFIDENTIAL),
+        hardware=SpatialHardwareProfile(provider_whitelist=["localhost", "bare-metal"]),
+        security=EpistemicSecurityProfile(epistemic_security=EpistemicSecurity.CONFIDENTIAL),
     )
     # If the validation passes without raising ValueError, the contract holds.
     assert profile.security.epistemic_security == EpistemicSecurity.CONFIDENTIAL
@@ -860,13 +861,14 @@ def test_sovereign_execution_allows_localhost_and_bare_metal() -> None:
 def test_agent_node_profile_network_topology_paradox() -> None:
     """Test that Mixnet routing requires strict network isolation."""
     with pytest.raises(ValueError, match="Topology Routing Violated"):
-        AgentNodeProfile(
-            description="Test agent", security=SecurityProfile(egress_obfuscation=True, network_isolation=False)
+        CognitiveAgentNodeProfile(
+            description="Test agent",
+            security=EpistemicSecurityProfile(egress_obfuscation=True, network_isolation=False),
         )
 
     # Success case for Mixnet routing
-    agent = AgentNodeProfile(
-        description="Test agent", security=SecurityProfile(egress_obfuscation=True, network_isolation=True)
+    agent = CognitiveAgentNodeProfile(
+        description="Test agent", security=EpistemicSecurityProfile(egress_obfuscation=True, network_isolation=True)
     )
     assert agent.security.egress_obfuscation is True
     assert agent.security.network_isolation is True

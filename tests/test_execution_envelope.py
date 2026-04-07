@@ -12,12 +12,12 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
-    ActionSpaceManifest,
+    CognitiveActionSpaceManifest,
     ExecutionEnvelopeState,
     PermissionBoundaryPolicy,
     SideEffectProfile,
+    SpatialToolManifest,
     StateVectorProfile,
-    ToolManifest,
     TraceContextState,
 )
 
@@ -89,12 +89,12 @@ def test_delta_state() -> None:
 
 def test_action_space_manifest_rejects_custom_state() -> None:
     with pytest.raises(ValidationError) as excinfo:
-        ActionSpaceManifest(
+        CognitiveActionSpaceManifest(
             action_space_cid="test_id",
             entry_point_cid="test_tool",
             transition_matrix={"test_tool": []},
             capabilities={
-                "test_tool": ToolManifest(
+                "test_tool": SpatialToolManifest(
                     type="native_tool",
                     tool_name="test_tool",
                     description="test tool",
@@ -107,12 +107,12 @@ def test_action_space_manifest_rejects_custom_state() -> None:
     assert "Framework Violation" in str(excinfo.value)
 
     # Should pass cleanly without any exceptions.
-    ActionSpaceManifest(
+    CognitiveActionSpaceManifest(
         action_space_cid="test_id_2",
         entry_point_cid="test_tool_2",
         transition_matrix={"test_tool_2": []},
         capabilities={
-            "test_tool_2": ToolManifest(
+            "test_tool_2": SpatialToolManifest(
                 type="native_tool",
                 tool_name="test_tool_2",
                 description="test tool 2",
