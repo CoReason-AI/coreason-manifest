@@ -1295,13 +1295,17 @@
           "persistence_commit": "#/$defs/PersistenceCommitReceipt",
           "system_fault": "#/$defs/SystemFaultEvent",
           "token_burn": "#/$defs/TokenBurnReceipt",
-          "tool_invocation": "#/$defs/ToolInvocationEvent"
+          "tool_invocation": "#/$defs/ToolInvocationEvent",
+          "transmutation_observation": "#/$defs/TransmutationObservationEvent"
         },
         "propertyName": "type"
       },
       "oneOf": [
         {
           "$ref": "#/$defs/ObservationEvent"
+        },
+        {
+          "$ref": "#/$defs/TransmutationObservationEvent"
         },
         {
           "$ref": "#/$defs/BeliefMutationEvent"
@@ -6468,6 +6472,58 @@
       "title": "EpistemicLedgerState",
       "type": "object"
     },
+    "EpistemicMappingContract": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes the Category Theory ruleset bridging high-entropy source keys to zero-entropy Universal Targets (W3C DIDs).\n\nCAUSAL AFFORDANCE: Instructs the orchestrator's state projection engine on how to execute sequential, side-effect-free data translation between disjoint ontological categories.\n\nEPISTEMIC BOUNDS: The `mapping_contract_id` is geometrically constrained to a 128-char CID. `source_dialect_keys` and `target_dids` are deterministically sorted via `@model_validator`. `mapping_rules` asserts a Topological Exemption to preserve chronological translation logic.\n\nMCP ROUTING TRIGGERS: Category Theory, Profunctor Optics, Semantic Harmonization, Topological Exemption, Bijective Mapping",
+      "properties": {
+        "mapping_contract_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Mapping Contract Id",
+          "type": "string"
+        },
+        "source_dialect_keys": {
+          "items": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "maxItems": 10000,
+          "title": "Source Dialect Keys",
+          "type": "array"
+        },
+        "target_dids": {
+          "items": {
+            "$ref": "#/$defs/NodeCIDState"
+          },
+          "maxItems": 10000,
+          "title": "Target Dids",
+          "type": "array"
+        },
+        "mapping_rules": {
+          "items": {
+            "additionalProperties": {
+              "$ref": "#/$defs/JsonPrimitiveState"
+            },
+            "propertyNames": {
+              "maxLength": 255
+            },
+            "type": "object"
+          },
+          "maxItems": 10000,
+          "title": "Mapping Rules",
+          "type": "array"
+        }
+      },
+      "required": [
+        "mapping_contract_id",
+        "source_dialect_keys",
+        "target_dids",
+        "mapping_rules"
+      ],
+      "title": "EpistemicMappingContract",
+      "type": "object"
+    },
     "EpistemicPromotionEvent": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents Hippocampal-Neocortical Consolidation, proving the successful extraction and transfer of generalized knowledge from short-term episodic traces into the permanent semantic graph.\n\nCAUSAL AFFORDANCE: Emits a permanent Merkle-DAG coordinate (`crystallized_semantic_node_id`) that downstream agents can zero-shot reference, severing the need to reload raw source logs into active context.\n\nEPISTEMIC BOUNDS: Mathematical chain of custody bound to the strictly sorted array of `source_episodic_event_cids`. Token efficiency proven by `compression_ratio` float (`le=1.0`) guaranteeing Shannon Entropy reduction.\n\nMCP ROUTING TRIGGERS: Hippocampal Consolidation, Knowledge Distillation, Semantic Memory, Shannon Entropy Compression, Epistemic Promotion",
@@ -8266,6 +8322,39 @@
         "cache_priority_weight"
       ],
       "title": "FederatedPeftContract",
+      "type": "object"
+    },
+    "FederatedSourceProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines a declarative, frozen snapshot of the exogenous data's physical geometry to calculate thermodynamic compute limits prior to ingestion.\n\nCAUSAL AFFORDANCE: Provides the orchestrator with the exact Cartesian limits of the incoming payload, enabling pre-flight VRAM allocation and preventing buffer overflows.\n\nEPISTEMIC BOUNDS: Physical graph size is mathematically clamped by `node_cardinality` and `edge_cardinality` (both `ge=0`, `le=1000000000`). Semantic origin is restricted by `source_dialect_identifier` (`max_length=2000`).\n\nMCP ROUTING TRIGGERS: Information Bottleneck, Minimum Description Length, Volumetric Bounding, Pre-Flight Allocation, Topological Profiling",
+      "properties": {
+        "node_cardinality": {
+          "description": "The exact count of discrete semantic vertices in the source manifold.",
+          "maximum": 1000000000,
+          "minimum": 0,
+          "title": "Node Cardinality",
+          "type": "integer"
+        },
+        "edge_cardinality": {
+          "description": "The exact count of topological relationships in the source manifold.",
+          "maximum": 1000000000,
+          "minimum": 0,
+          "title": "Edge Cardinality",
+          "type": "integer"
+        },
+        "source_dialect_identifier": {
+          "description": "The semantic origin, denoting the external schema or namespace.",
+          "maxLength": 2000,
+          "title": "Source Dialect Identifier",
+          "type": "string"
+        }
+      },
+      "required": [
+        "node_cardinality",
+        "edge_cardinality",
+        "source_dialect_identifier"
+      ],
+      "title": "FederatedSourceProfile",
       "type": "object"
     },
     "FederatedStateSnapshot": {
@@ -16860,6 +16949,65 @@
         "compute_weight_magnitude"
       ],
       "title": "TransitionEdgeProfile",
+      "type": "object"
+    },
+    "TransmutationObservationEvent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact representing the measurement of exogenous source entropy onto the Epistemic Ledger. Acts as a passive, non-mutative execution assessing exogenous geometry.\n\nCAUSAL AFFORDANCE: Commits the volumetric constraints of the source data to the ledger without triggering kinetic mutations, authorizing downstream agents to prepare the Functor.\n\nEPISTEMIC BOUNDS: Cryptographically anchors the payload via `exogenous_manifold_hash` (SHA-256 pattern `^[a-f0-9]{64}$`). Topologically bounded by the nested `source_profile`. Inherits temporal clamping from base event properties.\n\nMCP ROUTING TRIGGERS: Epistemic Freezing, Merkle-DAG Coordinate, Exogenous Entropy Measurement, Zero-Trust Ingestion, Genesis Block",
+      "properties": {
+        "event_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "type": {
+          "const": "transmutation_observation",
+          "default": "transmutation_observation",
+          "title": "Type",
+          "type": "string"
+        },
+        "source_profile": {
+          "$ref": "#/$defs/FederatedSourceProfile"
+        },
+        "exogenous_manifold_hash": {
+          "description": "The unforgeable SHA-256 fingerprint of the raw source data.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Exogenous Manifold Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "event_cid",
+        "timestamp",
+        "source_profile",
+        "exogenous_manifold_hash"
+      ],
+      "title": "TransmutationObservationEvent",
       "type": "object"
     },
     "TruthMaintenancePolicy": {
