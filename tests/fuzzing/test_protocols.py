@@ -133,10 +133,10 @@ def test_fuzz_mcp_server_manifest_valid_did(did_str: str) -> None:
     )
     with contextlib.suppress(ValidationError):
         MCPServerManifest(
-            server_id="test",
+            server_cid="test",
             transport=StdioTransportProfile(command="ls"),
             capability_whitelist=MCPCapabilityWhitelistPolicy(
-                allowed_tools=["test"], allowed_resources=["test"], allowed_prompts=["test"]
+                authorized_capability_array=["test"], allowed_resources=["test"], allowed_prompts=["test"]
             ),
             attestation_receipt=attest,
             binary_hash="0" * 64,
@@ -154,10 +154,10 @@ def test_fuzz_mcp_server_manifest_invalid_did(did_str: str) -> None:
 
     with pytest.raises(ValidationError, match="UNAUTHORIZED MCP MOUNT"):
         MCPServerManifest(
-            server_id="test",
+            server_cid="test",
             transport=StdioTransportProfile(command="ls"),
             capability_whitelist=MCPCapabilityWhitelistPolicy(
-                allowed_tools=["test"], allowed_resources=["test"], allowed_prompts=["test"]
+                authorized_capability_array=["test"], allowed_resources=["test"], allowed_prompts=["test"]
             ),
             attestation_receipt=attest,
             binary_hash="0" * 64,

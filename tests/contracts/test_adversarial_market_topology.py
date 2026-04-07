@@ -20,7 +20,7 @@ from coreason_manifest.spec.ontology import (
     SystemNodeProfile,
 )
 
-# W3C DID specification regex from NodeIdentifierState
+# W3C DID specification regex from NodeCIDState
 did_strategy = st.from_regex(r"^did:[a-z0-9]+:[a-zA-Z0-9.\-_:]+$", fullmatch=True)
 
 
@@ -62,8 +62,8 @@ def test_adversarial_market_compile_fuzzing(topology_data: dict[str, Any]) -> No
     """
     manifest = AdversarialMarketTopologyManifest(
         adjudicator_id=topology_data["adjudicator_id"],
-        blue_team_ids=topology_data["blue_team"],
-        red_team_ids=topology_data["red_team"],
+        blue_team_cids=topology_data["blue_team"],
+        red_team_cids=topology_data["red_team"],
         market_rules=topology_data["market_rules"],
     )
 
@@ -82,10 +82,10 @@ def test_adversarial_market_compile_fuzzing(topology_data: dict[str, Any]) -> No
     assert isinstance(compiled.nodes[topology_data["adjudicator_id"]], SystemNodeProfile)
     assert compiled.nodes[topology_data["adjudicator_id"]].description == "Synthesizing Adjudicator"
 
-    for node_id in topology_data["blue_team"]:
-        assert node_id in compiled.nodes
-        assert compiled.nodes[node_id].description == "Blue Team Member"
+    for node_cid in topology_data["blue_team"]:
+        assert node_cid in compiled.nodes
+        assert compiled.nodes[node_cid].description == "Blue Team Member"
 
-    for node_id in topology_data["red_team"]:
-        assert node_id in compiled.nodes
-        assert compiled.nodes[node_id].description == "Red Team Member"
+    for node_cid in topology_data["red_team"]:
+        assert node_cid in compiled.nodes
+        assert compiled.nodes[node_cid].description == "Red Team Member"

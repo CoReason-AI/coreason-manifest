@@ -151,7 +151,7 @@ def test_workflow_manifest_lbac_dominance(
 ) -> None:
     # Setup the required fields for WorkflowManifest
     prov = EpistemicProvenanceReceipt(
-        extracted_by="did:node:id-1", source_event_id="a" * 64, derivation_mode=DerivationMode.DIRECT_TRANSLATION
+        extracted_by="did:node:id-1", source_event_cid="a" * 64, derivation_mode=DerivationMode.DIRECT_TRANSLATION
     )
     topology = DAGTopologyManifest(nodes={}, edges=[], max_depth=10, max_fan_out=10)
     sla = BilateralSLA(
@@ -184,16 +184,16 @@ def test_workflow_manifest_lbac_dominance(
 
 
 @given(st.lists(st.text(min_size=1, max_size=128), min_size=2, max_size=10, unique=True))
-def test_smpc_topology_manifest_sorting(participant_ids: list[str]) -> None:
+def test_smpc_topology_manifest_sorting(participant_cids: list[str]) -> None:
     # filter out non-matching DIDs
-    dids = ["did:smpc:" + p for p in participant_ids]
+    dids = ["did:smpc:" + p for p in participant_cids]
     manifest = SMPCTopologyManifest(
         nodes={},
         smpc_protocol="garbled_circuits",
         joint_function_uri="https://example.com/circuit",
-        participant_node_ids=dids,
+        participant_node_cids=dids,
     )
-    assert manifest.participant_node_ids == sorted(dids)
+    assert manifest.participant_node_cids == sorted(dids)
 
 
 @given(st.sampled_from([("did:node:gen1", "did:node:gen1"), ("did:node:eval1", "did:node:gen1")]))

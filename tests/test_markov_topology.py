@@ -26,8 +26,8 @@ def test_cyclic_edge_infinite_loop_guillotine() -> None:
     # Test that discount_factor=1.0 and max_causal_depth=None raises ValueError
     with pytest.raises(ValidationError, match="Un-haltable infinite loop detected"):
         CyclicEdgeProfile(
-            edge_type="cyclic",
-            target_node_id="tool_A",
+            topology_class="cyclic",
+            target_node_cid="tool_A",
             probability_weight=1.0,
             compute_weight_magnitude=10,
             discount_factor=1.0,
@@ -36,8 +36,8 @@ def test_cyclic_edge_infinite_loop_guillotine() -> None:
 
     # Test valid CyclicEdgeProfile
     CyclicEdgeProfile(
-        edge_type="cyclic",
-        target_node_id="tool_A",
+        topology_class="cyclic",
+        target_node_cid="tool_A",
         probability_weight=1.0,
         compute_weight_magnitude=10,
         discount_factor=0.9,
@@ -45,8 +45,8 @@ def test_cyclic_edge_infinite_loop_guillotine() -> None:
     )
 
     CyclicEdgeProfile(
-        edge_type="cyclic",
-        target_node_id="tool_A",
+        topology_class="cyclic",
+        target_node_cid="tool_A",
         probability_weight=1.0,
         compute_weight_magnitude=10,
         discount_factor=1.0,
@@ -75,8 +75,8 @@ def test_action_space_dcg_compilation() -> None:
 
     # Coinductive Validation Test (No RecursionError)
     asm = ActionSpaceManifest(
-        action_space_id="test_dcg",
-        entry_point_id="tool_A",
+        action_space_cid="test_dcg",
+        entry_point_cid="tool_A",
         capabilities={
             "tool_A": tool_a,
             "tool_B": tool_b,
@@ -84,13 +84,16 @@ def test_action_space_dcg_compilation() -> None:
         transition_matrix={
             "tool_A": [
                 TransitionEdgeProfile(
-                    edge_type="acyclic", target_node_id="tool_B", probability_weight=1.0, compute_weight_magnitude=5
+                    topology_class="acyclic",
+                    target_node_cid="tool_B",
+                    probability_weight=1.0,
+                    compute_weight_magnitude=5,
                 )
             ],
             "tool_B": [
                 CyclicEdgeProfile(
-                    edge_type="cyclic",
-                    target_node_id="tool_A",
+                    topology_class="cyclic",
+                    target_node_cid="tool_A",
                     probability_weight=1.0,
                     compute_weight_magnitude=5,
                     discount_factor=0.9,
@@ -100,7 +103,7 @@ def test_action_space_dcg_compilation() -> None:
         },
     )
 
-    assert asm.entry_point_id == "tool_A"
+    assert asm.entry_point_cid == "tool_A"
     assert "tool_A" in asm.capabilities
     assert "tool_B" in asm.capabilities
 
@@ -118,23 +121,26 @@ def test_action_space_ghost_edge_prevention() -> None:
     # Missing tool_C in capabilities
     with pytest.raises(ValidationError, match="not found in capabilities"):
         ActionSpaceManifest(
-            action_space_id="test_ghost_edge",
-            entry_point_id="tool_A",
+            action_space_cid="test_ghost_edge",
+            entry_point_cid="tool_A",
             capabilities={"tool_A": tool_a},
             transition_matrix={
                 "tool_A": [
                     TransitionEdgeProfile(
-                        edge_type="acyclic", target_node_id="tool_C", probability_weight=1.0, compute_weight_magnitude=5
+                        topology_class="acyclic",
+                        target_node_cid="tool_C",
+                        probability_weight=1.0,
+                        compute_weight_magnitude=5,
                     )
                 ]
             },
         )
 
-    # Missing entry_point_id in capabilities
+    # Missing entry_point_cid in capabilities
     with pytest.raises(ValidationError, match="not found in capabilities"):
         ActionSpaceManifest(
-            action_space_id="test_ghost_edge",
-            entry_point_id="tool_B",
+            action_space_cid="test_ghost_edge",
+            entry_point_cid="tool_B",
             capabilities={"tool_A": tool_a},
             transition_matrix={"tool_A": []},
         )
@@ -143,8 +149,8 @@ def test_action_space_ghost_edge_prevention() -> None:
 def test_discount_factor_bounds() -> None:
     with pytest.raises(ValidationError, match="discount_factor"):
         CyclicEdgeProfile(
-            edge_type="cyclic",
-            target_node_id="tool_A",
+            topology_class="cyclic",
+            target_node_cid="tool_A",
             probability_weight=1.0,
             compute_weight_magnitude=10,
             discount_factor=1.5,

@@ -7,6 +7,7 @@
 # Commercial use beyond a 30-day trial requires a separate license
 #
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
+
 from typing import Any
 
 import hypothesis.strategies as st
@@ -62,8 +63,8 @@ def test_adversarial_market_disjoint_failure() -> None:
     )
     with pytest.raises(ValidationError, match="Topological Contradiction"):
         AdversarialMarketTopologyManifest(
-            blue_team_ids=["did:web:agent_a"],
-            red_team_ids=["did:web:agent_a"],
+            blue_team_cids=["did:web:agent_a"],
+            red_team_cids=["did:web:agent_a"],
             adjudicator_id="did:web:adj",
             market_rules=policy,
         )
@@ -216,16 +217,16 @@ def test_defeasible_cascade_logic_fuzz(cascade_id: str, root: str, quarantined: 
             cascade_id=cascade_id,
             root_falsified_event_id=root,
             propagated_decay_factor=decay,
-            quarantined_event_ids=quarantined,
+            quarantined_event_cids=quarantined,
         )
         if root in quarantined:
-            pytest.fail("DefeasibleCascadeEvent failed to reject root_falsified_event_id in quarantined_event_ids")
+            pytest.fail("DefeasibleCascadeEvent failed to reject root_falsified_event_id in quarantined_event_cids")
         if decay < 0.0 or decay > 1.0:
             pytest.fail("DefeasibleCascadeEvent failed to reject out-of-bounds decay factor")
     except ValueError as e:
         err_str = str(e).lower()
         if (
-            "root_falsified_event_id cannot be in quarantined_event_ids" in err_str
+            "root_falsified_event_id cannot be in quarantined_event_cids" in err_str
             or "propagated_decay_factor" in err_str
         ):
             pass  # Expected
@@ -239,11 +240,11 @@ def test_defeasible_cascade_logic_fuzz(cascade_id: str, root: str, quarantined: 
 @given(
     source=st.text(min_size=1, max_size=100),
     target=st.text(min_size=1, max_size=100),
-    edge_type=st.sampled_from(["direct_cause", "confounder", "collider", "mediator"]),
+    topology_class=st.sampled_from(["direct_cause", "confounder", "collider", "mediator"]),
 )
-def test_causal_directed_edge_state_fuzz(source: str, target: str, edge_type: Any) -> None:
+def test_causal_directed_edge_state_fuzz(source: str, target: str, topology_class: Any) -> None:
     try:
-        CausalDirectedEdgeState(source_variable=source, target_variable=target, edge_type=edge_type)
+        CausalDirectedEdgeState(source_variable=source, target_variable=target, edge_type=topology_class)
         if source == target:
             pytest.fail("CausalDirectedEdgeState failed to reject self-referential edge")
     except ValueError as e:
@@ -260,7 +261,7 @@ def test_causal_directed_edge_state_fuzz(source: str, target: str, edge_type: An
     history=st.lists(
         st.builds(
             ObservationEvent,
-            event_id=st.text(min_size=1, max_size=128, alphabet="abcdefg01234_-"),
+            event_cid=st.text(min_size=1, max_size=128, alphabet="abcdefg01234_-"),
             timestamp=st.floats(min_value=0.0, max_value=253402300799.0),
             payload=st.dictionaries(st.text(min_size=1, max_size=20), st.text(max_size=20), max_size=5),
         ),

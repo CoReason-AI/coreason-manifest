@@ -24,32 +24,35 @@ from coreason_manifest.spec.ontology import (
 
 def test_causal_integrity() -> None:
     a = TraceContextState(
-        trace_id="01HVK1Z5B7G6V5G8S8A2G1Z5B7", span_id="01HVK1Z5B7G6V5G8S8A2G1Z5B8", parent_span_id=None, causal_clock=0
+        trace_cid="01HVK1Z5B7G6V5G8S8A2G1Z5B7",
+        span_cid="01HVK1Z5B7G6V5G8S8A2G1Z5B8",
+        parent_span_cid=None,
+        causal_clock=0,
     )
 
     b = TraceContextState(
-        trace_id=a.trace_id,
-        span_id="01HVK1Z5B7G6V5G8S8A2G1Z5B9",
-        parent_span_id=a.span_id,
+        trace_cid=a.trace_cid,
+        span_cid="01HVK1Z5B7G6V5G8S8A2G1Z5B9",
+        parent_span_cid=a.span_cid,
         causal_clock=a.causal_clock + 1,
     )
 
     c = TraceContextState(
-        trace_id=a.trace_id,
-        span_id="01HVK1Z5B7G6V5G8S8A2G1Z5BA",
-        parent_span_id=b.span_id,
+        trace_cid=a.trace_cid,
+        span_cid="01HVK1Z5B7G6V5G8S8A2G1Z5BA",
+        parent_span_cid=b.span_cid,
         causal_clock=b.causal_clock + 1,
     )
 
-    assert c.trace_id == a.trace_id
+    assert c.trace_cid == a.trace_cid
     assert c.causal_clock == a.causal_clock + 2
 
     # Prevent superficial infinite self-pointers
     with pytest.raises(ValidationError):
         TraceContextState(
-            trace_id="01HVK1Z5B7G6V5G8S8A2G1Z5B7",
-            span_id="01HVK1Z5B7G6V5G8S8A2G1Z5B8",
-            parent_span_id="01HVK1Z5B7G6V5G8S8A2G1Z5B8",
+            trace_cid="01HVK1Z5B7G6V5G8S8A2G1Z5B7",
+            span_cid="01HVK1Z5B7G6V5G8S8A2G1Z5B8",
+            parent_span_cid="01HVK1Z5B7G6V5G8S8A2G1Z5B8",
             causal_clock=0,
         )
 
@@ -59,7 +62,7 @@ def test_pure_function() -> None:
     with pytest.raises(ValidationError):
         ExecutionEnvelopeState(
             trace_context=TraceContextState(
-                trace_id="01HVK1Z5B7G6V5G8S8A2G1Z5B7", span_id="01HVK1Z5B7G6V5G8S8A2G1Z5B8"
+                trace_cid="01HVK1Z5B7G6V5G8S8A2G1Z5B7", span_cid="01HVK1Z5B7G6V5G8S8A2G1Z5B8"
             ),
             state_vector=StateVectorProfile(),
             payload={"test": "data"},
@@ -69,7 +72,7 @@ def test_pure_function() -> None:
     with pytest.raises(ValidationError):
         ExecutionEnvelopeState(
             trace_context=TraceContextState(
-                trace_id="01HVK1Z5B7G6V5G8S8A2G1Z5B7", span_id="01HVK1Z5B7G6V5G8S8A2G1Z5B8"
+                trace_cid="01HVK1Z5B7G6V5G8S8A2G1Z5B7", span_cid="01HVK1Z5B7G6V5G8S8A2G1Z5B8"
             ),
             state_vector=StateVectorProfile(),
             payload={"test": "data"},
@@ -87,8 +90,8 @@ def test_delta_state() -> None:
 def test_action_space_manifest_rejects_custom_state() -> None:
     with pytest.raises(ValidationError) as excinfo:
         ActionSpaceManifest(
-            action_space_id="test_id",
-            entry_point_id="test_tool",
+            action_space_cid="test_id",
+            entry_point_cid="test_tool",
             transition_matrix={"test_tool": []},
             capabilities={
                 "test_tool": ToolManifest(
@@ -105,8 +108,8 @@ def test_action_space_manifest_rejects_custom_state() -> None:
 
     # Should pass cleanly without any exceptions.
     ActionSpaceManifest(
-        action_space_id="test_id_2",
-        entry_point_id="test_tool_2",
+        action_space_cid="test_id_2",
+        entry_point_cid="test_tool_2",
         transition_matrix={"test_tool_2": []},
         capabilities={
             "test_tool_2": ToolManifest(

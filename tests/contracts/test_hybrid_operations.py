@@ -8,7 +8,6 @@
 #
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
-
 import hypothesis.strategies as st
 import pytest
 from hypothesis import given
@@ -30,7 +29,7 @@ def test_epistemic_sealing_bounds(loops: int) -> None:
     with pytest.raises(ValidationError) as exc:
         EpistemicProvenanceReceipt(
             extracted_by="did:coreason:test1",
-            source_event_id="test-event-id",
+            source_event_cid="test-event-id",
             derivation_mode=DerivationMode.DIRECT_TRANSLATION,
             revision_loops_executed=loops,
         )
@@ -41,7 +40,7 @@ def test_epistemic_sealing_bounds(loops: int) -> None:
 def test_epistemic_sealing_bounds_valid(loops: int) -> None:
     receipt = EpistemicProvenanceReceipt(
         extracted_by="did:coreason:test1",
-        source_event_id="test-event-id",
+        source_event_cid="test-event-id",
         derivation_mode=DerivationMode.DIRECT_TRANSLATION,
         revision_loops_executed=loops,
     )
@@ -80,7 +79,7 @@ def test_terminal_handoff_isomorphism() -> None:
     )
 
     intent = InterventionIntent(
-        target_node_id="did:coreason:test2",
+        target_node_cid="did:coreason:test2",
         context_summary="Terminal failure",
         proposed_action={},
         adjudication_deadline=123456789.0,

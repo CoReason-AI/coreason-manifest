@@ -73,7 +73,7 @@ def test_market_contract_bounds(minimum_collateral: int, slashing_penalty: int) 
 
 
 @given(
-    trace_id=st.from_regex("^[a-zA-Z0-9_.:-]+$", fullmatch=True).filter(lambda x: 1 <= len(x) <= 128),
+    trace_cid=st.from_regex("^[a-zA-Z0-9_.:-]+$", fullmatch=True).filter(lambda x: 1 <= len(x) <= 128),
     explored_branch_ids=st.lists(
         st.from_regex("^[a-zA-Z0-9_.:-]+$", fullmatch=True).filter(lambda x: 1 <= len(x) <= 128),
         min_size=1,
@@ -82,17 +82,17 @@ def test_market_contract_bounds(minimum_collateral: int, slashing_penalty: int) 
     total_latent_tokens=st.integers(min_value=0, max_value=1000000000),
 )
 def test_latent_scratchpad_receipt_referential_integrity(
-    trace_id: str, explored_branch_ids: list[str], total_latent_tokens: int
+    trace_cid: str, explored_branch_ids: list[str], total_latent_tokens: int
 ) -> None:
     explored_branches = [
-        ThoughtBranchState(branch_id=b_id, latent_content_hash="a" * 64, prm_score=0.5) for b_id in explored_branch_ids
+        ThoughtBranchState(branch_cid=b_id, latent_content_hash="a" * 64, prm_score=0.5) for b_id in explored_branch_ids
     ]
 
     resolution_id = explored_branch_ids[0]
     discarded_id = explored_branch_ids[-1] if len(explored_branch_ids) > 1 else resolution_id
 
     receipt = LatentScratchpadReceipt(
-        trace_id=trace_id,
+        trace_cid=trace_cid,
         explored_branches=explored_branches,
         resolution_branch_id=resolution_id,
         discarded_branches=[discarded_id],
@@ -102,7 +102,7 @@ def test_latent_scratchpad_receipt_referential_integrity(
 
 
 @given(
-    action_space_id=st.from_regex("^[a-zA-Z0-9_.:-]+$", fullmatch=True).filter(lambda x: 1 <= len(x) <= 128),
+    action_space_cid=st.from_regex("^[a-zA-Z0-9_.:-]+$", fullmatch=True).filter(lambda x: 1 <= len(x) <= 128),
     tool_names=st.lists(
         st.from_regex("^[a-zA-Z0-9_.:-]+$", fullmatch=True).filter(lambda x: 1 <= len(x) <= 128),
         unique=True,
@@ -110,7 +110,7 @@ def test_latent_scratchpad_receipt_referential_integrity(
         max_size=5,
     ),
 )
-def test_action_space_manifest_uniqueness(action_space_id: str, tool_names: list[str]) -> None:
+def test_action_space_manifest_uniqueness(action_space_cid: str, tool_names: list[str]) -> None:
     native_tools = {
         name: ToolManifest(
             type="native_tool",
@@ -123,13 +123,13 @@ def test_action_space_manifest_uniqueness(action_space_id: str, tool_names: list
         for name in tool_names
     }
     manifest = ActionSpaceManifest(
-        action_space_id=action_space_id,
+        action_space_cid=action_space_cid,
         capabilities=native_tools,  # type: ignore[arg-type]
-        entry_point_id=tool_names[0],
+        entry_point_cid=tool_names[0],
         transition_matrix={name: [] for name in tool_names},
     )
 
-    assert manifest.action_space_id == action_space_id
+    assert manifest.action_space_cid == action_space_cid
     assert len(manifest.capabilities) == len(tool_names)
 
 
