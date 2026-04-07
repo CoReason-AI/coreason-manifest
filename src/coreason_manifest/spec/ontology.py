@@ -6481,6 +6481,36 @@ class OpticalMappingContract(CoreasonBaseState):
     strict_isomorphism: bool = Field(default=True, description="If true, mathematically forbids type coercion.")
 
 
+class EpistemicMappingContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Formalizes Homotopy Type Theory (HoTT) and Profunctor Optics to establish a rigid mathematical bridge between a high-entropy source dialect and a universal target ontology. As a ...Contract suffix, this defines a rigid mathematical boundary.
+
+    CAUSAL AFFORDANCE: Authorizes the translation engine to map external geometries into the swarm's Hollow Data Plane without executing arbitrary procedural code. It relies exclusively on deterministic Lens and Prism compositions.
+
+    EPISTEMIC BOUNDS: The source_dialect_keys and target_dids arrays are deterministically sorted by the @model_validator to prevent Byzantine Hash poisoning. The optical_mapping_sequence explicitly invokes the Topological Exemption, physically preserving the chronological execution order of the crosswalk.
+
+    MCP ROUTING TRIGGERS: Homotopy Type Theory, Profunctor Optics, Univalent Foundations, Semantic Crosswalking, Latent Isomorphism
+    """
+
+    contract_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    source_dialect_keys: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
+        description="The explicit array of incoming exogenous dimensions or properties."
+    )
+    target_dids: list[NodeCIDState] = Field(
+        description="The mathematically verified universal coordinates (W3C DIDs) acting as the target ontology."
+    )
+    optical_mapping_sequence: list[OpticalMappingContract] = Field(
+        description="The chronological sequence of Profunctor Optics (Lenses and Prisms) used to safely bridge the data."
+    )
+    # Note: optical_mapping_sequence is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "source_dialect_keys", sorted(self.source_dialect_keys))
+        object.__setattr__(self, "target_dids", sorted(self.target_dids))
+        return self
+
+
 class MCPServerManifest(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Represents a cryptographically verifiable Distributed RPC substrate mapping within the Actor Model, binding an external Model Context Protocol (MCP) manifold into the swarm's local topology under strict Object-Capability (OCap) rules.
@@ -12131,6 +12161,70 @@ class DifferentiableLogicConstraint(CoreasonBaseState):
     )
 
 
+class FederatedSourceProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A declarative, frozen snapshot utilizing Topological Data Analysis (TDA) to quantify the shape and entropy of an exogenous data manifold prior to kinetic processing. As a ...Profile suffix, this defines a rigid mathematical boundary.
+
+    CAUSAL AFFORDANCE: Authorizes the orchestrator to preemptively calculate the thermodynamic compute budget (VRAM footprint and token limits) required to load the payload, bypassing execution if the volume exceeds hardware constraints.
+
+    EPISTEMIC BOUNDS: Spatial geometry is rigidly clamped by manifold_cardinality_nodes and manifold_cardinality_edges (ge=0, le=1000000000). The @model_validator validate_simplicial_geometry mathematically prevents the instantiation of impossible topologies (edges existing without nodes).
+
+    MCP ROUTING TRIGGERS: Topological Data Analysis, Betti Numbers, Shannon Entropy, Exogenous Manifold, Simplicial Complex
+    """
+
+    exogenous_dialect_uri: Annotated[str, StringConstraints(max_length=2048)] = Field(
+        description="The URI or structural pointer to the exogenous schema dialect."
+    )
+    manifold_cardinality_nodes: int = Field(
+        ge=0, le=1000000000, description="The absolute count of 0-simplices (entities/rows) in the source manifold."
+    )
+    manifold_cardinality_edges: int = Field(
+        ge=0,
+        le=1000000000,
+        description="The absolute count of 1-simplices (relationships/foreign keys) in the source manifold.",
+    )
+    shannon_entropy_index: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="A normalized scalar measuring the aleatoric noise (unstructured fields, nulls) within the payload.",
+    )
+
+    @model_validator(mode="after")
+    def validate_simplicial_geometry(self) -> Self:
+        if self.manifold_cardinality_edges > 0 and self.manifold_cardinality_nodes < 2:
+            raise ValueError(
+                "Topological Contradiction: A manifold with edges (> 0) must possess at least 2 nodes to form valid 1-simplices."
+            )
+        return self
+
+
+class TransmutationObservationEvent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A cryptographically frozen historical fact recording the passive assessment and topological profiling of an exogenous dataset prior to kinetic mutation. As an ...Event suffix, this is an append-only coordinate on the Merkle-DAG.
+
+    CAUSAL AFFORDANCE: Injects the verified exogenous structural profile into the EpistemicLedgerState, allowing the orchestrator to determine if the bayesian_surprise_score requires the escalation of Test-Time Compute (System 2) to resolve semantic ambiguity.
+
+    EPISTEMIC BOUNDS: The bayesian_surprise_score is strictly clamped to a continuous float space (ge=0.0, le=1.0). Topologically anchored to the event_cid (128-char CID regex).
+
+    MCP ROUTING TRIGGERS: Source Entropy Measurement, Passive Profiling, Kullback-Leibler Divergence, Epistemic Baseline, Bayesian Surprise
+    """
+
+    event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    prior_event_hash: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
+    ) = Field(default=None)
+    timestamp: float = Field(ge=0.0, le=253402300799.0)
+    type: Literal["transmutation_observation"] = Field(default="transmutation_observation")
+    observed_manifold: FederatedSourceProfile = Field(
+        description="The quantified geometric measurement of the exogenous dataset."
+    )
+    bayesian_surprise_score: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="The Kullback-Leibler divergence between the new exogenous manifold and the swarm's existing baseline.",
+    )
+
+
 type AnyStateEvent = Annotated[
     ObservationEvent
     | BeliefMutationEvent
@@ -12150,7 +12244,8 @@ type AnyStateEvent = Annotated[
     | CognitiveRewardEvaluationReceipt
     | EpistemicFlowStateReceipt
     | CausalExplanationEvent
-    | IntentClassificationReceipt,
+    | IntentClassificationReceipt
+    | TransmutationObservationEvent,
     Field(discriminator="type", description="A discriminated union of state events."),
 ]
 
@@ -12478,3 +12573,7 @@ NeurosymbolicInferenceRequest.model_rebuild()
 
 EpistemicUpsamplingTask.model_rebuild()
 VolumetricPartitionSubscription.model_rebuild()
+
+FederatedSourceProfile.model_rebuild()
+TransmutationObservationEvent.model_rebuild()
+EpistemicMappingContract.model_rebuild()
