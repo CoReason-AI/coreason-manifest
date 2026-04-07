@@ -8,11 +8,12 @@
 #
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
+from typing import Any
+
 from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import ValidationError
 
-from typing import Any
 from coreason_manifest.spec.ontology import AmbientState, MacroGridProfile, PresentationManifest
 
 
