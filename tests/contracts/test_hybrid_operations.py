@@ -20,7 +20,7 @@ from coreason_manifest.spec.ontology import (
     EpistemicProvenanceReceipt,
     InterventionIntent,
     InterventionPolicy,
-    TerminalCognitiveFailure,
+    CognitiveFailureEvent,
 )
 
 
@@ -71,7 +71,7 @@ def test_terminal_handoff_isomorphism() -> None:
     )
     critique = CognitiveCritiqueProfile(reasoning_trace_hash="a" * 64, epistemic_penalty_scalar=0.5)
 
-    failure = TerminalCognitiveFailure(
+    failure = CognitiveFailureEvent(
         source_entity=source_entity,
         last_rejected_hypothesis_hash="b" * 64,
         final_critique_schema=critique,

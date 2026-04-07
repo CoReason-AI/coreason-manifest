@@ -621,12 +621,15 @@ class SpatialReferenceFrameManifest(CoreasonBaseState):
     )
 
 
-class KinematicDerivativeTensor(CoreasonBaseState):
+class KinematicDerivativeState(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Kinematic Derivatives, Hermite Spline Extrapolation, Continuous Collision Detection, Newtonian Mechanics
-    CAUSAL AFFORDANCE: Kinematic Derivatives, Hermite Spline Extrapolation, Continuous Collision Detection, Newtonian Mechanics
-    EPISTEMIC BOUNDS: Kinematic Derivatives, Hermite Spline Extrapolation, Continuous Collision Detection, Newtonian Mechanics
-    MCP ROUTING TRIGGERS: Kinematic Derivatives, Hermite Spline Extrapolation, Continuous Collision Detection, Newtonian Mechanics
+    AGENT INSTRUCTION: Formalizes first and second-order temporal derivatives of spatial coordinate matrices to model continuous Euclidean momentum and rotational inertia. As a ...State suffix, this is a declarative, frozen snapshot of velocity and acceleration vectors.
+
+    CAUSAL AFFORDANCE: Authorizes the spatial kinematics engine to execute Hermite spline extrapolation and continuous collision detection for topological nodes in motion.
+
+    EPISTEMIC BOUNDS: Tensors are strictly bounded to 3D tuples for linear and angular derivatives. These tuples invoke the Topological Exemption and MUST NOT be sorted, as their geometric axis ordering (x, y, z) is their mathematical state.
+
+    MCP ROUTING TRIGGERS: Kinematic Derivatives, Hermite Spline Extrapolation, Continuous Collision Detection, Newtonian Mechanics, Velocity Tensor
     """
 
     linear_velocity: tuple[float, float, float] = Field(description="The 3D Euclidean velocity vector.")
@@ -668,7 +671,7 @@ class SE3TransformProfile(CoreasonBaseState):
     scale: float = Field(
         ge=0.0001, le=10000.0, default=1.0, description="Strictly positive uniform volumetric scaling factor."
     )
-    kinematic_derivatives: KinematicDerivativeTensor | None = Field(
+    kinematic_derivatives: KinematicDerivativeState | None = Field(
         default=None, description="Tensors governing continuous momentum and velocity."
     )
     dual_quaternion_motor: tuple[float, float, float, float, float, float, float, float] | None = Field(
@@ -719,9 +722,12 @@ class VolumetricBoundingProfile(CoreasonBaseState):
 
 class GaussianSplattingProfile(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Neural Radiance Fields, 3D Gaussian Splatting, Spherical Harmonics, Volumetric Rendering, Covariance Matrix
-    CAUSAL AFFORDANCE: Neural Radiance Fields, 3D Gaussian Splatting, Spherical Harmonics, Volumetric Rendering, Covariance Matrix
-    EPISTEMIC BOUNDS: Neural Radiance Fields, 3D Gaussian Splatting, Spherical Harmonics, Volumetric Rendering, Covariance Matrix
+    AGENT INSTRUCTION: Defines the mathematical covariance and spherical harmonic coefficients required to render non-polygonal volumetric topologies. As a ...Profile suffix, this is a declarative, frozen snapshot of a rendering geometry.
+
+    CAUSAL AFFORDANCE: Instructs the rendering engine to project dense point clouds as continuous probability distributions (splats) instead of discrete meshes, enabling real-time neural radiance approximations.
+
+    EPISTEMIC BOUNDS: The `spherical_harmonics_degree` is physically clamped (ge=0, le=3) to prevent GPU VRAM explosion during rasterization. The `opacity_alpha` is restricted to a normalized probability space (ge=0.0, le=1.0).
+
     MCP ROUTING TRIGGERS: Neural Radiance Fields, 3D Gaussian Splatting, Spherical Harmonics, Volumetric Rendering, Covariance Matrix
     """
 
@@ -1727,8 +1733,9 @@ class ContextualizedSourceEntity(CoreasonBaseState):
     )
     contextual_envelope: list[Annotated[str, StringConstraints(max_length=100000)]] = Field(
         max_length=10000,
-        description="The strictly bounded array of adjacent token clusters forming the semantic proximity matrix. AGENT INSTRUCTION: Topological Exemption applied. Do NOT sort this array, as its chronological/spatial sequence is its mathematical state.",
+        description="The strictly bounded array of adjacent token clusters forming the semantic proximity matrix.",
     )
+    # Note: contextual_envelope is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     source_system_provenance_flag: bool = Field(
         description="The mathematical boolean boundary indicating strict physical provenance to an external host."
     )
@@ -1759,11 +1766,12 @@ class EpistemicUpsamplingTask(CoreasonBaseState):
     justification_vectors: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
         min_length=1,
         max_length=1000,
-        description="The strictly ordered matrix of reasoning paths mathematically justifying the topological expansion. AGENT INSTRUCTION: Topological Exemption applied. Do NOT sort this array, as the chronological sequence of extraction acts as mathematical state.",
+        description="The strictly ordered matrix of reasoning paths mathematically justifying the topological expansion.",
     )
+    # Note: justification_vectors is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
 
 
-class DataFidelityReceipt(CoreasonBaseState):
+class EpistemicFidelityReceipt(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Mathematically computes and stores the pre-inference structural density calculations of the context.
 
@@ -5944,7 +5952,7 @@ type AnyPanelProfile = Annotated[
 ]
 
 
-class TerminalCognitiveFailure(CoreasonBaseState):
+class CognitiveFailureEvent(CoreasonBaseState):
     """
     AGENT INSTRUCTION: A terminal state object generated when the Proposer-Verifier macro-topology exhausts its max_revision_loops without achieving ontological alignment. Packages the failure state for HITL routing.
 
@@ -5996,7 +6004,7 @@ class InterventionIntent(CoreasonBaseState):
     adjudication_deadline: float = Field(
         ge=0.0, le=253402300799.0, description="The deadline for adjudication, represented as a UNIX timestamp."
     )
-    failure_context: TerminalCognitiveFailure | None = Field(
+    failure_context: CognitiveFailureEvent | None = Field(
         default=None, description="Packages the exact contextual state at the moment of computational failure."
     )
 
@@ -7282,7 +7290,8 @@ class EpistemicProvenanceReceipt(CoreasonBaseState):
     """
 
     fidelity_receipt_hash: Annotated[str, StringConstraints(max_length=64)] | None = Field(
-        default=None, description="Cryptographic pointer back to the DataFidelityReceipt generated at the Input Gate."
+        default=None,
+        description="Cryptographic pointer back to the EpistemicFidelityReceipt generated at the Input Gate.",
     )
     revision_loops_executed: int | None = Field(
         default=None,
@@ -10202,7 +10211,7 @@ class DAGTopologyManifest(CoreasonBaseState):
     )
     max_depth: int = Field(ge=1, le=256, description="The maximum recursive depth of the routing DAG.")
     max_fan_out: int = Field(ge=1, le=1024, description="The maximum number of parallel child nodes.")
-    speculative_boundaries: list[SpeculativeExecutionBoundary] = Field(
+    speculative_boundaries: list[SpeculativeExecutionProfile] = Field(
         default_factory=list, description="The deterministic speculative boundaries executing within the DAG."
     )
 
@@ -11346,7 +11355,7 @@ class ObservationEvent(CoreasonBaseState):
         default=None,
         description="The deterministic capability pointer representing the specific ToolInvocationEvent that spawned this observation, forming a strict bipartite directed edge.",
     )
-    continuous_stream: ContinuousObservationStream | None = Field(
+    continuous_stream: ContinuousObservationState | None = Field(
         default=None, description="Buffers real-time audio/video or continuous token streams."
     )
     disfluency_rules: StreamingDisfluencyContract | None = Field(
@@ -12168,7 +12177,7 @@ type AnyStateEvent = Annotated[
 ]
 
 
-class ContinuousObservationStream(CoreasonBaseState):
+class ContinuousObservationState(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Defines the geometric snapshot of a continuous stream and its "forget gate" disfluency rules, acting as a declarative snapshot of continuous token flows.
 
@@ -12223,7 +12232,7 @@ class StreamingDisfluencyContract(CoreasonBaseState):
     )
 
 
-class SpeculativeExecutionBoundary(CoreasonBaseState):
+class SpeculativeExecutionProfile(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Defines the structural boundary for executing graph nodes probabilistically, enabling speculative execution branches and time-rewinding geometry.
 
@@ -12409,9 +12418,9 @@ ReasoningEngineeringPolicy.model_rebuild()
 KinematicNoiseProfile.model_rebuild()
 EnvironmentalSpoofingProfile.model_rebuild()
 AdversarialEmulationProfile.model_rebuild()
-ContinuousObservationStream.model_rebuild()
+ContinuousObservationState.model_rebuild()
 StreamingDisfluencyContract.model_rebuild()
-SpeculativeExecutionBoundary.model_rebuild()
+SpeculativeExecutionProfile.model_rebuild()
 EpistemicLedgerState.model_rebuild()
 PresentationManifest.model_rebuild()
 DynamicManifoldProjectionManifest.model_rebuild()
@@ -12432,7 +12441,7 @@ KinematicDeltaManifest.model_rebuild()
 SpatialBillboardContract.model_rebuild()
 VolumetricEdgeProfile.model_rebuild()
 GaussianSplattingProfile.model_rebuild()
-KinematicDerivativeTensor.model_rebuild()
+KinematicDerivativeState.model_rebuild()
 SemanticZoomProfile.model_rebuild()
 MarkovBlanketRenderingPolicy.model_rebuild()
 TelemetryBackpressureContract.model_rebuild()
@@ -12466,7 +12475,7 @@ class NeurosymbolicInferenceRequest(CoreasonBaseState):
     source_entity: ContextualizedSourceEntity = Field(
         description="The structurally isolated 1D boundary representing the semantic payload injected into the context window."
     )
-    fidelity_receipt: DataFidelityReceipt = Field(
+    fidelity_receipt: EpistemicFidelityReceipt = Field(
         description="The immutable scalar matrix capturing pre-inference mathematical contextual completeness."
     )
     uncertainty_profile: CognitiveUncertaintyProfile = Field(
@@ -12486,7 +12495,7 @@ class NeurosymbolicInferenceRequest(CoreasonBaseState):
 
 
 ContextualizedSourceEntity.model_rebuild()
-DataFidelityReceipt.model_rebuild()
+EpistemicFidelityReceipt.model_rebuild()
 NeurosymbolicInferenceRequest.model_rebuild()
 
 EpistemicUpsamplingTask.model_rebuild()
