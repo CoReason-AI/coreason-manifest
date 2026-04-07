@@ -23,6 +23,7 @@ from coreason_manifest.spec.ontology import AmbientState, MacroGridProfile, Pres
 )
 def test_fractional_grid_topology_contradiction(column_weights: list[float]) -> None:
     layout_matrix = [["p1", "p2", "p3"], ["p4", "p5", "p6"], ["p7", "p8", "p9"]]
+    row_weights = column_weights
     # Valid dummy panels so we don't trigger missing required fields or invalid panel validation
     panels: Any = [
         {
@@ -41,6 +42,7 @@ def test_fractional_grid_topology_contradiction(column_weights: list[float]) -> 
         {"type": "insight_card", "panel_cid": "p9", "title": "Title 9", "markdown_content": "Content 9"},
     ]
 
+    # First check column failure
     try:
         MacroGridProfile(layout_matrix=layout_matrix, column_fractional_weights=column_weights, panels=panels)
     except ValidationError as e:
@@ -48,6 +50,15 @@ def test_fractional_grid_topology_contradiction(column_weights: list[float]) -> 
             raise AssertionError(f"Expected verify_matrix_dimensions validation error, got: {e}") from e
     else:
         raise AssertionError("ValidationError not raised for invalid column_fractional_weights length")
+
+    # Second check row failure
+    try:
+        MacroGridProfile(layout_matrix=layout_matrix, row_fractional_weights=row_weights, panels=panels)
+    except ValidationError as e:
+        if "Topological Contradiction" not in str(e):
+            raise AssertionError(f"Expected verify_matrix_dimensions validation error, got: {e}") from e
+    else:
+        raise AssertionError("ValidationError not raised for invalid row_fractional_weights length")
 
 
 @given(st.floats(max_value=-0.01) | st.floats(min_value=1.01))
