@@ -23,6 +23,8 @@ from coreason_manifest.spec.ontology import HTTPTransportProfile, SSETransportPr
         "http://169.254.169.254/",
         "http://192.168.1.1/",
         "http://localtest.me/",
+        "http://127.0.0.1.nip.io/",
+        "http://[0:0:0:0:0:FFFF:127.0.0.1]/",
     ],
 )
 def test_http_transport_profile_ssrf(url: str) -> None:
@@ -42,6 +44,8 @@ def test_http_transport_profile_ssrf(url: str) -> None:
         "http://169.254.169.254/",
         "http://192.168.1.1/",
         "http://localtest.me/",
+        "http://127.0.0.1.nip.io/",
+        "http://[0:0:0:0:0:FFFF:127.0.0.1]/",
     ],
 )
 def test_sse_transport_profile_ssrf(url: str) -> None:
