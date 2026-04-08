@@ -18,19 +18,12 @@ classifiers = [
 ]
 dependencies = [
     "pydantic>=2.12.5",
-    "typer>=0.24.0",
-    "libcst>=1.8.6",
     "networkx>=3.6",
     "jsonpatch>=1.33",
     "numpy>=2.4",
     "canonicaljson>=2.0.0",
     "nh3>=0.2.17",
 ]
-
-[tool.uv]
-
-[project.scripts]
-coreason-manifest = "coreason_manifest.cli.main:app"
 
 [project.urls]
 Homepage = "https://github.com/CoReason-AI/coreason_manifest"
