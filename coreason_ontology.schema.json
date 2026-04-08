@@ -52,6 +52,7 @@
       "type": "object"
     },
     "AcceleratorType": {
+      "description": "AGENT INSTRUCTION: Maps abstract Tensor Calculus to the actual physical silicon limits of hardware accelerators.\n\nCAUSAL AFFORDANCE: Allows the orchestrator to verify compatibility between a requested execution graph and the available physical hardware tensors.\n\nEPISTEMIC BOUNDS: The literal automaton physically restricts the data type assignments to FP8_TENSOR, BF16_TENSOR, or CUDA_FP32.\n\nMCP ROUTING TRIGGERS: Hardware Accelerator, Tensor Calculus, GPU Execution, Physical Silicon, Hardware Topology",
       "enum": [
         "FP8_TENSOR",
         "BF16_TENSOR",
@@ -2316,7 +2317,7 @@
     },
     "CapabilityForgeTopologyManifest": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Create a zero-cost macro abstraction that unrolls the entire Zero-to-One generation, verification, and profiling loop.",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Create a zero-cost macro abstraction that unrolls the entire Zero-to-One generation, verification, and profiling loop.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator to dynamically synthesize a directed execution graph (DAGTopologyManifest) that formalizes the proposer-verifier neurosymbolic pipeline.\n\nEPISTEMIC BOUNDS: The generator node must strictly pass output to the formal verifier node to prevent hallucinated logic from executing on the main graph.\n\nMCP ROUTING TRIGGERS: Macro Abstraction, Capability Forge, DAG Synthesis, Formal Verification, Zero-to-One Generation",
       "properties": {
         "epistemic_enforcement": {
           "anyOf": [
@@ -3521,6 +3522,7 @@
       "type": "object"
     },
     "ComputeTier": {
+      "description": "AGENT INSTRUCTION: Mathematically aligns abstract Tensor Calculus with rigid Von Neumann Memory Hierarchy limits.\n\nCAUSAL AFFORDANCE: Empowers the orchestrator to preemptively calculate exact thermodynamic and spatial memory exhaustion limits (VRAM footprint) prior to authorizing the download or projection of N-dimensional tensor payloads.\n\nEPISTEMIC BOUNDS: The literal automaton prevents the execution graph from hallucinating non-standard or unsupported silicon data types.\n\nMCP ROUTING TRIGGERS: Hardware Topology, Von Neumann Architecture, Compute Tier, Epistemic Bounding, VRAM Isolation",
       "enum": [
         "KINETIC",
         "ORACLE"
@@ -6892,6 +6894,7 @@
       "type": "object"
     },
     "EpistemicSecurity": {
+      "description": "AGENT INSTRUCTION: Specifies the exact hardware root-of-trust and network isolation boundaries required for epistemic confidence.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator to map nodes into either standard logical boundaries or isolated trusted execution environments (CONFIDENTIAL).\n\nEPISTEMIC BOUNDS: Severely restricts the security mode to STANDARD or CONFIDENTIAL via a strict literal automaton.\n\nMCP ROUTING TRIGGERS: Trusted Execution Environment, Epistemic Security, Hardware Isolation, Root-of-Trust, Cryptographic Boundary",
       "enum": [
         "STANDARD",
         "CONFIDENTIAL"
