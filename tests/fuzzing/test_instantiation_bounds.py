@@ -23,7 +23,6 @@ from coreason_manifest.spec.ontology import (
     ComputeTier,
     ContextualizedSourceEntity,
     DAGTopologyManifest,
-    DataFidelityReceipt,
     EpistemicCompressionSLA,
     EpistemicSecurity,
     EpistemicSecurityProfile,
@@ -36,6 +35,7 @@ from coreason_manifest.spec.ontology import (
     StateHydrationManifest,
     TaskAnnouncementIntent,
     TaxonomicRoutingPolicy,
+    TopologicalFidelityReceipt,
     VolumetricBoundingProfile,
 )
 
@@ -108,7 +108,7 @@ def invalid_volumetric_bounds_st(draw: st.DrawFn) -> tuple[float, float, float]:
 def test_volumetric_bounding_profile_fuzzing(extents: tuple[float, float, float]) -> None:
     """Geometric/Spatial Fuzzing: Generate invalid extents for VolumetricBoundingProfile."""
     extents_x, extents_y, extents_z = extents
-    transform = SE3TransformProfile(reference_frame_id="frame", x=0, y=0, z=0)
+    transform = SE3TransformProfile(reference_frame_cid="frame", x=0, y=0, z=0)
 
     with pytest.raises((ValidationError, ValueError)):
         VolumetricBoundingProfile(
@@ -350,7 +350,7 @@ def test_refusal_to_reason_fuzzing(epistemic_gap: float, min_fidelity_threshold:
         contextual_envelope=[],
         source_system_provenance_flag=False,
     )
-    fidelity_receipt = DataFidelityReceipt(
+    fidelity_receipt = TopologicalFidelityReceipt(
         contextual_completeness_score=0.0,
         surrounding_token_density=token_density,
     )
@@ -407,7 +407,7 @@ def test_data_fidelity_receipt_positive_token_density() -> None:
     from pydantic import ValidationError
 
     with pytest.raises(ValidationError):
-        DataFidelityReceipt(
+        TopologicalFidelityReceipt(
             contextual_completeness_score=1.0,
             surrounding_token_density=-1,
         )

@@ -78,7 +78,7 @@ def state_mutation_intent_st(draw: st.DrawFn) -> StateMutationIntent:
 @settings(max_examples=1000, deadline=None)
 def test_apply_state_differential_fuzz(base_state: dict[str, Any], patches: list[StateMutationIntent]) -> None:
     manifest = StateDifferentialManifest(
-        diff_id="a" * 128, author_node_id="a" * 128, lamport_timestamp=1, vector_clock={}, patches=patches
+        diff_cid="a" * 128, author_node_cid="a" * 128, lamport_timestamp=1, vector_clock={}, patches=patches
     )
 
     original_state = copy.deepcopy(base_state)
@@ -104,8 +104,12 @@ def test_calculate_latent_alignment_fuzz(v1_floats: list[float], v2_floats: list
     v1_packed = struct.pack(f"<{dim}f", *v1_floats)
     v2_packed = struct.pack(f"<{dim}f", *v2_floats)
 
-    v1 = VectorEmbeddingState(vector_base64=base64.b64encode(v1_packed).decode(), dimensionality=dim, model_name="fuzz")
-    v2 = VectorEmbeddingState(vector_base64=base64.b64encode(v2_packed).decode(), dimensionality=dim, model_name="fuzz")
+    v1 = VectorEmbeddingState(
+        vector_base64=base64.b64encode(v1_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
+    )
+    v2 = VectorEmbeddingState(
+        vector_base64=base64.b64encode(v2_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
+    )
 
     policy = OntologicalAlignmentPolicy.model_construct(
         min_cosine_similarity=-1.0,
@@ -141,10 +145,10 @@ def test_calculate_latent_alignment_edge_cases() -> None:
             v1_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
             v2_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
             v1 = VectorEmbeddingState(
-                vector_base64=base64.b64encode(v1_packed).decode(), dimensionality=dim, model_name="fuzz"
+                vector_base64=base64.b64encode(v1_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
             )
             v2 = VectorEmbeddingState(
-                vector_base64=base64.b64encode(v2_packed).decode(), dimensionality=dim, model_name="fuzz"
+                vector_base64=base64.b64encode(v2_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
             )
             assert calculate_latent_alignment(v1, v2, policy) == 1.0
 
@@ -155,10 +159,10 @@ def test_calculate_latent_alignment_edge_cases() -> None:
             v1_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
             v2_packed = struct.pack(f"<{dim}f", -1.0, 0.0)
             v1 = VectorEmbeddingState(
-                vector_base64=base64.b64encode(v1_packed).decode(), dimensionality=dim, model_name="fuzz"
+                vector_base64=base64.b64encode(v1_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
             )
             v2 = VectorEmbeddingState(
-                vector_base64=base64.b64encode(v2_packed).decode(), dimensionality=dim, model_name="fuzz"
+                vector_base64=base64.b64encode(v2_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
             )
             assert calculate_latent_alignment(v1, v2, policy) == -1.0
 
@@ -169,10 +173,10 @@ def test_calculate_latent_alignment_edge_cases() -> None:
             v1_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
             v2_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
             v1 = VectorEmbeddingState(
-                vector_base64=base64.b64encode(v1_packed).decode(), dimensionality=dim, model_name="fuzz"
+                vector_base64=base64.b64encode(v1_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
             )
             v2 = VectorEmbeddingState(
-                vector_base64=base64.b64encode(v2_packed).decode(), dimensionality=dim, model_name="fuzz"
+                vector_base64=base64.b64encode(v2_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
             )
             assert calculate_latent_alignment(v1, v2, policy) == 0.0
 

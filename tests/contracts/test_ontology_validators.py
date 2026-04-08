@@ -26,7 +26,6 @@ from coreason_manifest.spec.ontology import (
     ConstrainedDecodingPolicy,
     ContextualizedSourceEntity,
     CoreasonBaseState,
-    DataFidelityReceipt,
     DefeasibleCascadeEvent,
     DynamicLayoutManifest,
     EphemeralNamespacePartitionState,
@@ -35,7 +34,6 @@ from coreason_manifest.spec.ontology import (
     EpistemicSecurityProfile,
     EpistemicUpsamplingTask,
     GradingCriterionProfile,
-    InformationClassificationProfile,
     LatentSmoothingProfile,
     MultimodalTokenAnchorState,
     NeurosymbolicInferenceRequest,
@@ -47,7 +45,9 @@ from coreason_manifest.spec.ontology import (
     SaeLatentPolicy,
     SE3TransformProfile,
     SecureSubSessionState,
+    SemanticClassificationProfile,
     SpatialHardwareProfile,
+    TopologicalFidelityReceipt,
     ViewportProjectionContract,
     VolumetricBoundingProfile,
 )
@@ -84,7 +84,7 @@ def test_coreason_base_state_hash() -> None:
 @settings(max_examples=100, suppress_health_check=[HealthCheck.too_slow])
 def test_spatial_bounds_fuzzing(extents_x: float, extents_y: float, extents_z: float) -> None:
     """Mathematically prove the 3D plane logic strictly rejects impossible Euclidean geometries."""
-    transform = SE3TransformProfile(reference_frame_id="frame", x=0, y=0, z=0)
+    transform = SE3TransformProfile(reference_frame_cid="frame", x=0, y=0, z=0)
     if extents_x * extents_y * extents_z == 0.0:
         with pytest.raises(ValidationError, match=r"strictly greater than 0"):
             VolumetricBoundingProfile(
@@ -100,31 +100,31 @@ def test_spatial_bounds_fuzzing(extents_x: float, extents_y: float, extents_z: f
 def test_se3_transform_quaternion_validation() -> None:
     # Magnitude 0.0
     with pytest.raises(ValidationError, match="Quaternion cannot be a zero vector"):
-        SE3TransformProfile(reference_frame_id="frame", x=0, y=0, z=0, qx=0.0, qy=0.0, qz=0.0, qw=0.0)
+        SE3TransformProfile(reference_frame_cid="frame", x=0, y=0, z=0, qx=0.0, qy=0.0, qz=0.0, qw=0.0)
 
     # Not normalized
     with pytest.raises(ValidationError, match="Quaternion magnitude is"):
-        SE3TransformProfile(reference_frame_id="frame", x=0, y=0, z=0, qx=1.0, qy=1.0, qz=1.0, qw=1.0)
+        SE3TransformProfile(reference_frame_cid="frame", x=0, y=0, z=0, qx=1.0, qy=1.0, qz=1.0, qw=1.0)
 
 
 def test_viewport_projection_validation() -> None:
     # Clipping plane near >= far
     with pytest.raises(ValidationError, match=r"clipping_plane_near must be strictly less than clipping_plane_far\."):
         ViewportProjectionContract(
-            projection_type="perspective", clipping_plane_near=0.5, clipping_plane_far=0.1, field_of_view_degrees=90.0
+            projection_class="perspective", clipping_plane_near=0.5, clipping_plane_far=0.1, field_of_view_degrees=90.0
         )
 
     # Perspective without FOV
     with pytest.raises(
         ValidationError, match=r"Perspective projection mathematically requires field_of_view_degrees\."
     ):
-        ViewportProjectionContract(projection_type="perspective", clipping_plane_near=0.1, clipping_plane_far=10.0)
+        ViewportProjectionContract(projection_class="perspective", clipping_plane_near=0.1, clipping_plane_far=10.0)
 
     # Valid configurations
     ViewportProjectionContract(
-        projection_type="perspective", clipping_plane_near=0.1, clipping_plane_far=10.0, field_of_view_degrees=90.0
+        projection_class="perspective", clipping_plane_near=0.1, clipping_plane_far=10.0, field_of_view_degrees=90.0
     )
-    ViewportProjectionContract(projection_type="orthographic", clipping_plane_near=0.1, clipping_plane_far=10.0)
+    ViewportProjectionContract(projection_class="orthographic", clipping_plane_near=0.1, clipping_plane_far=10.0)
 
 
 # --- 3. Byzantine Fault Tolerance Fuzzing ---
@@ -247,7 +247,7 @@ def test_compute_engine_profile_sorting() -> None:
         magnitude_unit="USD",
     )
     profile = ComputeEngineProfile(
-        model_name="test-model",
+        foundation_matrix_name="test-model",
         provider="test-provider",
         context_window_size=8192,
         capabilities=["write", "read", "execute", "analyze"],
@@ -298,7 +298,7 @@ def test_adjudication_rubric_profile_sorting() -> None:
 def test_redaction_policy_sorting() -> None:
     policy = RedactionPolicy(
         rule_cid="r1",
-        classification=InformationClassificationProfile.PUBLIC,
+        classification=SemanticClassificationProfile.PUBLIC,
         target_pattern="email",
         target_regex_pattern=".*",
         context_exclusion_zones=["/path/z", "/path/a"],
@@ -454,7 +454,7 @@ def test_browser_dom_state_safety_invalid_fuzzing(bogon: str) -> None:
 def test_defeasible_cascade_event_sorting() -> None:
     event = DefeasibleCascadeEvent(
         cascade_id="c1",
-        root_falsified_event_id="e1",
+        root_falsified_event_cid="e1",
         propagated_decay_factor=0.5,
         quarantined_event_cids=["z", "a", "x"],
     )
@@ -462,7 +462,9 @@ def test_defeasible_cascade_event_sorting() -> None:
 
 
 def test_rollback_intent_sorting() -> None:
-    intent = RollbackIntent(request_id="r1", target_event_id="e1", invalidated_node_cids=["node_c", "node_a", "node_b"])
+    intent = RollbackIntent(
+        request_cid="r1", target_event_cid="e1", invalidated_node_cids=["node_c", "node_a", "node_b"]
+    )
     assert intent.invalidated_node_cids == ["node_a", "node_b", "node_c"]
 
 
@@ -473,7 +475,7 @@ def test_multimodal_token_anchor_state_sorting() -> None:
 
 def test_secure_sub_session_state_sorting() -> None:
     state = SecureSubSessionState(
-        session_id="session1",
+        session_cid="session1",
         allowed_vault_keys=["vault_z", "vault_a", "vault_m"],
         max_ttl_seconds=3600,
         description="test session",
@@ -507,11 +509,11 @@ def test_ephemeral_namespace_partition_state_invalid_hash() -> None:
 
 
 def test_bilateral_sla_sorting() -> None:
-    from coreason_manifest.spec.ontology import FederatedBilateralSLA, InformationClassificationProfile
+    from coreason_manifest.spec.ontology import FederatedBilateralSLA, SemanticClassificationProfile
 
     sla = FederatedBilateralSLA(
         receiving_tenant_id="tenant-a",
-        max_permitted_classification=InformationClassificationProfile.PUBLIC,
+        max_permitted_classification=SemanticClassificationProfile.PUBLIC,
         liability_limit_magnitude=1000,
         permitted_geographic_regions=["us-west", "eu-central", "ap-south"],
     )
@@ -534,7 +536,7 @@ def test_adjudication_intent_sorting() -> None:
 
     intent = AdjudicationIntent(
         deadlocked_claims=["claim_3", "claim_1", "claim_2"],
-        resolution_schema={"type": "string"},
+        resolution_schema={"topology_class": "string"},
         timeout_action="rollback",
     )
     assert intent.deadlocked_claims == ["claim_1", "claim_2", "claim_3"]
@@ -580,18 +582,18 @@ def test_action_space_manifest_enforce_canonical_sort() -> None:
     )
 
     tool1 = SpatialToolManifest(
-        type="native_tool",
+        topology_class="native_tool",
         tool_name="tool_b",
         description="description",
-        input_schema={"type": "object", "properties": {}},
+        input_schema={"topology_class": "object", "properties": {}},
         side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
         permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
     )
     tool2 = SpatialToolManifest(
-        type="native_tool",
+        topology_class="native_tool",
         tool_name="tool_a",
         description="description 2",
-        input_schema={"type": "object", "properties": {}},
+        input_schema={"topology_class": "object", "properties": {}},
         side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
         permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
     )
@@ -880,7 +882,7 @@ def test_refusal_to_reason_enforcement() -> None:
         contextual_envelope=[],
         source_system_provenance_flag=False,
     )
-    fidelity_receipt = DataFidelityReceipt(
+    fidelity_receipt = TopologicalFidelityReceipt(
         contextual_completeness_score=0.0,
         surrounding_token_density=0,
     )
@@ -914,7 +916,7 @@ def test_successful_epistemic_grounding() -> None:
         contextual_envelope=["patient chart", "medication order"],
         source_system_provenance_flag=True,
     )
-    fidelity_receipt = DataFidelityReceipt(
+    fidelity_receipt = TopologicalFidelityReceipt(
         contextual_completeness_score=0.9,
         surrounding_token_density=10,
     )

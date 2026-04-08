@@ -23,7 +23,9 @@ from coreason_manifest.spec.ontology import ExecutionNodeReceipt
 def test_execution_node_receipt_orphaned_lineage() -> None:
     """Prove the receipt structurally rejects orphaned lineages."""
     with pytest.raises(ValidationError, match="Orphaned Lineage"):
-        ExecutionNodeReceipt(request_id="req-1", parent_request_id="req-0", root_request_id=None, inputs={}, outputs={})
+        ExecutionNodeReceipt(
+            request_cid="req-1", parent_request_id="req-0", root_request_id=None, inputs={}, outputs={}
+        )
 
 
 # 2. Define the Valid Mathematical Space for Payloads
@@ -44,14 +46,14 @@ def test_execution_node_receipt_hash_determinism(payload: Any) -> None:
     """
     # Base node instantiation
     node_1 = ExecutionNodeReceipt(
-        request_id="req-hash-test", inputs=payload, outputs=payload, parent_hashes=["hashA", "hashB"]
+        request_cid="req-hash-test", inputs=payload, outputs=payload, parent_hashes=["hashA", "hashB"]
     )
 
     # Create a semantically identical node by dumping/loading
     # to simulate chaotic dict insertion orders over network boundaries
     scrambled_payload = json.loads(json.dumps(payload))
     node_2 = ExecutionNodeReceipt(
-        request_id="req-hash-test",
+        request_cid="req-hash-test",
         inputs=scrambled_payload,
         outputs=scrambled_payload,
         parent_hashes=["hashA", "hashB"],
