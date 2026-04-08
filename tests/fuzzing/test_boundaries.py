@@ -502,15 +502,15 @@ def test_scale_policy(type_val: Any, domain_min: float | None, domain_max: float
 # --- NDimensionalTensorManifest ---
 @given(
     shape=st.lists(st.integers(min_value=-1, max_value=10), min_size=0, max_size=5),
-    structural_type=st.sampled_from(list(TensorStructuralFormatProfile)),
+    structural_format=st.sampled_from(list(TensorStructuralFormatProfile)),
 )
-def test_ndimensional_tensor_manifest(shape: list[int], structural_type: Any) -> None:
+def test_ndimensional_tensor_manifest(shape: list[int], structural_format: Any) -> None:
     valid = True
     if len(shape) < 1 or any(dim <= 0 for dim in shape):
         valid = False
 
     if valid:
-        bytes_per_element = structural_type.bytes_per_element
+        bytes_per_element = structural_format.bytes_per_element
         vram_footprint_bytes = math.prod(shape) * bytes_per_element
     else:
         vram_footprint_bytes = 10
@@ -521,7 +521,7 @@ def test_ndimensional_tensor_manifest(shape: list[int], structural_type: Any) ->
     if valid:
         NDimensionalTensorManifest(
             shape=tuple(shape),
-            structural_type=structural_type,
+            structural_format=structural_format,
             vram_footprint_bytes=vram_footprint_bytes,
             merkle_root=merkle_root,
             storage_uri=storage_uri,
@@ -530,7 +530,7 @@ def test_ndimensional_tensor_manifest(shape: list[int], structural_type: Any) ->
         with pytest.raises((ValueError, ValidationError)):
             NDimensionalTensorManifest(
                 shape=tuple(shape),
-                structural_type=structural_type,
+                structural_format=structural_format,
                 vram_footprint_bytes=vram_footprint_bytes,
                 merkle_root=merkle_root,
                 storage_uri=storage_uri,

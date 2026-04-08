@@ -21,13 +21,13 @@ from coreason_manifest.spec.ontology import (
     CognitiveSystemNodeProfile,
     CognitiveUncertaintyProfile,
     ComputeTierProfile,
-    ContextualizedSourceEntity,
+    ContextualizedSourceState,
     DAGTopologyManifest,
     EpistemicCompressionSLA,
     EpistemicSecurityPolicy,
     EpistemicSecurityProfile,
     MultimodalTokenAnchorState,
-    NeurosymbolicInferenceRequest,
+    NeurosymbolicInferenceIntent,
     ObservationEvent,
     QuorumPolicy,
     SE3TransformProfile,
@@ -345,7 +345,7 @@ def test_fuzz_network_topology_paradox(egress_obfuscation: bool, network_isolati
     token_density=st.integers(min_value=0, max_value=5),  # simulating context truncation
 )
 def test_refusal_to_reason_fuzzing(epistemic_gap: float, min_fidelity_threshold: float, token_density: int) -> None:
-    source_entity = ContextualizedSourceEntity(
+    source_entity = ContextualizedSourceState(
         target_string="Discharge",
         contextual_envelope=[],
         source_system_provenance_flag=False,
@@ -370,7 +370,7 @@ def test_refusal_to_reason_fuzzing(epistemic_gap: float, min_fidelity_threshold:
     from pydantic import ValidationError
 
     with pytest.raises(ValidationError):
-        NeurosymbolicInferenceRequest(
+        NeurosymbolicInferenceIntent(
             source_entity=source_entity,
             fidelity_receipt=fidelity_receipt,
             uncertainty_profile=uncertainty_profile,
@@ -382,21 +382,21 @@ def test_contextualized_source_entity_lengths() -> None:
     from pydantic import ValidationError
 
     with pytest.raises(ValidationError):
-        ContextualizedSourceEntity(
+        ContextualizedSourceState(
             target_string="x" * 100001,
             contextual_envelope=[],
             source_system_provenance_flag=False,
         )
 
     with pytest.raises(ValidationError):
-        ContextualizedSourceEntity(
+        ContextualizedSourceState(
             target_string="Valid",
             contextual_envelope=["x"] * 10001,
             source_system_provenance_flag=False,
         )
 
     with pytest.raises(ValidationError):
-        ContextualizedSourceEntity(
+        ContextualizedSourceState(
             target_string="Valid",
             contextual_envelope=["x" * 100001],
             source_system_provenance_flag=False,
