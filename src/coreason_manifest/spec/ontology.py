@@ -12601,7 +12601,8 @@ LiquidTypeContract.model_rebuild()
 HoareLogicProofReceipt.model_rebuild()
 AsymptoticComplexityReceipt.model_rebuild()
 TeleologicalIsometryReceipt.model_rebuild()
-
+InterventionIntent.model_rebuild()
+TerminalCognitiveEvent.model_rebuild()
 
 class NeurosymbolicInferenceIntent(CoreasonBaseState):
     r"""
