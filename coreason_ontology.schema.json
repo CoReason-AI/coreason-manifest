@@ -8677,7 +8677,7 @@
     },
     "GaussianSplattingProfile": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Neural Radiance Fields, 3D Gaussian Splatting, Spherical Harmonics, Volumetric Rendering, Covariance Matrix\nCAUSAL AFFORDANCE: Neural Radiance Fields, 3D Gaussian Splatting, Spherical Harmonics, Volumetric Rendering, Covariance Matrix\nEPISTEMIC BOUNDS: Neural Radiance Fields, 3D Gaussian Splatting, Spherical Harmonics, Volumetric Rendering, Covariance Matrix\nMCP ROUTING TRIGGERS: Neural Radiance Fields, 3D Gaussian Splatting, Spherical Harmonics, Volumetric Rendering, Covariance Matrix",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines a single localized 3D Gaussian ellipsoid for volumetric rendering in Neural Radiance Fields.\n\nCAUSAL AFFORDANCE: Authorizes the rendering engine to spatially rasterize point-based continuous geometries using view-dependent spherical harmonics and anisotropic covariance scaling.\n\nEPISTEMIC BOUNDS: The `spherical_harmonics_degree` is physically clamped (`ge=0, le=3`) to prevent VRAM exhaustion. The `opacity_alpha` parameter is rigidly clamped between `ge=0.0, le=1.0`. The `covariance_scale` utilizes a Topological Exemption against array sorting.\n\nMCP ROUTING TRIGGERS: Neural Radiance Fields, 3D Gaussian Splatting, Spherical Harmonics, Volumetric Rendering, Covariance Matrix",
       "properties": {
         "spherical_harmonics_degree": {
           "description": "Capped at 3 to physically prevent VRAM explosion during WebGL rasterization.",
@@ -10278,7 +10278,7 @@
     },
     "KinematicDerivativeProfile": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Kinematic Derivatives, Hermite Spline Extrapolation, Continuous Collision Detection, Newtonian Mechanics\nCAUSAL AFFORDANCE: Kinematic Derivatives, Hermite Spline Extrapolation, Continuous Collision Detection, Newtonian Mechanics\nEPISTEMIC BOUNDS: Kinematic Derivatives, Hermite Spline Extrapolation, Continuous Collision Detection, Newtonian Mechanics\nMCP ROUTING TRIGGERS: Kinematic Derivatives, Hermite Spline Extrapolation, Continuous Collision Detection, Newtonian Mechanics",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements continuous Newtonian Mechanics by defining first and second order derivatives (velocity and acceleration) for both linear and angular motion.\n\nCAUSAL AFFORDANCE: Instructs the spatial rendering engine to extrapolate future positions and rotations using Hermite Spline Extrapolation for continuous collision detection and smooth kinematics.\n\nEPISTEMIC BOUNDS: The physics are defined via `linear_velocity`, `angular_velocity`, `linear_acceleration`, and `angular_acceleration` arrays. These utilize a Topological Exemption preventing array sorting to mathematically preserve Euclidean vectors.\n\nMCP ROUTING TRIGGERS: Kinematic Derivatives, Hermite Spline Extrapolation, Continuous Collision Detection, Newtonian Mechanics",
       "properties": {
         "linear_velocity": {
           "description": "The 3D Euclidean velocity vector.",
