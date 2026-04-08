@@ -160,7 +160,7 @@ type CrossoverMechanismProfile = Literal["uniform_blend", "single_point", "heuri
 _CLEARANCE_MAPPING: dict[str, int] = {"public": 0, "internal": 1, "confidential": 2, "restricted": 3}
 
 
-class ComputeTier(StrEnum):
+class ComputeTierProfile(StrEnum):
     """
     AGENT INSTRUCTION: Categorizes the latency and reasoning depth of a given logical node, physically segregating cheap syntactic execution from heavy semantic computation.
 
@@ -191,7 +191,7 @@ class AcceleratorProfile(StrEnum):
     CUDA_FP32 = "CUDA_FP32"
 
 
-class EpistemicSecurity(StrEnum):
+class EpistemicSecurityPolicy(StrEnum):
     """
     AGENT INSTRUCTION: Defines the minimum cryptographic isolation perimeter required for this node's thermodynamic execution.
 
@@ -485,7 +485,7 @@ def _inject_workflow_examples(schema: dict[str, Any]) -> None:
     ]
 
 
-class RefusalToReasonError(ValueError):
+class RefusalToReasonEvent(ValueError):
     """
     AGENT INSTRUCTION: Exception raised when inference is aborted due to severe semantic degradation.
 
@@ -6261,13 +6261,13 @@ class SpatialHardwareProfile(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Instructs the orchestrator's provisioning layer to allocate exact silicon resources (Compute Tier, VRAM, and Accelerator Type) before allowing the node to execute generative operations.
 
-    EPISTEMIC BOUNDS: VRAM allocation is physically bounded by min_vram_gb (gt=0.0). The literal enumerations ComputeTier and AcceleratorProfile mathematically prevent the hallucination of non-existent silicon. The provider_whitelist is deterministically sorted for invariant RFC 8785 hashing.
+    EPISTEMIC BOUNDS: VRAM allocation is physically bounded by min_vram_gb (gt=0.0). The literal enumerations ComputeTierProfile and AcceleratorProfile mathematically prevent the hallucination of non-existent silicon. The provider_whitelist is deterministically sorted for invariant RFC 8785 hashing.
 
     MCP ROUTING TRIGGERS: Thermodynamic Bounding, VRAM Allocation, Spot Market Routing, Hardware Provisioning, Silicon Constraints
     """
 
-    compute_tier: ComputeTier = Field(
-        default=ComputeTier.KINETIC,
+    compute_tier: ComputeTierProfile = Field(
+        default=ComputeTierProfile.KINETIC,
         description="The discrete architectural boundary of the node (KINETIC for edge/consumer, ORACLE for datacenter).",
     )
     min_vram_gb: float = Field(
@@ -6301,8 +6301,8 @@ class EpistemicSecurityProfile(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Sovereign Execution, Trusted Execution Environment, Egress Obfuscation, Mixnet Routing, Network Isolation
     """
 
-    epistemic_security: EpistemicSecurity = Field(
-        default=EpistemicSecurity.STANDARD,
+    epistemic_security: EpistemicSecurityPolicy = Field(
+        default=EpistemicSecurityPolicy.STANDARD,
         description="The level of hardware-enforced cryptographic isolation required (STANDARD or CONFIDENTIAL).",
     )
     network_isolation: bool = Field(
@@ -10011,12 +10011,12 @@ class CognitiveAgentNodeProfile(CoreasonBaseState):
         Enforces Thermodynamic, Sovereign Execution, and Network Topology paradox traps.
         """
 
-        if self.hardware.compute_tier == ComputeTier.KINETIC and self.hardware.min_vram_gb > 24.0:
+        if self.hardware.compute_tier == ComputeTierProfile.KINETIC and self.hardware.min_vram_gb > 24.0:
             raise ValueError(
                 "Thermodynamic Constraint Violated: KINETIC tier cannot exceed 24.0 GB VRAM. Escalate to ORACLE tier."
             )
 
-        if self.security.epistemic_security == EpistemicSecurity.CONFIDENTIAL and not set(
+        if self.security.epistemic_security == EpistemicSecurityPolicy.CONFIDENTIAL and not set(
             self.hardware.provider_whitelist
         ).issubset(_TRUSTED_ENVIRONMENTS):
             invalid_targets = set(self.hardware.provider_whitelist) - _TRUSTED_ENVIRONMENTS
@@ -12630,7 +12630,7 @@ class NeurosymbolicInferenceRequest(CoreasonBaseState):
     @model_validator(mode="after")
     def validate_epistemic_gap(self) -> Self:
         if self.uncertainty_profile.epistemic_knowledge_gap >= self.sla.minimum_fidelity_threshold:
-            raise RefusalToReasonError(
+            raise RefusalToReasonEvent(
                 "Inference aborted due to severe semantic degradation. Epistemic gap exceeds SLA."
             )
         return self
