@@ -153,11 +153,11 @@ def test_state_vector_memory_bounds() -> None:
 def test_neurosymbolic_inference_request_requires_contextualized_entity() -> None:
     import pytest
 
-    from coreason_manifest.spec.ontology import NeurosymbolicInferenceRequest
+    from coreason_manifest.spec.ontology import NeurosymbolicInferenceIntent
 
-    # Instantiating with bare string instead of ContextualizedSourceEntity
+    # Instantiating with bare string instead of ContextualizedSourceState
     with pytest.raises(ValidationError) as exc_info:
-        NeurosymbolicInferenceRequest(
+        NeurosymbolicInferenceIntent(
             source_entity="Amoxicillin 500mg",  # type: ignore
             fidelity_receipt={  # type: ignore
                 "contextual_completeness_score": 0.9,
@@ -176,7 +176,7 @@ def test_neurosymbolic_inference_request_requires_contextualized_entity() -> Non
                 "minimum_fidelity_threshold": 0.5,
             },
         )
-    assert "Input should be a valid dictionary or instance of ContextualizedSourceEntity" in str(exc_info.value)
+    assert "Input should be a valid dictionary or instance of ContextualizedSourceState" in str(exc_info.value)
 
 
 def test_constitutional_amendment_intent_payload_bounds() -> None:

@@ -24,7 +24,7 @@ from coreason_manifest.spec.ontology import (
     ComputeTierProfile,
     ConsensusPolicy,
     ConstrainedDecodingPolicy,
-    ContextualizedSourceEntity,
+    ContextualizedSourceState,
     CoreasonBaseState,
     DefeasibleCascadeEvent,
     DynamicLayoutManifest,
@@ -36,7 +36,7 @@ from coreason_manifest.spec.ontology import (
     GradingCriterionProfile,
     LatentSmoothingProfile,
     MultimodalTokenAnchorState,
-    NeurosymbolicInferenceRequest,
+    NeurosymbolicInferenceIntent,
     PermissionBoundaryPolicy,
     QuorumPolicy,
     RedactionPolicy,
@@ -877,7 +877,7 @@ def test_agent_node_profile_network_topology_paradox() -> None:
 
 
 def test_refusal_to_reason_enforcement() -> None:
-    source_entity = ContextualizedSourceEntity(
+    source_entity = ContextualizedSourceState(
         target_string="Discharge",
         contextual_envelope=[],
         source_system_provenance_flag=False,
@@ -902,7 +902,7 @@ def test_refusal_to_reason_enforcement() -> None:
     with pytest.raises(
         ValidationError, match=r"Inference aborted due to severe semantic degradation. Epistemic gap exceeds SLA."
     ):
-        NeurosymbolicInferenceRequest(
+        NeurosymbolicInferenceIntent(
             source_entity=source_entity,
             fidelity_receipt=fidelity_receipt,
             uncertainty_profile=uncertainty_profile,
@@ -911,7 +911,7 @@ def test_refusal_to_reason_enforcement() -> None:
 
 
 def test_successful_epistemic_grounding() -> None:
-    source_entity = ContextualizedSourceEntity(
+    source_entity = ContextualizedSourceState(
         target_string="Amoxicillin 500mg",
         contextual_envelope=["patient chart", "medication order"],
         source_system_provenance_flag=True,
@@ -933,7 +933,7 @@ def test_successful_epistemic_grounding() -> None:
         minimum_fidelity_threshold=0.5,
     )
 
-    req = NeurosymbolicInferenceRequest(
+    req = NeurosymbolicInferenceIntent(
         source_entity=source_entity,
         fidelity_receipt=fidelity_receipt,
         uncertainty_profile=uncertainty_profile,
@@ -944,7 +944,7 @@ def test_successful_epistemic_grounding() -> None:
 
 def test_epistemic_upsampling_instantiation() -> None:
 
-    source = ContextualizedSourceEntity(
+    source = ContextualizedSourceState(
         target_string="test artifact",
         contextual_envelope=["context A", "context B"],
         source_system_provenance_flag=True,
@@ -963,7 +963,7 @@ def test_epistemic_upsampling_instantiation() -> None:
 
 def test_upsampling_confidence_bounds() -> None:
     """Prove that an agent cannot hallucinate an overconfident abductive leap."""
-    source = ContextualizedSourceEntity(
+    source = ContextualizedSourceState(
         target_string="test artifact",
         contextual_envelope=["context A"],
         source_system_provenance_flag=True,
@@ -990,7 +990,7 @@ def test_upsampling_confidence_bounds() -> None:
 
 def test_empty_justification_rejection() -> None:
     """Prove that the system structurally rejects an evidence-free abductive leap."""
-    source = ContextualizedSourceEntity(
+    source = ContextualizedSourceState(
         target_string="test artifact",
         contextual_envelope=["context A"],
         source_system_provenance_flag=True,

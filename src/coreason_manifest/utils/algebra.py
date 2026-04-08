@@ -190,7 +190,7 @@ def synthesize_remediation_intent(
             msg = f"The required semantic boundary at '{loc_path}' is completely missing. You must project this missing dimension to satisfy the StateContract."
 
         receipts.append(
-            ManifestViolationReceipt(failing_pointer=loc_path, violation_type=err_type, diagnostic_message=msg)
+            ManifestViolationReceipt(failing_pointer=loc_path, violation_category=err_type, diagnostic_message=msg)
         )
 
     return System2RemediationIntent(fault_cid=fault_cid, target_node_cid=target_node_cid, violation_receipts=receipts)

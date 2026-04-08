@@ -2102,7 +2102,7 @@
     },
     "ChaosExperimentTask": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Orchestrates an automated steady-state hypothesis falsification loop\nvia structured Chaos Engineering. As a ...Task suffix, this represents an authorized\nkinetic execution trigger initiating active topological stress testing.\n\nCAUSAL AFFORDANCE: Deploys a deterministic matrix of faults and exogenous shocks against\na baseline SteadyStateHypothesisState to empirically discover latent fragility and\nevaluate the resilience of the DAG topology.\n\nEPISTEMIC BOUNDS: Cryptographic determinism is mathematically guaranteed by the\n@model_validator, which sorts the faults array by composite key (fault_type,\ntarget_node_cid) and the shocks array by shock_id to preserve RFC 8785 canonical hashing.\n\nMCP ROUTING TRIGGERS: Steady State Falsification, Chaos Engineering, Automated Failure\nDiscovery, Resilience Orchestration, Systemic Perturbation",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Orchestrates an automated steady-state hypothesis falsification loop\nvia structured Chaos Engineering. As a ...Task suffix, this represents an authorized\nkinetic execution trigger initiating active topological stress testing.\n\nCAUSAL AFFORDANCE: Deploys a deterministic matrix of faults and exogenous shocks against\na baseline SteadyStateHypothesisState to empirically discover latent fragility and\nevaluate the resilience of the DAG topology.\n\nEPISTEMIC BOUNDS: Cryptographic determinism is mathematically guaranteed by the\n@model_validator, which sorts the faults array by composite key (fault_category,\ntarget_node_cid) and the shocks array by shock_id to preserve RFC 8785 canonical hashing.\n\nMCP ROUTING TRIGGERS: Steady State Falsification, Chaos Engineering, Automated Failure\nDiscovery, Resilience Orchestration, Systemic Perturbation",
       "properties": {
         "experiment_id": {
           "description": "The unique identifier for the chaos experiment.",
@@ -2379,7 +2379,7 @@
         "active_attention_ray": {
           "anyOf": [
             {
-              "$ref": "#/$defs/EpistemicAttentionRay"
+              "$ref": "#/$defs/EpistemicAttentionState"
             },
             {
               "type": "null"
@@ -2895,7 +2895,7 @@
         "active_attention_ray": {
           "anyOf": [
             {
-              "$ref": "#/$defs/EpistemicAttentionRay"
+              "$ref": "#/$defs/EpistemicAttentionState"
             },
             {
               "type": "null"
@@ -4051,7 +4051,7 @@
       "title": "ContextExpansionPolicy",
       "type": "object"
     },
-    "ContextualizedSourceEntity": {
+    "ContextualizedSourceState": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Projects a semantically unified spatial token footprint representing the strictly bounded source projection.\n\n    CAUSAL AFFORDANCE: Authorizes downstream parsing tasks to isolate exact dimensional target strings while strictly maintaining chronological relationships via the topological envelope.\n\n    EPISTEMIC BOUNDS: Limits structural explosion by constraining target sequences and contextual items mathematically to max_length=100000. Contains a strict topological exemption preventing array sorting.\n\n    MCP ROUTING TRIGGERS: Semantic Envelope, Contextual Projection, Spatial Token Footprint, Source Entity, Topos Sorting",
       "properties": {
@@ -4082,7 +4082,7 @@
         "contextual_envelope",
         "source_system_provenance_flag"
       ],
-      "title": "ContextualizedSourceEntity",
+      "title": "ContextualizedSourceState",
       "type": "object"
     },
     "ContinuousMutationPolicy": {
@@ -4533,7 +4533,7 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes the chromosomal crossover and genetic recombination\nheuristics for blending latent feature vectors of elite parent agents. As a ...Policy\nsuffix, this object defines rigid mathematical boundaries that the orchestrator must\nenforce globally.\n\nCAUSAL AFFORDANCE: Executes the deterministic interpolation of N-dimensional properties\nfrom successful agents using a specific geometric strategy (CrossoverMechanismProfile)\nto breed the next generation's starting state.\n\nEPISTEMIC BOUNDS: The blending_factor is strictly constrained to a fractional\ninterpolation ratio (ge=0.0, le=1.0) to mathematically prevent extrapolated state drift\nbeyond the parents' bounding box. Relies on optional verifiable_entropy\n(VerifiableEntropyReceipt) to ensure unbiased recombination.\n\nMCP ROUTING TRIGGERS: Genetic Recombination, Chromosomal Crossover, Vector\nInterpolation, Elitism, Reproduction Heuristic",
       "properties": {
-        "strategy_type": {
+        "strategy_profile": {
           "$ref": "#/$defs/CrossoverMechanismProfile",
           "description": "The heuristic method for blending successful parent agents."
         },
@@ -4558,7 +4558,7 @@
         }
       },
       "required": [
-        "strategy_type",
+        "strategy_profile",
         "blending_factor"
       ],
       "title": "CrossoverPolicy",
@@ -6062,7 +6062,7 @@
       "title": "EpistemicArgumentGraphState",
       "type": "object"
     },
-    "EpistemicAttentionRay": {
+    "EpistemicAttentionState": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Joint Attention and Gaze Raycasting across the distributed topology. Projects a continuous vector from an observer's optical center to indicate cognitive focus prior to physical mutation.\n\nCAUSAL AFFORDANCE: Broadcasts a non-kinetic 'cursor presence' to the swarm. The orchestrator calculates the dot product between this vector and surrounding nodes, identifying the exact topological vertices the observer is currently evaluating.\n\nEPISTEMIC BOUNDS: The `direction_unit_vector` is mathematically normalized to exactly 1.0 via `@model_validator` to prevent raycast scalar explosions. To mitigate $O(N^2)$ intersection complexity, the `intersected_node_cids` array is strictly capped at `max_length=100` and deterministically sorted.\n\nMCP ROUTING TRIGGERS: Spatial Raycasting, Joint Attention, Cognitive Frustum Intersection, Vector Math, Gaze Tracking",
       "properties": {
@@ -6116,7 +6116,7 @@
         "origin",
         "direction_unit_vector"
       ],
-      "title": "EpistemicAttentionRay",
+      "title": "EpistemicAttentionState",
       "type": "object"
     },
     "EpistemicAxiomState": {
@@ -7368,7 +7368,7 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Authorizes a connectionist agent to execute an abductive leap, reversing lossy compression via context.\n\n    CAUSAL AFFORDANCE: Unlocks generative projection mapping by allowing an agent to expand a generalized node into highly specific ontology dimensions based on contextual vectors.\n\n    EPISTEMIC BOUNDS: The confidence of the upsampling projection is clamped tightly between 0.0 and 1.0. Justification arrays enforce maximum structural lengths and explicitly declare Topological Exemptions against array sort.\n\n    MCP ROUTING TRIGGERS: Abductive Leap, Epistemic Upsampling, Lossy Compression Reversal, Vector Expansion, Connectionist Grounding",
       "properties": {
         "source_entity": {
-          "$ref": "#/$defs/ContextualizedSourceEntity",
+          "$ref": "#/$defs/ContextualizedSourceState",
           "description": "The specific source contextualized entity subject to topological upsampling."
         },
         "target_ontological_granularity": {
@@ -8371,9 +8371,9 @@
     },
     "FaultInjectionProfile": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines a deterministic Byzantine fault vector for Chaos Engineering\nperturbation tests. As a ...Profile suffix, this is a declarative, frozen snapshot of an\nattack geometry at a specific point in time.\n\nCAUSAL AFFORDANCE: Instructs the execution engine to physically degrade, throttle, or\ncorrupt the structural state or network connectivity of the target_node_cid based on the\nspecific fault_type (FaultCategoryProfile) manifold.\n\nEPISTEMIC BOUNDS: The severity of the perturbation is constrained above by the intensity\nscalar (le=1000000000.0) but unbounded below, permitting negative fault magnitudes. The\nblast radius targets either the entire swarm (target_node_cid=None) or a specific node\nbounded to a valid 128-char CID regex ^[a-zA-Z0-9_.:-]+$.\n\nMCP ROUTING TRIGGERS: Chaos Engineering, Byzantine Fault Injection, Perturbation Theory,\nStructural Sabotage, Resilience Testing",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines a deterministic Byzantine fault vector for Chaos Engineering\nperturbation tests. As a ...Profile suffix, this is a declarative, frozen snapshot of an\nattack geometry at a specific point in time.\n\nCAUSAL AFFORDANCE: Instructs the execution engine to physically degrade, throttle, or\ncorrupt the structural state or network connectivity of the target_node_cid based on the\nspecific fault_category (FaultCategoryProfile) manifold.\n\nEPISTEMIC BOUNDS: The severity of the perturbation is constrained above by the intensity\nscalar (le=1000000000.0) but unbounded below, permitting negative fault magnitudes. The\nblast radius targets either the entire swarm (target_node_cid=None) or a specific node\nbounded to a valid 128-char CID regex ^[a-zA-Z0-9_.:-]+$.\n\nMCP ROUTING TRIGGERS: Chaos Engineering, Byzantine Fault Injection, Perturbation Theory,\nStructural Sabotage, Resilience Testing",
       "properties": {
-        "fault_type": {
+        "fault_category": {
           "$ref": "#/$defs/FaultCategoryProfile",
           "description": "The specific type of fault to inject."
         },
@@ -8401,7 +8401,7 @@
         }
       },
       "required": [
-        "fault_type",
+        "fault_category",
         "intensity"
       ],
       "title": "FaultInjectionProfile",
@@ -8677,7 +8677,7 @@
     },
     "GaussianSplattingProfile": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Neural Radiance Fields, 3D Gaussian Splatting, Spherical Harmonics, Volumetric Rendering, Covariance Matrix\nCAUSAL AFFORDANCE: Neural Radiance Fields, 3D Gaussian Splatting, Spherical Harmonics, Volumetric Rendering, Covariance Matrix\nEPISTEMIC BOUNDS: Neural Radiance Fields, 3D Gaussian Splatting, Spherical Harmonics, Volumetric Rendering, Covariance Matrix\nMCP ROUTING TRIGGERS: Neural Radiance Fields, 3D Gaussian Splatting, Spherical Harmonics, Volumetric Rendering, Covariance Matrix",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines a single localized 3D Gaussian ellipsoid for volumetric rendering in Neural Radiance Fields.\n\nCAUSAL AFFORDANCE: Authorizes the rendering engine to spatially rasterize point-based continuous geometries using view-dependent spherical harmonics and anisotropic covariance scaling.\n\nEPISTEMIC BOUNDS: The `spherical_harmonics_degree` is physically clamped (`ge=0, le=3`) to prevent VRAM exhaustion. The `opacity_alpha` parameter is rigidly clamped between `ge=0.0, le=1.0`. The `covariance_scale` utilizes a Topological Exemption against array sorting.\n\nMCP ROUTING TRIGGERS: Neural Radiance Fields, 3D Gaussian Splatting, Spherical Harmonics, Volumetric Rendering, Covariance Matrix",
       "properties": {
         "spherical_harmonics_degree": {
           "description": "Capped at 3 to physically prevent VRAM explosion during WebGL rasterization.",
@@ -9883,7 +9883,7 @@
         "failure_context": {
           "anyOf": [
             {
-              "$ref": "#/$defs/TerminalCognitiveFailure"
+              "$ref": "#/$defs/TerminalCognitiveEvent"
             },
             {
               "type": "null"
@@ -10276,9 +10276,9 @@
       "title": "KinematicDeltaManifest",
       "type": "object"
     },
-    "KinematicDerivativeTensor": {
+    "KinematicDerivativeProfile": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Kinematic Derivatives, Hermite Spline Extrapolation, Continuous Collision Detection, Newtonian Mechanics\nCAUSAL AFFORDANCE: Kinematic Derivatives, Hermite Spline Extrapolation, Continuous Collision Detection, Newtonian Mechanics\nEPISTEMIC BOUNDS: Kinematic Derivatives, Hermite Spline Extrapolation, Continuous Collision Detection, Newtonian Mechanics\nMCP ROUTING TRIGGERS: Kinematic Derivatives, Hermite Spline Extrapolation, Continuous Collision Detection, Newtonian Mechanics",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements continuous Newtonian Mechanics by defining first and second order derivatives (velocity and acceleration) for both linear and angular motion.\n\nCAUSAL AFFORDANCE: Instructs the spatial rendering engine to extrapolate future positions and rotations using Hermite Spline Extrapolation for continuous collision detection and smooth kinematics.\n\nEPISTEMIC BOUNDS: The physics are defined via `linear_velocity`, `angular_velocity`, `linear_acceleration`, and `angular_acceleration` arrays. These utilize a Topological Exemption preventing array sorting to mathematically preserve Euclidean vectors.\n\nMCP ROUTING TRIGGERS: Kinematic Derivatives, Hermite Spline Extrapolation, Continuous Collision Detection, Newtonian Mechanics",
       "properties": {
         "linear_velocity": {
           "description": "The 3D Euclidean velocity vector.",
@@ -10359,7 +10359,7 @@
         "linear_acceleration",
         "angular_acceleration"
       ],
-      "title": "KinematicDerivativeTensor",
+      "title": "KinematicDerivativeProfile",
       "type": "object"
     },
     "KinematicNoiseProfile": {
@@ -11207,7 +11207,7 @@
     },
     "ManifestViolationReceipt": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A machine-readable, deterministic JSON receipt of an exact topological failure, replacing unstructured stack traces.\n\nCAUSAL AFFORDANCE: Enables the agent to execute $O(1)$ surgical patches via StateMutationIntent rather than hallucinating fixes.\n\nEPISTEMIC BOUNDS: `failing_pointer` mathematically maps exactly to RFC 6902 JSON Pointers (`max_length=2000`). `violation_type` capped at `255`.\n\nMCP ROUTING TRIGGERS: Fault Receipt, RFC 6902, Epistemic Loss Prevention, Surgical Patching, Traceback Serialization",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A machine-readable, deterministic JSON receipt of an exact topological failure, replacing unstructured stack traces.\n\nCAUSAL AFFORDANCE: Enables the agent to execute $O(1)$ surgical patches via StateMutationIntent rather than hallucinating fixes.\n\nEPISTEMIC BOUNDS: `failing_pointer` mathematically maps exactly to RFC 6902 JSON Pointers (`max_length=2000`). `violation_category` capped at `255`.\n\nMCP ROUTING TRIGGERS: Fault Receipt, RFC 6902, Epistemic Loss Prevention, Surgical Patching, Traceback Serialization",
       "properties": {
         "failing_pointer": {
           "description": "The exact RFC 6902 JSON pointer isolating the topological failure.",
@@ -11215,10 +11215,10 @@
           "title": "Failing Pointer",
           "type": "string"
         },
-        "violation_type": {
+        "violation_category": {
           "description": "Categorical descriptor of the failure, e.g., missing, type_error.",
           "maxLength": 255,
-          "title": "Violation Type",
+          "title": "Violation Category",
           "type": "string"
         },
         "diagnostic_message": {
@@ -11230,7 +11230,7 @@
       },
       "required": [
         "failing_pointer",
-        "violation_type",
+        "violation_category",
         "diagnostic_message"
       ],
       "title": "ManifestViolationReceipt",
@@ -11720,7 +11720,7 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Tensor Calculus and Differential Geometry representations\nto safely proxy high-dimensional latent structures across zero-trust network boundaries\nwithout transmitting raw, uncompressed bytes. As a ...Manifest suffix, this defines a\nfrozen, declarative coordinate.\n\nCAUSAL AFFORDANCE: Allows the orchestrator to route traffic and reserve exact physical\nGPU memory for massive tensors prior to downloading them via the storage_uri,\npreventing runtime out-of-memory (OOM) execution faults.\n\nEPISTEMIC BOUNDS: The @model_validator _enforce_physics_engine mathematically proves\nthat the topological shape exactly matches the declared vram_footprint_bytes limit\n(le=100000000000) based on the scalar structural_type byte density. Supply-chain\ntampering is physically prevented via the merkle_root SHA-256 requirement.\n\nMCP ROUTING TRIGGERS: Tensor Calculus, Differential Geometry, Merkle Tree Verification, Zero-Trust Computing, Memory Allocation",
       "properties": {
-        "structural_type": {
+        "structural_format": {
           "$ref": "#/$defs/TensorStructuralFormatProfile",
           "description": "Structural type of the tensor elements."
         },
@@ -11756,7 +11756,7 @@
         }
       },
       "required": [
-        "structural_type",
+        "structural_format",
         "shape",
         "vram_footprint_bytes",
         "merkle_root",
@@ -11861,12 +11861,12 @@
       "title": "NeuroSymbolicHandoffContract",
       "type": "object"
     },
-    "NeurosymbolicInferenceRequest": {
+    "NeurosymbolicInferenceIntent": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Orchestrates the core execution payload boundary, acting as the structural pre-inference gate for neurosymbolic probability.\n\n    CAUSAL AFFORDANCE: Empowers the routing engine to sever execution prior to LLM generation if the structural certainty SLA evaluates beyond acceptable mathematical variance boundaries.\n\n    EPISTEMIC BOUNDS: Mandates exact nesting of deterministic fidelity and uncertainty profiles. The pre-flight validator mathematically terminates evaluation if epistemic degradation breaches the SLA limit.\n\n    MCP ROUTING TRIGGERS: Pre-Inference Gate, Neurosymbolic Request, Probability Envelope, SLA Enforcement, Inference Termination",
       "properties": {
         "source_entity": {
-          "$ref": "#/$defs/ContextualizedSourceEntity",
+          "$ref": "#/$defs/ContextualizedSourceState",
           "description": "The structurally isolated 1D boundary representing the semantic payload injected into the context window."
         },
         "fidelity_receipt": {
@@ -11888,7 +11888,7 @@
         "uncertainty_profile",
         "sla"
       ],
-      "title": "NeurosymbolicInferenceRequest",
+      "title": "NeurosymbolicInferenceIntent",
       "type": "object"
     },
     "NeurosymbolicVerificationTopologyManifest": {
@@ -13537,7 +13537,7 @@
         "kinematic_derivatives": {
           "anyOf": [
             {
-              "$ref": "#/$defs/KinematicDerivativeTensor"
+              "$ref": "#/$defs/KinematicDerivativeProfile"
             },
             {
               "type": "null"
@@ -16131,7 +16131,7 @@
           "description": "The UNIX timestamp when this coordinate was invalidated.",
           "title": "Valid To"
         },
-        "interval_type": {
+        "interval_class": {
           "anyOf": [
             {
               "$ref": "#/$defs/CausalIntervalProfile"
@@ -16246,12 +16246,12 @@
       "title": "TerminalBufferState",
       "type": "object"
     },
-    "TerminalCognitiveFailure": {
+    "TerminalCognitiveEvent": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A terminal state object generated when the Proposer-Verifier macro-topology exhausts its max_revision_loops without achieving ontological alignment. Packages the failure state for HITL routing.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator to halt the active execution wave and physically route the exact contextual state of failure to a human supervisor for manual evaluation.\n\nEPISTEMIC BOUNDS: The cycle count is mathematically bounded by loops_exhausted (ge=1, le=100). The specific mathematical penalty gradient the proposer failed to resolve is locked via final_critique_schema. The last_rejected_hypothesis_hash is a cryptographically locked string (max_length=64).\n\nMCP ROUTING TRIGGERS: Proposer-Verifier Macro-Topology, Terminal State, Execution Halting, Human-in-the-Loop Routing, Cognitive Failure Packaging",
       "properties": {
         "source_entity": {
-          "$ref": "#/$defs/ContextualizedSourceEntity",
+          "$ref": "#/$defs/ContextualizedSourceState",
           "description": "The original contextualized input data the system attempted to process."
         },
         "last_rejected_hypothesis_hash": {
@@ -16278,7 +16278,7 @@
         "final_critique_schema",
         "loops_exhausted"
       ],
-      "title": "TerminalCognitiveFailure",
+      "title": "TerminalCognitiveEvent",
       "type": "object"
     },
     "TerminalConditionContract": {

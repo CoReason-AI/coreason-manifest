@@ -23,7 +23,7 @@ from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
     DynamicLayoutManifest,
-    EpistemicAttentionRay,
+    EpistemicAttentionState,
     ObservabilityLODPolicy,
     SE3TransformProfile,
     TelemetryBackpressureContract,
@@ -65,11 +65,11 @@ def test_differential_privacy_interlocks(foveated_privacy_epsilon: float) -> Non
 @given(hardware_gaze_signature=st.integers(min_value=8193, max_value=10000).map(lambda x: "a" * x))
 def test_biometric_signature_bounding(hardware_gaze_signature: str) -> None:
     """
-    Test EpistemicAttentionRay to trigger validation error when biometric
+    Test EpistemicAttentionState to trigger validation error when biometric
     signature string exceeds length limit.
     """
     with pytest.raises(ValidationError) as exc_info:
-        EpistemicAttentionRay(
+        EpistemicAttentionState(
             origin=SE3TransformProfile(reference_frame_cid="frame-123", x=0.0, y=0.0, z=0.0),
             direction_unit_vector=(1.0, 0.0, 0.0),
             hardware_gaze_signature=hardware_gaze_signature,
