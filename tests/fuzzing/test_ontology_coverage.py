@@ -24,9 +24,9 @@ from coreason_manifest.spec.ontology import (
     EvolutionaryTopologyManifest,
     FederatedBilateralSLA,
     FitnessObjectiveProfile,
-    SemanticClassificationProfile,
     MutationPolicy,
     RiskLevelPolicy,
+    SemanticClassificationProfile,
     SMPCTopologyManifest,
     WorkflowManifest,
 )

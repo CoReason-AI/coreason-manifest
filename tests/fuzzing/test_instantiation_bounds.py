@@ -23,7 +23,6 @@ from coreason_manifest.spec.ontology import (
     ComputeTier,
     ContextualizedSourceEntity,
     DAGTopologyManifest,
-    TopologicalFidelityReceipt,
     EpistemicCompressionSLA,
     EpistemicSecurity,
     EpistemicSecurityProfile,
@@ -36,6 +35,7 @@ from coreason_manifest.spec.ontology import (
     StateHydrationManifest,
     TaskAnnouncementIntent,
     TaxonomicRoutingPolicy,
+    TopologicalFidelityReceipt,
     VolumetricBoundingProfile,
 )
 

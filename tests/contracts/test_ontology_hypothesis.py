@@ -16,8 +16,8 @@ from hypothesis import strategies as st
 
 from coreason_manifest.spec.ontology import (
     CoreasonBaseState,
-    SemanticClassificationProfile,
     RiskLevelPolicy,
+    SemanticClassificationProfile,
     _validate_payload_bounds,
 )
 
