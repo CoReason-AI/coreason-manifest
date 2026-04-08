@@ -66,6 +66,10 @@ def test_hoare_logic_proof_receipt_canonical_sorting() -> None:
 
 
 def test_capability_forge_topology_compile() -> None:
+    # Ensure docstring is accessible and not compiled out incorrectly
+    assert "AGENT INSTRUCTION: Create a zero-cost macro abstraction" in CapabilityForgeTopologyManifest.__doc__
+    assert "CAUSAL AFFORDANCE:" in CapabilityForgeTopologyManifest.__doc__
+
     intent = SemanticDiscoveryIntent(
         query_vector=VectorEmbeddingState(vector_base64="abc", dimensionality=10, model_name="test-model"),
         min_isometry_score=0.9,
