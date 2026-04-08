@@ -1,4 +1,0 @@
-from coreason_manifest.spec.ontology import TerminalCognitiveEvent, ContextualizedSourceState, InterventionIntent
-TerminalCognitiveEvent.model_rebuild()
-ContextualizedSourceState.model_rebuild()
-InterventionIntent.model_rebuild()
