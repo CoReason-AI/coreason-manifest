@@ -669,9 +669,12 @@ class SpatialReferenceFrameManifest(CoreasonBaseState):
 
 class KinematicDerivativeProfile(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Kinematic Derivatives, Hermite Spline Extrapolation, Continuous Collision Detection, Newtonian Mechanics
-    CAUSAL AFFORDANCE: Kinematic Derivatives, Hermite Spline Extrapolation, Continuous Collision Detection, Newtonian Mechanics
-    EPISTEMIC BOUNDS: Kinematic Derivatives, Hermite Spline Extrapolation, Continuous Collision Detection, Newtonian Mechanics
+    AGENT INSTRUCTION: Implements continuous Newtonian Mechanics by defining first and second order derivatives (velocity and acceleration) for both linear and angular motion.
+
+    CAUSAL AFFORDANCE: Instructs the spatial rendering engine to extrapolate future positions and rotations using Hermite Spline Extrapolation for continuous collision detection and smooth kinematics.
+
+    EPISTEMIC BOUNDS: The physics are defined via `linear_velocity`, `angular_velocity`, `linear_acceleration`, and `angular_acceleration` arrays. These utilize a Topological Exemption preventing array sorting to mathematically preserve Euclidean vectors.
+
     MCP ROUTING TRIGGERS: Kinematic Derivatives, Hermite Spline Extrapolation, Continuous Collision Detection, Newtonian Mechanics
     """
 
@@ -765,9 +768,12 @@ class VolumetricBoundingProfile(CoreasonBaseState):
 
 class GaussianSplattingProfile(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Neural Radiance Fields, 3D Gaussian Splatting, Spherical Harmonics, Volumetric Rendering, Covariance Matrix
-    CAUSAL AFFORDANCE: Neural Radiance Fields, 3D Gaussian Splatting, Spherical Harmonics, Volumetric Rendering, Covariance Matrix
-    EPISTEMIC BOUNDS: Neural Radiance Fields, 3D Gaussian Splatting, Spherical Harmonics, Volumetric Rendering, Covariance Matrix
+    AGENT INSTRUCTION: Defines a single localized 3D Gaussian ellipsoid for volumetric rendering in Neural Radiance Fields.
+
+    CAUSAL AFFORDANCE: Authorizes the rendering engine to spatially rasterize point-based continuous geometries using view-dependent spherical harmonics and anisotropic covariance scaling.
+
+    EPISTEMIC BOUNDS: The `spherical_harmonics_degree` is physically clamped (`ge=0, le=3`) to prevent VRAM exhaustion. The `opacity_alpha` parameter is rigidly clamped between `ge=0.0, le=1.0`. The `covariance_scale` utilizes a Topological Exemption against array sorting.
+
     MCP ROUTING TRIGGERS: Neural Radiance Fields, 3D Gaussian Splatting, Spherical Harmonics, Volumetric Rendering, Covariance Matrix
     """
 
