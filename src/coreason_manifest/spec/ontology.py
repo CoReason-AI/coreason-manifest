@@ -132,21 +132,22 @@ def _validate_ssrf_safety(url: str) -> str:
             raise ValueError(f"SSRF restricted IP detected: {hostname}") from None
 
     try:
-        raw_ip = socket.gethostbyname(hostname_clean)
-        ip = ipaddress.ip_address(raw_ip)
+        addrinfo = socket.getaddrinfo(hostname_clean, None)
+        ips = [ipaddress.ip_address(info[4][0]) for info in addrinfo]
     except (socket.gaierror, ValueError) as e:
         raise ValueError(f"Security Validation Failed: Unresolvable or invalid host: {hostname}") from e
 
-    if (
-        ip.is_private
-        or ip.is_loopback
-        or ip.is_multicast
-        or getattr(ip, "is_link_local", False)
-        or getattr(ip, "is_reserved", False)
-        or getattr(ip, "is_unspecified", False)
-        or not getattr(ip, "is_global", True)
-    ):
-        raise ValueError(f"SSRF restricted IP detected: {hostname}") from None
+    for ip in ips:
+        if (
+            ip.is_private
+            or ip.is_loopback
+            or ip.is_multicast
+            or getattr(ip, "is_link_local", False)
+            or getattr(ip, "is_reserved", False)
+            or getattr(ip, "is_unspecified", False)
+            or not getattr(ip, "is_global", True)
+        ):
+            raise ValueError(f"SSRF restricted IP detected: {hostname}") from None
 
     return url
 
