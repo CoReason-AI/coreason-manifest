@@ -17,6 +17,8 @@ import math
 import operator
 import re
 import socket
+import threading
+import time
 import typing
 import urllib.parse
 from enum import StrEnum
@@ -102,6 +104,84 @@ def _canonicalize_payload(obj: Any) -> Any:
     return obj
 
 
+class _SimpleTTLCache:
+    """
+    ⚡ Bolt Optimization: A simple thread-safe TTL cache.
+    Why: `socket.getaddrinfo` is a synchronous, blocking network call that causes
+    significant overhead when validating the same hostname repeatedly (e.g., standard
+    provider endpoints).
+    Impact: Reduces DNS resolution overhead for frequent hostnames to ~O(1) dictionary
+    lookup while maintaining a short TTL (5s) to prevent DNS Rebinding attacks.
+    """
+    def __init__(self, ttl: int = 5, maxsize: int = 4096) -> None:
+        self.ttl = ttl
+        self.maxsize = maxsize
+        self.cache: dict[str, tuple[Any, float]] = {}
+        self._lock = threading.Lock()
+
+    def get(self, key: str) -> Any:
+        with self._lock:
+            if key in self.cache:
+                value, timestamp = self.cache[key]
+                if time.time() - timestamp < self.ttl:
+                    return value
+                self.cache.pop(key, None)
+            return None
+
+    def set(self, key: str, value: Any) -> None:
+        with self._lock:
+            if len(self.cache) >= self.maxsize:
+                self.cache.clear()
+            self.cache[key] = (value, time.time())
+
+
+_DNS_CACHE = _SimpleTTLCache(ttl=5, maxsize=4096)
+
+
+def _resolve_and_check_hostname(hostname: str) -> None:
+    cached_val = _DNS_CACHE.get(hostname)
+    if cached_val is not None:
+        if cached_val is True:
+            return
+        if cached_val == "ssrf":
+            raise ValueError(f"SSRF restricted IP detected: {hostname}")
+        raise ValueError(f"Security Validation Failed: Unresolvable or invalid host: {hostname}")
+
+    hostname_clean = hostname.strip("[]")
+
+    try:
+        ipaddress.ip_address(hostname_clean)
+    except ValueError:
+        if re.match(r"^(0x[0-9a-fA-F.]+|[0-9.]+)$", hostname_clean) and not hostname_clean.isdigit():
+            _DNS_CACHE.set(hostname, "ssrf")
+            raise ValueError(f"SSRF restricted IP detected: {hostname}") from None
+        if hostname_clean.isdigit():
+            _DNS_CACHE.set(hostname, "ssrf")
+            raise ValueError(f"SSRF restricted IP detected: {hostname}") from None
+
+    try:
+        addrinfo = socket.getaddrinfo(hostname_clean, None)
+        ips = [ipaddress.ip_address(info[4][0]) for info in addrinfo]
+    except (socket.gaierror, ValueError) as e:
+        _DNS_CACHE.set(hostname, "unresolvable")
+        raise ValueError(f"Security Validation Failed: Unresolvable or invalid host: {hostname}") from e
+
+    for ip in ips:
+        if (
+            ip.is_private
+            or ip.is_loopback
+            or ip.is_multicast
+            or getattr(ip, "is_link_local", False)
+            or getattr(ip, "is_reserved", False)
+            or getattr(ip, "is_unspecified", False)
+            or not getattr(ip, "is_global", True)
+        ):
+            _DNS_CACHE.set(hostname, "ssrf")
+            raise ValueError(f"SSRF restricted IP detected: {hostname}") from None
+
+    _DNS_CACHE.set(hostname, True)
+
+
 def _validate_ssrf_safety(url: str) -> str:
     """
     AGENT INSTRUCTION: Implements rigorous Network Topology and Server-Side Request Forgery (SSRF) Quarantine logic to guarantee mathematical zero-trust coordinate mapping.
@@ -121,33 +201,7 @@ def _validate_ssrf_safety(url: str) -> str:
             raise ValueError("SSRF topological violation detected: Invalid hostname in HTTP URI")
         return url
 
-    hostname_clean = hostname.strip("[]")
-
-    try:
-        ipaddress.ip_address(hostname_clean)
-    except ValueError:
-        if re.match(r"^(0x[0-9a-fA-F.]+|[0-9.]+)$", hostname_clean) and not hostname_clean.isdigit():
-            raise ValueError(f"SSRF restricted IP detected: {hostname}") from None
-        if hostname_clean.isdigit():
-            raise ValueError(f"SSRF restricted IP detected: {hostname}") from None
-
-    try:
-        addrinfo = socket.getaddrinfo(hostname_clean, None)
-        ips = [ipaddress.ip_address(info[4][0]) for info in addrinfo]
-    except (socket.gaierror, ValueError) as e:
-        raise ValueError(f"Security Validation Failed: Unresolvable or invalid host: {hostname}") from e
-
-    for ip in ips:
-        if (
-            ip.is_private
-            or ip.is_loopback
-            or ip.is_multicast
-            or getattr(ip, "is_link_local", False)
-            or getattr(ip, "is_reserved", False)
-            or getattr(ip, "is_unspecified", False)
-            or not getattr(ip, "is_global", True)
-        ):
-            raise ValueError(f"SSRF restricted IP detected: {hostname}") from None
+    _resolve_and_check_hostname(hostname)
 
     return url
 
