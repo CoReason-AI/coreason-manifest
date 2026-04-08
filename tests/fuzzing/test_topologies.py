@@ -65,7 +65,7 @@ def test_adversarial_market_disjoint_failure() -> None:
         AdversarialMarketTopologyManifest(
             blue_team_cids=["did:web:agent_a"],
             red_team_cids=["did:web:agent_a"],
-            adjudicator_id="did:web:adj",
+            adjudicator_cid="did:web:adj",
             market_rules=policy,
         )
 
@@ -83,7 +83,7 @@ def test_council_topology_byzantine_slash_requires_escrow() -> None:
     with pytest.raises(ValidationError, match="PBFT with slash_escrow requires a funded council_escrow"):
         CouncilTopologyManifest(
             nodes=nodes,
-            adjudicator_id="did:web:node_1",
+            adjudicator_cid="did:web:node_1",
             consensus_policy=ConsensusPolicy(strategy="pbft", quorum_rules=quorum),
         )
 
@@ -102,7 +102,7 @@ def test_generative_manifold_geometric_explosion(depth: int, fanout: int) -> Non
 @given(min_isometry_score=st.sampled_from([1.5, -2.0]))
 def test_semantic_discovery_isometry_bounds(min_isometry_score: float) -> None:
     """Prove that SemanticDiscoveryIntent rejects out-of-bounds isometry scores."""
-    vector = VectorEmbeddingState(vector_base64="aGVsbG8=", dimensionality=10, model_name="test-model")
+    vector = VectorEmbeddingState(vector_base64="aGVsbG8=", dimensionality=10, tensor_manifold="test-model")
     with pytest.raises(ValidationError):
         SemanticDiscoveryIntent(
             query_vector=vector, min_isometry_score=min_isometry_score, required_structural_types=["read_only"]
@@ -110,20 +110,20 @@ def test_semantic_discovery_isometry_bounds(min_isometry_score: float) -> None:
 
 
 @given(
-    sop_id=st.from_regex(r"^[a-zA-Z0-9_.:-]+$", fullmatch=True),
+    sop_cid=st.from_regex(r"^[a-zA-Z0-9_.:-]+$", fullmatch=True),
     target_persona=st.from_regex(r"^[a-zA-Z0-9_-]+$", fullmatch=True),
     ghost_source=st.text(min_size=1),
     ghost_target=st.text(min_size=1),
 )
 def test_epistemic_sop_ghost_node_rejection(
-    sop_id: str, target_persona: str, ghost_source: str, ghost_target: str
+    sop_cid: str, target_persona: str, ghost_source: str, ghost_target: str
 ) -> None:
     """Prove that EpistemicSOPManifest throws a ValidationError if an edge points to an undefined step."""
     # Build an empty cognitive_steps dictionary to easily test ghost nodes
 
     with pytest.raises(ValidationError, match="Ghost node referenced"):
         EpistemicSOPManifest(
-            sop_id=sop_id,
+            sop_cid=sop_cid,
             target_persona=target_persona,
             cognitive_steps={},
             structural_grammar_hashes={},
@@ -147,15 +147,15 @@ def test_epistemic_sop_ghost_node_rejection(
 )
 def test_dag_topology_cycles_and_bounds_fuzz(edges: list[tuple[str, str]]) -> None:
     edges_formatted = [("did:core:" + e[0], "did:core:" + e[1]) for e in edges]
-    nodes: Any = {e[0]: {"type": "agent", "description": "desc"} for e in edges_formatted} | {
-        e[1]: {"type": "agent", "description": "desc"} for e in edges_formatted
+    nodes: Any = {e[0]: {"topology_class": "agent", "description": "desc"} for e in edges_formatted} | {
+        e[1]: {"topology_class": "agent", "description": "desc"} for e in edges_formatted
     }
 
     # We enforce constraints to trigger specific ValueErrors if they breach the limit.
     # Otherwise, it should instantiate without error.
     try:
         DAGTopologyManifest(
-            type="dag", nodes=nodes, edges=edges_formatted, max_depth=5, max_fan_out=5, allow_cycles=False
+            topology_class="dag", nodes=nodes, edges=edges_formatted, max_depth=5, max_fan_out=5, allow_cycles=False
         )
         # If it succeeds, it must be valid.
     except ValueError as e:
@@ -175,7 +175,7 @@ def test_dag_topology_cycles_and_bounds_fuzz(edges: list[tuple[str, str]]) -> No
 @given(
     nodes_dict=st.dictionaries(
         keys=st.text(min_size=7, alphabet="abcdefg01234_-").map(lambda x: "did:core:" + x),
-        values=st.just({"type": "agent", "description": "desc"}),
+        values=st.just({"topology_class": "agent", "description": "desc"}),
         min_size=1,
         max_size=50,
     ),
@@ -187,7 +187,7 @@ def test_swarm_topology_constraints_fuzz(
 ) -> None:
     try:
         SwarmTopologyManifest(
-            type="swarm",
+            topology_class="swarm",
             nodes=nodes_dict,
             spawning_threshold=spawning_threshold,
             max_concurrent_agents=max_concurrent_agents,
@@ -206,27 +206,27 @@ def test_swarm_topology_constraints_fuzz(
 
 @settings(max_examples=250, deadline=None)
 @given(
-    cascade_id=st.text(min_size=7, alphabet="abcdefg01234_-"),
+    cascade_cid=st.text(min_size=7, alphabet="abcdefg01234_-"),
     root=st.text(min_size=7, alphabet="abcdefg01234_-"),
     quarantined=st.lists(st.text(min_size=7, alphabet="abcdefg01234_-"), min_size=1, max_size=20),
     decay=st.floats(min_value=-1.0, max_value=2.0),
 )
-def test_defeasible_cascade_logic_fuzz(cascade_id: str, root: str, quarantined: list[str], decay: float) -> None:
+def test_defeasible_cascade_logic_fuzz(cascade_cid: str, root: str, quarantined: list[str], decay: float) -> None:
     try:
         DefeasibleCascadeEvent(
-            cascade_id=cascade_id,
-            root_falsified_event_id=root,
+            cascade_cid=cascade_cid,
+            root_falsified_event_cid=root,
             propagated_decay_factor=decay,
             quarantined_event_cids=quarantined,
         )
         if root in quarantined:
-            pytest.fail("DefeasibleCascadeEvent failed to reject root_falsified_event_id in quarantined_event_cids")
+            pytest.fail("DefeasibleCascadeEvent failed to reject root_falsified_event_cid in quarantined_event_cids")
         if decay < 0.0 or decay > 1.0:
             pytest.fail("DefeasibleCascadeEvent failed to reject out-of-bounds decay factor")
     except ValueError as e:
         err_str = str(e).lower()
         if (
-            "root_falsified_event_id cannot be in quarantined_event_cids" in err_str
+            "root_falsified_event_cid cannot be in quarantined_event_cids" in err_str
             or "propagated_decay_factor" in err_str
         ):
             pass  # Expected

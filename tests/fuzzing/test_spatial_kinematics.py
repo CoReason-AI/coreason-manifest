@@ -71,20 +71,20 @@ def test_riemannian_geodesic_repulsion(
 
 
 @given(
-    anchoring_node_id=st.from_regex(r"^did:[a-z0-9]+:[a-zA-Z0-9.\-_:]+$", fullmatch=True).filter(lambda x: len(x) >= 7),
+    anchoring_node_cid=st.from_regex(r"^did:[a-z0-9]+:[a-zA-Z0-9.\-_:]+$", fullmatch=True).filter(lambda x: len(x) >= 7),
     always_face_camera=st.booleans(),
     occlude_behind_meshes=st.booleans(),
     distance_scaling_factor=st.floats(min_value=0.01, max_value=10.0),
 )
 def test_billboard_shearing_lock(
-    anchoring_node_id: str,
+    anchoring_node_cid: str,
     always_face_camera: bool,
     occlude_behind_meshes: bool,
     distance_scaling_factor: float,
 ) -> None:
     with pytest.raises(ValidationError):
         SpatialBillboardContract(
-            anchoring_node_id=anchoring_node_id,
+            anchoring_node_cid=anchoring_node_cid,
             always_face_camera=always_face_camera,
             occlude_behind_meshes=occlude_behind_meshes,
             distance_scaling_factor=distance_scaling_factor,
@@ -93,7 +93,7 @@ def test_billboard_shearing_lock(
 
     # Valid case
     SpatialBillboardContract(
-        anchoring_node_id=anchoring_node_id,
+        anchoring_node_cid=anchoring_node_cid,
         always_face_camera=always_face_camera,
         occlude_behind_meshes=occlude_behind_meshes,
         distance_scaling_factor=0.0,

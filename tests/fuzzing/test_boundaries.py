@@ -108,7 +108,7 @@ def test_multimodal_grounding_density_alignment(visual_modality: Any) -> None:
     ):
         EpistemicTransmutationTask(
             task_cid="task_visual_test",
-            artifact_event_id="artifact_1",
+            artifact_event_cid="artifact_1",
             target_modalities=[visual_modality],
             compression_sla=compression_sla,
         )
@@ -249,8 +249,8 @@ def test_procedural_manifold_deterministic_sort() -> None:
     """Prove that OntologicalSurfaceProjectionManifest deterministically sorts available_procedural_manifolds."""
     from coreason_manifest.spec.ontology import OntologicalSurfaceProjectionManifest, ProceduralMetadataManifest
 
-    m1 = ProceduralMetadataManifest(metadata_cid="zeta_01", target_sop_id="sop_1", trigger_description="Zeta SOP")
-    m2 = ProceduralMetadataManifest(metadata_cid="alpha_02", target_sop_id="sop_2", trigger_description="Alpha SOP")
+    m1 = ProceduralMetadataManifest(metadata_cid="zeta_01", target_sop_cid="sop_1", trigger_description="Zeta SOP")
+    m2 = ProceduralMetadataManifest(metadata_cid="alpha_02", target_sop_cid="sop_2", trigger_description="Alpha SOP")
 
     projection = OntologicalSurfaceProjectionManifest(projection_cid="proj_1", available_procedural_manifolds=[m1, m2])
 
@@ -370,7 +370,7 @@ def test_peft_adapter_rank_upper_bound() -> None:
 
     with pytest.raises(ValidationError):
         PeftAdapterContract(
-            adapter_id="test_adapter",
+            adapter_cid="test_adapter",
             safetensors_hash="a" * 64,
             base_model_hash="b" * 64,
             adapter_rank=65537,
@@ -391,7 +391,7 @@ def test_execution_node_receipt_recursive_payload(params: dict[str, Any]) -> Non
 
     deep_payload = build_deep_dict(11)
     with pytest.raises(ValidationError):
-        ExecutionNodeReceipt(request_id="test_id", inputs=deep_payload, outputs={"valid": "output"})
+        ExecutionNodeReceipt(request_cid="test_cid", inputs=deep_payload, outputs={"valid": "output"})
 
 
 def test_state_hydration_manifest_long_string_quarantine() -> None:
@@ -413,7 +413,7 @@ def test_state_hydration_manifest_long_string_quarantine() -> None:
     extents_z=st.floats(min_value=-1.0, max_value=2.0),
 )
 def test_volumetric_bounding_profile_all_floats(extents_x: float, extents_y: float, extents_z: float) -> None:
-    transform = SE3TransformProfile(reference_frame_id="frame", x=0, y=0, z=0)
+    transform = SE3TransformProfile(reference_frame_cid="frame", x=0, y=0, z=0)
     valid = extents_x >= 0.0 and extents_y >= 0.0 and extents_z >= 0.0 and extents_x * extents_y * extents_z > 0.0
 
     if valid:
@@ -493,10 +493,10 @@ def test_scale_policy(type_val: Any, domain_min: float | None, domain_max: float
             valid = False
 
     if valid:
-        ScalePolicy(type=type_val, domain_min=domain_min, domain_max=domain_max)
+        ScalePolicy(topology_class=type_val, domain_min=domain_min, domain_max=domain_max)
     else:
         with pytest.raises((ValueError, ValidationError)):
-            ScalePolicy(type=type_val, domain_min=domain_min, domain_max=domain_max)
+            ScalePolicy(topology_class=type_val, domain_min=domain_min, domain_max=domain_max)
 
 
 # --- NDimensionalTensorManifest ---
@@ -539,7 +539,7 @@ def test_ndimensional_tensor_manifest(shape: list[int], structural_type: Any) ->
 
 # --- DocumentLayoutRegionState ---
 @given(
-    block_id=st.text(
+    block_cid=st.text(
         min_size=1, max_size=128, alphabet=st.characters(whitelist_categories=("L", "N"), whitelist_characters="_.:-")
     ),
     block_type=st.sampled_from(["header", "paragraph", "figure", "table", "footnote", "caption", "equation"]),
@@ -547,9 +547,9 @@ def test_ndimensional_tensor_manifest(shape: list[int], structural_type: Any) ->
     token_span_end=st.integers(min_value=101, max_value=200),
 )
 def test_document_layout_region_state(
-    block_id: str, block_type: Any, token_span_start: int, token_span_end: int
+    block_cid: str, block_type: Any, token_span_start: int, token_span_end: int
 ) -> None:
     anchor = MultimodalTokenAnchorState(token_span_start=token_span_start, token_span_end=token_span_end)
 
     with contextlib.suppress(ValueError, ValidationError):
-        DocumentLayoutRegionState(block_id=block_id, block_type=block_type, anchor=anchor)
+        DocumentLayoutRegionState(block_cid=block_cid, block_type=block_type, anchor=anchor)

@@ -46,7 +46,7 @@ def test_prediction_market_state(probs: list[float]) -> None:
     probs_dict = {f"h{i}": str(p) for i, p in enumerate(probs)}
     pms = PredictionMarketState(
         market_cid="m1",
-        resolution_oracle_condition_id="c1",
+        resolution_oracle_condition_cid="c1",
         lmsr_b_parameter="1.5",
         order_book=[],
         current_market_probabilities=probs_dict,
@@ -103,7 +103,7 @@ def test_routing_frontier_policy(lat: int, cost: int, carbon: float) -> None:
 
 @given(escrow=st.integers(min_value=-2000000000, max_value=2000000000))
 def test_escrow_policy(escrow: int) -> None:
-    ep = EscrowPolicy(escrow_locked_magnitude=escrow, release_condition_metric="rc1", refund_target_node_id="n1")
+    ep = EscrowPolicy(escrow_locked_magnitude=escrow, release_condition_metric="rc1", refund_target_node_cid="n1")
     assert 0 <= ep.escrow_locked_magnitude <= 1000000000
 
 

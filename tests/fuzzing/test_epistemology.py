@@ -38,15 +38,15 @@ def test_tamper_evident_shatter_protocol(inputs: Any, outputs: Any) -> None:
 
     assume(outputs != "tampered_data")
 
-    n1 = ExecutionNodeReceipt(request_id="req_1", inputs=inputs, outputs=outputs, parent_hashes=[])
+    n1 = ExecutionNodeReceipt(request_cid="req_1", inputs=inputs, outputs=outputs, parent_hashes=[])
 
     """AGENT INSTRUCTION: Explicitly assert node_hash is not None for the parent_hashes parameter,
     because mypy thinks it could be None, but ExecutionNodeReceipt sets it to a string."""
     assert n1.node_hash is not None
-    n2 = ExecutionNodeReceipt(request_id="req_2", inputs="hop2", outputs="hop2", parent_hashes=[n1.node_hash])
+    n2 = ExecutionNodeReceipt(request_cid="req_2", inputs="hop2", outputs="hop2", parent_hashes=[n1.node_hash])
 
     assert n2.node_hash is not None
-    n3 = ExecutionNodeReceipt(request_id="req_3", inputs="hop3", outputs="hop3", parent_hashes=[n2.node_hash])
+    n3 = ExecutionNodeReceipt(request_cid="req_3", inputs="hop3", outputs="hop3", parent_hashes=[n2.node_hash])
 
     trace = [n1, n2, n3]
     assert verify_merkle_proof(trace) is True
@@ -110,12 +110,12 @@ def draw_latent_projection_intent(draw: st.DrawFn) -> dict[str, Any]:
         {
             "vector_base64": st.just("bWFnaWM="),  # Valid base64
             "dimensionality": st.integers(),
-            "model_name": st.text(),
+            "tensor_manifold": st.text(),
         }
     )
 
     return {
-        "type": "latent_projection",
+        "topology_class": "latent_projection",
         "synthetic_target_vector": draw(vector_embedding_st),
         "top_k_candidates": draw(st.integers(min_value=1)),
         "min_isometry_score": draw(st.floats(min_value=-1.0, max_value=1.0, allow_nan=False, allow_infinity=False)),

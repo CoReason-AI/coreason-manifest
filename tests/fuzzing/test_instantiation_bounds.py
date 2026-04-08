@@ -22,7 +22,7 @@ from coreason_manifest.spec.ontology import (
     ComputeTier,
     ContextualizedSourceEntity,
     DAGTopologyManifest,
-    DataFidelityReceipt,
+    ManifoldFidelityReceipt,
     EpistemicCompressionSLA,
     EpistemicSecurity,
     HardwareProfile,
@@ -108,7 +108,7 @@ def invalid_volumetric_bounds_st(draw: st.DrawFn) -> tuple[float, float, float]:
 def test_volumetric_bounding_profile_fuzzing(extents: tuple[float, float, float]) -> None:
     """Geometric/Spatial Fuzzing: Generate invalid extents for VolumetricBoundingProfile."""
     extents_x, extents_y, extents_z = extents
-    transform = SE3TransformProfile(reference_frame_id="frame", x=0, y=0, z=0)
+    transform = SE3TransformProfile(reference_frame_cid="frame", x=0, y=0, z=0)
 
     with pytest.raises((ValidationError, ValueError)):
         VolumetricBoundingProfile(
@@ -260,13 +260,13 @@ def test_dictionary_bombing_fuzzing(massive_key: str) -> None:
 @given(timestamp=st.one_of(st.floats(max_value=-0.0001), st.floats(min_value=253402300799.1)))
 def test_temporal_dilation_fuzzing(timestamp: float) -> None:
     with pytest.raises((ValidationError, ValueError)):
-        ObservationEvent(payload={}, event_cid="test_id", timestamp=timestamp)
+        ObservationEvent(payload={}, event_cid="test_cid", timestamp=timestamp)
 
 
-@given(massive_id=st.text(min_size=129))
-def test_id_bombing_fuzzing(massive_id: str) -> None:
+@given(massive_cid=st.text(min_size=129))
+def test_id_bombing_fuzzing(massive_cid: str) -> None:
     with pytest.raises((ValidationError, ValueError)):
-        TaskAnnouncementIntent(task_cid=massive_id, required_action_space_id=None, max_budget_magnitude=100)
+        TaskAnnouncementIntent(task_cid=massive_cid, required_action_space_cid=None, max_budget_magnitude=100)
 
 
 @given(
@@ -346,7 +346,7 @@ def test_refusal_to_reason_fuzzing(epistemic_gap: float, min_fidelity_threshold:
         contextual_envelope=[],
         source_system_provenance_flag=False,
     )
-    fidelity_receipt = DataFidelityReceipt(
+    fidelity_receipt = ManifoldFidelityReceipt(
         contextual_completeness_score=0.0,
         surrounding_token_density=token_density,
     )
@@ -403,7 +403,7 @@ def test_data_fidelity_receipt_positive_token_density() -> None:
     from pydantic import ValidationError
 
     with pytest.raises(ValidationError):
-        DataFidelityReceipt(
+        ManifoldFidelityReceipt(
             contextual_completeness_score=1.0,
             surrounding_token_density=-1,
         )

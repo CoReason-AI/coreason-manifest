@@ -49,21 +49,21 @@ from coreason_manifest.utils.algebra import (
 @given(
     st.builds(
         DynamicRoutingManifest,
-        manifest_id=st.just("m1"),
+        manifest_cid=st.just("m1"),
         branch_budgets_magnitude=st.just({"did:node:b111111": 10}),
         active_subgraphs=st.just({}),
         bypassed_steps=st.lists(
             st.builds(
                 BypassReceipt,
-                bypassed_node_id=st.just("did:node:bypass1"),
+                bypassed_node_cid=st.just("did:node:bypass1"),
                 cryptographic_null_hash=st.just("a" * 64),
-                artifact_event_id=st.just("event-1"),
+                artifact_event_cid=st.just("event-1"),
             ),
             min_size=1,
         ),
         artifact_profile=st.builds(
             GlobalSemanticProfile,
-            artifact_event_id=st.just("event-1"),
+            artifact_event_cid=st.just("event-1"),
             detected_modalities=st.just(["text"]),
             token_density=st.integers(min_value=0, max_value=100),
         ),
@@ -73,7 +73,7 @@ def test_project_mermaid_bypassed(manifest: DynamicRoutingManifest) -> None:
     result = project_manifest_to_mermaid(manifest)
     assert "subgraph Quarantined_Bypass" in result
     for b in manifest.bypassed_steps:
-        assert b.bypassed_node_id.replace(":", "_").replace("-", "_").replace(".", "_") in result
+        assert b.bypassed_node_cid.replace(":", "_").replace("-", "_").replace(".", "_") in result
 
 
 @given(
@@ -85,7 +85,7 @@ def test_project_mermaid_bypassed(manifest: DynamicRoutingManifest) -> None:
 )
 def test_project_markdown_optional_fields(intent: str, justification: str, lineage: str, sig: str, merkle: str) -> None:
     node = Mock()
-    node.type = "system"
+    node.topology_class="system"
     node.description = "desc"
     node.architectural_intent = intent
     node.justification = justification
@@ -98,8 +98,8 @@ def test_project_markdown_optional_fields(intent: str, justification: str, linea
 
     manifest = Mock()
     manifest.manifest_version = "1.0.0"
-    manifest.tenant_id = "t1"
-    manifest.session_id = "s1"
+    manifest.tenant_cid = "t1"
+    manifest.session_cid = "s1"
     manifest.topology = topology
 
     result = project_manifest_to_markdown(manifest)
@@ -120,10 +120,10 @@ def test_generate_correction_prompt_missing_and_invalid() -> None:
     try:
         WorkflowManifest(
             manifest_version="invalid",
-            tenant_id="t1",
-            session_id="s1",
+            tenant_cid="t1",
+            session_cid="s1",
             genesis_provenance={"author_identity": "did:node:n1"},  # type: ignore[arg-type]
-            topology=DAGTopologyManifest(type="dag", nodes={}, edges=[], max_depth=1, max_fan_out=1),
+            topology=DAGTopologyManifest(topology_class="dag", nodes={}, edges=[], max_depth=1, max_fan_out=1),
         )
     except ValidationError as e:
         prompt = synthesize_remediation_intent(e, "did:node:faulty1", "fault1")
@@ -148,8 +148,8 @@ def test_calculate_latent_alignment_success(v1: list[float]) -> None:
     b1 = struct.pack(f"<{len(v1)}f", *v1)
     b64 = base64.b64encode(b1).decode("ascii")
 
-    vec1 = VectorEmbeddingState(model_name="m1", dimensionality=len(v1), vector_base64=b64)
-    vec2 = VectorEmbeddingState(model_name="m1", dimensionality=len(v1), vector_base64=b64)
+    vec1 = VectorEmbeddingState(tensor_manifold="m1", dimensionality=len(v1), vector_base64=b64)
+    vec2 = VectorEmbeddingState(tensor_manifold="m1", dimensionality=len(v1), vector_base64=b64)
     policy = OntologicalAlignmentPolicy(min_cosine_similarity=0.9, require_isometry_proof=False)
 
     if any(x != 0.0 for x in v1):  # Avoid zero vectors
@@ -170,7 +170,7 @@ def test_calculate_latent_alignment_success(v1: list[float]) -> None:
 def test_apply_state_differential_hyp_add(ops: list[StateMutationIntent]) -> None:
     state: dict[str, Any] = {}
     manifest = StateDifferentialManifest(
-        diff_id="d111111", author_node_id="n111111", lamport_timestamp=1, vector_clock={"n111111": 1}, patches=ops
+        diff_cid="d111111", author_node_cid="n111111", lamport_timestamp=1, vector_clock={"n111111": 1}, patches=ops
     )
     with contextlib.suppress(ValueError):
         transmute_state_differential(state, manifest)
@@ -179,8 +179,8 @@ def test_apply_state_differential_hyp_add(ops: list[StateMutationIntent]) -> Non
 def test_apply_state_differential_test_fail() -> None:
     state = {"foo": "baz"}
     manifest = StateDifferentialManifest(
-        diff_id="d111111",
-        author_node_id="n111111",
+        diff_cid="d111111",
+        author_node_cid="n111111",
         lamport_timestamp=1,
         vector_clock={"n111111": 1},
         patches=[StateMutationIntent(op="test", path="/foo", value="bar")],
@@ -192,8 +192,8 @@ def test_apply_state_differential_test_fail() -> None:
 def test_apply_state_differential_copy() -> None:
     state = {"foo": {"bar": "baz"}}
     manifest = StateDifferentialManifest(
-        diff_id="d111111",
-        author_node_id="n111111",
+        diff_cid="d111111",
+        author_node_cid="n111111",
         lamport_timestamp=1,
         vector_clock={"n111111": 1},
         patches=[StateMutationIntent(**{"op": "copy", "from": "/foo/bar", "path": "/foo/qux"})],  # type: ignore[arg-type]
@@ -206,8 +206,8 @@ def test_apply_state_differential_copy() -> None:
 def test_apply_state_differential_move() -> None:
     state = {"foo": {"bar": "baz"}}
     manifest = StateDifferentialManifest(
-        diff_id="d111111",
-        author_node_id="n111111",
+        diff_cid="d111111",
+        author_node_cid="n111111",
         lamport_timestamp=1,
         vector_clock={"n111111": 1},
         patches=[StateMutationIntent(**{"op": "move", "from": "/foo/bar", "path": "/foo/qux"})],  # type: ignore[arg-type]
@@ -220,8 +220,8 @@ def test_apply_state_differential_move() -> None:
 def test_apply_state_differential_replace_list() -> None:
     state = {"foo": [1, 2, 3]}
     manifest = StateDifferentialManifest(
-        diff_id="d111111",
-        author_node_id="n111111",
+        diff_cid="d111111",
+        author_node_cid="n111111",
         lamport_timestamp=1,
         vector_clock={"n111111": 1},
         patches=[StateMutationIntent(op="replace", path="/foo/1", value=99)],
@@ -233,8 +233,8 @@ def test_apply_state_differential_replace_list() -> None:
 def test_apply_state_differential_remove_list() -> None:
     state = {"foo": [1, 2, 3]}
     manifest = StateDifferentialManifest(
-        diff_id="d111111",
-        author_node_id="n111111",
+        diff_cid="d111111",
+        author_node_cid="n111111",
         lamport_timestamp=1,
         vector_clock={"n111111": 1},
         patches=[StateMutationIntent(op="remove", path="/foo/1")],
@@ -246,8 +246,8 @@ def test_apply_state_differential_remove_list() -> None:
 def test_apply_state_differential_add_list_dash() -> None:
     state = {"foo": [1, 2]}
     manifest = StateDifferentialManifest(
-        diff_id="d111111",
-        author_node_id="n111111",
+        diff_cid="d111111",
+        author_node_cid="n111111",
         lamport_timestamp=1,
         vector_clock={"n111111": 1},
         patches=[StateMutationIntent(op="add", path="/foo/-", value=3)],
@@ -258,7 +258,7 @@ def test_apply_state_differential_add_list_dash() -> None:
 
 def test_project_mermaid_active_subgraph() -> None:
     manifest = Mock()
-    manifest.manifest_id = "m1"
+    manifest.manifest_cid = "m1"
     manifest.artifact_profile.detected_modalities = ["text"]
     manifest.active_subgraphs = {"text": ["did:node:1"]}
     manifest.bypassed_steps = []
@@ -297,8 +297,8 @@ def test_align_semantic_manifolds_dims() -> None:
 def test_apply_state_differential_test_pass() -> None:
     state = {"foo": "bar"}
     manifest = StateDifferentialManifest(
-        diff_id="d111",
-        author_node_id="n111",
+        diff_cid="d111",
+        author_node_cid="n111",
         lamport_timestamp=1,
         vector_clock={"n111": 1},
         patches=[StateMutationIntent(op="test", path="/foo", value="bar")],
@@ -309,8 +309,8 @@ def test_apply_state_differential_test_pass() -> None:
 
 def test_apply_state_differential_invalid_root() -> None:
     manifest = StateDifferentialManifest(
-        diff_id="d111",
-        author_node_id="n111",
+        diff_cid="d111",
+        author_node_cid="n111",
         lamport_timestamp=1,
         vector_clock={"n111": 1},
         patches=[StateMutationIntent(op="add", path="invalid", value="bar")],
@@ -321,8 +321,8 @@ def test_apply_state_differential_invalid_root() -> None:
 
 def test_apply_state_differential_invalid_from_path() -> None:
     manifest = StateDifferentialManifest(
-        diff_id="d111",
-        author_node_id="n111",
+        diff_cid="d111",
+        author_node_cid="n111",
         lamport_timestamp=1,
         vector_clock={"n111": 1},
         patches=[StateMutationIntent(**{"op": "copy", "path": "/foo", "from": "invalid"})],  # type: ignore[arg-type]
@@ -333,8 +333,8 @@ def test_apply_state_differential_invalid_from_path() -> None:
 
 def test_apply_state_differential_out_of_bounds() -> None:
     manifest = StateDifferentialManifest(
-        diff_id="d111",
-        author_node_id="n111",
+        diff_cid="d111",
+        author_node_cid="n111",
         lamport_timestamp=1,
         vector_clock={"n111": 1},
         patches=[StateMutationIntent(op="add", path="/foo/99", value="bar")],
@@ -346,7 +346,7 @@ def test_apply_state_differential_out_of_bounds() -> None:
 def test_apply_state_differential_exceptions() -> None:
     def manifest_base(patches: list[Any]) -> StateDifferentialManifest:
         return StateDifferentialManifest(
-            diff_id="d1", author_node_id="n1", lamport_timestamp=1, vector_clock={"n1": 1}, patches=patches
+            diff_cid="d1", author_node_cid="n1", lamport_timestamp=1, vector_clock={"n1": 1}, patches=patches
         )
 
     assert (
@@ -441,7 +441,7 @@ def test_apply_state_differential_exceptions() -> None:
 def test_apply_state_differential_copy_ops() -> None:
     def manifest_base(patches: list[Any]) -> StateDifferentialManifest:
         return StateDifferentialManifest(
-            diff_id="d2", author_node_id="n1", lamport_timestamp=1, vector_clock={"n1": 1}, patches=patches
+            diff_cid="d2", author_node_cid="n1", lamport_timestamp=1, vector_clock={"n1": 1}, patches=patches
         )
 
     # Test deep copy op inside object
@@ -518,7 +518,7 @@ def test_apply_state_differential_copy_ops() -> None:
 
 
 def test_compute_topology_hash() -> None:
-    top = DAGTopologyManifest(type="dag", nodes={}, edges=[], max_depth=1, max_fan_out=1)
+    top = DAGTopologyManifest(topology_class="dag", nodes={}, edges=[], max_depth=1, max_fan_out=1)
     h = compute_topology_hash(top)
     assert len(h) == 64
 
@@ -526,19 +526,19 @@ def test_compute_topology_hash() -> None:
 def test_verify_merkle_proof() -> None:
     assert verify_merkle_proof([])
 
-    n1 = Mock(node_hash=None, parent_hashes=[], request_id="r1")
+    n1 = Mock(node_hash=None, parent_hashes=[], request_cid="r1")
     assert not verify_merkle_proof([n1])
 
-    n2 = Mock(node_hash="h1", parent_hashes=[], request_id="r2")
+    n2 = Mock(node_hash="h1", parent_hashes=[], request_cid="r2")
     n2.generate_node_hash.return_value = "h1"
     assert verify_merkle_proof([n2])
 
-    n3 = Mock(node_hash="h3", parent_hashes=[], request_id="r3")
+    n3 = Mock(node_hash="h3", parent_hashes=[], request_cid="r3")
     n3.generate_node_hash.return_value = "invalid"
     with pytest.raises(Exception, match="Node hash mismatch"):
         verify_merkle_proof([n3])
 
-    n4 = Mock(node_hash="h4", parent_hashes=["missing_parent"], request_id="r4")
+    n4 = Mock(node_hash="h4", parent_hashes=["missing_parent"], request_cid="r4")
     n4.generate_node_hash.return_value = "h4"
     with pytest.raises(Exception, match="Missing parent hash"):
         verify_merkle_proof([n4])
@@ -557,7 +557,7 @@ def test_verify_ast_safety() -> None:
 def test_apply_state_differential_test_op() -> None:
     def manifest_base(patches: list[Any]) -> StateDifferentialManifest:
         return StateDifferentialManifest(
-            diff_id="d1", author_node_id="n1", lamport_timestamp=1, vector_clock={"n1": 1}, patches=patches
+            diff_cid="d1", author_node_cid="n1", lamport_timestamp=1, vector_clock={"n1": 1}, patches=patches
         )
 
     with pytest.raises(ValueError, match="Patch operation failed"):
@@ -583,11 +583,11 @@ def test_calculate_remaining_compute() -> None:
     ledger = Mock(history=[])
     assert calculate_remaining_compute(ledger, 10) == 10
 
-    tbr1 = Mock(type="token_burn", burn_magnitude=5)
+    tbr1 = Mock(topology_class="token_burn", burn_magnitude=5)
     ledger.history.append(tbr1)
     assert calculate_remaining_compute(ledger, 10) == 5
 
-    tbr2 = Mock(type="token_burn", burn_magnitude=10)
+    tbr2 = Mock(topology_class="token_burn", burn_magnitude=10)
     ledger.history.append(tbr2)
     with pytest.raises(ValueError, match="Mathematical Boundary Breached"):
         calculate_remaining_compute(ledger, 10)
@@ -597,19 +597,19 @@ def test_calculate_latent_alignment_errors() -> None:
     pol = OntologicalAlignmentPolicy(min_cosine_similarity=0.0, require_isometry_proof=False)
 
     v1 = VectorEmbeddingState(
-        vector_base64=base64.b64encode(struct.pack("<2f", 1.0, 2.0)).decode(), dimensionality=2, model_name="m1"
+        vector_base64=base64.b64encode(struct.pack("<2f", 1.0, 2.0)).decode(), dimensionality=2, tensor_manifold="m1"
     )
     v2 = VectorEmbeddingState(
-        vector_base64=base64.b64encode(struct.pack("<3f", 1.0, 2.0, 3.0)).decode(), dimensionality=3, model_name="m1"
+        vector_base64=base64.b64encode(struct.pack("<3f", 1.0, 2.0, 3.0)).decode(), dimensionality=3, tensor_manifold="m1"
     )
     with pytest.raises(ValueError, match="Topological Contradiction"):
         calculate_latent_alignment(v1, v2, pol)
 
     v3 = VectorEmbeddingState(
-        vector_base64=base64.b64encode(struct.pack("<2f", 1.0, 2.0)).decode(), dimensionality=3, model_name="m1"
+        vector_base64=base64.b64encode(struct.pack("<2f", 1.0, 2.0)).decode(), dimensionality=3, tensor_manifold="m1"
     )
     v4 = VectorEmbeddingState(
-        vector_base64=base64.b64encode(struct.pack("<2f", 1.0, 2.0)).decode(), dimensionality=3, model_name="m1"
+        vector_base64=base64.b64encode(struct.pack("<2f", 1.0, 2.0)).decode(), dimensionality=3, tensor_manifold="m1"
     )
     with pytest.raises(ValueError, match="Byte length does not match"):
         calculate_latent_alignment(v3, v4, pol)
@@ -634,11 +634,11 @@ def test_get_ontology_schema_empty() -> None:
 def test_calculate_latent_alignment_invalid_base64() -> None:
     pol = OntologicalAlignmentPolicy(min_cosine_similarity=-1.0, require_isometry_proof=False)
     # A string with valid chars but invalid length for base64: "a"
-    v_invalid = VectorEmbeddingState.model_construct(vector_base64="a", dimensionality=3, model_name="model1")
+    v_invalid = VectorEmbeddingState.model_construct(vector_base64="a", dimensionality=3, tensor_manifold="model1")
     v_valid = VectorEmbeddingState.model_construct(
         vector_base64=base64.b64encode(struct.pack("<3f", 1.0, 0.0, 0.0)).decode(),
         dimensionality=3,
-        model_name="model1",
+        tensor_manifold="model1",
     )
 
     with pytest.raises(ValueError, match=r"Topological Contradiction: Invalid base64 encoding\."):

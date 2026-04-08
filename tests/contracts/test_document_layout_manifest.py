@@ -33,8 +33,8 @@ def build_anchor() -> MultimodalTokenAnchorState:
     )
 
 
-def build_block(block_id: str) -> DocumentLayoutRegionState:
-    return DocumentLayoutRegionState(block_id=block_id, block_type="paragraph", anchor=build_anchor())
+def build_block(block_cid: str) -> DocumentLayoutRegionState:
+    return DocumentLayoutRegionState(block_cid=block_cid, block_type="paragraph", anchor=build_anchor())
 
 
 # 2. Atomic Parameterized Tests for Referential Integrity (Ghost Nodes)
@@ -85,7 +85,7 @@ def test_document_layout_manifest_fuzz_valid_dag(dag_data: dict[str, Any]) -> No
     AGENT INSTRUCTION: Fuzz the topological engine. Prove that any mathematically
     sound DAG is strictly accepted without hallucinating false-positive cycle rejections.
     """
-    blocks = {n_id: build_block(n_id) for n_id in dag_data["nodes"]}
+    blocks = {n_cid: build_block(n_cid) for n_cid in dag_data["nodes"]}
     manifest = DocumentLayoutManifest(blocks=blocks, chronological_flow_edges=dag_data["edges"])
 
     assert len(manifest.blocks) == len(dag_data["nodes"])

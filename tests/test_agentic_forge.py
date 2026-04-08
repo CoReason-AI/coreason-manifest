@@ -19,12 +19,12 @@ from coreason_manifest.spec.ontology import (
 
 
 def test_teleological_isometry_threshold() -> None:
-    source_intent_id = "intent-id-12345"
-    target_intent_vector = VectorEmbeddingState(vector_base64="abc", dimensionality=10, model_name="test-model")
-    forged_output_vector = VectorEmbeddingState(vector_base64="xyz", dimensionality=10, model_name="test-model")
+    source_intent_cid = "intent-id-12345"
+    target_intent_vector = VectorEmbeddingState(vector_base64="abc", dimensionality=10, tensor_manifold="test-model")
+    forged_output_vector = VectorEmbeddingState(vector_base64="xyz", dimensionality=10, tensor_manifold="test-model")
 
     receipt_passed = TeleologicalIsometryReceipt(
-        source_intent_id=source_intent_id,
+        source_intent_cid=source_intent_cid,
         target_intent_vector=target_intent_vector,
         forged_output_vector=forged_output_vector,
         measured_cosine_similarity=0.90,
@@ -33,7 +33,7 @@ def test_teleological_isometry_threshold() -> None:
     assert receipt_passed.alignment_threshold_passed is True
 
     receipt_failed = TeleologicalIsometryReceipt(
-        source_intent_id=source_intent_id,
+        source_intent_cid=source_intent_cid,
         target_intent_vector=target_intent_vector,
         forged_output_vector=forged_output_vector,
         measured_cosine_similarity=0.80,
@@ -48,7 +48,7 @@ def test_hoare_logic_proof_receipt_canonical_sorting() -> None:
     contract_c = LiquidTypeContract(target_property="c_prop", mathematical_predicate="x == 5")
 
     receipt = HoareLogicProofReceipt(
-        capability_id="cap-id-123",
+        capability_cid="cap-id-123",
         preconditions=[contract_b, contract_c, contract_a],
         postconditions=[contract_c, contract_a, contract_b],
         proof_system="lean4",
@@ -67,7 +67,7 @@ def test_hoare_logic_proof_receipt_canonical_sorting() -> None:
 
 def test_capability_forge_topology_compile() -> None:
     intent = SemanticDiscoveryIntent(
-        query_vector=VectorEmbeddingState(vector_base64="abc", dimensionality=10, model_name="test-model"),
+        query_vector=VectorEmbeddingState(vector_base64="abc", dimensionality=10, tensor_manifold="test-model"),
         min_isometry_score=0.9,
         required_structural_types=["test"],
     )
@@ -75,9 +75,9 @@ def test_capability_forge_topology_compile() -> None:
     # To pass validation without supplying raw nodes on creation, we supply an empty dict
     manifest = CapabilityForgeTopologyManifest(
         target_epistemic_deficit=intent,
-        generator_node_id="did:coreason:agent-1",
-        formal_verifier_id="did:coreason:system-1",
-        fuzzing_engine_id="did:coreason:system-2",
+        generator_node_cid="did:coreason:agent-1",
+        formal_verifier_cid="did:coreason:system-1",
+        fuzzing_engine_cid="did:coreason:system-2",
         nodes={},
     )
 

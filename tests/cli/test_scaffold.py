@@ -118,8 +118,8 @@ def test_test_bootstrapper(mock_write_text: MagicMock) -> None:
     from coreason_manifest.cli.test_bootstrapper import generate_test
 
     fields = [
-        {"name": "some_int", "type": "int", "minimum": 0, "maximum": 10},
-        {"name": "some_float", "type": "float", "exclusiveMinimum": 0.0, "exclusiveMaximum": 1.0},
+        {"name": "some_int", "topology_class": "int", "minimum": 0, "maximum": 10},
+        {"name": "some_float", "topology_class": "float", "exclusiveMinimum": 0.0, "exclusiveMaximum": 1.0},
     ]
 
     generate_test("TestCapability", fields)

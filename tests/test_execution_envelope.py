@@ -81,21 +81,21 @@ def test_pure_function() -> None:
 
 
 def test_delta_state() -> None:
-    # Assert that a StateVectorProfile with is_delta=True passes validation even if mandatory mutable_memory keys are omitted (it can be None or empty)
+    # Assert that a StateVectorProfile with is_delta=True passes validation even if mandatory mutable_manifold keys are omitted (it can be None or empty)
     s = StateVectorProfile(is_delta=True)
     assert s.is_delta is True
-    assert s.mutable_memory is None
+    assert s.mutable_manifold is None
 
 
 def test_action_space_manifest_rejects_custom_state() -> None:
     with pytest.raises(ValidationError) as excinfo:
         ActionSpaceManifest(
-            action_space_cid="test_id",
+            action_space_cid="test_cid",
             entry_point_cid="test_tool",
             transition_matrix={"test_tool": []},
             capabilities={
                 "test_tool": ToolManifest(
-                    type="native_tool",
+                    topology_class="native_tool",
                     tool_name="test_tool",
                     description="test tool",
                     input_schema={"type": "object", "properties": {"system_prompt": {"type": "string"}}},
@@ -113,7 +113,7 @@ def test_action_space_manifest_rejects_custom_state() -> None:
         transition_matrix={"test_tool_2": []},
         capabilities={
             "test_tool_2": ToolManifest(
-                type="native_tool",
+                topology_class="native_tool",
                 tool_name="test_tool_2",
                 description="test tool 2",
                 input_schema={"type": "object", "properties": {"sql_query": {"type": "string"}}},
@@ -131,9 +131,9 @@ def test_state_vector_memory_bounds() -> None:
     from coreason_manifest.spec.ontology import StateVectorProfile
 
     # It should pass with small valid dictionaries
-    s = StateVectorProfile(mutable_memory={"test": "abc"}, read_only_context={"rules": "abc"})
-    assert s.mutable_memory == {"test": "abc"}
-    assert s.read_only_context == {"rules": "abc"}
+    s = StateVectorProfile(mutable_manifold={"test": "abc"}, immutable_context={"rules": "abc"})
+    assert s.mutable_manifold == {"test": "abc"}
+    assert s.immutable_context == {"rules": "abc"}
 
     # It should fail with huge payloads exceeding nodes
     from typing import Any
@@ -143,9 +143,9 @@ def test_state_vector_memory_bounds() -> None:
         huge_dict[f"key_{i}"] = i
 
     with pytest.raises(ValidationError) as exc_info:
-        StateVectorProfile(mutable_memory=huge_dict)
+        StateVectorProfile(mutable_manifold=huge_dict)
     assert "Payload volume exceeds absolute hardware limit" in str(exc_info.value)
 
     with pytest.raises(ValidationError) as exc_info:
-        StateVectorProfile(read_only_context=huge_dict)
+        StateVectorProfile(immutable_context=huge_dict)
     assert "Payload volume exceeds absolute hardware limit" in str(exc_info.value)

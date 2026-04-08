@@ -61,7 +61,7 @@ def test_coreason_base_state_cached_hash(val: int) -> None:
     st.floats(min_value=0.0, max_value=0.0),
 )
 def test_volumetric_bounding_profile_invalid(extents_x: float) -> None:
-    transform = SE3TransformProfile(reference_frame_id="frame", x=0, y=0, z=0)
+    transform = SE3TransformProfile(reference_frame_cid="frame", x=0, y=0, z=0)
     with pytest.raises(ValidationError, match="strictly greater than 0"):
         VolumetricBoundingProfile(center_transform=transform, extents_x=extents_x, extents_y=1.0, extents_z=1.0)
 

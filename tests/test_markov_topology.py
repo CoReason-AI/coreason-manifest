@@ -56,7 +56,7 @@ def test_cyclic_edge_infinite_loop_guillotine() -> None:
 
 def test_action_space_dcg_compilation() -> None:
     tool_a = ToolManifest(
-        type="native_tool",
+        topology_class="native_tool",
         tool_name="tool_A",
         description="Tool A",
         input_schema={"type": "object", "properties": {"input": {"type": "string"}}},
@@ -65,7 +65,7 @@ def test_action_space_dcg_compilation() -> None:
     )
 
     tool_b = ToolManifest(
-        type="native_tool",
+        topology_class="native_tool",
         tool_name="tool_B",
         description="Tool B",
         input_schema={"type": "object", "properties": {"input": {"type": "string"}}},
@@ -110,7 +110,7 @@ def test_action_space_dcg_compilation() -> None:
 
 def test_action_space_ghost_edge_prevention() -> None:
     tool_a = ToolManifest(
-        type="native_tool",
+        topology_class="native_tool",
         tool_name="tool_A",
         description="Tool A",
         input_schema={"type": "object", "properties": {"input": {"type": "string"}}},

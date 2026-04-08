@@ -172,7 +172,7 @@ def mcp(name: str, description: str) -> None:
 
                     field_def = {
                         "name": prop_name,
-                        "type": ptype,
+                        "topology_class": ptype,
                         "description": pdesc,
                     }
                     if "minimum" in prop_details:

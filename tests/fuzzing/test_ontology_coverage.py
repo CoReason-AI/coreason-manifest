@@ -155,7 +155,7 @@ def test_workflow_manifest_lbac_dominance(
     )
     topology = DAGTopologyManifest(nodes={}, edges=[], max_depth=10, max_fan_out=10)
     sla = BilateralSLA(
-        receiving_tenant_id="tenant-x", max_permitted_classification=sla_max_class, liability_limit_magnitude=100
+        receiving_tenant_cid="tenant-x", max_permitted_classification=sla_max_class, liability_limit_magnitude=100
     )
 
     max_local_clearance = max(prof.clearance_level for prof in allowed_classes)
@@ -198,15 +198,15 @@ def test_smpc_topology_manifest_sorting(participant_cids: list[str]) -> None:
 
 @given(st.sampled_from([("did:node:gen1", "did:node:gen1"), ("did:node:eval1", "did:node:gen1")]))
 def test_evaluator_optimizer_bipartite_nodes(nodes_pair: tuple[str, str]) -> None:
-    gen_id, eval_id = nodes_pair
-    # Populate the nodes dict with the gen_id only
+    gen_cid, eval_cid = nodes_pair
+    # Populate the nodes dict with the gen_cid only
     from coreason_manifest.spec.ontology import AnyNodeProfile
 
-    nodes: dict[str, AnyNodeProfile] = {gen_id: SystemNodeProfile(description="desc")}
+    nodes: dict[str, AnyNodeProfile] = {gen_cid: SystemNodeProfile(description="desc")}
 
     with pytest.raises(ValidationError) as exc_info:
         EvaluatorOptimizerTopologyManifest(
-            nodes=nodes, generator_node_id=gen_id, evaluator_node_id=eval_id, max_revision_loops=5
+            nodes=nodes, generator_node_cid=gen_cid, evaluator_node_cid=eval_cid, max_revision_loops=5
         )
 
     # If they are the same, it fails the "cannot be the same node" or "not found"

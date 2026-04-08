@@ -59,26 +59,26 @@ def project_manifest_to_mermaid(manifest: DynamicRoutingManifest) -> str:
         "    classDef bypassed fill:#f5f5f5,stroke:#9e9e9e,stroke-width:2px,stroke-dasharray: 5 5;",
     ]
 
-    safe_root_id = manifest.manifest_id.replace(":", "_").replace("-", "_").replace(".", "_")
-    lines.append(f"    {safe_root_id}[{manifest.manifest_id}]")
+    safe_root_cid = manifest.manifest_cid.replace(":", "_").replace("-", "_").replace(".", "_")
+    lines.append(f"    {safe_root_cid}[{manifest.manifest_cid}]")
 
     for modality in manifest.artifact_profile.detected_modalities:
         lines.append(f"    subgraph {modality}")
 
         if modality in manifest.active_subgraphs:
             for node_cid in manifest.active_subgraphs[modality]:
-                safe_id = node_cid.replace(":", "_").replace("-", "_").replace(".", "_")
-                lines.append(f"        {safe_id}[{node_cid}]:::active")
-                lines.append(f"        {safe_root_id} --> {safe_id}")
+                safe_cid = node_cid.replace(":", "_").replace("-", "_").replace(".", "_")
+                lines.append(f"        {safe_cid}[{node_cid}]:::active")
+                lines.append(f"        {safe_root_cid} --> {safe_cid}")
 
         lines.append("    end")
 
     if manifest.bypassed_steps:
         lines.append("    subgraph Quarantined_Bypass")
         for bypass in manifest.bypassed_steps:
-            safe_id = bypass.bypassed_node_id.replace(":", "_").replace("-", "_").replace(".", "_")
-            lines.append(f"        {safe_id}[{bypass.bypassed_node_id}]:::bypassed")
-            lines.append(f"        {safe_root_id} -. {bypass.justification} .-> {safe_id}")
+            safe_cid = bypass.bypassed_node_cid.replace(":", "_").replace("-", "_").replace(".", "_")
+            lines.append(f"        {safe_cid}[{bypass.bypassed_node_cid}]:::bypassed")
+            lines.append(f"        {safe_root_cid} -. {bypass.justification} .-> {safe_cid}")
         lines.append("    end")
 
     return "\n".join(lines)
@@ -91,11 +91,11 @@ def project_manifest_to_markdown(manifest: WorkflowManifest) -> str:
         "",
         "## Workflow Identification",
         f"- **Manifest Version:** {manifest.manifest_version}",
-        f"- **Tenant ID:** {manifest.tenant_id or 'Unbound'}",
-        f"- **Session ID:** {manifest.session_id or 'Unbound'}",
+        f"- **Tenant ID:** {manifest.tenant_cid or 'Unbound'}",
+        f"- **Session ID:** {manifest.session_cid or 'Unbound'}",
         "",
         "## Root Topology",
-        f"- **Type:** `{manifest.topology.type}`",
+        f"- **Type:** `{manifest.topology.topology_class}`",
     ]
 
     if getattr(manifest.topology, "architectural_intent", None):
@@ -109,7 +109,7 @@ def project_manifest_to_markdown(manifest: WorkflowManifest) -> str:
     if hasattr(manifest.topology, "nodes"):
         for node_cid, node in getattr(manifest.topology, "nodes", {}).items():
             lines.append(f"### Node: `{node_cid}`")
-            lines.append(f"- **Type:** `{node.type}`")
+            lines.append(f"- **Type:** `{node.topology_class}`")
             lines.append(f"- **Description:** {node.description}")
 
             if getattr(node, "architectural_intent", None):
@@ -200,7 +200,7 @@ def align_semantic_manifolds(
     task_cid: str,
     source_modalities: list[str],
     target_modalities: list[Literal["text", "raster_image", "vector_graphics", "tabular_grid", "n_dimensional_tensor"]],
-    artifact_event_id: str,
+    artifact_event_cid: str,
 ) -> EpistemicTransmutationTask | None:
     """
     A pure algebraic functor that calculates the epistemic gap between two nodes.
@@ -219,7 +219,7 @@ def align_semantic_manifolds(
         minimum_fidelity_threshold=0.5,
     )
     return EpistemicTransmutationTask(
-        task_cid=task_cid, artifact_event_id=artifact_event_id, target_modalities=target_modalities, compression_sla=sla
+        task_cid=task_cid, artifact_event_cid=artifact_event_cid, target_modalities=target_modalities, compression_sla=sla
     )
 
 
@@ -229,7 +229,7 @@ def calculate_remaining_compute(ledger: ontology.EpistemicLedgerState, initial_e
     """
     remaining = initial_escrow_magnitude
     for event in ledger.history:
-        if isinstance(event, ontology.TokenBurnReceipt) or getattr(event, "type", None) == "token_burn":
+        if isinstance(event, ontology.TokenBurnReceipt) or getattr(event, "topology_class", None) == "token_burn":
             remaining -= getattr(event, "burn_magnitude", 0)
             if remaining < 0:
                 raise ValueError("Mathematical Boundary Breached: Compute escrow exhausted.")
@@ -243,7 +243,7 @@ def calculate_latent_alignment(
     A pure algebraic functor to calculate cosine similarity of two vectors.
     """
 
-    if v1.model_name != v2.model_name or v1.dimensionality != v2.dimensionality:
+    if v1.tensor_manifold != v2.tensor_manifold or v1.dimensionality != v2.dimensionality:
         raise ValueError("Topological Contradiction: Vector geometries are incommensurable.")
 
     try:
@@ -298,7 +298,7 @@ def verify_merkle_proof(trace: list[ExecutionNodeReceipt]) -> bool:
         node_map[node.node_hash] = node
     for node in trace:
         if node.generate_node_hash() != node.node_hash:
-            raise TamperFaultEvent(f"Node hash mismatch for request {node.request_id}")
+            raise TamperFaultEvent(f"Node hash mismatch for request {node.request_cid}")
         for parent_hash in node.parent_hashes:
             if parent_hash not in node_map:
                 raise TamperFaultEvent(f"Missing parent hash {parent_hash} in trace")

@@ -27,12 +27,12 @@ def valid_scratchpad_strategy(draw: st.DrawFn) -> dict[str, Any]:
         st.lists(st.from_regex(r"^[a-zA-Z0-9_.:-]+$", fullmatch=True), min_size=2, max_size=15, unique=True)
     )
 
-    explored = [ThoughtBranchState(branch_cid=b_id, latent_content_hash="a" * 64, prm_score=0.9) for b_id in branch_ids]
+    explored = [ThoughtBranchState(branch_cid=b_cid, latent_content_hash="a" * 64, prm_score=0.9) for b_cid in branch_ids]
 
     discarded = draw(st.lists(st.sampled_from(branch_ids), max_size=len(branch_ids), unique=True))
-    resolution_id = draw(st.one_of(st.none(), st.sampled_from(branch_ids)))
+    resolution_cid = draw(st.one_of(st.none(), st.sampled_from(branch_ids)))
 
-    return {"explored_branches": explored, "discarded_branches": discarded, "resolution_branch_id": resolution_id}
+    return {"explored_branches": explored, "discarded_branches": discarded, "resolution_branch_cid": resolution_cid}
 
 
 @given(data=valid_scratchpad_strategy())
@@ -46,7 +46,7 @@ def test_latent_scratchpad_receipt_fuzz_sorting_determinism(data: dict[str, Any]
         trace_cid="trace_fuzz_1",
         explored_branches=data["explored_branches"],
         discarded_branches=data["discarded_branches"],
-        resolution_branch_id=data["resolution_branch_id"],
+        resolution_branch_cid=data["resolution_branch_cid"],
         total_latent_tokens=100,
     )
 
@@ -62,12 +62,12 @@ def test_latent_scratchpad_receipt_resolution_branch_missing() -> None:
     """Prove that the orchestrator rejects resolution branches not found in the explored matrix."""
     branch_1 = ThoughtBranchState(branch_cid="branch_1", latent_content_hash="a" * 64, prm_score=0.9)
 
-    with pytest.raises(ValidationError, match="resolution_branch_id 'branch_invalid' not found in explored_branches"):
+    with pytest.raises(ValidationError, match="resolution_branch_cid 'branch_invalid' not found in explored_branches"):
         LatentScratchpadReceipt(
             trace_cid="trace_123",
             explored_branches=[branch_1],
             discarded_branches=[],
-            resolution_branch_id="branch_invalid",
+            resolution_branch_cid="branch_invalid",
             total_latent_tokens=100,
         )
 
@@ -81,6 +81,6 @@ def test_latent_scratchpad_receipt_discarded_branch_missing() -> None:
             trace_cid="trace_123",
             explored_branches=[branch_1],
             discarded_branches=["branch_invalid"],
-            resolution_branch_id=None,
+            resolution_branch_cid=None,
             total_latent_tokens=100,
         )
