@@ -485,7 +485,7 @@ def _inject_workflow_examples(schema: dict[str, Any]) -> None:
     ]
 
 
-class RefusalToReasonEvent(ValueError):
+class RefusalToReasonEvent(ValueError):  # noqa: N818
     """
     AGENT INSTRUCTION: Exception raised when inference is aborted due to severe semantic degradation.
 
