@@ -53,7 +53,7 @@ def test_riemannian_geodesic_repulsion(
 ) -> None:
     with pytest.raises(ValidationError):
         VolumetricEdgeProfile(
-            curve_type="riemannian_geodesic",
+            curve_class="riemannian_geodesic",
             tension=tension,
             flow_velocity=flow_velocity,
             edge_thickness=edge_thickness,
@@ -62,7 +62,7 @@ def test_riemannian_geodesic_repulsion(
 
     # Valid case
     VolumetricEdgeProfile(
-        curve_type="riemannian_geodesic",
+        curve_class="riemannian_geodesic",
         tension=tension,
         flow_velocity=flow_velocity,
         edge_thickness=edge_thickness,

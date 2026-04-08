@@ -20,8 +20,8 @@ from coreason_manifest.spec.ontology import (
 
 def test_teleological_isometry_threshold() -> None:
     source_intent_id = "intent-id-12345"
-    target_intent_vector = VectorEmbeddingState(vector_base64="abc", dimensionality=10, model_name="test-model")
-    forged_output_vector = VectorEmbeddingState(vector_base64="xyz", dimensionality=10, model_name="test-model")
+    target_intent_vector = VectorEmbeddingState(vector_base64="abc", dimensionality=10, foundation_matrix_name="test-model")
+    forged_output_vector = VectorEmbeddingState(vector_base64="xyz", dimensionality=10, foundation_matrix_name="test-model")
 
     receipt_passed = TeleologicalIsometryReceipt(
         source_intent_id=source_intent_id,
@@ -67,7 +67,7 @@ def test_hoare_logic_proof_receipt_canonical_sorting() -> None:
 
 def test_capability_forge_topology_compile() -> None:
     intent = SemanticDiscoveryIntent(
-        query_vector=VectorEmbeddingState(vector_base64="abc", dimensionality=10, model_name="test-model"),
+        query_vector=VectorEmbeddingState(vector_base64="abc", dimensionality=10, foundation_matrix_name="test-model"),
         min_isometry_score=0.9,
         required_structural_types=["test"],
     )
@@ -75,9 +75,9 @@ def test_capability_forge_topology_compile() -> None:
     # To pass validation without supplying raw nodes on creation, we supply an empty dict
     manifest = CapabilityForgeTopologyManifest(
         target_epistemic_deficit=intent,
-        generator_node_id="did:coreason:agent-1",
-        formal_verifier_id="did:coreason:system-1",
-        fuzzing_engine_id="did:coreason:system-2",
+        generator_node_cid="did:coreason:agent-1",
+        formal_verifier_cid="did:coreason:system-1",
+        fuzzing_engine_cid="did:coreason:system-2",
         nodes={},
     )
 

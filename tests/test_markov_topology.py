@@ -56,19 +56,19 @@ def test_cyclic_edge_infinite_loop_guillotine() -> None:
 
 def test_action_space_dcg_compilation() -> None:
     tool_a = SpatialToolManifest(
-        type="native_tool",
+        topology_class="native_tool",
         tool_name="tool_A",
         description="Tool A",
-        input_schema={"type": "object", "properties": {"input": {"type": "string"}}},
+        input_schema={"topology_class": "object", "properties": {"input": {"topology_class": "string"}}},
         side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
         permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
     )
 
     tool_b = SpatialToolManifest(
-        type="native_tool",
+        topology_class="native_tool",
         tool_name="tool_B",
         description="Tool B",
-        input_schema={"type": "object", "properties": {"input": {"type": "string"}}},
+        input_schema={"topology_class": "object", "properties": {"input": {"topology_class": "string"}}},
         side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
         permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
     )
@@ -110,10 +110,10 @@ def test_action_space_dcg_compilation() -> None:
 
 def test_action_space_ghost_edge_prevention() -> None:
     tool_a = SpatialToolManifest(
-        type="native_tool",
+        topology_class="native_tool",
         tool_name="tool_A",
         description="Tool A",
-        input_schema={"type": "object", "properties": {"input": {"type": "string"}}},
+        input_schema={"topology_class": "object", "properties": {"input": {"topology_class": "string"}}},
         side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
         permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
     )

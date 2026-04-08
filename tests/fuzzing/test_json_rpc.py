@@ -113,9 +113,9 @@ def test_latent_scratchpad_receipt_referential_integrity(
 def test_action_space_manifest_uniqueness(action_space_cid: str, tool_names: list[str]) -> None:
     native_tools = {
         name: SpatialToolManifest(
-            type="native_tool",
+            topology_class="native_tool",
             tool_name=name,
-            input_schema={"type": "object", "properties": {}},
+            input_schema={"topology_class": "object", "properties": {}},
             description="desc",
             side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
             permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),

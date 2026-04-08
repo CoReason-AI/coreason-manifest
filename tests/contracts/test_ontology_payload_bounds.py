@@ -133,20 +133,20 @@ def test_state_vector_memory_bounds() -> None:
 
     from coreason_manifest.spec.ontology import StateVectorProfile
 
-    s = StateVectorProfile(mutable_memory={"test": "abc"}, read_only_context={"rules": "abc"})
-    assert s.mutable_memory == {"test": "abc"}
-    assert s.read_only_context == {"rules": "abc"}
+    s = StateVectorProfile(mutable_matrix={"test": "abc"}, immutable_matrix={"rules": "abc"})
+    assert s.mutable_matrix == {"test": "abc"}
+    assert s.immutable_matrix == {"rules": "abc"}
 
     huge_dict: dict[str, Any] = {}
     for i in range(10001):
         huge_dict[f"key_{i}"] = i
 
     with pytest.raises(ValidationError) as exc_info:
-        StateVectorProfile(mutable_memory=huge_dict)
+        StateVectorProfile(mutable_matrix=huge_dict)
     assert "Payload volume exceeds absolute hardware limit" in str(exc_info.value)
 
     with pytest.raises(ValidationError) as exc_info:
-        StateVectorProfile(read_only_context=huge_dict)
+        StateVectorProfile(immutable_matrix=huge_dict)
     assert "Payload volume exceeds absolute hardware limit" in str(exc_info.value)
 
 

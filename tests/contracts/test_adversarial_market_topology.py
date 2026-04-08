@@ -30,7 +30,7 @@ def valid_adversarial_topology(draw: st.DrawFn) -> dict[str, Any]:
     # Generate an array of unique DIDs to prevent Pydantic disjoint overlap rejections
     all_dids = draw(st.lists(did_strategy, min_size=3, max_size=20, unique=True))
 
-    adjudicator_id = all_dids[0]
+    adjudicator_cid = all_dids[0]
 
     # Split remaining DIDs into two non-empty sets for Red/Blue teams
     split_idx = draw(st.integers(min_value=1, max_value=len(all_dids) - 2))
@@ -45,7 +45,7 @@ def valid_adversarial_topology(draw: st.DrawFn) -> dict[str, Any]:
     )
 
     return {
-        "adjudicator_id": adjudicator_id,
+        "adjudicator_cid": adjudicator_cid,
         "blue_team": blue_team,
         "red_team": red_team,
         "market_rules": market_rules,
@@ -61,7 +61,7 @@ def test_adversarial_market_compile_fuzzing(topology_data: dict[str, Any]) -> No
     into a rigid CouncilTopologyManifest across infinite valid states.
     """
     manifest = AdversarialMarketTopologyManifest(
-        adjudicator_id=topology_data["adjudicator_id"],
+        adjudicator_cid=topology_data["adjudicator_cid"],
         blue_team_cids=topology_data["blue_team"],
         red_team_cids=topology_data["red_team"],
         market_rules=topology_data["market_rules"],
@@ -71,16 +71,16 @@ def test_adversarial_market_compile_fuzzing(topology_data: dict[str, Any]) -> No
 
     # Assert the structural bounds of the compiled projection
     assert isinstance(compiled, CouncilTopologyManifest)
-    assert compiled.adjudicator_id == topology_data["adjudicator_id"]
+    assert compiled.adjudicator_cid == topology_data["adjudicator_cid"]
 
     assert compiled.consensus_policy is not None
     assert compiled.consensus_policy.strategy == "prediction_market"
     assert compiled.consensus_policy.prediction_market_rules == topology_data["market_rules"]
 
     # Assert exact node mapping and ontological injection
-    assert topology_data["adjudicator_id"] in compiled.nodes
-    assert isinstance(compiled.nodes[topology_data["adjudicator_id"]], CognitiveSystemNodeProfile)
-    assert compiled.nodes[topology_data["adjudicator_id"]].description == "Synthesizing Adjudicator"
+    assert topology_data["adjudicator_cid"] in compiled.nodes
+    assert isinstance(compiled.nodes[topology_data["adjudicator_cid"]], CognitiveSystemNodeProfile)
+    assert compiled.nodes[topology_data["adjudicator_cid"]].description == "Synthesizing Adjudicator"
 
     for node_cid in topology_data["blue_team"]:
         assert node_cid in compiled.nodes

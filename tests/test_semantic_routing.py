@@ -31,7 +31,7 @@ def test_transition_edge_xor_validation() -> None:
     intent = SemanticDiscoveryIntent(
         required_structural_types=["SpatialToolManifest"],
         min_isometry_score=0.9,
-        query_vector={"vector_base64": "dummy", "dimensionality": 128, "model_name": "test-model"},  # type: ignore[arg-type]
+        query_vector={"vector_base64": "dummy", "dimensionality": 128, "foundation_matrix_name": "test-model"},  # type: ignore[arg-type]
     )
     TransitionEdgeProfile(
         topology_class="acyclic", target_intent=intent, probability_weight=1.0, compute_weight_magnitude=5
@@ -54,10 +54,10 @@ def test_transition_edge_xor_validation() -> None:
 
 def test_dynamic_ghost_node_and_canonical_sorting() -> None:
     tool_a = SpatialToolManifest(
-        type="native_tool",
+        topology_class="native_tool",
         tool_name="tool_A",
         description="Tool A",
-        input_schema={"type": "object", "properties": {"input": {"type": "string"}}},
+        input_schema={"topology_class": "object", "properties": {"input": {"topology_class": "string"}}},
         side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
         permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
     )
@@ -66,13 +66,13 @@ def test_dynamic_ghost_node_and_canonical_sorting() -> None:
     intent1 = SemanticDiscoveryIntent(
         required_structural_types=["SpatialToolManifest"],
         min_isometry_score=0.8,
-        query_vector={"vector_base64": "dummy", "dimensionality": 128, "model_name": "test-model"},  # type: ignore[arg-type]
+        query_vector={"vector_base64": "dummy", "dimensionality": 128, "foundation_matrix_name": "test-model"},  # type: ignore[arg-type]
     )
     # Intent 2 should sort second
     intent2 = SemanticDiscoveryIntent(
         required_structural_types=["SpatialToolManifest"],
         min_isometry_score=0.9,
-        query_vector={"vector_base64": "dummy", "dimensionality": 128, "model_name": "test-model"},  # type: ignore[arg-type]
+        query_vector={"vector_base64": "dummy", "dimensionality": 128, "foundation_matrix_name": "test-model"},  # type: ignore[arg-type]
     )
 
     edge1 = TransitionEdgeProfile(
