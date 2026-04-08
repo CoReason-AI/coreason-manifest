@@ -21,7 +21,7 @@ from coreason_manifest.spec.ontology import (
     CognitiveUncertaintyProfile,
     ComputeEngineProfile,
     ComputeRateContract,
-    ComputeTier,
+    ComputeTierProfile,
     ConsensusPolicy,
     ConstrainedDecodingPolicy,
     ContextualizedSourceEntity,
@@ -30,7 +30,7 @@ from coreason_manifest.spec.ontology import (
     DynamicLayoutManifest,
     EphemeralNamespacePartitionState,
     EpistemicCompressionSLA,
-    EpistemicSecurity,
+    EpistemicSecurityPolicy,
     EpistemicSecurityProfile,
     EpistemicUpsamplingTask,
     GradingCriterionProfile,
@@ -816,9 +816,9 @@ def test_kinematic_delta_manifest_sorting() -> None:
 def test_agent_node_profile_success() -> None:
     """Test that default values instantiate cleanly without triggering traps."""
     agent = CognitiveAgentNodeProfile(description="Test agent")
-    assert agent.hardware.compute_tier == ComputeTier.KINETIC
+    assert agent.hardware.compute_tier == ComputeTierProfile.KINETIC
     assert agent.hardware.min_vram_gb == 8.0
-    assert agent.security.epistemic_security == EpistemicSecurity.STANDARD
+    assert agent.security.epistemic_security == EpistemicSecurityPolicy.STANDARD
 
 
 def test_agent_node_profile_thermodynamic_paradox() -> None:
@@ -826,7 +826,7 @@ def test_agent_node_profile_thermodynamic_paradox() -> None:
     with pytest.raises(ValueError, match="Thermodynamic Constraint Violated"):
         CognitiveAgentNodeProfile(
             description="Test agent",
-            hardware=SpatialHardwareProfile(compute_tier=ComputeTier.KINETIC, min_vram_gb=25.0),
+            hardware=SpatialHardwareProfile(compute_tier=ComputeTierProfile.KINETIC, min_vram_gb=25.0),
         )
 
 
@@ -836,16 +836,16 @@ def test_agent_node_profile_sovereign_execution_paradox() -> None:
         CognitiveAgentNodeProfile(
             description="Test agent",
             hardware=SpatialHardwareProfile(provider_whitelist=["vast", "aws"]),
-            security=EpistemicSecurityProfile(epistemic_security=EpistemicSecurity.CONFIDENTIAL),
+            security=EpistemicSecurityProfile(epistemic_security=EpistemicSecurityPolicy.CONFIDENTIAL),
         )
 
     # Success case for CONFIDENTIAL
     agent = CognitiveAgentNodeProfile(
         description="Test agent",
         hardware=SpatialHardwareProfile(provider_whitelist=["aws", "gcp"]),
-        security=EpistemicSecurityProfile(epistemic_security=EpistemicSecurity.CONFIDENTIAL),
+        security=EpistemicSecurityProfile(epistemic_security=EpistemicSecurityPolicy.CONFIDENTIAL),
     )
-    assert agent.security.epistemic_security == EpistemicSecurity.CONFIDENTIAL
+    assert agent.security.epistemic_security == EpistemicSecurityPolicy.CONFIDENTIAL
 
 
 def test_sovereign_execution_allows_localhost_and_bare_metal() -> None:
@@ -853,10 +853,10 @@ def test_sovereign_execution_allows_localhost_and_bare_metal() -> None:
     profile = CognitiveAgentNodeProfile(
         description="Secure local ETL agent for proprietary schemas.",
         hardware=SpatialHardwareProfile(provider_whitelist=["localhost", "bare-metal"]),
-        security=EpistemicSecurityProfile(epistemic_security=EpistemicSecurity.CONFIDENTIAL),
+        security=EpistemicSecurityProfile(epistemic_security=EpistemicSecurityPolicy.CONFIDENTIAL),
     )
     # If the validation passes without raising ValueError, the contract holds.
-    assert profile.security.epistemic_security == EpistemicSecurity.CONFIDENTIAL
+    assert profile.security.epistemic_security == EpistemicSecurityPolicy.CONFIDENTIAL
     assert "localhost" in profile.hardware.provider_whitelist
 
 

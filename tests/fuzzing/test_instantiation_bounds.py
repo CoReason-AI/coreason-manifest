@@ -20,11 +20,11 @@ from coreason_manifest.spec.ontology import (
     CognitiveAgentNodeProfile,
     CognitiveSystemNodeProfile,
     CognitiveUncertaintyProfile,
-    ComputeTier,
+    ComputeTierProfile,
     ContextualizedSourceEntity,
     DAGTopologyManifest,
     EpistemicCompressionSLA,
-    EpistemicSecurity,
+    EpistemicSecurityPolicy,
     EpistemicSecurityProfile,
     MultimodalTokenAnchorState,
     NeurosymbolicInferenceRequest,
@@ -279,7 +279,7 @@ def test_fuzz_thermodynamic_paradox(min_vram_gb: float) -> None:
     with pytest.raises((ValueError, ValidationError), match="Thermodynamic Constraint Violated"):
         CognitiveAgentNodeProfile(
             description="Fuzz test agent",
-            hardware=SpatialHardwareProfile(compute_tier=ComputeTier.KINETIC, min_vram_gb=min_vram_gb),
+            hardware=SpatialHardwareProfile(compute_tier=ComputeTierProfile.KINETIC, min_vram_gb=min_vram_gb),
         )
 
 
@@ -300,15 +300,15 @@ def test_fuzz_sovereign_execution_paradox(provider_whitelist: list[str]) -> None
             CognitiveAgentNodeProfile(
                 description="Fuzz test agent",
                 hardware=SpatialHardwareProfile(provider_whitelist=provider_whitelist),
-                security=EpistemicSecurityProfile(epistemic_security=EpistemicSecurity.CONFIDENTIAL),
+                security=EpistemicSecurityProfile(epistemic_security=EpistemicSecurityPolicy.CONFIDENTIAL),
             )
     else:
         agent = CognitiveAgentNodeProfile(
             description="Fuzz test agent",
             hardware=SpatialHardwareProfile(provider_whitelist=provider_whitelist),
-            security=EpistemicSecurityProfile(epistemic_security=EpistemicSecurity.CONFIDENTIAL),
+            security=EpistemicSecurityProfile(epistemic_security=EpistemicSecurityPolicy.CONFIDENTIAL),
         )
-        assert agent.security.epistemic_security == EpistemicSecurity.CONFIDENTIAL
+        assert agent.security.epistemic_security == EpistemicSecurityPolicy.CONFIDENTIAL
         assert agent.hardware.provider_whitelist == sorted(provider_whitelist)
 
 
