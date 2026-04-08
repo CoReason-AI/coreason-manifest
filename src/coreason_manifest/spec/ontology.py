@@ -86,6 +86,12 @@ def _canonicalize_payload(obj: Any) -> Any:
     """
     AGENT INSTRUCTION: Mathematically strips all `None` values recursively from a payload before hashing.
     Extracted to module level to prevent function-object recreation overhead during high-frequency DAG node serialization.
+
+    CAUSAL AFFORDANCE: Enables strict zero-variance equivalence mapping across disparate agent systems by forcibly normalizing dict and list topologies, preventing cache misses caused by semantic `None`.
+
+    EPISTEMIC BOUNDS: Operates as an absolute depth-first recursive mathematical sweep over any native Python primitive, strictly preserving the geometric ordering of arrays while functionally destroying all `None` states.
+
+    MCP ROUTING TRIGGERS: RFC 8785, Canonicalization, Merkle Hashing, Zero-Variance State, Topological Normalization
     """
 
     typ = type(obj)
@@ -154,17 +160,47 @@ _CLEARANCE_MAPPING: dict[str, int] = {"public": 0, "internal": 1, "confidential"
 
 
 class ComputeTier(StrEnum):
+    """
+    AGENT INSTRUCTION: Categorizes the latency and reasoning depth of a given logical node, physically segregating cheap syntactic execution from heavy semantic computation.
+
+    CAUSAL AFFORDANCE: Instructs the scheduling orchestrator to route this node's computation to the appropriately tiered hardware cluster (e.g. fast cheap APIs vs heavy GPU inference).
+
+    EPISTEMIC BOUNDS: Bounded to strict enumeration values.
+
+    MCP ROUTING TRIGGERS: Hardware Scheduling, Tiered Compute, Orchestration Cost, Resource Allocation
+    """
+
     KINETIC = "KINETIC"
     ORACLE = "ORACLE"
 
 
 class AcceleratorType(StrEnum):
+    """
+    AGENT INSTRUCTION: Specifies the hardware acceleration architecture required to materialize this execution node in the physical thermodynamic cluster.
+
+    CAUSAL AFFORDANCE: Provides the orchestration layer with the exact topological constraints needed to schedule the container on appropriate silicon.
+
+    EPISTEMIC BOUNDS: Strictly bounded to the literal enumeration types representing supported silicon backends.
+
+    MCP ROUTING TRIGGERS: GPU Scheduling, Hardware Accelerator, Precision Topology, Thermodynamic Bindings
+    """
+
     FP8_TENSOR = "FP8_TENSOR"
     BF16_TENSOR = "BF16_TENSOR"
     CUDA_FP32 = "CUDA_FP32"
 
 
 class EpistemicSecurity(StrEnum):
+    """
+    AGENT INSTRUCTION: Defines the minimum cryptographic isolation perimeter required for this node's thermodynamic execution.
+
+    CAUSAL AFFORDANCE: Binds the execution graph to hardware Trusted Execution Environments (TEEs) if CONFIDENTIAL is set, physically guillotining unauthorized exfiltration.
+
+    EPISTEMIC BOUNDS: Constrained strictly to the predefined enumeration values.
+
+    MCP ROUTING TRIGGERS: TEE Enforcement, Hardware Isolation, Secure Enclave, Zero-Trust Execution
+    """
+
     STANDARD = "STANDARD"
     CONFIDENTIAL = "CONFIDENTIAL"
 
@@ -448,7 +484,15 @@ def _inject_workflow_examples(schema: dict[str, Any]) -> None:
 
 
 class RefusalToReasonError(ValueError):
-    """Exception raised when inference is aborted due to severe semantic degradation."""
+    """
+    AGENT INSTRUCTION: Exception raised when inference is aborted due to severe semantic degradation.
+
+    CAUSAL AFFORDANCE: Operates as an absolute circuit breaker that mechanically shatters the execution stream when the language model's output diverges beyond permissible grammatical or ontological boundaries.
+
+    EPISTEMIC BOUNDS: Physically bounded to the `ValueError` base class to interlock seamlessly with native C-backed exception handlers. Triggers immediate rollback of any pending ledger state.
+
+    MCP ROUTING TRIGGERS: Execution Abort, Semantic Degradation, Inference Failure, Circuit Breaker, Exception Routing
+    """
 
 
 class CoreasonBaseState(BaseModel):
@@ -2355,7 +2399,10 @@ class StateMutationIntent(CoreasonBaseState):
     @field_validator("value", mode="before")
     @classmethod
     def enforce_payload_topology(cls, v: Any) -> Any:
-        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""
+        """
+        AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing.
+        EPISTEMIC BOUNDS: Physically guillotines evaluation the millisecond the absolute volume exceeds total_nodes <= 10000.
+        """
         return _validate_payload_bounds(v)
 
 
@@ -2457,7 +2504,10 @@ class StateHydrationManifest(CoreasonBaseState):
     @field_validator("working_context_variables", mode="before")
     @classmethod
     def enforce_payload_topology(cls, v: Any) -> Any:
-        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""
+        """
+        AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing.
+        EPISTEMIC BOUNDS: Physically guillotines evaluation the millisecond the absolute volume exceeds total_nodes <= 10000.
+        """
         return _validate_payload_bounds(v)
 
     max_retained_tokens: int = Field(
@@ -2846,7 +2896,10 @@ class AdjudicationIntent(CoreasonBaseState):
     @field_validator("resolution_schema", mode="before")
     @classmethod
     def enforce_payload_topology(cls, v: Any) -> Any:
-        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""
+        """
+        AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing.
+        EPISTEMIC BOUNDS: Physically guillotines evaluation the millisecond the absolute volume exceeds total_nodes <= 10000.
+        """
         return _validate_payload_bounds(v)
 
     @model_validator(mode="after")
@@ -3231,7 +3284,10 @@ class BoundedInterventionScopePolicy(CoreasonBaseState):
     @field_validator("json_schema_whitelist", mode="before")
     @classmethod
     def enforce_payload_topology(cls, v: Any) -> Any:
-        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""
+        """
+        AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing.
+        EPISTEMIC BOUNDS: Physically guillotines evaluation the millisecond the absolute volume exceeds total_nodes <= 10000.
+        """
         return _validate_payload_bounds(v)
 
     @model_validator(mode="after")
@@ -3277,7 +3333,10 @@ class BoundedJSONRPCIntent(CoreasonBaseState):
     @field_validator("params", mode="before")
     @classmethod
     def enforce_payload_topology(cls, v: Any) -> Any:
-        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""
+        """
+        AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing.
+        EPISTEMIC BOUNDS: Physically guillotines evaluation the millisecond the absolute volume exceeds total_nodes <= 10000.
+        """
         return _validate_payload_bounds(v)
 
 
@@ -3614,7 +3673,10 @@ class ConstitutionalAmendmentIntent(CoreasonBaseState):
     @field_validator("proposed_patch", mode="before")
     @classmethod
     def enforce_payload_topology(cls, v: Any) -> Any:
-        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""
+        """
+        AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing.
+        EPISTEMIC BOUNDS: Physically guillotines evaluation the millisecond the absolute volume exceeds total_nodes <= 10000.
+        """
         return _validate_payload_bounds(v)
 
 
@@ -4224,7 +4286,10 @@ class DraftingIntent(CoreasonBaseState):
     @field_validator("resolution_schema", mode="before")
     @classmethod
     def enforce_payload_topology(cls, v: Any) -> Any:
-        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""
+        """
+        AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing.
+        EPISTEMIC BOUNDS: Physically guillotines evaluation the millisecond the absolute volume exceeds total_nodes <= 10000.
+        """
         return _validate_payload_bounds(v)
 
 
@@ -4342,7 +4407,10 @@ class BargeInInterruptEvent(CoreasonBaseState):
     @field_validator("retained_partial_payload", mode="before")
     @classmethod
     def enforce_payload_topology(cls, v: Any) -> Any:
-        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""
+        """
+        AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing.
+        EPISTEMIC BOUNDS: Physically guillotines evaluation the millisecond the absolute volume exceeds total_nodes <= 10000.
+        """
         return _validate_payload_bounds(v)
 
 
@@ -4655,7 +4723,10 @@ class EscalationIntent(CoreasonBaseState):
     @field_validator("resolution_schema", mode="before")
     @classmethod
     def enforce_payload_topology(cls, v: Any) -> Any:
-        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""
+        """
+        AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing.
+        EPISTEMIC BOUNDS: Physically guillotines evaluation the millisecond the absolute volume exceeds total_nodes <= 10000.
+        """
         return _validate_payload_bounds(v)
 
 
@@ -4840,7 +4911,10 @@ class ExecutionNodeReceipt(CoreasonBaseState):
     @field_validator("inputs", "outputs", mode="before")
     @classmethod
     def enforce_payload_topology(cls, v: Any) -> Any:
-        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""
+        """
+        AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing.
+        EPISTEMIC BOUNDS: Physically guillotines evaluation the millisecond the absolute volume exceeds total_nodes <= 10000.
+        """
         return _validate_payload_bounds(v)
 
     parent_hashes: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
@@ -5569,6 +5643,12 @@ class HTTPTransportProfile(CoreasonBaseState):
     def _enforce_ssrf_quarantine(cls, url: HttpUrl) -> HttpUrl:
         """
         AGENT INSTRUCTION: Implements Network Topology and Server-Side Request Forgery (SSRF) Quarantine logic.
+
+        CAUSAL AFFORDANCE: Mechanically severs outbound network connections targeting private, reserved, or loopback local infrastructure, pushing complex affine coordinate resolution to the native C-backed IP stack.
+
+        EPISTEMIC BOUNDS: Discards fragile Turing-incomplete string parsing. Explicitly rejects any IP topology that resolves to Bogon space (localhost, link-local, multicast, and private IP ranges) via canonical `ipaddress` parsing.
+
+        MCP ROUTING TRIGGERS: SSRF Mitigation, Network Quarantine, Routing Geometry, Loopback Blocking, Threat Vector Severance
         """
         _validate_ssrf_safety(str(url))
         return url
@@ -5772,8 +5852,8 @@ class GenerativeTaxonomyManifest(CoreasonBaseState):
     @model_validator(mode="after")
     def verify_dag_integrity(self) -> Self:
         """
-        AGENT INSTRUCTION: Mathematically prove the absence of disconnected ghost nodes
-        and cyclical references within the projected visual manifold.
+        AGENT INSTRUCTION: Mathematically prove the absence of disconnected ghost nodes and cyclical references within the projected visual manifold.
+        EPISTEMIC BOUNDS: Triggers a ValueError if the root_node_id is not present in the nodes matrix.
         """
         if self.root_node_id not in self.nodes:
             raise ValueError(f"Topological Fracture: Root node '{self.root_node_id}' not found in matrix.")
@@ -5933,7 +6013,15 @@ class InsightCardProfile(CoreasonBaseState):
     @field_validator("markdown_content", mode="after")
     @classmethod
     def sanitize_markdown(cls, v: str) -> str:
-        """AGENT INSTRUCTION: Delegates XSS and malicious URI sanitization to Mozilla's authoritative Rust-backed ammonia engine."""
+        """
+        AGENT INSTRUCTION: Delegates XSS and malicious URI sanitization to Mozilla's authoritative Rust-backed ammonia engine.
+
+        CAUSAL AFFORDANCE: Physically sanitizes rendering strings passing into the UI manifold, blocking the injection of unapproved AST payloads into the presentation layer.
+
+        EPISTEMIC BOUNDS: Operates strictly on a pure string buffer, returning a stripped string with all non-compliant geometric tags violently excised.
+
+        MCP ROUTING TRIGGERS: XSS Quarantine, DOM Sanitization, Presentation Layer Scrubbing, Rust Execution Bridge
+        """
         return nh3.clean(v)
 
 
@@ -6072,7 +6160,10 @@ class JSONRPCErrorState(CoreasonBaseState):
     @field_validator("error_payload", mode="before")
     @classmethod
     def enforce_payload_topology(cls, v: Any) -> Any:
-        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""
+        """
+        AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing.
+        EPISTEMIC BOUNDS: Physically guillotines evaluation the millisecond the absolute volume exceeds total_nodes <= 10000.
+        """
         return _validate_payload_bounds(v)
 
 
@@ -6264,7 +6355,10 @@ class CognitiveHumanNodeProfile(CoreasonBaseState):
     @field_validator("domain_extensions", mode="before")
     @classmethod
     def enforce_payload_topology(cls, v: Any) -> Any:
-        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""
+        """
+        AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing.
+        EPISTEMIC BOUNDS: Physically guillotines evaluation the millisecond the absolute volume exceeds total_nodes <= 10000.
+        """
         return _validate_payload_bounds(v)
 
     type: Literal["human"] = Field(default="human", description="Discriminator for a Human node.")
@@ -6330,7 +6424,10 @@ class MemoizedNodeProfile(CoreasonBaseState):
     @field_validator("domain_extensions", mode="before")
     @classmethod
     def enforce_payload_topology(cls, v: Any) -> Any:
-        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""
+        """
+        AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing.
+        EPISTEMIC BOUNDS: Physically guillotines evaluation the millisecond the absolute volume exceeds total_nodes <= 10000.
+        """
         return _validate_payload_bounds(v)
 
     type: Literal["memoized"] = Field(default="memoized", description="Discriminator for a Memoized node.")
@@ -6395,7 +6492,10 @@ class CognitiveSystemNodeProfile(CoreasonBaseState):
     @field_validator("domain_extensions", mode="before")
     @classmethod
     def enforce_payload_topology(cls, v: Any) -> Any:
-        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""
+        """
+        AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing.
+        EPISTEMIC BOUNDS: Physically guillotines evaluation the millisecond the absolute volume exceeds total_nodes <= 10000.
+        """
         return _validate_payload_bounds(v)
 
     type: Literal["system"] = Field(default="system", description="Discriminator for a System node.")
@@ -7056,7 +7156,10 @@ class MCPPromptReferenceState(CoreasonBaseState):
     @field_validator("arguments", mode="before")
     @classmethod
     def enforce_payload_topology(cls, v: Any) -> Any:
-        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""
+        """
+        AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing.
+        EPISTEMIC BOUNDS: Physically guillotines evaluation the millisecond the absolute volume exceeds total_nodes <= 10000.
+        """
         return _validate_payload_bounds(v)
 
 
@@ -7652,7 +7755,10 @@ class CompositeNodeProfile(CoreasonBaseState):
     @field_validator("domain_extensions", mode="before")
     @classmethod
     def enforce_payload_topology(cls, v: Any) -> Any:
-        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""
+        """
+        AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing.
+        EPISTEMIC BOUNDS: Physically guillotines evaluation the millisecond the absolute volume exceeds total_nodes <= 10000.
+        """
         return _validate_payload_bounds(v)
 
     type: Literal["composite"] = Field(default="composite", description="Discriminator for a Composite node.")
@@ -8089,6 +8195,12 @@ class SSETransportProfile(CoreasonBaseState):
     def _enforce_ssrf_quarantine(cls, url: HttpUrl) -> HttpUrl:
         """
         AGENT INSTRUCTION: Implements Network Topology and Server-Side Request Forgery (SSRF) Quarantine logic.
+
+        CAUSAL AFFORDANCE: Mechanically severs outbound network connections targeting private, reserved, or loopback local infrastructure, pushing complex affine coordinate resolution to the native C-backed IP stack.
+
+        EPISTEMIC BOUNDS: Discards fragile Turing-incomplete string parsing. Explicitly rejects any IP topology that resolves to Bogon space (localhost, link-local, multicast, and private IP ranges) via canonical `ipaddress` parsing.
+
+        MCP ROUTING TRIGGERS: SSRF Mitigation, Network Quarantine, Routing Geometry, Loopback Blocking, Threat Vector Severance
         """
         _validate_ssrf_safety(str(url))
         return url
@@ -8365,7 +8477,10 @@ class SpanEvent(CoreasonBaseState):
     @field_validator("attributes", mode="before")
     @classmethod
     def enforce_payload_topology(cls, v: Any) -> Any:
-        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""
+        """
+        AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing.
+        EPISTEMIC BOUNDS: Physically guillotines evaluation the millisecond the absolute volume exceeds total_nodes <= 10000.
+        """
         return _validate_payload_bounds(v)
 
 
@@ -9119,7 +9234,10 @@ class ToolInvocationEvent(CoreasonBaseState):
     @field_validator("parameters", mode="before")
     @classmethod
     def enforce_payload_topology(cls, v: Any) -> Any:
-        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""
+        """
+        AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing.
+        EPISTEMIC BOUNDS: Physically guillotines evaluation the millisecond the absolute volume exceeds total_nodes <= 10000.
+        """
         return _validate_payload_bounds(v)
 
 
@@ -9674,7 +9792,10 @@ class VerifiableCredentialPresentationReceipt(CoreasonBaseState):
     @field_validator("authorization_claims", mode="before")
     @classmethod
     def enforce_payload_topology(cls, v: Any) -> Any:
-        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""
+        """
+        AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing.
+        EPISTEMIC BOUNDS: Physically guillotines evaluation the millisecond the absolute volume exceeds total_nodes <= 10000.
+        """
         return _validate_payload_bounds(v)
 
 
@@ -9763,7 +9884,10 @@ class CognitiveAgentNodeProfile(CoreasonBaseState):
     @field_validator("domain_extensions", mode="before")
     @classmethod
     def enforce_payload_topology(cls, v: Any) -> Any:
-        """AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing."""
+        """
+        AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing.
+        EPISTEMIC BOUNDS: Physically guillotines evaluation the millisecond the absolute volume exceeds total_nodes <= 10000.
+        """
         return _validate_payload_bounds(v)
 
     description: Annotated[str, StringConstraints(max_length=2000)] = Field(
@@ -10658,6 +10782,12 @@ class ConsensusFederationTopologyManifest(CoreasonBaseState):
 class CapabilityForgeTopologyManifest(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Create a zero-cost macro abstraction that unrolls the entire Zero-to-One generation, verification, and profiling loop.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator to physically bind the ephemeral tool-creation workflow into a rigid DAG topology, enabling full cryptographic observability over the dynamic synthesis of capabilities.
+
+    EPISTEMIC BOUNDS: Binds the execution state to a closed, finite mathematical matrix where every constituent node (generator, fuzzer, profiler) must resolve before the final capability is materialized onto the Hollow Data Plane.
+
+    MCP ROUTING TRIGGERS: Tool Synthesis, Capability Generation, Verification Matrix, Ephemeral Execution, Macro Topology
     """
 
     epistemic_enforcement: TruthMaintenancePolicy | None = Field(
@@ -11286,6 +11416,10 @@ class BeliefMutationEvent(CoreasonBaseState):
     @field_validator("payload", mode="before")
     @classmethod
     def enforce_payload_topology(cls, v: Any) -> Any:
+        """
+        AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing.
+        EPISTEMIC BOUNDS: Physically guillotines evaluation the millisecond the absolute volume exceeds total_nodes <= 10000.
+        """
         return _validate_payload_bounds(v)
 
 
@@ -11359,6 +11493,10 @@ class ObservationEvent(CoreasonBaseState):
     @field_validator("payload", mode="before")
     @classmethod
     def enforce_payload_topology(cls, v: Any) -> Any:
+        """
+        AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing.
+        EPISTEMIC BOUNDS: Physically guillotines evaluation the millisecond the absolute volume exceeds total_nodes <= 10000.
+        """
         return _validate_payload_bounds(v)
 
 
