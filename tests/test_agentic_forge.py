@@ -20,8 +20,12 @@ from coreason_manifest.spec.ontology import (
 
 def test_teleological_isometry_threshold() -> None:
     source_intent_id = "intent-id-12345"
-    target_intent_vector = VectorEmbeddingState(vector_base64="abc", dimensionality=10, foundation_matrix_name="test-model")
-    forged_output_vector = VectorEmbeddingState(vector_base64="xyz", dimensionality=10, foundation_matrix_name="test-model")
+    target_intent_vector = VectorEmbeddingState(
+        vector_base64="abc", dimensionality=10, foundation_matrix_name="test-model"
+    )
+    forged_output_vector = VectorEmbeddingState(
+        vector_base64="xyz", dimensionality=10, foundation_matrix_name="test-model"
+    )
 
     receipt_passed = TeleologicalIsometryReceipt(
         source_intent_id=source_intent_id,

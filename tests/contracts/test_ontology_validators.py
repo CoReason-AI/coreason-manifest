@@ -462,7 +462,9 @@ def test_defeasible_cascade_event_sorting() -> None:
 
 
 def test_rollback_intent_sorting() -> None:
-    intent = RollbackIntent(request_cid="r1", target_event_cid="e1", invalidated_node_cids=["node_c", "node_a", "node_b"])
+    intent = RollbackIntent(
+        request_cid="r1", target_event_cid="e1", invalidated_node_cids=["node_c", "node_a", "node_b"]
+    )
     assert intent.invalidated_node_cids == ["node_a", "node_b", "node_c"]
 
 

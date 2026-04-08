@@ -98,7 +98,10 @@ def test_action_space_manifest_rejects_custom_state() -> None:
                     topology_class="native_tool",
                     tool_name="test_tool",
                     description="test tool",
-                    input_schema={"topology_class": "object", "properties": {"system_prompt": {"topology_class": "string"}}},
+                    input_schema={
+                        "topology_class": "object",
+                        "properties": {"system_prompt": {"topology_class": "string"}},
+                    },
                     side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
                     permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
                 )

@@ -85,7 +85,7 @@ def test_project_mermaid_bypassed(manifest: DynamicRoutingManifest) -> None:
 )
 def test_project_markdown_optional_fields(intent: str, justification: str, lineage: str, sig: str, merkle: str) -> None:
     node = Mock()
-    node.topology_class= "system"
+    node.topology_class = "system"
     node.description = "desc"
     node.architectural_intent = intent
     node.justification = justification
@@ -597,19 +597,27 @@ def test_calculate_latent_alignment_errors() -> None:
     pol = OntologicalAlignmentPolicy(min_cosine_similarity=0.0, require_isometry_proof=False)
 
     v1 = VectorEmbeddingState(
-        vector_base64=base64.b64encode(struct.pack("<2f", 1.0, 2.0)).decode(), dimensionality=2, foundation_matrix_name="m1"
+        vector_base64=base64.b64encode(struct.pack("<2f", 1.0, 2.0)).decode(),
+        dimensionality=2,
+        foundation_matrix_name="m1",
     )
     v2 = VectorEmbeddingState(
-        vector_base64=base64.b64encode(struct.pack("<3f", 1.0, 2.0, 3.0)).decode(), dimensionality=3, foundation_matrix_name="m1"
+        vector_base64=base64.b64encode(struct.pack("<3f", 1.0, 2.0, 3.0)).decode(),
+        dimensionality=3,
+        foundation_matrix_name="m1",
     )
     with pytest.raises(ValueError, match="Topological Contradiction"):
         calculate_latent_alignment(v1, v2, pol)
 
     v3 = VectorEmbeddingState(
-        vector_base64=base64.b64encode(struct.pack("<2f", 1.0, 2.0)).decode(), dimensionality=3, foundation_matrix_name="m1"
+        vector_base64=base64.b64encode(struct.pack("<2f", 1.0, 2.0)).decode(),
+        dimensionality=3,
+        foundation_matrix_name="m1",
     )
     v4 = VectorEmbeddingState(
-        vector_base64=base64.b64encode(struct.pack("<2f", 1.0, 2.0)).decode(), dimensionality=3, foundation_matrix_name="m1"
+        vector_base64=base64.b64encode(struct.pack("<2f", 1.0, 2.0)).decode(),
+        dimensionality=3,
+        foundation_matrix_name="m1",
     )
     with pytest.raises(ValueError, match="Byte length does not match"):
         calculate_latent_alignment(v3, v4, pol)
@@ -634,7 +642,9 @@ def test_get_ontology_schema_empty() -> None:
 def test_calculate_latent_alignment_invalid_base64() -> None:
     pol = OntologicalAlignmentPolicy(min_cosine_similarity=-1.0, require_isometry_proof=False)
     # A string with valid chars but invalid length for base64: "a"
-    v_invalid = VectorEmbeddingState.model_construct(vector_base64="a", dimensionality=3, foundation_matrix_name="model1")
+    v_invalid = VectorEmbeddingState.model_construct(
+        vector_base64="a", dimensionality=3, foundation_matrix_name="model1"
+    )
     v_valid = VectorEmbeddingState.model_construct(
         vector_base64=base64.b64encode(struct.pack("<3f", 1.0, 0.0, 0.0)).decode(),
         dimensionality=3,

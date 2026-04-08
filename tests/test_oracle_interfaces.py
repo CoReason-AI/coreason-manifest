@@ -26,7 +26,7 @@ def test_human_directive_intent_valid() -> None:
     intent = HumanDirectiveIntent(
         natural_language_goal="Build a stock scraper.", allocated_budget_magnitude=1000, target_qos="interactive"
     )
-    assert intent.topology_class== "human_directive"
+    assert intent.topology_class == "human_directive"
     assert intent.natural_language_goal == "Build a stock scraper."
     assert intent.allocated_budget_magnitude == 1000
     assert intent.target_qos == "interactive"

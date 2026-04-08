@@ -2715,7 +2715,9 @@ class SpatialToolManifest(CoreasonBaseState):
 
     """
 
-    topology_class: Literal["native_tool"] = Field(default="native_tool", description="Discriminator type for a native tool.")
+    topology_class: Literal["native_tool"] = Field(
+        default="native_tool", description="Discriminator type for a native tool."
+    )
 
     tool_name: Annotated[str, StringConstraints(max_length=2000)] = Field(
         description="The deterministically bounded structural identifier mapping this capability within the zero-trust manifold."
@@ -3795,8 +3797,8 @@ class CrossSwarmHandshakeState(CoreasonBaseState):
     Machine, Cross-Tenant Federation, Asynchronous B2B
     """
 
-    handshake_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="Unique identifier for this B2B negotiation."
+    handshake_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
+        Field(description="Unique identifier for this B2B negotiation.")
     )
     initiating_tenant_id: Annotated[
         str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
@@ -5566,7 +5568,9 @@ class GrammarPanelProfile(CoreasonBaseState):
     panel_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
         description="The unique identifier for this UI panel."
     )
-    topology_class: Literal["grammar"] = Field(default="grammar", description="Discriminator for Grammar of Graphics charts.")
+    topology_class: Literal["grammar"] = Field(
+        default="grammar", description="Discriminator for Grammar of Graphics charts."
+    )
     title: Annotated[str, StringConstraints(max_length=2000)] = Field(
         description="The declarative semantic anchor summarizing the underlying visual grammar."
     )
@@ -6600,7 +6604,9 @@ class MCPServerManifest(CoreasonBaseState):
 
     """
 
-    topology_class: Literal["mcp_server"] = Field(default="mcp_server", description="Discriminator type for an MCP server.")
+    topology_class: Literal["mcp_server"] = Field(
+        default="mcp_server", description="Discriminator type for an MCP server."
+    )
 
     server_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
         ...,
@@ -7386,7 +7392,8 @@ class EpistemicProvenanceReceipt(CoreasonBaseState):
     """
 
     fidelity_receipt_hash: Annotated[str, StringConstraints(max_length=64)] | None = Field(
-        default=None, description="Cryptographic pointer back to the TopologicalFidelityReceipt generated at the Input Gate."
+        default=None,
+        description="Cryptographic pointer back to the TopologicalFidelityReceipt generated at the Input Gate.",
     )
     revision_loops_executed: int | None = Field(
         default=None,
@@ -7657,8 +7664,10 @@ class OntologicalHandshakeReceipt(CoreasonBaseState):
     Latent Alignment, Holographic Graph Projection
     """
 
-    handshake_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this protocol handshake to the Merkle-DAG.",
+    handshake_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
+        Field(
+            description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this protocol handshake to the Merkle-DAG.",
+        )
     )
     participant_node_cids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
         max_length=250, min_length=2, description="The agents establishing semantic alignment."
@@ -11061,9 +11070,9 @@ class WorkflowManifest(CoreasonBaseState):
     tenant_cid: Annotated[str, StringConstraints(min_length=1, max_length=255, pattern="^[a-zA-Z0-9_.:-]+$")] | None = (
         Field(default=None, description="The enterprise tenant boundary for this execution.")
     )
-    session_cid: Annotated[str, StringConstraints(min_length=1, max_length=255, pattern="^[a-zA-Z0-9_.:-]+$")] | None = (
-        Field(default=None, description="The ephemeral session boundary for this execution.")
-    )
+    session_cid: (
+        Annotated[str, StringConstraints(min_length=1, max_length=255, pattern="^[a-zA-Z0-9_.:-]+$")] | None
+    ) = Field(default=None, description="The ephemeral session boundary for this execution.")
     max_risk_tolerance: RiskLevelPolicy | None = Field(
         default=None, description="The absolute maximum enterprise risk threshold permitted for this topology."
     )
@@ -11085,9 +11094,7 @@ class WorkflowManifest(CoreasonBaseState):
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
         if self.allowed_semantic_classifications is not None:
-            object.__setattr__(
-                self, "allowed_semantic_classifications", sorted(self.allowed_semantic_classifications)
-            )
+            object.__setattr__(self, "allowed_semantic_classifications", sorted(self.allowed_semantic_classifications))
         if getattr(self, "allowed_semantic_classifications", None) is not None:
             object.__setattr__(
                 self,
@@ -11581,18 +11588,18 @@ class EpistemicAxiomState(CoreasonBaseState):
 
     """
 
-    source_concept_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
-        Field(
-            description="The globally unique decentralized identifier (DID) anchoring the origin node.",
-        )
+    source_concept_cid: Annotated[
+        str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
+    ] = Field(
+        description="The globally unique decentralized identifier (DID) anchoring the origin node.",
     )
     directed_edge_class: Annotated[str, StringConstraints(max_length=2000)] = Field(
         description="The topological relationship."
     )
-    target_concept_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
-        Field(
-            description="The globally unique decentralized identifier (DID) anchoring destination node.",
-        )
+    target_concept_cid: Annotated[
+        str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
+    ] = Field(
+        description="The globally unique decentralized identifier (DID) anchoring destination node.",
     )
 
 

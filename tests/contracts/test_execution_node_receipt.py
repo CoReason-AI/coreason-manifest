@@ -23,7 +23,9 @@ from coreason_manifest.spec.ontology import ExecutionNodeReceipt
 def test_execution_node_receipt_orphaned_lineage() -> None:
     """Prove the receipt structurally rejects orphaned lineages."""
     with pytest.raises(ValidationError, match="Orphaned Lineage"):
-        ExecutionNodeReceipt(request_cid="req-1", parent_request_id="req-0", root_request_id=None, inputs={}, outputs={})
+        ExecutionNodeReceipt(
+            request_cid="req-1", parent_request_id="req-0", root_request_id=None, inputs={}, outputs={}
+        )
 
 
 # 2. Define the Valid Mathematical Space for Payloads

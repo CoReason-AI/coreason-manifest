@@ -141,7 +141,7 @@ def test_successful_compilation() -> None:
     )
 
     dag = macro.compile_to_base_topology()
-    assert dag.topology_class== "dag"
+    assert dag.topology_class == "dag"
     assert dag.allow_cycles is True
     assert dag.max_depth == 42
     # Verify the edges exactly match the bidirectional Proposer-Verifier loop
