@@ -1,3 +1,13 @@
+# Copyright (c) 2026 CoReason, Inc
+#
+# This software is proprietary and dual-licensed
+# Licensed under the Prosperity Public License 3.0 (the "License")
+# A copy of the license is available at <https://prosperitylicense.com/versions/3.0.0>
+# For details, see the LICENSE file
+# Commercial use beyond a 30-day trial requires a separate license
+#
+# Source Code: <https://github.com/CoReason-AI/coreason-manifest>
+
 # Prosperity Public License 3.0
 #
 # Copyright (c) 2024 Coreason
@@ -60,7 +70,7 @@ def test_biometric_signature_bounding(hardware_gaze_signature: str) -> None:
     """
     with pytest.raises(ValidationError) as exc_info:
         EpistemicAttentionRay(
-            origin=SE3TransformProfile(reference_frame_id="frame-123", x=0.0, y=0.0, z=0.0),
+            origin=SE3TransformProfile(reference_frame_cid="frame-123", x=0.0, y=0.0, z=0.0),
             direction_unit_vector=(1.0, 0.0, 0.0),
             hardware_gaze_signature=hardware_gaze_signature,
         )

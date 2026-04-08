@@ -12,12 +12,12 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
-    ActionSpaceManifest,
+    CognitiveActionSpaceManifest,
     ExecutionEnvelopeState,
     PermissionBoundaryPolicy,
     SideEffectProfile,
+    SpatialToolManifest,
     StateVectorProfile,
-    ToolManifest,
     TraceContextState,
 )
 
@@ -81,24 +81,27 @@ def test_pure_function() -> None:
 
 
 def test_delta_state() -> None:
-    # Assert that a StateVectorProfile with is_delta=True passes validation even if mandatory mutable_memory keys are omitted (it can be None or empty)
+    # Assert that a StateVectorProfile with is_delta=True passes validation even if mandatory mutable_matrix keys are omitted (it can be None or empty)
     s = StateVectorProfile(is_delta=True)
     assert s.is_delta is True
-    assert s.mutable_memory is None
+    assert s.mutable_matrix is None
 
 
 def test_action_space_manifest_rejects_custom_state() -> None:
     with pytest.raises(ValidationError) as excinfo:
-        ActionSpaceManifest(
+        CognitiveActionSpaceManifest(
             action_space_cid="test_id",
             entry_point_cid="test_tool",
             transition_matrix={"test_tool": []},
             capabilities={
-                "test_tool": ToolManifest(
-                    type="native_tool",
+                "test_tool": SpatialToolManifest(
+                    topology_class="native_tool",
                     tool_name="test_tool",
                     description="test tool",
-                    input_schema={"type": "object", "properties": {"system_prompt": {"type": "string"}}},
+                    input_schema={
+                        "topology_class": "object",
+                        "properties": {"system_prompt": {"topology_class": "string"}},
+                    },
                     side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
                     permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
                 )
@@ -107,16 +110,16 @@ def test_action_space_manifest_rejects_custom_state() -> None:
     assert "Framework Violation" in str(excinfo.value)
 
     # Should pass cleanly without any exceptions.
-    ActionSpaceManifest(
+    CognitiveActionSpaceManifest(
         action_space_cid="test_id_2",
         entry_point_cid="test_tool_2",
         transition_matrix={"test_tool_2": []},
         capabilities={
-            "test_tool_2": ToolManifest(
-                type="native_tool",
+            "test_tool_2": SpatialToolManifest(
+                topology_class="native_tool",
                 tool_name="test_tool_2",
                 description="test tool 2",
-                input_schema={"type": "object", "properties": {"sql_query": {"type": "string"}}},
+                input_schema={"topology_class": "object", "properties": {"sql_query": {"topology_class": "string"}}},
                 side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
                 permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
             )
@@ -131,9 +134,9 @@ def test_state_vector_memory_bounds() -> None:
     from coreason_manifest.spec.ontology import StateVectorProfile
 
     # It should pass with small valid dictionaries
-    s = StateVectorProfile(mutable_memory={"test": "abc"}, read_only_context={"rules": "abc"})
-    assert s.mutable_memory == {"test": "abc"}
-    assert s.read_only_context == {"rules": "abc"}
+    s = StateVectorProfile(mutable_matrix={"test": "abc"}, immutable_matrix={"rules": "abc"})
+    assert s.mutable_matrix == {"test": "abc"}
+    assert s.immutable_matrix == {"rules": "abc"}
 
     # It should fail with huge payloads exceeding nodes
     from typing import Any
@@ -143,9 +146,9 @@ def test_state_vector_memory_bounds() -> None:
         huge_dict[f"key_{i}"] = i
 
     with pytest.raises(ValidationError) as exc_info:
-        StateVectorProfile(mutable_memory=huge_dict)
+        StateVectorProfile(mutable_matrix=huge_dict)
     assert "Payload volume exceeds absolute hardware limit" in str(exc_info.value)
 
     with pytest.raises(ValidationError) as exc_info:
-        StateVectorProfile(read_only_context=huge_dict)
+        StateVectorProfile(immutable_matrix=huge_dict)
     assert "Payload volume exceeds absolute hardware limit" in str(exc_info.value)

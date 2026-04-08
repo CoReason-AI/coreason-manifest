@@ -16,8 +16,8 @@ from hypothesis import strategies as st
 
 from coreason_manifest.spec.ontology import (
     CoreasonBaseState,
-    InformationClassificationProfile,
     RiskLevelPolicy,
+    SemanticClassificationProfile,
     _validate_payload_bounds,
 )
 
@@ -30,11 +30,11 @@ class DummyState(CoreasonBaseState):
 
 
 @given(
-    a=st.sampled_from(list(InformationClassificationProfile)),
-    b=st.sampled_from(list(InformationClassificationProfile)),
+    a=st.sampled_from(list(SemanticClassificationProfile)),
+    b=st.sampled_from(list(SemanticClassificationProfile)),
 )
 def test_information_classification_profile_comparisons(
-    a: InformationClassificationProfile, b: InformationClassificationProfile
+    a: SemanticClassificationProfile, b: SemanticClassificationProfile
 ) -> None:
     assert (a < b) == (a.clearance_level < b.clearance_level)
     assert (a <= b) == (a.clearance_level <= b.clearance_level)

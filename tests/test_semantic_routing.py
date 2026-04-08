@@ -12,11 +12,11 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
-    ActionSpaceManifest,
+    CognitiveActionSpaceManifest,
     PermissionBoundaryPolicy,
     SemanticDiscoveryIntent,
     SideEffectProfile,
-    ToolManifest,
+    SpatialToolManifest,
     TransitionEdgeProfile,
 )
 
@@ -29,9 +29,9 @@ def test_transition_edge_xor_validation() -> None:
 
     # Test valid target_intent only
     intent = SemanticDiscoveryIntent(
-        required_structural_types=["ToolManifest"],
+        required_structural_types=["SpatialToolManifest"],
         min_isometry_score=0.9,
-        query_vector={"vector_base64": "dummy", "dimensionality": 128, "model_name": "test-model"},  # type: ignore[arg-type]
+        query_vector={"vector_base64": "dummy", "dimensionality": 128, "foundation_matrix_name": "test-model"},  # type: ignore[arg-type]
     )
     TransitionEdgeProfile(
         topology_class="acyclic", target_intent=intent, probability_weight=1.0, compute_weight_magnitude=5
@@ -53,26 +53,26 @@ def test_transition_edge_xor_validation() -> None:
 
 
 def test_dynamic_ghost_node_and_canonical_sorting() -> None:
-    tool_a = ToolManifest(
-        type="native_tool",
+    tool_a = SpatialToolManifest(
+        topology_class="native_tool",
         tool_name="tool_A",
         description="Tool A",
-        input_schema={"type": "object", "properties": {"input": {"type": "string"}}},
+        input_schema={"topology_class": "object", "properties": {"input": {"topology_class": "string"}}},
         side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
         permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
     )
 
     # Intent 1 should sort first (min_isometry_score 0.8 < 0.9)
     intent1 = SemanticDiscoveryIntent(
-        required_structural_types=["ToolManifest"],
+        required_structural_types=["SpatialToolManifest"],
         min_isometry_score=0.8,
-        query_vector={"vector_base64": "dummy", "dimensionality": 128, "model_name": "test-model"},  # type: ignore[arg-type]
+        query_vector={"vector_base64": "dummy", "dimensionality": 128, "foundation_matrix_name": "test-model"},  # type: ignore[arg-type]
     )
     # Intent 2 should sort second
     intent2 = SemanticDiscoveryIntent(
-        required_structural_types=["ToolManifest"],
+        required_structural_types=["SpatialToolManifest"],
         min_isometry_score=0.9,
-        query_vector={"vector_base64": "dummy", "dimensionality": 128, "model_name": "test-model"},  # type: ignore[arg-type]
+        query_vector={"vector_base64": "dummy", "dimensionality": 128, "foundation_matrix_name": "test-model"},  # type: ignore[arg-type]
     )
 
     edge1 = TransitionEdgeProfile(
@@ -82,7 +82,7 @@ def test_dynamic_ghost_node_and_canonical_sorting() -> None:
         topology_class="acyclic", target_intent=intent1, probability_weight=1.0, compute_weight_magnitude=5
     )
 
-    asm = ActionSpaceManifest(
+    asm = CognitiveActionSpaceManifest(
         action_space_cid="test_dynamic_edges",
         entry_point_cid="tool_A",
         capabilities={"tool_A": tool_a},

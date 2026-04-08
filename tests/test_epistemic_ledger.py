@@ -52,7 +52,7 @@ def test_defeasible_quarantine() -> None:
             active_cascades=[
                 DefeasibleCascadeEvent(
                     cascade_id="cascade1",
-                    root_falsified_event_id="root_event",
+                    root_falsified_event_cid="root_event",
                     propagated_decay_factor=0.5,
                     quarantined_event_cids=["claim1"],
                 )

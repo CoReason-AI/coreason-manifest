@@ -133,20 +133,20 @@ def test_state_vector_memory_bounds() -> None:
 
     from coreason_manifest.spec.ontology import StateVectorProfile
 
-    s = StateVectorProfile(mutable_memory={"test": "abc"}, read_only_context={"rules": "abc"})
-    assert s.mutable_memory == {"test": "abc"}
-    assert s.read_only_context == {"rules": "abc"}
+    s = StateVectorProfile(mutable_matrix={"test": "abc"}, immutable_matrix={"rules": "abc"})
+    assert s.mutable_matrix == {"test": "abc"}
+    assert s.immutable_matrix == {"rules": "abc"}
 
     huge_dict: dict[str, Any] = {}
     for i in range(10001):
         huge_dict[f"key_{i}"] = i
 
     with pytest.raises(ValidationError) as exc_info:
-        StateVectorProfile(mutable_memory=huge_dict)
+        StateVectorProfile(mutable_matrix=huge_dict)
     assert "Payload volume exceeds absolute hardware limit" in str(exc_info.value)
 
     with pytest.raises(ValidationError) as exc_info:
-        StateVectorProfile(read_only_context=huge_dict)
+        StateVectorProfile(immutable_matrix=huge_dict)
     assert "Payload volume exceeds absolute hardware limit" in str(exc_info.value)
 
 
@@ -177,3 +177,43 @@ def test_neurosymbolic_inference_request_requires_contextualized_entity() -> Non
             },
         )
     assert "Input should be a valid dictionary or instance of ContextualizedSourceEntity" in str(exc_info.value)
+
+
+def test_constitutional_amendment_intent_payload_bounds() -> None:
+    from coreason_manifest.spec.ontology import ConstitutionalAmendmentIntent
+
+    # Valid payload
+    intent = ConstitutionalAmendmentIntent(
+        drift_event_id="drift:123",
+        proposed_patch={"op": "add", "path": "/policy", "value": "updated"},
+        justification="Valid patch justification",
+    )
+    assert intent.proposed_patch == {"op": "add", "path": "/policy", "value": "updated"}
+
+    # Invalid payload (exceeds depth)
+    nested_payload: Any = "leaf"
+    for _ in range(11):
+        nested_payload = {"key": nested_payload}
+
+    with pytest.raises(ValidationError) as exc_info:
+        ConstitutionalAmendmentIntent(
+            drift_event_id="drift:123", proposed_patch=nested_payload, justification="Valid patch justification"
+        )
+    assert "Payload exceeds maximum recursion depth of 10" in str(exc_info.value)
+
+
+def test_span_event_payload_bounds() -> None:
+    from coreason_manifest.spec.ontology import SpanEvent
+
+    # Valid payload
+    event = SpanEvent(name="test_event", timestamp_unix_nano=1678888888000000000, attributes={"key": "value"})
+    assert event.attributes == {"key": "value"}
+
+    # Invalid payload (exceeds depth)
+    nested_payload: Any = "leaf"
+    for _ in range(11):
+        nested_payload = {"key": nested_payload}
+
+    with pytest.raises(ValidationError) as exc_info:
+        SpanEvent(name="test_event", timestamp_unix_nano=1678888888000000000, attributes=nested_payload)
+    assert "Payload exceeds maximum recursion depth of 10" in str(exc_info.value)

@@ -14,8 +14,8 @@ from hypothesis import strategies as st
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
-    CoalgebraicHydrationPolicy,
     DynamicManifoldProjectionManifest,
+    EpistemicHydrationPolicy,
     GrammarPanelProfile,
     MCPClientIntent,
     SemanticZoomProfile,
@@ -28,14 +28,14 @@ from coreason_manifest.spec.ontology import (
     lazy_fetch_timeout_ms=st.integers(min_value=1, max_value=60000),
     truncation_strategy=st.sampled_from(["hash_pointer", "nullify", "scalar_summary"]),
 )
-def test_coalgebraic_hydration_policy_max_depth_bounds(
+def test_epistemic_hydration_policy_max_depth_bounds(
     max_unfold_depth: int, lazy_fetch_timeout_ms: int, truncation_strategy: str
 ) -> None:
     """
-    Test that initializing CoalgebraicHydrationPolicy with an invalid max_unfold_depth raises a ValidationError.
+    Test that initializing EpistemicHydrationPolicy with an invalid max_unfold_depth raises a ValidationError.
     """
     with pytest.raises(ValidationError) as excinfo:
-        CoalgebraicHydrationPolicy(
+        EpistemicHydrationPolicy(
             max_unfold_depth=max_unfold_depth,
             lazy_fetch_timeout_ms=lazy_fetch_timeout_ms,
             truncation_strategy=truncation_strategy,  # type: ignore[arg-type]
@@ -49,14 +49,14 @@ def test_coalgebraic_hydration_policy_max_depth_bounds(
     lazy_fetch_timeout_ms=st.integers(max_value=0) | st.integers(min_value=60001),
     truncation_strategy=st.sampled_from(["hash_pointer", "nullify", "scalar_summary"]),
 )
-def test_coalgebraic_hydration_policy_timeout_bounds(
+def test_epistemic_hydration_policy_timeout_bounds(
     max_unfold_depth: int, lazy_fetch_timeout_ms: int, truncation_strategy: str
 ) -> None:
     """
-    Test that initializing CoalgebraicHydrationPolicy with an invalid lazy_fetch_timeout_ms raises a ValidationError.
+    Test that initializing EpistemicHydrationPolicy with an invalid lazy_fetch_timeout_ms raises a ValidationError.
     """
     with pytest.raises(ValidationError) as excinfo:
-        CoalgebraicHydrationPolicy(
+        EpistemicHydrationPolicy(
             max_unfold_depth=max_unfold_depth,
             lazy_fetch_timeout_ms=lazy_fetch_timeout_ms,
             truncation_strategy=truncation_strategy,  # type: ignore[arg-type]

@@ -16,31 +16,31 @@ from hypothesis import HealthCheck, given, settings
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
-    AgentNodeProfile,
     BrowserDOMState,
+    CognitiveAgentNodeProfile,
+    CognitiveSystemNodeProfile,
     CognitiveUncertaintyProfile,
-    ComputeTier,
+    ComputeTierProfile,
     ContextualizedSourceEntity,
     DAGTopologyManifest,
-    DataFidelityReceipt,
     EpistemicCompressionSLA,
-    EpistemicSecurity,
-    HardwareProfile,
+    EpistemicSecurityPolicy,
+    EpistemicSecurityProfile,
     MultimodalTokenAnchorState,
     NeurosymbolicInferenceRequest,
     ObservationEvent,
     QuorumPolicy,
     SE3TransformProfile,
-    SecurityProfile,
+    SpatialHardwareProfile,
     StateHydrationManifest,
-    SystemNodeProfile,
     TaskAnnouncementIntent,
     TaxonomicRoutingPolicy,
+    TopologicalFidelityReceipt,
     VolumetricBoundingProfile,
 )
 
 valid_node_id_st = st.from_regex(r"^did:[a-z0-9]+:[a-zA-Z0-9.\-_:]+$", fullmatch=True)
-node_st = st.builds(SystemNodeProfile, description=st.text())
+node_st = st.builds(CognitiveSystemNodeProfile, description=st.text())
 
 
 @st.composite
@@ -108,7 +108,7 @@ def invalid_volumetric_bounds_st(draw: st.DrawFn) -> tuple[float, float, float]:
 def test_volumetric_bounding_profile_fuzzing(extents: tuple[float, float, float]) -> None:
     """Geometric/Spatial Fuzzing: Generate invalid extents for VolumetricBoundingProfile."""
     extents_x, extents_y, extents_z = extents
-    transform = SE3TransformProfile(reference_frame_id="frame", x=0, y=0, z=0)
+    transform = SE3TransformProfile(reference_frame_cid="frame", x=0, y=0, z=0)
 
     with pytest.raises((ValidationError, ValueError)):
         VolumetricBoundingProfile(
@@ -277,9 +277,9 @@ def test_fuzz_thermodynamic_paradox(min_vram_gb: float) -> None:
     Fuzz test to prove the compiler never yields a valid object where KINETIC > 24GB.
     """
     with pytest.raises((ValueError, ValidationError), match="Thermodynamic Constraint Violated"):
-        AgentNodeProfile(
+        CognitiveAgentNodeProfile(
             description="Fuzz test agent",
-            hardware=HardwareProfile(compute_tier=ComputeTier.KINETIC, min_vram_gb=min_vram_gb),
+            hardware=SpatialHardwareProfile(compute_tier=ComputeTierProfile.KINETIC, min_vram_gb=min_vram_gb),
         )
 
 
@@ -297,18 +297,18 @@ def test_fuzz_sovereign_execution_paradox(provider_whitelist: list[str]) -> None
     has_untrusted = not set(provider_whitelist).issubset(trusted_environments)
     if has_untrusted:
         with pytest.raises((ValueError, ValidationError), match="Sovereign Execution Violated"):
-            AgentNodeProfile(
+            CognitiveAgentNodeProfile(
                 description="Fuzz test agent",
-                hardware=HardwareProfile(provider_whitelist=provider_whitelist),
-                security=SecurityProfile(epistemic_security=EpistemicSecurity.CONFIDENTIAL),
+                hardware=SpatialHardwareProfile(provider_whitelist=provider_whitelist),
+                security=EpistemicSecurityProfile(epistemic_security=EpistemicSecurityPolicy.CONFIDENTIAL),
             )
     else:
-        agent = AgentNodeProfile(
+        agent = CognitiveAgentNodeProfile(
             description="Fuzz test agent",
-            hardware=HardwareProfile(provider_whitelist=provider_whitelist),
-            security=SecurityProfile(epistemic_security=EpistemicSecurity.CONFIDENTIAL),
+            hardware=SpatialHardwareProfile(provider_whitelist=provider_whitelist),
+            security=EpistemicSecurityProfile(epistemic_security=EpistemicSecurityPolicy.CONFIDENTIAL),
         )
-        assert agent.security.epistemic_security == EpistemicSecurity.CONFIDENTIAL
+        assert agent.security.epistemic_security == EpistemicSecurityPolicy.CONFIDENTIAL
         assert agent.hardware.provider_whitelist == sorted(provider_whitelist)
 
 
@@ -322,14 +322,18 @@ def test_fuzz_network_topology_paradox(egress_obfuscation: bool, network_isolati
     """
     if egress_obfuscation and not network_isolation:
         with pytest.raises((ValueError, ValidationError), match="Topology Routing Violated"):
-            AgentNodeProfile(
+            CognitiveAgentNodeProfile(
                 description="Fuzz test agent",
-                security=SecurityProfile(egress_obfuscation=egress_obfuscation, network_isolation=network_isolation),
+                security=EpistemicSecurityProfile(
+                    egress_obfuscation=egress_obfuscation, network_isolation=network_isolation
+                ),
             )
     else:
-        agent = AgentNodeProfile(
+        agent = CognitiveAgentNodeProfile(
             description="Fuzz test agent",
-            security=SecurityProfile(egress_obfuscation=egress_obfuscation, network_isolation=network_isolation),
+            security=EpistemicSecurityProfile(
+                egress_obfuscation=egress_obfuscation, network_isolation=network_isolation
+            ),
         )
         assert agent.security.egress_obfuscation == egress_obfuscation
         assert agent.security.network_isolation == network_isolation
@@ -346,7 +350,7 @@ def test_refusal_to_reason_fuzzing(epistemic_gap: float, min_fidelity_threshold:
         contextual_envelope=[],
         source_system_provenance_flag=False,
     )
-    fidelity_receipt = DataFidelityReceipt(
+    fidelity_receipt = TopologicalFidelityReceipt(
         contextual_completeness_score=0.0,
         surrounding_token_density=token_density,
     )
@@ -403,7 +407,7 @@ def test_data_fidelity_receipt_positive_token_density() -> None:
     from pydantic import ValidationError
 
     with pytest.raises(ValidationError):
-        DataFidelityReceipt(
+        TopologicalFidelityReceipt(
             contextual_completeness_score=1.0,
             surrounding_token_density=-1,
         )
