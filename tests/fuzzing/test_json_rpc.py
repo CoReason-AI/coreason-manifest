@@ -45,21 +45,21 @@ def test_valid_json_rpc_intent(params: typing.Any) -> None:
 
 
 @given(
-    target_buffer_id=st.from_regex("^[a-zA-Z0-9_.:-]+$", fullmatch=True).filter(lambda x: 1 <= len(x) <= 128),
+    target_buffer_cid=st.from_regex("^[a-zA-Z0-9_.:-]+$", fullmatch=True).filter(lambda x: 1 <= len(x) <= 128),
     max_schema_depth=st.integers(min_value=1, max_value=10),
     max_properties=st.integers(min_value=1, max_value=1000),
     require_strict_validation=st.booleans(),
 )
 def test_latent_schema_inference_intent_valid(
-    target_buffer_id: str, max_schema_depth: int, max_properties: int, require_strict_validation: bool
+    target_buffer_cid: str, max_schema_depth: int, max_properties: int, require_strict_validation: bool
 ) -> None:
     intent = LatentSchemaInferenceIntent(
-        target_buffer_id=target_buffer_id,
+        target_buffer_cid=target_buffer_cid,
         max_schema_depth=max_schema_depth,
         max_properties=max_properties,
         require_strict_validation=require_strict_validation,
     )
-    assert intent.target_buffer_id == target_buffer_id
+    assert intent.target_buffer_cid == target_buffer_cid
 
 
 @given(minimum_collateral=st.integers(min_value=0, max_value=1000000000), slashing_penalty=st.integers(min_value=0))
@@ -74,7 +74,7 @@ def test_market_contract_bounds(minimum_collateral: int, slashing_penalty: int) 
 
 @given(
     trace_cid=st.from_regex("^[a-zA-Z0-9_.:-]+$", fullmatch=True).filter(lambda x: 1 <= len(x) <= 128),
-    explored_branch_ids=st.lists(
+    explored_branch_cids=st.lists(
         st.from_regex("^[a-zA-Z0-9_.:-]+$", fullmatch=True).filter(lambda x: 1 <= len(x) <= 128),
         min_size=1,
         unique=True,
@@ -82,23 +82,24 @@ def test_market_contract_bounds(minimum_collateral: int, slashing_penalty: int) 
     total_latent_tokens=st.integers(min_value=0, max_value=1000000000),
 )
 def test_latent_scratchpad_receipt_referential_integrity(
-    trace_cid: str, explored_branch_ids: list[str], total_latent_tokens: int
+    trace_cid: str, explored_branch_cids: list[str], total_latent_tokens: int
 ) -> None:
     explored_branches = [
-        ThoughtBranchState(branch_cid=b_id, latent_content_hash="a" * 64, prm_score=0.5) for b_id in explored_branch_ids
+        ThoughtBranchState(branch_cid=b_cid, latent_content_hash="a" * 64, prm_score=0.5)
+        for b_cid in explored_branch_cids
     ]
 
-    resolution_id = explored_branch_ids[0]
-    discarded_id = explored_branch_ids[-1] if len(explored_branch_ids) > 1 else resolution_id
+    resolution_cid = explored_branch_cids[0]
+    discarded_cid = explored_branch_cids[-1] if len(explored_branch_cids) > 1 else resolution_cid
 
     receipt = LatentScratchpadReceipt(
         trace_cid=trace_cid,
         explored_branches=explored_branches,
-        resolution_branch_id=resolution_id,
-        discarded_branches=[discarded_id],
+        resolution_branch_cid=resolution_cid,
+        discarded_branches=[discarded_cid],
         total_latent_tokens=total_latent_tokens,
     )
-    assert receipt.resolution_branch_id == resolution_id
+    assert receipt.resolution_branch_cid == resolution_cid
 
 
 @given(
@@ -117,7 +118,7 @@ def test_action_space_manifest_uniqueness(action_space_cid: str, tool_names: lis
             tool_name=name,
             input_schema={"topology_class": "object", "properties": {}},
             description="desc",
-            side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
+            side_effects=SideEffectProfile(is_cidempotent=True, mutates_state=False),
             permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
         )
         for name in tool_names

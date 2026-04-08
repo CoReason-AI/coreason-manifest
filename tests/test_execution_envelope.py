@@ -90,7 +90,7 @@ def test_delta_state() -> None:
 def test_action_space_manifest_rejects_custom_state() -> None:
     with pytest.raises(ValidationError) as excinfo:
         CognitiveActionSpaceManifest(
-            action_space_cid="test_id",
+            action_space_cid="test_cid",
             entry_point_cid="test_tool",
             transition_matrix={"test_tool": []},
             capabilities={
@@ -102,7 +102,7 @@ def test_action_space_manifest_rejects_custom_state() -> None:
                         "topology_class": "object",
                         "properties": {"system_prompt": {"topology_class": "string"}},
                     },
-                    side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
+                    side_effects=SideEffectProfile(is_cidempotent=True, mutates_state=False),
                     permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
                 )
             },
@@ -111,7 +111,7 @@ def test_action_space_manifest_rejects_custom_state() -> None:
 
     # Should pass cleanly without any exceptions.
     CognitiveActionSpaceManifest(
-        action_space_cid="test_id_2",
+        action_space_cid="test_cid_2",
         entry_point_cid="test_tool_2",
         transition_matrix={"test_tool_2": []},
         capabilities={
@@ -120,7 +120,7 @@ def test_action_space_manifest_rejects_custom_state() -> None:
                 tool_name="test_tool_2",
                 description="test tool 2",
                 input_schema={"topology_class": "object", "properties": {"sql_query": {"topology_class": "string"}}},
-                side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
+                side_effects=SideEffectProfile(is_cidempotent=True, mutates_state=False),
                 permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
             )
         },

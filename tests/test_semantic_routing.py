@@ -58,7 +58,7 @@ def test_dynamic_ghost_node_and_canonical_sorting() -> None:
         tool_name="tool_A",
         description="Tool A",
         input_schema={"topology_class": "object", "properties": {"input": {"topology_class": "string"}}},
-        side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
+        side_effects=SideEffectProfile(is_cidempotent=True, mutates_state=False),
         permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
     )
 

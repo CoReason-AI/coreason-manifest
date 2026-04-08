@@ -46,7 +46,7 @@ def test_prediction_market_state(probs: list[float]) -> None:
     probs_dict = {f"h{i}": str(p) for i, p in enumerate(probs)}
     pms = PredictionMarketState(
         market_cid="m1",
-        resolution_oracle_condition_id="c1",
+        resolution_oracle_condition_cid="c1",
         lmsr_b_parameter="1.5",
         order_book=[],
         current_market_probabilities=probs_dict,

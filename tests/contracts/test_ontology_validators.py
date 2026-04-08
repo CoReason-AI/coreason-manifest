@@ -364,8 +364,8 @@ def test_active_inference_contract_bounds_fuzzing(eig: float) -> None:
         with pytest.raises(ValidationError, match=r"Input should be"):
             ActiveInferenceContract(
                 task_cid="task_1",
-                target_hypothesis_id="hyp_1",
-                target_condition_id="cond_1",
+                target_hypothesis_cid="hyp_1",
+                target_condition_cid="cond_1",
                 selected_tool_name="tool_1",
                 expected_information_gain=eig,
                 execution_cost_budget_magnitude=100,
@@ -373,8 +373,8 @@ def test_active_inference_contract_bounds_fuzzing(eig: float) -> None:
     else:
         contract = ActiveInferenceContract(
             task_cid="task_1",
-            target_hypothesis_id="hyp_1",
-            target_condition_id="cond_1",
+            target_hypothesis_cid="hyp_1",
+            target_condition_cid="cond_1",
             selected_tool_name="tool_1",
             expected_information_gain=eig,
             execution_cost_budget_magnitude=100,
@@ -453,7 +453,7 @@ def test_browser_dom_state_safety_invalid_fuzzing(bogon: str) -> None:
 
 def test_defeasible_cascade_event_sorting() -> None:
     event = DefeasibleCascadeEvent(
-        cascade_id="c1",
+        cascade_cid="c1",
         root_falsified_event_cid="e1",
         propagated_decay_factor=0.5,
         quarantined_event_cids=["z", "a", "x"],
@@ -488,7 +488,7 @@ def test_ephemeral_namespace_partition_state_sorting() -> None:
     hash_b = "b" * 64
     hash_c = "c" * 64
     state = EphemeralNamespacePartitionState(
-        partition_id="part1",
+        partition_cid="part1",
         execution_runtime="wasm32-wasi",
         authorized_bytecode_hashes=[hash_c, hash_a, hash_b],
         max_ttl_seconds=3600,
@@ -500,7 +500,7 @@ def test_ephemeral_namespace_partition_state_sorting() -> None:
 def test_ephemeral_namespace_partition_state_invalid_hash() -> None:
     with pytest.raises(ValidationError, match=r"Invalid SHA-256 hash in whitelist: invalid_hash"):
         EphemeralNamespacePartitionState(
-            partition_id="part1",
+            partition_cid="part1",
             execution_runtime="wasm32-wasi",
             authorized_bytecode_hashes=["invalid_hash"],
             max_ttl_seconds=3600,
@@ -512,7 +512,7 @@ def test_bilateral_sla_sorting() -> None:
     from coreason_manifest.spec.ontology import FederatedBilateralSLA, SemanticClassificationProfile
 
     sla = FederatedBilateralSLA(
-        receiving_tenant_id="tenant-a",
+        receiving_tenant_cid="tenant-a",
         max_permitted_classification=SemanticClassificationProfile.PUBLIC,
         liability_limit_magnitude=1000,
         permitted_geographic_regions=["us-west", "eu-central", "ap-south"],
@@ -586,7 +586,7 @@ def test_action_space_manifest_enforce_canonical_sort() -> None:
         tool_name="tool_b",
         description="description",
         input_schema={"topology_class": "object", "properties": {}},
-        side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
+        side_effects=SideEffectProfile(is_cidempotent=True, mutates_state=False),
         permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
     )
     tool2 = SpatialToolManifest(
@@ -594,7 +594,7 @@ def test_action_space_manifest_enforce_canonical_sort() -> None:
         tool_name="tool_a",
         description="description 2",
         input_schema={"topology_class": "object", "properties": {}},
-        side_effects=SideEffectProfile(is_idempotent=True, mutates_state=False),
+        side_effects=SideEffectProfile(is_cidempotent=True, mutates_state=False),
         permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
     )
 
@@ -712,7 +712,7 @@ def test_epistemic_sop_manifest_ghost_nodes() -> None:
 
     with pytest.raises(ValidationError, match=r"Ghost node referenced in chronological_flow_edges source"):
         EpistemicSOPManifest(
-            sop_id="sop_1",
+            sop_cid="sop_1",
             target_persona="persona_1",
             cognitive_steps={"step_1": cog_state},
             structural_grammar_hashes={},
@@ -722,7 +722,7 @@ def test_epistemic_sop_manifest_ghost_nodes() -> None:
 
     with pytest.raises(ValidationError, match=r"Ghost node referenced in chronological_flow_edges target"):
         EpistemicSOPManifest(
-            sop_id="sop_1",
+            sop_cid="sop_1",
             target_persona="persona_1",
             cognitive_steps={"step_1": cog_state},
             structural_grammar_hashes={},
@@ -732,7 +732,7 @@ def test_epistemic_sop_manifest_ghost_nodes() -> None:
 
     with pytest.raises(ValidationError, match=r"Ghost node referenced in structural_grammar_hashes"):
         EpistemicSOPManifest(
-            sop_id="sop_1",
+            sop_cid="sop_1",
             target_persona="persona_1",
             cognitive_steps={"step_1": cog_state},
             structural_grammar_hashes={"ghost_step": "abcdef"},
@@ -790,7 +790,7 @@ def test_causal_explanation_event_sorts_attributions() -> None:
     event = CausalExplanationEvent(
         event_cid="test_event_1",
         timestamp=123456.0,
-        target_outcome_event_id="test_outcome_1",
+        target_outcome_event_cid="test_outcome_1",
         collective_intelligence=ci_profile,
         agent_attributions=[receipt_b, receipt_a],
     )

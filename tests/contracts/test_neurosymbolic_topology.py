@@ -20,7 +20,7 @@ from coreason_manifest.spec.ontology import (
 )
 
 
-def test_bipartite_identity_violation() -> None:
+def test_bipartite_cidentity_violation() -> None:
     # Setup standard agent and system
     nodes: dict[str, Any] = {
         "did:coreason:node-1": CognitiveAgentNodeProfile(description="Test Proposer", topology_class="agent"),

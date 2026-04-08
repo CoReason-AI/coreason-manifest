@@ -33,8 +33,8 @@ def build_anchor() -> MultimodalTokenAnchorState:
     )
 
 
-def build_block(block_id: str) -> DocumentLayoutRegionState:
-    return DocumentLayoutRegionState(block_id=block_id, block_class="paragraph", anchor=build_anchor())
+def build_block(block_cid: str) -> DocumentLayoutRegionState:
+    return DocumentLayoutRegionState(block_cid=block_cid, block_class="paragraph", anchor=build_anchor())
 
 
 # 2. Atomic Parameterized Tests for Referential Integrity (Ghost Nodes)
@@ -69,13 +69,13 @@ def test_document_layout_manifest_static_cycles(edges: list[tuple[str, str]]) ->
 @st.composite
 def valid_dag_strategy(draw: st.DrawFn) -> dict[str, Any]:
     """Generates mathematically guaranteed DAGs by strictly pointing edges from lower to higher array indices."""
-    node_ids = draw(
+    node_cids = draw(
         st.lists(st.from_regex(r"^[a-zA-Z0-9_.:-]+$", fullmatch=True), min_size=2, max_size=15, unique=True)
     )
     edges: list[tuple[str, str]] = []
-    for i in range(len(node_ids)):
-        edges.extend((node_ids[i], node_ids[j]) for j in range(i + 1, len(node_ids)) if draw(st.booleans()))
-    return {"nodes": node_ids, "edges": edges}
+    for i in range(len(node_cids)):
+        edges.extend((node_cids[i], node_cids[j]) for j in range(i + 1, len(node_cids)) if draw(st.booleans()))
+    return {"nodes": node_cids, "edges": edges}
 
 
 @given(dag_data=valid_dag_strategy())
@@ -85,7 +85,7 @@ def test_document_layout_manifest_fuzz_valid_dag(dag_data: dict[str, Any]) -> No
     AGENT INSTRUCTION: Fuzz the topological engine. Prove that any mathematically
     sound DAG is strictly accepted without hallucinating false-positive cycle rejections.
     """
-    blocks = {n_id: build_block(n_id) for n_id in dag_data["nodes"]}
+    blocks = {n_cid: build_block(n_cid) for n_cid in dag_data["nodes"]}
     manifest = DocumentLayoutManifest(blocks=blocks, chronological_flow_edges=dag_data["edges"])
 
     assert len(manifest.blocks) == len(dag_data["nodes"])

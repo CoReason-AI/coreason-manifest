@@ -33,9 +33,9 @@ def valid_adversarial_topology(draw: st.DrawFn) -> dict[str, Any]:
     adjudicator_cid = all_dids[0]
 
     # Split remaining DIDs into two non-empty sets for Red/Blue teams
-    split_idx = draw(st.integers(min_value=1, max_value=len(all_dids) - 2))
-    blue_team = all_dids[1 : split_idx + 1]
-    red_team = all_dids[split_idx + 1 :]
+    split_cidx = draw(st.integers(min_value=1, max_value=len(all_dids) - 2))
+    blue_team = all_dids[1 : split_cidx + 1]
+    red_team = all_dids[split_cidx + 1 :]
 
     # Draw valid economic boundaries
     market_rules = PredictionMarketPolicy(
