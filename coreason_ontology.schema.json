@@ -52,6 +52,7 @@
       "type": "object"
     },
     "AcceleratorType": {
+      "description": "AGENT INSTRUCTION: Specifies the hardware acceleration architecture required to materialize this execution node in the physical thermodynamic cluster.\n\nCAUSAL AFFORDANCE: Provides the orchestration layer with the exact topological constraints needed to schedule the container on appropriate silicon.\n\nEPISTEMIC BOUNDS: Strictly bounded to the literal enumeration types representing supported silicon backends.\n\nMCP ROUTING TRIGGERS: GPU Scheduling, Hardware Accelerator, Precision Topology, Thermodynamic Bindings",
       "enum": [
         "FP8_TENSOR",
         "BF16_TENSOR",
@@ -1783,7 +1784,7 @@
     },
     "CapabilityForgeTopologyManifest": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Create a zero-cost macro abstraction that unrolls the entire Zero-to-One generation, verification, and profiling loop.",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Create a zero-cost macro abstraction that unrolls the entire Zero-to-One generation, verification, and profiling loop.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator to physically bind the ephemeral tool-creation workflow into a rigid DAG topology, enabling full cryptographic observability over the dynamic synthesis of capabilities.\n\nEPISTEMIC BOUNDS: Binds the execution state to a closed, finite mathematical matrix where every constituent node (generator, fuzzer, profiler) must resolve before the final capability is materialized onto the Hollow Data Plane.\n\nMCP ROUTING TRIGGERS: Tool Synthesis, Capability Generation, Verification Matrix, Ephemeral Execution, Macro Topology",
       "properties": {
         "epistemic_enforcement": {
           "anyOf": [
@@ -3724,6 +3725,7 @@
       "type": "object"
     },
     "ComputeTier": {
+      "description": "AGENT INSTRUCTION: Categorizes the latency and reasoning depth of a given logical node, physically segregating cheap syntactic execution from heavy semantic computation.\n\nCAUSAL AFFORDANCE: Instructs the scheduling orchestrator to route this node's computation to the appropriately tiered hardware cluster (e.g. fast cheap APIs vs heavy GPU inference).\n\nEPISTEMIC BOUNDS: Bounded to strict enumeration values.\n\nMCP ROUTING TRIGGERS: Hardware Scheduling, Tiered Compute, Orchestration Cost, Resource Allocation",
       "enum": [
         "KINETIC",
         "ORACLE"
@@ -7137,6 +7139,7 @@
       "type": "object"
     },
     "EpistemicSecurity": {
+      "description": "AGENT INSTRUCTION: Defines the minimum cryptographic isolation perimeter required for this node's thermodynamic execution.\n\nCAUSAL AFFORDANCE: Binds the execution graph to hardware Trusted Execution Environments (TEEs) if CONFIDENTIAL is set, physically guillotining unauthorized exfiltration.\n\nEPISTEMIC BOUNDS: Constrained strictly to the predefined enumeration values.\n\nMCP ROUTING TRIGGERS: TEE Enforcement, Hardware Isolation, Secure Enclave, Zero-Trust Execution",
       "enum": [
         "STANDARD",
         "CONFIDENTIAL"
