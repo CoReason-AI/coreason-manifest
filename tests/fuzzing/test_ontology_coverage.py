@@ -221,7 +221,7 @@ def test_evolutionary_topology_manifest_sorting(objectives_data: list[tuple[str,
         for name, weight in objectives_data
     ]
     mutation = MutationPolicy(mutation_rate=0.1, temperature_shift_variance=0.1)
-    crossover = CrossoverPolicy(strategy_type="single_point", blending_factor=0.5)
+    crossover = CrossoverPolicy(strategy_profile="single_point", blending_factor=0.5)
 
     manifest = EvolutionaryTopologyManifest(
         nodes={},

@@ -15,12 +15,12 @@ from pydantic import AnyUrl, ValidationError
 
 from coreason_manifest.spec.ontology import (
     CognitiveCritiqueProfile,
-    ContextualizedSourceEntity,
+    ContextualizedSourceState,
     DerivationMode,
     EpistemicProvenanceReceipt,
     InterventionIntent,
     InterventionPolicy,
-    TerminalCognitiveFailure,
+    TerminalCognitiveEvent,
 )
 
 
@@ -66,12 +66,12 @@ def test_hotl_telemetry_policy_gate() -> None:
 
 
 def test_terminal_handoff_isomorphism() -> None:
-    source_entity = ContextualizedSourceEntity(
+    source_entity = ContextualizedSourceState(
         target_string="test string", contextual_envelope=[], source_system_provenance_flag=False
     )
     critique = CognitiveCritiqueProfile(reasoning_trace_hash="a" * 64, epistemic_penalty_scalar=0.5)
 
-    failure = TerminalCognitiveFailure(
+    failure = TerminalCognitiveEvent(
         source_entity=source_entity,
         last_rejected_hypothesis_hash="b" * 64,
         final_critique_schema=critique,

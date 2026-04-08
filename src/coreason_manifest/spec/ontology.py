@@ -667,7 +667,7 @@ class SpatialReferenceFrameManifest(CoreasonBaseState):
     )
 
 
-class KinematicDerivativeTensor(CoreasonBaseState):
+class KinematicDerivativeProfile(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Kinematic Derivatives, Hermite Spline Extrapolation, Continuous Collision Detection, Newtonian Mechanics
     CAUSAL AFFORDANCE: Kinematic Derivatives, Hermite Spline Extrapolation, Continuous Collision Detection, Newtonian Mechanics
@@ -714,7 +714,7 @@ class SE3TransformProfile(CoreasonBaseState):
     scale: float = Field(
         ge=0.0001, le=10000.0, default=1.0, description="Strictly positive uniform volumetric scaling factor."
     )
-    kinematic_derivatives: KinematicDerivativeTensor | None = Field(
+    kinematic_derivatives: KinematicDerivativeProfile | None = Field(
         default=None, description="Tensors governing continuous momentum and velocity."
     )
     dual_quaternion_motor: tuple[float, float, float, float, float, float, float, float] | None = Field(
@@ -843,7 +843,7 @@ class PhysicallyBasedRenderingProfile(CoreasonBaseState):
     )
 
 
-class EpistemicAttentionRay(CoreasonBaseState):
+class EpistemicAttentionState(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Formalizes Joint Attention and Gaze Raycasting across the distributed topology. Projects a continuous vector from an observer's optical center to indicate cognitive focus prior to physical mutation.
 
@@ -1757,7 +1757,7 @@ class CognitiveStateProfile(CoreasonBaseState):
     )
 
 
-class ContextualizedSourceEntity(CoreasonBaseState):
+class ContextualizedSourceState(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Projects a semantically unified spatial token footprint representing the strictly bounded source projection.
 
@@ -1791,7 +1791,7 @@ class EpistemicUpsamplingTask(CoreasonBaseState):
         MCP ROUTING TRIGGERS: Abductive Leap, Epistemic Upsampling, Lossy Compression Reversal, Vector Expansion, Connectionist Grounding
     """
 
-    source_entity: ContextualizedSourceEntity = Field(
+    source_entity: ContextualizedSourceState = Field(
         description="The specific source contextualized entity subject to topological upsampling."
     )
     target_ontological_granularity: Annotated[str, StringConstraints(max_length=255)] = Field(
@@ -3833,7 +3833,7 @@ class CrossoverPolicy(CoreasonBaseState):
     Interpolation, Elitism, Reproduction Heuristic
     """
 
-    strategy_type: CrossoverMechanismProfile = Field(
+    strategy_profile: CrossoverMechanismProfile = Field(
         description="The heuristic method for blending successful parent agents."
     )
     blending_factor: float = Field(
@@ -5071,7 +5071,7 @@ class FaultInjectionProfile(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Instructs the execution engine to physically degrade, throttle, or
     corrupt the structural state or network connectivity of the target_node_cid based on the
-    specific fault_type (FaultCategoryProfile) manifold.
+    specific fault_category (FaultCategoryProfile) manifold.
 
     EPISTEMIC BOUNDS: The severity of the perturbation is constrained above by the intensity
     scalar (le=1000000000.0) but unbounded below, permitting negative fault magnitudes. The
@@ -5082,7 +5082,7 @@ class FaultInjectionProfile(CoreasonBaseState):
     Structural Sabotage, Resilience Testing
     """
 
-    fault_type: FaultCategoryProfile = Field(description="The specific type of fault to inject.")
+    fault_category: FaultCategoryProfile = Field(description="The specific type of fault to inject.")
     target_node_cid: (
         Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] | None
     ) = Field(default=None, description="The specific node to attack, or None for swarm-wide.")
@@ -6037,7 +6037,7 @@ type AnyPanelProfile = Annotated[
 ]
 
 
-class TerminalCognitiveFailure(CoreasonBaseState):
+class TerminalCognitiveEvent(CoreasonBaseState):
     """
     AGENT INSTRUCTION: A terminal state object generated when the Proposer-Verifier macro-topology exhausts its max_revision_loops without achieving ontological alignment. Packages the failure state for HITL routing.
 
@@ -6048,7 +6048,7 @@ class TerminalCognitiveFailure(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Proposer-Verifier Macro-Topology, Terminal State, Execution Halting, Human-in-the-Loop Routing, Cognitive Failure Packaging
     """
 
-    source_entity: ContextualizedSourceEntity = Field(
+    source_entity: ContextualizedSourceState = Field(
         description="The original contextualized input data the system attempted to process."
     )
     last_rejected_hypothesis_hash: Annotated[str, StringConstraints(max_length=64)] = Field(
@@ -6089,7 +6089,7 @@ class InterventionIntent(CoreasonBaseState):
     adjudication_deadline: float = Field(
         ge=0.0, le=253402300799.0, description="The deadline for adjudication, represented as a UNIX timestamp."
     )
-    failure_context: TerminalCognitiveFailure | None = Field(
+    failure_context: TerminalCognitiveEvent | None = Field(
         default=None, description="Packages the exact contextual state at the moment of computational failure."
     )
 
@@ -6371,7 +6371,7 @@ class CognitiveHumanNodeProfile(CoreasonBaseState):
     required_attestation: AttestationMechanismProfile = Field(
         description="The mandatory cryptographic attestation required to verify the human operator's identity."
     )
-    active_attention_ray: EpistemicAttentionRay | None = Field(
+    active_attention_ray: EpistemicAttentionState | None = Field(
         default=None,
         description="The continuous spatial vector representing the human operator's localized cognitive focus.",
     )
@@ -7504,7 +7504,7 @@ class NDimensionalTensorManifest(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Tensor Calculus, Differential Geometry, Merkle Tree Verification, Zero-Trust Computing, Memory Allocation
     """
 
-    structural_type: TensorStructuralFormatProfile = Field(..., description="Structural type of the tensor elements.")
+    structural_format: TensorStructuralFormatProfile = Field(..., description="Structural type of the tensor elements.")
     shape: tuple[int, ...] = Field(..., max_length=1000, description="N-Dimensional shape tuple.")
     vram_footprint_bytes: int = Field(..., le=100000000000, description="Exact byte size of the uncompressed tensor.")
     merkle_root: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-fA-F0-9]{64}$")] = Field(
@@ -7522,11 +7522,11 @@ class NDimensionalTensorManifest(CoreasonBaseState):
         for dim in self.shape:
             if dim <= 0:
                 raise ValueError(f"Tensor dimensions must be strictly positive integers. Got: {self.shape}")
-        bytes_per_element = self.structural_type.bytes_per_element
+        bytes_per_element = self.structural_format.bytes_per_element
         calculated_bytes = math.prod(self.shape) * bytes_per_element
         if calculated_bytes != self.vram_footprint_bytes:
             raise ValueError(
-                f"Topological mismatch: Shape {self.shape} of {self.structural_type.value} requires {calculated_bytes} bytes, but manifest declares {self.vram_footprint_bytes} bytes."
+                f"Topological mismatch: Shape {self.shape} of {self.structural_format.value} requires {calculated_bytes} bytes, but manifest declares {self.vram_footprint_bytes} bytes."
             )
         return self
 
@@ -8723,7 +8723,7 @@ class ChaosExperimentTask(CoreasonBaseState):
     evaluate the resilience of the DAG topology.
 
     EPISTEMIC BOUNDS: Cryptographic determinism is mathematically guaranteed by the
-    @model_validator, which sorts the faults array by composite key (fault_type,
+    @model_validator, which sorts the faults array by composite key (fault_category,
     target_node_cid) and the shocks array by shock_id to preserve RFC 8785 canonical hashing.
 
     MCP ROUTING TRIGGERS: Steady State Falsification, Chaos Engineering, Automated Failure
@@ -8745,7 +8745,7 @@ class ChaosExperimentTask(CoreasonBaseState):
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(
-            self, "faults", sorted(self.faults, key=operator.attrgetter("fault_type", "target_node_cid"))
+            self, "faults", sorted(self.faults, key=operator.attrgetter("fault_category", "target_node_cid"))
         )
         object.__setattr__(self, "shocks", sorted(self.shocks, key=operator.attrgetter("shock_id")))
         return self
@@ -8924,7 +8924,7 @@ class ManifestViolationReceipt(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Enables the agent to execute $O(1)$ surgical patches via StateMutationIntent rather than hallucinating fixes.
 
-    EPISTEMIC BOUNDS: `failing_pointer` mathematically maps exactly to RFC 6902 JSON Pointers (`max_length=2000`). `violation_type` capped at `255`.
+    EPISTEMIC BOUNDS: `failing_pointer` mathematically maps exactly to RFC 6902 JSON Pointers (`max_length=2000`). `violation_category` capped at `255`.
 
     MCP ROUTING TRIGGERS: Fault Receipt, RFC 6902, Epistemic Loss Prevention, Surgical Patching, Traceback Serialization
 
@@ -8933,7 +8933,7 @@ class ManifestViolationReceipt(CoreasonBaseState):
     failing_pointer: Annotated[str, StringConstraints(max_length=2000)] = Field(
         description="The exact RFC 6902 JSON pointer isolating the topological failure."
     )
-    violation_type: Annotated[str, StringConstraints(max_length=255)] = Field(
+    violation_category: Annotated[str, StringConstraints(max_length=255)] = Field(
         description="Categorical descriptor of the failure, e.g., missing, type_error."
     )
     diagnostic_message: Annotated[str, StringConstraints(max_length=2000)] = Field(
@@ -9108,7 +9108,7 @@ class TemporalBoundsProfile(CoreasonBaseState):
     valid_to: float | None = Field(
         le=1000000000.0, default=None, description="The UNIX timestamp when this coordinate was invalidated."
     )
-    interval_type: CausalIntervalProfile | None = Field(
+    interval_class: CausalIntervalProfile | None = Field(
         default=None, description="The Allen's interval algebra or causal relationship classification."
     )
 
@@ -9918,7 +9918,7 @@ class CognitiveAgentNodeProfile(CoreasonBaseState):
         default=None,
         description="The cryptographic contract forcing this agent to embed an undeniable provenance signature into its generative token stream.",
     )
-    active_attention_ray: EpistemicAttentionRay | None = Field(
+    active_attention_ray: EpistemicAttentionState | None = Field(
         default=None,
         description="The continuous spatial vector representing the agent's localized cognitive focus prior to kinetic actuation.",
     )
@@ -12583,12 +12583,12 @@ KinematicDeltaManifest.model_rebuild()
 SpatialBillboardContract.model_rebuild()
 VolumetricEdgeProfile.model_rebuild()
 GaussianSplattingProfile.model_rebuild()
-KinematicDerivativeTensor.model_rebuild()
+KinematicDerivativeProfile.model_rebuild()
 SemanticZoomProfile.model_rebuild()
 MarkovBlanketRenderingPolicy.model_rebuild()
 TelemetryBackpressureContract.model_rebuild()
 ObservabilityLODPolicy.model_rebuild()
-EpistemicAttentionRay.model_rebuild()
+EpistemicAttentionState.model_rebuild()
 VolumetricPartitionSubscription.model_rebuild()
 ContinuousSpatialMutationIntent.model_rebuild()
 
@@ -12601,9 +12601,11 @@ LiquidTypeContract.model_rebuild()
 HoareLogicProofReceipt.model_rebuild()
 AsymptoticComplexityReceipt.model_rebuild()
 TeleologicalIsometryReceipt.model_rebuild()
+InterventionIntent.model_rebuild()
+TerminalCognitiveEvent.model_rebuild()
 
 
-class NeurosymbolicInferenceRequest(CoreasonBaseState):
+class NeurosymbolicInferenceIntent(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Orchestrates the core execution payload boundary, acting as the structural pre-inference gate for neurosymbolic probability.
 
@@ -12614,7 +12616,7 @@ class NeurosymbolicInferenceRequest(CoreasonBaseState):
         MCP ROUTING TRIGGERS: Pre-Inference Gate, Neurosymbolic Request, Probability Envelope, SLA Enforcement, Inference Termination
     """
 
-    source_entity: ContextualizedSourceEntity = Field(
+    source_entity: ContextualizedSourceState = Field(
         description="The structurally isolated 1D boundary representing the semantic payload injected into the context window."
     )
     fidelity_receipt: TopologicalFidelityReceipt = Field(
@@ -12636,9 +12638,9 @@ class NeurosymbolicInferenceRequest(CoreasonBaseState):
         return self
 
 
-ContextualizedSourceEntity.model_rebuild()
+ContextualizedSourceState.model_rebuild()
 TopologicalFidelityReceipt.model_rebuild()
-NeurosymbolicInferenceRequest.model_rebuild()
+NeurosymbolicInferenceIntent.model_rebuild()
 
 EpistemicUpsamplingTask.model_rebuild()
 VolumetricPartitionSubscription.model_rebuild()
