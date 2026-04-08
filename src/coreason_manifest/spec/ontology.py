@@ -113,6 +113,7 @@ class _SimpleTTLCache:
     Impact: Reduces DNS resolution overhead for frequent hostnames to ~O(1) dictionary
     lookup while maintaining a short TTL (5s) to prevent DNS Rebinding attacks.
     """
+
     def __init__(self, ttl: int = 5, maxsize: int = 4096) -> None:
         self.ttl = ttl
         self.maxsize = maxsize
