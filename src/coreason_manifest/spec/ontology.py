@@ -166,6 +166,8 @@ _CLEARANCE_MAPPING: dict[str, int] = {"public": 0, "internal": 1, "confidential"
 
 class ComputeTierProfile(StrEnum):
     """
+    CoReason Shared Kernel Ontology
+
     AGENT INSTRUCTION: Categorizes the latency and reasoning depth of a given logical node, physically segregating cheap syntactic execution from heavy semantic computation.
 
     CAUSAL AFFORDANCE: Instructs the scheduling orchestrator to route this node's computation to the appropriately tiered hardware cluster (e.g. fast cheap APIs vs heavy GPU inference).
@@ -181,6 +183,8 @@ class ComputeTierProfile(StrEnum):
 
 class AcceleratorProfile(StrEnum):
     """
+    CoReason Shared Kernel Ontology
+
     AGENT INSTRUCTION: Specifies the hardware acceleration architecture required to materialize this execution node in the physical thermodynamic cluster.
 
     CAUSAL AFFORDANCE: Provides the orchestration layer with the exact topological constraints needed to schedule the container on appropriate silicon.
@@ -197,6 +201,8 @@ class AcceleratorProfile(StrEnum):
 
 class EpistemicSecurityPolicy(StrEnum):
     """
+    CoReason Shared Kernel Ontology
+
     AGENT INSTRUCTION: Defines the minimum cryptographic isolation perimeter required for this node's thermodynamic execution.
 
     CAUSAL AFFORDANCE: Binds the execution graph to hardware Trusted Execution Environments (TEEs) if CONFIDENTIAL is set, physically guillotining unauthorized exfiltration.
@@ -211,7 +217,17 @@ class EpistemicSecurityPolicy(StrEnum):
 
 
 class UpperOntologyClassProfile(StrEnum):
-    """AGENT INSTRUCTION: Classifies reality into domain-independent categories based on Basic Formal Ontology principles to prevent graph bloat."""
+    """
+    CoReason Shared Kernel Ontology
+
+    AGENT INSTRUCTION: Classifies reality into domain-independent categories based on Basic Formal Ontology principles to prevent graph bloat.
+
+    CAUSAL AFFORDANCE: Instructs the taxonomic routing engine to separate continuously existing entities (Continuants) from temporal events (Occurrents) prior to generating an active context partition.
+
+    EPISTEMIC BOUNDS: Strictly bounded to the literal enumeration of top-level BFO classes.
+
+    MCP ROUTING TRIGGERS: Basic Formal Ontology, Top-Level Classification, Continuant, Occurrent, Taxonomic Partitioning
+    """
 
     CONTINUANT = "continuant"
     OCCURRENT = "occurrent"
@@ -219,6 +235,8 @@ class UpperOntologyClassProfile(StrEnum):
 
 class SemanticClassificationProfile(StrEnum):
     """
+    CoReason Shared Kernel Ontology
+
     AGENT INSTRUCTION: Implements the Bell-LaPadula Model and Lattice-Based Access Control (LBAC), establishing the foundational mathematical axis for Information Flow Control across the distributed swarm.
 
     CAUSAL AFFORDANCE: Physically authorizes or severs the projection of semantic payloads. By exposing rich comparison operators (e.g., `<=`), it enables the orchestrator's verification engine to natively execute mathematical dominance checks between a payload's classification and an agent's clearance partition.
@@ -292,6 +310,8 @@ type ProfileCIDState = Annotated[
 
 class RiskLevelPolicy(StrEnum):
     """
+    CoReason Shared Kernel Ontology
+
     AGENT INSTRUCTION: Formalizes Quantitative Risk Assessment and Utility Theory, translating qualitative human threat vectors into computable scalar magnitudes that dictate systemic halting thresholds.
 
     CAUSAL AFFORDANCE: Instructs the orchestrator's control theory loop to measure the aggregate expected utility loss of a proposed topology. It serves as the physical threshold that triggers hardware circuit breakers or forced escalation overrides.
@@ -377,6 +397,8 @@ _ILLEGAL_KEYS: frozenset[str] = frozenset(
 
 class TensorStructuralFormatProfile(StrEnum):
     """
+    CoReason Shared Kernel Ontology
+
     AGENT INSTRUCTION: Mathematically aligns abstract Tensor Calculus with rigid Von Neumann Memory Hierarchy limits and IEEE 754 Floating-Point Arithmetic physics.
 
     CAUSAL AFFORDANCE: Empowers the orchestrator to preemptively calculate exact thermodynamic and spatial memory exhaustion limits (VRAM footprint) prior to authorizing the download or projection of N-dimensional tensor payloads.
@@ -5320,19 +5342,18 @@ class BudgetExhaustionEvent(CoreasonBaseState):
     ] = Field(description="A string representing the original escrow boundary breached.")
     final_burn_receipt_cid: Annotated[
         str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
-    ] = Field(description="A string pointing to the exact TokenBurnReceipt CID that pushed the state over the limit.")
+    ] = Field(description="A string pointing to the exact ThermodynamicBurnReceipt CID that pushed the state over the limit.")
 
 
-class TokenBurnReceipt(CoreasonBaseState):
+class ThermodynamicBurnReceipt(CoreasonBaseState):
     r"""
-    AGENT INSTRUCTION: Formalizes Landauer's Principle of thermodynamic computing within the neurosymbolic network, serving as a lock-free, cryptographically frozen record of irreversible token and energy expenditure.
+    AGENT INSTRUCTION: Formalizes Landauer's Principle of thermodynamic computing within the neurosymbolic network, serving as a lock-free, cryptographically frozen record of irreversible token, time, and bandwidth expenditure.
 
-    CAUSAL AFFORDANCE: Deducts exact computational magnitude from the agent's localized Proof-of-Stake (PoS) execution escrow, progressively narrowing its available search depth. Bound to causal origin via `tool_invocation_cid`.
+    CAUSAL AFFORDANCE: Deducts exact computational magnitude from the agent's localized Proof-of-Stake (PoS) execution escrow, progressively narrowing its available search depth. Bound to causal origin via `tool_invocation_cid` or temporal span.
 
-    EPISTEMIC BOUNDS: Integer bounds (`ge=0, le=1000000000`) on `input_tokens`, `output_tokens`, and `burn_magnitude` mathematically prevent integer overflow and fractional bypasses during ledger tallying.
+    EPISTEMIC BOUNDS: Integer bounds (`ge=0, le=1000000000`) on `input_tokens`, `output_tokens`, `execution_seconds`, and `burn_magnitude` mathematically prevent integer overflow and fractional bypasses during ledger tallying.
 
-    MCP ROUTING TRIGGERS: Landauer's Principle, Thermodynamic Compute, Token Burn, Resource Exhaustion, Lock-Free Tallying
-
+    MCP ROUTING TRIGGERS: Landauer's Principle, Thermodynamic Compute, Bare-Metal Leasing, Resource Exhaustion, Lock-Free Tallying
     """
 
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
@@ -5350,28 +5371,27 @@ class TokenBurnReceipt(CoreasonBaseState):
         description="Causal Ancestry markers required to resolve decentralized event ordering.",
     )
 
-    topology_class: Literal["token_burn"] = Field(
-        default="token_burn", description="Discriminator type for a token burn receipt."
+    topology_class: Literal["thermodynamic_burn"] = Field(
+        default="thermodynamic_burn", description="Discriminator type for a thermodynamic burn receipt."
     )
     tool_invocation_cid: Annotated[
         str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
-    ] = Field(description="A string linking this burn back to the specific ToolInvocationEvent CID.")
-    input_tokens: int = Field(le=1000000000, ge=0, description="The mathematical measure of input tokens consumed.")
-    output_tokens: int = Field(le=1000000000, ge=0, description="The mathematical measure of output tokens generated.")
+    ] | None = Field(default=None, description="A string linking this burn back to the specific ToolInvocationEvent CID.")
+    input_tokens: int = Field(default=0, le=1000000000, ge=0, description="The mathematical measure of input tokens consumed.")
+    output_tokens: int = Field(default=0, le=1000000000, ge=0, description="The mathematical measure of output tokens generated.")
+    execution_seconds: int = Field(default=0, le=1000000000, ge=0, description="The exact physical time leased on the unmanaged Spot Market host.")
+    network_egress_gb: int = Field(default=0, le=1000000000, ge=0, description="The bandwidth volume utilized during execution.")
     burn_magnitude: int = Field(
-        le=1000000000, ge=0, description="The normalized economic cost magnitude representing thermodynamic burn."
+        le=1000000000, ge=0, description="The normalized economic cost magnitude representing total thermodynamic burn."
     )
 
     @model_validator(mode="before")
     @classmethod
-    def _clamp_token_burn_before(cls, values: Any) -> Any:
+    def _clamp_burn_before(cls, values: Any) -> Any:
         if isinstance(values, dict):
-            if "input_tokens" in values:
-                values["input_tokens"] = max(0, min(values["input_tokens"], 1000000000))
-            if "output_tokens" in values:
-                values["output_tokens"] = max(0, min(values["output_tokens"], 1000000000))
-            if "burn_magnitude" in values:
-                values["burn_magnitude"] = max(0, min(values["burn_magnitude"], 1000000000))
+            for k in ["input_tokens", "output_tokens", "execution_seconds", "network_egress_gb", "burn_magnitude"]:
+                if k in values:
+                    values[k] = max(0, min(values.get(k, 0), 1000000000))
         return values
 
 
@@ -6295,6 +6315,8 @@ class InterventionPolicy(CoreasonBaseState):
 
 class InterconnectTopologyProfile(StrEnum):
     """
+    CoReason Shared Kernel Ontology
+
     AGENT INSTRUCTION: Categorizes the physical data-link layer connecting multiple silicon accelerators within a single thermodynamic execution node.
 
     CAUSAL AFFORDANCE: Instructs the orchestration layer to approve or reject multi-GPU allocations based on the exact bandwidth constraints required for tensor parallelism or ring-allreduce operations.
@@ -7466,13 +7488,15 @@ class MechanisticAuditContract(CoreasonBaseState):
 
 class DerivationModeProfile(StrEnum):
     """
-    AGENT INSTRUCTION: Defines the rigid mathematical derivation mode for semantic extraction.
+    CoReason Shared Kernel Ontology
 
-    CAUSAL AFFORDANCE: Instructs the extraction engine whether to perform a strict 1:1 topological mapping or an abductive expansion.
+    AGENT INSTRUCTION: Represents the exact logical method used to derive a conclusion or fact.
 
-    EPISTEMIC BOUNDS: Constrained entirely to strict Pydantic string literals to prevent hallucinated derivation paths.
+    CAUSAL AFFORDANCE: Governs the routing behavior of the active inference engine.
 
-    MCP ROUTING TRIGGERS: Derivation Mode, Abductive Upsampling, Direct Translation, Epistemic Extraction
+    EPISTEMIC BOUNDS: Constrained strictly to valid deduction, induction, and abduction paths.
+
+    MCP ROUTING TRIGGERS: Inference Mode, Causal Tracing, Logical Derivation
     """
 
     DIRECT_TRANSLATION = "direct_translation"
@@ -12401,7 +12425,7 @@ type AnyStateEvent = Annotated[
     | EpistemicPromotionEvent
     | NormativeDriftEvent
     | PersistenceCommitReceipt
-    | TokenBurnReceipt
+    | ThermodynamicBurnReceipt
     | BudgetExhaustionEvent
     | EpistemicTelemetryEvent
     | CognitivePredictionReceipt
@@ -12416,7 +12440,15 @@ type AnyStateEvent = Annotated[
 
 
 class SemanticRelationalRecordState(CoreasonBaseState):
-    """AGENT INSTRUCTION: Represents the untyped payload injection zone for harmonized structured telemetry. CAUSAL AFFORDANCE: Permits specialized downstream agents to project and decode specific industry payloads (e.g., OMOP CDM, FIX protocol) while preserving universal mathematical traversal of the graph. EPISTEMIC BOUNDS: The payload_injection_zone is routed through the volumetric hardware guillotine."""
+    """
+    AGENT INSTRUCTION: Represents the untyped payload injection zone for harmonized structured telemetry.
+
+    CAUSAL AFFORDANCE: Permits specialized downstream agents to project and decode specific industry payloads (e.g., OMOP CDM, FIX protocol) while preserving universal mathematical traversal of the graph.
+
+    EPISTEMIC BOUNDS: The payload_injection_zone is explicitly routed through the volumetric hardware guillotine to prevent recursive JSON bombing.
+
+    MCP ROUTING TRIGGERS: Industry Payload, Telemetry Harmonization, Untyped Injection Zone, Domain-Agnostic Routing, Structural Decoupling
+    """
 
     topology_class: Literal["semantic_relational_record"] = Field(default="semantic_relational_record")
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
@@ -12668,7 +12700,7 @@ CapabilityForgeTopologyManifest.model_rebuild()
 IntentElicitationTopologyManifest.model_rebuild()
 EpistemicSOPManifest.model_rebuild()
 DelegatedCapabilityManifest.model_rebuild()
-TokenBurnReceipt.model_rebuild()
+ThermodynamicBurnReceipt.model_rebuild()
 BudgetExhaustionEvent.model_rebuild()
 LatentProjectionIntent.model_rebuild()
 EpistemicAxiomState.model_rebuild()

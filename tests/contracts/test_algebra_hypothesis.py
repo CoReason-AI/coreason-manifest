@@ -23,7 +23,7 @@ from coreason_manifest.spec.ontology import (
     StateDifferentialManifest,
     StateMutationIntent,
     TamperFaultEvent,
-    TokenBurnReceipt,
+    ThermodynamicBurnReceipt,
     VectorEmbeddingState,
 )
 from coreason_manifest.utils.algebra import (
@@ -37,7 +37,7 @@ from coreason_manifest.utils.algebra import (
     st.integers(min_value=0, max_value=1000000),
     st.lists(
         st.builds(
-            TokenBurnReceipt,
+            ThermodynamicBurnReceipt,
             event_cid=st.from_regex(r"^[a-zA-Z0-9_.:-]+$", fullmatch=True),
             prior_event_hash=st.from_regex(r"^[a-f0-9]{64}$", fullmatch=True),
             timestamp=st.floats(min_value=0.0, max_value=253402300799.0),
@@ -47,7 +47,7 @@ from coreason_manifest.utils.algebra import (
         max_size=10,
     ),
 )
-def test_calculate_remaining_compute(initial: int, burns: list[TokenBurnReceipt]) -> None:
+def test_calculate_remaining_compute(initial: int, burns: list[ThermodynamicBurnReceipt]) -> None:
     ledger = EpistemicLedgerState(history=burns)  # type: ignore[arg-type]
     total_burned = sum(b.burn_magnitude for b in burns)
 

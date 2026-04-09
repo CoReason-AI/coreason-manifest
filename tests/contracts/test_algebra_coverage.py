@@ -583,11 +583,11 @@ def test_calculate_remaining_compute() -> None:
     ledger = Mock(history=[])
     assert calculate_remaining_compute(ledger, 10) == 10
 
-    tbr1 = Mock(topology_class="token_burn", burn_magnitude=5)
+    tbr1 = Mock(topology_class="thermodynamic_burn", burn_magnitude=5)
     ledger.history.append(tbr1)
     assert calculate_remaining_compute(ledger, 10) == 5
 
-    tbr2 = Mock(topology_class="token_burn", burn_magnitude=10)
+    tbr2 = Mock(topology_class="thermodynamic_burn", burn_magnitude=10)
     ledger.history.append(tbr2)
     with pytest.raises(ValueError, match="Mathematical Boundary Breached"):
         calculate_remaining_compute(ledger, 10)
