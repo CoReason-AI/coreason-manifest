@@ -12500,9 +12500,6 @@ class OntologicalReificationReceipt(CoreasonBaseState):
         Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
     ) = Field(default=None, description="The RFC 8785 Canonical hash of the immediate causal ancestor.")
     timestamp: float = Field(description="The precise temporal coordinate of the event realization.")
-    receipt_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="Unique identifier for this specific reification event."
-    )
     source_data_hash: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] = Field(
         description="The undeniable SHA-256 hash of the pre-transmutation artifact, unstructured text chunk, or telemetry row."
     )
