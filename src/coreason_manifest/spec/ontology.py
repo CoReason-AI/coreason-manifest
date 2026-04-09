@@ -217,6 +217,25 @@ class UpperOntologyClassProfile(StrEnum):
     OCCURRENT = "occurrent"
 
 
+class IllocutionaryForceProfile(StrEnum):
+    """AGENT INSTRUCTION: Mathematically categorizes the structural intent of a proposition to prevent reasoning agents from hallucinating contextual truth values. Dictates whether the swarm evaluates the node as an empirical fact, a normative constraint, a guaranteed promise, or a simulation."""
+
+    ASSERTIVE = "assertive"
+    DIRECTIVE_NORMATIVE = "directive_normative"
+    COMMISSIVE = "commissive"
+    FICTIVE_HYPOTHETICAL = "fictive_hypothetical"
+
+
+class RhetoricalStructureProfile(StrEnum):
+    """AGENT INSTRUCTION: Maps unstructured text segments into the strict logical confines of Rhetorical Structure Theory (RST), authorizing the extraction engine to build directed dependency graphs."""
+
+    PREMISE = "premise"
+    CONCLUSION = "conclusion"
+    ELABORATION = "elaboration"
+    CONTRAST = "contrast"
+    CONCESSION = "concession"
+
+
 class SemanticClassificationProfile(StrEnum):
     """
     AGENT INSTRUCTION: Implements the Bell-LaPadula Model and Lattice-Based Access Control (LBAC), establishing the foundational mathematical axis for Information Flow Control across the distributed swarm.
@@ -1577,25 +1596,25 @@ class RoutingFrontierPolicy(CoreasonBaseState):
                 try:
                     val = int(values["max_latency_ms"])
                     values["max_latency_ms"] = int(max(1, min(val, 86400000)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if "max_cost_magnitude_per_token" in values:
                 try:
                     val = int(values["max_cost_magnitude_per_token"])
                     values["max_cost_magnitude_per_token"] = int(max(1, min(val, 1000000000)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if "min_capability_score" in values:
                 try:
                     val_float = float(values["min_capability_score"])
                     values["min_capability_score"] = float(max(0.0, min(val_float, 1.0)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if values.get("max_carbon_intensity_gco2eq_kwh") is not None:
                 try:
                     val_float = float(values["max_carbon_intensity_gco2eq_kwh"])
                     values["max_carbon_intensity_gco2eq_kwh"] = float(max(0.0, min(val_float, 10000.0)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
         return values
 
@@ -4131,7 +4150,6 @@ class DocumentLayoutManifest(CoreasonBaseState):
 
     @model_validator(mode="after")
     def verify_dag_and_integrity(self) -> Self:
-
         graph = nx.DiGraph()
         for node_cid in self.blocks:
             graph.add_node(node_cid)
@@ -6994,7 +7012,6 @@ class CognitiveActionSpaceManifest(CoreasonBaseState):
 
     @model_validator(mode="after")
     def _enforce_structural_integrity(self) -> Self:
-
         if self.entry_point_cid not in self.capabilities:
             raise ValueError(f"entry_point_cid '{self.entry_point_cid}' not found in capabilities.")
 
@@ -7314,7 +7331,7 @@ class MarketContract(CoreasonBaseState):
                 try:
                     mc_int = int(mc)
                     sp_int = int(sp)
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             cmc = max(0, min(mc_int, 1000000000))
             if sp_int > cmc:
@@ -12318,10 +12335,48 @@ class DifferentiableLogicPolicy(CoreasonBaseState):
     )
 
 
+class AtomicPropositionState(CoreasonBaseState):
+    """AGENT INSTRUCTION: A declarative, frozen snapshot of a standalone, verifiable statement extracted from unstructured discourse. Transmutes probabilistic 'bags-of-words' into a discrete, traversable node within the Labeled Property Graph (LPG)."""
+
+    topology_class: Literal["atomic_proposition"] = Field(default="atomic_proposition")
+    event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG."
+    )
+    prior_event_hash: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
+    ) = Field(
+        default=None,
+        description="The RFC 8785 Canonical hash of the immediate causal ancestor, securing the Merkle-DAG.",
+    )
+    timestamp: float = Field(description="The precise temporal coordinate of the event realization.")
+    proposition_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
+        Field(description="A Content Identifier (CID) bounding this specific extracted proposition.")
+    )
+    rhetorical_role: RhetoricalStructureProfile = Field(
+        description="The structural relationship of this proposition to its surrounding discourse."
+    )
+    illocutionary_force: IllocutionaryForceProfile = Field(
+        description="The intentional boundary defining the statement's truth condition."
+    )
+    text_chunk: Annotated[str, StringConstraints(max_length=50000)] = Field(
+        description="The raw, atomic natural language representation of the proposition. Volumetrically clamped to prevent VRAM overflow."
+    )
+    anaphoric_resolution_cids: list[NodeCIDState] = Field(
+        default_factory=list,
+        description="Explicit array of entity DIDs/CIDs resolving implicit references (e.g., pronouns) within the text chunk back to explicit nodes.",
+    )
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort_anaphora(self) -> Self:
+        object.__setattr__(self, "anaphoric_resolution_cids", sorted(self.anaphoric_resolution_cids))
+        return self
+
+
 type AnyStateEvent = Annotated[
     ObservationEvent
     | BeliefMutationEvent
     | SystemFaultEvent
+    | AtomicPropositionState
     | HypothesisGenerationEvent
     | BargeInInterruptEvent
     | CounterfactualRegretEvent
@@ -12713,3 +12768,4 @@ NeurosymbolicInferenceIntent.model_rebuild()
 EpistemicUpsamplingTask.model_rebuild()
 VolumetricPartitionState.model_rebuild()
 SemanticRelationalRecordState.model_rebuild()
+AtomicPropositionState.model_rebuild()
