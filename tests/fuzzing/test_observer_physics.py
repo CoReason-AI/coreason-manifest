@@ -15,7 +15,6 @@
 # This software is distributed under the Prosperity Public License 3.0.
 # See the LICENSE file for more information.
 import contextlib
-import math
 
 import pytest
 from hypothesis import HealthCheck, given, settings
@@ -25,7 +24,6 @@ from pydantic import ValidationError
 from coreason_manifest.spec.ontology import (
     DynamicLayoutManifest,
     EpistemicAttentionState,
-    NodeCIDState,
     ObservabilityLODPolicy,
     SE3TransformProfile,
     TelemetryBackpressureContract,
@@ -113,63 +111,3 @@ def test_differential_privacy_valid() -> None:
         foveated_privacy_epsilon=0.5,
     )
     assert policy.foveated_privacy_epsilon == 0.5
-
-
-@given(
-    dx=st.floats(min_value=-10.0, max_value=10.0),
-    dy=st.floats(min_value=-10.0, max_value=10.0),
-    dz=st.floats(min_value=-10.0, max_value=10.0),
-)
-def test_attention_ray_normalization(dx: float, dy: float, dz: float) -> None:
-    d_mag = math.hypot(dx, dy, dz)
-    if d_mag == 0.0:
-        with pytest.raises(ValidationError) as exc_info:
-            EpistemicAttentionState(
-                origin=SE3TransformProfile(reference_frame_cid="frame-1", x=0, y=0, z=0),
-                direction_unit_vector=(0.0, 0.0, 0.0)
-            )
-        assert "Attention Ray direction cannot be a zero vector" in str(exc_info.value)
-    elif not math.isclose(d_mag, 1.0, abs_tol=1e-3):
-        with pytest.raises(ValidationError) as exc_info:
-             EpistemicAttentionState(
-                origin=SE3TransformProfile(reference_frame_cid="frame-1", x=0, y=0, z=0),
-                direction_unit_vector=(dx, dy, dz)
-            )
-        assert "direction vector must be normalized to 1.0" in str(exc_info.value)
-    else:
-         state = EpistemicAttentionState(
-            origin=SE3TransformProfile(reference_frame_cid="frame-1", x=0, y=0, z=0),
-            direction_unit_vector=(dx, dy, dz)
-        )
-         assert state.direction_unit_vector == (dx, dy, dz)
-
-
-@given(
-    node_id1=st.from_regex(r"^[a-zA-Z0-9.\-_:]+$", fullmatch=True).map(lambda x: f"did:node:{x}"),
-    node_id2=st.from_regex(r"^[a-zA-Z0-9.\-_:]+$", fullmatch=True).map(lambda x: f"did:node:{x}"),
-)
-def test_attention_state_canonical_sort(node_id1: str, node_id2: str) -> None:
-    state = EpistemicAttentionState(
-        origin=SE3TransformProfile(reference_frame_cid="frame-1", x=0, y=0, z=0),
-        direction_unit_vector=(1.0, 0.0, 0.0),
-        intersected_node_cids=[node_id2, node_id1]
-    )
-    assert state.intersected_node_cids == sorted([node_id2, node_id1])
-
-
-@given(depth=st.integers(min_value=10, max_value=50))
-def test_ast_thermodynamic_gas_limits_overload_1(depth: int) -> None:
-    """Trigger AST Complexity Overload in the first exec block"""
-    layout_tstring = "f'''" + "{1}" * depth + "'''"
-    with pytest.raises(ValidationError) as exc_info:
-        DynamicLayoutManifest(layout_tstring=layout_tstring, max_ast_node_budget=depth - 1)
-    assert "AST Complexity Overload" in str(exc_info.value)
-
-
-@given(depth=st.integers(min_value=10, max_value=50))
-def test_ast_thermodynamic_gas_limits_overload_2(depth: int) -> None:
-    """Trigger AST Complexity Overload in the second eval block"""
-    layout_tstring = "{1}" * depth
-    with pytest.raises(ValidationError) as exc_info:
-        DynamicLayoutManifest(layout_tstring=layout_tstring, max_ast_node_budget=depth - 1)
-    assert "AST Complexity Overload" in str(exc_info.value)

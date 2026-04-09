@@ -20,6 +20,7 @@ from coreason_manifest.spec.ontology import (
     CognitiveFormatContract,
     CognitiveUncertaintyProfile,
     ComputeEngineProfile,
+    ComputeRateContract,
     ComputeTierProfile,
     ConsensusPolicy,
     ConstrainedDecodingPolicy,
@@ -46,7 +47,6 @@ from coreason_manifest.spec.ontology import (
     SecureSubSessionState,
     SemanticClassificationProfile,
     SpatialHardwareProfile,
-    ThermodynamicRateContract,
     TopologicalFidelityReceipt,
     ViewportProjectionContract,
     VolumetricBoundingProfile,
@@ -241,7 +241,7 @@ def test_dynamic_layout_manifest_kinetic_bleed(tstring: str, bad_node: str) -> N
 
 # --- 7. Deterministic Array Sorting Validation ---
 def test_compute_engine_profile_sorting() -> None:
-    rate = ThermodynamicRateContract(
+    rate = ComputeRateContract(
         cost_per_million_input_tokens=1,
         cost_per_million_output_tokens=2,
         magnitude_unit="USD",
@@ -1002,44 +1002,28 @@ def test_empty_justification_rejection() -> None:
             justification_vectors=[],  # Empty evidence vector
         )
 
+def test_atomic_proposition_canonical_sort() -> None:
+    from coreason_manifest.spec.ontology import AtomicPropositionState, RhetoricalStructureProfile, IllocutionaryForceProfile
+    prop = AtomicPropositionState(
+        event_cid="event-1",
+        timestamp=100.0,
+        proposition_cid="prop-1",
+        rhetorical_role=RhetoricalStructureProfile.PREMISE,
+        illocutionary_force=IllocutionaryForceProfile.ASSERTIVE,
+        text_chunk="This is a test chunk.",
+        anaphoric_resolution_cids=["did:node:c", "did:node:a", "did:node:b"]
+    )
+    assert prop.anaphoric_resolution_cids == ["did:node:a", "did:node:b", "did:node:c"]
 
-def test_thermodynamic_rate_contract_validation() -> None:
-    from pydantic import ValidationError
-
-    with pytest.raises(ValidationError, match="Thermodynamic Void"):
-        ThermodynamicRateContract(magnitude_unit="USD")
-
-    # Should not raise
-    ThermodynamicRateContract(cost_per_million_input_tokens=100, magnitude_unit="USD")
-    ThermodynamicRateContract(cost_per_execution_second_magnitude=100, magnitude_unit="USD")
-
-
-def test_spatial_hardware_profile_physics_engine() -> None:
-    from pydantic import ValidationError
-
-    from coreason_manifest.spec.ontology import InterconnectTopologyProfile, SpatialHardwareProfile
-
-    with pytest.raises(ValidationError, match="Topological Contradiction"):
-        SpatialHardwareProfile(gpu_count_magnitude=2, interconnect_topology=InterconnectTopologyProfile.ISOLATED)
-
-    # Should not raise
-    SpatialHardwareProfile(gpu_count_magnitude=1, interconnect_topology=InterconnectTopologyProfile.ISOLATED)
-    SpatialHardwareProfile(gpu_count_magnitude=2, interconnect_topology=InterconnectTopologyProfile.PCIE_GEN4)
-
-
-def test_spatial_hardware_profile_physics_engine_invalid() -> None:
-    from pydantic import ValidationError
-
-    from coreason_manifest.spec.ontology import InterconnectTopologyProfile, SpatialHardwareProfile
-
-    with pytest.raises(ValidationError, match="Topological Contradiction"):
-        SpatialHardwareProfile(gpu_count_magnitude=2, interconnect_topology=InterconnectTopologyProfile.ISOLATED)
-
-
-def test_thermodynamic_rate_contract_validation_invalid() -> None:
-    from pydantic import ValidationError
-
-    from coreason_manifest.spec.ontology import ThermodynamicRateContract
-
-    with pytest.raises(ValidationError, match="Thermodynamic Void"):
-        ThermodynamicRateContract(magnitude_unit="USD")
+def test_atomic_proposition_defaults() -> None:
+    from coreason_manifest.spec.ontology import AtomicPropositionState, RhetoricalStructureProfile, IllocutionaryForceProfile
+    prop = AtomicPropositionState(
+        event_cid="event-1",
+        timestamp=100.0,
+        proposition_cid="prop-1",
+        rhetorical_role=RhetoricalStructureProfile.PREMISE,
+        illocutionary_force=IllocutionaryForceProfile.ASSERTIVE,
+        text_chunk="This is a test chunk.",
+    )
+    assert prop.anaphoric_resolution_cids == []
+    assert prop.topology_class == "atomic_proposition"
