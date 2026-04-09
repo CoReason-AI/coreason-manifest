@@ -242,6 +242,15 @@ class ManifoldAlignmentMetric(StrEnum):
     COSINE_SIMILARITY = "cosine_similarity"
 
 
+class TransformationMechanismProfile(StrEnum):
+    """AGENT INSTRUCTION: Dictates the exact algorithmic or logical mechanism utilized to forge a semantic connection or transmute a bimodal data state, allowing downstream agents to weigh epistemic reliability."""
+
+    LEXICAL_CROSSWALK = "lexical_crosswalk"
+    CONTEXTUAL_TRANSFORMER_INFERENCE = "contextual_transformer_inference"
+    RHETORICAL_EXTRACTION = "rhetorical_extraction"
+    ABDUCTIVE_INFERENCE = "abductive_inference"
+
+
 class RhetoricalStructureProfile(StrEnum):
     """AGENT INSTRUCTION: Maps unstructured text segments into the strict logical confines of Rhetorical Structure Theory (RST), authorizing the extraction engine to build directed dependency graphs."""
 
@@ -1612,25 +1621,25 @@ class RoutingFrontierPolicy(CoreasonBaseState):
                 try:
                     val = int(values["max_latency_ms"])
                     values["max_latency_ms"] = int(max(1, min(val, 86400000)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if "max_cost_magnitude_per_token" in values:
                 try:
                     val = int(values["max_cost_magnitude_per_token"])
                     values["max_cost_magnitude_per_token"] = int(max(1, min(val, 1000000000)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if "min_capability_score" in values:
                 try:
                     val_float = float(values["min_capability_score"])
                     values["min_capability_score"] = float(max(0.0, min(val_float, 1.0)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if values.get("max_carbon_intensity_gco2eq_kwh") is not None:
                 try:
                     val_float = float(values["max_carbon_intensity_gco2eq_kwh"])
                     values["max_carbon_intensity_gco2eq_kwh"] = float(max(0.0, min(val_float, 10000.0)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
         return values
 
@@ -7375,7 +7384,7 @@ class MarketContract(CoreasonBaseState):
                 try:
                     mc_int = int(mc)
                     sp_int = int(sp)
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             cmc = max(0, min(mc_int, 1000000000))
             if sp_int > cmc:
@@ -12472,9 +12481,44 @@ type AnyStateEvent = Annotated[
     | EpistemicFlowStateReceipt
     | CausalExplanationEvent
     | IntentClassificationReceipt
-    | SemanticRelationalRecordState,
+    | SemanticRelationalRecordState
+    | OntologicalReificationReceipt,
     Field(discriminator="topology_class", description="A discriminated union of state events."),
 ]
+
+
+class OntologicalReificationReceipt(CoreasonBaseState):
+    """AGENT INSTRUCTION: An append-only, cryptographically frozen coordinate verifying the integrity of a generalized bimodal semantic transformation. Commits the transformation mechanism to the Epistemic Ledger, physically separating explicit empirical facts from machine-inferred hypotheses to eliminate traceability collapse."""
+
+    topology_class: Literal["ontological_reification"] = Field(
+        default="ontological_reification", description="Discriminator for the reification receipt."
+    )
+    event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="Cryptographic Lineage Watermark binding this node to the Merkle-DAG."
+    )
+    prior_event_hash: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
+    ) = Field(default=None, description="The RFC 8785 Canonical hash of the immediate causal ancestor.")
+    timestamp: float = Field(description="The precise temporal coordinate of the event realization.")
+    receipt_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="Unique identifier for this specific reification event."
+    )
+    source_data_hash: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] = Field(
+        description="The undeniable SHA-256 hash of the pre-transmutation artifact, unstructured text chunk, or telemetry row."
+    )
+    target_namespace: Annotated[str, StringConstraints(max_length=2000)] = Field(
+        description="The standardized semantic ontology namespace the data was projected into."
+    )
+    algorithmic_mechanism: TransformationMechanismProfile = Field(
+        description="The deterministic or probabilistic engine used to execute the transmutation."
+    )
+    statistical_confidence_interval: float = Field(
+        ge=0.0, le=1.0, description="The mathematical proof of alignment fidelity."
+    )
+    is_latent_inference: bool = Field(
+        default=False,
+        description="CRITICAL: Explicit flag required if the edge or node was generated by an AI reasoning agent via transitive closure or abduction rather than extracted as an explicit empirical fact. Eliminates hallucinations of certainty.",
+    )
 
 
 class SemanticRelationalRecordState(CoreasonBaseState):
@@ -12850,3 +12894,4 @@ SemanticRelationalRecordState.model_rebuild()
 AtomicPropositionState.model_rebuild()
 ContextualSemanticResolutionIntent.model_rebuild()
 PostCoordinatedSemanticConcept.model_rebuild()
+OntologicalReificationReceipt.model_rebuild()
