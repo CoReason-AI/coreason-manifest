@@ -1003,6 +1003,8 @@ def test_empty_justification_rejection() -> None:
             upsampling_confidence_threshold=0.95,
             justification_vectors=[],  # Empty evidence vector
         )
+
+
 def test_thermodynamic_rate_contract_validation() -> None:
     from pydantic import ValidationError
 
@@ -1012,6 +1014,7 @@ def test_thermodynamic_rate_contract_validation() -> None:
     # Should not raise
     ThermodynamicRateContract(cost_per_million_input_tokens=100, magnitude_unit="USD")
     ThermodynamicRateContract(cost_per_execution_second_magnitude=100, magnitude_unit="USD")
+
 
 def test_spatial_hardware_profile_physics_engine() -> None:
     from pydantic import ValidationError
