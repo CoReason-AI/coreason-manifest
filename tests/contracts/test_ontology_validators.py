@@ -670,7 +670,6 @@ def test_mcpservermanifest_enforce_did() -> None:
 
 
 def test_insight_card_profile_xss_prevention() -> None:
-
     from coreason_manifest.spec.ontology import InsightCardProfile
 
     # Test that valid links work
@@ -943,7 +942,6 @@ def test_successful_epistemic_grounding() -> None:
 
 
 def test_epistemic_upsampling_instantiation() -> None:
-
     source = ContextualizedSourceState(
         target_string="test artifact",
         contextual_envelope=["context A", "context B"],
