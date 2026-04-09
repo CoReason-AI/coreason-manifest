@@ -936,6 +936,7 @@
           "council": "#/$defs/CouncilTopologyManifest",
           "dag": "#/$defs/DAGTopologyManifest",
           "digital_twin": "#/$defs/DigitalTwinTopologyManifest",
+          "discourse_tree": "#/$defs/DiscourseTreeManifest",
           "evaluator_optimizer": "#/$defs/EvaluatorOptimizerTopologyManifest",
           "evolutionary": "#/$defs/EvolutionaryTopologyManifest",
           "macro_adversarial": "#/$defs/AdversarialMarketTopologyManifest",
@@ -984,6 +985,9 @@
         },
         {
           "$ref": "#/$defs/NeurosymbolicVerificationTopologyManifest"
+        },
+        {
+          "$ref": "#/$defs/DiscourseTreeManifest"
         }
       ]
     },
@@ -5484,6 +5488,99 @@
       "title": "DimensionalProjectionContract",
       "type": "object"
     },
+    "DiscourseNodeState": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A structural vertex defining a distinct rhetorical block of text within a document, enabling hierarchical parsing and graph-based traversal of discourse.",
+      "properties": {
+        "node_cid": {
+          "$ref": "#/$defs/NodeCIDState",
+          "description": "The spatial coordinate of this specific discourse block."
+        },
+        "discourse_type": {
+          "description": "A strict universal automaton classifying the structural role of the text block.",
+          "enum": [
+            "preamble",
+            "methodology",
+            "argumentation",
+            "findings",
+            "conclusion",
+            "addendum"
+          ],
+          "title": "Discourse Type",
+          "type": "string"
+        },
+        "parent_node_cid": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NodeCIDState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A pointer to the subsuming structural block. None indicates this is a root node."
+        },
+        "contained_propositions": {
+          "description": "Explicit pointers linking this discourse block to the specific AtomicPropositionState nodes extracted from its text.",
+          "items": {
+            "$ref": "#/$defs/NodeCIDState"
+          },
+          "title": "Contained Propositions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "node_cid",
+        "discourse_type"
+      ],
+      "title": "DiscourseNodeState",
+      "type": "object"
+    },
+    "DiscourseTreeManifest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A verifiable Directed Acyclic Graph (DAG) mapping the hierarchical geometry of human discourse. Deprecates flat-sequence extraction to solve rhetorical flattening.",
+      "properties": {
+        "topology_class": {
+          "const": "discourse_tree",
+          "default": "discourse_tree",
+          "description": "Discriminator for a discourse tree topology.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "manifest_cid": {
+          "description": "Cryptographic identifier for this topology.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Manifest Cid",
+          "type": "string"
+        },
+        "root_node_cid": {
+          "$ref": "#/$defs/NodeCIDState",
+          "description": "The apex of the document tree."
+        },
+        "discourse_nodes": {
+          "additionalProperties": {
+            "$ref": "#/$defs/DiscourseNodeState"
+          },
+          "description": "The localized registry of all hierarchical blocks comprising the document.",
+          "maxProperties": 10000,
+          "propertyNames": {
+            "maxLength": 255
+          },
+          "title": "Discourse Nodes",
+          "type": "object"
+        }
+      },
+      "required": [
+        "manifest_cid",
+        "root_node_cid",
+        "discourse_nodes"
+      ],
+      "title": "DiscourseTreeManifest",
+      "type": "object"
+    },
     "DistributionProfile": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Bayesian Inference and Parametric Probability Density\nFunctions (PDFs) to mathematically define the stochastic shape of latent variables.\nAs a ...Profile suffix, this is a declarative, frozen snapshot of an evaluation geometry.\n\nCAUSAL AFFORDANCE: Projects a continuous statistical geometry (Gaussian, Uniform,\nor Beta) onto a stochastic process, dictating the generative bounds of entropy or\nreward distributions during reinforcement learning.\n\nEPISTEMIC BOUNDS: The Euclidean limits are physically clamped by mean and variance\n(le=1000000000.0). The @model_validator validate_confidence_interval mathematically\nenforces the invariant that the 95% confidence lower bound must be strictly less than\nthe upper bound.\n\nMCP ROUTING TRIGGERS: Probability Density Function, Bayesian Inference, Stochastic Geometry, Parametric Distribution, Variance Bounding",
@@ -9012,6 +9109,53 @@
       "title": "GlobalGovernancePolicy",
       "type": "object"
     },
+    "GlobalSemanticInvariantProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A macroscopic topological container that persists global contextual qualifiers (e.g., patient cohorts, operational environments, temporal scopes) across the Merkle-DAG, shielding downstream atomic propositions from context collapse.",
+      "properties": {
+        "invariant_cid": {
+          "description": "The cryptographic Merkle-DAG anchor for the invariant block.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Invariant Cid",
+          "type": "string"
+        },
+        "categorical_cohorts": {
+          "description": "Universal set-theoretic definitions of the entities or subjects the artifact governs.",
+          "items": {
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "title": "Categorical Cohorts",
+          "type": "array"
+        },
+        "operational_perimeters": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonPrimitiveState"
+          },
+          "description": "An untyped but volumetrically bounded dictionary defining study arms, jurisdictions, or specific environmental conditions.",
+          "propertyNames": {
+            "maxLength": 255
+          },
+          "title": "Operational Perimeters",
+          "type": "object"
+        },
+        "temporal_observation_horizons": {
+          "description": "The valid chronological windows encompassing the artifact.",
+          "items": {
+            "$ref": "#/$defs/TemporalBoundsProfile"
+          },
+          "title": "Temporal Observation Horizons",
+          "type": "array"
+        }
+      },
+      "required": [
+        "invariant_cid"
+      ],
+      "title": "GlobalSemanticInvariantProfile",
+      "type": "object"
+    },
     "GlobalSemanticProfile": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Acts as a structural invariant profile mapping the macroscopic dimensional properties of an artifact prior to deep inference.\n\nCAUSAL AFFORDANCE: Authorizes the orchestrator's routing engine to allocate specific functional experts and reserve physical VRAM budgets without needing to parse the full artifact into the active context window.\n\nEPISTEMIC BOUNDS: Memory allocation limits are mathematically bounded by token_density (ge=0, le=1000000000). The @model_validator deterministically sorts the detected_modalities enum array, guaranteeing zero-variance RFC 8785 canonical hashing across distributed nodes.\n\nMCP ROUTING TRIGGERS: Structural Indexing, VRAM Budgeting, Representation Engineering, Modality Detection, RFC 8785 Canonicalization",
@@ -11692,6 +11836,18 @@
           "minimum": 0.0,
           "title": "Temporal Ingest Timestamp",
           "type": "number"
+        },
+        "global_invariants": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GlobalSemanticInvariantProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The overarching protocol-level invariants shielding downstream propositions from context collapse."
         }
       },
       "required": [
