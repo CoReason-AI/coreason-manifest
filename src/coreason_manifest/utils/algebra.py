@@ -261,8 +261,9 @@ def calculate_latent_alignment(
     if len(arr1) != v1.dimensionality or len(arr2) != v2.dimensionality:
         raise ValueError("Byte length does not match declared dimensionality.")
 
-    mag1, mag2 = np.linalg.norm(arr1), np.linalg.norm(arr2)
-    similarity = 0.0 if mag1 == 0.0 or mag2 == 0.0 else float(np.dot(arr1, arr2) / (mag1 * mag2))
+    with np.errstate(all="ignore"):
+        mag1, mag2 = np.linalg.norm(arr1), np.linalg.norm(arr2)
+        similarity = 0.0 if mag1 == 0.0 or mag2 == 0.0 else float(np.dot(arr1, arr2) / (mag1 * mag2))
 
     if math.isnan(similarity):
         similarity = 0.0
