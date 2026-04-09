@@ -1136,6 +1136,14 @@
           },
           "title": "Anaphoric Resolution Cids",
           "type": "array"
+        },
+        "statistical_qualifiers": {
+          "description": "Explicit mathematical boundaries extracted from the text that empirically limit the certainty or scope of the proposition.",
+          "items": {
+            "$ref": "#/$defs/EmpiricalStatisticalQualifier"
+          },
+          "title": "Statistical Qualifiers",
+          "type": "array"
         }
       },
       "required": [
@@ -5270,6 +5278,48 @@
       "title": "DelegatedCapabilityManifest",
       "type": "object"
     },
+    "DempsterShaferBeliefVector": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Replaces monolithic probability floats with a composite tri-vector. Independently measures lexical matching, latent semantic distance, and topological graph integrity to allow the orchestrator to compute epistemic conflict and execute evidence discounting.",
+      "properties": {
+        "lexical_confidence": {
+          "description": "Represents exact syntactic schema or sub-string overlap.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Lexical Confidence",
+          "type": "number"
+        },
+        "semantic_distance": {
+          "description": "Represents continuous optimal transport alignment (e.g., Gromov-Wasserstein or Cosine distance) within the high-dimensional latent manifold.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Semantic Distance",
+          "type": "number"
+        },
+        "structural_graph_confidence": {
+          "description": "Represents the topological validity of the surrounding causal edges (e.g., evaluated via Random Walk with Restart).",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Structural Graph Confidence",
+          "type": "number"
+        },
+        "epistemic_conflict_mass": {
+          "description": "The calculated mathematical contradiction or dissonance between the three vectors. High conflict mass triggers evidence discounting.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Epistemic Conflict Mass",
+          "type": "number"
+        }
+      },
+      "required": [
+        "lexical_confidence",
+        "semantic_distance",
+        "structural_graph_confidence",
+        "epistemic_conflict_mass"
+      ],
+      "title": "DempsterShaferBeliefVector",
+      "type": "object"
+    },
     "DerivationModeProfile": {
       "description": "AGENT INSTRUCTION: Defines the rigid mathematical derivation mode for semantic extraction.\n\nCAUSAL AFFORDANCE: Instructs the extraction engine whether to perform a strict 1:1 topological mapping or an abductive expansion.\n\nEPISTEMIC BOUNDS: Constrained entirely to strict Pydantic string literals to prevent hallucinated derivation paths.\n\nMCP ROUTING TRIGGERS: Derivation Mode, Abductive Upsampling, Direct Translation, Epistemic Extraction",
       "enum": [
@@ -6054,6 +6104,74 @@
         "temporal_duration_ms"
       ],
       "title": "EmbodiedSensoryVectorProfile",
+      "type": "object"
+    },
+    "EmpiricalStatisticalQualifier": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: An explicit mathematical boundary extracted from text that limits the certainty or scope of a proposition. Physically prevents agents from performing epistemic smoothing.",
+      "properties": {
+        "qualifier_type": {
+          "description": "A universal automaton classifying the type of statistical boundary.",
+          "enum": [
+            "probability_value",
+            "sample_size",
+            "variance_metric",
+            "effect_size",
+            "confidence_interval"
+          ],
+          "title": "Qualifier Type",
+          "type": "string"
+        },
+        "algebraic_operator": {
+          "description": "The mathematical operator applying to the value.",
+          "enum": [
+            "eq",
+            "lt",
+            "le",
+            "gt",
+            "ge"
+          ],
+          "title": "Algebraic Operator",
+          "type": "string"
+        },
+        "value": {
+          "description": "The primary scalar boundary for the qualifier.",
+          "title": "Value",
+          "type": "number"
+        },
+        "lower_bound": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Used exclusively for geometric/statistical intervals.",
+          "title": "Lower Bound"
+        },
+        "upper_bound": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Used exclusively for geometric/statistical intervals.",
+          "title": "Upper Bound"
+        }
+      },
+      "required": [
+        "qualifier_type",
+        "algebraic_operator",
+        "value"
+      ],
+      "title": "EmpiricalStatisticalQualifier",
       "type": "object"
     },
     "EnsembleTopologyProfile": {
@@ -12796,12 +12914,9 @@
           "$ref": "#/$defs/TransformationMechanismProfile",
           "description": "The deterministic or probabilistic engine used to execute the transmutation."
         },
-        "statistical_confidence_interval": {
-          "description": "The mathematical proof of alignment fidelity.",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "Statistical Confidence Interval",
-          "type": "number"
+        "belief_vector": {
+          "$ref": "#/$defs/DempsterShaferBeliefVector",
+          "description": "The composite Dempster-Shafer tri-vector capturing independent confidence dimensions and calculated epistemic conflict."
         },
         "is_latent_inference": {
           "default": false,
@@ -12816,7 +12931,7 @@
         "source_data_hash",
         "target_namespace",
         "algorithmic_mechanism",
-        "statistical_confidence_interval"
+        "belief_vector"
       ],
       "title": "OntologicalReificationReceipt",
       "type": "object"
