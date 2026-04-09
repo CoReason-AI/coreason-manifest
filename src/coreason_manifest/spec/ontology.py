@@ -12406,6 +12406,7 @@ class PostCoordinatedSemanticConcept(CoreasonBaseState):
     )
 
     @field_validator("contextual_modifiers", mode="before")
+    @classmethod
     def enforce_payload_topology(cls, v: Any) -> Any:
         return _validate_payload_bounds(v)
 
