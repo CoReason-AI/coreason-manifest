@@ -59,26 +59,26 @@ def project_manifest_to_mermaid(manifest: DynamicRoutingManifest) -> str:
         "    classDef bypassed fill:#f5f5f5,stroke:#9e9e9e,stroke-width:2px,stroke-dasharray: 5 5;",
     ]
 
-    safe_root_id = manifest.manifest_id.replace(":", "_").replace("-", "_").replace(".", "_")
-    lines.append(f"    {safe_root_id}[{manifest.manifest_id}]")
+    safe_root_cid = manifest.manifest_cid.replace(":", "_").replace("-", "_").replace(".", "_")
+    lines.append(f"    {safe_root_cid}[{manifest.manifest_cid}]")
 
     for modality in manifest.artifact_profile.detected_modalities:
         lines.append(f"    subgraph {modality}")
 
         if modality in manifest.active_subgraphs:
             for node_cid in manifest.active_subgraphs[modality]:
-                safe_id = node_cid.replace(":", "_").replace("-", "_").replace(".", "_")
-                lines.append(f"        {safe_id}[{node_cid}]:::active")
-                lines.append(f"        {safe_root_id} --> {safe_id}")
+                safe_cid = node_cid.replace(":", "_").replace("-", "_").replace(".", "_")
+                lines.append(f"        {safe_cid}[{node_cid}]:::active")
+                lines.append(f"        {safe_root_cid} --> {safe_cid}")
 
         lines.append("    end")
 
     if manifest.bypassed_steps:
         lines.append("    subgraph Quarantined_Bypass")
         for bypass in manifest.bypassed_steps:
-            safe_id = bypass.bypassed_node_id.replace(":", "_").replace("-", "_").replace(".", "_")
-            lines.append(f"        {safe_id}[{bypass.bypassed_node_id}]:::bypassed")
-            lines.append(f"        {safe_root_id} -. {bypass.justification} .-> {safe_id}")
+            safe_cid = bypass.bypassed_node_cid.replace(":", "_").replace("-", "_").replace(".", "_")
+            lines.append(f"        {safe_cid}[{bypass.bypassed_node_cid}]:::bypassed")
+            lines.append(f"        {safe_root_cid} -. {bypass.justification} .-> {safe_cid}")
         lines.append("    end")
 
     return "\n".join(lines)
@@ -200,7 +200,7 @@ def align_semantic_manifolds(
     task_cid: str,
     source_modalities: list[str],
     target_modalities: list[Literal["text", "raster_image", "vector_graphics", "tabular_grid", "n_dimensional_tensor"]],
-    artifact_event_id: str,
+    artifact_event_cid: str,
 ) -> EpistemicTransmutationTask | None:
     """
     A pure algebraic functor that calculates the epistemic gap between two nodes.
@@ -219,7 +219,10 @@ def align_semantic_manifolds(
         minimum_fidelity_threshold=0.5,
     )
     return EpistemicTransmutationTask(
-        task_cid=task_cid, artifact_event_id=artifact_event_id, target_modalities=target_modalities, compression_sla=sla
+        task_cid=task_cid,
+        artifact_event_cid=artifact_event_cid,
+        target_modalities=target_modalities,
+        compression_sla=sla,
     )
 
 

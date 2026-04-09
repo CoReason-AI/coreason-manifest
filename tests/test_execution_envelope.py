@@ -90,7 +90,7 @@ def test_delta_state() -> None:
 def test_action_space_manifest_rejects_custom_state() -> None:
     with pytest.raises(ValidationError) as excinfo:
         CognitiveActionSpaceManifest(
-            action_space_cid="test_id",
+            action_space_cid="test_cid",
             entry_point_cid="test_tool",
             transition_matrix={"test_tool": []},
             capabilities={

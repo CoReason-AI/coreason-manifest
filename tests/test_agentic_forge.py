@@ -19,7 +19,7 @@ from coreason_manifest.spec.ontology import (
 
 
 def test_teleological_isometry_threshold() -> None:
-    source_intent_id = "intent-id-12345"
+    source_intent_cid = "intent-id-12345"
     target_intent_vector = VectorEmbeddingState(
         vector_base64="abc", dimensionality=10, foundation_matrix_name="test-model"
     )
@@ -28,7 +28,7 @@ def test_teleological_isometry_threshold() -> None:
     )
 
     receipt_passed = TeleologicalIsometryReceipt(
-        source_intent_id=source_intent_id,
+        source_intent_cid=source_intent_cid,
         target_intent_vector=target_intent_vector,
         forged_output_vector=forged_output_vector,
         measured_cosine_similarity=0.90,
@@ -37,7 +37,7 @@ def test_teleological_isometry_threshold() -> None:
     assert receipt_passed.alignment_threshold_passed is True
 
     receipt_failed = TeleologicalIsometryReceipt(
-        source_intent_id=source_intent_id,
+        source_intent_cid=source_intent_cid,
         target_intent_vector=target_intent_vector,
         forged_output_vector=forged_output_vector,
         measured_cosine_similarity=0.80,
@@ -52,14 +52,13 @@ def test_hoare_logic_proof_receipt_canonical_sorting() -> None:
     contract_c = LiquidTypeContract(target_property="c_prop", mathematical_predicate="x == 5")
 
     receipt = HoareLogicProofReceipt(
-        capability_id="cap-id-123",
+        capability_cid="cap-id-123",
         preconditions=[contract_b, contract_c, contract_a],
         postconditions=[contract_c, contract_a, contract_b],
         proof_system="lean4",
         verified_theorem_hash="a" * 64,
     )
 
-    # They should be sorted alphabetically by target_property
     assert receipt.preconditions[0].target_property == "a_prop"
     assert receipt.preconditions[1].target_property == "b_prop"
     assert receipt.preconditions[2].target_property == "c_prop"
@@ -75,8 +74,6 @@ def test_capability_forge_topology_compile() -> None:
         min_isometry_score=0.9,
         required_structural_types=["test"],
     )
-    # The CapabilityForgeTopologyManifest extends BaseTopologyManifest, which requires 'nodes' by default.
-    # To pass validation without supplying raw nodes on creation, we supply an empty dict
     manifest = CapabilityForgeTopologyManifest(
         target_epistemic_deficit=intent,
         generator_node_cid="did:coreason:agent-1",
@@ -87,15 +84,12 @@ def test_capability_forge_topology_compile() -> None:
 
     dag = manifest.compile_to_base_topology()
 
-    # DAG needs to have exactly 3 nodes
     assert len(dag.nodes) == 3
     assert "did:coreason:agent-1" in dag.nodes
     assert "did:coreason:system-1" in dag.nodes
     assert "did:coreason:system-2" in dag.nodes
 
-    # Edges should bridge chronologically
     assert len(dag.edges) == 2
 
-    # We can check specific edges
     assert ("did:coreason:agent-1", "did:coreason:system-1") in dag.edges
     assert ("did:coreason:system-1", "did:coreason:system-2") in dag.edges
