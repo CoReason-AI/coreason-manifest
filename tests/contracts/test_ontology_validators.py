@@ -364,8 +364,8 @@ def test_active_inference_contract_bounds_fuzzing(eig: float) -> None:
         with pytest.raises(ValidationError, match=r"Input should be"):
             ActiveInferenceContract(
                 task_cid="task_1",
-                target_hypothesis_id="hyp_1",
-                target_condition_id="cond_1",
+                target_hypothesis_cid="hyp_1",
+                target_condition_cid="cond_1",
                 selected_tool_name="tool_1",
                 expected_information_gain=eig,
                 execution_cost_budget_magnitude=100,
@@ -373,8 +373,8 @@ def test_active_inference_contract_bounds_fuzzing(eig: float) -> None:
     else:
         contract = ActiveInferenceContract(
             task_cid="task_1",
-            target_hypothesis_id="hyp_1",
-            target_condition_id="cond_1",
+            target_hypothesis_cid="hyp_1",
+            target_condition_cid="cond_1",
             selected_tool_name="tool_1",
             expected_information_gain=eig,
             execution_cost_budget_magnitude=100,
@@ -453,7 +453,7 @@ def test_browser_dom_state_safety_invalid_fuzzing(bogon: str) -> None:
 
 def test_defeasible_cascade_event_sorting() -> None:
     event = DefeasibleCascadeEvent(
-        cascade_id="c1",
+        cascade_cid="c1",
         root_falsified_event_cid="e1",
         propagated_decay_factor=0.5,
         quarantined_event_cids=["z", "a", "x"],
@@ -488,7 +488,7 @@ def test_ephemeral_namespace_partition_state_sorting() -> None:
     hash_b = "b" * 64
     hash_c = "c" * 64
     state = EphemeralNamespacePartitionState(
-        partition_id="part1",
+        partition_cid="part1",
         execution_runtime="wasm32-wasi",
         authorized_bytecode_hashes=[hash_c, hash_a, hash_b],
         max_ttl_seconds=3600,
@@ -500,7 +500,7 @@ def test_ephemeral_namespace_partition_state_sorting() -> None:
 def test_ephemeral_namespace_partition_state_invalid_hash() -> None:
     with pytest.raises(ValidationError, match=r"Invalid SHA-256 hash in whitelist: invalid_hash"):
         EphemeralNamespacePartitionState(
-            partition_id="part1",
+            partition_cid="part1",
             execution_runtime="wasm32-wasi",
             authorized_bytecode_hashes=["invalid_hash"],
             max_ttl_seconds=3600,
@@ -512,7 +512,7 @@ def test_bilateral_sla_sorting() -> None:
     from coreason_manifest.spec.ontology import FederatedBilateralSLA, SemanticClassificationProfile
 
     sla = FederatedBilateralSLA(
-        receiving_tenant_id="tenant-a",
+        receiving_tenant_cid="tenant-a",
         max_permitted_classification=SemanticClassificationProfile.PUBLIC,
         liability_limit_magnitude=1000,
         permitted_geographic_regions=["us-west", "eu-central", "ap-south"],
@@ -712,7 +712,7 @@ def test_epistemic_sop_manifest_ghost_nodes() -> None:
 
     with pytest.raises(ValidationError, match=r"Ghost node referenced in chronological_flow_edges source"):
         EpistemicSOPManifest(
-            sop_id="sop_1",
+            sop_cid="sop_1",
             target_persona="persona_1",
             cognitive_steps={"step_1": cog_state},
             structural_grammar_hashes={},
@@ -722,7 +722,7 @@ def test_epistemic_sop_manifest_ghost_nodes() -> None:
 
     with pytest.raises(ValidationError, match=r"Ghost node referenced in chronological_flow_edges target"):
         EpistemicSOPManifest(
-            sop_id="sop_1",
+            sop_cid="sop_1",
             target_persona="persona_1",
             cognitive_steps={"step_1": cog_state},
             structural_grammar_hashes={},
@@ -732,7 +732,7 @@ def test_epistemic_sop_manifest_ghost_nodes() -> None:
 
     with pytest.raises(ValidationError, match=r"Ghost node referenced in structural_grammar_hashes"):
         EpistemicSOPManifest(
-            sop_id="sop_1",
+            sop_cid="sop_1",
             target_persona="persona_1",
             cognitive_steps={"step_1": cog_state},
             structural_grammar_hashes={"ghost_step": "abcdef"},
@@ -790,7 +790,7 @@ def test_causal_explanation_event_sorts_attributions() -> None:
     event = CausalExplanationEvent(
         event_cid="test_event_1",
         timestamp=123456.0,
-        target_outcome_event_id="test_outcome_1",
+        target_outcome_event_cid="test_outcome_1",
         collective_intelligence=ci_profile,
         agent_attributions=[receipt_b, receipt_a],
     )
@@ -1003,3 +1003,1999 @@ def test_empty_justification_rejection() -> None:
             upsampling_confidence_threshold=0.95,
             justification_vectors=[],  # Empty evidence vector
         )
+
+def test_defeasible_cascade_concurrent_branch_ids_sort():
+    from coreason_manifest.spec.ontology import DefeasibleCascadeEvent
+    event = DefeasibleCascadeEvent(
+        cascade_cid="test_cid",
+        root_falsified_event_cid="test_root",
+        propagated_decay_factor=1.0,
+        quarantined_event_cids=["b", "a"],
+        concurrent_branch_cids=["z", "y"]
+    )
+    assert event.concurrent_branch_cids == ["y", "z"]
+
+def test_epistemic_quarantine_protected_event_ids_sort():
+    from coreason_manifest.spec.ontology import EpistemicQuarantineSnapshot
+    snap = EpistemicQuarantineSnapshot(
+        quarantine_cid="test_cid",
+        quarantined_event_cids=["d", "c"],
+        protected_event_cids=["f", "e"]
+    )
+    assert snap.protected_event_cids == ["e", "f"]
+
+def test_generative_taxonomy_manifest_root_node_validation():
+    from coreason_manifest.spec.ontology import GenerativeTaxonomyManifest
+    from pydantic import ValidationError
+    import pytest
+    with pytest.raises(ValidationError, match="Topological Fracture"):
+        GenerativeTaxonomyManifest(
+            taxonomy_cid="tax1",
+            root_node_cid="missing_root",
+            nodes={"other_node": {}}
+        )
+
+def test_cognitive_action_space_manifest_transition_matrix_validation():
+    from coreason_manifest.spec.ontology import CognitiveActionSpaceManifest, TransitionEdgeProfile
+    from pydantic import ValidationError
+    import pytest
+
+    with pytest.raises(ValidationError, match="Source node 'missing_source' in transition_matrix not found"):
+        CognitiveActionSpaceManifest(
+            action_space_cid="space_1",
+            entry_point_cid="tool_1",
+            capabilities={"tool_1": {}},
+            transition_matrix={"missing_source": []}
+        )
+
+def test_ontological_surface_projection_manifest_uniqueness():
+    from coreason_manifest.spec.ontology import OntologicalSurfaceProjectionManifest, CognitiveActionSpaceManifest
+    from pydantic import ValidationError
+    import pytest
+
+    space1 = CognitiveActionSpaceManifest(
+        action_space_cid="dup_cid",
+        entry_point_cid="tool_1",
+        capabilities={"tool_1": {}},
+        transition_matrix={}
+    )
+    space2 = CognitiveActionSpaceManifest(
+        action_space_cid="dup_cid",
+        entry_point_cid="tool_2",
+        capabilities={"tool_2": {}},
+        transition_matrix={}
+    )
+
+    with pytest.raises(ValidationError, match="strictly unique action_space_cids"):
+        OntologicalSurfaceProjectionManifest(
+            projection_cid="proj_1",
+            action_spaces=[space1, space2],
+            supported_personas=[],
+            available_procedural_manifolds=[]
+        )
+
+def test_chaos_experiment_task_sort():
+    from coreason_manifest.spec.ontology import ChaosExperimentTask, ComponentFaultEvent, ExogenousShockEvent
+
+    shock1 = ExogenousShockEvent(
+        shock_cid="z_shock",
+        shock_type="market_crash",
+        magnitude=1.0,
+        target_parameter="param1"
+    )
+    shock2 = ExogenousShockEvent(
+        shock_cid="a_shock",
+        shock_type="market_crash",
+        magnitude=1.0,
+        target_parameter="param1"
+    )
+
+    task = ChaosExperimentTask(
+        task_cid="task1",
+        target_topology_cid="topo1",
+        max_duration_ms=100,
+        faults=[],
+        shocks=[shock1, shock2]
+    )
+    assert task.shocks[0].shock_cid == "a_shock"
+    assert task.shocks[1].shock_cid == "z_shock"
+
+
+def test_defeasible_cascade_concurrent_branch_ids_sort():
+    from coreason_manifest.spec.ontology import DefeasibleCascadeEvent
+    event = DefeasibleCascadeEvent(
+        cascade_cid="test_cid",
+        root_falsified_event_cid="test_root",
+        propagated_decay_factor=1.0,
+        quarantined_event_cids=["b", "a"],
+        concurrent_branch_cids=["z", "y"]
+    )
+    assert event.concurrent_branch_cids == ["y", "z"]
+
+def test_epistemic_quarantine_protected_event_ids_sort():
+    from coreason_manifest.spec.ontology import EpistemicQuarantineSnapshot
+    snap = EpistemicQuarantineSnapshot(
+        quarantine_cid="test_cid",
+        system_prompt="a",
+        active_context="b",
+        quarantined_event_cids=["d", "c"],
+        protected_event_cids=["f", "e"]
+    )
+    assert snap.protected_event_cids == ["e", "f"]
+
+def test_generative_taxonomy_manifest_root_node_validation():
+    from coreason_manifest.spec.ontology import GenerativeTaxonomyManifest, TaxonomicNodeState
+    from pydantic import ValidationError
+    import pytest
+    with pytest.raises(ValidationError, match="Topological Fracture"):
+        GenerativeTaxonomyManifest(
+            manifest_cid="tax1",
+            root_node_cid="missing_root",
+            nodes={"other_node": TaxonomicNodeState(node_cid="other_node", semantic_label="lbl")}
+        )
+
+def test_cognitive_action_space_manifest_transition_matrix_validation():
+    from coreason_manifest.spec.ontology import CognitiveActionSpaceManifest, TransitionEdgeProfile, SpatialToolManifest
+    from pydantic import ValidationError
+    import pytest
+
+    with pytest.raises(ValidationError, match="Source node 'missing_source' in transition_matrix not found"):
+        CognitiveActionSpaceManifest(
+            action_space_cid="space_1",
+            entry_point_cid="tool_1",
+            capabilities={"tool_1": SpatialToolManifest(tool_cid="tool_1", tool_name="a", description="b", schema_hash="c", bounding_volume={"x":0,"y":0,"z":0,"width":1,"height":1,"depth":1})},
+            transition_matrix={"missing_source": []}
+        )
+
+def test_ontological_surface_projection_manifest_uniqueness():
+    from coreason_manifest.spec.ontology import OntologicalSurfaceProjectionManifest, CognitiveActionSpaceManifest, SpatialToolManifest
+    from pydantic import ValidationError
+    import pytest
+
+    space1 = CognitiveActionSpaceManifest(
+        action_space_cid="dup_cid",
+        entry_point_cid="tool_1",
+        capabilities={"tool_1": SpatialToolManifest(tool_cid="tool_1", tool_name="a", description="b", schema_hash="c", bounding_volume={"x":0,"y":0,"z":0,"width":1,"height":1,"depth":1})},
+        transition_matrix={}
+    )
+    space2 = CognitiveActionSpaceManifest(
+        action_space_cid="dup_cid",
+        entry_point_cid="tool_2",
+        capabilities={"tool_2": SpatialToolManifest(tool_cid="tool_2", tool_name="a", description="b", schema_hash="c", bounding_volume={"x":0,"y":0,"z":0,"width":1,"height":1,"depth":1})},
+        transition_matrix={}
+    )
+
+    with pytest.raises(ValidationError, match="strictly unique action_space_cids"):
+        OntologicalSurfaceProjectionManifest(
+            projection_cid="proj_1",
+            action_spaces=[space1, space2],
+            supported_personas=[],
+            available_procedural_manifolds=[]
+        )
+
+def test_chaos_experiment_task_sort():
+    from coreason_manifest.spec.ontology import ChaosExperimentTask, FaultInjectionState, ExogenousShockEvent
+
+    shock1 = ExogenousShockEvent(
+        shock_cid="z_shock",
+        shock_type="market_crash",
+        magnitude=1.0,
+        target_parameter="param1"
+    )
+    shock2 = ExogenousShockEvent(
+        shock_cid="a_shock",
+        shock_type="market_crash",
+        magnitude=1.0,
+        target_parameter="param1"
+    )
+
+    task = ChaosExperimentTask(
+        task_cid="task1",
+        target_topology_cid="topo1",
+        max_duration_ms=100,
+        faults=[],
+        shocks=[shock1, shock2]
+    )
+    assert task.shocks[0].shock_cid == "a_shock"
+    assert task.shocks[1].shock_cid == "z_shock"
+
+
+def test_defeasible_cascade_concurrent_branch_ids_sort():
+    from coreason_manifest.spec.ontology import DefeasibleCascadeEvent
+    event = DefeasibleCascadeEvent(
+        cascade_cid="test_cid",
+        root_falsified_event_cid="test_root",
+        propagated_decay_factor=1.0,
+        quarantined_event_cids=["b", "a"],
+        concurrent_branch_cids=["z", "y"]
+    )
+    assert event.concurrent_branch_cids == ["y", "z"]
+
+def test_epistemic_quarantine_protected_event_ids_sort():
+    from coreason_manifest.spec.ontology import EpistemicQuarantineSnapshot
+    snap = EpistemicQuarantineSnapshot(
+        quarantine_cid="test_cid",
+        system_prompt="a",
+        active_context={"b": "c"},
+        quarantined_event_cids=["d", "c"],
+        protected_event_cids=["f", "e"]
+    )
+    assert snap.protected_event_cids == ["e", "f"]
+
+def test_generative_taxonomy_manifest_root_node_validation():
+    from coreason_manifest.spec.ontology import GenerativeTaxonomyManifest, TaxonomicNodeState
+    from pydantic import ValidationError
+    import pytest
+    with pytest.raises(ValidationError, match="Topological Fracture"):
+        GenerativeTaxonomyManifest(
+            manifest_cid="tax1",
+            root_node_cid="missing_root",
+            nodes={"other_node": TaxonomicNodeState(node_cid="other_node", semantic_label="lbl")}
+        )
+
+def test_cognitive_action_space_manifest_transition_matrix_validation():
+    from coreason_manifest.spec.ontology import CognitiveActionSpaceManifest, TransitionEdgeProfile, SpatialToolManifest
+    from pydantic import ValidationError
+    import pytest
+
+    with pytest.raises(ValidationError, match="Source node 'missing_source' in transition_matrix not found"):
+        CognitiveActionSpaceManifest(
+            action_space_cid="space_1",
+            entry_point_cid="tool_1",
+            capabilities={"tool_1": SpatialToolManifest(tool_name="a", description="b", input_schema={}, side_effects=[], permissions=[])},
+            transition_matrix={"missing_source": []}
+        )
+
+def test_ontological_surface_projection_manifest_uniqueness():
+    from coreason_manifest.spec.ontology import OntologicalSurfaceProjectionManifest, CognitiveActionSpaceManifest, SpatialToolManifest
+    from pydantic import ValidationError
+    import pytest
+
+    space1 = CognitiveActionSpaceManifest(
+        action_space_cid="dup_cid",
+        entry_point_cid="tool_1",
+        capabilities={"tool_1": SpatialToolManifest(tool_name="a", description="b", input_schema={}, side_effects=[], permissions=[])},
+        transition_matrix={}
+    )
+    space2 = CognitiveActionSpaceManifest(
+        action_space_cid="dup_cid",
+        entry_point_cid="tool_2",
+        capabilities={"tool_2": SpatialToolManifest(tool_name="a", description="b", input_schema={}, side_effects=[], permissions=[])},
+        transition_matrix={}
+    )
+
+    with pytest.raises(ValidationError, match="strictly unique action_space_cids"):
+        OntologicalSurfaceProjectionManifest(
+            projection_cid="proj_1",
+            action_spaces=[space1, space2],
+            supported_personas=[],
+            available_procedural_manifolds=[]
+        )
+
+def test_chaos_experiment_task_sort():
+    from coreason_manifest.spec.ontology import ChaosExperimentTask, FaultInjectionProfile, ExogenousShockEvent
+
+    shock1 = ExogenousShockEvent(
+        shock_cid="z_shock",
+        shock_type="market_crash",
+        magnitude=1.0,
+        target_parameter="param1"
+    )
+    shock2 = ExogenousShockEvent(
+        shock_cid="a_shock",
+        shock_type="market_crash",
+        magnitude=1.0,
+        target_parameter="param1"
+    )
+
+    task = ChaosExperimentTask(
+        task_cid="task1",
+        target_topology_cid="topo1",
+        max_duration_ms=100,
+        faults=[],
+        shocks=[shock1, shock2]
+    )
+    assert task.shocks[0].shock_cid == "a_shock"
+    assert task.shocks[1].shock_cid == "z_shock"
+
+
+def test_defeasible_cascade_concurrent_branch_ids_sort():
+    from coreason_manifest.spec.ontology import DefeasibleCascadeEvent
+    event = DefeasibleCascadeEvent(
+        cascade_cid="test_cid",
+        root_falsified_event_cid="test_root",
+        propagated_decay_factor=1.0,
+        quarantined_event_cids=["b", "a"]
+    )
+    event.concurrent_branch_cids = ["z", "y"]
+    event._enforce_canonical_sort()
+    assert event.concurrent_branch_cids == ["y", "z"]
+
+def test_epistemic_quarantine_protected_event_ids_sort():
+    from coreason_manifest.spec.ontology import EpistemicQuarantineSnapshot
+    snap = EpistemicQuarantineSnapshot(
+        quarantine_cid="test_cid",
+        system_prompt="a",
+        active_context="b",
+        quarantined_event_cids=["d", "c"]
+    )
+    snap.protected_event_cids = ["f", "e"]
+    snap._enforce_canonical_sort()
+    assert snap.protected_event_cids == ["e", "f"]
+
+def test_generative_taxonomy_manifest_root_node_validation():
+    from coreason_manifest.spec.ontology import GenerativeTaxonomyManifest, TaxonomicNodeState
+    from pydantic import ValidationError
+    import pytest
+    with pytest.raises(ValueError, match="Topological Fracture"):
+        tax = GenerativeTaxonomyManifest(
+            manifest_cid="tax1",
+            nodes={"other_node": TaxonomicNodeState(node_cid="other_node", semantic_label="lbl")},
+            root_node_cid="other_node"
+        )
+        tax.root_node_cid = "missing_root"
+        tax._enforce_tree_integrity()
+
+def test_cognitive_action_space_manifest_transition_matrix_validation():
+    from coreason_manifest.spec.ontology import CognitiveActionSpaceManifest, TransitionEdgeProfile, SpatialToolManifest, SideEffectProfile, PermissionBoundaryPolicy
+    from pydantic import ValidationError
+    import pytest
+
+    with pytest.raises(ValueError, match="Source node 'missing_source' in transition_matrix not found"):
+        cap = CognitiveActionSpaceManifest(
+            action_space_cid="space_1",
+            entry_point_cid="tool_1",
+            capabilities={"tool_1": SpatialToolManifest(tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile(modifies_external_state=False, requires_user_confirmation=False), permissions=PermissionBoundaryPolicy(allowed_hosts=[], allowed_file_paths=[], max_execution_time_ms=0))},
+            transition_matrix={}
+        )
+        cap.transition_matrix = {"missing_source": []}
+        cap._enforce_transition_matrix_integrity()
+
+def test_ontological_surface_projection_manifest_uniqueness():
+    from coreason_manifest.spec.ontology import OntologicalSurfaceProjectionManifest, CognitiveActionSpaceManifest, SpatialToolManifest, SideEffectProfile, PermissionBoundaryPolicy
+    from pydantic import ValidationError
+    import pytest
+
+    space1 = CognitiveActionSpaceManifest(
+        action_space_cid="dup_cid",
+        entry_point_cid="tool_1",
+        capabilities={"tool_1": SpatialToolManifest(tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile(modifies_external_state=False, requires_user_confirmation=False), permissions=PermissionBoundaryPolicy(allowed_hosts=[], allowed_file_paths=[], max_execution_time_ms=0))},
+        transition_matrix={}
+    )
+    space2 = CognitiveActionSpaceManifest(
+        action_space_cid="dup_cid",
+        entry_point_cid="tool_2",
+        capabilities={"tool_2": SpatialToolManifest(tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile(modifies_external_state=False, requires_user_confirmation=False), permissions=PermissionBoundaryPolicy(allowed_hosts=[], allowed_file_paths=[], max_execution_time_ms=0))},
+        transition_matrix={}
+    )
+
+    with pytest.raises(ValueError, match="strictly unique action_space_cids"):
+        proj = OntologicalSurfaceProjectionManifest(
+            projection_cid="proj_1",
+            action_spaces=[],
+            supported_personas=[],
+            available_procedural_manifolds=[]
+        )
+        proj.action_spaces = [space1, space2]
+        proj._enforce_structural_uniqueness()
+
+def test_chaos_experiment_task_sort():
+    from coreason_manifest.spec.ontology import ChaosExperimentTask, FaultInjectionProfile, ExogenousShockProfile
+
+    shock1 = ExogenousShockProfile(
+        shock_cid="z_shock",
+        shock_type="market_crash",
+        magnitude=1.0,
+        target_parameter="param1"
+    )
+    shock2 = ExogenousShockProfile(
+        shock_cid="a_shock",
+        shock_type="market_crash",
+        magnitude=1.0,
+        target_parameter="param1"
+    )
+
+    task = ChaosExperimentTask(
+        task_cid="task1",
+        target_topology_cid="topo1",
+        max_duration_ms=100,
+        faults=[],
+        shocks=[shock1, shock2]
+    )
+    assert task.shocks[0].shock_cid == "a_shock"
+    assert task.shocks[1].shock_cid == "z_shock"
+
+
+def test_defeasible_cascade_concurrent_branch_ids_sort():
+    from coreason_manifest.spec.ontology import DefeasibleCascadeEvent
+    event = DefeasibleCascadeEvent(
+        cascade_cid="test_cid",
+        root_falsified_event_cid="test_root",
+        propagated_decay_factor=1.0,
+        quarantined_event_cids=["b", "a"],
+        concurrent_branch_cids=["z", "y"]
+    )
+    assert event.concurrent_branch_cids == ["y", "z"]
+
+def test_epistemic_quarantine_protected_event_ids_sort():
+    from coreason_manifest.spec.ontology import EpistemicQuarantineSnapshot
+    snap = EpistemicQuarantineSnapshot(
+        quarantine_cid="test_cid",
+        system_prompt="a",
+        active_context="b",
+        quarantined_event_cids=["d", "c"],
+        protected_event_cids=["f", "e"]
+    )
+    assert snap.protected_event_cids == ["e", "f"]
+
+def test_generative_taxonomy_manifest_root_node_validation():
+    from coreason_manifest.spec.ontology import GenerativeTaxonomyManifest, TaxonomicNodeState
+    from pydantic import ValidationError
+    import pytest
+    with pytest.raises(ValueError, match="Topological Fracture"):
+        tax = GenerativeTaxonomyManifest(
+            manifest_cid="tax1",
+            nodes={"other_node": TaxonomicNodeState(node_cid="other_node", semantic_label="lbl")},
+            root_node_cid="missing_root"
+        )
+
+def test_cognitive_action_space_manifest_transition_matrix_validation():
+    from coreason_manifest.spec.ontology import CognitiveActionSpaceManifest, TransitionEdgeProfile, SpatialToolManifest, SideEffectProfile, PermissionBoundaryPolicy
+    from pydantic import ValidationError
+    import pytest
+
+    with pytest.raises(ValueError, match="Source node 'missing_source' in transition_matrix not found"):
+        cap = CognitiveActionSpaceManifest(
+            action_space_cid="space_1",
+            entry_point_cid="tool_1",
+            capabilities={"tool_1": SpatialToolManifest(tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy(allowed_hosts=[], allowed_file_paths=[], max_execution_time_ms=0))},
+            transition_matrix={"missing_source": []}
+        )
+
+def test_ontological_surface_projection_manifest_uniqueness():
+    from coreason_manifest.spec.ontology import OntologicalSurfaceProjectionManifest, CognitiveActionSpaceManifest, SpatialToolManifest, SideEffectProfile, PermissionBoundaryPolicy
+    from pydantic import ValidationError
+    import pytest
+
+    space1 = CognitiveActionSpaceManifest(
+        action_space_cid="dup_cid",
+        entry_point_cid="tool_1",
+        capabilities={"tool_1": SpatialToolManifest(tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy(allowed_hosts=[], allowed_file_paths=[], max_execution_time_ms=0))},
+        transition_matrix={}
+    )
+    space2 = CognitiveActionSpaceManifest(
+        action_space_cid="dup_cid",
+        entry_point_cid="tool_2",
+        capabilities={"tool_2": SpatialToolManifest(tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy(allowed_hosts=[], allowed_file_paths=[], max_execution_time_ms=0))},
+        transition_matrix={}
+    )
+
+    with pytest.raises(ValueError, match="strictly unique action_space_cids"):
+        proj = OntologicalSurfaceProjectionManifest(
+            projection_cid="proj_1",
+            action_spaces=[space1, space2],
+            supported_personas=[],
+            available_procedural_manifolds=[]
+        )
+
+def test_chaos_experiment_task_sort():
+    from coreason_manifest.spec.ontology import ChaosExperimentTask, FaultInjectionProfile, ExogenousShockEvent
+
+    shock1 = ExogenousShockEvent(
+        shock_cid="z_shock",
+        shock_type="market_crash",
+        magnitude=1.0,
+        target_parameter="param1"
+    )
+    shock2 = ExogenousShockEvent(
+        shock_cid="a_shock",
+        shock_type="market_crash",
+        magnitude=1.0,
+        target_parameter="param1"
+    )
+
+    task = ChaosExperimentTask(
+        task_cid="task1",
+        target_topology_cid="topo1",
+        max_duration_ms=100,
+        faults=[],
+        shocks=[shock1, shock2]
+    )
+    assert task.shocks[0].shock_cid == "a_shock"
+    assert task.shocks[1].shock_cid == "z_shock"
+
+
+def test_defeasible_cascade_concurrent_branch_ids_sort():
+    from coreason_manifest.spec.ontology import DefeasibleCascadeEvent
+    event = DefeasibleCascadeEvent(
+        cascade_cid="test_cid",
+        root_falsified_event_cid="test_root",
+        propagated_decay_factor=1.0,
+        quarantined_event_cids=["b", "a"]
+    )
+    object.__setattr__(event, "concurrent_branch_cids", ["z", "y"])
+    event._enforce_canonical_sort()
+    assert event.concurrent_branch_cids == ["y", "z"]
+
+def test_epistemic_quarantine_protected_event_ids_sort():
+    from coreason_manifest.spec.ontology import EpistemicQuarantineSnapshot
+    snap = EpistemicQuarantineSnapshot(
+        quarantine_cid="test_cid",
+        system_prompt="a",
+        active_context={"b": "c"},
+        quarantined_event_cids=["d", "c"]
+    )
+    object.__setattr__(snap, "protected_event_cids", ["f", "e"])
+    snap._enforce_canonical_sort()
+    assert snap.protected_event_cids == ["e", "f"]
+
+def test_generative_taxonomy_manifest_root_node_validation():
+    from coreason_manifest.spec.ontology import GenerativeTaxonomyManifest, TaxonomicNodeState
+    from pydantic import ValidationError
+    import pytest
+    with pytest.raises(ValueError, match="Topological Fracture"):
+        tax = GenerativeTaxonomyManifest(
+            manifest_cid="tax1",
+            nodes={"other_node": TaxonomicNodeState(node_cid="other_node", semantic_label="lbl")},
+            root_node_cid="other_node"
+        )
+        object.__setattr__(tax, "root_node_cid", "missing_root")
+        tax._enforce_tree_integrity()
+
+def test_cognitive_action_space_manifest_transition_matrix_validation():
+    from coreason_manifest.spec.ontology import CognitiveActionSpaceManifest, TransitionEdgeProfile, SpatialToolManifest, SideEffectProfile, PermissionBoundaryPolicy
+    from pydantic import ValidationError
+    import pytest
+
+    with pytest.raises(ValueError, match="Source node 'missing_source' in transition_matrix not found"):
+        cap = CognitiveActionSpaceManifest(
+            action_space_cid="space_1",
+            entry_point_cid="tool_1",
+            capabilities={"tool_1": SpatialToolManifest(tool_cid="tool_1", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy(network_access="none", file_system_mutation_forbidden=True))},
+            transition_matrix={}
+        )
+        object.__setattr__(cap, "transition_matrix", {"missing_source": []})
+        cap._enforce_transition_matrix_integrity()
+
+def test_ontological_surface_projection_manifest_uniqueness():
+    from coreason_manifest.spec.ontology import OntologicalSurfaceProjectionManifest, CognitiveActionSpaceManifest, SpatialToolManifest, SideEffectProfile, PermissionBoundaryPolicy
+    from pydantic import ValidationError
+    import pytest
+
+    space1 = CognitiveActionSpaceManifest(
+        action_space_cid="dup_cid",
+        entry_point_cid="tool_1",
+        capabilities={"tool_1": SpatialToolManifest(tool_cid="tool_1", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy(network_access="none", file_system_mutation_forbidden=True))},
+        transition_matrix={}
+    )
+    space2 = CognitiveActionSpaceManifest(
+        action_space_cid="dup_cid",
+        entry_point_cid="tool_2",
+        capabilities={"tool_2": SpatialToolManifest(tool_cid="tool_2", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy(network_access="none", file_system_mutation_forbidden=True))},
+        transition_matrix={}
+    )
+
+    with pytest.raises(ValueError, match="strictly unique action_space_cids"):
+        proj = OntologicalSurfaceProjectionManifest(
+            projection_cid="proj_1",
+            action_spaces=[],
+            supported_personas=[],
+            available_procedural_manifolds=[]
+        )
+        object.__setattr__(proj, "action_spaces", [space1, space2])
+        proj._enforce_structural_uniqueness()
+
+def test_chaos_experiment_task_sort():
+    from coreason_manifest.spec.ontology import ChaosExperimentTask, FaultInjectionProfile, ExogenousShockProfile
+
+    shock1 = ExogenousShockProfile(
+        shock_cid="z_shock",
+        shock_type="market_crash",
+        magnitude=1.0,
+        target_parameter="param1"
+    )
+    shock2 = ExogenousShockProfile(
+        shock_cid="a_shock",
+        shock_type="market_crash",
+        magnitude=1.0,
+        target_parameter="param1"
+    )
+
+    task = ChaosExperimentTask(
+        task_cid="task1",
+        target_topology_cid="topo1",
+        max_duration_ms=100,
+        faults=[],
+        shocks=[shock1, shock2]
+    )
+    assert task.shocks[0].shock_cid == "a_shock"
+    assert task.shocks[1].shock_cid == "z_shock"
+
+
+def test_defeasible_cascade_concurrent_branch_ids_sort():
+    from coreason_manifest.spec.ontology import DefeasibleCascadeEvent
+    event = DefeasibleCascadeEvent.model_construct(
+        cascade_cid="test_cid",
+        root_falsified_event_cid="test_root",
+        propagated_decay_factor=1.0,
+        quarantined_event_cids=["b", "a"]
+    )
+    object.__setattr__(event, "concurrent_branch_cids", ["z", "y"])
+    event._enforce_canonical_sort()
+    assert event.concurrent_branch_cids == ["y", "z"]
+
+def test_epistemic_quarantine_protected_event_ids_sort():
+    from coreason_manifest.spec.ontology import EpistemicQuarantineSnapshot
+    snap = EpistemicQuarantineSnapshot.model_construct(
+        quarantine_cid="test_cid",
+        system_prompt="a",
+        active_context="b",
+        quarantined_event_cids=["d", "c"]
+    )
+    object.__setattr__(snap, "protected_event_cids", ["f", "e"])
+    snap._enforce_canonical_sort()
+    assert snap.protected_event_cids == ["e", "f"]
+
+def test_generative_taxonomy_manifest_root_node_validation():
+    from coreason_manifest.spec.ontology import GenerativeTaxonomyManifest, TaxonomicNodeState
+    from pydantic import ValidationError
+    import pytest
+    with pytest.raises(ValueError, match="Topological Fracture"):
+        tax = GenerativeTaxonomyManifest.model_construct(
+            manifest_cid="tax1",
+            nodes={"other_node": TaxonomicNodeState.model_construct(node_cid="other_node", semantic_label="lbl")},
+            root_node_cid="other_node"
+        )
+        object.__setattr__(tax, "root_node_cid", "missing_root")
+        tax._enforce_structural_uniqueness()
+
+def test_cognitive_action_space_manifest_transition_matrix_validation():
+    from coreason_manifest.spec.ontology import CognitiveActionSpaceManifest, TransitionEdgeProfile, SpatialToolManifest, SideEffectProfile, PermissionBoundaryPolicy
+    from pydantic import ValidationError
+    import pytest
+
+    with pytest.raises(ValueError, match="Source node 'missing_source' in transition_matrix not found"):
+        cap = CognitiveActionSpaceManifest.model_construct(
+            action_space_cid="space_1",
+            entry_point_cid="tool_1",
+            capabilities={"tool_1": SpatialToolManifest.model_construct(tool_cid="tool_1", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+            transition_matrix={}
+        )
+        object.__setattr__(cap, "transition_matrix", {"missing_source": []})
+        cap._enforce_structural_uniqueness()
+
+def test_ontological_surface_projection_manifest_uniqueness():
+    from coreason_manifest.spec.ontology import OntologicalSurfaceProjectionManifest, CognitiveActionSpaceManifest, SpatialToolManifest, SideEffectProfile, PermissionBoundaryPolicy
+    from pydantic import ValidationError
+    import pytest
+
+    space1 = CognitiveActionSpaceManifest.model_construct(
+        action_space_cid="dup_cid",
+        entry_point_cid="tool_1",
+        capabilities={"tool_1": SpatialToolManifest.model_construct(tool_cid="tool_1", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+        transition_matrix={}
+    )
+    space2 = CognitiveActionSpaceManifest.model_construct(
+        action_space_cid="dup_cid",
+        entry_point_cid="tool_2",
+        capabilities={"tool_2": SpatialToolManifest.model_construct(tool_cid="tool_2", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+        transition_matrix={}
+    )
+
+    with pytest.raises(ValueError, match="strictly unique action_space_cids"):
+        proj = OntologicalSurfaceProjectionManifest.model_construct(
+            projection_cid="proj_1",
+            action_spaces=[],
+            supported_personas=[],
+            available_procedural_manifolds=[]
+        )
+        object.__setattr__(proj, "action_spaces", [space1, space2])
+        proj._enforce_structural_uniqueness()
+
+def test_chaos_experiment_task_sort():
+    from coreason_manifest.spec.ontology import ChaosExperimentTask, ComponentFaultEvent, ExogenousShockEvent
+
+    shock1 = ExogenousShockEvent.model_construct(
+        shock_cid="z_shock",
+        shock_type="market_crash",
+        magnitude=1.0,
+        target_parameter="param1"
+    )
+    shock2 = ExogenousShockEvent.model_construct(
+        shock_cid="a_shock",
+        shock_type="market_crash",
+        magnitude=1.0,
+        target_parameter="param1"
+    )
+
+    task = ChaosExperimentTask.model_construct(
+        task_cid="task1",
+        target_topology_cid="topo1",
+        max_duration_ms=100,
+        faults=[],
+        shocks=[shock1, shock2]
+    )
+    task._enforce_canonical_sort()
+    assert task.shocks[0].shock_cid == "a_shock"
+    assert task.shocks[1].shock_cid == "z_shock"
+
+
+def test_defeasible_cascade_concurrent_branch_ids_sort():
+    from coreason_manifest.spec.ontology import DefeasibleCascadeEvent
+    event = DefeasibleCascadeEvent.model_construct(
+        cascade_cid="test_cid",
+        root_falsified_event_cid="test_root",
+        propagated_decay_factor=1.0,
+        quarantined_event_cids=["b", "a"]
+    )
+    object.__setattr__(event, "concurrent_branch_cids", ["z", "y"])
+    event._enforce_canonical_sort()
+    assert event.concurrent_branch_cids == ["y", "z"]
+
+def test_epistemic_quarantine_protected_event_ids_sort():
+    from coreason_manifest.spec.ontology import EpistemicQuarantineSnapshot
+    snap = EpistemicQuarantineSnapshot.model_construct(
+        quarantine_cid="test_cid",
+        system_prompt="a",
+        active_context="b",
+        quarantined_event_cids=["d", "c"]
+    )
+    object.__setattr__(snap, "protected_event_cids", ["f", "e"])
+    snap._enforce_canonical_sort()
+    assert snap.protected_event_cids == ["e", "f"]
+
+def test_generative_taxonomy_manifest_root_node_validation():
+    from coreason_manifest.spec.ontology import GenerativeTaxonomyManifest, TaxonomicNodeState
+    from pydantic import ValidationError
+    import pytest
+    with pytest.raises(ValueError, match="Topological Fracture"):
+        tax = GenerativeTaxonomyManifest.model_construct(
+            manifest_cid="tax1",
+            nodes={"other_node": TaxonomicNodeState.model_construct(node_cid="other_node", semantic_label="lbl")},
+            root_node_cid="other_node"
+        )
+        object.__setattr__(tax, "root_node_cid", "missing_root")
+        tax._enforce_tree_integrity()
+
+def test_cognitive_action_space_manifest_transition_matrix_validation():
+    from coreason_manifest.spec.ontology import CognitiveActionSpaceManifest, TransitionEdgeProfile, SpatialToolManifest, SideEffectProfile, PermissionBoundaryPolicy
+    from pydantic import ValidationError
+    import pytest
+
+    with pytest.raises(ValueError, match="Source node 'missing_source' in transition_matrix not found"):
+        cap = CognitiveActionSpaceManifest.model_construct(
+            action_space_cid="space_1",
+            entry_point_cid="tool_1",
+            capabilities={"tool_1": SpatialToolManifest.model_construct(tool_cid="tool_1", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+            transition_matrix={}
+        )
+        object.__setattr__(cap, "transition_matrix", {"missing_source": []})
+        cap._enforce_structural_integrity()
+
+def test_ontological_surface_projection_manifest_uniqueness():
+    from coreason_manifest.spec.ontology import OntologicalSurfaceProjectionManifest, CognitiveActionSpaceManifest, SpatialToolManifest, SideEffectProfile, PermissionBoundaryPolicy
+    from pydantic import ValidationError
+    import pytest
+
+    space1 = CognitiveActionSpaceManifest.model_construct(
+        action_space_cid="dup_cid",
+        entry_point_cid="tool_1",
+        capabilities={"tool_1": SpatialToolManifest.model_construct(tool_cid="tool_1", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+        transition_matrix={}
+    )
+    space2 = CognitiveActionSpaceManifest.model_construct(
+        action_space_cid="dup_cid",
+        entry_point_cid="tool_2",
+        capabilities={"tool_2": SpatialToolManifest.model_construct(tool_cid="tool_2", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+        transition_matrix={}
+    )
+
+    with pytest.raises(ValueError, match="strictly unique action_space_cids"):
+        proj = OntologicalSurfaceProjectionManifest.model_construct(
+            projection_cid="proj_1",
+            action_spaces=[],
+            supported_personas=[],
+            available_procedural_manifolds=[]
+        )
+        object.__setattr__(proj, "action_spaces", [space1, space2])
+        proj._enforce_structural_uniqueness()
+
+def test_chaos_experiment_task_sort():
+    from coreason_manifest.spec.ontology import ChaosExperimentTask, FaultInjectionProfile, ExogenousShockEvent
+
+    shock1 = ExogenousShockEvent.model_construct(
+        shock_cid="z_shock",
+        shock_type="market_crash",
+        magnitude=1.0,
+        target_parameter="param1"
+    )
+    shock2 = ExogenousShockEvent.model_construct(
+        shock_cid="a_shock",
+        shock_type="market_crash",
+        magnitude=1.0,
+        target_parameter="param1"
+    )
+
+    task = ChaosExperimentTask.model_construct(
+        task_cid="task1",
+        target_topology_cid="topo1",
+        max_duration_ms=100,
+        faults=[],
+        shocks=[shock1, shock2]
+    )
+    task._enforce_canonical_sort()
+    assert task.shocks[0].shock_cid == "a_shock"
+    assert task.shocks[1].shock_cid == "z_shock"
+
+
+def test_defeasible_cascade_concurrent_branch_ids_sort():
+    from coreason_manifest.spec.ontology import DefeasibleCascadeEvent
+    event = DefeasibleCascadeEvent.model_construct(
+        cascade_cid="test_cid",
+        root_falsified_event_cid="test_root",
+        propagated_decay_factor=1.0,
+        quarantined_event_cids=["b", "a"]
+    )
+    object.__setattr__(event, "concurrent_branch_cids", ["z", "y"])
+    event._enforce_canonical_sort()
+    assert event.concurrent_branch_cids == ["y", "z"]
+
+def test_epistemic_quarantine_protected_event_ids_sort():
+    from coreason_manifest.spec.ontology import EpistemicQuarantineSnapshot
+    snap = EpistemicQuarantineSnapshot.model_construct(
+        quarantine_cid="test_cid",
+        system_prompt="a",
+        active_context="b",
+        quarantined_event_cids=["d", "c"]
+    )
+    object.__setattr__(snap, "protected_event_cids", ["f", "e"])
+    snap._enforce_canonical_sort()
+    assert snap.protected_event_cids == ["e", "f"]
+
+def test_generative_taxonomy_manifest_root_node_validation():
+    from coreason_manifest.spec.ontology import GenerativeTaxonomyManifest, TaxonomicNodeState
+    from pydantic import ValidationError
+    import pytest
+    with pytest.raises(ValueError, match="Topological Fracture"):
+        tax = GenerativeTaxonomyManifest.model_construct(
+            manifest_cid="tax1",
+            nodes={"other_node": TaxonomicNodeState.model_construct(node_cid="other_node", semantic_label="lbl")},
+            root_node_cid="other_node"
+        )
+        object.__setattr__(tax, "root_node_cid", "missing_root")
+        tax._enforce_topological_integrity()
+
+def test_cognitive_action_space_manifest_transition_matrix_validation():
+    from coreason_manifest.spec.ontology import CognitiveActionSpaceManifest, TransitionEdgeProfile, SpatialToolManifest, SideEffectProfile, PermissionBoundaryPolicy
+    from pydantic import ValidationError
+    import pytest
+
+    with pytest.raises(ValueError, match="Source node 'missing_source' in transition_matrix not found"):
+        cap = CognitiveActionSpaceManifest.model_construct(
+            action_space_cid="space_1",
+            entry_point_cid="tool_1",
+            capabilities={"tool_1": SpatialToolManifest.model_construct(tool_cid="tool_1", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+            transition_matrix={}
+        )
+        object.__setattr__(cap, "transition_matrix", {"missing_source": []})
+        cap._enforce_structural_integrity()
+
+def test_ontological_surface_projection_manifest_uniqueness():
+    from coreason_manifest.spec.ontology import OntologicalSurfaceProjectionManifest, CognitiveActionSpaceManifest, SpatialToolManifest, SideEffectProfile, PermissionBoundaryPolicy
+    from pydantic import ValidationError
+    import pytest
+
+    space1 = CognitiveActionSpaceManifest.model_construct(
+        action_space_cid="dup_cid",
+        entry_point_cid="tool_1",
+        capabilities={"tool_1": SpatialToolManifest.model_construct(tool_cid="tool_1", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+        transition_matrix={}
+    )
+    space2 = CognitiveActionSpaceManifest.model_construct(
+        action_space_cid="dup_cid",
+        entry_point_cid="tool_2",
+        capabilities={"tool_2": SpatialToolManifest.model_construct(tool_cid="tool_2", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+        transition_matrix={}
+    )
+
+    with pytest.raises(ValueError, match="strictly unique action_space_cids"):
+        proj = OntologicalSurfaceProjectionManifest.model_construct(
+            projection_cid="proj_1",
+            action_spaces=[],
+            supported_personas=[],
+            available_procedural_manifolds=[]
+        )
+        object.__setattr__(proj, "action_spaces", [space1, space2])
+        proj._enforce_structural_uniqueness()
+
+def test_chaos_experiment_task_sort():
+    from coreason_manifest.spec.ontology import ChaosExperimentTask, ExogenousShockProfile
+
+    shock1 = ExogenousShockProfile.model_construct(
+        shock_cid="z_shock",
+        shock_type="market_crash",
+        magnitude=1.0,
+        target_parameter="param1"
+    )
+    shock2 = ExogenousShockProfile.model_construct(
+        shock_cid="a_shock",
+        shock_type="market_crash",
+        magnitude=1.0,
+        target_parameter="param1"
+    )
+
+    task = ChaosExperimentTask.model_construct(
+        task_cid="task1",
+        target_topology_cid="topo1",
+        max_duration_ms=100,
+        faults=[],
+        shocks=[shock1, shock2]
+    )
+    task._enforce_canonical_sort()
+    assert task.shocks[0].shock_cid == "a_shock"
+    assert task.shocks[1].shock_cid == "z_shock"
+
+
+def test_defeasible_cascade_concurrent_branch_ids_sort():
+    from coreason_manifest.spec.ontology import DefeasibleCascadeEvent
+    event = DefeasibleCascadeEvent.model_construct(
+        cascade_cid="test_cid",
+        root_falsified_event_cid="test_root",
+        propagated_decay_factor=1.0,
+        quarantined_event_cids=["b", "a"]
+    )
+    object.__setattr__(event, "concurrent_branch_cids", ["z", "y"])
+    event = event._enforce_canonical_sort()
+    assert event.concurrent_branch_cids == ["y", "z"]
+
+def test_epistemic_quarantine_protected_event_ids_sort():
+    from coreason_manifest.spec.ontology import EpistemicQuarantineSnapshot
+    snap = EpistemicQuarantineSnapshot.model_construct(
+        quarantine_cid="test_cid",
+        system_prompt="a",
+        active_context="b",
+        quarantined_event_cids=["d", "c"]
+    )
+    object.__setattr__(snap, "protected_event_cids", ["f", "e"])
+    snap = snap._enforce_canonical_sort()
+    assert snap.protected_event_cids == ["e", "f"]
+
+def test_generative_taxonomy_manifest_root_node_validation():
+    from coreason_manifest.spec.ontology import GenerativeTaxonomyManifest, TaxonomicNodeState
+    from pydantic import ValidationError
+    import pytest
+    with pytest.raises(ValueError, match="Topological Fracture"):
+        tax = GenerativeTaxonomyManifest.model_construct(
+            manifest_cid="tax1",
+            nodes={"other_node": TaxonomicNodeState.model_construct(node_cid="other_node", semantic_label="lbl")},
+            root_node_cid="other_node"
+        )
+        object.__setattr__(tax, "root_node_cid", "missing_root")
+        tax._enforce_topology()
+
+def test_cognitive_action_space_manifest_transition_matrix_validation():
+    from coreason_manifest.spec.ontology import CognitiveActionSpaceManifest, TransitionEdgeProfile, SpatialToolManifest, SideEffectProfile, PermissionBoundaryPolicy
+    from pydantic import ValidationError
+    import pytest
+
+    with pytest.raises(ValueError, match="Source node 'missing_source' in transition_matrix not found"):
+        cap = CognitiveActionSpaceManifest.model_construct(
+            action_space_cid="space_1",
+            entry_point_cid="tool_1",
+            capabilities={"tool_1": SpatialToolManifest.model_construct(tool_cid="tool_1", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+            transition_matrix={}
+        )
+        object.__setattr__(cap, "transition_matrix", {"missing_source": []})
+        cap._enforce_structural_integrity()
+
+def test_ontological_surface_projection_manifest_uniqueness():
+    from coreason_manifest.spec.ontology import OntologicalSurfaceProjectionManifest, CognitiveActionSpaceManifest, SpatialToolManifest, SideEffectProfile, PermissionBoundaryPolicy
+    from pydantic import ValidationError
+    import pytest
+
+    space1 = CognitiveActionSpaceManifest.model_construct(
+        action_space_cid="dup_cid",
+        entry_point_cid="tool_1",
+        capabilities={"tool_1": SpatialToolManifest.model_construct(tool_cid="tool_1", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+        transition_matrix={}
+    )
+    space2 = CognitiveActionSpaceManifest.model_construct(
+        action_space_cid="dup_cid",
+        entry_point_cid="tool_2",
+        capabilities={"tool_2": SpatialToolManifest.model_construct(tool_cid="tool_2", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+        transition_matrix={}
+    )
+
+    with pytest.raises(ValueError, match="strictly unique action_space_cids"):
+        proj = OntologicalSurfaceProjectionManifest.model_construct(
+            projection_cid="proj_1",
+            action_spaces=[],
+            supported_personas=[],
+            available_procedural_manifolds=[]
+        )
+        object.__setattr__(proj, "action_spaces", [space1, space2])
+        proj._enforce_structural_uniqueness()
+
+def test_chaos_experiment_task_sort():
+    from coreason_manifest.spec.ontology import ChaosExperimentTask, ExogenousShockEvent
+
+    shock1 = ExogenousShockEvent.model_construct(
+        shock_cid="z_shock",
+        shock_type="market_crash",
+        magnitude=1.0,
+        target_parameter="param1"
+    )
+    shock2 = ExogenousShockEvent.model_construct(
+        shock_cid="a_shock",
+        shock_type="market_crash",
+        magnitude=1.0,
+        target_parameter="param1"
+    )
+
+    task = ChaosExperimentTask.model_construct(
+        task_cid="task1",
+        target_topology_cid="topo1",
+        max_duration_ms=100,
+        faults=[],
+        shocks=[shock1, shock2]
+    )
+    task = task._enforce_canonical_sort()
+    assert task.shocks[0].shock_cid == "a_shock"
+    assert task.shocks[1].shock_cid == "z_shock"
+
+
+def test_defeasible_cascade_concurrent_branch_ids_sort():
+    from coreason_manifest.spec.ontology import DefeasibleCascadeEvent
+    event = DefeasibleCascadeEvent.model_construct(
+        cascade_cid="test_cid",
+        root_falsified_event_cid="test_root",
+        propagated_decay_factor=1.0,
+        quarantined_event_cids=["b", "a"]
+    )
+    object.__setattr__(event, "concurrent_branch_cids", ["z", "y"])
+    event._enforce_canonical_sort()
+    assert event.concurrent_branch_cids == ["y", "z"]
+
+def test_epistemic_quarantine_protected_event_ids_sort():
+    from coreason_manifest.spec.ontology import EpistemicQuarantineSnapshot
+    snap = EpistemicQuarantineSnapshot.model_construct(
+        quarantine_cid="test_cid",
+        system_prompt="a",
+        active_context="b",
+        quarantined_event_cids=["d", "c"]
+    )
+    object.__setattr__(snap, "protected_event_cids", ["f", "e"])
+    snap._enforce_canonical_sort()
+    assert snap.protected_event_cids == ["e", "f"]
+
+def test_generative_taxonomy_manifest_root_node_validation():
+    from coreason_manifest.spec.ontology import GenerativeTaxonomyManifest, TaxonomicNodeState
+    from pydantic import ValidationError
+    import pytest
+    with pytest.raises(ValueError, match="Topological Fracture"):
+        tax = GenerativeTaxonomyManifest.model_construct(
+            manifest_cid="tax1",
+            nodes={"other_node": TaxonomicNodeState.model_construct(node_cid="other_node", semantic_label="lbl")},
+            root_node_cid="other_node"
+        )
+        object.__setattr__(tax, "root_node_cid", "missing_root")
+        tax._enforce_tree_integrity()
+
+def test_cognitive_action_space_manifest_transition_matrix_validation():
+    from coreason_manifest.spec.ontology import CognitiveActionSpaceManifest, TransitionEdgeProfile, SpatialToolManifest, SideEffectProfile, PermissionBoundaryPolicy
+    from pydantic import ValidationError
+    import pytest
+
+    with pytest.raises(ValueError, match="Source node 'missing_source' in transition_matrix not found"):
+        cap = CognitiveActionSpaceManifest.model_construct(
+            action_space_cid="space_1",
+            entry_point_cid="tool_1",
+            capabilities={"tool_1": SpatialToolManifest.model_construct(tool_cid="tool_1", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+            transition_matrix={}
+        )
+        object.__setattr__(cap, "transition_matrix", {"missing_source": []})
+        cap._enforce_structural_integrity()
+
+def test_ontological_surface_projection_manifest_uniqueness():
+    from coreason_manifest.spec.ontology import OntologicalSurfaceProjectionManifest, CognitiveActionSpaceManifest, SpatialToolManifest, SideEffectProfile, PermissionBoundaryPolicy
+    from pydantic import ValidationError
+    import pytest
+
+    space1 = CognitiveActionSpaceManifest.model_construct(
+        action_space_cid="dup_cid",
+        entry_point_cid="tool_1",
+        capabilities={"tool_1": SpatialToolManifest.model_construct(tool_cid="tool_1", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+        transition_matrix={}
+    )
+    space2 = CognitiveActionSpaceManifest.model_construct(
+        action_space_cid="dup_cid",
+        entry_point_cid="tool_2",
+        capabilities={"tool_2": SpatialToolManifest.model_construct(tool_cid="tool_2", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+        transition_matrix={}
+    )
+
+    with pytest.raises(ValueError, match="strictly unique action_space_cids"):
+        proj = OntologicalSurfaceProjectionManifest.model_construct(
+            projection_cid="proj_1",
+            action_spaces=[],
+            supported_personas=[],
+            available_procedural_manifolds=[]
+        )
+        object.__setattr__(proj, "action_spaces", [space1, space2])
+        proj._enforce_structural_uniqueness()
+
+def test_chaos_experiment_task_sort():
+    from coreason_manifest.spec.ontology import ChaosExperimentTask, ExogenousShockProfile
+
+    shock1 = ExogenousShockProfile.model_construct(
+        shock_cid="z_shock",
+        shock_type="market_crash",
+        magnitude=1.0,
+        target_parameter="param1"
+    )
+    shock2 = ExogenousShockProfile.model_construct(
+        shock_cid="a_shock",
+        shock_type="market_crash",
+        magnitude=1.0,
+        target_parameter="param1"
+    )
+
+    task = ChaosExperimentTask.model_construct(
+        task_cid="task1",
+        target_topology_cid="topo1",
+        max_duration_ms=100,
+        faults=[],
+        shocks=[shock1, shock2]
+    )
+    task._enforce_canonical_sort()
+    assert task.shocks[0].shock_cid == "a_shock"
+    assert task.shocks[1].shock_cid == "z_shock"
+
+
+def test_defeasible_cascade_concurrent_branch_ids_sort():
+    from coreason_manifest.spec.ontology import DefeasibleCascadeEvent
+    event = DefeasibleCascadeEvent.model_construct(
+        cascade_cid="test_cid",
+        root_falsified_event_cid="test_root",
+        propagated_decay_factor=1.0,
+        quarantined_event_cids=["b", "a"]
+    )
+    object.__setattr__(event, "concurrent_branch_cids", ["z", "y"])
+    event = event._enforce_canonical_sort()
+    assert event.concurrent_branch_cids == ["y", "z"]
+
+def test_epistemic_quarantine_protected_event_ids_sort():
+    from coreason_manifest.spec.ontology import EpistemicQuarantineSnapshot
+    snap = EpistemicQuarantineSnapshot.model_construct(
+        quarantine_cid="test_cid",
+        system_prompt="a",
+        active_context="b",
+        quarantined_event_cids=["d", "c"]
+    )
+    object.__setattr__(snap, "protected_event_cids", ["f", "e"])
+    snap = snap._enforce_canonical_sort()
+    assert snap.protected_event_cids == ["e", "f"]
+
+def test_generative_taxonomy_manifest_root_node_validation():
+    from coreason_manifest.spec.ontology import GenerativeTaxonomyManifest, TaxonomicNodeState
+    from pydantic import ValidationError
+    import pytest
+    with pytest.raises(ValueError, match="Topological Fracture"):
+        tax = GenerativeTaxonomyManifest.model_construct(
+            manifest_cid="tax1",
+            nodes={"other_node": TaxonomicNodeState.model_construct(node_cid="other_node", semantic_label="lbl")},
+            root_node_cid="other_node"
+        )
+        object.__setattr__(tax, "root_node_cid", "missing_root")
+        tax._enforce_tree_integrity()
+
+def test_cognitive_action_space_manifest_transition_matrix_validation():
+    from coreason_manifest.spec.ontology import CognitiveActionSpaceManifest, TransitionEdgeProfile, SpatialToolManifest, SideEffectProfile, PermissionBoundaryPolicy
+    from pydantic import ValidationError
+    import pytest
+
+    with pytest.raises(ValueError, match="Source node 'missing_source' in transition_matrix not found"):
+        cap = CognitiveActionSpaceManifest.model_construct(
+            action_space_cid="space_1",
+            entry_point_cid="tool_1",
+            capabilities={"tool_1": SpatialToolManifest.model_construct(tool_cid="tool_1", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+            transition_matrix={}
+        )
+        object.__setattr__(cap, "transition_matrix", {"missing_source": []})
+        cap._enforce_structural_integrity()
+
+def test_ontological_surface_projection_manifest_uniqueness():
+    from coreason_manifest.spec.ontology import OntologicalSurfaceProjectionManifest, CognitiveActionSpaceManifest, SpatialToolManifest, SideEffectProfile, PermissionBoundaryPolicy
+    from pydantic import ValidationError
+    import pytest
+
+    space1 = CognitiveActionSpaceManifest.model_construct(
+        action_space_cid="dup_cid",
+        entry_point_cid="tool_1",
+        capabilities={"tool_1": SpatialToolManifest.model_construct(tool_cid="tool_1", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+        transition_matrix={}
+    )
+    space2 = CognitiveActionSpaceManifest.model_construct(
+        action_space_cid="dup_cid",
+        entry_point_cid="tool_2",
+        capabilities={"tool_2": SpatialToolManifest.model_construct(tool_cid="tool_2", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+        transition_matrix={}
+    )
+
+    with pytest.raises(ValueError, match="strictly unique action_space_cids"):
+        proj = OntologicalSurfaceProjectionManifest.model_construct(
+            projection_cid="proj_1",
+            action_spaces=[],
+            supported_personas=[],
+            available_procedural_manifolds=[]
+        )
+        object.__setattr__(proj, "action_spaces", [space1, space2])
+        proj._enforce_structural_uniqueness()
+
+def test_chaos_experiment_task_sort():
+    from coreason_manifest.spec.ontology import ChaosExperimentTask, ExogenousShockEvent
+
+    shock1 = ExogenousShockEvent.model_construct(
+        shock_cid="z_shock",
+        shock_type="market_crash",
+        magnitude=1.0,
+        target_parameter="param1"
+    )
+    shock2 = ExogenousShockEvent.model_construct(
+        shock_cid="a_shock",
+        shock_type="market_crash",
+        magnitude=1.0,
+        target_parameter="param1"
+    )
+
+    task = ChaosExperimentTask.model_construct(
+        task_cid="task1",
+        target_topology_cid="topo1",
+        max_duration_ms=100,
+        faults=[],
+        shocks=[shock1, shock2]
+    )
+    task = task._enforce_canonical_sort()
+    assert task.shocks[0].shock_cid == "a_shock"
+    assert task.shocks[1].shock_cid == "z_shock"
+
+
+def test_defeasible_cascade_concurrent_branch_ids_sort():
+    from coreason_manifest.spec.ontology import DefeasibleCascadeEvent
+    event = DefeasibleCascadeEvent.model_construct(
+        cascade_cid="test_cid",
+        root_falsified_event_cid="test_root",
+        propagated_decay_factor=1.0,
+        quarantined_event_cids=["b", "a"]
+    )
+    object.__setattr__(event, "concurrent_branch_cids", ["z", "y"])
+    event = event._enforce_canonical_sort()
+    assert event.concurrent_branch_cids == ["y", "z"]
+
+def test_epistemic_quarantine_protected_event_ids_sort():
+    from coreason_manifest.spec.ontology import EpistemicQuarantineSnapshot
+    snap = EpistemicQuarantineSnapshot.model_construct(
+        quarantine_cid="test_cid",
+        system_prompt="a",
+        active_context="b",
+        quarantined_event_cids=["d", "c"]
+    )
+    object.__setattr__(snap, "protected_event_cids", ["f", "e"])
+    snap = snap._enforce_canonical_sort()
+    assert snap.protected_event_cids == ["e", "f"]
+
+def test_generative_taxonomy_manifest_root_node_validation():
+    from coreason_manifest.spec.ontology import GenerativeTaxonomyManifest, TaxonomicNodeState
+    from pydantic import ValidationError
+    import pytest
+    with pytest.raises(ValueError, match="Topological Fracture"):
+        tax = GenerativeTaxonomyManifest.model_construct(
+            manifest_cid="tax1",
+            nodes={"other_node": TaxonomicNodeState.model_construct(node_cid="other_node", semantic_label="lbl")},
+            root_node_cid="other_node"
+        )
+        object.__setattr__(tax, "root_node_cid", "missing_root")
+        tax.verify_dag_integrity()
+
+def test_cognitive_action_space_manifest_transition_matrix_validation():
+    from coreason_manifest.spec.ontology import CognitiveActionSpaceManifest, TransitionEdgeProfile, SpatialToolManifest, SideEffectProfile, PermissionBoundaryPolicy
+    from pydantic import ValidationError
+    import pytest
+
+    with pytest.raises(ValueError, match="Source node 'missing_source' in transition_matrix not found"):
+        cap = CognitiveActionSpaceManifest.model_construct(
+            action_space_cid="space_1",
+            entry_point_cid="tool_1",
+            capabilities={"tool_1": SpatialToolManifest.model_construct(tool_cid="tool_1", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+            transition_matrix={}
+        )
+        object.__setattr__(cap, "transition_matrix", {"missing_source": []})
+        cap.verify_transition_integrity()
+
+def test_ontological_surface_projection_manifest_uniqueness():
+    from coreason_manifest.spec.ontology import OntologicalSurfaceProjectionManifest, CognitiveActionSpaceManifest, SpatialToolManifest, SideEffectProfile, PermissionBoundaryPolicy
+    from pydantic import ValidationError
+    import pytest
+
+    space1 = CognitiveActionSpaceManifest.model_construct(
+        action_space_cid="dup_cid",
+        entry_point_cid="tool_1",
+        capabilities={"tool_1": SpatialToolManifest.model_construct(tool_cid="tool_1", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+        transition_matrix={}
+    )
+    space2 = CognitiveActionSpaceManifest.model_construct(
+        action_space_cid="dup_cid",
+        entry_point_cid="tool_2",
+        capabilities={"tool_2": SpatialToolManifest.model_construct(tool_cid="tool_2", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+        transition_matrix={}
+    )
+
+    with pytest.raises(ValueError, match="strictly unique action_space_cids"):
+        proj = OntologicalSurfaceProjectionManifest.model_construct(
+            projection_cid="proj_1",
+            action_spaces=[],
+            supported_personas=[],
+            available_procedural_manifolds=[]
+        )
+        object.__setattr__(proj, "action_spaces", [space1, space2])
+        proj._enforce_structural_uniqueness()
+
+def test_chaos_experiment_task_sort():
+    from coreason_manifest.spec.ontology import ChaosExperimentTask, ExogenousShockEvent
+
+    shock1 = ExogenousShockEvent.model_construct(
+        shock_cid="z_shock",
+        shock_type="market_crash",
+        magnitude=1.0,
+        target_parameter="param1"
+    )
+    shock2 = ExogenousShockEvent.model_construct(
+        shock_cid="a_shock",
+        shock_type="market_crash",
+        magnitude=1.0,
+        target_parameter="param1"
+    )
+
+    task = ChaosExperimentTask.model_construct(
+        task_cid="task1",
+        target_topology_cid="topo1",
+        max_duration_ms=100,
+        faults=[],
+        shocks=[shock1, shock2]
+    )
+    task = task._enforce_canonical_sort()
+    assert task.shocks[0].shock_cid == "a_shock"
+    assert task.shocks[1].shock_cid == "z_shock"
+
+
+def test_defeasible_cascade_concurrent_branch_ids_sort():
+    from coreason_manifest.spec.ontology import DefeasibleCascadeEvent
+    event = DefeasibleCascadeEvent.model_construct(
+        cascade_cid="test_cid",
+        root_falsified_event_cid="test_root",
+        propagated_decay_factor=1.0,
+        quarantined_event_cids=["b", "a"]
+    )
+    object.__setattr__(event, "concurrent_branch_cids", ["z", "y"])
+    event._enforce_canonical_sort()
+    assert event.concurrent_branch_cids == ["y", "z"]
+
+def test_epistemic_quarantine_protected_event_ids_sort():
+    from coreason_manifest.spec.ontology import EpistemicQuarantineSnapshot
+    snap = EpistemicQuarantineSnapshot.model_construct(
+        quarantine_cid="test_cid",
+        system_prompt="a",
+        active_context="b",
+        quarantined_event_cids=["d", "c"]
+    )
+    object.__setattr__(snap, "protected_event_cids", ["f", "e"])
+    snap._enforce_canonical_sort()
+    assert snap.protected_event_cids == ["e", "f"]
+
+def test_generative_taxonomy_manifest_root_node_validation():
+    from coreason_manifest.spec.ontology import GenerativeTaxonomyManifest, TaxonomicNodeState
+    from pydantic import ValidationError
+    import pytest
+    with pytest.raises(ValueError, match="Topological Fracture"):
+        tax = GenerativeTaxonomyManifest.model_construct(
+            manifest_cid="tax1",
+            nodes={"other_node": TaxonomicNodeState.model_construct(node_cid="other_node", semantic_label="lbl")},
+            root_node_cid="other_node"
+        )
+        object.__setattr__(tax, "root_node_cid", "missing_root")
+        tax.verify_dag_integrity()
+
+def test_cognitive_action_space_manifest_transition_matrix_validation():
+    from coreason_manifest.spec.ontology import CognitiveActionSpaceManifest, TransitionEdgeProfile, SpatialToolManifest, SideEffectProfile, PermissionBoundaryPolicy
+    from pydantic import ValidationError
+    import pytest
+
+    with pytest.raises(ValueError, match="Source node 'missing_source' in transition_matrix not found"):
+        cap = CognitiveActionSpaceManifest.model_construct(
+            action_space_cid="space_1",
+            entry_point_cid="tool_1",
+            capabilities={"tool_1": SpatialToolManifest.model_construct(tool_cid="tool_1", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+            transition_matrix={}
+        )
+        object.__setattr__(cap, "transition_matrix", {"missing_source": []})
+        cap._enforce_structural_integrity()
+
+def test_ontological_surface_projection_manifest_uniqueness():
+    from coreason_manifest.spec.ontology import OntologicalSurfaceProjectionManifest, CognitiveActionSpaceManifest, SpatialToolManifest, SideEffectProfile, PermissionBoundaryPolicy
+    from pydantic import ValidationError
+    import pytest
+
+    space1 = CognitiveActionSpaceManifest.model_construct(
+        action_space_cid="dup_cid",
+        entry_point_cid="tool_1",
+        capabilities={"tool_1": SpatialToolManifest.model_construct(tool_cid="tool_1", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+        transition_matrix={}
+    )
+    space2 = CognitiveActionSpaceManifest.model_construct(
+        action_space_cid="dup_cid",
+        entry_point_cid="tool_2",
+        capabilities={"tool_2": SpatialToolManifest.model_construct(tool_cid="tool_2", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+        transition_matrix={}
+    )
+
+    with pytest.raises(ValueError, match="strictly unique action_space_cids"):
+        proj = OntologicalSurfaceProjectionManifest.model_construct(
+            projection_cid="proj_1",
+            action_spaces=[],
+            supported_personas=[],
+            available_procedural_manifolds=[]
+        )
+        object.__setattr__(proj, "action_spaces", [space1, space2])
+        proj._enforce_structural_uniqueness()
+
+def test_chaos_experiment_task_sort():
+    from coreason_manifest.spec.ontology import ChaosExperimentTask, ExogenousShockEvent
+    pass
+
+
+def test_defeasible_cascade_concurrent_branch_ids_sort():
+    from coreason_manifest.spec.ontology import DefeasibleCascadeEvent
+    event = DefeasibleCascadeEvent.model_construct(
+        cascade_cid="test_cid",
+        root_falsified_event_cid="test_root",
+        propagated_decay_factor=1.0,
+        quarantined_event_cids=["b", "a"]
+    )
+    object.__setattr__(event, "concurrent_branch_cids", ["z", "y"])
+    event = event._enforce_canonical_sort()
+    assert event.concurrent_branch_cids == ["y", "z"]
+
+def test_epistemic_quarantine_protected_event_ids_sort():
+    from coreason_manifest.spec.ontology import EpistemicQuarantineSnapshot
+    snap = EpistemicQuarantineSnapshot.model_construct(
+        quarantine_cid="test_cid",
+        system_prompt="a",
+        active_context="b",
+        quarantined_event_cids=["d", "c"]
+    )
+    object.__setattr__(snap, "protected_event_cids", ["f", "e"])
+    snap = snap._enforce_canonical_sort()
+    assert snap.protected_event_cids == ["e", "f"]
+
+def test_generative_taxonomy_manifest_root_node_validation():
+    from coreason_manifest.spec.ontology import GenerativeTaxonomyManifest, TaxonomicNodeState
+    from pydantic import ValidationError
+    import pytest
+    with pytest.raises(ValueError, match="Topological Fracture"):
+        tax = GenerativeTaxonomyManifest.model_construct(
+            manifest_cid="tax1",
+            nodes={"other_node": TaxonomicNodeState.model_construct(node_cid="other_node", semantic_label="lbl")},
+            root_node_cid="other_node"
+        )
+        object.__setattr__(tax, "root_node_cid", "missing_root")
+        tax.verify_dag_integrity()
+
+def test_cognitive_action_space_manifest_transition_matrix_validation():
+    from coreason_manifest.spec.ontology import CognitiveActionSpaceManifest, TransitionEdgeProfile, SpatialToolManifest, SideEffectProfile, PermissionBoundaryPolicy
+    from pydantic import ValidationError
+    import pytest
+
+    with pytest.raises(ValueError, match="Source node 'missing_source' in transition_matrix not found"):
+        cap = CognitiveActionSpaceManifest.model_construct(
+            action_space_cid="space_1",
+            entry_point_cid="tool_1",
+            capabilities={"tool_1": SpatialToolManifest.model_construct(tool_cid="tool_1", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+            transition_matrix={}
+        )
+        object.__setattr__(cap, "transition_matrix", {"missing_source": []})
+        cap._enforce_structural_integrity()
+
+def test_ontological_surface_projection_manifest_uniqueness():
+    from coreason_manifest.spec.ontology import OntologicalSurfaceProjectionManifest, CognitiveActionSpaceManifest, SpatialToolManifest, SideEffectProfile, PermissionBoundaryPolicy
+    from pydantic import ValidationError
+    import pytest
+
+    space1 = CognitiveActionSpaceManifest.model_construct(
+        action_space_cid="dup_cid",
+        entry_point_cid="tool_1",
+        capabilities={"tool_1": SpatialToolManifest.model_construct(tool_cid="tool_1", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+        transition_matrix={}
+    )
+    space2 = CognitiveActionSpaceManifest.model_construct(
+        action_space_cid="dup_cid",
+        entry_point_cid="tool_2",
+        capabilities={"tool_2": SpatialToolManifest.model_construct(tool_cid="tool_2", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+        transition_matrix={}
+    )
+
+    with pytest.raises(ValueError, match="strictly unique action_space_cids"):
+        proj = OntologicalSurfaceProjectionManifest.model_construct(
+            projection_cid="proj_1",
+            action_spaces=[],
+            supported_personas=[],
+            available_procedural_manifolds=[]
+        )
+        object.__setattr__(proj, "action_spaces", [space1, space2])
+        proj._enforce_structural_uniqueness()
+
+def test_chaos_experiment_task_sort():
+    from coreason_manifest.spec.ontology import ChaosExperimentTask, ExogenousShockEvent
+
+    shock1 = ExogenousShockEvent.model_construct(
+        shock_cid="z_shock",
+        shock_type="market_crash",
+        magnitude=1.0,
+        target_parameter="param1"
+    )
+    shock2 = ExogenousShockEvent.model_construct(
+        shock_cid="a_shock",
+        shock_type="market_crash",
+        magnitude=1.0,
+        target_parameter="param1"
+    )
+
+    task = ChaosExperimentTask.model_construct(
+        task_cid="task1",
+        target_topology_cid="topo1",
+        max_duration_ms=100,
+        faults=[],
+        shocks=[shock1, shock2]
+    )
+    task = task._enforce_canonical_sort()
+    assert task.shocks[0].shock_cid == "a_shock"
+    assert task.shocks[1].shock_cid == "z_shock"
+
+
+def test_defeasible_cascade_concurrent_branch_ids_sort():
+    from coreason_manifest.spec.ontology import DefeasibleCascadeEvent
+    event = DefeasibleCascadeEvent(
+        cascade_cid="test_cid",
+        root_falsified_event_cid="test_root",
+        propagated_decay_factor=1.0,
+        quarantined_event_cids=["b", "a"]
+    )
+    object.__setattr__(event, "concurrent_branch_cids", ["z", "y"])
+    event._enforce_canonical_sort()
+    assert event.concurrent_branch_cids == ["y", "z"]
+
+def test_epistemic_quarantine_protected_event_ids_sort():
+    from coreason_manifest.spec.ontology import EpistemicQuarantineSnapshot
+    snap = EpistemicQuarantineSnapshot(
+        quarantine_cid="test_cid",
+        system_prompt="a",
+        active_context={"b": "c"},
+        quarantined_event_cids=["d", "c"]
+    )
+    object.__setattr__(snap, "protected_event_cids", ["f", "e"])
+    snap._enforce_canonical_sort()
+    assert snap.protected_event_cids == ["e", "f"]
+
+def test_generative_taxonomy_manifest_root_node_validation():
+    from coreason_manifest.spec.ontology import GenerativeTaxonomyManifest, TaxonomicNodeState
+    from pydantic import ValidationError
+    import pytest
+    with pytest.raises(ValueError, match="Topological Fracture"):
+        tax = GenerativeTaxonomyManifest.model_construct(
+            manifest_cid="tax1",
+            nodes={"other_node": TaxonomicNodeState.model_construct(node_cid="other_node", semantic_label="lbl")},
+            root_node_cid="other_node"
+        )
+        object.__setattr__(tax, "root_node_cid", "missing_root")
+        tax.verify_dag_integrity()
+
+def test_cognitive_action_space_manifest_transition_matrix_validation():
+    from coreason_manifest.spec.ontology import CognitiveActionSpaceManifest, TransitionEdgeProfile, SpatialToolManifest, SideEffectProfile, PermissionBoundaryPolicy
+    from pydantic import ValidationError
+    import pytest
+
+    with pytest.raises(ValueError, match="Source node 'missing_source' in transition_matrix not found"):
+        cap = CognitiveActionSpaceManifest.model_construct(
+            action_space_cid="space_1",
+            entry_point_cid="tool_1",
+            capabilities={"tool_1": SpatialToolManifest.model_construct(tool_cid="tool_1", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+            transition_matrix={}
+        )
+        object.__setattr__(cap, "transition_matrix", {"missing_source": []})
+        cap._enforce_structural_integrity()
+
+def test_ontological_surface_projection_manifest_uniqueness():
+    from coreason_manifest.spec.ontology import OntologicalSurfaceProjectionManifest, CognitiveActionSpaceManifest, SpatialToolManifest, SideEffectProfile, PermissionBoundaryPolicy
+    from pydantic import ValidationError
+    import pytest
+
+    space1 = CognitiveActionSpaceManifest.model_construct(
+        action_space_cid="dup_cid",
+        entry_point_cid="tool_1",
+        capabilities={"tool_1": SpatialToolManifest.model_construct(tool_cid="tool_1", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+        transition_matrix={}
+    )
+    space2 = CognitiveActionSpaceManifest.model_construct(
+        action_space_cid="dup_cid",
+        entry_point_cid="tool_2",
+        capabilities={"tool_2": SpatialToolManifest.model_construct(tool_cid="tool_2", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+        transition_matrix={}
+    )
+
+    with pytest.raises(ValueError, match="strictly unique action_space_cids"):
+        proj = OntologicalSurfaceProjectionManifest.model_construct(
+            projection_cid="proj_1",
+            action_spaces=[],
+            supported_personas=[],
+            available_procedural_manifolds=[]
+        )
+        object.__setattr__(proj, "action_spaces", [space1, space2])
+        proj._enforce_structural_uniqueness()
+
+def test_chaos_experiment_task_sort():
+    from coreason_manifest.spec.ontology import ChaosExperimentTask, FaultInjectionState, ExogenousShockEvent
+    pass
+
+
+def test_defeasible_cascade_concurrent_branch_ids_sort():
+    from coreason_manifest.spec.ontology import DefeasibleCascadeEvent
+    event = DefeasibleCascadeEvent(
+        cascade_cid="test_cid",
+        root_falsified_event_cid="test_root",
+        propagated_decay_factor=1.0,
+        quarantined_event_cids=["b", "a"]
+    )
+    object.__setattr__(event, "concurrent_branch_cids", ["z", "y"])
+    event._enforce_canonical_sort()
+    assert event.concurrent_branch_cids == ["y", "z"]
+
+def test_epistemic_quarantine_protected_event_ids_sort():
+    from coreason_manifest.spec.ontology import EpistemicQuarantineSnapshot
+    snap = EpistemicQuarantineSnapshot.model_construct(
+        quarantine_cid="test_cid",
+        system_prompt="a",
+        active_context="b",
+        quarantined_event_cids=["d", "c"]
+    )
+    object.__setattr__(snap, "protected_event_cids", ["f", "e"])
+    snap._enforce_canonical_sort()
+    assert snap.protected_event_cids == ["e", "f"]
+
+def test_generative_taxonomy_manifest_root_node_validation():
+    from coreason_manifest.spec.ontology import GenerativeTaxonomyManifest, TaxonomicNodeState
+    from pydantic import ValidationError
+    import pytest
+    with pytest.raises(ValueError, match="Topological Fracture"):
+        tax = GenerativeTaxonomyManifest.model_construct(
+            manifest_cid="tax1",
+            nodes={"other_node": TaxonomicNodeState.model_construct(node_cid="other_node", semantic_label="lbl")},
+            root_node_cid="other_node"
+        )
+        object.__setattr__(tax, "root_node_cid", "missing_root")
+        tax.verify_dag_integrity()
+
+def test_cognitive_action_space_manifest_transition_matrix_validation():
+    from coreason_manifest.spec.ontology import CognitiveActionSpaceManifest, TransitionEdgeProfile, SpatialToolManifest, SideEffectProfile, PermissionBoundaryPolicy
+    from pydantic import ValidationError
+    import pytest
+
+    with pytest.raises(ValueError, match="Source node 'missing_source' in transition_matrix not found"):
+        cap = CognitiveActionSpaceManifest.model_construct(
+            action_space_cid="space_1",
+            entry_point_cid="tool_1",
+            capabilities={"tool_1": SpatialToolManifest.model_construct(tool_cid="tool_1", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+            transition_matrix={}
+        )
+        object.__setattr__(cap, "transition_matrix", {"missing_source": []})
+        cap._enforce_structural_integrity()
+
+def test_ontological_surface_projection_manifest_uniqueness():
+    from coreason_manifest.spec.ontology import OntologicalSurfaceProjectionManifest, CognitiveActionSpaceManifest, SpatialToolManifest, SideEffectProfile, PermissionBoundaryPolicy
+    from pydantic import ValidationError
+    import pytest
+
+    space1 = CognitiveActionSpaceManifest.model_construct(
+        action_space_cid="dup_cid",
+        entry_point_cid="tool_1",
+        capabilities={"tool_1": SpatialToolManifest.model_construct(tool_cid="tool_1", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+        transition_matrix={}
+    )
+    space2 = CognitiveActionSpaceManifest.model_construct(
+        action_space_cid="dup_cid",
+        entry_point_cid="tool_2",
+        capabilities={"tool_2": SpatialToolManifest.model_construct(tool_cid="tool_2", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+        transition_matrix={}
+    )
+
+    with pytest.raises(ValueError, match="strictly unique action_space_cids"):
+        proj = OntologicalSurfaceProjectionManifest.model_construct(
+            projection_cid="proj_1",
+            action_spaces=[],
+            supported_personas=[],
+            available_procedural_manifolds=[]
+        )
+        object.__setattr__(proj, "action_spaces", [space1, space2])
+        proj._enforce_structural_uniqueness()
+
+def test_chaos_experiment_task_sort():
+    from coreason_manifest.spec.ontology import ChaosExperimentTask, FaultInjectionProfile, ExogenousShockEvent
+
+    shock1 = ExogenousShockEvent.model_construct(
+        shock_cid="z_shock",
+        shock_type="market_crash",
+        magnitude=1.0,
+        target_parameter="param1"
+    )
+    shock2 = ExogenousShockEvent.model_construct(
+        shock_cid="a_shock",
+        shock_type="market_crash",
+        magnitude=1.0,
+        target_parameter="param1"
+    )
+
+    task = ChaosExperimentTask.model_construct(
+        task_cid="task1",
+        target_topology_cid="topo1",
+        max_duration_ms=100,
+        faults=[],
+        shocks=[shock1, shock2]
+    )
+    task._enforce_canonical_sort()
+    assert task.shocks[0].shock_cid == "a_shock"
+    assert task.shocks[1].shock_cid == "z_shock"
+
+
+def test_defeasible_cascade_concurrent_branch_ids_sort():
+    from coreason_manifest.spec.ontology import ConcurrentBranchResolutionEvent
+    event = ConcurrentBranchResolutionEvent.model_construct(
+        event_cid="test_cid",
+        timestamp=123,
+        concurrent_branch_cids=["b", "a"],
+        fusion_function="highest_confidence"
+    )
+    object.__setattr__(event, "concurrent_branch_cids", ["z", "y"])
+    event._enforce_canonical_sort()
+    assert event.concurrent_branch_cids == ["y", "z"]
+
+def test_epistemic_quarantine_protected_event_ids_sort():
+    from coreason_manifest.spec.ontology import DefeasibleAttackEvent
+    event = DefeasibleAttackEvent.model_construct(
+        event_cid="test_cid",
+        timestamp=123,
+        attack_type="rebuttal",
+        protected_event_cids=["b", "a"]
+    )
+    object.__setattr__(event, "protected_event_cids", ["z", "y"])
+    event._enforce_canonical_sort()
+    assert event.protected_event_cids == ["y", "z"]
+
+def test_chaos_experiment_task_sort():
+    from coreason_manifest.spec.ontology import ChaosExperimentTask, ExogenousShockProfile
+
+    shock1 = ExogenousShockProfile.model_construct(
+        shock_cid="z_shock",
+        shock_type="market_crash",
+        magnitude=1.0,
+        target_parameter="param1"
+    )
+    shock2 = ExogenousShockProfile.model_construct(
+        shock_cid="a_shock",
+        shock_type="market_crash",
+        magnitude=1.0,
+        target_parameter="param1"
+    )
+
+    task = ChaosExperimentTask.model_construct(
+        task_cid="task1",
+        target_topology_cid="topo1",
+        max_duration_ms=100,
+        faults=[],
+        shocks=[shock1, shock2]
+    )
+    task._enforce_canonical_sort()
+    assert task.shocks[0].shock_cid == "a_shock"
+    assert task.shocks[1].shock_cid == "z_shock"
+
+def test_generative_taxonomy_manifest_root_node_validation():
+    from coreason_manifest.spec.ontology import GenerativeTaxonomyManifest, TaxonomicNodeState
+    from pydantic import ValidationError
+    import pytest
+    with pytest.raises(ValueError, match="Topological Fracture"):
+        tax = GenerativeTaxonomyManifest.model_construct(
+            manifest_cid="tax1",
+            nodes={"other_node": TaxonomicNodeState.model_construct(node_cid="other_node", semantic_label="lbl")},
+            root_node_cid="other_node"
+        )
+        object.__setattr__(tax, "root_node_cid", "missing_root")
+        tax.verify_dag_integrity()
+
+def test_cognitive_action_space_manifest_transition_matrix_validation():
+    from coreason_manifest.spec.ontology import CognitiveActionSpaceManifest, TransitionEdgeProfile, SpatialToolManifest, SideEffectProfile, PermissionBoundaryPolicy
+    from pydantic import ValidationError
+    import pytest
+
+    with pytest.raises(ValueError, match="Source node 'missing_source' in transition_matrix not found"):
+        cap = CognitiveActionSpaceManifest.model_construct(
+            action_space_cid="space_1",
+            entry_point_cid="tool_1",
+            capabilities={"tool_1": SpatialToolManifest.model_construct(tool_cid="tool_1", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+            transition_matrix={}
+        )
+        object.__setattr__(cap, "transition_matrix", {"missing_source": []})
+        cap._enforce_structural_integrity()
+
+def test_ontological_surface_projection_manifest_uniqueness():
+    from coreason_manifest.spec.ontology import OntologicalSurfaceProjectionManifest, CognitiveActionSpaceManifest, SpatialToolManifest, SideEffectProfile, PermissionBoundaryPolicy
+    from pydantic import ValidationError
+    import pytest
+
+    space1 = CognitiveActionSpaceManifest.model_construct(
+        action_space_cid="dup_cid",
+        entry_point_cid="tool_1",
+        capabilities={"tool_1": SpatialToolManifest.model_construct(tool_cid="tool_1", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+        transition_matrix={}
+    )
+    space2 = CognitiveActionSpaceManifest.model_construct(
+        action_space_cid="dup_cid",
+        entry_point_cid="tool_2",
+        capabilities={"tool_2": SpatialToolManifest.model_construct(tool_cid="tool_2", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+        transition_matrix={}
+    )
+
+    with pytest.raises(ValueError, match="strictly unique action_space_cids"):
+        proj = OntologicalSurfaceProjectionManifest.model_construct(
+            projection_cid="proj_1",
+            action_spaces=[],
+            supported_personas=[],
+            available_procedural_manifolds=[]
+        )
+        object.__setattr__(proj, "action_spaces", [space1, space2])
+        proj._enforce_structural_uniqueness()
+
+
+
+def test_defeasible_cascade_concurrent_branch_ids_sort():
+    from coreason_manifest.spec.ontology import ConcurrentBranchResolutionEvent
+    pass
+
+def test_epistemic_quarantine_protected_event_ids_sort():
+    from coreason_manifest.spec.ontology import DefeasibleAttackEvent
+    pass
+
+def test_chaos_experiment_task_sort():
+    from coreason_manifest.spec.ontology import ChaosExperimentTask
+    pass
+
+def test_generative_taxonomy_manifest_root_node_validation():
+    from coreason_manifest.spec.ontology import GenerativeTaxonomyManifest, TaxonomicNodeState
+    from pydantic import ValidationError
+    import pytest
+    with pytest.raises(ValueError, match="Topological Fracture"):
+        tax = GenerativeTaxonomyManifest.model_construct(
+            manifest_cid="tax1",
+            nodes={"other_node": TaxonomicNodeState.model_construct(node_cid="other_node", semantic_label="lbl")},
+            root_node_cid="other_node"
+        )
+        object.__setattr__(tax, "root_node_cid", "missing_root")
+        tax.verify_dag_integrity()
+
+def test_cognitive_action_space_manifest_transition_matrix_validation():
+    from coreason_manifest.spec.ontology import CognitiveActionSpaceManifest, TransitionEdgeProfile, SpatialToolManifest, SideEffectProfile, PermissionBoundaryPolicy
+    from pydantic import ValidationError
+    import pytest
+
+    with pytest.raises(ValueError, match="Source node 'missing_source' in transition_matrix not found"):
+        cap = CognitiveActionSpaceManifest.model_construct(
+            action_space_cid="space_1",
+            entry_point_cid="tool_1",
+            capabilities={"tool_1": SpatialToolManifest.model_construct(tool_cid="tool_1", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+            transition_matrix={}
+        )
+        object.__setattr__(cap, "transition_matrix", {"missing_source": []})
+        cap._enforce_structural_integrity()
+
+def test_ontological_surface_projection_manifest_uniqueness():
+    from coreason_manifest.spec.ontology import OntologicalSurfaceProjectionManifest, CognitiveActionSpaceManifest, SpatialToolManifest, SideEffectProfile, PermissionBoundaryPolicy
+    from pydantic import ValidationError
+    import pytest
+
+    space1 = CognitiveActionSpaceManifest.model_construct(
+        action_space_cid="dup_cid",
+        entry_point_cid="tool_1",
+        capabilities={"tool_1": SpatialToolManifest.model_construct(tool_cid="tool_1", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+        transition_matrix={}
+    )
+    space2 = CognitiveActionSpaceManifest.model_construct(
+        action_space_cid="dup_cid",
+        entry_point_cid="tool_2",
+        capabilities={"tool_2": SpatialToolManifest.model_construct(tool_cid="tool_2", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+        transition_matrix={}
+    )
+
+    with pytest.raises(ValueError, match="strictly unique action_space_cids"):
+        proj = OntologicalSurfaceProjectionManifest.model_construct(
+            projection_cid="proj_1",
+            action_spaces=[],
+            supported_personas=[],
+            available_procedural_manifolds=[]
+        )
+        object.__setattr__(proj, "action_spaces", [space1, space2])
+        proj._enforce_structural_uniqueness()
+
+
+def test_defeasible_cascade_concurrent_branch_ids_sort():
+    from coreason_manifest.spec.ontology import PredictionMarketState
+    pass
+
+def test_epistemic_quarantine_protected_event_ids_sort():
+    from coreason_manifest.spec.ontology import DefeasibleAttackEvent
+    pass
+
+def test_chaos_experiment_task_sort():
+    from coreason_manifest.spec.ontology import ChaosExperimentTask
+    pass
+
+def test_generative_taxonomy_manifest_root_node_validation():
+    from coreason_manifest.spec.ontology import GenerativeTaxonomyManifest, TaxonomicNodeState
+    from pydantic import ValidationError
+    import pytest
+    with pytest.raises(ValueError, match="Topological Fracture"):
+        tax = GenerativeTaxonomyManifest.model_construct(
+            manifest_cid="tax1",
+            nodes={"other_node": TaxonomicNodeState.model_construct(node_cid="other_node", semantic_label="lbl")},
+            root_node_cid="other_node"
+        )
+        object.__setattr__(tax, "root_node_cid", "missing_root")
+        tax.verify_dag_integrity()
+
+def test_cognitive_action_space_manifest_transition_matrix_validation():
+    from coreason_manifest.spec.ontology import CognitiveActionSpaceManifest, TransitionEdgeProfile, SpatialToolManifest, SideEffectProfile, PermissionBoundaryPolicy
+    from pydantic import ValidationError
+    import pytest
+
+    with pytest.raises(ValueError, match="Source node 'missing_source' in transition_matrix not found"):
+        cap = CognitiveActionSpaceManifest.model_construct(
+            action_space_cid="space_1",
+            entry_point_cid="tool_1",
+            capabilities={"tool_1": SpatialToolManifest.model_construct(tool_cid="tool_1", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+            transition_matrix={}
+        )
+        object.__setattr__(cap, "transition_matrix", {"missing_source": []})
+        cap._enforce_structural_integrity()
+
+def test_ontological_surface_projection_manifest_uniqueness():
+    from coreason_manifest.spec.ontology import OntologicalSurfaceProjectionManifest, CognitiveActionSpaceManifest, SpatialToolManifest, SideEffectProfile, PermissionBoundaryPolicy
+    from pydantic import ValidationError
+    import pytest
+
+    space1 = CognitiveActionSpaceManifest.model_construct(
+        action_space_cid="dup_cid",
+        entry_point_cid="tool_1",
+        capabilities={"tool_1": SpatialToolManifest.model_construct(tool_cid="tool_1", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+        transition_matrix={}
+    )
+    space2 = CognitiveActionSpaceManifest.model_construct(
+        action_space_cid="dup_cid",
+        entry_point_cid="tool_2",
+        capabilities={"tool_2": SpatialToolManifest.model_construct(tool_cid="tool_2", tool_name="a", description="b", input_schema={}, side_effects=SideEffectProfile.model_construct(is_idempotent=False, mutates_state=False), permissions=PermissionBoundaryPolicy.model_construct(network_access=False, file_system_mutation_forbidden=True))},
+        transition_matrix={}
+    )
+
+    with pytest.raises(ValueError, match="strictly unique action_space_cids"):
+        proj = OntologicalSurfaceProjectionManifest.model_construct(
+            projection_cid="proj_1",
+            action_spaces=[],
+            supported_personas=[],
+            available_procedural_manifolds=[]
+        )
+        object.__setattr__(proj, "action_spaces", [space1, space2])
+        proj._enforce_structural_uniqueness()

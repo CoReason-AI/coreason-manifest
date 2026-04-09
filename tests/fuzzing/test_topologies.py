@@ -110,20 +110,20 @@ def test_semantic_discovery_isometry_bounds(min_isometry_score: float) -> None:
 
 
 @given(
-    sop_id=st.from_regex(r"^[a-zA-Z0-9_.:-]+$", fullmatch=True),
+    sop_cid=st.from_regex(r"^[a-zA-Z0-9_.:-]+$", fullmatch=True),
     target_persona=st.from_regex(r"^[a-zA-Z0-9_-]+$", fullmatch=True),
     ghost_source=st.text(min_size=1),
     ghost_target=st.text(min_size=1),
 )
 def test_epistemic_sop_ghost_node_rejection(
-    sop_id: str, target_persona: str, ghost_source: str, ghost_target: str
+    sop_cid: str, target_persona: str, ghost_source: str, ghost_target: str
 ) -> None:
     """Prove that EpistemicSOPManifest throws a ValidationError if an edge points to an undefined step."""
     # Build an empty cognitive_steps dictionary to easily test ghost nodes
 
     with pytest.raises(ValidationError, match="Ghost node referenced"):
         EpistemicSOPManifest(
-            sop_id=sop_id,
+            sop_cid=sop_cid,
             target_persona=target_persona,
             cognitive_steps={},
             structural_grammar_hashes={},
@@ -206,15 +206,15 @@ def test_swarm_topology_constraints_fuzz(
 
 @settings(max_examples=250, deadline=None)
 @given(
-    cascade_id=st.text(min_size=7, alphabet="abcdefg01234_-"),
+    cascade_cid=st.text(min_size=7, alphabet="abcdefg01234_-"),
     root=st.text(min_size=7, alphabet="abcdefg01234_-"),
     quarantined=st.lists(st.text(min_size=7, alphabet="abcdefg01234_-"), min_size=1, max_size=20),
     decay=st.floats(min_value=-1.0, max_value=2.0),
 )
-def test_defeasible_cascade_logic_fuzz(cascade_id: str, root: str, quarantined: list[str], decay: float) -> None:
+def test_defeasible_cascade_logic_fuzz(cascade_cid: str, root: str, quarantined: list[str], decay: float) -> None:
     try:
         DefeasibleCascadeEvent(
-            cascade_id=cascade_id,
+            cascade_cid=cascade_cid,
             root_falsified_event_cid=root,
             propagated_decay_factor=decay,
             quarantined_event_cids=quarantined,

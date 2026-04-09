@@ -16,7 +16,7 @@ from pydantic import AnyUrl, ValidationError
 from coreason_manifest.spec.ontology import (
     CognitiveCritiqueProfile,
     ContextualizedSourceState,
-    DerivationMode,
+    DerivationModeProfile,
     EpistemicProvenanceReceipt,
     InterventionIntent,
     InterventionPolicy,
@@ -30,7 +30,7 @@ def test_epistemic_sealing_bounds(loops: int) -> None:
         EpistemicProvenanceReceipt(
             extracted_by="did:coreason:test1",
             source_event_cid="test-event-id",
-            derivation_mode=DerivationMode.DIRECT_TRANSLATION,
+            derivation_mode=DerivationModeProfile.DIRECT_TRANSLATION,
             revision_loops_executed=loops,
         )
     assert "Input should be less than or equal to 100" in str(exc.value)
@@ -41,7 +41,7 @@ def test_epistemic_sealing_bounds_valid(loops: int) -> None:
     receipt = EpistemicProvenanceReceipt(
         extracted_by="did:coreason:test1",
         source_event_cid="test-event-id",
-        derivation_mode=DerivationMode.DIRECT_TRANSLATION,
+        derivation_mode=DerivationModeProfile.DIRECT_TRANSLATION,
         revision_loops_executed=loops,
     )
     assert receipt.revision_loops_executed == loops

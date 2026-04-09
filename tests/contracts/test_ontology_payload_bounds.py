@@ -184,7 +184,7 @@ def test_constitutional_amendment_intent_payload_bounds() -> None:
 
     # Valid payload
     intent = ConstitutionalAmendmentIntent(
-        drift_event_id="drift:123",
+        drift_event_cid="drift:123",
         proposed_patch={"op": "add", "path": "/policy", "value": "updated"},
         justification="Valid patch justification",
     )
@@ -197,7 +197,7 @@ def test_constitutional_amendment_intent_payload_bounds() -> None:
 
     with pytest.raises(ValidationError) as exc_info:
         ConstitutionalAmendmentIntent(
-            drift_event_id="drift:123", proposed_patch=nested_payload, justification="Valid patch justification"
+            drift_event_cid="drift:123", proposed_patch=nested_payload, justification="Valid patch justification"
         )
     assert "Payload exceeds maximum recursion depth of 10" in str(exc_info.value)
 

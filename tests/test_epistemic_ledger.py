@@ -13,7 +13,7 @@ import pytest
 from coreason_manifest.spec.ontology import (
     BeliefMutationEvent,
     DefeasibleCascadeEvent,
-    DerivationMode,
+    DerivationModeProfile,
     EpistemicLedgerState,
     EpistemicProvenanceReceipt,
     ObservationEvent,
@@ -45,13 +45,13 @@ def test_defeasible_quarantine() -> None:
                     provenance=EpistemicProvenanceReceipt(
                         source_event_cid="test_event",
                         extracted_by="did:coreason:agent-1",
-                        derivation_mode=DerivationMode.DIRECT_TRANSLATION,
+                        derivation_mode=DerivationModeProfile.DIRECT_TRANSLATION,
                     ),
                 )
             },
             active_cascades=[
                 DefeasibleCascadeEvent(
-                    cascade_id="cascade1",
+                    cascade_cid="cascade1",
                     root_falsified_event_cid="root_event",
                     propagated_decay_factor=0.5,
                     quarantined_event_cids=["claim1"],

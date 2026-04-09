@@ -19,7 +19,7 @@ from coreason_manifest.spec.ontology import (
 
 
 def test_teleological_isometry_threshold() -> None:
-    source_intent_id = "intent-id-12345"
+    source_intent_cid = "intent-id-12345"
     target_intent_vector = VectorEmbeddingState(
         vector_base64="abc", dimensionality=10, foundation_matrix_name="test-model"
     )
@@ -28,7 +28,7 @@ def test_teleological_isometry_threshold() -> None:
     )
 
     receipt_passed = TeleologicalIsometryReceipt(
-        source_intent_id=source_intent_id,
+        source_intent_cid=source_intent_cid,
         target_intent_vector=target_intent_vector,
         forged_output_vector=forged_output_vector,
         measured_cosine_similarity=0.90,
@@ -37,7 +37,7 @@ def test_teleological_isometry_threshold() -> None:
     assert receipt_passed.alignment_threshold_passed is True
 
     receipt_failed = TeleologicalIsometryReceipt(
-        source_intent_id=source_intent_id,
+        source_intent_cid=source_intent_cid,
         target_intent_vector=target_intent_vector,
         forged_output_vector=forged_output_vector,
         measured_cosine_similarity=0.80,
@@ -52,7 +52,7 @@ def test_hoare_logic_proof_receipt_canonical_sorting() -> None:
     contract_c = LiquidTypeContract(target_property="c_prop", mathematical_predicate="x == 5")
 
     receipt = HoareLogicProofReceipt(
-        capability_id="cap-id-123",
+        capability_cid="cap-id-123",
         preconditions=[contract_b, contract_c, contract_a],
         postconditions=[contract_c, contract_a, contract_b],
         proof_system="lean4",
