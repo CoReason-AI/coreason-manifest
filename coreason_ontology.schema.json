@@ -829,6 +829,7 @@
           "normative_drift": "#/$defs/NormativeDriftEvent",
           "observation": "#/$defs/ObservationEvent",
           "persistence_commit": "#/$defs/PersistenceCommitReceipt",
+          "semantic_relational_record": "#/$defs/SemanticRelationalRecordState",
           "system_fault": "#/$defs/SystemFaultEvent",
           "token_burn": "#/$defs/TokenBurnReceipt",
           "tool_invocation": "#/$defs/ToolInvocationEvent"
@@ -892,6 +893,9 @@
         },
         {
           "$ref": "#/$defs/IntentClassificationReceipt"
+        },
+        {
+          "$ref": "#/$defs/SemanticRelationalRecordState"
         }
       ]
     },
@@ -14420,6 +14424,103 @@
       "title": "SemanticNodeState",
       "type": "object"
     },
+    "SemanticRelationalRecordState": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents the untyped payload injection zone for harmonized structured telemetry. CAUSAL AFFORDANCE: Permits specialized downstream agents to project and decode specific industry payloads (e.g., OMOP CDM, FIX protocol) while preserving universal mathematical traversal of the graph. EPISTEMIC BOUNDS: The payload_injection_zone is routed through the volumetric hardware guillotine.",
+      "properties": {
+        "topology_class": {
+          "const": "semantic_relational_record",
+          "default": "semantic_relational_record",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "event_cid": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The RFC 8785 Canonical hash of the immediate causal ancestor, securing the Merkle-DAG.",
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "description": "The precise temporal coordinate of the event realization.",
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "record_cid": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this record.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Record Cid",
+          "type": "string"
+        },
+        "ontology_class": {
+          "$ref": "#/$defs/UpperOntologyClassProfile",
+          "description": "The domain-independent structural classification of the record."
+        },
+        "temporal_bounds": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TemporalBoundsProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The temporal mapping of the event."
+        },
+        "payload_injection_zone": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonPrimitiveState"
+          },
+          "description": "The untyped domain-specific schema payload.",
+          "propertyNames": {
+            "maxLength": 255
+          },
+          "title": "Payload Injection Zone",
+          "type": "object"
+        },
+        "multivariate_latent_projection": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/VectorEmbeddingState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The high-dimensional tabular embedding resolving the entire multivariate row into a holistic event meaning."
+        }
+      },
+      "required": [
+        "event_cid",
+        "timestamp",
+        "record_cid",
+        "ontology_class",
+        "payload_injection_zone"
+      ],
+      "title": "SemanticRelationalRecordState",
+      "type": "object"
+    },
     "SemanticSlicingPolicy": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Mandatory Access Control (MAC) and Cognitive Load Theory to aggressively cull context window topologies and prevent VRAM exhaustion.\n\nCAUSAL AFFORDANCE: Forces the attention mechanism to physically ignore state representations that lack the whitelisted `required_semantic_labels` or exceed the `permitted_classification_tiers`.\n\nEPISTEMIC BOUNDS: VRAM exhaustion is clamped by `context_window_token_ceiling` (`gt=0, le=2000000`). The validation pipeline mechanically sorts the tier arrays via `@model_validator` for invariant RFC 8785 canonical determinism.\n\nMCP ROUTING TRIGGERS: Mandatory Access Control, Zero-Trust Execution, Context Window Partitioning, Cognitive Load Theory, Epistemic Firewall",
@@ -16917,6 +17018,15 @@
       ],
       "title": "TruthMaintenancePolicy",
       "type": "object"
+    },
+    "UpperOntologyClassProfile": {
+      "description": "AGENT INSTRUCTION: Classifies reality into domain-independent categories based on Basic Formal Ontology principles to prevent graph bloat.",
+      "enum": [
+        "continuant",
+        "occurrent"
+      ],
+      "title": "UpperOntologyClassProfile",
+      "type": "string"
     },
     "UtilityJustificationGraphReceipt": {
       "additionalProperties": false,
