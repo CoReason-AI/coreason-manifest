@@ -1027,3 +1027,21 @@ def test_spatial_hardware_profile_physics_engine() -> None:
     # Should not raise
     SpatialHardwareProfile(gpu_count_magnitude=1, interconnect_topology=InterconnectTopologyProfile.ISOLATED)
     SpatialHardwareProfile(gpu_count_magnitude=2, interconnect_topology=InterconnectTopologyProfile.PCIE_GEN4)
+
+
+def test_spatial_hardware_profile_physics_engine_invalid() -> None:
+    from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import InterconnectTopologyProfile, SpatialHardwareProfile
+
+    with pytest.raises(ValidationError, match="Topological Contradiction"):
+        SpatialHardwareProfile(gpu_count_magnitude=2, interconnect_topology=InterconnectTopologyProfile.ISOLATED)
+
+
+def test_thermodynamic_rate_contract_validation_invalid() -> None:
+    from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import ThermodynamicRateContract
+
+    with pytest.raises(ValidationError, match="Thermodynamic Void"):
+        ThermodynamicRateContract(magnitude_unit="USD")
