@@ -232,7 +232,10 @@ def calculate_remaining_compute(ledger: ontology.EpistemicLedgerState, initial_e
     """
     remaining = initial_escrow_magnitude
     for event in ledger.history:
-        if isinstance(event, ontology.ThermodynamicBurnReceipt) or getattr(event, "topology_class", None) == "thermodynamic_burn":
+        if (
+            isinstance(event, ontology.ThermodynamicBurnReceipt)
+            or getattr(event, "topology_class", None) == "thermodynamic_burn"
+        ):
             remaining -= getattr(event, "burn_magnitude", 0)
             if remaining < 0:
                 raise ValueError("Mathematical Boundary Breached: Compute escrow exhausted.")

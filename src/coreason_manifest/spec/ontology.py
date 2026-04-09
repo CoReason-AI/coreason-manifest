@@ -5342,7 +5342,9 @@ class BudgetExhaustionEvent(CoreasonBaseState):
     ] = Field(description="A string representing the original escrow boundary breached.")
     final_burn_receipt_cid: Annotated[
         str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
-    ] = Field(description="A string pointing to the exact ThermodynamicBurnReceipt CID that pushed the state over the limit.")
+    ] = Field(
+        description="A string pointing to the exact ThermodynamicBurnReceipt CID that pushed the state over the limit."
+    )
 
 
 class ThermodynamicBurnReceipt(CoreasonBaseState):
@@ -5374,13 +5376,21 @@ class ThermodynamicBurnReceipt(CoreasonBaseState):
     topology_class: Literal["thermodynamic_burn"] = Field(
         default="thermodynamic_burn", description="Discriminator type for a thermodynamic burn receipt."
     )
-    tool_invocation_cid: Annotated[
-        str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
-    ] | None = Field(default=None, description="A string linking this burn back to the specific ToolInvocationEvent CID.")
-    input_tokens: int = Field(default=0, le=1000000000, ge=0, description="The mathematical measure of input tokens consumed.")
-    output_tokens: int = Field(default=0, le=1000000000, ge=0, description="The mathematical measure of output tokens generated.")
-    execution_seconds: int = Field(default=0, le=1000000000, ge=0, description="The exact physical time leased on the unmanaged Spot Market host.")
-    network_egress_gb: int = Field(default=0, le=1000000000, ge=0, description="The bandwidth volume utilized during execution.")
+    tool_invocation_cid: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] | None
+    ) = Field(default=None, description="A string linking this burn back to the specific ToolInvocationEvent CID.")
+    input_tokens: int = Field(
+        default=0, le=1000000000, ge=0, description="The mathematical measure of input tokens consumed."
+    )
+    output_tokens: int = Field(
+        default=0, le=1000000000, ge=0, description="The mathematical measure of output tokens generated."
+    )
+    execution_seconds: int = Field(
+        default=0, le=1000000000, ge=0, description="The exact physical time leased on the unmanaged Spot Market host."
+    )
+    network_egress_gb: int = Field(
+        default=0, le=1000000000, ge=0, description="The bandwidth volume utilized during execution."
+    )
     burn_magnitude: int = Field(
         le=1000000000, ge=0, description="The normalized economic cost magnitude representing total thermodynamic burn."
     )
