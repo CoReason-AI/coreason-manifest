@@ -217,3 +217,75 @@ def test_span_event_payload_bounds() -> None:
     with pytest.raises(ValidationError) as exc_info:
         SpanEvent(name="test_event", timestamp_unix_nano=1678888888000000000, attributes=nested_payload)
     assert "Payload exceeds maximum recursion depth of 10" in str(exc_info.value)
+
+
+def test_ontology_discovery_intent_payload_bounds() -> None:
+    from coreason_manifest.spec.ontology import OntologyDiscoveryIntent
+
+    # Valid payload
+    intent = OntologyDiscoveryIntent(
+        jsonrpc="2.0",
+        method="query_registry",
+        id="req-123",
+        target_registry_uri="https://www.ebi.ac.uk/ols4/api",  # type: ignore
+        query_concept_cid="SCTID:12345",
+        expected_response_schema={"type": "object"},
+    )
+    assert intent.expected_response_schema == {"type": "object"}
+
+    # Null payload
+    intent_null = OntologyDiscoveryIntent(
+        jsonrpc="2.0",
+        method="query_registry",
+        id="req-123",
+        target_registry_uri="https://www.ebi.ac.uk/ols4/api",  # type: ignore
+        query_concept_cid="SCTID:12345",
+        expected_response_schema=None,
+    )
+    assert intent_null.expected_response_schema is None
+
+    # Invalid payload (exceeds depth)
+    nested_payload: Any = "leaf"
+    for _ in range(11):
+        nested_payload = {"key": nested_payload}
+
+    with pytest.raises(ValidationError) as exc_info:
+        OntologyDiscoveryIntent(
+            method="query_registry",
+            id="req-123",
+            target_registry_uri="https://www.ebi.ac.uk/ols4/api",  # type: ignore
+            query_concept_cid="SCTID:12345",
+            expected_response_schema=nested_payload,
+        )
+    assert "Payload exceeds maximum recursion depth of 10" in str(exc_info.value)
+
+
+def test_semantic_mapping_heuristic_proposal_payload_bounds() -> None:
+    from coreason_manifest.spec.ontology import SemanticMappingHeuristicProposal
+
+    # Valid payload
+    proposal = SemanticMappingHeuristicProposal(
+        proposal_cid="prop-123",
+        source_ontology_namespace="ICD-10",
+        target_ontology_namespace="SNOMED-CT",
+        formal_rule_matrix={"rule": "SWRL_EXPRESSION"},
+        justification_evidence_cids=["did:example:node_B", "did:example:node_A"],
+    )
+    assert proposal.formal_rule_matrix == {"rule": "SWRL_EXPRESSION"}
+    # Verify canonical sorting
+    assert proposal.justification_evidence_cids == ["did:example:node_A", "did:example:node_B"]
+
+    # Invalid payload (exceeds depth)
+    nested_payload: Any = "leaf"
+    for _ in range(11):
+        nested_payload = {"key": nested_payload}
+
+    with pytest.raises(ValidationError) as exc_info:
+        SemanticMappingHeuristicProposal(
+            proposal_cid="prop-123",
+            source_ontology_namespace="ICD-10",
+            target_ontology_namespace="SNOMED-CT",
+            formal_rule_matrix=nested_payload,
+            justification_evidence_cids=["did:example:node_A"],
+        )
+    assert "Payload exceeds maximum recursion depth of 10" in str(exc_info.value)

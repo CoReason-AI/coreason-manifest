@@ -1621,7 +1621,7 @@ class RoutingFrontierPolicy(CoreasonBaseState):
                 try:
                     val = int(values["max_latency_ms"])
                     values["max_latency_ms"] = int(max(1, min(val, 86400000)))
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
             if "max_cost_magnitude_per_token" in values:
                 try:
@@ -3405,6 +3405,74 @@ class BoundedJSONRPCIntent(CoreasonBaseState):
         EPISTEMIC BOUNDS: Physically guillotines evaluation the millisecond the absolute volume exceeds total_nodes <= 10000.
         """
         return _validate_payload_bounds(v)
+
+
+class OntologyDiscoveryIntent(BoundedJSONRPCIntent):
+    """
+    AGENT INSTRUCTION: Authorizes a Semantic Watchdog Agent to perform strict, SSRF-protected out-of-band polling against external semantic registries to monitor for ontological deprecation or semantic drift.
+    """
+
+    topology_class: Literal["ontology_discovery"] = Field(
+        default="ontology_discovery", description="Discriminator for external ontology polling."
+    )
+    target_registry_uri: HttpUrl = Field(
+        description="The standard ontology registry endpoint (e.g., EBI-OLS, BioPortal)."
+    )
+    query_concept_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
+        Field(description="The internal standard CID the agent is checking for deprecation or semantic drift.")
+    )
+    expected_response_schema: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] | None = (
+        Field(default=None, description="Optional strict schema expected from the external RDF/OWL registry.")
+    )
+
+    @field_validator("target_registry_uri", mode="after")
+    @classmethod
+    def _enforce_ssrf_quarantine(cls, url: HttpUrl) -> HttpUrl:
+        _validate_ssrf_safety(str(url))
+        return url
+
+    @field_validator("expected_response_schema", mode="before")
+    @classmethod
+    def enforce_payload_topology(cls, v: Any) -> Any:
+        if v is not None:
+            _validate_payload_bounds(v)
+        return v
+
+
+class SemanticMappingHeuristicProposal(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A formal cryptographic petition submitted by an agent to update the swarm's internal graph logic. Compiles discovered literature and external API responses into a mathematically verifiable semantic mapping rule (e.g., SWRL).
+    """
+
+    topology_class: Literal["semantic_mapping_proposal"] = Field(
+        default="semantic_mapping_proposal", description="Discriminator for semantic heuristic proposals."
+    )
+    proposal_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="The cryptographic Merkle-DAG anchor for the proposal."
+    )
+    source_ontology_namespace: Annotated[str, StringConstraints(max_length=2000)] = Field(
+        description="The origin namespace (e.g., ICD-10, USC)."
+    )
+    target_ontology_namespace: Annotated[str, StringConstraints(max_length=2000)] = Field(
+        description="The destination namespace (e.g., SNOMED-CT, CFR)."
+    )
+    formal_rule_matrix: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
+        description="An untyped but volumetrically bounded dictionary defining the exact topological logic required to execute the crosswalk (e.g., a SWRL representation)."
+    )
+    justification_evidence_cids: list[NodeCIDState] = Field(
+        min_length=1,
+        description="Explicit pointers to the AtomicPropositionState or OntologicalReificationReceipt nodes that causally justify this new mapping rule.",
+    )
+
+    @field_validator("formal_rule_matrix", mode="before")
+    @classmethod
+    def enforce_payload_topology(cls, v: Any) -> Any:
+        return _validate_payload_bounds(v)
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "justification_evidence_cids", sorted(self.justification_evidence_cids))
+        return self
 
 
 class BrowserDOMState(CoreasonBaseState):
@@ -6051,7 +6119,9 @@ type AnyIntent = Annotated[
     | LatentProjectionIntent
     | LatentSchemaInferenceIntent
     | HumanDirectiveIntent
-    | ContextualSemanticResolutionIntent,
+    | ContextualSemanticResolutionIntent
+    | OntologyDiscoveryIntent
+    | SemanticMappingHeuristicProposal,
     Field(discriminator="topology_class"),
 ]
 
@@ -13051,3 +13121,5 @@ GlobalSemanticInvariantProfile.model_rebuild()
 MultimodalArtifactReceipt.model_rebuild()
 DiscourseNodeState.model_rebuild()
 DiscourseTreeManifest.model_rebuild()
+OntologyDiscoveryIntent.model_rebuild()
+SemanticMappingHeuristicProposal.model_rebuild()

@@ -12979,6 +12979,114 @@
       "title": "OntologicalSurfaceProjectionManifest",
       "type": "object"
     },
+    "OntologyDiscoveryIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Authorizes a Semantic Watchdog Agent to perform strict, SSRF-protected out-of-band polling against external semantic registries to monitor for ontological deprecation or semantic drift.",
+      "properties": {
+        "jsonrpc": {
+          "const": "2.0",
+          "description": "JSON-RPC version.",
+          "title": "Jsonrpc",
+          "type": "string"
+        },
+        "method": {
+          "description": "Method to be invoked.",
+          "maxLength": 1000,
+          "title": "Method",
+          "type": "string"
+        },
+        "params": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/JsonPrimitiveState"
+              },
+              "maxProperties": 86400000,
+              "propertyNames": {
+                "maxLength": 255
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Payload parameters. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
+          "title": "Params"
+        },
+        "id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9_.:-]+$",
+              "type": "string"
+            },
+            {
+              "maximum": 1000000000,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Unique request identifier.",
+          "title": "Id"
+        },
+        "topology_class": {
+          "const": "ontology_discovery",
+          "default": "ontology_discovery",
+          "description": "Discriminator for external ontology polling.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "target_registry_uri": {
+          "description": "The standard ontology registry endpoint (e.g., EBI-OLS, BioPortal).",
+          "format": "uri",
+          "maxLength": 2083,
+          "minLength": 1,
+          "title": "Target Registry Uri",
+          "type": "string"
+        },
+        "query_concept_cid": {
+          "description": "The internal standard CID the agent is checking for deprecation or semantic drift.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Query Concept Cid",
+          "type": "string"
+        },
+        "expected_response_schema": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/JsonPrimitiveState"
+              },
+              "propertyNames": {
+                "maxLength": 255
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional strict schema expected from the external RDF/OWL registry.",
+          "title": "Expected Response Schema"
+        }
+      },
+      "required": [
+        "jsonrpc",
+        "method",
+        "target_registry_uri",
+        "query_concept_cid"
+      ],
+      "title": "OntologyDiscoveryIntent",
+      "type": "object"
+    },
     "OpticalMappingContract": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Guarantee isomorphic data translation from untrusted MCP payloads into the swarm's working memory.\nCAUSAL AFFORDANCE: Verifies that the geometric shape of the payload perfectly satisfies the expected contravariant input of the target node without executing procedural mapping code.\nEPISTEMIC BOUNDS: The `lens_source_pointer` and `prism_target_pointer` mathematically lock to max_length=2000. `strict_isomorphism` forbids type coercion.\nMCP ROUTING TRIGGERS: Category Theory, Profunctor Optics, Lens, Prism, Isomorphic State Synchronization",
@@ -14938,6 +15046,68 @@
         "timeout_action"
       ],
       "title": "SemanticIntent",
+      "type": "object"
+    },
+    "SemanticMappingHeuristicProposal": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A formal cryptographic petition submitted by an agent to update the swarm's internal graph logic. Compiles discovered literature and external API responses into a mathematically verifiable semantic mapping rule (e.g., SWRL).",
+      "properties": {
+        "topology_class": {
+          "const": "semantic_mapping_proposal",
+          "default": "semantic_mapping_proposal",
+          "description": "Discriminator for semantic heuristic proposals.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "proposal_cid": {
+          "description": "The cryptographic Merkle-DAG anchor for the proposal.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Proposal Cid",
+          "type": "string"
+        },
+        "source_ontology_namespace": {
+          "description": "The origin namespace (e.g., ICD-10, USC).",
+          "maxLength": 2000,
+          "title": "Source Ontology Namespace",
+          "type": "string"
+        },
+        "target_ontology_namespace": {
+          "description": "The destination namespace (e.g., SNOMED-CT, CFR).",
+          "maxLength": 2000,
+          "title": "Target Ontology Namespace",
+          "type": "string"
+        },
+        "formal_rule_matrix": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonPrimitiveState"
+          },
+          "description": "An untyped but volumetrically bounded dictionary defining the exact topological logic required to execute the crosswalk (e.g., a SWRL representation).",
+          "propertyNames": {
+            "maxLength": 255
+          },
+          "title": "Formal Rule Matrix",
+          "type": "object"
+        },
+        "justification_evidence_cids": {
+          "description": "Explicit pointers to the AtomicPropositionState or OntologicalReificationReceipt nodes that causally justify this new mapping rule.",
+          "items": {
+            "$ref": "#/$defs/NodeCIDState"
+          },
+          "minItems": 1,
+          "title": "Justification Evidence Cids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "proposal_cid",
+        "source_ontology_namespace",
+        "target_ontology_namespace",
+        "formal_rule_matrix",
+        "justification_evidence_cids"
+      ],
+      "title": "SemanticMappingHeuristicProposal",
       "type": "object"
     },
     "SemanticNodeState": {
