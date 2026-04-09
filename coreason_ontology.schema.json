@@ -830,6 +830,7 @@
           "normative_drift": "#/$defs/NormativeDriftEvent",
           "observation": "#/$defs/ObservationEvent",
           "persistence_commit": "#/$defs/PersistenceCommitReceipt",
+          "post_coordinated_concept": "#/$defs/PostCoordinatedSemanticConcept",
           "semantic_relational_record": "#/$defs/SemanticRelationalRecordState",
           "system_fault": "#/$defs/SystemFaultEvent",
           "token_burn": "#/$defs/TokenBurnReceipt",
@@ -849,6 +850,9 @@
         },
         {
           "$ref": "#/$defs/AtomicPropositionState"
+        },
+        {
+          "$ref": "#/$defs/PostCoordinatedSemanticConcept"
         },
         {
           "$ref": "#/$defs/HypothesisGenerationEvent"
@@ -4141,6 +4145,59 @@
         "max_token_budget"
       ],
       "title": "ContextExpansionPolicy",
+      "type": "object"
+    },
+    "ContextualSemanticResolutionIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Acts as the kinetic trigger forcing the orchestrator to dynamically resolve a raw, untyped SemanticRelationalRecordState against a global standard ontology using optimal transport metrics, entirely bypassing legacy ETL string-matching.",
+      "properties": {
+        "topology_class": {
+          "const": "contextual_semantic_resolution",
+          "default": "contextual_semantic_resolution",
+          "description": "Discriminator for contextual semantic resolution.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "source_record_cid": {
+          "description": "An explicit cryptographic pointer to the raw SemanticRelationalRecordState pending resolution.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Source Record Cid",
+          "type": "string"
+        },
+        "target_ontology_graph_cid": {
+          "description": "A pointer to the specific standard vocabulary subgraph (e.g., an OMOP schema graph).",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Target Ontology Graph Cid",
+          "type": "string"
+        },
+        "encoding_profile": {
+          "$ref": "#/$defs/TabularEncodingProfile",
+          "description": "The method requested for compressing the source row into a continuous tensor."
+        },
+        "alignment_metric": {
+          "$ref": "#/$defs/ManifoldAlignmentMetric",
+          "description": "The optimal transport or algebraic distance metric used for evaluation."
+        },
+        "minimum_isometry_threshold": {
+          "description": "Mathematical circuit breaker. If the distance evaluates below this threshold, resolution is aborted to prevent semantic hallucination.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Minimum Isometry Threshold",
+          "type": "number"
+        }
+      },
+      "required": [
+        "source_record_cid",
+        "target_ontology_graph_cid",
+        "encoding_profile",
+        "alignment_metric",
+        "minimum_isometry_threshold"
+      ],
+      "title": "ContextualSemanticResolutionIntent",
       "type": "object"
     },
     "ContextualizedSourceState": {
@@ -11287,6 +11344,16 @@
       "title": "ManifestViolationReceipt",
       "type": "object"
     },
+    "ManifoldAlignmentMetric": {
+      "description": "AGENT INSTRUCTION: Defines the linear algebraic or optimal transport function used to mathematically measure the geometric distance between the telemetry vector and the standard ontology index.",
+      "enum": [
+        "gromov_wasserstein",
+        "earth_movers_distance",
+        "cosine_similarity"
+      ],
+      "title": "ManifoldAlignmentMetric",
+      "type": "string"
+    },
     "MarketContract": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Enforces Algorithmic Mechanism Design and Proof-of-Stake (PoS) economic collateralization required for an agent to participate in the epistemic market.\n\nCAUSAL AFFORDANCE: Unlocks the ability for the orchestrator to computationally slash Byzantine or hallucinating nodes, ensuring a strict thermodynamic cost to semantic drift.\n\nEPISTEMIC BOUNDS: Physically restricts the mathematical invariant where `slashing_penalty <= minimum_collateral` via an `@model_validator`. Both bounds are strictly enforced as atomic integer magnitudes (`ge=0, le=1000000000`).\n\nMCP ROUTING TRIGGERS: Proof-of-Stake, Slashing Condition, Byzantine Fault Tolerance, Economic Escrow",
@@ -12937,6 +13004,91 @@
         "emissive_intensity"
       ],
       "title": "PhysicallyBasedRenderingProfile",
+      "type": "object"
+    },
+    "PostCoordinatedSemanticConcept": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The definitive output of a successful latent manifold alignment. Represents a dynamic assembly of a standardized entity (Base Concept + Contextual Modifiers) to achieve infinite semantic specificity without requiring an infinitely large pre-coordinated vocabulary.",
+      "properties": {
+        "topology_class": {
+          "const": "post_coordinated_concept",
+          "default": "post_coordinated_concept",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "event_cid": {
+          "description": "Cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The RFC 8785 Canonical hash of the immediate causal ancestor.",
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "description": "The precise temporal coordinate of the event realization.",
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "concept_cid": {
+          "description": "The unique geometric coordinate representing this specific assembled concept.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Concept Cid",
+          "type": "string"
+        },
+        "base_concept_cid": {
+          "$ref": "#/$defs/NodeCIDState",
+          "description": "The pointer to the foundational, universal entity identified in the global EpistemicDomainGraphManifest."
+        },
+        "alignment_metric_used": {
+          "$ref": "#/$defs/ManifoldAlignmentMetric",
+          "description": "Audit trail of the exact mathematical metric applied during projection."
+        },
+        "isometry_score": {
+          "description": "The exact mathematical fidelity achieved during projection.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Isometry Score",
+          "type": "number"
+        },
+        "contextual_modifiers": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonPrimitiveState"
+          },
+          "description": "An untyped dictionary storing the isolated conditional factors dynamically extracted from the telemetry row.",
+          "propertyNames": {
+            "maxLength": 255
+          },
+          "title": "Contextual Modifiers",
+          "type": "object"
+        }
+      },
+      "required": [
+        "event_cid",
+        "timestamp",
+        "concept_cid",
+        "base_concept_cid",
+        "alignment_metric_used",
+        "isometry_score"
+      ],
+      "title": "PostCoordinatedSemanticConcept",
       "type": "object"
     },
     "PostQuantumSignatureReceipt": {
@@ -15945,6 +16097,16 @@
       ],
       "title": "SystemFaultEvent",
       "type": "object"
+    },
+    "TabularEncodingProfile": {
+      "description": "AGENT INSTRUCTION: Dictates the exact algorithmic mechanism the orchestrator must use to compress an untyped payload_injection_zone into a holistic high-dimensional VectorEmbeddingState, capturing multivariate covariance.",
+      "enum": [
+        "feature_wise_attention",
+        "hyperdimensional_hopfield",
+        "graph_convolutional_flattening"
+      ],
+      "title": "TabularEncodingProfile",
+      "type": "string"
     },
     "TaskAnnouncementIntent": {
       "additionalProperties": false,

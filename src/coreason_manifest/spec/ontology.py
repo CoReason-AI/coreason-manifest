@@ -226,6 +226,22 @@ class IllocutionaryForceProfile(StrEnum):
     FICTIVE_HYPOTHETICAL = "fictive_hypothetical"
 
 
+class TabularEncodingProfile(StrEnum):
+    """AGENT INSTRUCTION: Dictates the exact algorithmic mechanism the orchestrator must use to compress an untyped payload_injection_zone into a holistic high-dimensional VectorEmbeddingState, capturing multivariate covariance."""
+
+    FEATURE_WISE_ATTENTION = "feature_wise_attention"
+    HYPERDIMENSIONAL_HOPFIELD = "hyperdimensional_hopfield"
+    GRAPH_CONVOLUTIONAL_FLATTENING = "graph_convolutional_flattening"
+
+
+class ManifoldAlignmentMetric(StrEnum):
+    """AGENT INSTRUCTION: Defines the linear algebraic or optimal transport function used to mathematically measure the geometric distance between the telemetry vector and the standard ontology index."""
+
+    GROMOV_WASSERSTEIN = "gromov_wasserstein"
+    EARTH_MOVERS_DISTANCE = "earth_movers_distance"
+    COSINE_SIMILARITY = "cosine_similarity"
+
+
 class RhetoricalStructureProfile(StrEnum):
     """AGENT INSTRUCTION: Maps unstructured text segments into the strict logical confines of Rhetorical Structure Theory (RST), authorizing the extraction engine to build directed dependency graphs."""
 
@@ -4298,6 +4314,33 @@ class SemanticDiscoveryIntent(CoreasonBaseState):
         return self
 
 
+class ContextualSemanticResolutionIntent(CoreasonBaseState):
+    """AGENT INSTRUCTION: Acts as the kinetic trigger forcing the orchestrator to dynamically resolve a raw, untyped SemanticRelationalRecordState against a global standard ontology using optimal transport metrics, entirely bypassing legacy ETL string-matching."""
+
+    topology_class: Literal["contextual_semantic_resolution"] = Field(
+        default="contextual_semantic_resolution", description="Discriminator for contextual semantic resolution."
+    )
+    source_record_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
+        Field(
+            description="An explicit cryptographic pointer to the raw SemanticRelationalRecordState pending resolution."
+        )
+    )
+    target_ontology_graph_cid: Annotated[
+        str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
+    ] = Field(description="A pointer to the specific standard vocabulary subgraph (e.g., an OMOP schema graph).")
+    encoding_profile: TabularEncodingProfile = Field(
+        description="The method requested for compressing the source row into a continuous tensor."
+    )
+    alignment_metric: ManifoldAlignmentMetric = Field(
+        description="The optimal transport or algebraic distance metric used for evaluation."
+    )
+    minimum_isometry_threshold: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="Mathematical circuit breaker. If the distance evaluates below this threshold, resolution is aborted to prevent semantic hallucination.",
+    )
+
+
 class DraftingIntent(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Implements Fristonian Active Inference to minimize Expected Free Energy. Triggered when the swarm detects a catastrophic Epistemic Gap and lacks the structural parameters necessary to reduce Shannon Entropy autonomously.
@@ -5998,7 +6041,8 @@ type AnyIntent = Annotated[
     | TaxonomicRestructureIntent
     | LatentProjectionIntent
     | LatentSchemaInferenceIntent
-    | HumanDirectiveIntent,
+    | HumanDirectiveIntent
+    | ContextualSemanticResolutionIntent,
     Field(discriminator="topology_class"),
 ]
 
@@ -12335,6 +12379,40 @@ class DifferentiableLogicPolicy(CoreasonBaseState):
     )
 
 
+class PostCoordinatedSemanticConcept(CoreasonBaseState):
+    """AGENT INSTRUCTION: The definitive output of a successful latent manifold alignment. Represents a dynamic assembly of a standardized entity (Base Concept + Contextual Modifiers) to achieve infinite semantic specificity without requiring an infinitely large pre-coordinated vocabulary."""
+
+    topology_class: Literal["post_coordinated_concept"] = Field(default="post_coordinated_concept")
+    event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="Cryptographic Lineage Watermark binding this node to the Merkle-DAG."
+    )
+    prior_event_hash: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
+    ) = Field(default=None, description="The RFC 8785 Canonical hash of the immediate causal ancestor.")
+    timestamp: float = Field(description="The precise temporal coordinate of the event realization.")
+    concept_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="The unique geometric coordinate representing this specific assembled concept."
+    )
+    base_concept_cid: NodeCIDState = Field(
+        description="The pointer to the foundational, universal entity identified in the global EpistemicDomainGraphManifest."
+    )
+    alignment_metric_used: ManifoldAlignmentMetric = Field(
+        description="Audit trail of the exact mathematical metric applied during projection."
+    )
+    isometry_score: float = Field(
+        ge=0.0, le=1.0, description="The exact mathematical fidelity achieved during projection."
+    )
+    contextual_modifiers: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
+        default_factory=dict,
+        description="An untyped dictionary storing the isolated conditional factors dynamically extracted from the telemetry row.",
+    )
+
+    @field_validator("contextual_modifiers", mode="before")
+    @classmethod
+    def enforce_payload_topology(cls, v: Any) -> Any:
+        return _validate_payload_bounds(v)
+
+
 class AtomicPropositionState(CoreasonBaseState):
     """AGENT INSTRUCTION: A declarative, frozen snapshot of a standalone, verifiable statement extracted from unstructured discourse. Transmutes probabilistic 'bags-of-words' into a discrete, traversable node within the Labeled Property Graph (LPG)."""
 
@@ -12377,6 +12455,7 @@ type AnyStateEvent = Annotated[
     | BeliefMutationEvent
     | SystemFaultEvent
     | AtomicPropositionState
+    | PostCoordinatedSemanticConcept
     | HypothesisGenerationEvent
     | BargeInInterruptEvent
     | CounterfactualRegretEvent
@@ -12769,3 +12848,5 @@ EpistemicUpsamplingTask.model_rebuild()
 VolumetricPartitionState.model_rebuild()
 SemanticRelationalRecordState.model_rebuild()
 AtomicPropositionState.model_rebuild()
+ContextualSemanticResolutionIntent.model_rebuild()
+PostCoordinatedSemanticConcept.model_rebuild()
