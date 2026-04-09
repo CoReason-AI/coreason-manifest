@@ -11,7 +11,7 @@ from coreason_manifest.spec.ontology import EmpiricalStatisticalQualifier
     st.floats(allow_nan=False, allow_infinity=False, min_value=-1000, max_value=1000),
     st.floats(allow_nan=False, allow_infinity=False, min_value=0.01, max_value=100),
 )
-def test_valid_interval_geometry(lower, diff):
+def test_valid_interval_geometry(lower: float, diff: float) -> None:
     upper = lower + diff
     q = EmpiricalStatisticalQualifier(
         qualifier_type="confidence_interval",
@@ -20,7 +20,8 @@ def test_valid_interval_geometry(lower, diff):
         lower_bound=lower,
         upper_bound=upper,
     )
-    assert q.lower_bound < q.upper_bound
+    if q.lower_bound is not None and q.upper_bound is not None:
+        assert q.lower_bound < q.upper_bound
 
 
 # Test invalid cases where lower_bound >= upper_bound
@@ -28,7 +29,7 @@ def test_valid_interval_geometry(lower, diff):
     st.floats(allow_nan=False, allow_infinity=False, min_value=-1000, max_value=1000),
     st.floats(allow_nan=False, allow_infinity=False, min_value=0, max_value=100),
 )
-def test_invalid_interval_geometry_hypothesis(upper, diff):
+def test_invalid_interval_geometry_hypothesis(upper: float, diff: float) -> None:
     lower = upper + diff  # This ensures lower >= upper
     with pytest.raises(ValidationError) as exc_info:
         EmpiricalStatisticalQualifier(
