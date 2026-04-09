@@ -43,7 +43,7 @@ def test_adversarial_simulation_payload_fuzzing(payload: Any) -> None:
     try:
         # Attempt to instantiate the profile with the fuzzed synthetic payload
         profile = AdversarialSimulationProfile(
-            simulation_id="sim-chaos-001",
+            simulation_cid="sim-chaos-001",
             target_node_cid="did:coreason:target-node:123",
             attack_vector="tool_poisoning",
             synthetic_payload=payload,
@@ -72,7 +72,7 @@ def test_adversarial_simulation_dictionary_bombing() -> None:
 
     with pytest.raises(ValidationError, match="String should have at most 255 characters"):
         AdversarialSimulationProfile(
-            simulation_id="sim-chaos-002",
+            simulation_cid="sim-chaos-002",
             target_node_cid="did:coreason:target-node:123",
             attack_vector="semantic_hijacking",
             synthetic_payload=payload,
@@ -87,7 +87,7 @@ def test_adversarial_simulation_string_overflow() -> None:
 
     with pytest.raises(ValidationError, match="Value should have at most 100000 items after validation"):
         AdversarialSimulationProfile(
-            simulation_id="sim-chaos-003",
+            simulation_cid="sim-chaos-003",
             target_node_cid="did:coreason:target-node:123",
             attack_vector="data_exfiltration",
             synthetic_payload=massive_string,
@@ -100,7 +100,7 @@ def test_adversarial_simulation_invalid_attack_vector() -> None:
     """
     with pytest.raises(ValidationError, match="Input should be"):
         AdversarialSimulationProfile(
-            simulation_id="sim-chaos-004",
+            simulation_cid="sim-chaos-004",
             target_node_cid="did:coreason:target-node:123",
             attack_vector="invalid_attack_vector",  # type: ignore
             synthetic_payload={"method": "destroy"},

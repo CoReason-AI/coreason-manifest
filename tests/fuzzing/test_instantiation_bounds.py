@@ -260,13 +260,13 @@ def test_dictionary_bombing_fuzzing(massive_key: str) -> None:
 @given(timestamp=st.one_of(st.floats(max_value=-0.0001), st.floats(min_value=253402300799.1)))
 def test_temporal_dilation_fuzzing(timestamp: float) -> None:
     with pytest.raises((ValidationError, ValueError)):
-        ObservationEvent(payload={}, event_cid="test_id", timestamp=timestamp)
+        ObservationEvent(payload={}, event_cid="test_cid", timestamp=timestamp)
 
 
-@given(massive_id=st.text(min_size=129))
-def test_id_bombing_fuzzing(massive_id: str) -> None:
+@given(massive_cid=st.text(min_size=129))
+def test_id_bombing_fuzzing(massive_cid: str) -> None:
     with pytest.raises((ValidationError, ValueError)):
-        TaskAnnouncementIntent(task_cid=massive_id, required_action_space_id=None, max_budget_magnitude=100)
+        TaskAnnouncementIntent(task_cid=massive_cid, required_action_space_cid=None, max_budget_magnitude=100)
 
 
 @given(
