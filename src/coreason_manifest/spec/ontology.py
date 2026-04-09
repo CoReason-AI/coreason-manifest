@@ -7548,6 +7548,10 @@ class MultimodalArtifactReceipt(CoreasonBaseState):
     temporal_ingest_timestamp: float = Field(
         ge=0.0, le=253402300799.0, description="The UNIX timestamp anchoring the genesis block."
     )
+    global_invariants: GlobalSemanticInvariantProfile | None = Field(
+        default=None,
+        description="The overarching protocol-level invariants shielding downstream propositions from context collapse.",
+    )
 
 
 class MutationPolicy(CoreasonBaseState):
@@ -9207,6 +9211,99 @@ class TemporalBoundsProfile(CoreasonBaseState):
     def validate_temporal_bounds(self) -> Self:
         if self.valid_from is not None and self.valid_to is not None and (self.valid_to < self.valid_from):
             raise ValueError("valid_to cannot be before valid_from")
+        return self
+
+
+class GlobalSemanticInvariantProfile(CoreasonBaseState):
+    """AGENT INSTRUCTION: A macroscopic topological container that persists global contextual qualifiers (e.g., patient cohorts, operational environments, temporal scopes) across the Merkle-DAG, shielding downstream atomic propositions from context collapse."""
+
+    invariant_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
+        Field(description="The cryptographic Merkle-DAG anchor for the invariant block.")
+    )
+    categorical_cohorts: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
+        default_factory=list,
+        description="Universal set-theoretic definitions of the entities or subjects the artifact governs.",
+    )
+    operational_perimeters: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
+        default_factory=dict,
+        description="An untyped but volumetrically bounded dictionary defining study arms, jurisdictions, or specific environmental conditions.",
+    )
+    temporal_observation_horizons: list[TemporalBoundsProfile] = Field(
+        default_factory=list, description="The valid chronological windows encompassing the artifact."
+    )
+
+    @field_validator("operational_perimeters", mode="before")
+    @classmethod
+    def enforce_payload_topology(cls, v: Any) -> Any:
+        return _validate_payload_bounds(v)
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "categorical_cohorts", sorted(self.categorical_cohorts))
+        object.__setattr__(
+            self,
+            "temporal_observation_horizons",
+            sorted(
+                self.temporal_observation_horizons,
+                key=lambda x: x.valid_from if x.valid_from is not None else -float("inf"),
+            ),
+        )
+        return self
+
+
+class DiscourseNodeState(CoreasonBaseState):
+    """AGENT INSTRUCTION: A structural vertex defining a distinct rhetorical block of text within a document, enabling hierarchical parsing and graph-based traversal of discourse."""
+
+    node_cid: NodeCIDState = Field(description="The spatial coordinate of this specific discourse block.")
+    discourse_type: Literal["preamble", "methodology", "argumentation", "findings", "conclusion", "addendum"] = Field(
+        description="A strict universal automaton classifying the structural role of the text block."
+    )
+    parent_node_cid: NodeCIDState | None = Field(
+        default=None, description="A pointer to the subsuming structural block. None indicates this is a root node."
+    )
+    contained_propositions: list[NodeCIDState] = Field(
+        default_factory=list,
+        description="Explicit pointers linking this discourse block to the specific AtomicPropositionState nodes extracted from its text.",
+    )
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort_propositions(self) -> Self:
+        object.__setattr__(self, "contained_propositions", sorted(self.contained_propositions))
+        return self
+
+
+class DiscourseTreeManifest(CoreasonBaseState):
+    """AGENT INSTRUCTION: A verifiable Directed Acyclic Graph (DAG) mapping the hierarchical geometry of human discourse. Deprecates flat-sequence extraction to solve rhetorical flattening."""
+
+    topology_class: Literal["discourse_tree"] = Field(
+        default="discourse_tree", description="Discriminator for a discourse tree topology."
+    )
+    manifest_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="Cryptographic identifier for this topology."
+    )
+    root_node_cid: NodeCIDState = Field(description="The apex of the document tree.")
+    discourse_nodes: dict[Annotated[str, StringConstraints(max_length=255)], DiscourseNodeState] = Field(
+        max_length=10000, description="The localized registry of all hierarchical blocks comprising the document."
+    )
+
+    @model_validator(mode="after")
+    def verify_discourse_dag_integrity(self) -> Self:
+        if self.root_node_cid not in self.discourse_nodes:
+            raise ValueError("Topological Contradiction: root_node_cid not found in discourse_nodes.")
+
+        graph = nx.DiGraph()
+        for node_id in self.discourse_nodes:
+            graph.add_node(node_id)
+
+        for node_id, node_state in self.discourse_nodes.items():
+            if node_state.parent_node_cid is not None:
+                if node_state.parent_node_cid not in self.discourse_nodes:
+                    raise ValueError(f"Ghost pointer: Parent node {node_state.parent_node_cid} not found.")
+                graph.add_edge(node_state.parent_node_cid, node_id)
+
+        if not nx.is_directed_acyclic_graph(graph):
+            raise ValueError("Topological Contradiction: Discourse tree contains a cyclical reference.")
+
         return self
 
 
@@ -11132,7 +11229,8 @@ type AnyTopologyManifest = Annotated[
     | ConsensusFederationTopologyManifest
     | CapabilityForgeTopologyManifest
     | IntentElicitationTopologyManifest
-    | NeurosymbolicVerificationTopologyManifest,
+    | NeurosymbolicVerificationTopologyManifest
+    | DiscourseTreeManifest,
     Field(discriminator="topology_class", description="A discriminated union of workflow topologies."),
 ]
 
@@ -12892,3 +12990,8 @@ AtomicPropositionState.model_rebuild()
 ContextualSemanticResolutionIntent.model_rebuild()
 PostCoordinatedSemanticConcept.model_rebuild()
 OntologicalReificationReceipt.model_rebuild()
+
+GlobalSemanticInvariantProfile.model_rebuild()
+MultimodalArtifactReceipt.model_rebuild()
+DiscourseNodeState.model_rebuild()
+DiscourseTreeManifest.model_rebuild()
