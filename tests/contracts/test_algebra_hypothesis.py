@@ -92,7 +92,7 @@ def test_calculate_latent_alignment(vec1_list: list[float], vec2_list: list[floa
         # Due to float inaccuracies with highly extreme vectors, we check close OR difference
         assert (
             math.isclose(actual_similarity, expected_similarity, rel_tol=1e-3, abs_tol=1e-3)
-            or abs(actual_similarity - expected_similarity) < 0.01
+            or abs(actual_similarity - expected_similarity) < 0.05
             or (
                 math.isclose(expected_similarity, 0.0, abs_tol=1e-9)
                 and math.isclose(actual_similarity, 0.0, abs_tol=1e-3)

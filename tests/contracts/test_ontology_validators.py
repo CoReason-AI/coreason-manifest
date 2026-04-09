@@ -1003,3 +1003,27 @@ def test_empty_justification_rejection() -> None:
             upsampling_confidence_threshold=0.95,
             justification_vectors=[],  # Empty evidence vector
         )
+
+
+def test_thermodynamic_rate_contract_validation() -> None:
+    from pydantic import ValidationError
+
+    with pytest.raises(ValidationError, match="Thermodynamic Void"):
+        ThermodynamicRateContract(magnitude_unit="USD")
+
+    # Should not raise
+    ThermodynamicRateContract(cost_per_million_input_tokens=100, magnitude_unit="USD")
+    ThermodynamicRateContract(cost_per_execution_second_magnitude=100, magnitude_unit="USD")
+
+
+def test_spatial_hardware_profile_physics_engine() -> None:
+    from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import InterconnectTopologyProfile, SpatialHardwareProfile
+
+    with pytest.raises(ValidationError, match="Topological Contradiction"):
+        SpatialHardwareProfile(gpu_count_magnitude=2, interconnect_topology=InterconnectTopologyProfile.ISOLATED)
+
+    # Should not raise
+    SpatialHardwareProfile(gpu_count_magnitude=1, interconnect_topology=InterconnectTopologyProfile.ISOLATED)
+    SpatialHardwareProfile(gpu_count_magnitude=2, interconnect_topology=InterconnectTopologyProfile.PCIE_GEN4)
