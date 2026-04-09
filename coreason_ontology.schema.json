@@ -14463,14 +14463,6 @@
           "title": "Timestamp",
           "type": "number"
         },
-        "record_cid": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this record.",
-          "maxLength": 128,
-          "minLength": 1,
-          "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Record Cid",
-          "type": "string"
-        },
         "ontology_class": {
           "$ref": "#/$defs/UpperOntologyClassProfile",
           "description": "The domain-independent structural classification of the record."
@@ -14514,7 +14506,6 @@
       "required": [
         "event_cid",
         "timestamp",
-        "record_cid",
         "ontology_class",
         "payload_injection_zone"
       ],

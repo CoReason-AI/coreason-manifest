@@ -1,10 +1,11 @@
-from typing import Any
+from typing import Any, cast
 
 import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 
 from coreason_manifest.spec.ontology import (
+    JsonPrimitiveState,
     SemanticRelationalRecordState,
     TemporalBoundsProfile,
     UpperOntologyClassProfile,
@@ -20,10 +21,9 @@ def test_semantic_relational_record_payload_bounds(node_count: int) -> None:
     with pytest.raises(ValueError, match="Payload volume exceeds absolute hardware limit"):
         SemanticRelationalRecordState(
             event_cid="test-event-cid-1",
-            record_cid="test-record-cid-1",
             timestamp=123456789.0,
             ontology_class=UpperOntologyClassProfile.CONTINUANT,
-            payload_injection_zone=large_dict,
+            payload_injection_zone=cast("dict[str, JsonPrimitiveState]", large_dict),
         )
 
 
@@ -33,7 +33,6 @@ def test_semantic_relational_record_occurrent_temporality(valid_from: float) -> 
     tb = TemporalBoundsProfile(valid_from=valid_from)
     record = SemanticRelationalRecordState(
         event_cid="test-event-cid-2",
-        record_cid="test-record-cid-2",
         timestamp=123456789.0,
         ontology_class=UpperOntologyClassProfile.OCCURRENT,
         temporal_bounds=tb,
@@ -48,7 +47,6 @@ def test_semantic_relational_record_occurrent_temporality(valid_from: float) -> 
     ):
         SemanticRelationalRecordState(
             event_cid="test-event-cid-3",
-            record_cid="test-record-cid-3",
             timestamp=123456789.0,
             ontology_class=UpperOntologyClassProfile.OCCURRENT,
             payload_injection_zone={"key": "value"},
@@ -59,7 +57,6 @@ def test_semantic_relational_record_occurrent_temporality(valid_from: float) -> 
 def test_semantic_relational_record_continuant_no_temporality(timestamp: float) -> None:
     record = SemanticRelationalRecordState(
         event_cid="test-event-cid-4",
-        record_cid="test-record-cid-4",
         timestamp=timestamp,
         ontology_class=UpperOntologyClassProfile.CONTINUANT,
         payload_injection_zone={"key": "value"},
