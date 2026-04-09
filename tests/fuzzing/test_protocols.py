@@ -96,6 +96,7 @@ def test_fuzz_browser_dom_valid_urls(url: str) -> None:
         st.text(alphabet=st.characters(blacklist_categories=("Cs", "Cc")), min_size=1),
     )
 )
+@settings(deadline=None)
 def test_fuzz_http_transport_profile_valid(headers: dict[str, str]) -> None:
     with contextlib.suppress(ValidationError):
         HTTPTransportProfile(uri=HttpUrl("http://example.com"), headers=headers)

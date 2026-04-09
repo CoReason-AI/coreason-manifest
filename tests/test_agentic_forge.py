@@ -59,7 +59,6 @@ def test_hoare_logic_proof_receipt_canonical_sorting() -> None:
         verified_theorem_hash="a" * 64,
     )
 
-    # They should be sorted alphabetically by target_property
     assert receipt.preconditions[0].target_property == "a_prop"
     assert receipt.preconditions[1].target_property == "b_prop"
     assert receipt.preconditions[2].target_property == "c_prop"
@@ -75,8 +74,6 @@ def test_capability_forge_topology_compile() -> None:
         min_isometry_score=0.9,
         required_structural_types=["test"],
     )
-    # The CapabilityForgeTopologyManifest extends BaseTopologyManifest, which requires 'nodes' by default.
-    # To pass validation without supplying raw nodes on creation, we supply an empty dict
     manifest = CapabilityForgeTopologyManifest(
         target_epistemic_deficit=intent,
         generator_node_cid="did:coreason:agent-1",
@@ -87,15 +84,12 @@ def test_capability_forge_topology_compile() -> None:
 
     dag = manifest.compile_to_base_topology()
 
-    # DAG needs to have exactly 3 nodes
     assert len(dag.nodes) == 3
     assert "did:coreason:agent-1" in dag.nodes
     assert "did:coreason:system-1" in dag.nodes
     assert "did:coreason:system-2" in dag.nodes
 
-    # Edges should bridge chronologically
     assert len(dag.edges) == 2
 
-    # We can check specific edges
     assert ("did:coreason:agent-1", "did:coreason:system-1") in dag.edges
     assert ("did:coreason:system-1", "did:coreason:system-2") in dag.edges
