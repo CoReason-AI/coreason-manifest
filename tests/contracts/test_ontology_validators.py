@@ -1039,3 +1039,79 @@ def test_atomic_proposition_defaults() -> None:
     )
     assert prop.anaphoric_resolution_cids == []
     assert prop.topology_class == "atomic_proposition"
+
+from coreason_manifest.spec.ontology import (
+    GlobalSemanticInvariantProfile,
+    DiscourseNodeState,
+    DiscourseTreeManifest,
+    TemporalBoundsProfile,
+)
+
+def test_epic5_global_semantic_invariant_profile_sorting():
+    profile = GlobalSemanticInvariantProfile(
+        invariant_cid="invariant_1",
+        categorical_cohorts=["Zebra", "Apple"],
+        operational_perimeters={"test": "me"},
+        temporal_observation_horizons=[
+            TemporalBoundsProfile(valid_from=None),
+            TemporalBoundsProfile(valid_from=5.0)
+        ]
+    )
+    assert profile.categorical_cohorts == ["Apple", "Zebra"]
+
+def test_epic5_discourse_node_state_sorting():
+    node = DiscourseNodeState(
+        node_cid="did:ex:node1",
+        discourse_type="preamble",
+        contained_propositions=["did:ex:prop2", "did:ex:prop1"]
+    )
+    assert node.contained_propositions == ["did:ex:prop1", "did:ex:prop2"]
+
+def test_epic5_discourse_tree_manifest_dag():
+    nodes = {
+        "did:ex:root": DiscourseNodeState(node_cid="did:ex:root", discourse_type="preamble"),
+    }
+    manifest = DiscourseTreeManifest(
+        manifest_cid="manifest_1",
+        root_node_cid="did:ex:root",
+        discourse_nodes=nodes
+    )
+    assert manifest.root_node_cid == "did:ex:root"
+
+def test_epic5_discourse_tree_manifest_missing_root():
+    from pydantic import ValidationError
+    nodes = {
+        "did:ex:child1": DiscourseNodeState(node_cid="did:ex:child1", discourse_type="findings"),
+    }
+    with pytest.raises(ValidationError, match="Topological Contradiction: root_node_cid not found"):
+        DiscourseTreeManifest(
+            manifest_cid="manifest_1",
+            root_node_cid="did:ex:root",
+            discourse_nodes=nodes
+        )
+
+def test_epic5_discourse_tree_manifest_ghost_pointer():
+    from pydantic import ValidationError
+    nodes = {
+        "did:ex:root": DiscourseNodeState(node_cid="did:ex:root", discourse_type="preamble"),
+        "did:ex:child1": DiscourseNodeState(node_cid="did:ex:child1", discourse_type="findings", parent_node_cid="did:ex:ghost"),
+    }
+    with pytest.raises(ValidationError, match="Ghost pointer: Parent node did:ex:ghost not found"):
+        DiscourseTreeManifest(
+            manifest_cid="manifest_1",
+            root_node_cid="did:ex:root",
+            discourse_nodes=nodes
+        )
+
+def test_epic5_discourse_tree_manifest_cycle():
+    from pydantic import ValidationError
+    nodes = {
+        "did:ex:root": DiscourseNodeState(node_cid="did:ex:root", discourse_type="preamble", parent_node_cid="did:ex:child1"),
+        "did:ex:child1": DiscourseNodeState(node_cid="did:ex:child1", discourse_type="findings", parent_node_cid="did:ex:root"),
+    }
+    with pytest.raises(ValidationError, match="Topological Contradiction: Discourse tree contains a cyclical reference"):
+        DiscourseTreeManifest(
+            manifest_cid="manifest_1",
+            root_node_cid="did:ex:root",
+            discourse_nodes=nodes
+        )
