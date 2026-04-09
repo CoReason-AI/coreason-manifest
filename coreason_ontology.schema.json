@@ -813,6 +813,7 @@
       "description": "A discriminated union of state events.",
       "discriminator": {
         "mapping": {
+          "atomic_proposition": "#/$defs/AtomicPropositionState",
           "barge_in": "#/$defs/BargeInInterruptEvent",
           "belief_mutation": "#/$defs/BeliefMutationEvent",
           "budget_exhaustion": "#/$defs/BudgetExhaustionEvent",
@@ -845,6 +846,9 @@
         },
         {
           "$ref": "#/$defs/SystemFaultEvent"
+        },
+        {
+          "$ref": "#/$defs/AtomicPropositionState"
         },
         {
           "$ref": "#/$defs/HypothesisGenerationEvent"
@@ -1050,6 +1054,87 @@
         "simulated_cpu_cycles"
       ],
       "title": "AsymptoticComplexityReceipt",
+      "type": "object"
+    },
+    "AtomicPropositionState": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative, frozen snapshot of a standalone, verifiable statement extracted from unstructured discourse. Transmutes probabilistic 'bags-of-words' into a discrete, traversable node within the Labeled Property Graph (LPG).",
+      "properties": {
+        "topology_class": {
+          "const": "atomic_proposition",
+          "default": "atomic_proposition",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "event_cid": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The RFC 8785 Canonical hash of the immediate causal ancestor, securing the Merkle-DAG.",
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "description": "The precise temporal coordinate of the event realization.",
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "proposition_cid": {
+          "description": "A Content Identifier (CID) bounding this specific extracted proposition.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Proposition Cid",
+          "type": "string"
+        },
+        "rhetorical_role": {
+          "$ref": "#/$defs/RhetoricalStructureProfile",
+          "description": "The structural relationship of this proposition to its surrounding discourse."
+        },
+        "illocutionary_force": {
+          "$ref": "#/$defs/IllocutionaryForceProfile",
+          "description": "The intentional boundary defining the statement's truth condition."
+        },
+        "text_chunk": {
+          "description": "The raw, atomic natural language representation of the proposition. Volumetrically clamped to prevent VRAM overflow.",
+          "maxLength": 50000,
+          "title": "Text Chunk",
+          "type": "string"
+        },
+        "anaphoric_resolution_cids": {
+          "description": "Explicit array of entity DIDs/CIDs resolving implicit references (e.g., pronouns) within the text chunk back to explicit nodes.",
+          "items": {
+            "$ref": "#/$defs/NodeCIDState"
+          },
+          "title": "Anaphoric Resolution Cids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "event_cid",
+        "timestamp",
+        "proposition_cid",
+        "rhetorical_role",
+        "illocutionary_force",
+        "text_chunk"
+      ],
+      "title": "AtomicPropositionState",
       "type": "object"
     },
     "AttackVectorProfile": {
@@ -9460,6 +9545,17 @@
       "title": "HypothesisStakeReceipt",
       "type": "object"
     },
+    "IllocutionaryForceProfile": {
+      "description": "AGENT INSTRUCTION: Mathematically categorizes the structural intent of a proposition to prevent reasoning agents from hallucinating contextual truth values. Dictates whether the swarm evaluates the node as an empirical fact, a normative constraint, a guaranteed promise, or a simulation.",
+      "enum": [
+        "assertive",
+        "directive_normative",
+        "commissive",
+        "fictive_hypothetical"
+      ],
+      "title": "IllocutionaryForceProfile",
+      "type": "string"
+    },
     "InputMappingContract": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes a covariant Functor (Category Theory) mapping\nhigher-order topological state dimensions into an encapsulated subgraph's\nlocalized working memory. As a ...Contract suffix, this enforces rigid\nmathematical boundaries globally.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator's state projection engine to\nsafely inject parent variables into a CompositeNodeProfile without violating\nscope isolation or referential transparency.\n\nEPISTEMIC BOUNDS: The geometric projection vectors parent_key and child_key\nare strictly clamped to max_length=2000, mathematically severing the\ncapability for String Exhaustion Attacks and Path Traversal vulnerabilities\nduring AST resolution.\n\nMCP ROUTING TRIGGERS: Category Theory, Covariant Functor, Scope Isolation,\nState Projection, Bijective Mapping",
@@ -13311,6 +13407,18 @@
       ],
       "title": "RedactionPolicy",
       "type": "object"
+    },
+    "RhetoricalStructureProfile": {
+      "description": "AGENT INSTRUCTION: Maps unstructured text segments into the strict logical confines of Rhetorical Structure Theory (RST), authorizing the extraction engine to build directed dependency graphs.",
+      "enum": [
+        "premise",
+        "conclusion",
+        "elaboration",
+        "contrast",
+        "concession"
+      ],
+      "title": "RhetoricalStructureProfile",
+      "type": "string"
     },
     "RiskLevelPolicy": {
       "description": "AGENT INSTRUCTION: Formalizes Quantitative Risk Assessment and Utility Theory, translating qualitative human threat vectors into computable scalar magnitudes that dictate systemic halting thresholds.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator's control theory loop to measure the aggregate expected utility loss of a proposed topology. It serves as the physical threshold that triggers hardware circuit breakers or forced escalation overrides.\n\nEPISTEMIC BOUNDS: The semantic strings are mathematically locked to an absolute integer space via the `weight` property (0, 1, 2). Rich comparison methods explicitly bridge the string definitions to integer evaluations, guaranteeing zero variance during distributed ledger verification.\n\nMCP ROUTING TRIGGERS: Quantitative Risk Assessment, Game Theory, Cybernetic Governance, Structural Circuit Breaker, Utility Theory",
