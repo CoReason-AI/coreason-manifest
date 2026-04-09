@@ -1002,12 +1002,14 @@ def test_empty_justification_rejection() -> None:
             justification_vectors=[],  # Empty evidence vector
         )
 
+
 def test_atomic_proposition_canonical_sort() -> None:
     from coreason_manifest.spec.ontology import (
         AtomicPropositionState,
         IllocutionaryForceProfile,
         RhetoricalStructureProfile,
     )
+
     prop = AtomicPropositionState(
         event_cid="event-1",
         timestamp=100.0,
@@ -1015,9 +1017,10 @@ def test_atomic_proposition_canonical_sort() -> None:
         rhetorical_role=RhetoricalStructureProfile.PREMISE,
         illocutionary_force=IllocutionaryForceProfile.ASSERTIVE,
         text_chunk="This is a test chunk.",
-        anaphoric_resolution_cids=["did:node:c", "did:node:a", "did:node:b"]
+        anaphoric_resolution_cids=["did:node:c", "did:node:a", "did:node:b"],
     )
     assert prop.anaphoric_resolution_cids == ["did:node:a", "did:node:b", "did:node:c"]
+
 
 def test_atomic_proposition_defaults() -> None:
     from coreason_manifest.spec.ontology import (
@@ -1025,6 +1028,7 @@ def test_atomic_proposition_defaults() -> None:
         IllocutionaryForceProfile,
         RhetoricalStructureProfile,
     )
+
     prop = AtomicPropositionState(
         event_cid="event-1",
         timestamp=100.0,
