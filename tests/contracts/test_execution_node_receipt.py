@@ -24,7 +24,7 @@ def test_execution_node_receipt_orphaned_lineage() -> None:
     """Prove the receipt structurally rejects orphaned lineages."""
     with pytest.raises(ValidationError, match="Orphaned Lineage"):
         ExecutionNodeReceipt(
-            request_cid="req-1", parent_request_id="req-0", root_request_id=None, inputs={}, outputs={}
+            request_cid="req-1", parent_request_cid="req-0", root_request_cid=None, inputs={}, outputs={}
         )
 
 

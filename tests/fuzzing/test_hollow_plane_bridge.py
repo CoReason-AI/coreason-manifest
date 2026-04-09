@@ -103,19 +103,19 @@ def test_holographic_resolution_pass() -> None:
         id="req-123",
         method="mcp.ui.emit_intent",
         holographic_projection=DynamicManifoldProjectionManifest(
-            manifest_id="mani-123",
-            active_forge_id="node-1",
+            manifest_cid="mani-123",
+            active_forge_cid="node-1",
             ast_gradient_visual_mapping=GrammarPanelProfile(
                 panel_cid="panel-124",
                 title="Title",
-                ledger_source_id="node-123",
+                ledger_source_cid="node-123",
                 mark="point",
                 encodings=[],
             ),
             thermodynamic_burn_mapping=GrammarPanelProfile(
                 panel_cid="panel-123",
                 title="Title",
-                ledger_source_id="node-123",
+                ledger_source_cid="node-123",
                 mark="point",
                 encodings=[],
             ),

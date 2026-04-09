@@ -49,21 +49,21 @@ from coreason_manifest.utils.algebra import (
 @given(
     st.builds(
         DynamicRoutingManifest,
-        manifest_id=st.just("m1"),
+        manifest_cid=st.just("m1"),
         branch_budgets_magnitude=st.just({"did:node:b111111": 10}),
         active_subgraphs=st.just({}),
         bypassed_steps=st.lists(
             st.builds(
                 BypassReceipt,
-                bypassed_node_id=st.just("did:node:bypass1"),
+                bypassed_node_cid=st.just("did:node:bypass1"),
                 cryptographic_null_hash=st.just("a" * 64),
-                artifact_event_id=st.just("event-1"),
+                artifact_event_cid=st.just("event-1"),
             ),
             min_size=1,
         ),
         artifact_profile=st.builds(
             GlobalSemanticProfile,
-            artifact_event_id=st.just("event-1"),
+            artifact_event_cid=st.just("event-1"),
             detected_modalities=st.just(["text"]),
             token_density=st.integers(min_value=0, max_value=100),
         ),
@@ -73,7 +73,7 @@ def test_project_mermaid_bypassed(manifest: DynamicRoutingManifest) -> None:
     result = project_manifest_to_mermaid(manifest)
     assert "subgraph Quarantined_Bypass" in result
     for b in manifest.bypassed_steps:
-        assert b.bypassed_node_id.replace(":", "_").replace("-", "_").replace(".", "_") in result
+        assert b.bypassed_node_cid.replace(":", "_").replace("-", "_").replace(".", "_") in result
 
 
 @given(
@@ -258,7 +258,7 @@ def test_apply_state_differential_add_list_dash() -> None:
 
 def test_project_mermaid_active_subgraph() -> None:
     manifest = Mock()
-    manifest.manifest_id = "m1"
+    manifest.manifest_cid = "m1"
     manifest.artifact_profile.detected_modalities = ["text"]
     manifest.active_subgraphs = {"text": ["did:node:1"]}
     manifest.bypassed_steps = []
