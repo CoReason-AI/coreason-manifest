@@ -111,3 +111,44 @@ def test_differential_privacy_valid() -> None:
         foveated_privacy_epsilon=0.5,
     )
     assert policy.foveated_privacy_epsilon == 0.5
+
+
+@given(x=st.floats(min_value=2.0, max_value=100.0))
+def test_epistemic_attention_unnormalized_vector(x: float) -> None:
+    """Test unnormalized vector triggers validation error."""
+    with pytest.raises(ValidationError) as exc_info:
+        EpistemicAttentionState(
+            origin=SE3TransformProfile(reference_frame_cid="frame-123", x=0.0, y=0.0, z=0.0),
+            direction_unit_vector=(x, 0.0, 0.0),
+        )
+    assert "Attention Ray direction vector must be normalized to 1.0" in str(exc_info.value)
+
+def test_epistemic_attention_zero_vector() -> None:
+    """Test zero vector triggers validation error."""
+    with pytest.raises(ValidationError) as exc_info:
+        EpistemicAttentionState(
+            origin=SE3TransformProfile(reference_frame_cid="frame-123", x=0.0, y=0.0, z=0.0),
+            direction_unit_vector=(0.0, 0.0, 0.0),
+        )
+    assert "Attention Ray direction cannot be a zero vector" in str(exc_info.value)
+
+def test_epistemic_attention_canonical_sort() -> None:
+    """Test intersected_node_cids are canonically sorted."""
+    state = EpistemicAttentionState(
+        origin=SE3TransformProfile(reference_frame_cid="frame-123", x=0.0, y=0.0, z=0.0),
+        direction_unit_vector=(1.0, 0.0, 0.0),
+        intersected_node_cids=[
+            "did:node:bbb",
+            "did:node:aaa",
+        ]
+    )
+    assert state.intersected_node_cids[0] == "did:node:aaa"
+    assert state.intersected_node_cids[1] == "did:node:bbb"
+
+@given(depth=st.integers(min_value=20, max_value=40))
+def test_ast_complexity_overload_valid_syntax(depth: int) -> None:
+    """Test exactly hitting the AST node budget exception with valid syntax."""
+    layout_tstring = "f'''" + "{1}"*depth + "'''"
+    with pytest.raises(ValidationError) as exc_info:
+        DynamicLayoutManifest(layout_tstring=layout_tstring, max_ast_node_budget=5)
+    assert "AST Complexity Overload" in str(exc_info.value)

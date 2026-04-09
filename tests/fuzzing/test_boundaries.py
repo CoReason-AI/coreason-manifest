@@ -553,3 +553,48 @@ def test_document_layout_region_state(
 
     with contextlib.suppress(ValueError, ValidationError):
         DocumentLayoutRegionState(block_cid=block_cid, block_class=block_class, anchor=anchor)
+
+
+# --- ViewportProjectionContract ---
+from coreason_manifest.spec.ontology import ViewportProjectionContract
+
+@given(
+    clipping_plane_near=st.floats(min_value=1.0, max_value=10.0),
+    clipping_plane_far=st.floats(min_value=0.01, max_value=0.5)
+)
+def test_viewport_projection_clipping_planes(clipping_plane_near: float, clipping_plane_far: float) -> None:
+    """Prove that clipping_plane_near >= clipping_plane_far triggers ValidationError."""
+    with pytest.raises(ValidationError) as exc_info:
+        ViewportProjectionContract(
+            projection_class="orthographic",
+            clipping_plane_near=clipping_plane_near,
+            clipping_plane_far=clipping_plane_far,
+        )
+    assert "clipping_plane_near must be strictly less than clipping_plane_far" in str(exc_info.value)
+
+def test_viewport_projection_perspective_fov() -> None:
+    """Prove that perspective projection requires field_of_view_degrees."""
+    with pytest.raises(ValidationError) as exc_info:
+        ViewportProjectionContract(
+            projection_class="perspective",
+            clipping_plane_near=0.1,
+            clipping_plane_far=10.0,
+            field_of_view_degrees=None
+        )
+    assert "Perspective projection mathematically requires field_of_view_degrees" in str(exc_info.value)
+
+
+# --- VolumetricEdgeProfile ---
+from coreason_manifest.spec.ontology import VolumetricEdgeProfile
+
+def test_volumetric_edge_profile_geodesic() -> None:
+    """Prove that riemannian_geodesic needs strictly positive repulsion."""
+    with pytest.raises(ValidationError) as exc_info:
+        VolumetricEdgeProfile(
+            curve_class="riemannian_geodesic",
+            tension=0.5,
+            flow_velocity=1.0,
+            edge_thickness=0.5,
+            spatial_repulsion_scalar=0.0
+        )
+    assert "riemannian_geodesic must have spatial_repulsion_scalar strictly greater than 0.0" in str(exc_info.value)
