@@ -6974,7 +6974,9 @@ class CognitiveActionSpaceManifest(CoreasonBaseState):
     transition_matrix: dict[Annotated[str, StringConstraints(max_length=255)], list[AnyTransitionEdge]] = Field(
         max_length=500, description="The Stochastic Transition Matrix (P)."
     )
-    entry_point_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(description="Defines the initial state (S_0) of the MDP.")
+    entry_point_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
+        Field(description="Defines the initial state (S_0) of the MDP.")
+    )
     kinetic_separation: KineticSeparationPolicy | None = Field(
         default=None, description="The bipartite graph constraint preventing toxic tool combinations."
     )
