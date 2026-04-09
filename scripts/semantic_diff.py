@@ -22,7 +22,7 @@ def get_head_schema() -> dict[str, Any]:
             stderr=subprocess.DEVNULL,
             text=True,
         )
-        return cast(dict[str, Any], json.loads(output))
+        return cast("dict[str, Any]", json.loads(output))
     except subprocess.CalledProcessError:
         # File might not exist in HEAD~1
         return {}
@@ -33,7 +33,7 @@ def get_current_schema() -> dict[str, Any]:
     if not path.exists():
         return {}
     with open(path, encoding="utf-8") as f:
-        return cast(dict[str, Any], json.load(f))
+        return cast("dict[str, Any]", json.load(f))
 
 
 def check_for_breaking_changes(old_schema: dict[str, Any], new_schema: dict[str, Any]) -> list[str]:
