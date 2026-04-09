@@ -8789,12 +8789,6 @@ class StructuralCausalGraphProfile(CoreasonBaseState):
             "causal_edges",
             sorted(self.causal_edges, key=operator.attrgetter("source_variable", "target_variable")),
         )
-        if getattr(self, "causal_edges", None) is not None:
-            object.__setattr__(
-                self,
-                "causal_edges",
-                sorted(self.causal_edges, key=operator.attrgetter("source_node_cid", "target_node_cid")),
-            )
         return self
 
 
