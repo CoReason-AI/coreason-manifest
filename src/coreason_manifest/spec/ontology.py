@@ -1621,25 +1621,25 @@ class RoutingFrontierPolicy(CoreasonBaseState):
                 try:
                     val = int(values["max_latency_ms"])
                     values["max_latency_ms"] = int(max(1, min(val, 86400000)))
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
             if "max_cost_magnitude_per_token" in values:
                 try:
                     val = int(values["max_cost_magnitude_per_token"])
                     values["max_cost_magnitude_per_token"] = int(max(1, min(val, 1000000000)))
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
             if "min_capability_score" in values:
                 try:
                     val_float = float(values["min_capability_score"])
                     values["min_capability_score"] = float(max(0.0, min(val_float, 1.0)))
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
             if values.get("max_carbon_intensity_gco2eq_kwh") is not None:
                 try:
                     val_float = float(values["max_carbon_intensity_gco2eq_kwh"])
                     values["max_carbon_intensity_gco2eq_kwh"] = float(max(0.0, min(val_float, 10000.0)))
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
         return values
 
@@ -7384,7 +7384,7 @@ class MarketContract(CoreasonBaseState):
                 try:
                     mc_int = int(mc)
                     sp_int = int(sp)
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
             cmc = max(0, min(mc_int, 1000000000))
             if sp_int > cmc:
@@ -12520,12 +12520,15 @@ class PostCoordinatedSemanticConcept(CoreasonBaseState):
         return _validate_payload_bounds(v)
 
 
-
 class EmpiricalStatisticalQualifier(CoreasonBaseState):
     """AGENT INSTRUCTION: An explicit mathematical boundary extracted from text that limits the certainty or scope of a proposition. Physically prevents agents from performing epistemic smoothing."""
 
-    qualifier_type: Literal["probability_value", "sample_size", "variance_metric", "effect_size", "confidence_interval"] = Field(description="A universal automaton classifying the type of statistical boundary.")
-    algebraic_operator: Literal["eq", "lt", "le", "gt", "ge"] = Field(description="The mathematical operator applying to the value.")
+    qualifier_type: Literal[
+        "probability_value", "sample_size", "variance_metric", "effect_size", "confidence_interval"
+    ] = Field(description="A universal automaton classifying the type of statistical boundary.")
+    algebraic_operator: Literal["eq", "lt", "le", "gt", "ge"] = Field(
+        description="The mathematical operator applying to the value."
+    )
     value: float = Field(description="The primary scalar boundary for the qualifier.")
     lower_bound: float | None = Field(default=None, description="Used exclusively for geometric/statistical intervals.")
     upper_bound: float | None = Field(default=None, description="Used exclusively for geometric/statistical intervals.")
@@ -12569,13 +12572,17 @@ class AtomicPropositionState(CoreasonBaseState):
     )
     statistical_qualifiers: list[EmpiricalStatisticalQualifier] = Field(
         default_factory=list,
-        description="Explicit mathematical boundaries extracted from the text that empirically limit the certainty or scope of the proposition."
+        description="Explicit mathematical boundaries extracted from the text that empirically limit the certainty or scope of the proposition.",
     )
 
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "anaphoric_resolution_cids", sorted(self.anaphoric_resolution_cids))
-        object.__setattr__(self, "statistical_qualifiers", sorted(self.statistical_qualifiers, key=operator.attrgetter("qualifier_type", "value")))
+        object.__setattr__(
+            self,
+            "statistical_qualifiers",
+            sorted(self.statistical_qualifiers, key=operator.attrgetter("qualifier_type", "value")),
+        )
         return self
 
 
@@ -12607,14 +12614,27 @@ type AnyStateEvent = Annotated[
 ]
 
 
-
 class DempsterShaferBeliefVector(CoreasonBaseState):
     """AGENT INSTRUCTION: Replaces monolithic probability floats with a composite tri-vector. Independently measures lexical matching, latent semantic distance, and topological graph integrity to allow the orchestrator to compute epistemic conflict and execute evidence discounting."""
 
-    lexical_confidence: float = Field(ge=0.0, le=1.0, description="Represents exact syntactic schema or sub-string overlap.")
-    semantic_distance: float = Field(ge=0.0, le=1.0, description="Represents continuous optimal transport alignment (e.g., Gromov-Wasserstein or Cosine distance) within the high-dimensional latent manifold.")
-    structural_graph_confidence: float = Field(ge=0.0, le=1.0, description="Represents the topological validity of the surrounding causal edges (e.g., evaluated via Random Walk with Restart).")
-    epistemic_conflict_mass: float = Field(ge=0.0, le=1.0, description="The calculated mathematical contradiction or dissonance between the three vectors. High conflict mass triggers evidence discounting.")
+    lexical_confidence: float = Field(
+        ge=0.0, le=1.0, description="Represents exact syntactic schema or sub-string overlap."
+    )
+    semantic_distance: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="Represents continuous optimal transport alignment (e.g., Gromov-Wasserstein or Cosine distance) within the high-dimensional latent manifold.",
+    )
+    structural_graph_confidence: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="Represents the topological validity of the surrounding causal edges (e.g., evaluated via Random Walk with Restart).",
+    )
+    epistemic_conflict_mass: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="The calculated mathematical contradiction or dissonance between the three vectors. High conflict mass triggers evidence discounting.",
+    )
 
 
 class OntologicalReificationReceipt(CoreasonBaseState):
