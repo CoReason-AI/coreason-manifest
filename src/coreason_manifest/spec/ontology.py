@@ -1612,25 +1612,25 @@ class RoutingFrontierPolicy(CoreasonBaseState):
                 try:
                     val = int(values["max_latency_ms"])
                     values["max_latency_ms"] = int(max(1, min(val, 86400000)))
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
             if "max_cost_magnitude_per_token" in values:
                 try:
                     val = int(values["max_cost_magnitude_per_token"])
                     values["max_cost_magnitude_per_token"] = int(max(1, min(val, 1000000000)))
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
             if "min_capability_score" in values:
                 try:
                     val_float = float(values["min_capability_score"])
                     values["min_capability_score"] = float(max(0.0, min(val_float, 1.0)))
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
             if values.get("max_carbon_intensity_gco2eq_kwh") is not None:
                 try:
                     val_float = float(values["max_carbon_intensity_gco2eq_kwh"])
                     values["max_carbon_intensity_gco2eq_kwh"] = float(max(0.0, min(val_float, 10000.0)))
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
         return values
 
@@ -4320,12 +4320,14 @@ class ContextualSemanticResolutionIntent(CoreasonBaseState):
     topology_class: Literal["contextual_semantic_resolution"] = Field(
         default="contextual_semantic_resolution", description="Discriminator for contextual semantic resolution."
     )
-    source_record_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="An explicit cryptographic pointer to the raw SemanticRelationalRecordState pending resolution."
+    source_record_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
+        Field(
+            description="An explicit cryptographic pointer to the raw SemanticRelationalRecordState pending resolution."
+        )
     )
-    target_ontology_graph_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A pointer to the specific standard vocabulary subgraph (e.g., an OMOP schema graph)."
-    )
+    target_ontology_graph_cid: Annotated[
+        str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
+    ] = Field(description="A pointer to the specific standard vocabulary subgraph (e.g., an OMOP schema graph).")
     encoding_profile: TabularEncodingProfile = Field(
         description="The method requested for compressing the source row into a continuous tensor."
     )
@@ -7373,7 +7375,7 @@ class MarketContract(CoreasonBaseState):
                 try:
                     mc_int = int(mc)
                     sp_int = int(sp)
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
             cmc = max(0, min(mc_int, 1000000000))
             if sp_int > cmc:
@@ -12384,9 +12386,9 @@ class PostCoordinatedSemanticConcept(CoreasonBaseState):
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
         description="Cryptographic Lineage Watermark binding this node to the Merkle-DAG."
     )
-    prior_event_hash: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None = Field(
-        default=None, description="The RFC 8785 Canonical hash of the immediate causal ancestor."
-    )
+    prior_event_hash: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
+    ) = Field(default=None, description="The RFC 8785 Canonical hash of the immediate causal ancestor.")
     timestamp: float = Field(description="The precise temporal coordinate of the event realization.")
     concept_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
         description="The unique geometric coordinate representing this specific assembled concept."
