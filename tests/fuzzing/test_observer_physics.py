@@ -132,7 +132,7 @@ def test_epistemic_attention_state_validate_unit_vector(dx: float, dy: float, dz
                 direction_unit_vector=(dx, dy, dz),
             )
     elif not math.isclose(magnitude, 1.0, abs_tol=1e-3):
-        with pytest.raises(ValueError, match="Kinematic Violation: Attention Ray direction vector must be normalized to 1.0"):
+        with pytest.raises(ValueError, match=r"Kinematic Violation: Attention Ray direction vector must be normalized to 1\.0"):
             EpistemicAttentionState(
                 origin=SE3TransformProfile(reference_frame_cid="frame-123", x=0.0, y=0.0, z=0.0),
                 direction_unit_vector=(dx, dy, dz),
