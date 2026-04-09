@@ -1621,25 +1621,25 @@ class RoutingFrontierPolicy(CoreasonBaseState):
                 try:
                     val = int(values["max_latency_ms"])
                     values["max_latency_ms"] = int(max(1, min(val, 86400000)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if "max_cost_magnitude_per_token" in values:
                 try:
                     val = int(values["max_cost_magnitude_per_token"])
                     values["max_cost_magnitude_per_token"] = int(max(1, min(val, 1000000000)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if "min_capability_score" in values:
                 try:
                     val_float = float(values["min_capability_score"])
                     values["min_capability_score"] = float(max(0.0, min(val_float, 1.0)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if values.get("max_carbon_intensity_gco2eq_kwh") is not None:
                 try:
                     val_float = float(values["max_carbon_intensity_gco2eq_kwh"])
                     values["max_carbon_intensity_gco2eq_kwh"] = float(max(0.0, min(val_float, 10000.0)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
         return values
 
@@ -7384,7 +7384,7 @@ class MarketContract(CoreasonBaseState):
                 try:
                     mc_int = int(mc)
                     sp_int = int(sp)
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             cmc = max(0, min(mc_int, 1000000000))
             if sp_int > cmc:
@@ -12520,6 +12520,24 @@ class PostCoordinatedSemanticConcept(CoreasonBaseState):
         return _validate_payload_bounds(v)
 
 
+
+class EmpiricalStatisticalQualifier(CoreasonBaseState):
+    """AGENT INSTRUCTION: An explicit mathematical boundary extracted from text that limits the certainty or scope of a proposition. Physically prevents agents from performing epistemic smoothing."""
+
+    qualifier_type: Literal["probability_value", "sample_size", "variance_metric", "effect_size", "confidence_interval"] = Field(description="A universal automaton classifying the type of statistical boundary.")
+    algebraic_operator: Literal["eq", "lt", "le", "gt", "ge"] = Field(description="The mathematical operator applying to the value.")
+    value: float = Field(description="The primary scalar boundary for the qualifier.")
+    lower_bound: float | None = Field(default=None, description="Used exclusively for geometric/statistical intervals.")
+    upper_bound: float | None = Field(default=None, description="Used exclusively for geometric/statistical intervals.")
+
+    @model_validator(mode="after")
+    def validate_interval_geometry(self) -> Self:
+        if self.lower_bound is not None and self.upper_bound is not None:
+            if self.lower_bound >= self.upper_bound:
+                raise ValueError("lower_bound must be strictly less than upper_bound")
+        return self
+
+
 class AtomicPropositionState(CoreasonBaseState):
     """AGENT INSTRUCTION: A declarative, frozen snapshot of a standalone, verifiable statement extracted from unstructured discourse. Transmutes probabilistic 'bags-of-words' into a discrete, traversable node within the Labeled Property Graph (LPG)."""
 
@@ -12550,10 +12568,15 @@ class AtomicPropositionState(CoreasonBaseState):
         default_factory=list,
         description="Explicit array of entity DIDs/CIDs resolving implicit references (e.g., pronouns) within the text chunk back to explicit nodes.",
     )
+    statistical_qualifiers: list[EmpiricalStatisticalQualifier] = Field(
+        default_factory=list,
+        description="Explicit mathematical boundaries extracted from the text that empirically limit the certainty or scope of the proposition."
+    )
 
     @model_validator(mode="after")
-    def _enforce_canonical_sort_anaphora(self) -> Self:
+    def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "anaphoric_resolution_cids", sorted(self.anaphoric_resolution_cids))
+        object.__setattr__(self, "statistical_qualifiers", sorted(self.statistical_qualifiers, key=operator.attrgetter("qualifier_type", "value")))
         return self
 
 
@@ -12585,6 +12608,16 @@ type AnyStateEvent = Annotated[
 ]
 
 
+
+class DempsterShaferBeliefVector(CoreasonBaseState):
+    """AGENT INSTRUCTION: Replaces monolithic probability floats with a composite tri-vector. Independently measures lexical matching, latent semantic distance, and topological graph integrity to allow the orchestrator to compute epistemic conflict and execute evidence discounting."""
+
+    lexical_confidence: float = Field(ge=0.0, le=1.0, description="Represents exact syntactic schema or sub-string overlap.")
+    semantic_distance: float = Field(ge=0.0, le=1.0, description="Represents continuous optimal transport alignment (e.g., Gromov-Wasserstein or Cosine distance) within the high-dimensional latent manifold.")
+    structural_graph_confidence: float = Field(ge=0.0, le=1.0, description="Represents the topological validity of the surrounding causal edges (e.g., evaluated via Random Walk with Restart).")
+    epistemic_conflict_mass: float = Field(ge=0.0, le=1.0, description="The calculated mathematical contradiction or dissonance between the three vectors. High conflict mass triggers evidence discounting.")
+
+
 class OntologicalReificationReceipt(CoreasonBaseState):
     """AGENT INSTRUCTION: An append-only, cryptographically frozen coordinate verifying the integrity of a generalized bimodal semantic transformation. Commits the transformation mechanism to the Epistemic Ledger, physically separating explicit empirical facts from machine-inferred hypotheses to eliminate traceability collapse."""
 
@@ -12607,8 +12640,8 @@ class OntologicalReificationReceipt(CoreasonBaseState):
     algorithmic_mechanism: TransformationMechanismProfile = Field(
         description="The deterministic or probabilistic engine used to execute the transmutation."
     )
-    statistical_confidence_interval: float = Field(
-        ge=0.0, le=1.0, description="The mathematical proof of alignment fidelity."
+    belief_vector: DempsterShaferBeliefVector = Field(
+        description="The composite Dempster-Shafer tri-vector capturing independent confidence dimensions and calculated epistemic conflict."
     )
     is_latent_inference: bool = Field(
         default=False,
@@ -12985,11 +13018,15 @@ NeurosymbolicInferenceIntent.model_rebuild()
 
 EpistemicUpsamplingTask.model_rebuild()
 VolumetricPartitionState.model_rebuild()
+
+DempsterShaferBeliefVector.model_rebuild()
+EmpiricalStatisticalQualifier.model_rebuild()
 SemanticRelationalRecordState.model_rebuild()
 AtomicPropositionState.model_rebuild()
 ContextualSemanticResolutionIntent.model_rebuild()
 PostCoordinatedSemanticConcept.model_rebuild()
 OntologicalReificationReceipt.model_rebuild()
+
 
 GlobalSemanticInvariantProfile.model_rebuild()
 MultimodalArtifactReceipt.model_rebuild()
