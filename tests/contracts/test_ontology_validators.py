@@ -1003,7 +1003,11 @@ def test_empty_justification_rejection() -> None:
         )
 
 def test_atomic_proposition_canonical_sort() -> None:
-    from coreason_manifest.spec.ontology import AtomicPropositionState, RhetoricalStructureProfile, IllocutionaryForceProfile
+    from coreason_manifest.spec.ontology import (
+        AtomicPropositionState,
+        IllocutionaryForceProfile,
+        RhetoricalStructureProfile,
+    )
     prop = AtomicPropositionState(
         event_cid="event-1",
         timestamp=100.0,
@@ -1016,7 +1020,11 @@ def test_atomic_proposition_canonical_sort() -> None:
     assert prop.anaphoric_resolution_cids == ["did:node:a", "did:node:b", "did:node:c"]
 
 def test_atomic_proposition_defaults() -> None:
-    from coreason_manifest.spec.ontology import AtomicPropositionState, RhetoricalStructureProfile, IllocutionaryForceProfile
+    from coreason_manifest.spec.ontology import (
+        AtomicPropositionState,
+        IllocutionaryForceProfile,
+        RhetoricalStructureProfile,
+    )
     prop = AtomicPropositionState(
         event_cid="event-1",
         timestamp=100.0,
