@@ -20,7 +20,7 @@ from coreason_manifest.spec.ontology import (
     CognitiveFormatContract,
     CognitiveUncertaintyProfile,
     ComputeEngineProfile,
-    ComputeRateContract,
+    ThermodynamicRateContract,
     ComputeTierProfile,
     ConsensusPolicy,
     ConstrainedDecodingPolicy,
@@ -241,7 +241,7 @@ def test_dynamic_layout_manifest_kinetic_bleed(tstring: str, bad_node: str) -> N
 
 # --- 7. Deterministic Array Sorting Validation ---
 def test_compute_engine_profile_sorting() -> None:
-    rate = ComputeRateContract(
+    rate = ThermodynamicRateContract(
         cost_per_million_input_tokens=1,
         cost_per_million_output_tokens=2,
         magnitude_unit="USD",
