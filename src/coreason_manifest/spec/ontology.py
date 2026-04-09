@@ -1779,8 +1779,9 @@ class ContextualizedSourceState(CoreasonBaseState):
     )
     contextual_envelope: list[Annotated[str, StringConstraints(max_length=100000)]] = Field(
         max_length=10000,
-        description="The strictly bounded array of adjacent token clusters forming the semantic proximity matrix. AGENT INSTRUCTION: Topological Exemption applied. Do NOT sort this array, as its chronological/spatial sequence is its mathematical state.",
+        description="The strictly bounded array of adjacent token clusters forming the semantic proximity matrix.",
     )
+    # Note: contextual_envelope is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     source_system_provenance_flag: bool = Field(
         description="The mathematical boolean boundary indicating strict physical provenance to an external host."
     )
@@ -1811,8 +1812,9 @@ class EpistemicUpsamplingTask(CoreasonBaseState):
     justification_vectors: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
         min_length=1,
         max_length=1000,
-        description="The strictly ordered matrix of reasoning paths mathematically justifying the topological expansion. AGENT INSTRUCTION: Topological Exemption applied. Do NOT sort this array, as the chronological sequence of extraction acts as mathematical state.",
+        description="The strictly ordered matrix of reasoning paths mathematically justifying the topological expansion.",
     )
+    # Note: justification_vectors is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
 
 
 class TopologicalFidelityReceipt(CoreasonBaseState):
@@ -5372,7 +5374,9 @@ class GlobalGovernancePolicy(CoreasonBaseState):
     Bounding, ESG Constraint, Execution Envelope
     """
 
-    mandatory_license_rule: ConstitutionalPolicy
+    mandatory_license_rule: ConstitutionalPolicy = Field(
+        description="The mathematical licensing constraint enforced on all execution paths."
+    )
     max_budget_magnitude: int = Field(
         le=1000000000, description="The absolute maximum economic cost allowed for the entire swarm lifecycle."
     )
@@ -6970,7 +6974,7 @@ class CognitiveActionSpaceManifest(CoreasonBaseState):
     transition_matrix: dict[Annotated[str, StringConstraints(max_length=255)], list[AnyTransitionEdge]] = Field(
         max_length=500, description="The Stochastic Transition Matrix (P)."
     )
-    entry_point_cid: str = Field(description="Defines the initial state (S_0) of the MDP.")
+    entry_point_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(description="Defines the initial state (S_0) of the MDP.")
     kinetic_separation: KineticSeparationPolicy | None = Field(
         default=None, description="The bipartite graph constraint preventing toxic tool combinations."
     )
@@ -9242,7 +9246,9 @@ class ToolInvocationEvent(CoreasonBaseState):
         ge=1,
         description="The mandatory discrete thermodynamic token cost reserved for this specific run.",
     )
-    agent_attestation: AgentAttestationReceipt
+    agent_attestation: AgentAttestationReceipt = Field(
+        description="The cryptographic identity anchoring the agent to the execution environment."
+    )
     zk_proof: ZeroKnowledgeReceipt = Field(
         description="The mathematical attestation proving this tool execution was securely authorized."
     )
