@@ -29,8 +29,10 @@ from coreason_manifest.spec.ontology import (
     ObservationEvent,
     PredictionMarketPolicy,
     QuorumPolicy,
+    SE3TransformProfile,
     SemanticDiscoveryIntent,
     SwarmTopologyManifest,
+    TraceContextState,
     VectorEmbeddingState,
 )
 
@@ -277,3 +279,24 @@ def test_epistemic_ledger_history_fuzz(history: Any) -> None:
             pass
         else:
             pytest.fail(f"Unexpected ValueError: {e}")
+
+
+# --- TraceContextState ---
+
+
+@given(cid=st.from_regex(r"^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$", fullmatch=True))
+def test_trace_context_span_topology_violation(cid: str) -> None:
+    """Test that span_cid cannot equal parent_span_cid."""
+    with pytest.raises(ValidationError) as exc_info:
+        TraceContextState(trace_cid=cid, span_cid=cid, parent_span_cid=cid, causal_clock=0)
+    assert "span_cid cannot equal parent_span_cid" in str(exc_info.value)
+
+
+# --- SE3TransformProfile ---
+
+
+def test_se3_transform_zero_quaternion() -> None:
+    """Test that zero quaternion triggers ValidationError."""
+    with pytest.raises(ValidationError) as exc_info:
+        SE3TransformProfile(reference_frame_cid="frame-xyz", x=0.0, y=0.0, z=0.0, qx=0.0, qy=0.0, qz=0.0, qw=0.0)
+    assert "Quaternion cannot be a zero vector" in str(exc_info.value)

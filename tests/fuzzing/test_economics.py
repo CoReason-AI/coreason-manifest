@@ -19,7 +19,7 @@ from coreason_manifest.spec.ontology import (
     MarketContract,
     PredictionMarketState,
     RoutingFrontierPolicy,
-    ThermodynamicBurnReceipt,
+    TokenBurnReceipt,
 )
 
 
@@ -69,7 +69,7 @@ def test_compute_provisioning_intent(max_budget: int) -> None:
     out=st.integers(min_value=-2000000000, max_value=2000000000),
 )
 def test_token_burn_receipt(burn: int, inp: int, out: int) -> None:
-    tbr = ThermodynamicBurnReceipt(
+    tbr = TokenBurnReceipt(
         event_cid="e1",
         timestamp=100.0,
         tool_invocation_cid="t1",

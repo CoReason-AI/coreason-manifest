@@ -20,6 +20,7 @@ from coreason_manifest.spec.ontology import (
     CognitiveFormatContract,
     CognitiveUncertaintyProfile,
     ComputeEngineProfile,
+    ComputeRateContract,
     ComputeTierProfile,
     ConsensusPolicy,
     ConstrainedDecodingPolicy,
@@ -46,7 +47,6 @@ from coreason_manifest.spec.ontology import (
     SecureSubSessionState,
     SemanticClassificationProfile,
     SpatialHardwareProfile,
-    ThermodynamicRateContract,
     TopologicalFidelityReceipt,
     ViewportProjectionContract,
     VolumetricBoundingProfile,
@@ -241,7 +241,7 @@ def test_dynamic_layout_manifest_kinetic_bleed(tstring: str, bad_node: str) -> N
 
 # --- 7. Deterministic Array Sorting Validation ---
 def test_compute_engine_profile_sorting() -> None:
-    rate = ThermodynamicRateContract(
+    rate = ComputeRateContract(
         cost_per_million_input_tokens=1,
         cost_per_million_output_tokens=2,
         magnitude_unit="USD",
@@ -670,7 +670,6 @@ def test_mcpservermanifest_enforce_did() -> None:
 
 
 def test_insight_card_profile_xss_prevention() -> None:
-
     from coreason_manifest.spec.ontology import InsightCardProfile
 
     # Test that valid links work
@@ -943,7 +942,6 @@ def test_successful_epistemic_grounding() -> None:
 
 
 def test_epistemic_upsampling_instantiation() -> None:
-
     source = ContextualizedSourceState(
         target_string="test artifact",
         contextual_envelope=["context A", "context B"],
@@ -1005,43 +1003,116 @@ def test_empty_justification_rejection() -> None:
         )
 
 
-def test_thermodynamic_rate_contract_validation() -> None:
+def test_atomic_proposition_canonical_sort() -> None:
+    from coreason_manifest.spec.ontology import (
+        AtomicPropositionState,
+        IllocutionaryForceProfile,
+        RhetoricalStructureProfile,
+    )
+
+    prop = AtomicPropositionState(
+        event_cid="event-1",
+        timestamp=100.0,
+        proposition_cid="prop-1",
+        rhetorical_role=RhetoricalStructureProfile.PREMISE,
+        illocutionary_force=IllocutionaryForceProfile.ASSERTIVE,
+        text_chunk="This is a test chunk.",
+        anaphoric_resolution_cids=["did:node:c", "did:node:a", "did:node:b"],
+    )
+    assert prop.anaphoric_resolution_cids == ["did:node:a", "did:node:b", "did:node:c"]
+
+
+def test_atomic_proposition_defaults() -> None:
+    from coreason_manifest.spec.ontology import (
+        AtomicPropositionState,
+        IllocutionaryForceProfile,
+        RhetoricalStructureProfile,
+    )
+
+    prop = AtomicPropositionState(
+        event_cid="event-1",
+        timestamp=100.0,
+        proposition_cid="prop-1",
+        rhetorical_role=RhetoricalStructureProfile.PREMISE,
+        illocutionary_force=IllocutionaryForceProfile.ASSERTIVE,
+        text_chunk="This is a test chunk.",
+    )
+    assert prop.anaphoric_resolution_cids == []
+    assert prop.topology_class == "atomic_proposition"
+
+
+def test_epic5_global_semantic_invariant_profile_sorting() -> None:
+    from coreason_manifest.spec.ontology import GlobalSemanticInvariantProfile, TemporalBoundsProfile
+
+    profile = GlobalSemanticInvariantProfile(
+        invariant_cid="invariant_1",
+        categorical_cohorts=["Zebra", "Apple"],
+        operational_perimeters={"test": "me"},
+        temporal_observation_horizons=[TemporalBoundsProfile(valid_from=None), TemporalBoundsProfile(valid_from=5.0)],
+    )
+    assert profile.categorical_cohorts == ["Apple", "Zebra"]
+
+
+def test_epic5_discourse_node_state_sorting() -> None:
+    from coreason_manifest.spec.ontology import DiscourseNodeState
+
+    node = DiscourseNodeState(
+        node_cid="did:ex:node1", discourse_type="preamble", contained_propositions=["did:ex:prop2", "did:ex:prop1"]
+    )
+    assert node.contained_propositions == ["did:ex:prop1", "did:ex:prop2"]
+
+
+def test_epic5_discourse_tree_manifest_dag() -> None:
+    from coreason_manifest.spec.ontology import DiscourseNodeState, DiscourseTreeManifest
+
+    nodes = {
+        "did:ex:root": DiscourseNodeState(node_cid="did:ex:root", discourse_type="preamble"),
+    }
+    manifest = DiscourseTreeManifest(manifest_cid="manifest_1", root_node_cid="did:ex:root", discourse_nodes=nodes)
+    assert manifest.root_node_cid == "did:ex:root"
+
+
+def test_epic5_discourse_tree_manifest_missing_root() -> None:
     from pydantic import ValidationError
 
-    with pytest.raises(ValidationError, match="Thermodynamic Void"):
-        ThermodynamicRateContract(magnitude_unit="USD")
+    from coreason_manifest.spec.ontology import DiscourseNodeState, DiscourseTreeManifest
 
-    # Should not raise
-    ThermodynamicRateContract(cost_per_million_input_tokens=100, magnitude_unit="USD")
-    ThermodynamicRateContract(cost_per_execution_second_magnitude=100, magnitude_unit="USD")
+    nodes = {
+        "did:ex:child1": DiscourseNodeState(node_cid="did:ex:child1", discourse_type="findings"),
+    }
+    with pytest.raises(ValidationError, match="Topological Contradiction: root_node_cid not found"):
+        DiscourseTreeManifest(manifest_cid="manifest_1", root_node_cid="did:ex:root", discourse_nodes=nodes)
 
 
-def test_spatial_hardware_profile_physics_engine() -> None:
+def test_epic5_discourse_tree_manifest_ghost_pointer() -> None:
     from pydantic import ValidationError
 
-    from coreason_manifest.spec.ontology import InterconnectTopologyProfile, SpatialHardwareProfile
+    from coreason_manifest.spec.ontology import DiscourseNodeState, DiscourseTreeManifest
 
-    with pytest.raises(ValidationError, match="Topological Contradiction"):
-        SpatialHardwareProfile(gpu_count_magnitude=2, interconnect_topology=InterconnectTopologyProfile.ISOLATED)
+    nodes = {
+        "did:ex:root": DiscourseNodeState(node_cid="did:ex:root", discourse_type="preamble"),
+        "did:ex:child1": DiscourseNodeState(
+            node_cid="did:ex:child1", discourse_type="findings", parent_node_cid="did:ex:ghost"
+        ),
+    }
+    with pytest.raises(ValidationError, match="Ghost pointer: Parent node did:ex:ghost not found"):
+        DiscourseTreeManifest(manifest_cid="manifest_1", root_node_cid="did:ex:root", discourse_nodes=nodes)
 
-    # Should not raise
-    SpatialHardwareProfile(gpu_count_magnitude=1, interconnect_topology=InterconnectTopologyProfile.ISOLATED)
-    SpatialHardwareProfile(gpu_count_magnitude=2, interconnect_topology=InterconnectTopologyProfile.PCIE_GEN4)
 
-
-def test_spatial_hardware_profile_physics_engine_invalid() -> None:
+def test_epic5_discourse_tree_manifest_cycle() -> None:
     from pydantic import ValidationError
 
-    from coreason_manifest.spec.ontology import InterconnectTopologyProfile, SpatialHardwareProfile
+    from coreason_manifest.spec.ontology import DiscourseNodeState, DiscourseTreeManifest
 
-    with pytest.raises(ValidationError, match="Topological Contradiction"):
-        SpatialHardwareProfile(gpu_count_magnitude=2, interconnect_topology=InterconnectTopologyProfile.ISOLATED)
-
-
-def test_thermodynamic_rate_contract_validation_invalid() -> None:
-    from pydantic import ValidationError
-
-    from coreason_manifest.spec.ontology import ThermodynamicRateContract
-
-    with pytest.raises(ValidationError, match="Thermodynamic Void"):
-        ThermodynamicRateContract(magnitude_unit="USD")
+    nodes = {
+        "did:ex:root": DiscourseNodeState(
+            node_cid="did:ex:root", discourse_type="preamble", parent_node_cid="did:ex:child1"
+        ),
+        "did:ex:child1": DiscourseNodeState(
+            node_cid="did:ex:child1", discourse_type="findings", parent_node_cid="did:ex:root"
+        ),
+    }
+    with pytest.raises(
+        ValidationError, match="Topological Contradiction: Discourse tree contains a cyclical reference"
+    ):
+        DiscourseTreeManifest(manifest_cid="manifest_1", root_node_cid="did:ex:root", discourse_nodes=nodes)

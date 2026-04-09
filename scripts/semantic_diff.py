@@ -12,30 +12,31 @@ import json
 import subprocess
 import sys
 from pathlib import Path
+from typing import Any, cast
 
 
-def get_head_schema() -> dict:
+def get_head_schema() -> dict[str, Any]:
     try:
         output = subprocess.check_output(
             ["git", "show", "HEAD~1:coreason_ontology.schema.json"],  # noqa: S607
             stderr=subprocess.DEVNULL,
             text=True,
         )
-        return json.loads(output)
+        return cast("dict[str, Any]", json.loads(output))
     except subprocess.CalledProcessError:
         # File might not exist in HEAD~1
         return {}
 
 
-def get_current_schema() -> dict:
+def get_current_schema() -> dict[str, Any]:
     path = Path("coreason_ontology.schema.json")
     if not path.exists():
         return {}
     with open(path, encoding="utf-8") as f:
-        return json.load(f)
+        return cast("dict[str, Any]", json.load(f))
 
 
-def check_for_breaking_changes(old_schema: dict, new_schema: dict) -> list[str]:
+def check_for_breaking_changes(old_schema: dict[str, Any], new_schema: dict[str, Any]) -> list[str]:
     old_defs = old_schema.get("$defs", {})
     new_defs = new_schema.get("$defs", {})
 
