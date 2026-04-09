@@ -52,7 +52,7 @@
       "type": "object"
     },
     "AcceleratorProfile": {
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Specifies the hardware acceleration architecture required to materialize this execution node in the physical thermodynamic cluster.\n\nCAUSAL AFFORDANCE: Provides the orchestration layer with the exact topological constraints needed to schedule the container on appropriate silicon.\n\nEPISTEMIC BOUNDS: Strictly bounded to the literal enumeration types representing supported silicon backends.\n\nMCP ROUTING TRIGGERS: GPU Scheduling, Hardware Accelerator, Precision Topology, Thermodynamic Bindings",
+      "description": "AGENT INSTRUCTION: Specifies the hardware acceleration architecture required to materialize this execution node in the physical thermodynamic cluster.\n\nCAUSAL AFFORDANCE: Provides the orchestration layer with the exact topological constraints needed to schedule the container on appropriate silicon.\n\nEPISTEMIC BOUNDS: Strictly bounded to the literal enumeration types representing supported silicon backends.\n\nMCP ROUTING TRIGGERS: GPU Scheduling, Hardware Accelerator, Precision Topology, Thermodynamic Bindings",
       "enum": [
         "FP8_TENSOR",
         "BF16_TENSOR",
@@ -813,6 +813,7 @@
       "description": "A discriminated union of state events.",
       "discriminator": {
         "mapping": {
+          "atomic_proposition": "#/$defs/AtomicPropositionState",
           "barge_in": "#/$defs/BargeInInterruptEvent",
           "belief_mutation": "#/$defs/BeliefMutationEvent",
           "budget_exhaustion": "#/$defs/BudgetExhaustionEvent",
@@ -831,7 +832,7 @@
           "persistence_commit": "#/$defs/PersistenceCommitReceipt",
           "semantic_relational_record": "#/$defs/SemanticRelationalRecordState",
           "system_fault": "#/$defs/SystemFaultEvent",
-          "thermodynamic_burn": "#/$defs/ThermodynamicBurnReceipt",
+          "token_burn": "#/$defs/TokenBurnReceipt",
           "tool_invocation": "#/$defs/ToolInvocationEvent"
         },
         "propertyName": "topology_class"
@@ -845,6 +846,9 @@
         },
         {
           "$ref": "#/$defs/SystemFaultEvent"
+        },
+        {
+          "$ref": "#/$defs/AtomicPropositionState"
         },
         {
           "$ref": "#/$defs/HypothesisGenerationEvent"
@@ -868,7 +872,7 @@
           "$ref": "#/$defs/PersistenceCommitReceipt"
         },
         {
-          "$ref": "#/$defs/ThermodynamicBurnReceipt"
+          "$ref": "#/$defs/TokenBurnReceipt"
         },
         {
           "$ref": "#/$defs/BudgetExhaustionEvent"
@@ -1050,6 +1054,87 @@
         "simulated_cpu_cycles"
       ],
       "title": "AsymptoticComplexityReceipt",
+      "type": "object"
+    },
+    "AtomicPropositionState": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative, frozen snapshot of a standalone, verifiable statement extracted from unstructured discourse. Transmutes probabilistic 'bags-of-words' into a discrete, traversable node within the Labeled Property Graph (LPG).",
+      "properties": {
+        "topology_class": {
+          "const": "atomic_proposition",
+          "default": "atomic_proposition",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "event_cid": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The RFC 8785 Canonical hash of the immediate causal ancestor, securing the Merkle-DAG.",
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "description": "The precise temporal coordinate of the event realization.",
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "proposition_cid": {
+          "description": "A Content Identifier (CID) bounding this specific extracted proposition.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Proposition Cid",
+          "type": "string"
+        },
+        "rhetorical_role": {
+          "$ref": "#/$defs/RhetoricalStructureProfile",
+          "description": "The structural relationship of this proposition to its surrounding discourse."
+        },
+        "illocutionary_force": {
+          "$ref": "#/$defs/IllocutionaryForceProfile",
+          "description": "The intentional boundary defining the statement's truth condition."
+        },
+        "text_chunk": {
+          "description": "The raw, atomic natural language representation of the proposition. Volumetrically clamped to prevent VRAM overflow.",
+          "maxLength": 50000,
+          "title": "Text Chunk",
+          "type": "string"
+        },
+        "anaphoric_resolution_cids": {
+          "description": "Explicit array of entity DIDs/CIDs resolving implicit references (e.g., pronouns) within the text chunk back to explicit nodes.",
+          "items": {
+            "$ref": "#/$defs/NodeCIDState"
+          },
+          "title": "Anaphoric Resolution Cids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "event_cid",
+        "timestamp",
+        "proposition_cid",
+        "rhetorical_role",
+        "illocutionary_force",
+        "text_chunk"
+      ],
+      "title": "AtomicPropositionState",
       "type": "object"
     },
     "AttackVectorProfile": {
@@ -1725,7 +1810,7 @@
           "type": "string"
         },
         "final_burn_receipt_cid": {
-          "description": "A string pointing to the exact ThermodynamicBurnReceipt CID that pushed the state over the limit.",
+          "description": "A string pointing to the exact TokenBurnReceipt CID that pushed the state over the limit.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
@@ -3613,7 +3698,7 @@
     },
     "ComputeEngineProfile": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Acts as the liquid compute substrate abstraction, defining the\nfoundational LLM matrix available on the Spot Market for dynamic routing. As a ...Profile\nsuffix, this is a declarative, frozen snapshot of a compute geometry.\n\nCAUSAL AFFORDANCE: Projects the physical LLM capabilities, contextual memory constraints,\nand thermodynamic rate cards (ThermodynamicRateContract) into the orchestrator's active routing\nmanifold, allowing cost-aware topological planning.\n\nEPISTEMIC BOUNDS: The token working memory is mathematically bounded by\ncontext_window_size (le=1000000000). To guarantee RFC 8785 canonical hashing across\ndisparate nodes, the capabilities and supported_functional_experts arrays are strictly\nsorted at instantiation via @model_validator.\n\nMCP ROUTING TRIGGERS: Liquid Compute, Spot Market Routing, Foundation Model Matrix,\nThermodynamic Rate Card, Substrate Abstraction",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Acts as the liquid compute substrate abstraction, defining the\nfoundational LLM matrix available on the Spot Market for dynamic routing. As a ...Profile\nsuffix, this is a declarative, frozen snapshot of a compute geometry.\n\nCAUSAL AFFORDANCE: Projects the physical LLM capabilities, contextual memory constraints,\nand thermodynamic rate cards (ComputeRateContract) into the orchestrator's active routing\nmanifold, allowing cost-aware topological planning.\n\nEPISTEMIC BOUNDS: The token working memory is mathematically bounded by\ncontext_window_size (le=1000000000). To guarantee RFC 8785 canonical hashing across\ndisparate nodes, the capabilities and supported_functional_experts arrays are strictly\nsorted at instantiation via @model_validator.\n\nMCP ROUTING TRIGGERS: Liquid Compute, Spot Market Routing, Foundation Model Matrix,\nThermodynamic Rate Card, Substrate Abstraction",
       "properties": {
         "foundation_matrix_name": {
           "description": "The identifier of the underlying model.",
@@ -3644,7 +3729,7 @@
           "type": "array"
         },
         "rate_card": {
-          "$ref": "#/$defs/ThermodynamicRateContract",
+          "$ref": "#/$defs/ComputeRateContract",
           "description": "The economic cost definition associated with the model."
         },
         "supported_functional_experts": {
@@ -3700,8 +3785,39 @@
       "title": "ComputeProvisioningIntent",
       "type": "object"
     },
+    "ComputeRateContract": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The immutable economic physics engine defining the Thermodynamic Cost of token generation across the network.\n\nCAUSAL AFFORDANCE: Allows the swarm orchestrator to mathematically project the budget exhaustion of a specific Latent Scratchpad trace or MCTS rollout before committing to the execution graph.\n\nEPISTEMIC BOUNDS: Strict integer boundaries (`le=1000000000`) on `cost_per_million_input_tokens` and `cost_per_million_output_tokens` ensure economic execution vectors cannot overflow the Epistemic Ledger. Eliminates IEEE 754 precision loss.\n\nMCP ROUTING TRIGGERS: Thermodynamic Cost, Monte Carlo Tree Search, Economic Escrow, Token Burn, Budget Calculation",
+      "properties": {
+        "cost_per_million_input_tokens": {
+          "description": "The atomic integer cost per 1 million input tokens provided to the model.",
+          "maximum": 1000000000,
+          "title": "Cost Per Million Input Tokens",
+          "type": "integer"
+        },
+        "cost_per_million_output_tokens": {
+          "description": "The atomic integer cost per 1 million output tokens generated by the model.",
+          "maximum": 1000000000,
+          "title": "Cost Per Million Output Tokens",
+          "type": "integer"
+        },
+        "magnitude_unit": {
+          "description": "The magnitude unit of the associated costs.",
+          "maxLength": 2000,
+          "title": "Magnitude Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "cost_per_million_input_tokens",
+        "cost_per_million_output_tokens",
+        "magnitude_unit"
+      ],
+      "title": "ComputeRateContract",
+      "type": "object"
+    },
     "ComputeTierProfile": {
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Categorizes the latency and reasoning depth of a given logical node, physically segregating cheap syntactic execution from heavy semantic computation.\n\nCAUSAL AFFORDANCE: Instructs the scheduling orchestrator to route this node's computation to the appropriately tiered hardware cluster (e.g. fast cheap APIs vs heavy GPU inference).\n\nEPISTEMIC BOUNDS: Bounded to strict enumeration values.\n\nMCP ROUTING TRIGGERS: Hardware Scheduling, Tiered Compute, Orchestration Cost, Resource Allocation",
+      "description": "AGENT INSTRUCTION: Categorizes the latency and reasoning depth of a given logical node, physically segregating cheap syntactic execution from heavy semantic computation.\n\nCAUSAL AFFORDANCE: Instructs the scheduling orchestrator to route this node's computation to the appropriately tiered hardware cluster (e.g. fast cheap APIs vs heavy GPU inference).\n\nEPISTEMIC BOUNDS: Bounded to strict enumeration values.\n\nMCP ROUTING TRIGGERS: Hardware Scheduling, Tiered Compute, Orchestration Cost, Resource Allocation",
       "enum": [
         "KINETIC",
         "ORACLE"
@@ -5090,7 +5206,7 @@
       "type": "object"
     },
     "DerivationModeProfile": {
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents the exact logical method used to derive a conclusion or fact.\n\nCAUSAL AFFORDANCE: Governs the routing behavior of the active inference engine.\n\nEPISTEMIC BOUNDS: Constrained strictly to valid deduction, induction, and abduction paths.\n\nMCP ROUTING TRIGGERS: Inference Mode, Causal Tracing, Logical Derivation",
+      "description": "AGENT INSTRUCTION: Defines the rigid mathematical derivation mode for semantic extraction.\n\nCAUSAL AFFORDANCE: Instructs the extraction engine whether to perform a strict 1:1 topological mapping or an abductive expansion.\n\nEPISTEMIC BOUNDS: Constrained entirely to strict Pydantic string literals to prevent hallucinated derivation paths.\n\nMCP ROUTING TRIGGERS: Derivation Mode, Abductive Upsampling, Direct Translation, Epistemic Extraction",
       "enum": [
         "direct_translation",
         "abductive_upsampling"
@@ -7090,7 +7206,7 @@
       "type": "object"
     },
     "EpistemicSecurityPolicy": {
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the minimum cryptographic isolation perimeter required for this node's thermodynamic execution.\n\nCAUSAL AFFORDANCE: Binds the execution graph to hardware Trusted Execution Environments (TEEs) if CONFIDENTIAL is set, physically guillotining unauthorized exfiltration.\n\nEPISTEMIC BOUNDS: Constrained strictly to the predefined enumeration values.\n\nMCP ROUTING TRIGGERS: TEE Enforcement, Hardware Isolation, Secure Enclave, Zero-Trust Execution",
+      "description": "AGENT INSTRUCTION: Defines the minimum cryptographic isolation perimeter required for this node's thermodynamic execution.\n\nCAUSAL AFFORDANCE: Binds the execution graph to hardware Trusted Execution Environments (TEEs) if CONFIDENTIAL is set, physically guillotining unauthorized exfiltration.\n\nEPISTEMIC BOUNDS: Constrained strictly to the predefined enumeration values.\n\nMCP ROUTING TRIGGERS: TEE Enforcement, Hardware Isolation, Secure Enclave, Zero-Trust Execution",
       "enum": [
         "STANDARD",
         "CONFIDENTIAL"
@@ -9111,19 +9227,19 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents a Remote Attestation Quote generated by a Trusted Execution Environment (TEE) mathematically proving physical silicon isolation.\n\nCAUSAL AFFORDANCE: Authorizes the swarm orchestrator to securely inject RESTRICTED classification payloads into the agent's context by proving the host OS cannot read or tamper with the working memory.\n\nEPISTEMIC BOUNDS: Physically bounded by the 8192-byte `max_length` of `hardware_signature_blob`. Mathematically anchored to the exact memory state via `platform_measurement_hash` (strict SHA-256 pattern `^[a-f0-9]{64}$` representing PCRs). The `enclave_class` is clamped to a Literal.\n\nMCP ROUTING TRIGGERS: Trusted Execution Environment, Remote Attestation, Platform Configuration Register, Hardware Root-of-Trust, SGX/TDX/Nitro",
       "properties": {
         "enclave_class": {
-          "description": "The physical silicon architecture generating the root-of-trust quote. Includes PCIe validation for decentralized GPU spoofing prevention.",
+          "description": "The physical silicon architecture generating the root-of-trust quote.",
           "enum": [
             "intel_tdx",
             "amd_sev_snp",
             "aws_nitro",
-            "nvidia_cc",
-            "pci_device_attestation"
+            "nvidia_cc"
           ],
+          "le": 1000000000,
           "title": "Enclave Class",
           "type": "string"
         },
         "platform_measurement_hash": {
-          "description": "The cryptographic hash of the Platform Configuration Registers (PCRs) or signed driver nonce proving the hardware state.",
+          "description": "The cryptographic hash of the Platform Configuration Registers (PCRs) proving the memory state was physically isolated.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-f0-9]{64}$",
@@ -9428,6 +9544,17 @@
       ],
       "title": "HypothesisStakeReceipt",
       "type": "object"
+    },
+    "IllocutionaryForceProfile": {
+      "description": "AGENT INSTRUCTION: Mathematically categorizes the structural intent of a proposition to prevent reasoning agents from hallucinating contextual truth values. Dictates whether the swarm evaluates the node as an empirical fact, a normative constraint, a guaranteed promise, or a simulation.",
+      "enum": [
+        "assertive",
+        "directive_normative",
+        "commissive",
+        "fictive_hypothetical"
+      ],
+      "title": "IllocutionaryForceProfile",
+      "type": "string"
     },
     "InputMappingContract": {
       "additionalProperties": false,
@@ -9739,19 +9866,6 @@
       ],
       "title": "IntentElicitationTopologyManifest",
       "type": "object"
-    },
-    "InterconnectTopologyProfile": {
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Categorizes the physical data-link layer connecting multiple silicon accelerators within a single thermodynamic execution node.\n\nCAUSAL AFFORDANCE: Instructs the orchestration layer to approve or reject multi-GPU allocations based on the exact bandwidth constraints required for tensor parallelism or ring-allreduce operations.\n\nEPISTEMIC BOUNDS: Strictly bounded to the literal enumeration types representing physical bus protocols.\n\nMCP ROUTING TRIGGERS: PCIe Topology, NVLink, Tensor Parallelism, Bandwidth Bottleneck, Multi-GPU Communication",
-      "enum": [
-        "isolated",
-        "pcie_gen3",
-        "pcie_gen4",
-        "pcie_gen5",
-        "nvlink_3",
-        "nvlink_4"
-      ],
-      "title": "InterconnectTopologyProfile",
-      "type": "string"
     },
     "InterventionIntent": {
       "additionalProperties": false,
@@ -13294,8 +13408,20 @@
       "title": "RedactionPolicy",
       "type": "object"
     },
+    "RhetoricalStructureProfile": {
+      "description": "AGENT INSTRUCTION: Maps unstructured text segments into the strict logical confines of Rhetorical Structure Theory (RST), authorizing the extraction engine to build directed dependency graphs.",
+      "enum": [
+        "premise",
+        "conclusion",
+        "elaboration",
+        "contrast",
+        "concession"
+      ],
+      "title": "RhetoricalStructureProfile",
+      "type": "string"
+    },
     "RiskLevelPolicy": {
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Quantitative Risk Assessment and Utility Theory, translating qualitative human threat vectors into computable scalar magnitudes that dictate systemic halting thresholds.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator's control theory loop to measure the aggregate expected utility loss of a proposed topology. It serves as the physical threshold that triggers hardware circuit breakers or forced escalation overrides.\n\nEPISTEMIC BOUNDS: The semantic strings are mathematically locked to an absolute integer space via the `weight` property (0, 1, 2). Rich comparison methods explicitly bridge the string definitions to integer evaluations, guaranteeing zero variance during distributed ledger verification.\n\nMCP ROUTING TRIGGERS: Quantitative Risk Assessment, Game Theory, Cybernetic Governance, Structural Circuit Breaker, Utility Theory",
+      "description": "AGENT INSTRUCTION: Formalizes Quantitative Risk Assessment and Utility Theory, translating qualitative human threat vectors into computable scalar magnitudes that dictate systemic halting thresholds.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator's control theory loop to measure the aggregate expected utility loss of a proposed topology. It serves as the physical threshold that triggers hardware circuit breakers or forced escalation overrides.\n\nEPISTEMIC BOUNDS: The semantic strings are mathematically locked to an absolute integer space via the `weight` property (0, 1, 2). Rich comparison methods explicitly bridge the string definitions to integer evaluations, guaranteeing zero variance during distributed ledger verification.\n\nMCP ROUTING TRIGGERS: Quantitative Risk Assessment, Game Theory, Cybernetic Governance, Structural Circuit Breaker, Utility Theory",
       "enum": [
         "safe",
         "standard",
@@ -14008,7 +14134,7 @@
       "type": "object"
     },
     "SemanticClassificationProfile": {
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements the Bell-LaPadula Model and Lattice-Based Access Control (LBAC), establishing the foundational mathematical axis for Information Flow Control across the distributed swarm.\n\nCAUSAL AFFORDANCE: Physically authorizes or severs the projection of semantic payloads. By exposing rich comparison operators (e.g., `<=`), it enables the orchestrator's verification engine to natively execute mathematical dominance checks between a payload's classification and an agent's clearance partition.\n\nEPISTEMIC BOUNDS: Constrained to a strict, 4-dimensional string literal space to prevent the hallucination of unauthorized clearance levels. The internal `clearance_level` property maps these strings to an immutable integer hierarchy [0, 1, 2, 3], guaranteeing deterministic threshold evaluation.\n\nMCP ROUTING TRIGGERS: Bell-LaPadula Model, Lattice-Based Access Control, Mandatory Access Control, Information Flow Control, Epistemic Quarantine",
+      "description": "AGENT INSTRUCTION: Implements the Bell-LaPadula Model and Lattice-Based Access Control (LBAC), establishing the foundational mathematical axis for Information Flow Control across the distributed swarm.\n\nCAUSAL AFFORDANCE: Physically authorizes or severs the projection of semantic payloads. By exposing rich comparison operators (e.g., `<=`), it enables the orchestrator's verification engine to natively execute mathematical dominance checks between a payload's classification and an agent's clearance partition.\n\nEPISTEMIC BOUNDS: Constrained to a strict, 4-dimensional string literal space to prevent the hallucination of unauthorized clearance levels. The internal `clearance_level` property maps these strings to an immutable integer hierarchy [0, 1, 2, 3], guaranteeing deterministic threshold evaluation.\n\nMCP ROUTING TRIGGERS: Bell-LaPadula Model, Lattice-Based Access Control, Mandatory Access Control, Information Flow Control, Epistemic Quarantine",
       "enum": [
         "public",
         "internal",
@@ -14408,7 +14534,7 @@
     },
     "SemanticRelationalRecordState": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents the untyped payload injection zone for harmonized structured telemetry.\n\nCAUSAL AFFORDANCE: Permits specialized downstream agents to project and decode specific industry payloads (e.g., OMOP CDM, FIX protocol) while preserving universal mathematical traversal of the graph.\n\nEPISTEMIC BOUNDS: The payload_injection_zone is explicitly routed through the volumetric hardware guillotine to prevent recursive JSON bombing.\n\nMCP ROUTING TRIGGERS: Industry Payload, Telemetry Harmonization, Untyped Injection Zone, Domain-Agnostic Routing, Structural Decoupling",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents the untyped payload injection zone for harmonized structured telemetry. CAUSAL AFFORDANCE: Permits specialized downstream agents to project and decode specific industry payloads (e.g., OMOP CDM, FIX protocol) while preserving universal mathematical traversal of the graph. EPISTEMIC BOUNDS: The payload_injection_zone is routed through the volumetric hardware guillotine.",
       "properties": {
         "topology_class": {
           "const": "semantic_relational_record",
@@ -14791,7 +14917,7 @@
     },
     "SpatialHardwareProfile": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative, frozen snapshot of the physical hardware boundaries and thermodynamic constraints required to instantiate this node. As a ...Profile suffix, this defines a rigid mathematical boundary.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator's provisioning layer to allocate exact silicon resources (Compute Tier, VRAM, GPU Count, Interconnect) before allowing the node to execute generative operations.\n\nEPISTEMIC BOUNDS: VRAM allocation is physically bounded by min_vram_gb (gt=0.0). GPU counts are clamped (ge=1, le=65536). The literal enumerations mathematically prevent the hallucination of non-existent silicon. The provider_whitelist is deterministically sorted for invariant RFC 8785 hashing.\n\nMCP ROUTING TRIGGERS: Thermodynamic Bounding, VRAM Allocation, Spot Market Routing, Hardware Provisioning, Silicon Constraints",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative, frozen snapshot of the physical hardware boundaries and thermodynamic constraints required to instantiate this node. As a ...Profile suffix, this defines a rigid mathematical boundary.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator's provisioning layer to allocate exact silicon resources (Compute Tier, VRAM, and Accelerator Type) before allowing the node to execute generative operations.\n\nEPISTEMIC BOUNDS: VRAM allocation is physically bounded by min_vram_gb (gt=0.0). The literal enumerations ComputeTierProfile and AcceleratorProfile mathematically prevent the hallucination of non-existent silicon. The provider_whitelist is deterministically sorted for invariant RFC 8785 hashing.\n\nMCP ROUTING TRIGGERS: Thermodynamic Bounding, VRAM Allocation, Spot Market Routing, Hardware Provisioning, Silicon Constraints",
       "properties": {
         "compute_tier": {
           "$ref": "#/$defs/ComputeTierProfile",
@@ -14810,19 +14936,6 @@
           "default": "BF16_TENSOR",
           "description": "The rigid silicon precision format required to execute this node's neural circuits."
         },
-        "gpu_count_magnitude": {
-          "default": 1,
-          "description": "The exact topological requirement for distributed parallel execution.",
-          "maximum": 65536,
-          "minimum": 1,
-          "title": "Gpu Count Magnitude",
-          "type": "integer"
-        },
-        "interconnect_topology": {
-          "$ref": "#/$defs/InterconnectTopologyProfile",
-          "default": "isolated",
-          "description": "The strict physical bus protocol required if gpu_count_magnitude > 1."
-        },
         "provider_whitelist": {
           "description": "The explicit array of cloud infrastructure providers authorized to run this node.",
           "items": {
@@ -14831,18 +14944,6 @@
           },
           "title": "Provider Whitelist",
           "type": "array"
-        },
-        "spot_preemption_rules": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/SpotPreemptionPolicy"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The strict mathematical boundary governing resilience on unmanaged decentralized hosts."
         }
       },
       "title": "SpatialHardwareProfile",
@@ -15113,32 +15214,6 @@
         "commit_probability"
       ],
       "title": "SpeculativeExecutionPolicy",
-      "type": "object"
-    },
-    "SpotPreemptionPolicy": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Fault Tolerance and Checkpoint Theory to mathematically bound the risk of sudden hardware revocation in decentralized Spot Markets (e.g., Vast.ai).\n\nCAUSAL AFFORDANCE: Forces the orchestrator to continuously flush state vectors to the EpistemicLedger via PersistenceCommitReceipts at the specified frequency, guaranteeing Eventual Consistency even if the host forcefully terminates the container.\n\nEPISTEMIC BOUNDS: Interruption probability is physically clamped (`ge=0.0, le=1.0`). Checkpointing frequency is guillotined at an absolute minimum of 1 second and maximum of 86400 (24 hours) to prevent integer overflow or disk I/O thrashing.\n\nMCP ROUTING TRIGGERS: Spot Instance Preemption, Fault Tolerance, Write-Ahead Logging, Checkpoint Theory, Decentralized Ephemerality",
-      "properties": {
-        "max_interruption_probability": {
-          "description": "The statistical upper bound of acceptable host termination risk.",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "Max Interruption Probability",
-          "type": "number"
-        },
-        "checkpoint_frequency_seconds": {
-          "description": "The strict temporal interval dictating when the orchestrator must execute a PersistenceCommitReceipt.",
-          "maximum": 86400,
-          "minimum": 1,
-          "title": "Checkpoint Frequency Seconds",
-          "type": "integer"
-        }
-      },
-      "required": [
-        "max_interruption_probability",
-        "checkpoint_frequency_seconds"
-      ],
-      "title": "SpotPreemptionPolicy",
       "type": "object"
     },
     "StateContract": {
@@ -16312,7 +16387,7 @@
       "type": "object"
     },
     "TensorStructuralFormatProfile": {
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Mathematically aligns abstract Tensor Calculus with rigid Von Neumann Memory Hierarchy limits and IEEE 754 Floating-Point Arithmetic physics.\n\nCAUSAL AFFORDANCE: Empowers the orchestrator to preemptively calculate exact thermodynamic and spatial memory exhaustion limits (VRAM footprint) prior to authorizing the download or projection of N-dimensional tensor payloads.\n\nEPISTEMIC BOUNDS: The `bytes_per_element` property physically clamps array allocations to rigid hardware byte multiples (e.g., 4 bytes for float32). The literal automaton prevents the execution graph from hallucinating non-standard or unsupported silicon data types.\n\nMCP ROUTING TRIGGERS: IEEE 754, Von Neumann Architecture, Tensor Calculus, GPU VRAM Allocation, Memory Hierarchy",
+      "description": "AGENT INSTRUCTION: Mathematically aligns abstract Tensor Calculus with rigid Von Neumann Memory Hierarchy limits and IEEE 754 Floating-Point Arithmetic physics.\n\nCAUSAL AFFORDANCE: Empowers the orchestrator to preemptively calculate exact thermodynamic and spatial memory exhaustion limits (VRAM footprint) prior to authorizing the download or projection of N-dimensional tensor payloads.\n\nEPISTEMIC BOUNDS: The `bytes_per_element` property physically clamps array allocations to rigid hardware byte multiples (e.g., 4 bytes for float32). The literal automaton prevents the execution graph from hallucinating non-standard or unsupported silicon data types.\n\nMCP ROUTING TRIGGERS: IEEE 754, Von Neumann Architecture, Tensor Calculus, GPU VRAM Allocation, Memory Hierarchy",
       "enum": [
         "float32",
         "float64",
@@ -16495,185 +16570,6 @@
       "title": "TheoryOfMindSnapshot",
       "type": "object"
     },
-    "ThermodynamicBurnReceipt": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Landauer's Principle of thermodynamic computing within the neurosymbolic network, serving as a lock-free, cryptographically frozen record of irreversible token, time, and bandwidth expenditure.\n\nCAUSAL AFFORDANCE: Deducts exact computational magnitude from the agent's localized Proof-of-Stake (PoS) execution escrow, progressively narrowing its available search depth. Bound to causal origin via `tool_invocation_cid` or temporal span.\n\nEPISTEMIC BOUNDS: Integer bounds (`ge=0, le=1000000000`) on `input_tokens`, `output_tokens`, `execution_seconds`, and `burn_magnitude` mathematically prevent integer overflow and fractional bypasses during ledger tallying.\n\nMCP ROUTING TRIGGERS: Landauer's Principle, Thermodynamic Compute, Bare-Metal Leasing, Resource Exhaustion, Lock-Free Tallying",
-      "properties": {
-        "event_cid": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
-          "maxLength": 128,
-          "minLength": 1,
-          "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Event Cid",
-          "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
-          "title": "Prior Event Hash"
-        },
-        "timestamp": {
-          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
-          "maximum": 253402300799.0,
-          "minimum": 0.0,
-          "title": "Timestamp",
-          "type": "number"
-        },
-        "topology_class": {
-          "const": "thermodynamic_burn",
-          "default": "thermodynamic_burn",
-          "description": "Discriminator type for a thermodynamic burn receipt.",
-          "title": "Topology Class",
-          "type": "string"
-        },
-        "tool_invocation_cid": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-zA-Z0-9_.:-]+$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "A string linking this burn back to the specific ToolInvocationEvent CID.",
-          "title": "Tool Invocation Cid"
-        },
-        "input_tokens": {
-          "default": 0,
-          "description": "The mathematical measure of input tokens consumed.",
-          "maximum": 1000000000,
-          "minimum": 0,
-          "title": "Input Tokens",
-          "type": "integer"
-        },
-        "output_tokens": {
-          "default": 0,
-          "description": "The mathematical measure of output tokens generated.",
-          "maximum": 1000000000,
-          "minimum": 0,
-          "title": "Output Tokens",
-          "type": "integer"
-        },
-        "execution_seconds": {
-          "default": 0,
-          "description": "The exact physical time leased on the unmanaged Spot Market host.",
-          "maximum": 1000000000,
-          "minimum": 0,
-          "title": "Execution Seconds",
-          "type": "integer"
-        },
-        "network_egress_gb": {
-          "default": 0,
-          "description": "The bandwidth volume utilized during execution.",
-          "maximum": 1000000000,
-          "minimum": 0,
-          "title": "Network Egress Gb",
-          "type": "integer"
-        },
-        "burn_magnitude": {
-          "description": "The normalized economic cost magnitude representing total thermodynamic burn.",
-          "maximum": 1000000000,
-          "minimum": 0,
-          "title": "Burn Magnitude",
-          "type": "integer"
-        }
-      },
-      "required": [
-        "event_cid",
-        "timestamp",
-        "burn_magnitude"
-      ],
-      "title": "ThermodynamicBurnReceipt",
-      "type": "object"
-    },
-    "ThermodynamicRateContract": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The immutable economic physics engine defining the Thermodynamic Cost of token generation and bare-metal compute execution across the decentralized network.\n\nCAUSAL AFFORDANCE: Allows the swarm orchestrator to mathematically project the budget exhaustion of a specific Latent Scratchpad trace, MCTS rollout, or time-leased Spot Instance before committing to the execution graph.\n\nEPISTEMIC BOUNDS: Strict integer boundaries (`le=1000000000`) on all magnitude fields ensure economic execution vectors cannot overflow the Epistemic Ledger. Eliminates IEEE 754 precision loss. At least one pricing vector (token or time) must be instantiated.\n\nMCP ROUTING TRIGGERS: Thermodynamic Cost, Economic Escrow, Bare-Metal Leasing, Network Egress, Budget Calculation",
-      "properties": {
-        "cost_per_million_input_tokens": {
-          "anyOf": [
-            {
-              "maximum": 1000000000,
-              "type": "integer"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The atomic integer cost per 1 million input tokens.",
-          "title": "Cost Per Million Input Tokens"
-        },
-        "cost_per_million_output_tokens": {
-          "anyOf": [
-            {
-              "maximum": 1000000000,
-              "type": "integer"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The atomic integer cost per 1 million output tokens.",
-          "title": "Cost Per Million Output Tokens"
-        },
-        "cost_per_execution_second_magnitude": {
-          "anyOf": [
-            {
-              "maximum": 1000000000,
-              "type": "integer"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The atomic integer cost per second of physical hardware lease time.",
-          "title": "Cost Per Execution Second Magnitude"
-        },
-        "network_egress_cost_per_gb_magnitude": {
-          "anyOf": [
-            {
-              "maximum": 1000000000,
-              "type": "integer"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The atomic integer cost per gigabyte of network egress (bandwidth).",
-          "title": "Network Egress Cost Per Gb Magnitude"
-        },
-        "magnitude_unit": {
-          "description": "The magnitude unit of the associated costs (e.g., 'usd_cents', 'coreason_credits').",
-          "maxLength": 2000,
-          "title": "Magnitude Unit",
-          "type": "string"
-        }
-      },
-      "required": [
-        "magnitude_unit"
-      ],
-      "title": "ThermodynamicRateContract",
-      "type": "object"
-    },
     "ThoughtBranchState": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative, frozen snapshot of a discrete Markov Decision Process\n(MDP) state representing a single coordinate within a non-monotonic reasoning tree. As\na ...State suffix, this is a frozen N-dimensional coordinate.\n\nCAUSAL AFFORDANCE: Tracks a localized reasoning trajectory, enabling the orchestrator's\nProcess Reward Model (PRM) to score the branch and dictate if the traversal should\nrecursively backtrack or continue. Tree reconstruction is enabled via the optional\nparent_branch_cid.\n\nEPISTEMIC BOUNDS: The mathematical validity of the branch is continuously clamped by\nprm_score (optional, ge=0.0, le=1.0, default=None). The node is cryptographically\nanchored to the execution tree via latent_content_hash (strict SHA-256 pattern\n^[a-f0-9]{64}$). The branch_cid is locked to a 128-char CID.\n\nMCP ROUTING TRIGGERS: Markov Decision Process, Process Reward Model, Reasoning Node,\nHeuristic Search, Backtracking",
@@ -16741,6 +16637,89 @@
         "random"
       ],
       "type": "string"
+    },
+    "TokenBurnReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Landauer's Principle of thermodynamic computing within the neurosymbolic network, serving as a lock-free, cryptographically frozen record of irreversible token and energy expenditure.\n\nCAUSAL AFFORDANCE: Deducts exact computational magnitude from the agent's localized Proof-of-Stake (PoS) execution escrow, progressively narrowing its available search depth. Bound to causal origin via `tool_invocation_cid`.\n\nEPISTEMIC BOUNDS: Integer bounds (`ge=0, le=1000000000`) on `input_tokens`, `output_tokens`, and `burn_magnitude` mathematically prevent integer overflow and fractional bypasses during ledger tallying.\n\nMCP ROUTING TRIGGERS: Landauer's Principle, Thermodynamic Compute, Token Burn, Resource Exhaustion, Lock-Free Tallying",
+      "properties": {
+        "event_cid": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "topology_class": {
+          "const": "token_burn",
+          "default": "token_burn",
+          "description": "Discriminator type for a token burn receipt.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "tool_invocation_cid": {
+          "description": "A string linking this burn back to the specific ToolInvocationEvent CID.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Tool Invocation Cid",
+          "type": "string"
+        },
+        "input_tokens": {
+          "description": "The mathematical measure of input tokens consumed.",
+          "maximum": 1000000000,
+          "minimum": 0,
+          "title": "Input Tokens",
+          "type": "integer"
+        },
+        "output_tokens": {
+          "description": "The mathematical measure of output tokens generated.",
+          "maximum": 1000000000,
+          "minimum": 0,
+          "title": "Output Tokens",
+          "type": "integer"
+        },
+        "burn_magnitude": {
+          "description": "The normalized economic cost magnitude representing thermodynamic burn.",
+          "maximum": 1000000000,
+          "minimum": 0,
+          "title": "Burn Magnitude",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "event_cid",
+        "timestamp",
+        "tool_invocation_cid",
+        "input_tokens",
+        "output_tokens",
+        "burn_magnitude"
+      ],
+      "title": "TokenBurnReceipt",
+      "type": "object"
     },
     "ToolInvocationEvent": {
       "additionalProperties": false,
@@ -17140,7 +17119,7 @@
       "type": "object"
     },
     "UpperOntologyClassProfile": {
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Classifies reality into domain-independent categories based on Basic Formal Ontology principles to prevent graph bloat.\n\nCAUSAL AFFORDANCE: Instructs the taxonomic routing engine to separate continuously existing entities (Continuants) from temporal events (Occurrents) prior to generating an active context partition.\n\nEPISTEMIC BOUNDS: Strictly bounded to the literal enumeration of top-level BFO classes.\n\nMCP ROUTING TRIGGERS: Basic Formal Ontology, Top-Level Classification, Continuant, Occurrent, Taxonomic Partitioning",
+      "description": "AGENT INSTRUCTION: Classifies reality into domain-independent categories based on Basic Formal Ontology principles to prevent graph bloat.",
       "enum": [
         "continuant",
         "occurrent"
