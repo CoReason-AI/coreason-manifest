@@ -12532,9 +12532,8 @@ class EmpiricalStatisticalQualifier(CoreasonBaseState):
 
     @model_validator(mode="after")
     def validate_interval_geometry(self) -> Self:
-        if self.lower_bound is not None and self.upper_bound is not None:
-            if self.lower_bound >= self.upper_bound:
-                raise ValueError("lower_bound must be strictly less than upper_bound")
+        if self.lower_bound is not None and self.upper_bound is not None and self.lower_bound >= self.upper_bound:
+            raise ValueError("lower_bound must be strictly less than upper_bound")
         return self
 
 
