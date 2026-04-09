@@ -1621,25 +1621,25 @@ class RoutingFrontierPolicy(CoreasonBaseState):
                 try:
                     val = int(values["max_latency_ms"])
                     values["max_latency_ms"] = int(max(1, min(val, 86400000)))
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
             if "max_cost_magnitude_per_token" in values:
                 try:
                     val = int(values["max_cost_magnitude_per_token"])
                     values["max_cost_magnitude_per_token"] = int(max(1, min(val, 1000000000)))
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
             if "min_capability_score" in values:
                 try:
                     val_float = float(values["min_capability_score"])
                     values["min_capability_score"] = float(max(0.0, min(val_float, 1.0)))
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
             if values.get("max_carbon_intensity_gco2eq_kwh") is not None:
                 try:
                     val_float = float(values["max_carbon_intensity_gco2eq_kwh"])
                     values["max_carbon_intensity_gco2eq_kwh"] = float(max(0.0, min(val_float, 10000.0)))
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
         return values
 
@@ -3418,13 +3418,11 @@ class OntologyDiscoveryIntent(BoundedJSONRPCIntent):
     target_registry_uri: HttpUrl = Field(
         description="The standard ontology registry endpoint (e.g., EBI-OLS, BioPortal)."
     )
-    query_concept_cid: Annotated[
-        str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
-    ] = Field(description="The internal standard CID the agent is checking for deprecation or semantic drift.")
-    expected_response_schema: dict[
-        Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState
-    ] | None = Field(
-        default=None, description="Optional strict schema expected from the external RDF/OWL registry."
+    query_concept_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
+        Field(description="The internal standard CID the agent is checking for deprecation or semantic drift.")
+    )
+    expected_response_schema: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] | None = (
+        Field(default=None, description="Optional strict schema expected from the external RDF/OWL registry.")
     )
 
     @field_validator("target_registry_uri", mode="after")
@@ -3449,9 +3447,9 @@ class SemanticMappingHeuristicProposal(CoreasonBaseState):
     topology_class: Literal["semantic_mapping_proposal"] = Field(
         default="semantic_mapping_proposal", description="Discriminator for semantic heuristic proposals."
     )
-    proposal_cid: Annotated[
-        str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
-    ] = Field(description="The cryptographic Merkle-DAG anchor for the proposal.")
+    proposal_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="The cryptographic Merkle-DAG anchor for the proposal."
+    )
     source_ontology_namespace: Annotated[str, StringConstraints(max_length=2000)] = Field(
         description="The origin namespace (e.g., ICD-10, USC)."
     )
@@ -3473,12 +3471,8 @@ class SemanticMappingHeuristicProposal(CoreasonBaseState):
 
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
-        object.__setattr__(
-            self, "justification_evidence_cids", sorted(self.justification_evidence_cids)
-        )
+        object.__setattr__(self, "justification_evidence_cids", sorted(self.justification_evidence_cids))
         return self
-
-
 
 
 class BrowserDOMState(CoreasonBaseState):
@@ -7460,7 +7454,7 @@ class MarketContract(CoreasonBaseState):
                 try:
                     mc_int = int(mc)
                     sp_int = int(sp)
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
             cmc = max(0, min(mc_int, 1000000000))
             if sp_int > cmc:
