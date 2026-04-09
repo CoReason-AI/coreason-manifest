@@ -40,7 +40,11 @@ type JsonPrimitiveState = (
 
 
 def _validate_payload_bounds(
-    value: JsonPrimitiveState, current_depth: int = 0, state: list[int] | None = None
+    value: JsonPrimitiveState,
+    current_depth: int = 0,
+    state: list[int] | None = None,
+    max_nodes: int = 10000,
+    max_recursion: int = 10,
 ) -> JsonPrimitiveState:
     """
     AGENT INSTRUCTION: Implements Computational Complexity Theory to enforce an absolute Big-O volume limit on Merkle tree serialization, physically preventing RAM exhaustion.
@@ -55,11 +59,11 @@ def _validate_payload_bounds(
         state = [0]
     state[0] += 1
 
-    if state[0] > 10000:
-        raise ValueError("Payload volume exceeds absolute hardware limit of 10000 nodes (JSON Bomb protection).")
+    if state[0] > max_nodes:
+        raise ValueError(f"Payload volume exceeds absolute hardware limit of {max_nodes} nodes (JSON Bomb protection).")
 
-    if current_depth > 10:
-        raise ValueError("Payload exceeds maximum recursion depth of 10")
+    if current_depth > max_recursion:
+        raise ValueError(f"Payload exceeds maximum recursion depth of {max_recursion}")
 
     typ = type(value)
     if typ is dict:
@@ -204,6 +208,13 @@ class EpistemicSecurityPolicy(StrEnum):
 
     STANDARD = "STANDARD"
     CONFIDENTIAL = "CONFIDENTIAL"
+
+
+class UpperOntologyClassProfile(StrEnum):
+    """AGENT INSTRUCTION: Classifies reality into domain-independent categories based on Basic Formal Ontology principles to prevent graph bloat."""
+
+    CONTINUANT = "continuant"
+    OCCURRENT = "occurrent"
 
 
 class SemanticClassificationProfile(StrEnum):
@@ -12326,9 +12337,45 @@ type AnyStateEvent = Annotated[
     | CognitiveRewardEvaluationReceipt
     | EpistemicFlowStateReceipt
     | CausalExplanationEvent
-    | IntentClassificationReceipt,
+    | IntentClassificationReceipt
+    | SemanticRelationalRecordState,
     Field(discriminator="topology_class", description="A discriminated union of state events."),
 ]
+
+
+class SemanticRelationalRecordState(CoreasonBaseState):
+    """AGENT INSTRUCTION: Represents the untyped payload injection zone for harmonized structured telemetry. CAUSAL AFFORDANCE: Permits specialized downstream agents to project and decode specific industry payloads (e.g., OMOP CDM, FIX protocol) while preserving universal mathematical traversal of the graph. EPISTEMIC BOUNDS: The payload_injection_zone is routed through the volumetric hardware guillotine."""
+
+    topology_class: Literal["semantic_relational_record"] = Field(default="semantic_relational_record")
+    record_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this record."
+    )
+    ontology_class: UpperOntologyClassProfile = Field(
+        description="The domain-independent structural classification of the record."
+    )
+    temporal_bounds: TemporalBoundsProfile | None = Field(
+        default=None, description="The temporal mapping of the event."
+    )
+    payload_injection_zone: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
+        description="The untyped domain-specific schema payload."
+    )
+    multivariate_latent_projection: VectorEmbeddingState | None = Field(
+        default=None,
+        description="The high-dimensional tabular embedding resolving the entire multivariate row into a holistic event meaning.",
+    )
+
+    @field_validator("payload_injection_zone", mode="before")
+    @classmethod
+    def enforce_payload_topology(cls, v: Any) -> Any:
+        return _validate_payload_bounds(v)
+
+    @model_validator(mode="after")
+    def enforce_occurrent_temporality(self) -> Self:
+        if self.ontology_class == UpperOntologyClassProfile.OCCURRENT and self.temporal_bounds is None:
+            raise ValueError(
+                "Ontological Paradox: An OCCURRENT must mathematically possess a temporal_bounds coordinate."
+            )
+        return self
 
 
 class ContinuousObservationState(CoreasonBaseState):
@@ -12658,3 +12705,4 @@ NeurosymbolicInferenceIntent.model_rebuild()
 
 EpistemicUpsamplingTask.model_rebuild()
 VolumetricPartitionState.model_rebuild()
+SemanticRelationalRecordState.model_rebuild()
