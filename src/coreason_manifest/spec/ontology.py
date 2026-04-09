@@ -1225,7 +1225,6 @@ class ThermodynamicRateContract(CoreasonBaseState):
 
     MCP ROUTING TRIGGERS: Thermodynamic Cost, Economic Escrow, Bare-Metal Leasing, Network Egress, Budget Calculation
     """
-
     cost_per_million_input_tokens: int | None = Field(
         default=None, le=1000000000, description="The atomic integer cost per 1 million input tokens."
     )
@@ -1245,9 +1244,7 @@ class ThermodynamicRateContract(CoreasonBaseState):
     @model_validator(mode="after")
     def validate_pricing_vector(self) -> Self:
         if self.cost_per_million_input_tokens is None and self.cost_per_execution_second_magnitude is None:
-            raise ValueError(
-                "Thermodynamic Void: Rate contract must specify at least one economic vector (tokens or time)."
-            )
+            raise ValueError("Thermodynamic Void: Rate contract must specify at least one economic vector (tokens or time).")
         return self
 
 
@@ -1590,25 +1587,25 @@ class RoutingFrontierPolicy(CoreasonBaseState):
                 try:
                     val = int(values["max_latency_ms"])
                     values["max_latency_ms"] = int(max(1, min(val, 86400000)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if "max_cost_magnitude_per_token" in values:
                 try:
                     val = int(values["max_cost_magnitude_per_token"])
                     values["max_cost_magnitude_per_token"] = int(max(1, min(val, 1000000000)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if "min_capability_score" in values:
                 try:
                     val_float = float(values["min_capability_score"])
                     values["min_capability_score"] = float(max(0.0, min(val_float, 1.0)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if values.get("max_carbon_intensity_gco2eq_kwh") is not None:
                 try:
                     val_float = float(values["max_carbon_intensity_gco2eq_kwh"])
                     values["max_carbon_intensity_gco2eq_kwh"] = float(max(0.0, min(val_float, 10000.0)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
         return values
 
@@ -6303,7 +6300,6 @@ class InterconnectTopologyProfile(StrEnum):
 
     MCP ROUTING TRIGGERS: PCIe Topology, NVLink, Tensor Parallelism, Bandwidth Bottleneck, Multi-GPU Communication
     """
-
     ISOLATED = "isolated"
     PCIE_GEN3 = "pcie_gen3"
     PCIE_GEN4 = "pcie_gen4"
@@ -6322,14 +6318,11 @@ class SpotPreemptionPolicy(CoreasonBaseState):
 
     MCP ROUTING TRIGGERS: Spot Instance Preemption, Fault Tolerance, Write-Ahead Logging, Checkpoint Theory, Decentralized Ephemerality
     """
-
     max_interruption_probability: float = Field(
         ge=0.0, le=1.0, description="The statistical upper bound of acceptable host termination risk."
     )
     checkpoint_frequency_seconds: int = Field(
-        ge=1,
-        le=86400,
-        description="The strict temporal interval dictating when the orchestrator must execute a PersistenceCommitReceipt.",
+        ge=1, le=86400, description="The strict temporal interval dictating when the orchestrator must execute a PersistenceCommitReceipt."
     )
 
 
@@ -6343,7 +6336,6 @@ class SpatialHardwareProfile(CoreasonBaseState):
 
     MCP ROUTING TRIGGERS: Thermodynamic Bounding, VRAM Allocation, Spot Market Routing, Hardware Provisioning, Silicon Constraints
     """
-
     compute_tier: ComputeTierProfile = Field(
         default=ComputeTierProfile.KINETIC,
         description="The discrete architectural boundary of the node (KINETIC for edge/consumer, ORACLE for datacenter).",
@@ -6358,11 +6350,14 @@ class SpatialHardwareProfile(CoreasonBaseState):
         description="The rigid silicon precision format required to execute this node's neural circuits.",
     )
     gpu_count_magnitude: int = Field(
-        ge=1, le=65536, default=1, description="The exact topological requirement for distributed parallel execution."
+        ge=1,
+        le=65536,
+        default=1,
+        description="The exact topological requirement for distributed parallel execution."
     )
     interconnect_topology: InterconnectTopologyProfile = Field(
         default=InterconnectTopologyProfile.ISOLATED,
-        description="The strict physical bus protocol required if gpu_count_magnitude > 1.",
+        description="The strict physical bus protocol required if gpu_count_magnitude > 1."
     )
     provider_whitelist: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
         default_factory=lambda: ["vast", "runpod", "io_net", "aws", "gcp", "azure"],
@@ -6370,7 +6365,7 @@ class SpatialHardwareProfile(CoreasonBaseState):
     )
     spot_preemption_rules: SpotPreemptionPolicy | None = Field(
         default=None,
-        description="The strict mathematical boundary governing resilience on unmanaged decentralized hosts.",
+        description="The strict mathematical boundary governing resilience on unmanaged decentralized hosts."
     )
 
     @model_validator(mode="after")
@@ -6381,9 +6376,7 @@ class SpatialHardwareProfile(CoreasonBaseState):
     @model_validator(mode="after")
     def _enforce_physics_engine(self) -> Self:
         if self.gpu_count_magnitude > 1 and self.interconnect_topology == InterconnectTopologyProfile.ISOLATED:
-            raise ValueError(
-                "Topological Contradiction: gpu_count_magnitude > 1 requires a valid InterconnectTopologyProfile, cannot be ISOLATED."
-            )
+            raise ValueError("Topological Contradiction: gpu_count_magnitude > 1 requires a valid InterconnectTopologyProfile, cannot be ISOLATED.")
         return self
 
 
@@ -7386,7 +7379,7 @@ class MarketContract(CoreasonBaseState):
                 try:
                     mc_int = int(mc)
                     sp_int = int(sp)
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             cmc = max(0, min(mc_int, 1000000000))
             if sp_int > cmc:
