@@ -1,11 +1,12 @@
-import pytest
-from pydantic import ValidationError
-from hypothesis import given, strategies as st
-from coreason_manifest.spec.ontology import (
-    StochasticStateNode,
-    StochasticConsensus
-)
 import math
+
+import pytest
+from hypothesis import given
+from hypothesis import strategies as st
+from pydantic import ValidationError
+
+from coreason_manifest.spec.ontology import StochasticConsensus, StochasticStateNode
+
 
 @given(st.text(max_size=100000))
 def test_maximum_entropy_injection(chaotic_text):

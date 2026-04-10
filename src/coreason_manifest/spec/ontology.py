@@ -742,12 +742,11 @@ class StochasticTopology(CoreasonBaseState):
     def verify_acyclic_dag_integrity(self) -> Self:
         seen_cids = set()
         for node in self.stochastic_graph:
-            if node.parent_node_cid is not None:
-                if node.parent_node_cid not in seen_cids:
-                    raise ValueError(
-                        f"Topological Violation: parent_node_cid '{node.parent_node_cid}' "
-                        f"must appear before child node '{node.node_cid}' to prevent infinite cycles."
-                    )
+            if node.parent_node_cid is not None and node.parent_node_cid not in seen_cids:
+                raise ValueError(
+                    f"Topological Violation: parent_node_cid '{node.parent_node_cid}' "
+                    f"must appear before child node '{node.node_cid}' to prevent infinite cycles."
+                )
             seen_cids.add(node.node_cid)
         return self
 

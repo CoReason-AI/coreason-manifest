@@ -1,12 +1,10 @@
 import pytest
+from hypothesis import given
+from hypothesis import strategies as st
 from pydantic import ValidationError
-from hypothesis import given, strategies as st
-from coreason_manifest.spec.ontology import (
-    IdeationPhase,
-    StochasticStateNode,
-    StochasticConsensus,
-    StochasticTopology
-)
+
+from coreason_manifest.spec.ontology import IdeationPhase, StochasticStateNode, StochasticTopology
+
 
 @given(
     st.lists(
@@ -54,5 +52,5 @@ def test_serialization_isomorphism(topology):
     # Prove the _cid lineages remain intact
     assert topology.topology_cid == reconstructed.topology_cid
     assert len(topology.stochastic_graph) == len(reconstructed.stochastic_graph)
-    for orig, recon in zip(topology.stochastic_graph, reconstructed.stochastic_graph):
+    for orig, recon in zip(topology.stochastic_graph, reconstructed.stochastic_graph, strict=True):
         assert orig.node_cid == recon.node_cid

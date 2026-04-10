@@ -9868,6 +9868,17 @@
       "title": "HypothesisStakeReceipt",
       "type": "object"
     },
+    "IdeationPhase": {
+      "description": "AGENT INSTRUCTION: Categorizes the thermodynamic phase of the generative ensemble's exploration.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator on the execution status of the topology, governing state transitions.\n\nEPISTEMIC BOUNDS: Strictly bounded to the predefined string enumeration values.\n\nMCP ROUTING TRIGGERS: Phase Tracking, Thermodynamic Orchestration, State Machine",
+      "enum": [
+        "STOCHASTIC_DIFFUSION",
+        "ENTROPIC_EXPLORATION",
+        "TOPOLOGICAL_CRITIQUE",
+        "MANIFOLD_COLLAPSE"
+      ],
+      "title": "IdeationPhase",
+      "type": "string"
+    },
     "IllocutionaryForceProfile": {
       "description": "AGENT INSTRUCTION: Mathematically categorizes the structural intent of a proposition to prevent reasoning agents from hallucinating contextual truth values. Dictates whether the swarm evaluates the node as an empirical fact, a normative constraint, a guaranteed promise, or a simulation.",
       "enum": [
@@ -16247,6 +16258,137 @@
         "max_loops_allowed"
       ],
       "title": "SteadyStateHypothesisState",
+      "type": "object"
+    },
+    "StochasticConsensus": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A topological bridge mathematically projecting high-dimensional unverified graphs into actionable manifolds.\n\nCAUSAL AFFORDANCE: Authorizes a lossy deterministic projection or signals the continuation of diffusion if residual entropy is too high.\n\nEPISTEMIC BOUNDS: convergence_confidence is mathematically clamped to `[0.0, 1.0]`.\n\nMCP ROUTING TRIGGERS: Topological Consensus, Persistent Homology, Manifold Collapse Verification",
+      "properties": {
+        "consensus_cid": {
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Consensus Cid",
+          "type": "string"
+        },
+        "proposed_manifold": {
+          "title": "Proposed Manifold",
+          "type": "string"
+        },
+        "convergence_confidence": {
+          "title": "Convergence Confidence",
+          "type": "number"
+        },
+        "residual_entropy_vectors": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Residual Entropy Vectors",
+          "type": "array"
+        }
+      },
+      "required": [
+        "proposed_manifold",
+        "convergence_confidence",
+        "residual_entropy_vectors"
+      ],
+      "title": "StochasticConsensus",
+      "type": "object"
+    },
+    "StochasticStateNode": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A single discrete latent coordinate (a generated hypothesis or critique) inside an unverified stochastic diffusion search space.\n\nCAUSAL AFFORDANCE: Used by the ensemble as a vertex to map out Monte Carlo Tree Search (MCTS) exploration before manifold collapse.\n\nEPISTEMIC BOUNDS: epistemic_entropy is mathematically clamped to `[0.0, 1.0]` bounds (Shannon entropy).\n\nMCP ROUTING TRIGGERS: Latent Space Coordinates, MCTS Nodes, Shannon Entropy Bounding",
+      "properties": {
+        "node_cid": {
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Node Cid",
+          "type": "string"
+        },
+        "parent_node_cid": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Parent Node Cid"
+        },
+        "agent_role": {
+          "enum": [
+            "generator",
+            "critic",
+            "synthesizer"
+          ],
+          "title": "Agent Role",
+          "type": "string"
+        },
+        "stochastic_tensor": {
+          "description": "Unbounded semantic payload",
+          "title": "Stochastic Tensor",
+          "type": "string"
+        },
+        "epistemic_entropy": {
+          "title": "Epistemic Entropy",
+          "type": "number"
+        }
+      },
+      "required": [
+        "agent_role",
+        "stochastic_tensor",
+        "epistemic_entropy"
+      ],
+      "title": "StochasticStateNode",
+      "type": "object"
+    },
+    "StochasticTopology": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The structurally unbounded root container modeling multi-agent generative reasoning as a Topological DAG.\n\nCAUSAL AFFORDANCE: Holds unverified, high-variance semantic coordinates and manages MCTS execution.\n\nEPISTEMIC BOUNDS: Inherently enforces referential integrity for acyclic DAG sorting via `verify_acyclic_dag_integrity`. `epistemic_status` is locked strictly to 'stochastically_unbounded'.\n\nMCP ROUTING TRIGGERS: Directed Acyclic Graphs, Topological MCTS Container, Epistemic Immutability, Acyclic Integrity",
+      "properties": {
+        "topology_cid": {
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Topology Cid",
+          "type": "string"
+        },
+        "topology_class": {
+          "const": "stochastic_ensemble",
+          "default": "stochastic_ensemble",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "phase": {
+          "$ref": "#/$defs/IdeationPhase"
+        },
+        "stochastic_graph": {
+          "items": {
+            "$ref": "#/$defs/StochasticStateNode"
+          },
+          "title": "Stochastic Graph",
+          "type": "array"
+        },
+        "consensus": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StochasticConsensus"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "epistemic_status": {
+          "const": "stochastically_unbounded",
+          "default": "stochastically_unbounded",
+          "title": "Epistemic Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "phase",
+        "stochastic_graph"
+      ],
+      "title": "StochasticTopology",
       "type": "object"
     },
     "StreamingDisfluencyContract": {
