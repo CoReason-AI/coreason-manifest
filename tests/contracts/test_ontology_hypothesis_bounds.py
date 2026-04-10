@@ -47,8 +47,7 @@ def test_topological_projection_intent_guillotine(v: float) -> None:
 
 @given(st.floats(max_value=-0.001) | st.just(float("nan")) | st.just(float("inf")))
 def test_kl_divergence_paradox(v: float) -> None:
-    with pytest.raises(ValidationError, match="Mathematical paradox:|"
-                                              "Input should be a valid number"):
+    with pytest.raises(ValidationError, match=r"Mathematical paradox:|Input should be a valid number"):
         EpistemicRejectionReceipt(
             receipt_cid="test",
             failed_projection_cid="test-1234",
@@ -60,6 +59,5 @@ def test_kl_divergence_paradox(v: float) -> None:
 
 @given(st.floats(max_value=-0.001) | st.just(float("nan")) | st.just(float("inf")))
 def test_active_inference_epoch_paradox(v: float) -> None:
-    with pytest.raises(ValidationError, match="Mathematical paradox:|"
-                                              "Input should be a valid number"):
+    with pytest.raises(ValidationError, match=r"Mathematical paradox:|Input should be a valid number"):
         ActiveInferenceEpoch(epoch_cid="test", current_free_energy=v, rejection_history=[])

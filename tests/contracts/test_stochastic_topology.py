@@ -14,11 +14,12 @@ from hypothesis import strategies as st
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
-    IdeationPhase,
     HypothesisSuperposition,
+    IdeationPhase,
     StochasticStateNode,
     StochasticTopology,
 )
+
 
 @given(
     st.lists(
@@ -26,12 +27,12 @@ from coreason_manifest.spec.ontology import (
             StochasticStateNode,
             node_cid=st.uuids().map(str),
             parent_node_cid=st.none(),
-            epistemic_entropy=st.floats(min_value=0.0, max_value=1.0)
+            epistemic_entropy=st.floats(min_value=0.0, max_value=1.0),
         ),
         min_size=2,
         max_size=10,
     ),
-    st.uuids().map(str)
+    st.uuids().map(str),
 )
 def test_acyclic_dag_forward_reference(nodes: list[StochasticStateNode], topology_cid: str) -> None:
     nodes[0] = nodes[0].model_copy(update={"parent_node_cid": nodes[1].node_cid})
@@ -39,11 +40,13 @@ def test_acyclic_dag_forward_reference(nodes: list[StochasticStateNode], topolog
         StochasticTopology(topology_cid=topology_cid, phase=IdeationPhase.STOCHASTIC_DIFFUSION, stochastic_graph=nodes)
     assert "must appear before child node" in str(excinfo.value)
 
+
 @given(st.builds(StochasticTopology, topology_cid=st.uuids().map(str), stochastic_graph=st.just([])))
 def test_immutability_of_epistemic_status(topology: StochasticTopology) -> None:
     assert topology.epistemic_status == "stochastically_unbounded"
     with pytest.raises(ValidationError):
         topology.epistemic_status = "bounded"  # type: ignore[misc,assignment]
+
 
 @given(
     st.builds(
@@ -59,7 +62,13 @@ def test_immutability_of_epistemic_status(topology: StochasticTopology) -> None:
             max_size=5,
         ),
         superposition=st.one_of(
-            st.none(), st.builds(HypothesisSuperposition, superposition_cid=st.uuids().map(str), competing_manifolds=st.just({}), wave_collapse_function=st.just("deterministic_compiler"))
+            st.none(),
+            st.builds(
+                HypothesisSuperposition,
+                superposition_cid=st.uuids().map(str),
+                competing_manifolds=st.just({}),
+                wave_collapse_function=st.just("deterministic_compiler"),
+            ),
         ),
     )
 )

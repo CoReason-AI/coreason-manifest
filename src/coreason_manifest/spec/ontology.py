@@ -21,7 +21,6 @@ import threading
 import time
 import typing
 import urllib.parse
-import uuid
 from enum import StrEnum
 from typing import Annotated, Any, Literal, Self
 
@@ -679,7 +678,9 @@ class StochasticStateNode(CoreasonBaseState):
     node_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
     parent_node_cid: str | None = Field(default=None)
     agent_role: Literal["generator", "critic", "synthesizer"] = Field()
-    stochastic_tensor: Annotated[str, StringConstraints(max_length=100000)] = Field(description="Unbounded semantic payload")
+    stochastic_tensor: Annotated[str, StringConstraints(max_length=100000)] = Field(
+        description="Unbounded semantic payload"
+    )
     epistemic_entropy: float = Field()
 
     @field_validator("epistemic_entropy", mode="after")
@@ -702,16 +703,19 @@ class HypothesisSuperposition(CoreasonBaseState):
     """
 
     superposition_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
-    competing_manifolds: dict[Annotated[str, StringConstraints(max_length=128)], Annotated[float, Field(ge=0.0, le=1.0)]]
+    competing_manifolds: dict[
+        Annotated[str, StringConstraints(max_length=128)], Annotated[float, Field(ge=0.0, le=1.0)]
+    ]
     wave_collapse_function: Literal["plurality_vote", "highest_confidence", "deterministic_compiler"]
     residual_entropy_vectors: list[Annotated[str, StringConstraints(max_length=100000)]] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def enforce_conservation_of_probability(self) -> Self:
-        import math
         total_prob = sum(self.competing_manifolds.values())
         if total_prob > 1.0 + 1e-9:
-            raise ValueError(f"Conservation of Probability violated: sum of competing_manifolds probabilities ({total_prob}) > 1.0")
+            raise ValueError(
+                f"Conservation of Probability violated: sum of competing_manifolds probabilities ({total_prob}) > 1.0"
+            )
         return self
 
     @model_validator(mode="after")
@@ -912,7 +916,10 @@ class ComputationalThermodynamics(CoreasonBaseState):
             object.__setattr__(self, "system_state", ThermodynamicState.ENTROPIC_EXHAUSTION_ORACLE_INTERVENTION)
             return self
 
-        if self.entropy_derivative_delta is not None and abs(self.entropy_derivative_delta) < self.stagnation_tolerance_epsilon:
+        if (
+            self.entropy_derivative_delta is not None
+            and abs(self.entropy_derivative_delta) < self.stagnation_tolerance_epsilon
+        ):
             object.__setattr__(self, "system_state", ThermodynamicState.ENTROPIC_EXHAUSTION_ORACLE_INTERVENTION)
 
         return self
@@ -1947,25 +1954,25 @@ class RoutingFrontierPolicy(CoreasonBaseState):
                 try:
                     val = int(values["max_latency_ms"])
                     values["max_latency_ms"] = int(max(1, min(val, 86400000)))
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
             if "max_cost_magnitude_per_token" in values:
                 try:
                     val = int(values["max_cost_magnitude_per_token"])
                     values["max_cost_magnitude_per_token"] = int(max(1, min(val, 1000000000)))
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
             if "min_capability_score" in values:
                 try:
                     val_float = float(values["min_capability_score"])
                     values["min_capability_score"] = float(max(0.0, min(val_float, 1.0)))
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
             if values.get("max_carbon_intensity_gco2eq_kwh") is not None:
                 try:
                     val_float = float(values["max_carbon_intensity_gco2eq_kwh"])
                     values["max_carbon_intensity_gco2eq_kwh"] = float(max(0.0, min(val_float, 10000.0)))
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
         return values
 
@@ -3029,7 +3036,10 @@ class LatentScratchpadReceipt(CoreasonBaseState):
 
     @model_validator(mode="after")
     def verify_referential_integrity(self) -> Self:
-        explored_branch_cids = {getattr(branch, "branch_cid", getattr(branch, "topology_cid", "unknown")) for branch in self.explored_branches}
+        explored_branch_cids = {
+            getattr(branch, "branch_cid", getattr(branch, "topology_cid", "unknown"))
+            for branch in self.explored_branches
+        }
         if self.resolution_branch_cid is not None and self.resolution_branch_cid not in explored_branch_cids:
             raise ValueError(f"resolution_branch_cid '{self.resolution_branch_cid}' not found in explored_branches.")
         for discarded_cid in self.discarded_branches:
@@ -3040,7 +3050,12 @@ class LatentScratchpadReceipt(CoreasonBaseState):
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(
-            self, "explored_branches", sorted(self.explored_branches, key=lambda branch: getattr(branch, "branch_cid", getattr(branch, "topology_cid", "unknown")))
+            self,
+            "explored_branches",
+            sorted(
+                self.explored_branches,
+                key=lambda branch: getattr(branch, "branch_cid", getattr(branch, "topology_cid", "unknown")),
+            ),
         )
         object.__setattr__(self, "discarded_branches", sorted(self.discarded_branches))
         return self
@@ -7784,7 +7799,7 @@ class MarketContract(CoreasonBaseState):
                 try:
                     mc_int = int(mc)
                     sp_int = int(sp)
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
             cmc = max(0, min(mc_int, 1000000000))
             if sp_int > cmc:

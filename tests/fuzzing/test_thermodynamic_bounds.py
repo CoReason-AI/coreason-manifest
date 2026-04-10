@@ -15,6 +15,7 @@ from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import ComputationalThermodynamics, ThermodynamicState
 
+
 @given(
     max_diff=st.integers(min_value=1, max_value=1000),
     current_diff=st.integers(min_value=1001, max_value=10000),
@@ -35,6 +36,7 @@ def test_diffusion_overload(max_diff: int, current_diff: int, free_energy: float
         )
     assert "current_diffusions strictly exceeds max_stochastic_diffusions" in str(exc_info.value)
 
+
 @given(
     max_diff=st.integers(min_value=1, max_value=1000),
     current_diff=st.integers(min_value=0, max_value=1000),
@@ -54,6 +56,7 @@ def test_valid_operational_state(max_diff: int, current_diff: int, free_energy: 
     )
     assert thermo.system_state == ThermodynamicState.ACTIVE_DIFFUSION
 
+
 @given(
     max_diff=st.integers(min_value=1, max_value=1000),
     current_diff=st.integers(min_value=0, max_value=1000),
@@ -61,7 +64,9 @@ def test_valid_operational_state(max_diff: int, current_diff: int, free_energy: 
     delta=st.floats(min_value=-0.0009, max_value=0.0009),
     thermo_cid=st.uuids().map(str),
 )
-def test_thermodynamic_stagnation(max_diff: int, current_diff: int, free_energy: float, delta: float, thermo_cid: str) -> None:
+def test_thermodynamic_stagnation(
+    max_diff: int, current_diff: int, free_energy: float, delta: float, thermo_cid: str
+) -> None:
     if current_diff > max_diff:
         current_diff = max_diff
     thermo = ComputationalThermodynamics(

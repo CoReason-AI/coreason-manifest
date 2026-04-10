@@ -29,7 +29,8 @@ def test_kl_divergence_paradox_trapping(invalid_kl_divergence: float) -> None:
     st.text(min_size=1, max_size=10000),
 )
 def test_valid_gradient_space(valid_kl_divergence: float, valid_gradient: str) -> None:
-    receipt = EpistemicRejectionReceipt(receipt_cid='test',
+    receipt = EpistemicRejectionReceipt(
+        receipt_cid="test",
         failed_projection_cid="valid_projection_cid",
         violated_algebraic_constraint="Constraint X violated.",
         kl_divergence_to_validity=valid_kl_divergence,

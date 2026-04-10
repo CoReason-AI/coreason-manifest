@@ -13,6 +13,7 @@ from hypothesis import strategies as st
 
 from coreason_manifest.spec.ontology import ComputationalThermodynamics, ThermodynamicState
 
+
 @given(
     max_diff=st.integers(min_value=1, max_value=1000),
     current_diff=st.integers(min_value=0, max_value=1000),
@@ -32,6 +33,7 @@ def test_depletion_transition_mapping(max_diff: int, current_diff: int, free_ene
     )
     assert thermo.system_state == ThermodynamicState.ENTROPIC_EXHAUSTION_ORACLE_INTERVENTION
 
+
 @given(
     max_diff=st.integers(min_value=1, max_value=1000),
     current_diff=st.integers(min_value=0, max_value=1000),
@@ -41,7 +43,12 @@ def test_depletion_transition_mapping(max_diff: int, current_diff: int, free_ene
     thermo_cid_exhausted=st.uuids().map(str),
 )
 def test_serialization_isomorphism(
-    max_diff: int, current_diff: int, free_energy_active: float, free_energy_exhausted: float, thermo_cid_active: str, thermo_cid_exhausted: str
+    max_diff: int,
+    current_diff: int,
+    free_energy_active: float,
+    free_energy_exhausted: float,
+    thermo_cid_active: str,
+    thermo_cid_exhausted: str,
 ) -> None:
     if current_diff > max_diff:
         current_diff = max_diff

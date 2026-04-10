@@ -15,8 +15,16 @@ from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import TargetTopologyEnum, TopologicalProjectionIntent
 
-@given(st.floats(min_value=0.0, max_value=0.84999), st.uuids().map(str), st.uuids().map(str), st.sampled_from(TargetTopologyEnum))
-def test_isomorphism_guillotine(confidence: float, projection_cid: str, source_cid: str, topology: TargetTopologyEnum) -> None:
+
+@given(
+    st.floats(min_value=0.0, max_value=0.84999),
+    st.uuids().map(str),
+    st.uuids().map(str),
+    st.sampled_from(TargetTopologyEnum),
+)
+def test_isomorphism_guillotine(
+    confidence: float, projection_cid: str, source_cid: str, topology: TargetTopologyEnum
+) -> None:
     with pytest.raises(ValidationError) as exc_info:
         TopologicalProjectionIntent(
             projection_cid=projection_cid,
@@ -27,8 +35,16 @@ def test_isomorphism_guillotine(confidence: float, projection_cid: str, source_c
         )
     assert "Isomorphism Guillotine triggered" in str(exc_info.value)
 
-@given(st.floats(min_value=0.85, max_value=1.0), st.uuids().map(str), st.uuids().map(str), st.sampled_from(TargetTopologyEnum))
-def test_valid_projection_space(confidence: float, projection_cid: str, source_cid: str, topology: TargetTopologyEnum) -> None:
+
+@given(
+    st.floats(min_value=0.85, max_value=1.0),
+    st.uuids().map(str),
+    st.uuids().map(str),
+    st.sampled_from(TargetTopologyEnum),
+)
+def test_valid_projection_space(
+    confidence: float, projection_cid: str, source_cid: str, topology: TargetTopologyEnum
+) -> None:
     intent = TopologicalProjectionIntent(
         projection_cid=projection_cid,
         source_superposition_cid=source_cid,
@@ -39,6 +55,7 @@ def test_valid_projection_space(confidence: float, projection_cid: str, source_c
     assert intent.isomorphism_confidence == confidence
     assert intent.source_superposition_cid == source_cid
     assert intent.target_topology == topology
+
 
 @given(
     st.floats(min_value=0.85, max_value=1.0),

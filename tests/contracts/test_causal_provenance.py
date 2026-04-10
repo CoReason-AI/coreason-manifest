@@ -18,6 +18,7 @@ from coreason_manifest.spec.ontology import (
     TopologicalProjectionIntent,
 )
 
+
 class MockDeterministicExecutionNode(CryptographicProvenanceMixin):
     """
     AGENT INSTRUCTION: A local mock execution node to test cryptographic lineage traversals.
@@ -28,9 +29,12 @@ class MockDeterministicExecutionNode(CryptographicProvenanceMixin):
 
     MCP ROUTING TRIGGERS: Mock Execution, Cryptographic Lineage, Serialization Isomorphism
     """
+
     payload: str
 
+
 MockDeterministicExecutionNode.model_rebuild()
+
 
 @given(
     st.builds(
@@ -46,7 +50,11 @@ MockDeterministicExecutionNode.model_rebuild()
     st.text(min_size=1, max_size=50),
 )
 def test_cryptographic_lineage_and_serialization(
-    superposition: HypothesisSuperposition, projection_cid: str, confidence: float, topology: TargetTopologyEnum, mock_payload: str
+    superposition: HypothesisSuperposition,
+    projection_cid: str,
+    confidence: float,
+    topology: TargetTopologyEnum,
+    mock_payload: str,
 ) -> None:
     intent = TopologicalProjectionIntent(
         projection_cid=projection_cid,
