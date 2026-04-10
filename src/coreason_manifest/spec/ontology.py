@@ -804,6 +804,70 @@ class TopologicalProjectionIntent(CryptographicProvenanceMixin):
         return v
 
 
+class EpistemicRejectionReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: The mathematical backpropagation signal triggered when the Deterministic Compiler rejects a stochastic manifold. Quantifies the rejection and provides a mutation gradient.
+
+    CAUSAL AFFORDANCE: Instructs the LLM ensemble on how to perturb the Upper Confidence Bound (UCB) during the next MCTS generation attempt by mathematically quantifying the error.
+
+    EPISTEMIC BOUNDS: Kullback-Leibler divergence is strictly non-negative. A negative mathematical distance is a paradox and raises a ValueError.
+
+    MCP ROUTING TRIGGERS: Rejection Receipt, Free Energy Feedback, MCTS Backpropagation, Variational Free Energy, Mutation Gradient
+    """
+
+    receipt_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        default_factory=lambda: str(uuid.uuid4())
+    )
+    failed_projection_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
+    violated_algebraic_constraint: Annotated[str, StringConstraints(max_length=2000)]
+    kl_divergence_to_validity: float
+    stochastic_mutation_gradient: Annotated[str, StringConstraints(max_length=10000)]
+
+    @field_validator("kl_divergence_to_validity", mode="after")
+    @classmethod
+    def enforce_kl_divergence_physics(cls, v: float) -> float:
+        if math.isnan(v) or math.isinf(v):
+            raise ValueError(f"Mathematical paradox: KL Divergence cannot be {v}")
+        if v < 0.0:
+            raise ValueError(f"Mathematical paradox: Negative information distance detected (v={v}).")
+        return v
+
+
+class ActiveInferenceEpoch(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A macroscopic container tracking the directed graph of evolutionary retries across an entire task lifecycle.
+
+    CAUSAL AFFORDANCE: Aggregates free energy across multiple EpistemicRejectionReceipts to trigger thermodynamic circuit breakers when convergence fails.
+
+    EPISTEMIC BOUNDS: Aggregated free energy must be non-negative. Rejection history is deterministically sorted by receipt_cid for immutable hashing.
+
+    MCP ROUTING TRIGGERS: Active Inference Loop, Thermodynamic Circuit Breaker, Epistemic Aggregation, Retry Ledger
+    """
+
+    epoch_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        default_factory=lambda: str(uuid.uuid4())
+    )
+    target_objective_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")] | None = Field(default=None)
+    rejection_history: list[EpistemicRejectionReceipt] = Field(default_factory=list)
+    current_free_energy: float
+    epoch_status: Literal["active_inference_loop"] = Field(default="active_inference_loop")
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(
+            self, "rejection_history", sorted(self.rejection_history, key=operator.attrgetter("receipt_cid"))
+        )
+        return self
+
+    @model_validator(mode="after")
+    def validate_free_energy_aggregation(self) -> Self:
+        if math.isnan(self.current_free_energy) or math.isinf(self.current_free_energy):
+            raise ValueError(f"Mathematical paradox: Free Energy cannot be {self.current_free_energy}")
+        if self.current_free_energy < 0.0:
+            raise ValueError(f"Mathematical paradox: Negative free energy detected (v={self.current_free_energy}).")
+        return self
+
+
 class TraceContextState(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Implements Distributed Causality using Vector Clocks and rho-calculus. It forms the foundational causality boundary.
@@ -13341,3 +13405,5 @@ StochasticConsensus.model_rebuild()
 StochasticTopology.model_rebuild()
 CryptographicProvenanceMixin.model_rebuild()
 TopologicalProjectionIntent.model_rebuild()
+EpistemicRejectionReceipt.model_rebuild()
+ActiveInferenceEpoch.model_rebuild()
