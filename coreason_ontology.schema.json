@@ -736,6 +736,23 @@
         }
       ]
     },
+    "AnyExplorationBranch": {
+      "discriminator": {
+        "mapping": {
+          "stochastic_ideation": "#/$defs/StochasticIdeationTopology",
+          "thought_branch": "#/$defs/ThoughtBranchState"
+        },
+        "propertyName": "topology_class"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/ThoughtBranchState"
+        },
+        {
+          "$ref": "#/$defs/StochasticIdeationTopology"
+        }
+      ]
+    },
     "AnyNodeProfile": {
       "description": "A discriminated union of all valid workflow nodes.",
       "discriminator": {
@@ -6726,6 +6743,29 @@
       "title": "EpistemicDomainGraphManifest",
       "type": "object"
     },
+    "EpistemicEntropyState": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Distinguishes between Aleatoric Uncertainty (noise) and Epistemic Uncertainty (knowledge gaps) by quantifying the chaos of a probability distribution.\n\nCAUSAL AFFORDANCE: Exposes the internal cognitive dissonance of the swarm to the orchestrator, allowing the system to mathematically prove if an argument is converging toward a solution or caught in a deadlock.\n\nEPISTEMIC BOUNDS: Absolute chaos is bounded above zero by `shannon_entropy_index` (`ge=0.0`). Information gain is clamped to a normalized probability space via `bayesian_surprise_score` (`ge=0.0, le=1.0`).\n\nMCP ROUTING TRIGGERS: Shannon Entropy, Bayesian Surprise, Epistemic Uncertainty, Kullback-Leibler Divergence, Cognitive Chaos",
+      "properties": {
+        "shannon_entropy_index": {
+          "minimum": 0.0,
+          "title": "Shannon Entropy Index",
+          "type": "number"
+        },
+        "bayesian_surprise_score": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Bayesian Surprise Score",
+          "type": "number"
+        }
+      },
+      "required": [
+        "shannon_entropy_index",
+        "bayesian_surprise_score"
+      ],
+      "title": "EpistemicEntropyState",
+      "type": "object"
+    },
     "EpistemicEscalationContract": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes a Kahneman System 2 Test-Time Compute Allocation heuristic, leveraging Information Theory to dynamically unlock compute budgets based on measured Shannon Entropy.\n\nCAUSAL AFFORDANCE: Authorizes the orchestrator to recursively scale the active `max_latent_tokens_budget` via the `test_time_multiplier` when the agent's internal predictive distribution breaches the `baseline_entropy_threshold`.\n\nEPISTEMIC BOUNDS: State-Space Explosion is physically prevented by clamping `max_escalation_tiers` to `le=10`. Exponential recursive multiplication beyond this bound mathematically guarantees integer overflow and VRAM hardware exhaustion.\n\nMCP ROUTING TRIGGERS: System 2 Processing, Test-Time Compute, Shannon Entropy, Epistemic Escalation, Non-Monotonic Scaling",
@@ -9868,6 +9908,35 @@
       "title": "HypothesisStakeReceipt",
       "type": "object"
     },
+    "HypothesisSuperposition": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Supports the quantum-like superposition of mutually exclusive hypotheses in working memory, preventing premature wave-collapse during heuristic routing.\n\nCAUSAL AFFORDANCE: Permits the swarm to hold multiple contradictory ideas simultaneously. Instructs the execution engine exactly how to resolve the superposition via the `wave_collapse_function`.\n\nEPISTEMIC BOUNDS: The structural array of `competing_strategies` is mathematically forced into deterministic alignment by the `@model_validator`, sorting by `hypothesis_cid` to preserve canonical hashing.\n\nMCP ROUTING TRIGGERS: Defeasible Superposition, Probability Wave Collapse, State-Space Management, Plurality Vote",
+      "properties": {
+        "competing_strategies": {
+          "items": {
+            "$ref": "#/$defs/UnverifiedHypothesis"
+          },
+          "title": "Competing Strategies",
+          "type": "array"
+        },
+        "wave_collapse_function": {
+          "enum": [
+            "plurality_vote",
+            "lowest_entropy",
+            "adversarial_yield",
+            "human_adjudication"
+          ],
+          "title": "Wave Collapse Function",
+          "type": "string"
+        }
+      },
+      "required": [
+        "competing_strategies",
+        "wave_collapse_function"
+      ],
+      "title": "HypothesisSuperposition",
+      "type": "object"
+    },
     "IllocutionaryForceProfile": {
       "description": "AGENT INSTRUCTION: Mathematically categorizes the structural intent of a proposition to prevent reasoning agents from hallucinating contextual truth values. Dictates whether the swarm evaluates the node as an empirical fact, a normative constraint, a guaranteed promise, or a simulation.",
       "enum": [
@@ -11003,7 +11072,7 @@
         "explored_branches": {
           "description": "All logical paths the agent attempted within this Ephemeral Epistemic Quarantine—a volatile workspace where probability waves collapse before being committed to the immutable ledger.",
           "items": {
-            "$ref": "#/$defs/ThoughtBranchState"
+            "$ref": "#/$defs/AnyExplorationBranch"
           },
           "title": "Explored Branches",
           "type": "array"
@@ -14803,6 +14872,38 @@
       "title": "SemanticDiscoveryIntent",
       "type": "object"
     },
+    "SemanticDivergenceProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Information Geometry to mathematically track semantic drift during unconstrained multi-agent debate.\n\nCAUSAL AFFORDANCE: Authorizes the orchestrator to forcefully halt a brainstorming session and demand a prompt re-anchoring if the ensemble's lateral thinking drifts into an irrelevant geometric space.\n\nEPISTEMIC BOUNDS: The geometric radius of acceptable divergence is physically clamped by `max_allowable_divergence` (`ge=0.0, le=1.0`). The origin is cryptographically locked to the `anchor_embedding_hash` (SHA-256 regex `^[a-f0-9]{64}$`).\n\nMCP ROUTING TRIGGERS: Information Geometry, Semantic Drift, Gromov-Wasserstein Distance, Cosine Drift, Anchor Realignment",
+      "properties": {
+        "anchor_embedding_hash": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Anchor Embedding Hash",
+          "type": "string"
+        },
+        "current_cosine_drift": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Current Cosine Drift",
+          "type": "number"
+        },
+        "max_allowable_divergence": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Max Allowable Divergence",
+          "type": "number"
+        }
+      },
+      "required": [
+        "anchor_embedding_hash",
+        "current_cosine_drift",
+        "max_allowable_divergence"
+      ],
+      "title": "SemanticDivergenceProfile",
+      "type": "object"
+    },
     "SemanticEdgeState": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A mathematical tensor bridging two SemanticNodeStates, executing\nJudea Pearl's Structural Causal Models (SCMs) to explicitly formalize causality,\ncorrelation, or confounding relationships across the Knowledge Graph. As a ...State\nsuffix, this is a frozen N-dimensional coordinate.\n\nCAUSAL AFFORDANCE: Empowers the orchestrator's traversal engine to execute directed\ngraph algorithms (e.g., Random Walk with Restart) via subject_node_cid and\nobject_node_cid (both 128-char CIDs), utilizing the continuous confidence_score\n(optional, ge=0.0, le=1.0, default=None) to probabilistically prune uncertain paths.\nThe predicate (max_length=2000) carries the semantic relationship label.\n\nEPISTEMIC BOUNDS: Causal directionality is restricted to a strict Literal automaton\n[\"causes\", \"confounds\", \"correlates_with\", \"undirected\"] (default=\"undirected\").\nOptional typed fields (embedding: VectorEmbeddingState, provenance:\nEpistemicProvenanceReceipt, temporal_bounds: TemporalBoundsProfile) extend the edge\ngeometry without mandatory overhead.\n\nMCP ROUTING TRIGGERS: Structural Causal Models, Pearlian Directed Edge, Semantic\nTriplet, Adjacency Matrix, Epistemic Link",
@@ -16249,6 +16350,119 @@
       "title": "SteadyStateHypothesisState",
       "type": "object"
     },
+    "StochasticDebateLog": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically traceable coordinate of unconstrained natural language lateral thinking.\n\nCAUSAL AFFORDANCE: Permits an individual agent within a Mixture-of-Agents (MoA) ensemble to output unstructured, highly entropic text without triggering the strict bounds of System 2 execution schemas.\n\nEPISTEMIC BOUNDS: Unstructured heuristic thought is volumetrically clamped by `unstructured_content` (`max_length=100000`) to prevent VRAM overflow. Causal lineage is preserved via `parent_log_cid`.\n\nMCP ROUTING TRIGGERS: Mixture-of-Agents, Lateral Thinking, Unstructured Log, Heuristic Generation, Debate Coordinate",
+      "properties": {
+        "log_cid": {
+          "$ref": "#/$defs/NodeCIDState"
+        },
+        "agent_role": {
+          "enum": [
+            "generator",
+            "critic",
+            "synthesizer"
+          ],
+          "title": "Agent Role",
+          "type": "string"
+        },
+        "unstructured_content": {
+          "maxLength": 100000,
+          "title": "Unstructured Content",
+          "type": "string"
+        },
+        "entropy_state": {
+          "$ref": "#/$defs/EpistemicEntropyState"
+        },
+        "parent_log_cid": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NodeCIDState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "log_cid",
+        "agent_role",
+        "unstructured_content",
+        "entropy_state"
+      ],
+      "title": "StochasticDebateLog",
+      "type": "object"
+    },
+    "StochasticIdeationTopology": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Safely encapsulates unconstrained lateral thinking within a frozen, N-dimensional coordinate state.\n\nCAUSAL AFFORDANCE: The primary container for stochastic processing. Because it is immutably marked as UNVERIFIED_STOCHASTIC, the runtime will store it in the Latent Scratchpad but will NEVER route it to the WASM execution sandbox.\n\nEPISTEMIC BOUNDS: Generative logic is rigorously clamped by the nested `ThermodynamicIdeationBudget`. The `@model_validator` executes a physical check: if the entropy delta across debate logs falls below the required threshold, it mathematically severs the loop via a ValueError.\n\nMCP ROUTING TRIGGERS: Stochastic Ideation, Epistemic Quarantine, Latent Scratchpad, Thermodynamic Halting, Topology Container",
+      "properties": {
+        "topology_class": {
+          "const": "stochastic_ideation",
+          "default": "stochastic_ideation",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "topology_cid": {
+          "$ref": "#/$defs/NodeCIDState",
+          "description": "A Content Identifier (CID) bounding this specific stochastic exploration branch."
+        },
+        "phase": {
+          "$ref": "#/$defs/StochasticPhaseProfile"
+        },
+        "ideation_budget": {
+          "$ref": "#/$defs/ThermodynamicIdeationBudget"
+        },
+        "divergence_monitor": {
+          "$ref": "#/$defs/SemanticDivergenceProfile"
+        },
+        "debate_graph": {
+          "items": {
+            "$ref": "#/$defs/StochasticDebateLog"
+          },
+          "title": "Debate Graph",
+          "type": "array"
+        },
+        "superposition_state": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HypothesisSuperposition"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "epistemic_status": {
+          "const": "unverified_stochastic",
+          "default": "unverified_stochastic",
+          "title": "Epistemic Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "topology_cid",
+        "phase",
+        "ideation_budget",
+        "divergence_monitor",
+        "debate_graph"
+      ],
+      "title": "StochasticIdeationTopology",
+      "type": "object"
+    },
+    "StochasticPhaseProfile": {
+      "description": "AGENT INSTRUCTION: Defines the continuous probability wave state of the multi-agent ensemble during heuristic search.\n\nCAUSAL AFFORDANCE: Provides the macro-orchestrator with the localized phase of the debate, dictating whether agents should inject entropy (divergent) or reduce entropy (convergent).\n\nEPISTEMIC BOUNDS: Constrained strictly to the predefined literal enumeration values.\n\nMCP ROUTING TRIGGERS: Probability Wave State, Ideation Phase, Ensemble Learning, Convergence",
+      "enum": [
+        "divergent_brainstorming",
+        "adversarial_critique",
+        "convergent_consensus"
+      ],
+      "title": "StochasticPhaseProfile",
+      "type": "string"
+    },
     "StreamingDisfluencyContract": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements non-monotonic disfluency and \"forget gate\" triggers to repair continuous ingestion streams.\n\nCAUSAL AFFORDANCE: Triggers the orchestrator to excise or repair segments of the token stream when the `repair_marker_regex` matches, probabilistically governed by the `decay_threshold`.\n\nEPISTEMIC BOUNDS: `repair_marker_regex` is strictly capped at `max_length=2000` to prevent ReDoS CPU exhaustion. `decay_threshold` geometrically bounded (`ge=0.0, le=1.0`). Maximum temporal lookback clamped (`ge=0, le=1000000000`).\n\nMCP ROUTING TRIGGERS: Streaming Disfluency, Forget Gate, Token Excise, Sequence Repair, Temporal Lookback",
@@ -17260,10 +17474,47 @@
       "title": "TheoryOfMindSnapshot",
       "type": "object"
     },
+    "ThermodynamicIdeationBudget": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Landauer's Principle for heuristic reasoning, computationally solving the Halting Problem for unbounded LLM ideation.\n\nCAUSAL AFFORDANCE: Acts as a physical gas limit on lateral thinking. If the ensemble burns compute without achieving the `minimum_entropy_delta_per_turn`, it authorizes the orchestrator to shatter the generation loop.\n\nEPISTEMIC BOUNDS: VRAM memory explosion is mathematically prevented by clamping `max_heuristic_tokens` (`gt=0, le=1000000000`). Generative loops are hard-capped by `max_debate_turns` (`le=1000`).\n\nMCP ROUTING TRIGGERS: Halting Problem, Thermodynamic Budget, Gas Limit, Token Exhaustion, Entropy Reduction",
+      "properties": {
+        "max_heuristic_tokens": {
+          "exclusiveMinimum": 0,
+          "maximum": 1000000000,
+          "title": "Max Heuristic Tokens",
+          "type": "integer"
+        },
+        "max_debate_turns": {
+          "exclusiveMinimum": 0,
+          "maximum": 1000,
+          "title": "Max Debate Turns",
+          "type": "integer"
+        },
+        "minimum_entropy_delta_per_turn": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Minimum Entropy Delta Per Turn",
+          "type": "number"
+        }
+      },
+      "required": [
+        "max_heuristic_tokens",
+        "max_debate_turns",
+        "minimum_entropy_delta_per_turn"
+      ],
+      "title": "ThermodynamicIdeationBudget",
+      "type": "object"
+    },
     "ThoughtBranchState": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative, frozen snapshot of a discrete Markov Decision Process\n(MDP) state representing a single coordinate within a non-monotonic reasoning tree. As\na ...State suffix, this is a frozen N-dimensional coordinate.\n\nCAUSAL AFFORDANCE: Tracks a localized reasoning trajectory, enabling the orchestrator's\nProcess Reward Model (PRM) to score the branch and dictate if the traversal should\nrecursively backtrack or continue. Tree reconstruction is enabled via the optional\nparent_branch_cid.\n\nEPISTEMIC BOUNDS: The mathematical validity of the branch is continuously clamped by\nprm_score (optional, ge=0.0, le=1.0, default=None). The node is cryptographically\nanchored to the execution tree via latent_content_hash (strict SHA-256 pattern\n^[a-f0-9]{64}$). The branch_cid is locked to a 128-char CID.\n\nMCP ROUTING TRIGGERS: Markov Decision Process, Process Reward Model, Reasoning Node,\nHeuristic Search, Backtracking",
       "properties": {
+        "topology_class": {
+          "const": "thought_branch",
+          "default": "thought_branch",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "branch_cid": {
           "description": "A deterministic capability pointer bounding this specific topological divergence in the Latent Scratchpad Trace.",
           "maxLength": 128,
@@ -17817,6 +18068,39 @@
         "max_quarantine_blast_radius"
       ],
       "title": "TruthMaintenancePolicy",
+      "type": "object"
+    },
+    "UnverifiedHypothesis": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The emergent, abstract outcome of lateral brainstorming prior to semantic-to-symbolic compilation.\n\nCAUSAL AFFORDANCE: Safely stores a proposed stochastic solution in the Latent Scratchpad, highlighting `unresolved_frictions` for downstream deterministic solvers to evaluate.\n\nEPISTEMIC BOUNDS: The generative payload is physically clamped by `proposed_strategy` (`max_length=100000`). To guarantee RFC 8785 canonical hashing, the `@model_validator` deterministically alphabetizes the `unresolved_frictions` array.\n\nMCP ROUTING TRIGGERS: Unverified Hypothesis, Abstract Outcome, Friction Identification, Heuristic Proposal",
+      "properties": {
+        "hypothesis_cid": {
+          "$ref": "#/$defs/NodeCIDState"
+        },
+        "proposed_strategy": {
+          "maxLength": 100000,
+          "title": "Proposed Strategy",
+          "type": "string"
+        },
+        "epistemic_entropy": {
+          "$ref": "#/$defs/EpistemicEntropyState"
+        },
+        "unresolved_frictions": {
+          "items": {
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "title": "Unresolved Frictions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "hypothesis_cid",
+        "proposed_strategy",
+        "epistemic_entropy",
+        "unresolved_frictions"
+      ],
+      "title": "UnverifiedHypothesis",
       "type": "object"
     },
     "UpperOntologyClassProfile": {
