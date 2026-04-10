@@ -21,6 +21,7 @@ import threading
 import time
 import typing
 import urllib.parse
+import uuid
 from enum import StrEnum
 from typing import Annotated, Any, Literal, Self
 
@@ -645,6 +646,109 @@ class CoreasonBaseState(BaseModel):
 
 
 T = typing.TypeVar("T")
+
+
+class IdeationPhase(StrEnum):
+    """
+    AGENT INSTRUCTION: Categorizes the thermodynamic phase of the generative ensemble's exploration.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator on the execution status of the topology, governing state transitions.
+
+    EPISTEMIC BOUNDS: Strictly bounded to the predefined string enumeration values.
+
+    MCP ROUTING TRIGGERS: Phase Tracking, Thermodynamic Orchestration, State Machine
+    """
+
+    STOCHASTIC_DIFFUSION = "STOCHASTIC_DIFFUSION"
+    ENTROPIC_EXPLORATION = "ENTROPIC_EXPLORATION"
+    TOPOLOGICAL_CRITIQUE = "TOPOLOGICAL_CRITIQUE"
+    MANIFOLD_COLLAPSE = "MANIFOLD_COLLAPSE"
+
+
+class StochasticStateNode(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A single discrete latent coordinate (a generated hypothesis or critique) inside an unverified stochastic diffusion search space.
+
+    CAUSAL AFFORDANCE: Used by the ensemble as a vertex to map out Monte Carlo Tree Search (MCTS) exploration before manifold collapse.
+
+    EPISTEMIC BOUNDS: epistemic_entropy is mathematically clamped to `[0.0, 1.0]` bounds (Shannon entropy).
+
+    MCP ROUTING TRIGGERS: Latent Space Coordinates, MCTS Nodes, Shannon Entropy Bounding
+    """
+
+    node_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        default_factory=lambda: str(uuid.uuid4())
+    )
+    parent_node_cid: str | None = Field(default=None)
+    agent_role: Literal["generator", "critic", "synthesizer"] = Field()
+    stochastic_tensor: str = Field(description="Unbounded semantic payload")
+    epistemic_entropy: float = Field()
+
+    @field_validator("epistemic_entropy", mode="after")
+    @classmethod
+    def enforce_entropy_bounds(cls, v: float) -> float:
+        if not (0.0 <= v <= 1.0):
+            raise ValueError("epistemic_entropy must be strictly between 0.0 and 1.0 (Shannon entropy limits)")
+        return v
+
+
+class StochasticConsensus(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A topological bridge mathematically projecting high-dimensional unverified graphs into actionable manifolds.
+
+    CAUSAL AFFORDANCE: Authorizes a lossy deterministic projection or signals the continuation of diffusion if residual entropy is too high.
+
+    EPISTEMIC BOUNDS: convergence_confidence is mathematically clamped to `[0.0, 1.0]`.
+
+    MCP ROUTING TRIGGERS: Topological Consensus, Persistent Homology, Manifold Collapse Verification
+    """
+
+    consensus_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        default_factory=lambda: str(uuid.uuid4())
+    )
+    proposed_manifold: str = Field()
+    convergence_confidence: float = Field()
+    residual_entropy_vectors: list[str] = Field()
+
+    @field_validator("convergence_confidence", mode="after")
+    @classmethod
+    def enforce_confidence_bounds(cls, v: float) -> float:
+        if not (0.0 <= v <= 1.0):
+            raise ValueError("convergence_confidence must be strictly between 0.0 and 1.0")
+        return v
+
+
+class StochasticTopology(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: The structurally unbounded root container modeling multi-agent generative reasoning as a Topological DAG.
+
+    CAUSAL AFFORDANCE: Holds unverified, high-variance semantic coordinates and manages MCTS execution.
+
+    EPISTEMIC BOUNDS: Inherently enforces referential integrity for acyclic DAG sorting via `verify_acyclic_dag_integrity`. `epistemic_status` is locked strictly to 'stochastically_unbounded'.
+
+    MCP ROUTING TRIGGERS: Directed Acyclic Graphs, Topological MCTS Container, Epistemic Immutability, Acyclic Integrity
+    """
+
+    topology_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        default_factory=lambda: str(uuid.uuid4())
+    )
+    topology_class: Literal["stochastic_ensemble"] = Field(default="stochastic_ensemble")
+    phase: IdeationPhase = Field()
+    stochastic_graph: list[StochasticStateNode] = Field()
+    consensus: StochasticConsensus | None = Field(default=None)
+    epistemic_status: Literal["stochastically_unbounded"] = Field(default="stochastically_unbounded")
+
+    @model_validator(mode="after")
+    def verify_acyclic_dag_integrity(self) -> Self:
+        seen_cids = set()
+        for node in self.stochastic_graph:
+            if node.parent_node_cid is not None and node.parent_node_cid not in seen_cids:
+                raise ValueError(
+                    f"Topological Violation: parent_node_cid '{node.parent_node_cid}' "
+                    f"must appear before child node '{node.node_cid}' to prevent infinite cycles."
+                )
+            seen_cids.add(node.node_cid)
+        return self
 
 
 class TraceContextState(CoreasonBaseState):
@@ -13178,3 +13282,7 @@ DiscourseNodeState.model_rebuild()
 DiscourseTreeManifest.model_rebuild()
 OntologyDiscoveryIntent.model_rebuild()
 SemanticMappingHeuristicProposal.model_rebuild()
+
+StochasticStateNode.model_rebuild()
+StochasticConsensus.model_rebuild()
+StochasticTopology.model_rebuild()
