@@ -8,10 +8,10 @@
 #
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
-import json
-from hypothesis import given, strategies as st
+from hypothesis import given
+from hypothesis import strategies as st
+
 from coreason_manifest.spec.ontology import ComputationalThermodynamics, ThermodynamicState
-import math
 
 
 @given(
