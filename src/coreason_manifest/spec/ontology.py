@@ -2436,8 +2436,6 @@ class MultimodalTokenAnchorState(CoreasonBaseState):
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "visual_patch_hashes", sorted(self.visual_patch_hashes))
-        if getattr(self, "visual_patch_hashes", None) is not None:
-            object.__setattr__(self, "visual_patch_hashes", sorted(self.visual_patch_hashes))
         return self
 
 
@@ -2634,8 +2632,6 @@ class StateHydrationManifest(CoreasonBaseState):
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "crystallized_ledger_cids", sorted(self.crystallized_ledger_cids))
-        if getattr(self, "crystallized_ledger_cids", None) is not None:
-            object.__setattr__(self, "crystallized_ledger_cids", sorted(self.crystallized_ledger_cids))
         return self
 
 
@@ -2944,8 +2940,6 @@ class FederatedDiscoveryManifest(CoreasonBaseState):
     def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "broadcast_endpoints", sorted(self.broadcast_endpoints, key=str))
         object.__setattr__(self, "supported_ontologies", sorted(self.supported_ontologies))
-        if getattr(self, "supported_ontologies", None) is not None:
-            object.__setattr__(self, "supported_ontologies", sorted(self.supported_ontologies))
         return self
 
 
@@ -7207,18 +7201,8 @@ class CognitiveActionSpaceManifest(CoreasonBaseState):
                 return f"intent:{edge.target_intent.min_isometry_score}:{struct_types}"
             return "unknown"
 
-        for key in self.transition_matrix:
-            object.__setattr__(
-                self,
-                "transition_matrix",
-                {
-                    **self.transition_matrix,
-                    key: sorted(
-                        self.transition_matrix[key],
-                        key=edge_sort_key,
-                    ),
-                },
-            )
+        sorted_matrix = {k: sorted(v, key=edge_sort_key) for k, v in self.transition_matrix.items()}
+        object.__setattr__(self, "transition_matrix", sorted_matrix)
 
         return self
 
@@ -7784,10 +7768,6 @@ class NeuralAuditAttestationReceipt(CoreasonBaseState):
             "layer_activations",
             {k: sorted(v, key=operator.attrgetter("feature_index")) for k, v in self.layer_activations.items()},
         )
-        if getattr(self, "layer_activations", None) is not None:
-            object.__setattr__(
-                self, "layer_activations", sorted(self.layer_activations, key=operator.attrgetter("layer_index"))
-            )
         return self
 
 
@@ -9065,12 +9045,6 @@ class HypothesisGenerationEvent(CoreasonBaseState):
             "falsification_conditions",
             sorted(self.falsification_conditions, key=operator.attrgetter("condition_cid")),
         )
-        if getattr(self, "falsification_conditions", None) is not None:
-            object.__setattr__(
-                self,
-                "falsification_conditions",
-                sorted(self.falsification_conditions, key=operator.attrgetter("condition_cid")),
-            )
         return self
 
 
@@ -9495,8 +9469,6 @@ class TheoryOfMindSnapshot(CoreasonBaseState):
     def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "assumed_shared_beliefs", sorted(self.assumed_shared_beliefs))
         object.__setattr__(self, "identified_knowledge_gaps", sorted(self.identified_knowledge_gaps))
-        if getattr(self, "identified_knowledge_gaps", None) is not None:
-            object.__setattr__(self, "identified_knowledge_gaps", sorted(self.identified_knowledge_gaps))
         return self
 
     empathy_confidence_score: float = Field(
@@ -10156,12 +10128,6 @@ class AgentAttestationReceipt(CoreasonBaseState):
             "credential_presentations",
             sorted(self.credential_presentations, key=operator.attrgetter("issuer_did")),
         )
-        if getattr(self, "credential_presentations", None) is not None:
-            object.__setattr__(
-                self,
-                "credential_presentations",
-                sorted(self.credential_presentations, key=operator.attrgetter("issuer_did")),
-            )
         return self
 
 
@@ -11408,14 +11374,10 @@ class WorkflowManifest(CoreasonBaseState):
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
         if self.allowed_semantic_classifications is not None:
-            object.__setattr__(self, "allowed_semantic_classifications", sorted(self.allowed_semantic_classifications))
-        if getattr(self, "allowed_semantic_classifications", None) is not None:
             object.__setattr__(
                 self,
                 "allowed_semantic_classifications",
-                sorted(self.allowed_semantic_classifications, key=lambda x: str(x.value))
-                if self.allowed_semantic_classifications
-                else [],
+                sorted(self.allowed_semantic_classifications, key=lambda x: str(x.value)),
             )
         return self
 
@@ -11592,18 +11554,6 @@ class EpistemicQuarantineSnapshot(CoreasonBaseState):
             "capability_attestations",
             sorted(self.capability_attestations, key=operator.attrgetter("attestation_cid")),
         )
-        if getattr(self, "theory_of_mind_matrices", None) is not None:
-            object.__setattr__(
-                self,
-                "theory_of_mind_matrices",
-                sorted(self.theory_of_mind_matrices, key=operator.attrgetter("target_agent_cid")),
-            )
-        if getattr(self, "capability_attestations", None) is not None:
-            object.__setattr__(
-                self,
-                "capability_attestations",
-                sorted(self.capability_attestations, key=operator.attrgetter("attestation_cid")),
-            )
         return self
 
 
@@ -11717,12 +11667,6 @@ class BeliefMutationEvent(CoreasonBaseState):
         object.__setattr__(
             self, "causal_attributions", sorted(self.causal_attributions, key=operator.attrgetter("source_event_cid"))
         )
-        if getattr(self, "causal_attributions", None) is not None:
-            object.__setattr__(
-                self,
-                "causal_attributions",
-                sorted(self.causal_attributions, key=operator.attrgetter("source_event_cid")),
-            )
         return self
 
     @model_validator(mode="after")
@@ -13158,7 +13102,6 @@ TopologicalFidelityReceipt.model_rebuild()
 NeurosymbolicInferenceIntent.model_rebuild()
 
 EpistemicUpsamplingTask.model_rebuild()
-VolumetricPartitionState.model_rebuild()
 
 DempsterShaferBeliefVector.model_rebuild()
 EmpiricalStatisticalQualifier.model_rebuild()
