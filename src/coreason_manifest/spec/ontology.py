@@ -6413,7 +6413,9 @@ class JSONRPCErrorResponseState(CoreasonBaseState):
 
     jsonrpc: Literal["2.0"] = Field(..., description="JSON-RPC version.")
     error: JSONRPCErrorState = Field(..., description="The error object.")
-    id: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] | int | None = (  # Note: External Protocol Exemption.
+    id: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] | int | None
+    ) = (  # Note: External Protocol Exemption.
         Field(le=1000000000, default=None, description="The request ID that this error corresponds to.")
     )
 
