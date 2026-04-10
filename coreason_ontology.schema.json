@@ -169,6 +169,52 @@
       "title": "ActiveInferenceContract",
       "type": "object"
     },
+    "ActiveInferenceEpoch": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A macroscopic container tracking the directed graph of evolutionary retries across an entire task lifecycle.\n\nCAUSAL AFFORDANCE: Aggregates free energy across multiple EpistemicRejectionReceipts to trigger thermodynamic circuit breakers when convergence fails.\n\nEPISTEMIC BOUNDS: Aggregated free energy must be non-negative. Rejection history is deterministically sorted by receipt_cid for immutable hashing.\n\nMCP ROUTING TRIGGERS: Active Inference Loop, Thermodynamic Circuit Breaker, Epistemic Aggregation, Retry Ledger",
+      "properties": {
+        "epoch_cid": {
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Epoch Cid",
+          "type": "string"
+        },
+        "target_objective_cid": {
+          "anyOf": [
+            {
+              "pattern": "^[a-zA-Z0-9_.:-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Target Objective Cid"
+        },
+        "rejection_history": {
+          "items": {
+            "$ref": "#/$defs/EpistemicRejectionReceipt"
+          },
+          "title": "Rejection History",
+          "type": "array"
+        },
+        "current_free_energy": {
+          "title": "Current Free Energy",
+          "type": "number"
+        },
+        "epoch_status": {
+          "const": "active_inference_loop",
+          "default": "active_inference_loop",
+          "title": "Epoch Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "current_free_energy"
+      ],
+      "title": "ActiveInferenceEpoch",
+      "type": "object"
+    },
     "AdjudicationIntent": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Social Choice Theory to resolve the Condorcet Paradox. Triggers a Mixed-Initiative forced resolution to break an epistemic deadlock within a Council topology.\n\nCAUSAL AFFORDANCE: Halts the active execution DAG and forces an external oracle (human or system) to act as a Dictatorial tie-breaker, definitively collapsing the probability wave of competing claims in a Multi-Criteria Decision Analysis (MCDA) framework.\n\nEPISTEMIC BOUNDS: The state space is bounded by `deadlocked_claims` (`min_length=2, max_length=86400000`). The `resolution_schema` is mathematically bounded against recursive JSON-bombing by the `enforce_payload_topology` hook, physically preventing Automata Intersection deadlocks.\n\nMCP ROUTING TRIGGERS: Social Choice Theory, Condorcet Paradox, MCDA Deadlock, Dictatorial Resolution, Tie-Breaking Heuristic",
@@ -7335,6 +7381,44 @@
         "active_context"
       ],
       "title": "EpistemicQuarantineSnapshot",
+      "type": "object"
+    },
+    "EpistemicRejectionReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The mathematical backpropagation signal triggered when the Deterministic Compiler rejects a stochastic manifold. Quantifies the rejection and provides a mutation gradient.\n\nCAUSAL AFFORDANCE: Instructs the LLM ensemble on how to perturb the Upper Confidence Bound (UCB) during the next MCTS generation attempt by mathematically quantifying the error.\n\nEPISTEMIC BOUNDS: Kullback-Leibler divergence is strictly non-negative. A negative mathematical distance is a paradox and raises a ValueError.\n\nMCP ROUTING TRIGGERS: Rejection Receipt, Free Energy Feedback, MCTS Backpropagation, Variational Free Energy, Mutation Gradient",
+      "properties": {
+        "receipt_cid": {
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Receipt Cid",
+          "type": "string"
+        },
+        "failed_projection_cid": {
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Failed Projection Cid",
+          "type": "string"
+        },
+        "violated_algebraic_constraint": {
+          "maxLength": 2000,
+          "title": "Violated Algebraic Constraint",
+          "type": "string"
+        },
+        "kl_divergence_to_validity": {
+          "title": "Kl Divergence To Validity",
+          "type": "number"
+        },
+        "stochastic_mutation_gradient": {
+          "maxLength": 10000,
+          "title": "Stochastic Mutation Gradient",
+          "type": "string"
+        }
+      },
+      "required": [
+        "failed_projection_cid",
+        "violated_algebraic_constraint",
+        "kl_divergence_to_validity",
+        "stochastic_mutation_gradient"
+      ],
+      "title": "EpistemicRejectionReceipt",
       "type": "object"
     },
     "EpistemicRewardModelPolicy": {
