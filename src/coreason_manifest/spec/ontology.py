@@ -4449,7 +4449,7 @@ class ContextualSemanticResolutionIntent(CoreasonBaseState):
     topology_class: Literal["contextual_semantic_resolution"] = Field(
         default="contextual_semantic_resolution", description="Discriminator for contextual semantic resolution."
     )
-    source_record_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
+    source_vector_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
         Field(
             description="An explicit cryptographic pointer to the raw SemanticRelationalVectorState pending resolution."
         )
@@ -5502,7 +5502,7 @@ class BudgetExhaustionEvent(CoreasonBaseState):
 
 class TokenBurnReceipt(CoreasonBaseState):
     r"""
-    AGENT INSTRUCTION: Formalizes Landauer's Principle of thermodynamic computing within the neurosymbolic network, serving as a lock-free, cryptographically frozen record of irreversible token and energy expenditure.
+    AGENT INSTRUCTION: Formalizes Landauer's Principle of thermodynamic computing within the neurosymbolic network, serving as a lock-free, cryptographically frozen manifest of irreversible token and energy expenditure.
 
     CAUSAL AFFORDANCE: Deducts exact computational magnitude from the agent's localized Proof-of-Stake (PoS) execution escrow, progressively narrowing its available search depth. Bound to causal origin via `tool_invocation_cid`.
 
@@ -7619,7 +7619,7 @@ class EpistemicProvenanceReceipt(CoreasonBaseState):
         default=None,
         ge=0,
         le=100,
-        description="Records the exact cycle count the neural model required to pass the verifier.",
+        description="Denotes the exact cycle count the neural model required to pass the verifier.",
     )
     extracted_by: NodeCIDState = Field(
         description="The Content Identifier (CID) of the agent node that extracted this payload."
@@ -7876,7 +7876,7 @@ class OntologicalHandshakeReceipt(CoreasonBaseState):
     CAUSAL AFFORDANCE: Authorizes the physical bridging of two independent N-dimensional
     semantic spaces. If native geometries are incommensurable, it structurally demands the
     application of a DimensionalProjectionContract (applied_projection). The alignment_status
-    Literal ["aligned", "projected", "fallback_triggered", "incommensurable"] records the
+    Literal ["aligned", "projected", "fallback_triggered", "incommensurable"] manifests the
     final verdict.
 
     EPISTEMIC BOUNDS: Semantic isometry is quantified via measured_cosine_similarity, strictly
@@ -8750,7 +8750,7 @@ class ExecutionSpanReceipt(CoreasonBaseState):
     )
     status: SpanStatusCodeProfile = Field(default="unset", description="The execution health flag.")
     events: list[SpanEvent] = Field(
-        default_factory=list, max_length=10000, description="Structured log records emitted during the span."
+        default_factory=list, max_length=10000, description="Structured log vectors emitted during the span."
     )
 
     @model_validator(mode="after")
@@ -10989,7 +10989,7 @@ class SwarmTopologyManifest(CoreasonBaseState):
     )
     resolved_markets: list[MarketResolutionState] = Field(
         default_factory=list,
-        description="The immutable records of finalized markets and reputation capital distributions.",
+        description="The immutable history of finalized markets and reputation capital distributions.",
     )
 
     @model_validator(mode="after")
@@ -11701,7 +11701,7 @@ class BeliefMutationEvent(CoreasonBaseState):
     )
     scratchpad_trace: LatentScratchpadReceipt | None = Field(
         default=None,
-        description="The cryptographic record of the non-monotonic internal monologue that justifies this belief.",
+        description="The cryptographic history of the non-monotonic internal monologue that justifies this belief.",
     )
     neural_audit: NeuralAuditAttestationReceipt | None = Field(
         default=None,
@@ -12511,7 +12511,7 @@ class CognitiveDetailedBalanceContract(CoreasonBaseState):
 
 class EpistemicFlowStateReceipt(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: An immutable cryptographic coordinate recording the successful
+    AGENT INSTRUCTION: An immutable cryptographic coordinate attesting the successful
     factorization of a terminal reward into a fractional flow value across a continuous
     CognitiveReasoningTraceState trajectory. As a ...Receipt suffix, this is an append-only
     coordinate on the Merkle-DAG.
@@ -12793,7 +12793,7 @@ class OntologicalReificationReceipt(CoreasonBaseState):
 class SemanticRelationalVectorState(CoreasonBaseState):
     """AGENT INSTRUCTION: Represents the untyped payload injection zone for harmonized structured telemetry. CAUSAL AFFORDANCE: Permits specialized downstream agents to project and decode specific industry payloads (e.g., OMOP CDM, FIX protocol) while preserving universal mathematical traversal of the graph. EPISTEMIC BOUNDS: The payload_injection_zone is routed through the volumetric hardware guillotine."""
 
-    topology_class: Literal["semantic_relational_record"] = Field(default="semantic_relational_record")
+    topology_class: Literal["semantic_relational_vector"] = Field(default="semantic_relational_vector")
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
         description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
     )
@@ -12805,7 +12805,7 @@ class SemanticRelationalVectorState(CoreasonBaseState):
     )
     timestamp: float = Field(description="The precise temporal coordinate of the event realization.")
     ontology_class: UpperOntologyClassProfile = Field(
-        description="The domain-independent structural classification of the record."
+        description="The domain-independent structural classification of the state."
     )
     temporal_bounds: TemporalBoundsProfile | None = Field(
         default=None, description="The temporal mapping of the event."

@@ -20,7 +20,6 @@ from coreason_manifest.spec.ontology import (
     PredictionMarketPolicy,
 )
 
-# W3C DID specification regex from NodeCIDState
 did_strategy = st.from_regex(r"^did:[a-z0-9]+:[a-zA-Z0-9.\-_:]+$", fullmatch=True)
 
 
@@ -31,7 +30,6 @@ def valid_adversarial_topology(draw: st.DrawFn) -> dict[str, Any]:
 
     adjudicator_cid = all_dids[0]
 
-    # Split remaining DIDs into two non-empty sets for Red/Blue teams
     split_idx = draw(st.integers(min_value=1, max_value=len(all_dids) - 2))
     blue_team = all_dids[1 : split_idx + 1]
     red_team = all_dids[split_idx + 1 :]
@@ -67,7 +65,6 @@ def test_adversarial_market_compile_fuzzing(topology_data: dict[str, Any]) -> No
 
     compiled = manifest.compile_to_base_topology()
 
-    # Assert the structural bounds of the compiled projection
     assert isinstance(compiled, CouncilTopologyManifest)
     assert compiled.adjudicator_cid == topology_data["adjudicator_cid"]
 
@@ -75,7 +72,6 @@ def test_adversarial_market_compile_fuzzing(topology_data: dict[str, Any]) -> No
     assert compiled.consensus_policy.strategy == "prediction_market"
     assert compiled.consensus_policy.prediction_market_rules == topology_data["market_rules"]
 
-    # Assert exact node mapping and ontological injection
     assert topology_data["adjudicator_cid"] in compiled.nodes
     assert isinstance(compiled.nodes[topology_data["adjudicator_cid"]], CognitiveSystemNodeProfile)
     assert compiled.nodes[topology_data["adjudicator_cid"]].description == "Synthesizing Adjudicator"
