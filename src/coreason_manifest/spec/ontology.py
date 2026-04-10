@@ -13223,4 +13223,4 @@ class IdeationTopology(BaseModel):
     phase: IdeationPhase
     debate_graph: list[AgentDebateLog]
     consensus: EnsembleConsensus | None = Field(default=None)
-    epistemic_status: Literal["epistemically_unverified"] = Field(default="epistemically_unverified")
+    epistemic_status: Literal["epistemically_unverified"] = "epistemically_unverified"

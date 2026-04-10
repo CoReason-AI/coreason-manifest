@@ -227,7 +227,7 @@ def test_ontology_discovery_intent_payload_bounds() -> None:
         jsonrpc="2.0",
         method="query_registry",
         id="req-123",
-        target_registry_uri="https://www.ebi.ac.uk/ols4/api",  # type: ignore
+        target_registry_uri="https://api.github.com",  # type: ignore
         query_concept_cid="SCTID:12345",
         expected_response_schema={"type": "object"},
     )
