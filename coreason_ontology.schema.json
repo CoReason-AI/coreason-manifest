@@ -579,6 +579,30 @@
       "title": "AgentBidIntent",
       "type": "object"
     },
+    "AlgebraicRefinementContract": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Mathematically bounds a specific target property using strict Liquid Type (Refinement Type) declarations.\n\n    CAUSAL AFFORDANCE: Establishes a definitive algebraic constraint against an instantiated variable, forcing the formal verifier to evaluate conditions mathematically prior to downstream deployment.\n\n    EPISTEMIC BOUNDS: Bounding variables and mathematical predicates are rigidly clamped to a maximum string geometry of 2000 characters to prevent polynomial regex execution attacks.\n\n    MCP ROUTING TRIGGERS: Liquid Types, Refinement Types, Algebraic Constraint, Mathematical Predicate, Bounded Property",
+      "properties": {
+        "target_property": {
+          "description": "The specific localized node schema key undergoing rigorous mathematical bounding.",
+          "maxLength": 2000,
+          "title": "Target Property",
+          "type": "string"
+        },
+        "mathematical_predicate": {
+          "description": "The formal algebraic representation vector utilized to define physical bounds (e.g., x > 0 and x < 100).",
+          "maxLength": 2000,
+          "title": "Mathematical Predicate",
+          "type": "string"
+        }
+      },
+      "required": [
+        "target_property",
+        "mathematical_predicate"
+      ],
+      "title": "AlgebraicRefinementContract",
+      "type": "object"
+    },
     "AmbientState": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Acts as a unidirectional telemetry pipeline projecting internal swarm kinematics across the Markov Blanket without inducing causal feedback loops.\n\nCAUSAL AFFORDANCE: Emits an ephemeral, 1D representation of the active probability distribution and execution progress to the external UI plane without halting the underlying generative trajectory.\n\nEPISTEMIC BOUNDS: Semantic `status_message` structurally clamped to `max_length=2000`. The continuous `progress` metric bounded by float limits (`le=1000000000.0`) allowing it to represent 0.0-1.0 ratios or exact token counts. The `thermodynamic_burn_rate` is physically bounded (`ge=0.0`), and `epistemic_entropy_score` is normalized (`ge=0.0, le=1.0`).\n\nMCP ROUTING TRIGGERS: Markov Blanket, Ephemeral Projection, Continuous Observability, Kinetic Execution State, UI Telemetry",
@@ -832,7 +856,7 @@
           "ontological_reification": "#/$defs/OntologicalReificationReceipt",
           "persistence_commit": "#/$defs/PersistenceCommitReceipt",
           "post_coordinated_concept": "#/$defs/PostCoordinatedSemanticConcept",
-          "semantic_relational_record": "#/$defs/SemanticRelationalRecordState",
+          "semantic_relational_record": "#/$defs/SemanticRelationalVectorState",
           "system_fault": "#/$defs/SystemFaultEvent",
           "token_burn": "#/$defs/TokenBurnReceipt",
           "tool_invocation": "#/$defs/ToolInvocationEvent"
@@ -904,7 +928,7 @@
           "$ref": "#/$defs/IntentClassificationReceipt"
         },
         {
-          "$ref": "#/$defs/SemanticRelationalRecordState"
+          "$ref": "#/$defs/SemanticRelationalVectorState"
         },
         {
           "$ref": "#/$defs/OntologicalReificationReceipt"
@@ -2707,7 +2731,7 @@
         "grpo_reward_policy": {
           "anyOf": [
             {
-              "$ref": "#/$defs/EpistemicRewardModelPolicy"
+              "$ref": "#/$defs/EpistemicRewardGradientPolicy"
             },
             {
               "type": "null"
@@ -4165,7 +4189,7 @@
     },
     "ContextualSemanticResolutionIntent": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Acts as the kinetic trigger forcing the orchestrator to dynamically resolve a raw, untyped SemanticRelationalRecordState against a global standard ontology using optimal transport metrics, entirely bypassing legacy ETL string-matching.",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Acts as the kinetic trigger forcing the orchestrator to dynamically resolve a raw, untyped SemanticRelationalVectorState against a global standard ontology using optimal transport metrics, entirely bypassing legacy ETL string-matching.",
       "properties": {
         "topology_class": {
           "const": "contextual_semantic_resolution",
@@ -4175,7 +4199,7 @@
           "type": "string"
         },
         "source_record_cid": {
-          "description": "An explicit cryptographic pointer to the raw SemanticRelationalRecordState pending resolution.",
+          "description": "An explicit cryptographic pointer to the raw SemanticRelationalVectorState pending resolution.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
@@ -6912,7 +6936,7 @@
     },
     "EpistemicLedgerState": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Event Sourcing and the Merkle-DAG structure as the absolute, immutable source of truth for the swarm, fully partitioned from volatile memory.\n\nCAUSAL AFFORDANCE: Permanently crystallizes validated events into the `history` log. Applies Truth Maintenance, context eviction, and tracks active `DefeasibleCascadeEvents` and `RollbackIntents`.\n\nEPISTEMIC BOUNDS: The `@model_validator` `_enforce_canonical_sort` deterministically sorts history by timestamp, checkpoints by ID, and active cascades—guaranteeing invariant RFC 8785 canonical hashing. Validation prevents epistemic paradoxes (child before parent).\n\nMCP ROUTING TRIGGERS: Event Sourcing, Merkle-DAG, Immutable Ledger, Truth Crystallization, Chronological Sort",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Event Sourcing and the Merkle-DAG structure as the absolute, immutable source of truth for the swarm, fully partitioned from volatile memory.\n\nCAUSAL AFFORDANCE: Permanently crystallizes validated events into the `history` log. Applies Truth Maintenance, context eviction, and tracks active `DefeasibleCascadeEvents` and `RollbackIntents`.\n\nEPISTEMIC BOUNDS: The `@model_validator` `_enforce_canonical_sort` deterministically sorts history by timestamp, checkpoints by ID, and active cascades\u2014guaranteeing invariant RFC 8785 canonical hashing. Validation prevents epistemic paradoxes (child before parent).\n\nMCP ROUTING TRIGGERS: Event Sourcing, Merkle-DAG, Immutable Ledger, Truth Crystallization, Chronological Sort",
       "properties": {
         "history": {
           "description": "An append-only, cryptographic ledger of state events. [SITD-Alpha: Non-Monotonic Epistemic Quarantine Isometry]",
@@ -7316,7 +7340,7 @@
       "title": "EpistemicQuarantineSnapshot",
       "type": "object"
     },
-    "EpistemicRewardModelPolicy": {
+    "EpistemicRewardGradientPolicy": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes the Group Relative Policy Optimization (GRPO) reward shaping ruleset, mathematically immunizing the swarm against Goodhart's Law and reward hacking.\n\nCAUSAL AFFORDANCE: Projects a continuous penalty/reward gradient across extracted axiomatic paths, enforcing syntactic compliance through the format contract while simultaneously evaluating semantic/topological validity.\n\nEPISTEMIC BOUNDS: Prevents reward hacking by scaling the logical validity score (R_path) via the `beta_path_weight` scalar (`ge=0.0, le=1.0`). Gated by a cryptographic `reference_graph_cid` CID.\n\nMCP ROUTING TRIGGERS: GRPO, Reward Shaping, Goodhart's Law, Policy Gradient, Advantage Estimation",
       "properties": {
@@ -7366,7 +7390,7 @@
         "format_contract",
         "beta_path_weight"
       ],
-      "title": "EpistemicRewardModelPolicy",
+      "title": "EpistemicRewardGradientPolicy",
       "type": "object"
     },
     "EpistemicSOPManifest": {
@@ -8638,7 +8662,7 @@
     },
     "FallbackSLA": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes a Hard Real-Time Systems deadline for Supervisory Control\nTheory interactions, mathematically bounding the Halting Problem during human-in-the-loop\npauses. As an ...SLA suffix, this object enforces rigid mathematical boundaries globally.\n\nCAUSAL AFFORDANCE: Dictates the deterministic timeout_action\n(Literal[\"fail_safe\", \"proceed_with_defaults\", \"escalate\"]) the orchestrator must execute\nwhen the temporal limit expires, structurally preventing execution deadlocks. If\nescalation is selected, traffic routes to the optional escalation_target_node_cid.\n\nEPISTEMIC BOUNDS: The temporal envelope is physically capped by timeout_seconds (gt=0,\nle=86400 — a strict 24-hour absolute maximum TTL). Escalation routing targets a valid\nNodeCIDState (escalation_target_node_cid, default=None).\n\nMCP ROUTING TRIGGERS: Hard Real-Time Systems, Supervisory Control Theory, Execution\nDeadlock Prevention, Bounded Delay, Liveness Guarantee",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes a Hard Real-Time Systems deadline for Supervisory Control\nTheory interactions, mathematically bounding the Halting Problem during human-in-the-loop\npauses. As an ...SLA suffix, this object enforces rigid mathematical boundaries globally.\n\nCAUSAL AFFORDANCE: Dictates the deterministic timeout_action\n(Literal[\"fail_safe\", \"proceed_with_defaults\", \"escalate\"]) the orchestrator must execute\nwhen the temporal limit expires, structurally preventing execution deadlocks. If\nescalation is selected, traffic routes to the optional escalation_target_node_cid.\n\nEPISTEMIC BOUNDS: The temporal envelope is physically capped by timeout_seconds (gt=0,\nle=86400 \u2014 a strict 24-hour absolute maximum TTL). Escalation routing targets a valid\nNodeCIDState (escalation_target_node_cid, default=None).\n\nMCP ROUTING TRIGGERS: Hard Real-Time Systems, Supervisory Control Theory, Execution\nDeadlock Prevention, Bounded Delay, Liveness Guarantee",
       "properties": {
         "timeout_seconds": {
           "description": "The maximum allowed delay for a human intervention.",
@@ -9165,7 +9189,7 @@
     },
     "GlobalGovernancePolicy": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Superimposes macro-economic and thermodynamic constraints over the\nswarm's execution graph to prevent unbounded compute exhaustion. As a ...Policy suffix,\nthis object defines rigid mathematical boundaries that the orchestrator must enforce\nglobally.\n\nCAUSAL AFFORDANCE: Acts as the ultimate hardware guillotine, authorizing the orchestrator\nto physically sever the execution thread if thermodynamic, economic, or temporal budgets\nare breached. Includes a mandatory zero-trust @model_validator enforcing the Prosperity\nPublic License 3.0 via mandatory_license_rule (rule_cid=\"PPL_3_0_COMPLIANCE\",\nseverity=\"critical\").\n\nEPISTEMIC BOUNDS: Enforces absolute physical ceilings: max_budget_magnitude\n(le=1000000000), max_global_tokens (le=1000000000), global_timeout_seconds (ge=0,\nle=86400 — a strict 24-hour TTL), and optional max_carbon_budget_gco2eq (ge=0.0,\nle=10000.0). An optional FormalVerificationContract provides mathematical proofs of\nstructural correctness.\n\nMCP ROUTING TRIGGERS: Thermodynamic Compute Limits, Hardware Guillotine, Halting Problem\nBounding, ESG Constraint, Execution Envelope",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Superimposes macro-economic and thermodynamic constraints over the\nswarm's execution graph to prevent unbounded compute exhaustion. As a ...Policy suffix,\nthis object defines rigid mathematical boundaries that the orchestrator must enforce\nglobally.\n\nCAUSAL AFFORDANCE: Acts as the ultimate hardware guillotine, authorizing the orchestrator\nto physically sever the execution thread if thermodynamic, economic, or temporal budgets\nare breached. Includes a mandatory zero-trust @model_validator enforcing the Prosperity\nPublic License 3.0 via mandatory_license_rule (rule_cid=\"PPL_3_0_COMPLIANCE\",\nseverity=\"critical\").\n\nEPISTEMIC BOUNDS: Enforces absolute physical ceilings: max_budget_magnitude\n(le=1000000000), max_global_tokens (le=1000000000), global_timeout_seconds (ge=0,\nle=86400 \u2014 a strict 24-hour TTL), and optional max_carbon_budget_gco2eq (ge=0.0,\nle=10000.0). An optional FormalVerificationContract provides mathematical proofs of\nstructural correctness.\n\nMCP ROUTING TRIGGERS: Thermodynamic Compute Limits, Hardware Guillotine, Halting Problem\nBounding, ESG Constraint, Execution Envelope",
       "properties": {
         "mandatory_license_rule": {
           "$ref": "#/$defs/ConstitutionalPolicy",
@@ -9586,7 +9610,7 @@
     },
     "HoareLogicProofReceipt": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Hoare Logic to provide cryptographic proof of algorithmic preconditions and postconditions prior to capability execution.\n\n    CAUSAL AFFORDANCE: Instructs the orchestrator's verification engine to validate the formal proof geometry prior to allocating swarm budget to a generated tool or component.\n\n    EPISTEMIC BOUNDS: Strictly relies on arrays of LiquidTypeContracts, demanding at least one pre-bound and post-bound. Formal systems are strictly bounded by a Literal automaton constraint.\n\n    MCP ROUTING TRIGGERS: Hoare Logic, Automated Theorem Proving, Preconditions Postconditions, Formal Verification, Cryptographic Proof",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Hoare Logic to provide cryptographic proof of algorithmic preconditions and postconditions prior to capability execution.\n\n    CAUSAL AFFORDANCE: Instructs the orchestrator's verification engine to validate the formal proof geometry prior to allocating swarm budget to a generated tool or component.\n\n    EPISTEMIC BOUNDS: Strictly relies on arrays of AlgebraicRefinementContracts, demanding at least one pre-bound and post-bound. Formal systems are strictly bounded by a Literal automaton constraint.\n\n    MCP ROUTING TRIGGERS: Hoare Logic, Automated Theorem Proving, Preconditions Postconditions, Formal Verification, Cryptographic Proof",
       "properties": {
         "capability_cid": {
           "description": "The 128-char DID boundary physically binding this proof to the target executable matrix.",
@@ -9596,18 +9620,18 @@
           "type": "string"
         },
         "preconditions": {
-          "description": "The strictly bounded array of foundational LiquidTypeContracts representing the P state geometry.",
+          "description": "The strictly bounded array of foundational AlgebraicRefinementContracts representing the P state geometry.",
           "items": {
-            "$ref": "#/$defs/LiquidTypeContract"
+            "$ref": "#/$defs/AlgebraicRefinementContract"
           },
           "minItems": 1,
           "title": "Preconditions",
           "type": "array"
         },
         "postconditions": {
-          "description": "The strictly bounded array of subsequent LiquidTypeContracts representing the Q state geometry.",
+          "description": "The strictly bounded array of subsequent AlgebraicRefinementContracts representing the Q state geometry.",
           "items": {
-            "$ref": "#/$defs/LiquidTypeContract"
+            "$ref": "#/$defs/AlgebraicRefinementContract"
           },
           "minItems": 1,
           "title": "Postconditions",
@@ -10738,7 +10762,7 @@
     },
     "KinematicNoiseProfile": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Stochastic Process Theory (1/f^β spectral noise)\nand Hick-Hyman Law cognitive delay modeling to inject human-like motor control\nperturbations into pointer trajectories, preventing deterministic bot-detection\nvia timing analysis. As a ...Profile suffix, this is a declarative, frozen\nsnapshot of a noise geometry.\n\nCAUSAL AFFORDANCE: Authorizes the Spatial Kinematics engine to perturb each\nSE3TransformProfile along the Bezier trajectory by sampling from the\nspecified noise distribution, achieving biomechanically plausible jitter with\ncognitive delay and corrective submovements.\n\nEPISTEMIC BOUNDS: The pink_noise_amplitude is strictly clamped to the\nnormalized range (ge=0.0, le=1.0), preventing trajectory corruption. The\nfrequency_exponent (1/f^β) is bounded (ge=0.0, le=5.0) to cover the full\nspectrum from white noise (β=0) to black noise (β≥2). The noise_class Literal\nautomaton locks generation to [\"pink\", \"brownian\", \"gaussian\"]. The\nvelocity_profile is locked to [\"minimum_jerk\", \"constant\",\n\"fractional_brownian\"]. target_overshoot_radius_pixels is bounded (ge=0,\nle=5000) and hick_hyman_dwell_time_ms is bounded (ge=0, le=86400000).\n\nMCP ROUTING TRIGGERS: Stochastic Process, Pink Noise, Brownian Motion,\nMotor Control Perturbation, Hick-Hyman Law, Fitts's Law",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Stochastic Process Theory (1/f^\u03b2 spectral noise)\nand Hick-Hyman Law cognitive delay modeling to inject human-like motor control\nperturbations into pointer trajectories, preventing deterministic bot-detection\nvia timing analysis. As a ...Profile suffix, this is a declarative, frozen\nsnapshot of a noise geometry.\n\nCAUSAL AFFORDANCE: Authorizes the Spatial Kinematics engine to perturb each\nSE3TransformProfile along the Bezier trajectory by sampling from the\nspecified noise distribution, achieving biomechanically plausible jitter with\ncognitive delay and corrective submovements.\n\nEPISTEMIC BOUNDS: The pink_noise_amplitude is strictly clamped to the\nnormalized range (ge=0.0, le=1.0), preventing trajectory corruption. The\nfrequency_exponent (1/f^\u03b2) is bounded (ge=0.0, le=5.0) to cover the full\nspectrum from white noise (\u03b2=0) to black noise (\u03b2\u22652). The noise_class Literal\nautomaton locks generation to [\"pink\", \"brownian\", \"gaussian\"]. The\nvelocity_profile is locked to [\"minimum_jerk\", \"constant\",\n\"fractional_brownian\"]. target_overshoot_radius_pixels is bounded (ge=0,\nle=5000) and hick_hyman_dwell_time_ms is bounded (ge=0, le=86400000).\n\nMCP ROUTING TRIGGERS: Stochastic Process, Pink Noise, Brownian Motion,\nMotor Control Perturbation, Hick-Hyman Law, Fitts's Law",
       "properties": {
         "noise_class": {
           "description": "The stochastic process governing the noise generation for pointer trajectory perturbation.",
@@ -10769,7 +10793,7 @@
           "type": "number"
         },
         "frequency_exponent": {
-          "description": "The spectral exponent β in the 1/f^β power spectral density function governing noise color.",
+          "description": "The spectral exponent \u03b2 in the 1/f^\u03b2 power spectral density function governing noise color.",
           "maximum": 5.0,
           "minimum": 0.0,
           "title": "Frequency Exponent",
@@ -11001,7 +11025,7 @@
           "type": "string"
         },
         "explored_branches": {
-          "description": "All logical paths the agent attempted within this Ephemeral Epistemic Quarantine—a volatile workspace where probability waves collapse before being committed to the immutable ledger.",
+          "description": "All logical paths the agent attempted within this Ephemeral Epistemic Quarantine\u2014a volatile workspace where probability waves collapse before being committed to the immutable ledger.",
           "items": {
             "$ref": "#/$defs/ThoughtBranchState"
           },
@@ -11145,30 +11169,6 @@
         "tamper_evident_root"
       ],
       "title": "LineageWatermarkReceipt",
-      "type": "object"
-    },
-    "LiquidTypeContract": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Mathematically bounds a specific target property using strict Liquid Type (Refinement Type) declarations.\n\n    CAUSAL AFFORDANCE: Establishes a definitive algebraic constraint against an instantiated variable, forcing the formal verifier to evaluate conditions mathematically prior to downstream deployment.\n\n    EPISTEMIC BOUNDS: Bounding variables and mathematical predicates are rigidly clamped to a maximum string geometry of 2000 characters to prevent polynomial regex execution attacks.\n\n    MCP ROUTING TRIGGERS: Liquid Types, Refinement Types, Algebraic Constraint, Mathematical Predicate, Bounded Property",
-      "properties": {
-        "target_property": {
-          "description": "The specific localized node schema key undergoing rigorous mathematical bounding.",
-          "maxLength": 2000,
-          "title": "Target Property",
-          "type": "string"
-        },
-        "mathematical_predicate": {
-          "description": "The formal algebraic representation vector utilized to define physical bounds (e.g., x > 0 and x < 100).",
-          "maxLength": 2000,
-          "title": "Mathematical Predicate",
-          "type": "string"
-        }
-      },
-      "required": [
-        "target_property",
-        "mathematical_predicate"
-      ],
-      "title": "LiquidTypeContract",
       "type": "object"
     },
     "LogitSteganographyContract": {
@@ -14514,7 +14514,7 @@
     },
     "SaeLatentPolicy": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Sparse Dictionary Learning and Mechanistic Interpretability to actively monitor and steer monosemantic neural circuits during the model's forward pass.\n\nCAUSAL AFFORDANCE: Executes real-time tensor remediation—clamping, halting, quarantining, or smoothly decaying residual stream activations—when specific features diverge toward adversarial or hallucinated geometries.\n\nEPISTEMIC BOUNDS: The `max_activation_threshold` (`ge=0.0, le=1000000000.0`) physically bounds the continuous Euclidean magnitude of the `target_feature_index`. Topologically locked to SAE matrix via `sae_dictionary_hash` (SHA-256). The `@model_validator` `validate_smooth_decay` mathematically enforces asymptotic bounds.\n\nMCP ROUTING TRIGGERS: Mechanistic Interpretability, Sparse Autoencoders, Residual Stream Steering, Tensor Remediation, Monosemantic Features",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Sparse Dictionary Learning and Mechanistic Interpretability to actively monitor and steer monosemantic neural circuits during the model's forward pass.\n\nCAUSAL AFFORDANCE: Executes real-time tensor remediation\u2014clamping, halting, quarantining, or smoothly decaying residual stream activations\u2014when specific features diverge toward adversarial or hallucinated geometries.\n\nEPISTEMIC BOUNDS: The `max_activation_threshold` (`ge=0.0, le=1000000000.0`) physically bounds the continuous Euclidean magnitude of the `target_feature_index`. Topologically locked to SAE matrix via `sae_dictionary_hash` (SHA-256). The `@model_validator` `validate_smooth_decay` mathematically enforces asymptotic bounds.\n\nMCP ROUTING TRIGGERS: Mechanistic Interpretability, Sparse Autoencoders, Residual Stream Steering, Tensor Remediation, Monosemantic Features",
       "properties": {
         "target_feature_index": {
           "description": "The exact dimensional index of the monosemantic feature in the Sparse Autoencoder dictionary.",
@@ -15212,7 +15212,7 @@
       "title": "SemanticNodeState",
       "type": "object"
     },
-    "SemanticRelationalRecordState": {
+    "SemanticRelationalVectorState": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents the untyped payload injection zone for harmonized structured telemetry. CAUSAL AFFORDANCE: Permits specialized downstream agents to project and decode specific industry payloads (e.g., OMOP CDM, FIX protocol) while preserving universal mathematical traversal of the graph. EPISTEMIC BOUNDS: The payload_injection_zone is routed through the volumetric hardware guillotine.",
       "properties": {
@@ -15297,7 +15297,7 @@
         "ontology_class",
         "payload_injection_zone"
       ],
-      "title": "SemanticRelationalRecordState",
+      "title": "SemanticRelationalVectorState",
       "type": "object"
     },
     "SemanticSlicingPolicy": {

@@ -4447,14 +4447,14 @@ class SemanticDiscoveryIntent(CoreasonBaseState):
 
 
 class ContextualSemanticResolutionIntent(CoreasonBaseState):
-    """AGENT INSTRUCTION: Acts as the kinetic trigger forcing the orchestrator to dynamically resolve a raw, untyped SemanticRelationalRecordState against a global standard ontology using optimal transport metrics, entirely bypassing legacy ETL string-matching."""
+    """AGENT INSTRUCTION: Acts as the kinetic trigger forcing the orchestrator to dynamically resolve a raw, untyped SemanticRelationalVectorState against a global standard ontology using optimal transport metrics, entirely bypassing legacy ETL string-matching."""
 
     topology_class: Literal["contextual_semantic_resolution"] = Field(
         default="contextual_semantic_resolution", description="Discriminator for contextual semantic resolution."
     )
     source_record_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
         Field(
-            description="An explicit cryptographic pointer to the raw SemanticRelationalRecordState pending resolution."
+            description="An explicit cryptographic pointer to the raw SemanticRelationalVectorState pending resolution."
         )
     )
     target_ontology_graph_cid: Annotated[
@@ -9677,7 +9677,7 @@ class UtilityJustificationGraphReceipt(CoreasonBaseState):
         return self
 
 
-class LiquidTypeContract(CoreasonBaseState):
+class AlgebraicRefinementContract(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Mathematically bounds a specific target property using strict Liquid Type (Refinement Type) declarations.
 
@@ -9702,7 +9702,7 @@ class HoareLogicProofReceipt(CoreasonBaseState):
 
         CAUSAL AFFORDANCE: Instructs the orchestrator's verification engine to validate the formal proof geometry prior to allocating swarm budget to a generated tool or component.
 
-        EPISTEMIC BOUNDS: Strictly relies on arrays of LiquidTypeContracts, demanding at least one pre-bound and post-bound. Formal systems are strictly bounded by a Literal automaton constraint.
+        EPISTEMIC BOUNDS: Strictly relies on arrays of AlgebraicRefinementContracts, demanding at least one pre-bound and post-bound. Formal systems are strictly bounded by a Literal automaton constraint.
 
         MCP ROUTING TRIGGERS: Hoare Logic, Automated Theorem Proving, Preconditions Postconditions, Formal Verification, Cryptographic Proof
     """
@@ -9710,11 +9710,11 @@ class HoareLogicProofReceipt(CoreasonBaseState):
     capability_cid: Annotated[str, StringConstraints(max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
         description="The 128-char DID boundary physically binding this proof to the target executable matrix."
     )
-    preconditions: Annotated[list[LiquidTypeContract], Field(min_length=1)] = Field(
-        description="The strictly bounded array of foundational LiquidTypeContracts representing the P state geometry."
+    preconditions: Annotated[list[AlgebraicRefinementContract], Field(min_length=1)] = Field(
+        description="The strictly bounded array of foundational AlgebraicRefinementContracts representing the P state geometry."
     )
-    postconditions: Annotated[list[LiquidTypeContract], Field(min_length=1)] = Field(
-        description="The strictly bounded array of subsequent LiquidTypeContracts representing the Q state geometry."
+    postconditions: Annotated[list[AlgebraicRefinementContract], Field(min_length=1)] = Field(
+        description="The strictly bounded array of subsequent AlgebraicRefinementContracts representing the Q state geometry."
     )
     proof_system: Literal["lean4", "coq", "z3", "tla_plus"] = Field(
         description="The strict mathematical automaton engine responsible for evaluating the structural boundary."
@@ -10299,7 +10299,7 @@ class CognitiveAgentNodeProfile(CoreasonBaseState):
         default=None,
         description="The declarative contract mathematically binding this agent to a core altruistic objective.",
     )
-    grpo_reward_policy: EpistemicRewardModelPolicy | None = Field(
+    grpo_reward_policy: EpistemicRewardGradientPolicy | None = Field(
         default=None,
         description="The RL post-training contract forcing the agent to evaluate traces against an implicit graph reward.",
     )
@@ -12390,7 +12390,7 @@ class CognitiveFormatContract(CoreasonBaseState):
         return self
 
 
-class EpistemicRewardModelPolicy(CoreasonBaseState):
+class EpistemicRewardGradientPolicy(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Establishes the Group Relative Policy Optimization (GRPO) reward shaping ruleset, mathematically immunizing the swarm against Goodhart's Law and reward hacking.
 
@@ -12733,7 +12733,7 @@ type AnyStateEvent = Annotated[
     | EpistemicFlowStateReceipt
     | CausalExplanationEvent
     | IntentClassificationReceipt
-    | SemanticRelationalRecordState
+    | SemanticRelationalVectorState
     | OntologicalReificationReceipt,
     Field(discriminator="topology_class", description="A discriminated union of state events."),
 ]
@@ -12793,7 +12793,7 @@ class OntologicalReificationReceipt(CoreasonBaseState):
     )
 
 
-class SemanticRelationalRecordState(CoreasonBaseState):
+class SemanticRelationalVectorState(CoreasonBaseState):
     """AGENT INSTRUCTION: Represents the untyped payload injection zone for harmonized structured telemetry. CAUSAL AFFORDANCE: Permits specialized downstream agents to project and decode specific industry payloads (e.g., OMOP CDM, FIX protocol) while preserving universal mathematical traversal of the graph. EPISTEMIC BOUNDS: The payload_injection_zone is routed through the volumetric hardware guillotine."""
 
     topology_class: Literal["semantic_relational_record"] = Field(default="semantic_relational_record")
@@ -13063,7 +13063,7 @@ EpistemicGroundedTaskManifest.model_rebuild()
 EpistemicCurriculumManifest.model_rebuild()
 ConstrainedDecodingPolicy.model_rebuild()
 CognitiveFormatContract.model_rebuild()
-EpistemicRewardModelPolicy.model_rebuild()
+EpistemicRewardGradientPolicy.model_rebuild()
 CognitiveRewardEvaluationReceipt.model_rebuild()
 CognitiveAgentNodeProfile.model_rebuild()
 CognitiveDetailedBalanceContract.model_rebuild()
@@ -13115,7 +13115,7 @@ TransitionEdgeProfile.model_rebuild()
 CyclicEdgeProfile.model_rebuild()
 CognitiveActionSpaceManifest.model_rebuild()
 ASTGradientReceipt.model_rebuild()
-LiquidTypeContract.model_rebuild()
+AlgebraicRefinementContract.model_rebuild()
 HoareLogicProofReceipt.model_rebuild()
 AsymptoticComplexityReceipt.model_rebuild()
 TeleologicalIsometryReceipt.model_rebuild()
@@ -13165,7 +13165,7 @@ VolumetricPartitionState.model_rebuild()
 
 DempsterShaferBeliefVector.model_rebuild()
 EmpiricalStatisticalQualifier.model_rebuild()
-SemanticRelationalRecordState.model_rebuild()
+SemanticRelationalVectorState.model_rebuild()
 AtomicPropositionState.model_rebuild()
 ContextualSemanticResolutionIntent.model_rebuild()
 PostCoordinatedSemanticConcept.model_rebuild()

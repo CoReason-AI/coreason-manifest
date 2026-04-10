@@ -11,7 +11,7 @@
 from coreason_manifest.spec.ontology import (
     CapabilityForgeTopologyManifest,
     HoareLogicProofReceipt,
-    LiquidTypeContract,
+    AlgebraicRefinementContract,
     SemanticDiscoveryIntent,
     TeleologicalIsometryReceipt,
     VectorEmbeddingState,
@@ -47,9 +47,9 @@ def test_teleological_isometry_threshold() -> None:
 
 
 def test_hoare_logic_proof_receipt_canonical_sorting() -> None:
-    contract_b = LiquidTypeContract(target_property="b_prop", mathematical_predicate="x > 0")
-    contract_a = LiquidTypeContract(target_property="a_prop", mathematical_predicate="x < 100")
-    contract_c = LiquidTypeContract(target_property="c_prop", mathematical_predicate="x == 5")
+    contract_b = AlgebraicRefinementContract(target_property="b_prop", mathematical_predicate="x > 0")
+    contract_a = AlgebraicRefinementContract(target_property="a_prop", mathematical_predicate="x < 100")
+    contract_c = AlgebraicRefinementContract(target_property="c_prop", mathematical_predicate="x == 5")
 
     receipt = HoareLogicProofReceipt(
         capability_cid="cap-id-123",
