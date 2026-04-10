@@ -3437,7 +3437,7 @@ class BoundedJSONRPCIntent(CoreasonBaseState):
         default=None,
         description="Payload parameters. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
     )
-    id: (
+    id: (  # Note: External Protocol Exemption.
         Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
         | Annotated[int, Field(le=1000000000)]
         | None
@@ -6416,7 +6416,7 @@ class JSONRPCErrorResponseState(CoreasonBaseState):
 
     jsonrpc: Literal["2.0"] = Field(..., description="JSON-RPC version.")
     error: JSONRPCErrorState = Field(..., description="The error object.")
-    id: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] | int | None = (
+    id: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] | int | None = (  # Note: External Protocol Exemption.
         Field(le=1000000000, default=None, description="The request ID that this error corresponds to.")
     )
 
