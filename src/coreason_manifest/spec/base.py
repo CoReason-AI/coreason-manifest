@@ -8,16 +8,13 @@
 #
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
-from coreason_manifest.spec.stochastic import (
-    IdeationPhase,
-    StochasticConsensus,
-    StochasticStateNode,
-    StochasticTopology,
-)
+from pydantic import BaseModel, ConfigDict
 
-__all__ = [
-    "IdeationPhase",
-    "StochasticConsensus",
-    "StochasticStateNode",
-    "StochasticTopology",
-]
+
+class CoreasonBaseState(BaseModel):
+    """
+    Base class for all Coreason states.
+    Enforces strict configuration to prevent arbitrary assignment and extra fields.
+    """
+
+    model_config = ConfigDict(extra="forbid", validate_assignment=True)
