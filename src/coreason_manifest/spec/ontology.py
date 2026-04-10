@@ -1676,25 +1676,25 @@ class RoutingFrontierPolicy(CoreasonBaseState):
                 try:
                     val = int(values["max_latency_ms"])
                     values["max_latency_ms"] = int(max(1, min(val, 86400000)))
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
             if "max_cost_magnitude_per_token" in values:
                 try:
                     val = int(values["max_cost_magnitude_per_token"])
                     values["max_cost_magnitude_per_token"] = int(max(1, min(val, 1000000000)))
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
             if "min_capability_score" in values:
                 try:
                     val_float = float(values["min_capability_score"])
                     values["min_capability_score"] = float(max(0.0, min(val_float, 1.0)))
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
             if values.get("max_carbon_intensity_gco2eq_kwh") is not None:
                 try:
                     val_float = float(values["max_carbon_intensity_gco2eq_kwh"])
                     values["max_carbon_intensity_gco2eq_kwh"] = float(max(0.0, min(val_float, 10000.0)))
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
         return values
 
@@ -7204,10 +7204,7 @@ class CognitiveActionSpaceManifest(CoreasonBaseState):
                 return f"intent:{edge.target_intent.min_isometry_score}:{struct_types}"
             return "unknown"
 
-        sorted_matrix = {
-            k: sorted(v, key=edge_sort_key)
-            for k, v in self.transition_matrix.items()
-        }
+        sorted_matrix = {k: sorted(v, key=edge_sort_key) for k, v in self.transition_matrix.items()}
         object.__setattr__(self, "transition_matrix", sorted_matrix)
 
         return self
@@ -7496,7 +7493,7 @@ class MarketContract(CoreasonBaseState):
                 try:
                     mc_int = int(mc)
                     sp_int = int(sp)
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
             cmc = max(0, min(mc_int, 1000000000))
             if sp_int > cmc:
@@ -11387,7 +11384,7 @@ class WorkflowManifest(CoreasonBaseState):
             object.__setattr__(
                 self,
                 "allowed_semantic_classifications",
-                sorted(self.allowed_semantic_classifications, key=lambda x: str(x.value))
+                sorted(self.allowed_semantic_classifications, key=lambda x: str(x.value)),
             )
         return self
 
