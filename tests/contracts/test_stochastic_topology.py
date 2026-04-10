@@ -3,7 +3,12 @@ from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import ValidationError
 
-from coreason_manifest.spec.ontology import IdeationPhase, StochasticStateNode, StochasticTopology
+from coreason_manifest.spec.ontology import (
+    IdeationPhase,
+    StochasticConsensus,
+    StochasticStateNode,
+    StochasticTopology,
+)
 
 
 @given(
@@ -43,6 +48,9 @@ def test_immutability_of_epistemic_status(topology):
                 epistemic_entropy=st.floats(min_value=0.0, max_value=1.0),
             ),
             max_size=5,
+        ),
+        consensus=st.one_of(
+            st.none(), st.builds(StochasticConsensus, convergence_confidence=st.floats(min_value=0.0, max_value=1.0))
         ),
     )
 )
