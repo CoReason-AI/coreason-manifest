@@ -67,3 +67,62 @@ def test_vram_protection_string_length() -> None:
             unstructured_content=content,
             entropy_state=EpistemicEntropyState(shannon_entropy_index=2.0, bayesian_surprise_score=0.5),
         )
+
+
+def test_thermodynamic_halting_edge_cases() -> None:
+    import pytest
+
+    from coreason_manifest.spec.ontology import StochasticIdeationTopology
+
+    class DummyItem:
+        def __init__(self, entropy_val: float) -> None:
+            class DummyEntropy:
+                shannon_entropy_index = entropy_val
+            self.entropy_state = DummyEntropy()
+
+    class DummyBudget:
+        minimum_entropy_delta_per_turn = 0.5
+
+    data = {
+        "debate_graph": [
+            DummyItem(2.0),
+            DummyItem(1.5),
+            DummyItem(1.2),
+        ],
+        "ideation_budget": DummyBudget()
+    }
+
+    with pytest.raises(ValueError, match="Thermodynamic halt"):
+        StochasticIdeationTopology._enforce_thermodynamic_halting.__get__(None, StochasticIdeationTopology)(data) # type: ignore
+
+    data2 = {
+        "debate_graph": [
+            {"entropy_state": {"shannon_entropy_index": 2.0}},
+            {"entropy_state": {"shannon_entropy_index": 1.5}},
+            {"entropy_state": type('obj', (object,), {'shannon_entropy_index': 1.2})()},
+        ],
+        "ideation_budget": {"minimum_entropy_delta_per_turn": 0.5}
+    }
+
+    with pytest.raises(ValueError, match="Thermodynamic halt"):
+        StochasticIdeationTopology._enforce_thermodynamic_halting.__get__(None, StochasticIdeationTopology)(data2) # type: ignore
+
+def test_sort_key_empty() -> None:
+    import pytest
+    from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import LatentScratchpadReceipt
+
+    class MockBranch:
+        topology_class = "unknown"
+
+    data = {
+        "trace_cid": "trace_123",
+        "explored_branches": [MockBranch()],
+        "discarded_branches": [],
+        "total_latent_tokens": 100,
+    }
+
+    # model_validate processes sort_key under _enforce_canonical_sort
+    with pytest.raises(ValidationError):
+        LatentScratchpadReceipt.model_validate(data)

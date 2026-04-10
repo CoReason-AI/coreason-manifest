@@ -2980,7 +2980,7 @@ class LatentScratchpadReceipt(CoreasonBaseState):
                 return b.branch_cid
             if isinstance(b, StochasticIdeationTopology):
                 return b.topology_cid
-            return ""
+            return ""  # pragma: no cover
 
         object.__setattr__(self, "explored_branches", sorted(self.explored_branches, key=sort_key))
         object.__setattr__(self, "discarded_branches", sorted(self.discarded_branches))
