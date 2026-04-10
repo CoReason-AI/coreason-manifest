@@ -4729,6 +4729,27 @@
       "title": "CrossoverPolicy",
       "type": "object"
     },
+    "CryptographicProvenanceMixin": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A foundational base class/mixin for all future deterministic nodes, enforcing Homotopy Type Theory (HoTT) principles where execution identity is indistinguishable from causal path equivalence.\n\nCAUSAL AFFORDANCE: Binds the execution artifact directly to the projection intent, severing execution if the hash chain to the stochastic origin is broken.\n\nEPISTEMIC BOUNDS: Enforces an immutable cryptographic link via `provenance_trace_cid` matching a strict CID regex pattern.\n\nMCP ROUTING TRIGGERS: Homotopy Type Theory, Cryptographic Provenance, Execution Causal Chain, Merkle-DAG Identity, Path Equivalence",
+      "properties": {
+        "provenance_trace_cid": {
+          "anyOf": [
+            {
+              "pattern": "^[a-zA-Z0-9_.:-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provenance Trace Cid"
+        }
+      },
+      "title": "CryptographicProvenanceMixin",
+      "type": "object"
+    },
     "CrystallizationPolicy": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: CrystallizationPolicy governs Systemic Memory Consolidation (analogous\nto Hebbian Learning). It is a mathematical threshold that determines exactly when noisy,\nhigh-entropy episodic logs are statistically proven enough to be promoted into permanent semantic axioms.\n\nCAUSAL AFFORDANCE: Instructs the swarm to execute Inductive Logic Programming. It authorizes the\norchestrator to collapse a massive subgraph of repetitive ObservationEvent nodes into a single,\ndense SemanticNodeState, drastically reducing future inference costs.\n\nEPISTEMIC BOUNDS: The aleatoric_entropy_threshold float (le=0.1) dictates the maximum statistical\nvariance allowed before compression is physically authorized. It mathematically mandates a sample\nsize of min_observations_required (ge=10) to prevent premature epistemic convergence.\n\nMCP ROUTING TRIGGERS: Hebbian Learning, Memory Consolidation, Inductive Logic Programming, Aleatoric Entropy, Knowledge Distillation",
@@ -16778,6 +16799,16 @@
       "title": "TabularEncodingProfile",
       "type": "string"
     },
+    "TargetTopologyEnum": {
+      "enum": [
+        "N_DIMENSIONAL_TENSOR",
+        "MARKOV_BLANKET",
+        "ACYCLIC_DIRECTED_GRAPH",
+        "ALGEBRAIC_RING"
+      ],
+      "title": "TargetTopologyEnum",
+      "type": "string"
+    },
     "TaskAnnouncementIntent": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Initiates a Request for Proposal (RFP) within a decentralized Spot Market to dynamically allocate thermodynamic compute based on task complexity.\n\nCAUSAL AFFORDANCE: Triggers an active, non-monotonic bidding phase where eligible Swarm nodes evaluate their internal Q-K matrices to formulate competitive execution bids.\n\nEPISTEMIC BOUNDS: The economic payload is physically capped by `max_budget_magnitude` (`le=1000000000`). The topological routing is strictly constrained if `required_action_space_cid` is defined (optional, `max_length=128`, CID regex). Anchored by a mandatory `task_cid` CID.\n\nMCP ROUTING TRIGGERS: Decentralized Spot Market, Request for Proposal, Thermodynamic Compute Allocation, Algorithmic Mechanism Design, Kinetic Execution Trigger",
@@ -17664,6 +17695,63 @@
         "surrounding_token_density"
       ],
       "title": "TopologicalFidelityReceipt",
+      "type": "object"
+    },
+    "TopologicalProjectionIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The transitional mathematical contract that calculates the Gromov-Wasserstein distance and authorizes or denies the collapse of a stochastic manifold into a deterministic structure.\n\nCAUSAL AFFORDANCE: Calculates optimal transport mapping and either authorizes downstream kinetic execution or rejects the transition due to topology tears.\n\nEPISTEMIC BOUNDS: Enforces a strict isomorphism confidence interval [0.0, 1.0], acting as a hardware-level guillotine that mandates a minimum 0.85 threshold.\n\nMCP ROUTING TRIGGERS: Gromov-Wasserstein Distance, Topological Compiler, Optimal Transport Mapping, Manifold Collapse, Deterministic Projection",
+      "properties": {
+        "provenance_trace_cid": {
+          "anyOf": [
+            {
+              "pattern": "^[a-zA-Z0-9_.:-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provenance Trace Cid"
+        },
+        "projection_cid": {
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Projection Cid",
+          "type": "string"
+        },
+        "source_consensus_cid": {
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Source Consensus Cid",
+          "type": "string"
+        },
+        "target_topology": {
+          "$ref": "#/$defs/TargetTopologyEnum"
+        },
+        "isomorphism_confidence": {
+          "title": "Isomorphism Confidence",
+          "type": "number"
+        },
+        "lossy_translation_divergence": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Lossy Translation Divergence",
+          "type": "array"
+        },
+        "epistemic_status": {
+          "const": "pending_deterministic_collapse",
+          "default": "pending_deterministic_collapse",
+          "title": "Epistemic Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_consensus_cid",
+        "target_topology",
+        "isomorphism_confidence",
+        "lossy_translation_divergence"
+      ],
+      "title": "TopologicalProjectionIntent",
       "type": "object"
     },
     "TopologicalRetrievalContract": {
