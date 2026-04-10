@@ -11,7 +11,8 @@
 import math
 import uuid
 
-from hypothesis import given, strategies as st
+from hypothesis import given
+from hypothesis import strategies as st
 from pydantic import ValidationError
 
 from coreason_manifest.spec.stochastic import StochasticConsensus, StochasticStateNode
@@ -60,7 +61,7 @@ def test_float_boundary_warfare(chaotic_float: float):
                 stochastic_tensor="test",
                 epistemic_entropy=chaotic_float,
             )
-            assert False, f"Should have raised ValidationError for epistemic_entropy: {chaotic_float}"
+            raise AssertionError(f"Should have raised ValidationError for epistemic_entropy: {chaotic_float}")
         except ValidationError:
             pass
     else:
@@ -81,7 +82,7 @@ def test_float_boundary_warfare(chaotic_float: float):
                 convergence_confidence=chaotic_float,
                 residual_entropy_vectors=[],
             )
-            assert False, f"Should have raised ValidationError for convergence_confidence: {chaotic_float}"
+            raise AssertionError(f"Should have raised ValidationError for convergence_confidence: {chaotic_float}")
         except ValidationError:
             pass
     else:

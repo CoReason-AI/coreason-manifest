@@ -9,9 +9,9 @@
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
 import uuid
-from typing import List
 
-from hypothesis import given, strategies as st
+from hypothesis import given
+from hypothesis import strategies as st
 from pydantic import ValidationError
 
 from coreason_manifest.spec.stochastic import (
@@ -77,13 +77,13 @@ def test_immutability_of_epistemic_status(topology: StochasticTopology):
     # and Literal typing constraints
     try:
         topology.epistemic_status = "bounded"  # type: ignore
-        assert False, "Mutation should have raised a ValidationError"
+        raise AssertionError("Mutation should have raised a ValidationError")
     except ValidationError:
         pass
 
 
 @given(stochastic_graph_strategy(), st.uuids())
-def test_referential_integrity(valid_graph: List[StochasticStateNode], external_uuid: uuid.UUID):
+def test_referential_integrity(valid_graph: list[StochasticStateNode], external_uuid: uuid.UUID):
     """
     Assertion 2: Prove that any populated `parent_node_cid` strictly maps to an existing
     `node_cid` within the `stochastic_graph`, or raise a modeled validation error.
@@ -116,7 +116,7 @@ def test_referential_integrity(valid_graph: List[StochasticStateNode], external_
             phase=IdeationPhase.STOCHASTIC_DIFFUSION,
             stochastic_graph=invalid_graph,
         )
-        assert False, "Referential integrity validation should have failed"
+        raise AssertionError("Referential integrity validation should have failed")
     except ValidationError:
         pass
 
@@ -136,7 +136,7 @@ def test_serialization_isomorphism(topology: StochasticTopology):
 
     # Check DAG nodes
     assert len(topology.stochastic_graph) == len(restored_topology.stochastic_graph)
-    for orig_node, rest_node in zip(topology.stochastic_graph, restored_topology.stochastic_graph):
+    for orig_node, rest_node in zip(topology.stochastic_graph, restored_topology.stochastic_graph, strict=False):
         assert orig_node.node_cid == rest_node.node_cid
         assert orig_node.parent_node_cid == rest_node.parent_node_cid
         assert orig_node.agent_role == rest_node.agent_role

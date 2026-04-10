@@ -9,15 +9,15 @@
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
 import uuid
-from enum import Enum
-from typing import List, Literal, Optional
+from enum import StrEnum
+from typing import Literal
 
 from pydantic import Field, field_validator, model_validator
 
 from coreason_manifest.spec.base import CoreasonBaseState
 
 
-class IdeationPhase(str, Enum):
+class IdeationPhase(StrEnum):
     """
     Thermodynamic Phase Tracking for stochastic ideation.
     """
@@ -36,7 +36,7 @@ class StochasticStateNode(CoreasonBaseState):
     """
 
     node_cid: uuid.UUID = Field(default_factory=uuid.uuid4)
-    parent_node_cid: Optional[uuid.UUID] = None
+    parent_node_cid: uuid.UUID | None = None
     agent_role: Literal["generator", "critic", "synthesizer"]
     stochastic_tensor: str
     epistemic_entropy: float
@@ -60,7 +60,7 @@ class StochasticConsensus(CoreasonBaseState):
     consensus_cid: uuid.UUID = Field(default_factory=uuid.uuid4)
     proposed_manifold: str
     convergence_confidence: float
-    residual_entropy_vectors: List[str]
+    residual_entropy_vectors: list[str]
 
     @field_validator("convergence_confidence")
     @classmethod
@@ -81,8 +81,8 @@ class StochasticTopology(CoreasonBaseState):
     topology_cid: uuid.UUID = Field(default_factory=uuid.uuid4)
     topology_type: Literal["stochastic_ensemble"] = "stochastic_ensemble"
     phase: IdeationPhase
-    stochastic_graph: List[StochasticStateNode]
-    consensus: Optional[StochasticConsensus] = None
+    stochastic_graph: list[StochasticStateNode]
+    consensus: StochasticConsensus | None = None
     epistemic_status: Literal["stochastically_unbounded"] = "stochastically_unbounded"
 
     @model_validator(mode="after")
