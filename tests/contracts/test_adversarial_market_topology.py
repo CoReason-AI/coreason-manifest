@@ -27,7 +27,6 @@ did_strategy = st.from_regex(r"^did:[a-z0-9]+:[a-zA-Z0-9.\-_:]+$", fullmatch=Tru
 @st.composite
 def valid_adversarial_topology(draw: st.DrawFn) -> dict[str, Any]:
     """Generates mathematically guaranteed disjoint topological sets to test compilation determinism."""
-    # Generate an array of unique DIDs to prevent Pydantic disjoint overlap rejections
     all_dids = draw(st.lists(did_strategy, min_size=3, max_size=20, unique=True))
 
     adjudicator_cid = all_dids[0]
@@ -37,7 +36,6 @@ def valid_adversarial_topology(draw: st.DrawFn) -> dict[str, Any]:
     blue_team = all_dids[1 : split_idx + 1]
     red_team = all_dids[split_idx + 1 :]
 
-    # Draw valid economic boundaries
     market_rules = PredictionMarketPolicy(
         staking_function=draw(st.sampled_from(["linear", "quadratic"])),
         min_liquidity_magnitude=draw(st.integers(min_value=0, max_value=10000)),

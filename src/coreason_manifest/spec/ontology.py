@@ -110,12 +110,9 @@ def _canonicalize_payload(obj: Any) -> Any:
 
 class _SimpleTTLCache:
     """
-    ⚡ Bolt Optimization: A simple thread-safe TTL cache.
-    Why: `socket.getaddrinfo` is a synchronous, blocking network call that causes
-    significant overhead when validating the same hostname repeatedly (e.g., standard
-    provider endpoints).
-    Impact: Reduces DNS resolution overhead for frequent hostnames to ~O(1) dictionary
-    lookup while maintaining a short TTL (5s) to prevent DNS Rebinding attacks.
+    AGENT INSTRUCTION: A mathematically bounded thread-safe Time-To-Live (TTL) cache.
+    CAUSAL AFFORDANCE: Eliminates redundant synchronous network calls during cryptographic hashing and validation.
+    EPISTEMIC BOUNDS: Strictly bounds caching intervals to 5 seconds to mathematically prevent DNS Rebinding attacks.
     """
 
     def __init__(self, ttl: int = 5, maxsize: int = 4096) -> None:
@@ -2565,8 +2562,8 @@ class StateDifferentialManifest(CoreasonBaseState):
     patches: list[StateMutationIntent] = Field(
         default_factory=list,
         description="The exact, ordered sequence of deterministic state vector mutations.",
-        # Note: patches is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     )
+    # Note: patches is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
 
 
 class EpistemicHydrationPolicy(CoreasonBaseState):
@@ -4292,9 +4289,9 @@ class DocumentLayoutManifest(CoreasonBaseState):
     )
     chronological_flow_edges: list[tuple[str, str]] = Field(
         default_factory=list,
-        # Note: chronological_flow_edges is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
         description="Directed edges defining the topological sort (chronological flow) of the document.",
     )
+    # Note: chronological_flow_edges is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
 
     @model_validator(mode="after")
     def verify_dag_and_integrity(self) -> Self:
@@ -4447,14 +4444,14 @@ class SemanticDiscoveryIntent(CoreasonBaseState):
 
 
 class ContextualSemanticResolutionIntent(CoreasonBaseState):
-    """AGENT INSTRUCTION: Acts as the kinetic trigger forcing the orchestrator to dynamically resolve a raw, untyped SemanticRelationalRecordState against a global standard ontology using optimal transport metrics, entirely bypassing legacy ETL string-matching."""
+    """AGENT INSTRUCTION: Acts as the kinetic trigger forcing the orchestrator to dynamically resolve a raw, untyped SemanticRelationalVectorState against a global standard ontology using optimal transport metrics, entirely bypassing legacy ETL string-matching."""
 
     topology_class: Literal["contextual_semantic_resolution"] = Field(
         default="contextual_semantic_resolution", description="Discriminator for contextual semantic resolution."
     )
     source_record_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
         Field(
-            description="An explicit cryptographic pointer to the raw SemanticRelationalRecordState pending resolution."
+            description="An explicit cryptographic pointer to the raw SemanticRelationalVectorState pending resolution."
         )
     )
     target_ontology_graph_cid: Annotated[
@@ -5136,10 +5133,10 @@ class ExecutionNodeReceipt(CoreasonBaseState):
         return _validate_payload_bounds(v)
 
     parent_hashes: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
-        # Note: parent_hashes is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
         default_factory=list,
         description="The strict array of cryptographic hashes of parent execution nodes.",
     )
+    # Note: parent_hashes is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     node_hash: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None = Field(
         default=None, description="The cryptographic SHA-256 hash of this node."
     )
@@ -7435,10 +7432,10 @@ class MacroGridProfile(CoreasonBaseState):
     """
 
     layout_matrix: list[list[Annotated[str, StringConstraints(max_length=255)]]] = Field(
-        # Note: layout_matrix is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
         max_length=1000,
         description="A matrix defining the layout structure, using panel IDs.",
     )
+    # Note: layout_matrix is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     column_fractional_weights: list[float] = Field(
         default_factory=list, description="Euclidean fractional weights for column partitioning."
     )
@@ -7449,8 +7446,8 @@ class MacroGridProfile(CoreasonBaseState):
     # Note: row_fractional_weights is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     panels: list[AnyPanelProfile] = Field(
         description="The ordered array of topological UI panels physically rendered in the grid."
-        # Note: panels is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     )
+    # Note: panels is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
 
     @model_validator(mode="after")
     def verify_matrix_dimensions(self) -> Self:
@@ -8294,8 +8291,8 @@ class EpistemicSOPManifest(CoreasonBaseState):
     # Note: chronological_flow_edges is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     prm_evaluations: list["ProcessRewardContract"] = Field(
         description="The strict array of Process Reward Contracts evaluating the logic."
-        # Note: prm_evaluations is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     )
+    # Note: prm_evaluations is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
 
     @model_validator(mode="after")
     def reject_ghost_nodes(self) -> Self:
@@ -8794,8 +8791,8 @@ class SpatialKinematicActionIntent(CoreasonBaseState):
     bezier_control_points: list[SE3TransformProfile] = Field(
         default_factory=list,
         description="Waypoints for constructing non-linear, bot-evasive movement curves.",
-        # Note: bezier_control_points is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     )
+    # Note: bezier_control_points is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     expected_visual_concept: Annotated[str, StringConstraints(max_length=2000)] | None = Field(
         default=None,
         description="The visual anchor (e.g., 'Submit Button'). The orchestrator must verify this semantic concept exists at the target_coordinate before executing the macro, preventing blind clicks.",
@@ -8886,11 +8883,11 @@ class StdioTransportProfile(CoreasonBaseState):
         ..., description="The command executable to run (e.g., 'node', 'python')."
     )
     args: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
-        # Note: args is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
         max_length=1000,
         default_factory=list,
         description="The explicit array of arguments to pass to the command.",
     )
+    # Note: args is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     env_vars: dict[
         Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=2000)]
     ] = Field(default_factory=dict, description="Environment variables required by the transport.")
@@ -12150,8 +12147,8 @@ class EpistemicTopologicalProofManifest(CoreasonBaseState):
     axiomatic_chain: list[EpistemicAxiomState] = Field(
         min_length=1,
         description="The strictly ordered sequence of axioms forming the reasoning path.",
-        # Note: axiomatic_chain is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     )
+    # Note: axiomatic_chain is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
 
 
 class CognitiveSamplingPolicy(CoreasonBaseState):
@@ -12733,7 +12730,7 @@ type AnyStateEvent = Annotated[
     | EpistemicFlowStateReceipt
     | CausalExplanationEvent
     | IntentClassificationReceipt
-    | SemanticRelationalRecordState
+    | SemanticRelationalVectorState
     | OntologicalReificationReceipt,
     Field(discriminator="topology_class", description="A discriminated union of state events."),
 ]
@@ -12793,7 +12790,7 @@ class OntologicalReificationReceipt(CoreasonBaseState):
     )
 
 
-class SemanticRelationalRecordState(CoreasonBaseState):
+class SemanticRelationalVectorState(CoreasonBaseState):
     """AGENT INSTRUCTION: Represents the untyped payload injection zone for harmonized structured telemetry. CAUSAL AFFORDANCE: Permits specialized downstream agents to project and decode specific industry payloads (e.g., OMOP CDM, FIX protocol) while preserving universal mathematical traversal of the graph. EPISTEMIC BOUNDS: The payload_injection_zone is routed through the volumetric hardware guillotine."""
 
     topology_class: Literal["semantic_relational_record"] = Field(default="semantic_relational_record")
@@ -12851,10 +12848,10 @@ class ContinuousObservationState(CoreasonBaseState):
         description="A Content Identifier (CID) for the continuous observation stream."
     )
     token_buffer: list[Annotated[str, StringConstraints(max_length=10000)]] = Field(
-        # Note: token_buffer is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
         max_length=1000000,
         description="The array of ingested tokens representing the continuous stream. AGENT INSTRUCTION: Topological Exemption applied. Do NOT sort this array, as its chronological sequence is its mathematical state.",
     )
+    # Note: token_buffer is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     temporal_decay_matrix: dict[Annotated[int, Field(ge=0)], Annotated[float, Field(ge=0.0, le=1.0)]] = Field(
         description="The mathematical decay map applied to historical token indices."
     )
@@ -13165,7 +13162,7 @@ VolumetricPartitionState.model_rebuild()
 
 DempsterShaferBeliefVector.model_rebuild()
 EmpiricalStatisticalQualifier.model_rebuild()
-SemanticRelationalRecordState.model_rebuild()
+SemanticRelationalVectorState.model_rebuild()
 AtomicPropositionState.model_rebuild()
 ContextualSemanticResolutionIntent.model_rebuild()
 PostCoordinatedSemanticConcept.model_rebuild()

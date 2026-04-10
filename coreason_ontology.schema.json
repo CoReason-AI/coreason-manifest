@@ -856,7 +856,7 @@
           "ontological_reification": "#/$defs/OntologicalReificationReceipt",
           "persistence_commit": "#/$defs/PersistenceCommitReceipt",
           "post_coordinated_concept": "#/$defs/PostCoordinatedSemanticConcept",
-          "semantic_relational_record": "#/$defs/SemanticRelationalRecordState",
+          "semantic_relational_record": "#/$defs/SemanticRelationalVectorState",
           "system_fault": "#/$defs/SystemFaultEvent",
           "token_burn": "#/$defs/TokenBurnReceipt",
           "tool_invocation": "#/$defs/ToolInvocationEvent"
@@ -928,7 +928,7 @@
           "$ref": "#/$defs/IntentClassificationReceipt"
         },
         {
-          "$ref": "#/$defs/SemanticRelationalRecordState"
+          "$ref": "#/$defs/SemanticRelationalVectorState"
         },
         {
           "$ref": "#/$defs/OntologicalReificationReceipt"
@@ -4189,7 +4189,7 @@
     },
     "ContextualSemanticResolutionIntent": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Acts as the kinetic trigger forcing the orchestrator to dynamically resolve a raw, untyped SemanticRelationalRecordState against a global standard ontology using optimal transport metrics, entirely bypassing legacy ETL string-matching.",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Acts as the kinetic trigger forcing the orchestrator to dynamically resolve a raw, untyped SemanticRelationalVectorState against a global standard ontology using optimal transport metrics, entirely bypassing legacy ETL string-matching.",
       "properties": {
         "topology_class": {
           "const": "contextual_semantic_resolution",
@@ -4199,7 +4199,7 @@
           "type": "string"
         },
         "source_record_cid": {
-          "description": "An explicit cryptographic pointer to the raw SemanticRelationalRecordState pending resolution.",
+          "description": "An explicit cryptographic pointer to the raw SemanticRelationalVectorState pending resolution.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
@@ -15212,7 +15212,7 @@
       "title": "SemanticNodeState",
       "type": "object"
     },
-    "SemanticRelationalRecordState": {
+    "SemanticRelationalVectorState": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents the untyped payload injection zone for harmonized structured telemetry. CAUSAL AFFORDANCE: Permits specialized downstream agents to project and decode specific industry payloads (e.g., OMOP CDM, FIX protocol) while preserving universal mathematical traversal of the graph. EPISTEMIC BOUNDS: The payload_injection_zone is routed through the volumetric hardware guillotine.",
       "properties": {
@@ -15297,7 +15297,7 @@
         "ontology_class",
         "payload_injection_zone"
       ],
-      "title": "SemanticRelationalRecordState",
+      "title": "SemanticRelationalVectorState",
       "type": "object"
     },
     "SemanticSlicingPolicy": {

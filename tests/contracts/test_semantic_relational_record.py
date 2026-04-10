@@ -6,7 +6,7 @@ from hypothesis import strategies as st
 
 from coreason_manifest.spec.ontology import (
     JsonPrimitiveState,
-    SemanticRelationalRecordState,
+    SemanticRelationalVectorState,
     TemporalBoundsProfile,
     UpperOntologyClassProfile,
 )
@@ -19,7 +19,7 @@ def test_semantic_relational_record_payload_bounds(node_count: int) -> None:
     large_dict: dict[str, Any] = {"level_1": [{"node": i} for i in range(node_count)]}
 
     with pytest.raises(ValueError, match="Payload volume exceeds absolute hardware limit"):
-        SemanticRelationalRecordState(
+        SemanticRelationalVectorState(
             event_cid="test-event-cid-1",
             timestamp=123456789.0,
             ontology_class=UpperOntologyClassProfile.CONTINUANT,
@@ -31,7 +31,7 @@ def test_semantic_relational_record_payload_bounds(node_count: int) -> None:
 def test_semantic_relational_record_occurrent_temporality(valid_from: float) -> None:
     # Test valid occurrent with temporal bounds
     tb = TemporalBoundsProfile(valid_from=valid_from)
-    record = SemanticRelationalRecordState(
+    record = SemanticRelationalVectorState(
         event_cid="test-event-cid-2",
         timestamp=123456789.0,
         ontology_class=UpperOntologyClassProfile.OCCURRENT,
@@ -45,7 +45,7 @@ def test_semantic_relational_record_occurrent_temporality(valid_from: float) -> 
         ValueError,
         match=r"Ontological Paradox: An OCCURRENT must mathematically possess a temporal_bounds coordinate\.",
     ):
-        SemanticRelationalRecordState(
+        SemanticRelationalVectorState(
             event_cid="test-event-cid-3",
             timestamp=123456789.0,
             ontology_class=UpperOntologyClassProfile.OCCURRENT,
@@ -55,7 +55,7 @@ def test_semantic_relational_record_occurrent_temporality(valid_from: float) -> 
 
 @given(st.floats(min_value=0.0, max_value=1000000000.0))
 def test_semantic_relational_record_continuant_no_temporality(timestamp: float) -> None:
-    record = SemanticRelationalRecordState(
+    record = SemanticRelationalVectorState(
         event_cid="test-event-cid-4",
         timestamp=timestamp,
         ontology_class=UpperOntologyClassProfile.CONTINUANT,
