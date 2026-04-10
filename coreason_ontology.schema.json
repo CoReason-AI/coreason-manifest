@@ -3762,6 +3762,54 @@
       "title": "CompositeNodeProfile",
       "type": "object"
     },
+    "ComputationalThermodynamics": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The macroscopic envelope that tracks the thermodynamic cost of stochastic ideation and violently halts execution when energy budgets or spatial limits are depleted.\n\nCAUSAL AFFORDANCE: Operates as the absolute mathematical circuit breaker for MCTS DAG expansion, physically revoking generative privileges if thresholds are breached.\n\nEPISTEMIC BOUNDS: Bounded by strict topological limits: max_stochastic_diffusions (ge=1) and computational_free_energy_budget (ge=0.0). current_diffusions must be strictly <= max_stochastic_diffusions.\n\nMCP ROUTING TRIGGERS: Computational Thermodynamics, Spatial Circuit Breaker, MCTS Halting, Epistemic Bounding, Thermodynamic Cost",
+      "properties": {
+        "thermodynamics_cid": {
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Thermodynamics Cid",
+          "type": "string"
+        },
+        "target_topology_cid": {
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Target Topology Cid",
+          "type": "string"
+        },
+        "max_stochastic_diffusions": {
+          "minimum": 1,
+          "title": "Max Stochastic Diffusions",
+          "type": "integer"
+        },
+        "computational_free_energy_budget": {
+          "minimum": 0.0,
+          "title": "Computational Free Energy Budget",
+          "type": "number"
+        },
+        "current_diffusions": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Current Diffusions",
+          "type": "integer"
+        },
+        "remaining_free_energy": {
+          "title": "Remaining Free Energy",
+          "type": "number"
+        },
+        "system_state": {
+          "$ref": "#/$defs/ThermodynamicState",
+          "default": "ACTIVE_DIFFUSION"
+        }
+      },
+      "required": [
+        "target_topology_cid",
+        "max_stochastic_diffusions",
+        "computational_free_energy_budget",
+        "remaining_free_energy"
+      ],
+      "title": "ComputationalThermodynamics",
+      "type": "object"
+    },
     "ComputeEngineProfile": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Acts as the liquid compute substrate abstraction, defining the\nfoundational LLM matrix available on the Spot Market for dynamic routing. As a ...Profile\nsuffix, this is a declarative, frozen snapshot of a compute geometry.\n\nCAUSAL AFFORDANCE: Projects the physical LLM capabilities, contextual memory constraints,\nand thermodynamic rate cards (ComputeRateContract) into the orchestrator's active routing\nmanifold, allowing cost-aware topological planning.\n\nEPISTEMIC BOUNDS: The token working memory is mathematically bounded by\ncontext_window_size (le=1000000000). To guarantee RFC 8785 canonical hashing across\ndisparate nodes, the capabilities and supported_functional_experts arrays are strictly\nsorted at instantiation via @model_validator.\n\nMCP ROUTING TRIGGERS: Liquid Compute, Spot Market Routing, Foundation Model Matrix,\nThermodynamic Rate Card, Substrate Abstraction",
@@ -17516,6 +17564,15 @@
       ],
       "title": "TheoryOfMindSnapshot",
       "type": "object"
+    },
+    "ThermodynamicState": {
+      "description": "AGENT INSTRUCTION: A rigid string enumeration mapping the kinetic liveness of the computational budget.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator on whether the thermodynamic search envelope is active or mathematically depleted.\n\nEPISTEMIC BOUNDS: Strictly bounded to the explicit kinetic states ACTIVE_DIFFUSION and ENTROPIC_EXHAUSTION_ORACLE_INTERVENTION.\n\nMCP ROUTING TRIGGERS: Thermodynamic State, Budget Envelope, MCTS Liveness, Entropy Tracking",
+      "enum": [
+        "ACTIVE_DIFFUSION",
+        "ENTROPIC_EXHAUSTION_ORACLE_INTERVENTION"
+      ],
+      "title": "ThermodynamicState",
+      "type": "string"
     },
     "ThoughtBranchState": {
       "additionalProperties": false,
