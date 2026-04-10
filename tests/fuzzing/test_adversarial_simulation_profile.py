@@ -111,6 +111,7 @@ def test_adversarial_simulation_invalid_attack_vector() -> None:
             synthetic_payload={"method": "destroy"},
         )
 
+
 @given(st.text())
 @settings(max_examples=100, suppress_health_check=[HealthCheck.too_slow])
 def test_fuzz_agent_debate_logs(text: str) -> None:

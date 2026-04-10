@@ -94,6 +94,7 @@ def test_adversarial_market_compile_fuzzing(topology_data: dict[str, Any]) -> No
         assert node_cid in compiled.nodes
         assert compiled.nodes[node_cid].description == "Red Team Member"
 
+
 def test_red_team_blue_team_ideation() -> None:
     """
     Simulate a scenario where a Blue Team agent proposes a strategy and a Red Team
@@ -120,7 +121,7 @@ def test_red_team_blue_team_ideation() -> None:
         confidence_score=0.15,
         unresolved_frictions=[
             "The team lacks bandwidth to maintain two execution loops.",
-            "Feature flags might add latency that defeats the purpose of the refactor."
+            "Feature flags might add latency that defeats the purpose of the refactor.",
         ],
     )
 

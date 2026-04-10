@@ -94,6 +94,7 @@ def test_latent_scratchpad_receipt_discarded_branch_missing() -> None:
             total_latent_tokens=100,
         )
 
+
 def test_latent_scratchpad_accepts_ideation_topology() -> None:
     """
     Test that the Latent Scratchpad can accept and safely serialize IdeationTopology
