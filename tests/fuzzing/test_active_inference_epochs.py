@@ -1,9 +1,6 @@
-import math
 
-import pytest
 from hypothesis import given
 from hypothesis import strategies as st
-from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import ActiveInferenceEpoch, EpistemicRejectionReceipt
 
