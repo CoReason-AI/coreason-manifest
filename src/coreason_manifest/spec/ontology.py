@@ -110,12 +110,13 @@ def _canonicalize_payload(obj: Any) -> Any:
 
 class _SimpleTTLCache:
     """
-    ⚡ Bolt Optimization: A simple thread-safe TTL cache.
-    Why: `socket.getaddrinfo` is a synchronous, blocking network call that causes
-    significant overhead when validating the same hostname repeatedly (e.g., standard
-    provider endpoints).
-    Impact: Reduces DNS resolution overhead for frequent hostnames to ~O(1) dictionary
-    lookup while maintaining a short TTL (5s) to prevent DNS Rebinding attacks.
+    AGENT INSTRUCTION: Implements an ephemeral thread-safe Time-To-Live (TTL) memory matrix for network resolution. Functions as a localized caching boundary.
+
+    CAUSAL AFFORDANCE: Physically intercepts synchronous blocking network calls to reduce DNS resolution overhead, unlocking ~O(1) dictionary lookups for the system.
+
+    EPISTEMIC BOUNDS: Mathematically clamped by a strict time-bound maximum `ttl` to prevent DNS Rebinding attacks, while enforcing a rigid structural footprint via `maxsize` to prevent OOM memory exhaustion.
+
+    MCP ROUTING TRIGGERS: TTL Memory Matrix, DNS Resolution Caching, O(1) Dictionary Lookup, Temporal Bounding, Thread-Safe Ephemeral State
     """
 
     def __init__(self, ttl: int = 5, maxsize: int = 4096) -> None:
