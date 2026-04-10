@@ -16,6 +16,7 @@ from coreason_manifest.spec.ontology import EpistemicRejectionReceipt
 def test_kl_divergence_paradox_trapping(invalid_kl_divergence: float) -> None:
     with pytest.raises(ValidationError) as exc_info:
         EpistemicRejectionReceipt(
+            receipt_cid="test",
             failed_projection_cid="valid_projection_cid",
             violated_algebraic_constraint="Constraint X violated.",
             kl_divergence_to_validity=invalid_kl_divergence,

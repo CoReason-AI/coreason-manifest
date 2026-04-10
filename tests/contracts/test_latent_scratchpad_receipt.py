@@ -28,7 +28,8 @@ def valid_scratchpad_strategy(draw: st.DrawFn) -> dict[str, Any]:
     branch_ids = draw(
         st.lists(st.from_regex(r"^[a-zA-Z0-9_.:-]+$", fullmatch=True), min_size=2, max_size=15, unique=True)
     )
-    explored = []
+    from coreason_manifest.spec.ontology import AnyExplorationBranch
+    explored: list[AnyExplorationBranch] = []
     for b_cid in branch_ids:
         if draw(st.booleans()):
             explored.append(ThoughtBranchState(branch_cid=b_cid, latent_content_hash="a" * 64, prm_score=0.9))
