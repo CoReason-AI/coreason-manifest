@@ -78,7 +78,11 @@ def test_thermodynamic_halting_edge_cases() -> None:
         def __init__(self, entropy_val: float) -> None:
             class DummyEntropy:
                 shannon_entropy_index = entropy_val
+
             self.entropy_state = DummyEntropy()
+            self.log_cid = "did:log:abc_123"
+            self.agent_role = "generator"
+            self.unstructured_content = "Idea 1"
 
     class DummyBudget:
         minimum_entropy_delta_per_turn = 0.5
@@ -89,23 +93,50 @@ def test_thermodynamic_halting_edge_cases() -> None:
             DummyItem(1.5),
             DummyItem(1.2),
         ],
-        "ideation_budget": DummyBudget()
+        "ideation_budget": DummyBudget(),
     }
 
     with pytest.raises(ValueError, match="Thermodynamic halt"):
-        StochasticIdeationTopology._enforce_thermodynamic_halting.__get__(None, StochasticIdeationTopology)(data) # type: ignore
+        StochasticIdeationTopology.model_validate(
+            {
+                "topology_cid": "did:topology:01_abc",
+                "phase": "divergent_brainstorming",
+                "ideation_budget": data["ideation_budget"],
+                "divergence_monitor": {
+                    "anchor_embedding_hash": "a" * 64,
+                    "current_cosine_drift": 0.1,
+                    "max_allowable_divergence": 0.5,
+                },
+                "debate_graph": data["debate_graph"],
+                "superposition_state": None,
+            }
+        )
 
     data2 = {
         "debate_graph": [
             {"entropy_state": {"shannon_entropy_index": 2.0}},
             {"entropy_state": {"shannon_entropy_index": 1.5}},
-            {"entropy_state": type('obj', (object,), {'shannon_entropy_index': 1.2})()},
+            {"entropy_state": type("obj", (object,), {"shannon_entropy_index": 1.2})()},
         ],
-        "ideation_budget": {"minimum_entropy_delta_per_turn": 0.5}
+        "ideation_budget": {"minimum_entropy_delta_per_turn": 0.5},
     }
 
     with pytest.raises(ValueError, match="Thermodynamic halt"):
-        StochasticIdeationTopology._enforce_thermodynamic_halting.__get__(None, StochasticIdeationTopology)(data2) # type: ignore
+        StochasticIdeationTopology.model_validate(
+            {
+                "topology_cid": "did:topology:01_abc",
+                "phase": "divergent_brainstorming",
+                "ideation_budget": data2["ideation_budget"],
+                "divergence_monitor": {
+                    "anchor_embedding_hash": "a" * 64,
+                    "current_cosine_drift": 0.1,
+                    "max_allowable_divergence": 0.5,
+                },
+                "debate_graph": data2["debate_graph"],
+                "superposition_state": None,
+            }
+        )
+
 
 def test_sort_key_empty() -> None:
     import pytest
