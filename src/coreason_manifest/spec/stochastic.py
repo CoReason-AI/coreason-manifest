@@ -21,6 +21,7 @@ class IdeationPhase(StrEnum):
     """
     Thermodynamic Phase Tracking for stochastic ideation.
     """
+
     STOCHASTIC_DIFFUSION = "STOCHASTIC_DIFFUSION"
     ENTROPIC_EXPLORATION = "ENTROPIC_EXPLORATION"
     TOPOLOGICAL_CRITIQUE = "TOPOLOGICAL_CRITIQUE"

@@ -100,7 +100,7 @@ def test_referential_integrity(valid_graph: list[StochasticStateNode], external_
     # Ensure external_uuid is definitely not in the graph
     node_cids = {n.node_cid for n in invalid_graph}
     if external_uuid in node_cids:
-        return # Skip if randomly generated uuid clashes
+        return  # Skip if randomly generated uuid clashes
 
     invalid_node = StochasticStateNode(
         node_cid=uuid.uuid4(),
