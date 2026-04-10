@@ -20,7 +20,7 @@ from coreason_manifest.spec.ontology import (
         max_size=10,
     )
 )
-def test_acyclic_dag_forward_reference(nodes):
+def test_acyclic_dag_forward_reference(nodes: list[StochasticStateNode]) -> None:
     # Setup a cycle: The first node points to the second node
     nodes[0] = nodes[0].model_copy(update={"parent_node_cid": nodes[1].node_cid})
 
@@ -30,12 +30,12 @@ def test_acyclic_dag_forward_reference(nodes):
 
 
 @given(st.builds(StochasticTopology, stochastic_graph=st.just([])))
-def test_immutability_of_epistemic_status(topology):
+def test_immutability_of_epistemic_status(topology: StochasticTopology) -> None:
     assert topology.epistemic_status == "stochastically_unbounded"
 
     with pytest.raises(ValidationError):
         # Attempting to assign to a model with validate_assignment=True
-        topology.epistemic_status = "bounded"
+        topology.epistemic_status = "bounded"  # type: ignore[misc,assignment]
 
 
 @given(
@@ -54,7 +54,7 @@ def test_immutability_of_epistemic_status(topology):
         ),
     )
 )
-def test_serialization_isomorphism(topology):
+def test_serialization_isomorphism(topology: StochasticTopology) -> None:
     # Check serialization
     json_data = topology.model_dump_json()
     reconstructed = StochasticTopology.model_validate_json(json_data)
