@@ -8,7 +8,6 @@
 #
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
-import math
 import pytest
 from hypothesis import given
 from hypothesis import strategies as st
@@ -17,19 +16,21 @@ from pydantic import ValidationError
 from coreason_manifest.spec.ontology import (
     ActiveInferenceEpoch,
     EpistemicRejectionReceipt,
-    TopologicalProjectionIntent,
     TargetTopologyEnum,
+    TopologicalProjectionIntent,
 )
+
 
 @given(st.floats(max_value=-0.001) | st.floats(min_value=1.001))
 def test_topological_projection_intent_out_of_bounds(v: float) -> None:
-    with pytest.raises(ValidationError, match="isomorphism_confidence must be between 0.0 and 1.0"):
+    with pytest.raises(ValidationError, match=r"isomorphism_confidence must be between 0\.0 and 1\.0"):
         TopologicalProjectionIntent(
             source_consensus_cid="test-1234",
             target_topology=TargetTopologyEnum.ALGEBRAIC_RING,
             isomorphism_confidence=v,
-            lossy_translation_divergence=[]
+            lossy_translation_divergence=[],
         )
+
 
 @given(st.floats(min_value=0.0, max_value=0.84999))
 def test_topological_projection_intent_guillotine(v: float) -> None:
@@ -38,8 +39,9 @@ def test_topological_projection_intent_guillotine(v: float) -> None:
             source_consensus_cid="test-1234",
             target_topology=TargetTopologyEnum.ALGEBRAIC_RING,
             isomorphism_confidence=v,
-            lossy_translation_divergence=[]
+            lossy_translation_divergence=[],
         )
+
 
 @given(st.floats(max_value=-0.001) | st.just(float("nan")) | st.just(float("inf")))
 def test_kl_divergence_paradox(v: float) -> None:
@@ -51,10 +53,8 @@ def test_kl_divergence_paradox(v: float) -> None:
             stochastic_mutation_gradient="test",
         )
 
+
 @given(st.floats(max_value=-0.001) | st.just(float("nan")) | st.just(float("inf")))
 def test_active_inference_epoch_paradox(v: float) -> None:
     with pytest.raises(ValidationError, match="Mathematical paradox:"):
-        ActiveInferenceEpoch(
-            current_free_energy=v,
-            rejection_history=[]
-        )
+        ActiveInferenceEpoch(current_free_energy=v, rejection_history=[])
