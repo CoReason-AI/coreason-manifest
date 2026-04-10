@@ -1,5 +1,7 @@
+import pytest
 from hypothesis import given
 from hypothesis import strategies as st
+from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import ActiveInferenceEpoch, EpistemicRejectionReceipt
 
@@ -51,3 +53,22 @@ def test_serialization_isomorphism(
     cids_original = [receipt.receipt_cid for receipt in epoch.rejection_history]
     cids_deserialized = [receipt.receipt_cid for receipt in deserialized.rejection_history]
     assert cids_original == cids_deserialized
+
+
+@given(
+    st.lists(receipt_strategy),
+    st.one_of(
+        st.floats(max_value=-0.0001, allow_nan=False, allow_infinity=False),
+        st.just(float("nan")),
+        st.just(float("-inf")),
+    ),
+)
+def test_free_energy_paradox_trapping(
+    rejection_history: list[EpistemicRejectionReceipt], invalid_free_energy: float
+) -> None:
+    with pytest.raises(ValidationError) as exc_info:
+        ActiveInferenceEpoch(
+            rejection_history=rejection_history,
+            current_free_energy=invalid_free_energy,
+        )
+    assert "Mathematical paradox" in str(exc_info.value) or "Input should be a valid number" in str(exc_info.value)
