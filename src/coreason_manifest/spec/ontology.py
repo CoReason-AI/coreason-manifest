@@ -676,12 +676,10 @@ class StochasticStateNode(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Latent Space Coordinates, MCTS Nodes, Shannon Entropy Bounding
     """
 
-    node_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        default_factory=lambda: str(uuid.uuid4())
-    )
+    node_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
     parent_node_cid: str | None = Field(default=None)
     agent_role: Literal["generator", "critic", "synthesizer"] = Field()
-    stochastic_tensor: str = Field(description="Unbounded semantic payload")
+    stochastic_tensor: Annotated[str, StringConstraints(max_length=100000)] = Field(description="Unbounded semantic payload")
     epistemic_entropy: float = Field()
 
     @field_validator("epistemic_entropy", mode="after")
@@ -692,30 +690,34 @@ class StochasticStateNode(CoreasonBaseState):
         return v
 
 
-class StochasticConsensus(CoreasonBaseState):
+class HypothesisSuperposition(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: A topological bridge mathematically projecting high-dimensional unverified graphs into actionable manifolds.
+    AGENT INSTRUCTION: Maintains the quantum-like probability mass of mutually exclusive semantic manifolds, delaying wave collapse until deterministically evaluated.
 
-    CAUSAL AFFORDANCE: Authorizes a lossy deterministic projection or signals the continuation of diffusion if residual entropy is too high.
+    CAUSAL AFFORDANCE: Delays premature wave collapse by preserving competing hypotheses and their precise statistical probability mass.
 
-    EPISTEMIC BOUNDS: convergence_confidence is mathematically clamped to `[0.0, 1.0]`.
+    EPISTEMIC BOUNDS: Mathematically asserts that the sum of competing_manifolds probabilities is <= 1.0. Enforces deterministic sorting of residual_entropy_vectors for RFC 8785 compliance.
 
-    MCP ROUTING TRIGGERS: Topological Consensus, Persistent Homology, Manifold Collapse Verification
+    MCP ROUTING TRIGGERS: Hypothesis Superposition, Wave Collapse, Probability Mass, Defeasible Superposition
     """
 
-    consensus_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        default_factory=lambda: str(uuid.uuid4())
-    )
-    proposed_manifold: str = Field()
-    convergence_confidence: float = Field()
-    residual_entropy_vectors: list[str] = Field()
+    superposition_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
+    competing_manifolds: dict[Annotated[str, StringConstraints(max_length=128)], Annotated[float, Field(ge=0.0, le=1.0)]]
+    wave_collapse_function: Literal["plurality_vote", "highest_confidence", "deterministic_compiler"]
+    residual_entropy_vectors: list[Annotated[str, StringConstraints(max_length=100000)]] = Field(default_factory=list)
 
-    @field_validator("convergence_confidence", mode="after")
-    @classmethod
-    def enforce_confidence_bounds(cls, v: float) -> float:
-        if not (0.0 <= v <= 1.0):
-            raise ValueError("convergence_confidence must be strictly between 0.0 and 1.0")
-        return v
+    @model_validator(mode="after")
+    def enforce_conservation_of_probability(self) -> Self:
+        import math
+        total_prob = sum(self.competing_manifolds.values())
+        if total_prob > 1.0 + 1e-9:
+            raise ValueError(f"Conservation of Probability violated: sum of competing_manifolds probabilities ({total_prob}) > 1.0")
+        return self
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "residual_entropy_vectors", sorted(self.residual_entropy_vectors))
+        return self
 
 
 class StochasticTopology(CoreasonBaseState):
@@ -729,13 +731,11 @@ class StochasticTopology(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Directed Acyclic Graphs, Topological MCTS Container, Epistemic Immutability, Acyclic Integrity
     """
 
-    topology_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        default_factory=lambda: str(uuid.uuid4())
-    )
+    topology_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
     topology_class: Literal["stochastic_ensemble"] = Field(default="stochastic_ensemble")
     phase: IdeationPhase = Field()
     stochastic_graph: list[StochasticStateNode] = Field()
-    consensus: StochasticConsensus | None = Field(default=None)
+    superposition: HypothesisSuperposition | None = Field(default=None)
     epistemic_status: Literal["stochastically_unbounded"] = Field(default="stochastically_unbounded")
 
     @model_validator(mode="after")
@@ -748,6 +748,11 @@ class StochasticTopology(CoreasonBaseState):
                     f"must appear before child node '{node.node_cid}' to prevent infinite cycles."
                 )
             seen_cids.add(node.node_cid)
+        return self
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "stochastic_graph", sorted(self.stochastic_graph, key=operator.attrgetter("node_cid")))
         return self
 
 
@@ -783,13 +788,11 @@ class TopologicalProjectionIntent(CryptographicProvenanceMixin):
     MCP ROUTING TRIGGERS: Gromov-Wasserstein Distance, Topological Compiler, Optimal Transport Mapping, Manifold Collapse, Deterministic Projection
     """
 
-    projection_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        default_factory=lambda: str(uuid.uuid4())
-    )
-    source_consensus_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
+    projection_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
+    source_superposition_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
     target_topology: TargetTopologyEnum
     isomorphism_confidence: float
-    lossy_translation_divergence: list[str]
+    lossy_translation_divergence: list[Annotated[str, StringConstraints(max_length=100000)]]
     epistemic_status: Literal["pending_deterministic_collapse"] = Field(default="pending_deterministic_collapse")
 
     @field_validator("isomorphism_confidence", mode="after")
@@ -815,13 +818,11 @@ class EpistemicRejectionReceipt(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Rejection Receipt, Free Energy Feedback, MCTS Backpropagation, Variational Free Energy, Mutation Gradient
     """
 
-    receipt_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        default_factory=lambda: str(uuid.uuid4())
-    )
+    receipt_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
     failed_projection_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
     violated_algebraic_constraint: Annotated[str, StringConstraints(max_length=2000)]
     kl_divergence_to_validity: float
-    stochastic_mutation_gradient: Annotated[str, StringConstraints(max_length=10000)]
+    stochastic_mutation_gradient: Annotated[str, StringConstraints(max_length=100000)]
 
     @field_validator("kl_divergence_to_validity", mode="after")
     @classmethod
@@ -844,9 +845,7 @@ class ActiveInferenceEpoch(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Active Inference Loop, Thermodynamic Circuit Breaker, Epistemic Aggregation, Retry Ledger
     """
 
-    epoch_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        default_factory=lambda: str(uuid.uuid4())
-    )
+    epoch_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
     target_objective_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")] | None = Field(default=None)
     rejection_history: list[EpistemicRejectionReceipt] = Field(default_factory=list)
     current_free_energy: float
@@ -894,14 +893,14 @@ class ComputationalThermodynamics(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Computational Thermodynamics, Spatial Circuit Breaker, MCTS Halting, Epistemic Bounding, Thermodynamic Cost
     """
 
-    thermodynamics_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        default_factory=lambda: str(uuid.uuid4())
-    )
+    thermodynamics_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
     target_topology_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
     max_stochastic_diffusions: int = Field(ge=1)
     computational_free_energy_budget: float = Field(ge=0.0)
     current_diffusions: int = Field(default=0, ge=0)
     remaining_free_energy: float
+    entropy_derivative_delta: float | None = Field(default=None)
+    stagnation_tolerance_epsilon: float = Field(default=0.001, ge=0.0)
     system_state: ThermodynamicState = Field(default=ThermodynamicState.ACTIVE_DIFFUSION)
 
     @model_validator(mode="after")
@@ -910,6 +909,10 @@ class ComputationalThermodynamics(CoreasonBaseState):
             raise ValueError("Topological Fracture: current_diffusions strictly exceeds max_stochastic_diffusions.")
 
         if self.remaining_free_energy <= 0.0:
+            object.__setattr__(self, "system_state", ThermodynamicState.ENTROPIC_EXHAUSTION_ORACLE_INTERVENTION)
+            return self
+
+        if self.entropy_derivative_delta is not None and abs(self.entropy_derivative_delta) < self.stagnation_tolerance_epsilon:
             object.__setattr__(self, "system_state", ThermodynamicState.ENTROPIC_EXHAUSTION_ORACLE_INTERVENTION)
 
         return self
@@ -1944,25 +1947,25 @@ class RoutingFrontierPolicy(CoreasonBaseState):
                 try:
                     val = int(values["max_latency_ms"])
                     values["max_latency_ms"] = int(max(1, min(val, 86400000)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if "max_cost_magnitude_per_token" in values:
                 try:
                     val = int(values["max_cost_magnitude_per_token"])
                     values["max_cost_magnitude_per_token"] = int(max(1, min(val, 1000000000)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if "min_capability_score" in values:
                 try:
                     val_float = float(values["min_capability_score"])
                     values["min_capability_score"] = float(max(0.0, min(val_float, 1.0)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if values.get("max_carbon_intensity_gco2eq_kwh") is not None:
                 try:
                     val_float = float(values["max_carbon_intensity_gco2eq_kwh"])
                     values["max_carbon_intensity_gco2eq_kwh"] = float(max(0.0, min(val_float, 10000.0)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
         return values
 
@@ -2979,6 +2982,10 @@ class ThoughtBranchState(CoreasonBaseState):
         le=1.0,
         description="The logical validity score assigned to this branch by the Process Reward Model.",
     )
+    topology_class: Literal["thought_branch"] = Field(default="thought_branch")
+
+
+type AnyExplorationBranch = Annotated[ThoughtBranchState | StochasticTopology, Field(discriminator="topology_class")]
 
 
 class LatentScratchpadReceipt(CoreasonBaseState):
@@ -3004,7 +3011,7 @@ class LatentScratchpadReceipt(CoreasonBaseState):
     trace_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
         description="A Content Identifier (CID) bounding this ephemeral test-time execution tree.",
     )
-    explored_branches: list[ThoughtBranchState] = Field(
+    explored_branches: list[AnyExplorationBranch] = Field(
         description="All logical paths the agent attempted within this Ephemeral Epistemic Quarantine—a volatile workspace where probability waves collapse before being committed to the immutable ledger."
     )
     discarded_branches: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
@@ -3022,7 +3029,7 @@ class LatentScratchpadReceipt(CoreasonBaseState):
 
     @model_validator(mode="after")
     def verify_referential_integrity(self) -> Self:
-        explored_branch_cids = {branch.branch_cid for branch in self.explored_branches}
+        explored_branch_cids = {getattr(branch, "branch_cid", getattr(branch, "topology_cid", "unknown")) for branch in self.explored_branches}
         if self.resolution_branch_cid is not None and self.resolution_branch_cid not in explored_branch_cids:
             raise ValueError(f"resolution_branch_cid '{self.resolution_branch_cid}' not found in explored_branches.")
         for discarded_cid in self.discarded_branches:
@@ -3033,7 +3040,7 @@ class LatentScratchpadReceipt(CoreasonBaseState):
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(
-            self, "explored_branches", sorted(self.explored_branches, key=operator.attrgetter("branch_cid"))
+            self, "explored_branches", sorted(self.explored_branches, key=lambda branch: getattr(branch, "branch_cid", getattr(branch, "topology_cid", "unknown")))
         )
         object.__setattr__(self, "discarded_branches", sorted(self.discarded_branches))
         return self
@@ -7777,7 +7784,7 @@ class MarketContract(CoreasonBaseState):
                 try:
                     mc_int = int(mc)
                     sp_int = int(sp)
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             cmc = max(0, min(mc_int, 1000000000))
             if sp_int > cmc:
@@ -13448,7 +13455,7 @@ OntologyDiscoveryIntent.model_rebuild()
 SemanticMappingHeuristicProposal.model_rebuild()
 
 StochasticStateNode.model_rebuild()
-StochasticConsensus.model_rebuild()
+HypothesisSuperposition.model_rebuild()
 StochasticTopology.model_rebuild()
 CryptographicProvenanceMixin.model_rebuild()
 TopologicalProjectionIntent.model_rebuild()

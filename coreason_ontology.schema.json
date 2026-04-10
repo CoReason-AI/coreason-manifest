@@ -210,6 +210,7 @@
         }
       },
       "required": [
+        "epoch_cid",
         "current_free_energy"
       ],
       "title": "ActiveInferenceEpoch",
@@ -779,6 +780,23 @@
         },
         {
           "$ref": "#/$defs/EphemeralNamespacePartitionState"
+        }
+      ]
+    },
+    "AnyExplorationBranch": {
+      "discriminator": {
+        "mapping": {
+          "stochastic_ensemble": "#/$defs/StochasticTopology",
+          "thought_branch": "#/$defs/ThoughtBranchState"
+        },
+        "propertyName": "topology_class"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/ThoughtBranchState"
+        },
+        {
+          "$ref": "#/$defs/StochasticTopology"
         }
       ]
     },
@@ -3796,12 +3814,31 @@
           "title": "Remaining Free Energy",
           "type": "number"
         },
+        "entropy_derivative_delta": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Entropy Derivative Delta"
+        },
+        "stagnation_tolerance_epsilon": {
+          "default": 0.001,
+          "minimum": 0.0,
+          "title": "Stagnation Tolerance Epsilon",
+          "type": "number"
+        },
         "system_state": {
           "$ref": "#/$defs/ThermodynamicState",
           "default": "ACTIVE_DIFFUSION"
         }
       },
       "required": [
+        "thermodynamics_cid",
         "target_topology_cid",
         "max_stochastic_diffusions",
         "computational_free_energy_budget",
@@ -7455,12 +7492,13 @@
           "type": "number"
         },
         "stochastic_mutation_gradient": {
-          "maxLength": 10000,
+          "maxLength": 100000,
           "title": "Stochastic Mutation Gradient",
           "type": "string"
         }
       },
       "required": [
+        "receipt_cid",
         "failed_projection_cid",
         "violated_algebraic_constraint",
         "kl_divergence_to_validity",
@@ -10021,6 +10059,53 @@
       "title": "HypothesisStakeReceipt",
       "type": "object"
     },
+    "HypothesisSuperposition": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Maintains the quantum-like probability mass of mutually exclusive semantic manifolds, delaying wave collapse until deterministically evaluated.\n\nCAUSAL AFFORDANCE: Delays premature wave collapse by preserving competing hypotheses and their precise statistical probability mass.\n\nEPISTEMIC BOUNDS: Mathematically asserts that the sum of competing_manifolds probabilities is <= 1.0. Enforces deterministic sorting of residual_entropy_vectors for RFC 8785 compliance.\n\nMCP ROUTING TRIGGERS: Hypothesis Superposition, Wave Collapse, Probability Mass, Defeasible Superposition",
+      "properties": {
+        "superposition_cid": {
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Superposition Cid",
+          "type": "string"
+        },
+        "competing_manifolds": {
+          "additionalProperties": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "type": "number"
+          },
+          "propertyNames": {
+            "maxLength": 128
+          },
+          "title": "Competing Manifolds",
+          "type": "object"
+        },
+        "wave_collapse_function": {
+          "enum": [
+            "plurality_vote",
+            "highest_confidence",
+            "deterministic_compiler"
+          ],
+          "title": "Wave Collapse Function",
+          "type": "string"
+        },
+        "residual_entropy_vectors": {
+          "items": {
+            "maxLength": 100000,
+            "type": "string"
+          },
+          "title": "Residual Entropy Vectors",
+          "type": "array"
+        }
+      },
+      "required": [
+        "superposition_cid",
+        "competing_manifolds",
+        "wave_collapse_function"
+      ],
+      "title": "HypothesisSuperposition",
+      "type": "object"
+    },
     "IdeationPhase": {
       "description": "AGENT INSTRUCTION: Categorizes the thermodynamic phase of the generative ensemble's exploration.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator on the execution status of the topology, governing state transitions.\n\nEPISTEMIC BOUNDS: Strictly bounded to the predefined string enumeration values.\n\nMCP ROUTING TRIGGERS: Phase Tracking, Thermodynamic Orchestration, State Machine",
       "enum": [
@@ -11167,7 +11252,7 @@
         "explored_branches": {
           "description": "All logical paths the agent attempted within this Ephemeral Epistemic Quarantine—a volatile workspace where probability waves collapse before being committed to the immutable ledger.",
           "items": {
-            "$ref": "#/$defs/ThoughtBranchState"
+            "$ref": "#/$defs/AnyExplorationBranch"
           },
           "title": "Explored Branches",
           "type": "array"
@@ -16413,39 +16498,6 @@
       "title": "SteadyStateHypothesisState",
       "type": "object"
     },
-    "StochasticConsensus": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A topological bridge mathematically projecting high-dimensional unverified graphs into actionable manifolds.\n\nCAUSAL AFFORDANCE: Authorizes a lossy deterministic projection or signals the continuation of diffusion if residual entropy is too high.\n\nEPISTEMIC BOUNDS: convergence_confidence is mathematically clamped to `[0.0, 1.0]`.\n\nMCP ROUTING TRIGGERS: Topological Consensus, Persistent Homology, Manifold Collapse Verification",
-      "properties": {
-        "consensus_cid": {
-          "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Consensus Cid",
-          "type": "string"
-        },
-        "proposed_manifold": {
-          "title": "Proposed Manifold",
-          "type": "string"
-        },
-        "convergence_confidence": {
-          "title": "Convergence Confidence",
-          "type": "number"
-        },
-        "residual_entropy_vectors": {
-          "items": {
-            "type": "string"
-          },
-          "title": "Residual Entropy Vectors",
-          "type": "array"
-        }
-      },
-      "required": [
-        "proposed_manifold",
-        "convergence_confidence",
-        "residual_entropy_vectors"
-      ],
-      "title": "StochasticConsensus",
-      "type": "object"
-    },
     "StochasticStateNode": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A single discrete latent coordinate (a generated hypothesis or critique) inside an unverified stochastic diffusion search space.\n\nCAUSAL AFFORDANCE: Used by the ensemble as a vertex to map out Monte Carlo Tree Search (MCTS) exploration before manifold collapse.\n\nEPISTEMIC BOUNDS: epistemic_entropy is mathematically clamped to `[0.0, 1.0]` bounds (Shannon entropy).\n\nMCP ROUTING TRIGGERS: Latent Space Coordinates, MCTS Nodes, Shannon Entropy Bounding",
@@ -16478,6 +16530,7 @@
         },
         "stochastic_tensor": {
           "description": "Unbounded semantic payload",
+          "maxLength": 100000,
           "title": "Stochastic Tensor",
           "type": "string"
         },
@@ -16487,6 +16540,7 @@
         }
       },
       "required": [
+        "node_cid",
         "agent_role",
         "stochastic_tensor",
         "epistemic_entropy"
@@ -16519,10 +16573,10 @@
           "title": "Stochastic Graph",
           "type": "array"
         },
-        "consensus": {
+        "superposition": {
           "anyOf": [
             {
-              "$ref": "#/$defs/StochasticConsensus"
+              "$ref": "#/$defs/HypothesisSuperposition"
             },
             {
               "type": "null"
@@ -16538,6 +16592,7 @@
         }
       },
       "required": [
+        "topology_cid",
         "phase",
         "stochastic_graph"
       ],
@@ -17624,6 +17679,12 @@
           "default": null,
           "description": "The logical validity score assigned to this branch by the Process Reward Model.",
           "title": "Prm Score"
+        },
+        "topology_class": {
+          "const": "thought_branch",
+          "default": "thought_branch",
+          "title": "Topology Class",
+          "type": "string"
         }
       },
       "required": [
@@ -17860,9 +17921,9 @@
           "title": "Projection Cid",
           "type": "string"
         },
-        "source_consensus_cid": {
+        "source_superposition_cid": {
           "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Source Consensus Cid",
+          "title": "Source Superposition Cid",
           "type": "string"
         },
         "target_topology": {
@@ -17874,6 +17935,7 @@
         },
         "lossy_translation_divergence": {
           "items": {
+            "maxLength": 100000,
             "type": "string"
           },
           "title": "Lossy Translation Divergence",
@@ -17887,7 +17949,8 @@
         }
       },
       "required": [
-        "source_consensus_cid",
+        "projection_cid",
+        "source_superposition_cid",
         "target_topology",
         "isomorphism_confidence",
         "lossy_translation_divergence"

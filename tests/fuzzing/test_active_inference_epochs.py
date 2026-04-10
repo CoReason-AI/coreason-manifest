@@ -6,11 +6,11 @@ from pydantic import ValidationError
 from coreason_manifest.spec.ontology import ActiveInferenceEpoch, EpistemicRejectionReceipt
 
 receipt_strategy = st.builds(
-    EpistemicRejectionReceipt,
+    EpistemicRejectionReceipt, receipt_cid=st.uuids().map(str),
     failed_projection_cid=st.text(min_size=1, max_size=10, alphabet="abcdefghijklmnopqrstuvwxyz0123456789_-"),
     violated_algebraic_constraint=st.text(min_size=1, max_size=2000),
     kl_divergence_to_validity=st.floats(min_value=0.0, max_value=1e10, allow_nan=False, allow_infinity=False),
-    stochastic_mutation_gradient=st.text(min_size=1, max_size=10000),
+    stochastic_mutation_gradient=st.text(min_size=1, max_size=100000),
 )
 
 
@@ -18,7 +18,7 @@ receipt_strategy = st.builds(
 def test_referential_integrity_and_canonical_sorting(
     rejection_history: list[EpistemicRejectionReceipt], valid_free_energy: float
 ) -> None:
-    epoch = ActiveInferenceEpoch(
+    epoch = ActiveInferenceEpoch(epoch_cid='test',
         rejection_history=rejection_history,
         current_free_energy=valid_free_energy,
     )
@@ -36,7 +36,7 @@ def test_referential_integrity_and_canonical_sorting(
 def test_serialization_isomorphism(
     rejection_history: list[EpistemicRejectionReceipt], valid_free_energy: float
 ) -> None:
-    epoch = ActiveInferenceEpoch(
+    epoch = ActiveInferenceEpoch(epoch_cid='test',
         rejection_history=rejection_history,
         current_free_energy=valid_free_energy,
     )
@@ -67,7 +67,7 @@ def test_free_energy_paradox_trapping(
     rejection_history: list[EpistemicRejectionReceipt], invalid_free_energy: float
 ) -> None:
     with pytest.raises(ValidationError) as exc_info:
-        ActiveInferenceEpoch(
+        ActiveInferenceEpoch(epoch_cid='test',
             rejection_history=rejection_history,
             current_free_energy=invalid_free_energy,
         )

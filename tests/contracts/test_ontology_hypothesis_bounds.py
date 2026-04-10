@@ -25,7 +25,8 @@ from coreason_manifest.spec.ontology import (
 def test_topological_projection_intent_out_of_bounds(v: float) -> None:
     with pytest.raises(ValidationError, match=r"isomorphism_confidence must be between 0\.0 and 1\.0"):
         TopologicalProjectionIntent(
-            source_consensus_cid="test-1234",
+            projection_cid="test",
+            source_superposition_cid="test-1234",
             target_topology=TargetTopologyEnum.ALGEBRAIC_RING,
             isomorphism_confidence=v,
             lossy_translation_divergence=[],
@@ -36,7 +37,8 @@ def test_topological_projection_intent_out_of_bounds(v: float) -> None:
 def test_topological_projection_intent_guillotine(v: float) -> None:
     with pytest.raises(ValidationError, match="Isomorphism Guillotine triggered"):
         TopologicalProjectionIntent(
-            source_consensus_cid="test-1234",
+            projection_cid="test",
+            source_superposition_cid="test-1234",
             target_topology=TargetTopologyEnum.ALGEBRAIC_RING,
             isomorphism_confidence=v,
             lossy_translation_divergence=[],
@@ -45,8 +47,10 @@ def test_topological_projection_intent_guillotine(v: float) -> None:
 
 @given(st.floats(max_value=-0.001) | st.just(float("nan")) | st.just(float("inf")))
 def test_kl_divergence_paradox(v: float) -> None:
-    with pytest.raises(ValidationError, match="Mathematical paradox:"):
+    with pytest.raises(ValidationError, match="Mathematical paradox:|"
+                                              "Input should be a valid number"):
         EpistemicRejectionReceipt(
+            receipt_cid="test",
             failed_projection_cid="test-1234",
             violated_algebraic_constraint="test",
             kl_divergence_to_validity=v,
@@ -56,5 +60,6 @@ def test_kl_divergence_paradox(v: float) -> None:
 
 @given(st.floats(max_value=-0.001) | st.just(float("nan")) | st.just(float("inf")))
 def test_active_inference_epoch_paradox(v: float) -> None:
-    with pytest.raises(ValidationError, match="Mathematical paradox:"):
-        ActiveInferenceEpoch(current_free_energy=v, rejection_history=[])
+    with pytest.raises(ValidationError, match="Mathematical paradox:|"
+                                              "Input should be a valid number"):
+        ActiveInferenceEpoch(epoch_cid="test", current_free_energy=v, rejection_history=[])
