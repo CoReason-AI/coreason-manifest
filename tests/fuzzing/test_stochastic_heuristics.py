@@ -31,6 +31,8 @@ def test_thermodynamic_halting_circuit_breaker() -> None:
         unstructured_content="Idea 2",
         entropy_state=EpistemicEntropyState(shannon_entropy_index=1.5, bayesian_surprise_score=0.4),
     )
+    _ = log1
+    _ = log2
     log3 = StochasticDebateLog(
         log_cid="did:log:3_abc",
         agent_role="generator",
