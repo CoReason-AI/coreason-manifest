@@ -1676,25 +1676,25 @@ class RoutingFrontierPolicy(CoreasonBaseState):
                 try:
                     val = int(values["max_latency_ms"])
                     values["max_latency_ms"] = int(max(1, min(val, 86400000)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if "max_cost_magnitude_per_token" in values:
                 try:
                     val = int(values["max_cost_magnitude_per_token"])
                     values["max_cost_magnitude_per_token"] = int(max(1, min(val, 1000000000)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if "min_capability_score" in values:
                 try:
                     val_float = float(values["min_capability_score"])
                     values["min_capability_score"] = float(max(0.0, min(val_float, 1.0)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             if values.get("max_carbon_intensity_gco2eq_kwh") is not None:
                 try:
                     val_float = float(values["max_carbon_intensity_gco2eq_kwh"])
                     values["max_carbon_intensity_gco2eq_kwh"] = float(max(0.0, min(val_float, 10000.0)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
         return values
 
@@ -7509,7 +7509,7 @@ class MarketContract(CoreasonBaseState):
                 try:
                     mc_int = int(mc)
                     sp_int = int(sp)
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     pass
             cmc = max(0, min(mc_int, 1000000000))
             if sp_int > cmc:
@@ -9677,15 +9677,15 @@ class UtilityJustificationGraphReceipt(CoreasonBaseState):
         return self
 
 
-class LiquidTypeContract(CoreasonBaseState):
+class AlgebraicRefinementContract(CoreasonBaseState):
     r"""
-    AGENT INSTRUCTION: Mathematically bounds a specific target property using strict Liquid Type (Refinement Type) declarations.
+    AGENT INSTRUCTION: Mathematically bounds a specific target property using strict Algebraic Refinement declarations.
 
         CAUSAL AFFORDANCE: Establishes a definitive algebraic constraint against an instantiated variable, forcing the formal verifier to evaluate conditions mathematically prior to downstream deployment.
 
         EPISTEMIC BOUNDS: Bounding variables and mathematical predicates are rigidly clamped to a maximum string geometry of 2000 characters to prevent polynomial regex execution attacks.
 
-        MCP ROUTING TRIGGERS: Liquid Types, Refinement Types, Algebraic Constraint, Mathematical Predicate, Bounded Property
+        MCP ROUTING TRIGGERS: Algebraic Refinement, Algebraic Constraint, Mathematical Predicate, Bounded Property
     """
 
     target_property: Annotated[str, StringConstraints(max_length=2000)] = Field(
@@ -9702,7 +9702,7 @@ class HoareLogicProofReceipt(CoreasonBaseState):
 
         CAUSAL AFFORDANCE: Instructs the orchestrator's verification engine to validate the formal proof geometry prior to allocating swarm budget to a generated tool or component.
 
-        EPISTEMIC BOUNDS: Strictly relies on arrays of LiquidTypeContracts, demanding at least one pre-bound and post-bound. Formal systems are strictly bounded by a Literal automaton constraint.
+        EPISTEMIC BOUNDS: Strictly relies on arrays of AlgebraicRefinementContracts, demanding at least one pre-bound and post-bound. Formal systems are strictly bounded by a Literal automaton constraint.
 
         MCP ROUTING TRIGGERS: Hoare Logic, Automated Theorem Proving, Preconditions Postconditions, Formal Verification, Cryptographic Proof
     """
@@ -9710,11 +9710,11 @@ class HoareLogicProofReceipt(CoreasonBaseState):
     capability_cid: Annotated[str, StringConstraints(max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
         description="The 128-char DID boundary physically binding this proof to the target executable matrix."
     )
-    preconditions: Annotated[list[LiquidTypeContract], Field(min_length=1)] = Field(
-        description="The strictly bounded array of foundational LiquidTypeContracts representing the P state geometry."
+    preconditions: Annotated[list[AlgebraicRefinementContract], Field(min_length=1)] = Field(
+        description="The strictly bounded array of foundational AlgebraicRefinementContracts representing the P state geometry."
     )
-    postconditions: Annotated[list[LiquidTypeContract], Field(min_length=1)] = Field(
-        description="The strictly bounded array of subsequent LiquidTypeContracts representing the Q state geometry."
+    postconditions: Annotated[list[AlgebraicRefinementContract], Field(min_length=1)] = Field(
+        description="The strictly bounded array of subsequent AlgebraicRefinementContracts representing the Q state geometry."
     )
     proof_system: Literal["lean4", "coq", "z3", "tla_plus"] = Field(
         description="The strict mathematical automaton engine responsible for evaluating the structural boundary."
@@ -10299,7 +10299,7 @@ class CognitiveAgentNodeProfile(CoreasonBaseState):
         default=None,
         description="The declarative contract mathematically binding this agent to a core altruistic objective.",
     )
-    grpo_reward_policy: EpistemicRewardModelPolicy | None = Field(
+    grpo_reward_policy: EpistemicRewardGradientPolicy | None = Field(
         default=None,
         description="The RL post-training contract forcing the agent to evaluate traces against an implicit graph reward.",
     )
@@ -12390,7 +12390,7 @@ class CognitiveFormatContract(CoreasonBaseState):
         return self
 
 
-class EpistemicRewardModelPolicy(CoreasonBaseState):
+class EpistemicRewardGradientPolicy(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Establishes the Group Relative Policy Optimization (GRPO) reward shaping ruleset, mathematically immunizing the swarm against Goodhart's Law and reward hacking.
 
@@ -13063,7 +13063,7 @@ EpistemicGroundedTaskManifest.model_rebuild()
 EpistemicCurriculumManifest.model_rebuild()
 ConstrainedDecodingPolicy.model_rebuild()
 CognitiveFormatContract.model_rebuild()
-EpistemicRewardModelPolicy.model_rebuild()
+EpistemicRewardGradientPolicy.model_rebuild()
 CognitiveRewardEvaluationReceipt.model_rebuild()
 CognitiveAgentNodeProfile.model_rebuild()
 CognitiveDetailedBalanceContract.model_rebuild()
@@ -13115,7 +13115,7 @@ TransitionEdgeProfile.model_rebuild()
 CyclicEdgeProfile.model_rebuild()
 CognitiveActionSpaceManifest.model_rebuild()
 ASTGradientReceipt.model_rebuild()
-LiquidTypeContract.model_rebuild()
+AlgebraicRefinementContract.model_rebuild()
 HoareLogicProofReceipt.model_rebuild()
 AsymptoticComplexityReceipt.model_rebuild()
 TeleologicalIsometryReceipt.model_rebuild()
