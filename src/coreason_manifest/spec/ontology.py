@@ -21,6 +21,7 @@ import threading
 import time
 import typing
 import urllib.parse
+import uuid
 from enum import StrEnum
 from typing import Annotated, Any, Literal, Self
 
@@ -13178,3 +13179,40 @@ DiscourseNodeState.model_rebuild()
 DiscourseTreeManifest.model_rebuild()
 OntologyDiscoveryIntent.model_rebuild()
 SemanticMappingHeuristicProposal.model_rebuild()
+
+class IdeationPhase(StrEnum):
+    """
+    AGENT INSTRUCTION: System 1 Epistemic Container. Defines the current fluid state of the lateral thinking ideation phase.
+    """
+    DIVERGENT_BRAINSTORMING = "DIVERGENT_BRAINSTORMING"
+    ADVERSARIAL_CRITIQUE = "ADVERSARIAL_CRITIQUE"
+    CONVERGENT_CONSENSUS = "CONVERGENT_CONSENSUS"
+
+class AgentDebateLog(BaseModel):
+    """
+    AGENT INSTRUCTION: System 1 Epistemic Container. A flexible record of unconstrained natural language lateral thinking.
+    """
+    node_id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    agent_role: Literal["generator", "critic", "synthesizer"]
+    unstructured_content: str
+    confidence_score: float = Field(ge=0.0, le=1.0)
+    parent_node_id: uuid.UUID | None = Field(default=None)
+
+class EnsembleConsensus(BaseModel):
+    """
+    AGENT INSTRUCTION: System 1 Epistemic Container. The emergent abstract outcome of lateral brainstorming.
+    """
+    proposed_strategy: str
+    confidence_score: float = Field(ge=0.0, le=1.0)
+    unresolved_frictions: list[str]
+
+class IdeationTopology(BaseModel):
+    """
+    AGENT INSTRUCTION: System 1 Epistemic Container. Safely encapsulates unconstrained lateral thinking.
+    Crucially marked as epistemically_unverified so it cannot be executed downstream.
+    """
+    topology_type: Literal["ideation_ensemble"]
+    phase: IdeationPhase
+    debate_graph: list[AgentDebateLog]
+    consensus: EnsembleConsensus | None = Field(default=None)
+    epistemic_status: Literal["epistemically_unverified"] = Field(default="epistemically_unverified")

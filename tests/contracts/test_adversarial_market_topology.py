@@ -15,8 +15,12 @@ from hypothesis import HealthCheck, given, settings
 
 from coreason_manifest.spec.ontology import (
     AdversarialMarketTopologyManifest,
+    AgentDebateLog,
     CognitiveSystemNodeProfile,
     CouncilTopologyManifest,
+    EnsembleConsensus,
+    IdeationPhase,
+    IdeationTopology,
     PredictionMarketPolicy,
 )
 
@@ -89,3 +93,48 @@ def test_adversarial_market_compile_fuzzing(topology_data: dict[str, Any]) -> No
     for node_cid in topology_data["red_team"]:
         assert node_cid in compiled.nodes
         assert compiled.nodes[node_cid].description == "Red Team Member"
+
+def test_red_team_blue_team_ideation() -> None:
+    """
+    Simulate a scenario where a Blue Team agent proposes a strategy and a Red Team
+    agent heavily counters it. Populate EnsembleConsensus with multiple
+    unresolved_frictions and a low confidence_score. Assert that Pydantic properly
+    validates this schema, proving the manifest handles uncertainty and deep
+    disagreement elegantly.
+    """
+    blue_generator = AgentDebateLog(
+        agent_role="generator",
+        unstructured_content="We should refactor the core execution loop for speed.",
+        confidence_score=0.6,
+    )
+
+    red_critic = AgentDebateLog(
+        agent_role="critic",
+        unstructured_content="Refactoring now introduces too much risk and breaks backward compatibility. Absolutely not.",
+        confidence_score=0.95,
+        parent_node_id=blue_generator.node_id,
+    )
+
+    consensus = EnsembleConsensus(
+        proposed_strategy="Implement a feature flag to slowly roll out the new loop alongside the old one.",
+        confidence_score=0.15,
+        unresolved_frictions=[
+            "The team lacks bandwidth to maintain two execution loops.",
+            "Feature flags might add latency that defeats the purpose of the refactor."
+        ],
+    )
+
+    topology = IdeationTopology(
+        topology_type="ideation_ensemble",
+        phase=IdeationPhase.ADVERSARIAL_CRITIQUE,
+        debate_graph=[blue_generator, red_critic],
+        consensus=consensus,
+    )
+
+    # Assert successful validation and correct structure
+    assert topology.topology_type == "ideation_ensemble"
+    assert topology.phase == IdeationPhase.ADVERSARIAL_CRITIQUE
+    assert len(topology.debate_graph) == 2
+    assert topology.consensus is not None
+    assert topology.consensus.confidence_score == 0.15
+    assert len(topology.consensus.unresolved_frictions) == 2

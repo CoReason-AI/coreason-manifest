@@ -15,7 +15,12 @@ import pytest
 from hypothesis import HealthCheck, given, settings
 from pydantic import ValidationError
 
-from coreason_manifest.spec.ontology import AdversarialSimulationProfile
+from coreason_manifest.spec.ontology import (
+    AdversarialSimulationProfile,
+    AgentDebateLog,
+    IdeationPhase,
+    IdeationTopology,
+)
 
 # 1. Strategy for generating deeply nested, potentially malformed JSON-RPC-like payloads
 # Includes strings that deliberately push past the 100,000 limit, and keys past 255.
@@ -105,3 +110,26 @@ def test_adversarial_simulation_invalid_attack_vector() -> None:
             attack_vector="invalid_attack_vector",  # type: ignore
             synthetic_payload={"method": "destroy"},
         )
+
+@given(st.text())
+@settings(max_examples=100, suppress_health_check=[HealthCheck.too_slow])
+def test_fuzz_agent_debate_logs(text: str) -> None:
+    """
+    Prove that because this is a System 1 IdeationTopology, the manifest DOES NOT CRASH.
+    Unlike strict execution topologies which reject invalid syntax, the IdeationTopology
+    must safely encapsulate fuzzed garbage strings as valid 'unverified thought'.
+    """
+    log = AgentDebateLog(
+        agent_role="generator",
+        unstructured_content=text,
+        confidence_score=0.5,
+    )
+
+    topology = IdeationTopology(
+        topology_type="ideation_ensemble",
+        phase=IdeationPhase.DIVERGENT_BRAINSTORMING,
+        debate_graph=[log],
+    )
+
+    # Assert successful validation and instantiation
+    assert topology.debate_graph[0].unstructured_content == text

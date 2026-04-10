@@ -15,7 +15,14 @@ import pytest
 from hypothesis import HealthCheck, given, settings
 from pydantic import ValidationError
 
-from coreason_manifest.spec.ontology import LatentScratchpadReceipt, ThoughtBranchState
+from coreason_manifest.spec.ontology import (
+    AgentDebateLog,
+    EnsembleConsensus,
+    IdeationPhase,
+    IdeationTopology,
+    LatentScratchpadReceipt,
+    ThoughtBranchState,
+)
 
 
 # 1. Fuzzing Array Sorting Determinism
@@ -86,3 +93,40 @@ def test_latent_scratchpad_receipt_discarded_branch_missing() -> None:
             resolution_branch_cid=None,
             total_latent_tokens=100,
         )
+
+def test_latent_scratchpad_accepts_ideation_topology() -> None:
+    """
+    Test that the Latent Scratchpad can accept and safely serialize IdeationTopology
+    without triggering strict downstream execution errors.
+    """
+    generator_log = AgentDebateLog(
+        agent_role="generator",
+        unstructured_content="I propose we use a genetic algorithm to evolve the heuristic.",
+        confidence_score=0.75,
+    )
+
+    critic_log = AgentDebateLog(
+        agent_role="critic",
+        unstructured_content="Genetic algorithms are too slow here, we need a greedy approach.",
+        confidence_score=0.9,
+        parent_node_id=generator_log.node_id,
+    )
+
+    consensus = EnsembleConsensus(
+        proposed_strategy="Hybrid approach combining greedy initialization with genetic refinement.",
+        confidence_score=0.8,
+        unresolved_frictions=["May still exceed the time constraint for large graphs."],
+    )
+
+    ideation_topology = IdeationTopology(
+        topology_type="ideation_ensemble",
+        phase=IdeationPhase.CONVERGENT_CONSENSUS,
+        debate_graph=[generator_log, critic_log],
+        consensus=consensus,
+    )
+
+    dumped = ideation_topology.model_dump()
+
+    # Assert successful serialization and epistemic_status
+    assert dumped["epistemic_status"] == "epistemically_unverified"
+    assert ideation_topology.epistemic_status == "epistemically_unverified"
