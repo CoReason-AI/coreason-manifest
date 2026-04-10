@@ -868,6 +868,53 @@ class ActiveInferenceEpoch(CoreasonBaseState):
         return self
 
 
+class ThermodynamicState(StrEnum):
+    """
+    AGENT INSTRUCTION: A rigid string enumeration mapping the kinetic liveness of the computational budget.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator on whether the thermodynamic search envelope is active or mathematically depleted.
+
+    EPISTEMIC BOUNDS: Strictly bounded to the explicit kinetic states ACTIVE_DIFFUSION and ENTROPIC_EXHAUSTION_ORACLE_INTERVENTION.
+
+    MCP ROUTING TRIGGERS: Thermodynamic State, Budget Envelope, MCTS Liveness, Entropy Tracking
+    """
+
+    ACTIVE_DIFFUSION = "ACTIVE_DIFFUSION"
+    ENTROPIC_EXHAUSTION_ORACLE_INTERVENTION = "ENTROPIC_EXHAUSTION_ORACLE_INTERVENTION"
+
+
+class ComputationalThermodynamics(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: The macroscopic envelope that tracks the thermodynamic cost of stochastic ideation and violently halts execution when energy budgets or spatial limits are depleted.
+
+    CAUSAL AFFORDANCE: Operates as the absolute mathematical circuit breaker for MCTS DAG expansion, physically revoking generative privileges if thresholds are breached.
+
+    EPISTEMIC BOUNDS: Bounded by strict topological limits: max_stochastic_diffusions (ge=1) and computational_free_energy_budget (ge=0.0). current_diffusions must be strictly <= max_stochastic_diffusions.
+
+    MCP ROUTING TRIGGERS: Computational Thermodynamics, Spatial Circuit Breaker, MCTS Halting, Epistemic Bounding, Thermodynamic Cost
+    """
+
+    thermodynamics_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        default_factory=lambda: str(uuid.uuid4())
+    )
+    target_topology_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
+    max_stochastic_diffusions: int = Field(ge=1)
+    computational_free_energy_budget: float = Field(ge=0.0)
+    current_diffusions: int = Field(default=0, ge=0)
+    remaining_free_energy: float
+    system_state: ThermodynamicState = Field(default=ThermodynamicState.ACTIVE_DIFFUSION)
+
+    @model_validator(mode="after")
+    def validate_thermodynamic_circuit_breaker(self) -> Self:
+        if self.current_diffusions > self.max_stochastic_diffusions:
+            raise ValueError("Topological Fracture: current_diffusions strictly exceeds max_stochastic_diffusions.")
+
+        if self.remaining_free_energy <= 0.0:
+            object.__setattr__(self, "system_state", ThermodynamicState.ENTROPIC_EXHAUSTION_ORACLE_INTERVENTION)
+
+        return self
+
+
 class TraceContextState(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Implements Distributed Causality using Vector Clocks and rho-calculus. It forms the foundational causality boundary.
@@ -13407,3 +13454,4 @@ CryptographicProvenanceMixin.model_rebuild()
 TopologicalProjectionIntent.model_rebuild()
 EpistemicRejectionReceipt.model_rebuild()
 ActiveInferenceEpoch.model_rebuild()
+ComputationalThermodynamics.model_rebuild()
