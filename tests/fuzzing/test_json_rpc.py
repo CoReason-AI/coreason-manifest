@@ -94,7 +94,7 @@ def test_latent_scratchpad_receipt_referential_integrity(
 
     receipt = LatentScratchpadReceipt(
         trace_cid=trace_cid,
-        explored_branches=explored_branches,
+        explored_branches=explored_branches,  # type: ignore[arg-type]
         resolution_branch_cid=resolution_cid,
         discarded_branches=[discarded_cid],
         total_latent_tokens=total_latent_tokens,

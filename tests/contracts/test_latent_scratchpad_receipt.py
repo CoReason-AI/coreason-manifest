@@ -53,9 +53,12 @@ def test_latent_scratchpad_receipt_fuzz_sorting_determinism(data: dict[str, Any]
     )
 
     # Assert deterministic sorting
-    assert [b.branch_cid for b in receipt.explored_branches] == sorted(
-        [b.branch_cid for b in data["explored_branches"]]
-    )
+    actual_cids = [
+        b.branch_cid if hasattr(b, "branch_cid") else getattr(b, "topology_cid", "") for b in receipt.explored_branches
+    ]
+    expected_cids = sorted([b.branch_cid for b in data["explored_branches"]])
+    assert actual_cids == expected_cids
+
     assert receipt.discarded_branches == sorted(data["discarded_branches"])
 
 
@@ -86,3 +89,79 @@ def test_latent_scratchpad_receipt_discarded_branch_missing() -> None:
             resolution_branch_cid=None,
             total_latent_tokens=100,
         )
+
+
+def test_stochastic_ideation_serialization() -> None:
+    from coreason_manifest.spec.ontology import (
+        EpistemicEntropyState,
+        EpistemicStatusProfile,
+        HypothesisSuperposition,
+        SemanticDivergenceProfile,
+        StochasticDebateLog,
+        StochasticIdeationTopology,
+        StochasticPhaseProfile,
+        ThermodynamicIdeationBudget,
+        UnverifiedHypothesis,
+    )
+
+    budget = ThermodynamicIdeationBudget(
+        max_heuristic_tokens=10000, max_debate_turns=10, minimum_entropy_delta_per_turn=0.1
+    )
+    divergence_monitor = SemanticDivergenceProfile(
+        anchor_embedding_hash="a" * 64, current_cosine_drift=0.1, max_allowable_divergence=0.5
+    )
+
+    log1 = StochasticDebateLog(
+        log_cid="did:log:01_abc",
+        agent_role="generator",
+        unstructured_content="Idea 1",
+        entropy_state=EpistemicEntropyState(shannon_entropy_index=2.0, bayesian_surprise_score=0.5),
+    )
+    log2 = StochasticDebateLog(
+        log_cid="did:log:02_abc",
+        agent_role="critic",
+        unstructured_content="Idea 1 is bad",
+        entropy_state=EpistemicEntropyState(shannon_entropy_index=1.8, bayesian_surprise_score=0.4),
+        parent_log_cid="did:log:01_abc",
+    )
+
+    hypothesis = UnverifiedHypothesis(
+        hypothesis_cid="did:hypo:01_abc",
+        proposed_strategy="Use Idea 1",
+        epistemic_entropy=EpistemicEntropyState(shannon_entropy_index=1.0, bayesian_surprise_score=0.1),
+        unresolved_frictions=["Friction B", "Friction A"],
+    )
+
+    superposition = HypothesisSuperposition(competing_strategies=[hypothesis], wave_collapse_function="lowest_entropy")
+
+    topology = StochasticIdeationTopology(
+        topology_cid="did:topology:01_abc",
+        phase=StochasticPhaseProfile.DIVERGENT_BRAINSTORMING,
+        ideation_budget=budget,
+        divergence_monitor=divergence_monitor,
+        debate_graph=[log2, log1],  # Test sorting
+        superposition_state=superposition,
+    )
+
+    from coreason_manifest.spec.ontology import LatentScratchpadReceipt
+
+    receipt = LatentScratchpadReceipt(
+        trace_cid="trace_123",
+        explored_branches=[topology],
+        discarded_branches=[],
+        resolution_branch_cid=None,
+        total_latent_tokens=100,
+    )
+
+    stoch_top = receipt.explored_branches[0]
+    assert stoch_top.topology_class == "stochastic_ideation"
+    assert stoch_top.epistemic_status == EpistemicStatusProfile.UNVERIFIED_STOCHASTIC
+    assert stoch_top.debate_graph[0].log_cid == "did:log:01_abc"
+    if stoch_top.superposition_state is not None:
+        assert stoch_top.superposition_state.competing_strategies[0].unresolved_frictions == [
+            "Friction A",
+            "Friction B",
+        ]
+
+    dump = receipt.model_dump_canonical()
+    assert b"unverified_stochastic" in dump

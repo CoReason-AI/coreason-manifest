@@ -369,6 +369,39 @@ type FaultCategoryProfile = Literal[
     "dependency_blackout",
 ]
 type CognitiveTierProfile = Literal["working", "episodic", "semantic"]
+
+
+class EpistemicStatusProfile(StrEnum):
+    """
+    AGENT INSTRUCTION: The absolute hardware circuit-breaker distinguishing non-monotonic stochastic generation from deterministic kinetic execution.
+
+    CAUSAL AFFORDANCE: Instructs the runtime orchestrator's routing engine whether a payload is safe to evaluate conceptually in a sandbox or if it is authorized to physically actuate state on the Hollow Data Plane.
+
+    EPISTEMIC BOUNDS: Constrained strictly to the predefined literal enumeration values.
+
+    MCP ROUTING TRIGGERS: Epistemic Demarcation, Hardware Circuit-Breaker, Execution Quarantine, Stochastic vs Deterministic
+    """
+
+    UNVERIFIED_STOCHASTIC = "unverified_stochastic"
+    VERIFIED_DETERMINISTIC = "verified_deterministic"
+
+
+class StochasticPhaseProfile(StrEnum):
+    """
+    AGENT INSTRUCTION: Defines the continuous probability wave state of the multi-agent ensemble during heuristic search.
+
+    CAUSAL AFFORDANCE: Provides the macro-orchestrator with the localized phase of the debate, dictating whether agents should inject entropy (divergent) or reduce entropy (convergent).
+
+    EPISTEMIC BOUNDS: Constrained strictly to the predefined literal enumeration values.
+
+    MCP ROUTING TRIGGERS: Probability Wave State, Ideation Phase, Ensemble Learning, Convergence
+    """
+
+    DIVERGENT_BRAINSTORMING = "divergent_brainstorming"
+    ADVERSARIAL_CRITIQUE = "adversarial_critique"
+    CONVERGENT_CONSENSUS = "convergent_consensus"
+
+
 type NodeCIDState = Annotated[
     str,
     StringConstraints(min_length=7, pattern="^did:[a-z0-9]+:[a-zA-Z0-9.\\-_:]+$"),
@@ -2642,6 +2675,172 @@ class StateHydrationManifest(CoreasonBaseState):
         return self
 
 
+class SemanticDivergenceProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Formalizes Information Geometry to mathematically track semantic drift during unconstrained multi-agent debate.
+
+    CAUSAL AFFORDANCE: Authorizes the orchestrator to forcefully halt a brainstorming session and demand a prompt re-anchoring if the ensemble's lateral thinking drifts into an irrelevant geometric space.
+
+    EPISTEMIC BOUNDS: The geometric radius of acceptable divergence is physically clamped by `max_allowable_divergence` (`ge=0.0, le=1.0`). The origin is cryptographically locked to the `anchor_embedding_hash` (SHA-256 regex `^[a-f0-9]{64}$`).
+
+    MCP ROUTING TRIGGERS: Information Geometry, Semantic Drift, Gromov-Wasserstein Distance, Cosine Drift, Anchor Realignment
+    """
+
+    anchor_embedding_hash: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")]
+    current_cosine_drift: float = Field(ge=0.0, le=1.0)
+    max_allowable_divergence: float = Field(ge=0.0, le=1.0)
+
+
+class EpistemicEntropyState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Distinguishes between Aleatoric Uncertainty (noise) and Epistemic Uncertainty (knowledge gaps) by quantifying the chaos of a probability distribution.
+
+    CAUSAL AFFORDANCE: Exposes the internal cognitive dissonance of the swarm to the orchestrator, allowing the system to mathematically prove if an argument is converging toward a solution or caught in a deadlock.
+
+    EPISTEMIC BOUNDS: Absolute chaos is bounded above zero by `shannon_entropy_index` (`ge=0.0`). Information gain is clamped to a normalized probability space via `bayesian_surprise_score` (`ge=0.0, le=1.0`).
+
+    MCP ROUTING TRIGGERS: Shannon Entropy, Bayesian Surprise, Epistemic Uncertainty, Kullback-Leibler Divergence, Cognitive Chaos
+    """
+
+    shannon_entropy_index: float = Field(ge=0.0)
+    bayesian_surprise_score: float = Field(ge=0.0, le=1.0)
+
+
+class ThermodynamicIdeationBudget(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Implements Landauer's Principle for heuristic reasoning, computationally solving the Halting Problem for unbounded LLM ideation.
+
+    CAUSAL AFFORDANCE: Acts as a physical gas limit on lateral thinking. If the ensemble burns compute without achieving the `minimum_entropy_delta_per_turn`, it authorizes the orchestrator to shatter the generation loop.
+
+    EPISTEMIC BOUNDS: VRAM memory explosion is mathematically prevented by clamping `max_heuristic_tokens` (`gt=0, le=1000000000`). Generative loops are hard-capped by `max_debate_turns` (`le=1000`).
+
+    MCP ROUTING TRIGGERS: Halting Problem, Thermodynamic Budget, Gas Limit, Token Exhaustion, Entropy Reduction
+    """
+
+    max_heuristic_tokens: int = Field(gt=0, le=1000000000)
+    max_debate_turns: int = Field(gt=0, le=1000)
+    minimum_entropy_delta_per_turn: float = Field(ge=0.0, le=1.0)
+
+
+class UnverifiedHypothesis(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: The emergent, abstract outcome of lateral brainstorming prior to semantic-to-symbolic compilation.
+
+    CAUSAL AFFORDANCE: Safely stores a proposed stochastic solution in the Latent Scratchpad, highlighting `unresolved_frictions` for downstream deterministic solvers to evaluate.
+
+    EPISTEMIC BOUNDS: The generative payload is physically clamped by `proposed_strategy` (`max_length=100000`). To guarantee RFC 8785 canonical hashing, the `@model_validator` deterministically alphabetizes the `unresolved_frictions` array.
+
+    MCP ROUTING TRIGGERS: Unverified Hypothesis, Abstract Outcome, Friction Identification, Heuristic Proposal
+    """
+
+    hypothesis_cid: "NodeCIDState"
+    proposed_strategy: Annotated[str, StringConstraints(max_length=100000)]
+    epistemic_entropy: EpistemicEntropyState
+    unresolved_frictions: list[Annotated[str, StringConstraints(max_length=2000)]]
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "unresolved_frictions", sorted(self.unresolved_frictions))
+        return self
+
+
+class HypothesisSuperposition(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Supports the quantum-like superposition of mutually exclusive hypotheses in working memory, preventing premature wave-collapse during heuristic routing.
+
+    CAUSAL AFFORDANCE: Permits the swarm to hold multiple contradictory ideas simultaneously. Instructs the execution engine exactly how to resolve the superposition via the `wave_collapse_function`.
+
+    EPISTEMIC BOUNDS: The structural array of `competing_strategies` is mathematically forced into deterministic alignment by the `@model_validator`, sorting by `hypothesis_cid` to preserve canonical hashing.
+
+    MCP ROUTING TRIGGERS: Defeasible Superposition, Probability Wave Collapse, State-Space Management, Plurality Vote
+    """
+
+    competing_strategies: list["UnverifiedHypothesis"]
+    wave_collapse_function: Literal["plurality_vote", "lowest_entropy", "adversarial_yield", "human_adjudication"]
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(
+            self, "competing_strategies", sorted(self.competing_strategies, key=operator.attrgetter("hypothesis_cid"))
+        )
+        return self
+
+
+class StochasticDebateLog(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A cryptographically traceable coordinate of unconstrained natural language lateral thinking.
+
+    CAUSAL AFFORDANCE: Permits an individual agent within a Mixture-of-Agents (MoA) ensemble to output unstructured, highly entropic text without triggering the strict bounds of System 2 execution schemas.
+
+    EPISTEMIC BOUNDS: Unstructured heuristic thought is volumetrically clamped by `unstructured_content` (`max_length=100000`) to prevent VRAM overflow. Causal lineage is preserved via `parent_log_cid`.
+
+    MCP ROUTING TRIGGERS: Mixture-of-Agents, Lateral Thinking, Unstructured Log, Heuristic Generation, Debate Coordinate
+    """
+
+    log_cid: "NodeCIDState"
+    agent_role: Literal["generator", "critic", "synthesizer"]
+    unstructured_content: Annotated[str, StringConstraints(max_length=100000)]
+    entropy_state: EpistemicEntropyState
+    parent_log_cid: "NodeCIDState | None" = None
+
+
+class StochasticIdeationTopology(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Safely encapsulates unconstrained lateral thinking within a frozen, N-dimensional coordinate state.
+
+    CAUSAL AFFORDANCE: The primary container for stochastic processing. Because it is immutably marked as UNVERIFIED_STOCHASTIC, the runtime will store it in the Latent Scratchpad but will NEVER route it to the WASM execution sandbox.
+
+    EPISTEMIC BOUNDS: Generative logic is rigorously clamped by the nested `ThermodynamicIdeationBudget`. The `@model_validator` executes a physical check: if the entropy delta across debate logs falls below the required threshold, it mathematically severs the loop via a ValueError.
+
+    MCP ROUTING TRIGGERS: Stochastic Ideation, Epistemic Quarantine, Latent Scratchpad, Thermodynamic Halting, Topology Container
+    """
+
+    topology_class: Literal["stochastic_ideation"] = "stochastic_ideation"
+    topology_cid: "NodeCIDState" = Field(
+        description="A Content Identifier (CID) bounding this specific stochastic exploration branch."
+    )
+    phase: StochasticPhaseProfile
+    ideation_budget: ThermodynamicIdeationBudget
+    divergence_monitor: SemanticDivergenceProfile
+    debate_graph: list[StochasticDebateLog]
+    superposition_state: HypothesisSuperposition | None = None
+    epistemic_status: Literal[EpistemicStatusProfile.UNVERIFIED_STOCHASTIC] = (
+        EpistemicStatusProfile.UNVERIFIED_STOCHASTIC
+    )
+
+    @model_validator(mode="before")
+    @classmethod
+    def _enforce_thermodynamic_halting(cls, data: dict[str, Any]) -> dict[str, Any]:
+        debate_graph = data.get("debate_graph", [])
+        ideation_budget = data.get("ideation_budget", {})
+
+        def get_entropy(item: Any) -> float:
+            if isinstance(item, dict):
+                entropy_state = item.get("entropy_state", {})
+                if isinstance(entropy_state, dict):
+                    return float(entropy_state.get("shannon_entropy_index", 0.0))
+                return float(getattr(entropy_state, "shannon_entropy_index", 0.0))
+            return float(getattr(item.entropy_state, "shannon_entropy_index", 0.0))
+
+        min_delta = 0.0
+        if isinstance(ideation_budget, dict):
+            min_delta = ideation_budget.get("minimum_entropy_delta_per_turn", 0.0)
+        elif ideation_budget:
+            min_delta = getattr(ideation_budget, "minimum_entropy_delta_per_turn", 0.0)
+
+        if len(debate_graph) >= 3 and ideation_budget:
+            last_two = debate_graph[-2:]
+            entropy_delta = abs(get_entropy(last_two[0]) - get_entropy(last_two[1]))
+            if entropy_delta < min_delta:
+                raise ValueError("Thermodynamic halt: Ensemble failed to reduce entropy below required budget delta.")
+        return data
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort_graph(self) -> Self:
+        object.__setattr__(self, "debate_graph", sorted(self.debate_graph, key=operator.attrgetter("log_cid")))
+        return self
+
+
 class TemporalCheckpointState(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Implements the Chandy-Lamport Distributed Snapshot Algorithm
@@ -2696,6 +2895,7 @@ class ThoughtBranchState(CoreasonBaseState):
     Heuristic Search, Backtracking
     """
 
+    topology_class: Literal["thought_branch"] = Field(default="thought_branch")
     branch_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
         description="A deterministic capability pointer bounding this specific topological divergence in the Latent Scratchpad Trace."
     )
@@ -2711,6 +2911,11 @@ class ThoughtBranchState(CoreasonBaseState):
         le=1.0,
         description="The logical validity score assigned to this branch by the Process Reward Model.",
     )
+
+
+type AnyExplorationBranch = Annotated[
+    ThoughtBranchState | StochasticIdeationTopology, Field(discriminator="topology_class")
+]
 
 
 class LatentScratchpadReceipt(CoreasonBaseState):
@@ -2736,7 +2941,7 @@ class LatentScratchpadReceipt(CoreasonBaseState):
     trace_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
         description="A Content Identifier (CID) bounding this ephemeral test-time execution tree.",
     )
-    explored_branches: list[ThoughtBranchState] = Field(
+    explored_branches: list[AnyExplorationBranch] = Field(
         description="All logical paths the agent attempted within this Ephemeral Epistemic Quarantine—a volatile workspace where probability waves collapse before being committed to the immutable ledger."
     )
     discarded_branches: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
@@ -2753,8 +2958,14 @@ class LatentScratchpadReceipt(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def verify_referential_integrity(self) -> Self:
-        explored_branch_cids = {branch.branch_cid for branch in self.explored_branches}
+    def verify_referential_integrity(self) -> "Self":
+        explored_branch_cids = set()
+        for branch in self.explored_branches:
+            if isinstance(branch, ThoughtBranchState):
+                explored_branch_cids.add(branch.branch_cid)
+            elif isinstance(branch, StochasticIdeationTopology):
+                explored_branch_cids.add(branch.topology_cid)
+
         if self.resolution_branch_cid is not None and self.resolution_branch_cid not in explored_branch_cids:
             raise ValueError(f"resolution_branch_cid '{self.resolution_branch_cid}' not found in explored_branches.")
         for discarded_cid in self.discarded_branches:
@@ -2763,10 +2974,15 @@ class LatentScratchpadReceipt(CoreasonBaseState):
         return self
 
     @model_validator(mode="after")
-    def _enforce_canonical_sort(self) -> Self:
-        object.__setattr__(
-            self, "explored_branches", sorted(self.explored_branches, key=operator.attrgetter("branch_cid"))
-        )
+    def _enforce_canonical_sort(self) -> "Self":
+        def sort_key(b: AnyExplorationBranch) -> str:
+            if isinstance(b, ThoughtBranchState):
+                return b.branch_cid
+            if isinstance(b, StochasticIdeationTopology):
+                return b.topology_cid
+            return ""
+
+        object.__setattr__(self, "explored_branches", sorted(self.explored_branches, key=sort_key))
         object.__setattr__(self, "discarded_branches", sorted(self.discarded_branches))
         return self
 
@@ -13178,3 +13394,6 @@ DiscourseNodeState.model_rebuild()
 DiscourseTreeManifest.model_rebuild()
 OntologyDiscoveryIntent.model_rebuild()
 SemanticMappingHeuristicProposal.model_rebuild()
+
+StochasticIdeationTopology.model_rebuild()
+ThoughtBranchState.model_rebuild()
