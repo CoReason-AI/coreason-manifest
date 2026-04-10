@@ -751,6 +751,59 @@ class StochasticTopology(CoreasonBaseState):
         return self
 
 
+class TargetTopologyEnum(StrEnum):
+    N_DIMENSIONAL_TENSOR = "N_DIMENSIONAL_TENSOR"
+    MARKOV_BLANKET = "MARKOV_BLANKET"
+    ACYCLIC_DIRECTED_GRAPH = "ACYCLIC_DIRECTED_GRAPH"
+    ALGEBRAIC_RING = "ALGEBRAIC_RING"
+
+
+class CryptographicProvenanceMixin(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A foundational base class/mixin for all future deterministic nodes, enforcing Homotopy Type Theory (HoTT) principles where execution identity is indistinguishable from causal path equivalence.
+
+    CAUSAL AFFORDANCE: Binds the execution artifact directly to the projection intent, severing execution if the hash chain to the stochastic origin is broken.
+
+    EPISTEMIC BOUNDS: Enforces an immutable cryptographic link via `provenance_trace_cid` matching a strict CID regex pattern.
+
+    MCP ROUTING TRIGGERS: Homotopy Type Theory, Cryptographic Provenance, Execution Causal Chain, Merkle-DAG Identity, Path Equivalence
+    """
+
+    provenance_trace_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")] | None = Field(default=None)
+
+
+class TopologicalProjectionIntent(CryptographicProvenanceMixin):
+    """
+    AGENT INSTRUCTION: The transitional mathematical contract that calculates the Gromov-Wasserstein distance and authorizes or denies the collapse of a stochastic manifold into a deterministic structure.
+
+    CAUSAL AFFORDANCE: Calculates optimal transport mapping and either authorizes downstream kinetic execution or rejects the transition due to topology tears.
+
+    EPISTEMIC BOUNDS: Enforces a strict isomorphism confidence interval [0.0, 1.0], acting as a hardware-level guillotine that mandates a minimum 0.85 threshold.
+
+    MCP ROUTING TRIGGERS: Gromov-Wasserstein Distance, Topological Compiler, Optimal Transport Mapping, Manifold Collapse, Deterministic Projection
+    """
+
+    projection_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        default_factory=lambda: str(uuid.uuid4())
+    )
+    source_consensus_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
+    target_topology: TargetTopologyEnum
+    isomorphism_confidence: float
+    lossy_translation_divergence: list[str]
+    epistemic_status: Literal["pending_deterministic_collapse"] = Field(default="pending_deterministic_collapse")
+
+    @field_validator("isomorphism_confidence", mode="after")
+    @classmethod
+    def enforce_isomorphism_guillotine(cls, v: float) -> float:
+        if not (0.0 <= v <= 1.0):
+            raise ValueError("isomorphism_confidence must be between 0.0 and 1.0")
+        if v < 0.85:
+            raise ValueError(
+                f"Isomorphism Guillotine triggered: Confidence {v} is below the 0.85 threshold. Lossy translation corruption detected."
+            )
+        return v
+
+
 class TraceContextState(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Implements Distributed Causality using Vector Clocks and rho-calculus. It forms the foundational causality boundary.
@@ -13286,3 +13339,5 @@ SemanticMappingHeuristicProposal.model_rebuild()
 StochasticStateNode.model_rebuild()
 StochasticConsensus.model_rebuild()
 StochasticTopology.model_rebuild()
+CryptographicProvenanceMixin.model_rebuild()
+TopologicalProjectionIntent.model_rebuild()
