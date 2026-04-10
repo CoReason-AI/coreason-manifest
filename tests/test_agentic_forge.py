@@ -9,9 +9,9 @@
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
 from coreason_manifest.spec.ontology import (
+    AlgebraicRefinementContract,
     CapabilityForgeTopologyManifest,
     HoareLogicProofReceipt,
-    AlgebraicRefinementContract,
     SemanticDiscoveryIntent,
     TeleologicalIsometryReceipt,
     VectorEmbeddingState,
