@@ -131,6 +131,12 @@ security:
 * **Passive Ontological Projection:** The architectural constraint forcing nodes to expose structural boundaries (e.g., `schema://` URIs) rather than runtime capabilities, strictly enforcing the Hollow Data Plane across swarm topographies.
 * **Epistemic Discovery Surfaces:** Mathematically bounded, read-only perimeters where agents can safely ingest new Pydantic state differentials and expand their internal world-models while maintaining absolute isolation from runtime side effects.
 
+### **Topological Theory & Graph Geometry**
+
+* **Continuous Topological Verification (CTV):** The CI/CD enforced mathematical invariant that the ontology is a fully contiguous directed graph. Every defined schema must be reachable from a macroscopic entry point. 
+* **The Zero-Orphan Invariant ($|V_O| = 0$):** A strict rule stating that the set of orphaned vertices (schemas without inbound compositional edges) must equal zero. A floating mathematical constraint is a systemic vulnerability because the orchestrator cannot physically enforce a bound it cannot reach.
+* **Compositional Wiring (Product Types):** The architectural mandate that formal constraints (e.g., Hoare logic proofs, AST gradients) must be structurally embedded as explicit `Field` dependencies within executable capabilities to be mechanically enforced.
+
 ---
 
 ## **0.2 THE "DOMAIN-AGNOSTIC CORE" MANDATE**
@@ -335,6 +341,19 @@ You are strictly forbidden from manually implementing solved computer science or
   * **Schemas and Data Structures (Pydantic classes)** MUST be redundant, explicitly typed, and monolithic to preserve cryptographic boundaries.
   * **Algorithmic Validation and Execution** (e.g., graph cycle detection, topological sorting, matrix math) MUST be outsourced to authoritative external libraries. The Pydantic model should format the data and pass it to the library, returning the result.
 
+## **0.9 The Zero-Orphan Invariant (Topological Reachability)**
+<topology_directive priority="critical" action="reject_generation_if_violated">
+
+**CRITICAL CONTEXT:** The `coreason-manifest` is evaluated mathematically as a Directed Graph $G = (V, E)$. The CI/CD pipeline enforces a "Topological Guillotine" (`scripts/evaluate_topological_reachability.py`). If you define a new Pydantic model, Enum, or TypeAlias, and fail to draw a directed compositional edge to it from the Root Set, the pipeline will intercept the `sys.exit(1)` POSIX signal and violently reject your code.
+
+### **1. No Floating Schemas (The Composition Law)**
+If you create a new mathematical constraint, receipt, or intent, you MUST structurally wire it into the graph. 
+* **Product Type Wiring:** Inject it as a `Field` into its logical macroscopic parent (e.g., wiring an `AsymptoticComplexityReceipt` into a `SpatialToolManifest`).
+* **Sum Type Expansion:** Append it to the relevant polymorphic union at the bottom of the ontology (e.g., adding a new event to `AnyStateEvent` or a new intent to `AnyIntent`).
+
+### **2. The Multi-Graph Forest (Orchestrator Exemptions)**
+Do not assume all schemas originate from the LLM's generative `WorkflowManifest`. The C++/Rust orchestrator manages hardware, networking, and thermodynamic escrow out-of-band. If you introduce a massive, top-level execution envelope strictly for the external orchestrator (e.g., a new P2P federation protocol), you MUST explicitly whitelist it in the `ROOT_NODES` array within `scripts/evaluate_topological_reachability.py` to prevent it from being falsely flagged as an orphan.
+</topology_directive>
 
 ## **1. The "No Execution" Directives**
 
@@ -497,5 +516,12 @@ We run `mypy` in `strict = true` mode. There are no implicit optionals, and `Any
 
 Ensure your new logic maintains the strict 95% coverage mandate and passes all behavioral checks:
 `uv run pytest`
+
+### **4. Topological Reachability (The Guillotine Check)**
+
+We strictly enforce the Zero-Orphan Invariant ($|V_O| = 0$). Before committing, you must mathematically prove that your AST modifications have not introduced severed nodes, ghost affordances, or isolated mathematical bounds:
+`uv run python scripts/evaluate_topological_reachability.py`
+
+*Note: The script must output "0 Orphans Detected" and exit cleanly with code 0. If it lists orphaned schemas, you have failed to wire your components compositionally and must fix your AST injections.*
 
 *Note: Do not bypass type hints or add `# type: ignore` unless interacting with deeply dynamic external modules, and only do so with an explicit explanatory comment.*
