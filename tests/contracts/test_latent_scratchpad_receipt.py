@@ -29,6 +29,7 @@ def valid_scratchpad_strategy(draw: st.DrawFn) -> dict[str, Any]:
         st.lists(st.from_regex(r"^[a-zA-Z0-9_.:-]+$", fullmatch=True), min_size=2, max_size=15, unique=True)
     )
     from coreason_manifest.spec.ontology import AnyExplorationBranch
+
     explored: list[AnyExplorationBranch] = []
     for b_cid in branch_ids:
         if draw(st.booleans()):

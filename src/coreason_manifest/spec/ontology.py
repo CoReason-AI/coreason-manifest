@@ -909,13 +909,26 @@ class ComputationalThermodynamics(CoreasonBaseState):
 
     @model_validator(mode="after")
     def validate_thermodynamic_circuit_breaker(self) -> Self:
+        import math
+
         if self.current_diffusions > self.max_stochastic_diffusions:
             raise ValueError("Topological Fracture: current_diffusions strictly exceeds max_stochastic_diffusions.")
 
+        # Trap NaN / Infinity to prevent circuit breaker bypass
+        if math.isnan(self.remaining_free_energy) or math.isinf(self.remaining_free_energy):
+            raise ValueError("Mathematical Paradox: remaining_free_energy cannot be NaN or Infinity.")
+
+        if self.entropy_derivative_delta is not None and (
+            math.isnan(self.entropy_derivative_delta) or math.isinf(self.entropy_derivative_delta)
+        ):
+            raise ValueError("Mathematical Paradox: entropy_derivative_delta cannot be NaN or Infinity.")
+
+        # Circuit Breaker 1: Absolute Energy Depletion
         if self.remaining_free_energy <= 0.0:
             object.__setattr__(self, "system_state", ThermodynamicState.ENTROPIC_EXHAUSTION_ORACLE_INTERVENTION)
             return self
 
+        # Circuit Breaker 2: Thermodynamic Stagnation (Flat Loss Gradient)
         if (
             self.entropy_derivative_delta is not None
             and abs(self.entropy_derivative_delta) < self.stagnation_tolerance_epsilon

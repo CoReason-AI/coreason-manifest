@@ -85,6 +85,7 @@ def test_latent_scratchpad_receipt_referential_integrity(
     trace_cid: str, explored_branch_ids: list[str], total_latent_tokens: int
 ) -> None:
     from coreason_manifest.spec.ontology import AnyExplorationBranch
+
     explored_branches: list[AnyExplorationBranch] = [
         ThoughtBranchState(branch_cid=b_cid, latent_content_hash="a" * 64, prm_score=0.5)
         for b_cid in explored_branch_ids
