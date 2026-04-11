@@ -1399,6 +1399,10 @@ class ContinuousSpatialMutationIntent(CoreasonBaseState):
 
     """
 
+    topology_class: Literal["continuous_spatial_mutation"] = Field(
+        default="continuous_spatial_mutation",
+        description="The discriminative topological boundary for spatial mutation intents.",
+    )
     target_node_cid: NodeCIDState = Field(description="The specific topology vertex undergoing spatial mutation.")
     proposed_transform: SE3TransformProfile = Field(description="The requested absolute SE(3) spatial terminus.")
     lamport_clock: int = Field(
@@ -3516,6 +3520,10 @@ class AgentBidIntent(CoreasonBaseState):
 
     """
 
+    topology_class: Literal["agent_bid"] = Field(
+        default="agent_bid",
+        description="The discriminative topological boundary for agent bid intents.",
+    )
     agent_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
         description="The NodeCIDState of the bidder."
     )
@@ -6545,7 +6553,13 @@ type AnyIntent = Annotated[
     | HumanDirectiveIntent
     | ContextualSemanticResolutionIntent
     | OntologyDiscoveryIntent
-    | SemanticMappingHeuristicProposal,
+    | SemanticMappingHeuristicProposal
+    | ContinuousSpatialMutationIntent
+    | AgentBidIntent
+    | ComputeProvisioningIntent
+    | TaskAnnouncementIntent
+    | QuarantineIntent
+    | InterventionIntent,
     Field(discriminator="topology_class"),
 ]
 
@@ -6998,6 +7012,10 @@ class MemoizedNodeProfile(CoreasonBaseState):
     intervention_policies: list[InterventionPolicy] = Field(
         default_factory=list,
         description="The declarative array of proactive oversight hooks bound to this node's lifecycle.",
+    )
+    emitted_intents: list[AnyIntent] = Field(
+        default_factory=list,
+        description="The array of cognitive intents and structural proposals emitted by this agent.",
     )
     domain_extensions: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] | None = Field(
         default=None,
@@ -8726,6 +8744,10 @@ class ComputeProvisioningIntent(CoreasonBaseState):
 
     """
 
+    topology_class: Literal["compute_provisioning"] = Field(
+        default="compute_provisioning",
+        description="The discriminative topological boundary for compute provisioning intents.",
+    )
     max_budget: int = Field(
         le=1000000000, description="The maximum atomic cost budget allowable for the provisioned compute."
     )
@@ -9577,6 +9599,10 @@ class TaskAnnouncementIntent(CoreasonBaseState):
 
     """
 
+    topology_class: Literal["task_announcement"] = Field(
+        default="task_announcement",
+        description="The discriminative topological boundary for task announcement intents.",
+    )
     task_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
         description="Unique identifier for the required task."
     )
