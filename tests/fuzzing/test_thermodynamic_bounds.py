@@ -20,20 +20,14 @@ from coreason_manifest.spec.ontology import ComputationalThermodynamics, Thermod
     max_diff=st.integers(min_value=1, max_value=1000),
     current_diff=st.integers(min_value=1001, max_value=10000),
     free_energy=st.floats(min_value=0.1, max_value=100.0, exclude_max=False),
+    thermo_cid=st.uuids().map(str),
 )
-def test_diffusion_overload(max_diff: int, current_diff: int, free_energy: float) -> None:
-    """
-    Assertion 1 (Diffusion Overload):
-    Prove the spatial circuit breakers using only hypothesis.
-    Generate configurations where current_diffusions is strictly greater than max_stochastic_diffusions.
-    Assert that attempting to instantiate ComputationalThermodynamics with these values universally raises a Pydantic ValidationError.
-    """
-    # Overriding to ensure current_diff > max_diff
+def test_diffusion_overload(max_diff: int, current_diff: int, free_energy: float, thermo_cid: str) -> None:
     if current_diff <= max_diff:
         current_diff = max_diff + 1
-
     with pytest.raises(ValidationError) as exc_info:
         ComputationalThermodynamics(
+            thermodynamics_cid=thermo_cid,
             target_topology_cid="topology-1234",
             max_stochastic_diffusions=max_diff,
             computational_free_energy_budget=100.0,
@@ -47,22 +41,67 @@ def test_diffusion_overload(max_diff: int, current_diff: int, free_energy: float
     max_diff=st.integers(min_value=1, max_value=1000),
     current_diff=st.integers(min_value=0, max_value=1000),
     free_energy=st.floats(min_value=0.1, max_value=100.0),
+    thermo_cid=st.uuids().map(str),
 )
-def test_valid_operational_state(max_diff: int, current_diff: int, free_energy: float) -> None:
-    """
-    Assertion 2 (Valid Operational State):
-    Generate configurations where current_diffusions <= max_stochastic_diffusions and remaining_free_energy > 0.0.
-    Assert successful instantiation and mathematically prove that system_state remains ThermodynamicState.ACTIVE_DIFFUSION.
-    """
+def test_valid_operational_state(max_diff: int, current_diff: int, free_energy: float, thermo_cid: str) -> None:
     if current_diff > max_diff:
         current_diff = max_diff
-
     thermo = ComputationalThermodynamics(
+        thermodynamics_cid=thermo_cid,
         target_topology_cid="topology-1234",
         max_stochastic_diffusions=max_diff,
         computational_free_energy_budget=100.0,
         current_diffusions=current_diff,
         remaining_free_energy=free_energy,
     )
+    assert thermo.system_state == ThermodynamicState.ACTIVE_DIFFUSION
 
+
+@given(
+    max_diff=st.integers(min_value=1, max_value=1000),
+    current_diff=st.integers(min_value=0, max_value=1000),
+    free_energy=st.floats(min_value=0.1, max_value=100.0),
+    delta=st.floats(min_value=-0.0009, max_value=0.0009),
+    thermo_cid=st.uuids().map(str),
+)
+def test_thermodynamic_stagnation(
+    max_diff: int, current_diff: int, free_energy: float, delta: float, thermo_cid: str
+) -> None:
+    if current_diff > max_diff:
+        current_diff = max_diff
+    thermo = ComputationalThermodynamics(
+        thermodynamics_cid=thermo_cid,
+        target_topology_cid="topology-1234",
+        max_stochastic_diffusions=max_diff,
+        computational_free_energy_budget=100.0,
+        current_diffusions=current_diff,
+        remaining_free_energy=free_energy,
+        entropy_derivative_delta=delta,
+        stagnation_tolerance_epsilon=0.001,
+    )
+    assert thermo.system_state == ThermodynamicState.ENTROPIC_EXHAUSTION_ORACLE_INTERVENTION
+
+
+@given(
+    max_diff=st.integers(min_value=1, max_value=1000),
+    current_diff=st.integers(min_value=0, max_value=1000),
+    free_energy=st.floats(min_value=0.1, max_value=100.0),
+    delta=st.floats(min_value=0.0011, max_value=10.0),
+    thermo_cid=st.uuids().map(str),
+)
+def test_thermodynamic_active_with_valid_delta(
+    max_diff: int, current_diff: int, free_energy: float, delta: float, thermo_cid: str
+) -> None:
+    if current_diff > max_diff:
+        current_diff = max_diff
+    thermo = ComputationalThermodynamics(
+        thermodynamics_cid=thermo_cid,
+        target_topology_cid="topology-1234",
+        max_stochastic_diffusions=max_diff,
+        computational_free_energy_budget=100.0,
+        current_diffusions=current_diff,
+        remaining_free_energy=free_energy,
+        entropy_derivative_delta=delta,
+        stagnation_tolerance_epsilon=0.001,
+    )
     assert thermo.system_state == ThermodynamicState.ACTIVE_DIFFUSION

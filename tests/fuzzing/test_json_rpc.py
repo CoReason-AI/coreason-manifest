@@ -84,7 +84,9 @@ def test_market_contract_bounds(minimum_collateral: int, slashing_penalty: int) 
 def test_latent_scratchpad_receipt_referential_integrity(
     trace_cid: str, explored_branch_ids: list[str], total_latent_tokens: int
 ) -> None:
-    explored_branches = [
+    from coreason_manifest.spec.ontology import AnyExplorationBranch
+
+    explored_branches: list[AnyExplorationBranch] = [
         ThoughtBranchState(branch_cid=b_cid, latent_content_hash="a" * 64, prm_score=0.5)
         for b_cid in explored_branch_ids
     ]
