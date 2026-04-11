@@ -3226,6 +3226,12 @@ class SpatialToolManifest(CoreasonBaseState):
         max_length=1000,
         description="The strict JSON Schema dictionary defining the pure domain-specific arguments ($T$). The framework orchestrator will automatically wrap this in the ExecutionEnvelopeState at runtime.",
     )
+    hoare_proof: HoareLogicProofReceipt | None = Field(
+        default=None, description="Formal mathematical proof of pre/post conditions."
+    )
+    asymptotic_complexity: AsymptoticComplexityReceipt | None = Field(
+        default=None, description="Big-O computational bounds."
+    )
     side_effects: SideEffectProfile = Field(
         description="The declarative side-effect and idempotency profile of the tool."
     )
@@ -6559,7 +6565,8 @@ type AnyIntent = Annotated[
     | ComputeProvisioningIntent
     | TaskAnnouncementIntent
     | QuarantineIntent
-    | InterventionIntent,
+    | InterventionIntent
+    | System2RemediationIntent,
     Field(discriminator="topology_class"),
 ]
 
@@ -7097,6 +7104,12 @@ class CognitiveSystemNodeProfile(CoreasonBaseState):
     )
     neural_optics: GaussianSplattingProfile | None = Field(
         default=None, description="The volumetric Gaussian Splatting configuration for non-polygonal rendering."
+    )
+    hoare_proof: HoareLogicProofReceipt | None = Field(
+        default=None, description="Formal mathematical proof of pre/post conditions."
+    )
+    asymptotic_complexity: AsymptoticComplexityReceipt | None = Field(
+        default=None, description="Big-O computational bounds."
     )
 
     @field_validator("domain_extensions", mode="before")
@@ -9560,6 +9573,10 @@ class System2RemediationIntent(CoreasonBaseState):
 
     """
 
+    topology_class: Literal["system_2_remediation"] = Field(
+        default="system_2_remediation", description="Discriminator type for System2RemediationIntent."
+    )
+
     fault_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
         description="A cryptographic Lineage Watermark (CID) tracking this specific dimensional collapse.",
     )
@@ -9568,6 +9585,9 @@ class System2RemediationIntent(CoreasonBaseState):
     )
     violation_receipts: list[ManifestViolationReceipt] = Field(
         min_length=1, description="The deterministic array of exact structural faults the agent must correct."
+    )
+    ast_gradient: ASTGradientReceipt | None = Field(
+        default=None, description="The structural loss vector guiding AST repair."
     )
 
     @model_validator(mode="after")
@@ -9976,6 +9996,9 @@ class TraceExportManifest(CoreasonBaseState):
     )
     spans: list[ExecutionSpanReceipt] = Field(
         default_factory=list, description="A collection of execution spans to be serialized."
+    )
+    execution_nodes: list[ExecutionNodeReceipt] = Field(
+        default_factory=list, description="The array of strictly typed trace executions."
     )
 
     @model_validator(mode="after")
@@ -11613,6 +11636,9 @@ class CapabilityForgeTopologyManifest(CoreasonBaseState):
     human_supervisor_cid: NodeCIDState | None = Field(
         default=None,
         description="The W3C DID of the human oracle required to cryptographically sign off on the forged capability.",
+    )
+    isometry_verification: TeleologicalIsometryReceipt | None = Field(
+        default=None, description="The final behavioral verification of the forged capability."
     )
 
     def compile_to_base_topology(self) -> DAGTopologyManifest:

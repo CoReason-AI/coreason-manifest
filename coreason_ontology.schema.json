@@ -832,6 +832,7 @@
           "request": "#/$defs/InterventionIntent",
           "semantic_discovery": "#/$defs/SemanticDiscoveryIntent",
           "semantic_mapping_proposal": "#/$defs/SemanticMappingHeuristicProposal",
+          "system_2_remediation": "#/$defs/System2RemediationIntent",
           "task_announcement": "#/$defs/TaskAnnouncementIntent",
           "taxonomic_restructure": "#/$defs/TaxonomicRestructureIntent"
         },
@@ -891,6 +892,9 @@
         },
         {
           "$ref": "#/$defs/InterventionIntent"
+        },
+        {
+          "$ref": "#/$defs/System2RemediationIntent"
         }
       ]
     },
@@ -2184,6 +2188,18 @@
           ],
           "default": null,
           "description": "The W3C DID of the human oracle required to cryptographically sign off on the forged capability."
+        },
+        "isometry_verification": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TeleologicalIsometryReceipt"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The final behavioral verification of the forged capability."
         }
       },
       "required": [
@@ -3679,6 +3695,30 @@
           ],
           "default": null,
           "description": "The volumetric Gaussian Splatting configuration for non-polygonal rendering."
+        },
+        "hoare_proof": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HoareLogicProofReceipt"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Formal mathematical proof of pre/post conditions."
+        },
+        "asymptotic_complexity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AsymptoticComplexityReceipt"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Big-O computational bounds."
         },
         "topology_class": {
           "const": "system",
@@ -16245,6 +16285,30 @@
           "description": "The strict JSON Schema dictionary defining the pure domain-specific arguments ($T$). The framework orchestrator will automatically wrap this in the ExecutionEnvelopeState at runtime.",
           "title": "Output Schema"
         },
+        "hoare_proof": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HoareLogicProofReceipt"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Formal mathematical proof of pre/post conditions."
+        },
+        "asymptotic_complexity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AsymptoticComplexityReceipt"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Big-O computational bounds."
+        },
         "side_effects": {
           "$ref": "#/$defs/SideEffectProfile",
           "description": "The declarative side-effect and idempotency profile of the tool."
@@ -17096,6 +17160,13 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Kahneman's Dual-Process Theory by explicitly triggering a System 2 non-monotonic self-correction loop in response to a structural execution collapse. As an ...Intent suffix, this represents an authorized kinetic execution trigger.\n\nCAUSAL AFFORDANCE: Intercepts physical instantiation failures (e.g., Pydantic ValidationErrors) and redirects the generation trajectory, forcing the agent into a recursive backtracking search to rewrite the isolated subgraph via `violation_receipts`.\n\nEPISTEMIC BOUNDS: The `fault_cid` is cryptographically tied to a 128-char CID. The `violation_receipts` array is deterministically sorted by the `_enforce_canonical_sort_receipts` hook to preserve RFC 8785 canonical hashing and map exact JSON paths without ambiguity.\n\nMCP ROUTING TRIGGERS: Dual-Process Theory, Non-Monotonic Revision, System 2 Remediation, Backtracking Search, Abstract Syntax Tree",
       "properties": {
+        "topology_class": {
+          "const": "system_2_remediation",
+          "default": "system_2_remediation",
+          "description": "Discriminator type for System2RemediationIntent.",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "fault_cid": {
           "description": "A cryptographic Lineage Watermark (CID) tracking this specific dimensional collapse.",
           "maxLength": 128,
@@ -17116,6 +17187,18 @@
           "minItems": 1,
           "title": "Violation Receipts",
           "type": "array"
+        },
+        "ast_gradient": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ASTGradientReceipt"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The structural loss vector guiding AST repair."
         }
       },
       "required": [
@@ -18316,6 +18399,14 @@
             "$ref": "#/$defs/ExecutionSpanReceipt"
           },
           "title": "Spans",
+          "type": "array"
+        },
+        "execution_nodes": {
+          "description": "The array of strictly typed trace executions.",
+          "items": {
+            "$ref": "#/$defs/ExecutionNodeReceipt"
+          },
+          "title": "Execution Nodes",
           "type": "array"
         }
       },
