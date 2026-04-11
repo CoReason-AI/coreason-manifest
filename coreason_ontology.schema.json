@@ -818,21 +818,25 @@
         "mapping": {
           "agent_bid": "#/$defs/AgentBidIntent",
           "compute_provisioning": "#/$defs/ComputeProvisioningIntent",
+          "constitutional_amendment": "#/$defs/ConstitutionalAmendmentIntent",
           "contextual_semantic_resolution": "#/$defs/ContextualSemanticResolutionIntent",
           "continuous_spatial_mutation": "#/$defs/ContinuousSpatialMutationIntent",
           "drafting": "#/$defs/DraftingIntent",
           "escalation": "#/$defs/EscalationIntent",
+          "fallback_intent": "#/$defs/FallbackIntent",
           "forced_adjudication": "#/$defs/AdjudicationIntent",
+          "fyi": "#/$defs/FYIIntent",
           "human_directive": "#/$defs/HumanDirectiveIntent",
           "informational": "#/$defs/SemanticIntent",
           "latent_projection": "#/$defs/LatentProjectionIntent",
           "latent_schema_inference": "#/$defs/LatentSchemaInferenceIntent",
           "ontology_discovery": "#/$defs/OntologyDiscoveryIntent",
+          "override": "#/$defs/OverrideIntent",
           "quarantine_intent": "#/$defs/QuarantineIntent",
           "request": "#/$defs/InterventionIntent",
           "semantic_discovery": "#/$defs/SemanticDiscoveryIntent",
           "semantic_mapping_proposal": "#/$defs/SemanticMappingHeuristicProposal",
-          "system_2_remediation": "#/$defs/System2RemediationIntent",
+          "spatial_kinematic": "#/$defs/SpatialKinematicActionIntent",
           "task_announcement": "#/$defs/TaskAnnouncementIntent",
           "taxonomic_restructure": "#/$defs/TaxonomicRestructureIntent"
         },
@@ -894,7 +898,19 @@
           "$ref": "#/$defs/InterventionIntent"
         },
         {
-          "$ref": "#/$defs/System2RemediationIntent"
+          "$ref": "#/$defs/FYIIntent"
+        },
+        {
+          "$ref": "#/$defs/FallbackIntent"
+        },
+        {
+          "$ref": "#/$defs/OverrideIntent"
+        },
+        {
+          "$ref": "#/$defs/ConstitutionalAmendmentIntent"
+        },
+        {
+          "$ref": "#/$defs/SpatialKinematicActionIntent"
         }
       ]
     },
@@ -980,13 +996,16 @@
           "belief_mutation": "#/$defs/BeliefMutationEvent",
           "budget_exhaustion": "#/$defs/BudgetExhaustionEvent",
           "causal_explanation": "#/$defs/CausalExplanationEvent",
+          "circuit_breaker_event": "#/$defs/CircuitBreakerEvent",
           "cognitive_prediction": "#/$defs/CognitivePredictionReceipt",
           "cognitive_reward_evaluation": "#/$defs/CognitiveRewardEvaluationReceipt",
           "counterfactual_regret": "#/$defs/CounterfactualRegretEvent",
           "epistemic_axiom_verification": "#/$defs/EpistemicAxiomVerificationReceipt",
           "epistemic_flow_state": "#/$defs/EpistemicFlowStateReceipt",
+          "epistemic_log": "#/$defs/EpistemicLogEvent",
           "epistemic_promotion": "#/$defs/EpistemicPromotionEvent",
           "epistemic_telemetry": "#/$defs/EpistemicTelemetryEvent",
+          "exogenous_event": "#/$defs/ExogenousEpistemicEvent",
           "hypothesis": "#/$defs/HypothesisGenerationEvent",
           "intent_classification": "#/$defs/IntentClassificationReceipt",
           "normative_drift": "#/$defs/NormativeDriftEvent",
@@ -1070,6 +1089,15 @@
         },
         {
           "$ref": "#/$defs/OntologicalReificationReceipt"
+        },
+        {
+          "$ref": "#/$defs/CircuitBreakerEvent"
+        },
+        {
+          "$ref": "#/$defs/ExogenousEpistemicEvent"
+        },
+        {
+          "$ref": "#/$defs/EpistemicLogEvent"
         }
       ]
     },
@@ -2428,6 +2456,37 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Lyapunov Stability and distributed Control Theory to guarantee that the neurosymbolic network returns to a deterministic equilibrium when facing catastrophic variance. As an ...Event suffix, this is a cryptographically frozen coordinate.\n\nCAUSAL AFFORDANCE: Physically severs the active execution thread for the targeted node, acting as a hardware guillotine that immediately halts out-of-memory cascades, runaway generative loops, or API rate-limit breaches.\n\nEPISTEMIC BOUNDS: The fault perimeter is mathematically restricted to a specific `target_node_cid` (`NodeCIDState`). To prevent log-poisoning and VRAM exhaustion during the crash, the `error_signature` is strictly clamped at `max_length=2000`.\n\nMCP ROUTING TRIGGERS: Lyapunov Stability, Control Theory, Circuit Breaker, Cascading Failure, State Equilibrium",
       "properties": {
+        "event_cid": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
         "topology_class": {
           "const": "circuit_breaker_event",
           "default": "circuit_breaker_event",
@@ -2447,6 +2506,8 @@
         }
       },
       "required": [
+        "event_cid",
+        "timestamp",
         "target_node_cid",
         "error_signature"
       ],
@@ -7373,6 +7434,37 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines a purely out-of-band semantic logging vector, structurally isolated from the rigorous causal constraints of the Dapper trace tree.\n\nCAUSAL AFFORDANCE: Emits asynchronous telemetry for human-in-the-loop debugging or peripheral auditing without mutating the active Epistemic Ledger's topological state.\n\nEPISTEMIC BOUNDS: Temporal reality clamped by `timestamp`. Severity strictly masked by a Literal automaton `[\"DEBUG\", \"INFO\", \"WARNING\", \"ERROR\", \"CRITICAL\"]`. Message bounded to `max_length=2000`.\n\nMCP ROUTING TRIGGERS: Out-of-Band Telemetry, Asynchronous Logging, Severity Masking, Peripheral Audit, Ephemeral Context",
       "properties": {
+        "event_cid": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
+        },
+        "topology_class": {
+          "const": "epistemic_log",
+          "default": "epistemic_log",
+          "description": "Discriminator type for a log event.",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "timestamp": {
           "description": "The UNIX timestamp of the log event.",
           "maximum": 253402300799.0,
@@ -7404,6 +7496,7 @@
         }
       },
       "required": [
+        "event_cid",
         "timestamp",
         "level",
         "message"
@@ -8899,6 +8992,44 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Nassim Taleb's Black Swan Theory by injecting\nOut-of-Distribution (OOD) epistemic shocks into the causal graph. As an ...Event suffix,\nthis is an append-only coordinate on the Merkle-DAG that the LLM must never hallucinate\na mutation to.\n\nCAUSAL AFFORDANCE: Forces the active reasoning topology to process a high-entropy\nsynthetic_payload, actively testing the swarm's non-monotonic truth maintenance,\ndefeasible reasoning, and overall topological resilience.\n\nEPISTEMIC BOUNDS: Cryptographically targets a specific Merkle root via target_node_hash\n(strict SHA-256 pattern ^[a-f0-9]{64}$) and bounds the Variational Free Energy via\nbayesian_surprise_score [ge=0.0, le=1.0, allow_inf_nan=False]. The @model_validator\nphysically guarantees execution is halted if the attached escrow is not strictly positive.\n\nMCP ROUTING TRIGGERS: Black Swan Theory, Out-of-Distribution Shock, Variational Free\nEnergy, Exogenous Perturbation, Epistemic Stress Test",
       "properties": {
+        "event_cid": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "topology_class": {
+          "const": "exogenous_event",
+          "default": "exogenous_event",
+          "description": "Discriminator type for an exogenous event.",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "shock_cid": {
           "description": "Cryptographic identifier for the Black Swan event.",
           "maxLength": 128,
@@ -8940,6 +9071,8 @@
         }
       },
       "required": [
+        "event_cid",
+        "timestamp",
         "shock_cid",
         "target_node_hash",
         "bayesian_surprise_score",
@@ -16116,6 +16249,13 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Employs Mathematical Kinematics and Fitts's Law to project precise, non-linear physical interactions across an exogenous UI manifold.\n\nCAUSAL AFFORDANCE: Authorizes the translation of latent spatial targets into OS-level actuation, utilizing bezier_control_points to construct continuous polynomial trajectories that simulate human motor control and bypass bot-evasive heuristics.\n\nEPISTEMIC BOUNDS: Spatial execution is clamped to SE3 dimensional boundaries via the nested SE3TransformProfile. Execution liveness is temporally guillotined by trajectory_duration_ms (le=86400000).\n\nMCP ROUTING TRIGGERS: Mathematical Kinematics, Bezier Geometry, Fitts's Law, OS-Level Actuation, Non-Linear Trajectory",
       "properties": {
+        "topology_class": {
+          "const": "spatial_kinematic",
+          "default": "spatial_kinematic",
+          "description": "Discriminator for a spatial kinematic action.",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "action_class": {
           "description": "The specific kinematic interaction paradigm.",
           "enum": [

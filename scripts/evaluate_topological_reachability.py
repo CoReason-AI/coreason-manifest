@@ -140,6 +140,21 @@ ROOT_NODES = [
     "EpistemicDomainGraphManifest",
     "EpistemicTopologicalProofManifest",
     "EpistemicCurriculumManifest",
+    "ExecutionEnvelopeState",
+    "JSONRPCErrorResponseState",
+    "JSONRPCErrorState",
+    "CrossSwarmHandshakeState",
+    "OntologicalHandshakeReceipt",
+    "StateDifferentialManifest",
+    "ComputeEngineProfile",
+    "DelegatedCapabilityManifest",
+    "ComputationalThermodynamics",
+    "ActiveInferenceEpoch",
+    "AuctionState",
+    "AdversarialSimulationProfile",
+    "ChaosExperimentTask",
+    "DocumentLayoutManifest",
+    "DynamicLayoutManifest",
 ]
 
 reachable_nodes = set(ROOT_NODES)
