@@ -15,7 +15,9 @@ from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
     ActiveInferenceEpoch,
+    ComputationalThermodynamics,
     EpistemicRejectionReceipt,
+    HypothesisSuperposition,
     TargetTopologyEnum,
     TopologicalProjectionIntent,
 )
@@ -61,3 +63,28 @@ def test_kl_divergence_paradox(v: float) -> None:
 def test_active_inference_epoch_paradox(v: float) -> None:
     with pytest.raises(ValidationError, match=r"Mathematical paradox:|Input should be a valid number"):
         ActiveInferenceEpoch(epoch_cid="test", current_free_energy=v, rejection_history=[])
+
+
+def test_hypothesis_superposition_probability_violation() -> None:
+    with pytest.raises(ValidationError, match="Conservation of Probability violated"):
+        HypothesisSuperposition(
+            superposition_cid="test-1234",
+            competing_manifolds={"a": 0.6, "b": 0.5},
+            wave_collapse_function="highest_confidence",
+            residual_entropy_vectors=[],
+        )
+
+
+@given(st.just(float("nan")) | st.just(float("inf")))
+def test_computational_thermodynamics_paradox(v: float) -> None:
+    with pytest.raises(ValidationError, match="Mathematical Paradox"):
+        ComputationalThermodynamics(
+            thermodynamics_cid="test-1234",
+            target_topology_cid="test",
+            max_stochastic_diffusions=10,
+            computational_free_energy_budget=100.0,
+            current_diffusions=5,
+            remaining_free_energy=10.0,
+            entropy_derivative_delta=v,
+            stagnation_tolerance_epsilon=0.001,
+        )

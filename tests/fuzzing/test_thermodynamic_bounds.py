@@ -80,3 +80,28 @@ def test_thermodynamic_stagnation(
         stagnation_tolerance_epsilon=0.001,
     )
     assert thermo.system_state == ThermodynamicState.ENTROPIC_EXHAUSTION_ORACLE_INTERVENTION
+
+
+@given(
+    max_diff=st.integers(min_value=1, max_value=1000),
+    current_diff=st.integers(min_value=0, max_value=1000),
+    free_energy=st.floats(min_value=0.1, max_value=100.0),
+    delta=st.floats(min_value=0.0011, max_value=10.0),
+    thermo_cid=st.uuids().map(str),
+)
+def test_thermodynamic_active_with_valid_delta(
+    max_diff: int, current_diff: int, free_energy: float, delta: float, thermo_cid: str
+) -> None:
+    if current_diff > max_diff:
+        current_diff = max_diff
+    thermo = ComputationalThermodynamics(
+        thermodynamics_cid=thermo_cid,
+        target_topology_cid="topology-1234",
+        max_stochastic_diffusions=max_diff,
+        computational_free_energy_budget=100.0,
+        current_diffusions=current_diff,
+        remaining_free_energy=free_energy,
+        entropy_derivative_delta=delta,
+        stagnation_tolerance_epsilon=0.001,
+    )
+    assert thermo.system_state == ThermodynamicState.ACTIVE_DIFFUSION
