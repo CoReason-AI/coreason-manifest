@@ -1,3 +1,5 @@
+import sys
+
 # Copyright (c) 2026 CoReason, Inc
 #
 # This software is proprietary and dual-licensed
@@ -7,10 +9,8 @@
 # Commercial use beyond a 30-day trial requires a separate license
 #
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
-
-import sys
 import types
-from typing import Annotated, Any, ForwardRef, TypeAliasType, Union, get_args, get_origin
+from typing import Annotated, Any, ForwardRef, TypeAliasType, Union, get_args, get_origin, get_type_hints
 
 import networkx as nx
 
@@ -89,12 +89,15 @@ def extract_referenced_models(annotation: Any, seen: set | None = None) -> list[
 
 
 for cls_name, cls in CLASS_REGISTRY.items():
-    for field in cls.model_fields.values():
-        referenced_models = extract_referenced_models(field.annotation)
-        for ref_model in referenced_models:
-            if ref_model.__name__ in CLASS_REGISTRY:
-                G.add_edge(cls_name, ref_model.__name__)
-
+    try:
+        hints = get_type_hints(cls, vars(onto), include_extras=True)
+        for resolved_type in hints.values():
+            referenced_models = extract_referenced_models(resolved_type)
+            for ref_model in referenced_models:
+                if ref_model.__name__ in CLASS_REGISTRY:
+                    G.add_edge(cls_name, ref_model.__name__)
+    except Exception as e:
+        print(f"Warning: Failed to resolve type hints for {cls_name}: {e}")
 ROOT_NODES = [
     "WorkflowManifest",
     "EpistemicLedgerState",
