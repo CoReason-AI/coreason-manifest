@@ -16,7 +16,7 @@ from coreason_manifest.spec.ontology import (
 )
 
 
-def test_federated_security_macro():
+def test_federated_security_macro() -> None:
     macro = FederatedSecurityMacroManifest(
         target_endpoint_uri="did:target.com",
         required_clearance=SemanticClassificationProfile.PUBLIC,
@@ -28,35 +28,38 @@ def test_federated_security_macro():
     assert topology.liability_limit_magnitude == 100
 
 
-def test_cognitive_swarm_deployment_macro_majority():
+def test_cognitive_swarm_deployment_macro_majority() -> None:
     macro = CognitiveSwarmDeploymentMacro(
         swarm_objective_prompt="Solve puzzle", agent_node_count=3, consensus_mechanism="majority"
     )
     topology = macro.compile_to_base_topology()
     assert len(topology.nodes) == 4
     assert topology.adjudicator_cid == "did:coreason:adjudicator"
+    assert topology.consensus_policy is not None
     assert topology.consensus_policy.strategy == "majority"
 
 
-def test_cognitive_swarm_deployment_macro_pbft():
+def test_cognitive_swarm_deployment_macro_pbft() -> None:
     macro = CognitiveSwarmDeploymentMacro(
         swarm_objective_prompt="Solve puzzle", agent_node_count=3, consensus_mechanism="pbft"
     )
     topology = macro.compile_to_base_topology()
     assert len(topology.nodes) == 4
+    assert topology.consensus_policy is not None
     assert topology.consensus_policy.strategy == "pbft"
 
 
-def test_cognitive_swarm_deployment_macro_prediction_market():
+def test_cognitive_swarm_deployment_macro_prediction_market() -> None:
     macro = CognitiveSwarmDeploymentMacro(
         swarm_objective_prompt="Solve puzzle", agent_node_count=3, consensus_mechanism="prediction_market"
     )
     topology = macro.compile_to_base_topology()
     assert len(topology.nodes) == 4
+    assert topology.consensus_policy is not None
     assert topology.consensus_policy.strategy == "prediction_market"
 
 
-def test_injectors():
+def test_injectors() -> None:
     schema: dict[str, Any] = {}
     _inject_spatial_cluster(schema)
     assert schema["x-domain-cluster"] == "spatial_kinematics"
