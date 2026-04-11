@@ -29,13 +29,11 @@ def get_all_subclasses(cls):
 EXCLUDED_BASE_CLASSES = {
     "CryptographicProvenanceMixin",
     "BoundedJSONRPCIntent",
-    "AnyToolchainState" # (if implemented as an ABC/union wrapper rather than a concrete node)
+    "AnyToolchainState",  # (if implemented as an ABC/union wrapper rather than a concrete node)
 }
 
 CLASS_REGISTRY = {
-    cls.__name__: cls
-    for cls in get_all_subclasses(onto.CoreasonBaseState)
-    if cls.__name__ not in EXCLUDED_BASE_CLASSES
+    cls.__name__: cls for cls in get_all_subclasses(onto.CoreasonBaseState) if cls.__name__ not in EXCLUDED_BASE_CLASSES
 }
 
 ALIAS_REGISTRY = {name: obj.__value__ for name, obj in vars(onto).items() if isinstance(obj, TypeAliasType)}

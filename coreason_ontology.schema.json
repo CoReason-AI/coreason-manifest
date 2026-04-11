@@ -586,6 +586,13 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents a probabilistic agentic bid in a multi-objective optimization market, factoring in projected compute latency, carbon constraints, and internal epistemic certainty.\n\nCAUSAL AFFORDANCE: Injects a competitive trajectory into the AuctionState order book, seeking authorization from the orchestrator to execute a specific TaskAnnouncementIntent branch.\n\nEPISTEMIC BOUNDS: Geometrically bounded by `estimated_cost_magnitude` (`le=1000000000`), `estimated_latency_ms` (`le=86400000, ge=0`), `estimated_carbon_gco2eq` (`le=10000.0, ge=0.0`), and `confidence_score` (`ge=0.0, le=1.0`). `agent_cid` is a 128-char CID.\n\nMCP ROUTING TRIGGERS: Expected Utility Theory, Multi-Objective Optimization, Epistemic Certainty, Spot Market Bid, Cost Estimation",
       "properties": {
+        "topology_class": {
+          "const": "agent_bid",
+          "default": "agent_bid",
+          "description": "The discriminative topological boundary for agent bid intents.",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "agent_cid": {
           "description": "The NodeCIDState of the bidder.",
           "maxLength": 128,
@@ -803,6 +810,87 @@
         },
         {
           "$ref": "#/$defs/StochasticTopology"
+        }
+      ]
+    },
+    "AnyIntent": {
+      "discriminator": {
+        "mapping": {
+          "agent_bid": "#/$defs/AgentBidIntent",
+          "compute_provisioning": "#/$defs/ComputeProvisioningIntent",
+          "contextual_semantic_resolution": "#/$defs/ContextualSemanticResolutionIntent",
+          "continuous_spatial_mutation": "#/$defs/ContinuousSpatialMutationIntent",
+          "drafting": "#/$defs/DraftingIntent",
+          "escalation": "#/$defs/EscalationIntent",
+          "forced_adjudication": "#/$defs/AdjudicationIntent",
+          "human_directive": "#/$defs/HumanDirectiveIntent",
+          "informational": "#/$defs/SemanticIntent",
+          "latent_projection": "#/$defs/LatentProjectionIntent",
+          "latent_schema_inference": "#/$defs/LatentSchemaInferenceIntent",
+          "ontology_discovery": "#/$defs/OntologyDiscoveryIntent",
+          "quarantine_intent": "#/$defs/QuarantineIntent",
+          "request": "#/$defs/InterventionIntent",
+          "semantic_discovery": "#/$defs/SemanticDiscoveryIntent",
+          "semantic_mapping_proposal": "#/$defs/SemanticMappingHeuristicProposal",
+          "task_announcement": "#/$defs/TaskAnnouncementIntent",
+          "taxonomic_restructure": "#/$defs/TaxonomicRestructureIntent"
+        },
+        "propertyName": "topology_class"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/SemanticIntent"
+        },
+        {
+          "$ref": "#/$defs/DraftingIntent"
+        },
+        {
+          "$ref": "#/$defs/AdjudicationIntent"
+        },
+        {
+          "$ref": "#/$defs/EscalationIntent"
+        },
+        {
+          "$ref": "#/$defs/SemanticDiscoveryIntent"
+        },
+        {
+          "$ref": "#/$defs/TaxonomicRestructureIntent"
+        },
+        {
+          "$ref": "#/$defs/LatentProjectionIntent"
+        },
+        {
+          "$ref": "#/$defs/LatentSchemaInferenceIntent"
+        },
+        {
+          "$ref": "#/$defs/HumanDirectiveIntent"
+        },
+        {
+          "$ref": "#/$defs/ContextualSemanticResolutionIntent"
+        },
+        {
+          "$ref": "#/$defs/OntologyDiscoveryIntent"
+        },
+        {
+          "$ref": "#/$defs/SemanticMappingHeuristicProposal"
+        },
+        {
+          "$ref": "#/$defs/ContinuousSpatialMutationIntent"
+        },
+        {
+          "$ref": "#/$defs/AgentBidIntent"
+        },
+        {
+          "$ref": "#/$defs/ComputeProvisioningIntent"
+        },
+        {
+          "$ref": "#/$defs/TaskAnnouncementIntent"
+        },
+        {
+          "$ref": "#/$defs/QuarantineIntent"
+        },
+        {
+          "$ref": "#/$defs/InterventionIntent"
         }
       ]
     },
@@ -3517,6 +3605,14 @@
           "title": "Intervention Policies",
           "type": "array"
         },
+        "emitted_intents": {
+          "description": "The array of cognitive intents and structural proposals emitted by this agent.",
+          "items": {
+            "$ref": "#/$defs/AnyIntent"
+          },
+          "title": "Emitted Intents",
+          "type": "array"
+        },
         "domain_extensions": {
           "anyOf": [
             {
@@ -3952,6 +4048,13 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formulates a constrained Knapsack Problem for dynamically allocating liquid compute resources based on exact Quality of Service (QoS) priorities and semantic load shedding rules.\n\nCAUSAL AFFORDANCE: Emits a structural demand to the swarm orchestrator to negotiate, acquire, and cryptographically lock the requisite token escrow before allocating kinetic execution cycles to a sub-graph.\n\nEPISTEMIC BOUNDS: Economic velocity is strictly clamped by `max_budget` (`le=1000000000`), physically typed as an integer to prevent floating-point fractures during spot market bidding. The `required_capabilities` array is deterministically sorted by a `@model_validator`.\n\nMCP ROUTING TRIGGERS: Knapsack Optimization, Semantic Load Shedding, Spot Compute Bidding, QoS Classification, Resource Provisioning",
       "properties": {
+        "topology_class": {
+          "const": "compute_provisioning",
+          "default": "compute_provisioning",
+          "description": "The discriminative topological boundary for compute provisioning intents.",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "max_budget": {
           "description": "The maximum atomic cost budget allowable for the provisioned compute.",
           "maximum": 1000000000,
@@ -4515,6 +4618,13 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes an Affine Conflict-free Replicated Data Type (CRDT) to execute Optimistic Concurrency Control across geometric manipulations.\n\nCAUSAL AFFORDANCE: Authorizes a participant to kinetically drag, rotate, or scale a topological node. The orchestrator uses the provided Lamport clock to mathematically resolve Spherical Linear Interpolation (SLERP) and translation collisions between concurrent actors.\n\nEPISTEMIC BOUNDS: The mutation strictly targets a verified `NodeCIDState`. The `lamport_clock` (`ge=0, le=1000000000`) prevents temporal overflow during logical state reconciliation.\n\nMCP ROUTING TRIGGERS: Optimistic Locking, Affine CRDT, Spherical Linear Interpolation, Continuous Reconciliation, Kinematic Drag",
       "properties": {
+        "topology_class": {
+          "const": "continuous_spatial_mutation",
+          "default": "continuous_spatial_mutation",
+          "description": "The discriminative topological boundary for spatial mutation intents.",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "target_node_cid": {
           "$ref": "#/$defs/NodeCIDState",
           "description": "The specific topology vertex undergoing spatial mutation."
@@ -17090,6 +17200,13 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Initiates a Request for Proposal (RFP) within a decentralized Spot Market to dynamically allocate thermodynamic compute based on task complexity.\n\nCAUSAL AFFORDANCE: Triggers an active, non-monotonic bidding phase where eligible Swarm nodes evaluate their internal Q-K matrices to formulate competitive execution bids.\n\nEPISTEMIC BOUNDS: The economic payload is physically capped by `max_budget_magnitude` (`le=1000000000`). The topological routing is strictly constrained if `required_action_space_cid` is defined (optional, `max_length=128`, CID regex). Anchored by a mandatory `task_cid` CID.\n\nMCP ROUTING TRIGGERS: Decentralized Spot Market, Request for Proposal, Thermodynamic Compute Allocation, Algorithmic Mechanism Design, Kinetic Execution Trigger",
       "properties": {
+        "topology_class": {
+          "const": "task_announcement",
+          "default": "task_announcement",
+          "description": "The discriminative topological boundary for task announcement intents.",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "task_cid": {
           "description": "Unique identifier for the required task.",
           "maxLength": 128,
