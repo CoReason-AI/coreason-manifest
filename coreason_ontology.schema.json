@@ -813,87 +813,6 @@
         }
       ]
     },
-    "AnyIntent": {
-      "discriminator": {
-        "mapping": {
-          "agent_bid": "#/$defs/AgentBidIntent",
-          "compute_provisioning": "#/$defs/ComputeProvisioningIntent",
-          "contextual_semantic_resolution": "#/$defs/ContextualSemanticResolutionIntent",
-          "continuous_spatial_mutation": "#/$defs/ContinuousSpatialMutationIntent",
-          "drafting": "#/$defs/DraftingIntent",
-          "escalation": "#/$defs/EscalationIntent",
-          "forced_adjudication": "#/$defs/AdjudicationIntent",
-          "human_directive": "#/$defs/HumanDirectiveIntent",
-          "informational": "#/$defs/SemanticIntent",
-          "latent_projection": "#/$defs/LatentProjectionIntent",
-          "latent_schema_inference": "#/$defs/LatentSchemaInferenceIntent",
-          "ontology_discovery": "#/$defs/OntologyDiscoveryIntent",
-          "quarantine_intent": "#/$defs/QuarantineIntent",
-          "request": "#/$defs/InterventionIntent",
-          "semantic_discovery": "#/$defs/SemanticDiscoveryIntent",
-          "semantic_mapping_proposal": "#/$defs/SemanticMappingHeuristicProposal",
-          "task_announcement": "#/$defs/TaskAnnouncementIntent",
-          "taxonomic_restructure": "#/$defs/TaxonomicRestructureIntent"
-        },
-        "propertyName": "topology_class"
-      },
-      "oneOf": [
-        {
-          "$ref": "#/$defs/SemanticIntent"
-        },
-        {
-          "$ref": "#/$defs/DraftingIntent"
-        },
-        {
-          "$ref": "#/$defs/AdjudicationIntent"
-        },
-        {
-          "$ref": "#/$defs/EscalationIntent"
-        },
-        {
-          "$ref": "#/$defs/SemanticDiscoveryIntent"
-        },
-        {
-          "$ref": "#/$defs/TaxonomicRestructureIntent"
-        },
-        {
-          "$ref": "#/$defs/LatentProjectionIntent"
-        },
-        {
-          "$ref": "#/$defs/LatentSchemaInferenceIntent"
-        },
-        {
-          "$ref": "#/$defs/HumanDirectiveIntent"
-        },
-        {
-          "$ref": "#/$defs/ContextualSemanticResolutionIntent"
-        },
-        {
-          "$ref": "#/$defs/OntologyDiscoveryIntent"
-        },
-        {
-          "$ref": "#/$defs/SemanticMappingHeuristicProposal"
-        },
-        {
-          "$ref": "#/$defs/ContinuousSpatialMutationIntent"
-        },
-        {
-          "$ref": "#/$defs/AgentBidIntent"
-        },
-        {
-          "$ref": "#/$defs/ComputeProvisioningIntent"
-        },
-        {
-          "$ref": "#/$defs/TaskAnnouncementIntent"
-        },
-        {
-          "$ref": "#/$defs/QuarantineIntent"
-        },
-        {
-          "$ref": "#/$defs/InterventionIntent"
-        }
-      ]
-    },
     "AnyNodeProfile": {
       "description": "A discriminated union of all valid workflow nodes.",
       "discriminator": {
@@ -3603,14 +3522,6 @@
             "$ref": "#/$defs/InterventionPolicy"
           },
           "title": "Intervention Policies",
-          "type": "array"
-        },
-        "emitted_intents": {
-          "description": "The array of cognitive intents and structural proposals emitted by this agent.",
-          "items": {
-            "$ref": "#/$defs/AnyIntent"
-          },
-          "title": "Emitted Intents",
           "type": "array"
         },
         "domain_extensions": {
