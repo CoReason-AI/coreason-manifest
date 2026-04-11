@@ -169,6 +169,53 @@
       "title": "ActiveInferenceContract",
       "type": "object"
     },
+    "ActiveInferenceEpoch": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A macroscopic container tracking the directed graph of evolutionary retries across an entire task lifecycle.\n\nCAUSAL AFFORDANCE: Aggregates free energy across multiple EpistemicRejectionReceipts to trigger thermodynamic circuit breakers when convergence fails.\n\nEPISTEMIC BOUNDS: Aggregated free energy must be non-negative. Rejection history is deterministically sorted by receipt_cid for immutable hashing.\n\nMCP ROUTING TRIGGERS: Active Inference Loop, Thermodynamic Circuit Breaker, Epistemic Aggregation, Retry Ledger",
+      "properties": {
+        "epoch_cid": {
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Epoch Cid",
+          "type": "string"
+        },
+        "target_objective_cid": {
+          "anyOf": [
+            {
+              "pattern": "^[a-zA-Z0-9_.:-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Target Objective Cid"
+        },
+        "rejection_history": {
+          "items": {
+            "$ref": "#/$defs/EpistemicRejectionReceipt"
+          },
+          "title": "Rejection History",
+          "type": "array"
+        },
+        "current_free_energy": {
+          "title": "Current Free Energy",
+          "type": "number"
+        },
+        "epoch_status": {
+          "const": "active_inference_loop",
+          "default": "active_inference_loop",
+          "title": "Epoch Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "epoch_cid",
+        "current_free_energy"
+      ],
+      "title": "ActiveInferenceEpoch",
+      "type": "object"
+    },
     "AdjudicationIntent": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Social Choice Theory to resolve the Condorcet Paradox. Triggers a Mixed-Initiative forced resolution to break an epistemic deadlock within a Council topology.\n\nCAUSAL AFFORDANCE: Halts the active execution DAG and forces an external oracle (human or system) to act as a Dictatorial tie-breaker, definitively collapsing the probability wave of competing claims in a Multi-Criteria Decision Analysis (MCDA) framework.\n\nEPISTEMIC BOUNDS: The state space is bounded by `deadlocked_claims` (`min_length=2, max_length=86400000`). The `resolution_schema` is mathematically bounded against recursive JSON-bombing by the `enforce_payload_topology` hook, physically preventing Automata Intersection deadlocks.\n\nMCP ROUTING TRIGGERS: Social Choice Theory, Condorcet Paradox, MCDA Deadlock, Dictatorial Resolution, Tie-Breaking Heuristic",
@@ -733,6 +780,23 @@
         },
         {
           "$ref": "#/$defs/EphemeralNamespacePartitionState"
+        }
+      ]
+    },
+    "AnyExplorationBranch": {
+      "discriminator": {
+        "mapping": {
+          "stochastic_ensemble": "#/$defs/StochasticTopology",
+          "thought_branch": "#/$defs/ThoughtBranchState"
+        },
+        "propertyName": "topology_class"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/ThoughtBranchState"
+        },
+        {
+          "$ref": "#/$defs/StochasticTopology"
         }
       ]
     },
@@ -3716,6 +3780,73 @@
       "title": "CompositeNodeProfile",
       "type": "object"
     },
+    "ComputationalThermodynamics": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The macroscopic envelope that tracks the thermodynamic cost of stochastic ideation and violently halts execution when energy budgets or spatial limits are depleted.\n\nCAUSAL AFFORDANCE: Operates as the absolute mathematical circuit breaker for MCTS DAG expansion, physically revoking generative privileges if thresholds are breached.\n\nEPISTEMIC BOUNDS: Bounded by strict topological limits: max_stochastic_diffusions (ge=1) and computational_free_energy_budget (ge=0.0). current_diffusions must be strictly <= max_stochastic_diffusions.\n\nMCP ROUTING TRIGGERS: Computational Thermodynamics, Spatial Circuit Breaker, MCTS Halting, Epistemic Bounding, Thermodynamic Cost",
+      "properties": {
+        "thermodynamics_cid": {
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Thermodynamics Cid",
+          "type": "string"
+        },
+        "target_topology_cid": {
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Target Topology Cid",
+          "type": "string"
+        },
+        "max_stochastic_diffusions": {
+          "minimum": 1,
+          "title": "Max Stochastic Diffusions",
+          "type": "integer"
+        },
+        "computational_free_energy_budget": {
+          "minimum": 0.0,
+          "title": "Computational Free Energy Budget",
+          "type": "number"
+        },
+        "current_diffusions": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Current Diffusions",
+          "type": "integer"
+        },
+        "remaining_free_energy": {
+          "title": "Remaining Free Energy",
+          "type": "number"
+        },
+        "entropy_derivative_delta": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Entropy Derivative Delta"
+        },
+        "stagnation_tolerance_epsilon": {
+          "default": 0.001,
+          "minimum": 0.0,
+          "title": "Stagnation Tolerance Epsilon",
+          "type": "number"
+        },
+        "system_state": {
+          "$ref": "#/$defs/ThermodynamicState",
+          "default": "ACTIVE_DIFFUSION"
+        }
+      },
+      "required": [
+        "thermodynamics_cid",
+        "target_topology_cid",
+        "max_stochastic_diffusions",
+        "computational_free_energy_budget",
+        "remaining_free_energy"
+      ],
+      "title": "ComputationalThermodynamics",
+      "type": "object"
+    },
     "ComputeEngineProfile": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Acts as the liquid compute substrate abstraction, defining the\nfoundational LLM matrix available on the Spot Market for dynamic routing. As a ...Profile\nsuffix, this is a declarative, frozen snapshot of a compute geometry.\n\nCAUSAL AFFORDANCE: Projects the physical LLM capabilities, contextual memory constraints,\nand thermodynamic rate cards (ComputeRateContract) into the orchestrator's active routing\nmanifold, allowing cost-aware topological planning.\n\nEPISTEMIC BOUNDS: The token working memory is mathematically bounded by\ncontext_window_size (le=1000000000). To guarantee RFC 8785 canonical hashing across\ndisparate nodes, the capabilities and supported_functional_experts arrays are strictly\nsorted at instantiation via @model_validator.\n\nMCP ROUTING TRIGGERS: Liquid Compute, Spot Market Routing, Foundation Model Matrix,\nThermodynamic Rate Card, Substrate Abstraction",
@@ -4727,6 +4858,27 @@
         "blending_factor"
       ],
       "title": "CrossoverPolicy",
+      "type": "object"
+    },
+    "CryptographicProvenanceMixin": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A foundational base class/mixin for all future deterministic nodes, enforcing Homotopy Type Theory (HoTT) principles where execution identity is indistinguishable from causal path equivalence.\n\nCAUSAL AFFORDANCE: Binds the execution artifact directly to the projection intent, severing execution if the hash chain to the stochastic origin is broken.\n\nEPISTEMIC BOUNDS: Enforces an immutable cryptographic link via `provenance_trace_cid` matching a strict CID regex pattern.\n\nMCP ROUTING TRIGGERS: Homotopy Type Theory, Cryptographic Provenance, Execution Causal Chain, Merkle-DAG Identity, Path Equivalence",
+      "properties": {
+        "provenance_trace_cid": {
+          "anyOf": [
+            {
+              "pattern": "^[a-zA-Z0-9_.:-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provenance Trace Cid"
+        }
+      },
+      "title": "CryptographicProvenanceMixin",
       "type": "object"
     },
     "CrystallizationPolicy": {
@@ -7316,6 +7468,45 @@
       "title": "EpistemicQuarantineSnapshot",
       "type": "object"
     },
+    "EpistemicRejectionReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The mathematical backpropagation signal triggered when the Deterministic Compiler rejects a stochastic manifold. Quantifies the rejection and provides a mutation gradient.\n\nCAUSAL AFFORDANCE: Instructs the LLM ensemble on how to perturb the Upper Confidence Bound (UCB) during the next MCTS generation attempt by mathematically quantifying the error.\n\nEPISTEMIC BOUNDS: Kullback-Leibler divergence is strictly non-negative. A negative mathematical distance is a paradox and raises a ValueError.\n\nMCP ROUTING TRIGGERS: Rejection Receipt, Free Energy Feedback, MCTS Backpropagation, Variational Free Energy, Mutation Gradient",
+      "properties": {
+        "receipt_cid": {
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Receipt Cid",
+          "type": "string"
+        },
+        "failed_projection_cid": {
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Failed Projection Cid",
+          "type": "string"
+        },
+        "violated_algebraic_constraint": {
+          "maxLength": 2000,
+          "title": "Violated Algebraic Constraint",
+          "type": "string"
+        },
+        "kl_divergence_to_validity": {
+          "title": "Kl Divergence To Validity",
+          "type": "number"
+        },
+        "stochastic_mutation_gradient": {
+          "maxLength": 100000,
+          "title": "Stochastic Mutation Gradient",
+          "type": "string"
+        }
+      },
+      "required": [
+        "receipt_cid",
+        "failed_projection_cid",
+        "violated_algebraic_constraint",
+        "kl_divergence_to_validity",
+        "stochastic_mutation_gradient"
+      ],
+      "title": "EpistemicRejectionReceipt",
+      "type": "object"
+    },
     "EpistemicRewardModelPolicy": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes the Group Relative Policy Optimization (GRPO) reward shaping ruleset, mathematically immunizing the swarm against Goodhart's Law and reward hacking.\n\nCAUSAL AFFORDANCE: Projects a continuous penalty/reward gradient across extracted axiomatic paths, enforcing syntactic compliance through the format contract while simultaneously evaluating semantic/topological validity.\n\nEPISTEMIC BOUNDS: Prevents reward hacking by scaling the logical validity score (R_path) via the `beta_path_weight` scalar (`ge=0.0, le=1.0`). Gated by a cryptographic `reference_graph_cid` CID.\n\nMCP ROUTING TRIGGERS: GRPO, Reward Shaping, Goodhart's Law, Policy Gradient, Advantage Estimation",
@@ -9868,6 +10059,64 @@
       "title": "HypothesisStakeReceipt",
       "type": "object"
     },
+    "HypothesisSuperposition": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Maintains the quantum-like probability mass of mutually exclusive semantic manifolds, delaying wave collapse until deterministically evaluated.\n\nCAUSAL AFFORDANCE: Delays premature wave collapse by preserving competing hypotheses and their precise statistical probability mass.\n\nEPISTEMIC BOUNDS: Mathematically asserts that the sum of competing_manifolds probabilities is <= 1.0. Enforces deterministic sorting of residual_entropy_vectors for RFC 8785 compliance.\n\nMCP ROUTING TRIGGERS: Hypothesis Superposition, Wave Collapse, Probability Mass, Defeasible Superposition",
+      "properties": {
+        "superposition_cid": {
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Superposition Cid",
+          "type": "string"
+        },
+        "competing_manifolds": {
+          "additionalProperties": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "type": "number"
+          },
+          "propertyNames": {
+            "maxLength": 128
+          },
+          "title": "Competing Manifolds",
+          "type": "object"
+        },
+        "wave_collapse_function": {
+          "enum": [
+            "plurality_vote",
+            "highest_confidence",
+            "deterministic_compiler"
+          ],
+          "title": "Wave Collapse Function",
+          "type": "string"
+        },
+        "residual_entropy_vectors": {
+          "items": {
+            "maxLength": 100000,
+            "type": "string"
+          },
+          "title": "Residual Entropy Vectors",
+          "type": "array"
+        }
+      },
+      "required": [
+        "superposition_cid",
+        "competing_manifolds",
+        "wave_collapse_function"
+      ],
+      "title": "HypothesisSuperposition",
+      "type": "object"
+    },
+    "IdeationPhase": {
+      "description": "AGENT INSTRUCTION: Categorizes the thermodynamic phase of the generative ensemble's exploration.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator on the execution status of the topology, governing state transitions.\n\nEPISTEMIC BOUNDS: Strictly bounded to the predefined string enumeration values.\n\nMCP ROUTING TRIGGERS: Phase Tracking, Thermodynamic Orchestration, State Machine",
+      "enum": [
+        "STOCHASTIC_DIFFUSION",
+        "ENTROPIC_EXPLORATION",
+        "TOPOLOGICAL_CRITIQUE",
+        "MANIFOLD_COLLAPSE"
+      ],
+      "title": "IdeationPhase",
+      "type": "string"
+    },
     "IllocutionaryForceProfile": {
       "description": "AGENT INSTRUCTION: Mathematically categorizes the structural intent of a proposition to prevent reasoning agents from hallucinating contextual truth values. Dictates whether the swarm evaluates the node as an empirical fact, a normative constraint, a guaranteed promise, or a simulation.",
       "enum": [
@@ -11003,7 +11252,7 @@
         "explored_branches": {
           "description": "All logical paths the agent attempted within this Ephemeral Epistemic Quarantine—a volatile workspace where probability waves collapse before being committed to the immutable ledger.",
           "items": {
-            "$ref": "#/$defs/ThoughtBranchState"
+            "$ref": "#/$defs/AnyExplorationBranch"
           },
           "title": "Explored Branches",
           "type": "array"
@@ -16249,6 +16498,107 @@
       "title": "SteadyStateHypothesisState",
       "type": "object"
     },
+    "StochasticStateNode": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A single discrete latent coordinate (a generated hypothesis or critique) inside an unverified stochastic diffusion search space.\n\nCAUSAL AFFORDANCE: Used by the ensemble as a vertex to map out Monte Carlo Tree Search (MCTS) exploration before manifold collapse.\n\nEPISTEMIC BOUNDS: epistemic_entropy is mathematically clamped to `[0.0, 1.0]` bounds (Shannon entropy).\n\nMCP ROUTING TRIGGERS: Latent Space Coordinates, MCTS Nodes, Shannon Entropy Bounding",
+      "properties": {
+        "node_cid": {
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Node Cid",
+          "type": "string"
+        },
+        "parent_node_cid": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Parent Node Cid"
+        },
+        "agent_role": {
+          "enum": [
+            "generator",
+            "critic",
+            "synthesizer"
+          ],
+          "title": "Agent Role",
+          "type": "string"
+        },
+        "stochastic_tensor": {
+          "description": "Unbounded semantic payload",
+          "maxLength": 100000,
+          "title": "Stochastic Tensor",
+          "type": "string"
+        },
+        "epistemic_entropy": {
+          "title": "Epistemic Entropy",
+          "type": "number"
+        }
+      },
+      "required": [
+        "node_cid",
+        "agent_role",
+        "stochastic_tensor",
+        "epistemic_entropy"
+      ],
+      "title": "StochasticStateNode",
+      "type": "object"
+    },
+    "StochasticTopology": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The structurally unbounded root container modeling multi-agent generative reasoning as a Topological DAG.\n\nCAUSAL AFFORDANCE: Holds unverified, high-variance semantic coordinates and manages MCTS execution.\n\nEPISTEMIC BOUNDS: Inherently enforces referential integrity for acyclic DAG sorting via `verify_acyclic_dag_integrity`. `epistemic_status` is locked strictly to 'stochastically_unbounded'.\n\nMCP ROUTING TRIGGERS: Directed Acyclic Graphs, Topological MCTS Container, Epistemic Immutability, Acyclic Integrity",
+      "properties": {
+        "topology_cid": {
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Topology Cid",
+          "type": "string"
+        },
+        "topology_class": {
+          "const": "stochastic_ensemble",
+          "default": "stochastic_ensemble",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "phase": {
+          "$ref": "#/$defs/IdeationPhase"
+        },
+        "stochastic_graph": {
+          "items": {
+            "$ref": "#/$defs/StochasticStateNode"
+          },
+          "title": "Stochastic Graph",
+          "type": "array"
+        },
+        "superposition": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HypothesisSuperposition"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "epistemic_status": {
+          "const": "stochastically_unbounded",
+          "default": "stochastically_unbounded",
+          "title": "Epistemic Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "topology_cid",
+        "phase",
+        "stochastic_graph"
+      ],
+      "title": "StochasticTopology",
+      "type": "object"
+    },
     "StreamingDisfluencyContract": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements non-monotonic disfluency and \"forget gate\" triggers to repair continuous ingestion streams.\n\nCAUSAL AFFORDANCE: Triggers the orchestrator to excise or repair segments of the token stream when the `repair_marker_regex` matches, probabilistically governed by the `decay_threshold`.\n\nEPISTEMIC BOUNDS: `repair_marker_regex` is strictly capped at `max_length=2000` to prevent ReDoS CPU exhaustion. `decay_threshold` geometrically bounded (`ge=0.0, le=1.0`). Maximum temporal lookback clamped (`ge=0, le=1000000000`).\n\nMCP ROUTING TRIGGERS: Streaming Disfluency, Forget Gate, Token Excise, Sequence Repair, Temporal Lookback",
@@ -16634,6 +16984,16 @@
         "graph_convolutional_flattening"
       ],
       "title": "TabularEncodingProfile",
+      "type": "string"
+    },
+    "TargetTopologyEnum": {
+      "enum": [
+        "N_DIMENSIONAL_TENSOR",
+        "MARKOV_BLANKET",
+        "ACYCLIC_DIRECTED_GRAPH",
+        "ALGEBRAIC_RING"
+      ],
+      "title": "TargetTopologyEnum",
       "type": "string"
     },
     "TaskAnnouncementIntent": {
@@ -17260,6 +17620,15 @@
       "title": "TheoryOfMindSnapshot",
       "type": "object"
     },
+    "ThermodynamicState": {
+      "description": "AGENT INSTRUCTION: A rigid string enumeration mapping the kinetic liveness of the computational budget.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator on whether the thermodynamic search envelope is active or mathematically depleted.\n\nEPISTEMIC BOUNDS: Strictly bounded to the explicit kinetic states ACTIVE_DIFFUSION and ENTROPIC_EXHAUSTION_ORACLE_INTERVENTION.\n\nMCP ROUTING TRIGGERS: Thermodynamic State, Budget Envelope, MCTS Liveness, Entropy Tracking",
+      "enum": [
+        "ACTIVE_DIFFUSION",
+        "ENTROPIC_EXHAUSTION_ORACLE_INTERVENTION"
+      ],
+      "title": "ThermodynamicState",
+      "type": "string"
+    },
     "ThoughtBranchState": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative, frozen snapshot of a discrete Markov Decision Process\n(MDP) state representing a single coordinate within a non-monotonic reasoning tree. As\na ...State suffix, this is a frozen N-dimensional coordinate.\n\nCAUSAL AFFORDANCE: Tracks a localized reasoning trajectory, enabling the orchestrator's\nProcess Reward Model (PRM) to score the branch and dictate if the traversal should\nrecursively backtrack or continue. Tree reconstruction is enabled via the optional\nparent_branch_cid.\n\nEPISTEMIC BOUNDS: The mathematical validity of the branch is continuously clamped by\nprm_score (optional, ge=0.0, le=1.0, default=None). The node is cryptographically\nanchored to the execution tree via latent_content_hash (strict SHA-256 pattern\n^[a-f0-9]{64}$). The branch_cid is locked to a 128-char CID.\n\nMCP ROUTING TRIGGERS: Markov Decision Process, Process Reward Model, Reasoning Node,\nHeuristic Search, Backtracking",
@@ -17310,6 +17679,12 @@
           "default": null,
           "description": "The logical validity score assigned to this branch by the Process Reward Model.",
           "title": "Prm Score"
+        },
+        "topology_class": {
+          "const": "thought_branch",
+          "default": "thought_branch",
+          "title": "Topology Class",
+          "type": "string"
         }
       },
       "required": [
@@ -17522,6 +17897,65 @@
         "surrounding_token_density"
       ],
       "title": "TopologicalFidelityReceipt",
+      "type": "object"
+    },
+    "TopologicalProjectionIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The transitional mathematical contract that calculates the Gromov-Wasserstein distance and authorizes or denies the collapse of a stochastic manifold into a deterministic structure.\n\nCAUSAL AFFORDANCE: Calculates optimal transport mapping and either authorizes downstream kinetic execution or rejects the transition due to topology tears.\n\nEPISTEMIC BOUNDS: Enforces a strict isomorphism confidence interval [0.0, 1.0], acting as a hardware-level guillotine that mandates a minimum 0.85 threshold.\n\nMCP ROUTING TRIGGERS: Gromov-Wasserstein Distance, Topological Compiler, Optimal Transport Mapping, Manifold Collapse, Deterministic Projection",
+      "properties": {
+        "provenance_trace_cid": {
+          "anyOf": [
+            {
+              "pattern": "^[a-zA-Z0-9_.:-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provenance Trace Cid"
+        },
+        "projection_cid": {
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Projection Cid",
+          "type": "string"
+        },
+        "source_superposition_cid": {
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Source Superposition Cid",
+          "type": "string"
+        },
+        "target_topology": {
+          "$ref": "#/$defs/TargetTopologyEnum"
+        },
+        "isomorphism_confidence": {
+          "title": "Isomorphism Confidence",
+          "type": "number"
+        },
+        "lossy_translation_divergence": {
+          "items": {
+            "maxLength": 100000,
+            "type": "string"
+          },
+          "title": "Lossy Translation Divergence",
+          "type": "array"
+        },
+        "epistemic_status": {
+          "const": "pending_deterministic_collapse",
+          "default": "pending_deterministic_collapse",
+          "title": "Epistemic Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "projection_cid",
+        "source_superposition_cid",
+        "target_topology",
+        "isomorphism_confidence",
+        "lossy_translation_divergence"
+      ],
+      "title": "TopologicalProjectionIntent",
       "type": "object"
     },
     "TopologicalRetrievalContract": {

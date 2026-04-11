@@ -647,6 +647,297 @@ class CoreasonBaseState(BaseModel):
 T = typing.TypeVar("T")
 
 
+class IdeationPhase(StrEnum):
+    """
+    AGENT INSTRUCTION: Categorizes the thermodynamic phase of the generative ensemble's exploration.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator on the execution status of the topology, governing state transitions.
+
+    EPISTEMIC BOUNDS: Strictly bounded to the predefined string enumeration values.
+
+    MCP ROUTING TRIGGERS: Phase Tracking, Thermodynamic Orchestration, State Machine
+    """
+
+    STOCHASTIC_DIFFUSION = "STOCHASTIC_DIFFUSION"
+    ENTROPIC_EXPLORATION = "ENTROPIC_EXPLORATION"
+    TOPOLOGICAL_CRITIQUE = "TOPOLOGICAL_CRITIQUE"
+    MANIFOLD_COLLAPSE = "MANIFOLD_COLLAPSE"
+
+
+class StochasticStateNode(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A single discrete latent coordinate (a generated hypothesis or critique) inside an unverified stochastic diffusion search space.
+
+    CAUSAL AFFORDANCE: Used by the ensemble as a vertex to map out Monte Carlo Tree Search (MCTS) exploration before manifold collapse.
+
+    EPISTEMIC BOUNDS: epistemic_entropy is mathematically clamped to `[0.0, 1.0]` bounds (Shannon entropy).
+
+    MCP ROUTING TRIGGERS: Latent Space Coordinates, MCTS Nodes, Shannon Entropy Bounding
+    """
+
+    node_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
+    parent_node_cid: str | None = Field(default=None)
+    agent_role: Literal["generator", "critic", "synthesizer"] = Field()
+    stochastic_tensor: Annotated[str, StringConstraints(max_length=100000)] = Field(
+        description="Unbounded semantic payload"
+    )
+    epistemic_entropy: float = Field()
+
+    @field_validator("epistemic_entropy", mode="after")
+    @classmethod
+    def enforce_entropy_bounds(cls, v: float) -> float:
+        if not (0.0 <= v <= 1.0):
+            raise ValueError("epistemic_entropy must be strictly between 0.0 and 1.0 (Shannon entropy limits)")
+        return v
+
+
+class HypothesisSuperposition(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Maintains the quantum-like probability mass of mutually exclusive semantic manifolds, delaying wave collapse until deterministically evaluated.
+
+    CAUSAL AFFORDANCE: Delays premature wave collapse by preserving competing hypotheses and their precise statistical probability mass.
+
+    EPISTEMIC BOUNDS: Mathematically asserts that the sum of competing_manifolds probabilities is <= 1.0. Enforces deterministic sorting of residual_entropy_vectors for RFC 8785 compliance.
+
+    MCP ROUTING TRIGGERS: Hypothesis Superposition, Wave Collapse, Probability Mass, Defeasible Superposition
+    """
+
+    superposition_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
+    competing_manifolds: dict[
+        Annotated[str, StringConstraints(max_length=128)], Annotated[float, Field(ge=0.0, le=1.0)]
+    ]
+    wave_collapse_function: Literal["plurality_vote", "highest_confidence", "deterministic_compiler"]
+    residual_entropy_vectors: list[Annotated[str, StringConstraints(max_length=100000)]] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def enforce_conservation_of_probability(self) -> Self:
+        total_prob = sum(self.competing_manifolds.values())
+        if total_prob > 1.0 + 1e-9:
+            raise ValueError(
+                f"Conservation of Probability violated: sum of competing_manifolds probabilities ({total_prob}) > 1.0"
+            )
+        return self
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "residual_entropy_vectors", sorted(self.residual_entropy_vectors))
+        return self
+
+
+class StochasticTopology(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: The structurally unbounded root container modeling multi-agent generative reasoning as a Topological DAG.
+
+    CAUSAL AFFORDANCE: Holds unverified, high-variance semantic coordinates and manages MCTS execution.
+
+    EPISTEMIC BOUNDS: Inherently enforces referential integrity for acyclic DAG sorting via `verify_acyclic_dag_integrity`. `epistemic_status` is locked strictly to 'stochastically_unbounded'.
+
+    MCP ROUTING TRIGGERS: Directed Acyclic Graphs, Topological MCTS Container, Epistemic Immutability, Acyclic Integrity
+    """
+
+    topology_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
+    topology_class: Literal["stochastic_ensemble"] = Field(default="stochastic_ensemble")
+    phase: IdeationPhase = Field()
+    stochastic_graph: list[StochasticStateNode] = Field()
+    superposition: HypothesisSuperposition | None = Field(default=None)
+    epistemic_status: Literal["stochastically_unbounded"] = Field(default="stochastically_unbounded")
+
+    @model_validator(mode="after")
+    def verify_acyclic_dag_integrity(self) -> Self:
+        seen_cids = set()
+        for node in self.stochastic_graph:
+            if node.parent_node_cid is not None and node.parent_node_cid not in seen_cids:
+                raise ValueError(
+                    f"Topological Violation: parent_node_cid '{node.parent_node_cid}' "
+                    f"must appear before child node '{node.node_cid}' to prevent infinite cycles."
+                )
+            seen_cids.add(node.node_cid)
+        return self
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "stochastic_graph", sorted(self.stochastic_graph, key=operator.attrgetter("node_cid")))
+        return self
+
+
+class TargetTopologyEnum(StrEnum):
+    N_DIMENSIONAL_TENSOR = "N_DIMENSIONAL_TENSOR"
+    MARKOV_BLANKET = "MARKOV_BLANKET"
+    ACYCLIC_DIRECTED_GRAPH = "ACYCLIC_DIRECTED_GRAPH"
+    ALGEBRAIC_RING = "ALGEBRAIC_RING"
+
+
+class CryptographicProvenanceMixin(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A foundational base class/mixin for all future deterministic nodes, enforcing Homotopy Type Theory (HoTT) principles where execution identity is indistinguishable from causal path equivalence.
+
+    CAUSAL AFFORDANCE: Binds the execution artifact directly to the projection intent, severing execution if the hash chain to the stochastic origin is broken.
+
+    EPISTEMIC BOUNDS: Enforces an immutable cryptographic link via `provenance_trace_cid` matching a strict CID regex pattern.
+
+    MCP ROUTING TRIGGERS: Homotopy Type Theory, Cryptographic Provenance, Execution Causal Chain, Merkle-DAG Identity, Path Equivalence
+    """
+
+    provenance_trace_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")] | None = Field(default=None)
+
+
+class TopologicalProjectionIntent(CryptographicProvenanceMixin):
+    """
+    AGENT INSTRUCTION: The transitional mathematical contract that calculates the Gromov-Wasserstein distance and authorizes or denies the collapse of a stochastic manifold into a deterministic structure.
+
+    CAUSAL AFFORDANCE: Calculates optimal transport mapping and either authorizes downstream kinetic execution or rejects the transition due to topology tears.
+
+    EPISTEMIC BOUNDS: Enforces a strict isomorphism confidence interval [0.0, 1.0], acting as a hardware-level guillotine that mandates a minimum 0.85 threshold.
+
+    MCP ROUTING TRIGGERS: Gromov-Wasserstein Distance, Topological Compiler, Optimal Transport Mapping, Manifold Collapse, Deterministic Projection
+    """
+
+    projection_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
+    source_superposition_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
+    target_topology: TargetTopologyEnum
+    isomorphism_confidence: float
+    lossy_translation_divergence: list[Annotated[str, StringConstraints(max_length=100000)]]
+    epistemic_status: Literal["pending_deterministic_collapse"] = Field(default="pending_deterministic_collapse")
+
+    @field_validator("isomorphism_confidence", mode="after")
+    @classmethod
+    def enforce_isomorphism_guillotine(cls, v: float) -> float:
+        if not (0.0 <= v <= 1.0):
+            raise ValueError("isomorphism_confidence must be between 0.0 and 1.0")
+        if v < 0.85:
+            raise ValueError(
+                f"Isomorphism Guillotine triggered: Confidence {v} is below the 0.85 threshold. Lossy translation corruption detected."
+            )
+        return v
+
+
+class EpistemicRejectionReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: The mathematical backpropagation signal triggered when the Deterministic Compiler rejects a stochastic manifold. Quantifies the rejection and provides a mutation gradient.
+
+    CAUSAL AFFORDANCE: Instructs the LLM ensemble on how to perturb the Upper Confidence Bound (UCB) during the next MCTS generation attempt by mathematically quantifying the error.
+
+    EPISTEMIC BOUNDS: Kullback-Leibler divergence is strictly non-negative. A negative mathematical distance is a paradox and raises a ValueError.
+
+    MCP ROUTING TRIGGERS: Rejection Receipt, Free Energy Feedback, MCTS Backpropagation, Variational Free Energy, Mutation Gradient
+    """
+
+    receipt_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
+    failed_projection_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
+    violated_algebraic_constraint: Annotated[str, StringConstraints(max_length=2000)]
+    kl_divergence_to_validity: float
+    stochastic_mutation_gradient: Annotated[str, StringConstraints(max_length=100000)]
+
+    @field_validator("kl_divergence_to_validity", mode="after")
+    @classmethod
+    def enforce_kl_divergence_physics(cls, v: float) -> float:
+        if math.isnan(v) or math.isinf(v):
+            raise ValueError(f"Mathematical paradox: KL Divergence cannot be {v}")
+        if v < 0.0:
+            raise ValueError(f"Mathematical paradox: Negative information distance detected (v={v}).")
+        return v
+
+
+class ActiveInferenceEpoch(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A macroscopic container tracking the directed graph of evolutionary retries across an entire task lifecycle.
+
+    CAUSAL AFFORDANCE: Aggregates free energy across multiple EpistemicRejectionReceipts to trigger thermodynamic circuit breakers when convergence fails.
+
+    EPISTEMIC BOUNDS: Aggregated free energy must be non-negative. Rejection history is deterministically sorted by receipt_cid for immutable hashing.
+
+    MCP ROUTING TRIGGERS: Active Inference Loop, Thermodynamic Circuit Breaker, Epistemic Aggregation, Retry Ledger
+    """
+
+    epoch_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
+    target_objective_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")] | None = Field(default=None)
+    rejection_history: list[EpistemicRejectionReceipt] = Field(default_factory=list)
+    current_free_energy: float
+    epoch_status: Literal["active_inference_loop"] = Field(default="active_inference_loop")
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(
+            self, "rejection_history", sorted(self.rejection_history, key=operator.attrgetter("receipt_cid"))
+        )
+        return self
+
+    @model_validator(mode="after")
+    def validate_free_energy_aggregation(self) -> Self:
+        if math.isnan(self.current_free_energy) or math.isinf(self.current_free_energy):
+            raise ValueError(f"Mathematical paradox: Free Energy cannot be {self.current_free_energy}")
+        if self.current_free_energy < 0.0:
+            raise ValueError(f"Mathematical paradox: Negative free energy detected (v={self.current_free_energy}).")
+        return self
+
+
+class ThermodynamicState(StrEnum):
+    """
+    AGENT INSTRUCTION: A rigid string enumeration mapping the kinetic liveness of the computational budget.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator on whether the thermodynamic search envelope is active or mathematically depleted.
+
+    EPISTEMIC BOUNDS: Strictly bounded to the explicit kinetic states ACTIVE_DIFFUSION and ENTROPIC_EXHAUSTION_ORACLE_INTERVENTION.
+
+    MCP ROUTING TRIGGERS: Thermodynamic State, Budget Envelope, MCTS Liveness, Entropy Tracking
+    """
+
+    ACTIVE_DIFFUSION = "ACTIVE_DIFFUSION"
+    ENTROPIC_EXHAUSTION_ORACLE_INTERVENTION = "ENTROPIC_EXHAUSTION_ORACLE_INTERVENTION"
+
+
+class ComputationalThermodynamics(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: The macroscopic envelope that tracks the thermodynamic cost of stochastic ideation and violently halts execution when energy budgets or spatial limits are depleted.
+
+    CAUSAL AFFORDANCE: Operates as the absolute mathematical circuit breaker for MCTS DAG expansion, physically revoking generative privileges if thresholds are breached.
+
+    EPISTEMIC BOUNDS: Bounded by strict topological limits: max_stochastic_diffusions (ge=1) and computational_free_energy_budget (ge=0.0). current_diffusions must be strictly <= max_stochastic_diffusions.
+
+    MCP ROUTING TRIGGERS: Computational Thermodynamics, Spatial Circuit Breaker, MCTS Halting, Epistemic Bounding, Thermodynamic Cost
+    """
+
+    thermodynamics_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
+    target_topology_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
+    max_stochastic_diffusions: int = Field(ge=1)
+    computational_free_energy_budget: float = Field(ge=0.0)
+    current_diffusions: int = Field(default=0, ge=0)
+    remaining_free_energy: float
+    entropy_derivative_delta: float | None = Field(default=None)
+    stagnation_tolerance_epsilon: float = Field(default=0.001, ge=0.0)
+    system_state: ThermodynamicState = Field(default=ThermodynamicState.ACTIVE_DIFFUSION)
+
+    @model_validator(mode="after")
+    def validate_thermodynamic_circuit_breaker(self) -> Self:
+        import math
+
+        if self.current_diffusions > self.max_stochastic_diffusions:
+            raise ValueError("Topological Fracture: current_diffusions strictly exceeds max_stochastic_diffusions.")
+
+        # Trap NaN / Infinity to prevent circuit breaker bypass
+        if math.isnan(self.remaining_free_energy) or math.isinf(self.remaining_free_energy):
+            raise ValueError("Mathematical Paradox: remaining_free_energy cannot be NaN or Infinity.")
+
+        if self.entropy_derivative_delta is not None and (
+            math.isnan(self.entropy_derivative_delta) or math.isinf(self.entropy_derivative_delta)
+        ):
+            raise ValueError("Mathematical Paradox: entropy_derivative_delta cannot be NaN or Infinity.")
+
+        # Circuit Breaker 1: Absolute Energy Depletion
+        if self.remaining_free_energy <= 0.0:
+            object.__setattr__(self, "system_state", ThermodynamicState.ENTROPIC_EXHAUSTION_ORACLE_INTERVENTION)
+            return self
+
+        # Circuit Breaker 2: Thermodynamic Stagnation (Flat Loss Gradient)
+        if (
+            self.entropy_derivative_delta is not None
+            and abs(self.entropy_derivative_delta) < self.stagnation_tolerance_epsilon
+        ):
+            object.__setattr__(self, "system_state", ThermodynamicState.ENTROPIC_EXHAUSTION_ORACLE_INTERVENTION)
+
+        return self
+
+
 class TraceContextState(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Implements Distributed Causality using Vector Clocks and rho-calculus. It forms the foundational causality boundary.
@@ -2711,6 +3002,10 @@ class ThoughtBranchState(CoreasonBaseState):
         le=1.0,
         description="The logical validity score assigned to this branch by the Process Reward Model.",
     )
+    topology_class: Literal["thought_branch"] = Field(default="thought_branch")
+
+
+type AnyExplorationBranch = Annotated[ThoughtBranchState | StochasticTopology, Field(discriminator="topology_class")]
 
 
 class LatentScratchpadReceipt(CoreasonBaseState):
@@ -2736,7 +3031,7 @@ class LatentScratchpadReceipt(CoreasonBaseState):
     trace_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
         description="A Content Identifier (CID) bounding this ephemeral test-time execution tree.",
     )
-    explored_branches: list[ThoughtBranchState] = Field(
+    explored_branches: list[AnyExplorationBranch] = Field(
         description="All logical paths the agent attempted within this Ephemeral Epistemic Quarantine—a volatile workspace where probability waves collapse before being committed to the immutable ledger."
     )
     discarded_branches: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
@@ -2754,7 +3049,10 @@ class LatentScratchpadReceipt(CoreasonBaseState):
 
     @model_validator(mode="after")
     def verify_referential_integrity(self) -> Self:
-        explored_branch_cids = {branch.branch_cid for branch in self.explored_branches}
+        explored_branch_cids = {
+            getattr(branch, "branch_cid", getattr(branch, "topology_cid", "unknown"))
+            for branch in self.explored_branches
+        }
         if self.resolution_branch_cid is not None and self.resolution_branch_cid not in explored_branch_cids:
             raise ValueError(f"resolution_branch_cid '{self.resolution_branch_cid}' not found in explored_branches.")
         for discarded_cid in self.discarded_branches:
@@ -2765,7 +3063,12 @@ class LatentScratchpadReceipt(CoreasonBaseState):
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(
-            self, "explored_branches", sorted(self.explored_branches, key=operator.attrgetter("branch_cid"))
+            self,
+            "explored_branches",
+            sorted(
+                self.explored_branches,
+                key=lambda branch: getattr(branch, "branch_cid", getattr(branch, "topology_cid", "unknown")),
+            ),
         )
         object.__setattr__(self, "discarded_branches", sorted(self.discarded_branches))
         return self
@@ -13178,3 +13481,12 @@ DiscourseNodeState.model_rebuild()
 DiscourseTreeManifest.model_rebuild()
 OntologyDiscoveryIntent.model_rebuild()
 SemanticMappingHeuristicProposal.model_rebuild()
+
+StochasticStateNode.model_rebuild()
+HypothesisSuperposition.model_rebuild()
+StochasticTopology.model_rebuild()
+CryptographicProvenanceMixin.model_rebuild()
+TopologicalProjectionIntent.model_rebuild()
+EpistemicRejectionReceipt.model_rebuild()
+ActiveInferenceEpoch.model_rebuild()
+ComputationalThermodynamics.model_rebuild()

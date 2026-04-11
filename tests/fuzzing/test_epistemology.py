@@ -74,7 +74,12 @@ def test_latent_scratchpad_trace_sorting_determinism() -> None:
         total_latent_tokens=100,
     )
     assert trace.discarded_branches == ["branch_A", "branch_Z"]
-    assert trace.explored_branches[0].branch_cid == "branch_A"
+    assert (
+        getattr(
+            trace.explored_branches[0], "branch_cid", getattr(trace.explored_branches[0], "topology_cid", "unknown")
+        )
+        == "branch_A"
+    )
 
 
 @st.composite
