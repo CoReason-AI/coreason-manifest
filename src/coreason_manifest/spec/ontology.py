@@ -4205,6 +4205,20 @@ class CircuitBreakerEvent(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Lyapunov Stability, Control Theory, Circuit Breaker, Cascading Failure, State Equilibrium
     """
 
+    event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+    )
+    prior_event_hash: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
+    ) = Field(
+        default=None,
+        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+    )
+    timestamp: float = Field(
+        ge=0.0,
+        le=253402300799.0,
+        description="Causal Ancestry markers required to resolve decentralized event ordering.",
+    )
     topology_class: Literal["circuit_breaker_event"] = Field(
         default="circuit_breaker_event", description="The type of the resilience payload."
     )
@@ -6566,7 +6580,11 @@ type AnyIntent = Annotated[
     | TaskAnnouncementIntent
     | QuarantineIntent
     | InterventionIntent
-    | System2RemediationIntent,
+    | FYIIntent
+    | FallbackIntent
+    | OverrideIntent
+    | ConstitutionalAmendmentIntent
+    | SpatialKinematicActionIntent,
     Field(discriminator="topology_class"),
 ]
 
@@ -9068,6 +9086,23 @@ class ExogenousEpistemicEvent(CoreasonBaseState):
     Energy, Exogenous Perturbation, Epistemic Stress Test
     """
 
+    event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+    )
+    prior_event_hash: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
+    ) = Field(
+        default=None,
+        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+    )
+    timestamp: float = Field(
+        ge=0.0,
+        le=253402300799.0,
+        description="Causal Ancestry markers required to resolve decentralized event ordering.",
+    )
+    topology_class: Literal["exogenous_event"] = Field(
+        default="exogenous_event", description="Discriminator type for an exogenous event."
+    )
     shock_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
         description="Cryptographic identifier for the Black Swan event."
     )
@@ -9179,6 +9214,9 @@ class SpatialKinematicActionIntent(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Mathematical Kinematics, Bezier Geometry, Fitts's Law, OS-Level Actuation, Non-Linear Trajectory
     """
 
+    topology_class: Literal["spatial_kinematic"] = Field(
+        default="spatial_kinematic", description="Discriminator for a spatial kinematic action."
+    )
     action_class: Literal["click", "double_click", "drag_and_drop", "scroll", "hover", "keystroke"] = Field(
         description="The specific kinematic interaction paradigm."
     )
@@ -9712,6 +9750,18 @@ class EpistemicLogEvent(CoreasonBaseState):
 
     """
 
+    event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+    )
+    prior_event_hash: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
+    ) = Field(
+        default=None,
+        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+    )
+    topology_class: Literal["epistemic_log"] = Field(
+        default="epistemic_log", description="Discriminator type for a log event."
+    )
     timestamp: float = Field(ge=0.0, le=253402300799.0, description="The UNIX timestamp of the log event.")
     level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = Field(
         description="The severity level of the log event."
@@ -13223,7 +13273,10 @@ type AnyStateEvent = Annotated[
     | CausalExplanationEvent
     | IntentClassificationReceipt
     | SemanticRelationalRecordState
-    | OntologicalReificationReceipt,
+    | OntologicalReificationReceipt
+    | CircuitBreakerEvent
+    | ExogenousEpistemicEvent
+    | EpistemicLogEvent,
     Field(discriminator="topology_class", description="A discriminated union of state events."),
 ]
 
