@@ -2897,6 +2897,14 @@
           ],
           "default": null,
           "description": "Authorizes trajectory balance optimization during non-monotonic reasoning."
+        },
+        "emitted_intents": {
+          "description": "The array of cognitive intents and structural proposals emitted by this agent.",
+          "items": {
+            "$ref": "#/$defs/AnyIntent"
+          },
+          "title": "Emitted Intents",
+          "type": "array"
         }
       },
       "required": [
@@ -12256,14 +12264,6 @@
             "$ref": "#/$defs/InterventionPolicy"
           },
           "title": "Intervention Policies",
-          "type": "array"
-        },
-        "emitted_intents": {
-          "description": "The array of cognitive intents and structural proposals emitted by this agent.",
-          "items": {
-            "$ref": "#/$defs/AnyIntent"
-          },
-          "title": "Emitted Intents",
           "type": "array"
         },
         "domain_extensions": {

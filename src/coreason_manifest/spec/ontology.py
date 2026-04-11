@@ -7013,10 +7013,6 @@ class MemoizedNodeProfile(CoreasonBaseState):
         default_factory=list,
         description="The declarative array of proactive oversight hooks bound to this node's lifecycle.",
     )
-    emitted_intents: list[AnyIntent] = Field(
-        default_factory=list,
-        description="The array of cognitive intents and structural proposals emitted by this agent.",
-    )
     domain_extensions: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] | None = Field(
         default=None,
         description="Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
@@ -10704,6 +10700,10 @@ class CognitiveAgentNodeProfile(CoreasonBaseState):
     )
     gflownet_balance_policy: CognitiveDetailedBalanceContract | None = Field(
         default=None, description="Authorizes trajectory balance optimization during non-monotonic reasoning."
+    )
+    emitted_intents: list[AnyIntent] = Field(
+        default_factory=list,
+        description="The array of cognitive intents and structural proposals emitted by this agent.",
     )
 
     @model_validator(mode="after")
