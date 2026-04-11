@@ -10,8 +10,9 @@
 
 import sys
 import types
+from typing import Annotated, Any, ForwardRef, TypeAliasType, Union, get_args, get_origin
+
 import networkx as nx
-from typing import TypeAliasType, get_args, get_origin, Union, Annotated, Any, ForwardRef
 
 # Importing the module triggers model_rebuild() at the bottom, resolving Pydantic schemas.
 import coreason_manifest.spec.ontology as onto
@@ -24,23 +25,18 @@ def get_all_subclasses(cls):
         subclasses.update(get_all_subclasses(sub))
     return subclasses
 
-CLASS_REGISTRY = {
-    cls.__name__: cls
-    for cls in get_all_subclasses(onto.CoreasonBaseState)
-}
 
-ALIAS_REGISTRY = {
-    name: obj.__value__
-    for name, obj in vars(onto).items()
-    if isinstance(obj, TypeAliasType)
-}
+CLASS_REGISTRY = {cls.__name__: cls for cls in get_all_subclasses(onto.CoreasonBaseState)}
+
+ALIAS_REGISTRY = {name: obj.__value__ for name, obj in vars(onto).items() if isinstance(obj, TypeAliasType)}
 
 G = nx.DiGraph()
 
 for cls_name in CLASS_REGISTRY:
     G.add_node(cls_name)
 
-def extract_referenced_models(annotation: Any, seen: set = None) -> list[type]:
+
+def extract_referenced_models(annotation: Any, seen: set | None = None) -> list[type]:
     if seen is None:
         seen = set()
 
@@ -54,7 +50,7 @@ def extract_referenced_models(annotation: Any, seen: set = None) -> list[type]:
         clean_string = annotation.strip("'\"")
         if clean_string in ALIAS_REGISTRY:
             return extract_referenced_models(ALIAS_REGISTRY[clean_string], seen)
-        elif clean_string in CLASS_REGISTRY:
+        if clean_string in CLASS_REGISTRY:
             return [CLASS_REGISTRY[clean_string]]
         return []
 
@@ -91,30 +87,48 @@ def extract_referenced_models(annotation: Any, seen: set = None) -> list[type]:
 
     return []
 
+
 for cls_name, cls in CLASS_REGISTRY.items():
-    for field_name, field in cls.model_fields.items():
+    for field in cls.model_fields.values():
         referenced_models = extract_referenced_models(field.annotation)
         for ref_model in referenced_models:
             if ref_model.__name__ in CLASS_REGISTRY:
                 G.add_edge(cls_name, ref_model.__name__)
 
 ROOT_NODES = [
-    "WorkflowManifest", "EpistemicLedgerState", "StateHydrationManifest",
-    "KinematicDeltaManifest", "TraceExportManifest",
-    "FederatedSecurityMacroManifest", "CognitiveSwarmDeploymentMacro",
-    "AdversarialMarketTopologyManifest", "ConsensusFederationTopologyManifest",
-    "CapabilityForgeTopologyManifest", "IntentElicitationTopologyManifest",
+    "WorkflowManifest",
+    "EpistemicLedgerState",
+    "StateHydrationManifest",
+    "KinematicDeltaManifest",
+    "TraceExportManifest",
+    "FederatedSecurityMacroManifest",
+    "CognitiveSwarmDeploymentMacro",
+    "AdversarialMarketTopologyManifest",
+    "ConsensusFederationTopologyManifest",
+    "CapabilityForgeTopologyManifest",
+    "IntentElicitationTopologyManifest",
     "NeurosymbolicVerificationTopologyManifest",
-    "DAGTopologyManifest", "CouncilTopologyManifest", "SwarmTopologyManifest",
-    "EvolutionaryTopologyManifest", "SMPCTopologyManifest",
-    "EvaluatorOptimizerTopologyManifest", "DigitalTwinTopologyManifest",
+    "DAGTopologyManifest",
+    "CouncilTopologyManifest",
+    "SwarmTopologyManifest",
+    "EvolutionaryTopologyManifest",
+    "SMPCTopologyManifest",
+    "EvaluatorOptimizerTopologyManifest",
+    "DigitalTwinTopologyManifest",
     "DiscourseTreeManifest",
-    "OntologicalSurfaceProjectionManifest", "FederatedDiscoveryManifest",
-    "PresentationManifest", "DynamicManifoldProjectionManifest",
-    "MCPClientIntent", "OntologyDiscoveryIntent", "SemanticMappingHeuristicProposal",
-    "TerminalCognitiveEvent", "CognitiveActionSpaceManifest", "EpistemicSOPManifest",
-    "EpistemicDomainGraphManifest", "EpistemicTopologicalProofManifest",
-    "EpistemicCurriculumManifest"
+    "OntologicalSurfaceProjectionManifest",
+    "FederatedDiscoveryManifest",
+    "PresentationManifest",
+    "DynamicManifoldProjectionManifest",
+    "MCPClientIntent",
+    "OntologyDiscoveryIntent",
+    "SemanticMappingHeuristicProposal",
+    "TerminalCognitiveEvent",
+    "CognitiveActionSpaceManifest",
+    "EpistemicSOPManifest",
+    "EpistemicDomainGraphManifest",
+    "EpistemicTopologicalProofManifest",
+    "EpistemicCurriculumManifest",
 ]
 
 reachable_nodes = set(ROOT_NODES)
