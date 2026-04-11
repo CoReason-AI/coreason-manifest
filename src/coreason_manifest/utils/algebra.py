@@ -354,8 +354,12 @@ def transmute_state_differential(
 ) -> dict[str, Any]:
     # ⚡ Bolt Optimization: Replace slow Pydantic model_dump with manual dictionary construction (~5x faster)
     patch_list = [
-        {"op": p.op, "path": p.path, "value": p.value} if p.value is not None else (
-            {"op": p.op, "path": p.path, "from": p.from_path} if p.from_path is not None else {"op": p.op, "path": p.path}
+        {"op": p.op, "path": p.path, "value": p.value}
+        if p.value is not None
+        else (
+            {"op": p.op, "path": p.path, "from": p.from_path}
+            if p.from_path is not None
+            else {"op": p.op, "path": p.path}
         )
         for p in differential.patches
     ]
