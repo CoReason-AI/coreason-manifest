@@ -595,6 +595,72 @@ def _inject_workflow_examples(schema: dict[str, Any]) -> None:
     ]
 
 
+def _inject_spatial_cluster(schema: dict[str, Any]) -> None:
+    _inject_topological_lock(schema)
+    schema["x-domain-cluster"] = "spatial_kinematics"
+    schema["x-synergistic-classes"] = ["SE3TransformProfile", "VolumetricBoundingProfile", "ViewportProjectionContract"]
+
+
+def _inject_epistemic_cluster(schema: dict[str, Any]) -> None:
+    _inject_topological_lock(schema)
+    schema["x-domain-cluster"] = "epistemic_ledger"
+    schema["x-synergistic-classes"] = ["EpistemicLedgerState", "ObservationEvent", "BeliefMutationEvent"]
+
+
+def _inject_cognitive_routing_cluster(schema: dict[str, Any]) -> None:
+    _inject_topological_lock(schema)
+    schema["x-domain-cluster"] = "cognitive_routing"
+    schema["x-synergistic-classes"] = [
+        "TaxonomicRoutingPolicy",
+        "CognitiveAgentNodeProfile",
+        "SemanticRelationalRecord",
+    ]
+
+
+def _inject_thermodynamic_cluster(schema: dict[str, Any]) -> None:
+    _inject_topological_lock(schema)
+    schema["x-domain-cluster"] = "thermodynamic_orchestration"
+    schema["x-synergistic-classes"] = ["ComputationalThermodynamics", "ComputeRateContract", "FreeEnergyExhaustion"]
+
+
+def _inject_security_cluster(schema: dict[str, Any]) -> None:
+    _inject_topological_lock(schema)
+    schema["x-domain-cluster"] = "zero_trust_security"
+    schema["x-synergistic-classes"] = ["FederatedBilateralSLA", "HardwareEnclaveReceipt", "TransportSSRFBoundary"]
+
+
+def _inject_diff_examples_and_epistemic_cluster(schema: dict[str, Any]) -> None:
+    _inject_diff_examples(schema)
+    schema["x-domain-cluster"] = "epistemic_ledger"
+    schema["x-synergistic-classes"] = ["EpistemicLedgerState", "ObservationEvent", "BeliefMutationEvent"]
+
+
+def _inject_sim_examples_and_security_cluster(schema: dict[str, Any]) -> None:
+    _inject_sim_examples(schema)
+    schema["x-domain-cluster"] = "zero_trust_security"
+    schema["x-synergistic-classes"] = ["FederatedBilateralSLA", "HardwareEnclaveReceipt", "TransportSSRFBoundary"]
+
+
+def _inject_dag_examples_and_routing_cluster(schema: dict[str, Any]) -> None:
+    _inject_dag_examples(schema)
+    schema["x-domain-cluster"] = "cognitive_routing"
+    schema["x-synergistic-classes"] = [
+        "TaxonomicRoutingPolicy",
+        "CognitiveAgentNodeProfile",
+        "SemanticRelationalRecord",
+    ]
+
+
+def _inject_workflow_examples_and_routing_cluster(schema: dict[str, Any]) -> None:
+    _inject_workflow_examples(schema)
+    schema["x-domain-cluster"] = "cognitive_routing"
+    schema["x-synergistic-classes"] = [
+        "TaxonomicRoutingPolicy",
+        "CognitiveAgentNodeProfile",
+        "SemanticRelationalRecord",
+    ]
+
+
 class RefusalToReasonEvent(ValueError):  # noqa: N818
     """
     AGENT INSTRUCTION: Exception raised when inference is aborted due to severe semantic degradation.
@@ -2837,7 +2903,7 @@ class StateDifferentialManifest(CoreasonBaseState):
     Vector Clock, Eventual Consistency, Last-Writer-Wins
     """
 
-    model_config = ConfigDict(json_schema_extra=_inject_diff_examples)
+    model_config = ConfigDict(json_schema_extra=_inject_diff_examples_and_epistemic_cluster)
 
     diff_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
         description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this state differential.",
@@ -3377,7 +3443,7 @@ class AdversarialSimulationProfile(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Chaos Engineering, Judas Node, Threat Modeling, Structural Sabotage, Semantic Firewall Validation
     """
 
-    model_config = ConfigDict(json_schema_extra=_inject_sim_examples)
+    model_config = ConfigDict(json_schema_extra=_inject_sim_examples_and_security_cluster)
 
     simulation_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
         Field(description="The unique identifier for this red-team experiment.")
@@ -10945,7 +11011,7 @@ class DAGTopologyManifest(CoreasonBaseState):
         description="The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph.",
     )
 
-    model_config = ConfigDict(json_schema_extra=_inject_dag_examples)
+    model_config = ConfigDict(json_schema_extra=_inject_dag_examples_and_routing_cluster)
 
     topology_class: Literal["dag"] = Field(default="dag", description="Discriminator for a DAG topology.")
     edges: list[tuple[NodeCIDState, NodeCIDState]] = Field(
@@ -11317,6 +11383,74 @@ class SwarmTopologyManifest(CoreasonBaseState):
         return self
 
 
+class FederatedSecurityMacroManifest(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Simplifies the creation of a secure federated network link across a Zero-Trust boundary.
+    """
+
+    model_config = ConfigDict(json_schema_extra=_inject_security_cluster)
+
+    target_endpoint_uri: str = Field(description="The endpoint to connect to.")
+    required_clearance: SemanticClassificationProfile = Field(description="Default security tier.")
+    max_liability_budget: int = Field(description="Max token/compute allocation.")
+
+    def compile_to_base_topology(self) -> FederatedBilateralSLA:
+        """Deterministically unwraps the macro into a rigid FederatedBilateralSLA."""
+        return FederatedBilateralSLA(
+            receiving_tenant_cid=self.target_endpoint_uri,
+            max_permitted_classification=self.required_clearance,
+            liability_limit_magnitude=self.max_liability_budget,
+            permitted_geographic_regions=[],
+            max_permitted_grid_carbon_intensity=None,
+            pq_signature=None,
+        )
+
+
+class CognitiveSwarmDeploymentMacro(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Simplifies bootstrapping a multi-agent routing topology.
+    """
+
+    model_config = ConfigDict(json_schema_extra=_inject_cognitive_routing_cluster)
+
+    swarm_objective_prompt: str = Field(description="The main goal.")
+    agent_node_count: int = Field(description="Number of nodes.")
+    consensus_mechanism: Literal["majority", "prediction_market", "pbft"] = Field(description="Consensus mechanism.")
+
+    def compile_to_base_topology(self) -> CouncilTopologyManifest:
+        """Deterministically unwraps the macro into a rigid CouncilTopologyManifest."""
+        nodes: dict[NodeCIDState, AnyNodeProfile] = {}
+        for i in range(self.agent_node_count):
+            nodes[f"did:coreason:agent-{i}"] = CognitiveAgentNodeProfile(
+                description=f"Swarm agent {i} for: {self.swarm_objective_prompt}"
+            )
+
+        nodes["did:coreason:adjudicator"] = CognitiveSystemNodeProfile(
+            description="Synthesizing Adjudicator for Swarm Deployment"
+        )
+
+        # Need to construct the policy based on mechanism
+        if self.consensus_mechanism == "pbft":
+            q_rules = QuorumPolicy(
+                max_tolerable_faults=0,
+                min_quorum_size=max(1, self.agent_node_count),
+                state_validation_metric="ledger_hash",
+                byzantine_action="ignore",
+            )
+            consensus = ConsensusPolicy(strategy="pbft", quorum_rules=q_rules)
+        elif self.consensus_mechanism == "prediction_market":
+            pm_rules = PredictionMarketPolicy(
+                staking_function="linear", min_liquidity_magnitude=0, convergence_delta_threshold=0.0
+            )
+            consensus = ConsensusPolicy(strategy="prediction_market", prediction_market_rules=pm_rules)
+        else:
+            consensus = ConsensusPolicy(strategy="majority")
+
+        return CouncilTopologyManifest(
+            nodes=nodes, adjudicator_cid="did:coreason:adjudicator", consensus_policy=consensus
+        )
+
+
 class AdversarialMarketTopologyManifest(CoreasonBaseState):
     """
     AGENT INSTRUCTION: A Zero-Cost Macro abstraction that mathematically projects a Zero-Sum Minimax game into a rigid Red/Blue team CouncilTopologyManifest. As a ...Manifest suffix, this defines a frozen coordinate of a topological structure.
@@ -11675,7 +11809,7 @@ class WorkflowManifest(CoreasonBaseState):
 
     """
 
-    model_config = ConfigDict(json_schema_extra=_inject_workflow_examples)
+    model_config = ConfigDict(json_schema_extra=_inject_workflow_examples_and_routing_cluster)
 
     genesis_provenance: EpistemicProvenanceReceipt = Field(
         description="The cryptographic chain of custody anchoring this execution graph to its genesis block."
@@ -13490,3 +13624,5 @@ TopologicalProjectionIntent.model_rebuild()
 EpistemicRejectionReceipt.model_rebuild()
 ActiveInferenceEpoch.model_rebuild()
 ComputationalThermodynamics.model_rebuild()
+FederatedSecurityMacroManifest.model_rebuild()
+CognitiveSwarmDeploymentMacro.model_rebuild()

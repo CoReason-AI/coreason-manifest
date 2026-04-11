@@ -532,7 +532,13 @@
         "synthetic_payload"
       ],
       "title": "AdversarialSimulationProfile",
-      "type": "object"
+      "type": "object",
+      "x-domain-cluster": "zero_trust_security",
+      "x-synergistic-classes": [
+        "FederatedBilateralSLA",
+        "HardwareEnclaveReceipt",
+        "TransportSSRFBoundary"
+      ]
     },
     "AgentAttestationReceipt": {
       "additionalProperties": false,
@@ -3426,6 +3432,45 @@
       "title": "CognitiveStateProfile",
       "type": "object"
     },
+    "CognitiveSwarmDeploymentMacro": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Simplifies bootstrapping a multi-agent routing topology.",
+      "properties": {
+        "swarm_objective_prompt": {
+          "description": "The main goal.",
+          "title": "Swarm Objective Prompt",
+          "type": "string"
+        },
+        "agent_node_count": {
+          "description": "Number of nodes.",
+          "title": "Agent Node Count",
+          "type": "integer"
+        },
+        "consensus_mechanism": {
+          "description": "Consensus mechanism.",
+          "enum": [
+            "majority",
+            "prediction_market",
+            "pbft"
+          ],
+          "title": "Consensus Mechanism",
+          "type": "string"
+        }
+      },
+      "required": [
+        "swarm_objective_prompt",
+        "agent_node_count",
+        "consensus_mechanism"
+      ],
+      "title": "CognitiveSwarmDeploymentMacro",
+      "type": "object",
+      "x-domain-cluster": "cognitive_routing",
+      "x-synergistic-classes": [
+        "TaxonomicRoutingPolicy",
+        "CognitiveAgentNodeProfile",
+        "SemanticRelationalRecord"
+      ]
+    },
     "CognitiveSystemNodeProfile": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Encapsulates pure functional logic (Lambda Calculus) and Finite State Machine (FSM) mechanics to represent a completely deterministic, side-effect-free system capability.\n\nCAUSAL AFFORDANCE: Executes rigid, zero-variance procedural logic without invoking the expensive stochastic policy gradients required by foundational LLM models.\n\nEPISTEMIC BOUNDS: This node defines NO additional fields beyond inherited `CoreasonBaseState` constraints, including the rigorous `domain_extensions` volumetric depth limits. The type discriminator is locked to `Literal[\"system\"]`.\n\nMCP ROUTING TRIGGERS: Lambda Calculus, Finite State Machine, Referential Transparency, Deterministic Execution, Zero Variance",
@@ -5279,7 +5324,13 @@
         "max_fan_out"
       ],
       "title": "DAGTopologyManifest",
-      "type": "object"
+      "type": "object",
+      "x-domain-cluster": "cognitive_routing",
+      "x-synergistic-classes": [
+        "TaxonomicRoutingPolicy",
+        "CognitiveAgentNodeProfile",
+        "SemanticRelationalRecord"
+      ]
     },
     "DefeasibleAttackEvent": {
       "additionalProperties": false,
@@ -9142,6 +9193,39 @@
       ],
       "title": "FederatedPeftContract",
       "type": "object"
+    },
+    "FederatedSecurityMacroManifest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Simplifies the creation of a secure federated network link across a Zero-Trust boundary.",
+      "properties": {
+        "target_endpoint_uri": {
+          "description": "The endpoint to connect to.",
+          "title": "Target Endpoint Uri",
+          "type": "string"
+        },
+        "required_clearance": {
+          "$ref": "#/$defs/SemanticClassificationProfile",
+          "description": "Default security tier."
+        },
+        "max_liability_budget": {
+          "description": "Max token/compute allocation.",
+          "title": "Max Liability Budget",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "target_endpoint_uri",
+        "required_clearance",
+        "max_liability_budget"
+      ],
+      "title": "FederatedSecurityMacroManifest",
+      "type": "object",
+      "x-domain-cluster": "zero_trust_security",
+      "x-synergistic-classes": [
+        "FederatedBilateralSLA",
+        "HardwareEnclaveReceipt",
+        "TransportSSRFBoundary"
+      ]
     },
     "FederatedStateSnapshot": {
       "additionalProperties": false,
@@ -16263,7 +16347,13 @@
         "vector_clock"
       ],
       "title": "StateDifferentialManifest",
-      "type": "object"
+      "type": "object",
+      "x-domain-cluster": "epistemic_ledger",
+      "x-synergistic-classes": [
+        "EpistemicLedgerState",
+        "ObservationEvent",
+        "BeliefMutationEvent"
+      ]
     },
     "StateHydrationManifest": {
       "additionalProperties": false,
@@ -18852,7 +18942,13 @@
         "topology"
       ],
       "title": "WorkflowManifest",
-      "type": "object"
+      "type": "object",
+      "x-domain-cluster": "cognitive_routing",
+      "x-synergistic-classes": [
+        "TaxonomicRoutingPolicy",
+        "CognitiveAgentNodeProfile",
+        "SemanticRelationalRecord"
+      ]
     },
     "ZeroKnowledgeReceipt": {
       "additionalProperties": false,
