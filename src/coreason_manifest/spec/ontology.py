@@ -5695,6 +5695,11 @@ class EmpiricalFalsificationContract(CoreasonBaseState):
 
     """
 
+    topology_class: Literal["empirical_falsification_contract"] = Field(
+        default="empirical_falsification_contract",
+        description="Discriminator type for empirical falsification contract.",
+    )
+
     condition_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
         Field(
             description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this falsification test to the Merkle-DAG.",
@@ -7070,6 +7075,7 @@ class SubstrateHydrationManifest(CoreasonBaseState):
 
 type AnyIntent = Annotated[
     EpistemicZeroTrustContract
+    | EmpiricalFalsificationContract
     | FalsificationContract
     | SemanticIntent
     | DraftingIntent
