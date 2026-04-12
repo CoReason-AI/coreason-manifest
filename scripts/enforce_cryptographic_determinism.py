@@ -8,7 +8,7 @@ from typing import Annotated, Union, get_args, get_origin
 from pydantic import BaseModel
 
 # Import all models to ensure they are registered
-from coreason_manifest.spec.ontology import *
+from coreason_manifest.spec.ontology import *  # noqa: F403
 from coreason_manifest.spec.ontology import CoreasonBaseState
 
 
@@ -58,7 +58,7 @@ def check_ast_for_sort(cls, field_name):
 
     for node in ast.walk(tree):
         # We look for a call to `sorted` that targets `field_name`.
-        if isinstance(node, ast.Call):
+        if isinstance(node, ast.Call):  # noqa: SIM102
             if isinstance(node.func, ast.Name) and node.func.id == "sorted":
                 # We assume if sorted is called and there is some reference to field_name or it is part of an assignment to field_name, it's valid.
                 pass
@@ -77,7 +77,7 @@ def check_ast_for_sort(cls, field_name):
                 ):
                     targets_field = True
 
-            if targets_field:
+            if targets_field:  # noqa: SIM102
                 # Is value sorted?
                 if (
                     isinstance(node.value, ast.Call)
@@ -89,7 +89,7 @@ def check_ast_for_sort(cls, field_name):
         # Or look for expressions like object.__setattr__(self, "field_name", sorted(...))
         if isinstance(node, ast.Expr) and isinstance(node.value, ast.Call):
             call = node.value
-            if isinstance(call.func, ast.Attribute) and call.func.attr == "__setattr__":
+            if isinstance(call.func, ast.Attribute) and call.func.attr == "__setattr__":  # noqa: SIM102
                 # check args: self, "field_name", sorted(...)
                 if len(call.args) >= 3:
                     arg1 = call.args[1]
