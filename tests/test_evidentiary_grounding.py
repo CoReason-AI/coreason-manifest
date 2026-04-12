@@ -15,7 +15,7 @@ from coreason_manifest.spec.ontology import EvidentiaryCitationState
 
 def test_evidentiary_citation_state_ssrf_quarantine() -> None:
     # Test that instantiating EvidentiaryCitationState with a Bogon IP raises a validation error
-    from pydantic import TypeAdapter, HttpUrl
+    from pydantic import HttpUrl, TypeAdapter
     url_adapter = TypeAdapter(HttpUrl)
     with pytest.raises(ValueError, match="SSRF restricted IP detected"):
         EvidentiaryCitationState(
