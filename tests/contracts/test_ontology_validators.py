@@ -859,6 +859,57 @@ def test_sovereign_execution_allows_localhost_and_bare_metal() -> None:
     assert "localhost" in profile.hardware.provider_whitelist
 
 
+def test_deprecated_solver_coq() -> None:
+    from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import FormalVerificationContract
+
+    with pytest.raises(ValidationError) as exc_info:
+        FormalVerificationContract(proof_system="coq", invariant_theorem="test", compiled_proof_hash="a" * 64)  # type: ignore
+    assert "Input should be 'lean4' or 'z3'" in str(exc_info.value)
+
+
+def test_deprecated_solver_isabelle() -> None:
+    from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import FormalVerificationContract
+
+    with pytest.raises(ValidationError) as exc_info:
+        FormalVerificationContract(proof_system="isabelle", invariant_theorem="test", compiled_proof_hash="a" * 64)  # type: ignore
+    assert "Input should be 'lean4' or 'z3'" in str(exc_info.value)
+
+
+def test_deprecated_solver_tla_plus() -> None:
+    from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import NeuroSymbolicHandoffContract
+
+    with pytest.raises(ValidationError) as exc_info:
+        NeuroSymbolicHandoffContract(
+            handoff_cid="test",
+            solver_protocol="tla_plus",  # type: ignore
+            formal_grammar_payload="test",
+            timeout_ms=1000,
+        )
+    assert "Input should be 'lean4' or 'z3'" in str(exc_info.value)
+
+
+def test_deprecated_solver_sympy() -> None:
+    from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import AlgebraicRefinementContract, HoareLogicProofReceipt
+
+    with pytest.raises(ValidationError) as exc_info:
+        HoareLogicProofReceipt(
+            capability_cid="test",
+            preconditions=[AlgebraicRefinementContract(target_property="x", mathematical_predicate="x > 0")],
+            postconditions=[AlgebraicRefinementContract(target_property="x", mathematical_predicate="x > 0")],
+            proof_system="sympy",  # type: ignore
+            verified_theorem_hash="a" * 64,
+        )
+    assert "Input should be 'lean4' or 'z3'" in str(exc_info.value)
+
+
 def test_agent_node_profile_network_topology_paradox() -> None:
     """Test that Mixnet routing requires strict network isolation."""
     with pytest.raises(ValueError, match="Topology Routing Violated"):
