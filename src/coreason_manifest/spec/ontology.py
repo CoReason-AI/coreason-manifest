@@ -724,7 +724,7 @@ class CoreasonBaseState(BaseModel):
 
             canonical_dump = canonicaljson.encode_canonical_json(raw_dict)
             object.__setattr__(self, "_cached_canonical_dump", canonical_dump)
-            return canonical_dump
+            return canonical_dump  # type: ignore[no-any-return]
 
 
 class EpistemicProxyState[T](CoreasonBaseState):
@@ -6884,6 +6884,8 @@ class PrologDeductionReceipt(CoreasonBaseState):
         # Topological Exemption: Freeze the outer list sequence (the mathematical order of unification).
         # However, to maintain RFC 8785 compliance, sort the keys *inside* the individual dictionaries.
         return [dict(sorted(b.items())) for b in variable_bindings]
+
+
 class DocumentKnowledgeGraphManifest(CoreasonBaseState):
     topology_class: Literal["document_knowledge_graph"] = "document_knowledge_graph"
     graph_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
@@ -7075,7 +7077,7 @@ type AnyIntent = Annotated[
     | TopologicalProjectionIntent
     | EpistemicLean4Premise
     | EpistemicLogicPremise
-    | EpistemicPrologPremise,
+    | EpistemicPrologPremise
     | CausalPropagationIntent
     | RDFSerializationIntent,
     Field(discriminator="topology_class"),
@@ -7150,7 +7152,7 @@ class InsightCardProfile(CoreasonBaseState):
 
         MCP ROUTING TRIGGERS: XSS Quarantine, DOM Sanitization, Presentation Layer Scrubbing, Rust Execution Bridge
         """
-        return nh3.clean(v)
+        return nh3.clean(v)  # type: ignore[no-any-return]
 
 
 type AnyPanelProfile = Annotated[
@@ -14148,7 +14150,7 @@ type AnyStateEvent = Annotated[
     | EpistemicRejectionReceipt
     | Lean4VerificationReceipt
     | FormalLogicProofReceipt
-    | PrologDeductionReceipt,
+    | PrologDeductionReceipt
     | BeliefModulationReceipt
     | RDFExportReceipt,
     Field(discriminator="topology_class", description="A discriminated union of state events."),

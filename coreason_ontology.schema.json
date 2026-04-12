@@ -1012,6 +1012,8 @@
         },
         {
           "$ref": "#/$defs/EpistemicPrologPremise"
+        },
+        {
           "$ref": "#/$defs/CausalPropagationIntent"
         },
         {
@@ -1245,6 +1247,8 @@
         },
         {
           "$ref": "#/$defs/PrologDeductionReceipt"
+        },
+        {
           "$ref": "#/$defs/BeliefModulationReceipt"
         },
         {
