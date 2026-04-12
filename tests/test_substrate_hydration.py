@@ -5,7 +5,7 @@ from coreason_manifest.spec.ontology import (
 )
 
 
-def test_execution_substrate_profile_canonical_sort():
+def test_execution_substrate_profile_canonical_sort() -> None:
     profile = ExecutionSubstrateProfile(
         dialect=SubstrateDialectProfile.SYMBOLIC_AI_DBC,
         required_package_signatures=["b==2.0", "a==1.0", "c==3.0"],
@@ -16,7 +16,7 @@ def test_execution_substrate_profile_canonical_sort():
     assert profile.required_package_signatures == ["a==1.0", "b==2.0", "c==3.0"]
 
 
-def test_substrate_hydration_manifest_creation():
+def test_substrate_hydration_manifest_creation() -> None:
     profile = ExecutionSubstrateProfile(
         dialect=SubstrateDialectProfile.NATIVE_PYTHON,
         required_package_signatures=["xyz==1.0"],
