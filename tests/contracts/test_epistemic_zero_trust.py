@@ -59,3 +59,19 @@ def test_epistemic_zero_trust_receipt_firewall_breach() -> None:
 def test_epistemic_constraint_policy_invalid_type() -> None:
     with pytest.raises(ValidationError):
         EpistemicConstraintPolicy(assertion_ast=123, remediation_prompt="test")  # type: ignore
+
+def test_epistemic_zero_trust_receipt_firewall_breach_bypass() -> None:
+    receipt = EpistemicZeroTrustReceipt(
+        event_cid="receipt-1",
+        timestamp=123.0,
+        intent_reference_id="intent-1",
+        llm_blind_plan_hash="a" * 64,
+        remediation_epochs_consumed=2,
+        transmuted_payload_hash="b" * 64,
+    )
+
+    # Force bypass the Literal validation to hit the model_validator
+    object.__setattr__(receipt, "firewall_breach_detected", True)
+
+    with pytest.raises(ValueError, match="Topological Collapse: Firewall breach detected. Receipt invalid."):
+        receipt.verify_firewall_integrity()
