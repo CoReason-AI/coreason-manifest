@@ -572,11 +572,9 @@ def test_apply_state_differential_test_op() -> None:
 def test_align_semantic_manifolds_transmutation() -> None:
     res1 = align_semantic_manifolds("t1", [], ["raster_image"], "e1")
     assert res1 is not None
-    assert res1.compression_sla.required_grounding_density == "dense"
 
     res2 = align_semantic_manifolds("t1", [], ["text"], "e1")
     assert res2 is not None
-    assert res2.compression_sla.required_grounding_density == "sparse"
 
 
 def test_calculate_remaining_compute() -> None:
@@ -653,3 +651,115 @@ def test_calculate_latent_alignment_invalid_base64() -> None:
 
     with pytest.raises(ValueError, match=r"Topological Contradiction: Invalid base64 encoding\."):
         calculate_latent_alignment(v_invalid, v_valid, pol)
+
+
+def test_epistemic_transmutation_schema_presence() -> None:
+    import pytest
+    from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import EpistemicTransmutationTask
+
+    with pytest.raises(
+        ValidationError,
+        match=r"schema_governance is strictly required when target_modalities includes 'semantic_graph'.",
+    ):
+        EpistemicTransmutationTask(
+            task_cid="t1", artifact_event_cid="a1", target_modalities=["semantic_graph"], schema_governance=None
+        )
+
+
+def test_edge_evidence_or_sla() -> None:
+    import pytest
+    from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import CausalDirectedEdgeState, SemanticEdgeState
+
+    with pytest.raises(
+        ValidationError,
+        match=r"Causal edge must possess either empirical evidence \(belief_vector\) or an explicit grounding_sla.",
+    ):
+        CausalDirectedEdgeState(
+            source_variable="A",
+            target_variable="B",
+            edge_class="direct_cause",
+            predicate_curie="test:pred",
+            belief_vector=None,
+            grounding_sla=None,
+        )
+
+    with pytest.raises(
+        ValidationError,
+        match=r"Edge must possess either empirical evidence \(belief_vector\) or an explicit grounding_sla.",
+    ):
+        SemanticEdgeState(
+            edge_cid="e1",
+            subject_node_cid="n1",
+            object_node_cid="n2",
+            predicate_curie="test:pred",
+            belief_vector=None,
+            grounding_sla=None,
+        )
+
+
+def test_canonical_sorts() -> None:
+
+    # DocumentKnowledgeGraphManifest
+    from coreason_manifest.spec.ontology import (
+        BeliefModulationReceipt,
+        CausalDirectedEdgeState,
+        CausalPropagationIntent,
+        DerivationModeProfile,
+        DocumentKnowledgeGraphManifest,
+        EpistemicProvenanceReceipt,
+        EvidentiaryGroundingSLA,
+        SemanticNodeState,
+    )
+
+    prov = EpistemicProvenanceReceipt(
+        extracted_by="did:coreason:abc:123",
+        source_event_cid="e1",
+        derivation_mode=DerivationModeProfile.DIRECT_TRANSLATION,
+    )
+    n1 = SemanticNodeState(node_cid="did:coreason:b", label="B", scope="session", text_chunk="B", provenance=prov)
+    n2 = SemanticNodeState(node_cid="did:coreason:a", label="A", scope="session", text_chunk="A", provenance=prov)
+
+    e1 = CausalDirectedEdgeState(
+        source_variable="B",
+        target_variable="C",
+        edge_class="direct_cause",
+        predicate_curie="t:p",
+        grounding_sla=EvidentiaryGroundingSLA(minimum_nli_entailment_score=0.5),
+    )
+    e2 = CausalDirectedEdgeState(
+        source_variable="A",
+        target_variable="B",
+        edge_class="direct_cause",
+        predicate_curie="t:p",
+        grounding_sla=EvidentiaryGroundingSLA(minimum_nli_entailment_score=0.5),
+    )
+
+    m = DocumentKnowledgeGraphManifest(
+        graph_cid="g1", source_artifact_cid="a1", nodes=[n1, n2], causal_edges=[e1, e2], isomorphism_hash="a" * 64
+    )
+    assert m.nodes[0].node_cid == "did:coreason:a"
+    assert m.causal_edges[0].source_variable == "A"
+
+    # CausalPropagationIntent
+    c = CausalPropagationIntent(
+        target_graph_cid="g1",
+        task_cid="t1",
+        grounding_sla=EvidentiaryGroundingSLA(minimum_nli_entailment_score=0.5),
+        unverified_edges=[e1, e2],
+    )
+    assert c.unverified_edges[0].source_variable == "A"
+
+    # BeliefModulationReceipt
+    b = BeliefModulationReceipt(
+        receipt_cid="r1",
+        event_cid="e1",
+        timestamp=1.0,
+        target_graph_cid="g1",
+        grounded_edges={},
+        severed_edge_cids=["z1", "a1"],
+    )
+    assert b.severed_edge_cids == ["a1", "z1"]

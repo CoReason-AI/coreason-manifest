@@ -24,8 +24,6 @@ from coreason_manifest.spec.ontology import (
     ContinuousMutationPolicy,
     DocumentLayoutRegionState,
     DynamicLayoutManifest,
-    EpistemicCompressionSLA,
-    EpistemicTransmutationTask,
     ExecutionNodeReceipt,
     GlobalGovernancePolicy,
     InsightCardProfile,
@@ -95,27 +93,6 @@ def test_continuous_mutation_oom_buffer_limit(rows: int) -> None:
         )
 
 
-@pytest.mark.parametrize("visual_modality", ["tabular_grid", "raster_image"])
-def test_multimodal_grounding_density_alignment(visual_modality: Any) -> None:
-    """Prove that EpistemicTransmutationTask rejects visual modalities combined with sparse grounding density."""
-    compression_sla = EpistemicCompressionSLA(
-        strict_probability_retention=True,
-        max_allowed_entropy_loss=0.5,
-        required_grounding_density="sparse",
-        minimum_fidelity_threshold=0.5,
-    )
-    with pytest.raises(
-        ValidationError,
-        match=r"Epistemic safety violation: Visual or tabular modalities require strict spatial tracking\.",
-    ):
-        EpistemicTransmutationTask(
-            task_cid="task_visual_test",
-            artifact_event_cid="artifact_1",
-            target_modalities=[visual_modality],
-            compression_sla=compression_sla,
-        )
-
-
 def test_epistemic_license_enforcement() -> None:
     """Prove that instantiating GlobalGovernancePolicy with invalid mandatory_license_rule triggers ValidationError."""
     invalid_license = ConstitutionalPolicy(
@@ -150,7 +127,7 @@ def test_mcp_quarantine_gateway_tripwire() -> None:
     with pytest.raises(ValidationError, match="UNAUTHORIZED MCP MOUNT"):
         MCPServerManifest(
             server_cid="rogue_server_1",
-            transport=HTTPTransportProfile(uri=HttpUrl("http://www.example.com"), headers={}),
+            transport=HTTPTransportProfile(uri=HttpUrl("http://1.1.1.1"), headers={}),
             capability_whitelist=MCPCapabilityWhitelistPolicy(
                 authorized_capability_array=["shell"], allowed_resources=["file://*"], allowed_prompts=["system"]
             ),
