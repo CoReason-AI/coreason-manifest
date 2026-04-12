@@ -111,16 +111,15 @@ tree = ast.parse(content)
 lines = content.splitlines(keepends=True)
 
 for node in sorted(tree.body, key=lambda n: getattr(n, "lineno", -1), reverse=True):
-    if isinstance(node, ast.ClassDef) and node.name in NEW_DOCSTRINGS:
-        if ast.get_docstring(node):
-            docstr_node = node.body[0]
-            start_line = docstr_node.lineno - 1
-            end_line = docstr_node.end_lineno
+    if isinstance(node, ast.ClassDef) and node.name in NEW_DOCSTRINGS and ast.get_docstring(node):
+        docstr_node = node.body[0]
+        start_line = docstr_node.lineno - 1
+        end_line = docstr_node.end_lineno
 
-            # Create proper docstring representation
-            new_doc = '    """\n    ' + NEW_DOCSTRINGS[node.name].replace("\n", "\n    ") + '\n    """\n'
+        # Create proper docstring representation
+        new_doc = '    """\n    ' + NEW_DOCSTRINGS[node.name].replace("\n", "\n    ") + '\n    """\n'
 
-            lines[start_line:end_line] = [new_doc]
+        lines[start_line:end_line] = [new_doc]
 
 with open(file_path, "w", encoding="utf-8") as f:
     f.write("".join(lines))

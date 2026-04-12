@@ -70,25 +70,24 @@ REQUIRED_SUFFIXES = [
 DOCSTRING_PARTS = ["AGENT INSTRUCTION:", "CAUSAL AFFORDANCE:", "EPISTEMIC BOUNDS:", "MCP ROUTING TRIGGERS:"]
 
 
-def check_header(filepath: Path) -> list:
-    errors = []
+def check_header(filepath: Path) -> list[str]:
+    errors: list[str] = []
     content = filepath.read_text(encoding="utf-8")
     if not content.startswith(HEADER):
         errors.append("Missing or incorrect copyright header")
     return errors
 
 
-def check_class_defs(filepath: Path) -> dict:
+def check_class_defs(filepath: Path) -> dict[str, list[str]]:
     content = filepath.read_text(encoding="utf-8")
     tree = ast.parse(content)
 
-    class_errors = {}
-    type_aliases = []  # Wait, we should also check TypeAlias assignments for anti-CRUD?
+    class_errors: dict[str, list[str]] = {}
     # but the instructions specifically mention "Every object name MUST terminate with a strictly typed suffix"
 
     class CodeVisitor(ast.NodeVisitor):
-        def visit_ClassDef(self, node):
-            errors = []
+        def visit_ClassDef(self, node: ast.ClassDef) -> None:
+            errors: list[str] = []
             name = node.name
 
             # Skip exception classes and private classes?
@@ -98,21 +97,17 @@ def check_class_defs(filepath: Path) -> dict:
                     and (base.id == "ValueError" or base.id.endswith("Error") or base.id == "Exception")
                     for base in node.bases
                 )
-                is_enum = any(
-                    isinstance(base, ast.Name) and (base.id == "StrEnum" or base.id == "Enum") for base in node.bases
-                )
+                any(isinstance(base, ast.Name) and (base.id == "StrEnum" or base.id == "Enum") for base in node.bases)
 
                 # Check Anti-CRUD
-                for crud in FORBIDDEN_CRUD:
-                    if (
-                        crud.lower() in name.lower() and not is_exception
-                    ):  # Exact case or lower case? Let's check exact or Titlecase inside word
-                        # "Model Context Protocol (MCP)" might have "Model" but as a string. Here it's class names.
-                        if crud in name:
-                            errors.append(f"Forbidden CRUD term '{crud}' in name")
+                errors.extend(
+                    f"Forbidden CRUD term '{crud}' in name"
+                    for crud in FORBIDDEN_CRUD
+                    if crud.lower() in name.lower() and not is_exception and crud in name
+                )
 
                 # Check Suffix
-                if not is_exception and not name == "CoreasonBaseState":  # Base state is a special one
+                if not is_exception and name != "CoreasonBaseState":  # Base state is a special one
                     has_suffix = any(name.endswith(suffix) for suffix in REQUIRED_SUFFIXES)
                     if not has_suffix:
                         # Some exceptions for Enums? The prompt says "Every object name"
@@ -126,28 +121,26 @@ def check_class_defs(filepath: Path) -> dict:
                     if not docstring:
                         errors.append("Missing docstring for CoreasonBaseState subclass")
                     else:
-                        for part in DOCSTRING_PARTS:
-                            if part not in docstring:
-                                errors.append(f"Missing '{part}' in docstring")
+                        errors.extend(
+                            f"Missing '{part}' in docstring" for part in DOCSTRING_PARTS if part not in docstring
+                        )
 
             if errors:
                 class_errors[name] = errors
             self.generic_visit(node)
 
-        def visit_TypeAlias(self, node):
+        def visit_TypeAlias(self, node: ast.stmt) -> None:
             # Python 3.12+ `type` keyword
-            errors = []
-            if isinstance(node.name, ast.Name):
-                name = node.name.id
-                for crud in FORBIDDEN_CRUD:
-                    if crud in name:
-                        errors.append(f"Forbidden CRUD term '{crud}' in alias name")
+            errors: list[str] = []
+            if isinstance(node.name, ast.Name):  # type: ignore
+                name: str = node.name.id  # type: ignore
+                errors.extend(f"Forbidden CRUD term '{crud}' in alias name" for crud in FORBIDDEN_CRUD if crud in name)
                 has_suffix = any(name.endswith(suffix) for suffix in REQUIRED_SUFFIXES)
                 if not has_suffix and "State" not in name and "Profile" not in name:
                     pass  # We do the same check
             self.generic_visit(node)
 
-        def visit_Assign(self, node):
+        def visit_Assign(self, node: ast.Assign) -> None:
             # old style type aliases e.g. Name = TypeVar(...) or Annotated
             pass
 
@@ -156,7 +149,7 @@ def check_class_defs(filepath: Path) -> dict:
     return class_errors
 
 
-def main():
+def main() -> None:
     print("Starting audit...")
     all_files = list(SRC_DIR.rglob("*.py")) + list(TESTS_DIR.rglob("*.py")) + list(SCRIPTS_DIR.rglob("*.py"))
 
