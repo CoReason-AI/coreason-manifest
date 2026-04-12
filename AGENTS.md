@@ -447,20 +447,25 @@ We physically separate probabilistic textual generation (System 1) from schema v
 * **Mechanistic Penalty:** If the Docling subsystem crashes due to DRM-locks or malformed byte streams, the wrapper must immediately emit an `ArtifactCorruptionEvent` to sever the topology and halt epistemic contagion.
 
 ### 8.2 `OntologicalGroundingSpecialist` (The Semantic Web Engine)
-* **Open-Source Substrate:** Monarch Initiative `ontogpt` / `linkml`
+* **Open-Source Substrate:** Monarch Initiative `ontogpt` / `linkml` / `oaklib`
 * **Compute Plane Profile:** `CognitiveSystemNodeProfile` (Sandboxed SPIRES Engine)
-* **Data Plane Boundary:** `SchemaDrivenExtractionSLA` (`ontogpt_spires`)
-* **Routing Constraints:** Automatically triggered when extracting into academic biological, chemical, or legal ontologies. Uses the SPIRES framework to mathematically force the LLM to recursively map unstructured text into peer-reviewed W3C LinkML hierarchies, emitting strict `CausalDirectedEdgeState` objects with CURIE predicates.
+* **Data Plane Boundary:** `SchemaDrivenExtractionSLA` (`ontogpt_spires`) combined strictly with `LinkMLValidationSLA`.
+* **Routing Constraints:** Automatically triggered when extracting into academic biological, chemical, or legal ontologies.
+* **Bipartite Crosswalk Execution:** Processes the `OntologicalCrosswalkIntent` by routing ungrounded strings through the Ontology Access Kit (OAK), searching only the bounded `target_ontology_registries`. It emits a `CrosswalkResolutionReceipt` to cryptographically freeze the translation.
+* **Mechanistic Penalty (Graph-Shape Governance):** If the LLM generates a semantic edge violating the Domain/Range constraints declared in the `linkml_schema_uri`, this wrapper must physically sever the connection or trigger the defined `validation_failure_action`, guaranteeing absolute structural isomorphism without crashing the global DAG.
 
 ### 8.3 `EpistemicGroundingOracle` (The Verification Engine)
 * **Open-Source Substrate:** `coolgenerator/CurioCat`
 * **Compute Plane Profile:** `CognitiveSystemNodeProfile` (Sandboxed NLI & Web Search)
 * **Data Plane Boundary:** `CausalPropagationIntent` / `EvidentiaryGroundingSLA`
 * **Routing Constraints (The Golden Rule):** Standard LLMs are mathematically forbidden from assigning their own `DempsterShaferBeliefVector` weights due to the "Blind Causal Inference" anomaly (confusing correlation with causation). Any newly generated edge lacking empirical evidence MUST be routed through this Oracle.
-* **Mechanistic Penalty:** If CurioCat fails to find external Natural Language Inference (NLI) entailment backing the proposed edge, it mathematically drops the belief mass to zero and emits a `DefeasibleCascadeEvent` to aggressively quarantine the epistemic contagion.
+* **Evidentiary Output:** The CurioCat substrate is mathematically required to output its findings as discrete `EvidentiaryCitationState` objects, injecting them directly into the `supporting_citations` array of the target edge's belief vector.
+* **Mechanistic Penalty (Epistemic Starvation):** If the oracle fails to retrieve external evidence that breaches the SLA's NLI entailment threshold, it must mathematically drop the edge's belief mass to zero by emitting an `EpistemicStarvationEvent`. This definitively records the empirical failure and sequentially triggers a `DefeasibleCascadeEvent` to dynamically sever the ungrounded edge and aggressively quarantine the epistemic contagion across the DAG.
 
 ### 8.4 `SemanticWebArchivist` (The Egress Gateway)
-* **Open-Source Substrate:** `omegaice/pydantic-rdf` & `rdflib`
+* **Open-Source Substrate:** `omegaice/pydantic-rdf`, `pyshacl`, & `rdflib`
 * **Compute Plane Profile:** `CognitiveSystemNodeProfile`
-* **Data Plane Boundary:** `RDFSerializationIntent`
-* **Routing Constraints:** LLMs are forbidden from generating raw Turtle, XML, or JSON-LD syntax due to formatting hallucination risks. The Orchestrator routes the finalized JSON-native Knowledge Graph to this node, which reads passive `json_schema_extra` tags (e.g., `rdf_subject`, `rdf_predicate`) to deterministically compile the graph into W3C standard formats for enterprise triplestores without stochastic variance.
+* **Data Plane Boundary:** `RDFSerializationIntent` and `SPARQLQueryIntent`.
+* **Routing Constraints (Serialization):** LLMs are forbidden from generating raw Turtle, XML, or JSON-LD syntax. The Orchestrator routes the finalized JSON-native Knowledge Graph to this node to deterministically compile the graph into W3C standard formats for enterprise triplestores without stochastic variance.
+* **SHACL Execution Loop:** If the `RDFSerializationIntent` contains a `SHACLValidationSLA` (which is mathematically required for strict formats like XML or JSON-LD), the Archivist MUST run a validation pass via `pyshacl` prior to emission. If the generated triples violate the shape, the Archivist must physically execute the `violation_action` (e.g., dropping the graph or stripping invalid triples) to prevent polluting enterprise endpoints.
+* **SPARQL Execution Boundaries:** All `SPARQLQueryIntent` executions are strictly subject to SSRF network quarantine. The Archivist MUST ensure that returned bindings are passed through the volumetric hardware guillotine (`_validate_payload_bounds`), aborting the connection if the external triplestore attempts to flood the swarm's VRAM.

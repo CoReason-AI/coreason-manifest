@@ -904,6 +904,7 @@
           "latent_projection": "#/$defs/LatentProjectionIntent",
           "latent_schema_inference": "#/$defs/LatentSchemaInferenceIntent",
           "neurosymbolic_inference": "#/$defs/NeurosymbolicInferenceIntent",
+          "ontological_crosswalk": "#/$defs/OntologicalCrosswalkIntent",
           "ontology_discovery": "#/$defs/OntologyDiscoveryIntent",
           "override": "#/$defs/OverrideIntent",
           "quarantine_intent": "#/$defs/QuarantineIntent",
@@ -911,6 +912,7 @@
           "request": "#/$defs/InterventionIntent",
           "semantic_discovery": "#/$defs/SemanticDiscoveryIntent",
           "semantic_mapping_proposal": "#/$defs/SemanticMappingHeuristicIntent",
+          "sparql_query": "#/$defs/SPARQLQueryIntent",
           "spatial_kinematic": "#/$defs/SpatialKinematicActionIntent",
           "substrate_hydration": "#/$defs/SubstrateHydrationManifest",
           "system_2_remediation": "#/$defs/System2RemediationIntent",
@@ -922,6 +924,9 @@
         "propertyName": "topology_class"
       },
       "oneOf": [
+        {
+          "$ref": "#/$defs/OntologicalCrosswalkIntent"
+        },
         {
           "$ref": "#/$defs/EpistemicZeroTrustContract"
         },
@@ -1026,6 +1031,9 @@
         },
         {
           "$ref": "#/$defs/RDFSerializationIntent"
+        },
+        {
+          "$ref": "#/$defs/SPARQLQueryIntent"
         }
       ]
     },
@@ -1118,6 +1126,7 @@
           "cognitive_prediction": "#/$defs/CognitivePredictionReceipt",
           "cognitive_reward_evaluation": "#/$defs/CognitiveRewardEvaluationReceipt",
           "counterfactual_regret": "#/$defs/CounterfactualRegretEvent",
+          "crosswalk_resolution": "#/$defs/CrosswalkResolutionReceipt",
           "custody_receipt": "#/$defs/CustodyReceipt",
           "defeasible_attack": "#/$defs/DefeasibleAttackEvent",
           "epistemic_axiom_verification": "#/$defs/EpistemicAxiomVerificationReceipt",
@@ -1125,6 +1134,7 @@
           "epistemic_log": "#/$defs/EpistemicLogEvent",
           "epistemic_promotion": "#/$defs/EpistemicPromotionEvent",
           "epistemic_rejection": "#/$defs/EpistemicRejectionReceipt",
+          "epistemic_starvation": "#/$defs/EpistemicStarvationEvent",
           "epistemic_telemetry": "#/$defs/EpistemicTelemetryEvent",
           "exogenous_event": "#/$defs/ExogenousEpistemicEvent",
           "formal_logic_proof": "#/$defs/FormalLogicProofReceipt",
@@ -1139,6 +1149,7 @@
           "prolog_deduction_receipt": "#/$defs/PrologDeductionReceipt",
           "rdf_export_receipt": "#/$defs/RDFExportReceipt",
           "semantic_relational_record": "#/$defs/SemanticRelationalVectorState",
+          "sparql_query_result": "#/$defs/SPARQLQueryResultReceipt",
           "system_fault": "#/$defs/SystemFaultEvent",
           "token_burn": "#/$defs/TokenBurnReceipt",
           "tool_invocation": "#/$defs/ToolInvocationEvent",
@@ -1148,6 +1159,9 @@
         "propertyName": "topology_class"
       },
       "oneOf": [
+        {
+          "$ref": "#/$defs/CrosswalkResolutionReceipt"
+        },
         {
           "$ref": "#/$defs/EpistemicZeroTrustReceipt"
         },
@@ -1261,6 +1275,12 @@
         },
         {
           "$ref": "#/$defs/RDFExportReceipt"
+        },
+        {
+          "$ref": "#/$defs/EpistemicStarvationEvent"
+        },
+        {
+          "$ref": "#/$defs/SPARQLQueryResultReceipt"
         }
       ]
     },
@@ -5021,6 +5041,7 @@
           "type": "string"
         },
         "contextual_envelope": {
+          "coreason_topological_exemption": true,
           "description": "The strictly bounded array of adjacent token clusters forming the semantic proximity matrix.",
           "items": {
             "maxLength": 100000,
@@ -5093,6 +5114,7 @@
           "type": "string"
         },
         "token_buffer": {
+          "coreason_topological_exemption": true,
           "description": "The array of ingested tokens representing the continuous stream. AGENT INSTRUCTION: Topological Exemption applied. Do NOT sort this array, as its chronological sequence is its mathematical state.",
           "items": {
             "maxLength": 10000,
@@ -5528,6 +5550,86 @@
         "blending_factor"
       ],
       "title": "CrossoverPolicy",
+      "type": "object"
+    },
+    "CrosswalkResolutionReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The immutable, cryptographically frozen result of an OntoGPT semantic grounding pass.\n\nCAUSAL AFFORDANCE: Commits the successful translation of raw strings to formal CURIEs into the Epistemic Ledger, physically preserving traceability and preventing 'Traceability Collapse'.\n\nEPISTEMIC BOUNDS: The `resolved_curies` dictionary mathematically locks arbitrary strings to strict W3C CURIE regex patterns (`^[a-zA-Z0-9_]+:[a-zA-Z0-9_]+$`). The alignment certainty is captured by the `grounding_confidence` tri-vector.\n\nMCP ROUTING TRIGGERS: Epistemic Provenance, Crosswalk Resolution, Grounding Receipt, Ontology Access Kit, CURIE",
+      "properties": {
+        "event_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "topology_class": {
+          "const": "crosswalk_resolution",
+          "default": "crosswalk_resolution",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "receipt_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Receipt Cid",
+          "type": "string"
+        },
+        "target_graph_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Target Graph Cid",
+          "type": "string"
+        },
+        "resolved_curies": {
+          "additionalProperties": {
+            "pattern": "^[a-zA-Z0-9_]+:[a-zA-Z0-9_]+$",
+            "type": "string"
+          },
+          "description": "Strict dictionary mapping the original strings to formal W3C CURIEs.",
+          "propertyNames": {
+            "maxLength": 2000
+          },
+          "title": "Resolved Curies",
+          "type": "object"
+        },
+        "grounding_confidence": {
+          "$ref": "#/$defs/DempsterShaferBeliefVector",
+          "description": "Quantifies the semantic alignment and epistemic conflict of the applied crosswalk."
+        }
+      },
+      "required": [
+        "event_cid",
+        "timestamp",
+        "receipt_cid",
+        "target_graph_cid",
+        "resolved_curies",
+        "grounding_confidence"
+      ],
+      "title": "CrosswalkResolutionReceipt",
       "type": "object"
     },
     "CryptographicProvenancePolicy": {
@@ -6215,6 +6317,15 @@
           "minimum": 0.0,
           "title": "Epistemic Conflict Mass",
           "type": "number"
+        },
+        "supporting_citations": {
+          "description": "The array of external NLI-scored citations aggregating to form this belief mass.",
+          "items": {
+            "$ref": "#/$defs/EvidentiaryCitationState"
+          },
+          "maxItems": 100,
+          "title": "Supporting Citations",
+          "type": "array"
         }
       },
       "required": [
@@ -6721,6 +6832,7 @@
           "type": "object"
         },
         "chronological_flow_edges": {
+          "coreason_topological_exemption": true,
           "description": "Directed edges defining the topological sort (chronological flow) of the document.",
           "items": {
             "maxItems": 2,
@@ -8006,6 +8118,7 @@
           "$ref": "#/$defs/NodeCIDState"
         },
         "environment_imports": {
+          "coreason_topological_exemption": true,
           "items": {
             "maxLength": 255,
             "type": "string"
@@ -8787,6 +8900,7 @@
           "type": "object"
         },
         "chronological_flow_edges": {
+          "coreason_topological_exemption": true,
           "description": "The exact topological flow between step_cids.",
           "items": {
             "maxItems": 2,
@@ -8805,6 +8919,7 @@
           "type": "array"
         },
         "prm_evaluations": {
+          "coreason_topological_exemption": true,
           "description": "The strict array of Process Reward Contracts evaluating the logic.",
           "items": {
             "$ref": "#/$defs/ProcessRewardContract"
@@ -8915,6 +9030,77 @@
         "relation_diversity_bucket_size"
       ],
       "title": "EpistemicSeedInjectionPolicy",
+      "type": "object"
+    },
+    "EpistemicStarvationEvent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: An append-only historical coordinate recording the definitive failure of empirical validation.\n\nCAUSAL AFFORDANCE: Acts as the kinetic trigger for non-monotonic Truth Maintenance. By dropping belief mass to zero, it forces the orchestrator to emit a DefeasibleCascadeEvent to prune the ungrounded edge from the graph.\n\nEPISTEMIC BOUNDS: The `failed_citations` array mathematically proves that an exhaustive search was attempted but no retrieved snippet breached the required SLA threshold. The array is deterministically sorted for invariant hashing.\n\nMCP ROUTING TRIGGERS: Epistemic Starvation, Natural Language Inference, Truth Maintenance System, Defeasible Logic, Belief Mass Depletion",
+      "properties": {
+        "event_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "topology_class": {
+          "const": "epistemic_starvation",
+          "default": "epistemic_starvation",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "starved_edge_cid": {
+          "description": "The cryptographic pointer to the specific edge that failed empirical grounding.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Starved Edge Cid",
+          "type": "string"
+        },
+        "failed_citations": {
+          "description": "The array of citations evaluated that fell below the required NLI threshold.",
+          "items": {
+            "$ref": "#/$defs/EvidentiaryCitationState"
+          },
+          "title": "Failed Citations",
+          "type": "array"
+        },
+        "diagnostic_reason": {
+          "description": "The semantic explanation for the starvation (e.g., 'Maximum search retries exhausted').",
+          "maxLength": 2000,
+          "title": "Diagnostic Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "event_cid",
+        "timestamp",
+        "starved_edge_cid",
+        "failed_citations",
+        "diagnostic_reason"
+      ],
+      "title": "EpistemicStarvationEvent",
       "type": "object"
     },
     "EpistemicTelemetryEvent": {
@@ -9028,6 +9214,7 @@
           "type": "string"
         },
         "axiomatic_chain": {
+          "coreason_topological_exemption": true,
           "description": "The strictly ordered sequence of axioms forming the reasoning path.",
           "items": {
             "$ref": "#/$defs/EpistemicAxiomState"
@@ -9150,6 +9337,7 @@
           "type": "number"
         },
         "justification_vectors": {
+          "coreason_topological_exemption": true,
           "description": "The strictly ordered matrix of reasoning paths mathematically justifying the topological expansion.",
           "items": {
             "maxLength": 2000,
@@ -9621,6 +9809,64 @@
       "title": "EvictionPolicy",
       "type": "object"
     },
+    "EvidentiaryCitationState": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative coordinate representing an immutable, localized snippet of external evidence retrieved by an oracle, coupled with its calculated Natural Language Inference (NLI) score.\n\nCAUSAL AFFORDANCE: Physically anchors an abductive hypothesis to empirical reality, providing the exact string evaluated by the NLI cross-encoder to prevent source drift.\n\nEPISTEMIC BOUNDS: Network resolution is strictly gated by the `_enforce_ssrf_quarantine` hook to prevent Bogon/loopback execution. The textual premise is volumetrically clamped by `extracted_snippet` (`max_length=10000`). Entailment probability is bounded `[0.0, 1.0]`.\n\nMCP ROUTING TRIGGERS: Retrieval-Augmented Fact-Checking, Natural Language Inference, SSRF Quarantine, Evidentiary Coordinate, Cross-Encoder Validation",
+      "properties": {
+        "citation_cid": {
+          "description": "Cryptographic anchor for the specific piece of evidence.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Citation Cid",
+          "type": "string"
+        },
+        "source_url": {
+          "description": "The canonical origin of the evidence.",
+          "format": "uri",
+          "maxLength": 2083,
+          "minLength": 1,
+          "title": "Source Url",
+          "type": "string"
+        },
+        "extracted_snippet": {
+          "description": "The exact text evaluated by the NLI model.",
+          "maxLength": 10000,
+          "title": "Extracted Snippet",
+          "type": "string"
+        },
+        "nli_entailment_score": {
+          "description": "The conditional probability that the snippet entails the proposed causal edge.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Nli Entailment Score",
+          "type": "number"
+        },
+        "publication_timestamp": {
+          "anyOf": [
+            {
+              "maximum": 253402300799.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional temporal boundary allowing downstream algorithms to apply temporal discounting.",
+          "title": "Publication Timestamp"
+        }
+      },
+      "required": [
+        "citation_cid",
+        "source_url",
+        "extracted_snippet",
+        "nli_entailment_score"
+      ],
+      "title": "EvidentiaryCitationState",
+      "type": "object"
+    },
     "EvidentiaryGroundingSLA": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology",
@@ -9950,6 +10196,7 @@
           "description": "The outputs generated by the execution node. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion."
         },
         "parent_hashes": {
+          "coreason_topological_exemption": true,
           "description": "The strict array of cryptographic hashes of parent execution nodes.",
           "items": {
             "maxLength": 128,
@@ -10767,6 +11014,7 @@
           "type": "string"
         },
         "answer_sets": {
+          "coreason_topological_exemption": true,
           "description": "Topological Exemption: DO NOT SORT.",
           "items": {
             "items": {
@@ -10848,6 +11096,7 @@
           "type": "integer"
         },
         "covariance_scale": {
+          "coreason_topological_exemption": true,
           "description": "The 3D anisotropic scaling vector of the Gaussian ellipsoid.",
           "maxItems": 3,
           "minItems": 3,
@@ -11414,6 +11663,7 @@
           "type": "object"
         },
         "containment_edges": {
+          "coreason_topological_exemption": true,
           "description": "Directed edges defining the parent-child spatial containment (Parent -> Child).",
           "items": {
             "maxItems": 2,
@@ -12603,6 +12853,7 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements continuous Newtonian Mechanics by defining first and second order derivatives (velocity and acceleration) for both linear and angular motion.\n\nCAUSAL AFFORDANCE: Instructs the spatial rendering engine to extrapolate future positions and rotations using Hermite Spline Extrapolation for continuous collision detection and smooth kinematics.\n\nEPISTEMIC BOUNDS: The physics are defined via `linear_velocity`, `angular_velocity`, `linear_acceleration`, and `angular_acceleration` arrays. These utilize a Topological Exemption preventing array sorting to mathematically preserve Euclidean vectors.\n\nMCP ROUTING TRIGGERS: Kinematic Derivatives, Hermite Spline Extrapolation, Continuous Collision Detection, Newtonian Mechanics",
       "properties": {
         "linear_velocity": {
+          "coreason_topological_exemption": true,
           "description": "The 3D Euclidean velocity vector.",
           "maxItems": 3,
           "minItems": 3,
@@ -12621,6 +12872,7 @@
           "type": "array"
         },
         "angular_velocity": {
+          "coreason_topological_exemption": true,
           "description": "The 3D rotational velocity vector.",
           "maxItems": 3,
           "minItems": 3,
@@ -12639,6 +12891,7 @@
           "type": "array"
         },
         "linear_acceleration": {
+          "coreason_topological_exemption": true,
           "description": "The 3D Euclidean acceleration vector.",
           "maxItems": 3,
           "minItems": 3,
@@ -12657,6 +12910,7 @@
           "type": "array"
         },
         "angular_acceleration": {
+          "coreason_topological_exemption": true,
           "description": "The 3D rotational acceleration vector.",
           "maxItems": 3,
           "minItems": 3,
@@ -13164,6 +13418,36 @@
       "title": "LineageWatermarkReceipt",
       "type": "object"
     },
+    "LinkMLValidationSLA": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes Graph-Shape Governance, acting as the execution contract instructing the orchestrator to validate extracted nodes and edges against an external LinkML YAML shape graph before committing them.\n\nCAUSAL AFFORDANCE: Forces the structural validation of all causal edges. Authorizes the orchestrator to mechanically sever relations that violate the predicate's declared Domain, Range, or Cardinality constraints.\n\nEPISTEMIC BOUNDS: The `linkml_schema_uri` strictly clamps the topological ruleset to a remote, verifiable YAML definition.\n\nMCP ROUTING TRIGGERS: LinkML, Graph-Shape Governance, Structural Isomorphism, SHACL, Domain and Range Enforcement",
+      "properties": {
+        "linkml_schema_uri": {
+          "description": "RFC 8785 canonicalized URI pointing to the canonical LinkML YAML definition.",
+          "format": "uri",
+          "minLength": 1,
+          "title": "Linkml Schema Uri",
+          "type": "string"
+        },
+        "strict_domain_range_checking": {
+          "default": true,
+          "description": "If True, the orchestrator physically severs any CausalDirectedEdgeState where the subject/object node classes violate the predicate's declared LinkML domain/range.",
+          "title": "Strict Domain Range Checking",
+          "type": "boolean"
+        },
+        "allow_unmapped_entities": {
+          "default": false,
+          "description": "A boolean gate dictating whether the resulting graph is permitted to retain high-entropy text nodes that OntoGPT failed to resolve into a formal CURIE.",
+          "title": "Allow Unmapped Entities",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "linkml_schema_uri"
+      ],
+      "title": "LinkMLValidationSLA",
+      "type": "object"
+    },
     "LogitSteganographyContract": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographic mandate for neural watermarking. Uses a Pseudo-Random Function (PRF) seeded by previous token context to deterministically split the vocabulary during Gumbel-Softmax sampling.\n\nCAUSAL AFFORDANCE: Physically manipulates the LLM's residual stream logit distribution just before the final softmax activation, embedding an undeniable, high-entropy Shannon information signature directly into the generated text without degrading model perplexity.\n\nEPISTEMIC BOUNDS: Injection is mathematically clamped by `watermark_strength_delta` (`gt=0.0, le=1.0`). Resistance to cropping attacks is geometrically enforced by `context_history_window` (`ge=0, le=1000000000`). Information density is bounded by `target_bits_per_token` (`gt=0.0, le=1000000000.0`). Locked by `prf_seed_hash` (SHA-256).\n\nMCP ROUTING TRIGGERS: Logit Steganography, Gumbel-Softmax Watermarking, Pseudo-Random Function, Shannon Entropy, Provenance Tracking",
@@ -13528,6 +13812,7 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Acts as a Cartesian topological coordinator based on Edward Tufte's Small Multiples, organizing multiple discrete visual artifacts into a unified grid configuration.\n\nCAUSAL AFFORDANCE: Translates abstract UI panels into fixed 2D matrices (`layout_matrix`), forcing spatial determinism on the frontend rendering engine.\n\nEPISTEMIC BOUNDS: A strictly bounded `@model_validator` executes a referential integrity sweep, mathematically guaranteeing that every panel ID referenced in the `layout_matrix` (`max_length=1000`) corresponds to a verified object in the `panels` array, physically severing Ghost Panel hallucinations. The `@model_validator` `verify_matrix_dimensions` mathematically forces `column_fractional_weights` and `row_fractional_weights` to perfectly match the Cartesian topology.\n\nMCP ROUTING TRIGGERS: Cartesian Coordinate System, Small Multiples, Spatial Topology, Referential Integrity, Layout Matrix",
       "properties": {
         "layout_matrix": {
+          "coreason_topological_exemption": true,
           "description": "A matrix defining the layout structure, using panel IDs.",
           "items": {
             "items": {
@@ -13541,6 +13826,7 @@
           "type": "array"
         },
         "column_fractional_weights": {
+          "coreason_topological_exemption": true,
           "description": "Euclidean fractional weights for column partitioning.",
           "items": {
             "type": "number"
@@ -13549,6 +13835,7 @@
           "type": "array"
         },
         "row_fractional_weights": {
+          "coreason_topological_exemption": true,
           "description": "Euclidean fractional weights for row partitioning.",
           "items": {
             "type": "number"
@@ -13557,6 +13844,7 @@
           "type": "array"
         },
         "panels": {
+          "coreason_topological_exemption": true,
           "description": "The ordered array of topological UI panels physically rendered in the grid.",
           "items": {
             "$ref": "#/$defs/AnyPanelProfile"
@@ -14782,6 +15070,60 @@
       "title": "OntologicalAlignmentPolicy",
       "type": "object"
     },
+    "OntologicalCrosswalkIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A kinetic trigger instructing the orchestrator to route an array of ungrounded text entities through a grounding oracle (OntoGPT/OAK) to map them to formal ontology CURIEs.\n\nCAUSAL AFFORDANCE: Authorizes the runtime to execute Bipartite Ontological Mapping, collapsing high-entropy natural language strings into zero-entropy Semantic Web identifiers.\n\nEPISTEMIC BOUNDS: The search space is rigidly clamped by the `target_ontology_registries` array (e.g., ['MONDO', 'HP']). The `minimum_isometry_threshold` physically restricts acceptable mappings to a strictly positive cosine/BM25 similarity (`ge=0.0, le=1.0`).\n\nMCP ROUTING TRIGGERS: Bipartite Ontological Mapping, Grounding Oracle, CURIE Resolution, Isometry Thresholding, Semantic Crosswalk",
+      "properties": {
+        "topology_class": {
+          "const": "ontological_crosswalk",
+          "default": "ontological_crosswalk",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "target_graph_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Target Graph Cid",
+          "type": "string"
+        },
+        "source_strings": {
+          "description": "The ungrounded natural language concepts extracted by the LLM.",
+          "items": {
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Source Strings",
+          "type": "array"
+        },
+        "target_ontology_registries": {
+          "description": "The strictly typed standard ontology namespaces to search (e.g., 'MONDO', 'CHEBI').",
+          "items": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Target Ontology Registries",
+          "type": "array"
+        },
+        "minimum_isometry_threshold": {
+          "description": "The semantic distance threshold required to automatically accept a mapping.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Minimum Isometry Threshold",
+          "type": "number"
+        }
+      },
+      "required": [
+        "target_graph_cid",
+        "source_strings",
+        "target_ontology_registries",
+        "minimum_isometry_threshold"
+      ],
+      "title": "OntologicalCrosswalkIntent",
+      "type": "object"
+    },
     "OntologicalHandshakeReceipt": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact representing the absolute\nmathematical alignment of two swarms' latent vector spaces prior to establishing a shared\nepistemic blackboard. As a ...Receipt suffix, this is an append-only coordinate on the\nMerkle-DAG that the LLM must never hallucinate a mutation to.\n\nCAUSAL AFFORDANCE: Authorizes the physical bridging of two independent N-dimensional\nsemantic spaces. If native geometries are incommensurable, it structurally demands the\napplication of a DimensionalProjectionContract (applied_projection). The alignment_status\nLiteral [\"aligned\", \"projected\", \"fallback_triggered\", \"incommensurable\"] records the\nfinal verdict.\n\nEPISTEMIC BOUNDS: Semantic isometry is quantified via measured_cosine_similarity, strictly\nclamped between [ge=-1.0, le=1.0]. The participant_node_cids array (min_length=2) is\ndeterministically sorted via @model_validator to prevent Byzantine replay anomalies\nduring cross-swarm Merkle hashing.\n\nMCP ROUTING TRIGGERS: Earth Mover's Distance, Cosine Similarity, Vector Space Isometry,\nLatent Alignment, Holographic Graph Projection",
@@ -15910,6 +16252,7 @@
           "type": "boolean"
         },
         "variable_bindings": {
+          "coreason_topological_exemption": true,
           "description": "Topological Exemption: DO NOT SORT.",
           "items": {
             "additionalProperties": {
@@ -16132,6 +16475,18 @@
           "minLength": 1,
           "title": "Base Uri Namespace",
           "type": "string"
+        },
+        "shacl_governance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SHACLValidationSLA"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The structural shape constraints governing the exported RDF graph."
         }
       },
       "required": [
@@ -16481,6 +16836,7 @@
               "type": "null"
             }
           ],
+          "coreason_topological_exemption": true,
           "default": null,
           "description": "The 8-dimensional Clifford Algebra motor for mathematically flawless ScLERP interpolation.",
           "title": "Dual Quaternion Motor"
@@ -16493,6 +16849,41 @@
         "z"
       ],
       "title": "SE3TransformProfile",
+      "type": "object"
+    },
+    "SHACLValidationSLA": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Acts as the deterministic execution contract instructing the egress engine to validate the serialized RDF graph against a formal W3C SHACL shape graph before authorizing the export.\n\nCAUSAL AFFORDANCE: Physically authorizes the orchestrator to evaluate emitted graphs against enterprise logic, mechanically preventing the pollution of external triplestores with hallucinated topologies.\n\nEPISTEMIC BOUNDS: The validation logic is constrained to the `violation_action` finite state automaton, dictating exactly what the runtime must do if the graph violates the SHACL shape.\n\nMCP ROUTING TRIGGERS: SHACL, Topological Isomorphism, Semantic Web Egress, Graph-Shape Validation, Triplestore Interoperability",
+      "properties": {
+        "shacl_shape_uri": {
+          "description": "A canonicalized URI pointing to the definitive .shacl or .ttl shape graph.",
+          "format": "uri",
+          "minLength": 1,
+          "title": "Shacl Shape Uri",
+          "type": "string"
+        },
+        "strict_mode": {
+          "default": true,
+          "description": "If True, a single topological shape violation causes the entire graph export to be mathematically rejected.",
+          "title": "Strict Mode",
+          "type": "boolean"
+        },
+        "violation_action": {
+          "description": "A finite state automaton dictating the exact mechanistic penalty the orchestrator must apply if non-conforming triples are detected.",
+          "enum": [
+            "drop_graph",
+            "quarantine",
+            "strip_invalid_triples"
+          ],
+          "title": "Violation Action",
+          "type": "string"
+        }
+      },
+      "required": [
+        "shacl_shape_uri",
+        "violation_action"
+      ],
+      "title": "SHACLValidationSLA",
       "type": "object"
     },
     "SMPCTopologyManifest": {
@@ -16650,6 +17041,124 @@
         "participant_node_cids"
       ],
       "title": "SMPCTopologyManifest",
+      "type": "object"
+    },
+    "SPARQLQueryIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A kinetic trigger instructing the orchestrator to execute a read-only SPARQL query against an external or internal RDF triplestore.\n\nCAUSAL AFFORDANCE: Authorizes the agent to retrieve formalized Semantic Web data. The query is strictly clamped to prevent buffer overflows, and the target is network-quarantined.\n\nEPISTEMIC BOUNDS: The `target_endpoint_uri` is mathematically scrubbed against Bogon and loopback IP spaces to prevent SSRF. The `expected_result_schema` is volumetrically bounded to prevent schema evaluation explosions.\n\nMCP ROUTING TRIGGERS: SPARQL, Semantic Web Query, Zero-Trust Egress, SSRF Quarantine, Triplestore",
+      "properties": {
+        "topology_class": {
+          "const": "sparql_query",
+          "default": "sparql_query",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "target_endpoint_uri": {
+          "description": "The specific SPARQL endpoint to query.",
+          "format": "uri",
+          "maxLength": 2083,
+          "minLength": 1,
+          "title": "Target Endpoint Uri",
+          "type": "string"
+        },
+        "query_string": {
+          "description": "The raw SPARQL syntax, mathematically clamped to prevent query buffer overflow attacks.",
+          "maxLength": 5000,
+          "title": "Query String",
+          "type": "string"
+        },
+        "expected_result_schema": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonPrimitiveState"
+          },
+          "description": "An untyped but volumetrically bounded dictionary defining the exact expected JSON schema of the SPARQL bindings.",
+          "propertyNames": {
+            "maxLength": 255
+          },
+          "title": "Expected Result Schema",
+          "type": "object"
+        }
+      },
+      "required": [
+        "target_endpoint_uri",
+        "query_string",
+        "expected_result_schema"
+      ],
+      "title": "SPARQLQueryIntent",
+      "type": "object"
+    },
+    "SPARQLQueryResultReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The immutable, cryptographically frozen result of a SPARQL query, projecting returned RDF bindings into the swarm's working memory.\n\nCAUSAL AFFORDANCE: Commits external Semantic Web knowledge into the Epistemic Ledger, mathematically binding the result set to the intent that authorized it.\n\nEPISTEMIC BOUNDS: The `returned_bindings` dictionary is violently truncated/evaluated by the `_validate_payload_bounds` hardware guillotine to prevent massive data returns from causing VRAM exhaustion.\n\nMCP ROUTING TRIGGERS: SPARQL Result, RDF Bindings, Epistemic Projection, Payload Bounding, Ledger Commit",
+      "properties": {
+        "event_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "topology_class": {
+          "const": "sparql_query_result",
+          "default": "sparql_query_result",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "query_intent_cid": {
+          "description": "A pointer back to the SPARQLQueryIntent that authorized this execution.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Query Intent Cid",
+          "type": "string"
+        },
+        "returned_bindings": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonPrimitiveState"
+          },
+          "description": "The localized subset of data retrieved, structurally restricted by the hardware guillotine.",
+          "propertyNames": {
+            "maxLength": 255
+          },
+          "title": "Returned Bindings",
+          "type": "object"
+        },
+        "execution_time_ms": {
+          "description": "A temporal integer capturing the physical cost of the query.",
+          "minimum": 0,
+          "title": "Execution Time Ms",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "event_cid",
+        "timestamp",
+        "query_intent_cid",
+        "returned_bindings",
+        "execution_time_ms"
+      ],
+      "title": "SPARQLQueryResultReceipt",
       "type": "object"
     },
     "SSETransportProfile": {
@@ -16932,6 +17441,18 @@
           ],
           "title": "Validation Failure Action",
           "type": "string"
+        },
+        "linkml_governance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LinkMLValidationSLA"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The structural shape constraints for the graph."
         }
       },
       "required": [
@@ -17962,6 +18483,7 @@
           "title": "Trajectory Duration Ms"
         },
         "bezier_control_points": {
+          "coreason_topological_exemption": true,
           "description": "Waypoints for constructing non-linear, bot-evasive movement curves.",
           "items": {
             "$ref": "#/$defs/SE3TransformProfile"
@@ -18311,6 +18833,7 @@
           "type": "object"
         },
         "patches": {
+          "coreason_topological_exemption": true,
           "description": "The exact, ordered sequence of deterministic state vector mutations.",
           "items": {
             "$ref": "#/$defs/StateMutationIntent"
@@ -18512,6 +19035,7 @@
           "type": "string"
         },
         "args": {
+          "coreason_topological_exemption": true,
           "description": "The explicit array of arguments to pass to the command.",
           "items": {
             "maxLength": 2000,

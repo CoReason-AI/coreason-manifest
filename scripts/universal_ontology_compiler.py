@@ -492,7 +492,7 @@ def calculate_semantic_differential() -> None:
     def get_head_schema() -> dict[str, Any]:
         try:
             output = subprocess.check_output(
-                ["git", "show", "HEAD~1:coreason_ontology.schema.json"],  # noqa: S607
+                ["git", "show", "HEAD~1:coreason_ontology.schema.json"],  # noqa: S607 # nosec B603 B607
                 stderr=subprocess.DEVNULL,
                 text=True,
             )
@@ -562,7 +562,7 @@ def scan_epistemic_quarantine(source: str) -> None:
 
     try:
         if source.startswith(("http://", "https://")):
-            with urllib.request.urlopen(source, timeout=10) as response:  # noqa: S310
+            with urllib.request.urlopen(source, timeout=10) as response:  # noqa: S310 # nosec B310
                 schema_dict = json.loads(response.read().decode("utf-8"))
         else:
             with open(source, encoding="utf-8") as f:

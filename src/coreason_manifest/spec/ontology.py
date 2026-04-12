@@ -22,7 +22,7 @@ import time
 import typing
 import urllib.parse
 from enum import StrEnum
-from typing import Annotated, Any, Literal, Self
+from typing import Annotated, Any, Literal, Self, cast
 
 import canonicaljson
 import networkx as nx
@@ -724,7 +724,7 @@ class CoreasonBaseState(BaseModel):
 
             canonical_dump = canonicaljson.encode_canonical_json(raw_dict)
             object.__setattr__(self, "_cached_canonical_dump", canonical_dump)
-            return canonical_dump
+            return cast("bytes", canonical_dump)
 
 
 class EpistemicProxyState[T](CoreasonBaseState):
@@ -1121,13 +1121,21 @@ class KinematicDerivativeProfile(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Kinematic Derivatives, Hermite Spline Extrapolation, Continuous Collision Detection, Newtonian Mechanics
     """
 
-    linear_velocity: tuple[float, float, float] = Field(description="The 3D Euclidean velocity vector.")
+    linear_velocity: tuple[float, float, float] = Field(
+        json_schema_extra={"coreason_topological_exemption": True}, description="The 3D Euclidean velocity vector."
+    )
     # Note: linear_velocity is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
-    angular_velocity: tuple[float, float, float] = Field(description="The 3D rotational velocity vector.")
+    angular_velocity: tuple[float, float, float] = Field(
+        json_schema_extra={"coreason_topological_exemption": True}, description="The 3D rotational velocity vector."
+    )
     # Note: angular_velocity is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
-    linear_acceleration: tuple[float, float, float] = Field(description="The 3D Euclidean acceleration vector.")
+    linear_acceleration: tuple[float, float, float] = Field(
+        json_schema_extra={"coreason_topological_exemption": True}, description="The 3D Euclidean acceleration vector."
+    )
     # Note: linear_acceleration is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
-    angular_acceleration: tuple[float, float, float] = Field(description="The 3D rotational acceleration vector.")
+    angular_acceleration: tuple[float, float, float] = Field(
+        json_schema_extra={"coreason_topological_exemption": True}, description="The 3D rotational acceleration vector."
+    )
     # Note: angular_acceleration is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
 
 
@@ -1164,6 +1172,7 @@ class SE3TransformProfile(CoreasonBaseState):
         default=None, description="Tensors governing continuous momentum and velocity."
     )
     dual_quaternion_motor: tuple[float, float, float, float, float, float, float, float] | None = Field(
+        json_schema_extra={"coreason_topological_exemption": True},
         default=None,
         description="The 8-dimensional Clifford Algebra motor for mathematically flawless ScLERP interpolation.",
     )
@@ -1224,7 +1233,8 @@ class GaussianSplattingProfile(CoreasonBaseState):
         ge=0, le=3, description="Capped at 3 to physically prevent VRAM explosion during WebGL rasterization."
     )
     covariance_scale: tuple[float, float, float] = Field(
-        description="The 3D anisotropic scaling vector of the Gaussian ellipsoid."
+        json_schema_extra={"coreason_topological_exemption": True},
+        description="The 3D anisotropic scaling vector of the Gaussian ellipsoid.",
     )
     # Note: covariance_scale is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     opacity_alpha: float = Field(ge=0.0, le=1.0, description="The alpha transmittance scalar of the splat.")
@@ -2225,6 +2235,7 @@ class ContextualizedSourceState(CoreasonBaseState):
         description="The strictly bounded, un-redacted 1D string projection of the semantic artifact undergoing evaluation."
     )
     contextual_envelope: list[Annotated[str, StringConstraints(max_length=100000)]] = Field(
+        json_schema_extra={"coreason_topological_exemption": True},
         max_length=10000,
         description="The strictly bounded array of adjacent token clusters forming the semantic proximity matrix.",
     )
@@ -2257,6 +2268,7 @@ class EpistemicUpsamplingTask(CoreasonBaseState):
         description="The minimum acceptable certainty probability required to project the upsampled node.",
     )
     justification_vectors: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
+        json_schema_extra={"coreason_topological_exemption": True},
         min_length=1,
         max_length=1000,
         description="The strictly ordered matrix of reasoning paths mathematically justifying the topological expansion.",
@@ -2905,6 +2917,7 @@ class StateDifferentialManifest(CoreasonBaseState):
         description="Causal history mapping of all known Lineage Watermarks to their latest logical mutation count at the time of authoring."
     )
     patches: list[StateMutationIntent] = Field(
+        json_schema_extra={"coreason_topological_exemption": True},
         default_factory=list,
         description="The exact, ordered sequence of deterministic state vector mutations.",
         # Note: patches is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
@@ -4659,6 +4672,7 @@ class DocumentLayoutManifest(CoreasonBaseState):
         max_length=1000, description="Dictionary mapping block_cids to their strict spatial definitions."
     )
     chronological_flow_edges: list[tuple[str, str]] = Field(
+        json_schema_extra={"coreason_topological_exemption": True},
         default_factory=list,
         # Note: chronological_flow_edges is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
         description="Directed edges defining the topological sort (chronological flow) of the document.",
@@ -5191,6 +5205,91 @@ class EpistemicScanningPolicy(CoreasonBaseState):
     )
 
 
+class LinkMLValidationSLA(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Establishes Graph-Shape Governance, acting as the execution contract instructing the orchestrator to validate extracted nodes and edges against an external LinkML YAML shape graph before committing them.
+
+    CAUSAL AFFORDANCE: Forces the structural validation of all causal edges. Authorizes the orchestrator to mechanically sever relations that violate the predicate's declared Domain, Range, or Cardinality constraints.
+
+    EPISTEMIC BOUNDS: The `linkml_schema_uri` strictly clamps the topological ruleset to a remote, verifiable YAML definition.
+
+    MCP ROUTING TRIGGERS: LinkML, Graph-Shape Governance, Structural Isomorphism, SHACL, Domain and Range Enforcement
+    """
+
+    linkml_schema_uri: AnyUrl = Field(
+        description="RFC 8785 canonicalized URI pointing to the canonical LinkML YAML definition."
+    )
+    strict_domain_range_checking: bool = Field(
+        default=True,
+        description="If True, the orchestrator physically severs any CausalDirectedEdgeState where the subject/object node classes violate the predicate's declared LinkML domain/range.",
+    )
+    allow_unmapped_entities: bool = Field(
+        default=False,
+        description="A boolean gate dictating whether the resulting graph is permitted to retain high-entropy text nodes that OntoGPT failed to resolve into a formal CURIE.",
+    )
+
+
+class OntologicalCrosswalkIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A kinetic trigger instructing the orchestrator to route an array of ungrounded text entities through a grounding oracle (OntoGPT/OAK) to map them to formal ontology CURIEs.
+
+    CAUSAL AFFORDANCE: Authorizes the runtime to execute Bipartite Ontological Mapping, collapsing high-entropy natural language strings into zero-entropy Semantic Web identifiers.
+
+    EPISTEMIC BOUNDS: The search space is rigidly clamped by the `target_ontology_registries` array (e.g., ['MONDO', 'HP']). The `minimum_isometry_threshold` physically restricts acceptable mappings to a strictly positive cosine/BM25 similarity (`ge=0.0, le=1.0`).
+
+    MCP ROUTING TRIGGERS: Bipartite Ontological Mapping, Grounding Oracle, CURIE Resolution, Isometry Thresholding, Semantic Crosswalk
+    """
+
+    topology_class: Literal["ontological_crosswalk"] = "ontological_crosswalk"
+    target_graph_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    source_strings: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
+        min_length=1, description="The ungrounded natural language concepts extracted by the LLM."
+    )
+    target_ontology_registries: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
+        min_length=1, description="The strictly typed standard ontology namespaces to search (e.g., 'MONDO', 'CHEBI')."
+    )
+    minimum_isometry_threshold: float = Field(
+        ge=0.0, le=1.0, description="The semantic distance threshold required to automatically accept a mapping."
+    )
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "source_strings", sorted(self.source_strings))
+        object.__setattr__(self, "target_ontology_registries", sorted(self.target_ontology_registries))
+        return self
+
+
+class CrosswalkResolutionReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: The immutable, cryptographically frozen result of an OntoGPT semantic grounding pass.
+
+    CAUSAL AFFORDANCE: Commits the successful translation of raw strings to formal CURIEs into the Epistemic Ledger, physically preserving traceability and preventing 'Traceability Collapse'.
+
+    EPISTEMIC BOUNDS: The `resolved_curies` dictionary mathematically locks arbitrary strings to strict W3C CURIE regex patterns (`^[a-zA-Z0-9_]+:[a-zA-Z0-9_]+$`). The alignment certainty is captured by the `grounding_confidence` tri-vector.
+
+    MCP ROUTING TRIGGERS: Epistemic Provenance, Crosswalk Resolution, Grounding Receipt, Ontology Access Kit, CURIE
+    """
+
+    event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        ...
+    )
+    prior_event_hash: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
+    ) = Field(default=None)
+    timestamp: float = Field(ge=0.0, le=253402300799.0)
+
+    topology_class: Literal["crosswalk_resolution"] = "crosswalk_resolution"
+    receipt_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    target_graph_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    resolved_curies: dict[
+        Annotated[str, StringConstraints(max_length=2000)],
+        Annotated[str, StringConstraints(pattern=r"^[a-zA-Z0-9_]+:[a-zA-Z0-9_]+$")],
+    ] = Field(description="Strict dictionary mapping the original strings to formal W3C CURIEs.")
+    grounding_confidence: DempsterShaferBeliefVector = Field(
+        description="Quantifies the semantic alignment and epistemic conflict of the applied crosswalk."
+    )
+
+
 class SchemaDrivenExtractionSLA(CoreasonBaseState):
     schema_registry_uri: AnyUrl = Field(
         description="RFC 8785 canonicalized URI to the exact Pydantic template or LinkML definition."
@@ -5198,6 +5297,17 @@ class SchemaDrivenExtractionSLA(CoreasonBaseState):
     extraction_framework: Literal["docling_graph_explicit", "ontogpt_spires"] = Field(...)
     max_schema_retries: int = Field(ge=0, le=10)
     validation_failure_action: Literal["quarantine_chunk", "escalate_to_human", "drop_edge"]
+    linkml_governance: LinkMLValidationSLA | None = Field(
+        default=None, description="The structural shape constraints for the graph."
+    )
+
+    @model_validator(mode="after")
+    def enforce_linkml_for_ontogpt(self) -> Self:
+        if self.extraction_framework == "ontogpt_spires" and self.linkml_governance is None:
+            raise ValueError(
+                "Epistemic Violation: Using the 'ontogpt_spires' framework mathematically requires a LinkMLValidationSLA to govern shape constraints."
+            )
+        return self
 
 
 class EvidentiaryGroundingSLA(CoreasonBaseState):
@@ -5571,6 +5681,7 @@ class ExecutionNodeReceipt(CoreasonBaseState):
         return _validate_payload_bounds(v)
 
     parent_hashes: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
+        json_schema_extra={"coreason_topological_exemption": True},
         # Note: parent_hashes is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
         default_factory=list,
         description="The strict array of cryptographic hashes of parent execution nodes.",
@@ -6710,6 +6821,12 @@ class TopologicalProjectionIntent(CryptographicProvenancePolicy):
     lossy_translation_divergence: list[Annotated[str, StringConstraints(max_length=100000)]]
     epistemic_status: Literal["pending_deterministic_collapse"] = Field(default="pending_deterministic_collapse")
 
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        if self.lossy_translation_divergence:
+            object.__setattr__(self, "lossy_translation_divergence", sorted(self.lossy_translation_divergence))
+        return self
+
     @field_validator("isomorphism_confidence", mode="after")
     @classmethod
     def enforce_isomorphism_guillotine(cls, v: float) -> float:
@@ -6831,7 +6948,8 @@ class EpistemicLean4Premise(CoreasonBaseState):
     topology_class: Literal["epistemic_lean4_premise"] = Field(default="epistemic_lean4_premise")
     ontology_node_id: NodeCIDState
     environment_imports: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
-        default_factory=lambda: ["Mathlib"]
+        default_factory=lambda: ["Mathlib"],
+        json_schema_extra={"coreason_topological_exemption": True},
     )
     formal_statement: Annotated[str, StringConstraints(min_length=1, max_length=10000)]
     tactic_proof: Annotated[str, StringConstraints(min_length=1, max_length=100000)]
@@ -6870,7 +6988,9 @@ class FormalLogicProofReceipt(CoreasonBaseState):
     prior_event_hash: str | None = Field(default=None)
     satisfiability: Literal["SATISFIABLE", "UNSATISFIABLE", "UNKNOWN", "OPTIMUM FOUND"]
     answer_sets: list[list[Annotated[str, StringConstraints(max_length=1024)]]] = Field(
-        default_factory=list, description="Topological Exemption: DO NOT SORT."
+        default_factory=list,
+        json_schema_extra={"coreason_topological_exemption": True},
+        description="Topological Exemption: DO NOT SORT.",
     )
 
     @field_serializer("answer_sets")
@@ -6901,7 +7021,9 @@ class PrologDeductionReceipt(CoreasonBaseState):
     prior_event_hash: str | None = Field(default=None)
     truth_value: bool
     variable_bindings: list[dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState]] = Field(
-        default_factory=list, description="Topological Exemption: DO NOT SORT."
+        default_factory=list,
+        json_schema_extra={"coreason_topological_exemption": True},
+        description="Topological Exemption: DO NOT SORT.",
     )
 
     @field_serializer("variable_bindings")
@@ -6974,12 +7096,121 @@ class BeliefModulationReceipt(CoreasonBaseState):
         return self
 
 
+class SHACLValidationSLA(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Acts as the deterministic execution contract instructing the egress engine to validate the serialized RDF graph against a formal W3C SHACL shape graph before authorizing the export.
+
+    CAUSAL AFFORDANCE: Physically authorizes the orchestrator to evaluate emitted graphs against enterprise logic, mechanically preventing the pollution of external triplestores with hallucinated topologies.
+
+    EPISTEMIC BOUNDS: The validation logic is constrained to the `violation_action` finite state automaton, dictating exactly what the runtime must do if the graph violates the SHACL shape.
+
+    MCP ROUTING TRIGGERS: SHACL, Topological Isomorphism, Semantic Web Egress, Graph-Shape Validation, Triplestore Interoperability
+    """
+
+    shacl_shape_uri: AnyUrl = Field(
+        description="A canonicalized URI pointing to the definitive .shacl or .ttl shape graph."
+    )
+    strict_mode: bool = Field(
+        default=True,
+        description="If True, a single topological shape violation causes the entire graph export to be mathematically rejected.",
+    )
+    violation_action: Literal["drop_graph", "quarantine", "strip_invalid_triples"] = Field(
+        description="A finite state automaton dictating the exact mechanistic penalty the orchestrator must apply if non-conforming triples are detected."
+    )
+
+
+class SPARQLQueryIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A kinetic trigger instructing the orchestrator to execute a read-only SPARQL query against an external or internal RDF triplestore.
+
+    CAUSAL AFFORDANCE: Authorizes the agent to retrieve formalized Semantic Web data. The query is strictly clamped to prevent buffer overflows, and the target is network-quarantined.
+
+    EPISTEMIC BOUNDS: The `target_endpoint_uri` is mathematically scrubbed against Bogon and loopback IP spaces to prevent SSRF. The `expected_result_schema` is volumetrically bounded to prevent schema evaluation explosions.
+
+    MCP ROUTING TRIGGERS: SPARQL, Semantic Web Query, Zero-Trust Egress, SSRF Quarantine, Triplestore
+    """
+
+    topology_class: Literal["sparql_query"] = "sparql_query"
+    target_endpoint_uri: HttpUrl = Field(description="The specific SPARQL endpoint to query.")
+    query_string: Annotated[str, StringConstraints(max_length=5000)] = Field(
+        description="The raw SPARQL syntax, mathematically clamped to prevent query buffer overflow attacks."
+    )
+    expected_result_schema: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
+        description="An untyped but volumetrically bounded dictionary defining the exact expected JSON schema of the SPARQL bindings."
+    )
+
+    @field_validator("target_endpoint_uri", mode="after")
+    @classmethod
+    def _enforce_ssrf_quarantine(cls, url: HttpUrl) -> HttpUrl:
+        """
+        AGENT INSTRUCTION: Implements Network Topology and Server-Side Request Forgery (SSRF) Quarantine logic.
+        """
+        _validate_ssrf_safety(str(url))
+        return url
+
+    @field_validator("expected_result_schema", mode="before")
+    @classmethod
+    def enforce_payload_topology(cls, v: Any) -> Any:
+        """
+        AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion.
+        """
+        return _validate_payload_bounds(v)
+
+
+class SPARQLQueryResultReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: The immutable, cryptographically frozen result of a SPARQL query, projecting returned RDF bindings into the swarm's working memory.
+
+    CAUSAL AFFORDANCE: Commits external Semantic Web knowledge into the Epistemic Ledger, mathematically binding the result set to the intent that authorized it.
+
+    EPISTEMIC BOUNDS: The `returned_bindings` dictionary is violently truncated/evaluated by the `_validate_payload_bounds` hardware guillotine to prevent massive data returns from causing VRAM exhaustion.
+
+    MCP ROUTING TRIGGERS: SPARQL Result, RDF Bindings, Epistemic Projection, Payload Bounding, Ledger Commit
+    """
+
+    event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        ...
+    )
+    prior_event_hash: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
+    ) = Field(default=None)
+    timestamp: float = Field(ge=0.0, le=253402300799.0)
+
+    topology_class: Literal["sparql_query_result"] = "sparql_query_result"
+    query_intent_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
+        Field(description="A pointer back to the SPARQLQueryIntent that authorized this execution.")
+    )
+    returned_bindings: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
+        description="The localized subset of data retrieved, structurally restricted by the hardware guillotine."
+    )
+    execution_time_ms: int = Field(ge=0, description="A temporal integer capturing the physical cost of the query.")
+
+    @field_validator("returned_bindings", mode="before")
+    @classmethod
+    def enforce_payload_topology(cls, v: Any) -> Any:
+        """
+        AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion.
+        """
+        return _validate_payload_bounds(v)
+
+
 class RDFSerializationIntent(CoreasonBaseState):
     topology_class: Literal["rdf_serialization"] = "rdf_serialization"
     export_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
     target_graph_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
     target_format: Literal["turtle", "xml", "json-ld", "ntriples"] = "turtle"
     base_uri_namespace: AnyUrl
+    shacl_governance: SHACLValidationSLA | None = Field(
+        default=None, description="The structural shape constraints governing the exported RDF graph."
+    )
+
+    @model_validator(mode="after")
+    def enforce_shacl_governance(self) -> Self:
+        if self.target_format in ["xml", "json-ld"] and self.shacl_governance is None:
+            raise ValueError(
+                "Epistemic Violation: Exporting to highly structured enterprise formats ('xml', 'json-ld') mathematically requires a SHACLValidationSLA to prevent topological corruption."
+            )
+        return self
 
 
 class RDFExportReceipt(CoreasonBaseState):
@@ -7077,6 +7308,8 @@ type AnyIntent = Annotated[
     EpistemicZeroTrustContract
     | EmpiricalFalsificationContract
     | FalsificationContract
+    | OntologicalCrosswalkIntent
+    | EpistemicZeroTrustContract
     | SemanticIntent
     | DraftingIntent
     | AdjudicationIntent
@@ -7108,7 +7341,8 @@ type AnyIntent = Annotated[
     | EpistemicLogicPremise
     | EpistemicPrologPremise
     | CausalPropagationIntent
-    | RDFSerializationIntent,
+    | RDFSerializationIntent
+    | SPARQLQueryIntent,
     Field(discriminator="topology_class"),
 ]
 
@@ -7181,7 +7415,7 @@ class InsightCardProfile(CoreasonBaseState):
 
         MCP ROUTING TRIGGERS: XSS Quarantine, DOM Sanitization, Presentation Layer Scrubbing, Rust Execution Bridge
         """
-        return nh3.clean(v)
+        return cast("str", nh3.clean(v))
 
 
 type AnyPanelProfile = Annotated[
@@ -8378,20 +8612,26 @@ class MacroGridProfile(CoreasonBaseState):
     """
 
     layout_matrix: list[list[Annotated[str, StringConstraints(max_length=255)]]] = Field(
+        json_schema_extra={"coreason_topological_exemption": True},
         # Note: layout_matrix is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
         max_length=1000,
         description="A matrix defining the layout structure, using panel IDs.",
     )
     column_fractional_weights: list[float] = Field(
-        default_factory=list, description="Euclidean fractional weights for column partitioning."
+        json_schema_extra={"coreason_topological_exemption": True},
+        default_factory=list,
+        description="Euclidean fractional weights for column partitioning.",
     )
     # Note: column_fractional_weights is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     row_fractional_weights: list[float] = Field(
-        default_factory=list, description="Euclidean fractional weights for row partitioning."
+        json_schema_extra={"coreason_topological_exemption": True},
+        default_factory=list,
+        description="Euclidean fractional weights for row partitioning.",
     )
     # Note: row_fractional_weights is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     panels: list[AnyPanelProfile] = Field(
-        description="The ordered array of topological UI panels physically rendered in the grid."
+        json_schema_extra={"coreason_topological_exemption": True},
+        description="The ordered array of topological UI panels physically rendered in the grid.",
         # Note: panels is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     )
 
@@ -9233,10 +9473,14 @@ class EpistemicSOPManifest(CoreasonBaseState):
     structural_grammar_hashes: dict[Annotated[str, StringConstraints(max_length=255)], str] = Field(
         description="Dictionary mapping step_cids to SHA-256 hashes of strict Context-Free Grammars or JSON Schemas."
     )
-    chronological_flow_edges: list[tuple[str, str]] = Field(description="The exact topological flow between step_cids.")
+    chronological_flow_edges: list[tuple[str, str]] = Field(
+        json_schema_extra={"coreason_topological_exemption": True},
+        description="The exact topological flow between step_cids.",
+    )
     # Note: chronological_flow_edges is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     prm_evaluations: list["ProcessRewardContract"] = Field(
-        description="The strict array of Process Reward Contracts evaluating the logic."
+        json_schema_extra={"coreason_topological_exemption": True},
+        description="The strict array of Process Reward Contracts evaluating the logic.",
         # Note: prm_evaluations is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     )
 
@@ -9759,6 +10003,7 @@ class SpatialKinematicActionIntent(CoreasonBaseState):
         description="The exact temporal duration of the movement, simulating human kinematics.",
     )
     bezier_control_points: list[SE3TransformProfile] = Field(
+        json_schema_extra={"coreason_topological_exemption": True},
         default_factory=list,
         description="Waypoints for constructing non-linear, bot-evasive movement curves.",
         # Note: bezier_control_points is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
@@ -9853,6 +10098,7 @@ class StdioTransportProfile(CoreasonBaseState):
         ..., description="The command executable to run (e.g., 'node', 'python')."
     )
     args: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
+        json_schema_extra={"coreason_topological_exemption": True},
         # Note: args is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
         max_length=1000,
         default_factory=list,
@@ -10569,6 +10815,10 @@ class TraceExportManifest(CoreasonBaseState):
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Any:
         object.__setattr__(self, "spans", sorted(self.spans, key=operator.attrgetter("span_cid")))
+        if self.execution_nodes:
+            object.__setattr__(
+                self, "execution_nodes", sorted(self.execution_nodes, key=operator.attrgetter("node_hash"))
+            )
         return self
 
 
@@ -11311,6 +11561,14 @@ class CognitiveAgentNodeProfile(CoreasonBaseState):
         object.__setattr__(
             self, "intervention_policies", sorted(self.intervention_policies, key=operator.attrgetter("trigger"))
         )
+        if self.emitted_intents:
+            object.__setattr__(
+                self,
+                "emitted_intents",
+                sorted(
+                    self.emitted_intents, key=lambda x: (x.__class__.__name__, x.model_dump_json(exclude_unset=True))
+                ),
+            )
         return self
 
     @model_validator(mode="after")
@@ -11363,6 +11621,7 @@ class HierarchicalDOMManifest(CoreasonBaseState):
         default_factory=list,
         # Note: containment_edges is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
         description="Directed edges defining the parent-child spatial containment (Parent -> Child).",
+        json_schema_extra={"coreason_topological_exemption": True},
     )
 
     @model_validator(mode="after")
@@ -13270,6 +13529,7 @@ class EpistemicTopologicalProofManifest(CoreasonBaseState):
         description="A Content Identifier (CID) for this specific topological proof.",
     )
     axiomatic_chain: list[EpistemicAxiomState] = Field(
+        json_schema_extra={"coreason_topological_exemption": True},
         min_length=1,
         description="The strictly ordered sequence of axioms forming the reasoning path.",
         # Note: axiomatic_chain is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
@@ -14154,7 +14414,8 @@ class EpistemicZeroTrustReceipt(CoreasonBaseState):
 
 
 type AnyStateEvent = Annotated[
-    EpistemicZeroTrustReceipt
+    CrosswalkResolutionReceipt
+    | EpistemicZeroTrustReceipt
     | ObservationEvent
     | BeliefMutationEvent
     | SystemFaultEvent
@@ -14191,9 +14452,49 @@ type AnyStateEvent = Annotated[
     | FormalLogicProofReceipt
     | PrologDeductionReceipt
     | BeliefModulationReceipt
-    | RDFExportReceipt,
+    | RDFExportReceipt
+    | EpistemicStarvationEvent
+    | SPARQLQueryResultReceipt,
     Field(discriminator="topology_class", description="A discriminated union of state events."),
 ]
+
+
+class EvidentiaryCitationState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A declarative coordinate representing an immutable, localized snippet of external evidence retrieved by an oracle, coupled with its calculated Natural Language Inference (NLI) score.
+
+    CAUSAL AFFORDANCE: Physically anchors an abductive hypothesis to empirical reality, providing the exact string evaluated by the NLI cross-encoder to prevent source drift.
+
+    EPISTEMIC BOUNDS: Network resolution is strictly gated by the `_enforce_ssrf_quarantine` hook to prevent Bogon/loopback execution. The textual premise is volumetrically clamped by `extracted_snippet` (`max_length=10000`). Entailment probability is bounded `[0.0, 1.0]`.
+
+    MCP ROUTING TRIGGERS: Retrieval-Augmented Fact-Checking, Natural Language Inference, SSRF Quarantine, Evidentiary Coordinate, Cross-Encoder Validation
+    """
+
+    citation_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="Cryptographic anchor for the specific piece of evidence."
+    )
+    source_url: HttpUrl = Field(description="The canonical origin of the evidence.")
+    extracted_snippet: Annotated[str, StringConstraints(max_length=10000)] = Field(
+        description="The exact text evaluated by the NLI model."
+    )
+    nli_entailment_score: float = Field(
+        ge=0.0, le=1.0, description="The conditional probability that the snippet entails the proposed causal edge."
+    )
+    publication_timestamp: float | None = Field(
+        default=None,
+        ge=0.0,
+        le=253402300799.0,
+        description="Optional temporal boundary allowing downstream algorithms to apply temporal discounting.",
+    )
+
+    @field_validator("source_url", mode="after")
+    @classmethod
+    def _enforce_ssrf_quarantine(cls, url: HttpUrl) -> HttpUrl:
+        """
+        AGENT INSTRUCTION: Implements Network Topology and Server-Side Request Forgery (SSRF) Quarantine logic.
+        """
+        _validate_ssrf_safety(str(url))
+        return url
 
 
 class DempsterShaferBeliefVector(CoreasonBaseState):
@@ -14225,6 +14526,56 @@ class DempsterShaferBeliefVector(CoreasonBaseState):
         le=1.0,
         description="The calculated mathematical contradiction or dissonance between the three vectors. High conflict mass triggers evidence discounting.",
     )
+    supporting_citations: list[EvidentiaryCitationState] = Field(
+        default_factory=list,
+        max_length=100,
+        description="The array of external NLI-scored citations aggregating to form this belief mass.",
+    )
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort_citations(self) -> Self:
+        object.__setattr__(
+            self, "supporting_citations", sorted(self.supporting_citations, key=operator.attrgetter("citation_cid"))
+        )
+        return self
+
+
+class EpistemicStarvationEvent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: An append-only historical coordinate recording the definitive failure of empirical validation.
+
+    CAUSAL AFFORDANCE: Acts as the kinetic trigger for non-monotonic Truth Maintenance. By dropping belief mass to zero, it forces the orchestrator to emit a DefeasibleCascadeEvent to prune the ungrounded edge from the graph.
+
+    EPISTEMIC BOUNDS: The `failed_citations` array mathematically proves that an exhaustive search was attempted but no retrieved snippet breached the required SLA threshold. The array is deterministically sorted for invariant hashing.
+
+    MCP ROUTING TRIGGERS: Epistemic Starvation, Natural Language Inference, Truth Maintenance System, Defeasible Logic, Belief Mass Depletion
+    """
+
+    event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        ...
+    )
+    prior_event_hash: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
+    ) = Field(default=None)
+    timestamp: float = Field(ge=0.0, le=253402300799.0)
+
+    topology_class: Literal["epistemic_starvation"] = "epistemic_starvation"
+    starved_edge_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
+        Field(description="The cryptographic pointer to the specific edge that failed empirical grounding.")
+    )
+    failed_citations: list[EvidentiaryCitationState] = Field(
+        description="The array of citations evaluated that fell below the required NLI threshold."
+    )
+    diagnostic_reason: Annotated[str, StringConstraints(max_length=2000)] = Field(
+        description="The semantic explanation for the starvation (e.g., 'Maximum search retries exhausted')."
+    )
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort_failed_citations(self) -> Self:
+        object.__setattr__(
+            self, "failed_citations", sorted(self.failed_citations, key=operator.attrgetter("citation_cid"))
+        )
+        return self
 
 
 class OntologicalReificationReceipt(CoreasonBaseState):
@@ -14332,6 +14683,7 @@ class ContinuousObservationState(CoreasonBaseState):
         description="A Content Identifier (CID) for the continuous observation stream."
     )
     token_buffer: list[Annotated[str, StringConstraints(max_length=10000)]] = Field(
+        json_schema_extra={"coreason_topological_exemption": True},
         # Note: token_buffer is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
         max_length=1000000,
         description="The array of ingested tokens representing the continuous stream. AGENT INSTRUCTION: Topological Exemption applied. Do NOT sort this array, as its chronological sequence is its mathematical state.",
@@ -14670,3 +15022,13 @@ FalsificationContract.model_rebuild()
 FormalVerificationContract.model_rebuild()
 EvidentiaryGroundingSLA.model_rebuild()
 EpistemicAxiomVerificationReceipt.model_rebuild()
+
+LinkMLValidationSLA.model_rebuild()
+OntologicalCrosswalkIntent.model_rebuild()
+CrosswalkResolutionReceipt.model_rebuild()
+
+EvidentiaryCitationState.model_rebuild()
+EpistemicStarvationEvent.model_rebuild()
+SHACLValidationSLA.model_rebuild()
+SPARQLQueryIntent.model_rebuild()
+SPARQLQueryResultReceipt.model_rebuild()
