@@ -273,6 +273,43 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact representing the\ndefinitive collapse of an MCDA evaluation, acting as a verified Outcome Reward Model\n(ORM) signal. As a ...Receipt suffix, this is an append-only coordinate on the\nMerkle-DAG.\n\nCAUSAL AFFORDANCE: Commits the calculated score and boolean passed verdict to the\nEpistemic Ledger, permanently binding the deterministic evaluation to the specific\ntarget_node_cid (NodeCIDState) and authorizing downstream policy updates.\n\nEPISTEMIC BOUNDS: The evaluation outcome is strictly bounded to an integer score\n(ge=0, le=100). The underlying deductive proof (reasoning) is physically capped at\nmax_length=2000. The entire receipt is cryptographically locked to the originating\nrubric_cid CID (128-char regex).\n\nMCP ROUTING TRIGGERS: Cryptographic Verdict, Deterministic Proof, Grading Execution,\nEpistemic Commitment, Audit Trail",
       "properties": {
+        "event_cid": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "topology_class": {
+          "const": "adjudication_receipt",
+          "default": "adjudication_receipt",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "rubric_cid": {
           "description": "The cryptographic pointer to the rubric dictating adjudication.",
           "maxLength": 128,
@@ -305,6 +342,8 @@
         }
       },
       "required": [
+        "event_cid",
+        "timestamp",
         "rubric_cid",
         "target_node_cid",
         "score",
@@ -532,7 +571,13 @@
         "synthetic_payload"
       ],
       "title": "AdversarialSimulationProfile",
-      "type": "object"
+      "type": "object",
+      "x-domain-cluster": "zero_trust_security",
+      "x-synergistic-classes": [
+        "FederatedBilateralSLA",
+        "HardwareEnclaveReceipt",
+        "TransportSSRFBoundary"
+      ]
     },
     "AgentAttestationReceipt": {
       "additionalProperties": false,
@@ -580,6 +625,13 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents a probabilistic agentic bid in a multi-objective optimization market, factoring in projected compute latency, carbon constraints, and internal epistemic certainty.\n\nCAUSAL AFFORDANCE: Injects a competitive trajectory into the AuctionState order book, seeking authorization from the orchestrator to execute a specific TaskAnnouncementIntent branch.\n\nEPISTEMIC BOUNDS: Geometrically bounded by `estimated_cost_magnitude` (`le=1000000000`), `estimated_latency_ms` (`le=86400000, ge=0`), `estimated_carbon_gco2eq` (`le=10000.0, ge=0.0`), and `confidence_score` (`ge=0.0, le=1.0`). `agent_cid` is a 128-char CID.\n\nMCP ROUTING TRIGGERS: Expected Utility Theory, Multi-Objective Optimization, Epistemic Certainty, Spot Market Bid, Cost Estimation",
       "properties": {
+        "topology_class": {
+          "const": "agent_bid",
+          "default": "agent_bid",
+          "description": "The discriminative topological boundary for agent bid intents.",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "agent_cid": {
           "description": "The NodeCIDState of the bidder.",
           "maxLength": 128,
@@ -800,6 +852,119 @@
         }
       ]
     },
+    "AnyIntent": {
+      "discriminator": {
+        "mapping": {
+          "agent_bid": "#/$defs/AgentBidIntent",
+          "compute_provisioning": "#/$defs/ComputeProvisioningIntent",
+          "constitutional_amendment": "#/$defs/ConstitutionalAmendmentIntent",
+          "contextual_semantic_resolution": "#/$defs/ContextualSemanticResolutionIntent",
+          "continuous_spatial_mutation": "#/$defs/ContinuousSpatialMutationIntent",
+          "drafting": "#/$defs/DraftingIntent",
+          "escalation": "#/$defs/EscalationIntent",
+          "fallback_intent": "#/$defs/FallbackIntent",
+          "forced_adjudication": "#/$defs/AdjudicationIntent",
+          "fyi": "#/$defs/FYIIntent",
+          "human_directive": "#/$defs/HumanDirectiveIntent",
+          "informational": "#/$defs/SemanticIntent",
+          "latent_projection": "#/$defs/LatentProjectionIntent",
+          "latent_schema_inference": "#/$defs/LatentSchemaInferenceIntent",
+          "neurosymbolic_inference": "#/$defs/NeurosymbolicInferenceIntent",
+          "ontology_discovery": "#/$defs/OntologyDiscoveryIntent",
+          "override": "#/$defs/OverrideIntent",
+          "quarantine_intent": "#/$defs/QuarantineIntent",
+          "request": "#/$defs/InterventionIntent",
+          "semantic_discovery": "#/$defs/SemanticDiscoveryIntent",
+          "semantic_mapping_proposal": "#/$defs/SemanticMappingHeuristicProposal",
+          "spatial_kinematic": "#/$defs/SpatialKinematicActionIntent",
+          "system_2_remediation": "#/$defs/System2RemediationIntent",
+          "task_announcement": "#/$defs/TaskAnnouncementIntent",
+          "taxonomic_restructure": "#/$defs/TaxonomicRestructureIntent",
+          "topological_projection": "#/$defs/TopologicalProjectionIntent"
+        },
+        "propertyName": "topology_class"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/SemanticIntent"
+        },
+        {
+          "$ref": "#/$defs/DraftingIntent"
+        },
+        {
+          "$ref": "#/$defs/AdjudicationIntent"
+        },
+        {
+          "$ref": "#/$defs/EscalationIntent"
+        },
+        {
+          "$ref": "#/$defs/SemanticDiscoveryIntent"
+        },
+        {
+          "$ref": "#/$defs/TaxonomicRestructureIntent"
+        },
+        {
+          "$ref": "#/$defs/LatentProjectionIntent"
+        },
+        {
+          "$ref": "#/$defs/LatentSchemaInferenceIntent"
+        },
+        {
+          "$ref": "#/$defs/HumanDirectiveIntent"
+        },
+        {
+          "$ref": "#/$defs/ContextualSemanticResolutionIntent"
+        },
+        {
+          "$ref": "#/$defs/OntologyDiscoveryIntent"
+        },
+        {
+          "$ref": "#/$defs/SemanticMappingHeuristicProposal"
+        },
+        {
+          "$ref": "#/$defs/ContinuousSpatialMutationIntent"
+        },
+        {
+          "$ref": "#/$defs/AgentBidIntent"
+        },
+        {
+          "$ref": "#/$defs/ComputeProvisioningIntent"
+        },
+        {
+          "$ref": "#/$defs/TaskAnnouncementIntent"
+        },
+        {
+          "$ref": "#/$defs/QuarantineIntent"
+        },
+        {
+          "$ref": "#/$defs/InterventionIntent"
+        },
+        {
+          "$ref": "#/$defs/FYIIntent"
+        },
+        {
+          "$ref": "#/$defs/FallbackIntent"
+        },
+        {
+          "$ref": "#/$defs/OverrideIntent"
+        },
+        {
+          "$ref": "#/$defs/ConstitutionalAmendmentIntent"
+        },
+        {
+          "$ref": "#/$defs/SpatialKinematicActionIntent"
+        },
+        {
+          "$ref": "#/$defs/System2RemediationIntent"
+        },
+        {
+          "$ref": "#/$defs/NeurosymbolicInferenceIntent"
+        },
+        {
+          "$ref": "#/$defs/TopologicalProjectionIntent"
+        }
+      ]
+    },
     "AnyNodeProfile": {
       "description": "A discriminated union of all valid workflow nodes.",
       "discriminator": {
@@ -877,18 +1042,25 @@
       "description": "A discriminated union of state events.",
       "discriminator": {
         "mapping": {
+          "adjudication_receipt": "#/$defs/AdjudicationReceipt",
           "atomic_proposition": "#/$defs/AtomicPropositionState",
           "barge_in": "#/$defs/BargeInInterruptEvent",
           "belief_mutation": "#/$defs/BeliefMutationEvent",
           "budget_exhaustion": "#/$defs/BudgetExhaustionEvent",
           "causal_explanation": "#/$defs/CausalExplanationEvent",
+          "circuit_breaker_event": "#/$defs/CircuitBreakerEvent",
           "cognitive_prediction": "#/$defs/CognitivePredictionReceipt",
           "cognitive_reward_evaluation": "#/$defs/CognitiveRewardEvaluationReceipt",
           "counterfactual_regret": "#/$defs/CounterfactualRegretEvent",
+          "custody_receipt": "#/$defs/CustodyReceipt",
+          "defeasible_attack": "#/$defs/DefeasibleAttackEvent",
           "epistemic_axiom_verification": "#/$defs/EpistemicAxiomVerificationReceipt",
           "epistemic_flow_state": "#/$defs/EpistemicFlowStateReceipt",
+          "epistemic_log": "#/$defs/EpistemicLogEvent",
           "epistemic_promotion": "#/$defs/EpistemicPromotionEvent",
+          "epistemic_rejection": "#/$defs/EpistemicRejectionReceipt",
           "epistemic_telemetry": "#/$defs/EpistemicTelemetryEvent",
+          "exogenous_event": "#/$defs/ExogenousEpistemicEvent",
           "hypothesis": "#/$defs/HypothesisGenerationEvent",
           "intent_classification": "#/$defs/IntentClassificationReceipt",
           "normative_drift": "#/$defs/NormativeDriftEvent",
@@ -899,7 +1071,8 @@
           "semantic_relational_record": "#/$defs/SemanticRelationalRecordState",
           "system_fault": "#/$defs/SystemFaultEvent",
           "token_burn": "#/$defs/TokenBurnReceipt",
-          "tool_invocation": "#/$defs/ToolInvocationEvent"
+          "tool_invocation": "#/$defs/ToolInvocationEvent",
+          "verdict": "#/$defs/InterventionReceipt"
         },
         "propertyName": "topology_class"
       },
@@ -972,6 +1145,30 @@
         },
         {
           "$ref": "#/$defs/OntologicalReificationReceipt"
+        },
+        {
+          "$ref": "#/$defs/CircuitBreakerEvent"
+        },
+        {
+          "$ref": "#/$defs/ExogenousEpistemicEvent"
+        },
+        {
+          "$ref": "#/$defs/EpistemicLogEvent"
+        },
+        {
+          "$ref": "#/$defs/InterventionReceipt"
+        },
+        {
+          "$ref": "#/$defs/AdjudicationReceipt"
+        },
+        {
+          "$ref": "#/$defs/CustodyReceipt"
+        },
+        {
+          "$ref": "#/$defs/DefeasibleAttackEvent"
+        },
+        {
+          "$ref": "#/$defs/EpistemicRejectionReceipt"
         }
       ]
     },
@@ -2090,6 +2287,18 @@
           ],
           "default": null,
           "description": "The W3C DID of the human oracle required to cryptographically sign off on the forged capability."
+        },
+        "isometry_verification": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TeleologicalIsometryReceipt"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The final behavioral verification of the forged capability."
         }
       },
       "required": [
@@ -2318,6 +2527,37 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Lyapunov Stability and distributed Control Theory to guarantee that the neurosymbolic network returns to a deterministic equilibrium when facing catastrophic variance. As an ...Event suffix, this is a cryptographically frozen coordinate.\n\nCAUSAL AFFORDANCE: Physically severs the active execution thread for the targeted node, acting as a hardware guillotine that immediately halts out-of-memory cascades, runaway generative loops, or API rate-limit breaches.\n\nEPISTEMIC BOUNDS: The fault perimeter is mathematically restricted to a specific `target_node_cid` (`NodeCIDState`). To prevent log-poisoning and VRAM exhaustion during the crash, the `error_signature` is strictly clamped at `max_length=2000`.\n\nMCP ROUTING TRIGGERS: Lyapunov Stability, Control Theory, Circuit Breaker, Cascading Failure, State Equilibrium",
       "properties": {
+        "event_cid": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
         "topology_class": {
           "const": "circuit_breaker_event",
           "default": "circuit_breaker_event",
@@ -2337,6 +2577,8 @@
         }
       },
       "required": [
+        "event_cid",
+        "timestamp",
         "target_node_cid",
         "error_signature"
       ],
@@ -2803,6 +3045,14 @@
           ],
           "default": null,
           "description": "Authorizes trajectory balance optimization during non-monotonic reasoning."
+        },
+        "emitted_intents": {
+          "description": "The array of cognitive intents and structural proposals emitted by this agent.",
+          "items": {
+            "$ref": "#/$defs/AnyIntent"
+          },
+          "title": "Emitted Intents",
+          "type": "array"
         }
       },
       "required": [
@@ -3426,6 +3676,45 @@
       "title": "CognitiveStateProfile",
       "type": "object"
     },
+    "CognitiveSwarmDeploymentMacro": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Simplifies bootstrapping a multi-agent routing topology.",
+      "properties": {
+        "swarm_objective_prompt": {
+          "description": "The main goal.",
+          "title": "Swarm Objective Prompt",
+          "type": "string"
+        },
+        "agent_node_count": {
+          "description": "Number of nodes.",
+          "title": "Agent Node Count",
+          "type": "integer"
+        },
+        "consensus_mechanism": {
+          "description": "Consensus mechanism.",
+          "enum": [
+            "majority",
+            "prediction_market",
+            "pbft"
+          ],
+          "title": "Consensus Mechanism",
+          "type": "string"
+        }
+      },
+      "required": [
+        "swarm_objective_prompt",
+        "agent_node_count",
+        "consensus_mechanism"
+      ],
+      "title": "CognitiveSwarmDeploymentMacro",
+      "type": "object",
+      "x-domain-cluster": "cognitive_routing",
+      "x-synergistic-classes": [
+        "TaxonomicRoutingPolicy",
+        "CognitiveAgentNodeProfile",
+        "SemanticRelationalRecord"
+      ]
+    },
     "CognitiveSystemNodeProfile": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Encapsulates pure functional logic (Lambda Calculus) and Finite State Machine (FSM) mechanics to represent a completely deterministic, side-effect-free system capability.\n\nCAUSAL AFFORDANCE: Executes rigid, zero-variance procedural logic without invoking the expensive stochastic policy gradients required by foundational LLM models.\n\nEPISTEMIC BOUNDS: This node defines NO additional fields beyond inherited `CoreasonBaseState` constraints, including the rigorous `domain_extensions` volumetric depth limits. The type discriminator is locked to `Literal[\"system\"]`.\n\nMCP ROUTING TRIGGERS: Lambda Calculus, Finite State Machine, Referential Transparency, Deterministic Execution, Zero Variance",
@@ -3538,6 +3827,30 @@
           ],
           "default": null,
           "description": "The volumetric Gaussian Splatting configuration for non-polygonal rendering."
+        },
+        "hoare_proof": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HoareLogicProofReceipt"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Formal mathematical proof of pre/post conditions."
+        },
+        "asymptotic_complexity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AsymptoticComplexityReceipt"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Big-O computational bounds."
         },
         "topology_class": {
           "const": "system",
@@ -3907,6 +4220,13 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formulates a constrained Knapsack Problem for dynamically allocating liquid compute resources based on exact Quality of Service (QoS) priorities and semantic load shedding rules.\n\nCAUSAL AFFORDANCE: Emits a structural demand to the swarm orchestrator to negotiate, acquire, and cryptographically lock the requisite token escrow before allocating kinetic execution cycles to a sub-graph.\n\nEPISTEMIC BOUNDS: Economic velocity is strictly clamped by `max_budget` (`le=1000000000`), physically typed as an integer to prevent floating-point fractures during spot market bidding. The `required_capabilities` array is deterministically sorted by a `@model_validator`.\n\nMCP ROUTING TRIGGERS: Knapsack Optimization, Semantic Load Shedding, Spot Compute Bidding, QoS Classification, Resource Provisioning",
       "properties": {
+        "topology_class": {
+          "const": "compute_provisioning",
+          "default": "compute_provisioning",
+          "description": "The discriminative topological boundary for compute provisioning intents.",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "max_budget": {
           "description": "The maximum atomic cost budget allowable for the provisioned compute.",
           "maximum": 1000000000,
@@ -4470,6 +4790,13 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes an Affine Conflict-free Replicated Data Type (CRDT) to execute Optimistic Concurrency Control across geometric manipulations.\n\nCAUSAL AFFORDANCE: Authorizes a participant to kinetically drag, rotate, or scale a topological node. The orchestrator uses the provided Lamport clock to mathematically resolve Spherical Linear Interpolation (SLERP) and translation collisions between concurrent actors.\n\nEPISTEMIC BOUNDS: The mutation strictly targets a verified `NodeCIDState`. The `lamport_clock` (`ge=0, le=1000000000`) prevents temporal overflow during logical state reconciliation.\n\nMCP ROUTING TRIGGERS: Optimistic Locking, Affine CRDT, Spherical Linear Interpolation, Continuous Reconciliation, Kinematic Drag",
       "properties": {
+        "topology_class": {
+          "const": "continuous_spatial_mutation",
+          "default": "continuous_spatial_mutation",
+          "description": "The discriminative topological boundary for spatial mutation intents.",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "target_node_cid": {
           "$ref": "#/$defs/NodeCIDState",
           "description": "The specific topology vertex undergoing spatial mutation."
@@ -4920,6 +5247,43 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact representing the successful execution of an SemanticFlowPolicy redaction on the Merkle-DAG. Enforced as fully immutable via `ConfigDict(frozen=True)`.\n\nCAUSAL AFFORDANCE: Unlocks strict audit compliance by mathematically mapping the optional toxic `pre_redaction_hash` to the mandatory safe `post_redaction_hash`, proving non-repudiation via the `applied_policy_cid`.\n\nEPISTEMIC BOUNDS: Temporal geometry strictly clamped to `redaction_timestamp_unix_nano` (`ge=0, le=253402300799000000000`). Both hashes are locked to immutable SHA-256 hexadecimal bounds (`^[a-f0-9]{64}$`). `pre_redaction_hash` is optional (`default=None`) for isolated audit vaults.\n\nMCP ROUTING TRIGGERS: Chain of Custody, Cryptographic Provenance, Merkle-DAG Audit, Non-Repudiation, Data Isomorphism",
       "properties": {
+        "event_cid": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "topology_class": {
+          "const": "custody_receipt",
+          "default": "custody_receipt",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "custody_cid": {
           "description": "Unique identifier for this chain-of-custody entry.",
           "maxLength": 255,
@@ -4977,6 +5341,8 @@
         }
       },
       "required": [
+        "event_cid",
+        "timestamp",
         "custody_cid",
         "source_node_cid",
         "applied_policy_cid",
@@ -5279,12 +5645,55 @@
         "max_fan_out"
       ],
       "title": "DAGTopologyManifest",
-      "type": "object"
+      "type": "object",
+      "x-domain-cluster": "cognitive_routing",
+      "x-synergistic-classes": [
+        "TaxonomicRoutingPolicy",
+        "CognitiveAgentNodeProfile",
+        "SemanticRelationalRecord"
+      ]
     },
     "DefeasibleAttackEvent": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes the binary attack relation in Dung's Abstract Argumentation Framework. As an ...Event suffix, this is an append-only, cryptographically frozen historical fact on the Merkle-DAG.\n\nCAUSAL AFFORDANCE: Projects an undercutting or rebutting defeater from a source claim against a target claim. If mathematically validated, it physically triggers a DefeasibleCascadeEvent to sever all downstream nodes relying on the target.\n\nEPISTEMIC BOUNDS: Strictly bounds the attack geometry using AttackVectorProfile enums (`Literal[\"rebuttal\", \"undercutter\", \"underminer\"]`). Source and target mappings are locked to 128-character CIDs, preventing unbounded graph traversals.\n\nMCP ROUTING TRIGGERS: Undercutting Defeater, Dialectical Edge, Truth Maintenance System, Bipartite Mapping, Non-Monotonic Retraction",
       "properties": {
+        "event_cid": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "topology_class": {
+          "const": "defeasible_attack",
+          "default": "defeasible_attack",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "attack_cid": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this directed attack edge.",
           "maxLength": 128,
@@ -5315,6 +5724,8 @@
         }
       },
       "required": [
+        "event_cid",
+        "timestamp",
         "attack_cid",
         "source_claim_cid",
         "target_claim_cid",
@@ -7172,6 +7583,37 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines a purely out-of-band semantic logging vector, structurally isolated from the rigorous causal constraints of the Dapper trace tree.\n\nCAUSAL AFFORDANCE: Emits asynchronous telemetry for human-in-the-loop debugging or peripheral auditing without mutating the active Epistemic Ledger's topological state.\n\nEPISTEMIC BOUNDS: Temporal reality clamped by `timestamp`. Severity strictly masked by a Literal automaton `[\"DEBUG\", \"INFO\", \"WARNING\", \"ERROR\", \"CRITICAL\"]`. Message bounded to `max_length=2000`.\n\nMCP ROUTING TRIGGERS: Out-of-Band Telemetry, Asynchronous Logging, Severity Masking, Peripheral Audit, Ephemeral Context",
       "properties": {
+        "event_cid": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
+        },
+        "topology_class": {
+          "const": "epistemic_log",
+          "default": "epistemic_log",
+          "description": "Discriminator type for a log event.",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "timestamp": {
           "description": "The UNIX timestamp of the log event.",
           "maximum": 253402300799.0,
@@ -7203,6 +7645,7 @@
         }
       },
       "required": [
+        "event_cid",
         "timestamp",
         "level",
         "message"
@@ -7472,6 +7915,43 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The mathematical backpropagation signal triggered when the Deterministic Compiler rejects a stochastic manifold. Quantifies the rejection and provides a mutation gradient.\n\nCAUSAL AFFORDANCE: Instructs the LLM ensemble on how to perturb the Upper Confidence Bound (UCB) during the next MCTS generation attempt by mathematically quantifying the error.\n\nEPISTEMIC BOUNDS: Kullback-Leibler divergence is strictly non-negative. A negative mathematical distance is a paradox and raises a ValueError.\n\nMCP ROUTING TRIGGERS: Rejection Receipt, Free Energy Feedback, MCTS Backpropagation, Variational Free Energy, Mutation Gradient",
       "properties": {
+        "event_cid": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "topology_class": {
+          "const": "epistemic_rejection",
+          "default": "epistemic_rejection",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "receipt_cid": {
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Receipt Cid",
@@ -7498,6 +7978,8 @@
         }
       },
       "required": [
+        "event_cid",
+        "timestamp",
         "receipt_cid",
         "failed_projection_cid",
         "violated_algebraic_constraint",
@@ -8698,6 +9180,44 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Nassim Taleb's Black Swan Theory by injecting\nOut-of-Distribution (OOD) epistemic shocks into the causal graph. As an ...Event suffix,\nthis is an append-only coordinate on the Merkle-DAG that the LLM must never hallucinate\na mutation to.\n\nCAUSAL AFFORDANCE: Forces the active reasoning topology to process a high-entropy\nsynthetic_payload, actively testing the swarm's non-monotonic truth maintenance,\ndefeasible reasoning, and overall topological resilience.\n\nEPISTEMIC BOUNDS: Cryptographically targets a specific Merkle root via target_node_hash\n(strict SHA-256 pattern ^[a-f0-9]{64}$) and bounds the Variational Free Energy via\nbayesian_surprise_score [ge=0.0, le=1.0, allow_inf_nan=False]. The @model_validator\nphysically guarantees execution is halted if the attached escrow is not strictly positive.\n\nMCP ROUTING TRIGGERS: Black Swan Theory, Out-of-Distribution Shock, Variational Free\nEnergy, Exogenous Perturbation, Epistemic Stress Test",
       "properties": {
+        "event_cid": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "topology_class": {
+          "const": "exogenous_event",
+          "default": "exogenous_event",
+          "description": "Discriminator type for an exogenous event.",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "shock_cid": {
           "description": "Cryptographic identifier for the Black Swan event.",
           "maxLength": 128,
@@ -8739,6 +9259,8 @@
         }
       },
       "required": [
+        "event_cid",
+        "timestamp",
         "shock_cid",
         "target_node_hash",
         "bayesian_surprise_score",
@@ -9142,6 +9664,39 @@
       ],
       "title": "FederatedPeftContract",
       "type": "object"
+    },
+    "FederatedSecurityMacroManifest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Simplifies the creation of a secure federated network link across a Zero-Trust boundary.",
+      "properties": {
+        "target_endpoint_uri": {
+          "description": "The endpoint to connect to.",
+          "title": "Target Endpoint Uri",
+          "type": "string"
+        },
+        "required_clearance": {
+          "$ref": "#/$defs/SemanticClassificationProfile",
+          "description": "Default security tier."
+        },
+        "max_liability_budget": {
+          "description": "Max token/compute allocation.",
+          "title": "Max Liability Budget",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "target_endpoint_uri",
+        "required_clearance",
+        "max_liability_budget"
+      ],
+      "title": "FederatedSecurityMacroManifest",
+      "type": "object",
+      "x-domain-cluster": "zero_trust_security",
+      "x-synergistic-classes": [
+        "FederatedBilateralSLA",
+        "HardwareEnclaveReceipt",
+        "TransportSSRFBoundary"
+      ]
     },
     "FederatedStateSnapshot": {
       "additionalProperties": false,
@@ -10591,6 +11146,37 @@
           "title": "Topology Class",
           "type": "string"
         },
+        "event_cid": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
         "intervention_request_cid": {
           "description": "The cryptographic nonce uniquely identifying the intervention request.",
           "maxLength": 128,
@@ -10635,6 +11221,8 @@
         }
       },
       "required": [
+        "event_cid",
+        "timestamp",
         "intervention_request_cid",
         "target_node_cid",
         "approved",
@@ -12510,6 +13098,12 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Orchestrates the core execution payload boundary, acting as the structural pre-inference gate for neurosymbolic probability.\n\n    CAUSAL AFFORDANCE: Empowers the routing engine to sever execution prior to LLM generation if the structural certainty SLA evaluates beyond acceptable mathematical variance boundaries.\n\n    EPISTEMIC BOUNDS: Mandates exact nesting of deterministic fidelity and uncertainty profiles. The pre-flight validator mathematically terminates evaluation if epistemic degradation breaches the SLA limit.\n\n    MCP ROUTING TRIGGERS: Pre-Inference Gate, Neurosymbolic Request, Probability Envelope, SLA Enforcement, Inference Termination",
       "properties": {
+        "topology_class": {
+          "const": "neurosymbolic_inference",
+          "default": "neurosymbolic_inference",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "source_entity": {
           "$ref": "#/$defs/ContextualizedSourceState",
           "description": "The structurally isolated 1D boundary representing the semantic payload injected into the context window."
@@ -15882,6 +16476,13 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Employs Mathematical Kinematics and Fitts's Law to project precise, non-linear physical interactions across an exogenous UI manifold.\n\nCAUSAL AFFORDANCE: Authorizes the translation of latent spatial targets into OS-level actuation, utilizing bezier_control_points to construct continuous polynomial trajectories that simulate human motor control and bypass bot-evasive heuristics.\n\nEPISTEMIC BOUNDS: Spatial execution is clamped to SE3 dimensional boundaries via the nested SE3TransformProfile. Execution liveness is temporally guillotined by trajectory_duration_ms (le=86400000).\n\nMCP ROUTING TRIGGERS: Mathematical Kinematics, Bezier Geometry, Fitts's Law, OS-Level Actuation, Non-Linear Trajectory",
       "properties": {
+        "topology_class": {
+          "const": "spatial_kinematic",
+          "default": "spatial_kinematic",
+          "description": "Discriminator for a spatial kinematic action.",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "action_class": {
           "description": "The specific kinematic interaction paradigm.",
           "enum": [
@@ -16050,6 +16651,30 @@
           "default": null,
           "description": "The strict JSON Schema dictionary defining the pure domain-specific arguments ($T$). The framework orchestrator will automatically wrap this in the ExecutionEnvelopeState at runtime.",
           "title": "Output Schema"
+        },
+        "hoare_proof": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HoareLogicProofReceipt"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Formal mathematical proof of pre/post conditions."
+        },
+        "asymptotic_complexity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AsymptoticComplexityReceipt"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Big-O computational bounds."
         },
         "side_effects": {
           "$ref": "#/$defs/SideEffectProfile",
@@ -16263,7 +16888,13 @@
         "vector_clock"
       ],
       "title": "StateDifferentialManifest",
-      "type": "object"
+      "type": "object",
+      "x-domain-cluster": "epistemic_ledger",
+      "x-synergistic-classes": [
+        "EpistemicLedgerState",
+        "ObservationEvent",
+        "BeliefMutationEvent"
+      ]
     },
     "StateHydrationManifest": {
       "additionalProperties": false,
@@ -16896,6 +17527,13 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Kahneman's Dual-Process Theory by explicitly triggering a System 2 non-monotonic self-correction loop in response to a structural execution collapse. As an ...Intent suffix, this represents an authorized kinetic execution trigger.\n\nCAUSAL AFFORDANCE: Intercepts physical instantiation failures (e.g., Pydantic ValidationErrors) and redirects the generation trajectory, forcing the agent into a recursive backtracking search to rewrite the isolated subgraph via `violation_receipts`.\n\nEPISTEMIC BOUNDS: The `fault_cid` is cryptographically tied to a 128-char CID. The `violation_receipts` array is deterministically sorted by the `_enforce_canonical_sort_receipts` hook to preserve RFC 8785 canonical hashing and map exact JSON paths without ambiguity.\n\nMCP ROUTING TRIGGERS: Dual-Process Theory, Non-Monotonic Revision, System 2 Remediation, Backtracking Search, Abstract Syntax Tree",
       "properties": {
+        "topology_class": {
+          "const": "system_2_remediation",
+          "default": "system_2_remediation",
+          "description": "Discriminator type for System2RemediationIntent.",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "fault_cid": {
           "description": "A cryptographic Lineage Watermark (CID) tracking this specific dimensional collapse.",
           "maxLength": 128,
@@ -16916,6 +17554,18 @@
           "minItems": 1,
           "title": "Violation Receipts",
           "type": "array"
+        },
+        "ast_gradient": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ASTGradientReceipt"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The structural loss vector guiding AST repair."
         }
       },
       "required": [
@@ -17000,6 +17650,13 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Initiates a Request for Proposal (RFP) within a decentralized Spot Market to dynamically allocate thermodynamic compute based on task complexity.\n\nCAUSAL AFFORDANCE: Triggers an active, non-monotonic bidding phase where eligible Swarm nodes evaluate their internal Q-K matrices to formulate competitive execution bids.\n\nEPISTEMIC BOUNDS: The economic payload is physically capped by `max_budget_magnitude` (`le=1000000000`). The topological routing is strictly constrained if `required_action_space_cid` is defined (optional, `max_length=128`, CID regex). Anchored by a mandatory `task_cid` CID.\n\nMCP ROUTING TRIGGERS: Decentralized Spot Market, Request for Proposal, Thermodynamic Compute Allocation, Algorithmic Mechanism Design, Kinetic Execution Trigger",
       "properties": {
+        "topology_class": {
+          "const": "task_announcement",
+          "default": "task_announcement",
+          "description": "The discriminative topological boundary for task announcement intents.",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "task_cid": {
           "description": "Unique identifier for the required task.",
           "maxLength": 128,
@@ -17916,6 +18573,12 @@
           "default": null,
           "title": "Provenance Trace Cid"
         },
+        "topology_class": {
+          "const": "topological_projection",
+          "default": "topological_projection",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "projection_cid": {
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Projection Cid",
@@ -18109,6 +18772,14 @@
             "$ref": "#/$defs/ExecutionSpanReceipt"
           },
           "title": "Spans",
+          "type": "array"
+        },
+        "execution_nodes": {
+          "description": "The array of strictly typed trace executions.",
+          "items": {
+            "$ref": "#/$defs/ExecutionNodeReceipt"
+          },
+          "title": "Execution Nodes",
           "type": "array"
         }
       },
@@ -18852,7 +19523,13 @@
         "topology"
       ],
       "title": "WorkflowManifest",
-      "type": "object"
+      "type": "object",
+      "x-domain-cluster": "cognitive_routing",
+      "x-synergistic-classes": [
+        "TaxonomicRoutingPolicy",
+        "CognitiveAgentNodeProfile",
+        "SemanticRelationalRecord"
+      ]
     },
     "ZeroKnowledgeReceipt": {
       "additionalProperties": false,

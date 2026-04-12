@@ -1,0 +1,332 @@
+diff --git a/src/coreason_manifest/spec/ontology.py b/src/coreason_manifest/spec/ontology.py
+index e7e04b9..493b31a 100644
+--- a/src/coreason_manifest/spec/ontology.py
++++ b/src/coreason_manifest/spec/ontology.py
+@@ -595,6 +595,72 @@ def _inject_workflow_examples(schema: dict[str, Any]) -> None:
+     ]
+
+
++def _inject_spatial_cluster(schema: dict[str, Any]) -> None:
++    _inject_topological_lock(schema)
++    schema["x-domain-cluster"] = "spatial_kinematics"
++    schema["x-synergistic-classes"] = ["SE3TransformProfile", "VolumetricBoundingProfile", "ViewportProjectionContract"]
++
++
++def _inject_epistemic_cluster(schema: dict[str, Any]) -> None:
++    _inject_topological_lock(schema)
++    schema["x-domain-cluster"] = "epistemic_ledger"
++    schema["x-synergistic-classes"] = ["EpistemicLedgerState", "ObservationEvent", "BeliefMutationEvent"]
++
++
++def _inject_cognitive_routing_cluster(schema: dict[str, Any]) -> None:
++    _inject_topological_lock(schema)
++    schema["x-domain-cluster"] = "cognitive_routing"
++    schema["x-synergistic-classes"] = [
++        "TaxonomicRoutingPolicy",
++        "CognitiveAgentNodeProfile",
++        "SemanticRelationalRecord",
++    ]
++
++
++def _inject_thermodynamic_cluster(schema: dict[str, Any]) -> None:
++    _inject_topological_lock(schema)
++    schema["x-domain-cluster"] = "thermodynamic_orchestration"
++    schema["x-synergistic-classes"] = ["ComputationalThermodynamics", "ComputeRateContract", "FreeEnergyExhaustion"]
++
++
++def _inject_security_cluster(schema: dict[str, Any]) -> None:
++    _inject_topological_lock(schema)
++    schema["x-domain-cluster"] = "zero_trust_security"
++    schema["x-synergistic-classes"] = ["FederatedBilateralSLA", "HardwareEnclaveReceipt", "TransportSSRFBoundary"]
++
++
++def _inject_diff_examples_and_epistemic_cluster(schema: dict[str, Any]) -> None:
++    _inject_diff_examples(schema)
++    schema["x-domain-cluster"] = "epistemic_ledger"
++    schema["x-synergistic-classes"] = ["EpistemicLedgerState", "ObservationEvent", "BeliefMutationEvent"]
++
++
++def _inject_sim_examples_and_security_cluster(schema: dict[str, Any]) -> None:
++    _inject_sim_examples(schema)
++    schema["x-domain-cluster"] = "zero_trust_security"
++    schema["x-synergistic-classes"] = ["FederatedBilateralSLA", "HardwareEnclaveReceipt", "TransportSSRFBoundary"]
++
++
++def _inject_dag_examples_and_routing_cluster(schema: dict[str, Any]) -> None:
++    _inject_dag_examples(schema)
++    schema["x-domain-cluster"] = "cognitive_routing"
++    schema["x-synergistic-classes"] = [
++        "TaxonomicRoutingPolicy",
++        "CognitiveAgentNodeProfile",
++        "SemanticRelationalRecord",
++    ]
++
++
++def _inject_workflow_examples_and_routing_cluster(schema: dict[str, Any]) -> None:
++    _inject_workflow_examples(schema)
++    schema["x-domain-cluster"] = "cognitive_routing"
++    schema["x-synergistic-classes"] = [
++        "TaxonomicRoutingPolicy",
++        "CognitiveAgentNodeProfile",
++        "SemanticRelationalRecord",
++    ]
++
++
+ class RefusalToReasonEvent(ValueError):  # noqa: N818
+     """
+     AGENT INSTRUCTION: Exception raised when inference is aborted due to severe semantic degradation.
+@@ -1333,6 +1399,10 @@ class ContinuousSpatialMutationIntent(CoreasonBaseState):
+
+     """
+
++    topology_class: Literal["continuous_spatial_mutation"] = Field(
++        default="continuous_spatial_mutation",
++        description="The discriminative topological boundary for spatial mutation intents.",
++    )
+     target_node_cid: NodeCIDState = Field(description="The specific topology vertex undergoing spatial mutation.")
+     proposed_transform: SE3TransformProfile = Field(description="The requested absolute SE(3) spatial terminus.")
+     lamport_clock: int = Field(
+@@ -2837,7 +2907,7 @@ class StateDifferentialManifest(CoreasonBaseState):
+     Vector Clock, Eventual Consistency, Last-Writer-Wins
+     """
+
+-    model_config = ConfigDict(json_schema_extra=_inject_diff_examples)
++    model_config = ConfigDict(json_schema_extra=_inject_diff_examples_and_epistemic_cluster)
+
+     diff_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+         description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this state differential.",
+@@ -3156,6 +3226,12 @@ class SpatialToolManifest(CoreasonBaseState):
+         max_length=1000,
+         description="The strict JSON Schema dictionary defining the pure domain-specific arguments ($T$). The framework orchestrator will automatically wrap this in the ExecutionEnvelopeState at runtime.",
+     )
++    hoare_proof: HoareLogicProofReceipt | None = Field(
++        default=None, description="Formal mathematical proof of pre/post conditions."
++    )
++    asymptotic_complexity: AsymptoticComplexityReceipt | None = Field(
++        default=None, description="Big-O computational bounds."
++    )
+     side_effects: SideEffectProfile = Field(
+         description="The declarative side-effect and idempotency profile of the tool."
+     )
+@@ -3377,7 +3453,7 @@ class AdversarialSimulationProfile(CoreasonBaseState):
+     MCP ROUTING TRIGGERS: Chaos Engineering, Judas Node, Threat Modeling, Structural Sabotage, Semantic Firewall Validation
+     """
+
+-    model_config = ConfigDict(json_schema_extra=_inject_sim_examples)
++    model_config = ConfigDict(json_schema_extra=_inject_sim_examples_and_security_cluster)
+
+     simulation_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
+         Field(description="The unique identifier for this red-team experiment.")
+@@ -3450,6 +3526,10 @@ class AgentBidIntent(CoreasonBaseState):
+
+     """
+
++    topology_class: Literal["agent_bid"] = Field(
++        default="agent_bid",
++        description="The discriminative topological boundary for agent bid intents.",
++    )
+     agent_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+         description="The NodeCIDState of the bidder."
+     )
+@@ -6479,7 +6559,14 @@ type AnyIntent = Annotated[
+     | HumanDirectiveIntent
+     | ContextualSemanticResolutionIntent
+     | OntologyDiscoveryIntent
+-    | SemanticMappingHeuristicProposal,
++    | SemanticMappingHeuristicProposal
++    | ContinuousSpatialMutationIntent
++    | AgentBidIntent
++    | ComputeProvisioningIntent
++    | TaskAnnouncementIntent
++    | QuarantineIntent
++    | InterventionIntent
++    | System2RemediationIntent,
+     Field(discriminator="topology_class"),
+ ]
+
+@@ -7018,6 +7105,12 @@ class CognitiveSystemNodeProfile(CoreasonBaseState):
+     neural_optics: GaussianSplattingProfile | None = Field(
+         default=None, description="The volumetric Gaussian Splatting configuration for non-polygonal rendering."
+     )
++    hoare_proof: HoareLogicProofReceipt | None = Field(
++        default=None, description="Formal mathematical proof of pre/post conditions."
++    )
++    asymptotic_complexity: AsymptoticComplexityReceipt | None = Field(
++        default=None, description="Big-O computational bounds."
++    )
+
+     @field_validator("domain_extensions", mode="before")
+     @classmethod
+@@ -8660,6 +8753,10 @@ class ComputeProvisioningIntent(CoreasonBaseState):
+
+     """
+
++    topology_class: Literal["compute_provisioning"] = Field(
++        default="compute_provisioning",
++        description="The discriminative topological boundary for compute provisioning intents.",
++    )
+     max_budget: int = Field(
+         le=1000000000, description="The maximum atomic cost budget allowable for the provisioned compute."
+     )
+@@ -9476,6 +9573,10 @@ class System2RemediationIntent(CoreasonBaseState):
+
+     """
+
++    topology_class: Literal["system_2_remediation"] = Field(
++        default="system_2_remediation", description="Discriminator type for System2RemediationIntent."
++    )
++
+     fault_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+         description="A cryptographic Lineage Watermark (CID) tracking this specific dimensional collapse.",
+     )
+@@ -9485,6 +9586,9 @@ class System2RemediationIntent(CoreasonBaseState):
+     violation_receipts: list[ManifestViolationReceipt] = Field(
+         min_length=1, description="The deterministic array of exact structural faults the agent must correct."
+     )
++    ast_gradient: ASTGradientReceipt | None = Field(
++        default=None, description="The structural loss vector guiding AST repair."
++    )
+
+     @model_validator(mode="after")
+     def _enforce_canonical_sort_receipts(self) -> Self:
+@@ -9511,6 +9615,10 @@ class TaskAnnouncementIntent(CoreasonBaseState):
+
+     """
+
++    topology_class: Literal["task_announcement"] = Field(
++        default="task_announcement",
++        description="The discriminative topological boundary for task announcement intents.",
++    )
+     task_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+         description="Unique identifier for the required task."
+     )
+@@ -9889,6 +9997,9 @@ class TraceExportManifest(CoreasonBaseState):
+     spans: list[ExecutionSpanReceipt] = Field(
+         default_factory=list, description="A collection of execution spans to be serialized."
+     )
++    execution_nodes: list[ExecutionNodeReceipt] = Field(
++        default_factory=list, description="The array of strictly typed trace executions."
++    )
+
+     @model_validator(mode="after")
+     def _enforce_canonical_sort(self) -> Any:
+@@ -10613,6 +10724,10 @@ class CognitiveAgentNodeProfile(CoreasonBaseState):
+     gflownet_balance_policy: CognitiveDetailedBalanceContract | None = Field(
+         default=None, description="Authorizes trajectory balance optimization during non-monotonic reasoning."
+     )
++    emitted_intents: list[AnyIntent] = Field(
++        default_factory=list,
++        description="The array of cognitive intents and structural proposals emitted by this agent.",
++    )
+
+     @model_validator(mode="after")
+     def _enforce_canonical_sort(self) -> Self:
+@@ -10945,7 +11060,7 @@ class DAGTopologyManifest(CoreasonBaseState):
+         description="The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph.",
+     )
+
+-    model_config = ConfigDict(json_schema_extra=_inject_dag_examples)
++    model_config = ConfigDict(json_schema_extra=_inject_dag_examples_and_routing_cluster)
+
+     topology_class: Literal["dag"] = Field(default="dag", description="Discriminator for a DAG topology.")
+     edges: list[tuple[NodeCIDState, NodeCIDState]] = Field(
+@@ -11317,6 +11432,74 @@ class SwarmTopologyManifest(CoreasonBaseState):
+         return self
+
+
++class FederatedSecurityMacroManifest(CoreasonBaseState):
++    """
++    AGENT INSTRUCTION: Simplifies the creation of a secure federated network link across a Zero-Trust boundary.
++    """
++
++    model_config = ConfigDict(json_schema_extra=_inject_security_cluster)
++
++    target_endpoint_uri: str = Field(description="The endpoint to connect to.")
++    required_clearance: SemanticClassificationProfile = Field(description="Default security tier.")
++    max_liability_budget: int = Field(description="Max token/compute allocation.")
++
++    def compile_to_base_topology(self) -> FederatedBilateralSLA:
++        """Deterministically unwraps the macro into a rigid FederatedBilateralSLA."""
++        return FederatedBilateralSLA(
++            receiving_tenant_cid=self.target_endpoint_uri,
++            max_permitted_classification=self.required_clearance,
++            liability_limit_magnitude=self.max_liability_budget,
++            permitted_geographic_regions=[],
++            max_permitted_grid_carbon_intensity=None,
++            pq_signature=None,
++        )
++
++
++class CognitiveSwarmDeploymentMacro(CoreasonBaseState):
++    """
++    AGENT INSTRUCTION: Simplifies bootstrapping a multi-agent routing topology.
++    """
++
++    model_config = ConfigDict(json_schema_extra=_inject_cognitive_routing_cluster)
++
++    swarm_objective_prompt: str = Field(description="The main goal.")
++    agent_node_count: int = Field(description="Number of nodes.")
++    consensus_mechanism: Literal["majority", "prediction_market", "pbft"] = Field(description="Consensus mechanism.")
++
++    def compile_to_base_topology(self) -> CouncilTopologyManifest:
++        """Deterministically unwraps the macro into a rigid CouncilTopologyManifest."""
++        nodes: dict[NodeCIDState, AnyNodeProfile] = {}
++        for i in range(self.agent_node_count):
++            nodes[f"did:coreason:agent-{i}"] = CognitiveAgentNodeProfile(
++                description=f"Swarm agent {i} for: {self.swarm_objective_prompt}"
++            )
++
++        nodes["did:coreason:adjudicator"] = CognitiveSystemNodeProfile(
++            description="Synthesizing Adjudicator for Swarm Deployment"
++        )
++
++        # Need to construct the policy based on mechanism
++        if self.consensus_mechanism == "pbft":
++            q_rules = QuorumPolicy(
++                max_tolerable_faults=0,
++                min_quorum_size=max(1, self.agent_node_count),
++                state_validation_metric="ledger_hash",
++                byzantine_action="ignore",
++            )
++            consensus = ConsensusPolicy(strategy="pbft", quorum_rules=q_rules)
++        elif self.consensus_mechanism == "prediction_market":
++            pm_rules = PredictionMarketPolicy(
++                staking_function="linear", min_liquidity_magnitude=0, convergence_delta_threshold=0.0
++            )
++            consensus = ConsensusPolicy(strategy="prediction_market", prediction_market_rules=pm_rules)
++        else:
++            consensus = ConsensusPolicy(strategy="majority")
++
++        return CouncilTopologyManifest(
++            nodes=nodes, adjudicator_cid="did:coreason:adjudicator", consensus_policy=consensus
++        )
++
++
+ class AdversarialMarketTopologyManifest(CoreasonBaseState):
+     """
+     AGENT INSTRUCTION: A Zero-Cost Macro abstraction that mathematically projects a Zero-Sum Minimax game into a rigid Red/Blue team CouncilTopologyManifest. As a ...Manifest suffix, this defines a frozen coordinate of a topological structure.
+@@ -11454,6 +11637,9 @@ class CapabilityForgeTopologyManifest(CoreasonBaseState):
+         default=None,
+         description="The W3C DID of the human oracle required to cryptographically sign off on the forged capability.",
+     )
++    isometry_verification: TeleologicalIsometryReceipt | None = Field(
++        default=None, description="The final behavioral verification of the forged capability."
++    )
+
+     def compile_to_base_topology(self) -> DAGTopologyManifest:
+         """Deterministically unwraps the macro into a rigid DAGTopologyManifest."""
+@@ -11675,7 +11861,7 @@ class WorkflowManifest(CoreasonBaseState):
+
+     """
+
+-    model_config = ConfigDict(json_schema_extra=_inject_workflow_examples)
++    model_config = ConfigDict(json_schema_extra=_inject_workflow_examples_and_routing_cluster)
+
+     genesis_provenance: EpistemicProvenanceReceipt = Field(
+         description="The cryptographic chain of custody anchoring this execution graph to its genesis block."
+@@ -13490,3 +13676,5 @@ TopologicalProjectionIntent.model_rebuild()
+ EpistemicRejectionReceipt.model_rebuild()
+ ActiveInferenceEpoch.model_rebuild()
+ ComputationalThermodynamics.model_rebuild()
++FederatedSecurityMacroManifest.model_rebuild()
++CognitiveSwarmDeploymentMacro.model_rebuild()
