@@ -80,7 +80,9 @@ def _validate_payload_bounds(
     elif typ is list:
         nxt_depth = current_depth + 1
         for item in value:  # type: ignore
-            _validate_payload_bounds(typing.cast("JsonPrimitiveState", item), nxt_depth, state, max_nodes, max_recursion)
+            _validate_payload_bounds(
+                typing.cast("JsonPrimitiveState", item), nxt_depth, state, max_nodes, max_recursion
+            )
     elif typ is str:
         if len(value) > 10000:  # type: ignore
             raise ValueError("String exceeds max length of 10000")
