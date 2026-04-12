@@ -93,7 +93,10 @@ exclude = [
 addopts = "--cov=src/coreason_manifest --cov-report=xml --cov-report=term-missing --cov-fail-under=95 -n auto"
 testpaths = ["tests"]
 asyncio_mode = "auto"
-filterwarnings = ["ignore:Pydantic serializer warnings:UserWarning"]
+filterwarnings = [
+    "ignore:Pydantic serializer warnings:UserWarning",
+    "ignore::pytest_benchmark.logger.PytestBenchmarkWarning",
+]
 markers = [
     "evals: Agentic UX Trajectory Evals",
 ]
