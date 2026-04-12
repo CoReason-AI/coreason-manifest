@@ -11,6 +11,7 @@
 import pytest
 
 from coreason_manifest.spec.ontology import (
+    TemporalBoundsProfile,
     BeliefMutationEvent,
     DefeasibleCascadeEvent,
     DerivationModeProfile,
@@ -47,6 +48,7 @@ def test_defeasible_quarantine() -> None:
                         extracted_by="did:coreason:agent-1",
                         derivation_mode=DerivationModeProfile.DIRECT_TRANSLATION,
                     ),
+                    temporal_bounds=TemporalBoundsProfile(valid_from=10.0),
                 )
             },
             active_cascades=[

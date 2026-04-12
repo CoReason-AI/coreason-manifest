@@ -2663,6 +2663,11 @@ class DefeasibleCascadeEvent(CoreasonBaseState):
         default=False,
         description="Cryptographic proof that this cascade was broadcast to the Swarm to halt epistemic contagion.",
     )
+    temporal_blast_radius: tuple[float, float] | None = Field(
+        default=None,
+        description="Limits the cascade to sever downstream nodes whose valid_from falls within this exact window."
+    )
+
 
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
@@ -2673,6 +2678,13 @@ class DefeasibleCascadeEvent(CoreasonBaseState):
     def reject_root_in_quarantine(self) -> Self:
         if self.root_falsified_event_cid in self.quarantined_event_cids:
             raise ValueError("Epistemic paradox: root_falsified_event_cid cannot be in quarantined_event_cids.")
+        return self
+
+    @model_validator(mode="after")
+    def validate_temporal_blast_radius(self) -> Self:
+        if self.temporal_blast_radius is not None:
+            if self.temporal_blast_radius[0] > self.temporal_blast_radius[1]:
+                raise ValueError("temporal_blast_radius[0] must be <= temporal_blast_radius[1]")
         return self
 
 
@@ -2841,22 +2853,20 @@ class TemporalEdgeInvalidationIntent(CoreasonBaseState):
     EPISTEMIC BOUNDS: The target_edge_cid is strictly typed. The invalidation_timestamp physically caps the timeline geometry.
     MCP ROUTING TRIGGERS: Graph CRDTs, Topological Retraction, Non-Monotonic Logic, Edge Invalidation
     """
-
     topology_class: Literal["temporal_invalidation"] = Field(
-        default="temporal_invalidation", description="Discriminator for temporal edge invalidation."
+        default="temporal_invalidation",
+        description="Discriminator for temporal edge invalidation."
     )
     target_edge_cid: NodeCIDState = Field(
         description="The Decentralized Identifier (DID) of the edge being temporally invalidated."
     )
     invalidation_timestamp: float = Field(
-        ge=0.0,
-        le=253402300799.0,
-        description="The precise chronological coordinate terminating the truth value (Graphiti valid_to).",
+        ge=0.0, le=253402300799.0,
+        description="The precise chronological coordinate terminating the truth value (Graphiti valid_to)."
     )
     causal_justification_cid: NodeCIDState = Field(
         description="The ObservationEvent or FalsificationContract CID forcing this non-monotonic state transition."
     )
-
 
 class TemporalGraphCRDTManifest(CoreasonBaseState):
     """
@@ -10476,8 +10486,8 @@ class SemanticEdgeState(CoreasonBaseState):
         default=None,
         description="Optional distinct provenance if the relationship was inferred separately from the nodes.",
     )
-    temporal_bounds: TemporalBoundsProfile | None = Field(
-        default=None, description="The time window during which this relationship holds true."
+    temporal_bounds: TemporalBoundsProfile = Field(
+        description="The strict time window during which this coordinate is considered valid."
     )
     causal_relationship: Literal["causes", "confounds", "correlates_with", "undirected"] = Field(
         default="undirected", description="The Pearlian directionality of the semantic relationship."
@@ -10531,8 +10541,8 @@ class SemanticNodeState(CoreasonBaseState):
     tier: CognitiveTierProfile = Field(
         default="semantic", description="The cognitive tier this latent state resides in."
     )
-    temporal_bounds: TemporalBoundsProfile | None = Field(
-        default=None, description="The time window during which this node is considered valid."
+    temporal_bounds: TemporalBoundsProfile = Field(
+        description="The strict time window during which this coordinate is considered valid."
     )
     salience: SalienceProfile | None = Field(
         default=None, description="The mathematical importance profile governing structural pruning."

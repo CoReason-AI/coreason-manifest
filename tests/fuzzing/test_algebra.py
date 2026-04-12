@@ -9,24 +9,66 @@
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
 import base64
+import copy
+import math
 import struct
+from typing import Any, cast
 
+from hypothesis import given, settings
 from hypothesis import strategies as st
 
 from coreason_manifest.spec.ontology import (
     OntologicalAlignmentPolicy,
+            TamperFaultEvent,
     VectorEmbeddingState,
 )
 from coreason_manifest.utils.algebra import calculate_latent_alignment
 
 
-@st.composite
-def json_path_st(draw: st.DrawFn) -> str:
-    parts = draw(st.lists(st.text(alphabet=st.characters(blacklist_categories=["Cs"])), min_size=0, max_size=5))
-    if not parts:
-        return ""
-    escaped = [p.replace("~", "~0").replace("/", "~1") for p in parts]
-    return "/" + "/".join(escaped)
+
+
+
+
+
+
+
+
+
+@given(
+    st.lists(st.floats(allow_nan=True, allow_infinity=True, width=32), min_size=1, max_size=1000),
+    st.lists(st.floats(allow_nan=True, allow_infinity=True, width=32), min_size=1, max_size=1000),
+)
+@settings(max_examples=1000, deadline=None)
+def test_calculate_latent_alignment_fuzz(v1_floats: list[float], v2_floats: list[float]) -> None:
+    dim = len(v1_floats)
+    if len(v2_floats) > dim:
+        v2_floats = v2_floats[:dim]
+    elif len(v2_floats) < dim:
+        v2_floats = v2_floats + [0.0] * (dim - len(v2_floats))
+
+    v1_packed = struct.pack(f"<{dim}f", *v1_floats)
+    v2_packed = struct.pack(f"<{dim}f", *v2_floats)
+
+    v1 = VectorEmbeddingState(
+        vector_base64=base64.b64encode(v1_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
+    )
+    v2 = VectorEmbeddingState(
+        vector_base64=base64.b64encode(v2_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
+    )
+
+    policy = OntologicalAlignmentPolicy.model_construct(
+        min_cosine_similarity=-1.0,
+        require_isometry_proof=True,
+    )
+
+    try:
+        sim = calculate_latent_alignment(v1, v2, policy)
+        assert not math.isnan(sim), "Similarity should never be NaN"
+        assert -1.0001 <= sim <= 1.0001, f"Cosine similarity out of bounds: {sim}"
+    except ValueError:
+        pass
+    except TamperFaultEvent:
+        pass
 
 
 def test_calculate_latent_alignment_edge_cases() -> None:

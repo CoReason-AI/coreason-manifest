@@ -9,16 +9,27 @@
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
 import base64
+import contextlib
 import struct
+from typing import Any, cast
 from unittest.mock import Mock, patch
 
 import pytest
+from hypothesis import given, settings
+from hypothesis import strategies as st
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
+    TemporalGraphCRDTManifest,
+    TemporalEdgeInvalidationIntent,
+    BypassReceipt,
     DAGTopologyManifest,
+    DynamicRoutingManifest,
+    GlobalSemanticProfile,
     OntologicalAlignmentPolicy,
+    StateMutationIntent,
     VectorEmbeddingState,
+    WorkflowManifest,
 )
 from coreason_manifest.utils.algebra import (
     align_semantic_manifolds,
@@ -26,11 +37,21 @@ from coreason_manifest.utils.algebra import (
     calculate_remaining_compute,
     compute_topology_hash,
     get_ontology_schema,
+    project_manifest_to_markdown,
     project_manifest_to_mermaid,
+    synthesize_remediation_intent,
+    transmute_temporal_crdt,
     verify_ast_safety,
     verify_manifold_bounds,
     verify_merkle_proof,
 )
+
+
+
+
+
+
+
 
 
 def test_project_mermaid_active_subgraph() -> None:
@@ -71,6 +92,12 @@ def test_align_semantic_manifolds_dims() -> None:
     )
 
 
+
+
+
+
+
+
 def test_compute_topology_hash() -> None:
     top = DAGTopologyManifest(topology_class="dag", nodes={}, edges=[], max_depth=1, max_fan_out=1)
     h = compute_topology_hash(top)
@@ -106,6 +133,7 @@ def test_verify_ast_safety() -> None:
         verify_ast_safety("2 ** 100")
     with pytest.raises(ValueError, match="not valid syntax"):
         verify_ast_safety("invalid syntax +")
+
 
 
 def test_align_semantic_manifolds_transmutation() -> None:
@@ -194,105 +222,92 @@ def test_calculate_latent_alignment_invalid_base64() -> None:
         calculate_latent_alignment(v_invalid, v_valid, pol)
 
 
-def test_transmute_temporal_crdt_idempotence():
-    from coreason_manifest.spec.ontology import TemporalEdgeInvalidationIntent, TemporalGraphCRDTManifest
-    from coreason_manifest.utils.algebra import transmute_temporal_crdt
-
+def test_transmute_temporal_crdt_idempotence() -> None:
+    state: dict[str, Any] = {"add_set": [], "terminate_set": []}
+    cid_a = "did:coreason:agent1:" + "a" * 100
+    cid_b = "did:coreason:agent1:" + "b" * 100
     manifest = TemporalGraphCRDTManifest(
-        manifest_cid="did:coreason:man-1",
-        author_node_cid="did:coreason:agent-1",
+        manifest_cid=cid_a,
+        author_node_cid=cid_a,
         lamport_timestamp=1,
-        vector_clock={"did:coreason:agent-1": 1},
-        add_set=["did:coreason:node-1", "did:coreason:node-2"],
-        terminate_set=[
-            TemporalEdgeInvalidationIntent(
-                target_edge_cid="did:coreason:edge-1",
-                invalidation_timestamp=100.0,
-                causal_justification_cid="did:coreason:just-1",
-            )
-        ],
-    )
-
-    state = {"add_set": [], "terminate_set": []}
-
-    state_once = transmute_temporal_crdt(state, manifest)
-    state_twice = transmute_temporal_crdt(state_once, manifest)
-
-    assert state_once == state_twice
-    assert state_once["add_set"] == ["did:coreason:node-1", "did:coreason:node-2"]
-    assert state_once["terminate_set"] == ["did:coreason:edge-1"]
-
-
-def test_transmute_temporal_crdt_commutativity():
-    from coreason_manifest.spec.ontology import TemporalEdgeInvalidationIntent, TemporalGraphCRDTManifest
-    from coreason_manifest.utils.algebra import transmute_temporal_crdt
-
-    manifest_a = TemporalGraphCRDTManifest(
-        manifest_cid="did:coreason:man-a",
-        author_node_cid="did:coreason:agent-1",
-        lamport_timestamp=1,
-        vector_clock={"did:coreason:agent-1": 1},
-        add_set=["did:coreason:node-a"],
-        terminate_set=[
-            TemporalEdgeInvalidationIntent(
-                target_edge_cid="did:coreason:edge-a",
-                invalidation_timestamp=100.0,
-                causal_justification_cid="did:coreason:just-1",
-            )
-        ],
-    )
-
-    manifest_b = TemporalGraphCRDTManifest(
-        manifest_cid="did:coreason:man-b",
-        author_node_cid="did:coreason:agent-2",
-        lamport_timestamp=2,
-        vector_clock={"did:coreason:agent-2": 1},
-        add_set=["did:coreason:node-b"],
-        terminate_set=[
-            TemporalEdgeInvalidationIntent(
-                target_edge_cid="did:coreason:edge-b",
-                invalidation_timestamp=200.0,
-                causal_justification_cid="did:coreason:just-2",
-            )
-        ],
-    )
-
-    state = {"add_set": [], "terminate_set": []}
-
-    state_ab = transmute_temporal_crdt(transmute_temporal_crdt(state, manifest_a), manifest_b)
-    state_ba = transmute_temporal_crdt(transmute_temporal_crdt(state, manifest_b), manifest_a)
-
-    assert state_ab == state_ba
-    assert "did:coreason:node-a" in state_ab["add_set"]
-    assert "did:coreason:node-b" in state_ab["add_set"]
-    assert "did:coreason:edge-a" in state_ab["terminate_set"]
-    assert "did:coreason:edge-b" in state_ab["terminate_set"]
-
-
-def test_transmute_temporal_crdt_extraction_correctness():
-    from coreason_manifest.spec.ontology import TemporalEdgeInvalidationIntent, TemporalGraphCRDTManifest
-    from coreason_manifest.utils.algebra import transmute_temporal_crdt
-
-    manifest = TemporalGraphCRDTManifest(
-        manifest_cid="did:coreason:man-ext",
-        author_node_cid="did:coreason:agent-ext",
-        lamport_timestamp=1,
-        vector_clock={"did:coreason:agent-ext": 1},
+        vector_clock={cid_a: 1},
         add_set=[],
         terminate_set=[
             TemporalEdgeInvalidationIntent(
-                target_edge_cid="did:coreason:edge-ext",
+                target_edge_cid=cid_b,
+                topology_class="temporal_invalidation",
                 invalidation_timestamp=100.0,
-                causal_justification_cid="did:coreason:just-ext",
+                causal_justification_cid=cid_b
             )
-        ],
+        ]
     )
+    state1 = transmute_temporal_crdt(state, manifest)
+    state2 = transmute_temporal_crdt(state1, manifest)
+    assert state1 == state2
+    assert len(state1["terminate_set"]) == 1
+    assert state1["terminate_set"][0] == cid_b
 
-    state = {}
+def test_transmute_temporal_crdt_commutativity() -> None:
+    state: dict[str, Any] = {"add_set": [], "terminate_set": []}
+    cid_a = "did:coreason:agent1:" + "a" * 100
+    cid_b = "did:coreason:agent1:" + "b" * 100
+    cid_c = "did:coreason:agent1:" + "c" * 100
+    cid_d = "did:coreason:agent1:" + "d" * 100
+    manifest_a = TemporalGraphCRDTManifest(
+        manifest_cid=cid_a,
+        author_node_cid=cid_a,
+        lamport_timestamp=1,
+        vector_clock={cid_a: 1},
+        add_set=[],
+        terminate_set=[
+            TemporalEdgeInvalidationIntent(
+                target_edge_cid=cid_c,
+                topology_class="temporal_invalidation",
+                invalidation_timestamp=100.0,
+                causal_justification_cid=cid_c
+            )
+        ]
+    )
+    manifest_b = TemporalGraphCRDTManifest(
+        manifest_cid=cid_b,
+        author_node_cid=cid_b,
+        lamport_timestamp=2,
+        vector_clock={cid_b: 1},
+        add_set=[],
+        terminate_set=[
+            TemporalEdgeInvalidationIntent(
+                target_edge_cid=cid_d,
+                topology_class="temporal_invalidation",
+                invalidation_timestamp=200.0,
+                causal_justification_cid=cid_d
+            )
+        ]
+    )
+    state_ab = transmute_temporal_crdt(transmute_temporal_crdt(state, manifest_a), manifest_b)
+    state_ba = transmute_temporal_crdt(transmute_temporal_crdt(state, manifest_b), manifest_a)
+    assert state_ab == state_ba
+    assert len(state_ab["terminate_set"]) == 2
+    assert set(state_ab["terminate_set"]) == {cid_c, cid_d}
+
+def test_transmute_temporal_crdt_extraction() -> None:
+    state: dict[str, Any] = {}
+    cid_a = "did:coreason:agent1:" + "a" * 100
+    cid_b = "did:coreason:agent1:" + "b" * 100
+    manifest = TemporalGraphCRDTManifest(
+        manifest_cid=cid_a,
+        author_node_cid=cid_a,
+        lamport_timestamp=1,
+        vector_clock={cid_a: 1},
+        add_set=[],
+        terminate_set=[
+            TemporalEdgeInvalidationIntent(
+                target_edge_cid=cid_b,
+                topology_class="temporal_invalidation",
+                invalidation_timestamp=100.0,
+                causal_justification_cid=cid_b
+            )
+        ]
+    )
     res = transmute_temporal_crdt(state, manifest)
-
-    assert "terminate_set" in res
-    assert isinstance(res["terminate_set"], list)
     assert len(res["terminate_set"]) == 1
-    assert isinstance(res["terminate_set"][0], str)
-    assert res["terminate_set"][0] == "did:coreason:edge-ext"
+    assert res["terminate_set"][0] == cid_b

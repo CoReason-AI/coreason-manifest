@@ -5801,6 +5801,29 @@
           "description": "Cryptographic proof that this cascade was broadcast to the Swarm to halt epistemic contagion.",
           "title": "Cross Boundary Quarantine Issued",
           "type": "boolean"
+        },
+        "temporal_blast_radius": {
+          "anyOf": [
+            {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limits the cascade to sever downstream nodes whose valid_from falls within this exact window.",
+          "title": "Temporal Blast Radius"
         }
       },
       "required": [
@@ -14178,7 +14201,7 @@
     },
     "PersistenceCommitReceipt": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact representing the absolute Write-Ahead Logging (WAL) serialization of an ephemeral state differential to durable cold-storage.\n\nCAUSAL AFFORDANCE: Commits the internal `committed_state_diff_cid` into the macroscopic Apache Iceberg or Delta Lake backing store, yielding a verifiable `lakehouse_snapshot_cid` to guarantee Eventual Consistency.\n\nEPISTEMIC BOUNDS: `lakehouse_snapshot_cid` and `committed_state_diff_cid` are rigorously clamped by `max_length=128` and a strict CID regex (`^[a-zA-Z0-9_.:-]+$`), mathematically preventing path traversal injections.\n\nMCP ROUTING TRIGGERS: Event Sourcing, Write-Ahead Logging, Two-Phase Commit, Lakehouse Serialization, State Differential Flush",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact representing the absolute Write-Ahead Logging (WAL) serialization of an ephemeral state differential to durable cold-storage.\n\nCAUSAL AFFORDANCE: Commits the internal `committed_crdt_manifest_cid` into the macroscopic Apache Iceberg or Delta Lake backing store, yielding a verifiable `lakehouse_snapshot_cid` to guarantee Eventual Consistency.\n\nEPISTEMIC BOUNDS: `lakehouse_snapshot_cid` and `committed_crdt_manifest_cid` are rigorously clamped by `max_length=128` and a strict CID regex (`^[a-zA-Z0-9_.:-]+$`), mathematically preventing path traversal injections.\n\nMCP ROUTING TRIGGERS: Event Sourcing, Write-Ahead Logging, Two-Phase Commit, Lakehouse Serialization, State Differential Flush",
       "properties": {
         "event_cid": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
@@ -14226,12 +14249,12 @@
           "title": "Lakehouse Snapshot Cid",
           "type": "string"
         },
-        "committed_state_diff_cid": {
-          "description": "The internal StateDifferentialManifest CID that was flushed.",
+        "committed_crdt_manifest_cid": {
+          "description": "The internal TemporalGraphCRDTManifest CID that was flushed.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Committed State Diff Cid",
+          "title": "Committed Crdt Manifest Cid",
           "type": "string"
         },
         "target_table_uri": {
@@ -14246,7 +14269,7 @@
         "event_cid",
         "timestamp",
         "lakehouse_snapshot_cid",
-        "committed_state_diff_cid",
+        "committed_crdt_manifest_cid",
         "target_table_uri"
       ],
       "title": "PersistenceCommitReceipt",
@@ -15720,16 +15743,8 @@
           "description": "Optional distinct provenance if the relationship was inferred separately from the nodes."
         },
         "temporal_bounds": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/TemporalBoundsProfile"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The time window during which this relationship holds true."
+          "$ref": "#/$defs/TemporalBoundsProfile",
+          "description": "The strict time window during which this coordinate is considered valid."
         },
         "causal_relationship": {
           "default": "undirected",
@@ -15760,7 +15775,8 @@
         "edge_cid",
         "subject_node_cid",
         "object_node_cid",
-        "predicate"
+        "predicate",
+        "temporal_bounds"
       ],
       "title": "SemanticEdgeState",
       "type": "object"
@@ -16010,16 +16026,8 @@
           "description": "The cognitive tier this latent state resides in."
         },
         "temporal_bounds": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/TemporalBoundsProfile"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The time window during which this node is considered valid."
+          "$ref": "#/$defs/TemporalBoundsProfile",
+          "description": "The strict time window during which this coordinate is considered valid."
         },
         "salience": {
           "anyOf": [
@@ -16050,7 +16058,8 @@
         "node_cid",
         "label",
         "text_chunk",
-        "provenance"
+        "provenance",
+        "temporal_bounds"
       ],
       "title": "SemanticNodeState",
       "type": "object"
@@ -16809,92 +16818,6 @@
       ],
       "title": "StateContract",
       "type": "object"
-    },
-    "StateDifferentialManifest": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Conflict-free Replicated Data Types (CRDTs) using Lamport\nlogical clocks and Vector Clocks to guarantee Eventual Consistency. As a ...Manifest\nsuffix, this defines a frozen, declarative coordinate of a state transition matrix.\n\nCAUSAL AFFORDANCE: Enables lock-free, decentralized state synchronization across the\nswarm. Forces the orchestrator to resolve Last-Writer-Wins (LWW) topological conflicts\nbefore flushing the patches (list[StateMutationIntent]) to the immutable Epistemic\nLedger. The vector_clock dict maps node CIDs to their ge=0 integer mutation counts.\n\nEPISTEMIC BOUNDS: Cryptographically anchored by diff_cid and author_node_cid (both\nstrict 128-char CID regex). The synchronization math is clamped by lamport_timestamp\n(ge=0, le=1000000000), physically preventing logical clock integer overflow during\nprolonged swarm execution cycles.\n\nMCP ROUTING TRIGGERS: Conflict-Free Replicated Data Types, Lamport Logical Clock,\nVector Clock, Eventual Consistency, Last-Writer-Wins",
-      "examples": [
-        {
-          "author_node_cid": "did:coreason:agent-1",
-          "diff_cid": "bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdibafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi1234567890",
-          "lamport_timestamp": 42,
-          "patches": [
-            {
-              "op": "add",
-              "path": "/working_context_variables/new_observation",
-              "value": "Anomalous heat signature detected."
-            },
-            {
-              "op": "replace",
-              "path": "/status",
-              "value": "investigating"
-            }
-          ],
-          "vector_clock": {
-            "did:coreason:agent-1": 42,
-            "did:coreason:system-1": 15
-          }
-        }
-      ],
-      "properties": {
-        "diff_cid": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this state differential.",
-          "maxLength": 128,
-          "minLength": 1,
-          "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Diff Cid",
-          "type": "string"
-        },
-        "author_node_cid": {
-          "description": "The exact Lineage Watermark of the agent or system that authored this state mutation.",
-          "maxLength": 128,
-          "minLength": 1,
-          "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Author Node Cid",
-          "type": "string"
-        },
-        "lamport_timestamp": {
-          "description": "Strict scalar logical clock governing deterministic LWW (Last-Writer-Wins) conflict resolution.",
-          "maximum": 1000000000,
-          "minimum": 0,
-          "title": "Lamport Timestamp",
-          "type": "integer"
-        },
-        "vector_clock": {
-          "additionalProperties": {
-            "minimum": 0,
-            "type": "integer"
-          },
-          "description": "Causal history mapping of all known Lineage Watermarks to their latest logical mutation count at the time of authoring.",
-          "propertyNames": {
-            "maxLength": 255
-          },
-          "title": "Vector Clock",
-          "type": "object"
-        },
-        "patches": {
-          "description": "The exact, ordered sequence of deterministic state vector mutations.",
-          "items": {
-            "$ref": "#/$defs/StateMutationIntent"
-          },
-          "title": "Patches",
-          "type": "array"
-        }
-      },
-      "required": [
-        "diff_cid",
-        "author_node_cid",
-        "lamport_timestamp",
-        "vector_clock"
-      ],
-      "title": "StateDifferentialManifest",
-      "type": "object",
-      "x-domain-cluster": "epistemic_ledger",
-      "x-synergistic-classes": [
-        "EpistemicLedgerState",
-        "ObservationEvent",
-        "BeliefMutationEvent"
-      ]
     },
     "StateHydrationManifest": {
       "additionalProperties": false,
@@ -18092,6 +18015,135 @@
       ],
       "title": "TemporalCheckpointState",
       "type": "object"
+    },
+    "TemporalEdgeInvalidationIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements temporal retraction for Graph CRDTs by targeting specific edges for invalidation.\nCAUSAL AFFORDANCE: Allows a node to issue a topological retraction by appending it to a CRDT terminate set, without destroying historical provenance.\nEPISTEMIC BOUNDS: The target_edge_cid is strictly typed. The invalidation_timestamp physically caps the timeline geometry.\nMCP ROUTING TRIGGERS: Graph CRDTs, Topological Retraction, Non-Monotonic Logic, Edge Invalidation",
+      "properties": {
+        "topology_class": {
+          "const": "temporal_invalidation",
+          "default": "temporal_invalidation",
+          "description": "Discriminator for temporal edge invalidation.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "target_edge_cid": {
+          "$ref": "#/$defs/NodeCIDState",
+          "description": "The Decentralized Identifier (DID) of the edge being temporally invalidated."
+        },
+        "invalidation_timestamp": {
+          "description": "The precise chronological coordinate terminating the truth value (Graphiti valid_to).",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Invalidation Timestamp",
+          "type": "number"
+        },
+        "causal_justification_cid": {
+          "$ref": "#/$defs/NodeCIDState",
+          "description": "The ObservationEvent or FalsificationContract CID forcing this non-monotonic state transition."
+        }
+      },
+      "required": [
+        "target_edge_cid",
+        "invalidation_timestamp",
+        "causal_justification_cid"
+      ],
+      "title": "TemporalEdgeInvalidationIntent",
+      "type": "object"
+    },
+    "TemporalGraphCRDTManifest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Elevates differential patching to formal Graph CRDT representation using G-Sets (Grow-Only Sets).\n\nCAUSAL AFFORDANCE: Eradicates destructive Last-Writer-Wins conflict resolution, allowing concurrent temporal invalidations from disparate swarm nodes to mathematically converge via semilattices.\n\nEPISTEMIC BOUNDS: `manifest_cid` and `author_node_cid` strictly adhere to the 128-char CID regex constraint. `add_set` and `terminate_set` are deterministically sorted via `@model_validator(mode=\"after\")` `_enforce_canonical_sort` using `object.__setattr__` to guarantee RFC 8785 canonicalization.\n\nMCP ROUTING TRIGGERS: Graph CRDTs, Conflict-Free Replicated Data Types, Temporal Graphs, State-based Semilattices, Transmutation",
+      "examples": [
+        {
+          "author_node_cid": "did:coreason:agent-1",
+          "diff_cid": "bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdibafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi1234567890",
+          "lamport_timestamp": 42,
+          "patches": [
+            {
+              "op": "add",
+              "path": "/working_context_variables/new_observation",
+              "value": "Anomalous heat signature detected."
+            },
+            {
+              "op": "replace",
+              "path": "/status",
+              "value": "investigating"
+            }
+          ],
+          "vector_clock": {
+            "did:coreason:agent-1": 42,
+            "did:coreason:system-1": 15
+          }
+        }
+      ],
+      "properties": {
+        "manifest_cid": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this CRDT manifest.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Manifest Cid",
+          "type": "string"
+        },
+        "author_node_cid": {
+          "description": "The exact Lineage Watermark of the agent or system that authored this state mutation.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Author Node Cid",
+          "type": "string"
+        },
+        "lamport_timestamp": {
+          "description": "Strict scalar logical clock governing deterministic tie-breaking.",
+          "maximum": 1000000000,
+          "minimum": 0,
+          "title": "Lamport Timestamp",
+          "type": "integer"
+        },
+        "vector_clock": {
+          "additionalProperties": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "description": "Causal history mapping of all known Lineage Watermarks to their latest logical mutation count at the time of authoring.",
+          "propertyNames": {
+            "maxLength": 255
+          },
+          "title": "Vector Clock",
+          "type": "object"
+        },
+        "add_set": {
+          "description": "Topological additions representing Transmutations.",
+          "items": {
+            "$ref": "#/$defs/NodeCIDState"
+          },
+          "title": "Add Set",
+          "type": "array"
+        },
+        "terminate_set": {
+          "description": "Temporal invalidations representing topological retractions.",
+          "items": {
+            "$ref": "#/$defs/TemporalEdgeInvalidationIntent"
+          },
+          "title": "Terminate Set",
+          "type": "array"
+        }
+      },
+      "required": [
+        "manifest_cid",
+        "author_node_cid",
+        "lamport_timestamp",
+        "vector_clock"
+      ],
+      "title": "TemporalGraphCRDTManifest",
+      "type": "object",
+      "x-domain-cluster": "epistemic_ledger",
+      "x-synergistic-classes": [
+        "EpistemicLedgerState",
+        "ObservationEvent",
+        "BeliefMutationEvent"
+      ]
     },
     "TensorStructuralFormatProfile": {
       "description": "AGENT INSTRUCTION: Mathematically aligns abstract Tensor Calculus with rigid Von Neumann Memory Hierarchy limits and IEEE 754 Floating-Point Arithmetic physics.\n\nCAUSAL AFFORDANCE: Empowers the orchestrator to preemptively calculate exact thermodynamic and spatial memory exhaustion limits (VRAM footprint) prior to authorizing the download or projection of N-dimensional tensor payloads.\n\nEPISTEMIC BOUNDS: The `bytes_per_element` property physically clamps array allocations to rigid hardware byte multiples (e.g., 4 bytes for float32). The literal automaton prevents the execution graph from hallucinating non-standard or unsupported silicon data types.\n\nMCP ROUTING TRIGGERS: IEEE 754, Von Neumann Architecture, Tensor Calculus, GPU VRAM Allocation, Memory Hierarchy",
