@@ -22,7 +22,7 @@ import time
 import typing
 import urllib.parse
 from enum import StrEnum
-from typing import Annotated, Any, Literal, Self
+from typing import Annotated, Any, Literal, Self, cast
 
 import canonicaljson
 import networkx as nx
@@ -724,7 +724,7 @@ class CoreasonBaseState(BaseModel):
 
             canonical_dump = canonicaljson.encode_canonical_json(raw_dict)
             object.__setattr__(self, "_cached_canonical_dump", canonical_dump)
-            return canonical_dump
+            return cast("bytes", canonical_dump)
 
 
 class EpistemicProxyState[T](CoreasonBaseState):
@@ -6962,8 +6962,8 @@ class FormalLogicProofReceipt(CoreasonBaseState):
     satisfiability: Literal["SATISFIABLE", "UNSATISFIABLE", "UNKNOWN", "OPTIMUM FOUND"]
     answer_sets: list[list[Annotated[str, StringConstraints(max_length=1024)]]] = Field(
         default_factory=list,
-        description="Topological Exemption: DO NOT SORT.",
         json_schema_extra={"coreason_topological_exemption": True},
+        description="Topological Exemption: DO NOT SORT.",
     )
 
     @field_serializer("answer_sets")
@@ -6995,8 +6995,8 @@ class PrologDeductionReceipt(CoreasonBaseState):
     truth_value: bool
     variable_bindings: list[dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState]] = Field(
         default_factory=list,
-        description="Topological Exemption: DO NOT SORT.",
         json_schema_extra={"coreason_topological_exemption": True},
+        description="Topological Exemption: DO NOT SORT.",
     )
 
     @field_serializer("variable_bindings")
@@ -7069,12 +7069,121 @@ class BeliefModulationReceipt(CoreasonBaseState):
         return self
 
 
+class SHACLValidationSLA(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Acts as the deterministic execution contract instructing the egress engine to validate the serialized RDF graph against a formal W3C SHACL shape graph before authorizing the export.
+
+    CAUSAL AFFORDANCE: Physically authorizes the orchestrator to evaluate emitted graphs against enterprise logic, mechanically preventing the pollution of external triplestores with hallucinated topologies.
+
+    EPISTEMIC BOUNDS: The validation logic is constrained to the `violation_action` finite state automaton, dictating exactly what the runtime must do if the graph violates the SHACL shape.
+
+    MCP ROUTING TRIGGERS: SHACL, Topological Isomorphism, Semantic Web Egress, Graph-Shape Validation, Triplestore Interoperability
+    """
+
+    shacl_shape_uri: AnyUrl = Field(
+        description="A canonicalized URI pointing to the definitive .shacl or .ttl shape graph."
+    )
+    strict_mode: bool = Field(
+        default=True,
+        description="If True, a single topological shape violation causes the entire graph export to be mathematically rejected.",
+    )
+    violation_action: Literal["drop_graph", "quarantine", "strip_invalid_triples"] = Field(
+        description="A finite state automaton dictating the exact mechanistic penalty the orchestrator must apply if non-conforming triples are detected."
+    )
+
+
+class SPARQLQueryIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A kinetic trigger instructing the orchestrator to execute a read-only SPARQL query against an external or internal RDF triplestore.
+
+    CAUSAL AFFORDANCE: Authorizes the agent to retrieve formalized Semantic Web data. The query is strictly clamped to prevent buffer overflows, and the target is network-quarantined.
+
+    EPISTEMIC BOUNDS: The `target_endpoint_uri` is mathematically scrubbed against Bogon and loopback IP spaces to prevent SSRF. The `expected_result_schema` is volumetrically bounded to prevent schema evaluation explosions.
+
+    MCP ROUTING TRIGGERS: SPARQL, Semantic Web Query, Zero-Trust Egress, SSRF Quarantine, Triplestore
+    """
+
+    topology_class: Literal["sparql_query"] = "sparql_query"
+    target_endpoint_uri: HttpUrl = Field(description="The specific SPARQL endpoint to query.")
+    query_string: Annotated[str, StringConstraints(max_length=5000)] = Field(
+        description="The raw SPARQL syntax, mathematically clamped to prevent query buffer overflow attacks."
+    )
+    expected_result_schema: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
+        description="An untyped but volumetrically bounded dictionary defining the exact expected JSON schema of the SPARQL bindings."
+    )
+
+    @field_validator("target_endpoint_uri", mode="after")
+    @classmethod
+    def _enforce_ssrf_quarantine(cls, url: HttpUrl) -> HttpUrl:
+        """
+        AGENT INSTRUCTION: Implements Network Topology and Server-Side Request Forgery (SSRF) Quarantine logic.
+        """
+        _validate_ssrf_safety(str(url))
+        return url
+
+    @field_validator("expected_result_schema", mode="before")
+    @classmethod
+    def enforce_payload_topology(cls, v: Any) -> Any:
+        """
+        AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion.
+        """
+        return _validate_payload_bounds(v)
+
+
+class SPARQLQueryResultReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: The immutable, cryptographically frozen result of a SPARQL query, projecting returned RDF bindings into the swarm's working memory.
+
+    CAUSAL AFFORDANCE: Commits external Semantic Web knowledge into the Epistemic Ledger, mathematically binding the result set to the intent that authorized it.
+
+    EPISTEMIC BOUNDS: The `returned_bindings` dictionary is violently truncated/evaluated by the `_validate_payload_bounds` hardware guillotine to prevent massive data returns from causing VRAM exhaustion.
+
+    MCP ROUTING TRIGGERS: SPARQL Result, RDF Bindings, Epistemic Projection, Payload Bounding, Ledger Commit
+    """
+
+    event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        ...
+    )
+    prior_event_hash: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
+    ) = Field(default=None)
+    timestamp: float = Field(ge=0.0, le=253402300799.0)
+
+    topology_class: Literal["sparql_query_result"] = "sparql_query_result"
+    query_intent_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
+        Field(description="A pointer back to the SPARQLQueryIntent that authorized this execution.")
+    )
+    returned_bindings: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
+        description="The localized subset of data retrieved, structurally restricted by the hardware guillotine."
+    )
+    execution_time_ms: int = Field(ge=0, description="A temporal integer capturing the physical cost of the query.")
+
+    @field_validator("returned_bindings", mode="before")
+    @classmethod
+    def enforce_payload_topology(cls, v: Any) -> Any:
+        """
+        AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion.
+        """
+        return _validate_payload_bounds(v)
+
+
 class RDFSerializationIntent(CoreasonBaseState):
     topology_class: Literal["rdf_serialization"] = "rdf_serialization"
     export_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
     target_graph_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
     target_format: Literal["turtle", "xml", "json-ld", "ntriples"] = "turtle"
     base_uri_namespace: AnyUrl
+    shacl_governance: SHACLValidationSLA | None = Field(
+        default=None, description="The structural shape constraints governing the exported RDF graph."
+    )
+
+    @model_validator(mode="after")
+    def enforce_shacl_governance(self) -> Self:
+        if self.target_format in ["xml", "json-ld"] and self.shacl_governance is None:
+            raise ValueError(
+                "Epistemic Violation: Exporting to highly structured enterprise formats ('xml', 'json-ld') mathematically requires a SHACLValidationSLA to prevent topological corruption."
+            )
+        return self
 
 
 class RDFExportReceipt(CoreasonBaseState):
@@ -7202,7 +7311,8 @@ type AnyIntent = Annotated[
     | EpistemicLogicPremise
     | EpistemicPrologPremise
     | CausalPropagationIntent
-    | RDFSerializationIntent,
+    | RDFSerializationIntent
+    | SPARQLQueryIntent,
     Field(discriminator="topology_class"),
 ]
 
@@ -7275,7 +7385,7 @@ class InsightCardProfile(CoreasonBaseState):
 
         MCP ROUTING TRIGGERS: XSS Quarantine, DOM Sanitization, Presentation Layer Scrubbing, Rust Execution Bridge
         """
-        return nh3.clean(v)
+        return cast("str", nh3.clean(v))
 
 
 type AnyPanelProfile = Annotated[
@@ -14303,7 +14413,8 @@ type AnyStateEvent = Annotated[
     | PrologDeductionReceipt
     | BeliefModulationReceipt
     | RDFExportReceipt
-    | EpistemicStarvationEvent,
+    | EpistemicStarvationEvent
+    | SPARQLQueryResultReceipt,
     Field(discriminator="topology_class", description="A discriminated union of state events."),
 ]
 
@@ -14874,3 +14985,6 @@ CrosswalkResolutionReceipt.model_rebuild()
 
 EvidentiaryCitationState.model_rebuild()
 EpistemicStarvationEvent.model_rebuild()
+SHACLValidationSLA.model_rebuild()
+SPARQLQueryIntent.model_rebuild()
+SPARQLQueryResultReceipt.model_rebuild()

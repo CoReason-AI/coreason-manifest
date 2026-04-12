@@ -910,6 +910,7 @@
           "request": "#/$defs/InterventionIntent",
           "semantic_discovery": "#/$defs/SemanticDiscoveryIntent",
           "semantic_mapping_proposal": "#/$defs/SemanticMappingHeuristicIntent",
+          "sparql_query": "#/$defs/SPARQLQueryIntent",
           "spatial_kinematic": "#/$defs/SpatialKinematicActionIntent",
           "substrate_hydration": "#/$defs/SubstrateHydrationManifest",
           "system_2_remediation": "#/$defs/System2RemediationIntent",
@@ -1022,6 +1023,9 @@
         },
         {
           "$ref": "#/$defs/RDFSerializationIntent"
+        },
+        {
+          "$ref": "#/$defs/SPARQLQueryIntent"
         }
       ]
     },
@@ -1137,6 +1141,7 @@
           "prolog_deduction_receipt": "#/$defs/PrologDeductionReceipt",
           "rdf_export_receipt": "#/$defs/RDFExportReceipt",
           "semantic_relational_record": "#/$defs/SemanticRelationalVectorState",
+          "sparql_query_result": "#/$defs/SPARQLQueryResultReceipt",
           "system_fault": "#/$defs/SystemFaultEvent",
           "token_burn": "#/$defs/TokenBurnReceipt",
           "tool_invocation": "#/$defs/ToolInvocationEvent",
@@ -1265,6 +1270,9 @@
         },
         {
           "$ref": "#/$defs/EpistemicStarvationEvent"
+        },
+        {
+          "$ref": "#/$defs/SPARQLQueryResultReceipt"
         }
       ]
     },
@@ -16373,6 +16381,18 @@
           "minLength": 1,
           "title": "Base Uri Namespace",
           "type": "string"
+        },
+        "shacl_governance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SHACLValidationSLA"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The structural shape constraints governing the exported RDF graph."
         }
       },
       "required": [
@@ -16737,6 +16757,41 @@
       "title": "SE3TransformProfile",
       "type": "object"
     },
+    "SHACLValidationSLA": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Acts as the deterministic execution contract instructing the egress engine to validate the serialized RDF graph against a formal W3C SHACL shape graph before authorizing the export.\n\nCAUSAL AFFORDANCE: Physically authorizes the orchestrator to evaluate emitted graphs against enterprise logic, mechanically preventing the pollution of external triplestores with hallucinated topologies.\n\nEPISTEMIC BOUNDS: The validation logic is constrained to the `violation_action` finite state automaton, dictating exactly what the runtime must do if the graph violates the SHACL shape.\n\nMCP ROUTING TRIGGERS: SHACL, Topological Isomorphism, Semantic Web Egress, Graph-Shape Validation, Triplestore Interoperability",
+      "properties": {
+        "shacl_shape_uri": {
+          "description": "A canonicalized URI pointing to the definitive .shacl or .ttl shape graph.",
+          "format": "uri",
+          "minLength": 1,
+          "title": "Shacl Shape Uri",
+          "type": "string"
+        },
+        "strict_mode": {
+          "default": true,
+          "description": "If True, a single topological shape violation causes the entire graph export to be mathematically rejected.",
+          "title": "Strict Mode",
+          "type": "boolean"
+        },
+        "violation_action": {
+          "description": "A finite state automaton dictating the exact mechanistic penalty the orchestrator must apply if non-conforming triples are detected.",
+          "enum": [
+            "drop_graph",
+            "quarantine",
+            "strip_invalid_triples"
+          ],
+          "title": "Violation Action",
+          "type": "string"
+        }
+      },
+      "required": [
+        "shacl_shape_uri",
+        "violation_action"
+      ],
+      "title": "SHACLValidationSLA",
+      "type": "object"
+    },
     "SMPCTopologyManifest": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative, frozen snapshot establishing a Secure Multi-Party Computation (SMPC) ring, leveraging cryptographic privacy-preserving protocols to evaluate a joint function over decentralized inputs.\n\nCAUSAL AFFORDANCE: Authorizes the decentralized orchestrator to route zero-trust traffic via specific mathematical logic (`garbled_circuits`, `secret_sharing`, `oblivious_transfer`), allowing mutually distrustful agents to synthesize a shared output.\n\nEPISTEMIC BOUNDS: The topology physically mandates a minimum of two participants (`participant_node_cids` `min_length=2`) to satisfy the multi-party invariant. The `joint_function_uri` is bounded to `max_length=2000`. Nodes are deterministically sorted.\n\nMCP ROUTING TRIGGERS: Secure Multi-Party Computation, Garbled Circuits, Secret Sharing, Oblivious Transfer, Zero-Trust Cryptography",
@@ -16892,6 +16947,124 @@
         "participant_node_cids"
       ],
       "title": "SMPCTopologyManifest",
+      "type": "object"
+    },
+    "SPARQLQueryIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A kinetic trigger instructing the orchestrator to execute a read-only SPARQL query against an external or internal RDF triplestore.\n\nCAUSAL AFFORDANCE: Authorizes the agent to retrieve formalized Semantic Web data. The query is strictly clamped to prevent buffer overflows, and the target is network-quarantined.\n\nEPISTEMIC BOUNDS: The `target_endpoint_uri` is mathematically scrubbed against Bogon and loopback IP spaces to prevent SSRF. The `expected_result_schema` is volumetrically bounded to prevent schema evaluation explosions.\n\nMCP ROUTING TRIGGERS: SPARQL, Semantic Web Query, Zero-Trust Egress, SSRF Quarantine, Triplestore",
+      "properties": {
+        "topology_class": {
+          "const": "sparql_query",
+          "default": "sparql_query",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "target_endpoint_uri": {
+          "description": "The specific SPARQL endpoint to query.",
+          "format": "uri",
+          "maxLength": 2083,
+          "minLength": 1,
+          "title": "Target Endpoint Uri",
+          "type": "string"
+        },
+        "query_string": {
+          "description": "The raw SPARQL syntax, mathematically clamped to prevent query buffer overflow attacks.",
+          "maxLength": 5000,
+          "title": "Query String",
+          "type": "string"
+        },
+        "expected_result_schema": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonPrimitiveState"
+          },
+          "description": "An untyped but volumetrically bounded dictionary defining the exact expected JSON schema of the SPARQL bindings.",
+          "propertyNames": {
+            "maxLength": 255
+          },
+          "title": "Expected Result Schema",
+          "type": "object"
+        }
+      },
+      "required": [
+        "target_endpoint_uri",
+        "query_string",
+        "expected_result_schema"
+      ],
+      "title": "SPARQLQueryIntent",
+      "type": "object"
+    },
+    "SPARQLQueryResultReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The immutable, cryptographically frozen result of a SPARQL query, projecting returned RDF bindings into the swarm's working memory.\n\nCAUSAL AFFORDANCE: Commits external Semantic Web knowledge into the Epistemic Ledger, mathematically binding the result set to the intent that authorized it.\n\nEPISTEMIC BOUNDS: The `returned_bindings` dictionary is violently truncated/evaluated by the `_validate_payload_bounds` hardware guillotine to prevent massive data returns from causing VRAM exhaustion.\n\nMCP ROUTING TRIGGERS: SPARQL Result, RDF Bindings, Epistemic Projection, Payload Bounding, Ledger Commit",
+      "properties": {
+        "event_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "topology_class": {
+          "const": "sparql_query_result",
+          "default": "sparql_query_result",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "query_intent_cid": {
+          "description": "A pointer back to the SPARQLQueryIntent that authorized this execution.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Query Intent Cid",
+          "type": "string"
+        },
+        "returned_bindings": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonPrimitiveState"
+          },
+          "description": "The localized subset of data retrieved, structurally restricted by the hardware guillotine.",
+          "propertyNames": {
+            "maxLength": 255
+          },
+          "title": "Returned Bindings",
+          "type": "object"
+        },
+        "execution_time_ms": {
+          "description": "A temporal integer capturing the physical cost of the query.",
+          "minimum": 0,
+          "title": "Execution Time Ms",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "event_cid",
+        "timestamp",
+        "query_intent_cid",
+        "returned_bindings",
+        "execution_time_ms"
+      ],
+      "title": "SPARQLQueryResultReceipt",
       "type": "object"
     },
     "SSETransportProfile": {

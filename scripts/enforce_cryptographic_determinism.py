@@ -1,9 +1,18 @@
-#!/usr/bin/env python3
+# Copyright (c) 2026 CoReason, Inc
+#
+# This software is proprietary and dual-licensed
+# Licensed under the Prosperity Public License 3.0 (the "License")
+# A copy of the license is available at <https://prosperitylicense.com/versions/3.0.0>
+# For details, see the LICENSE file
+# Commercial use beyond a 30-day trial requires a separate license
+#
+# Source Code: <https://github.com/CoReason-AI/coreason-manifest>
+
 import ast
 import inspect
 import sys
 import types
-from typing import Annotated, Union, get_args, get_origin
+from typing import Annotated, Any, Union, get_args, get_origin
 
 from pydantic import BaseModel
 
@@ -12,7 +21,7 @@ from coreason_manifest.spec.ontology import *  # noqa: F403
 from coreason_manifest.spec.ontology import CoreasonBaseState
 
 
-def is_list_type(annotation):
+def is_list_type(annotation: Any) -> bool:
     origin = get_origin(annotation)
     if origin is list or annotation is list:
         return True
@@ -30,7 +39,7 @@ def is_list_type(annotation):
     return False
 
 
-def get_all_subclasses(cls):
+def get_all_subclasses(cls: type) -> list[type]:
     all_subclasses = []
     for subclass in cls.__subclasses__():
         all_subclasses.append(subclass)
@@ -38,7 +47,7 @@ def get_all_subclasses(cls):
     return all_subclasses
 
 
-def check_ast_for_sort(cls, field_name):
+def check_ast_for_sort(cls: type, field_name: str) -> bool:
     try:
         source = inspect.getsource(cls)
     except TypeError:
@@ -100,7 +109,7 @@ def check_ast_for_sort(cls, field_name):
     return False
 
 
-def main():
+def main() -> None:
     subclasses = get_all_subclasses(CoreasonBaseState)
     failures = []
 
@@ -112,7 +121,7 @@ def main():
             if is_list_type(field_info.annotation):
                 # Condition A
                 schema_extra = field_info.json_schema_extra or {}
-                if schema_extra.get("coreason_topological_exemption") is True:
+                if isinstance(schema_extra, dict) and schema_extra.get("coreason_topological_exemption") is True:
                     continue
 
                 # Condition B

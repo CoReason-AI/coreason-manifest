@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 
-def main():
+def main() -> None:
     # Ensure we are working from the project root
     project_root = Path(__file__).resolve().parent.parent
     os.chdir(project_root)
@@ -20,7 +20,7 @@ def main():
 
     print("Generating TypeScript bindings...")
     ts_cmd = ["npx", "quicktype", "-s", "schema", schema_file, "-o", ts_out, "--just-types"]
-    subprocess.run(ts_cmd, check=True)  # noqa: S603
+    subprocess.run(ts_cmd, check=True)  # noqa: S603 # nosec B603
 
     print("Generating Rust bindings...")
     rust_cmd = [
@@ -37,7 +37,7 @@ def main():
         "--derive-clone",
         "--derive-partial-eq",
     ]
-    subprocess.run(rust_cmd, check=True)  # noqa: S603
+    subprocess.run(rust_cmd, check=True)  # noqa: S603 # nosec B603
 
     print("Post-processing Rust bindings...")
     with open(rust_out, encoding="utf-8") as f:
@@ -49,10 +49,10 @@ def main():
         f.write(rust_code)
 
     print("Formatting TypeScript...")
-    subprocess.run(["npx", "prettier", "--write", ts_out], check=True)  # noqa: S603, S607
+    subprocess.run(["npx", "prettier", "--write", ts_out], check=True)  # noqa: S603, S607 # nosec B603 B607
 
     print("Formatting Rust...")
-    subprocess.run(["cargo", "fmt", "--manifest-path", "bindings/rust/Cargo.toml"], check=True)  # noqa: S607
+    subprocess.run(["cargo", "fmt", "--manifest-path", "bindings/rust/Cargo.toml"], check=True)  # noqa: S607 # nosec B603 B607
 
     print("Cross-language bindings generated successfully.")
 
