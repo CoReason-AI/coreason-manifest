@@ -21,7 +21,7 @@ repos:
     hooks:
       - id: mypy
         additional_dependencies:
-          [pydantic>=2.0, pytest, types-PyYAML, hypothesis, types-networkx]
+          [pydantic>=2.0, pytest, types-PyYAML]
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.24.0
     hooks:
