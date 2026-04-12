@@ -10,10 +10,11 @@
 
 import pytest
 from pydantic import AnyUrl, TypeAdapter
+
 from coreason_manifest.spec.ontology import (
+    LinkMLValidationSLA,
     OntologicalCrosswalkIntent,
     SchemaDrivenExtractionSLA,
-    LinkMLValidationSLA,
 )
 
 url_adapter = TypeAdapter(AnyUrl)
