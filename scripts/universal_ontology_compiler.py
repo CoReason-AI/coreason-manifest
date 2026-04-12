@@ -24,8 +24,8 @@ import networkx as nx
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-import coreason_manifest.spec.ontology as onto
-from coreason_manifest.utils.algebra import get_ontology_schema
+import coreason_manifest.spec.ontology as onto  # noqa: E402
+from coreason_manifest.utils.algebra import get_ontology_schema  # noqa: E402
 
 # ==========================================
 # 1. evaluate_epistemic_compliance
@@ -73,28 +73,29 @@ DOCSTRING_PARTS = ["AGENT INSTRUCTION:", "CAUSAL AFFORDANCE:", "EPISTEMIC BOUNDS
 
 def evaluate_epistemic_compliance() -> None:
     print("Starting audit...")
-    SRC_DIR = REPO_ROOT / "src"
-    TESTS_DIR = REPO_ROOT / "tests"
-    SCRIPTS_DIR = REPO_ROOT / "scripts"
-    all_files = list(SRC_DIR.rglob("*.py")) + list(TESTS_DIR.rglob("*.py")) + list(SCRIPTS_DIR.rglob("*.py"))
+    src_dir = REPO_ROOT / "src"
+    tests_dir = REPO_ROOT / "tests"
+    scripts_dir = REPO_ROOT / "scripts"
+    all_files = list(src_dir.rglob("*.py")) + list(tests_dir.rglob("*.py")) + list(scripts_dir.rglob("*.py"))
 
     header_errors = 0
     class_violations = 0
 
-    HEADER = "# Copyright (c) 2026 CoReason, Inc"
+    header = "# Copyright (c) 2026 CoReason, Inc"
     for filepath in all_files:
         content = filepath.read_text(encoding="utf-8")
-        if not content.startswith(HEADER):
+        if not content.startswith(header):
             print(f"[HEADER ERROR] {filepath.relative_to(REPO_ROOT)}")
             header_errors += 1
 
-    for filepath in SRC_DIR.rglob("spec/ontology.py"):
+    for filepath in src_dir.rglob("spec/ontology.py"):
         print(f"Checking {filepath.relative_to(REPO_ROOT)}")
         content = filepath.read_text(encoding="utf-8")
         tree = ast.parse(content)
-        class_errors: dict[str, list[str]] = {}
 
         class CodeVisitor(ast.NodeVisitor):
+            def __init__(self) -> None:
+                self.class_errors: dict[str, list[str]] = {}
             def visit_ClassDef(self, node: ast.ClassDef) -> None:
                 errors: list[str] = []
                 name = node.name
@@ -123,7 +124,7 @@ def evaluate_epistemic_compliance() -> None:
                                 f"Missing '{part}' in docstring" for part in DOCSTRING_PARTS if part not in docstring
                             )
                 if errors:
-                    class_errors[name] = errors
+                    self.class_errors[name] = errors
                 self.generic_visit(node)
 
             def visit_TypeAlias(self, node: ast.stmt) -> None:
@@ -137,7 +138,7 @@ def evaluate_epistemic_compliance() -> None:
 
         visitor = CodeVisitor()
         visitor.visit(tree)
-        for cls_name, errs in class_errors.items():
+        for cls_name, errs in visitor.class_errors.items():
             print(f"[CLASS ERROR] {cls_name}:")
             for e in errs:
                 print(f"  - {e}")
@@ -148,7 +149,7 @@ def evaluate_epistemic_compliance() -> None:
 # 2. evaluate_architectural_manifold
 # ==========================================
 def evaluate_architectural_manifold() -> None:
-    FORBIDDEN_PATTERNS = [
+    forbidden_patterns = [
         r"import\s+fastapi",
         r"from\s+fastapi\s+import",
         r"import\s+flask\b",
@@ -168,7 +169,7 @@ def evaluate_architectural_manifold() -> None:
         if in_py_file and line.startswith("+") and not line.startswith("+++"):
             added_lines.append(line[1:])
     for added_line in added_lines:
-        for pattern in FORBIDDEN_PATTERNS:
+        for pattern in forbidden_patterns:
             if re.search(pattern, added_line, re.IGNORECASE):
                 print(f"Architectural Violation: Forbidden runtime artifact detected: {added_line}")
                 sys.exit(1)
@@ -316,17 +317,17 @@ def evaluate_topological_reachability() -> None:
             subclasses.update(get_all_subclasses(sub))
         return subclasses
 
-    EXCLUDED_BASE_CLASSES = {"CryptographicProvenancePolicy", "BoundedJSONRPCIntent", "AnyToolchainState"}
-    CLASS_REGISTRY = {
+    excluded_base_classes = {"CryptographicProvenancePolicy", "BoundedJSONRPCIntent", "AnyToolchainState"}
+    class_registry = {
         cls.__name__: cls
         for cls in get_all_subclasses(onto.CoreasonBaseState)
-        if cls.__name__ not in EXCLUDED_BASE_CLASSES
+        if cls.__name__ not in excluded_base_classes
     }
-    ALIAS_REGISTRY = {name: obj.__value__ for name, obj in vars(onto).items() if isinstance(obj, TypeAliasType)}
+    alias_registry = {name: obj.__value__ for name, obj in vars(onto).items() if isinstance(obj, TypeAliasType)}
 
-    G: nx.DiGraph[Any] = nx.DiGraph()
-    for cls_name in CLASS_REGISTRY:
-        G.add_node(cls_name)
+    graph: nx.DiGraph[Any] = nx.DiGraph()
+    for cls_name in class_registry:
+        graph.add_node(cls_name)
 
     def extract_referenced_models(annotation: Any, seen: set[int | str] | None = None) -> list[type]:
         if seen is None:
@@ -337,10 +338,10 @@ def evaluate_topological_reachability() -> None:
         seen.add(ann_id)
         if isinstance(annotation, str):
             clean_string = annotation.strip("'\"")
-            if clean_string in ALIAS_REGISTRY:
-                return extract_referenced_models(ALIAS_REGISTRY[clean_string], seen)
-            if clean_string in CLASS_REGISTRY:
-                return [CLASS_REGISTRY[clean_string]]
+            if clean_string in alias_registry:
+                return extract_referenced_models(alias_registry[clean_string], seen)
+            if clean_string in class_registry:
+                return [class_registry[clean_string]]
             return []
         if isinstance(annotation, ForwardRef):
             return extract_referenced_models(annotation.__forward_arg__, seen)
@@ -366,17 +367,17 @@ def evaluate_topological_reachability() -> None:
             return [annotation]
         return []
 
-    for cls_name, cls in CLASS_REGISTRY.items():
+    for cls_name, cls in class_registry.items():
         try:
             hints = get_type_hints(cls, vars(onto), include_extras=True)
             for resolved_type in hints.values():
                 for ref_model in extract_referenced_models(resolved_type):
-                    if ref_model.__name__ in CLASS_REGISTRY:
-                        G.add_edge(cls_name, ref_model.__name__)
+                    if ref_model.__name__ in class_registry:
+                        graph.add_edge(cls_name, ref_model.__name__)
         except Exception as e:
             print(f"Warning: Failed to resolve type hints for {cls_name}: {e}")
 
-    ROOT_NODES = [
+    root_nodes = [
         "WorkflowManifest",
         "EpistemicLedgerState",
         "StateHydrationManifest",
@@ -456,11 +457,11 @@ def evaluate_topological_reachability() -> None:
         "SyntheticGenerationProfile",
         "NDimensionalTensorManifest",
     ]
-    reachable_nodes = set(ROOT_NODES)
-    for root in ROOT_NODES:
-        if root in G:
-            reachable_nodes.update(nx.descendants(G, root))
-    orphaned_nodes = set(G.nodes) - reachable_nodes
+    reachable_nodes = set(root_nodes)
+    for root in root_nodes:
+        if root in graph:
+            reachable_nodes.update(nx.descendants(graph, root))
+    orphaned_nodes = set(graph.nodes) - reachable_nodes
     if len(orphaned_nodes) > 0:
         print("CRITICAL FAULT: True Orphaned Nodes Detected")
         print("-" * 50)
@@ -469,7 +470,7 @@ def evaluate_topological_reachability() -> None:
         print("-" * 50)
         sys.exit(1)
     else:
-        print(f"Topological Reachability Confirmed: {len(G.nodes)}/{len(G.nodes)} Nodes")
+        print(f"Topological Reachability Confirmed: {len(graph.nodes)}/{len(graph.nodes)} Nodes")
         sys.exit(0)
 
 
@@ -480,7 +481,7 @@ def calculate_semantic_differential() -> None:
     def get_head_schema() -> dict[str, Any]:
         try:
             output = subprocess.check_output(
-                ["git", "show", "HEAD~1:coreason_ontology.schema.json"], stderr=subprocess.DEVNULL, text=True
+                ["git", "show", "HEAD~1:coreason_ontology.schema.json"], stderr=subprocess.DEVNULL, text=True  # noqa: S607
             )
             return cast("dict[str, Any]", json.loads(output))
         except subprocess.CalledProcessError:
@@ -510,11 +511,10 @@ def calculate_semantic_differential() -> None:
             breaking_changes.append(f"[{name}] Contravariance Violation: added required properties: {added_required}")
         old_props, new_props = old_def.get("properties", {}), new_def.get("properties", {})
         for prop_name, old_prop in old_props.items():
-            if prop_name in new_props:
-                if old_prop.get("type") != new_props[prop_name].get("type"):
-                    breaking_changes.append(
-                        f"[{name}.{prop_name}] Covariance Violation: type changed from {old_prop.get('type')} to {new_props[prop_name].get('type')}"
-                    )
+            if prop_name in new_props and old_prop.get("type") != new_props[prop_name].get("type"):
+                breaking_changes.append(
+                    f"[{name}.{prop_name}] Covariance Violation: type changed from {old_prop.get('type')} to {new_props[prop_name].get('type')}"
+                )
     if breaking_changes:
         print("Blast Radius Warning: Topological breakages detected.")
         for change in breaking_changes:
@@ -527,7 +527,7 @@ def calculate_semantic_differential() -> None:
 # 6. scan_epistemic_quarantine
 # ==========================================
 def scan_epistemic_quarantine(source: str) -> None:
-    REGISTRY = [
+    registry = [
         "SITD-Alpha: Non-Monotonic Epistemic Quarantine Isometry",
         "SITD-Beta: Defeasible Merkle-DAG Causal Bounding",
         "SITD-Gamma: Neurosymbolic Substrate Alignment",
@@ -559,8 +559,8 @@ def scan_epistemic_quarantine(source: str) -> None:
         sys.exit(1)
 
     descriptions = extract_descriptions(schema_dict)
-    matches = sum(1 for watermark in REGISTRY if any(watermark in desc for desc in descriptions))
-    score = matches / len(REGISTRY)
+    matches = sum(1 for watermark in registry if any(watermark in desc for desc in descriptions))
+    score = matches / len(registry)
     if score >= 0.6:
         print("CRITICAL: PPL 3.0 VIOLATION DETECTED. Derived work contains CoReason cryptographic canaries.")
         sys.exit(1)
@@ -572,14 +572,14 @@ def scan_epistemic_quarantine(source: str) -> None:
 # 7. inject_cryptographic_provenance
 # ==========================================
 def inject_cryptographic_provenance(files: list[str]) -> int:
-    REQUIRED_HEADER = '# Copyright (c) 2026 CoReason, Inc\n#\n# This software is proprietary and dual-licensed\n# Licensed under the Prosperity Public License 3.0 (the "License")\n# A copy of the license is available at <https://prosperitylicense.com/versions/3.0.0>\n# For details, see the LICENSE file\n# Commercial use beyond a 30-day trial requires a separate license\n#\n# Source Code: <https://github.com/CoReason-AI/coreason-manifest>\n'
+    required_header = '# Copyright (c) 2026 CoReason, Inc\n#\n# This software is proprietary and dual-licensed\n# Licensed under the Prosperity Public License 3.0 (the "License")\n# A copy of the license is available at <https://prosperitylicense.com/versions/3.0.0>\n# For details, see the LICENSE file\n# Commercial use beyond a 30-day trial requires a separate license\n#\n# Source Code: <https://github.com/CoReason-AI/coreason-manifest>\n'
     exit_code = 0
     for file_path in files:
         path = Path(file_path)
         if not path.is_file() or path.suffix != ".py":
             continue
         content = path.read_text(encoding="utf-8")
-        if not content.startswith(REQUIRED_HEADER.strip()):
+        if not content.startswith(required_header.strip()):
             print(f"Fixing missing/incorrect header in: {file_path}")
             if content.startswith("# Copyright"):
                 lines = content.splitlines()
@@ -589,7 +589,7 @@ def inject_cryptographic_provenance(files: list[str]) -> int:
                         start_idx = i
                         break
                 content = "\n".join(lines[start_idx:]).lstrip()
-            path.write_text(REQUIRED_HEADER + "\n" + content, encoding="utf-8")
+            path.write_text(required_header + "\n" + content, encoding="utf-8")
             exit_code = 1
     return exit_code
 
@@ -611,7 +611,7 @@ def project_ontology_manifold() -> None:
 # 9. execute_ontological_transmutation
 # ==========================================
 def execute_ontological_transmutation() -> None:
-    RENAMES = {
+    renames = {
         "LiquidTypeContract": "AlgebraicRefinementContract",
         "EpistemicRewardModelPolicy": "EpistemicRewardGradientPolicy",
         "SemanticRelationalRecordState": "SemanticRelationalVectorState",
@@ -637,7 +637,7 @@ def execute_ontological_transmutation() -> None:
             continue
         content = f.read_text(encoding="utf-8")
         original = content
-        for old, new in RENAMES.items():
+        for old, new in renames.items():
             content = content.replace(old, new)
         if content != original:
             f.write_text(content, encoding="utf-8")
@@ -653,7 +653,7 @@ def execute_ontological_transmutation() -> None:
 # 10. inject_ast_semantic_anchors
 # ==========================================
 def inject_ast_semantic_anchors() -> None:
-    NEW_DOCSTRINGS = {
+    new_docstrings = {
         "SemanticMappingHeuristicIntent": "AGENT INSTRUCTION: A formal cryptographic petition submitted by an agent to update the swarm's internal graph logic. Compiles discovered literature and external API responses into a mathematically verifiable semantic mapping rule (e.g., SWRL).\n\n    CAUSAL AFFORDANCE: Physically authorizes the orchestrator to inject a new heuristic into the swarm's global hypothesis space.\n\n    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.\n\n    MCP ROUTING TRIGGERS: Semantic Mapping, Heuristic Injection, Cryptographic Petition, Swarm Logic",
         "ContextualSemanticResolutionIntent": "AGENT INSTRUCTION: Acts as the kinetic trigger forcing the orchestrator to dynamically resolve a raw, untyped SemanticRelationalVectorState against a global standard ontology using optimal transport metrics, entirely bypassing legacy ETL string-matching.\n\n    CAUSAL AFFORDANCE: Physically authorizes the orchestrator to execute the defined optimal transport resolution.\n\n    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.\n\n    MCP ROUTING TRIGGERS: Semantic Resolution, Optimal Transport, ETL Bypass, Dynamic Ontology",
         "GlobalSemanticInvariantProfile": "AGENT INSTRUCTION: A macroscopic topological container that persists global contextual qualifiers (e.g., patient cohorts, operational environments, temporal scopes) across the Merkle-DAG, shielding downstream atomic propositions from context collapse.\n\n    CAUSAL AFFORDANCE: Instructs the orchestrator's verification engine to natively execute mathematical dominance checks between a payload's classification and its context.\n\n    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.\n\n    MCP ROUTING TRIGGERS: Contextual Qualifiers, Topological Container, Semantic Invariant, Context Collapse",
@@ -675,11 +675,11 @@ def inject_ast_semantic_anchors() -> None:
     tree = ast.parse(content)
     lines = content.splitlines(keepends=True)
     for node in sorted(tree.body, key=lambda n: getattr(n, "lineno", -1), reverse=True):
-        if isinstance(node, ast.ClassDef) and node.name in NEW_DOCSTRINGS and ast.get_docstring(node):
+        if isinstance(node, ast.ClassDef) and node.name in new_docstrings and ast.get_docstring(node):
             docstr_node = node.body[0]
             start_line = docstr_node.lineno - 1
             end_line = docstr_node.end_lineno
-            new_doc = '    """\n    ' + NEW_DOCSTRINGS[node.name].replace("\n", "\n    ") + '\n    """\n'
+            new_doc = '    """\n    ' + new_docstrings[node.name].replace("\n", "\n    ") + '\n    """\n'
             lines[start_line:end_line] = [new_doc]
     with open(file_path, "w", encoding="utf-8") as f:
         f.write("".join(lines))
