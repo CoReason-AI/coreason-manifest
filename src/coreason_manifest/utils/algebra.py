@@ -29,7 +29,7 @@ import typing
 from collections.abc import Sequence
 from typing import Any, Literal, cast
 
-import jsonpatch  # type: ignore[import-untyped]
+import jsonpatch
 import numpy as np
 from pydantic import AnyUrl, BaseModel, ValidationError
 from pydantic.json_schema import models_json_schema
