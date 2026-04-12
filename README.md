@@ -18,7 +18,7 @@ This repository is a completely **Hollow Data Plane**.
 
 * It is distributed exclusively as an inert data library (Wheel).
 * Importing any module **MUST NOT** trigger runtime side effects (no network sockets, no file writing, no global loggers, no runtime loops).
-* Dependencies are strictly limited to pure data parsers (`pydantic` and `pyyaml`).
+* Dependencies are strictly limited to pure data parsers and structural utilities (`pydantic`, `networkx`, `jsonpatch`, `numpy`, `canonicaljson`, `nh3`).
 
 ### 2. The "God Context" Monolith Directive
 
@@ -53,9 +53,7 @@ coreason_manifest/
 │   └── utils/
 │       └── algebra.py        # Pure algebraic functors, matrix projections, and validation.
 ├── scripts/
-│   ├── evaluate_architecture.py  # CI gate blocking runtime side-effects.
-│   ├── semantic_diff.py          # CI gate enforcing backward schema compatibility.
-│   └── swarm_watchdog.py         # Semantic scanner for intellectual property bounds.
+│   └── universal_ontology_compiler.py  # Monolithic CI gate: architecture, AST bounds, reachability, headers, schema.
 ├── coreason_ontology.schema.json # The compiled JSON Schema used for MCP Discovery.
 └── pyproject.toml            # Project definitions and uv dependencies.
 

@@ -178,9 +178,26 @@ jobs:
           enable-cache: true
           python-version: "3.14"
 
-      - name: Build wheel
-        run: uv build
-
-      - name: Verify SHA256
+      - name: Build wheel (attempt 1)
         run: |
-          sha256sum dist/*.whl
+          uv build --out-dir dist1
+          sha256sum dist1/*.whl > dist1/checksums.txt
+
+      - name: Build wheel (attempt 2)
+        run: |
+          uv build --out-dir dist2
+          sha256sum dist2/*.whl > dist2/checksums.txt
+
+      - name: Verify Deterministic Build
+        run: |
+          WHL1=$(basename dist1/*.whl)
+          WHL2=$(basename dist2/*.whl)
+          HASH1=$(sha256sum dist1/$WHL1 | awk '{print $1}')
+          HASH2=$(sha256sum dist2/$WHL2 | awk '{print $1}')
+          echo "Build 1: $HASH1  $WHL1"
+          echo "Build 2: $HASH2  $WHL2"
+          if [ "$HASH1" != "$HASH2" ]; then
+            echo "CRITICAL: Non-deterministic build detected!"
+            exit 1
+          fi
+          echo "Deterministic build verified."
