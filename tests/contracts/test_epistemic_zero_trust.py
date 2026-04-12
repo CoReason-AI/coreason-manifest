@@ -12,9 +12,11 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
+    EpistemicAxiomVerificationReceipt,
     EpistemicConstraintPolicy,
     EpistemicZeroTrustContract,
     EpistemicZeroTrustReceipt,
+    FormalVerificationContract,
 )
 
 
@@ -86,3 +88,27 @@ def test_epistemic_zero_trust_receipt_firewall_breach_bypass() -> None:
 
     with pytest.raises(ValueError, match=r"Topological Collapse: Firewall breach detected\. Receipt invalid\."):
         receipt.verify_firewall_integrity()  # type: ignore[operator]
+
+
+def test_epistemic_axiom_guillotine() -> None:
+    with pytest.raises(
+        ValidationError, match=r"Proof-Carrying Data required: Cannot verify axiom without a formal_backing_receipt_cid\."
+    ):
+        EpistemicAxiomVerificationReceipt(
+            event_cid="receipt-1",
+            timestamp=123.0,
+            source_prediction_cid="did:coreason:agent-1",
+            sequence_similarity_score=0.9,
+            fact_score_passed=True,
+            formal_backing_receipt_cid=None,
+        )
+
+
+def test_formal_verification_contract_pointer() -> None:
+    contract = FormalVerificationContract(
+        proof_system="lean4",
+        invariant_theorem="theorem1",
+        compiled_proof_hash="a" * 64,
+        verified_receipt_cid="did:coreason:receipt-1",
+    )
+    assert contract.verified_receipt_cid == "did:coreason:receipt-1"

@@ -895,6 +895,7 @@
           "epistemic_prolog_premise": "#/$defs/EpistemicPrologPremise",
           "escalation": "#/$defs/EscalationIntent",
           "fallback_intent": "#/$defs/FallbackIntent",
+          "falsification_contract": "#/$defs/FalsificationContract",
           "forced_adjudication": "#/$defs/AdjudicationIntent",
           "fyi": "#/$defs/FYIIntent",
           "human_directive": "#/$defs/HumanDirectiveIntent",
@@ -922,6 +923,9 @@
       "oneOf": [
         {
           "$ref": "#/$defs/EpistemicZeroTrustContract"
+        },
+        {
+          "$ref": "#/$defs/FalsificationContract"
         },
         {
           "$ref": "#/$defs/SemanticIntent"
@@ -7563,6 +7567,18 @@
           "default": null,
           "description": "The undeniable pointer proving the source prediction traversed the Zero-Trust contract before being verified as an axiom.",
           "title": "Zero Trust Receipt Cid"
+        },
+        "formal_backing_receipt_cid": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NodeCIDState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cryptographic pointer to the deterministic Triad execution receipt (Proof-Carrying Data)."
         }
       },
       "required": [
@@ -9581,6 +9597,18 @@
           },
           "title": "Allowed Evidence Domains",
           "type": "array"
+        },
+        "required_deduction_receipt_cid": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NodeCIDState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "If grounding via strict hierarchies (e.g., medical ontologies), this MUST point to a PrologDeductionReceipt with truth_value=True."
         }
       },
       "required": [
@@ -10279,47 +10307,43 @@
     },
     "FalsificationContract": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Enforces strict Popperian Falsificationism by defining the exact empirical boundary conditions that would logically invalidate a non-monotonic causal hypothesis.\n\nCAUSAL AFFORDANCE: Provides the deterministic pattern-matching criteria (`falsifying_observation_signature`) that triggers a DefeasibleCascadeEvent, instantly quarantining the collapsed subgraph if met.\n\nEPISTEMIC BOUNDS: Limits the falsification logic to a strictly typed `condition_cid` (`max_length=128`) and physically binds the empirical test to an explicit `required_tool_name` (`max_length=2000`) to prevent unbounded or hallucinated search spaces.\n\nMCP ROUTING TRIGGERS: Popperian Falsification, Null Hypothesis, Defeasible Logic, Empirical Falsifiability, Structural Boundary",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A contract deploying constraint oracles to hunt for counter-models to falsify a hypothesis.",
       "properties": {
-        "condition_cid": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this falsification test to the Merkle-DAG.",
-          "maxLength": 128,
-          "minLength": 1,
-          "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Condition Cid",
+        "topology_class": {
+          "const": "falsification_contract",
+          "default": "falsification_contract",
+          "title": "Topology Class",
           "type": "string"
         },
-        "description": {
-          "description": "Semantic description of what observation would prove the parent hypothesis is false.",
-          "maxLength": 2000,
-          "title": "Description",
+        "falsification_solver": {
+          "default": "clingo",
+          "description": "The constraint oracle tasked with finding a counter-model.",
+          "enum": [
+            "clingo",
+            "z3"
+          ],
+          "title": "Falsification Solver",
           "type": "string"
         },
-        "required_tool_name": {
+        "target_hypothesis_cid": {
+          "$ref": "#/$defs/NodeCIDState",
+          "description": "Pointer to the hypothesis claim being challenged."
+        },
+        "counter_model_receipt_cid": {
           "anyOf": [
             {
-              "maxLength": 2000,
-              "type": "string"
+              "$ref": "#/$defs/NodeCIDState"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "The specific CognitiveActionSpaceManifest tool required to test this condition (e.g., 'sql_query_db').",
-          "title": "Required Tool Name"
-        },
-        "falsifying_observation_signature": {
-          "description": "The expected data schema or regex pattern that, if returned by the tool, kills the hypothesis.",
-          "maxLength": 2000,
-          "title": "Falsifying Observation Signature",
-          "type": "string"
+          "description": "MUST point to a FormalLogicProofReceipt evaluating to SATISFIABLE to collapse the hypothesis."
         }
       },
       "required": [
-        "condition_cid",
-        "description",
-        "falsifying_observation_signature"
+        "target_hypothesis_cid"
       ],
       "title": "FalsificationContract",
       "type": "object"
@@ -10732,6 +10756,18 @@
           "pattern": "^[a-f0-9]{64}$",
           "title": "Compiled Proof Hash",
           "type": "string"
+        },
+        "verified_receipt_cid": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NodeCIDState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Pointer to a Lean4VerificationReceipt or HoareLogicProofReceipt validating the logic."
         }
       },
       "required": [
