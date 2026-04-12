@@ -843,7 +843,8 @@
         "mapping": {
           "ephemeral_partition": "#/$defs/EphemeralNamespacePartitionState",
           "mcp_server": "#/$defs/MCPServerManifest",
-          "native_tool": "#/$defs/SpatialToolManifest"
+          "native_tool": "#/$defs/SpatialToolManifest",
+          "zero_trust_contract": "#/$defs/EpistemicZeroTrustContract"
         },
         "propertyName": "topology_class"
       },
@@ -856,6 +857,9 @@
         },
         {
           "$ref": "#/$defs/EphemeralNamespacePartitionState"
+        },
+        {
+          "$ref": "#/$defs/EpistemicZeroTrustContract"
         }
       ]
     },
@@ -7357,7 +7361,7 @@
     },
     "EpistemicAxiomVerificationReceipt": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements automated Natural Language Inference (NLI) and Entailment Verification to mechanically quarantine hallucinated tokens. As a ...Receipt suffix, it represents an immutable cryptographic verdict.\n\nCAUSAL AFFORDANCE: Acts as the definitive logic gate for the Truth Maintenance System. If verification succeeds, it physically unlocks the promotion of the source prediction into the global semantic knowledge graph.\n\nEPISTEMIC BOUNDS: Factual alignment is geometrically bounded by sequence_similarity_score (ge=0.0, le=1.0). The @model_validator enforce_epistemic_quarantine deliberately crashes instantiation if fact_score_passed is False, physically severing the DAG to prevent epistemic contagion.\n\nMCP ROUTING TRIGGERS: Entailment Verification, Natural Language Inference, Truth Maintenance System, Epistemic Quarantine, Hallucination Filtering",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements automated Natural Language Inference (NLI) and Entailment Verification to mechanically quarantine hallucinated tokens. As a ...Receipt suffix, it represents an immutable cryptographic verdict.\n\nCAUSAL AFFORDANCE: Acts as the definitive logic gate for the Truth Maintenance System. If verification succeeds, it physically unlocks the promotion of the source prediction into the global semantic knowledge graph.\n\nEPISTEMIC BOUNDS: Factual alignment is geometrically bounded by sequence_similarity_score (ge=0.0, le=1.0). The @model_validator enforce_epistemic_quarantine deliberately crashes instantiation if fact_score_passed is False, physically severing the DAG to prevent epistemic contagion. Structural integrity mathematically demands that the `zero_trust_receipt_cid` be present to prove the generative extraction bypassed prompt injection boundaries.\n\nMCP ROUTING TRIGGERS: Entailment Verification, Natural Language Inference, Truth Maintenance System, Epistemic Quarantine, Hallucination Filtering",
       "properties": {
         "event_cid": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
@@ -7412,6 +7416,22 @@
         "fact_score_passed": {
           "title": "Fact Score Passed",
           "type": "boolean"
+        },
+        "zero_trust_receipt_cid": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9_.:-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The undeniable pointer proving the source prediction traversed the Zero-Trust contract before being verified as an axiom.",
+          "title": "Zero Trust Receipt Cid"
         }
       },
       "required": [
@@ -17655,7 +17675,7 @@
     },
     "StateMutationIntent": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements the formal RFC 6902 JSON Patch standard to execute atomic,\ndeterministic state vector mutations across the swarm's N-dimensional blackboard. As an\n...Intent suffix, this represents an authorized kinetic execution trigger.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator's algebraic engine to surgically apply,\ntest, or ablate targeted JSON pointers without requiring full payload transmission.\n\nEPISTEMIC BOUNDS: The `value` (JsonPrimitiveState) mutation payload is volumetrically\nclamped by `enforce_payload_topology` to guarantee that the resulting state matrix $S'$\ndoes not expand beyond VRAM constraints. The operation geometry is rigidly restricted by\nthe op field to the PatchOperationProfile. Target topological coordinates (path and\nfrom_path) are physically bounded to max_length=2000.\n\nMCP ROUTING TRIGGERS: RFC 6902, JSON Patch, Atomic Mutation, State Vector Projection,\nDeterministic Operator",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements the formal RFC 6902 JSON Patch standard to execute atomic,\ndeterministic state vector mutations across the swarm's N-dimensional blackboard. As an\n...Intent suffix, this represents an authorized kinetic execution trigger.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator's algebraic engine to surgically apply,\ntest, or ablate targeted JSON pointers without requiring full payload transmission.\n\nEPISTEMIC BOUNDS: The `value` (JsonPrimitiveState) mutation payload is volumetrically\nclamped by `enforce_payload_topology` to guarantee that the resulting state matrix $S'$\ndoes not expand beyond VRAM constraints. The operation geometry is rigidly restricted by\nthe op field to the PatchOperationProfile. Target topological coordinates (path and\nfrom_path) are physically bounded to max_length=2000. If the mutation introduces high-entropy external strings, the `zero_trust_receipt_cid` MUST be populated to satisfy Sheaf-theoretic consistency, proving the payload traversed the Symbolic Firewall.\n\nMCP ROUTING TRIGGERS: RFC 6902, JSON Patch, Atomic Mutation, State Vector Projection,\nDeterministic Operator",
       "properties": {
         "op": {
           "$ref": "#/$defs/PatchOperationProfile",
@@ -17685,6 +17705,22 @@
           "default": null,
           "description": "The JSON pointer from which to copy or move the state vector, if applicable.",
           "title": "From"
+        },
+        "zero_trust_receipt_cid": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9_.:-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cryptographic proof that this mutation was sanitized by the Symbolic Firewall.",
+          "title": "Zero Trust Receipt Cid"
         }
       },
       "required": [
