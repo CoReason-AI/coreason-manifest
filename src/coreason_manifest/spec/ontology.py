@@ -2821,7 +2821,7 @@ class StateMutationIntent(CoreasonBaseState):
     clamped by `enforce_payload_topology` to guarantee that the resulting state matrix $S'$
     does not expand beyond VRAM constraints. The operation geometry is rigidly restricted by
     the op field to the PatchOperationProfile. Target topological coordinates (path and
-    from_path) are physically bounded to max_length=2000.
+    from_path) are physically bounded to max_length=2000. If the mutation introduces high-entropy external strings, the `zero_trust_receipt_cid` MUST be populated to satisfy Sheaf-theoretic consistency, proving the payload traversed the Symbolic Firewall.
 
     MCP ROUTING TRIGGERS: RFC 6902, JSON Patch, Atomic Mutation, State Vector Projection,
     Deterministic Operator
@@ -2841,6 +2841,11 @@ class StateMutationIntent(CoreasonBaseState):
         default=None,
         alias="from",
         description="The JSON pointer from which to copy or move the state vector, if applicable.",
+    )
+    zero_trust_receipt_cid: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] | None
+    ) = Field(
+        default=None, description="Cryptographic proof that this mutation was sanitized by the Symbolic Firewall."
     )
 
     @field_validator("value", mode="before")
@@ -7768,7 +7773,8 @@ type AnyTransitionEdge = Annotated[TransitionEdgeProfile | CyclicEdgeProfile, Fi
 
 
 type AnyActionSpaceCapability = Annotated[
-    SpatialToolManifest | MCPServerManifest | EphemeralNamespacePartitionState, Field(discriminator="topology_class")
+    SpatialToolManifest | MCPServerManifest | EphemeralNamespacePartitionState | EpistemicZeroTrustContract,
+    Field(discriminator="topology_class"),
 ]
 
 _ILLEGAL_PAYLOAD_KEYS: frozenset[str] = frozenset(
@@ -12788,7 +12794,7 @@ class EpistemicAxiomVerificationReceipt(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Acts as the definitive logic gate for the Truth Maintenance System. If verification succeeds, it physically unlocks the promotion of the source prediction into the global semantic knowledge graph.
 
-    EPISTEMIC BOUNDS: Factual alignment is geometrically bounded by sequence_similarity_score (ge=0.0, le=1.0). The @model_validator enforce_epistemic_quarantine deliberately crashes instantiation if fact_score_passed is False, physically severing the DAG to prevent epistemic contagion.
+    EPISTEMIC BOUNDS: Factual alignment is geometrically bounded by sequence_similarity_score (ge=0.0, le=1.0). The @model_validator enforce_epistemic_quarantine deliberately crashes instantiation if fact_score_passed is False, physically severing the DAG to prevent epistemic contagion. Structural integrity mathematically demands that the `zero_trust_receipt_cid` be present to prove the generative extraction bypassed prompt injection boundaries.
 
     MCP ROUTING TRIGGERS: Entailment Verification, Natural Language Inference, Truth Maintenance System, Epistemic Quarantine, Hallucination Filtering
     """
@@ -12814,6 +12820,12 @@ class EpistemicAxiomVerificationReceipt(CoreasonBaseState):
     ] = Field()
     sequence_similarity_score: float = Field(ge=0.0, le=1.0)
     fact_score_passed: bool
+    zero_trust_receipt_cid: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] | None
+    ) = Field(
+        default=None,
+        description="The undeniable pointer proving the source prediction traversed the Zero-Trust contract before being verified as an axiom.",
+    )
 
     @model_validator(mode="after")
     def enforce_epistemic_quarantine(self) -> Self:
