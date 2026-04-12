@@ -25,7 +25,7 @@ from enum import StrEnum
 from typing import Annotated, Any, Literal, Self
 
 import canonicaljson
-import networkx as nx  # type: ignore[import-untyped]
+import networkx as nx
 import nh3
 import numpy as np
 from pydantic import AnyUrl, BaseModel, ConfigDict, Field, HttpUrl, StringConstraints, field_validator, model_validator
@@ -1980,25 +1980,25 @@ class RoutingFrontierPolicy(CoreasonBaseState):
                 try:
                     val = int(values["max_latency_ms"])
                     values["max_latency_ms"] = int(max(1, min(val, 86400000)))
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
             if "max_cost_magnitude_per_token" in values:
                 try:
                     val = int(values["max_cost_magnitude_per_token"])
                     values["max_cost_magnitude_per_token"] = int(max(1, min(val, 1000000000)))
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
             if "min_capability_score" in values:
                 try:
                     val_float = float(values["min_capability_score"])
                     values["min_capability_score"] = float(max(0.0, min(val_float, 1.0)))
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
             if values.get("max_carbon_intensity_gco2eq_kwh") is not None:
                 try:
                     val_float = float(values["max_carbon_intensity_gco2eq_kwh"])
                     values["max_carbon_intensity_gco2eq_kwh"] = float(max(0.0, min(val_float, 10000.0)))
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
         return values
 
@@ -4542,7 +4542,7 @@ class DocumentLayoutManifest(CoreasonBaseState):
 
     @model_validator(mode="after")
     def verify_dag_and_integrity(self) -> Self:
-        graph = nx.DiGraph()
+        graph: nx.DiGraph[Any] = nx.DiGraph()
         for node_cid in self.blocks:
             graph.add_node(node_cid)
 
@@ -7878,7 +7878,7 @@ class MarketContract(CoreasonBaseState):
                 try:
                     mc_int = int(mc)
                     sp_int = int(sp)
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
             cmc = max(0, min(mc_int, 1000000000))
             if sp_int > cmc:
@@ -9794,7 +9794,7 @@ class DiscourseTreeManifest(CoreasonBaseState):
         if self.root_node_cid not in self.discourse_nodes:
             raise ValueError("Topological Contradiction: root_node_cid not found in discourse_nodes.")
 
-        graph = nx.DiGraph()
+        graph: nx.DiGraph[Any] = nx.DiGraph()
         for node_id in self.discourse_nodes:
             graph.add_node(node_id)
 
@@ -11058,7 +11058,7 @@ class DAGTopologyManifest(CoreasonBaseState):
         if self.lifecycle_phase == "draft":
             return self
 
-        graph = nx.DiGraph()
+        graph: nx.DiGraph[Any] = nx.DiGraph()
         for node_cid in self.nodes:
             graph.add_node(node_cid)
 
