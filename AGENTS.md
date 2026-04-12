@@ -105,7 +105,7 @@ The era of dumping raw payload text or tabular JSON into an LLM context window i
 * **Firewall Declarations:** All high-entropy data (e.g., user input, external HTML, unverified text) MUST be quarantined at the schema level using the `EpistemicFirewallField` (which injects `"coreason_firewall": "STRICT_MASK"` into the JSON schema). The physical masking is delegated to the `coreason-runtime` OpenSymbolicAI engine.
 
 ### **Topological Theory & Graph Geometry**
-* **Continuous Topological Verification (CTV):** The CI/CD enforced mathematical invariant that the ontology is a fully contiguous directed graph. Every defined schema must be reachable from a macroscopic entry point. 
+* **Continuous Topological Verification (CTV):** The CI/CD enforced mathematical invariant that the ontology is a fully contiguous directed graph. Every defined schema must be reachable from a macroscopic entry point.
 * **The Zero-Orphan Invariant ($|V_O| = 0$):** A strict rule stating that the set of orphaned vertices (schemas without inbound compositional edges) must equal zero. A floating mathematical constraint is a systemic vulnerability because the orchestrator cannot physically enforce a bound it cannot reach.
 * **Compositional Wiring (Product Types):** The architectural mandate that formal constraints (e.g., Hoare logic proofs, AST gradients) must be structurally embedded as explicit `Field` dependencies within executable capabilities to be mechanically enforced.
 
@@ -248,7 +248,7 @@ To maintain ecosystem purity, legacy 2010s-era software engineering paradigms ar
 You are STRICTLY FORBIDDEN from attempting to enforce JSON or structural formats via natural language prompting. Do NOT write instructions like: *"Output your response as a valid JSON object"*. All grammar and syntax constraints must be physically enforced at the hardware level using **FSM Logit Masking (Constrained Decoding)** via the `ConstrainedDecodingPolicy` to suffocate invalid token probabilities to $-\infty$.
 
 **2. Hallucinated Proof Schemas are Banned:**
-You are STRICTLY FORBIDDEN from letting an LLM hallucinate the output JSON schema for a mathematical proof or logic deduction. All formal reasoning must route to an immutable cryptographic receipt defined in the manifest (e.g., `Lean4VerificationReceipt`, `PrologDeductionReceipt`, `FormalLogicProofReceipt`). 
+You are STRICTLY FORBIDDEN from letting an LLM hallucinate the output JSON schema for a mathematical proof or logic deduction. All formal reasoning must route to an immutable cryptographic receipt defined in the manifest (e.g., `Lean4VerificationReceipt`, `PrologDeductionReceipt`, `FormalLogicProofReceipt`).
 
 **3. Untyped Logic Matrices are Banned:**
 You are STRICTLY FORBIDDEN from using untyped dictionaries (e.g., `dict[str, Any]`) to represent formal logical crosswalks, rule engines, or theorems. All formal logic must be stored as geometrically bounded, executable strings (e.g., Lean 4 tactics, Prolog Horn clauses, ASP programs) within the Pydantic schemas.
@@ -256,7 +256,7 @@ You are STRICTLY FORBIDDEN from using untyped dictionaries (e.g., `dict[str, Any
 
 <contract_directive priority="critical" action="reject_generation_if_violated">
 ### **4. Abstract Design-by-Contract (DbC) Enclosures**
-You are STRICTLY FORBIDDEN from defining a `...Task` or `...Intent` that relies solely on a natural language `semantic_planning_task`. 
+You are STRICTLY FORBIDDEN from defining a `...Task` or `...Intent` that relies solely on a natural language `semantic_planning_task`.
 
 Every cognitive task MUST be enclosed in a `ZeroTrustContractModel` containing explicit `structural_pre_conditions` and `structural_post_conditions`.
 * **AST Evaluation Only:** These conditions must be written as strictly parsable Python Abstract Syntax Trees (AST) that evaluate the *geometry of the plan*, not the string content.
@@ -303,7 +303,7 @@ The manifest simply defines the exact `EpistemicProxyState` and `EpistemicConstr
 **CRITICAL CONTEXT:** The `coreason-manifest` is evaluated mathematically as a Directed Graph $G = (V, E)$. The CI/CD pipeline enforces a "Topological Guillotine". If you define a new Pydantic model, Enum, or TypeAlias, and fail to draw a directed compositional edge to it from the Root Set, the pipeline will violently reject your code.
 
 ### **1. No Floating Schemas (The Composition Law)**
-If you create a new mathematical constraint, receipt, or logic premise, you MUST structurally wire it into the graph. 
+If you create a new mathematical constraint, receipt, or logic premise, you MUST structurally wire it into the graph.
 * **Product Type Wiring:** Inject it as a `Field` into its logical macroscopic parent.
 * **Sum Type Expansion:** Append it to the relevant polymorphic union at the bottom of the ontology (e.g., adding a new event to `AnyStateEvent`).
 </topology_directive>
@@ -366,10 +366,10 @@ You are strictly forbidden from introducing "Active" or "Runtime" logic into thi
 ### **Code Style & Typing**
 * **Linting:** `ruff check --fix` (Strict).
 * **Formatting:** `ruff format`.
-* **Typing:** Strict `mypy`. Use `Pydantic` models for all data structures. 
+* **Typing:** Strict `mypy`. Use `Pydantic` models for all data structures.
 
 ### **Cryptographic Determinism (The Merkle Rule)**
-* **The Physics of RFC 8785:** Because `CoreasonBaseModel` enforces strict canonical hashing, dictionary keys are sorted automatically, but **array ordering is mathematically preserved**. 
+* **The Physics of RFC 8785:** Because `CoreasonBaseModel` enforces strict canonical hashing, dictionary keys are sorted automatically, but **array ordering is mathematically preserved**.
 * **Paradigm 1: Unordered Sets (Must Be Sorted):** If the array represents a set of capabilities or IDs, you MUST deterministically sort it via a post-init validator (using `object.__setattr__`).
 * **Paradigm 2: Structural Sequences (The Topological Exemption):** If the array encodes physical, temporal, or causal reality (e.g., topological DAG edges, logic execution steps), sorting it destroys its epistemic value. You MUST anchor this exemption into the AST using an inline comment:
   `# Note: <field_name> is a structurally ordered sequence (<Reason>) and MUST NOT be sorted.`
@@ -412,7 +412,7 @@ You are strictly bound to the **"God Context" Monolith Directive**. You are EXPL
 
 ## **7. 🛡️ Mandatory Local Verification Workflow**
 
-This package enforces a zero-tolerance policy for type errors, linting violations, and coverage drops. **The following checks must be run locally before opening a Pull Request or finalizing an AI-generated refactor.** 
+This package enforces a zero-tolerance policy for type errors, linting violations, and coverage drops. **The following checks must be run locally before opening a Pull Request or finalizing an AI-generated refactor.**
 
 ### **1. Formatting and Linting**
 `uv run ruff format .`

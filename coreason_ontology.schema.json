@@ -890,6 +890,9 @@
           "contextual_semantic_resolution": "#/$defs/ContextualSemanticResolutionIntent",
           "continuous_spatial_mutation": "#/$defs/ContinuousSpatialMutationIntent",
           "drafting": "#/$defs/DraftingIntent",
+          "epistemic_lean4_premise": "#/$defs/EpistemicLean4Premise",
+          "epistemic_logic_premise": "#/$defs/EpistemicLogicPremise",
+          "epistemic_prolog_premise": "#/$defs/EpistemicPrologPremise",
           "escalation": "#/$defs/EscalationIntent",
           "fallback_intent": "#/$defs/FallbackIntent",
           "forced_adjudication": "#/$defs/AdjudicationIntent",
@@ -1002,6 +1005,15 @@
           "$ref": "#/$defs/TopologicalProjectionIntent"
         },
         {
+          "$ref": "#/$defs/EpistemicLean4Premise"
+        },
+        {
+          "$ref": "#/$defs/EpistemicLogicPremise"
+        },
+        {
+          "$ref": "#/$defs/EpistemicPrologPremise"
+        },
+        {
           "$ref": "#/$defs/CausalPropagationIntent"
         },
         {
@@ -1107,13 +1119,16 @@
           "epistemic_rejection": "#/$defs/EpistemicRejectionReceipt",
           "epistemic_telemetry": "#/$defs/EpistemicTelemetryEvent",
           "exogenous_event": "#/$defs/ExogenousEpistemicEvent",
+          "formal_logic_proof": "#/$defs/FormalLogicProofReceipt",
           "hypothesis": "#/$defs/HypothesisGenerationEvent",
           "intent_classification": "#/$defs/IntentClassificationReceipt",
+          "lean4_verification_receipt": "#/$defs/Lean4VerificationReceipt",
           "normative_drift": "#/$defs/NormativeDriftEvent",
           "observation": "#/$defs/ObservationEvent",
           "ontological_reification": "#/$defs/OntologicalReificationReceipt",
           "persistence_commit": "#/$defs/PersistenceCommitReceipt",
           "post_coordinated_concept": "#/$defs/PostCoordinatedSemanticState",
+          "prolog_deduction_receipt": "#/$defs/PrologDeductionReceipt",
           "rdf_export_receipt": "#/$defs/RDFExportReceipt",
           "semantic_relational_record": "#/$defs/SemanticRelationalVectorState",
           "system_fault": "#/$defs/SystemFaultEvent",
@@ -1223,6 +1238,15 @@
         },
         {
           "$ref": "#/$defs/EpistemicRejectionReceipt"
+        },
+        {
+          "$ref": "#/$defs/Lean4VerificationReceipt"
+        },
+        {
+          "$ref": "#/$defs/FormalLogicProofReceipt"
+        },
+        {
+          "$ref": "#/$defs/PrologDeductionReceipt"
         },
         {
           "$ref": "#/$defs/BeliefModulationReceipt"
@@ -7894,6 +7918,48 @@
       "title": "EpistemicHydrationPolicy",
       "type": "object"
     },
+    "EpistemicLean4Premise": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A formal theorem and tactic proof for Lean 4 validation.",
+      "properties": {
+        "topology_class": {
+          "const": "epistemic_lean4_premise",
+          "default": "epistemic_lean4_premise",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "ontology_node_id": {
+          "$ref": "#/$defs/NodeCIDState"
+        },
+        "environment_imports": {
+          "items": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "title": "Environment Imports",
+          "type": "array"
+        },
+        "formal_statement": {
+          "maxLength": 10000,
+          "minLength": 1,
+          "title": "Formal Statement",
+          "type": "string"
+        },
+        "tactic_proof": {
+          "maxLength": 100000,
+          "minLength": 1,
+          "title": "Tactic Proof",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ontology_node_id",
+        "formal_statement",
+        "tactic_proof"
+      ],
+      "title": "EpistemicLean4Premise",
+      "type": "object"
+    },
     "EpistemicLedgerState": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Event Sourcing and the Merkle-DAG structure as the absolute, immutable source of truth for the swarm, fully partitioned from volatile memory.\n\nCAUSAL AFFORDANCE: Permanently crystallizes validated events into the `history` log. Applies Truth Maintenance, context eviction, and tracks active `DefeasibleCascadeEvents` and `RollbackIntents`.\n\nEPISTEMIC BOUNDS: The `@model_validator` `_enforce_canonical_sort` deterministically sorts history by timestamp, checkpoints by ID, and active cascades—guaranteeing invariant RFC 8785 canonical hashing. Validation prevents epistemic paradoxes (child before parent).\n\nMCP ROUTING TRIGGERS: Event Sourcing, Merkle-DAG, Immutable Ledger, Truth Crystallization, Chronological Sort",
@@ -8072,6 +8138,98 @@
         "message"
       ],
       "title": "EpistemicLogEvent",
+      "type": "object"
+    },
+    "EpistemicLogicPremise": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents a formal Answer Set Programming (ASP) logic string.",
+      "properties": {
+        "topology_class": {
+          "const": "epistemic_logic_premise",
+          "default": "epistemic_logic_premise",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "ontology_node_id": {
+          "$ref": "#/$defs/NodeCIDState"
+        },
+        "asp_program": {
+          "maxLength": 65536,
+          "minLength": 1,
+          "title": "Asp Program",
+          "type": "string"
+        },
+        "max_models": {
+          "default": 1,
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Max Models",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "ontology_node_id",
+        "asp_program"
+      ],
+      "title": "EpistemicLogicPremise",
+      "type": "object"
+    },
+    "EpistemicPrologPremise": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents a formal Horn clause query and knowledge base.",
+      "properties": {
+        "topology_class": {
+          "const": "epistemic_prolog_premise",
+          "default": "epistemic_prolog_premise",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "ontology_node_id": {
+          "$ref": "#/$defs/NodeCIDState"
+        },
+        "knowledge_base_cid": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NodeCIDState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "ephemeral_facts": {
+          "anyOf": [
+            {
+              "maxLength": 65536,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ephemeral Facts"
+        },
+        "prolog_query": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "title": "Prolog Query",
+          "type": "string"
+        },
+        "max_solutions": {
+          "default": 1,
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Max Solutions",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "ontology_node_id",
+        "prolog_query"
+      ],
+      "title": "EpistemicPrologPremise",
       "type": "object"
     },
     "EpistemicPromotionEvent": {
@@ -10480,6 +10638,74 @@
       "title": "FitnessObjectiveProfile",
       "type": "object"
     },
+    "FormalLogicProofReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The immutable receipt from the Clingo solver.",
+      "properties": {
+        "topology_class": {
+          "const": "formal_logic_proof",
+          "default": "formal_logic_proof",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "causal_provenance_id": {
+          "$ref": "#/$defs/NodeCIDState"
+        },
+        "event_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "timestamp": {
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prior Event Hash"
+        },
+        "satisfiability": {
+          "enum": [
+            "SATISFIABLE",
+            "UNSATISFIABLE",
+            "UNKNOWN",
+            "OPTIMUM FOUND"
+          ],
+          "title": "Satisfiability",
+          "type": "string"
+        },
+        "answer_sets": {
+          "description": "Topological Exemption: DO NOT SORT.",
+          "items": {
+            "items": {
+              "maxLength": 1024,
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "title": "Answer Sets",
+          "type": "array"
+        }
+      },
+      "required": [
+        "causal_provenance_id",
+        "event_cid",
+        "timestamp",
+        "satisfiability"
+      ],
+      "title": "FormalLogicProofReceipt",
+      "type": "object"
+    },
     "FormalVerificationContract": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Leverages Automated Theorem Proving and the Curry-Howard\nCorrespondence to bind the causal graph to a mathematically verified safety\ninvariant. As a ...Contract suffix, this enforces rigid mathematical\nboundaries globally.\n\nCAUSAL AFFORDANCE: Authorizes the Rust/C++ orchestrator to ingest a compiled\nproof artifact and mechanically verify that the topology cannot transition into\na catastrophic or forbidden geometric state. The invariant_theorem\n(max_length=2000) specifies the exact safety assertion.\n\nEPISTEMIC BOUNDS: The theorem prover dialect is strictly locked to the\nproof_system Literal [\"tla_plus\", \"lean4\", \"coq\", \"z3\"]. Cryptographic\nintegrity is guaranteed by the compiled_proof_hash (SHA-256 regex\n^[a-f0-9]{64}$).\n\nMCP ROUTING TRIGGERS: Automated Theorem Proving, Curry-Howard Correspondence,\nSafety Invariant, TLA+, Formal Methods",
@@ -12722,6 +12948,75 @@
       "title": "LatentSmoothingProfile",
       "type": "object"
     },
+    "Lean4VerificationReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The immutable receipt of the Lean 4 kernel's execution.",
+      "properties": {
+        "topology_class": {
+          "const": "lean4_verification_receipt",
+          "default": "lean4_verification_receipt",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "causal_provenance_id": {
+          "$ref": "#/$defs/NodeCIDState"
+        },
+        "verification_status": {
+          "enum": [
+            "PROVED",
+            "FALSIFIED_AT_TACTIC",
+            "SORRY_DETECTED",
+            "TIMEOUT"
+          ],
+          "title": "Verification Status",
+          "type": "string"
+        },
+        "failing_tactic_state": {
+          "anyOf": [
+            {
+              "maxLength": 65536,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Failing Tactic State"
+        },
+        "event_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "timestamp": {
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prior Event Hash"
+        }
+      },
+      "required": [
+        "causal_provenance_id",
+        "verification_status",
+        "event_cid",
+        "timestamp"
+      ],
+      "title": "Lean4VerificationReceipt",
+      "type": "object"
+    },
     "LifecycleTriggerEvent": {
       "enum": [
         "on_start",
@@ -13818,10 +14113,28 @@
           "description": "The target deterministic math/logic engine.",
           "enum": [
             "lean4",
-            "z3"
+            "z3",
+            "clingo",
+            "swi_prolog"
           ],
           "title": "Solver Protocol",
           "type": "string"
+        },
+        "expected_proof_receipt_cid": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9_.:-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Pointer to anticipated receipt.",
+          "title": "Expected Proof Receipt Cid"
         },
         "formal_grammar_payload": {
           "description": "The raw code or formal proof syntax generated by the LLM to be evaluated.",
@@ -15461,6 +15774,70 @@
       "minLength": 1,
       "pattern": "^[a-zA-Z0-9_-]+$",
       "type": "string"
+    },
+    "PrologDeductionReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The immutable receipt representing SWI-Prolog backward-chaining execution.",
+      "properties": {
+        "topology_class": {
+          "const": "prolog_deduction_receipt",
+          "default": "prolog_deduction_receipt",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "causal_provenance_id": {
+          "$ref": "#/$defs/NodeCIDState"
+        },
+        "event_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "timestamp": {
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prior Event Hash"
+        },
+        "truth_value": {
+          "title": "Truth Value",
+          "type": "boolean"
+        },
+        "variable_bindings": {
+          "description": "Topological Exemption: DO NOT SORT.",
+          "items": {
+            "additionalProperties": {
+              "$ref": "#/$defs/JsonPrimitiveState"
+            },
+            "propertyNames": {
+              "maxLength": 255
+            },
+            "type": "object"
+          },
+          "title": "Variable Bindings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "causal_provenance_id",
+        "event_cid",
+        "timestamp",
+        "truth_value"
+      ],
+      "title": "PrologDeductionReceipt",
+      "type": "object"
     },
     "QoSClassificationProfile": {
       "enum": [
