@@ -1,6 +1,5 @@
 import copy
 import random
-from typing import Any
 
 import pytest
 
@@ -35,7 +34,7 @@ def test_hash_invariance_semantic_flow_policy() -> None:
             target_regex_pattern="^pattern.*$",
             context_exclusion_zones=[f"zone-{z}" for z in range(5)],
             action="redact",
-            replacement_token="[REDACTED]",  # noqa: S106
+            replacement_token="[REDACTED]",
         )
         rules_payload.append(rule)
 
@@ -52,15 +51,13 @@ def test_hash_invariance_semantic_flow_policy() -> None:
         firewalls_payload.append(fw)
 
     # Base payload dictionary
-    payload_a: dict[str, Any] = {
-        "policy_cid": "policy-123",
-        "active": True,
-        "rules": rules_payload,
-        "latent_firewalls": firewalls_payload,
-    }
-
     # Model A
-    model_a = SemanticFlowPolicy(**payload_a)
+    model_a = SemanticFlowPolicy(
+        policy_cid="policy-123",
+        active=True,
+        rules=rules_payload,
+        latent_firewalls=firewalls_payload,
+    )
 
     # Shuffle internal structures for Model B
     rules_shuffled = copy.deepcopy(rules_payload)
@@ -76,15 +73,13 @@ def test_hash_invariance_semantic_flow_policy() -> None:
     for fw in firewalls_shuffled:
         random.shuffle(fw.monitored_layers)
 
-    payload_b: dict[str, Any] = {
-        "policy_cid": "policy-123",
-        "active": True,
-        "rules": rules_shuffled,
-        "latent_firewalls": firewalls_shuffled,
-    }
-
     # Model B
-    model_b = SemanticFlowPolicy(**payload_b)
+    model_b = SemanticFlowPolicy(
+        policy_cid="policy-123",
+        active=True,
+        rules=rules_shuffled,
+        latent_firewalls=firewalls_shuffled,
+    )
 
     # Mathematical Assertions
     assert hash(model_a) == hash(model_b), "Hash fracture detected! Insertion order modified the hash."
@@ -95,6 +90,7 @@ def test_hash_invariance_semantic_flow_policy() -> None:
 
 if __name__ == "__main__":
     pytest.main([__file__])
+
 
 
 def test_hash_invariance_cognitive_action_space() -> None:
@@ -119,9 +115,10 @@ def test_hash_invariance_cognitive_action_space() -> None:
         permissions=PermissionBoundaryPolicy(network_access=False, file_system_mutation_forbidden=True),
     )
 
-    capabilities = {"cap1": cap1, "cap2": cap2}
+    from typing import Any
+    capabilities: dict[str, Any] = {"cap1": cap1, "cap2": cap2}
 
-    edges_payload = []
+    edges_payload: list[Any] = []
     for i in range(10):
         cap_id = f"cap{i}"
         capabilities[cap_id] = SpatialToolManifest(
@@ -134,32 +131,78 @@ def test_hash_invariance_cognitive_action_space() -> None:
         edge = TransitionEdgeProfile(target_node_cid=cap_id, probability_weight=0.5, compute_weight_magnitude=100 - i)
         edges_payload.append(edge)
 
-    payload_a: dict[str, Any] = {
-        "action_space_cid": "space-123",
-        "capabilities": capabilities,
-        "transition_matrix": {"cap1": edges_payload},
-        "entry_point_cid": "cap1",
-    }
-
     # Model A
-    model_a = CognitiveActionSpaceManifest(**payload_a)
+    model_a = CognitiveActionSpaceManifest(
+        action_space_cid="space-123",
+        capabilities=capabilities,
+        transition_matrix={"cap1": edges_payload},
+        entry_point_cid="cap1",
+    )
 
     # Shuffle internal structures for Model B
     edges_shuffled = copy.deepcopy(edges_payload)
     random.shuffle(edges_shuffled)
 
-    payload_b: dict[str, Any] = {
-        "action_space_cid": "space-123",
-        "capabilities": capabilities,
-        "transition_matrix": {"cap1": edges_shuffled},
-        "entry_point_cid": "cap1",
-    }
-
     # Model B
-    model_b = CognitiveActionSpaceManifest(**payload_b)
+    model_b = CognitiveActionSpaceManifest(
+        action_space_cid="space-123",
+        capabilities=capabilities,
+        transition_matrix={"cap1": edges_shuffled},
+        entry_point_cid="cap1",
+    )
 
     # Mathematical Assertions
     assert hash(model_a) == hash(model_b), "Hash fracture detected! Insertion order modified the hash."
     assert model_a.model_dump_canonical() == model_b.model_dump_canonical(), (
         "Canonical serialization fracture detected!"
     )
+
+from coreason_manifest.spec.ontology import (
+    TraceExportManifest,
+    ExecutionNodeReceipt,
+    CognitiveAgentNodeProfile,
+    DraftingIntent,
+    SpatialHardwareProfile,
+    EpistemicSecurityProfile
+)
+
+def test_trace_export_manifest_sort() -> None:
+    node1 = ExecutionNodeReceipt(
+        request_cid="req1",
+        inputs={},
+        outputs={},
+        node_hash="a" * 64
+    )
+    node2 = ExecutionNodeReceipt(
+        request_cid="req2",
+        inputs={},
+        outputs={},
+        node_hash="b" * 64
+    )
+    # The order should be fixed by node_hash
+    manifest = TraceExportManifest(
+        batch_cid="batch-123",
+        execution_nodes=[node2, node1]
+    )
+    assert manifest.execution_nodes[0].node_hash == "a" * 64
+
+def test_cognitive_agent_node_profile_sort() -> None:
+    intent1 = DraftingIntent(
+        context_prompt="prompt1",
+        resolution_schema={},
+        timeout_action="rollback"
+    )
+
+    intent2 = DraftingIntent(
+        context_prompt="prompt2",
+        resolution_schema={},
+        timeout_action="rollback"
+    )
+
+    agent = CognitiveAgentNodeProfile(
+        description="test agent",
+        hardware=SpatialHardwareProfile(),
+        security=EpistemicSecurityProfile(),
+        emitted_intents=[intent2, intent1]
+    )
+    assert getattr(agent.emitted_intents[0], "context_prompt", "") == "prompt1"
