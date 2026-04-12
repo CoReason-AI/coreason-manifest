@@ -34,7 +34,7 @@ def test_hash_invariance_semantic_flow_policy():
             target_regex_pattern="^pattern.*$",
             context_exclusion_zones=[f"zone-{z}" for z in range(5)],
             action="redact",
-            replacement_token="[REDACTED]",
+            replacement_token="[REDACTED]",  # noqa: S106
         )
         rules_payload.append(rule)
 
@@ -94,7 +94,6 @@ def test_hash_invariance_semantic_flow_policy():
 
 if __name__ == "__main__":
     pytest.main([__file__])
-
 
 
 def test_hash_invariance_cognitive_action_space():

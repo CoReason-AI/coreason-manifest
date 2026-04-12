@@ -8,7 +8,7 @@ from typing import Annotated, Union, get_args, get_origin
 from pydantic import BaseModel
 
 # Import all models to ensure they are registered
-from coreason_manifest.spec.ontology import *
+from coreason_manifest.spec.ontology import *  # noqa: F403
 from coreason_manifest.spec.ontology import CoreasonBaseState
 
 
@@ -58,10 +58,9 @@ def check_ast_for_sort(cls, field_name):
 
     for node in ast.walk(tree):
         # We look for a call to `sorted` that targets `field_name`.
-        if isinstance(node, ast.Call):
-            if isinstance(node.func, ast.Name) and node.func.id == "sorted":
-                # We assume if sorted is called and there is some reference to field_name or it is part of an assignment to field_name, it's valid.
-                pass
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "sorted":
+            # We assume if sorted is called and there is some reference to field_name or it is part of an assignment to field_name, it's valid.
+            pass
 
         # To be rigorous: look for setattr(self, "field_name", sorted(...))
         # or self.field_name = sorted(...)
@@ -72,29 +71,27 @@ def check_ast_for_sort(cls, field_name):
             # Check targets
             targets_field = False
             for target in node.targets:
-                if (isinstance(target, ast.Attribute) and target.attr == field_name) or (isinstance(target, ast.Name) and target.id == field_name):
+                if (isinstance(target, ast.Attribute) and target.attr == field_name) or (
+                    isinstance(target, ast.Name) and target.id == field_name
+                ):
                     targets_field = True
 
-            if targets_field:
-                # Is value sorted?
-                if (
-                    isinstance(node.value, ast.Call)
-                    and isinstance(node.value.func, ast.Name)
-                    and node.value.func.id == "sorted"
-                ):
-                    return True
+            if targets_field and (
+                isinstance(node.value, ast.Call)
+                and isinstance(node.value.func, ast.Name)
+                and node.value.func.id == "sorted"
+            ):
+                return True
 
         # Or look for expressions like object.__setattr__(self, "field_name", sorted(...))
         if isinstance(node, ast.Expr) and isinstance(node.value, ast.Call):
             call = node.value
-            if isinstance(call.func, ast.Attribute) and call.func.attr == "__setattr__":
-                # check args: self, "field_name", sorted(...)
-                if len(call.args) >= 3:
-                    arg1 = call.args[1]
-                    if isinstance(arg1, ast.Constant) and arg1.value == field_name:
-                        arg2 = call.args[2]
-                        if isinstance(arg2, ast.Call) and isinstance(arg2.func, ast.Name) and arg2.func.id == "sorted":
-                            return True
+            if isinstance(call.func, ast.Attribute) and call.func.attr == "__setattr__" and len(call.args) >= 3:
+                arg1 = call.args[1]
+                if isinstance(arg1, ast.Constant) and arg1.value == field_name:
+                    arg2 = call.args[2]
+                    if isinstance(arg2, ast.Call) and isinstance(arg2.func, ast.Name) and arg2.func.id == "sorted":
+                        return True
     return False
 
 
