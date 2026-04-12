@@ -28,3 +28,17 @@ jobs:
 
       - name: Run pip-audit
         run: uv run --with pip-audit pip-audit -r reqs.txt --ignore-vuln CVE-2026-4539
+
+  osv-scan:
+    name: OSV CVE Scan (Transitive Dependency Manifold)
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: OSV Scan
+        uses: google/osv-scanner-action/osv-scanner-action@v2
+        with:
+          scan-args: |-
+            --lockfile=uv.lock

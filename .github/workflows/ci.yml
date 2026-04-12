@@ -41,6 +41,18 @@ jobs:
       - name: Docs Audit
         run: uv run zensical build
 
+      - name: Docs Link Validation
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
+            --verbose
+            --no-progress
+            --accept 200,204,301,429
+            --exclude-loopback
+            '*.md'
+            'docs/**/*.md'
+          fail: true
+
   schema-contracts:
     name: Schema Contracts (Semantic Backward-Compatibility)
     runs-on: ubuntu-latest

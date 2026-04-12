@@ -10,6 +10,7 @@ permissions:
   contents: write
   id-token: write # Required for PyPI OIDC Trusted Publishing and Sigstore
   pages: write    # Required for GitHub Pages deployment
+  attestations: write # Required for SLSA Level 3 provenance
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
@@ -40,6 +41,13 @@ jobs:
 
       - name: Build Artifacts
         run: uv build
+
+      - name: Generate SLSA Provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            dist/*.whl
+            dist/*.tar.gz
 
       - name: Generate SBOM
         uses: anchore/sbom-action@v0
