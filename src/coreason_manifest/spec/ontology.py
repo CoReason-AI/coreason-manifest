@@ -200,7 +200,7 @@ def _validate_ssrf_safety(url: str) -> str:
 
     MCP ROUTING TRIGGERS: Network Topology, SSRF Quarantine, Bogon Space, Zero-Trust Execution, Lateral Movement Prevention
     """
-    parsed = urllib.parse.urlparse(url)
+    parsed = urllib.parse.urlparse(str(url))
     if parsed.scheme == "file":
         raise ValueError("SSRF topological violation detected: file:// schema is forbidden")
     hostname = parsed.hostname
