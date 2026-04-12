@@ -6557,18 +6557,21 @@ type AnyPresentationIntent = Annotated[
 ]
 
 
-
 class EpistemicLean4Premise(CoreasonBaseState):
     """AGENT INSTRUCTION: A formal theorem and tactic proof for Lean 4 validation."""
+
     topology_class: Literal["epistemic_lean4_premise"] = Field(default="epistemic_lean4_premise")
     ontology_node_id: NodeCIDState
-    environment_imports: list[Annotated[str, StringConstraints(max_length=255)]] = Field(default_factory=lambda: ["Mathlib"])
+    environment_imports: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
+        default_factory=lambda: ["Mathlib"]
+    )
     formal_statement: Annotated[str, StringConstraints(min_length=1, max_length=10000)]
     tactic_proof: Annotated[str, StringConstraints(min_length=1, max_length=100000)]
 
 
 class Lean4VerificationReceipt(CoreasonBaseState):
     """AGENT INSTRUCTION: The immutable receipt of the Lean 4 kernel's execution."""
+
     topology_class: Literal["lean4_verification_receipt"] = Field(default="lean4_verification_receipt")
     causal_provenance_id: NodeCIDState
     verification_status: Literal["PROVED", "FALSIFIED_AT_TACTIC", "SORRY_DETECTED", "TIMEOUT"]
@@ -6581,6 +6584,7 @@ class Lean4VerificationReceipt(CoreasonBaseState):
 
 class EpistemicLogicPremise(CoreasonBaseState):
     """AGENT INSTRUCTION: Represents a formal Answer Set Programming (ASP) logic string."""
+
     topology_class: Literal["epistemic_logic_premise"] = Field(default="epistemic_logic_premise")
     ontology_node_id: NodeCIDState
     asp_program: Annotated[str, StringConstraints(min_length=1, max_length=65536)]
@@ -6589,6 +6593,7 @@ class EpistemicLogicPremise(CoreasonBaseState):
 
 class FormalLogicProofReceipt(CoreasonBaseState):
     """AGENT INSTRUCTION: The immutable receipt from the Clingo solver."""
+
     topology_class: Literal["formal_logic_proof"] = Field(default="formal_logic_proof")
     causal_provenance_id: NodeCIDState
 
@@ -6596,15 +6601,19 @@ class FormalLogicProofReceipt(CoreasonBaseState):
     timestamp: float
     prior_event_hash: str | None = Field(default=None)
     satisfiability: Literal["SATISFIABLE", "UNSATISFIABLE", "UNKNOWN", "OPTIMUM FOUND"]
-    answer_sets: list[list[Annotated[str, StringConstraints(max_length=1024)]]] = Field(default_factory=list, description="Topological Exemption: DO NOT SORT.")
+    answer_sets: list[list[Annotated[str, StringConstraints(max_length=1024)]]] = Field(
+        default_factory=list, description="Topological Exemption: DO NOT SORT."
+    )
 
-    @field_serializer('answer_sets')
+    @field_serializer("answer_sets")
     def serialize_answer_sets(self, answer_sets: list[list[str]], _info: Any) -> list[list[str]]:
         # Topological Exemption: Explicitly freeze the exact list sequence.
         return answer_sets
 
+
 class EpistemicPrologPremise(CoreasonBaseState):
     """AGENT INSTRUCTION: Represents a formal Horn clause query and knowledge base."""
+
     topology_class: Literal["epistemic_prolog_premise"] = Field(default="epistemic_prolog_premise")
     ontology_node_id: NodeCIDState
     knowledge_base_cid: NodeCIDState | None = Field(default=None)
@@ -6615,6 +6624,7 @@ class EpistemicPrologPremise(CoreasonBaseState):
 
 class PrologDeductionReceipt(CoreasonBaseState):
     """AGENT INSTRUCTION: The immutable receipt representing SWI-Prolog backward-chaining execution."""
+
     topology_class: Literal["prolog_deduction_receipt"] = Field(default="prolog_deduction_receipt")
     causal_provenance_id: NodeCIDState
 
@@ -6622,10 +6632,14 @@ class PrologDeductionReceipt(CoreasonBaseState):
     timestamp: float
     prior_event_hash: str | None = Field(default=None)
     truth_value: bool
-    variable_bindings: list[dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState]] = Field(default_factory=list, description="Topological Exemption: DO NOT SORT.")
+    variable_bindings: list[dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState]] = Field(
+        default_factory=list, description="Topological Exemption: DO NOT SORT."
+    )
 
-    @field_serializer('variable_bindings')
-    def serialize_variable_bindings(self, variable_bindings: list[dict[str, JsonPrimitiveState]], _info: Any) -> list[dict[str, JsonPrimitiveState]]:
+    @field_serializer("variable_bindings")
+    def serialize_variable_bindings(
+        self, variable_bindings: list[dict[str, JsonPrimitiveState]], _info: Any
+    ) -> list[dict[str, JsonPrimitiveState]]:
         # Topological Exemption: Freeze the outer list sequence (the mathematical order of unification).
         # However, to maintain RFC 8785 compliance, sort the keys *inside* the individual dictionaries.
         return [dict(sorted(b.items())) for b in variable_bindings]
@@ -8299,8 +8313,12 @@ class NeuroSymbolicHandoffContract(CoreasonBaseState):
     handoff_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
         description="Unique identifier for this symbolic delegation."
     )
-    solver_protocol: Literal["lean4", "z3", "clingo", "swi_prolog"] = Field(description="The target deterministic math/logic engine.")
-    expected_proof_receipt_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] | None = Field(default=None, description="Pointer to anticipated receipt.")
+    solver_protocol: Literal["lean4", "z3", "clingo", "swi_prolog"] = Field(
+        description="The target deterministic math/logic engine."
+    )
+    expected_proof_receipt_cid: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] | None
+    ) = Field(default=None, description="Pointer to anticipated receipt.")
     formal_grammar_payload: Annotated[str, StringConstraints(max_length=100000)] = Field(
         description="The raw code or formal proof syntax generated by the LLM to be evaluated."
     )

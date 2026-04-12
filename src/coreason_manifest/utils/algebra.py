@@ -48,7 +48,6 @@ SCHEMA_REGISTRY: dict[str, type[BaseModel]] = {
     "state_differential": StateMutationIntent,
     "cognitive_sync": CognitiveStateProfile,
     "system2_remediation": System2RemediationIntent,
-
     "lean4_premise": ontology.EpistemicLean4Premise,
     "lean4_receipt": ontology.Lean4VerificationReceipt,
     "logic_premise": ontology.EpistemicLogicPremise,

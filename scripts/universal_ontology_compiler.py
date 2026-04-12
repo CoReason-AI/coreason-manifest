@@ -274,7 +274,11 @@ def evaluate_ast_instantiation_bounds() -> None:
                             has_violations = True
                         if item.name not in allowed_methods:
                             decorators = get_decorators(item)
-                            if "model_validator" not in decorators and "field_validator" not in decorators and "field_serializer" not in decorators:
+                            if (
+                                "model_validator" not in decorators
+                                and "field_validator" not in decorators
+                                and "field_serializer" not in decorators
+                            ):
                                 print(
                                     f"Rule B Violation: Class '{node.name}' function '{item.name}' missing validator decorator in {filepath}",
                                     file=sys.stderr,

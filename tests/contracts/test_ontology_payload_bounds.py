@@ -295,22 +295,14 @@ def test_epistemic_logic_premise_bounds() -> None:
     from coreason_manifest.spec.ontology import EpistemicLogicPremise
 
     # Valid payload
-    premise = EpistemicLogicPremise(
-        ontology_node_id="did:example:node_123",
-        asp_program="a :- b.",
-        max_models=5
-    )
+    premise = EpistemicLogicPremise(ontology_node_id="did:example:node_123", asp_program="a :- b.", max_models=5)
     assert premise.asp_program == "a :- b."
 
     # Invalid payload (exceeds length constraint 65536)
     large_string = "a" * 65537
 
     with pytest.raises(ValidationError) as exc_info:
-        EpistemicLogicPremise(
-            ontology_node_id="did:example:node_123",
-            asp_program=large_string,
-            max_models=5
-        )
+        EpistemicLogicPremise(ontology_node_id="did:example:node_123", asp_program=large_string, max_models=5)
     assert "String should have at most 65536 characters" in str(exc_info.value)
 
 
@@ -323,7 +315,7 @@ def test_epistemic_lean4_premise_bounds() -> None:
     premise = EpistemicLean4Premise(
         ontology_node_id="did:example:node_123",
         formal_statement="theorem test : True := by trivial",
-        tactic_proof="trivial"
+        tactic_proof="trivial",
     )
     assert premise.tactic_proof == "trivial"
 
@@ -334,6 +326,6 @@ def test_epistemic_lean4_premise_bounds() -> None:
         EpistemicLean4Premise(
             ontology_node_id="did:example:node_123",
             formal_statement="theorem test : True := by trivial",
-            tactic_proof=large_string
+            tactic_proof=large_string,
         )
     assert "String should have at most 100000 characters" in str(exc_info.value)
