@@ -96,6 +96,7 @@ def evaluate_epistemic_compliance() -> None:
         class CodeVisitor(ast.NodeVisitor):
             def __init__(self) -> None:
                 self.class_errors: dict[str, list[str]] = {}
+
             def visit_ClassDef(self, node: ast.ClassDef) -> None:
                 errors: list[str] = []
                 name = node.name
@@ -481,7 +482,9 @@ def calculate_semantic_differential() -> None:
     def get_head_schema() -> dict[str, Any]:
         try:
             output = subprocess.check_output(
-                ["git", "show", "HEAD~1:coreason_ontology.schema.json"], stderr=subprocess.DEVNULL, text=True  # noqa: S607
+                ["git", "show", "HEAD~1:coreason_ontology.schema.json"],
+                stderr=subprocess.DEVNULL,
+                text=True,  # noqa: S607
             )
             return cast("dict[str, Any]", json.loads(output))
         except subprocess.CalledProcessError:
