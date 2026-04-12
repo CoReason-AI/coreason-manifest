@@ -6778,6 +6778,75 @@ class RDFExportReceipt(CoreasonBaseState):
     sha256_graph_hash: Annotated[str, StringConstraints(pattern="^[a-f0-9]{64}$")]
 
 
+class SubstrateDialectProfile(StrEnum):
+    """
+    AGENT INSTRUCTION: Categorizes the specific computational physics engine or open-source library authorized to execute a node's logic.
+
+    CAUSAL AFFORDANCE: Provides the Functorial Semantics mapping the declarative syntax of the manifest to the active semantic environment of the orchestrator.
+
+    EPISTEMIC BOUNDS: Strictly clamped to the literal enumerations representing audited open-source frameworks.
+
+    MCP ROUTING TRIGGERS: Functorial Semantics, Engine Dialect, Execution Substrate, Framework Mapping
+    """
+
+    SYMBOLIC_AI_DBC = "SYMBOLIC_AI_DBC"
+    OPEN_SYMBOLIC_FIREWALL = "OPEN_SYMBOLIC_FIREWALL"
+    DOCLING_GRAPH_EXTRACTOR = "DOCLING_GRAPH_EXTRACTOR"
+    ONTOGPT_SPIRES = "ONTOGPT_SPIRES"
+    NATIVE_PYTHON = "NATIVE_PYTHON"
+
+
+class ExecutionSubstrateProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A declarative blueprint defining the hardware and software prerequisites to safely load an external compute engine.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator's JIT compiler to fetch and verify external packages before kinetic execution, ensuring Dependency Isomorphism.
+
+    EPISTEMIC BOUNDS: VRAM constrained strictly above zero. Dependencies are deterministically sorted to preserve RFC 8785 canonical hashing.
+
+    MCP ROUTING TRIGGERS: Coalgebraic Thunking, Dependency Isomorphism, JIT Hydration, VRAM Allocation
+    """
+
+    dialect: SubstrateDialectProfile = Field(description="The discrete open-source engine identifier.")
+    required_package_signatures: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
+        description="A whitelist of exact PEP 508 dependency specifiers or wheel hashes."
+    )
+    vram_overhead_mb: int = Field(
+        ge=0, le=1000000000, description="The physical thermodynamic cost (in MB) of loading the library."
+    )
+    supports_lazy_hydration: bool = Field(
+        description="Whether the orchestrator can utilize Coalgebraic Thunking to unmount the engine between invocations to save VRAM."
+    )
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "required_package_signatures", sorted(self.required_package_signatures))
+        return self
+
+
+class SubstrateHydrationManifest(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A kinetic trigger dictating the Just-In-Time (JIT) initialization of an external execution environment.
+
+    CAUSAL AFFORDANCE: Forces the Compute Plane to physically download, verify, and mount the requested software library into active memory.
+
+    EPISTEMIC BOUNDS: Cryptographic checksums strictly verify loaded wheels to prevent supply-chain poisoning during dynamic module imports.
+
+    MCP ROUTING TRIGGERS: Environment Initialization, Supply-Chain Verification, Dynamic Import, JIT Mounting
+    """
+
+    target_node_cid: NodeCIDState = Field(description="The exact deterministic node demanding the physical hydration.")
+    substrate_profile: ExecutionSubstrateProfile = Field(
+        description="The exact blueprint geometry being loaded into VRAM."
+    )
+    topology_class: Literal["substrate_hydration"] = Field(
+        default="substrate_hydration", description="Discriminator type for substrate hydration."
+    )
+    cryptographic_checksums: dict[
+        Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=255)]
+    ] = Field(default_factory=dict, description="A map of package names to SHA-256 hashes verifying the loaded wheels.")
+
+
 type AnyIntent = Annotated[
     EpistemicZeroTrustContract
     | SemanticIntent
@@ -6804,6 +6873,7 @@ type AnyIntent = Annotated[
     | ConstitutionalAmendmentIntent
     | SpatialKinematicActionIntent
     | System2RemediationIntent
+    | SubstrateHydrationManifest
     | NeurosymbolicInferenceIntent
     | TopologicalProjectionIntent
     | CausalPropagationIntent
@@ -7351,6 +7421,10 @@ class CognitiveSystemNodeProfile(CoreasonBaseState):
     )
     asymptotic_complexity: AsymptoticComplexityReceipt | None = Field(
         default=None, description="Big-O computational bounds."
+    )
+    execution_substrate: ExecutionSubstrateProfile | None = Field(
+        default=None,
+        description="The mathematical functor blueprint authorizing the runtime to hydrate a specific open-source engine (e.g., SymbolicAI) for this node.",
     )
 
     @field_validator("domain_extensions", mode="before")
@@ -14254,3 +14328,7 @@ EpistemicProxyState.model_rebuild()
 EpistemicConstraintPolicy.model_rebuild()
 EpistemicZeroTrustContract.model_rebuild()
 EpistemicZeroTrustReceipt.model_rebuild()
+
+
+ExecutionSubstrateProfile.model_rebuild()
+SubstrateHydrationManifest.model_rebuild()
