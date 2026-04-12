@@ -447,10 +447,12 @@ We physically separate probabilistic textual generation (System 1) from schema v
 * **Mechanistic Penalty:** If the Docling subsystem crashes due to DRM-locks or malformed byte streams, the wrapper must immediately emit an `ArtifactCorruptionEvent` to sever the topology and halt epistemic contagion.
 
 ### 8.2 `OntologicalGroundingSpecialist` (The Semantic Web Engine)
-* **Open-Source Substrate:** Monarch Initiative `ontogpt` / `linkml`
+* **Open-Source Substrate:** Monarch Initiative `ontogpt` / `linkml` / `oaklib`
 * **Compute Plane Profile:** `CognitiveSystemNodeProfile` (Sandboxed SPIRES Engine)
-* **Data Plane Boundary:** `SchemaDrivenExtractionSLA` (`ontogpt_spires`)
-* **Routing Constraints:** Automatically triggered when extracting into academic biological, chemical, or legal ontologies. Uses the SPIRES framework to mathematically force the LLM to recursively map unstructured text into peer-reviewed W3C LinkML hierarchies, emitting strict `CausalDirectedEdgeState` objects with CURIE predicates.
+* **Data Plane Boundary:** `SchemaDrivenExtractionSLA` (`ontogpt_spires`) combined strictly with `LinkMLValidationSLA`.
+* **Routing Constraints:** Automatically triggered when extracting into academic biological, chemical, or legal ontologies.
+* **Bipartite Crosswalk Execution:** Processes the `OntologicalCrosswalkIntent` by routing ungrounded strings through the Ontology Access Kit (OAK), searching only the bounded `target_ontology_registries`. It emits a `CrosswalkResolutionReceipt` to cryptographically freeze the translation.
+* **Mechanistic Penalty (Graph-Shape Governance):** If the LLM generates a semantic edge violating the Domain/Range constraints declared in the `linkml_schema_uri`, this wrapper must physically sever the connection or trigger the defined `validation_failure_action`, guaranteeing absolute structural isomorphism without crashing the global DAG.
 
 ### 8.3 `EpistemicGroundingOracle` (The Verification Engine)
 * **Open-Source Substrate:** `coolgenerator/CurioCat`
