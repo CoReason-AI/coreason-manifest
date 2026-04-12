@@ -273,6 +273,43 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact representing the\ndefinitive collapse of an MCDA evaluation, acting as a verified Outcome Reward Model\n(ORM) signal. As a ...Receipt suffix, this is an append-only coordinate on the\nMerkle-DAG.\n\nCAUSAL AFFORDANCE: Commits the calculated score and boolean passed verdict to the\nEpistemic Ledger, permanently binding the deterministic evaluation to the specific\ntarget_node_cid (NodeCIDState) and authorizing downstream policy updates.\n\nEPISTEMIC BOUNDS: The evaluation outcome is strictly bounded to an integer score\n(ge=0, le=100). The underlying deductive proof (reasoning) is physically capped at\nmax_length=2000. The entire receipt is cryptographically locked to the originating\nrubric_cid CID (128-char regex).\n\nMCP ROUTING TRIGGERS: Cryptographic Verdict, Deterministic Proof, Grading Execution,\nEpistemic Commitment, Audit Trail",
       "properties": {
+        "event_cid": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "topology_class": {
+          "const": "adjudication_receipt",
+          "default": "adjudication_receipt",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "rubric_cid": {
           "description": "The cryptographic pointer to the rubric dictating adjudication.",
           "maxLength": 128,
@@ -305,6 +342,8 @@
         }
       },
       "required": [
+        "event_cid",
+        "timestamp",
         "rubric_cid",
         "target_node_cid",
         "score",
@@ -830,6 +869,7 @@
           "informational": "#/$defs/SemanticIntent",
           "latent_projection": "#/$defs/LatentProjectionIntent",
           "latent_schema_inference": "#/$defs/LatentSchemaInferenceIntent",
+          "neurosymbolic_inference": "#/$defs/NeurosymbolicInferenceIntent",
           "ontology_discovery": "#/$defs/OntologyDiscoveryIntent",
           "override": "#/$defs/OverrideIntent",
           "quarantine_intent": "#/$defs/QuarantineIntent",
@@ -837,8 +877,10 @@
           "semantic_discovery": "#/$defs/SemanticDiscoveryIntent",
           "semantic_mapping_proposal": "#/$defs/SemanticMappingHeuristicProposal",
           "spatial_kinematic": "#/$defs/SpatialKinematicActionIntent",
+          "system_2_remediation": "#/$defs/System2RemediationIntent",
           "task_announcement": "#/$defs/TaskAnnouncementIntent",
-          "taxonomic_restructure": "#/$defs/TaxonomicRestructureIntent"
+          "taxonomic_restructure": "#/$defs/TaxonomicRestructureIntent",
+          "topological_projection": "#/$defs/TopologicalProjectionIntent"
         },
         "propertyName": "topology_class"
       },
@@ -911,6 +953,15 @@
         },
         {
           "$ref": "#/$defs/SpatialKinematicActionIntent"
+        },
+        {
+          "$ref": "#/$defs/System2RemediationIntent"
+        },
+        {
+          "$ref": "#/$defs/NeurosymbolicInferenceIntent"
+        },
+        {
+          "$ref": "#/$defs/TopologicalProjectionIntent"
         }
       ]
     },
@@ -991,6 +1042,7 @@
       "description": "A discriminated union of state events.",
       "discriminator": {
         "mapping": {
+          "adjudication_receipt": "#/$defs/AdjudicationReceipt",
           "atomic_proposition": "#/$defs/AtomicPropositionState",
           "barge_in": "#/$defs/BargeInInterruptEvent",
           "belief_mutation": "#/$defs/BeliefMutationEvent",
@@ -1000,10 +1052,13 @@
           "cognitive_prediction": "#/$defs/CognitivePredictionReceipt",
           "cognitive_reward_evaluation": "#/$defs/CognitiveRewardEvaluationReceipt",
           "counterfactual_regret": "#/$defs/CounterfactualRegretEvent",
+          "custody_receipt": "#/$defs/CustodyReceipt",
+          "defeasible_attack": "#/$defs/DefeasibleAttackEvent",
           "epistemic_axiom_verification": "#/$defs/EpistemicAxiomVerificationReceipt",
           "epistemic_flow_state": "#/$defs/EpistemicFlowStateReceipt",
           "epistemic_log": "#/$defs/EpistemicLogEvent",
           "epistemic_promotion": "#/$defs/EpistemicPromotionEvent",
+          "epistemic_rejection": "#/$defs/EpistemicRejectionReceipt",
           "epistemic_telemetry": "#/$defs/EpistemicTelemetryEvent",
           "exogenous_event": "#/$defs/ExogenousEpistemicEvent",
           "hypothesis": "#/$defs/HypothesisGenerationEvent",
@@ -1016,7 +1071,8 @@
           "semantic_relational_record": "#/$defs/SemanticRelationalRecordState",
           "system_fault": "#/$defs/SystemFaultEvent",
           "token_burn": "#/$defs/TokenBurnReceipt",
-          "tool_invocation": "#/$defs/ToolInvocationEvent"
+          "tool_invocation": "#/$defs/ToolInvocationEvent",
+          "verdict": "#/$defs/InterventionReceipt"
         },
         "propertyName": "topology_class"
       },
@@ -1098,6 +1154,21 @@
         },
         {
           "$ref": "#/$defs/EpistemicLogEvent"
+        },
+        {
+          "$ref": "#/$defs/InterventionReceipt"
+        },
+        {
+          "$ref": "#/$defs/AdjudicationReceipt"
+        },
+        {
+          "$ref": "#/$defs/CustodyReceipt"
+        },
+        {
+          "$ref": "#/$defs/DefeasibleAttackEvent"
+        },
+        {
+          "$ref": "#/$defs/EpistemicRejectionReceipt"
         }
       ]
     },
@@ -5176,6 +5247,43 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact representing the successful execution of an SemanticFlowPolicy redaction on the Merkle-DAG. Enforced as fully immutable via `ConfigDict(frozen=True)`.\n\nCAUSAL AFFORDANCE: Unlocks strict audit compliance by mathematically mapping the optional toxic `pre_redaction_hash` to the mandatory safe `post_redaction_hash`, proving non-repudiation via the `applied_policy_cid`.\n\nEPISTEMIC BOUNDS: Temporal geometry strictly clamped to `redaction_timestamp_unix_nano` (`ge=0, le=253402300799000000000`). Both hashes are locked to immutable SHA-256 hexadecimal bounds (`^[a-f0-9]{64}$`). `pre_redaction_hash` is optional (`default=None`) for isolated audit vaults.\n\nMCP ROUTING TRIGGERS: Chain of Custody, Cryptographic Provenance, Merkle-DAG Audit, Non-Repudiation, Data Isomorphism",
       "properties": {
+        "event_cid": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "topology_class": {
+          "const": "custody_receipt",
+          "default": "custody_receipt",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "custody_cid": {
           "description": "Unique identifier for this chain-of-custody entry.",
           "maxLength": 255,
@@ -5233,6 +5341,8 @@
         }
       },
       "required": [
+        "event_cid",
+        "timestamp",
         "custody_cid",
         "source_node_cid",
         "applied_policy_cid",
@@ -5547,6 +5657,43 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes the binary attack relation in Dung's Abstract Argumentation Framework. As an ...Event suffix, this is an append-only, cryptographically frozen historical fact on the Merkle-DAG.\n\nCAUSAL AFFORDANCE: Projects an undercutting or rebutting defeater from a source claim against a target claim. If mathematically validated, it physically triggers a DefeasibleCascadeEvent to sever all downstream nodes relying on the target.\n\nEPISTEMIC BOUNDS: Strictly bounds the attack geometry using AttackVectorProfile enums (`Literal[\"rebuttal\", \"undercutter\", \"underminer\"]`). Source and target mappings are locked to 128-character CIDs, preventing unbounded graph traversals.\n\nMCP ROUTING TRIGGERS: Undercutting Defeater, Dialectical Edge, Truth Maintenance System, Bipartite Mapping, Non-Monotonic Retraction",
       "properties": {
+        "event_cid": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "topology_class": {
+          "const": "defeasible_attack",
+          "default": "defeasible_attack",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "attack_cid": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this directed attack edge.",
           "maxLength": 128,
@@ -5577,6 +5724,8 @@
         }
       },
       "required": [
+        "event_cid",
+        "timestamp",
         "attack_cid",
         "source_claim_cid",
         "target_claim_cid",
@@ -7766,6 +7915,43 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The mathematical backpropagation signal triggered when the Deterministic Compiler rejects a stochastic manifold. Quantifies the rejection and provides a mutation gradient.\n\nCAUSAL AFFORDANCE: Instructs the LLM ensemble on how to perturb the Upper Confidence Bound (UCB) during the next MCTS generation attempt by mathematically quantifying the error.\n\nEPISTEMIC BOUNDS: Kullback-Leibler divergence is strictly non-negative. A negative mathematical distance is a paradox and raises a ValueError.\n\nMCP ROUTING TRIGGERS: Rejection Receipt, Free Energy Feedback, MCTS Backpropagation, Variational Free Energy, Mutation Gradient",
       "properties": {
+        "event_cid": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "topology_class": {
+          "const": "epistemic_rejection",
+          "default": "epistemic_rejection",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "receipt_cid": {
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Receipt Cid",
@@ -7792,6 +7978,8 @@
         }
       },
       "required": [
+        "event_cid",
+        "timestamp",
         "receipt_cid",
         "failed_projection_cid",
         "violated_algebraic_constraint",
@@ -10958,6 +11146,37 @@
           "title": "Topology Class",
           "type": "string"
         },
+        "event_cid": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
         "intervention_request_cid": {
           "description": "The cryptographic nonce uniquely identifying the intervention request.",
           "maxLength": 128,
@@ -11002,6 +11221,8 @@
         }
       },
       "required": [
+        "event_cid",
+        "timestamp",
         "intervention_request_cid",
         "target_node_cid",
         "approved",
@@ -12877,6 +13098,12 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Orchestrates the core execution payload boundary, acting as the structural pre-inference gate for neurosymbolic probability.\n\n    CAUSAL AFFORDANCE: Empowers the routing engine to sever execution prior to LLM generation if the structural certainty SLA evaluates beyond acceptable mathematical variance boundaries.\n\n    EPISTEMIC BOUNDS: Mandates exact nesting of deterministic fidelity and uncertainty profiles. The pre-flight validator mathematically terminates evaluation if epistemic degradation breaches the SLA limit.\n\n    MCP ROUTING TRIGGERS: Pre-Inference Gate, Neurosymbolic Request, Probability Envelope, SLA Enforcement, Inference Termination",
       "properties": {
+        "topology_class": {
+          "const": "neurosymbolic_inference",
+          "default": "neurosymbolic_inference",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "source_entity": {
           "$ref": "#/$defs/ContextualizedSourceState",
           "description": "The structurally isolated 1D boundary representing the semantic payload injected into the context window."
@@ -18345,6 +18572,12 @@
           ],
           "default": null,
           "title": "Provenance Trace Cid"
+        },
+        "topology_class": {
+          "const": "topological_projection",
+          "default": "topological_projection",
+          "title": "Topology Class",
+          "type": "string"
         },
         "projection_cid": {
           "pattern": "^[a-zA-Z0-9_.:-]+$",
