@@ -235,8 +235,11 @@ def evaluate_ast_instantiation_bounds() -> None:
                             elif isinstance(base, ast.Subscript) and isinstance(base.value, ast.Name):
                                 bases.add(base.value.id)
                         known_classes[node.name] = bases
-            except SyntaxError:
-                pass
+            except SyntaxError as e:
+                print(
+                    f"Syntax error while collecting class metadata from {filepath}: {e}; skipping file.",
+                    file=sys.stderr,
+                )
 
     has_violations = False
     for filepath in py_files:
