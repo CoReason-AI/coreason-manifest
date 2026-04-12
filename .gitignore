@@ -147,3 +147,12 @@ cython_debug/
 # Runtime Logs
 logs/
 opa
+
+# Development artifacts
+*.patch
+*.diff
+reqs.txt
+fix_*.py
+tmp_*.py
+.ruff_cache/
+.benchmarks/

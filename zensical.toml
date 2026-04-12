@@ -1,8 +1,8 @@
 [project]
 site_name = "CoReason Manifest"
-site_url = "https://coreason-ai.github.io/coreason_manifest/"
-repo_name = "CoReason-AI/coreason_manifest"
-repo_url = "https://github.com/CoReason-AI/coreason_manifest"
+site_url = "https://coreason-ai.github.io/coreason-manifest/"
+repo_name = "CoReason-AI/coreason-manifest"
+repo_url = "https://github.com/CoReason-AI/coreason-manifest"
 
 [project.theme]
 features = [

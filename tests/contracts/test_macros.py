@@ -1,7 +1,17 @@
+# Copyright (c) 2026 CoReason, Inc
+#
+# This software is proprietary and dual-licensed
+# Licensed under the Prosperity Public License 3.0 (the "License")
+# A copy of the license is available at <https://prosperitylicense.com/versions/3.0.0>
+# For details, see the LICENSE file
+# Commercial use beyond a 30-day trial requires a separate license
+#
+# Source Code: <https://github.com/CoReason-AI/coreason-manifest>
+
 from typing import Any
 
 from coreason_manifest.spec.ontology import (
-    CognitiveSwarmDeploymentMacro,
+    CognitiveSwarmDeploymentManifest,
     FederatedSecurityMacroManifest,
     SemanticClassificationProfile,
     _inject_cognitive_routing_cluster,
@@ -29,7 +39,7 @@ def test_federated_security_macro() -> None:
 
 
 def test_cognitive_swarm_deployment_macro_majority() -> None:
-    macro = CognitiveSwarmDeploymentMacro(
+    macro = CognitiveSwarmDeploymentManifest(
         swarm_objective_prompt="Solve puzzle", agent_node_count=3, consensus_mechanism="majority"
     )
     topology = macro.compile_to_base_topology()
@@ -40,7 +50,7 @@ def test_cognitive_swarm_deployment_macro_majority() -> None:
 
 
 def test_cognitive_swarm_deployment_macro_pbft() -> None:
-    macro = CognitiveSwarmDeploymentMacro(
+    macro = CognitiveSwarmDeploymentManifest(
         swarm_objective_prompt="Solve puzzle", agent_node_count=3, consensus_mechanism="pbft"
     )
     topology = macro.compile_to_base_topology()
@@ -50,7 +60,7 @@ def test_cognitive_swarm_deployment_macro_pbft() -> None:
 
 
 def test_cognitive_swarm_deployment_macro_prediction_market() -> None:
-    macro = CognitiveSwarmDeploymentMacro(
+    macro = CognitiveSwarmDeploymentManifest(
         swarm_objective_prompt="Solve puzzle", agent_node_count=3, consensus_mechanism="prediction_market"
     )
     topology = macro.compile_to_base_topology()

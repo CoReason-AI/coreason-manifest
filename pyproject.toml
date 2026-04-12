@@ -15,6 +15,8 @@ authors = [
 classifiers = [
     "License :: Other/Proprietary License",
     "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.14",
+    "Typing :: Typed",
 ]
 dependencies = [
     "pydantic>=2.12.5",
@@ -26,9 +28,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/CoReason-AI/coreason_manifest"
-Repository = "https://github.com/CoReason-AI/coreason_manifest"
-Documentation = "https://github.com/CoReason-AI/coreason_manifest"
+Homepage = "https://github.com/CoReason-AI/coreason-manifest"
+Repository = "https://github.com/CoReason-AI/coreason-manifest"
+Documentation = "https://github.com/CoReason-AI/coreason-manifest"
 
 [dependency-groups]
 dev = [
@@ -88,10 +90,13 @@ exclude = [
 ]
 
 [tool.pytest.ini_options]
-addopts = "--cov=src/coreason_manifest --cov-report=xml"
+addopts = "--cov=src/coreason_manifest --cov-report=xml --cov-report=term-missing --cov-fail-under=95 -n auto"
 testpaths = ["tests"]
 asyncio_mode = "auto"
-filterwarnings = ["ignore:Pydantic serializer warnings:UserWarning"]
+filterwarnings = [
+    "ignore:Pydantic serializer warnings:UserWarning",
+    "ignore::pytest_benchmark.logger.PytestBenchmarkWarning",
+]
 markers = [
     "evals: Agentic UX Trajectory Evals",
 ]

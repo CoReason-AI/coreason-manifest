@@ -289,7 +289,7 @@ class TabularEncodingProfile(StrEnum):
     GRAPH_CONVOLUTIONAL_FLATTENING = "graph_convolutional_flattening"
 
 
-class ManifoldAlignmentMetric(StrEnum):
+class ManifoldAlignmentMetricProfile(StrEnum):
     """AGENT INSTRUCTION: Defines the linear algebraic or optimal transport function used to mathematically measure the geometric distance between the telemetry vector and the standard ontology index."""
 
     GROMOV_WASSERSTEIN = "gromov_wasserstein"
@@ -613,14 +613,18 @@ def _inject_cognitive_routing_cluster(schema: dict[str, Any]) -> None:
     schema["x-synergistic-classes"] = [
         "TaxonomicRoutingPolicy",
         "CognitiveAgentNodeProfile",
-        "SemanticRelationalRecord",
+        "SemanticRelationalVectorState",
     ]
 
 
 def _inject_thermodynamic_cluster(schema: dict[str, Any]) -> None:
     _inject_topological_lock(schema)
     schema["x-domain-cluster"] = "thermodynamic_orchestration"
-    schema["x-synergistic-classes"] = ["ComputationalThermodynamics", "ComputeRateContract", "FreeEnergyExhaustion"]
+    schema["x-synergistic-classes"] = [
+        "ComputationalThermodynamicsProfile",
+        "ComputeRateContract",
+        "FreeEnergyExhaustion",
+    ]
 
 
 def _inject_security_cluster(schema: dict[str, Any]) -> None:
@@ -647,7 +651,7 @@ def _inject_dag_examples_and_routing_cluster(schema: dict[str, Any]) -> None:
     schema["x-synergistic-classes"] = [
         "TaxonomicRoutingPolicy",
         "CognitiveAgentNodeProfile",
-        "SemanticRelationalRecord",
+        "SemanticRelationalVectorState",
     ]
 
 
@@ -657,7 +661,7 @@ def _inject_workflow_examples_and_routing_cluster(schema: dict[str, Any]) -> Non
     schema["x-synergistic-classes"] = [
         "TaxonomicRoutingPolicy",
         "CognitiveAgentNodeProfile",
-        "SemanticRelationalRecord",
+        "SemanticRelationalVectorState",
     ]
 
 
@@ -713,7 +717,7 @@ class CoreasonBaseState(BaseModel):
 T = typing.TypeVar("T")
 
 
-class IdeationPhase(StrEnum):
+class IdeationPhaseProfile(StrEnum):
     """
     AGENT INSTRUCTION: Categorizes the thermodynamic phase of the generative ensemble's exploration.
 
@@ -730,7 +734,7 @@ class IdeationPhase(StrEnum):
     MANIFOLD_COLLAPSE = "MANIFOLD_COLLAPSE"
 
 
-class StochasticStateNode(CoreasonBaseState):
+class StochasticNodeState(CoreasonBaseState):
     """
     AGENT INSTRUCTION: A single discrete latent coordinate (a generated hypothesis or critique) inside an unverified stochastic diffusion search space.
 
@@ -757,7 +761,7 @@ class StochasticStateNode(CoreasonBaseState):
         return v
 
 
-class HypothesisSuperposition(CoreasonBaseState):
+class HypothesisSuperpositionState(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Maintains the quantum-like probability mass of mutually exclusive semantic manifolds, delaying wave collapse until deterministically evaluated.
 
@@ -790,7 +794,7 @@ class HypothesisSuperposition(CoreasonBaseState):
         return self
 
 
-class StochasticTopology(CoreasonBaseState):
+class StochasticTopologyManifest(CoreasonBaseState):
     """
     AGENT INSTRUCTION: The structurally unbounded root container modeling multi-agent generative reasoning as a Topological DAG.
 
@@ -803,9 +807,9 @@ class StochasticTopology(CoreasonBaseState):
 
     topology_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
     topology_class: Literal["stochastic_ensemble"] = Field(default="stochastic_ensemble")
-    phase: IdeationPhase = Field()
-    stochastic_graph: list[StochasticStateNode] = Field()
-    superposition: HypothesisSuperposition | None = Field(default=None)
+    phase: IdeationPhaseProfile = Field()
+    stochastic_graph: list[StochasticNodeState] = Field()
+    superposition: HypothesisSuperpositionState | None = Field(default=None)
     epistemic_status: Literal["stochastically_unbounded"] = Field(default="stochastically_unbounded")
 
     @model_validator(mode="after")
@@ -826,14 +830,14 @@ class StochasticTopology(CoreasonBaseState):
         return self
 
 
-class TargetTopologyEnum(StrEnum):
+class TargetTopologyProfile(StrEnum):
     N_DIMENSIONAL_TENSOR = "N_DIMENSIONAL_TENSOR"
     MARKOV_BLANKET = "MARKOV_BLANKET"
     ACYCLIC_DIRECTED_GRAPH = "ACYCLIC_DIRECTED_GRAPH"
     ALGEBRAIC_RING = "ALGEBRAIC_RING"
 
 
-class CryptographicProvenanceMixin(CoreasonBaseState):
+class CryptographicProvenancePolicy(CoreasonBaseState):
     """
     AGENT INSTRUCTION: A foundational base class/mixin for all future deterministic nodes, enforcing Homotopy Type Theory (HoTT) principles where execution identity is indistinguishable from causal path equivalence.
 
@@ -847,7 +851,7 @@ class CryptographicProvenanceMixin(CoreasonBaseState):
     provenance_trace_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")] | None = Field(default=None)
 
 
-class ActiveInferenceEpoch(CoreasonBaseState):
+class ActiveInferenceEpochState(CoreasonBaseState):
     """
     AGENT INSTRUCTION: A macroscopic container tracking the directed graph of evolutionary retries across an entire task lifecycle.
 
@@ -895,7 +899,7 @@ class ThermodynamicState(StrEnum):
     ENTROPIC_EXHAUSTION_ORACLE_INTERVENTION = "ENTROPIC_EXHAUSTION_ORACLE_INTERVENTION"
 
 
-class ComputationalThermodynamics(CoreasonBaseState):
+class ComputationalThermodynamicsProfile(CoreasonBaseState):
     """
     AGENT INSTRUCTION: The macroscopic envelope that tracks the thermodynamic cost of stochastic ideation and violently halts execution when energy budgets or spatial limits are depleted.
 
@@ -1980,25 +1984,25 @@ class RoutingFrontierPolicy(CoreasonBaseState):
                 try:
                     val = int(values["max_latency_ms"])
                     values["max_latency_ms"] = int(max(1, min(val, 86400000)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError) as e:  # noqa: F841
                     pass
             if "max_cost_magnitude_per_token" in values:
                 try:
                     val = int(values["max_cost_magnitude_per_token"])
                     values["max_cost_magnitude_per_token"] = int(max(1, min(val, 1000000000)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError) as e:  # noqa: F841
                     pass
             if "min_capability_score" in values:
                 try:
                     val_float = float(values["min_capability_score"])
                     values["min_capability_score"] = float(max(0.0, min(val_float, 1.0)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError) as e:  # noqa: F841
                     pass
             if values.get("max_carbon_intensity_gco2eq_kwh") is not None:
                 try:
                     val_float = float(values["max_carbon_intensity_gco2eq_kwh"])
                     values["max_carbon_intensity_gco2eq_kwh"] = float(max(0.0, min(val_float, 10000.0)))
-                except ValueError, TypeError:
+                except (ValueError, TypeError) as e:  # noqa: F841
                     pass
         return values
 
@@ -3018,7 +3022,9 @@ class ThoughtBranchState(CoreasonBaseState):
     topology_class: Literal["thought_branch"] = Field(default="thought_branch")
 
 
-type AnyExplorationBranch = Annotated[ThoughtBranchState | StochasticTopology, Field(discriminator="topology_class")]
+type AnyExplorationBranch = Annotated[
+    ThoughtBranchState | StochasticTopologyManifest, Field(discriminator="topology_class")
+]
 
 
 class LatentScratchpadReceipt(CoreasonBaseState):
@@ -3787,9 +3793,15 @@ class OntologyDiscoveryIntent(BoundedJSONRPCIntent):
         return v
 
 
-class SemanticMappingHeuristicProposal(CoreasonBaseState):
+class SemanticMappingHeuristicIntent(CoreasonBaseState):
     """
     AGENT INSTRUCTION: A formal cryptographic petition submitted by an agent to update the swarm's internal graph logic. Compiles discovered literature and external API responses into a mathematically verifiable semantic mapping rule (e.g., SWRL).
+
+        CAUSAL AFFORDANCE: Physically authorizes the orchestrator to inject a new heuristic into the swarm's global hypothesis space.
+
+        EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
+
+        MCP ROUTING TRIGGERS: Semantic Mapping, Heuristic Injection, Cryptographic Petition, Swarm Logic
     """
 
     topology_class: Literal["semantic_mapping_proposal"] = Field(
@@ -4691,14 +4703,22 @@ class SemanticDiscoveryIntent(CoreasonBaseState):
 
 
 class ContextualSemanticResolutionIntent(CoreasonBaseState):
-    """AGENT INSTRUCTION: Acts as the kinetic trigger forcing the orchestrator to dynamically resolve a raw, untyped SemanticRelationalRecordState against a global standard ontology using optimal transport metrics, entirely bypassing legacy ETL string-matching."""
+    """
+    AGENT INSTRUCTION: Acts as the kinetic trigger forcing the orchestrator to dynamically resolve a raw, untyped SemanticRelationalVectorState against a global standard ontology using optimal transport metrics, entirely bypassing legacy ETL string-matching.
+
+        CAUSAL AFFORDANCE: Physically authorizes the orchestrator to execute the defined optimal transport resolution.
+
+        EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
+
+        MCP ROUTING TRIGGERS: Semantic Resolution, Optimal Transport, ETL Bypass, Dynamic Ontology
+    """
 
     topology_class: Literal["contextual_semantic_resolution"] = Field(
         default="contextual_semantic_resolution", description="Discriminator for contextual semantic resolution."
     )
     source_record_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
         Field(
-            description="An explicit cryptographic pointer to the raw SemanticRelationalRecordState pending resolution."
+            description="An explicit cryptographic pointer to the raw SemanticRelationalVectorState pending resolution."
         )
     )
     target_ontology_graph_cid: Annotated[
@@ -4707,7 +4727,7 @@ class ContextualSemanticResolutionIntent(CoreasonBaseState):
     encoding_profile: TabularEncodingProfile = Field(
         description="The method requested for compressing the source row into a continuous tensor."
     )
-    alignment_metric: ManifoldAlignmentMetric = Field(
+    alignment_metric: ManifoldAlignmentMetricProfile = Field(
         description="The optimal transport or algebraic distance metric used for evaluation."
     )
     minimum_isometry_threshold: float = Field(
@@ -6477,7 +6497,7 @@ class System2RemediationIntent(CoreasonBaseState):
         return self
 
 
-class TopologicalProjectionIntent(CryptographicProvenanceMixin):
+class TopologicalProjectionIntent(CryptographicProvenancePolicy):
     """
     AGENT INSTRUCTION: The transitional mathematical contract that calculates the Gromov-Wasserstein distance and authorizes or denies the collapse of a stochastic manifold into a deterministic structure.
 
@@ -6491,7 +6511,7 @@ class TopologicalProjectionIntent(CryptographicProvenanceMixin):
     topology_class: Literal["topological_projection"] = Field(default="topological_projection")
     projection_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
     source_superposition_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
-    target_topology: TargetTopologyEnum
+    target_topology: TargetTopologyProfile
     isomorphism_confidence: float
     lossy_translation_divergence: list[Annotated[str, StringConstraints(max_length=100000)]]
     epistemic_status: Literal["pending_deterministic_collapse"] = Field(default="pending_deterministic_collapse")
@@ -6525,7 +6545,7 @@ type AnyIntent = Annotated[
     | HumanDirectiveIntent
     | ContextualSemanticResolutionIntent
     | OntologyDiscoveryIntent
-    | SemanticMappingHeuristicProposal
+    | SemanticMappingHeuristicIntent
     | ContinuousSpatialMutationIntent
     | AgentBidIntent
     | ComputeProvisioningIntent
@@ -7878,7 +7898,7 @@ class MarketContract(CoreasonBaseState):
                 try:
                     mc_int = int(mc)
                     sp_int = int(sp)
-                except ValueError, TypeError:
+                except (ValueError, TypeError) as e:  # noqa: F841
                     pass
             cmc = max(0, min(mc_int, 1000000000))
             if sp_int > cmc:
@@ -9718,7 +9738,15 @@ class TemporalBoundsProfile(CoreasonBaseState):
 
 
 class GlobalSemanticInvariantProfile(CoreasonBaseState):
-    """AGENT INSTRUCTION: A macroscopic topological container that persists global contextual qualifiers (e.g., patient cohorts, operational environments, temporal scopes) across the Merkle-DAG, shielding downstream atomic propositions from context collapse."""
+    """
+    AGENT INSTRUCTION: A macroscopic topological container that persists global contextual qualifiers (e.g., patient cohorts, operational environments, temporal scopes) across the Merkle-DAG, shielding downstream atomic propositions from context collapse.
+
+        CAUSAL AFFORDANCE: Instructs the orchestrator's verification engine to natively execute mathematical dominance checks between a payload's classification and its context.
+
+        EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
+
+        MCP ROUTING TRIGGERS: Contextual Qualifiers, Topological Container, Semantic Invariant, Context Collapse
+    """
 
     invariant_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
         Field(description="The cryptographic Merkle-DAG anchor for the invariant block.")
@@ -9755,7 +9783,15 @@ class GlobalSemanticInvariantProfile(CoreasonBaseState):
 
 
 class DiscourseNodeState(CoreasonBaseState):
-    """AGENT INSTRUCTION: A structural vertex defining a distinct rhetorical block of text within a document, enabling hierarchical parsing and graph-based traversal of discourse."""
+    """
+    AGENT INSTRUCTION: A structural vertex defining a distinct rhetorical block of text within a document, enabling hierarchical parsing and graph-based traversal of discourse.
+
+        CAUSAL AFFORDANCE: Instructs the orchestrator to allocate memory for a distinct rhetorical block of text.
+
+        EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
+
+        MCP ROUTING TRIGGERS: Rhetorical Block, Discourse Parsing, Graph Traversal, Structural Vertex
+    """
 
     node_cid: NodeCIDState = Field(description="The spatial coordinate of this specific discourse block.")
     discourse_type: Literal["preamble", "methodology", "argumentation", "findings", "conclusion", "addendum"] = Field(
@@ -9776,7 +9812,15 @@ class DiscourseNodeState(CoreasonBaseState):
 
 
 class DiscourseTreeManifest(CoreasonBaseState):
-    """AGENT INSTRUCTION: A verifiable Directed Acyclic Graph (DAG) mapping the hierarchical geometry of human discourse. Deprecates flat-sequence extraction to solve rhetorical flattening."""
+    """
+    AGENT INSTRUCTION: A verifiable Directed Acyclic Graph (DAG) mapping the hierarchical geometry of human discourse. Deprecates flat-sequence extraction to solve rhetorical flattening.
+
+        CAUSAL AFFORDANCE: Instructs the orchestrator to enforce a strict Directed Acyclic Graph (DAG) for discourse representation.
+
+        EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
+
+        MCP ROUTING TRIGGERS: Discourse Geometry, Rhetorical Flattening, Directed Acyclic Graph, Hierarchical Extraction
+    """
 
     topology_class: Literal["discourse_tree"] = Field(
         default="discourse_tree", description="Discriminator for a discourse tree topology."
@@ -10058,7 +10102,7 @@ class UtilityJustificationGraphReceipt(CoreasonBaseState):
         return self
 
 
-class LiquidTypeContract(CoreasonBaseState):
+class AlgebraicRefinementContract(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Mathematically bounds a specific target property using strict Liquid Type (Refinement Type) declarations.
 
@@ -10083,7 +10127,7 @@ class HoareLogicProofReceipt(CoreasonBaseState):
 
         CAUSAL AFFORDANCE: Instructs the orchestrator's verification engine to validate the formal proof geometry prior to allocating swarm budget to a generated tool or component.
 
-        EPISTEMIC BOUNDS: Strictly relies on arrays of LiquidTypeContracts, demanding at least one pre-bound and post-bound. Formal systems are strictly bounded by a Literal automaton constraint.
+        EPISTEMIC BOUNDS: Strictly relies on arrays of AlgebraicRefinementContracts, demanding at least one pre-bound and post-bound. Formal systems are strictly bounded by a Literal automaton constraint.
 
         MCP ROUTING TRIGGERS: Hoare Logic, Automated Theorem Proving, Preconditions Postconditions, Formal Verification, Cryptographic Proof
     """
@@ -10091,11 +10135,11 @@ class HoareLogicProofReceipt(CoreasonBaseState):
     capability_cid: Annotated[str, StringConstraints(max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
         description="The 128-char DID boundary physically binding this proof to the target executable matrix."
     )
-    preconditions: Annotated[list[LiquidTypeContract], Field(min_length=1)] = Field(
-        description="The strictly bounded array of foundational LiquidTypeContracts representing the P state geometry."
+    preconditions: Annotated[list[AlgebraicRefinementContract], Field(min_length=1)] = Field(
+        description="The strictly bounded array of foundational AlgebraicRefinementContracts representing the P state geometry."
     )
-    postconditions: Annotated[list[LiquidTypeContract], Field(min_length=1)] = Field(
-        description="The strictly bounded array of subsequent LiquidTypeContracts representing the Q state geometry."
+    postconditions: Annotated[list[AlgebraicRefinementContract], Field(min_length=1)] = Field(
+        description="The strictly bounded array of subsequent AlgebraicRefinementContracts representing the Q state geometry."
     )
     proof_system: Literal["lean4", "coq", "z3", "tla_plus"] = Field(
         description="The strict mathematical automaton engine responsible for evaluating the structural boundary."
@@ -10680,7 +10724,7 @@ class CognitiveAgentNodeProfile(CoreasonBaseState):
         default=None,
         description="The declarative contract mathematically binding this agent to a core altruistic objective.",
     )
-    grpo_reward_policy: EpistemicRewardModelPolicy | None = Field(
+    grpo_reward_policy: EpistemicRewardGradientPolicy | None = Field(
         default=None,
         description="The RL post-training contract forcing the agent to evaluate traces against an implicit graph reward.",
     )
@@ -11402,6 +11446,12 @@ class SwarmTopologyManifest(CoreasonBaseState):
 class FederatedSecurityMacroManifest(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Simplifies the creation of a secure federated network link across a Zero-Trust boundary.
+
+        CAUSAL AFFORDANCE: Physically authorizes the orchestrator to forge a secure federated network link across a Zero-Trust boundary.
+
+        EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
+
+        MCP ROUTING TRIGGERS: Federated Security, Zero-Trust Boundary, Network Link, Macro Manifest
     """
 
     model_config = ConfigDict(json_schema_extra=_inject_security_cluster)
@@ -11422,9 +11472,15 @@ class FederatedSecurityMacroManifest(CoreasonBaseState):
         )
 
 
-class CognitiveSwarmDeploymentMacro(CoreasonBaseState):
+class CognitiveSwarmDeploymentManifest(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Simplifies bootstrapping a multi-agent routing topology.
+
+        CAUSAL AFFORDANCE: Physically authorizes the orchestrator to deploy a multi-agent routing topology.
+
+        EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
+
+        MCP ROUTING TRIGGERS: Cognitive Swarm, Agent Deployment, Routing Topology, Bootstrapping Macro
     """
 
     model_config = ConfigDict(json_schema_extra=_inject_cognitive_routing_cluster)
@@ -11718,8 +11774,14 @@ class IntentElicitationTopologyManifest(CoreasonBaseState):
 
 
 class NeurosymbolicVerificationTopologyManifest(CoreasonBaseState):
-    r"""
-    A Zero-Cost Macro abstraction enforcing a strict Bipartite Graph for Proposer-Verifier loops. Isolates connectionist generation from symbolic validation and bounds cyclic computation.
+    """
+    AGENT INSTRUCTION: A Zero-Cost Macro abstraction enforcing a strict Bipartite Graph for Proposer-Verifier loops. Isolates connectionist generation from symbolic validation and bounds cyclic computation.
+
+        CAUSAL AFFORDANCE: Instructs the orchestrator to enforce a strict Bipartite Graph for Proposer-Verifier loops.
+
+        EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
+
+        MCP ROUTING TRIGGERS: Proposer-Verifier Loop, Bipartite Graph, Symbolic Validation, Cyclic Computation
     """
 
     epistemic_enforcement: TruthMaintenancePolicy | None = Field(
@@ -12797,7 +12859,7 @@ class CognitiveFormatContract(CoreasonBaseState):
         return self
 
 
-class EpistemicRewardModelPolicy(CoreasonBaseState):
+class EpistemicRewardGradientPolicy(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Establishes the Group Relative Policy Optimization (GRPO) reward shaping ruleset, mathematically immunizing the swarm against Goodhart's Law and reward hacking.
 
@@ -13018,8 +13080,16 @@ class DifferentiableLogicPolicy(CoreasonBaseState):
     )
 
 
-class PostCoordinatedSemanticConcept(CoreasonBaseState):
-    """AGENT INSTRUCTION: The definitive output of a successful latent manifold alignment. Represents a dynamic assembly of a standardized entity (Base Concept + Contextual Modifiers) to achieve infinite semantic specificity without requiring an infinitely large pre-coordinated vocabulary."""
+class PostCoordinatedSemanticState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: The definitive output of a successful latent manifold alignment. Represents a dynamic assembly of a standardized entity (Base Concept + Contextual Modifiers) to achieve infinite semantic specificity without requiring an infinitely large pre-coordinated vocabulary.
+
+        CAUSAL AFFORDANCE: Physically authorizes the orchestrator to assemble a standardized entity with contextual modifiers.
+
+        EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
+
+        MCP ROUTING TRIGGERS: Post-Coordinated Semantics, Latent Manifold Alignment, Semantic Specificity, Entity Assembly
+    """
 
     topology_class: Literal["post_coordinated_concept"] = Field(default="post_coordinated_concept")
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
@@ -13035,7 +13105,7 @@ class PostCoordinatedSemanticConcept(CoreasonBaseState):
     base_concept_cid: NodeCIDState = Field(
         description="The pointer to the foundational, universal entity identified in the global EpistemicDomainGraphManifest."
     )
-    alignment_metric_used: ManifoldAlignmentMetric = Field(
+    alignment_metric_used: ManifoldAlignmentMetricProfile = Field(
         description="Audit trail of the exact mathematical metric applied during projection."
     )
     isometry_score: float = Field(
@@ -13052,8 +13122,16 @@ class PostCoordinatedSemanticConcept(CoreasonBaseState):
         return _validate_payload_bounds(v)
 
 
-class EmpiricalStatisticalQualifier(CoreasonBaseState):
-    """AGENT INSTRUCTION: An explicit mathematical boundary extracted from text that limits the certainty or scope of a proposition. Physically prevents agents from performing epistemic smoothing."""
+class EmpiricalStatisticalProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: An explicit mathematical boundary extracted from text that limits the certainty or scope of a proposition. Physically prevents agents from performing epistemic smoothing.
+
+        CAUSAL AFFORDANCE: Physically authorizes the orchestrator to impose explicit mathematical boundaries on propositions.
+
+        EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
+
+        MCP ROUTING TRIGGERS: Empirical Statistics, Mathematical Boundary, Epistemic Smoothing, Proposition Certainty
+    """
 
     qualifier_type: Literal[
         "probability_value", "sample_size", "variance_metric", "effect_size", "confidence_interval"
@@ -13073,7 +13151,15 @@ class EmpiricalStatisticalQualifier(CoreasonBaseState):
 
 
 class AtomicPropositionState(CoreasonBaseState):
-    """AGENT INSTRUCTION: A declarative, frozen snapshot of a standalone, verifiable statement extracted from unstructured discourse. Transmutes probabilistic 'bags-of-words' into a discrete, traversable node within the Labeled Property Graph (LPG)."""
+    """
+    AGENT INSTRUCTION: A declarative, frozen snapshot of a standalone, verifiable statement extracted from unstructured discourse. Transmutes probabilistic 'bags-of-words' into a discrete, traversable node within the Labeled Property Graph (LPG).
+
+        CAUSAL AFFORDANCE: Instructs the orchestrator to persist a verifiable statement as a discrete node within the LPG.
+
+        EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
+
+        MCP ROUTING TRIGGERS: Atomic Proposition, Discourse Extraction, Labeled Property Graph, Verifiable Statement
+    """
 
     topology_class: Literal["atomic_proposition"] = Field(default="atomic_proposition")
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
@@ -13102,7 +13188,7 @@ class AtomicPropositionState(CoreasonBaseState):
         default_factory=list,
         description="Explicit array of entity DIDs/CIDs resolving implicit references (e.g., pronouns) within the text chunk back to explicit nodes.",
     )
-    statistical_qualifiers: list[EmpiricalStatisticalQualifier] = Field(
+    statistical_qualifiers: list[EmpiricalStatisticalProfile] = Field(
         default_factory=list,
         description="Explicit mathematical boundaries extracted from the text that empirically limit the certainty or scope of the proposition.",
     )
@@ -13369,7 +13455,7 @@ type AnyStateEvent = Annotated[
     | BeliefMutationEvent
     | SystemFaultEvent
     | AtomicPropositionState
-    | PostCoordinatedSemanticConcept
+    | PostCoordinatedSemanticState
     | HypothesisGenerationEvent
     | BargeInInterruptEvent
     | CounterfactualRegretEvent
@@ -13386,7 +13472,7 @@ type AnyStateEvent = Annotated[
     | EpistemicFlowStateReceipt
     | CausalExplanationEvent
     | IntentClassificationReceipt
-    | SemanticRelationalRecordState
+    | SemanticRelationalVectorState
     | OntologicalReificationReceipt
     | CircuitBreakerEvent
     | ExogenousEpistemicEvent
@@ -13400,8 +13486,16 @@ type AnyStateEvent = Annotated[
 ]
 
 
-class DempsterShaferBeliefVector(CoreasonBaseState):
-    """AGENT INSTRUCTION: Replaces monolithic probability floats with a composite tri-vector. Independently measures lexical matching, latent semantic distance, and topological graph integrity to allow the orchestrator to compute epistemic conflict and execute evidence discounting."""
+class DempsterShaferBeliefState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Replaces monolithic probability floats with a composite tri-vector. Independently measures lexical matching, latent semantic distance, and topological graph integrity to allow the orchestrator to compute epistemic conflict and execute evidence discounting.
+
+        CAUSAL AFFORDANCE: Instructs the orchestrator to independently measure lexical matching, latent semantic distance, and topological graph integrity.
+
+        EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
+
+        MCP ROUTING TRIGGERS: Dempster-Shafer, Epistemic Conflict, Evidence Discounting, Composite Tri-Vector
+    """
 
     lexical_confidence: float = Field(
         ge=0.0, le=1.0, description="Represents exact syntactic schema or sub-string overlap."
@@ -13424,7 +13518,15 @@ class DempsterShaferBeliefVector(CoreasonBaseState):
 
 
 class OntologicalReificationReceipt(CoreasonBaseState):
-    """AGENT INSTRUCTION: An append-only, cryptographically frozen coordinate verifying the integrity of a generalized bimodal semantic transformation. Commits the transformation mechanism to the Epistemic Ledger, physically separating explicit empirical facts from machine-inferred hypotheses to eliminate traceability collapse."""
+    """
+    AGENT INSTRUCTION: An append-only, cryptographically frozen coordinate verifying the integrity of a generalized bimodal semantic transformation. Commits the transformation mechanism to the Epistemic Ledger, physically separating explicit empirical facts from machine-inferred hypotheses to eliminate traceability collapse.
+
+        CAUSAL AFFORDANCE: Physically authorizes the orchestrator to commit the transformation mechanism to the Epistemic Ledger.
+
+        EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
+
+        MCP ROUTING TRIGGERS: Ontological Reification, Bimodal Semantic Transformation, Epistemic Ledger, Traceability Collapse
+    """
 
     topology_class: Literal["ontological_reification"] = Field(
         default="ontological_reification", description="Discriminator for the reification receipt."
@@ -13445,7 +13547,7 @@ class OntologicalReificationReceipt(CoreasonBaseState):
     algorithmic_mechanism: TransformationMechanismProfile = Field(
         description="The deterministic or probabilistic engine used to execute the transmutation."
     )
-    belief_vector: DempsterShaferBeliefVector = Field(
+    belief_vector: DempsterShaferBeliefState = Field(
         description="The composite Dempster-Shafer tri-vector capturing independent confidence dimensions and calculated epistemic conflict."
     )
     is_latent_inference: bool = Field(
@@ -13454,8 +13556,16 @@ class OntologicalReificationReceipt(CoreasonBaseState):
     )
 
 
-class SemanticRelationalRecordState(CoreasonBaseState):
-    """AGENT INSTRUCTION: Represents the untyped payload injection zone for harmonized structured telemetry. CAUSAL AFFORDANCE: Permits specialized downstream agents to project and decode specific industry payloads (e.g., OMOP CDM, FIX protocol) while preserving universal mathematical traversal of the graph. EPISTEMIC BOUNDS: The payload_injection_zone is routed through the volumetric hardware guillotine."""
+class SemanticRelationalVectorState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Represents the untyped payload injection zone for harmonized structured telemetry.
+
+        CAUSAL AFFORDANCE: Permits specialized downstream agents to project and decode specific industry payloads (e.g., OMOP CDM, FIX protocol) while preserving universal mathematical traversal of the graph.
+
+        EPISTEMIC BOUNDS: The payload_injection_zone is routed through the volumetric hardware guillotine.
+
+        MCP ROUTING TRIGGERS: Semantic Relational Record, Payload Injection, Hardware Guillotine, Structured Telemetry
+    """
 
     topology_class: Literal["semantic_relational_record"] = Field(default="semantic_relational_record")
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
@@ -13724,7 +13834,7 @@ EpistemicGroundedTaskManifest.model_rebuild()
 EpistemicCurriculumManifest.model_rebuild()
 ConstrainedDecodingPolicy.model_rebuild()
 CognitiveFormatContract.model_rebuild()
-EpistemicRewardModelPolicy.model_rebuild()
+EpistemicRewardGradientPolicy.model_rebuild()
 CognitiveRewardEvaluationReceipt.model_rebuild()
 CognitiveAgentNodeProfile.model_rebuild()
 CognitiveDetailedBalanceContract.model_rebuild()
@@ -13776,7 +13886,7 @@ TransitionEdgeProfile.model_rebuild()
 CyclicEdgeProfile.model_rebuild()
 CognitiveActionSpaceManifest.model_rebuild()
 ASTGradientReceipt.model_rebuild()
-LiquidTypeContract.model_rebuild()
+AlgebraicRefinementContract.model_rebuild()
 HoareLogicProofReceipt.model_rebuild()
 AsymptoticComplexityReceipt.model_rebuild()
 TeleologicalIsometryReceipt.model_rebuild()
@@ -13791,12 +13901,12 @@ NeurosymbolicInferenceIntent.model_rebuild()
 EpistemicUpsamplingTask.model_rebuild()
 VolumetricPartitionState.model_rebuild()
 
-DempsterShaferBeliefVector.model_rebuild()
-EmpiricalStatisticalQualifier.model_rebuild()
-SemanticRelationalRecordState.model_rebuild()
+DempsterShaferBeliefState.model_rebuild()
+EmpiricalStatisticalProfile.model_rebuild()
+SemanticRelationalVectorState.model_rebuild()
 AtomicPropositionState.model_rebuild()
 ContextualSemanticResolutionIntent.model_rebuild()
-PostCoordinatedSemanticConcept.model_rebuild()
+PostCoordinatedSemanticState.model_rebuild()
 OntologicalReificationReceipt.model_rebuild()
 
 
@@ -13805,15 +13915,15 @@ MultimodalArtifactReceipt.model_rebuild()
 DiscourseNodeState.model_rebuild()
 DiscourseTreeManifest.model_rebuild()
 OntologyDiscoveryIntent.model_rebuild()
-SemanticMappingHeuristicProposal.model_rebuild()
+SemanticMappingHeuristicIntent.model_rebuild()
 
-StochasticStateNode.model_rebuild()
-HypothesisSuperposition.model_rebuild()
-StochasticTopology.model_rebuild()
-CryptographicProvenanceMixin.model_rebuild()
+StochasticNodeState.model_rebuild()
+HypothesisSuperpositionState.model_rebuild()
+StochasticTopologyManifest.model_rebuild()
+CryptographicProvenancePolicy.model_rebuild()
 TopologicalProjectionIntent.model_rebuild()
 EpistemicRejectionReceipt.model_rebuild()
-ActiveInferenceEpoch.model_rebuild()
-ComputationalThermodynamics.model_rebuild()
+ActiveInferenceEpochState.model_rebuild()
+ComputationalThermodynamicsProfile.model_rebuild()
 FederatedSecurityMacroManifest.model_rebuild()
-CognitiveSwarmDeploymentMacro.model_rebuild()
+CognitiveSwarmDeploymentManifest.model_rebuild()
