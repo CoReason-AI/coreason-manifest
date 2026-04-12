@@ -12174,7 +12174,7 @@ class EpistemicQuarantineSnapshot(CoreasonBaseState):
     active_context: dict[
         Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=100000)]
     ] = Field(
-        le=1000000000,
+        max_length=1000000000,
         description="The ephemeral latent variables and environmental bindings currently active in Epistemic Quarantine.",
     )
     argumentation: EpistemicArgumentGraphState | None = Field(

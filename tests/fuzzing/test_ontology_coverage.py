@@ -29,6 +29,20 @@ from coreason_manifest.spec.ontology import (
     SemanticClassificationProfile,
     SMPCTopologyManifest,
     WorkflowManifest,
+    EpistemicQuarantineSnapshot,
+    TheoryOfMindSnapshot,
+    FederatedCapabilityAttestationReceipt,
+    BeliefMutationEvent,
+    CausalAttributionState,
+    EpistemicDomainGraphManifest,
+    EpistemicAxiomState,
+    SecureSubSessionState,
+    FederatedBilateralSLA,
+    EpistemicChainGraphState,
+    VerifiableCredentialPresentationReceipt,
+    AgentAttestationReceipt,
+    DiscourseTreeManifest,
+    CognitivePredictionReceipt,
 )
 
 
@@ -235,3 +249,179 @@ def test_evolutionary_topology_manifest_sorting(objectives_data: list[tuple[str,
     )
     # the @model_validator should sort objectives by target_metric
     assert manifest.fitness_objectives == sorted(objectives, key=lambda x: x.target_metric)
+
+
+@given(
+    st.lists(
+        st.tuples(
+            st.from_regex(r"^[a-zA-Z0-9_.:-]+$", fullmatch=True),
+            st.from_regex(r"^[a-zA-Z0-9_.:-]+$", fullmatch=True),
+        ),
+        min_size=2,
+        max_size=10,
+    ),
+    st.lists(
+        st.tuples(
+            st.from_regex(r"^[a-zA-Z0-9_.:-]+$", fullmatch=True),
+            st.from_regex(r"^[a-zA-Z0-9_.:-]+$", fullmatch=True),
+        ),
+        min_size=2,
+        max_size=10,
+    ),
+)
+def test_epistemic_quarantine_snapshot_sorting(
+    tom_data: list[tuple[str, str]], cap_data: list[tuple[str, str]]
+) -> None:
+    theory_of_mind_matrices = [
+        TheoryOfMindSnapshot(
+            target_agent_cid=cid,
+            assumed_shared_beliefs=[],
+            identified_knowledge_gaps=[],
+            empathy_confidence_score=0.9,
+        )
+        for cid, hash_val in tom_data
+    ]
+    capability_attestations = [
+        FederatedCapabilityAttestationReceipt(
+            attestation_cid=cid,
+            target_topology_cid=f"did:web:{cid[:10]}-target",
+            authorized_session=SecureSubSessionState(
+                session_cid=cid,
+                allowed_vault_keys=[],
+                max_ttl_seconds=3600,
+                description="desc",
+            ),
+            governing_sla=FederatedBilateralSLA(
+                receiving_tenant_cid=cid,
+                max_permitted_classification=SemanticClassificationProfile("public"),
+                liability_limit_magnitude=100,
+            ),
+        )
+        for cid, hash_val in cap_data
+    ]
+
+    snapshot = EpistemicQuarantineSnapshot(
+        system_prompt="prompt",
+        active_context={},
+        theory_of_mind_matrices=theory_of_mind_matrices,
+        capability_attestations=capability_attestations,
+    )
+    assert snapshot.theory_of_mind_matrices == sorted(theory_of_mind_matrices, key=lambda x: x.target_agent_cid)
+    assert snapshot.capability_attestations == sorted(capability_attestations, key=lambda x: x.attestation_cid)
+
+
+@given(
+    st.lists(st.from_regex(r"^[a-zA-Z0-9_.:-]+$", fullmatch=True), min_size=2, max_size=10, unique=True),
+    st.lists(
+        st.tuples(
+            st.from_regex(r"^[a-zA-Z0-9_.:-]+$", fullmatch=True),
+            st.from_regex(r"^[a-zA-Z0-9_.:-]+$", fullmatch=True),
+        ),
+        min_size=2,
+        max_size=10,
+    ),
+)
+def test_belief_mutation_event_sorting(quorums: list[str], causal_data: list[tuple[str, str]]) -> None:
+    v_causal = [
+        CausalAttributionState(source_event_cid=cid, influence_weight=0.5)
+        for cid, rel in causal_data
+    ]
+
+    event = BeliefMutationEvent(
+        event_cid="event-1",
+        timestamp=100.0,
+        payload={},
+        source_node_cid="did:web:node-123",
+        quorum_signatures=quorums,
+        causal_attributions=v_causal,
+    )
+
+    assert event.quorum_signatures == sorted(quorums)
+    assert event.causal_attributions == sorted(v_causal, key=lambda x: x.source_event_cid)
+
+
+@given(
+    st.lists(
+        st.tuples(
+            st.from_regex(r"^[a-zA-Z0-9_.:-]+$", fullmatch=True),
+            st.text(min_size=1, max_size=128),
+            st.from_regex(r"^[a-zA-Z0-9_.:-]+$", fullmatch=True),
+        ),
+        min_size=2,
+        max_size=10,
+    )
+)
+def test_epistemic_domain_graph_manifest_sorting(axiom_data: list[tuple[str, str, str]]) -> None:
+    axioms = [
+        EpistemicAxiomState(source_concept_cid=s, directed_edge_class=p.strip() or "p", target_concept_cid=o)
+        for s, p, o in axiom_data
+    ]
+
+    partition = EpistemicDomainGraphManifest(graph_cid="part-1", verified_axioms=axioms)
+
+    assert partition.verified_axioms == sorted(
+        axioms, key=lambda x: (x.source_concept_cid, x.directed_edge_class, x.target_concept_cid)
+    )
+
+
+@given(
+    st.lists(
+        st.tuples(
+            st.from_regex(r"^[a-zA-Z0-9_.:-]+$", fullmatch=True),
+            st.text(min_size=1, max_size=128),
+            st.from_regex(r"^[a-zA-Z0-9_.:-]+$", fullmatch=True),
+        ),
+        min_size=2,
+        max_size=10,
+    ),
+    st.lists(st.text(min_size=1, max_size=100), min_size=2, max_size=10),
+)
+def test_epistemic_chain_graph_state_sorting(
+    axiom_data: list[tuple[str, str, str]], syntactic_roots: list[str]
+) -> None:
+    axioms = [
+        EpistemicAxiomState(source_concept_cid=s, directed_edge_class=p.strip() or "p", target_concept_cid=o)
+        for s, p, o in axiom_data
+    ]
+
+    chain = EpistemicChainGraphState(
+        chain_cid="chain-1", syntactic_roots=syntactic_roots, semantic_leaves=axioms
+    )
+
+    assert chain.syntactic_roots == sorted(syntactic_roots)
+    assert chain.semantic_leaves == sorted(
+        axioms, key=lambda x: (x.source_concept_cid, x.directed_edge_class, x.target_concept_cid)
+    )
+
+
+@given(
+    st.lists(
+        st.tuples(
+            st.text(min_size=1, max_size=128),
+            st.text(min_size=1, max_size=128),
+        ),
+        min_size=2,
+        max_size=10,
+    )
+)
+def test_agent_attestation_receipt_sorting(cred_data: list[tuple[str, str]]) -> None:
+    # issuer_did pattern is ^did:[a-z0-9]+:.*$
+    creds = [
+        VerifiableCredentialPresentationReceipt(
+            issuer_did=f"did:web:{i}",
+            presentation_format="jwt_vc",
+            cryptographic_proof_blob="blob",
+            authorization_claims={},
+        )
+        for i, (cid, p) in enumerate(cred_data)
+    ]
+
+    profile = AgentAttestationReceipt(
+        training_lineage_hash="a" * 64,
+        developer_signature="sig",
+        capability_merkle_root="b" * 64,
+        credential_presentations=creds,
+    )
+    assert profile.credential_presentations == sorted(creds, key=lambda x: x.issuer_did)
+
+
