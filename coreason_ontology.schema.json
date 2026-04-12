@@ -11637,7 +11637,7 @@
         "falsification_conditions": {
           "description": "The strict array of strict conditions that the orchestrator must test to attempt to disprove this premise.",
           "items": {
-            "$ref": "#/$defs/FalsificationContract"
+            "$ref": "#/$defs/EmpiricalFalsificationContract"
           },
           "minItems": 1,
           "title": "Falsification Conditions",
