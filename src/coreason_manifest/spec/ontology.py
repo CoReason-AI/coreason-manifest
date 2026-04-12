@@ -6921,7 +6921,7 @@ class EpistemicLean4Premise(CoreasonBaseState):
     topology_class: Literal["epistemic_lean4_premise"] = Field(default="epistemic_lean4_premise")
     ontology_node_id: NodeCIDState
     environment_imports: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
-        default_factory=lambda: ["Mathlib"]
+        default_factory=lambda: ["Mathlib"], json_schema_extra={"coreason_topological_exemption": True}
     )
     formal_statement: Annotated[str, StringConstraints(min_length=1, max_length=10000)]
     tactic_proof: Annotated[str, StringConstraints(min_length=1, max_length=100000)]
@@ -6960,7 +6960,9 @@ class FormalLogicProofReceipt(CoreasonBaseState):
     prior_event_hash: str | None = Field(default=None)
     satisfiability: Literal["SATISFIABLE", "UNSATISFIABLE", "UNKNOWN", "OPTIMUM FOUND"]
     answer_sets: list[list[Annotated[str, StringConstraints(max_length=1024)]]] = Field(
-        default_factory=list, description="Topological Exemption: DO NOT SORT."
+        default_factory=list,
+        json_schema_extra={"coreason_topological_exemption": True},
+        description="Topological Exemption: DO NOT SORT.",
     )
 
     @field_serializer("answer_sets")
@@ -6991,7 +6993,9 @@ class PrologDeductionReceipt(CoreasonBaseState):
     prior_event_hash: str | None = Field(default=None)
     truth_value: bool
     variable_bindings: list[dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState]] = Field(
-        default_factory=list, description="Topological Exemption: DO NOT SORT."
+        default_factory=list,
+        json_schema_extra={"coreason_topological_exemption": True},
+        description="Topological Exemption: DO NOT SORT.",
     )
 
     @field_serializer("variable_bindings")
@@ -11584,6 +11588,7 @@ class HierarchicalDOMManifest(CoreasonBaseState):
     )
     containment_edges: list[tuple[str, str]] = Field(
         default_factory=list,
+        json_schema_extra={"coreason_topological_exemption": True},
         # Note: containment_edges is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
         description="Directed edges defining the parent-child spatial containment (Parent -> Child).",
     )
