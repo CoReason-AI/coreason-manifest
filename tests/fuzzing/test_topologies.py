@@ -16,7 +16,6 @@ from hypothesis import given, settings
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
-    EvidentiaryGroundingSLA,
     AdversarialMarketTopologyManifest,
     CausalDirectedEdgeState,
     CognitiveSystemNodeProfile,
@@ -26,6 +25,7 @@ from coreason_manifest.spec.ontology import (
     DefeasibleCascadeEvent,
     EpistemicLedgerState,
     EpistemicSOPManifest,
+    EvidentiaryGroundingSLA,
     GenerativeManifoldSLA,
     ObservationEvent,
     PredictionMarketPolicy,
@@ -247,7 +247,18 @@ def test_defeasible_cascade_logic_fuzz(cascade_cid: str, root: str, quarantined:
 )
 def test_causal_directed_edge_state_fuzz(source: str, target: str, topology_class: Any) -> None:
     try:
-        CausalDirectedEdgeState(source_variable=source, target_variable=target, edge_class=topology_class, predicate_curie="test:pred", grounding_sla=EvidentiaryGroundingSLA(minimum_nli_entailment_score=0.5, require_independent_sources=1, ungrounded_link_action="sever_edge", allowed_evidence_domains=["test"]))
+        CausalDirectedEdgeState(
+            source_variable=source,
+            target_variable=target,
+            edge_class=topology_class,
+            predicate_curie="test:pred",
+            grounding_sla=EvidentiaryGroundingSLA(
+                minimum_nli_entailment_score=0.5,
+                require_independent_sources=1,
+                ungrounded_link_action="sever_edge",
+                allowed_evidence_domains=["test"],
+            ),
+        )
         if source == target:
             pytest.fail("CausalDirectedEdgeState failed to reject self-referential edge")
     except ValueError as e:

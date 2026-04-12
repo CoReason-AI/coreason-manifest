@@ -1,4 +1,3 @@
-import pydantic
 # Copyright (c) 2026 CoReason, Inc
 #
 # This software is proprietary and dual-licensed
@@ -19,15 +18,12 @@ from hypothesis import HealthCheck, given, settings
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
-    SchemaDrivenExtractionSLA,
     BoundedJSONRPCIntent,
     BrowserDOMState,
     ConstitutionalPolicy,
     ContinuousMutationPolicy,
     DocumentLayoutRegionState,
     DynamicLayoutManifest,
-    EpistemicCompressionSLA,
-    EpistemicTransmutationTask,
     ExecutionNodeReceipt,
     GlobalGovernancePolicy,
     InsightCardProfile,
@@ -97,15 +93,6 @@ def test_continuous_mutation_oom_buffer_limit(rows: int) -> None:
         )
 
 
-@pytest.mark.parametrize("visual_modality", ["tabular_grid", "raster_image"])
-def test_multimodal_grounding_density_alignment(visual_modality: Any) -> None:
-    """Prove that EpistemicTransmutationTask rejects visual modalities combined with sparse grounding density."""
-    compression_sla = EpistemicCompressionSLA(
-        strict_probability_retention=True,
-        max_allowed_entropy_loss=0.5,
-        required_grounding_density="sparse",
-        minimum_fidelity_threshold=0.5,
-    )
 
 
 
@@ -125,7 +112,6 @@ def test_epistemic_license_enforcement() -> None:
 
 def test_mcp_quarantine_gateway_tripwire() -> None:
     from coreason_manifest.spec.ontology import (
-    SchemaDrivenExtractionSLA,
         MCPCapabilityWhitelistPolicy,
         MCPServerManifest,
         VerifiableCredentialPresentationReceipt,
@@ -169,7 +155,6 @@ def test_tool_invocation_cryptographic_starvation() -> None:
 def test_mcp_quarantine_gateway_authorized_mount() -> None:
     """Prove the 'Happy Path' for the MCP Gateway, achieving 100% branch coverage."""
     from coreason_manifest.spec.ontology import (
-    SchemaDrivenExtractionSLA,
         MCPCapabilityWhitelistPolicy,
         MCPServerManifest,
         VerifiableCredentialPresentationReceipt,

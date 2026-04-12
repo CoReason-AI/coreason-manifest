@@ -1,4 +1,5 @@
-import pydantic
+"""AGENT INSTRUCTION: This module contains pure data transformations of the Hollow Data Plane."""
+
 # Copyright (c) 2026 CoReason, Inc
 #
 # This software is proprietary and dual-licensed
@@ -9,7 +10,6 @@ import pydantic
 #
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
-"""AGENT INSTRUCTION: This module contains pure data transformations of the Hollow Data Plane."""
 
 import ast
 import base64
@@ -18,11 +18,11 @@ import hashlib
 import math
 import typing
 from collections.abc import Sequence
-from typing import Sequence, Any, Literal, cast
+from typing import Any, Literal, cast
 
 import jsonpatch  # type: ignore[import-untyped]
 import numpy as np
-from pydantic import BaseModel, ValidationError
+from pydantic import AnyUrl, BaseModel, ValidationError
 from pydantic.json_schema import models_json_schema
 
 import coreason_manifest.spec.ontology as ontology
@@ -32,7 +32,6 @@ from coreason_manifest.spec.ontology import (
     CoreasonBaseState,
     DocumentLayoutManifest,
     DynamicRoutingManifest,
-    EpistemicCompressionSLA,
     EpistemicTransmutationTask,
     ExecutionNodeReceipt,
     ManifestViolationReceipt,
@@ -214,10 +213,10 @@ def align_semantic_manifolds(
     schema_governance = None
     if "semantic_graph" in target_modalities:
         schema_governance = ontology.SchemaDrivenExtractionSLA(
-            schema_registry_uri=pydantic.AnyUrl("http://example.com/schema"),
+            schema_registry_uri=AnyUrl("http://example.com/schema"),
             extraction_framework="docling_graph_explicit",
             max_schema_retries=3,
-            validation_failure_action="escalate_to_human"
+            validation_failure_action="escalate_to_human",
         )
     return EpistemicTransmutationTask(
         task_cid=task_cid,

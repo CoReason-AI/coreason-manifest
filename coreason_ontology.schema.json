@@ -1069,6 +1069,7 @@
           "adjudication_receipt": "#/$defs/AdjudicationReceipt",
           "atomic_proposition": "#/$defs/AtomicPropositionState",
           "barge_in": "#/$defs/BargeInInterruptEvent",
+          "belief_modulation": "#/$defs/BeliefModulationReceipt",
           "belief_mutation": "#/$defs/BeliefMutationEvent",
           "budget_exhaustion": "#/$defs/BudgetExhaustionEvent",
           "causal_explanation": "#/$defs/CausalExplanationEvent",
@@ -1092,6 +1093,7 @@
           "ontological_reification": "#/$defs/OntologicalReificationReceipt",
           "persistence_commit": "#/$defs/PersistenceCommitReceipt",
           "post_coordinated_concept": "#/$defs/PostCoordinatedSemanticState",
+          "rdf_export_receipt": "#/$defs/RDFExportReceipt",
           "semantic_relational_record": "#/$defs/SemanticRelationalVectorState",
           "system_fault": "#/$defs/SystemFaultEvent",
           "token_burn": "#/$defs/TokenBurnReceipt",
@@ -1193,6 +1195,12 @@
         },
         {
           "$ref": "#/$defs/EpistemicRejectionReceipt"
+        },
+        {
+          "$ref": "#/$defs/BeliefModulationReceipt"
+        },
+        {
+          "$ref": "#/$defs/RDFExportReceipt"
         }
       ]
     },
@@ -1222,6 +1230,7 @@
           "dag": "#/$defs/DAGTopologyManifest",
           "digital_twin": "#/$defs/DigitalTwinTopologyManifest",
           "discourse_tree": "#/$defs/DiscourseTreeManifest",
+          "document_knowledge_graph": "#/$defs/DocumentKnowledgeGraphManifest",
           "evaluator_optimizer": "#/$defs/EvaluatorOptimizerTopologyManifest",
           "evolutionary": "#/$defs/EvolutionaryTopologyManifest",
           "macro_adversarial": "#/$defs/AdversarialMarketTopologyManifest",
@@ -1273,6 +1282,9 @@
         },
         {
           "$ref": "#/$defs/DiscourseTreeManifest"
+        },
+        {
+          "$ref": "#/$defs/DocumentKnowledgeGraphManifest"
         }
       ]
     },
@@ -1742,6 +1754,92 @@
         "epistemic_disposition"
       ],
       "title": "BargeInInterruptEvent",
+      "type": "object"
+    },
+    "BeliefModulationReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "topology_class": {
+          "const": "belief_modulation",
+          "default": "belief_modulation",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "receipt_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Receipt Cid",
+          "type": "string"
+        },
+        "event_cid": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "target_graph_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Target Graph Cid",
+          "type": "string"
+        },
+        "grounded_edges": {
+          "additionalProperties": {
+            "$ref": "#/$defs/DempsterShaferBeliefVector"
+          },
+          "propertyNames": {
+            "maxLength": 255
+          },
+          "title": "Grounded Edges",
+          "type": "object"
+        },
+        "severed_edge_cids": {
+          "items": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Severed Edge Cids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "receipt_cid",
+        "event_cid",
+        "timestamp",
+        "target_graph_cid",
+        "grounded_edges",
+        "severed_edge_cids"
+      ],
+      "title": "BeliefModulationReceipt",
       "type": "object"
     },
     "BeliefMutationEvent": {
@@ -2413,12 +2511,41 @@
           ],
           "title": "Edge Class",
           "type": "string"
+        },
+        "predicate_curie": {
+          "pattern": "^[a-zA-Z0-9_]+:[a-zA-Z0-9_]+$",
+          "rdf_edge_property": true,
+          "title": "Predicate Curie",
+          "type": "string"
+        },
+        "belief_vector": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DempsterShaferBeliefVector"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "grounding_sla": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EvidentiaryGroundingSLA"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         }
       },
       "required": [
         "source_variable",
         "target_variable",
-        "edge_class"
+        "edge_class",
+        "predicate_curie"
       ],
       "title": "CausalDirectedEdgeState",
       "type": "object"
@@ -2505,6 +2632,50 @@
         "mitigates"
       ],
       "type": "string"
+    },
+    "CausalPropagationIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "topology_class": {
+          "const": "causal_propagation",
+          "default": "causal_propagation",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "target_graph_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Target Graph Cid",
+          "type": "string"
+        },
+        "task_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Task Cid",
+          "type": "string"
+        },
+        "grounding_sla": {
+          "$ref": "#/$defs/EvidentiaryGroundingSLA"
+        },
+        "unverified_edges": {
+          "items": {
+            "$ref": "#/$defs/CausalDirectedEdgeState"
+          },
+          "title": "Unverified Edges",
+          "type": "array"
+        }
+      },
+      "required": [
+        "target_graph_cid",
+        "task_cid",
+        "grounding_sla",
+        "unverified_edges"
+      ],
+      "title": "CausalPropagationIntent",
+      "type": "object"
     },
     "ChaosExperimentTask": {
       "additionalProperties": false,
@@ -5865,7 +6036,7 @@
       "title": "DelegatedCapabilityManifest",
       "type": "object"
     },
-    "DempsterShaferBeliefState": {
+    "DempsterShaferBeliefVector": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Replaces monolithic probability floats with a composite tri-vector. Independently measures lexical matching, latent semantic distance, and topological graph integrity to allow the orchestrator to compute epistemic conflict and execute evidence discounting.\n\n    CAUSAL AFFORDANCE: Instructs the orchestrator to independently measure lexical matching, latent semantic distance, and topological graph integrity.\n\n    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.\n\n    MCP ROUTING TRIGGERS: Dempster-Shafer, Epistemic Conflict, Evidence Discounting, Composite Tri-Vector",
       "properties": {
@@ -5904,7 +6075,7 @@
         "structural_graph_confidence",
         "epistemic_conflict_mass"
       ],
-      "title": "DempsterShaferBeliefState",
+      "title": "DempsterShaferBeliefVector",
       "type": "object"
     },
     "DerivationModeProfile": {
@@ -6329,6 +6500,62 @@
       "title": "DiversityPolicy",
       "type": "object"
     },
+    "DocumentKnowledgeGraphManifest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "topology_class": {
+          "const": "document_knowledge_graph",
+          "default": "document_knowledge_graph",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "graph_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Graph Cid",
+          "type": "string"
+        },
+        "source_artifact_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Source Artifact Cid",
+          "type": "string"
+        },
+        "nodes": {
+          "items": {
+            "$ref": "#/$defs/SemanticNodeState"
+          },
+          "maxItems": 100000,
+          "title": "Nodes",
+          "type": "array"
+        },
+        "causal_edges": {
+          "items": {
+            "$ref": "#/$defs/CausalDirectedEdgeState"
+          },
+          "maxItems": 100000,
+          "title": "Causal Edges",
+          "type": "array"
+        },
+        "isomorphism_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Isomorphism Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "graph_cid",
+        "source_artifact_cid",
+        "nodes",
+        "causal_edges",
+        "isomorphism_hash"
+      ],
+      "title": "DocumentKnowledgeGraphManifest",
+      "type": "object"
+    },
     "DocumentLayoutManifest": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Instantiates a Directed Acyclic Graph (DAG) to represent\nthe strictly chronological reading flow of a complex 2D multimodal manifold.\nAs a ...Manifest suffix, this is a frozen N-dimensional coordinate state.\n\nCAUSAL AFFORDANCE: Synthesizes spatially disparate DocumentLayoutRegionState\nnodes into a mathematically ordered execution trajectory, dictating the exact\nsequential vector for downstream tokenization.\n\nEPISTEMIC BOUNDS: The @model_validator verify_dag_and_integrity executes a\nDepth First Search to mathematically prove chronological_flow_edges form a\nparadox-free DAG. It simultaneously verifies referential integrity against the\nblocks dictionary (bounded to 1,000,000,000 max properties).\n\nMCP ROUTING TRIGGERS: Directed Acyclic Graph, Kahn's Algorithm, Topological\nSort, Referential Integrity, Spatial Reading Order",
@@ -6391,7 +6618,10 @@
             "table",
             "footnote",
             "caption",
-            "equation"
+            "equation",
+            "list_item",
+            "code_block",
+            "form_field"
           ],
           "title": "Block Class",
           "type": "string"
@@ -8391,7 +8621,8 @@
               "raster_image",
               "vector_graphics",
               "tabular_grid",
-              "n_dimensional_tensor"
+              "n_dimensional_tensor",
+              "semantic_graph"
             ],
             "type": "string"
           },
@@ -8399,9 +8630,16 @@
           "title": "Target Modalities",
           "type": "array"
         },
-        "compression_sla": {
-          "$ref": "#/$defs/EpistemicCompressionSLA",
-          "description": "The strict mathematical boundary defining the maximum allowed informational entropy loss."
+        "schema_governance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SchemaDrivenExtractionSLA"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         },
         "execution_cost_budget_magnitude": {
           "anyOf": [
@@ -8422,8 +8660,7 @@
       "required": [
         "task_cid",
         "artifact_event_cid",
-        "target_modalities",
-        "compression_sla"
+        "target_modalities"
       ],
       "title": "EpistemicTransmutationTask",
       "type": "object"
@@ -8763,6 +9000,48 @@
         "max_retained_tokens"
       ],
       "title": "EvictionPolicy",
+      "type": "object"
+    },
+    "EvidentiaryGroundingSLA": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "minimum_nli_entailment_score": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Minimum Nli Entailment Score",
+          "type": "number"
+        },
+        "require_independent_sources": {
+          "default": 1,
+          "maximum": 10,
+          "minimum": 1,
+          "title": "Require Independent Sources",
+          "type": "integer"
+        },
+        "ungrounded_link_action": {
+          "default": "sever_edge",
+          "enum": [
+            "sever_edge",
+            "flag_for_human",
+            "decay_weight"
+          ],
+          "title": "Ungrounded Link Action",
+          "type": "string"
+        },
+        "allowed_evidence_domains": {
+          "items": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "title": "Allowed Evidence Domains",
+          "type": "array"
+        }
+      },
+      "required": [
+        "minimum_nli_entailment_score"
+      ],
+      "title": "EvidentiaryGroundingSLA",
       "type": "object"
     },
     "EvidentiaryWarrantState": {
@@ -13758,7 +14037,7 @@
           "description": "The deterministic or probabilistic engine used to execute the transmutation."
         },
         "belief_vector": {
-          "$ref": "#/$defs/DempsterShaferBeliefState",
+          "$ref": "#/$defs/DempsterShaferBeliefVector",
           "description": "The composite Dempster-Shafer tri-vector capturing independent confidence dimensions and calculated epistemic conflict."
         },
         "is_latent_inference": {
@@ -14768,6 +15047,129 @@
       "title": "QuorumPolicy",
       "type": "object"
     },
+    "RDFExportReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "topology_class": {
+          "const": "rdf_export_receipt",
+          "default": "rdf_export_receipt",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "export_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Export Cid",
+          "type": "string"
+        },
+        "event_cid": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "serialized_payload": {
+          "title": "Serialized Payload",
+          "type": "string"
+        },
+        "rdf_triple_count": {
+          "title": "Rdf Triple Count",
+          "type": "integer"
+        },
+        "sha256_graph_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Sha256 Graph Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "export_cid",
+        "event_cid",
+        "timestamp",
+        "serialized_payload",
+        "rdf_triple_count",
+        "sha256_graph_hash"
+      ],
+      "title": "RDFExportReceipt",
+      "type": "object"
+    },
+    "RDFSerializationIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "topology_class": {
+          "const": "rdf_serialization",
+          "default": "rdf_serialization",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "export_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Export Cid",
+          "type": "string"
+        },
+        "target_graph_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Target Graph Cid",
+          "type": "string"
+        },
+        "target_format": {
+          "default": "turtle",
+          "enum": [
+            "turtle",
+            "xml",
+            "json-ld",
+            "ntriples"
+          ],
+          "title": "Target Format",
+          "type": "string"
+        },
+        "base_uri_namespace": {
+          "format": "uri",
+          "minLength": 1,
+          "title": "Base Uri Namespace",
+          "type": "string"
+        }
+      },
+      "required": [
+        "export_cid",
+        "target_graph_cid",
+        "base_uri_namespace"
+      ],
+      "title": "RDFSerializationIntent",
+      "type": "object"
+    },
     "ReasoningEngineeringPolicy": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Governs how human rejections translate into penalty scalars to bend the agent's Monte Carlo Tree Search.\n\nCAUSAL AFFORDANCE: Permits human observation and penalty insertion into internal LatentScratchpadReceipt traces without halting the execution tree.\n\nEPISTEMIC BOUNDS: Bounds `telemetry_export_frequency_hz` between 1 and 60. Bounds `human_override_gradient` between `0.0` and `1.0`.\n\nMCP ROUTING TRIGGERS: Supervisory Control Theory, MCTS Bending, Penalty Scalar, Trace Evaluation, Cognitive Engineering",
@@ -15525,6 +15927,50 @@
       "title": "ScalePolicy",
       "type": "object"
     },
+    "SchemaDrivenExtractionSLA": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "schema_registry_uri": {
+          "description": "RFC 8785 canonicalized URI to the exact Pydantic template or LinkML definition.",
+          "format": "uri",
+          "minLength": 1,
+          "title": "Schema Registry Uri",
+          "type": "string"
+        },
+        "extraction_framework": {
+          "enum": [
+            "docling_graph_explicit",
+            "ontogpt_spires"
+          ],
+          "title": "Extraction Framework",
+          "type": "string"
+        },
+        "max_schema_retries": {
+          "maximum": 10,
+          "minimum": 0,
+          "title": "Max Schema Retries",
+          "type": "integer"
+        },
+        "validation_failure_action": {
+          "enum": [
+            "quarantine_chunk",
+            "escalate_to_human",
+            "drop_edge"
+          ],
+          "title": "Validation Failure Action",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_registry_uri",
+        "extraction_framework",
+        "max_schema_retries",
+        "validation_failure_action"
+      ],
+      "title": "SchemaDrivenExtractionSLA",
+      "type": "object"
+    },
     "SecureSubSessionState": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes the Principle of Least Privilege (PoLP) and Time-Based Access Control (TBAC) for handling high-entropy cryptographic secrets within a declarative N-dimensional coordinate.\n\nCAUSAL AFFORDANCE: Authorizes a temporary, mathematically bounded partition where the agent can access unredacted enterprise vault keys without permanently leaking them into the global EpistemicLedgerState.\n\nEPISTEMIC BOUNDS: The temporal exposure window is physically clamped by `max_ttl_seconds` (`ge=1, le=3600`), enforcing an absolute maximum 1-hour session. Spatial access is geometrically restricted to `allowed_vault_keys` (`max_length=100`), deterministically sorted by `@model_validator` for RFC 8785 hashing.\n\nMCP ROUTING TRIGGERS: Principle of Least Privilege, Time-Based Access Control, Secret Vaulting, Ephemeral Partition, Cryptographic Isolation",
@@ -15674,26 +16120,33 @@
           "title": "Object Node Cid",
           "type": "string"
         },
-        "confidence_score": {
+        "predicate_curie": {
+          "pattern": "^[a-zA-Z0-9_]+:[a-zA-Z0-9_]+$",
+          "rdf_edge_property": true,
+          "title": "Predicate Curie",
+          "type": "string"
+        },
+        "belief_vector": {
           "anyOf": [
             {
-              "maximum": 1.0,
-              "minimum": 0.0,
-              "type": "number"
+              "$ref": "#/$defs/DempsterShaferBeliefVector"
             },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "description": "The probabilistic certainty of this logical connection.",
-          "title": "Confidence Score"
+          "default": null
         },
-        "predicate": {
-          "description": "The string representation of the relationship (e.g., 'WORKS_FOR').",
-          "maxLength": 2000,
-          "title": "Predicate",
-          "type": "string"
+        "grounding_sla": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EvidentiaryGroundingSLA"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         },
         "embedding": {
           "anyOf": [
@@ -15760,7 +16213,7 @@
         "edge_cid",
         "subject_node_cid",
         "object_node_cid",
-        "predicate"
+        "predicate_curie"
       ],
       "title": "SemanticEdgeState",
       "type": "object"
@@ -15962,12 +16415,29 @@
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "rdf_subject": true,
           "title": "Node Cid",
           "type": "string"
+        },
+        "canonical_uri": {
+          "anyOf": [
+            {
+              "format": "uri",
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "rdf_predicate": "owl:sameAs",
+          "title": "Canonical Uri"
         },
         "label": {
           "description": "The categorical label of the node (e.g., 'Person', 'Concept').",
           "maxLength": 2000,
+          "rdf_predicate": "rdfs:label",
           "title": "Label",
           "type": "string"
         },
@@ -15985,6 +16455,7 @@
         "text_chunk": {
           "description": "The raw natural language representation of the semantic node.",
           "maxLength": 50000,
+          "rdf_predicate": "schema:description",
           "title": "Text Chunk",
           "type": "string"
         },
