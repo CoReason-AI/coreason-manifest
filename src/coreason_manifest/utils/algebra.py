@@ -1,3 +1,5 @@
+"""AGENT INSTRUCTION: This module contains pure data transformations of the Hollow Data Plane."""
+
 # Copyright (c) 2026 CoReason, Inc
 #
 # This software is proprietary and dual-licensed
@@ -7,8 +9,6 @@
 # Commercial use beyond a 30-day trial requires a separate license
 #
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
-
-"""AGENT INSTRUCTION: This module contains pure data transformations of the Hollow Data Plane."""
 
 import ast
 import base64
@@ -21,7 +21,7 @@ from typing import Any, Literal, cast
 
 import jsonpatch  # type: ignore[import-untyped]
 import numpy as np
-from pydantic import BaseModel, ValidationError
+from pydantic import AnyUrl, BaseModel, ValidationError
 from pydantic.json_schema import models_json_schema
 
 import coreason_manifest.spec.ontology as ontology
@@ -31,7 +31,6 @@ from coreason_manifest.spec.ontology import (
     CoreasonBaseState,
     DocumentLayoutManifest,
     DynamicRoutingManifest,
-    EpistemicCompressionSLA,
     EpistemicTransmutationTask,
     ExecutionNodeReceipt,
     ManifestViolationReceipt,
@@ -210,19 +209,19 @@ def align_semantic_manifolds(
     target_set = set(target_modalities)
     if target_set.issubset(source_set):
         return None
-    require_dense = any(mod in ["raster_image", "tabular_grid"] for mod in target_modalities)
-    density: Literal["sparse", "dense", "exhaustive"] = "dense" if require_dense else "sparse"
-    sla = EpistemicCompressionSLA(
-        strict_probability_retention=True,
-        max_allowed_entropy_loss=0.01,
-        required_grounding_density=density,
-        minimum_fidelity_threshold=0.5,
-    )
+    schema_governance = None
+    if "semantic_graph" in target_modalities:
+        schema_governance = ontology.SchemaDrivenExtractionSLA(
+            schema_registry_uri=AnyUrl("http://example.com/schema"),
+            extraction_framework="docling_graph_explicit",
+            max_schema_retries=3,
+            validation_failure_action="escalate_to_human",
+        )
     return EpistemicTransmutationTask(
         task_cid=task_cid,
         artifact_event_cid=artifact_event_cid,
-        target_modalities=target_modalities,
-        compression_sla=sla,
+        target_modalities=list(target_modalities),
+        schema_governance=schema_governance,
     )
 
 
