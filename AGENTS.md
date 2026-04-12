@@ -390,6 +390,8 @@ You are strictly bound to the **"God Context" Monolith Directive**. You are EXPL
 * **`src/coreason_manifest/`**:
   * **`spec/ontology.py`**: The SINGLE, monolithic file containing ALL Pydantic models. **Do not split this file.**
   * **`utils/algebra.py`**: The SINGLE file containing all pure algebraic functors and detached validation logic.
+* **`scripts/`**:
+  * **`universal_ontology_compiler.py`**: The SINGLE "God Context" execution monolith. Do NOT fragment CI/CD or maintenance logic into decentralized files.
 * **Root**:
   * **NO** `Dockerfile` or `Containerfile`.
   * **NO** `app.py`, `server.py`, or any runtime entry point.
@@ -424,7 +426,7 @@ This package enforces a zero-tolerance policy for type errors, linting violation
 
 ### **4. Topological Reachability (The Guillotine Check)**
 We strictly enforce the Zero-Orphan Invariant ($|V_O| = 0$). You must mathematically prove that your AST modifications have not introduced severed nodes:
-`uv run python scripts/evaluate_topological_reachability.py`
+`uv run python scripts/universal_ontology_compiler.py evaluate_topological_reachability`
 *(Note: The script must output "0 Orphans Detected" and exit cleanly with code 0.)*
 
 ---
