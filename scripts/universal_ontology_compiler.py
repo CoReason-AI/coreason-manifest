@@ -342,6 +342,8 @@ def evaluate_topological_reachability() -> None:
         seen.add(ann_id)
         if isinstance(annotation, str):
             clean_string = annotation.strip("'\"")
+            if "[" in clean_string:
+                clean_string = clean_string.split("[")[0]
             if clean_string in alias_registry:
                 return extract_referenced_models(alias_registry[clean_string], seen)
             if clean_string in class_registry:
