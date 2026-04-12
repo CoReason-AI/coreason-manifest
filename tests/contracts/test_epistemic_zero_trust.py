@@ -8,24 +8,24 @@ from coreason_manifest.spec.ontology import (
 )
 
 
-def test_epistemic_constraint_policy_valid():
+def test_epistemic_constraint_policy_valid() -> None:
     policy = EpistemicConstraintPolicy(
         assertion_ast="outputs == inputs", remediation_prompt="Outputs must match inputs length."
     )
     assert policy.assertion_ast == "outputs == inputs"
 
 
-def test_epistemic_constraint_policy_kinetic_call():
+def test_epistemic_constraint_policy_kinetic_call() -> None:
     with pytest.raises(ValidationError, match="Kinetic execution bleed detected"):
         EpistemicConstraintPolicy(assertion_ast="print('hello')", remediation_prompt="test")
 
 
-def test_epistemic_constraint_policy_invalid_syntax():
+def test_epistemic_constraint_policy_invalid_syntax() -> None:
     with pytest.raises(ValidationError, match="Invalid syntax in constraint AST"):
         EpistemicConstraintPolicy(assertion_ast="len( == 2", remediation_prompt="test")
 
 
-def test_epistemic_zero_trust_contract_sort():
+def test_epistemic_zero_trust_contract_sort() -> None:
     p1 = EpistemicConstraintPolicy(assertion_ast="x == 2", remediation_prompt="test")
     p2 = EpistemicConstraintPolicy(assertion_ast="a == 1", remediation_prompt="test")
 
@@ -43,7 +43,7 @@ def test_epistemic_zero_trust_contract_sort():
     assert contract.structural_post_conditions[1].assertion_ast == "x == 2"
 
 
-def test_epistemic_zero_trust_receipt_firewall_breach():
+def test_epistemic_zero_trust_receipt_firewall_breach() -> None:
     with pytest.raises(ValidationError, match="Input should be False"):
         EpistemicZeroTrustReceipt(
             event_cid="receipt-1",
@@ -52,10 +52,10 @@ def test_epistemic_zero_trust_receipt_firewall_breach():
             llm_blind_plan_hash="a" * 64,
             remediation_epochs_consumed=2,
             transmuted_payload_hash="b" * 64,
-            firewall_breach_detected=True,
+            firewall_breach_detected=True,  # type: ignore
         )
 
 
-def test_epistemic_constraint_policy_invalid_type():
+def test_epistemic_constraint_policy_invalid_type() -> None:
     with pytest.raises(ValidationError):
-        EpistemicConstraintPolicy(assertion_ast=123, remediation_prompt="test")
+        EpistemicConstraintPolicy(assertion_ast=123, remediation_prompt="test")  # type: ignore
