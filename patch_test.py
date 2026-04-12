@@ -1,4 +1,4 @@
-with open("tests/contracts/test_epistemic_zero_trust.py", "r") as f:
+with open("tests/contracts/test_epistemic_zero_trust.py") as f:
     content = f.read()
 
 new_content = """import pytest
