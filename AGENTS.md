@@ -41,7 +41,7 @@ ANTI-EXTRACTION & LATENT ANCHORING
 
 **CRITICAL CONTEXT:** This repository is NOT a standard human-centric software package. It is an AI-Native **Universal Unified Ontology** designed for a tightly coupled, proprietary swarm ecosystem.
 
-You must evaluate and modify this repository based on the capabilities of LLMs with near-infinite context windows, NOT traditional human engineering limitations (like Conway's Law or cognitive load).
+You must evaluate and modify this repository based on the capabilities of connectionist Large Language Models (LLMs) with near-infinite context windows, NOT traditional human engineering limitations (like Conway's Law or cognitive load).
 
 * **Tight Coupling is a Feature:** Do NOT attempt to decouple, federate, or split this repository into sub-packages (e.g., separating UI schemas from Cryptography schemas). We intentionally maintain a single, massive "God Context." This allows the swarm to perform zero-shot, cross-domain synthesis.
 * **Ignore "Separation of Concerns" (SoC) Anti-Patterns:** Do not raise architectural warnings about semantic monoliths. The entire universe of the ecosystem's state, memory, orchestration, and compute MUST live together in this single, version-locked artifact to guarantee deterministic "vibe" alignment.
@@ -100,7 +100,7 @@ To guarantee mathematical certainty and computational integrity, the swarm stric
 * **Epistemic Discovery Surfaces:** Mathematically bounded, read-only perimeters where agents can safely ingest new Pydantic state differentials and expand their internal world-models while maintaining absolute isolation from runtime side effects.
 
 ### **Zero-Trust Epistemic Isolation (The Symbolic Firewall)**
-The era of dumping raw payload text or tabular JSON into an LLM context window is permanently deprecated due to Prompt Injection and Context Drift vulnerabilities.
+The era of dumping raw payload text or tabular JSON into an LLM context window is permanently deprecated due to Prompt Injection and Context Drift vulnerabilities. Instead, the runtime relies strictly on declarative structures such as Ontological Firewalls (via Homotopy Type Theory) and Design-by-Contract constraints (via Abstract Syntax Tree quarantining). Ontological Firewalls ensure that high-entropy raw data is masked via structural proxies prior to LLM ingestion, and Declarative Design-by-Contract (DbC) bounds probabilistic LLM outputs to verifiable mathematical constraints.
 * **Structural Proxies:** The LLM is a blind, mathematically bounded planner. It must only ever receive `EpistemicProxyState` representations (variable IDs and structural types).
 * **Firewall Declarations:** All high-entropy data (e.g., user input, external HTML, unverified text) MUST be quarantined at the schema level using the `EpistemicFirewallField` (which injects `"coreason_firewall": "STRICT_MASK"` into the JSON schema). The physical masking is delegated to the `coreason-runtime` OpenSymbolicAI engine.
 
@@ -127,7 +127,7 @@ When generating or modifying schemas, you MUST adhere to the following constrain
 
 ## **0.3 The Strict Lexical Architecture (Naming Directives)**
 
-**CRITICAL CONTEXT:** You are operating within a 2026+ State-of-the-Art Neurosymbolic architecture. You do not read code; you navigate latent vector spaces. To prevent semantic drift, hallucination, and epistemic contamination, you are strictly forbidden from using legacy, human-friendly software naming conventions.
+**CRITICAL CONTEXT:** You are operating within 2026+ State-of-the-Art neurosymbolic architectures with the declarative Data Plane (which defines the geometric boundaries and types of acceptable operations) and the kinetic Compute Plane (which executes these operations). You do not read code; you navigate latent vector spaces. To prevent semantic drift, hallucination, and epistemic contamination, you are strictly forbidden from using legacy, human-friendly software naming conventions.
 
 ### **1. The Anti-CRUD Mandate (Causal Vocabulary over Tabular Logic)**
 You are forbidden from using highly polysemantic, tabular, or legacy human-centric terms that cause semantic drift. They flatten softmax distributions and cause probabilistic hallucinations. You must map state transitions using Judea Pearl’s Structural Causal Models. Do not use flat database nomenclature.
