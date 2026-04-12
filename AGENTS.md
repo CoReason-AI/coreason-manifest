@@ -433,7 +433,7 @@ We strictly enforce the Zero-Orphan Invariant ($|V_O| = 0$). You must mathematic
 
 ## 8. SOTA 2026+ Open-Source Substrate Oracles
 
-To achieve a SOTA 2026+ "Zero-Hallucination" graph engine, the CoReason ecosystem officially adopts a "Borrow to Build" philosophy for complex algorithmic execution. 
+To achieve a SOTA 2026+ "Zero-Hallucination" graph engine, the CoReason ecosystem officially adopts a "Borrow to Build" philosophy for complex algorithmic execution.
 
 We physically separate probabilistic textual generation (System 1) from schema validation, evidentiary grounding, and semantic serialization (System 2). General-purpose connectionist agents (`CognitiveAgentNodeProfile`) are strictly mathematically forbidden from bypassing these deterministic wrappers. They MUST route the appropriate Data Plane Intents to the following open-source execution nodes:
 
@@ -453,7 +453,7 @@ We physically separate probabilistic textual generation (System 1) from schema v
 * **Open-Source Substrate:** `coolgenerator/CurioCat`
 * **Compute Plane Profile:** `CognitiveSystemNodeProfile` (Sandboxed NLI & Web Search)
 * **Data Plane Boundary:** `CausalPropagationIntent` / `EvidentiaryGroundingSLA`
-* **Routing Constraints (The Golden Rule):** Standard LLMs are mathematically forbidden from assigning their own `DempsterShaferBeliefVector` weights due to the "Blind Causal Inference" anomaly (confusing correlation with causation). Any newly generated edge lacking empirical evidence MUST be routed through this Oracle. 
+* **Routing Constraints (The Golden Rule):** Standard LLMs are mathematically forbidden from assigning their own `DempsterShaferBeliefVector` weights due to the "Blind Causal Inference" anomaly (confusing correlation with causation). Any newly generated edge lacking empirical evidence MUST be routed through this Oracle.
 * **Mechanistic Penalty:** If CurioCat fails to find external Natural Language Inference (NLI) entailment backing the proposed edge, it mathematically drops the belief mass to zero and emits a `DefeasibleCascadeEvent` to aggressively quarantine the epistemic contagion.
 
 ### 8.4 `SemanticWebArchivist` (The Egress Gateway)

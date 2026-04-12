@@ -572,11 +572,9 @@ def test_apply_state_differential_test_op() -> None:
 def test_align_semantic_manifolds_transmutation() -> None:
     res1 = align_semantic_manifolds("t1", [], ["raster_image"], "e1")
     assert res1 is not None
-    assert res1.compression_sla.required_grounding_density == "dense"
 
     res2 = align_semantic_manifolds("t1", [], ["text"], "e1")
     assert res2 is not None
-    assert res2.compression_sla.required_grounding_density == "sparse"
 
 
 def test_calculate_remaining_compute() -> None:

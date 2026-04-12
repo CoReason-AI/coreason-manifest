@@ -4108,6 +4108,19 @@ class CausalDirectedEdgeState(CoreasonBaseState):
     edge_class: Literal["direct_cause", "confounder", "collider", "mediator"] = Field(
         description="The specific Pearlian topological relationship between the two variables."
     )
+    predicate_curie: Annotated[str, StringConstraints(pattern=r"^[a-zA-Z0-9_]+:[a-zA-Z0-9_]+$")] = Field(
+        json_schema_extra={"rdf_edge_property": True}
+    )
+    belief_vector: DempsterShaferBeliefVector | None = Field(default=None)
+    grounding_sla: EvidentiaryGroundingSLA | None = Field(default=None)
+
+    @model_validator(mode="after")
+    def enforce_evidence_or_sla(self) -> Self:
+        if self.belief_vector is None and self.grounding_sla is None:
+            raise ValueError(
+                "Causal edge must possess either empirical evidence (belief_vector) or an explicit grounding_sla."
+            )
+        return self
 
     @model_validator(mode="after")
     def reject_self_referential_edge(self) -> Self:
@@ -4516,9 +4529,18 @@ class DocumentLayoutRegionState(CoreasonBaseState):
     block_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
         description="Unique structural identifier for this geometric region."
     )
-    block_class: Literal["header", "paragraph", "figure", "table", "footnote", "caption", "equation"] = Field(
-        description="The taxonomic classification of the layout region."
-    )
+    block_class: Literal[
+        "header",
+        "paragraph",
+        "figure",
+        "table",
+        "footnote",
+        "caption",
+        "equation",
+        "list_item",
+        "code_block",
+        "form_field",
+    ] = Field(description="The taxonomic classification of the layout region.")
     anchor: MultimodalTokenAnchorState = Field(
         description="The strict visual and token coordinate bindings for this block."
     )
@@ -5079,6 +5101,27 @@ class EpistemicScanningPolicy(CoreasonBaseState):
     )
 
 
+class SchemaDrivenExtractionSLA(CoreasonBaseState):
+    schema_registry_uri: AnyUrl = Field(
+        description="RFC 8785 canonicalized URI to the exact Pydantic template or LinkML definition."
+    )
+    extraction_framework: Literal["docling_graph_explicit", "ontogpt_spires"] = Field(...)
+    max_schema_retries: int = Field(ge=0, le=10)
+    validation_failure_action: Literal["quarantine_chunk", "escalate_to_human", "drop_edge"]
+
+
+class EvidentiaryGroundingSLA(CoreasonBaseState):
+    minimum_nli_entailment_score: float = Field(ge=0.0, le=1.0)
+    require_independent_sources: int = Field(ge=1, le=10, default=1)
+    ungrounded_link_action: Literal["sever_edge", "flag_for_human", "decay_weight"] = Field(default="sever_edge")
+    allowed_evidence_domains: list[Annotated[str, StringConstraints(max_length=255)]] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "allowed_evidence_domains", sorted(self.allowed_evidence_domains))
+        return self
+
+
 class EpistemicTransmutationTask(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Orchestrates Cross-Modal Representation Alignment,
@@ -5110,11 +5153,9 @@ class EpistemicTransmutationTask(CoreasonBaseState):
         description="The globally unique decentralized identifier (DID) anchoring the MultimodalArtifactReceipt being processed.",
     )
     target_modalities: list[
-        Literal["text", "raster_image", "vector_graphics", "tabular_grid", "n_dimensional_tensor"]
+        Literal["text", "raster_image", "vector_graphics", "tabular_grid", "n_dimensional_tensor", "semantic_graph"]
     ] = Field(min_length=1, description="The specific SOTA modality resolutions required for this extraction pass.")
-    compression_sla: EpistemicCompressionSLA = Field(
-        description="The strict mathematical boundary defining the maximum allowed informational entropy loss."
-    )
+    schema_governance: SchemaDrivenExtractionSLA | None = Field(default=None)
     execution_cost_budget_magnitude: int | None = Field(
         le=1000000000,
         default=None,
@@ -5123,13 +5164,9 @@ class EpistemicTransmutationTask(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def validate_grounding_density_for_visuals(self) -> Self:
-        if (
-            "tabular_grid" in self.target_modalities or "raster_image" in self.target_modalities
-        ) and self.compression_sla.required_grounding_density == "sparse":
-            raise ValueError(
-                "Epistemic safety violation: Visual or tabular modalities require strict spatial tracking. 'required_grounding_density' cannot be 'sparse'."
-            )
+    def validate_graph_schema_presence(self) -> Self:
+        if "semantic_graph" in self.target_modalities and self.schema_governance is None:
+            raise ValueError("schema_governance is strictly required when target_modalities includes 'semantic_graph'.")
         return self
 
     @model_validator(mode="after")
@@ -6531,6 +6568,93 @@ class TopologicalProjectionIntent(CryptographicProvenancePolicy):
 type AnyPresentationIntent = Annotated[
     SemanticIntent | DraftingIntent | AdjudicationIntent | EscalationIntent, Field(discriminator="topology_class")
 ]
+
+
+class DocumentKnowledgeGraphManifest(CoreasonBaseState):
+    topology_class: Literal["document_knowledge_graph"] = "document_knowledge_graph"
+    graph_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    source_artifact_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    nodes: list[SemanticNodeState] = Field(max_length=100000)
+    causal_edges: list[CausalDirectedEdgeState] = Field(max_length=100000)
+    isomorphism_hash: Annotated[str, StringConstraints(pattern="^[a-f0-9]{64}$")]
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "nodes", sorted(self.nodes, key=operator.attrgetter("node_cid")))
+        object.__setattr__(
+            self, "causal_edges", sorted(self.causal_edges, key=lambda e: (e.source_variable, e.target_variable))
+        )
+        return self
+
+
+class CausalPropagationIntent(CoreasonBaseState):
+    topology_class: Literal["causal_propagation"] = "causal_propagation"
+    target_graph_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    task_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    grounding_sla: EvidentiaryGroundingSLA
+    unverified_edges: list[CausalDirectedEdgeState]
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(
+            self,
+            "unverified_edges",
+            sorted(self.unverified_edges, key=lambda e: (e.source_variable, e.target_variable)),
+        )
+        return self
+
+
+class BeliefModulationReceipt(CoreasonBaseState):
+    topology_class: Literal["belief_modulation"] = "belief_modulation"
+    receipt_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+    )
+    prior_event_hash: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None = Field(
+        default=None,
+        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+    )
+    timestamp: float = Field(
+        ge=0.0,
+        le=253402300799.0,
+        description="Causal Ancestry markers required to resolve decentralized event ordering.",
+    )
+    target_graph_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    grounded_edges: dict[Annotated[str, StringConstraints(max_length=255)], DempsterShaferBeliefVector]
+    severed_edge_cids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]]
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "severed_edge_cids", sorted(self.severed_edge_cids))
+        return self
+
+
+class RDFSerializationIntent(CoreasonBaseState):
+    topology_class: Literal["rdf_serialization"] = "rdf_serialization"
+    export_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    target_graph_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    target_format: Literal["turtle", "xml", "json-ld", "ntriples"] = "turtle"
+    base_uri_namespace: AnyUrl
+
+
+class RDFExportReceipt(CoreasonBaseState):
+    topology_class: Literal["rdf_export_receipt"] = "rdf_export_receipt"
+    export_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+    )
+    prior_event_hash: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None = Field(
+        default=None,
+        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+    )
+    timestamp: float = Field(
+        ge=0.0,
+        le=253402300799.0,
+        description="Causal Ancestry markers required to resolve decentralized event ordering.",
+    )
+    serialized_payload: str
+    rdf_triple_count: int
+    sha256_graph_hash: Annotated[str, StringConstraints(pattern="^[a-f0-9]{64}$")]
 
 
 type AnyIntent = Annotated[
@@ -10434,12 +10558,11 @@ class SemanticEdgeState(CoreasonBaseState):
             description="The destination SemanticNodeState Content Identifier (CID).",
         )
     )
-    confidence_score: float | None = Field(
-        default=None, ge=0.0, le=1.0, description="The probabilistic certainty of this logical connection."
+    predicate_curie: Annotated[str, StringConstraints(pattern=r"^[a-zA-Z0-9_]+:[a-zA-Z0-9_]+$")] = Field(
+        json_schema_extra={"rdf_edge_property": True}
     )
-    predicate: Annotated[str, StringConstraints(max_length=2000)] = Field(
-        description="The string representation of the relationship (e.g., 'WORKS_FOR')."
-    )
+    belief_vector: DempsterShaferBeliefVector | None = Field(default=None)
+    grounding_sla: EvidentiaryGroundingSLA | None = Field(default=None)
     embedding: VectorEmbeddingState | None = Field(
         default=None,
         description="Topologically Bounded Latent Spaces used to calculate exact geometric distance and preserve structural Isometry.",
@@ -10457,6 +10580,14 @@ class SemanticEdgeState(CoreasonBaseState):
     volumetric_geometry: VolumetricEdgeProfile | None = Field(
         default=None, description="The continuous parametric spline defining the physical connection manifold."
     )
+
+    @model_validator(mode="after")
+    def enforce_evidence_or_sla(self) -> Self:
+        if self.belief_vector is None and self.grounding_sla is None:
+            raise ValueError(
+                "Edge must possess either empirical evidence (belief_vector) or an explicit grounding_sla."
+            )
+        return self
 
 
 class SemanticNodeState(CoreasonBaseState):
@@ -10482,16 +10613,20 @@ class SemanticNodeState(CoreasonBaseState):
 
     node_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
         description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this semantic node to the Merkle-DAG.",
+        json_schema_extra={"rdf_subject": True},
     )
+    canonical_uri: AnyUrl | None = Field(default=None, json_schema_extra={"rdf_predicate": "owl:sameAs"})
     label: Annotated[str, StringConstraints(max_length=2000)] = Field(
-        description="The categorical label of the node (e.g., 'Person', 'Concept')."
+        description="The categorical label of the node (e.g., 'Person', 'Concept').",
+        json_schema_extra={"rdf_predicate": "rdfs:label"},
     )
     scope: Literal["global", "tenant", "session"] = Field(
         default="session",
         description="The cryptographic namespace partitioning boundary. Global is public, Tenant is corporate, Session is ephemeral.",
     )
     text_chunk: Annotated[str, StringConstraints(max_length=50000)] = Field(
-        description="The raw natural language representation of the semantic node."
+        description="The raw natural language representation of the semantic node.",
+        json_schema_extra={"rdf_predicate": "schema:description"},
     )
     embedding: VectorEmbeddingState | None = Field(
         default=None,
@@ -11873,7 +12008,8 @@ type AnyTopologyManifest = Annotated[
     | CapabilityForgeTopologyManifest
     | IntentElicitationTopologyManifest
     | NeurosymbolicVerificationTopologyManifest
-    | DiscourseTreeManifest,
+    | DiscourseTreeManifest
+    | DocumentKnowledgeGraphManifest,
     Field(discriminator="topology_class", description="A discriminated union of workflow topologies."),
 ]
 
@@ -13481,12 +13617,14 @@ type AnyStateEvent = Annotated[
     | AdjudicationReceipt
     | CustodyReceipt
     | DefeasibleAttackEvent
-    | EpistemicRejectionReceipt,
+    | EpistemicRejectionReceipt
+    | BeliefModulationReceipt
+    | RDFExportReceipt,
     Field(discriminator="topology_class", description="A discriminated union of state events."),
 ]
 
 
-class DempsterShaferBeliefState(CoreasonBaseState):
+class DempsterShaferBeliefVector(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Replaces monolithic probability floats with a composite tri-vector. Independently measures lexical matching, latent semantic distance, and topological graph integrity to allow the orchestrator to compute epistemic conflict and execute evidence discounting.
 
@@ -13547,7 +13685,7 @@ class OntologicalReificationReceipt(CoreasonBaseState):
     algorithmic_mechanism: TransformationMechanismProfile = Field(
         description="The deterministic or probabilistic engine used to execute the transmutation."
     )
-    belief_vector: DempsterShaferBeliefState = Field(
+    belief_vector: DempsterShaferBeliefVector = Field(
         description="The composite Dempster-Shafer tri-vector capturing independent confidence dimensions and calculated epistemic conflict."
     )
     is_latent_inference: bool = Field(
@@ -13901,7 +14039,7 @@ NeurosymbolicInferenceIntent.model_rebuild()
 EpistemicUpsamplingTask.model_rebuild()
 VolumetricPartitionState.model_rebuild()
 
-DempsterShaferBeliefState.model_rebuild()
+DempsterShaferBeliefVector.model_rebuild()
 EmpiricalStatisticalProfile.model_rebuild()
 SemanticRelationalVectorState.model_rebuild()
 AtomicPropositionState.model_rebuild()
@@ -13927,3 +14065,11 @@ ActiveInferenceEpochState.model_rebuild()
 ComputationalThermodynamicsProfile.model_rebuild()
 FederatedSecurityMacroManifest.model_rebuild()
 CognitiveSwarmDeploymentManifest.model_rebuild()
+
+DocumentKnowledgeGraphManifest.model_rebuild()
+CausalPropagationIntent.model_rebuild()
+BeliefModulationReceipt.model_rebuild()
+RDFSerializationIntent.model_rebuild()
+RDFExportReceipt.model_rebuild()
+SchemaDrivenExtractionSLA.model_rebuild()
+EvidentiaryGroundingSLA.model_rebuild()

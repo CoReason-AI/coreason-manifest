@@ -1,3 +1,4 @@
+import pydantic
 # Copyright (c) 2026 CoReason, Inc
 #
 # This software is proprietary and dual-licensed
@@ -17,7 +18,7 @@ import hashlib
 import math
 import typing
 from collections.abc import Sequence
-from typing import Any, Literal, cast
+from typing import Sequence, Any, Literal, cast
 
 import jsonpatch  # type: ignore[import-untyped]
 import numpy as np
@@ -210,19 +211,19 @@ def align_semantic_manifolds(
     target_set = set(target_modalities)
     if target_set.issubset(source_set):
         return None
-    require_dense = any(mod in ["raster_image", "tabular_grid"] for mod in target_modalities)
-    density: Literal["sparse", "dense", "exhaustive"] = "dense" if require_dense else "sparse"
-    sla = EpistemicCompressionSLA(
-        strict_probability_retention=True,
-        max_allowed_entropy_loss=0.01,
-        required_grounding_density=density,
-        minimum_fidelity_threshold=0.5,
-    )
+    schema_governance = None
+    if "semantic_graph" in target_modalities:
+        schema_governance = ontology.SchemaDrivenExtractionSLA(
+            schema_registry_uri=pydantic.AnyUrl("http://example.com/schema"),
+            extraction_framework="docling_graph_explicit",
+            max_schema_retries=3,
+            validation_failure_action="escalate_to_human"
+        )
     return EpistemicTransmutationTask(
         task_cid=task_cid,
         artifact_event_cid=artifact_event_cid,
-        target_modalities=target_modalities,
-        compression_sla=sla,
+        target_modalities=list(target_modalities),
+        schema_governance=schema_governance,
     )
 
 
