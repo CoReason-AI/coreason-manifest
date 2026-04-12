@@ -802,7 +802,7 @@ def test_tabular_matrix_profile_coverage() -> None:
     m_ok = TabularMatrixProfile(matrix_cid="m1", total_rows=5, total_columns=5, cells=[cell_bad, cell_ok])
     assert m_ok.cells[0].cell_cid == "c1"
 
-    anchor = MultimodalTokenAnchorState.model_construct(anchor_cid="a1")
+    anchor = MultimodalTokenAnchorState.model_construct()
 
     with pytest.raises(
         ValidationError,
