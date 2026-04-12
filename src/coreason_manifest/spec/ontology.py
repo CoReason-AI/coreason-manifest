@@ -5181,6 +5181,91 @@ class EpistemicScanningPolicy(CoreasonBaseState):
     )
 
 
+class LinkMLValidationSLA(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Establishes Graph-Shape Governance, acting as the execution contract instructing the orchestrator to validate extracted nodes and edges against an external LinkML YAML shape graph before committing them.
+
+    CAUSAL AFFORDANCE: Forces the structural validation of all causal edges. Authorizes the orchestrator to mechanically sever relations that violate the predicate's declared Domain, Range, or Cardinality constraints.
+
+    EPISTEMIC BOUNDS: The `linkml_schema_uri` strictly clamps the topological ruleset to a remote, verifiable YAML definition.
+
+    MCP ROUTING TRIGGERS: LinkML, Graph-Shape Governance, Structural Isomorphism, SHACL, Domain and Range Enforcement
+    """
+
+    linkml_schema_uri: AnyUrl = Field(
+        description="RFC 8785 canonicalized URI pointing to the canonical LinkML YAML definition."
+    )
+    strict_domain_range_checking: bool = Field(
+        default=True,
+        description="If True, the orchestrator physically severs any CausalDirectedEdgeState where the subject/object node classes violate the predicate's declared LinkML domain/range.",
+    )
+    allow_unmapped_entities: bool = Field(
+        default=False,
+        description="A boolean gate dictating whether the resulting graph is permitted to retain high-entropy text nodes that OntoGPT failed to resolve into a formal CURIE.",
+    )
+
+
+class OntologicalCrosswalkIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A kinetic trigger instructing the orchestrator to route an array of ungrounded text entities through a grounding oracle (OntoGPT/OAK) to map them to formal ontology CURIEs.
+
+    CAUSAL AFFORDANCE: Authorizes the runtime to execute Bipartite Ontological Mapping, collapsing high-entropy natural language strings into zero-entropy Semantic Web identifiers.
+
+    EPISTEMIC BOUNDS: The search space is rigidly clamped by the `target_ontology_registries` array (e.g., ['MONDO', 'HP']). The `minimum_isometry_threshold` physically restricts acceptable mappings to a strictly positive cosine/BM25 similarity (`ge=0.0, le=1.0`).
+
+    MCP ROUTING TRIGGERS: Bipartite Ontological Mapping, Grounding Oracle, CURIE Resolution, Isometry Thresholding, Semantic Crosswalk
+    """
+
+    topology_class: Literal["ontological_crosswalk"] = "ontological_crosswalk"
+    target_graph_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    source_strings: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
+        min_length=1, description="The ungrounded natural language concepts extracted by the LLM."
+    )
+    target_ontology_registries: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
+        min_length=1, description="The strictly typed standard ontology namespaces to search (e.g., 'MONDO', 'CHEBI')."
+    )
+    minimum_isometry_threshold: float = Field(
+        ge=0.0, le=1.0, description="The semantic distance threshold required to automatically accept a mapping."
+    )
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "source_strings", sorted(self.source_strings))
+        object.__setattr__(self, "target_ontology_registries", sorted(self.target_ontology_registries))
+        return self
+
+
+class CrosswalkResolutionReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: The immutable, cryptographically frozen result of an OntoGPT semantic grounding pass.
+
+    CAUSAL AFFORDANCE: Commits the successful translation of raw strings to formal CURIEs into the Epistemic Ledger, physically preserving traceability and preventing 'Traceability Collapse'.
+
+    EPISTEMIC BOUNDS: The `resolved_curies` dictionary mathematically locks arbitrary strings to strict W3C CURIE regex patterns (`^[a-zA-Z0-9_]+:[a-zA-Z0-9_]+$`). The alignment certainty is captured by the `grounding_confidence` tri-vector.
+
+    MCP ROUTING TRIGGERS: Epistemic Provenance, Crosswalk Resolution, Grounding Receipt, Ontology Access Kit, CURIE
+    """
+
+    event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        ...
+    )
+    prior_event_hash: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
+    ) = Field(default=None)
+    timestamp: float = Field(ge=0.0, le=253402300799.0)
+
+    topology_class: Literal["crosswalk_resolution"] = "crosswalk_resolution"
+    receipt_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    target_graph_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    resolved_curies: dict[
+        Annotated[str, StringConstraints(max_length=2000)],
+        Annotated[str, StringConstraints(pattern=r"^[a-zA-Z0-9_]+:[a-zA-Z0-9_]+$")],
+    ] = Field(description="Strict dictionary mapping the original strings to formal W3C CURIEs.")
+    grounding_confidence: DempsterShaferBeliefVector = Field(
+        description="Quantifies the semantic alignment and epistemic conflict of the applied crosswalk."
+    )
+
+
 class SchemaDrivenExtractionSLA(CoreasonBaseState):
     schema_registry_uri: AnyUrl = Field(
         description="RFC 8785 canonicalized URI to the exact Pydantic template or LinkML definition."
@@ -5188,6 +5273,17 @@ class SchemaDrivenExtractionSLA(CoreasonBaseState):
     extraction_framework: Literal["docling_graph_explicit", "ontogpt_spires"] = Field(...)
     max_schema_retries: int = Field(ge=0, le=10)
     validation_failure_action: Literal["quarantine_chunk", "escalate_to_human", "drop_edge"]
+    linkml_governance: LinkMLValidationSLA | None = Field(
+        default=None, description="The structural shape constraints for the graph."
+    )
+
+    @model_validator(mode="after")
+    def enforce_linkml_for_ontogpt(self) -> Self:
+        if self.extraction_framework == "ontogpt_spires" and self.linkml_governance is None:
+            raise ValueError(
+                "Epistemic Violation: Using the 'ontogpt_spires' framework mathematically requires a LinkMLValidationSLA to govern shape constraints."
+            )
+        return self
 
 
 class EvidentiaryGroundingSLA(CoreasonBaseState):
@@ -6949,7 +7045,8 @@ class SubstrateHydrationManifest(CoreasonBaseState):
 
 
 type AnyIntent = Annotated[
-    EpistemicZeroTrustContract
+    OntologicalCrosswalkIntent
+    | EpistemicZeroTrustContract
     | SemanticIntent
     | DraftingIntent
     | AdjudicationIntent
@@ -14009,7 +14106,8 @@ class EpistemicZeroTrustReceipt(CoreasonBaseState):
 
 
 type AnyStateEvent = Annotated[
-    EpistemicZeroTrustReceipt
+    CrosswalkResolutionReceipt
+    | EpistemicZeroTrustReceipt
     | ObservationEvent
     | BeliefMutationEvent
     | SystemFaultEvent
@@ -14511,3 +14609,7 @@ EpistemicZeroTrustReceipt.model_rebuild()
 
 ExecutionSubstrateProfile.model_rebuild()
 SubstrateHydrationManifest.model_rebuild()
+
+LinkMLValidationSLA.model_rebuild()
+OntologicalCrosswalkIntent.model_rebuild()
+CrosswalkResolutionReceipt.model_rebuild()
