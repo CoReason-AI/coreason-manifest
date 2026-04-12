@@ -866,7 +866,7 @@ def test_deprecated_solver_coq() -> None:
 
     with pytest.raises(ValidationError) as exc_info:
         FormalVerificationContract(proof_system="coq", invariant_theorem="test", compiled_proof_hash="a" * 64)  # type: ignore
-    assert "Input should be 'lean4' or 'z3'" in str(exc_info.value)
+    assert "Input should be \'lean4\' or \'z3\'" in str(exc_info.value)
 
 
 def test_deprecated_solver_isabelle() -> None:
@@ -876,7 +876,7 @@ def test_deprecated_solver_isabelle() -> None:
 
     with pytest.raises(ValidationError) as exc_info:
         FormalVerificationContract(proof_system="isabelle", invariant_theorem="test", compiled_proof_hash="a" * 64)  # type: ignore
-    assert "Input should be 'lean4' or 'z3'" in str(exc_info.value)
+    assert "Input should be \'lean4\' or \'z3\'" in str(exc_info.value)
 
 
 def test_deprecated_solver_tla_plus() -> None:
@@ -891,7 +891,7 @@ def test_deprecated_solver_tla_plus() -> None:
             formal_grammar_payload="test",
             timeout_ms=1000,
         )
-    assert "Input should be 'lean4' or 'z3'" in str(exc_info.value)
+    assert "Input should be 'lean4', 'z3', 'clingo' or 'swi_prolog'" in str(exc_info.value)
 
 
 def test_deprecated_solver_sympy() -> None:
@@ -907,7 +907,7 @@ def test_deprecated_solver_sympy() -> None:
             proof_system="sympy",  # type: ignore
             verified_theorem_hash="a" * 64,
         )
-    assert "Input should be 'lean4' or 'z3'" in str(exc_info.value)
+    assert "Input should be \'lean4\' or \'z3\'" in str(exc_info.value)
 
 
 def test_agent_node_profile_network_topology_paradox() -> None:

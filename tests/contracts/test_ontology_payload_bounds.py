@@ -287,3 +287,51 @@ def test_semantic_mapping_heuristic_proposal_payload_bounds() -> None:
             justification_evidence_cids=["did:example:node_A"],
         )
     assert "String should have at most 65536 characters" in str(exc_info.value)
+
+
+def test_epistemic_logic_premise_bounds() -> None:
+    from pydantic import ValidationError
+    from coreason_manifest.spec.ontology import EpistemicLogicPremise
+
+    # Valid payload
+    premise = EpistemicLogicPremise(
+        ontology_node_id="did:example:node_123",
+        asp_program="a :- b.",
+        max_models=5
+    )
+    assert premise.asp_program == "a :- b."
+
+    # Invalid payload (exceeds length constraint 65536)
+    large_string = "a" * 65537
+
+    with pytest.raises(ValidationError) as exc_info:
+        EpistemicLogicPremise(
+            ontology_node_id="did:example:node_123",
+            asp_program=large_string,
+            max_models=5
+        )
+    assert "String should have at most 65536 characters" in str(exc_info.value)
+
+
+def test_epistemic_lean4_premise_bounds() -> None:
+    from pydantic import ValidationError
+    from coreason_manifest.spec.ontology import EpistemicLean4Premise
+
+    # Valid payload
+    premise = EpistemicLean4Premise(
+        ontology_node_id="did:example:node_123",
+        formal_statement="theorem test : True := by trivial",
+        tactic_proof="trivial"
+    )
+    assert premise.tactic_proof == "trivial"
+
+    # Invalid payload (exceeds length constraint 100000)
+    large_string = "a" * 100001
+
+    with pytest.raises(ValidationError) as exc_info:
+        EpistemicLean4Premise(
+            ontology_node_id="did:example:node_123",
+            formal_statement="theorem test : True := by trivial",
+            tactic_proof=large_string
+        )
+    assert "String should have at most 100000 characters" in str(exc_info.value)
