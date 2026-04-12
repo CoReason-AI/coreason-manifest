@@ -113,9 +113,7 @@ def test_formal_verification_contract_pointer() -> None:
         verified_receipt_cid="did:coreason:receipt-1",
     )
     assert contract.verified_receipt_cid == "did:coreason:receipt-1"
-import pytest
-from pydantic import ValidationError
-from coreason_manifest.spec.ontology import EpistemicAxiomVerificationReceipt
+
 
 def test_epistemic_axiom_guillotine_pass() -> None:
     receipt = EpistemicAxiomVerificationReceipt(
@@ -124,6 +122,6 @@ def test_epistemic_axiom_guillotine_pass() -> None:
         source_prediction_cid="did:coreason:agent-1",
         sequence_similarity_score=0.9,
         fact_score_passed=True,
-        formal_backing_receipt_cid="did:coreason:receipt-2"
+        formal_backing_receipt_cid="did:coreason:receipt-2",
     )
     assert receipt.formal_backing_receipt_cid == "did:coreason:receipt-2"
