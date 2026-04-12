@@ -1,7 +1,9 @@
-with open("tests/contracts/test_epistemic_zero_trust.py", "r") as f:
+with open("tests/contracts/test_epistemic_zero_trust.py") as f:
     content = f.read()
 
-new_content = content + """
+new_content = (
+    content
+    + """
 def test_epistemic_constraint_policy_invalid_type():
     with pytest.raises(ValidationError):
         EpistemicConstraintPolicy(
@@ -9,5 +11,6 @@ def test_epistemic_constraint_policy_invalid_type():
             remediation_prompt="test"
         )
 """
+)
 with open("tests/contracts/test_epistemic_zero_trust.py", "w") as f:
     f.write(new_content)

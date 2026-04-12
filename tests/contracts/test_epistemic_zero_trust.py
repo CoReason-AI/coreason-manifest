@@ -1,31 +1,29 @@
 import pytest
 from pydantic import ValidationError
+
 from coreason_manifest.spec.ontology import (
     EpistemicConstraintPolicy,
     EpistemicZeroTrustContract,
-    EpistemicZeroTrustReceipt
+    EpistemicZeroTrustReceipt,
 )
+
 
 def test_epistemic_constraint_policy_valid():
     policy = EpistemicConstraintPolicy(
-        assertion_ast="outputs == inputs",
-        remediation_prompt="Outputs must match inputs length."
+        assertion_ast="outputs == inputs", remediation_prompt="Outputs must match inputs length."
     )
     assert policy.assertion_ast == "outputs == inputs"
 
+
 def test_epistemic_constraint_policy_kinetic_call():
     with pytest.raises(ValidationError, match="Kinetic execution bleed detected"):
-        EpistemicConstraintPolicy(
-            assertion_ast="print('hello')",
-            remediation_prompt="test"
-        )
+        EpistemicConstraintPolicy(assertion_ast="print('hello')", remediation_prompt="test")
+
 
 def test_epistemic_constraint_policy_invalid_syntax():
     with pytest.raises(ValidationError, match="Invalid syntax in constraint AST"):
-        EpistemicConstraintPolicy(
-            assertion_ast="len( == 2",
-            remediation_prompt="test"
-        )
+        EpistemicConstraintPolicy(assertion_ast="len( == 2", remediation_prompt="test")
+
 
 def test_epistemic_zero_trust_contract_sort():
     p1 = EpistemicConstraintPolicy(assertion_ast="x == 2", remediation_prompt="test")
@@ -44,21 +42,20 @@ def test_epistemic_zero_trust_contract_sort():
     assert contract.structural_post_conditions[0].assertion_ast == "a == 1"
     assert contract.structural_post_conditions[1].assertion_ast == "x == 2"
 
+
 def test_epistemic_zero_trust_receipt_firewall_breach():
     with pytest.raises(ValidationError, match="Input should be False"):
         EpistemicZeroTrustReceipt(
             event_cid="receipt-1",
             timestamp=123.0,
             intent_reference_id="intent-1",
-            llm_blind_plan_hash="a"*64,
+            llm_blind_plan_hash="a" * 64,
             remediation_epochs_consumed=2,
-            transmuted_payload_hash="b"*64,
-            firewall_breach_detected=True
+            transmuted_payload_hash="b" * 64,
+            firewall_breach_detected=True,
         )
+
 
 def test_epistemic_constraint_policy_invalid_type():
     with pytest.raises(ValidationError):
-        EpistemicConstraintPolicy(
-            assertion_ast=123,
-            remediation_prompt="test"
-        )
+        EpistemicConstraintPolicy(assertion_ast=123, remediation_prompt="test")
