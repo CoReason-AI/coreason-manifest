@@ -12,9 +12,13 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
+    EmpiricalFalsificationContract,
+    EpistemicAxiomVerificationReceipt,
     EpistemicConstraintPolicy,
     EpistemicZeroTrustContract,
     EpistemicZeroTrustReceipt,
+    FalsificationContract,
+    FormalVerificationContract,
 )
 
 
@@ -86,3 +90,44 @@ def test_epistemic_zero_trust_receipt_firewall_breach_bypass() -> None:
 
     with pytest.raises(ValueError, match=r"Topological Collapse: Firewall breach detected\. Receipt invalid\."):
         receipt.verify_firewall_integrity()  # type: ignore[operator]
+
+
+def test_epistemic_axiom_guillotine() -> None:
+    with pytest.raises(
+        ValidationError,
+        match=r"Proof-Carrying Data required: Cannot verify axiom without a formal_backing_receipt_cid\.",
+    ):
+        EpistemicAxiomVerificationReceipt(
+            event_cid="receipt-1",
+            timestamp=123.0,
+            source_prediction_cid="did:coreason:agent-1",
+            sequence_similarity_score=0.9,
+            fact_score_passed=True,
+            formal_backing_receipt_cid=None,
+        )
+
+
+def test_formal_verification_contract_pointer() -> None:
+    contract = FormalVerificationContract(
+        proof_system="lean4",
+        invariant_theorem="theorem1",
+        compiled_proof_hash="a" * 64,
+        verified_receipt_cid="did:coreason:receipt-1",
+    )
+    assert contract.verified_receipt_cid == "did:coreason:receipt-1"
+
+
+def test_falsification_contract_instantiation() -> None:
+    contract = FalsificationContract(
+        target_hypothesis_cid="did:coreason:hyp-1", counter_model_receipt_cid="did:coreason:receipt-1"
+    )
+    assert contract.target_hypothesis_cid == "did:coreason:hyp-1"
+    assert contract.counter_model_receipt_cid == "did:coreason:receipt-1"
+
+
+def test_empirical_falsification_contract_instantiation() -> None:
+    contract = EmpiricalFalsificationContract(
+        condition_cid="condition-1", description="Test condition", falsifying_observation_signature="error.*"
+    )
+    assert contract.condition_cid == "condition-1"
+    assert contract.falsifying_observation_signature == "error.*"

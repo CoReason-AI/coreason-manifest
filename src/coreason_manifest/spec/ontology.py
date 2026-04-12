@@ -5205,6 +5205,10 @@ class EvidentiaryGroundingSLA(CoreasonBaseState):
     require_independent_sources: int = Field(ge=1, le=10, default=1)
     ungrounded_link_action: Literal["sever_edge", "flag_for_human", "decay_weight"] = Field(default="sever_edge")
     allowed_evidence_domains: list[Annotated[str, StringConstraints(max_length=255)]] = Field(default_factory=list)
+    required_deduction_receipt_cid: NodeCIDState | None = Field(
+        default=None,
+        description="If grounding via strict hierarchies (e.g., medical ontologies), this MUST point to a PrologDeductionReceipt with truth_value=True.",
+    )
 
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
@@ -5679,7 +5683,7 @@ class FallbackIntent(CoreasonBaseState):
     )
 
 
-class FalsificationContract(CoreasonBaseState):
+class EmpiricalFalsificationContract(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Enforces strict Popperian Falsificationism by defining the exact empirical boundary conditions that would logically invalidate a non-monotonic causal hypothesis.
 
@@ -5690,6 +5694,11 @@ class FalsificationContract(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Popperian Falsification, Null Hypothesis, Defeasible Logic, Empirical Falsifiability, Structural Boundary
 
     """
+
+    topology_class: Literal["empirical_falsification_contract"] = Field(
+        default="empirical_falsification_contract",
+        description="Discriminator type for empirical falsification contract.",
+    )
 
     condition_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
         Field(
@@ -5827,6 +5836,20 @@ class FitnessObjectiveProfile(CoreasonBaseState):
     )
 
 
+class FalsificationContract(CoreasonBaseState):
+    """AGENT INSTRUCTION: A contract deploying constraint oracles to hunt for counter-models to falsify a hypothesis."""
+
+    topology_class: Literal["falsification_contract"] = Field(default="falsification_contract")
+    falsification_solver: Literal["clingo", "z3"] = Field(
+        default="clingo", description="The constraint oracle tasked with finding a counter-model."
+    )
+    target_hypothesis_cid: NodeCIDState = Field(description="Pointer to the hypothesis claim being challenged.")
+    counter_model_receipt_cid: NodeCIDState | None = Field(
+        default=None,
+        description="MUST point to a FormalLogicProofReceipt evaluating to SATISFIABLE to collapse the hypothesis.",
+    )
+
+
 class FormalVerificationContract(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Leverages Automated Theorem Proving and the Curry-Howard
@@ -5858,6 +5881,10 @@ class FormalVerificationContract(CoreasonBaseState):
         Field(
             description="The SHA-256 fingerprint of the verified proof object that the Rust/C++ orchestrator must load and check."
         )
+    )
+    verified_receipt_cid: NodeCIDState | None = Field(
+        default=None,
+        description="Pointer to a Lean4VerificationReceipt or HoareLogicProofReceipt validating the logic.",
     )
 
 
@@ -7048,6 +7075,8 @@ class SubstrateHydrationManifest(CoreasonBaseState):
 
 type AnyIntent = Annotated[
     EpistemicZeroTrustContract
+    | EmpiricalFalsificationContract
+    | FalsificationContract
     | SemanticIntent
     | DraftingIntent
     | AdjudicationIntent
@@ -9987,7 +10016,7 @@ class HypothesisGenerationEvent(CoreasonBaseState):
     bayesian_prior: float = Field(
         ge=0.0, le=1.0, description="The agent's initial probabilistic belief in this hypothesis before testing."
     )
-    falsification_conditions: list[FalsificationContract] = Field(
+    falsification_conditions: list[EmpiricalFalsificationContract] = Field(
         min_length=1,
         description="The strict array of strict conditions that the orchestrator must test to attempt to disprove this premise.",
     )
@@ -13178,11 +13207,21 @@ class EpistemicAxiomVerificationReceipt(CoreasonBaseState):
         default=None,
         description="The undeniable pointer proving the source prediction traversed the Zero-Trust contract before being verified as an axiom.",
     )
+    formal_backing_receipt_cid: NodeCIDState | None = Field(
+        default=None,
+        description="Cryptographic pointer to the deterministic Triad execution receipt (Proof-Carrying Data).",
+    )
 
     @model_validator(mode="after")
     def enforce_epistemic_quarantine(self) -> Self:
         if not self.fact_score_passed:
             raise ValueError("Epistemic Contagion Prevented: Axioms failing validation cannot be verified.")
+        return self
+
+    @model_validator(mode="after")
+    def enforce_proof_carrying_data(self) -> "Self":
+        if getattr(self, "fact_score_passed", False) is True and self.formal_backing_receipt_cid is None:
+            raise ValueError("Proof-Carrying Data required: Cannot verify axiom without a formal_backing_receipt_cid.")
         return self
 
 
@@ -14627,3 +14666,7 @@ EpistemicZeroTrustReceipt.model_rebuild()
 
 ExecutionSubstrateProfile.model_rebuild()
 SubstrateHydrationManifest.model_rebuild()
+FalsificationContract.model_rebuild()
+FormalVerificationContract.model_rebuild()
+EvidentiaryGroundingSLA.model_rebuild()
+EpistemicAxiomVerificationReceipt.model_rebuild()
