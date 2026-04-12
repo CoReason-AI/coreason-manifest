@@ -48,6 +48,7 @@ dev = [
     "hypothesis>=6.151.9",
     "hypothesis-jsonschema>=0.23.1",
     "syrupy>=5.1.0",
+    "types-networkx>=3.6.1.20260408",
 ]
 
 [tool.hatch.build.targets.wheel]

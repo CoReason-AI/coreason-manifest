@@ -16,6 +16,8 @@ from coreason_manifest.spec.ontology import EpistemicRejectionReceipt
 def test_kl_divergence_paradox_trapping(invalid_kl_divergence: float) -> None:
     with pytest.raises(ValidationError) as exc_info:
         EpistemicRejectionReceipt(
+            event_cid="receipt-123",
+            timestamp=100.0,
             receipt_cid="test",
             failed_projection_cid="valid_projection_cid",
             violated_algebraic_constraint="Constraint X violated.",
@@ -31,6 +33,8 @@ def test_kl_divergence_paradox_trapping(invalid_kl_divergence: float) -> None:
 )
 def test_valid_gradient_space(valid_kl_divergence: float, valid_gradient: str) -> None:
     receipt = EpistemicRejectionReceipt(
+        event_cid="receipt-123",
+        timestamp=100.0,
         receipt_cid="test",
         failed_projection_cid="valid_projection_cid",
         violated_algebraic_constraint="Constraint X violated.",

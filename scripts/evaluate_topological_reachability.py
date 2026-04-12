@@ -18,7 +18,7 @@ import networkx as nx
 import coreason_manifest.spec.ontology as onto
 
 
-def get_all_subclasses(cls):
+def get_all_subclasses(cls: type) -> set[type]:
     subclasses = set()
     for sub in cls.__subclasses__():
         subclasses.add(sub)
@@ -38,13 +38,13 @@ CLASS_REGISTRY = {
 
 ALIAS_REGISTRY = {name: obj.__value__ for name, obj in vars(onto).items() if isinstance(obj, TypeAliasType)}
 
-G = nx.DiGraph()
+G: nx.DiGraph[Any] = nx.DiGraph()
 
 for cls_name in CLASS_REGISTRY:
     G.add_node(cls_name)
 
 
-def extract_referenced_models(annotation: Any, seen: set | None = None) -> list[type]:
+def extract_referenced_models(annotation: Any, seen: set[int | str] | None = None) -> list[type]:
     if seen is None:
         seen = set()
 
@@ -140,6 +140,51 @@ ROOT_NODES = [
     "EpistemicDomainGraphManifest",
     "EpistemicTopologicalProofManifest",
     "EpistemicCurriculumManifest",
+    "ExecutionEnvelopeState",
+    "JSONRPCErrorResponseState",
+    "JSONRPCErrorState",
+    "CrossSwarmHandshakeState",
+    "OntologicalHandshakeReceipt",
+    "StateDifferentialManifest",
+    "ComputeEngineProfile",
+    "DelegatedCapabilityManifest",
+    "ComputationalThermodynamics",
+    "ActiveInferenceEpoch",
+    "AuctionState",
+    "AdversarialSimulationProfile",
+    "ChaosExperimentTask",
+    "DocumentLayoutManifest",
+    "DynamicLayoutManifest",
+    "AdjudicationRubricProfile",
+    "CognitiveSamplingPolicy",
+    "ContinuousMutationPolicy",
+    "DifferentiableLogicPolicy",
+    "DistributionProfile",
+    "EnsembleTopologyProfile",
+    "EpistemicEscalationContract",
+    "EpistemicSeedInjectionPolicy",
+    "FederatedPeftContract",
+    "GovernancePolicy",
+    "GradingCriterionProfile",
+    "GraphFlatteningPolicy",
+    "KineticBudgetPolicy",
+    "MCPPromptReferenceState",
+    "MCPResourceManifest",
+    "MarketContract",
+    "ReasoningEngineeringPolicy",
+    "SemanticEdgeState",
+    "SpatialReferenceFrameManifest",
+    "TaxonomicRoutingPolicy",
+    "UtilityJustificationGraphReceipt",
+    "ViewportProjectionContract",
+    "EpistemicQuarantineSnapshot",
+    "MultimodalArtifactReceipt",
+    "DynamicRoutingManifest",
+    "EpistemicChainGraphState",
+    "EpistemicTransmutationTask",
+    "EpistemicUpsamplingTask",
+    "SyntheticGenerationProfile",
+    "NDimensionalTensorManifest",
 ]
 
 reachable_nodes = set(ROOT_NODES)

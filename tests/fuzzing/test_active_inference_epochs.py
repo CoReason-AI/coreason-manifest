@@ -7,6 +7,8 @@ from coreason_manifest.spec.ontology import ActiveInferenceEpoch, EpistemicRejec
 
 receipt_strategy = st.builds(
     EpistemicRejectionReceipt,
+    event_cid=st.uuids().map(str),
+    timestamp=st.floats(min_value=0.0, max_value=253402300799.0, allow_nan=False, allow_infinity=False),
     receipt_cid=st.uuids().map(str),
     failed_projection_cid=st.text(min_size=1, max_size=10, alphabet="abcdefghijklmnopqrstuvwxyz0123456789_-"),
     violated_algebraic_constraint=st.text(min_size=1, max_size=2000),
