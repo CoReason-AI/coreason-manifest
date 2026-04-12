@@ -724,7 +724,7 @@ class CoreasonBaseState(BaseModel):
 
             canonical_dump = canonicaljson.encode_canonical_json(raw_dict)
             object.__setattr__(self, "_cached_canonical_dump", canonical_dump)
-            return canonical_dump
+            return canonical_dump  # type: ignore[no-any-return]
 
 
 class EpistemicProxyState[T](CoreasonBaseState):
@@ -6747,7 +6747,7 @@ class InsightCardProfile(CoreasonBaseState):
 
         MCP ROUTING TRIGGERS: XSS Quarantine, DOM Sanitization, Presentation Layer Scrubbing, Rust Execution Bridge
         """
-        return nh3.clean(v)
+        return nh3.clean(v)  # type: ignore[no-any-return]
 
 
 type AnyPanelProfile = Annotated[

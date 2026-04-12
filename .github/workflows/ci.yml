@@ -49,6 +49,7 @@ jobs:
             --no-progress
             --accept 200,204,301,429
             --exclude-loopback
+            --exclude conventionalcommits.org
             '*.md'
             'docs/**/*.md'
           fail: true
