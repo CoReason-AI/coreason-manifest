@@ -1,5 +1,6 @@
 import copy
 import random
+from typing import Any
 
 import pytest
 
@@ -16,7 +17,7 @@ from coreason_manifest.spec.ontology import (
 )
 
 
-def test_hash_invariance_semantic_flow_policy():
+def test_hash_invariance_semantic_flow_policy() -> None:
     """
     Generative test to prove that internal @model_validator hooks correctly stabilize
     the Merkle root by deterministically sorting lists.
@@ -51,7 +52,7 @@ def test_hash_invariance_semantic_flow_policy():
         firewalls_payload.append(fw)
 
     # Base payload dictionary
-    payload_a = {
+    payload_a: dict[str, Any] = {
         "policy_cid": "policy-123",
         "active": True,
         "rules": rules_payload,
@@ -75,7 +76,7 @@ def test_hash_invariance_semantic_flow_policy():
     for fw in firewalls_shuffled:
         random.shuffle(fw.monitored_layers)
 
-    payload_b = {
+    payload_b: dict[str, Any] = {
         "policy_cid": "policy-123",
         "active": True,
         "rules": rules_shuffled,
@@ -96,7 +97,7 @@ if __name__ == "__main__":
     pytest.main([__file__])
 
 
-def test_hash_invariance_cognitive_action_space():
+def test_hash_invariance_cognitive_action_space() -> None:
     """
     Generative test to prove that internal @model_validator hooks correctly stabilize
     the Merkle root by deterministically sorting lists/dicts inside CognitiveActionSpaceManifest.
@@ -133,7 +134,7 @@ def test_hash_invariance_cognitive_action_space():
         edge = TransitionEdgeProfile(target_node_cid=cap_id, probability_weight=0.5, compute_weight_magnitude=100 - i)
         edges_payload.append(edge)
 
-    payload_a = {
+    payload_a: dict[str, Any] = {
         "action_space_cid": "space-123",
         "capabilities": capabilities,
         "transition_matrix": {"cap1": edges_payload},
@@ -147,7 +148,7 @@ def test_hash_invariance_cognitive_action_space():
     edges_shuffled = copy.deepcopy(edges_payload)
     random.shuffle(edges_shuffled)
 
-    payload_b = {
+    payload_b: dict[str, Any] = {
         "action_space_cid": "space-123",
         "capabilities": capabilities,
         "transition_matrix": {"cap1": edges_shuffled},
