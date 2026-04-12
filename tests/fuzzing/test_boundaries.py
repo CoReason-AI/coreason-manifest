@@ -93,9 +93,6 @@ def test_continuous_mutation_oom_buffer_limit(rows: int) -> None:
         )
 
 
-
-
-
 def test_epistemic_license_enforcement() -> None:
     """Prove that instantiating GlobalGovernancePolicy with invalid mandatory_license_rule triggers ValidationError."""
     invalid_license = ConstitutionalPolicy(

@@ -10,7 +10,6 @@
 #
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
-
 import ast
 import base64
 import copy
