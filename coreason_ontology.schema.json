@@ -899,6 +899,7 @@
           "latent_projection": "#/$defs/LatentProjectionIntent",
           "latent_schema_inference": "#/$defs/LatentSchemaInferenceIntent",
           "neurosymbolic_inference": "#/$defs/NeurosymbolicInferenceIntent",
+          "ontological_crosswalk": "#/$defs/OntologicalCrosswalkIntent",
           "ontology_discovery": "#/$defs/OntologyDiscoveryIntent",
           "override": "#/$defs/OverrideIntent",
           "quarantine_intent": "#/$defs/QuarantineIntent",
@@ -917,6 +918,9 @@
         "propertyName": "topology_class"
       },
       "oneOf": [
+        {
+          "$ref": "#/$defs/OntologicalCrosswalkIntent"
+        },
         {
           "$ref": "#/$defs/EpistemicZeroTrustContract"
         },
@@ -1098,6 +1102,7 @@
           "cognitive_prediction": "#/$defs/CognitivePredictionReceipt",
           "cognitive_reward_evaluation": "#/$defs/CognitiveRewardEvaluationReceipt",
           "counterfactual_regret": "#/$defs/CounterfactualRegretEvent",
+          "crosswalk_resolution": "#/$defs/CrosswalkResolutionReceipt",
           "custody_receipt": "#/$defs/CustodyReceipt",
           "defeasible_attack": "#/$defs/DefeasibleAttackEvent",
           "epistemic_axiom_verification": "#/$defs/EpistemicAxiomVerificationReceipt",
@@ -1125,6 +1130,9 @@
         "propertyName": "topology_class"
       },
       "oneOf": [
+        {
+          "$ref": "#/$defs/CrosswalkResolutionReceipt"
+        },
         {
           "$ref": "#/$defs/EpistemicZeroTrustReceipt"
         },
@@ -5496,6 +5504,86 @@
         "blending_factor"
       ],
       "title": "CrossoverPolicy",
+      "type": "object"
+    },
+    "CrosswalkResolutionReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The immutable, cryptographically frozen result of an OntoGPT semantic grounding pass.\n\nCAUSAL AFFORDANCE: Commits the successful translation of raw strings to formal CURIEs into the Epistemic Ledger, physically preserving traceability and preventing 'Traceability Collapse'.\n\nEPISTEMIC BOUNDS: The `resolved_curies` dictionary mathematically locks arbitrary strings to strict W3C CURIE regex patterns (`^[a-zA-Z0-9_]+:[a-zA-Z0-9_]+$`). The alignment certainty is captured by the `grounding_confidence` tri-vector.\n\nMCP ROUTING TRIGGERS: Epistemic Provenance, Crosswalk Resolution, Grounding Receipt, Ontology Access Kit, CURIE",
+      "properties": {
+        "event_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "topology_class": {
+          "const": "crosswalk_resolution",
+          "default": "crosswalk_resolution",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "receipt_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Receipt Cid",
+          "type": "string"
+        },
+        "target_graph_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Target Graph Cid",
+          "type": "string"
+        },
+        "resolved_curies": {
+          "additionalProperties": {
+            "pattern": "^[a-zA-Z0-9_]+:[a-zA-Z0-9_]+$",
+            "type": "string"
+          },
+          "description": "Strict dictionary mapping the original strings to formal W3C CURIEs.",
+          "propertyNames": {
+            "maxLength": 2000
+          },
+          "title": "Resolved Curies",
+          "type": "object"
+        },
+        "grounding_confidence": {
+          "$ref": "#/$defs/DempsterShaferBeliefVector",
+          "description": "Quantifies the semantic alignment and epistemic conflict of the applied crosswalk."
+        }
+      },
+      "required": [
+        "event_cid",
+        "timestamp",
+        "receipt_cid",
+        "target_graph_cid",
+        "resolved_curies",
+        "grounding_confidence"
+      ],
+      "title": "CrosswalkResolutionReceipt",
       "type": "object"
     },
     "CryptographicProvenancePolicy": {
@@ -12775,6 +12863,36 @@
       "title": "LineageWatermarkReceipt",
       "type": "object"
     },
+    "LinkMLValidationSLA": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes Graph-Shape Governance, acting as the execution contract instructing the orchestrator to validate extracted nodes and edges against an external LinkML YAML shape graph before committing them.\n\nCAUSAL AFFORDANCE: Forces the structural validation of all causal edges. Authorizes the orchestrator to mechanically sever relations that violate the predicate's declared Domain, Range, or Cardinality constraints.\n\nEPISTEMIC BOUNDS: The `linkml_schema_uri` strictly clamps the topological ruleset to a remote, verifiable YAML definition.\n\nMCP ROUTING TRIGGERS: LinkML, Graph-Shape Governance, Structural Isomorphism, SHACL, Domain and Range Enforcement",
+      "properties": {
+        "linkml_schema_uri": {
+          "description": "RFC 8785 canonicalized URI pointing to the canonical LinkML YAML definition.",
+          "format": "uri",
+          "minLength": 1,
+          "title": "Linkml Schema Uri",
+          "type": "string"
+        },
+        "strict_domain_range_checking": {
+          "default": true,
+          "description": "If True, the orchestrator physically severs any CausalDirectedEdgeState where the subject/object node classes violate the predicate's declared LinkML domain/range.",
+          "title": "Strict Domain Range Checking",
+          "type": "boolean"
+        },
+        "allow_unmapped_entities": {
+          "default": false,
+          "description": "A boolean gate dictating whether the resulting graph is permitted to retain high-entropy text nodes that OntoGPT failed to resolve into a formal CURIE.",
+          "title": "Allow Unmapped Entities",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "linkml_schema_uri"
+      ],
+      "title": "LinkMLValidationSLA",
+      "type": "object"
+    },
     "LogitSteganographyContract": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographic mandate for neural watermarking. Uses a Pseudo-Random Function (PRF) seeded by previous token context to deterministically split the vocabulary during Gumbel-Softmax sampling.\n\nCAUSAL AFFORDANCE: Physically manipulates the LLM's residual stream logit distribution just before the final softmax activation, embedding an undeniable, high-entropy Shannon information signature directly into the generated text without degrading model perplexity.\n\nEPISTEMIC BOUNDS: Injection is mathematically clamped by `watermark_strength_delta` (`gt=0.0, le=1.0`). Resistance to cropping attacks is geometrically enforced by `context_history_window` (`ge=0, le=1000000000`). Information density is bounded by `target_bits_per_token` (`gt=0.0, le=1000000000.0`). Locked by `prf_seed_hash` (SHA-256).\n\nMCP ROUTING TRIGGERS: Logit Steganography, Gumbel-Softmax Watermarking, Pseudo-Random Function, Shannon Entropy, Provenance Tracking",
@@ -14373,6 +14491,60 @@
         "require_isometry_proof"
       ],
       "title": "OntologicalAlignmentPolicy",
+      "type": "object"
+    },
+    "OntologicalCrosswalkIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A kinetic trigger instructing the orchestrator to route an array of ungrounded text entities through a grounding oracle (OntoGPT/OAK) to map them to formal ontology CURIEs.\n\nCAUSAL AFFORDANCE: Authorizes the runtime to execute Bipartite Ontological Mapping, collapsing high-entropy natural language strings into zero-entropy Semantic Web identifiers.\n\nEPISTEMIC BOUNDS: The search space is rigidly clamped by the `target_ontology_registries` array (e.g., ['MONDO', 'HP']). The `minimum_isometry_threshold` physically restricts acceptable mappings to a strictly positive cosine/BM25 similarity (`ge=0.0, le=1.0`).\n\nMCP ROUTING TRIGGERS: Bipartite Ontological Mapping, Grounding Oracle, CURIE Resolution, Isometry Thresholding, Semantic Crosswalk",
+      "properties": {
+        "topology_class": {
+          "const": "ontological_crosswalk",
+          "default": "ontological_crosswalk",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "target_graph_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Target Graph Cid",
+          "type": "string"
+        },
+        "source_strings": {
+          "description": "The ungrounded natural language concepts extracted by the LLM.",
+          "items": {
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Source Strings",
+          "type": "array"
+        },
+        "target_ontology_registries": {
+          "description": "The strictly typed standard ontology namespaces to search (e.g., 'MONDO', 'CHEBI').",
+          "items": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Target Ontology Registries",
+          "type": "array"
+        },
+        "minimum_isometry_threshold": {
+          "description": "The semantic distance threshold required to automatically accept a mapping.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Minimum Isometry Threshold",
+          "type": "number"
+        }
+      },
+      "required": [
+        "target_graph_cid",
+        "source_strings",
+        "target_ontology_registries",
+        "minimum_isometry_threshold"
+      ],
+      "title": "OntologicalCrosswalkIntent",
       "type": "object"
     },
     "OntologicalHandshakeReceipt": {
@@ -16461,6 +16633,18 @@
           ],
           "title": "Validation Failure Action",
           "type": "string"
+        },
+        "linkml_governance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LinkMLValidationSLA"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The structural shape constraints for the graph."
         }
       },
       "required": [
