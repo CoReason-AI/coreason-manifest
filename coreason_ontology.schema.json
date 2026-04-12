@@ -906,11 +906,15 @@
           "system_2_remediation": "#/$defs/System2RemediationIntent",
           "task_announcement": "#/$defs/TaskAnnouncementIntent",
           "taxonomic_restructure": "#/$defs/TaxonomicRestructureIntent",
-          "topological_projection": "#/$defs/TopologicalProjectionIntent"
+          "topological_projection": "#/$defs/TopologicalProjectionIntent",
+          "zero_trust_contract": "#/$defs/EpistemicZeroTrustContract"
         },
         "propertyName": "topology_class"
       },
       "oneOf": [
+        {
+          "$ref": "#/$defs/EpistemicZeroTrustContract"
+        },
         {
           "$ref": "#/$defs/SemanticIntent"
         },
@@ -1106,11 +1110,15 @@
           "system_fault": "#/$defs/SystemFaultEvent",
           "token_burn": "#/$defs/TokenBurnReceipt",
           "tool_invocation": "#/$defs/ToolInvocationEvent",
-          "verdict": "#/$defs/InterventionReceipt"
+          "verdict": "#/$defs/InterventionReceipt",
+          "zero_trust_receipt": "#/$defs/EpistemicZeroTrustReceipt"
         },
         "propertyName": "topology_class"
       },
       "oneOf": [
+        {
+          "$ref": "#/$defs/EpistemicZeroTrustReceipt"
+        },
         {
           "$ref": "#/$defs/ObservationEvent"
         },
@@ -7495,6 +7503,30 @@
       "title": "EpistemicCompressionSLA",
       "type": "object"
     },
+    "EpistemicConstraintPolicy": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A mathematical invariant evaluated against an LLM's proxy-based structural plan.\n\nCAUSAL AFFORDANCE: Enables SymbolicAI's Design-by-Contract (DbC) autonomous correction loop during test-time compute.\n\nEPISTEMIC BOUNDS: `assertion_ast` must be a strictly parsable Python AST string. It structurally prohibits imports, assignments, or kinetic network calls to guarantee safe downstream evaluation.\n\nMCP ROUTING TRIGGERS: Design-by-Contract, AST Evaluation, Invariant Checking, SymbolicAI DbC, Zero-Trust Execution",
+      "properties": {
+        "assertion_ast": {
+          "description": "Strict AST-parsable string constraint (e.g., 'len(plan.outputs) == len(plan.inputs)').",
+          "maxLength": 1024,
+          "title": "Assertion Ast",
+          "type": "string"
+        },
+        "remediation_prompt": {
+          "description": "The exact semantic prompt injected into the LLM if the AST assertion collapses natively.",
+          "maxLength": 2048,
+          "title": "Remediation Prompt",
+          "type": "string"
+        }
+      },
+      "required": [
+        "assertion_ast",
+        "remediation_prompt"
+      ],
+      "title": "EpistemicConstraintPolicy",
+      "type": "object"
+    },
     "EpistemicCurriculumManifest": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Curriculum Learning and Experience Replay manifolds,\nserving as the definitive batch transport layer for continuous swarm optimization. As a\n...Manifest suffix, this defines a frozen, N-dimensional coordinate state.\n\nCAUSAL AFFORDANCE: Injects a validated cluster of EpistemicGroundedTaskManifest\nprimitives into the decentralized training pipeline, forcing deterministic policy\ngradient updates across all subscribing nodes.\n\nEPISTEMIC BOUNDS: The tasks array requires min_length=1 to prevent empty compute\ncycles. To guarantee zero-trust distribution and prevent Byzantine hash fractures, the\n@model_validator sort_tasks mechanically sorts the array by task_cid, ensuring perfect\nRFC 8785 canonical hashing. Anchored by a 128-char curriculum_cid CID.\n\nMCP ROUTING TRIGGERS: Curriculum Learning, Experience Replay, Policy Gradient,\nCanonical Hashing, Knowledge Distillation",
@@ -8765,6 +8797,162 @@
         "justification_vectors"
       ],
       "title": "EpistemicUpsamplingTask",
+      "type": "object"
+    },
+    "EpistemicZeroTrustContract": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The macroscopic task topology combining OpenSymbolicAI's data masking with SymbolicAI's logic enforcement.\n\nCAUSAL AFFORDANCE: Triggers the runtime to initiate a blind LLM inference cycle bounded by rigid mathematical proofs.\n\nEPISTEMIC BOUNDS: Bounded to a maximum of 10 remediation epochs to prevent thermodynamic free energy exhaustion. Arrays are deterministically sorted for RFC 8785 canonicalization.\n\nMCP ROUTING TRIGGERS: Bipartite Proposer-Verifier, Test-Time Compute, Zero-Trust Execution, Active Inference, Contract Topology",
+      "properties": {
+        "topology_class": {
+          "const": "zero_trust_contract",
+          "default": "zero_trust_contract",
+          "description": "Discriminator for a zero-trust contract.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "intent_id": {
+          "description": "UUIDv7 mapping to the ledger.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Intent Id",
+          "type": "string"
+        },
+        "semantic_planning_task": {
+          "description": "The core semantic instruction for the blind LLM planner.",
+          "maxLength": 4096,
+          "title": "Semantic Planning Task",
+          "type": "string"
+        },
+        "schema_blueprint_name": {
+          "description": "The registered URI of the Pydantic schema used to generate the proxies.",
+          "maxLength": 256,
+          "title": "Schema Blueprint Name",
+          "type": "string"
+        },
+        "structural_pre_conditions": {
+          "description": "DbC bounds checked before inference.",
+          "items": {
+            "$ref": "#/$defs/EpistemicConstraintPolicy"
+          },
+          "title": "Structural Pre Conditions",
+          "type": "array"
+        },
+        "structural_post_conditions": {
+          "description": "DbC bounds checked after inference to ensure the structural plan is valid.",
+          "items": {
+            "$ref": "#/$defs/EpistemicConstraintPolicy"
+          },
+          "title": "Structural Post Conditions",
+          "type": "array"
+        },
+        "max_planning_remediation_epochs": {
+          "default": 3,
+          "description": "Thermodynamic cap on SymbolicAI DbC retries.",
+          "maximum": 10,
+          "minimum": 0,
+          "title": "Max Planning Remediation Epochs",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "intent_id",
+        "semantic_planning_task",
+        "schema_blueprint_name"
+      ],
+      "title": "EpistemicZeroTrustContract",
+      "type": "object"
+    },
+    "EpistemicZeroTrustReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact proving the flawless execution of an EpistemicZeroTrustContract.\n\nCAUSAL AFFORDANCE: Permits the orchestrator to append the transmuted payload to the global immutable ledger, certifying that prompt injection was structurally impossible and AST contracts were fulfilled.\n\nEPISTEMIC BOUNDS: `firewall_breach_detected` must strictly be False. Hashes are bounded to RFC 8785 canonicalization requirements.\n\nMCP ROUTING TRIGGERS: Cryptographic Ledger, Formal Verification Receipt, Immutable Provenance, Hash Canonicalization, Data Masking",
+      "properties": {
+        "event_cid": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "topology_class": {
+          "const": "zero_trust_receipt",
+          "default": "zero_trust_receipt",
+          "description": "Discriminator for a zero-trust receipt.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "intent_reference_id": {
+          "description": "Pointer to the originating EpistemicZeroTrustContract.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Intent Reference Id",
+          "type": "string"
+        },
+        "llm_blind_plan_hash": {
+          "description": "RFC 8785 hash of the proxy-only structural logic generated by the LLM.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Llm Blind Plan Hash",
+          "type": "string"
+        },
+        "firewall_breach_detected": {
+          "const": false,
+          "default": false,
+          "description": "A strictly False literal guaranteeing no raw entropy leaked into the LLM context.",
+          "title": "Firewall Breach Detected",
+          "type": "boolean"
+        },
+        "remediation_epochs_consumed": {
+          "description": "The exact count of DbC retries required.",
+          "maximum": 10,
+          "minimum": 0,
+          "title": "Remediation Epochs Consumed",
+          "type": "integer"
+        },
+        "transmuted_payload_hash": {
+          "description": "RFC 8785 canonical hash of the final executed payload.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Transmuted Payload Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "event_cid",
+        "timestamp",
+        "intent_reference_id",
+        "llm_blind_plan_hash",
+        "remediation_epochs_consumed",
+        "transmuted_payload_hash"
+      ],
+      "title": "EpistemicZeroTrustReceipt",
       "type": "object"
     },
     "EscalationContract": {
