@@ -6921,7 +6921,8 @@ class EpistemicLean4Premise(CoreasonBaseState):
     topology_class: Literal["epistemic_lean4_premise"] = Field(default="epistemic_lean4_premise")
     ontology_node_id: NodeCIDState
     environment_imports: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
-        default_factory=lambda: ["Mathlib"], json_schema_extra={"coreason_topological_exemption": True}
+        default_factory=lambda: ["Mathlib"], json_schema_extra={"coreason_topological_exemption": True},
+        json_schema_extra={"coreason_topological_exemption": True},
     )
     formal_statement: Annotated[str, StringConstraints(min_length=1, max_length=10000)]
     tactic_proof: Annotated[str, StringConstraints(min_length=1, max_length=100000)]
@@ -11591,6 +11592,7 @@ class HierarchicalDOMManifest(CoreasonBaseState):
         json_schema_extra={"coreason_topological_exemption": True},
         # Note: containment_edges is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
         description="Directed edges defining the parent-child spatial containment (Parent -> Child).",
+        json_schema_extra={"coreason_topological_exemption": True},
     )
 
     @model_validator(mode="after")
