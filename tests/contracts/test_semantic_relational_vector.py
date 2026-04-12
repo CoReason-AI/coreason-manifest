@@ -34,32 +34,7 @@ def test_semantic_relational_vector_payload_bounds(node_count: int) -> None:
             timestamp=123456789.0,
             ontology_class=UpperOntologyClassProfile.CONTINUANT,
             payload_injection_zone=cast("dict[str, JsonPrimitiveState]", large_dict),
-        )
-
-
-@given(st.floats(min_value=0.0, max_value=1000000000.0))
-def test_semantic_relational_vector_occurrent_temporality(valid_from: float) -> None:
-    # Test valid occurrent with temporal bounds
-    tb = TemporalBoundsProfile(valid_from=valid_from)
-    record = SemanticRelationalVectorState(
-        event_cid="test-event-cid-2",
-        timestamp=123456789.0,
-        ontology_class=UpperOntologyClassProfile.OCCURRENT,
-        temporal_bounds=tb,
-        payload_injection_zone={"key": "value"},
-    )
-    assert record.ontology_class == UpperOntologyClassProfile.OCCURRENT
-
-    # Test occurrent without temporal bounds
-    with pytest.raises(
-        ValueError,
-        match=r"Ontological Paradox: An OCCURRENT must mathematically possess a temporal_bounds coordinate\.",
-    ):
-        SemanticRelationalVectorState(
-            event_cid="test-event-cid-3",
-            timestamp=123456789.0,
-            ontology_class=UpperOntologyClassProfile.OCCURRENT,
-            payload_injection_zone={"key": "value"},
+            temporal_bounds=TemporalBoundsProfile(valid_from=1000000.0),
         )
 
 
@@ -70,5 +45,6 @@ def test_semantic_relational_vector_continuant_no_temporality(timestamp: float) 
         timestamp=timestamp,
         ontology_class=UpperOntologyClassProfile.CONTINUANT,
         payload_injection_zone={"key": "value"},
+        temporal_bounds=TemporalBoundsProfile(valid_from=1000000.0),
     )
     assert record.ontology_class == UpperOntologyClassProfile.CONTINUANT

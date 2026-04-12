@@ -18,6 +18,7 @@ from coreason_manifest.spec.ontology import (
     EpistemicProvenanceReceipt,
     ObservationEvent,
     SemanticNodeState,
+    TemporalBoundsProfile,
 )
 
 
@@ -47,6 +48,7 @@ def test_defeasible_quarantine() -> None:
                         extracted_by="did:coreason:agent-1",
                         derivation_mode=DerivationModeProfile.DIRECT_TRANSLATION,
                     ),
+                    temporal_bounds=TemporalBoundsProfile(valid_from=1000000.0),
                 )
             },
             active_cascades=[

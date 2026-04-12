@@ -1099,7 +1099,7 @@ def test_epic5_global_semantic_invariant_profile_sorting() -> None:
         invariant_cid="invariant_1",
         categorical_cohorts=["Zebra", "Apple"],
         operational_perimeters={"test": "me"},
-        temporal_observation_horizons=[TemporalBoundsProfile(valid_from=None), TemporalBoundsProfile(valid_from=5.0)],
+        temporal_observation_horizons=[TemporalBoundsProfile(valid_from=0.0), TemporalBoundsProfile(valid_from=5.0)],
     )
     assert profile.categorical_cohorts == ["Apple", "Zebra"]
 
