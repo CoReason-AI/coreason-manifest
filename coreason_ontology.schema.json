@@ -1075,6 +1075,7 @@
       "discriminator": {
         "mapping": {
           "adjudication_receipt": "#/$defs/AdjudicationReceipt",
+          "artifact_corruption": "#/$defs/ArtifactCorruptionEvent",
           "atomic_proposition": "#/$defs/AtomicPropositionState",
           "barge_in": "#/$defs/BargeInInterruptEvent",
           "belief_modulation": "#/$defs/BeliefModulationReceipt",
@@ -1125,6 +1126,9 @@
         },
         {
           "$ref": "#/$defs/PostCoordinatedSemanticState"
+        },
+        {
+          "$ref": "#/$defs/ArtifactCorruptionEvent"
         },
         {
           "$ref": "#/$defs/HypothesisGenerationEvent"
@@ -1241,6 +1245,7 @@
           "document_knowledge_graph": "#/$defs/DocumentKnowledgeGraphManifest",
           "evaluator_optimizer": "#/$defs/EvaluatorOptimizerTopologyManifest",
           "evolutionary": "#/$defs/EvolutionaryTopologyManifest",
+          "hierarchical_dom": "#/$defs/HierarchicalDOMManifest",
           "macro_adversarial": "#/$defs/AdversarialMarketTopologyManifest",
           "macro_elicitation": "#/$defs/IntentElicitationTopologyManifest",
           "macro_federation": "#/$defs/ConsensusFederationTopologyManifest",
@@ -1293,6 +1298,9 @@
         },
         {
           "$ref": "#/$defs/DocumentKnowledgeGraphManifest"
+        },
+        {
+          "$ref": "#/$defs/HierarchicalDOMManifest"
         }
       ]
     },
@@ -1312,6 +1320,78 @@
           "$ref": "#/$defs/CyclicEdgeProfile"
         }
       ]
+    },
+    "ArtifactCorruptionEvent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A terminal state representing catastrophic physical failure of the ingestion engine (e.g., Docling segfaults on malformed bytes).\n\nCAUSAL AFFORDANCE: Emits an immediate circuit breaker to the orchestrator, cleanly severing the ingestion branch and preventing systemic DAG collapse.\n\nEPISTEMIC BOUNDS: Evaluated via a strict Literal automaton classifying the failure physics.\n\nMCP ROUTING TRIGGERS: Artifact Contagion Prevention, Terminal Fault, VLM Crash, Malformed Bytes, DRM Lock",
+      "properties": {
+        "event_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "topology_class": {
+          "const": "artifact_corruption",
+          "default": "artifact_corruption",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "artifact_cid": {
+          "description": "The genesis artifact that caused the ingestion engine to crash.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Artifact Cid",
+          "type": "string"
+        },
+        "corruption_class": {
+          "enum": [
+            "drm_locked",
+            "malformed_bytes",
+            "ocr_failure",
+            "unsupported_format"
+          ],
+          "title": "Corruption Class",
+          "type": "string"
+        },
+        "diagnostic_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Diagnostic Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "event_cid",
+        "timestamp",
+        "artifact_cid",
+        "corruption_class",
+        "diagnostic_hash"
+      ],
+      "title": "ArtifactCorruptionEvent",
+      "type": "object"
     },
     "AsymptoticComplexityReceipt": {
       "additionalProperties": false,
@@ -6634,6 +6714,17 @@
           "title": "Block Class",
           "type": "string"
         },
+        "tabular_matrix": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TabularMatrixProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "anchor": {
           "$ref": "#/$defs/MultimodalTokenAnchorState",
           "description": "The strict visual and token coordinate bindings for this block."
@@ -8655,7 +8746,7 @@
     },
     "EpistemicTransmutationTask": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Orchestrates Cross-Modal Representation Alignment,\ndeterministically transmuting unstructured artifacts into machine-readable\nN-dimensional tensors or discrete graphs. As a ...Task suffix, this represents\nan authorized kinetic execution trigger.\n\nCAUSAL AFFORDANCE: Forces the orchestrator's VLM or extraction engine to process\nthe artifact_event_cid (128-char CID) and project it into target_modalities\n(5-value Literal, min_length=1) while strictly adhering to the attached\ncompression_sla (EpistemicCompressionSLA).\n\nEPISTEMIC BOUNDS: The @model_validator validate_grounding_density_for_visuals\nrejects sparse grounding for visual/tabular modalities. The @model_validator\nsort_arrays deterministically sorts target_modalities for RFC 8785 canonical\nhashing. The optional execution_cost_budget_magnitude (int | None,\nle=1000000000, ge=0, default=None) caps thermodynamic cost.\n\nMCP ROUTING TRIGGERS: Cross-Modal Alignment, Representation Engineering,\nMultimodal Extraction, VLM Transmutation, Deterministic Projection",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Orchestrates Cross-Modal Representation Alignment,\ndeterministically transmuting unstructured artifacts into machine-readable\nN-dimensional tensors or discrete graphs. As a ...Task suffix, this represents\nan authorized kinetic execution trigger.\n\nCAUSAL AFFORDANCE: Forces the orchestrator's VLM or extraction engine to process\nthe artifact_event_cid (128-char CID) and project it into target_modalities\n(5-value Literal, min_length=1) while strictly adhering to the attached\noptical_governance (OpticalParsingSLA) and schema_governance (SchemaDrivenExtractionSLA).\n\nEPISTEMIC BOUNDS: The @model_validator validate_optical_governance_presence\nrejects extracting raster_image or tabular_grid without proper OpticalParsingSLA configuration. The @model_validator\nsort_arrays deterministically sorts target_modalities for RFC 8785 canonical\nhashing. The optional execution_cost_budget_magnitude (int | None,\nle=1000000000, ge=0, default=None) caps thermodynamic cost.\n\nMCP ROUTING TRIGGERS: Cross-Modal Alignment, Representation Engineering,\nMultimodal Extraction, VLM Transmutation, Deterministic Projection",
       "properties": {
         "task_cid": {
           "description": "Unique identifier for this specific multimodal extraction intervention.",
@@ -8700,6 +8791,18 @@
             }
           ],
           "default": null
+        },
+        "optical_governance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OpticalParsingSLA"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The structural boundaries for visual extraction."
         },
         "execution_cost_budget_magnitude": {
           "anyOf": [
@@ -10689,6 +10792,69 @@
         "hardware_signature_blob"
       ],
       "title": "HardwareEnclaveReceipt",
+      "type": "object"
+    },
+    "HierarchicalDOMManifest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A verifiable Directed Acyclic Graph (DAG) representing the nested visual and logical containment of an ingested multimodal artifact (e.g., Docling Output).\n\nCAUSAL AFFORDANCE: Replaces flat token arrays with an adjacency matrix, instructing the orchestrator exactly how spatial blocks physically encapsulate one another.\n\nEPISTEMIC BOUNDS: Dictionary sizes are volumetrically clamped (`max_length=100000`). The `verify_dom_dag_integrity` `@model_validator` executes a DFS mathematical proof via networkx to guarantee the absence of cyclical containment paradoxes.\n\nMCP ROUTING TRIGGERS: Spatial-Semantic Isomorphism, Document Object Model, Containment DAG, Visual Hierarchy, Rhetorical Bounding",
+      "properties": {
+        "topology_class": {
+          "const": "hierarchical_dom",
+          "default": "hierarchical_dom",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "dom_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Dom Cid",
+          "type": "string"
+        },
+        "root_block_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Root Block Cid",
+          "type": "string"
+        },
+        "blocks": {
+          "additionalProperties": {
+            "$ref": "#/$defs/DocumentLayoutRegionState"
+          },
+          "description": "The localized registry of all extracted spatial blocks.",
+          "maxProperties": 100000,
+          "propertyNames": {
+            "maxLength": 255
+          },
+          "title": "Blocks",
+          "type": "object"
+        },
+        "containment_edges": {
+          "description": "Directed edges defining the parent-child spatial containment (Parent -> Child).",
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "type": "array"
+          },
+          "title": "Containment Edges",
+          "type": "array"
+        }
+      },
+      "required": [
+        "dom_cid",
+        "root_block_cid",
+        "blocks"
+      ],
+      "title": "HierarchicalDOMManifest",
       "type": "object"
     },
     "HoareLogicProofReceipt": {
@@ -14281,6 +14447,34 @@
         "prism_target_pointer"
       ],
       "title": "OpticalMappingContract",
+      "type": "object"
+    },
+    "OpticalParsingSLA": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes the hardware and thermodynamic boundaries for the Docling vision models, dictating the deployment of Real-Time Detection Transformers (RT-DETR).\n\nCAUSAL AFFORDANCE: Physically acts as a computational throttle, authorizing the orchestrator to deploy expensive pixel-level Optical Character Recognition (OCR) and Table Structure Recognition (TSR) models over standard byte-extraction.\n\nEPISTEMIC BOUNDS: The `bitmap_dpi_resolution` is physically clamped to `ge=72, le=600` to mathematically prevent VRAM memory bombs on oversized, high-density raster images.\n\nMCP ROUTING TRIGGERS: Optical Thermodynamic Bounding, RT-DETR, VRAM Throttling, LayoutLMv3, Hardware Guillotine",
+      "properties": {
+        "force_ocr": {
+          "default": false,
+          "description": "Boolean gate authorizing deep optical evaluation when native PDF byte-extraction fails.",
+          "title": "Force Ocr",
+          "type": "boolean"
+        },
+        "bitmap_dpi_resolution": {
+          "default": 72,
+          "description": "The strict maximum spatial resolution authorized for rendering rasterized tensors.",
+          "maximum": 600,
+          "minimum": 72,
+          "title": "Bitmap Dpi Resolution",
+          "type": "integer"
+        },
+        "table_structure_recognition": {
+          "default": true,
+          "description": "Authorizes the deployment of dense bipartite mapping models (e.g., TableFormer) over tabular grids.",
+          "title": "Table Structure Recognition",
+          "type": "boolean"
+        }
+      },
+      "title": "OpticalParsingSLA",
       "type": "object"
     },
     "OptimizationDirectionProfile": {
@@ -18136,6 +18330,59 @@
       "title": "SystemFaultEvent",
       "type": "object"
     },
+    "TabularCellState": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative, discrete spatial vertex mapping an exact cell coordinate within a 2D relational matrix.\n\nCAUSAL AFFORDANCE: Instructs the Table Structure Recognition engine to project extracted strings into precise Cartesian coordinates, preventing semantic flattening.\n\nEPISTEMIC BOUNDS: Spatial geometry is clamped by non-negative `row_index` and `column_index` (`ge=0`). Span integers are strictly positive (`ge=1`). The payload is clamped at `max_length=10000` to prevent dictionary bombing.\n\nMCP ROUTING TRIGGERS: Tabular Matrix Geometry, Table Structure Recognition, Bipartite Graph, Cartesian Coordinate, Spatial Grid",
+      "properties": {
+        "cell_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Cell Cid",
+          "type": "string"
+        },
+        "row_index": {
+          "description": "The primary Cartesian Y-coordinate of the cell.",
+          "minimum": 0,
+          "title": "Row Index",
+          "type": "integer"
+        },
+        "column_index": {
+          "description": "The primary Cartesian X-coordinate of the cell.",
+          "minimum": 0,
+          "title": "Column Index",
+          "type": "integer"
+        },
+        "row_span": {
+          "default": 1,
+          "description": "The vertical geometric span of the cell.",
+          "minimum": 1,
+          "title": "Row Span",
+          "type": "integer"
+        },
+        "column_span": {
+          "default": 1,
+          "description": "The horizontal geometric span of the cell.",
+          "minimum": 1,
+          "title": "Column Span",
+          "type": "integer"
+        },
+        "text_payload": {
+          "description": "The extracted atomic data point within the cell.",
+          "maxLength": 10000,
+          "title": "Text Payload",
+          "type": "string"
+        }
+      },
+      "required": [
+        "cell_cid",
+        "row_index",
+        "column_index",
+        "text_payload"
+      ],
+      "title": "TabularCellState",
+      "type": "object"
+    },
     "TabularEncodingProfile": {
       "description": "AGENT INSTRUCTION: Dictates the exact algorithmic mechanism the orchestrator must use to compress an untyped payload_injection_zone into a holistic high-dimensional VectorEmbeddingState, capturing multivariate covariance.",
       "enum": [
@@ -18145,6 +18392,45 @@
       ],
       "title": "TabularEncodingProfile",
       "type": "string"
+    },
+    "TabularMatrixProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative envelope defining a localized 2D bipartite tabular graph.\n\nCAUSAL AFFORDANCE: Isolates dense relational data grids from standard 1D text extraction, permitting downstream agents to execute spatial querying.\n\nEPISTEMIC BOUNDS: Total dimensions bounded `ge=1`. The `validate_matrix_physics` `@model_validator` mathematically guarantees no cell violates Euclidean space by exceeding `total_rows` or `total_columns`.\n\nMCP ROUTING TRIGGERS: TableFormer, Relational Matrix, Grid Topology, Spatial Bounding, 2D Array",
+      "properties": {
+        "matrix_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Matrix Cid",
+          "type": "string"
+        },
+        "total_rows": {
+          "minimum": 1,
+          "title": "Total Rows",
+          "type": "integer"
+        },
+        "total_columns": {
+          "minimum": 1,
+          "title": "Total Columns",
+          "type": "integer"
+        },
+        "cells": {
+          "description": "The complete, sorted array of constituent cell geometries.",
+          "items": {
+            "$ref": "#/$defs/TabularCellState"
+          },
+          "title": "Cells",
+          "type": "array"
+        }
+      },
+      "required": [
+        "matrix_cid",
+        "total_rows",
+        "total_columns",
+        "cells"
+      ],
+      "title": "TabularMatrixProfile",
+      "type": "object"
     },
     "TargetTopologyProfile": {
       "enum": [

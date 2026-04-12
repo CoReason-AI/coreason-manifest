@@ -217,11 +217,20 @@ def align_semantic_manifolds(
             max_schema_retries=3,
             validation_failure_action="escalate_to_human",
         )
+    from coreason_manifest.spec.ontology import OpticalParsingSLA
+
+    optical_governance = None
+    if "raster_image" in target_modalities or "tabular_grid" in target_modalities:
+        optical_governance = OpticalParsingSLA(
+            force_ocr=False, bitmap_dpi_resolution=72, table_structure_recognition=True
+        )
+
     return EpistemicTransmutationTask(
         task_cid=task_cid,
         artifact_event_cid=artifact_event_cid,
         target_modalities=list(target_modalities),
         schema_governance=schema_governance,
+        optical_governance=optical_governance,
     )
 
 

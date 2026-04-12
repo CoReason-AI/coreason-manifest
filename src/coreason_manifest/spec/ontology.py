@@ -4520,6 +4520,58 @@ class DiversityPolicy(CoreasonBaseState):
     )
 
 
+class TabularCellState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A declarative, discrete spatial vertex mapping an exact cell coordinate within a 2D relational matrix.
+
+    CAUSAL AFFORDANCE: Instructs the Table Structure Recognition engine to project extracted strings into precise Cartesian coordinates, preventing semantic flattening.
+
+    EPISTEMIC BOUNDS: Spatial geometry is clamped by non-negative `row_index` and `column_index` (`ge=0`). Span integers are strictly positive (`ge=1`). The payload is clamped at `max_length=10000` to prevent dictionary bombing.
+
+    MCP ROUTING TRIGGERS: Tabular Matrix Geometry, Table Structure Recognition, Bipartite Graph, Cartesian Coordinate, Spatial Grid
+    """
+
+    cell_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    row_index: int = Field(ge=0, description="The primary Cartesian Y-coordinate of the cell.")
+    column_index: int = Field(ge=0, description="The primary Cartesian X-coordinate of the cell.")
+    row_span: int = Field(ge=1, default=1, description="The vertical geometric span of the cell.")
+    column_span: int = Field(ge=1, default=1, description="The horizontal geometric span of the cell.")
+    text_payload: Annotated[str, StringConstraints(max_length=10000)] = Field(
+        description="The extracted atomic data point within the cell."
+    )
+
+
+class TabularMatrixProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A declarative envelope defining a localized 2D bipartite tabular graph.
+
+    CAUSAL AFFORDANCE: Isolates dense relational data grids from standard 1D text extraction, permitting downstream agents to execute spatial querying.
+
+    EPISTEMIC BOUNDS: Total dimensions bounded `ge=1`. The `validate_matrix_physics` `@model_validator` mathematically guarantees no cell violates Euclidean space by exceeding `total_rows` or `total_columns`.
+
+    MCP ROUTING TRIGGERS: TableFormer, Relational Matrix, Grid Topology, Spatial Bounding, 2D Array
+    """
+
+    matrix_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    total_rows: int = Field(ge=1)
+    total_columns: int = Field(ge=1)
+    cells: list[TabularCellState] = Field(description="The complete, sorted array of constituent cell geometries.")
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        import operator
+
+        object.__setattr__(self, "cells", sorted(self.cells, key=operator.attrgetter("cell_cid")))
+        return self
+
+    @model_validator(mode="after")
+    def validate_matrix_physics(self) -> Self:
+        for cell in self.cells:
+            if cell.row_index >= self.total_rows or cell.column_index >= self.total_columns:
+                raise ValueError("Topological Contradiction: Tabular cell geometry exceeds defined matrix dimensions.")
+        return self
+
+
 class DocumentLayoutRegionState(CoreasonBaseState):
     """
     AGENT INSTRUCTION: A discrete topological bounding box within a formalized
@@ -4555,9 +4607,18 @@ class DocumentLayoutRegionState(CoreasonBaseState):
         "code_block",
         "form_field",
     ] = Field(description="The taxonomic classification of the layout region.")
+    tabular_matrix: TabularMatrixProfile | None = Field(default=None)
     anchor: MultimodalTokenAnchorState = Field(
         description="The strict visual and token coordinate bindings for this block."
     )
+
+    @model_validator(mode="after")
+    def enforce_tabular_alignment(self) -> Self:
+        if getattr(self, "tabular_matrix", None) is not None and self.block_class != "table":
+            raise ValueError(
+                "Topological Contradiction: tabular_matrix can only be populated if block_class is 'table'."
+            )
+        return self
 
 
 class DocumentLayoutManifest(CoreasonBaseState):
@@ -5136,6 +5197,33 @@ class EvidentiaryGroundingSLA(CoreasonBaseState):
         return self
 
 
+class OpticalParsingSLA(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Establishes the hardware and thermodynamic boundaries for the Docling vision models, dictating the deployment of Real-Time Detection Transformers (RT-DETR).
+
+    CAUSAL AFFORDANCE: Physically acts as a computational throttle, authorizing the orchestrator to deploy expensive pixel-level Optical Character Recognition (OCR) and Table Structure Recognition (TSR) models over standard byte-extraction.
+
+    EPISTEMIC BOUNDS: The `bitmap_dpi_resolution` is physically clamped to `ge=72, le=600` to mathematically prevent VRAM memory bombs on oversized, high-density raster images.
+
+    MCP ROUTING TRIGGERS: Optical Thermodynamic Bounding, RT-DETR, VRAM Throttling, LayoutLMv3, Hardware Guillotine
+    """
+
+    force_ocr: bool = Field(
+        default=False,
+        description="Boolean gate authorizing deep optical evaluation when native PDF byte-extraction fails.",
+    )
+    bitmap_dpi_resolution: int = Field(
+        ge=72,
+        le=600,
+        default=72,
+        description="The strict maximum spatial resolution authorized for rendering rasterized tensors.",
+    )
+    table_structure_recognition: bool = Field(
+        default=True,
+        description="Authorizes the deployment of dense bipartite mapping models (e.g., TableFormer) over tabular grids.",
+    )
+
+
 class EpistemicTransmutationTask(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Orchestrates Cross-Modal Representation Alignment,
@@ -5146,10 +5234,10 @@ class EpistemicTransmutationTask(CoreasonBaseState):
     CAUSAL AFFORDANCE: Forces the orchestrator's VLM or extraction engine to process
     the artifact_event_cid (128-char CID) and project it into target_modalities
     (5-value Literal, min_length=1) while strictly adhering to the attached
-    compression_sla (EpistemicCompressionSLA).
+    optical_governance (OpticalParsingSLA) and schema_governance (SchemaDrivenExtractionSLA).
 
-    EPISTEMIC BOUNDS: The @model_validator validate_grounding_density_for_visuals
-    rejects sparse grounding for visual/tabular modalities. The @model_validator
+    EPISTEMIC BOUNDS: The @model_validator validate_optical_governance_presence
+    rejects extracting raster_image or tabular_grid without proper OpticalParsingSLA configuration. The @model_validator
     sort_arrays deterministically sorts target_modalities for RFC 8785 canonical
     hashing. The optional execution_cost_budget_magnitude (int | None,
     le=1000000000, ge=0, default=None) caps thermodynamic cost.
@@ -5170,6 +5258,9 @@ class EpistemicTransmutationTask(CoreasonBaseState):
         Literal["text", "raster_image", "vector_graphics", "tabular_grid", "n_dimensional_tensor", "semantic_graph"]
     ] = Field(min_length=1, description="The specific SOTA modality resolutions required for this extraction pass.")
     schema_governance: SchemaDrivenExtractionSLA | None = Field(default=None)
+    optical_governance: OpticalParsingSLA | None = Field(
+        default=None, description="The structural boundaries for visual extraction."
+    )
     execution_cost_budget_magnitude: int | None = Field(
         le=1000000000,
         default=None,
@@ -5181,6 +5272,16 @@ class EpistemicTransmutationTask(CoreasonBaseState):
     def validate_graph_schema_presence(self) -> Self:
         if "semantic_graph" in self.target_modalities and self.schema_governance is None:
             raise ValueError("schema_governance is strictly required when target_modalities includes 'semantic_graph'.")
+        return self
+
+    @model_validator(mode="after")
+    def validate_optical_governance_presence(self) -> Self:
+        if (
+            "raster_image" in self.target_modalities or "tabular_grid" in self.target_modalities
+        ) and self.optical_governance is None:
+            raise ValueError(
+                "Epistemic Violation: Extracting 'raster_image' or 'tabular_grid' mathematically requires an OpticalParsingSLA."
+            )
         return self
 
     @model_validator(mode="after")
@@ -10927,6 +11028,49 @@ class CognitiveAgentNodeProfile(CoreasonBaseState):
         return self
 
 
+class HierarchicalDOMManifest(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A verifiable Directed Acyclic Graph (DAG) representing the nested visual and logical containment of an ingested multimodal artifact (e.g., Docling Output).
+
+    CAUSAL AFFORDANCE: Replaces flat token arrays with an adjacency matrix, instructing the orchestrator exactly how spatial blocks physically encapsulate one another.
+
+    EPISTEMIC BOUNDS: Dictionary sizes are volumetrically clamped (`max_length=100000`). The `verify_dom_dag_integrity` `@model_validator` executes a DFS mathematical proof via networkx to guarantee the absence of cyclical containment paradoxes.
+
+    MCP ROUTING TRIGGERS: Spatial-Semantic Isomorphism, Document Object Model, Containment DAG, Visual Hierarchy, Rhetorical Bounding
+    """
+
+    topology_class: Literal["hierarchical_dom"] = "hierarchical_dom"
+    dom_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    root_block_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    blocks: dict[Annotated[str, StringConstraints(max_length=255)], DocumentLayoutRegionState] = Field(
+        max_length=100000, description="The localized registry of all extracted spatial blocks."
+    )
+    containment_edges: list[tuple[str, str]] = Field(
+        default_factory=list,
+        # Note: containment_edges is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
+        description="Directed edges defining the parent-child spatial containment (Parent -> Child).",
+    )
+
+    @model_validator(mode="after")
+    def verify_dom_dag_integrity(self) -> Self:
+        if self.root_block_cid not in self.blocks:
+            raise ValueError("Topological Contradiction: root_block_cid not found in blocks.")
+
+        graph: nx.DiGraph[Any] = nx.DiGraph()
+        for node_id in self.blocks:
+            graph.add_node(node_id)
+
+        for source, target in self.containment_edges:
+            if source not in self.blocks or target not in self.blocks:
+                raise ValueError("Ghost pointer: Containment edge references undefined block.")
+            graph.add_edge(source, target)
+
+        if not nx.is_directed_acyclic_graph(graph):
+            raise ValueError("Topological Contradiction: Hierarchical DOM tree contains a spatial cycle.")
+
+        return self
+
+
 type AnyNodeProfile = Annotated[
     CognitiveAgentNodeProfile
     | CognitiveHumanNodeProfile
@@ -12024,7 +12168,8 @@ type AnyTopologyManifest = Annotated[
     | IntentElicitationTopologyManifest
     | NeurosymbolicVerificationTopologyManifest
     | DiscourseTreeManifest
-    | DocumentKnowledgeGraphManifest,
+    | DocumentKnowledgeGraphManifest
+    | HierarchicalDOMManifest,
     Field(discriminator="topology_class", description="A discriminated union of workflow topologies."),
 ]
 
@@ -12464,6 +12609,33 @@ class ReasoningEngineeringPolicy(CoreasonBaseState):
     human_override_gradient: float = Field(
         ge=0.0, le=1.0, description="The absolute penalty applied to a prm_score if a human rejects the branch."
     )
+
+
+class ArtifactCorruptionEvent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A terminal state representing catastrophic physical failure of the ingestion engine (e.g., Docling segfaults on malformed bytes).
+
+    CAUSAL AFFORDANCE: Emits an immediate circuit breaker to the orchestrator, cleanly severing the ingestion branch and preventing systemic DAG collapse.
+
+    EPISTEMIC BOUNDS: Evaluated via a strict Literal automaton classifying the failure physics.
+
+    MCP ROUTING TRIGGERS: Artifact Contagion Prevention, Terminal Fault, VLM Crash, Malformed Bytes, DRM Lock
+    """
+
+    event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        ...
+    )
+    prior_event_hash: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
+    ) = Field(default=None)
+    timestamp: float = Field(ge=0.0, le=253402300799.0)
+
+    topology_class: Literal["artifact_corruption"] = "artifact_corruption"
+    artifact_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="The genesis artifact that caused the ingestion engine to crash."
+    )
+    corruption_class: Literal["drm_locked", "malformed_bytes", "ocr_failure", "unsupported_format"]
+    diagnostic_hash: Annotated[str, StringConstraints(pattern="^[a-f0-9]{64}$")]
 
 
 class EpistemicTelemetryEvent(CoreasonBaseState):
@@ -13607,6 +13779,7 @@ type AnyStateEvent = Annotated[
     | SystemFaultEvent
     | AtomicPropositionState
     | PostCoordinatedSemanticState
+    | ArtifactCorruptionEvent
     | HypothesisGenerationEvent
     | BargeInInterruptEvent
     | CounterfactualRegretEvent
@@ -14089,3 +14262,9 @@ RDFExportReceipt.model_rebuild()
 SchemaDrivenExtractionSLA.model_rebuild()
 EvidentiaryGroundingSLA.model_rebuild()
 EpistemicProxyState.model_rebuild()
+OpticalParsingSLA.model_rebuild()
+TabularCellState.model_rebuild()
+TabularMatrixProfile.model_rebuild()
+HierarchicalDOMManifest.model_rebuild()
+ArtifactCorruptionEvent.model_rebuild()
+EpistemicTransmutationTask.model_rebuild()
