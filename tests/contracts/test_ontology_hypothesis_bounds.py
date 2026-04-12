@@ -51,6 +51,8 @@ def test_topological_projection_intent_guillotine(v: float) -> None:
 def test_kl_divergence_paradox(v: float) -> None:
     with pytest.raises(ValidationError, match=r"Mathematical paradox:|Input should be a valid number"):
         EpistemicRejectionReceipt(
+            event_cid="receipt-123",
+            timestamp=100.0,
             receipt_cid="test",
             failed_projection_cid="test-1234",
             violated_algebraic_constraint="test",

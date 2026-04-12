@@ -847,63 +847,6 @@ class CryptographicProvenanceMixin(CoreasonBaseState):
     provenance_trace_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")] | None = Field(default=None)
 
 
-class TopologicalProjectionIntent(CryptographicProvenanceMixin):
-    """
-    AGENT INSTRUCTION: The transitional mathematical contract that calculates the Gromov-Wasserstein distance and authorizes or denies the collapse of a stochastic manifold into a deterministic structure.
-
-    CAUSAL AFFORDANCE: Calculates optimal transport mapping and either authorizes downstream kinetic execution or rejects the transition due to topology tears.
-
-    EPISTEMIC BOUNDS: Enforces a strict isomorphism confidence interval [0.0, 1.0], acting as a hardware-level guillotine that mandates a minimum 0.85 threshold.
-
-    MCP ROUTING TRIGGERS: Gromov-Wasserstein Distance, Topological Compiler, Optimal Transport Mapping, Manifold Collapse, Deterministic Projection
-    """
-
-    projection_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
-    source_superposition_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
-    target_topology: TargetTopologyEnum
-    isomorphism_confidence: float
-    lossy_translation_divergence: list[Annotated[str, StringConstraints(max_length=100000)]]
-    epistemic_status: Literal["pending_deterministic_collapse"] = Field(default="pending_deterministic_collapse")
-
-    @field_validator("isomorphism_confidence", mode="after")
-    @classmethod
-    def enforce_isomorphism_guillotine(cls, v: float) -> float:
-        if not (0.0 <= v <= 1.0):
-            raise ValueError("isomorphism_confidence must be between 0.0 and 1.0")
-        if v < 0.85:
-            raise ValueError(
-                f"Isomorphism Guillotine triggered: Confidence {v} is below the 0.85 threshold. Lossy translation corruption detected."
-            )
-        return v
-
-
-class EpistemicRejectionReceipt(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: The mathematical backpropagation signal triggered when the Deterministic Compiler rejects a stochastic manifold. Quantifies the rejection and provides a mutation gradient.
-
-    CAUSAL AFFORDANCE: Instructs the LLM ensemble on how to perturb the Upper Confidence Bound (UCB) during the next MCTS generation attempt by mathematically quantifying the error.
-
-    EPISTEMIC BOUNDS: Kullback-Leibler divergence is strictly non-negative. A negative mathematical distance is a paradox and raises a ValueError.
-
-    MCP ROUTING TRIGGERS: Rejection Receipt, Free Energy Feedback, MCTS Backpropagation, Variational Free Energy, Mutation Gradient
-    """
-
-    receipt_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
-    failed_projection_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
-    violated_algebraic_constraint: Annotated[str, StringConstraints(max_length=2000)]
-    kl_divergence_to_validity: float
-    stochastic_mutation_gradient: Annotated[str, StringConstraints(max_length=100000)]
-
-    @field_validator("kl_divergence_to_validity", mode="after")
-    @classmethod
-    def enforce_kl_divergence_physics(cls, v: float) -> float:
-        if math.isnan(v) or math.isinf(v):
-            raise ValueError(f"Mathematical paradox: KL Divergence cannot be {v}")
-        if v < 0.0:
-            raise ValueError(f"Mathematical paradox: Negative information distance detected (v={v}).")
-        return v
-
-
 class ActiveInferenceEpoch(CoreasonBaseState):
     """
     AGENT INSTRUCTION: A macroscopic container tracking the directed graph of evolutionary retries across an entire task lifecycle.
@@ -3409,39 +3352,6 @@ class AdjudicationIntent(CoreasonBaseState):
         return self
 
 
-class AdjudicationReceipt(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: A cryptographically frozen historical fact representing the
-    definitive collapse of an MCDA evaluation, acting as a verified Outcome Reward Model
-    (ORM) signal. As a ...Receipt suffix, this is an append-only coordinate on the
-    Merkle-DAG.
-
-    CAUSAL AFFORDANCE: Commits the calculated score and boolean passed verdict to the
-    Epistemic Ledger, permanently binding the deterministic evaluation to the specific
-    target_node_cid (NodeCIDState) and authorizing downstream policy updates.
-
-    EPISTEMIC BOUNDS: The evaluation outcome is strictly bounded to an integer score
-    (ge=0, le=100). The underlying deductive proof (reasoning) is physically capped at
-    max_length=2000. The entire receipt is cryptographically locked to the originating
-    rubric_cid CID (128-char regex).
-
-    MCP ROUTING TRIGGERS: Cryptographic Verdict, Deterministic Proof, Grading Execution,
-    Epistemic Commitment, Audit Trail
-    """
-
-    rubric_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="The cryptographic pointer to the rubric dictating adjudication."
-    )
-    target_node_cid: NodeCIDState = Field(
-        description="The deterministic capability pointer representing the node that was evaluated."
-    )
-    score: int = Field(ge=0, le=100, description="The final score assigned based on the rubric.")
-    passed: bool = Field(description="Indicates whether the evaluation passed the threshold.")
-    reasoning: Annotated[str, StringConstraints(max_length=2000)] = Field(
-        description="The deterministic logical proof justifying the final verdict and mathematical score."
-    )
-
-
 class AdversarialSimulationProfile(CoreasonBaseState):
     """
     AGENT INSTRUCTION: A deterministic red-team configuration injecting Chaos Engineering vectors into a targeted node to map the fragility of the active context boundary. As a ...Profile suffix, this is a declarative snapshot of an attack geometry.
@@ -4456,69 +4366,6 @@ class CrystallizationPolicy(CoreasonBaseState):
     target_cognitive_tier: Literal["semantic", "working"] = Field(
         description="The destination tier where the compressed rule will be stored."
     )
-
-
-class CustodyReceipt(CoreasonBaseState):
-    r"""
-    AGENT INSTRUCTION: A cryptographically frozen historical fact representing the successful execution of an SemanticFlowPolicy redaction on the Merkle-DAG. Enforced as fully immutable via `ConfigDict(frozen=True)`.
-
-    CAUSAL AFFORDANCE: Unlocks strict audit compliance by mathematically mapping the optional toxic `pre_redaction_hash` to the mandatory safe `post_redaction_hash`, proving non-repudiation via the `applied_policy_cid`.
-
-    EPISTEMIC BOUNDS: Temporal geometry strictly clamped to `redaction_timestamp_unix_nano` (`ge=0, le=253402300799000000000`). Both hashes are locked to immutable SHA-256 hexadecimal bounds (`^[a-f0-9]{64}$`). `pre_redaction_hash` is optional (`default=None`) for isolated audit vaults.
-
-    MCP ROUTING TRIGGERS: Chain of Custody, Cryptographic Provenance, Merkle-DAG Audit, Non-Repudiation, Data Isomorphism
-
-    """
-
-    model_config = ConfigDict(frozen=True)
-    custody_cid: Annotated[str, StringConstraints(min_length=1, max_length=255, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="Unique identifier for this chain-of-custody entry."
-    )
-    source_node_cid: Annotated[str, StringConstraints(min_length=1, max_length=255, pattern="^[a-zA-Z0-9_.:-]+$")] = (
-        Field(description="The execution node that emitted the original payload.")
-    )
-    applied_policy_cid: Annotated[
-        str, StringConstraints(min_length=1, max_length=255, pattern="^[a-zA-Z0-9_.:-]+$")
-    ] = Field(
-        description="The deterministic capability pointer representing the SemanticFlowPolicy successfully applied."
-    )
-    pre_redaction_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=255, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(default=None, description="Optional SHA-256 hash of the raw toxic data for isolated audit vaults.")
-    post_redaction_hash: Annotated[str, StringConstraints(min_length=1, max_length=255, pattern="^[a-f0-9]{64}$")] = (
-        Field(description="The definitive SHA-256 hash of the sanitized, mathematically clean payload.")
-    )
-    redaction_timestamp_unix_nano: int = Field(
-        ge=0, le=253402300799000000000, description="The precise temporal point the redaction was completed."
-    )
-
-
-class DefeasibleAttackEvent(CoreasonBaseState):
-    r"""
-    AGENT INSTRUCTION: Formalizes the binary attack relation in Dung's Abstract Argumentation Framework. As an ...Event suffix, this is an append-only, cryptographically frozen historical fact on the Merkle-DAG.
-
-    CAUSAL AFFORDANCE: Projects an undercutting or rebutting defeater from a source claim against a target claim. If mathematically validated, it physically triggers a DefeasibleCascadeEvent to sever all downstream nodes relying on the target.
-
-    EPISTEMIC BOUNDS: Strictly bounds the attack geometry using AttackVectorProfile enums (`Literal["rebuttal", "undercutter", "underminer"]`). Source and target mappings are locked to 128-character CIDs, preventing unbounded graph traversals.
-
-    MCP ROUTING TRIGGERS: Undercutting Defeater, Dialectical Edge, Truth Maintenance System, Bipartite Mapping, Non-Monotonic Retraction
-
-    """
-
-    attack_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this directed attack edge.",
-    )
-    source_claim_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
-        Field(
-            description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the claim mounting the attack.",
-        )
-    )
-    target_claim_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
-        Field(
-            description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the claim being attacked.",
-        )
-    )
-    attack_vector: AttackVectorProfile = Field(description="Geometric matrices of undercutting defeaters.")
 
 
 class DimensionalProjectionContract(CoreasonBaseState):
@@ -6558,9 +6405,114 @@ class TaxonomicRoutingPolicy(CoreasonBaseState):
     )
 
 
+class NeurosymbolicInferenceIntent(CoreasonBaseState):
+    r"""
+    AGENT INSTRUCTION: Orchestrates the core execution payload boundary, acting as the structural pre-inference gate for neurosymbolic probability.
+
+        CAUSAL AFFORDANCE: Empowers the routing engine to sever execution prior to LLM generation if the structural certainty SLA evaluates beyond acceptable mathematical variance boundaries.
+
+        EPISTEMIC BOUNDS: Mandates exact nesting of deterministic fidelity and uncertainty profiles. The pre-flight validator mathematically terminates evaluation if epistemic degradation breaches the SLA limit.
+
+        MCP ROUTING TRIGGERS: Pre-Inference Gate, Neurosymbolic Request, Probability Envelope, SLA Enforcement, Inference Termination
+    """
+
+    topology_class: Literal["neurosymbolic_inference"] = Field(default="neurosymbolic_inference")
+    source_entity: ContextualizedSourceState = Field(
+        description="The structurally isolated 1D boundary representing the semantic payload injected into the context window."
+    )
+    fidelity_receipt: TopologicalFidelityReceipt = Field(
+        description="The immutable scalar matrix capturing pre-inference mathematical contextual completeness."
+    )
+    uncertainty_profile: CognitiveUncertaintyProfile = Field(
+        description="The rigid matrix evaluating probabilistic uncertainty vectors bounding the initial request state."
+    )
+    sla: EpistemicCompressionSLA = Field(
+        description="The mathematical structural boundaries defining acceptable epistemic loss perimeters."
+    )
+
+    @model_validator(mode="after")
+    def validate_epistemic_gap(self) -> Self:
+        if self.uncertainty_profile.epistemic_knowledge_gap >= self.sla.minimum_fidelity_threshold:
+            raise RefusalToReasonEvent(
+                "Inference aborted due to severe semantic degradation. Epistemic gap exceeds SLA."
+            )
+        return self
+
+
+class System2RemediationIntent(CoreasonBaseState):
+    r"""
+    AGENT INSTRUCTION: Implements Kahneman's Dual-Process Theory by explicitly triggering a System 2 non-monotonic self-correction loop in response to a structural execution collapse. As an ...Intent suffix, this represents an authorized kinetic execution trigger.
+
+    CAUSAL AFFORDANCE: Intercepts physical instantiation failures (e.g., Pydantic ValidationErrors) and redirects the generation trajectory, forcing the agent into a recursive backtracking search to rewrite the isolated subgraph via `violation_receipts`.
+
+    EPISTEMIC BOUNDS: The `fault_cid` is cryptographically tied to a 128-char CID. The `violation_receipts` array is deterministically sorted by the `_enforce_canonical_sort_receipts` hook to preserve RFC 8785 canonical hashing and map exact JSON paths without ambiguity.
+
+    MCP ROUTING TRIGGERS: Dual-Process Theory, Non-Monotonic Revision, System 2 Remediation, Backtracking Search, Abstract Syntax Tree
+
+    """
+
+    topology_class: Literal["system_2_remediation"] = Field(
+        default="system_2_remediation", description="Discriminator type for System2RemediationIntent."
+    )
+
+    fault_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="A cryptographic Lineage Watermark (CID) tracking this specific dimensional collapse.",
+    )
+    target_node_cid: NodeCIDState = Field(
+        description="The globally unique decentralized identifier (DID) anchoring the agent that authored the invalid state, ensuring the fault is routed back to the exact state partition."
+    )
+    violation_receipts: list[ManifestViolationReceipt] = Field(
+        min_length=1, description="The deterministic array of exact structural faults the agent must correct."
+    )
+    ast_gradient: ASTGradientReceipt | None = Field(
+        default=None, description="The structural loss vector guiding AST repair."
+    )
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort_receipts(self) -> Self:
+        """Mathematically sort receipts to guarantee deterministic canonical hashing."""
+        object.__setattr__(
+            self, "violation_receipts", sorted(self.violation_receipts, key=operator.attrgetter("failing_pointer"))
+        )
+        return self
+
+
+class TopologicalProjectionIntent(CryptographicProvenanceMixin):
+    """
+    AGENT INSTRUCTION: The transitional mathematical contract that calculates the Gromov-Wasserstein distance and authorizes or denies the collapse of a stochastic manifold into a deterministic structure.
+
+    CAUSAL AFFORDANCE: Calculates optimal transport mapping and either authorizes downstream kinetic execution or rejects the transition due to topology tears.
+
+    EPISTEMIC BOUNDS: Enforces a strict isomorphism confidence interval [0.0, 1.0], acting as a hardware-level guillotine that mandates a minimum 0.85 threshold.
+
+    MCP ROUTING TRIGGERS: Gromov-Wasserstein Distance, Topological Compiler, Optimal Transport Mapping, Manifold Collapse, Deterministic Projection
+    """
+
+    topology_class: Literal["topological_projection"] = Field(default="topological_projection")
+    projection_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
+    source_superposition_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
+    target_topology: TargetTopologyEnum
+    isomorphism_confidence: float
+    lossy_translation_divergence: list[Annotated[str, StringConstraints(max_length=100000)]]
+    epistemic_status: Literal["pending_deterministic_collapse"] = Field(default="pending_deterministic_collapse")
+
+    @field_validator("isomorphism_confidence", mode="after")
+    @classmethod
+    def enforce_isomorphism_guillotine(cls, v: float) -> float:
+        if not (0.0 <= v <= 1.0):
+            raise ValueError("isomorphism_confidence must be between 0.0 and 1.0")
+        if v < 0.85:
+            raise ValueError(
+                f"Isomorphism Guillotine triggered: Confidence {v} is below the 0.85 threshold. Lossy translation corruption detected."
+            )
+        return v
+
+
 type AnyPresentationIntent = Annotated[
     SemanticIntent | DraftingIntent | AdjudicationIntent | EscalationIntent, Field(discriminator="topology_class")
 ]
+
+
 type AnyIntent = Annotated[
     SemanticIntent
     | DraftingIntent
@@ -6584,7 +6536,10 @@ type AnyIntent = Annotated[
     | FallbackIntent
     | OverrideIntent
     | ConstitutionalAmendmentIntent
-    | SpatialKinematicActionIntent,
+    | SpatialKinematicActionIntent
+    | System2RemediationIntent
+    | NeurosymbolicInferenceIntent
+    | TopologicalProjectionIntent,
     Field(discriminator="topology_class"),
 ]
 
@@ -9599,44 +9554,6 @@ class ManifestViolationReceipt(CoreasonBaseState):
     )
 
 
-class System2RemediationIntent(CoreasonBaseState):
-    r"""
-    AGENT INSTRUCTION: Implements Kahneman's Dual-Process Theory by explicitly triggering a System 2 non-monotonic self-correction loop in response to a structural execution collapse. As an ...Intent suffix, this represents an authorized kinetic execution trigger.
-
-    CAUSAL AFFORDANCE: Intercepts physical instantiation failures (e.g., Pydantic ValidationErrors) and redirects the generation trajectory, forcing the agent into a recursive backtracking search to rewrite the isolated subgraph via `violation_receipts`.
-
-    EPISTEMIC BOUNDS: The `fault_cid` is cryptographically tied to a 128-char CID. The `violation_receipts` array is deterministically sorted by the `_enforce_canonical_sort_receipts` hook to preserve RFC 8785 canonical hashing and map exact JSON paths without ambiguity.
-
-    MCP ROUTING TRIGGERS: Dual-Process Theory, Non-Monotonic Revision, System 2 Remediation, Backtracking Search, Abstract Syntax Tree
-
-    """
-
-    topology_class: Literal["system_2_remediation"] = Field(
-        default="system_2_remediation", description="Discriminator type for System2RemediationIntent."
-    )
-
-    fault_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A cryptographic Lineage Watermark (CID) tracking this specific dimensional collapse.",
-    )
-    target_node_cid: NodeCIDState = Field(
-        description="The globally unique decentralized identifier (DID) anchoring the agent that authored the invalid state, ensuring the fault is routed back to the exact state partition."
-    )
-    violation_receipts: list[ManifestViolationReceipt] = Field(
-        min_length=1, description="The deterministic array of exact structural faults the agent must correct."
-    )
-    ast_gradient: ASTGradientReceipt | None = Field(
-        default=None, description="The structural loss vector guiding AST repair."
-    )
-
-    @model_validator(mode="after")
-    def _enforce_canonical_sort_receipts(self) -> Self:
-        """Mathematically sort receipts to guarantee deterministic canonical hashing."""
-        object.__setattr__(
-            self, "violation_receipts", sorted(self.violation_receipts, key=operator.attrgetter("failing_pointer"))
-        )
-        return self
-
-
 class TamperFaultEvent(ValueError):  # noqa: N818
     """Raised when an execution trace has been tampered with or is topologically invalid."""
 
@@ -12019,55 +11936,6 @@ class WetwareAttestationContract(CoreasonBaseState):
     )
 
 
-class InterventionReceipt(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: InterventionReceipt is a cryptographically frozen historical fact representing
-    the resolution of a Mixed-Initiative pause. It acts as the mathematical key that unlocks a suspended
-    state partition.
-
-    CAUSAL AFFORDANCE: Collapses the halted superposition of the DAG, physically re-activating the
-    execution thread and authorizing the orchestrator to commit the human-approved state mutation to
-    the Epistemic Ledger.
-
-    EPISTEMIC BOUNDS: Mathematically locked against Replay Attacks via the intervention_request_cid
-    (a UUID cryptographic nonce). The @model_validator physically guarantees that if a WetwareAttestationContract
-    is present, its internal DAG node nonce must perfectly match the request ID, preventing signature laundering,
-    and mathematically linking the human's signature to the liveness_challenge_hash challenge.
-
-    MCP ROUTING TRIGGERS: Cryptographic Nonce, State Resumption, Replay Attack Prevention, Wetware Attestation, Liveness Resolution
-    """
-
-    topology_class: Literal["verdict"] = Field(default="verdict", description="The type of the intervention payload.")
-    intervention_request_cid: Annotated[
-        str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
-    ] = Field(description="The cryptographic nonce uniquely identifying the intervention request.")
-    target_node_cid: NodeCIDState = Field(
-        description="The deterministic capability pointer representing the target node."
-    )
-    approved: bool = Field(description="Indicates whether the proposed action was approved.")
-    feedback: Annotated[str, StringConstraints(max_length=2000)] | None = Field(
-        description="Optional feedback provided along with the verdict."
-    )
-    attestation: WetwareAttestationContract | None = Field(
-        default=None, description="The cryptographic proof provided by the human operator, if required."
-    )
-
-    @model_validator(mode="after")
-    def verify_attestation_nonce(self) -> "InterventionReceipt":
-        """
-        Mathematically guarantees that if a cryptographic signature is presented,
-        it cannot be a replay attack from a different node in the DAG. Also asserts that
-        if self.attestation is provided, it carries the liveness_challenge_hash,
-        mathematically linking the human's hardware-backed signature to the
-        orchestrator's real-time challenge alongside verifying dag_node_nonce.
-        """
-        if self.attestation is not None and self.attestation.dag_node_nonce != self.intervention_request_cid:
-            raise ValueError(
-                "Anti-Replay Lock Triggered: Attestation nonce does not match the intervention request ID."
-            )
-        return self
-
-
 type AnyInterventionState = Annotated[
     InterventionIntent | InterventionReceipt | OverrideIntent | ConstitutionalAmendmentIntent,
     Field(discriminator="topology_class"),
@@ -13250,6 +13118,252 @@ class AtomicPropositionState(CoreasonBaseState):
         return self
 
 
+class EpistemicRejectionReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: The mathematical backpropagation signal triggered when the Deterministic Compiler rejects a stochastic manifold. Quantifies the rejection and provides a mutation gradient.
+
+    CAUSAL AFFORDANCE: Instructs the LLM ensemble on how to perturb the Upper Confidence Bound (UCB) during the next MCTS generation attempt by mathematically quantifying the error.
+
+    EPISTEMIC BOUNDS: Kullback-Leibler divergence is strictly non-negative. A negative mathematical distance is a paradox and raises a ValueError.
+
+    MCP ROUTING TRIGGERS: Rejection Receipt, Free Energy Feedback, MCTS Backpropagation, Variational Free Energy, Mutation Gradient
+    """
+
+    event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+    )
+    prior_event_hash: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
+    ) = Field(
+        default=None,
+        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+    )
+    timestamp: float = Field(
+        ge=0.0,
+        le=253402300799.0,
+        description="Causal Ancestry markers required to resolve decentralized event ordering.",
+    )
+    topology_class: Literal["epistemic_rejection"] = Field(default="epistemic_rejection")
+    receipt_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
+    failed_projection_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
+    violated_algebraic_constraint: Annotated[str, StringConstraints(max_length=2000)]
+    kl_divergence_to_validity: float
+    stochastic_mutation_gradient: Annotated[str, StringConstraints(max_length=100000)]
+
+    @field_validator("kl_divergence_to_validity", mode="after")
+    @classmethod
+    def enforce_kl_divergence_physics(cls, v: float) -> float:
+        if math.isnan(v) or math.isinf(v):
+            raise ValueError(f"Mathematical paradox: KL Divergence cannot be {v}")
+        if v < 0.0:
+            raise ValueError(f"Mathematical paradox: Negative information distance detected (v={v}).")
+        return v
+
+
+class AdjudicationReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A cryptographically frozen historical fact representing the
+    definitive collapse of an MCDA evaluation, acting as a verified Outcome Reward Model
+    (ORM) signal. As a ...Receipt suffix, this is an append-only coordinate on the
+    Merkle-DAG.
+
+    CAUSAL AFFORDANCE: Commits the calculated score and boolean passed verdict to the
+    Epistemic Ledger, permanently binding the deterministic evaluation to the specific
+    target_node_cid (NodeCIDState) and authorizing downstream policy updates.
+
+    EPISTEMIC BOUNDS: The evaluation outcome is strictly bounded to an integer score
+    (ge=0, le=100). The underlying deductive proof (reasoning) is physically capped at
+    max_length=2000. The entire receipt is cryptographically locked to the originating
+    rubric_cid CID (128-char regex).
+
+    MCP ROUTING TRIGGERS: Cryptographic Verdict, Deterministic Proof, Grading Execution,
+    Epistemic Commitment, Audit Trail
+    """
+
+    event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+    )
+    prior_event_hash: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
+    ) = Field(
+        default=None,
+        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+    )
+    timestamp: float = Field(
+        ge=0.0,
+        le=253402300799.0,
+        description="Causal Ancestry markers required to resolve decentralized event ordering.",
+    )
+    topology_class: Literal["adjudication_receipt"] = Field(default="adjudication_receipt")
+    rubric_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="The cryptographic pointer to the rubric dictating adjudication."
+    )
+    target_node_cid: NodeCIDState = Field(
+        description="The deterministic capability pointer representing the node that was evaluated."
+    )
+    score: int = Field(ge=0, le=100, description="The final score assigned based on the rubric.")
+    passed: bool = Field(description="Indicates whether the evaluation passed the threshold.")
+    reasoning: Annotated[str, StringConstraints(max_length=2000)] = Field(
+        description="The deterministic logical proof justifying the final verdict and mathematical score."
+    )
+
+
+class CustodyReceipt(CoreasonBaseState):
+    r"""
+    AGENT INSTRUCTION: A cryptographically frozen historical fact representing the successful execution of an SemanticFlowPolicy redaction on the Merkle-DAG. Enforced as fully immutable via `ConfigDict(frozen=True)`.
+
+    CAUSAL AFFORDANCE: Unlocks strict audit compliance by mathematically mapping the optional toxic `pre_redaction_hash` to the mandatory safe `post_redaction_hash`, proving non-repudiation via the `applied_policy_cid`.
+
+    EPISTEMIC BOUNDS: Temporal geometry strictly clamped to `redaction_timestamp_unix_nano` (`ge=0, le=253402300799000000000`). Both hashes are locked to immutable SHA-256 hexadecimal bounds (`^[a-f0-9]{64}$`). `pre_redaction_hash` is optional (`default=None`) for isolated audit vaults.
+
+    MCP ROUTING TRIGGERS: Chain of Custody, Cryptographic Provenance, Merkle-DAG Audit, Non-Repudiation, Data Isomorphism
+
+    """
+
+    model_config = ConfigDict(frozen=True)
+    event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+    )
+    prior_event_hash: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
+    ) = Field(
+        default=None,
+        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+    )
+    timestamp: float = Field(
+        ge=0.0,
+        le=253402300799.0,
+        description="Causal Ancestry markers required to resolve decentralized event ordering.",
+    )
+    topology_class: Literal["custody_receipt"] = Field(default="custody_receipt")
+    custody_cid: Annotated[str, StringConstraints(min_length=1, max_length=255, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="Unique identifier for this chain-of-custody entry."
+    )
+    source_node_cid: Annotated[str, StringConstraints(min_length=1, max_length=255, pattern="^[a-zA-Z0-9_.:-]+$")] = (
+        Field(description="The execution node that emitted the original payload.")
+    )
+    applied_policy_cid: Annotated[
+        str, StringConstraints(min_length=1, max_length=255, pattern="^[a-zA-Z0-9_.:-]+$")
+    ] = Field(
+        description="The deterministic capability pointer representing the SemanticFlowPolicy successfully applied."
+    )
+    pre_redaction_hash: (
+        Annotated[str, StringConstraints(min_length=1, max_length=255, pattern="^[a-f0-9]{64}$")] | None
+    ) = Field(default=None, description="Optional SHA-256 hash of the raw toxic data for isolated audit vaults.")
+    post_redaction_hash: Annotated[str, StringConstraints(min_length=1, max_length=255, pattern="^[a-f0-9]{64}$")] = (
+        Field(description="The definitive SHA-256 hash of the sanitized, mathematically clean payload.")
+    )
+    redaction_timestamp_unix_nano: int = Field(
+        ge=0, le=253402300799000000000, description="The precise temporal point the redaction was completed."
+    )
+
+
+class DefeasibleAttackEvent(CoreasonBaseState):
+    r"""
+    AGENT INSTRUCTION: Formalizes the binary attack relation in Dung's Abstract Argumentation Framework. As an ...Event suffix, this is an append-only, cryptographically frozen historical fact on the Merkle-DAG.
+
+    CAUSAL AFFORDANCE: Projects an undercutting or rebutting defeater from a source claim against a target claim. If mathematically validated, it physically triggers a DefeasibleCascadeEvent to sever all downstream nodes relying on the target.
+
+    EPISTEMIC BOUNDS: Strictly bounds the attack geometry using AttackVectorProfile enums (`Literal["rebuttal", "undercutter", "underminer"]`). Source and target mappings are locked to 128-character CIDs, preventing unbounded graph traversals.
+
+    MCP ROUTING TRIGGERS: Undercutting Defeater, Dialectical Edge, Truth Maintenance System, Bipartite Mapping, Non-Monotonic Retraction
+
+    """
+
+    event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+    )
+    prior_event_hash: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
+    ) = Field(
+        default=None,
+        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+    )
+    timestamp: float = Field(
+        ge=0.0,
+        le=253402300799.0,
+        description="Causal Ancestry markers required to resolve decentralized event ordering.",
+    )
+    topology_class: Literal["defeasible_attack"] = Field(default="defeasible_attack")
+    attack_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this directed attack edge.",
+    )
+    source_claim_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
+        Field(
+            description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the claim mounting the attack.",
+        )
+    )
+    target_claim_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
+        Field(
+            description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the claim being attacked.",
+        )
+    )
+    attack_vector: AttackVectorProfile = Field(description="Geometric matrices of undercutting defeaters.")
+
+
+class InterventionReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: InterventionReceipt is a cryptographically frozen historical fact representing
+    the resolution of a Mixed-Initiative pause. It acts as the mathematical key that unlocks a suspended
+    state partition.
+
+    CAUSAL AFFORDANCE: Collapses the halted superposition of the DAG, physically re-activating the
+    execution thread and authorizing the orchestrator to commit the human-approved state mutation to
+    the Epistemic Ledger.
+
+    EPISTEMIC BOUNDS: Mathematically locked against Replay Attacks via the intervention_request_cid
+    (a UUID cryptographic nonce). The @model_validator physically guarantees that if a WetwareAttestationContract
+    is present, its internal DAG node nonce must perfectly match the request ID, preventing signature laundering,
+    and mathematically linking the human's signature to the liveness_challenge_hash challenge.
+
+    MCP ROUTING TRIGGERS: Cryptographic Nonce, State Resumption, Replay Attack Prevention, Wetware Attestation, Liveness Resolution
+    """
+
+    topology_class: Literal["verdict"] = Field(default="verdict", description="The type of the intervention payload.")
+    event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+    )
+    prior_event_hash: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
+    ) = Field(
+        default=None,
+        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+    )
+    timestamp: float = Field(
+        ge=0.0,
+        le=253402300799.0,
+        description="Causal Ancestry markers required to resolve decentralized event ordering.",
+    )
+    intervention_request_cid: Annotated[
+        str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
+    ] = Field(description="The cryptographic nonce uniquely identifying the intervention request.")
+    target_node_cid: NodeCIDState = Field(
+        description="The deterministic capability pointer representing the target node."
+    )
+    approved: bool = Field(description="Indicates whether the proposed action was approved.")
+    feedback: Annotated[str, StringConstraints(max_length=2000)] | None = Field(
+        description="Optional feedback provided along with the verdict."
+    )
+    attestation: WetwareAttestationContract | None = Field(
+        default=None, description="The cryptographic proof provided by the human operator, if required."
+    )
+
+    @model_validator(mode="after")
+    def verify_attestation_nonce(self) -> "InterventionReceipt":
+        """
+        Mathematically guarantees that if a cryptographic signature is presented,
+        it cannot be a replay attack from a different node in the DAG. Also asserts that
+        if self.attestation is provided, it carries the liveness_challenge_hash,
+        mathematically linking the human's hardware-backed signature to the
+        orchestrator's real-time challenge alongside verifying dag_node_nonce.
+        """
+        if self.attestation is not None and self.attestation.dag_node_nonce != self.intervention_request_cid:
+            raise ValueError(
+                "Anti-Replay Lock Triggered: Attestation nonce does not match the intervention request ID."
+            )
+        return self
+
+
 type AnyStateEvent = Annotated[
     ObservationEvent
     | BeliefMutationEvent
@@ -13276,7 +13390,12 @@ type AnyStateEvent = Annotated[
     | OntologicalReificationReceipt
     | CircuitBreakerEvent
     | ExogenousEpistemicEvent
-    | EpistemicLogEvent,
+    | EpistemicLogEvent
+    | InterventionReceipt
+    | AdjudicationReceipt
+    | CustodyReceipt
+    | DefeasibleAttackEvent
+    | EpistemicRejectionReceipt,
     Field(discriminator="topology_class", description="A discriminated union of state events."),
 ]
 
@@ -13663,39 +13782,6 @@ AsymptoticComplexityReceipt.model_rebuild()
 TeleologicalIsometryReceipt.model_rebuild()
 InterventionIntent.model_rebuild()
 TerminalCognitiveEvent.model_rebuild()
-
-
-class NeurosymbolicInferenceIntent(CoreasonBaseState):
-    r"""
-    AGENT INSTRUCTION: Orchestrates the core execution payload boundary, acting as the structural pre-inference gate for neurosymbolic probability.
-
-        CAUSAL AFFORDANCE: Empowers the routing engine to sever execution prior to LLM generation if the structural certainty SLA evaluates beyond acceptable mathematical variance boundaries.
-
-        EPISTEMIC BOUNDS: Mandates exact nesting of deterministic fidelity and uncertainty profiles. The pre-flight validator mathematically terminates evaluation if epistemic degradation breaches the SLA limit.
-
-        MCP ROUTING TRIGGERS: Pre-Inference Gate, Neurosymbolic Request, Probability Envelope, SLA Enforcement, Inference Termination
-    """
-
-    source_entity: ContextualizedSourceState = Field(
-        description="The structurally isolated 1D boundary representing the semantic payload injected into the context window."
-    )
-    fidelity_receipt: TopologicalFidelityReceipt = Field(
-        description="The immutable scalar matrix capturing pre-inference mathematical contextual completeness."
-    )
-    uncertainty_profile: CognitiveUncertaintyProfile = Field(
-        description="The rigid matrix evaluating probabilistic uncertainty vectors bounding the initial request state."
-    )
-    sla: EpistemicCompressionSLA = Field(
-        description="The mathematical structural boundaries defining acceptable epistemic loss perimeters."
-    )
-
-    @model_validator(mode="after")
-    def validate_epistemic_gap(self) -> Self:
-        if self.uncertainty_profile.epistemic_knowledge_gap >= self.sla.minimum_fidelity_threshold:
-            raise RefusalToReasonEvent(
-                "Inference aborted due to severe semantic degradation. Epistemic gap exceeds SLA."
-            )
-        return self
 
 
 ContextualizedSourceState.model_rebuild()
