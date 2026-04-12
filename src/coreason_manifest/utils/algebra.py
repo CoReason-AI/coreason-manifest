@@ -63,6 +63,7 @@ SCHEMA_REGISTRY: dict[str, type[BaseModel]] = {
     "logic_receipt": ontology.FormalLogicProofReceipt,
     "prolog_premise": ontology.EpistemicPrologPremise,
     "prolog_receipt": ontology.PrologDeductionReceipt,
+    "falsification_contract": ontology.FalsificationContract,
 }
 
 
