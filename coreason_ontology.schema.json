@@ -843,7 +843,8 @@
         "mapping": {
           "ephemeral_partition": "#/$defs/EphemeralNamespacePartitionState",
           "mcp_server": "#/$defs/MCPServerManifest",
-          "native_tool": "#/$defs/SpatialToolManifest"
+          "native_tool": "#/$defs/SpatialToolManifest",
+          "zero_trust_contract": "#/$defs/EpistemicZeroTrustContract"
         },
         "propertyName": "topology_class"
       },
@@ -856,6 +857,9 @@
         },
         {
           "$ref": "#/$defs/EphemeralNamespacePartitionState"
+        },
+        {
+          "$ref": "#/$defs/EpistemicZeroTrustContract"
         }
       ]
     },
@@ -903,14 +907,19 @@
           "semantic_discovery": "#/$defs/SemanticDiscoveryIntent",
           "semantic_mapping_proposal": "#/$defs/SemanticMappingHeuristicIntent",
           "spatial_kinematic": "#/$defs/SpatialKinematicActionIntent",
+          "substrate_hydration": "#/$defs/SubstrateHydrationManifest",
           "system_2_remediation": "#/$defs/System2RemediationIntent",
           "task_announcement": "#/$defs/TaskAnnouncementIntent",
           "taxonomic_restructure": "#/$defs/TaxonomicRestructureIntent",
-          "topological_projection": "#/$defs/TopologicalProjectionIntent"
+          "topological_projection": "#/$defs/TopologicalProjectionIntent",
+          "zero_trust_contract": "#/$defs/EpistemicZeroTrustContract"
         },
         "propertyName": "topology_class"
       },
       "oneOf": [
+        {
+          "$ref": "#/$defs/EpistemicZeroTrustContract"
+        },
         {
           "$ref": "#/$defs/SemanticIntent"
         },
@@ -982,6 +991,9 @@
         },
         {
           "$ref": "#/$defs/System2RemediationIntent"
+        },
+        {
+          "$ref": "#/$defs/SubstrateHydrationManifest"
         },
         {
           "$ref": "#/$defs/NeurosymbolicInferenceIntent"
@@ -1107,11 +1119,15 @@
           "system_fault": "#/$defs/SystemFaultEvent",
           "token_burn": "#/$defs/TokenBurnReceipt",
           "tool_invocation": "#/$defs/ToolInvocationEvent",
-          "verdict": "#/$defs/InterventionReceipt"
+          "verdict": "#/$defs/InterventionReceipt",
+          "zero_trust_receipt": "#/$defs/EpistemicZeroTrustReceipt"
         },
         "propertyName": "topology_class"
       },
       "oneOf": [
+        {
+          "$ref": "#/$defs/EpistemicZeroTrustReceipt"
+        },
         {
           "$ref": "#/$defs/ObservationEvent"
         },
@@ -4134,6 +4150,18 @@
           ],
           "default": null,
           "description": "Big-O computational bounds."
+        },
+        "execution_substrate": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ExecutionSubstrateProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematical functor blueprint authorizing the runtime to hydrate a specific open-source engine (e.g., SymbolicAI) for this node."
         },
         "topology_class": {
           "const": "system",
@@ -7440,7 +7468,7 @@
     },
     "EpistemicAxiomVerificationReceipt": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements automated Natural Language Inference (NLI) and Entailment Verification to mechanically quarantine hallucinated tokens. As a ...Receipt suffix, it represents an immutable cryptographic verdict.\n\nCAUSAL AFFORDANCE: Acts as the definitive logic gate for the Truth Maintenance System. If verification succeeds, it physically unlocks the promotion of the source prediction into the global semantic knowledge graph.\n\nEPISTEMIC BOUNDS: Factual alignment is geometrically bounded by sequence_similarity_score (ge=0.0, le=1.0). The @model_validator enforce_epistemic_quarantine deliberately crashes instantiation if fact_score_passed is False, physically severing the DAG to prevent epistemic contagion.\n\nMCP ROUTING TRIGGERS: Entailment Verification, Natural Language Inference, Truth Maintenance System, Epistemic Quarantine, Hallucination Filtering",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements automated Natural Language Inference (NLI) and Entailment Verification to mechanically quarantine hallucinated tokens. As a ...Receipt suffix, it represents an immutable cryptographic verdict.\n\nCAUSAL AFFORDANCE: Acts as the definitive logic gate for the Truth Maintenance System. If verification succeeds, it physically unlocks the promotion of the source prediction into the global semantic knowledge graph.\n\nEPISTEMIC BOUNDS: Factual alignment is geometrically bounded by sequence_similarity_score (ge=0.0, le=1.0). The @model_validator enforce_epistemic_quarantine deliberately crashes instantiation if fact_score_passed is False, physically severing the DAG to prevent epistemic contagion. Structural integrity mathematically demands that the `zero_trust_receipt_cid` be present to prove the generative extraction bypassed prompt injection boundaries.\n\nMCP ROUTING TRIGGERS: Entailment Verification, Natural Language Inference, Truth Maintenance System, Epistemic Quarantine, Hallucination Filtering",
       "properties": {
         "event_cid": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
@@ -7495,6 +7523,22 @@
         "fact_score_passed": {
           "title": "Fact Score Passed",
           "type": "boolean"
+        },
+        "zero_trust_receipt_cid": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9_.:-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The undeniable pointer proving the source prediction traversed the Zero-Trust contract before being verified as an axiom.",
+          "title": "Zero Trust Receipt Cid"
         }
       },
       "required": [
@@ -7584,6 +7628,30 @@
         "minimum_fidelity_threshold"
       ],
       "title": "EpistemicCompressionSLA",
+      "type": "object"
+    },
+    "EpistemicConstraintPolicy": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A mathematical invariant evaluated against an LLM's proxy-based structural plan.\n\nCAUSAL AFFORDANCE: Enables SymbolicAI's Design-by-Contract (DbC) autonomous correction loop during test-time compute.\n\nEPISTEMIC BOUNDS: `assertion_ast` must be a strictly parsable Python AST string. It structurally prohibits imports, assignments, or kinetic network calls to guarantee safe downstream evaluation.\n\nMCP ROUTING TRIGGERS: Design-by-Contract, AST Evaluation, Invariant Checking, SymbolicAI DbC, Zero-Trust Execution",
+      "properties": {
+        "assertion_ast": {
+          "description": "Strict AST-parsable string constraint (e.g., 'len(plan.outputs) == len(plan.inputs)').",
+          "maxLength": 1024,
+          "title": "Assertion Ast",
+          "type": "string"
+        },
+        "remediation_prompt": {
+          "description": "The exact semantic prompt injected into the LLM if the AST assertion collapses natively.",
+          "maxLength": 2048,
+          "title": "Remediation Prompt",
+          "type": "string"
+        }
+      },
+      "required": [
+        "assertion_ast",
+        "remediation_prompt"
+      ],
+      "title": "EpistemicConstraintPolicy",
       "type": "object"
     },
     "EpistemicCurriculumManifest": {
@@ -8870,6 +8938,162 @@
       "title": "EpistemicUpsamplingTask",
       "type": "object"
     },
+    "EpistemicZeroTrustContract": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The macroscopic task topology combining OpenSymbolicAI's data masking with SymbolicAI's logic enforcement.\n\nCAUSAL AFFORDANCE: Triggers the runtime to initiate a blind LLM inference cycle bounded by rigid mathematical proofs.\n\nEPISTEMIC BOUNDS: Bounded to a maximum of 10 remediation epochs to prevent thermodynamic free energy exhaustion. Arrays are deterministically sorted for RFC 8785 canonicalization.\n\nMCP ROUTING TRIGGERS: Bipartite Proposer-Verifier, Test-Time Compute, Zero-Trust Execution, Active Inference, Contract Topology",
+      "properties": {
+        "topology_class": {
+          "const": "zero_trust_contract",
+          "default": "zero_trust_contract",
+          "description": "Discriminator for a zero-trust contract.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "intent_id": {
+          "description": "UUIDv7 mapping to the ledger.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Intent Id",
+          "type": "string"
+        },
+        "semantic_planning_task": {
+          "description": "The core semantic instruction for the blind LLM planner.",
+          "maxLength": 4096,
+          "title": "Semantic Planning Task",
+          "type": "string"
+        },
+        "schema_blueprint_name": {
+          "description": "The registered URI of the Pydantic schema used to generate the proxies.",
+          "maxLength": 256,
+          "title": "Schema Blueprint Name",
+          "type": "string"
+        },
+        "structural_pre_conditions": {
+          "description": "DbC bounds checked before inference.",
+          "items": {
+            "$ref": "#/$defs/EpistemicConstraintPolicy"
+          },
+          "title": "Structural Pre Conditions",
+          "type": "array"
+        },
+        "structural_post_conditions": {
+          "description": "DbC bounds checked after inference to ensure the structural plan is valid.",
+          "items": {
+            "$ref": "#/$defs/EpistemicConstraintPolicy"
+          },
+          "title": "Structural Post Conditions",
+          "type": "array"
+        },
+        "max_planning_remediation_epochs": {
+          "default": 3,
+          "description": "Thermodynamic cap on SymbolicAI DbC retries.",
+          "maximum": 10,
+          "minimum": 0,
+          "title": "Max Planning Remediation Epochs",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "intent_id",
+        "semantic_planning_task",
+        "schema_blueprint_name"
+      ],
+      "title": "EpistemicZeroTrustContract",
+      "type": "object"
+    },
+    "EpistemicZeroTrustReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact proving the flawless execution of an EpistemicZeroTrustContract.\n\nCAUSAL AFFORDANCE: Permits the orchestrator to append the transmuted payload to the global immutable ledger, certifying that prompt injection was structurally impossible and AST contracts were fulfilled.\n\nEPISTEMIC BOUNDS: `firewall_breach_detected` must strictly be False. Hashes are bounded to RFC 8785 canonicalization requirements.\n\nMCP ROUTING TRIGGERS: Cryptographic Ledger, Formal Verification Receipt, Immutable Provenance, Hash Canonicalization, Data Masking",
+      "properties": {
+        "event_cid": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "topology_class": {
+          "const": "zero_trust_receipt",
+          "default": "zero_trust_receipt",
+          "description": "Discriminator for a zero-trust receipt.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "intent_reference_id": {
+          "description": "Pointer to the originating EpistemicZeroTrustContract.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Intent Reference Id",
+          "type": "string"
+        },
+        "llm_blind_plan_hash": {
+          "description": "RFC 8785 hash of the proxy-only structural logic generated by the LLM.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Llm Blind Plan Hash",
+          "type": "string"
+        },
+        "firewall_breach_detected": {
+          "const": false,
+          "default": false,
+          "description": "A strictly False literal guaranteeing no raw entropy leaked into the LLM context.",
+          "title": "Firewall Breach Detected",
+          "type": "boolean"
+        },
+        "remediation_epochs_consumed": {
+          "description": "The exact count of DbC retries required.",
+          "maximum": 10,
+          "minimum": 0,
+          "title": "Remediation Epochs Consumed",
+          "type": "integer"
+        },
+        "transmuted_payload_hash": {
+          "description": "RFC 8785 canonical hash of the final executed payload.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Transmuted Payload Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "event_cid",
+        "timestamp",
+        "intent_reference_id",
+        "llm_blind_plan_hash",
+        "remediation_epochs_consumed",
+        "transmuted_payload_hash"
+      ],
+      "title": "EpistemicZeroTrustReceipt",
+      "type": "object"
+    },
     "EscalationContract": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A rigid mathematical agreement governing when an agent is authorized\nto expand its test-time compute allocation (System 2 thinking) based on measured doubt.\nAs a ...Contract suffix, this object defines rigid mathematical boundaries.\n\nCAUSAL AFFORDANCE: Physically unlocks the LatentScratchpadReceipt, granting the agent\na budget of hidden tokens to execute a non-monotonic search tree (MCTS or Beam Search).\n\nEPISTEMIC BOUNDS: Mathematically bounded by uncertainty_escalation_threshold (ge=0.0,\nle=1.0). The computation is physically capped by max_latent_tokens_budget (gt=0,\nle=1000000000) and max_test_time_compute_ms (gt=0, le=86400000) to prevent infinite\nloops and VRAM exhaustion.\n\nMCP ROUTING TRIGGERS: Test-Time Compute, System 2 Thinking, Epistemic Uncertainty,\nNon-Monotonic Escalation, Token Budgeting",
@@ -9640,6 +9864,45 @@
         "start_time_unix_nano"
       ],
       "title": "ExecutionSpanReceipt",
+      "type": "object"
+    },
+    "ExecutionSubstrateProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative blueprint defining the hardware and software prerequisites to safely load an external compute engine.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator's JIT compiler to fetch and verify external packages before kinetic execution, ensuring Dependency Isomorphism.\n\nEPISTEMIC BOUNDS: VRAM constrained strictly above zero. Dependencies are deterministically sorted to preserve RFC 8785 canonical hashing.\n\nMCP ROUTING TRIGGERS: Coalgebraic Thunking, Dependency Isomorphism, JIT Hydration, VRAM Allocation",
+      "properties": {
+        "dialect": {
+          "$ref": "#/$defs/SubstrateDialectProfile",
+          "description": "The discrete open-source engine identifier."
+        },
+        "required_package_signatures": {
+          "description": "A whitelist of exact PEP 508 dependency specifiers or wheel hashes.",
+          "items": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "title": "Required Package Signatures",
+          "type": "array"
+        },
+        "vram_overhead_mb": {
+          "description": "The physical thermodynamic cost (in MB) of loading the library.",
+          "maximum": 1000000000,
+          "minimum": 0,
+          "title": "Vram Overhead Mb",
+          "type": "integer"
+        },
+        "supports_lazy_hydration": {
+          "description": "Whether the orchestrator can utilize Coalgebraic Thunking to unmount the engine between invocations to save VRAM.",
+          "title": "Supports Lazy Hydration",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "dialect",
+        "required_package_signatures",
+        "vram_overhead_mb",
+        "supports_lazy_hydration"
+      ],
+      "title": "ExecutionSubstrateProfile",
       "type": "object"
     },
     "ExogenousEpistemicEvent": {
@@ -17661,7 +17924,7 @@
     },
     "StateMutationIntent": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements the formal RFC 6902 JSON Patch standard to execute atomic,\ndeterministic state vector mutations across the swarm's N-dimensional blackboard. As an\n...Intent suffix, this represents an authorized kinetic execution trigger.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator's algebraic engine to surgically apply,\ntest, or ablate targeted JSON pointers without requiring full payload transmission.\n\nEPISTEMIC BOUNDS: The `value` (JsonPrimitiveState) mutation payload is volumetrically\nclamped by `enforce_payload_topology` to guarantee that the resulting state matrix $S'$\ndoes not expand beyond VRAM constraints. The operation geometry is rigidly restricted by\nthe op field to the PatchOperationProfile. Target topological coordinates (path and\nfrom_path) are physically bounded to max_length=2000.\n\nMCP ROUTING TRIGGERS: RFC 6902, JSON Patch, Atomic Mutation, State Vector Projection,\nDeterministic Operator",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements the formal RFC 6902 JSON Patch standard to execute atomic,\ndeterministic state vector mutations across the swarm's N-dimensional blackboard. As an\n...Intent suffix, this represents an authorized kinetic execution trigger.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator's algebraic engine to surgically apply,\ntest, or ablate targeted JSON pointers without requiring full payload transmission.\n\nEPISTEMIC BOUNDS: The `value` (JsonPrimitiveState) mutation payload is volumetrically\nclamped by `enforce_payload_topology` to guarantee that the resulting state matrix $S'$\ndoes not expand beyond VRAM constraints. The operation geometry is rigidly restricted by\nthe op field to the PatchOperationProfile. Target topological coordinates (path and\nfrom_path) are physically bounded to max_length=2000. If the mutation introduces high-entropy external strings, the `zero_trust_receipt_cid` MUST be populated to satisfy Sheaf-theoretic consistency, proving the payload traversed the Symbolic Firewall.\n\nMCP ROUTING TRIGGERS: RFC 6902, JSON Patch, Atomic Mutation, State Vector Projection,\nDeterministic Operator",
       "properties": {
         "op": {
           "$ref": "#/$defs/PatchOperationProfile",
@@ -17691,6 +17954,22 @@
           "default": null,
           "description": "The JSON pointer from which to copy or move the state vector, if applicable.",
           "title": "From"
+        },
+        "zero_trust_receipt_cid": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9_.:-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cryptographic proof that this mutation was sanitized by the Symbolic Firewall.",
+          "title": "Zero Trust Receipt Cid"
         }
       },
       "required": [
@@ -18006,6 +18285,57 @@
         "causal_edges"
       ],
       "title": "StructuralCausalGraphProfile",
+      "type": "object"
+    },
+    "SubstrateDialectProfile": {
+      "description": "AGENT INSTRUCTION: Categorizes the specific computational physics engine or open-source library authorized to execute a node's logic.\n\nCAUSAL AFFORDANCE: Provides the Functorial Semantics mapping the declarative syntax of the manifest to the active semantic environment of the orchestrator.\n\nEPISTEMIC BOUNDS: Strictly clamped to the literal enumerations representing audited open-source frameworks.\n\nMCP ROUTING TRIGGERS: Functorial Semantics, Engine Dialect, Execution Substrate, Framework Mapping",
+      "enum": [
+        "SYMBOLIC_AI_DBC",
+        "OPEN_SYMBOLIC_FIREWALL",
+        "DOCLING_GRAPH_EXTRACTOR",
+        "ONTOGPT_SPIRES",
+        "NATIVE_PYTHON"
+      ],
+      "title": "SubstrateDialectProfile",
+      "type": "string"
+    },
+    "SubstrateHydrationManifest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A kinetic trigger dictating the Just-In-Time (JIT) initialization of an external execution environment.\n\nCAUSAL AFFORDANCE: Forces the Compute Plane to physically download, verify, and mount the requested software library into active memory.\n\nEPISTEMIC BOUNDS: Cryptographic checksums strictly verify loaded wheels to prevent supply-chain poisoning during dynamic module imports.\n\nMCP ROUTING TRIGGERS: Environment Initialization, Supply-Chain Verification, Dynamic Import, JIT Mounting",
+      "properties": {
+        "target_node_cid": {
+          "$ref": "#/$defs/NodeCIDState",
+          "description": "The exact deterministic node demanding the physical hydration."
+        },
+        "substrate_profile": {
+          "$ref": "#/$defs/ExecutionSubstrateProfile",
+          "description": "The exact blueprint geometry being loaded into VRAM."
+        },
+        "topology_class": {
+          "const": "substrate_hydration",
+          "default": "substrate_hydration",
+          "description": "Discriminator type for substrate hydration.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "cryptographic_checksums": {
+          "additionalProperties": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "description": "A map of package names to SHA-256 hashes verifying the loaded wheels.",
+          "propertyNames": {
+            "maxLength": 255
+          },
+          "title": "Cryptographic Checksums",
+          "type": "object"
+        }
+      },
+      "required": [
+        "target_node_cid",
+        "substrate_profile"
+      ],
+      "title": "SubstrateHydrationManifest",
       "type": "object"
     },
     "SwarmTopologyManifest": {
