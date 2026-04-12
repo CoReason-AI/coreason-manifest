@@ -890,6 +890,9 @@
           "contextual_semantic_resolution": "#/$defs/ContextualSemanticResolutionIntent",
           "continuous_spatial_mutation": "#/$defs/ContinuousSpatialMutationIntent",
           "drafting": "#/$defs/DraftingIntent",
+          "epistemic_lean4_premise": "#/$defs/EpistemicLean4Premise",
+          "epistemic_logic_premise": "#/$defs/EpistemicLogicPremise",
+          "epistemic_prolog_premise": "#/$defs/EpistemicPrologPremise",
           "escalation": "#/$defs/EscalationIntent",
           "fallback_intent": "#/$defs/FallbackIntent",
           "forced_adjudication": "#/$defs/AdjudicationIntent",
@@ -899,6 +902,7 @@
           "latent_projection": "#/$defs/LatentProjectionIntent",
           "latent_schema_inference": "#/$defs/LatentSchemaInferenceIntent",
           "neurosymbolic_inference": "#/$defs/NeurosymbolicInferenceIntent",
+          "ontological_crosswalk": "#/$defs/OntologicalCrosswalkIntent",
           "ontology_discovery": "#/$defs/OntologyDiscoveryIntent",
           "override": "#/$defs/OverrideIntent",
           "quarantine_intent": "#/$defs/QuarantineIntent",
@@ -917,6 +921,9 @@
         "propertyName": "topology_class"
       },
       "oneOf": [
+        {
+          "$ref": "#/$defs/OntologicalCrosswalkIntent"
+        },
         {
           "$ref": "#/$defs/EpistemicZeroTrustContract"
         },
@@ -1000,6 +1007,15 @@
         },
         {
           "$ref": "#/$defs/TopologicalProjectionIntent"
+        },
+        {
+          "$ref": "#/$defs/EpistemicLean4Premise"
+        },
+        {
+          "$ref": "#/$defs/EpistemicLogicPremise"
+        },
+        {
+          "$ref": "#/$defs/EpistemicPrologPremise"
         },
         {
           "$ref": "#/$defs/CausalPropagationIntent"
@@ -1087,6 +1103,7 @@
       "discriminator": {
         "mapping": {
           "adjudication_receipt": "#/$defs/AdjudicationReceipt",
+          "artifact_corruption": "#/$defs/ArtifactCorruptionEvent",
           "atomic_proposition": "#/$defs/AtomicPropositionState",
           "barge_in": "#/$defs/BargeInInterruptEvent",
           "belief_modulation": "#/$defs/BeliefModulationReceipt",
@@ -1097,6 +1114,7 @@
           "cognitive_prediction": "#/$defs/CognitivePredictionReceipt",
           "cognitive_reward_evaluation": "#/$defs/CognitiveRewardEvaluationReceipt",
           "counterfactual_regret": "#/$defs/CounterfactualRegretEvent",
+          "crosswalk_resolution": "#/$defs/CrosswalkResolutionReceipt",
           "custody_receipt": "#/$defs/CustodyReceipt",
           "defeasible_attack": "#/$defs/DefeasibleAttackEvent",
           "epistemic_axiom_verification": "#/$defs/EpistemicAxiomVerificationReceipt",
@@ -1106,13 +1124,16 @@
           "epistemic_rejection": "#/$defs/EpistemicRejectionReceipt",
           "epistemic_telemetry": "#/$defs/EpistemicTelemetryEvent",
           "exogenous_event": "#/$defs/ExogenousEpistemicEvent",
+          "formal_logic_proof": "#/$defs/FormalLogicProofReceipt",
           "hypothesis": "#/$defs/HypothesisGenerationEvent",
           "intent_classification": "#/$defs/IntentClassificationReceipt",
+          "lean4_verification_receipt": "#/$defs/Lean4VerificationReceipt",
           "normative_drift": "#/$defs/NormativeDriftEvent",
           "observation": "#/$defs/ObservationEvent",
           "ontological_reification": "#/$defs/OntologicalReificationReceipt",
           "persistence_commit": "#/$defs/PersistenceCommitReceipt",
           "post_coordinated_concept": "#/$defs/PostCoordinatedSemanticState",
+          "prolog_deduction_receipt": "#/$defs/PrologDeductionReceipt",
           "rdf_export_receipt": "#/$defs/RDFExportReceipt",
           "semantic_relational_record": "#/$defs/SemanticRelationalVectorState",
           "system_fault": "#/$defs/SystemFaultEvent",
@@ -1124,6 +1145,9 @@
         "propertyName": "topology_class"
       },
       "oneOf": [
+        {
+          "$ref": "#/$defs/CrosswalkResolutionReceipt"
+        },
         {
           "$ref": "#/$defs/EpistemicZeroTrustReceipt"
         },
@@ -1141,6 +1165,9 @@
         },
         {
           "$ref": "#/$defs/PostCoordinatedSemanticState"
+        },
+        {
+          "$ref": "#/$defs/ArtifactCorruptionEvent"
         },
         {
           "$ref": "#/$defs/HypothesisGenerationEvent"
@@ -1221,6 +1248,15 @@
           "$ref": "#/$defs/EpistemicRejectionReceipt"
         },
         {
+          "$ref": "#/$defs/Lean4VerificationReceipt"
+        },
+        {
+          "$ref": "#/$defs/FormalLogicProofReceipt"
+        },
+        {
+          "$ref": "#/$defs/PrologDeductionReceipt"
+        },
+        {
           "$ref": "#/$defs/BeliefModulationReceipt"
         },
         {
@@ -1257,6 +1293,7 @@
           "document_knowledge_graph": "#/$defs/DocumentKnowledgeGraphManifest",
           "evaluator_optimizer": "#/$defs/EvaluatorOptimizerTopologyManifest",
           "evolutionary": "#/$defs/EvolutionaryTopologyManifest",
+          "hierarchical_dom": "#/$defs/HierarchicalDOMManifest",
           "macro_adversarial": "#/$defs/AdversarialMarketTopologyManifest",
           "macro_elicitation": "#/$defs/IntentElicitationTopologyManifest",
           "macro_federation": "#/$defs/ConsensusFederationTopologyManifest",
@@ -1309,6 +1346,9 @@
         },
         {
           "$ref": "#/$defs/DocumentKnowledgeGraphManifest"
+        },
+        {
+          "$ref": "#/$defs/HierarchicalDOMManifest"
         }
       ]
     },
@@ -1328,6 +1368,78 @@
           "$ref": "#/$defs/CyclicEdgeProfile"
         }
       ]
+    },
+    "ArtifactCorruptionEvent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A terminal state representing catastrophic physical failure of the ingestion engine (e.g., Docling segfaults on malformed bytes).\n\nCAUSAL AFFORDANCE: Emits an immediate circuit breaker to the orchestrator, cleanly severing the ingestion branch and preventing systemic DAG collapse.\n\nEPISTEMIC BOUNDS: Evaluated via a strict Literal automaton classifying the failure physics.\n\nMCP ROUTING TRIGGERS: Artifact Contagion Prevention, Terminal Fault, VLM Crash, Malformed Bytes, DRM Lock",
+      "properties": {
+        "event_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "topology_class": {
+          "const": "artifact_corruption",
+          "default": "artifact_corruption",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "artifact_cid": {
+          "description": "The genesis artifact that caused the ingestion engine to crash.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Artifact Cid",
+          "type": "string"
+        },
+        "corruption_class": {
+          "enum": [
+            "drm_locked",
+            "malformed_bytes",
+            "ocr_failure",
+            "unsupported_format"
+          ],
+          "title": "Corruption Class",
+          "type": "string"
+        },
+        "diagnostic_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Diagnostic Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "event_cid",
+        "timestamp",
+        "artifact_cid",
+        "corruption_class",
+        "diagnostic_hash"
+      ],
+      "title": "ArtifactCorruptionEvent",
+      "type": "object"
     },
     "AsymptoticComplexityReceipt": {
       "additionalProperties": false,
@@ -5420,6 +5532,86 @@
       "title": "CrossoverPolicy",
       "type": "object"
     },
+    "CrosswalkResolutionReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The immutable, cryptographically frozen result of an OntoGPT semantic grounding pass.\n\nCAUSAL AFFORDANCE: Commits the successful translation of raw strings to formal CURIEs into the Epistemic Ledger, physically preserving traceability and preventing 'Traceability Collapse'.\n\nEPISTEMIC BOUNDS: The `resolved_curies` dictionary mathematically locks arbitrary strings to strict W3C CURIE regex patterns (`^[a-zA-Z0-9_]+:[a-zA-Z0-9_]+$`). The alignment certainty is captured by the `grounding_confidence` tri-vector.\n\nMCP ROUTING TRIGGERS: Epistemic Provenance, Crosswalk Resolution, Grounding Receipt, Ontology Access Kit, CURIE",
+      "properties": {
+        "event_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "topology_class": {
+          "const": "crosswalk_resolution",
+          "default": "crosswalk_resolution",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "receipt_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Receipt Cid",
+          "type": "string"
+        },
+        "target_graph_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Target Graph Cid",
+          "type": "string"
+        },
+        "resolved_curies": {
+          "additionalProperties": {
+            "pattern": "^[a-zA-Z0-9_]+:[a-zA-Z0-9_]+$",
+            "type": "string"
+          },
+          "description": "Strict dictionary mapping the original strings to formal W3C CURIEs.",
+          "propertyNames": {
+            "maxLength": 2000
+          },
+          "title": "Resolved Curies",
+          "type": "object"
+        },
+        "grounding_confidence": {
+          "$ref": "#/$defs/DempsterShaferBeliefVector",
+          "description": "Quantifies the semantic alignment and epistemic conflict of the applied crosswalk."
+        }
+      },
+      "required": [
+        "event_cid",
+        "timestamp",
+        "receipt_cid",
+        "target_graph_cid",
+        "resolved_curies",
+        "grounding_confidence"
+      ],
+      "title": "CrosswalkResolutionReceipt",
+      "type": "object"
+    },
     "CryptographicProvenancePolicy": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A foundational base class/mixin for all future deterministic nodes, enforcing Homotopy Type Theory (HoTT) principles where execution identity is indistinguishable from causal path equivalence.\n\nCAUSAL AFFORDANCE: Binds the execution artifact directly to the projection intent, severing execution if the hash chain to the stochastic origin is broken.\n\nEPISTEMIC BOUNDS: Enforces an immutable cryptographic link via `provenance_trace_cid` matching a strict CID regex pattern.\n\nMCP ROUTING TRIGGERS: Homotopy Type Theory, Cryptographic Provenance, Execution Causal Chain, Merkle-DAG Identity, Path Equivalence",
@@ -6665,6 +6857,17 @@
           "title": "Block Class",
           "type": "string"
         },
+        "tabular_matrix": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TabularMatrixProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "anchor": {
           "$ref": "#/$defs/MultimodalTokenAnchorState",
           "description": "The strict visual and token coordinate bindings for this block."
@@ -7806,6 +8009,48 @@
       "title": "EpistemicHydrationPolicy",
       "type": "object"
     },
+    "EpistemicLean4Premise": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A formal theorem and tactic proof for Lean 4 validation.",
+      "properties": {
+        "topology_class": {
+          "const": "epistemic_lean4_premise",
+          "default": "epistemic_lean4_premise",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "ontology_node_id": {
+          "$ref": "#/$defs/NodeCIDState"
+        },
+        "environment_imports": {
+          "items": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "title": "Environment Imports",
+          "type": "array"
+        },
+        "formal_statement": {
+          "maxLength": 10000,
+          "minLength": 1,
+          "title": "Formal Statement",
+          "type": "string"
+        },
+        "tactic_proof": {
+          "maxLength": 100000,
+          "minLength": 1,
+          "title": "Tactic Proof",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ontology_node_id",
+        "formal_statement",
+        "tactic_proof"
+      ],
+      "title": "EpistemicLean4Premise",
+      "type": "object"
+    },
     "EpistemicLedgerState": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Event Sourcing and the Merkle-DAG structure as the absolute, immutable source of truth for the swarm, fully partitioned from volatile memory.\n\nCAUSAL AFFORDANCE: Permanently crystallizes validated events into the `history` log. Applies Truth Maintenance, context eviction, and tracks active `DefeasibleCascadeEvents` and `RollbackIntents`.\n\nEPISTEMIC BOUNDS: The `@model_validator` `_enforce_canonical_sort` deterministically sorts history by timestamp, checkpoints by ID, and active cascades—guaranteeing invariant RFC 8785 canonical hashing. Validation prevents epistemic paradoxes (child before parent).\n\nMCP ROUTING TRIGGERS: Event Sourcing, Merkle-DAG, Immutable Ledger, Truth Crystallization, Chronological Sort",
@@ -7984,6 +8229,98 @@
         "message"
       ],
       "title": "EpistemicLogEvent",
+      "type": "object"
+    },
+    "EpistemicLogicPremise": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents a formal Answer Set Programming (ASP) logic string.",
+      "properties": {
+        "topology_class": {
+          "const": "epistemic_logic_premise",
+          "default": "epistemic_logic_premise",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "ontology_node_id": {
+          "$ref": "#/$defs/NodeCIDState"
+        },
+        "asp_program": {
+          "maxLength": 65536,
+          "minLength": 1,
+          "title": "Asp Program",
+          "type": "string"
+        },
+        "max_models": {
+          "default": 1,
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Max Models",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "ontology_node_id",
+        "asp_program"
+      ],
+      "title": "EpistemicLogicPremise",
+      "type": "object"
+    },
+    "EpistemicPrologPremise": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents a formal Horn clause query and knowledge base.",
+      "properties": {
+        "topology_class": {
+          "const": "epistemic_prolog_premise",
+          "default": "epistemic_prolog_premise",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "ontology_node_id": {
+          "$ref": "#/$defs/NodeCIDState"
+        },
+        "knowledge_base_cid": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NodeCIDState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "ephemeral_facts": {
+          "anyOf": [
+            {
+              "maxLength": 65536,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ephemeral Facts"
+        },
+        "prolog_query": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "title": "Prolog Query",
+          "type": "string"
+        },
+        "max_solutions": {
+          "default": 1,
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Max Solutions",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "ontology_node_id",
+        "prolog_query"
+      ],
+      "title": "EpistemicPrologPremise",
       "type": "object"
     },
     "EpistemicPromotionEvent": {
@@ -8729,7 +9066,7 @@
     },
     "EpistemicTransmutationTask": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Orchestrates Cross-Modal Representation Alignment,\ndeterministically transmuting unstructured artifacts into machine-readable\nN-dimensional tensors or discrete graphs. As a ...Task suffix, this represents\nan authorized kinetic execution trigger.\n\nCAUSAL AFFORDANCE: Forces the orchestrator's VLM or extraction engine to process\nthe artifact_event_cid (128-char CID) and project it into target_modalities\n(5-value Literal, min_length=1) while strictly adhering to the attached\ncompression_sla (EpistemicCompressionSLA).\n\nEPISTEMIC BOUNDS: The @model_validator validate_grounding_density_for_visuals\nrejects sparse grounding for visual/tabular modalities. The @model_validator\nsort_arrays deterministically sorts target_modalities for RFC 8785 canonical\nhashing. The optional execution_cost_budget_magnitude (int | None,\nle=1000000000, ge=0, default=None) caps thermodynamic cost.\n\nMCP ROUTING TRIGGERS: Cross-Modal Alignment, Representation Engineering,\nMultimodal Extraction, VLM Transmutation, Deterministic Projection",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Orchestrates Cross-Modal Representation Alignment,\ndeterministically transmuting unstructured artifacts into machine-readable\nN-dimensional tensors or discrete graphs. As a ...Task suffix, this represents\nan authorized kinetic execution trigger.\n\nCAUSAL AFFORDANCE: Forces the orchestrator's VLM or extraction engine to process\nthe artifact_event_cid (128-char CID) and project it into target_modalities\n(5-value Literal, min_length=1) while strictly adhering to the attached\noptical_governance (OpticalParsingSLA) and schema_governance (SchemaDrivenExtractionSLA).\n\nEPISTEMIC BOUNDS: The @model_validator validate_optical_governance_presence\nrejects extracting raster_image or tabular_grid without proper OpticalParsingSLA configuration. The @model_validator\nsort_arrays deterministically sorts target_modalities for RFC 8785 canonical\nhashing. The optional execution_cost_budget_magnitude (int | None,\nle=1000000000, ge=0, default=None) caps thermodynamic cost.\n\nMCP ROUTING TRIGGERS: Cross-Modal Alignment, Representation Engineering,\nMultimodal Extraction, VLM Transmutation, Deterministic Projection",
       "properties": {
         "task_cid": {
           "description": "Unique identifier for this specific multimodal extraction intervention.",
@@ -8774,6 +9111,18 @@
             }
           ],
           "default": null
+        },
+        "optical_governance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OpticalParsingSLA"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The structural boundaries for visual extraction."
         },
         "execution_cost_budget_magnitude": {
           "anyOf": [
@@ -10385,6 +10734,74 @@
       "title": "FitnessObjectiveProfile",
       "type": "object"
     },
+    "FormalLogicProofReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The immutable receipt from the Clingo solver.",
+      "properties": {
+        "topology_class": {
+          "const": "formal_logic_proof",
+          "default": "formal_logic_proof",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "causal_provenance_id": {
+          "$ref": "#/$defs/NodeCIDState"
+        },
+        "event_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "timestamp": {
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prior Event Hash"
+        },
+        "satisfiability": {
+          "enum": [
+            "SATISFIABLE",
+            "UNSATISFIABLE",
+            "UNKNOWN",
+            "OPTIMUM FOUND"
+          ],
+          "title": "Satisfiability",
+          "type": "string"
+        },
+        "answer_sets": {
+          "description": "Topological Exemption: DO NOT SORT.",
+          "items": {
+            "items": {
+              "maxLength": 1024,
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "title": "Answer Sets",
+          "type": "array"
+        }
+      },
+      "required": [
+        "causal_provenance_id",
+        "event_cid",
+        "timestamp",
+        "satisfiability"
+      ],
+      "title": "FormalLogicProofReceipt",
+      "type": "object"
+    },
     "FormalVerificationContract": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Leverages Automated Theorem Proving and the Curry-Howard\nCorrespondence to bind the causal graph to a mathematically verified safety\ninvariant. As a ...Contract suffix, this enforces rigid mathematical\nboundaries globally.\n\nCAUSAL AFFORDANCE: Authorizes the Rust/C++ orchestrator to ingest a compiled\nproof artifact and mechanically verify that the topology cannot transition into\na catastrophic or forbidden geometric state. The invariant_theorem\n(max_length=2000) specifies the exact safety assertion.\n\nEPISTEMIC BOUNDS: The theorem prover dialect is strictly locked to the\nproof_system Literal [\"tla_plus\", \"lean4\", \"coq\", \"z3\"]. Cryptographic\nintegrity is guaranteed by the compiled_proof_hash (SHA-256 regex\n^[a-f0-9]{64}$).\n\nMCP ROUTING TRIGGERS: Automated Theorem Proving, Curry-Howard Correspondence,\nSafety Invariant, TLA+, Formal Methods",
@@ -10961,6 +11378,69 @@
         "hardware_signature_blob"
       ],
       "title": "HardwareEnclaveReceipt",
+      "type": "object"
+    },
+    "HierarchicalDOMManifest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A verifiable Directed Acyclic Graph (DAG) representing the nested visual and logical containment of an ingested multimodal artifact (e.g., Docling Output).\n\nCAUSAL AFFORDANCE: Replaces flat token arrays with an adjacency matrix, instructing the orchestrator exactly how spatial blocks physically encapsulate one another.\n\nEPISTEMIC BOUNDS: Dictionary sizes are volumetrically clamped (`max_length=100000`). The `verify_dom_dag_integrity` `@model_validator` executes a DFS mathematical proof via networkx to guarantee the absence of cyclical containment paradoxes.\n\nMCP ROUTING TRIGGERS: Spatial-Semantic Isomorphism, Document Object Model, Containment DAG, Visual Hierarchy, Rhetorical Bounding",
+      "properties": {
+        "topology_class": {
+          "const": "hierarchical_dom",
+          "default": "hierarchical_dom",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "dom_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Dom Cid",
+          "type": "string"
+        },
+        "root_block_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Root Block Cid",
+          "type": "string"
+        },
+        "blocks": {
+          "additionalProperties": {
+            "$ref": "#/$defs/DocumentLayoutRegionState"
+          },
+          "description": "The localized registry of all extracted spatial blocks.",
+          "maxProperties": 100000,
+          "propertyNames": {
+            "maxLength": 255
+          },
+          "title": "Blocks",
+          "type": "object"
+        },
+        "containment_edges": {
+          "description": "Directed edges defining the parent-child spatial containment (Parent -> Child).",
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "type": "array"
+          },
+          "title": "Containment Edges",
+          "type": "array"
+        }
+      },
+      "required": [
+        "dom_cid",
+        "root_block_cid",
+        "blocks"
+      ],
+      "title": "HierarchicalDOMManifest",
       "type": "object"
     },
     "HoareLogicProofReceipt": {
@@ -12569,6 +13049,75 @@
       "title": "LatentSmoothingProfile",
       "type": "object"
     },
+    "Lean4VerificationReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The immutable receipt of the Lean 4 kernel's execution.",
+      "properties": {
+        "topology_class": {
+          "const": "lean4_verification_receipt",
+          "default": "lean4_verification_receipt",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "causal_provenance_id": {
+          "$ref": "#/$defs/NodeCIDState"
+        },
+        "verification_status": {
+          "enum": [
+            "PROVED",
+            "FALSIFIED_AT_TACTIC",
+            "SORRY_DETECTED",
+            "TIMEOUT"
+          ],
+          "title": "Verification Status",
+          "type": "string"
+        },
+        "failing_tactic_state": {
+          "anyOf": [
+            {
+              "maxLength": 65536,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Failing Tactic State"
+        },
+        "event_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "timestamp": {
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prior Event Hash"
+        }
+      },
+      "required": [
+        "causal_provenance_id",
+        "verification_status",
+        "event_cid",
+        "timestamp"
+      ],
+      "title": "Lean4VerificationReceipt",
+      "type": "object"
+    },
     "LifecycleTriggerEvent": {
       "enum": [
         "on_start",
@@ -12620,6 +13169,36 @@
         "tamper_evident_root"
       ],
       "title": "LineageWatermarkReceipt",
+      "type": "object"
+    },
+    "LinkMLValidationSLA": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes Graph-Shape Governance, acting as the execution contract instructing the orchestrator to validate extracted nodes and edges against an external LinkML YAML shape graph before committing them.\n\nCAUSAL AFFORDANCE: Forces the structural validation of all causal edges. Authorizes the orchestrator to mechanically sever relations that violate the predicate's declared Domain, Range, or Cardinality constraints.\n\nEPISTEMIC BOUNDS: The `linkml_schema_uri` strictly clamps the topological ruleset to a remote, verifiable YAML definition.\n\nMCP ROUTING TRIGGERS: LinkML, Graph-Shape Governance, Structural Isomorphism, SHACL, Domain and Range Enforcement",
+      "properties": {
+        "linkml_schema_uri": {
+          "description": "RFC 8785 canonicalized URI pointing to the canonical LinkML YAML definition.",
+          "format": "uri",
+          "minLength": 1,
+          "title": "Linkml Schema Uri",
+          "type": "string"
+        },
+        "strict_domain_range_checking": {
+          "default": true,
+          "description": "If True, the orchestrator physically severs any CausalDirectedEdgeState where the subject/object node classes violate the predicate's declared LinkML domain/range.",
+          "title": "Strict Domain Range Checking",
+          "type": "boolean"
+        },
+        "allow_unmapped_entities": {
+          "default": false,
+          "description": "A boolean gate dictating whether the resulting graph is permitted to retain high-entropy text nodes that OntoGPT failed to resolve into a formal CURIE.",
+          "title": "Allow Unmapped Entities",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "linkml_schema_uri"
+      ],
+      "title": "LinkMLValidationSLA",
       "type": "object"
     },
     "LogitSteganographyContract": {
@@ -13669,10 +14248,28 @@
           "description": "The target deterministic math/logic engine.",
           "enum": [
             "lean4",
-            "z3"
+            "z3",
+            "clingo",
+            "swi_prolog"
           ],
           "title": "Solver Protocol",
           "type": "string"
+        },
+        "expected_proof_receipt_cid": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9_.:-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Pointer to anticipated receipt.",
+          "title": "Expected Proof Receipt Cid"
         },
         "formal_grammar_payload": {
           "description": "The raw code or formal proof syntax generated by the LLM to be evaluated.",
@@ -14226,6 +14823,60 @@
       "title": "OntologicalAlignmentPolicy",
       "type": "object"
     },
+    "OntologicalCrosswalkIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A kinetic trigger instructing the orchestrator to route an array of ungrounded text entities through a grounding oracle (OntoGPT/OAK) to map them to formal ontology CURIEs.\n\nCAUSAL AFFORDANCE: Authorizes the runtime to execute Bipartite Ontological Mapping, collapsing high-entropy natural language strings into zero-entropy Semantic Web identifiers.\n\nEPISTEMIC BOUNDS: The search space is rigidly clamped by the `target_ontology_registries` array (e.g., ['MONDO', 'HP']). The `minimum_isometry_threshold` physically restricts acceptable mappings to a strictly positive cosine/BM25 similarity (`ge=0.0, le=1.0`).\n\nMCP ROUTING TRIGGERS: Bipartite Ontological Mapping, Grounding Oracle, CURIE Resolution, Isometry Thresholding, Semantic Crosswalk",
+      "properties": {
+        "topology_class": {
+          "const": "ontological_crosswalk",
+          "default": "ontological_crosswalk",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "target_graph_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Target Graph Cid",
+          "type": "string"
+        },
+        "source_strings": {
+          "description": "The ungrounded natural language concepts extracted by the LLM.",
+          "items": {
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Source Strings",
+          "type": "array"
+        },
+        "target_ontology_registries": {
+          "description": "The strictly typed standard ontology namespaces to search (e.g., 'MONDO', 'CHEBI').",
+          "items": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Target Ontology Registries",
+          "type": "array"
+        },
+        "minimum_isometry_threshold": {
+          "description": "The semantic distance threshold required to automatically accept a mapping.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Minimum Isometry Threshold",
+          "type": "number"
+        }
+      },
+      "required": [
+        "target_graph_cid",
+        "source_strings",
+        "target_ontology_registries",
+        "minimum_isometry_threshold"
+      ],
+      "title": "OntologicalCrosswalkIntent",
+      "type": "object"
+    },
     "OntologicalHandshakeReceipt": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact representing the absolute\nmathematical alignment of two swarms' latent vector spaces prior to establishing a shared\nepistemic blackboard. As a ...Receipt suffix, this is an append-only coordinate on the\nMerkle-DAG that the LLM must never hallucinate a mutation to.\n\nCAUSAL AFFORDANCE: Authorizes the physical bridging of two independent N-dimensional\nsemantic spaces. If native geometries are incommensurable, it structurally demands the\napplication of a DimensionalProjectionContract (applied_projection). The alignment_status\nLiteral [\"aligned\", \"projected\", \"fallback_triggered\", \"incommensurable\"] records the\nfinal verdict.\n\nEPISTEMIC BOUNDS: Semantic isometry is quantified via measured_cosine_similarity, strictly\nclamped between [ge=-1.0, le=1.0]. The participant_node_cids array (min_length=2) is\ndeterministically sorted via @model_validator to prevent Byzantine replay anomalies\nduring cross-swarm Merkle hashing.\n\nMCP ROUTING TRIGGERS: Earth Mover's Distance, Cosine Similarity, Vector Space Isometry,\nLatent Alignment, Holographic Graph Projection",
@@ -14561,6 +15212,34 @@
         "prism_target_pointer"
       ],
       "title": "OpticalMappingContract",
+      "type": "object"
+    },
+    "OpticalParsingSLA": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes the hardware and thermodynamic boundaries for the Docling vision models, dictating the deployment of Real-Time Detection Transformers (RT-DETR).\n\nCAUSAL AFFORDANCE: Physically acts as a computational throttle, authorizing the orchestrator to deploy expensive pixel-level Optical Character Recognition (OCR) and Table Structure Recognition (TSR) models over standard byte-extraction.\n\nEPISTEMIC BOUNDS: The `bitmap_dpi_resolution` is physically clamped to `ge=72, le=600` to mathematically prevent VRAM memory bombs on oversized, high-density raster images.\n\nMCP ROUTING TRIGGERS: Optical Thermodynamic Bounding, RT-DETR, VRAM Throttling, LayoutLMv3, Hardware Guillotine",
+      "properties": {
+        "force_ocr": {
+          "default": false,
+          "description": "Boolean gate authorizing deep optical evaluation when native PDF byte-extraction fails.",
+          "title": "Force Ocr",
+          "type": "boolean"
+        },
+        "bitmap_dpi_resolution": {
+          "default": 72,
+          "description": "The strict maximum spatial resolution authorized for rendering rasterized tensors.",
+          "maximum": 600,
+          "minimum": 72,
+          "title": "Bitmap Dpi Resolution",
+          "type": "integer"
+        },
+        "table_structure_recognition": {
+          "default": true,
+          "description": "Authorizes the deployment of dense bipartite mapping models (e.g., TableFormer) over tabular grids.",
+          "title": "Table Structure Recognition",
+          "type": "boolean"
+        }
+      },
+      "title": "OpticalParsingSLA",
       "type": "object"
     },
     "OptimizationDirectionProfile": {
@@ -15284,6 +15963,70 @@
       "minLength": 1,
       "pattern": "^[a-zA-Z0-9_-]+$",
       "type": "string"
+    },
+    "PrologDeductionReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The immutable receipt representing SWI-Prolog backward-chaining execution.",
+      "properties": {
+        "topology_class": {
+          "const": "prolog_deduction_receipt",
+          "default": "prolog_deduction_receipt",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "causal_provenance_id": {
+          "$ref": "#/$defs/NodeCIDState"
+        },
+        "event_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "timestamp": {
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prior Event Hash"
+        },
+        "truth_value": {
+          "title": "Truth Value",
+          "type": "boolean"
+        },
+        "variable_bindings": {
+          "description": "Topological Exemption: DO NOT SORT.",
+          "items": {
+            "additionalProperties": {
+              "$ref": "#/$defs/JsonPrimitiveState"
+            },
+            "propertyNames": {
+              "maxLength": 255
+            },
+            "type": "object"
+          },
+          "title": "Variable Bindings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "causal_provenance_id",
+        "event_cid",
+        "timestamp",
+        "truth_value"
+      ],
+      "title": "PrologDeductionReceipt",
+      "type": "object"
     },
     "QoSClassificationProfile": {
       "enum": [
@@ -16285,6 +17028,18 @@
           ],
           "title": "Validation Failure Action",
           "type": "string"
+        },
+        "linkml_governance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LinkMLValidationSLA"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The structural shape constraints for the graph."
         }
       },
       "required": [
@@ -18487,6 +19242,59 @@
       "title": "SystemFaultEvent",
       "type": "object"
     },
+    "TabularCellState": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative, discrete spatial vertex mapping an exact cell coordinate within a 2D relational matrix.\n\nCAUSAL AFFORDANCE: Instructs the Table Structure Recognition engine to project extracted strings into precise Cartesian coordinates, preventing semantic flattening.\n\nEPISTEMIC BOUNDS: Spatial geometry is clamped by non-negative `row_index` and `column_index` (`ge=0`). Span integers are strictly positive (`ge=1`). The payload is clamped at `max_length=10000` to prevent dictionary bombing.\n\nMCP ROUTING TRIGGERS: Tabular Matrix Geometry, Table Structure Recognition, Bipartite Graph, Cartesian Coordinate, Spatial Grid",
+      "properties": {
+        "cell_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Cell Cid",
+          "type": "string"
+        },
+        "row_index": {
+          "description": "The primary Cartesian Y-coordinate of the cell.",
+          "minimum": 0,
+          "title": "Row Index",
+          "type": "integer"
+        },
+        "column_index": {
+          "description": "The primary Cartesian X-coordinate of the cell.",
+          "minimum": 0,
+          "title": "Column Index",
+          "type": "integer"
+        },
+        "row_span": {
+          "default": 1,
+          "description": "The vertical geometric span of the cell.",
+          "minimum": 1,
+          "title": "Row Span",
+          "type": "integer"
+        },
+        "column_span": {
+          "default": 1,
+          "description": "The horizontal geometric span of the cell.",
+          "minimum": 1,
+          "title": "Column Span",
+          "type": "integer"
+        },
+        "text_payload": {
+          "description": "The extracted atomic data point within the cell.",
+          "maxLength": 10000,
+          "title": "Text Payload",
+          "type": "string"
+        }
+      },
+      "required": [
+        "cell_cid",
+        "row_index",
+        "column_index",
+        "text_payload"
+      ],
+      "title": "TabularCellState",
+      "type": "object"
+    },
     "TabularEncodingProfile": {
       "description": "AGENT INSTRUCTION: Dictates the exact algorithmic mechanism the orchestrator must use to compress an untyped payload_injection_zone into a holistic high-dimensional VectorEmbeddingState, capturing multivariate covariance.",
       "enum": [
@@ -18496,6 +19304,45 @@
       ],
       "title": "TabularEncodingProfile",
       "type": "string"
+    },
+    "TabularMatrixProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative envelope defining a localized 2D bipartite tabular graph.\n\nCAUSAL AFFORDANCE: Isolates dense relational data grids from standard 1D text extraction, permitting downstream agents to execute spatial querying.\n\nEPISTEMIC BOUNDS: Total dimensions bounded `ge=1`. The `validate_matrix_physics` `@model_validator` mathematically guarantees no cell violates Euclidean space by exceeding `total_rows` or `total_columns`.\n\nMCP ROUTING TRIGGERS: TableFormer, Relational Matrix, Grid Topology, Spatial Bounding, 2D Array",
+      "properties": {
+        "matrix_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Matrix Cid",
+          "type": "string"
+        },
+        "total_rows": {
+          "minimum": 1,
+          "title": "Total Rows",
+          "type": "integer"
+        },
+        "total_columns": {
+          "minimum": 1,
+          "title": "Total Columns",
+          "type": "integer"
+        },
+        "cells": {
+          "description": "The complete, sorted array of constituent cell geometries.",
+          "items": {
+            "$ref": "#/$defs/TabularCellState"
+          },
+          "title": "Cells",
+          "type": "array"
+        }
+      },
+      "required": [
+        "matrix_cid",
+        "total_rows",
+        "total_columns",
+        "cells"
+      ],
+      "title": "TabularMatrixProfile",
+      "type": "object"
     },
     "TargetTopologyProfile": {
       "enum": [
