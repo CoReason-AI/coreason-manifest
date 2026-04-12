@@ -9782,9 +9782,7 @@
         "proof_system": {
           "description": "The mathematical dialect and theorem prover used to compile the proof.",
           "enum": [
-            "tla_plus",
             "lean4",
-            "coq",
             "z3"
           ],
           "title": "Proof System",
@@ -10387,9 +10385,7 @@
           "description": "The strict mathematical automaton engine responsible for evaluating the structural boundary.",
           "enum": [
             "lean4",
-            "coq",
-            "z3",
-            "tla_plus"
+            "z3"
           ],
           "title": "Proof System",
           "type": "string"
@@ -13037,7 +13033,7 @@
     },
     "NeuroSymbolicHandoffContract": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Bridges the stochastic-deterministic divide by invoking Satisfiability Modulo Theories (SMT) and formal theorem provers (Z3, Lean4, Coq) to execute mathematically unassailable logic.\n\nCAUSAL AFFORDANCE: Offloads non-monotonic probabilistic reasoning into a rigid, verifiable algebraic solver, returning the mathematically proven result to the swarm via the `expected_proof_schema`.\n\nEPISTEMIC BOUNDS: The solver target is restricted to the strict `solver_protocol` Literal automaton (`[\"z3\", \"lean4\", \"coq\", \"tla_plus\", \"sympy\"]`). The Halting Problem is explicitly mitigated by clamping `timeout_ms` (`gt=0, le=86400000`), preventing infinite computational loops.\n\nMCP ROUTING TRIGGERS: Satisfiability Modulo Theories, Curry-Howard Correspondence, Theorem Proving, Symbolic Handoff, Halting Problem Mitigation",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Bridges the stochastic-deterministic divide by invoking Satisfiability Modulo Theories (SMT) and formal theorem provers (Z3, Lean4, Coq) to execute mathematically unassailable logic.\n\nCAUSAL AFFORDANCE: Offloads non-monotonic probabilistic reasoning into a rigid, verifiable algebraic solver, returning the mathematically proven result to the swarm.\n\nEPISTEMIC BOUNDS: The solver target is restricted to the strict `solver_protocol` Literal automaton (`[\"z3\", \"lean4\", \"coq\", \"tla_plus\", \"sympy\"]`). The Halting Problem is explicitly mitigated by clamping `timeout_ms` (`gt=0, le=86400000`), preventing infinite computational loops.\n\nMCP ROUTING TRIGGERS: Satisfiability Modulo Theories, Curry-Howard Correspondence, Theorem Proving, Symbolic Handoff, Halting Problem Mitigation",
       "properties": {
         "handoff_cid": {
           "description": "Unique identifier for this symbolic delegation.",
@@ -13050,11 +13046,8 @@
         "solver_protocol": {
           "description": "The target deterministic math/logic engine.",
           "enum": [
-            "z3",
             "lean4",
-            "coq",
-            "tla_plus",
-            "sympy"
+            "z3"
           ],
           "title": "Solver Protocol",
           "type": "string"
@@ -13064,17 +13057,6 @@
           "maxLength": 100000,
           "title": "Formal Grammar Payload",
           "type": "string"
-        },
-        "expected_proof_schema": {
-          "additionalProperties": {
-            "$ref": "#/$defs/JsonPrimitiveState"
-          },
-          "description": "The strict JSON Schema the deterministic solver must use to return the verified answer to the agent.",
-          "propertyNames": {
-            "maxLength": 255
-          },
-          "title": "Expected Proof Schema",
-          "type": "object"
         },
         "timeout_ms": {
           "description": "The maximum compute time allocated to the symbolic solver before aborting.",
@@ -13088,7 +13070,6 @@
         "handoff_cid",
         "solver_protocol",
         "formal_grammar_payload",
-        "expected_proof_schema",
         "timeout_ms"
       ],
       "title": "NeuroSymbolicHandoffContract",
@@ -15922,16 +15903,11 @@
           "title": "Target Ontology Namespace",
           "type": "string"
         },
-        "formal_rule_matrix": {
-          "additionalProperties": {
-            "$ref": "#/$defs/JsonPrimitiveState"
-          },
-          "description": "An untyped but volumetrically bounded dictionary defining the exact topological logic required to execute the crosswalk (e.g., a SWRL representation).",
-          "propertyNames": {
-            "maxLength": 255
-          },
-          "title": "Formal Rule Matrix",
-          "type": "object"
+        "formal_logic_clauses": {
+          "description": "The exact topological logic required to execute the crosswalk, strictly written as a flat, executable formal logic string (e.g., SWRL, ASP, or Prolog syntax) rather than a nested dictionary.",
+          "maxLength": 65536,
+          "title": "Formal Logic Clauses",
+          "type": "string"
         },
         "justification_evidence_cids": {
           "description": "Explicit pointers to the AtomicPropositionState or OntologicalReificationReceipt nodes that causally justify this new mapping rule.",
@@ -15947,7 +15923,7 @@
         "proposal_cid",
         "source_ontology_namespace",
         "target_ontology_namespace",
-        "formal_rule_matrix",
+        "formal_logic_clauses",
         "justification_evidence_cids"
       ],
       "title": "SemanticMappingHeuristicIntent",
