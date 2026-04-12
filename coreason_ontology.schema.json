@@ -907,6 +907,7 @@
           "semantic_discovery": "#/$defs/SemanticDiscoveryIntent",
           "semantic_mapping_proposal": "#/$defs/SemanticMappingHeuristicIntent",
           "spatial_kinematic": "#/$defs/SpatialKinematicActionIntent",
+          "substrate_hydration": "#/$defs/SubstrateHydrationManifest",
           "system_2_remediation": "#/$defs/System2RemediationIntent",
           "task_announcement": "#/$defs/TaskAnnouncementIntent",
           "taxonomic_restructure": "#/$defs/TaxonomicRestructureIntent",
@@ -990,6 +991,9 @@
         },
         {
           "$ref": "#/$defs/System2RemediationIntent"
+        },
+        {
+          "$ref": "#/$defs/SubstrateHydrationManifest"
         },
         {
           "$ref": "#/$defs/NeurosymbolicInferenceIntent"
@@ -4066,6 +4070,18 @@
           ],
           "default": null,
           "description": "Big-O computational bounds."
+        },
+        "execution_substrate": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ExecutionSubstrateProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematical functor blueprint authorizing the runtime to hydrate a specific open-source engine (e.g., SymbolicAI) for this node."
         },
         "topology_class": {
           "const": "system",
@@ -9745,6 +9761,45 @@
         "start_time_unix_nano"
       ],
       "title": "ExecutionSpanReceipt",
+      "type": "object"
+    },
+    "ExecutionSubstrateProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative blueprint defining the hardware and software prerequisites to safely load an external compute engine.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator's JIT compiler to fetch and verify external packages before kinetic execution, ensuring Dependency Isomorphism.\n\nEPISTEMIC BOUNDS: VRAM constrained strictly above zero. Dependencies are deterministically sorted to preserve RFC 8785 canonical hashing.\n\nMCP ROUTING TRIGGERS: Coalgebraic Thunking, Dependency Isomorphism, JIT Hydration, VRAM Allocation",
+      "properties": {
+        "dialect": {
+          "$ref": "#/$defs/SubstrateDialectProfile",
+          "description": "The discrete open-source engine identifier."
+        },
+        "required_package_signatures": {
+          "description": "A whitelist of exact PEP 508 dependency specifiers or wheel hashes.",
+          "items": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "title": "Required Package Signatures",
+          "type": "array"
+        },
+        "vram_overhead_mb": {
+          "description": "The physical thermodynamic cost (in MB) of loading the library.",
+          "maximum": 1000000000,
+          "minimum": 0,
+          "title": "Vram Overhead Mb",
+          "type": "integer"
+        },
+        "supports_lazy_hydration": {
+          "description": "Whether the orchestrator can utilize Coalgebraic Thunking to unmount the engine between invocations to save VRAM.",
+          "title": "Supports Lazy Hydration",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "dialect",
+        "required_package_signatures",
+        "vram_overhead_mb",
+        "supports_lazy_hydration"
+      ],
+      "title": "ExecutionSubstrateProfile",
       "type": "object"
     },
     "ExogenousEpistemicEvent": {
@@ -18036,6 +18091,57 @@
         "causal_edges"
       ],
       "title": "StructuralCausalGraphProfile",
+      "type": "object"
+    },
+    "SubstrateDialectProfile": {
+      "description": "AGENT INSTRUCTION: Categorizes the specific computational physics engine or open-source library authorized to execute a node's logic.\n\nCAUSAL AFFORDANCE: Provides the Functorial Semantics mapping the declarative syntax of the manifest to the active semantic environment of the orchestrator.\n\nEPISTEMIC BOUNDS: Strictly clamped to the literal enumerations representing audited open-source frameworks.\n\nMCP ROUTING TRIGGERS: Functorial Semantics, Engine Dialect, Execution Substrate, Framework Mapping",
+      "enum": [
+        "SYMBOLIC_AI_DBC",
+        "OPEN_SYMBOLIC_FIREWALL",
+        "DOCLING_GRAPH_EXTRACTOR",
+        "ONTOGPT_SPIRES",
+        "NATIVE_PYTHON"
+      ],
+      "title": "SubstrateDialectProfile",
+      "type": "string"
+    },
+    "SubstrateHydrationManifest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A kinetic trigger dictating the Just-In-Time (JIT) initialization of an external execution environment.\n\nCAUSAL AFFORDANCE: Forces the Compute Plane to physically download, verify, and mount the requested software library into active memory.\n\nEPISTEMIC BOUNDS: Cryptographic checksums strictly verify loaded wheels to prevent supply-chain poisoning during dynamic module imports.\n\nMCP ROUTING TRIGGERS: Environment Initialization, Supply-Chain Verification, Dynamic Import, JIT Mounting",
+      "properties": {
+        "target_node_cid": {
+          "$ref": "#/$defs/NodeCIDState",
+          "description": "The exact deterministic node demanding the physical hydration."
+        },
+        "substrate_profile": {
+          "$ref": "#/$defs/ExecutionSubstrateProfile",
+          "description": "The exact blueprint geometry being loaded into VRAM."
+        },
+        "topology_class": {
+          "const": "substrate_hydration",
+          "default": "substrate_hydration",
+          "description": "Discriminator type for substrate hydration.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "cryptographic_checksums": {
+          "additionalProperties": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "description": "A map of package names to SHA-256 hashes verifying the loaded wheels.",
+          "propertyNames": {
+            "maxLength": 255
+          },
+          "title": "Cryptographic Checksums",
+          "type": "object"
+        }
+      },
+      "required": [
+        "target_node_cid",
+        "substrate_profile"
+      ],
+      "title": "SubstrateHydrationManifest",
       "type": "object"
     },
     "SwarmTopologyManifest": {
