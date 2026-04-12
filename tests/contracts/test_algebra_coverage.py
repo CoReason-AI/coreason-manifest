@@ -795,7 +795,7 @@ def test_tabular_matrix_profile_coverage() -> None:
     # Test valid matrix and sorting
     # bad is indexed 2, but total_rows=2, so it should fail physics
     with pytest.raises(
-        ValidationError, match="Topological Contradiction: Tabular cell geometry exceeds defined matrix dimensions."
+        ValidationError, match=r"Topological Contradiction: Tabular cell geometry exceeds defined matrix dimensions."
     ):
         TabularMatrixProfile(matrix_cid="m1", total_rows=2, total_columns=2, cells=[cell_bad, cell_ok])
 
@@ -806,7 +806,7 @@ def test_tabular_matrix_profile_coverage() -> None:
 
     with pytest.raises(
         ValidationError,
-        match="Topological Contradiction: tabular_matrix can only be populated if block_class is 'table'.",
+        match=r"Topological Contradiction: tabular_matrix can only be populated if block_class is 'table'.",
     ):
         DocumentLayoutRegionState(block_cid="b1", block_class="paragraph", anchor=anchor, tabular_matrix=m_ok)
 
@@ -814,16 +814,16 @@ def test_tabular_matrix_profile_coverage() -> None:
 
     r_other = DocumentLayoutRegionState(block_cid="b2", block_class="paragraph", anchor=anchor)
 
-    with pytest.raises(ValidationError, match="Topological Contradiction: root_block_cid not found in blocks."):
+    with pytest.raises(ValidationError, match=r"Topological Contradiction: root_block_cid not found in blocks."):
         HierarchicalDOMManifest(dom_cid="d1", root_block_cid="missing", blocks={"b1": r_ok})
 
-    with pytest.raises(ValidationError, match="Ghost pointer: Containment edge references undefined block."):
+    with pytest.raises(ValidationError, match=r"Ghost pointer: Containment edge references undefined block."):
         HierarchicalDOMManifest(
             dom_cid="d1", root_block_cid="b1", blocks={"b1": r_ok}, containment_edges=[("b1", "b2")]
         )
 
     with pytest.raises(
-        ValidationError, match="Topological Contradiction: Hierarchical DOM tree contains a spatial cycle."
+        ValidationError, match=r"Topological Contradiction: Hierarchical DOM tree contains a spatial cycle."
     ):
         HierarchicalDOMManifest(
             dom_cid="d1",
@@ -832,6 +832,6 @@ def test_tabular_matrix_profile_coverage() -> None:
             containment_edges=[("b1", "b2"), ("b2", "b1")],
         )
 
-    dom_ok = HierarchicalDOMManifest(
+    HierarchicalDOMManifest(
         dom_cid="d1", root_block_cid="b1", blocks={"b1": r_ok, "b2": r_other}, containment_edges=[("b1", "b2")]
     )
