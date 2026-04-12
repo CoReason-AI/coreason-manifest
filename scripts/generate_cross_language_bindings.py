@@ -23,7 +23,7 @@ def main():
         "npx", "quicktype", "-s", "schema", schema_file,
         "-o", ts_out, "--just-types"
     ]
-    subprocess.run(ts_cmd, check=True)
+    subprocess.run(ts_cmd, check=True)  # noqa: S603
 
     print("Generating Rust bindings...")
     rust_cmd = [
@@ -31,7 +31,7 @@ def main():
         "-o", rust_out, "--visibility", "public",
         "--derive-debug", "--derive-clone", "--derive-partial-eq"
     ]
-    subprocess.run(rust_cmd, check=True)
+    subprocess.run(rust_cmd, check=True)  # noqa: S603
 
     print("Post-processing Rust bindings...")
     with open(rust_out, encoding="utf-8") as f:
@@ -43,10 +43,10 @@ def main():
         f.write(rust_code)
 
     print("Formatting TypeScript...")
-    subprocess.run(["npx", "prettier", "--write", ts_out], check=True)
+    subprocess.run(["npx", "prettier", "--write", ts_out], check=True)  # noqa: S603, S607
 
     print("Formatting Rust...")
-    subprocess.run(["cargo", "fmt", "--manifest-path", "bindings/rust/Cargo.toml"], check=True)
+    subprocess.run(["cargo", "fmt", "--manifest-path", "bindings/rust/Cargo.toml"], check=True)  # noqa: S607
 
     print("Cross-language bindings generated successfully.")
 
