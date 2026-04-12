@@ -73,5 +73,5 @@ def test_epistemic_zero_trust_receipt_firewall_breach_bypass() -> None:
     # Force bypass the Literal validation to hit the model_validator
     object.__setattr__(receipt, "firewall_breach_detected", True)
 
-    with pytest.raises(ValueError, match="Topological Collapse: Firewall breach detected. Receipt invalid."):
+    with pytest.raises(ValueError, match=r"Topological Collapse: Firewall breach detected\. Receipt invalid\."):
         receipt.verify_firewall_integrity()
