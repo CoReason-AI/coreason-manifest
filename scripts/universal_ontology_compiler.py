@@ -482,9 +482,9 @@ def calculate_semantic_differential() -> None:
     def get_head_schema() -> dict[str, Any]:
         try:
             output = subprocess.check_output(
-                ["git", "show", "HEAD~1:coreason_ontology.schema.json"],
+                ["git", "show", "HEAD~1:coreason_ontology.schema.json"],  # noqa: S607
                 stderr=subprocess.DEVNULL,
-                text=True,  # noqa: S607
+                text=True,
             )
             return cast("dict[str, Any]", json.loads(output))
         except subprocess.CalledProcessError:
