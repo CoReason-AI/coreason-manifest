@@ -268,24 +268,22 @@ def test_semantic_mapping_heuristic_proposal_payload_bounds() -> None:
         proposal_cid="prop-123",
         source_ontology_namespace="ICD-10",
         target_ontology_namespace="SNOMED-CT",
-        formal_rule_matrix={"rule": "SWRL_EXPRESSION"},
+        formal_logic_clauses="SWRL_EXPRESSION",
         justification_evidence_cids=["did:example:node_B", "did:example:node_A"],
     )
-    assert proposal.formal_rule_matrix == {"rule": "SWRL_EXPRESSION"}
+    assert proposal.formal_logic_clauses == "SWRL_EXPRESSION"
     # Verify canonical sorting
     assert proposal.justification_evidence_cids == ["did:example:node_A", "did:example:node_B"]
 
-    # Invalid payload (exceeds depth)
-    nested_payload: Any = "leaf"
-    for _ in range(11):
-        nested_payload = {"key": nested_payload}
+    # Invalid payload (exceeds length constraint)
+    large_string = "a" * 65537
 
     with pytest.raises(ValidationError) as exc_info:
         SemanticMappingHeuristicIntent(
             proposal_cid="prop-123",
             source_ontology_namespace="ICD-10",
             target_ontology_namespace="SNOMED-CT",
-            formal_rule_matrix=nested_payload,
+            formal_logic_clauses=large_string,
             justification_evidence_cids=["did:example:node_A"],
         )
-    assert "Payload exceeds maximum recursion depth of 10" in str(exc_info.value)
+    assert "String should have at most 65536 characters" in str(exc_info.value)
