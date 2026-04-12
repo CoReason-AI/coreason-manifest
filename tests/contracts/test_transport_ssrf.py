@@ -9,7 +9,7 @@
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
 import pytest
-from pydantic import AnyUrl, HttpUrl, ValidationError
+from pydantic import HttpUrl, ValidationError
 
 from coreason_manifest.spec.ontology import HTTPTransportProfile, SSETransportProfile
 
@@ -139,6 +139,8 @@ def test_sparql_query_result_receipt() -> None:
 
 
 def test_rdf_serialization_intent_shacl_governance() -> None:
+    from pydantic import AnyUrl
+
     from coreason_manifest.spec.ontology import RDFSerializationIntent, SHACLValidationSLA
 
     # Missing SHACL should fail for strictly typed target_formats (xml, json-ld)
