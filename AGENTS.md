@@ -440,8 +440,11 @@ We physically separate probabilistic textual generation (System 1) from schema v
 ### 8.1 `MultimodalGraphCompiler` (The Ingestion Engine)
 * **Open-Source Substrate:** IBM `docling-graph`
 * **Compute Plane Profile:** `CognitiveSystemNodeProfile` (Heavyweight Vision/NetworkX environment)
-* **Data Plane Boundary:** `SchemaDrivenExtractionSLA` (`docling_graph_explicit`)
+* **Data Plane Boundary:** `SchemaDrivenExtractionSLA` (`docling_graph_explicit`) combined with `OpticalParsingSLA`.
 * **Routing Constraints:** The orchestrator MUST route complex multimodal artifacts (e.g., PDFs with tables/figures) here. This node abandons fuzzy vector embeddings, forcing `DocumentLayoutRegionState` spatial chunks directly into explicit Pydantic topologies, solving "Rhetorical Flattening."
+* **Intermediate Topology:** Before emitting the final `DocumentKnowledgeGraphManifest`, the compiler MUST instantiate a `HierarchicalDOMManifest` to strictly map the N-ary tree containment of spatial blocks.
+* **Tabular Preservation:** The engine is mathematically required to preserve 2D table matrices via `TabularMatrixProfile` when the `OpticalParsingSLA` permits structure recognition, eradicating 1D Tabular Flattening anomalies.
+* **Mechanistic Penalty:** If the Docling subsystem crashes due to DRM-locks or malformed byte streams, the wrapper must immediately emit an `ArtifactCorruptionEvent` to sever the topology and halt epistemic contagion.
 
 ### 8.2 `OntologicalGroundingSpecialist` (The Semantic Web Engine)
 * **Open-Source Substrate:** Monarch Initiative `ontogpt` / `linkml`

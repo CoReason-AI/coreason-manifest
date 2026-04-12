@@ -668,7 +668,20 @@ def test_epistemic_transmutation_schema_presence() -> None:
         )
 
 
+def test_transmutation_optical_sla_required() -> None:
+    from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import EpistemicTransmutationTask
+
+    with pytest.raises(
+        ValidationError,
+        match=r"Epistemic Violation: Extracting 'raster_image' or 'tabular_grid' mathematically requires an OpticalParsingSLA.",
+    ):
+        EpistemicTransmutationTask(task_cid="t1", artifact_event_cid="a1", target_modalities=["raster_image"])
+
+
 def test_edge_evidence_or_sla() -> None:
+
     import pytest
     from pydantic import ValidationError
 
