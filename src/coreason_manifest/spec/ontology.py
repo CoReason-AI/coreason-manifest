@@ -10016,7 +10016,7 @@ class HypothesisGenerationEvent(CoreasonBaseState):
     bayesian_prior: float = Field(
         ge=0.0, le=1.0, description="The agent's initial probabilistic belief in this hypothesis before testing."
     )
-    falsification_conditions: list[FalsificationContract] = Field(
+    falsification_conditions: list[EmpiricalFalsificationContract] = Field(
         min_length=1,
         description="The strict array of strict conditions that the orchestrator must test to attempt to disprove this premise.",
     )
