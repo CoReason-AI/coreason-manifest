@@ -19,3 +19,6 @@ You are operating within a 2026+ State-of-the-Art Neurosymbolic architecture. Yo
    - This repository is a pure structural data library.
    - Importing any module MUST NOT trigger side effects. (NO `os.mkdir`, NO global loggers, NO sockets).
    - Dependencies are strictly limited to pure data parsers (`pydantic`, `pyyaml`).
+
+5. **Neurosymbolic Triad Enforcement:**
+   - When generating mock data, writing tests, or proposing schema modifications for `coreason-manifest`, you MUST strictly utilize the Neurosymbolic Triad (`lean4`, `clingo`, `swi_prolog`). NEVER inject dummy boolean data to bypass Proof-Carrying Data validations. All axiom verifications must point to a Triad receipt CID.
