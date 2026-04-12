@@ -14250,9 +14250,48 @@ type AnyStateEvent = Annotated[
     | FormalLogicProofReceipt
     | PrologDeductionReceipt
     | BeliefModulationReceipt
-    | RDFExportReceipt,
+    | RDFExportReceipt
+    | EpistemicStarvationEvent,
     Field(discriminator="topology_class", description="A discriminated union of state events."),
 ]
+
+
+class EvidentiaryCitationState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A declarative coordinate representing an immutable, localized snippet of external evidence retrieved by an oracle, coupled with its calculated Natural Language Inference (NLI) score.
+
+    CAUSAL AFFORDANCE: Physically anchors an abductive hypothesis to empirical reality, providing the exact string evaluated by the NLI cross-encoder to prevent source drift.
+
+    EPISTEMIC BOUNDS: Network resolution is strictly gated by the `_enforce_ssrf_quarantine` hook to prevent Bogon/loopback execution. The textual premise is volumetrically clamped by `extracted_snippet` (`max_length=10000`). Entailment probability is bounded `[0.0, 1.0]`.
+
+    MCP ROUTING TRIGGERS: Retrieval-Augmented Fact-Checking, Natural Language Inference, SSRF Quarantine, Evidentiary Coordinate, Cross-Encoder Validation
+    """
+
+    citation_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="Cryptographic anchor for the specific piece of evidence."
+    )
+    source_url: HttpUrl = Field(description="The canonical origin of the evidence.")
+    extracted_snippet: Annotated[str, StringConstraints(max_length=10000)] = Field(
+        description="The exact text evaluated by the NLI model."
+    )
+    nli_entailment_score: float = Field(
+        ge=0.0, le=1.0, description="The conditional probability that the snippet entails the proposed causal edge."
+    )
+    publication_timestamp: float | None = Field(
+        default=None,
+        ge=0.0,
+        le=253402300799.0,
+        description="Optional temporal boundary allowing downstream algorithms to apply temporal discounting.",
+    )
+
+    @field_validator("source_url", mode="after")
+    @classmethod
+    def _enforce_ssrf_quarantine(cls, url: HttpUrl) -> HttpUrl:
+        """
+        AGENT INSTRUCTION: Implements Network Topology and Server-Side Request Forgery (SSRF) Quarantine logic.
+        """
+        _validate_ssrf_safety(str(url))
+        return url
 
 
 class DempsterShaferBeliefVector(CoreasonBaseState):
@@ -14284,6 +14323,56 @@ class DempsterShaferBeliefVector(CoreasonBaseState):
         le=1.0,
         description="The calculated mathematical contradiction or dissonance between the three vectors. High conflict mass triggers evidence discounting.",
     )
+    supporting_citations: list[EvidentiaryCitationState] = Field(
+        default_factory=list,
+        max_length=100,
+        description="The array of external NLI-scored citations aggregating to form this belief mass.",
+    )
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort_citations(self) -> Self:
+        object.__setattr__(
+            self, "supporting_citations", sorted(self.supporting_citations, key=operator.attrgetter("citation_cid"))
+        )
+        return self
+
+
+class EpistemicStarvationEvent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: An append-only historical coordinate recording the definitive failure of empirical validation.
+
+    CAUSAL AFFORDANCE: Acts as the kinetic trigger for non-monotonic Truth Maintenance. By dropping belief mass to zero, it forces the orchestrator to emit a DefeasibleCascadeEvent to prune the ungrounded edge from the graph.
+
+    EPISTEMIC BOUNDS: The `failed_citations` array mathematically proves that an exhaustive search was attempted but no retrieved snippet breached the required SLA threshold. The array is deterministically sorted for invariant hashing.
+
+    MCP ROUTING TRIGGERS: Epistemic Starvation, Natural Language Inference, Truth Maintenance System, Defeasible Logic, Belief Mass Depletion
+    """
+
+    event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        ...
+    )
+    prior_event_hash: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
+    ) = Field(default=None)
+    timestamp: float = Field(ge=0.0, le=253402300799.0)
+
+    topology_class: Literal["epistemic_starvation"] = "epistemic_starvation"
+    starved_edge_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
+        Field(description="The cryptographic pointer to the specific edge that failed empirical grounding.")
+    )
+    failed_citations: list[EvidentiaryCitationState] = Field(
+        description="The array of citations evaluated that fell below the required NLI threshold."
+    )
+    diagnostic_reason: Annotated[str, StringConstraints(max_length=2000)] = Field(
+        description="The semantic explanation for the starvation (e.g., 'Maximum search retries exhausted')."
+    )
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort_failed_citations(self) -> Self:
+        object.__setattr__(
+            self, "failed_citations", sorted(self.failed_citations, key=operator.attrgetter("citation_cid"))
+        )
+        return self
 
 
 class OntologicalReificationReceipt(CoreasonBaseState):
@@ -14729,3 +14818,6 @@ SubstrateHydrationManifest.model_rebuild()
 LinkMLValidationSLA.model_rebuild()
 OntologicalCrosswalkIntent.model_rebuild()
 CrosswalkResolutionReceipt.model_rebuild()
+
+EvidentiaryCitationState.model_rebuild()
+EpistemicStarvationEvent.model_rebuild()

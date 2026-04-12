@@ -459,7 +459,8 @@ We physically separate probabilistic textual generation (System 1) from schema v
 * **Compute Plane Profile:** `CognitiveSystemNodeProfile` (Sandboxed NLI & Web Search)
 * **Data Plane Boundary:** `CausalPropagationIntent` / `EvidentiaryGroundingSLA`
 * **Routing Constraints (The Golden Rule):** Standard LLMs are mathematically forbidden from assigning their own `DempsterShaferBeliefVector` weights due to the "Blind Causal Inference" anomaly (confusing correlation with causation). Any newly generated edge lacking empirical evidence MUST be routed through this Oracle.
-* **Mechanistic Penalty:** If CurioCat fails to find external Natural Language Inference (NLI) entailment backing the proposed edge, it mathematically drops the belief mass to zero and emits a `DefeasibleCascadeEvent` to aggressively quarantine the epistemic contagion.
+* **Evidentiary Output:** The CurioCat substrate is mathematically required to output its findings as discrete `EvidentiaryCitationState` objects, injecting them directly into the `supporting_citations` array of the target edge's belief vector.
+* **Mechanistic Penalty (Epistemic Starvation):** If the oracle fails to retrieve external evidence that breaches the SLA's NLI entailment threshold, it must mathematically drop the edge's belief mass to zero by emitting an `EpistemicStarvationEvent`. This definitively records the empirical failure and sequentially triggers a `DefeasibleCascadeEvent` to dynamically sever the ungrounded edge and aggressively quarantine the epistemic contagion across the DAG.
 
 ### 8.4 `SemanticWebArchivist` (The Egress Gateway)
 * **Open-Source Substrate:** `omegaice/pydantic-rdf` & `rdflib`

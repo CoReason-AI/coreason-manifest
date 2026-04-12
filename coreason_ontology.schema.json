@@ -1122,6 +1122,7 @@
           "epistemic_log": "#/$defs/EpistemicLogEvent",
           "epistemic_promotion": "#/$defs/EpistemicPromotionEvent",
           "epistemic_rejection": "#/$defs/EpistemicRejectionReceipt",
+          "epistemic_starvation": "#/$defs/EpistemicStarvationEvent",
           "epistemic_telemetry": "#/$defs/EpistemicTelemetryEvent",
           "exogenous_event": "#/$defs/ExogenousEpistemicEvent",
           "formal_logic_proof": "#/$defs/FormalLogicProofReceipt",
@@ -1261,6 +1262,9 @@
         },
         {
           "$ref": "#/$defs/RDFExportReceipt"
+        },
+        {
+          "$ref": "#/$defs/EpistemicStarvationEvent"
         }
       ]
     },
@@ -6295,6 +6299,15 @@
           "minimum": 0.0,
           "title": "Epistemic Conflict Mass",
           "type": "number"
+        },
+        "supporting_citations": {
+          "description": "The array of external NLI-scored citations aggregating to form this belief mass.",
+          "items": {
+            "$ref": "#/$defs/EvidentiaryCitationState"
+          },
+          "maxItems": 100,
+          "title": "Supporting Citations",
+          "type": "array"
         }
       },
       "required": [
@@ -8931,6 +8944,77 @@
       "title": "EpistemicSeedInjectionPolicy",
       "type": "object"
     },
+    "EpistemicStarvationEvent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: An append-only historical coordinate recording the definitive failure of empirical validation.\n\nCAUSAL AFFORDANCE: Acts as the kinetic trigger for non-monotonic Truth Maintenance. By dropping belief mass to zero, it forces the orchestrator to emit a DefeasibleCascadeEvent to prune the ungrounded edge from the graph.\n\nEPISTEMIC BOUNDS: The `failed_citations` array mathematically proves that an exhaustive search was attempted but no retrieved snippet breached the required SLA threshold. The array is deterministically sorted for invariant hashing.\n\nMCP ROUTING TRIGGERS: Epistemic Starvation, Natural Language Inference, Truth Maintenance System, Defeasible Logic, Belief Mass Depletion",
+      "properties": {
+        "event_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "topology_class": {
+          "const": "epistemic_starvation",
+          "default": "epistemic_starvation",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "starved_edge_cid": {
+          "description": "The cryptographic pointer to the specific edge that failed empirical grounding.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Starved Edge Cid",
+          "type": "string"
+        },
+        "failed_citations": {
+          "description": "The array of citations evaluated that fell below the required NLI threshold.",
+          "items": {
+            "$ref": "#/$defs/EvidentiaryCitationState"
+          },
+          "title": "Failed Citations",
+          "type": "array"
+        },
+        "diagnostic_reason": {
+          "description": "The semantic explanation for the starvation (e.g., 'Maximum search retries exhausted').",
+          "maxLength": 2000,
+          "title": "Diagnostic Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "event_cid",
+        "timestamp",
+        "starved_edge_cid",
+        "failed_citations",
+        "diagnostic_reason"
+      ],
+      "title": "EpistemicStarvationEvent",
+      "type": "object"
+    },
     "EpistemicTelemetryEvent": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Human-in-the-Loop (HITL) Supervisory Control Theory and Epistemic Regret tracking to measure out-of-band human physical attention kinematics.\n\nCAUSAL AFFORDANCE: Emits passive structural telemetry to update retrieval gradients and Bayesian priors based on human spatial interaction, without halting the underlying execution DAG.\n\nEPISTEMIC BOUNDS: The human interaction is rigidly confined to the `interaction_modality` Literal automaton. Temporal liveness of attention is bounded by `dwell_duration_ms` (`ge=0, le=86400000`). Target is locked to `target_node_cid` CID.\n\nMCP ROUTING TRIGGERS: Epistemic Regret, Supervisory Control Theory, Human-in-the-Loop, Dwell Time, Spatial Telemetry",
@@ -9633,6 +9717,64 @@
         "max_retained_tokens"
       ],
       "title": "EvictionPolicy",
+      "type": "object"
+    },
+    "EvidentiaryCitationState": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative coordinate representing an immutable, localized snippet of external evidence retrieved by an oracle, coupled with its calculated Natural Language Inference (NLI) score.\n\nCAUSAL AFFORDANCE: Physically anchors an abductive hypothesis to empirical reality, providing the exact string evaluated by the NLI cross-encoder to prevent source drift.\n\nEPISTEMIC BOUNDS: Network resolution is strictly gated by the `_enforce_ssrf_quarantine` hook to prevent Bogon/loopback execution. The textual premise is volumetrically clamped by `extracted_snippet` (`max_length=10000`). Entailment probability is bounded `[0.0, 1.0]`.\n\nMCP ROUTING TRIGGERS: Retrieval-Augmented Fact-Checking, Natural Language Inference, SSRF Quarantine, Evidentiary Coordinate, Cross-Encoder Validation",
+      "properties": {
+        "citation_cid": {
+          "description": "Cryptographic anchor for the specific piece of evidence.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Citation Cid",
+          "type": "string"
+        },
+        "source_url": {
+          "description": "The canonical origin of the evidence.",
+          "format": "uri",
+          "maxLength": 2083,
+          "minLength": 1,
+          "title": "Source Url",
+          "type": "string"
+        },
+        "extracted_snippet": {
+          "description": "The exact text evaluated by the NLI model.",
+          "maxLength": 10000,
+          "title": "Extracted Snippet",
+          "type": "string"
+        },
+        "nli_entailment_score": {
+          "description": "The conditional probability that the snippet entails the proposed causal edge.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Nli Entailment Score",
+          "type": "number"
+        },
+        "publication_timestamp": {
+          "anyOf": [
+            {
+              "maximum": 253402300799.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional temporal boundary allowing downstream algorithms to apply temporal discounting.",
+          "title": "Publication Timestamp"
+        }
+      },
+      "required": [
+        "citation_cid",
+        "source_url",
+        "extracted_snippet",
+        "nli_entailment_score"
+      ],
+      "title": "EvidentiaryCitationState",
       "type": "object"
     },
     "EvidentiaryGroundingSLA": {
