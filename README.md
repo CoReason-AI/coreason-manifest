@@ -3,7 +3,7 @@
 [![PyPI Version](https://img.shields.io/pypi/v/coreason_manifest?style=flat-square&logo=pypi&logoColor=white&label=PyPI)](https://pypi.org/project/coreason_manifest/)
 [![Python Versions](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2FCoReason-AI%2Fcoreason-manifest%2Fmain%2Fpyproject.toml&style=flat-square&logo=python&logoColor=white&label=Python)](https://pypi.org/project/coreason_manifest/)
 [![CI](https://img.shields.io/github/actions/workflow/status/CoReason-AI/coreason-manifest/ci.yml?branch=main&style=flat-square&logo=github&label=CI)](https://github.com/CoReason-AI/coreason-manifest/actions/workflows/ci.yml)
-[![Codecov](https://img.shields.io/codecov/c/github/CoReason-AI/coreason-manifest?style=flat-square&logo=codecov&logoColor=white&label=Coverage)](https://codecov.io/gh/CoReason-AI/coreason-manifest)
+[![Codecov](https://img.shields.io/codecov/c/github/CoReason-AI/coreason-manifest?style=flat-square&logo=codecov&logoColor=white&label=Coverage)](https://app.codecov.io/gh/CoReason-AI/coreason-manifest)
 [![OpenSSF Scorecard](https://img.shields.io/ossf-scorecard/github.com/CoReason-AI/coreason-manifest?style=flat-square&label=OpenSSF)](https://scorecard.dev/viewer/?uri=github.com/CoReason-AI/coreason-manifest)
 [![License](https://img.shields.io/badge/License-Prosperity%203.0-blue?style=flat-square)](./LICENSE)
 [![Security Policy](https://img.shields.io/badge/Security-Policy-green?style=flat-square)](./SECURITY.md)
@@ -122,7 +122,7 @@ See [`SECURITY.md`](./SECURITY.md) for our full security policy, response SLAs, 
 
 ## Contributing
 
-This project follows [Conventional Commits](https://www.conventionalcommits.org/) to power automated release notes and changelogs via [Release Please](https://github.com/googleapis/release-please). All commit messages should follow the format:
+This project follows [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) to power automated release notes and changelogs via [Release Please](https://github.com/googleapis/release-please). All commit messages should follow the format:
 
 ```
 <type>(<scope>): <description>
