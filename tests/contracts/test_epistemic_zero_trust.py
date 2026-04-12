@@ -92,7 +92,8 @@ def test_epistemic_zero_trust_receipt_firewall_breach_bypass() -> None:
 
 def test_epistemic_axiom_guillotine() -> None:
     with pytest.raises(
-        ValidationError, match=r"Proof-Carrying Data required: Cannot verify axiom without a formal_backing_receipt_cid\."
+        ValidationError,
+        match=r"Proof-Carrying Data required: Cannot verify axiom without a formal_backing_receipt_cid\.",
     ):
         EpistemicAxiomVerificationReceipt(
             event_cid="receipt-1",

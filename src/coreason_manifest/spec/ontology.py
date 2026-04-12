@@ -13215,9 +13215,7 @@ class EpistemicAxiomVerificationReceipt(CoreasonBaseState):
     @model_validator(mode="after")
     def enforce_proof_carrying_data(self) -> "Self":
         if getattr(self, "fact_score_passed", False) is True and self.formal_backing_receipt_cid is None:
-            raise ValueError(
-                "Proof-Carrying Data required: Cannot verify axiom without a formal_backing_receipt_cid."
-            )
+            raise ValueError("Proof-Carrying Data required: Cannot verify axiom without a formal_backing_receipt_cid.")
         return self
 
 
