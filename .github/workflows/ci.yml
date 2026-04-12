@@ -38,6 +38,12 @@ jobs:
       - name: Enforce Cryptographic Determinism
         run: uv run python scripts/enforce_cryptographic_determinism.py
 
+      - name: Generate Cross-Language Bindings
+        run: uv run python scripts/generate_cross_language_bindings.py
+
+      - name: Enforce Absolute Type Isomorphism (Drift Guillotine)
+        run: git diff --exit-code bindings/
+
       - name: Deptry Check
         run: uv run deptry src/
 
