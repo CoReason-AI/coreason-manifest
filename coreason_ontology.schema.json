@@ -880,6 +880,7 @@
       "discriminator": {
         "mapping": {
           "agent_bid": "#/$defs/AgentBidIntent",
+          "causal_propagation": "#/$defs/CausalPropagationIntent",
           "compute_provisioning": "#/$defs/ComputeProvisioningIntent",
           "constitutional_amendment": "#/$defs/ConstitutionalAmendmentIntent",
           "contextual_semantic_resolution": "#/$defs/ContextualSemanticResolutionIntent",
@@ -897,6 +898,7 @@
           "ontology_discovery": "#/$defs/OntologyDiscoveryIntent",
           "override": "#/$defs/OverrideIntent",
           "quarantine_intent": "#/$defs/QuarantineIntent",
+          "rdf_serialization": "#/$defs/RDFSerializationIntent",
           "request": "#/$defs/InterventionIntent",
           "semantic_discovery": "#/$defs/SemanticDiscoveryIntent",
           "semantic_mapping_proposal": "#/$defs/SemanticMappingHeuristicIntent",
@@ -986,6 +988,12 @@
         },
         {
           "$ref": "#/$defs/TopologicalProjectionIntent"
+        },
+        {
+          "$ref": "#/$defs/CausalPropagationIntent"
+        },
+        {
+          "$ref": "#/$defs/RDFSerializationIntent"
         }
       ]
     },
