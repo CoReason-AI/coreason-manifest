@@ -2834,30 +2834,45 @@ class StateMutationIntent(CoreasonBaseState):
         return _validate_payload_bounds(v)
 
 
-class StateDifferentialManifest(CoreasonBaseState):
+class TemporalEdgeInvalidationIntent(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Formalizes Conflict-free Replicated Data Types (CRDTs) using Lamport
-    logical clocks and Vector Clocks to guarantee Eventual Consistency. As a ...Manifest
-    suffix, this defines a frozen, declarative coordinate of a state transition matrix.
+    AGENT INSTRUCTION: Implements temporal retraction for Graph CRDTs by targeting specific edges for invalidation.
+    CAUSAL AFFORDANCE: Allows a node to issue a topological retraction by appending it to a CRDT terminate set, without destroying historical provenance.
+    EPISTEMIC BOUNDS: The target_edge_cid is strictly typed. The invalidation_timestamp physically caps the timeline geometry.
+    MCP ROUTING TRIGGERS: Graph CRDTs, Topological Retraction, Non-Monotonic Logic, Edge Invalidation
+    """
 
-    CAUSAL AFFORDANCE: Enables lock-free, decentralized state synchronization across the
-    swarm. Forces the orchestrator to resolve Last-Writer-Wins (LWW) topological conflicts
-    before flushing the patches (list[StateMutationIntent]) to the immutable Epistemic
-    Ledger. The vector_clock dict maps node CIDs to their ge=0 integer mutation counts.
+    topology_class: Literal["temporal_invalidation"] = Field(
+        default="temporal_invalidation", description="Discriminator for temporal edge invalidation."
+    )
+    target_edge_cid: NodeCIDState = Field(
+        description="The Decentralized Identifier (DID) of the edge being temporally invalidated."
+    )
+    invalidation_timestamp: float = Field(
+        ge=0.0,
+        le=253402300799.0,
+        description="The precise chronological coordinate terminating the truth value (Graphiti valid_to).",
+    )
+    causal_justification_cid: NodeCIDState = Field(
+        description="The ObservationEvent or FalsificationContract CID forcing this non-monotonic state transition."
+    )
 
-    EPISTEMIC BOUNDS: Cryptographically anchored by diff_cid and author_node_cid (both
-    strict 128-char CID regex). The synchronization math is clamped by lamport_timestamp
-    (ge=0, le=1000000000), physically preventing logical clock integer overflow during
-    prolonged swarm execution cycles.
 
-    MCP ROUTING TRIGGERS: Conflict-Free Replicated Data Types, Lamport Logical Clock,
-    Vector Clock, Eventual Consistency, Last-Writer-Wins
+class TemporalGraphCRDTManifest(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Elevates differential patching to formal Graph CRDT representation using G-Sets (Grow-Only Sets).
+
+    CAUSAL AFFORDANCE: Eradicates destructive Last-Writer-Wins conflict resolution, allowing concurrent temporal invalidations from disparate swarm nodes to mathematically converge via semilattices.
+
+    EPISTEMIC BOUNDS: `manifest_cid` and `author_node_cid` strictly adhere to the 128-char CID regex constraint. `add_set` and `terminate_set` are deterministically sorted via `@model_validator(mode="after")` `_enforce_canonical_sort` using `object.__setattr__` to guarantee RFC 8785 canonicalization.
+
+    MCP ROUTING TRIGGERS: Graph CRDTs, Conflict-Free Replicated Data Types, Temporal Graphs, State-based Semilattices, Transmutation
     """
 
     model_config = ConfigDict(json_schema_extra=_inject_diff_examples_and_epistemic_cluster)
 
-    diff_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this state differential.",
+    manifest_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this CRDT manifest.",
     )
     author_node_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
         Field(description="The exact Lineage Watermark of the agent or system that authored this state mutation.")
@@ -2865,16 +2880,29 @@ class StateDifferentialManifest(CoreasonBaseState):
     lamport_timestamp: int = Field(
         le=1000000000,
         ge=0,
-        description="Strict scalar logical clock governing deterministic LWW (Last-Writer-Wins) conflict resolution.",
+        description="Strict scalar logical clock governing deterministic tie-breaking.",
     )
     vector_clock: dict[Annotated[str, StringConstraints(max_length=255)], Annotated[int, Field(ge=0)]] = Field(
         description="Causal history mapping of all known Lineage Watermarks to their latest logical mutation count at the time of authoring."
     )
-    patches: list[StateMutationIntent] = Field(
+    add_set: list[NodeCIDState] = Field(
         default_factory=list,
-        description="The exact, ordered sequence of deterministic state vector mutations.",
-        # Note: patches is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
+        description="Topological additions representing Transmutations.",
     )
+    terminate_set: list[TemporalEdgeInvalidationIntent] = Field(
+        default_factory=list,
+        description="Temporal invalidations representing topological retractions.",
+    )
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        import operator
+
+        object.__setattr__(self, "add_set", sorted(self.add_set))
+        object.__setattr__(
+            self, "terminate_set", sorted(self.terminate_set, key=operator.attrgetter("target_edge_cid"))
+        )
+        return self
 
 
 class EpistemicHydrationPolicy(CoreasonBaseState):
@@ -8478,9 +8506,9 @@ class PersistenceCommitReceipt(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: A cryptographically frozen historical fact representing the absolute Write-Ahead Logging (WAL) serialization of an ephemeral state differential to durable cold-storage.
 
-    CAUSAL AFFORDANCE: Commits the internal `committed_state_diff_cid` into the macroscopic Apache Iceberg or Delta Lake backing store, yielding a verifiable `lakehouse_snapshot_cid` to guarantee Eventual Consistency.
+    CAUSAL AFFORDANCE: Commits the internal `committed_crdt_manifest_cid` into the macroscopic Apache Iceberg or Delta Lake backing store, yielding a verifiable `lakehouse_snapshot_cid` to guarantee Eventual Consistency.
 
-    EPISTEMIC BOUNDS: `lakehouse_snapshot_cid` and `committed_state_diff_cid` are rigorously clamped by `max_length=128` and a strict CID regex (`^[a-zA-Z0-9_.:-]+$`), mathematically preventing path traversal injections.
+    EPISTEMIC BOUNDS: `lakehouse_snapshot_cid` and `committed_crdt_manifest_cid` are rigorously clamped by `max_length=128` and a strict CID regex (`^[a-zA-Z0-9_.:-]+$`), mathematically preventing path traversal injections.
 
     MCP ROUTING TRIGGERS: Event Sourcing, Write-Ahead Logging, Two-Phase Commit, Lakehouse Serialization, State Differential Flush
 
@@ -8507,9 +8535,9 @@ class PersistenceCommitReceipt(CoreasonBaseState):
     lakehouse_snapshot_cid: Annotated[
         str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
     ] = Field(description="The external cryptographic receipt generated by Iceberg/Delta.")
-    committed_state_diff_cid: Annotated[
+    committed_crdt_manifest_cid: Annotated[
         str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
-    ] = Field(description="The internal StateDifferentialManifest CID that was flushed.")
+    ] = Field(description="The internal TemporalGraphCRDTManifest CID that was flushed.")
     target_table_uri: Annotated[str, StringConstraints(max_length=2048)] = Field(
         min_length=1, description="The specific table mutated."
     )
@@ -13927,3 +13955,6 @@ ActiveInferenceEpochState.model_rebuild()
 ComputationalThermodynamicsProfile.model_rebuild()
 FederatedSecurityMacroManifest.model_rebuild()
 CognitiveSwarmDeploymentManifest.model_rebuild()
+
+TemporalEdgeInvalidationIntent.model_rebuild()
+TemporalGraphCRDTManifest.model_rebuild()

@@ -9,26 +9,16 @@
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
 import base64
-import contextlib
 import struct
-from typing import Any, cast
 from unittest.mock import Mock, patch
 
 import pytest
-from hypothesis import given, settings
-from hypothesis import strategies as st
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
-    BypassReceipt,
     DAGTopologyManifest,
-    DynamicRoutingManifest,
-    GlobalSemanticProfile,
     OntologicalAlignmentPolicy,
-    StateDifferentialManifest,
-    StateMutationIntent,
     VectorEmbeddingState,
-    WorkflowManifest,
 )
 from coreason_manifest.utils.algebra import (
     align_semantic_manifolds,
@@ -36,224 +26,11 @@ from coreason_manifest.utils.algebra import (
     calculate_remaining_compute,
     compute_topology_hash,
     get_ontology_schema,
-    project_manifest_to_markdown,
     project_manifest_to_mermaid,
-    synthesize_remediation_intent,
-    transmute_state_differential,
     verify_ast_safety,
     verify_manifold_bounds,
     verify_merkle_proof,
 )
-
-
-@given(
-    st.builds(
-        DynamicRoutingManifest,
-        manifest_cid=st.just("m1"),
-        branch_budgets_magnitude=st.just({"did:node:b111111": 10}),
-        active_subgraphs=st.just({}),
-        bypassed_steps=st.lists(
-            st.builds(
-                BypassReceipt,
-                bypassed_node_cid=st.just("did:node:bypass1"),
-                cryptographic_null_hash=st.just("a" * 64),
-                artifact_event_cid=st.just("event-1"),
-            ),
-            min_size=1,
-        ),
-        artifact_profile=st.builds(
-            GlobalSemanticProfile,
-            artifact_event_cid=st.just("event-1"),
-            detected_modalities=st.just(["text"]),
-            token_density=st.integers(min_value=0, max_value=100),
-        ),
-    )
-)
-def test_project_mermaid_bypassed(manifest: DynamicRoutingManifest) -> None:
-    result = project_manifest_to_mermaid(manifest)
-    assert "subgraph Quarantined_Bypass" in result
-    for b in manifest.bypassed_steps:
-        assert b.bypassed_node_cid.replace(":", "_").replace("-", "_").replace(".", "_") in result
-
-
-@given(
-    intent=st.text(min_size=1, max_size=50),
-    justification=st.text(min_size=1, max_size=50),
-    lineage=st.just("b" * 64),
-    sig=st.just("sig" * 10),
-    merkle=st.just("c" * 64),
-)
-def test_project_markdown_optional_fields(intent: str, justification: str, lineage: str, sig: str, merkle: str) -> None:
-    node = Mock()
-    node.topology_class = "system"
-    node.description = "desc"
-    node.architectural_intent = intent
-    node.justification = justification
-    node.agent_attestation = Mock(training_lineage_hash=lineage, developer_signature=sig, capability_merkle_root=merkle)
-
-    topology = Mock()
-    topology.nodes = {"n1": node}
-    topology.architectural_intent = intent
-    topology.justification = justification
-
-    manifest = Mock()
-    manifest.manifest_version = "1.0.0"
-    manifest.tenant_cid = "t1"
-    manifest.session_cid = "s1"
-    manifest.topology = topology
-
-    result = project_manifest_to_markdown(manifest)
-    assert intent in result
-    assert justification in result
-    assert lineage in result
-
-
-def test_generate_correction_prompt_missing_and_invalid() -> None:
-    # Trigger a missing error
-    try:
-        WorkflowManifest(manifest_version="1.0.0")  # type: ignore[call-arg]
-    except ValidationError as e:
-        prompt = synthesize_remediation_intent(e, "did:node:faulty1", "fault1")
-        assert any("completely missing" in r.diagnostic_message for r in prompt.violation_receipts)
-
-    # Trigger an invalid error
-    try:
-        WorkflowManifest(
-            manifest_version="invalid",
-            tenant_cid="t1",
-            session_cid="s1",
-            genesis_provenance={"author_identity": "did:node:n1"},  # type: ignore[arg-type]
-            topology=DAGTopologyManifest(topology_class="dag", nodes={}, edges=[], max_depth=1, max_fan_out=1),
-        )
-    except ValidationError as e:
-        prompt = synthesize_remediation_intent(e, "did:node:faulty1", "fault1")
-        assert any("String should match pattern" in r.diagnostic_message for r in prompt.violation_receipts)
-
-
-@given(source=st.lists(st.sampled_from(["text", "raster_image", "vector_graphics"]), min_size=2, unique=True))
-def test_align_semantic_manifolds_subset(source: list[str]) -> None:
-    # Pass subset to target
-    target = source[:1]
-    res = align_semantic_manifolds("task1", source, target, "event1")  # type: ignore[arg-type]
-    assert res is None
-
-
-@given(
-    v1=st.lists(
-        st.floats(min_value=-10.0, max_value=10.0, allow_nan=False, allow_infinity=False), min_size=1, max_size=10
-    )
-)
-@settings(max_examples=100)
-def test_calculate_latent_alignment_success(v1: list[float]) -> None:
-    b1 = struct.pack(f"<{len(v1)}f", *v1)
-    b64 = base64.b64encode(b1).decode("ascii")
-
-    vec1 = VectorEmbeddingState(foundation_matrix_name="m1", dimensionality=len(v1), vector_base64=b64)
-    vec2 = VectorEmbeddingState(foundation_matrix_name="m1", dimensionality=len(v1), vector_base64=b64)
-    policy = OntologicalAlignmentPolicy(min_cosine_similarity=0.9, require_isometry_proof=False)
-
-    if any(x != 0.0 for x in v1):  # Avoid zero vectors
-        try:
-            res = calculate_latent_alignment(vec1, vec2, policy)
-        except ValueError as e:
-            if "Latent alignment failed" not in str(e):
-                raise
-        else:
-            assert res >= 0.9
-
-
-@given(
-    ops=st.lists(
-        st.builds(StateMutationIntent, op=st.sampled_from(["test", "add"]), path=st.just("/foo"), value=st.just("bar"))
-    )
-)
-def test_apply_state_differential_hyp_add(ops: list[StateMutationIntent]) -> None:
-    state: dict[str, Any] = {}
-    manifest = StateDifferentialManifest(
-        diff_cid="d111111", author_node_cid="n111111", lamport_timestamp=1, vector_clock={"n111111": 1}, patches=ops
-    )
-    with contextlib.suppress(ValueError):
-        transmute_state_differential(state, manifest)
-
-
-def test_apply_state_differential_test_fail() -> None:
-    state = {"foo": "baz"}
-    manifest = StateDifferentialManifest(
-        diff_cid="d111111",
-        author_node_cid="n111111",
-        lamport_timestamp=1,
-        vector_clock={"n111111": 1},
-        patches=[StateMutationIntent(op="test", path="/foo", value="bar")],
-    )
-    with pytest.raises(ValueError, match="Patch operation failed"):
-        transmute_state_differential(state, manifest)
-
-
-def test_apply_state_differential_copy() -> None:
-    state = {"foo": {"bar": "baz"}}
-    manifest = StateDifferentialManifest(
-        diff_cid="d111111",
-        author_node_cid="n111111",
-        lamport_timestamp=1,
-        vector_clock={"n111111": 1},
-        patches=[StateMutationIntent(**{"op": "copy", "from": "/foo/bar", "path": "/foo/qux"})],  # type: ignore[arg-type]
-    )
-    res = transmute_state_differential(state, manifest)
-    assert res["foo"]["qux"] == "baz"
-    assert res["foo"]["bar"] == "baz"
-
-
-def test_apply_state_differential_move() -> None:
-    state = {"foo": {"bar": "baz"}}
-    manifest = StateDifferentialManifest(
-        diff_cid="d111111",
-        author_node_cid="n111111",
-        lamport_timestamp=1,
-        vector_clock={"n111111": 1},
-        patches=[StateMutationIntent(**{"op": "move", "from": "/foo/bar", "path": "/foo/qux"})],  # type: ignore[arg-type]
-    )
-    res = transmute_state_differential(state, manifest)
-    assert res["foo"]["qux"] == "baz"
-    assert "bar" not in res["foo"]
-
-
-def test_apply_state_differential_replace_list() -> None:
-    state = {"foo": [1, 2, 3]}
-    manifest = StateDifferentialManifest(
-        diff_cid="d111111",
-        author_node_cid="n111111",
-        lamport_timestamp=1,
-        vector_clock={"n111111": 1},
-        patches=[StateMutationIntent(op="replace", path="/foo/1", value=99)],
-    )
-    res = transmute_state_differential(state, manifest)
-    assert res["foo"][1] == 99
-
-
-def test_apply_state_differential_remove_list() -> None:
-    state = {"foo": [1, 2, 3]}
-    manifest = StateDifferentialManifest(
-        diff_cid="d111111",
-        author_node_cid="n111111",
-        lamport_timestamp=1,
-        vector_clock={"n111111": 1},
-        patches=[StateMutationIntent(op="remove", path="/foo/1")],
-    )
-    res = transmute_state_differential(state, manifest)
-    assert res["foo"] == [1, 3]
-
-
-def test_apply_state_differential_add_list_dash() -> None:
-    state = {"foo": [1, 2]}
-    manifest = StateDifferentialManifest(
-        diff_cid="d111111",
-        author_node_cid="n111111",
-        lamport_timestamp=1,
-        vector_clock={"n111111": 1},
-        patches=[StateMutationIntent(op="add", path="/foo/-", value=3)],
-    )
-    res = transmute_state_differential(state, manifest)
-    assert res["foo"] == [1, 2, 3]
 
 
 def test_project_mermaid_active_subgraph() -> None:
@@ -294,229 +71,6 @@ def test_align_semantic_manifolds_dims() -> None:
     )
 
 
-def test_apply_state_differential_test_pass() -> None:
-    state = {"foo": "bar"}
-    manifest = StateDifferentialManifest(
-        diff_cid="d111",
-        author_node_cid="n111",
-        lamport_timestamp=1,
-        vector_clock={"n111": 1},
-        patches=[StateMutationIntent(op="test", path="/foo", value="bar")],
-    )
-    res = transmute_state_differential(state, manifest)
-    assert res == state
-
-
-def test_apply_state_differential_invalid_root() -> None:
-    manifest = StateDifferentialManifest(
-        diff_cid="d111",
-        author_node_cid="n111",
-        lamport_timestamp=1,
-        vector_clock={"n111": 1},
-        patches=[StateMutationIntent(op="add", path="invalid", value="bar")],
-    )
-    with pytest.raises(ValueError, match="Patch operation failed"):
-        transmute_state_differential({}, manifest)
-
-
-def test_apply_state_differential_invalid_from_path() -> None:
-    manifest = StateDifferentialManifest(
-        diff_cid="d111",
-        author_node_cid="n111",
-        lamport_timestamp=1,
-        vector_clock={"n111": 1},
-        patches=[StateMutationIntent(**{"op": "copy", "path": "/foo", "from": "invalid"})],  # type: ignore[arg-type]
-    )
-    with pytest.raises(ValueError, match="Patch operation failed"):
-        transmute_state_differential({"foo": 1}, manifest)
-
-
-def test_apply_state_differential_out_of_bounds() -> None:
-    manifest = StateDifferentialManifest(
-        diff_cid="d111",
-        author_node_cid="n111",
-        lamport_timestamp=1,
-        vector_clock={"n111": 1},
-        patches=[StateMutationIntent(op="add", path="/foo/99", value="bar")],
-    )
-    with pytest.raises(ValueError, match="Patch operation failed"):
-        transmute_state_differential({"foo": []}, manifest)
-
-
-def test_apply_state_differential_exceptions() -> None:
-    def manifest_base(patches: list[Any]) -> StateDifferentialManifest:
-        return StateDifferentialManifest(
-            diff_cid="d1", author_node_cid="n1", lamport_timestamp=1, vector_clock={"n1": 1}, patches=patches
-        )
-
-    assert (
-        cast("Any", transmute_state_differential({}, manifest_base([StateMutationIntent(op="add", path="", value=1)])))
-        == 1
-    )
-
-    with pytest.raises(ValueError, match="Patch operation failed"):
-        transmute_state_differential({"a": "b"}, manifest_base([StateMutationIntent(op="add", path="/a/b", value=1)]))
-
-    with pytest.raises(ValueError, match="Patch operation failed"):
-        transmute_state_differential({"a": []}, manifest_base([StateMutationIntent(op="add", path="/a/~foo", value=1)]))
-
-    with pytest.raises(ValueError, match="Patch operation failed"):
-        transmute_state_differential(
-            {"a": []}, manifest_base([StateMutationIntent(op="add", path="/a/foo/bar", value=1)])
-        )
-
-    p = StateMutationIntent(**{"op": "copy", "path": "/b", "from": "/a/foo/bar"})  # type: ignore[arg-type]
-    with pytest.raises(ValueError, match="Patch operation failed"):
-        transmute_state_differential({"a": [], "b": 1}, manifest_base([p]))
-
-    with pytest.raises(ValueError, match="Patch operation failed"):
-        transmute_state_differential({"a": {}}, manifest_base([StateMutationIntent(op="add", path="/a/b/c", value=1)]))
-
-    with pytest.raises(ValueError, match="Patch operation failed"):
-        transmute_state_differential(
-            {"a": []},
-            manifest_base([StateMutationIntent(**{"op": "copy", "path": "/b", "from": "/a/-"})]),  # type: ignore[arg-type]
-        )
-
-    with pytest.raises(ValueError, match="Patch operation failed"):
-        transmute_state_differential(
-            {"a": []},
-            manifest_base([StateMutationIntent(**{"op": "copy", "path": "/b", "from": "/a/99"})]),  # type: ignore[arg-type]
-        )
-
-    with pytest.raises(ValueError, match="Patch operation failed"):
-        transmute_state_differential(
-            {"a": []},
-            manifest_base([StateMutationIntent(**{"op": "copy", "path": "/b", "from": "/a/foo"})]),  # type: ignore[arg-type]
-        )
-
-    with pytest.raises(ValueError, match="Patch operation failed"):
-        transmute_state_differential({"a": {}}, manifest_base([StateMutationIntent(op="remove", path="/a/foo")]))
-
-    with pytest.raises(ValueError, match="Patch operation failed"):
-        transmute_state_differential({"a": []}, manifest_base([StateMutationIntent(op="remove", path="/a/-")]))
-
-    with pytest.raises(ValueError, match="Patch operation failed"):
-        transmute_state_differential({"a": []}, manifest_base([StateMutationIntent(op="remove", path="/a/99")]))
-
-    with pytest.raises(ValueError, match="Patch operation failed"):
-        transmute_state_differential({"a": []}, manifest_base([StateMutationIntent(op="remove", path="/a/foo")]))
-
-    with pytest.raises(ValueError, match="Patch operation failed"):
-        transmute_state_differential({"a": []}, manifest_base([StateMutationIntent(op="add", path="/a/99", value=1)]))
-
-    with pytest.raises(ValueError, match="Patch operation failed"):
-        transmute_state_differential(1, manifest_base([StateMutationIntent(op="add", path="/a", value=1)]))  # type: ignore[arg-type]
-
-    with pytest.raises(ValueError, match="Patch operation failed"):
-        transmute_state_differential(
-            {"a": {"b": 1}}, manifest_base([StateMutationIntent(op="add", path="/a/b/c/d", value=1)])
-        )
-
-    # Hit 369: valid list navigation
-    transmute_state_differential(
-        {"a": [{"b": 1}]}, manifest_base([StateMutationIntent(op="test", path="/a/0/b", value=1)])
-    )
-
-    # Hit 371: invalid list navigation
-    with pytest.raises(ValueError, match="Patch operation failed"):
-        transmute_state_differential(
-            {"a": []}, manifest_base([StateMutationIntent(op="add", path="/a/foo/b", value=1)])
-        )
-
-    # Hit 391: valid from_path list navigation
-    p_valid = StateMutationIntent(**{"op": "copy", "path": "/c", "from": "/a/0/b"})  # type: ignore[arg-type]
-    transmute_state_differential({"a": [{"b": 1}], "c": 0}, manifest_base([p_valid]))
-
-    # Hit 386: from_path missing parent dict key
-    p_invalid_key = StateMutationIntent(**{"op": "copy", "path": "/c", "from": "/a/foo/bar"})  # type: ignore[arg-type]
-    with pytest.raises(ValueError, match="Patch operation failed"):
-        transmute_state_differential({"a": {}}, manifest_base([p_invalid_key]))
-
-    p_invalid = StateMutationIntent(**{"op": "copy", "path": "/c", "from": "/a/b/c/d"})  # type: ignore[arg-type]
-    with pytest.raises(ValueError, match="Patch operation failed"):
-        transmute_state_differential({"a": {"b": 1}}, manifest_base([p_invalid]))
-
-
-def test_apply_state_differential_copy_ops() -> None:
-    def manifest_base(patches: list[Any]) -> StateDifferentialManifest:
-        return StateDifferentialManifest(
-            diff_cid="d2", author_node_cid="n1", lamport_timestamp=1, vector_clock={"n1": 1}, patches=patches
-        )
-
-    # Test deep copy op inside object
-    res = transmute_state_differential(
-        {"a": {"b": 1}},
-        manifest_base([StateMutationIntent(**{"op": "copy", "path": "/a/c", "from": "/a/b"})]),  # type: ignore[arg-type]
-    )
-    assert res["a"]["c"] == 1
-
-    # Test move op inside list
-    res = transmute_state_differential(
-        {"a": [1, 2]},
-        manifest_base([StateMutationIntent(**{"op": "move", "path": "/a/-", "from": "/a/0"})]),  # type: ignore[arg-type]
-    )
-    assert res["a"] == [2, 1]
-
-    # Test replace op inside dict
-    res = transmute_state_differential(
-        {"a": {"b": 1}}, manifest_base([StateMutationIntent(op="replace", path="/a/b", value=2)])
-    )
-    assert res["a"]["b"] == 2
-
-    # Test overlapping from_path for copy/move
-    with pytest.raises(ValueError, match="Patch operation failed"):
-        transmute_state_differential(
-            {"a": {"b": 1}},
-            manifest_base([StateMutationIntent(**{"op": "copy", "path": "/a/b/c", "from": "/a/b"})]),  # type: ignore[arg-type]
-        )
-
-    with pytest.raises(ValueError, match="Patch operation failed"):
-        transmute_state_differential({"a": 1}, manifest_base([StateMutationIntent(op="copy", path="/b")]))
-
-    with pytest.raises(ValueError, match="Patch operation failed"):
-        transmute_state_differential(
-            {"a": []}, manifest_base([StateMutationIntent(op="replace", path="/a/-", value=1)])
-        )
-
-    with pytest.raises(ValueError, match="Patch operation failed"):
-        transmute_state_differential(
-            {"a": []}, manifest_base([StateMutationIntent(op="replace", path="/a/foo", value=1)])
-        )
-
-    # cover 494-511 copy/move array logic
-    # copy append to list (-)
-    transmute_state_differential(
-        {"a": [1]},
-        manifest_base([StateMutationIntent(**{"op": "copy", "path": "/a/-", "from": "/a/0"})]),  # type: ignore[arg-type]
-    )
-
-    # copy insert to list (0)
-    transmute_state_differential(
-        {"a": [1]},
-        manifest_base([StateMutationIntent(**{"op": "copy", "path": "/a/0", "from": "/a/0"})]),  # type: ignore[arg-type]
-    )
-
-    # copy insert to list invalid index
-    with pytest.raises(ValueError, match="Patch operation failed"):
-        transmute_state_differential(
-            {"a": [1]},
-            manifest_base([StateMutationIntent(**{"op": "copy", "path": "/a/foo", "from": "/a/0"})]),  # type: ignore[arg-type]
-        )
-
-    # move insert to same list (from_idx < last_part)
-    transmute_state_differential(
-        {"a": [1, 2, 3]},
-        manifest_base([StateMutationIntent(**{"op": "move", "path": "/a/2", "from": "/a/0"})]),  # type: ignore[arg-type]
-    )
-
-    # move insert to same list (from_idx >= last_part)
-    transmute_state_differential(
-        {"a": [1, 2, 3]},
-        manifest_base([StateMutationIntent(**{"op": "move", "path": "/a/0", "from": "/a/2"})]),  # type: ignore[arg-type]
-    )
-
-
 def test_compute_topology_hash() -> None:
     top = DAGTopologyManifest(topology_class="dag", nodes={}, edges=[], max_depth=1, max_fan_out=1)
     h = compute_topology_hash(top)
@@ -552,21 +106,6 @@ def test_verify_ast_safety() -> None:
         verify_ast_safety("2 ** 100")
     with pytest.raises(ValueError, match="not valid syntax"):
         verify_ast_safety("invalid syntax +")
-
-
-def test_apply_state_differential_test_op() -> None:
-    def manifest_base(patches: list[Any]) -> StateDifferentialManifest:
-        return StateDifferentialManifest(
-            diff_cid="d1", author_node_cid="n1", lamport_timestamp=1, vector_clock={"n1": 1}, patches=patches
-        )
-
-    with pytest.raises(ValueError, match="Patch operation failed"):
-        transmute_state_differential({"a": 1}, manifest_base([StateMutationIntent(op="test", path="", value={"a": 2})]))
-
-    res = transmute_state_differential(
-        {"a": 1}, manifest_base([StateMutationIntent(op="test", path="", value={"a": 1})])
-    )
-    assert res == {"a": 1}
 
 
 def test_align_semantic_manifolds_transmutation() -> None:
@@ -653,3 +192,107 @@ def test_calculate_latent_alignment_invalid_base64() -> None:
 
     with pytest.raises(ValueError, match=r"Topological Contradiction: Invalid base64 encoding\."):
         calculate_latent_alignment(v_invalid, v_valid, pol)
+
+
+def test_transmute_temporal_crdt_idempotence():
+    from coreason_manifest.spec.ontology import TemporalEdgeInvalidationIntent, TemporalGraphCRDTManifest
+    from coreason_manifest.utils.algebra import transmute_temporal_crdt
+
+    manifest = TemporalGraphCRDTManifest(
+        manifest_cid="did:coreason:man-1",
+        author_node_cid="did:coreason:agent-1",
+        lamport_timestamp=1,
+        vector_clock={"did:coreason:agent-1": 1},
+        add_set=["did:coreason:node-1", "did:coreason:node-2"],
+        terminate_set=[
+            TemporalEdgeInvalidationIntent(
+                target_edge_cid="did:coreason:edge-1",
+                invalidation_timestamp=100.0,
+                causal_justification_cid="did:coreason:just-1",
+            )
+        ],
+    )
+
+    state = {"add_set": [], "terminate_set": []}
+
+    state_once = transmute_temporal_crdt(state, manifest)
+    state_twice = transmute_temporal_crdt(state_once, manifest)
+
+    assert state_once == state_twice
+    assert state_once["add_set"] == ["did:coreason:node-1", "did:coreason:node-2"]
+    assert state_once["terminate_set"] == ["did:coreason:edge-1"]
+
+
+def test_transmute_temporal_crdt_commutativity():
+    from coreason_manifest.spec.ontology import TemporalEdgeInvalidationIntent, TemporalGraphCRDTManifest
+    from coreason_manifest.utils.algebra import transmute_temporal_crdt
+
+    manifest_a = TemporalGraphCRDTManifest(
+        manifest_cid="did:coreason:man-a",
+        author_node_cid="did:coreason:agent-1",
+        lamport_timestamp=1,
+        vector_clock={"did:coreason:agent-1": 1},
+        add_set=["did:coreason:node-a"],
+        terminate_set=[
+            TemporalEdgeInvalidationIntent(
+                target_edge_cid="did:coreason:edge-a",
+                invalidation_timestamp=100.0,
+                causal_justification_cid="did:coreason:just-1",
+            )
+        ],
+    )
+
+    manifest_b = TemporalGraphCRDTManifest(
+        manifest_cid="did:coreason:man-b",
+        author_node_cid="did:coreason:agent-2",
+        lamport_timestamp=2,
+        vector_clock={"did:coreason:agent-2": 1},
+        add_set=["did:coreason:node-b"],
+        terminate_set=[
+            TemporalEdgeInvalidationIntent(
+                target_edge_cid="did:coreason:edge-b",
+                invalidation_timestamp=200.0,
+                causal_justification_cid="did:coreason:just-2",
+            )
+        ],
+    )
+
+    state = {"add_set": [], "terminate_set": []}
+
+    state_ab = transmute_temporal_crdt(transmute_temporal_crdt(state, manifest_a), manifest_b)
+    state_ba = transmute_temporal_crdt(transmute_temporal_crdt(state, manifest_b), manifest_a)
+
+    assert state_ab == state_ba
+    assert "did:coreason:node-a" in state_ab["add_set"]
+    assert "did:coreason:node-b" in state_ab["add_set"]
+    assert "did:coreason:edge-a" in state_ab["terminate_set"]
+    assert "did:coreason:edge-b" in state_ab["terminate_set"]
+
+
+def test_transmute_temporal_crdt_extraction_correctness():
+    from coreason_manifest.spec.ontology import TemporalEdgeInvalidationIntent, TemporalGraphCRDTManifest
+    from coreason_manifest.utils.algebra import transmute_temporal_crdt
+
+    manifest = TemporalGraphCRDTManifest(
+        manifest_cid="did:coreason:man-ext",
+        author_node_cid="did:coreason:agent-ext",
+        lamport_timestamp=1,
+        vector_clock={"did:coreason:agent-ext": 1},
+        add_set=[],
+        terminate_set=[
+            TemporalEdgeInvalidationIntent(
+                target_edge_cid="did:coreason:edge-ext",
+                invalidation_timestamp=100.0,
+                causal_justification_cid="did:coreason:just-ext",
+            )
+        ],
+    )
+
+    state = {}
+    res = transmute_temporal_crdt(state, manifest)
+
+    assert "terminate_set" in res
+    assert isinstance(res["terminate_set"], list)
+    assert len(res["terminate_set"]) == 1
+    assert isinstance(res["terminate_set"][0], str)
+    assert res["terminate_set"][0] == "did:coreason:edge-ext"

@@ -19,7 +19,6 @@ import typing
 from collections.abc import Sequence
 from typing import Any, Literal, cast
 
-import jsonpatch  # type: ignore[import-untyped]
 import numpy as np
 from pydantic import BaseModel, ValidationError
 from pydantic.json_schema import models_json_schema
@@ -349,21 +348,26 @@ def verify_ast_safety(payload: str) -> bool:
     return True
 
 
-def transmute_state_differential(
-    current_state: dict[str, Any], differential: ontology.StateDifferentialManifest
+def transmute_temporal_crdt(
+    current_state: dict[str, Any], manifest: ontology.TemporalGraphCRDTManifest
 ) -> dict[str, Any]:
-    # ⚡ Bolt Optimization: Replace slow Pydantic model_dump with manual dictionary construction (~5x faster)
-    patch_list = [
-        {"op": p.op, "path": p.path, "value": p.value}
-        if p.value is not None
-        else (
-            {"op": p.op, "path": p.path, "from": p.from_path}
-            if p.from_path is not None
-            else {"op": p.op, "path": p.path}
-        )
-        for p in differential.patches
-    ]
-    try:
-        return cast("dict[str, Any]", jsonpatch.apply_patch(current_state, patch_list))
-    except (jsonpatch.JsonPatchException, jsonpatch.JsonPointerException, TypeError) as e:
-        raise ValueError(f"Patch operation failed: {e}") from e
+    """
+    Applies Graph CRDT semantics to a given state dict.
+    Unions add_set and terminate_set strings correctly.
+    """
+    new_state = copy.deepcopy(current_state)
+
+    add_set = new_state.setdefault("add_set", [])
+    for node_cid in manifest.add_set:
+        if node_cid not in add_set:
+            add_set.append(node_cid)
+
+    terminate_set = new_state.setdefault("terminate_set", [])
+    for intent in manifest.terminate_set:
+        if intent.target_edge_cid not in terminate_set:
+            terminate_set.append(intent.target_edge_cid)
+
+    new_state["add_set"] = sorted(add_set)
+    new_state["terminate_set"] = sorted(terminate_set)
+
+    return new_state
