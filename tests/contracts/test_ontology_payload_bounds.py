@@ -291,6 +291,7 @@ def test_semantic_mapping_heuristic_proposal_payload_bounds() -> None:
 
 def test_epistemic_logic_premise_bounds() -> None:
     from pydantic import ValidationError
+
     from coreason_manifest.spec.ontology import EpistemicLogicPremise
 
     # Valid payload
@@ -315,6 +316,7 @@ def test_epistemic_logic_premise_bounds() -> None:
 
 def test_epistemic_lean4_premise_bounds() -> None:
     from pydantic import ValidationError
+
     from coreason_manifest.spec.ontology import EpistemicLean4Premise
 
     # Valid payload
