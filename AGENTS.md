@@ -463,7 +463,9 @@ We physically separate probabilistic textual generation (System 1) from schema v
 * **Mechanistic Penalty (Epistemic Starvation):** If the oracle fails to retrieve external evidence that breaches the SLA's NLI entailment threshold, it must mathematically drop the edge's belief mass to zero by emitting an `EpistemicStarvationEvent`. This definitively records the empirical failure and sequentially triggers a `DefeasibleCascadeEvent` to dynamically sever the ungrounded edge and aggressively quarantine the epistemic contagion across the DAG.
 
 ### 8.4 `SemanticWebArchivist` (The Egress Gateway)
-* **Open-Source Substrate:** `omegaice/pydantic-rdf` & `rdflib`
+* **Open-Source Substrate:** `omegaice/pydantic-rdf`, `pyshacl`, & `rdflib`
 * **Compute Plane Profile:** `CognitiveSystemNodeProfile`
-* **Data Plane Boundary:** `RDFSerializationIntent`
-* **Routing Constraints:** LLMs are forbidden from generating raw Turtle, XML, or JSON-LD syntax due to formatting hallucination risks. The Orchestrator routes the finalized JSON-native Knowledge Graph to this node, which reads passive `json_schema_extra` tags (e.g., `rdf_subject`, `rdf_predicate`) to deterministically compile the graph into W3C standard formats for enterprise triplestores without stochastic variance.
+* **Data Plane Boundary:** `RDFSerializationIntent` and `SPARQLQueryIntent`.
+* **Routing Constraints (Serialization):** LLMs are forbidden from generating raw Turtle, XML, or JSON-LD syntax. The Orchestrator routes the finalized JSON-native Knowledge Graph to this node to deterministically compile the graph into W3C standard formats for enterprise triplestores without stochastic variance.
+* **SHACL Execution Loop:** If the `RDFSerializationIntent` contains a `SHACLValidationSLA` (which is mathematically required for strict formats like XML or JSON-LD), the Archivist MUST run a validation pass via `pyshacl` prior to emission. If the generated triples violate the shape, the Archivist must physically execute the `violation_action` (e.g., dropping the graph or stripping invalid triples) to prevent polluting enterprise endpoints.
+* **SPARQL Execution Boundaries:** All `SPARQLQueryIntent` executions are strictly subject to SSRF network quarantine. The Archivist MUST ensure that returned bindings are passed through the volumetric hardware guillotine (`_validate_payload_bounds`), aborting the connection if the external triplestore attempts to flood the swarm's VRAM.
