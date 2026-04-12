@@ -891,7 +891,7 @@ def test_deprecated_solver_tla_plus() -> None:
             formal_grammar_payload="test",
             timeout_ms=1000,
         )
-    assert "Input should be 'lean4' or 'z3'" in str(exc_info.value)
+    assert "Input should be 'lean4', 'z3', 'clingo' or 'swi_prolog'" in str(exc_info.value)
 
 
 def test_deprecated_solver_sympy() -> None:
