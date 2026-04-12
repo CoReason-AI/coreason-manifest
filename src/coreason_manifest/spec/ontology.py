@@ -6687,7 +6687,9 @@ type AnyIntent = Annotated[
     | SpatialKinematicActionIntent
     | System2RemediationIntent
     | NeurosymbolicInferenceIntent
-    | TopologicalProjectionIntent,
+    | TopologicalProjectionIntent
+    | CausalPropagationIntent
+    | RDFSerializationIntent,
     Field(discriminator="topology_class"),
 ]
 
