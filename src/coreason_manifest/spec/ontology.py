@@ -210,7 +210,7 @@ def _validate_ssrf_safety(url: str) -> str:
 
     MCP ROUTING TRIGGERS: Network Topology, SSRF Quarantine, Bogon Space, Zero-Trust Execution, Lateral Movement Prevention
     """
-    parsed = urllib.parse.urlparse(url)
+    parsed = urllib.parse.urlparse(str(url))
     if parsed.scheme == "file":
         raise ValueError("SSRF topological violation detected: file:// schema is forbidden")
     hostname = parsed.hostname
@@ -2831,7 +2831,7 @@ class StateMutationIntent(CoreasonBaseState):
     clamped by `enforce_payload_topology` to guarantee that the resulting state matrix $S'$
     does not expand beyond VRAM constraints. The operation geometry is rigidly restricted by
     the op field to the PatchOperationProfile. Target topological coordinates (path and
-    from_path) are physically bounded to max_length=2000.
+    from_path) are physically bounded to max_length=2000. If the mutation introduces high-entropy external strings, the `zero_trust_receipt_cid` MUST be populated to satisfy Sheaf-theoretic consistency, proving the payload traversed the Symbolic Firewall.
 
     MCP ROUTING TRIGGERS: RFC 6902, JSON Patch, Atomic Mutation, State Vector Projection,
     Deterministic Operator
@@ -2851,6 +2851,11 @@ class StateMutationIntent(CoreasonBaseState):
         default=None,
         alias="from",
         description="The JSON pointer from which to copy or move the state vector, if applicable.",
+    )
+    zero_trust_receipt_cid: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] | None
+    ) = Field(
+        default=None, description="Cryptographic proof that this mutation was sanitized by the Symbolic Firewall."
     )
 
     @field_validator("value", mode="before")
@@ -4132,6 +4137,19 @@ class CausalDirectedEdgeState(CoreasonBaseState):
     edge_class: Literal["direct_cause", "confounder", "collider", "mediator"] = Field(
         description="The specific Pearlian topological relationship between the two variables."
     )
+    predicate_curie: Annotated[str, StringConstraints(pattern=r"^[a-zA-Z0-9_]+:[a-zA-Z0-9_]+$")] = Field(
+        json_schema_extra={"rdf_edge_property": True}
+    )
+    belief_vector: DempsterShaferBeliefVector | None = Field(default=None)
+    grounding_sla: EvidentiaryGroundingSLA | None = Field(default=None)
+
+    @model_validator(mode="after")
+    def enforce_evidence_or_sla(self) -> Self:
+        if self.belief_vector is None and self.grounding_sla is None:
+            raise ValueError(
+                "Causal edge must possess either empirical evidence (belief_vector) or an explicit grounding_sla."
+            )
+        return self
 
     @model_validator(mode="after")
     def reject_self_referential_edge(self) -> Self:
@@ -4517,6 +4535,58 @@ class DiversityPolicy(CoreasonBaseState):
     )
 
 
+class TabularCellState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A declarative, discrete spatial vertex mapping an exact cell coordinate within a 2D relational matrix.
+
+    CAUSAL AFFORDANCE: Instructs the Table Structure Recognition engine to project extracted strings into precise Cartesian coordinates, preventing semantic flattening.
+
+    EPISTEMIC BOUNDS: Spatial geometry is clamped by non-negative `row_index` and `column_index` (`ge=0`). Span integers are strictly positive (`ge=1`). The payload is clamped at `max_length=10000` to prevent dictionary bombing.
+
+    MCP ROUTING TRIGGERS: Tabular Matrix Geometry, Table Structure Recognition, Bipartite Graph, Cartesian Coordinate, Spatial Grid
+    """
+
+    cell_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    row_index: int = Field(ge=0, description="The primary Cartesian Y-coordinate of the cell.")
+    column_index: int = Field(ge=0, description="The primary Cartesian X-coordinate of the cell.")
+    row_span: int = Field(ge=1, default=1, description="The vertical geometric span of the cell.")
+    column_span: int = Field(ge=1, default=1, description="The horizontal geometric span of the cell.")
+    text_payload: Annotated[str, StringConstraints(max_length=10000)] = Field(
+        description="The extracted atomic data point within the cell."
+    )
+
+
+class TabularMatrixProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A declarative envelope defining a localized 2D bipartite tabular graph.
+
+    CAUSAL AFFORDANCE: Isolates dense relational data grids from standard 1D text extraction, permitting downstream agents to execute spatial querying.
+
+    EPISTEMIC BOUNDS: Total dimensions bounded `ge=1`. The `validate_matrix_physics` `@model_validator` mathematically guarantees no cell violates Euclidean space by exceeding `total_rows` or `total_columns`.
+
+    MCP ROUTING TRIGGERS: TableFormer, Relational Matrix, Grid Topology, Spatial Bounding, 2D Array
+    """
+
+    matrix_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    total_rows: int = Field(ge=1)
+    total_columns: int = Field(ge=1)
+    cells: list[TabularCellState] = Field(description="The complete, sorted array of constituent cell geometries.")
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        import operator
+
+        object.__setattr__(self, "cells", sorted(self.cells, key=operator.attrgetter("cell_cid")))
+        return self
+
+    @model_validator(mode="after")
+    def validate_matrix_physics(self) -> Self:
+        for cell in self.cells:
+            if cell.row_index >= self.total_rows or cell.column_index >= self.total_columns:
+                raise ValueError("Topological Contradiction: Tabular cell geometry exceeds defined matrix dimensions.")
+        return self
+
+
 class DocumentLayoutRegionState(CoreasonBaseState):
     """
     AGENT INSTRUCTION: A discrete topological bounding box within a formalized
@@ -4540,12 +4610,30 @@ class DocumentLayoutRegionState(CoreasonBaseState):
     block_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
         description="Unique structural identifier for this geometric region."
     )
-    block_class: Literal["header", "paragraph", "figure", "table", "footnote", "caption", "equation"] = Field(
-        description="The taxonomic classification of the layout region."
-    )
+    block_class: Literal[
+        "header",
+        "paragraph",
+        "figure",
+        "table",
+        "footnote",
+        "caption",
+        "equation",
+        "list_item",
+        "code_block",
+        "form_field",
+    ] = Field(description="The taxonomic classification of the layout region.")
+    tabular_matrix: TabularMatrixProfile | None = Field(default=None)
     anchor: MultimodalTokenAnchorState = Field(
         description="The strict visual and token coordinate bindings for this block."
     )
+
+    @model_validator(mode="after")
+    def enforce_tabular_alignment(self) -> Self:
+        if getattr(self, "tabular_matrix", None) is not None and self.block_class != "table":
+            raise ValueError(
+                "Topological Contradiction: tabular_matrix can only be populated if block_class is 'table'."
+            )
+        return self
 
 
 class DocumentLayoutManifest(CoreasonBaseState):
@@ -5103,6 +5191,54 @@ class EpistemicScanningPolicy(CoreasonBaseState):
     )
 
 
+class SchemaDrivenExtractionSLA(CoreasonBaseState):
+    schema_registry_uri: AnyUrl = Field(
+        description="RFC 8785 canonicalized URI to the exact Pydantic template or LinkML definition."
+    )
+    extraction_framework: Literal["docling_graph_explicit", "ontogpt_spires"] = Field(...)
+    max_schema_retries: int = Field(ge=0, le=10)
+    validation_failure_action: Literal["quarantine_chunk", "escalate_to_human", "drop_edge"]
+
+
+class EvidentiaryGroundingSLA(CoreasonBaseState):
+    minimum_nli_entailment_score: float = Field(ge=0.0, le=1.0)
+    require_independent_sources: int = Field(ge=1, le=10, default=1)
+    ungrounded_link_action: Literal["sever_edge", "flag_for_human", "decay_weight"] = Field(default="sever_edge")
+    allowed_evidence_domains: list[Annotated[str, StringConstraints(max_length=255)]] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "allowed_evidence_domains", sorted(self.allowed_evidence_domains))
+        return self
+
+
+class OpticalParsingSLA(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Establishes the hardware and thermodynamic boundaries for the Docling vision models, dictating the deployment of Real-Time Detection Transformers (RT-DETR).
+
+    CAUSAL AFFORDANCE: Physically acts as a computational throttle, authorizing the orchestrator to deploy expensive pixel-level Optical Character Recognition (OCR) and Table Structure Recognition (TSR) models over standard byte-extraction.
+
+    EPISTEMIC BOUNDS: The `bitmap_dpi_resolution` is physically clamped to `ge=72, le=600` to mathematically prevent VRAM memory bombs on oversized, high-density raster images.
+
+    MCP ROUTING TRIGGERS: Optical Thermodynamic Bounding, RT-DETR, VRAM Throttling, LayoutLMv3, Hardware Guillotine
+    """
+
+    force_ocr: bool = Field(
+        default=False,
+        description="Boolean gate authorizing deep optical evaluation when native PDF byte-extraction fails.",
+    )
+    bitmap_dpi_resolution: int = Field(
+        ge=72,
+        le=600,
+        default=72,
+        description="The strict maximum spatial resolution authorized for rendering rasterized tensors.",
+    )
+    table_structure_recognition: bool = Field(
+        default=True,
+        description="Authorizes the deployment of dense bipartite mapping models (e.g., TableFormer) over tabular grids.",
+    )
+
+
 class EpistemicTransmutationTask(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Orchestrates Cross-Modal Representation Alignment,
@@ -5113,10 +5249,10 @@ class EpistemicTransmutationTask(CoreasonBaseState):
     CAUSAL AFFORDANCE: Forces the orchestrator's VLM or extraction engine to process
     the artifact_event_cid (128-char CID) and project it into target_modalities
     (5-value Literal, min_length=1) while strictly adhering to the attached
-    compression_sla (EpistemicCompressionSLA).
+    optical_governance (OpticalParsingSLA) and schema_governance (SchemaDrivenExtractionSLA).
 
-    EPISTEMIC BOUNDS: The @model_validator validate_grounding_density_for_visuals
-    rejects sparse grounding for visual/tabular modalities. The @model_validator
+    EPISTEMIC BOUNDS: The @model_validator validate_optical_governance_presence
+    rejects extracting raster_image or tabular_grid without proper OpticalParsingSLA configuration. The @model_validator
     sort_arrays deterministically sorts target_modalities for RFC 8785 canonical
     hashing. The optional execution_cost_budget_magnitude (int | None,
     le=1000000000, ge=0, default=None) caps thermodynamic cost.
@@ -5134,10 +5270,11 @@ class EpistemicTransmutationTask(CoreasonBaseState):
         description="The globally unique decentralized identifier (DID) anchoring the MultimodalArtifactReceipt being processed.",
     )
     target_modalities: list[
-        Literal["text", "raster_image", "vector_graphics", "tabular_grid", "n_dimensional_tensor"]
+        Literal["text", "raster_image", "vector_graphics", "tabular_grid", "n_dimensional_tensor", "semantic_graph"]
     ] = Field(min_length=1, description="The specific SOTA modality resolutions required for this extraction pass.")
-    compression_sla: EpistemicCompressionSLA = Field(
-        description="The strict mathematical boundary defining the maximum allowed informational entropy loss."
+    schema_governance: SchemaDrivenExtractionSLA | None = Field(default=None)
+    optical_governance: OpticalParsingSLA | None = Field(
+        default=None, description="The structural boundaries for visual extraction."
     )
     execution_cost_budget_magnitude: int | None = Field(
         le=1000000000,
@@ -5147,12 +5284,18 @@ class EpistemicTransmutationTask(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def validate_grounding_density_for_visuals(self) -> Self:
+    def validate_graph_schema_presence(self) -> Self:
+        if "semantic_graph" in self.target_modalities and self.schema_governance is None:
+            raise ValueError("schema_governance is strictly required when target_modalities includes 'semantic_graph'.")
+        return self
+
+    @model_validator(mode="after")
+    def validate_optical_governance_presence(self) -> Self:
         if (
-            "tabular_grid" in self.target_modalities or "raster_image" in self.target_modalities
-        ) and self.compression_sla.required_grounding_density == "sparse":
+            "raster_image" in self.target_modalities or "tabular_grid" in self.target_modalities
+        ) and self.optical_governance is None:
             raise ValueError(
-                "Epistemic safety violation: Visual or tabular modalities require strict spatial tracking. 'required_grounding_density' cannot be 'sparse'."
+                "Epistemic Violation: Extracting 'raster_image' or 'tabular_grid' mathematically requires an OpticalParsingSLA."
             )
         return self
 
@@ -6552,6 +6695,104 @@ class TopologicalProjectionIntent(CryptographicProvenancePolicy):
         return v
 
 
+class EpistemicConstraintPolicy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A mathematical invariant evaluated against an LLM's proxy-based structural plan.
+
+    CAUSAL AFFORDANCE: Enables SymbolicAI's Design-by-Contract (DbC) autonomous correction loop during test-time compute.
+
+    EPISTEMIC BOUNDS: `assertion_ast` must be a strictly parsable Python AST string. It structurally prohibits imports, assignments, or kinetic network calls to guarantee safe downstream evaluation.
+
+    MCP ROUTING TRIGGERS: Design-by-Contract, AST Evaluation, Invariant Checking, SymbolicAI DbC, Zero-Trust Execution
+    """
+
+    assertion_ast: Annotated[str, StringConstraints(max_length=1024)] = Field(
+        description="Strict AST-parsable string constraint (e.g., 'len(plan.outputs) == len(plan.inputs)')."
+    )
+    remediation_prompt: Annotated[str, StringConstraints(max_length=2048)] = Field(
+        description="The exact semantic prompt injected into the LLM if the AST assertion collapses natively."
+    )
+
+    @field_validator("assertion_ast", mode="after")
+    @classmethod
+    def validate_ast_safety(cls, v: str) -> str:
+        """
+        AGENT INSTRUCTION: Automata Theory bounds for AST validation.
+        EPISTEMIC BOUNDS: Mechanically parses the string into a syntax tree and explicitly quarantines forbidden kinetic nodes (e.g., imports, assignments, function calls) to mathematically prevent Arbitrary Code Execution (ACE).
+        """
+        try:
+            tree = ast.parse(v, mode="eval")
+            for node in ast.walk(tree):
+                # Blacklist dangerous kinetic nodes
+                if isinstance(
+                    node,
+                    (
+                        ast.Assign,
+                        ast.AnnAssign,
+                        ast.AugAssign,
+                        ast.Delete,
+                        ast.Import,
+                        ast.ImportFrom,
+                        ast.Yield,
+                        ast.YieldFrom,
+                        ast.Await,
+                        ast.Call,
+                    ),
+                ):
+                    raise ValueError(f"Kinetic execution bleed detected: Forbidden AST node {type(node).__name__}")
+        except SyntaxError as e:
+            raise ValueError(f"Invalid syntax in constraint AST: {e}") from e
+        return v
+
+
+class EpistemicZeroTrustContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: The macroscopic task topology combining OpenSymbolicAI's data masking with SymbolicAI's logic enforcement.
+
+    CAUSAL AFFORDANCE: Triggers the runtime to initiate a blind LLM inference cycle bounded by rigid mathematical proofs.
+
+    EPISTEMIC BOUNDS: Bounded to a maximum of 10 remediation epochs to prevent thermodynamic free energy exhaustion. Arrays are deterministically sorted for RFC 8785 canonicalization.
+
+    MCP ROUTING TRIGGERS: Bipartite Proposer-Verifier, Test-Time Compute, Zero-Trust Execution, Active Inference, Contract Topology
+    """
+
+    topology_class: Literal["zero_trust_contract"] = Field(
+        default="zero_trust_contract", description="Discriminator for a zero-trust contract."
+    )
+    intent_id: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="UUIDv7 mapping to the ledger."
+    )
+    semantic_planning_task: Annotated[str, StringConstraints(max_length=4096)] = Field(
+        description="The core semantic instruction for the blind LLM planner."
+    )
+    schema_blueprint_name: Annotated[str, StringConstraints(max_length=256)] = Field(
+        description="The registered URI of the Pydantic schema used to generate the proxies."
+    )
+    structural_pre_conditions: list[EpistemicConstraintPolicy] = Field(
+        default_factory=list, description="DbC bounds checked before inference."
+    )
+    structural_post_conditions: list[EpistemicConstraintPolicy] = Field(
+        default_factory=list, description="DbC bounds checked after inference to ensure the structural plan is valid."
+    )
+    max_planning_remediation_epochs: int = Field(
+        default=3, le=10, ge=0, description="Thermodynamic cap on SymbolicAI DbC retries."
+    )
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(
+            self,
+            "structural_pre_conditions",
+            sorted(self.structural_pre_conditions, key=operator.attrgetter("assertion_ast")),
+        )
+        object.__setattr__(
+            self,
+            "structural_post_conditions",
+            sorted(self.structural_post_conditions, key=operator.attrgetter("assertion_ast")),
+        )
+        return self
+
+
 type AnyPresentationIntent = Annotated[
     SemanticIntent | DraftingIntent | AdjudicationIntent | EscalationIntent, Field(discriminator="topology_class")
 ]
@@ -6643,10 +6884,169 @@ class PrologDeductionReceipt(CoreasonBaseState):
         # Topological Exemption: Freeze the outer list sequence (the mathematical order of unification).
         # However, to maintain RFC 8785 compliance, sort the keys *inside* the individual dictionaries.
         return [dict(sorted(b.items())) for b in variable_bindings]
+class DocumentKnowledgeGraphManifest(CoreasonBaseState):
+    topology_class: Literal["document_knowledge_graph"] = "document_knowledge_graph"
+    graph_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    source_artifact_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    nodes: list[SemanticNodeState] = Field(max_length=100000)
+    causal_edges: list[CausalDirectedEdgeState] = Field(max_length=100000)
+    isomorphism_hash: Annotated[str, StringConstraints(pattern="^[a-f0-9]{64}$")]
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "nodes", sorted(self.nodes, key=operator.attrgetter("node_cid")))
+        object.__setattr__(
+            self, "causal_edges", sorted(self.causal_edges, key=lambda e: (e.source_variable, e.target_variable))
+        )
+        return self
+
+
+class CausalPropagationIntent(CoreasonBaseState):
+    topology_class: Literal["causal_propagation"] = "causal_propagation"
+    target_graph_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    task_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    grounding_sla: EvidentiaryGroundingSLA
+    unverified_edges: list[CausalDirectedEdgeState]
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(
+            self,
+            "unverified_edges",
+            sorted(self.unverified_edges, key=lambda e: (e.source_variable, e.target_variable)),
+        )
+        return self
+
+
+class BeliefModulationReceipt(CoreasonBaseState):
+    topology_class: Literal["belief_modulation"] = "belief_modulation"
+    receipt_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+    )
+    prior_event_hash: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
+    ) = Field(
+        default=None,
+        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+    )
+    timestamp: float = Field(
+        ge=0.0,
+        le=253402300799.0,
+        description="Causal Ancestry markers required to resolve decentralized event ordering.",
+    )
+    target_graph_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    grounded_edges: dict[Annotated[str, StringConstraints(max_length=255)], DempsterShaferBeliefVector]
+    severed_edge_cids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]]
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "severed_edge_cids", sorted(self.severed_edge_cids))
+        return self
+
+
+class RDFSerializationIntent(CoreasonBaseState):
+    topology_class: Literal["rdf_serialization"] = "rdf_serialization"
+    export_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    target_graph_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    target_format: Literal["turtle", "xml", "json-ld", "ntriples"] = "turtle"
+    base_uri_namespace: AnyUrl
+
+
+class RDFExportReceipt(CoreasonBaseState):
+    topology_class: Literal["rdf_export_receipt"] = "rdf_export_receipt"
+    export_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+    )
+    prior_event_hash: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
+    ) = Field(
+        default=None,
+        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+    )
+    timestamp: float = Field(
+        ge=0.0,
+        le=253402300799.0,
+        description="Causal Ancestry markers required to resolve decentralized event ordering.",
+    )
+    serialized_payload: str
+    rdf_triple_count: int
+    sha256_graph_hash: Annotated[str, StringConstraints(pattern="^[a-f0-9]{64}$")]
+
+
+class SubstrateDialectProfile(StrEnum):
+    """
+    AGENT INSTRUCTION: Categorizes the specific computational physics engine or open-source library authorized to execute a node's logic.
+
+    CAUSAL AFFORDANCE: Provides the Functorial Semantics mapping the declarative syntax of the manifest to the active semantic environment of the orchestrator.
+
+    EPISTEMIC BOUNDS: Strictly clamped to the literal enumerations representing audited open-source frameworks.
+
+    MCP ROUTING TRIGGERS: Functorial Semantics, Engine Dialect, Execution Substrate, Framework Mapping
+    """
+
+    SYMBOLIC_AI_DBC = "SYMBOLIC_AI_DBC"
+    OPEN_SYMBOLIC_FIREWALL = "OPEN_SYMBOLIC_FIREWALL"
+    DOCLING_GRAPH_EXTRACTOR = "DOCLING_GRAPH_EXTRACTOR"
+    ONTOGPT_SPIRES = "ONTOGPT_SPIRES"
+    NATIVE_PYTHON = "NATIVE_PYTHON"
+
+
+class ExecutionSubstrateProfile(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A declarative blueprint defining the hardware and software prerequisites to safely load an external compute engine.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator's JIT compiler to fetch and verify external packages before kinetic execution, ensuring Dependency Isomorphism.
+
+    EPISTEMIC BOUNDS: VRAM constrained strictly above zero. Dependencies are deterministically sorted to preserve RFC 8785 canonical hashing.
+
+    MCP ROUTING TRIGGERS: Coalgebraic Thunking, Dependency Isomorphism, JIT Hydration, VRAM Allocation
+    """
+
+    dialect: SubstrateDialectProfile = Field(description="The discrete open-source engine identifier.")
+    required_package_signatures: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
+        description="A whitelist of exact PEP 508 dependency specifiers or wheel hashes."
+    )
+    vram_overhead_mb: int = Field(
+        ge=0, le=1000000000, description="The physical thermodynamic cost (in MB) of loading the library."
+    )
+    supports_lazy_hydration: bool = Field(
+        description="Whether the orchestrator can utilize Coalgebraic Thunking to unmount the engine between invocations to save VRAM."
+    )
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "required_package_signatures", sorted(self.required_package_signatures))
+        return self
+
+
+class SubstrateHydrationManifest(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A kinetic trigger dictating the Just-In-Time (JIT) initialization of an external execution environment.
+
+    CAUSAL AFFORDANCE: Forces the Compute Plane to physically download, verify, and mount the requested software library into active memory.
+
+    EPISTEMIC BOUNDS: Cryptographic checksums strictly verify loaded wheels to prevent supply-chain poisoning during dynamic module imports.
+
+    MCP ROUTING TRIGGERS: Environment Initialization, Supply-Chain Verification, Dynamic Import, JIT Mounting
+    """
+
+    target_node_cid: NodeCIDState = Field(description="The exact deterministic node demanding the physical hydration.")
+    substrate_profile: ExecutionSubstrateProfile = Field(
+        description="The exact blueprint geometry being loaded into VRAM."
+    )
+    topology_class: Literal["substrate_hydration"] = Field(
+        default="substrate_hydration", description="Discriminator type for substrate hydration."
+    )
+    cryptographic_checksums: dict[
+        Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=255)]
+    ] = Field(default_factory=dict, description="A map of package names to SHA-256 hashes verifying the loaded wheels.")
 
 
 type AnyIntent = Annotated[
-    SemanticIntent
+    EpistemicZeroTrustContract
+    | SemanticIntent
     | DraftingIntent
     | AdjudicationIntent
     | EscalationIntent
@@ -6670,11 +7070,14 @@ type AnyIntent = Annotated[
     | ConstitutionalAmendmentIntent
     | SpatialKinematicActionIntent
     | System2RemediationIntent
+    | SubstrateHydrationManifest
     | NeurosymbolicInferenceIntent
     | TopologicalProjectionIntent
     | EpistemicLean4Premise
     | EpistemicLogicPremise
     | EpistemicPrologPremise,
+    | CausalPropagationIntent
+    | RDFSerializationIntent,
     Field(discriminator="topology_class"),
 ]
 
@@ -7219,6 +7622,10 @@ class CognitiveSystemNodeProfile(CoreasonBaseState):
     asymptotic_complexity: AsymptoticComplexityReceipt | None = Field(
         default=None, description="Big-O computational bounds."
     )
+    execution_substrate: ExecutionSubstrateProfile | None = Field(
+        default=None,
+        description="The mathematical functor blueprint authorizing the runtime to hydrate a specific open-source engine (e.g., SymbolicAI) for this node.",
+    )
 
     @field_validator("domain_extensions", mode="before")
     @classmethod
@@ -7640,7 +8047,8 @@ type AnyTransitionEdge = Annotated[TransitionEdgeProfile | CyclicEdgeProfile, Fi
 
 
 type AnyActionSpaceCapability = Annotated[
-    SpatialToolManifest | MCPServerManifest | EphemeralNamespacePartitionState, Field(discriminator="topology_class")
+    SpatialToolManifest | MCPServerManifest | EphemeralNamespacePartitionState | EpistemicZeroTrustContract,
+    Field(discriminator="topology_class"),
 ]
 
 _ILLEGAL_PAYLOAD_KEYS: frozenset[str] = frozenset(
@@ -10549,12 +10957,11 @@ class SemanticEdgeState(CoreasonBaseState):
             description="The destination SemanticNodeState Content Identifier (CID).",
         )
     )
-    confidence_score: float | None = Field(
-        default=None, ge=0.0, le=1.0, description="The probabilistic certainty of this logical connection."
+    predicate_curie: Annotated[str, StringConstraints(pattern=r"^[a-zA-Z0-9_]+:[a-zA-Z0-9_]+$")] = Field(
+        json_schema_extra={"rdf_edge_property": True}
     )
-    predicate: Annotated[str, StringConstraints(max_length=2000)] = Field(
-        description="The string representation of the relationship (e.g., 'WORKS_FOR')."
-    )
+    belief_vector: DempsterShaferBeliefVector | None = Field(default=None)
+    grounding_sla: EvidentiaryGroundingSLA | None = Field(default=None)
     embedding: VectorEmbeddingState | None = Field(
         default=None,
         description="Topologically Bounded Latent Spaces used to calculate exact geometric distance and preserve structural Isometry.",
@@ -10572,6 +10979,14 @@ class SemanticEdgeState(CoreasonBaseState):
     volumetric_geometry: VolumetricEdgeProfile | None = Field(
         default=None, description="The continuous parametric spline defining the physical connection manifold."
     )
+
+    @model_validator(mode="after")
+    def enforce_evidence_or_sla(self) -> Self:
+        if self.belief_vector is None and self.grounding_sla is None:
+            raise ValueError(
+                "Edge must possess either empirical evidence (belief_vector) or an explicit grounding_sla."
+            )
+        return self
 
 
 class SemanticNodeState(CoreasonBaseState):
@@ -10597,16 +11012,20 @@ class SemanticNodeState(CoreasonBaseState):
 
     node_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
         description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this semantic node to the Merkle-DAG.",
+        json_schema_extra={"rdf_subject": True},
     )
+    canonical_uri: AnyUrl | None = Field(default=None, json_schema_extra={"rdf_predicate": "owl:sameAs"})
     label: Annotated[str, StringConstraints(max_length=2000)] = Field(
-        description="The categorical label of the node (e.g., 'Person', 'Concept')."
+        description="The categorical label of the node (e.g., 'Person', 'Concept').",
+        json_schema_extra={"rdf_predicate": "rdfs:label"},
     )
     scope: Literal["global", "tenant", "session"] = Field(
         default="session",
         description="The cryptographic namespace partitioning boundary. Global is public, Tenant is corporate, Session is ephemeral.",
     )
     text_chunk: Annotated[str, StringConstraints(max_length=50000)] = Field(
-        description="The raw natural language representation of the semantic node."
+        description="The raw natural language representation of the semantic node.",
+        json_schema_extra={"rdf_predicate": "schema:description"},
     )
     embedding: VectorEmbeddingState | None = Field(
         default=None,
@@ -10888,6 +11307,49 @@ class CognitiveAgentNodeProfile(CoreasonBaseState):
             raise ValueError(
                 "Topology Routing Violated: Egress Mixnet obfuscation mathematically requires strict Network Isolation to be True."
             )
+
+        return self
+
+
+class HierarchicalDOMManifest(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A verifiable Directed Acyclic Graph (DAG) representing the nested visual and logical containment of an ingested multimodal artifact (e.g., Docling Output).
+
+    CAUSAL AFFORDANCE: Replaces flat token arrays with an adjacency matrix, instructing the orchestrator exactly how spatial blocks physically encapsulate one another.
+
+    EPISTEMIC BOUNDS: Dictionary sizes are volumetrically clamped (`max_length=100000`). The `verify_dom_dag_integrity` `@model_validator` executes a DFS mathematical proof via networkx to guarantee the absence of cyclical containment paradoxes.
+
+    MCP ROUTING TRIGGERS: Spatial-Semantic Isomorphism, Document Object Model, Containment DAG, Visual Hierarchy, Rhetorical Bounding
+    """
+
+    topology_class: Literal["hierarchical_dom"] = "hierarchical_dom"
+    dom_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    root_block_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
+    blocks: dict[Annotated[str, StringConstraints(max_length=255)], DocumentLayoutRegionState] = Field(
+        max_length=100000, description="The localized registry of all extracted spatial blocks."
+    )
+    containment_edges: list[tuple[str, str]] = Field(
+        default_factory=list,
+        # Note: containment_edges is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
+        description="Directed edges defining the parent-child spatial containment (Parent -> Child).",
+    )
+
+    @model_validator(mode="after")
+    def verify_dom_dag_integrity(self) -> Self:
+        if self.root_block_cid not in self.blocks:
+            raise ValueError("Topological Contradiction: root_block_cid not found in blocks.")
+
+        graph: nx.DiGraph[Any] = nx.DiGraph()
+        for node_id in self.blocks:
+            graph.add_node(node_id)
+
+        for source, target in self.containment_edges:
+            if source not in self.blocks or target not in self.blocks:
+                raise ValueError("Ghost pointer: Containment edge references undefined block.")
+            graph.add_edge(source, target)
+
+        if not nx.is_directed_acyclic_graph(graph):
+            raise ValueError("Topological Contradiction: Hierarchical DOM tree contains a spatial cycle.")
 
         return self
 
@@ -11988,7 +12450,9 @@ type AnyTopologyManifest = Annotated[
     | CapabilityForgeTopologyManifest
     | IntentElicitationTopologyManifest
     | NeurosymbolicVerificationTopologyManifest
-    | DiscourseTreeManifest,
+    | DiscourseTreeManifest
+    | DocumentKnowledgeGraphManifest
+    | HierarchicalDOMManifest,
     Field(discriminator="topology_class", description="A discriminated union of workflow topologies."),
 ]
 
@@ -12430,6 +12894,33 @@ class ReasoningEngineeringPolicy(CoreasonBaseState):
     )
 
 
+class ArtifactCorruptionEvent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A terminal state representing catastrophic physical failure of the ingestion engine (e.g., Docling segfaults on malformed bytes).
+
+    CAUSAL AFFORDANCE: Emits an immediate circuit breaker to the orchestrator, cleanly severing the ingestion branch and preventing systemic DAG collapse.
+
+    EPISTEMIC BOUNDS: Evaluated via a strict Literal automaton classifying the failure physics.
+
+    MCP ROUTING TRIGGERS: Artifact Contagion Prevention, Terminal Fault, VLM Crash, Malformed Bytes, DRM Lock
+    """
+
+    event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        ...
+    )
+    prior_event_hash: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
+    ) = Field(default=None)
+    timestamp: float = Field(ge=0.0, le=253402300799.0)
+
+    topology_class: Literal["artifact_corruption"] = "artifact_corruption"
+    artifact_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="The genesis artifact that caused the ingestion engine to crash."
+    )
+    corruption_class: Literal["drm_locked", "malformed_bytes", "ocr_failure", "unsupported_format"]
+    diagnostic_hash: Annotated[str, StringConstraints(pattern="^[a-f0-9]{64}$")]
+
+
 class EpistemicTelemetryEvent(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Implements Human-in-the-Loop (HITL) Supervisory Control Theory and Epistemic Regret tracking to measure out-of-band human physical attention kinematics.
@@ -12653,7 +13144,7 @@ class EpistemicAxiomVerificationReceipt(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Acts as the definitive logic gate for the Truth Maintenance System. If verification succeeds, it physically unlocks the promotion of the source prediction into the global semantic knowledge graph.
 
-    EPISTEMIC BOUNDS: Factual alignment is geometrically bounded by sequence_similarity_score (ge=0.0, le=1.0). The @model_validator enforce_epistemic_quarantine deliberately crashes instantiation if fact_score_passed is False, physically severing the DAG to prevent epistemic contagion.
+    EPISTEMIC BOUNDS: Factual alignment is geometrically bounded by sequence_similarity_score (ge=0.0, le=1.0). The @model_validator enforce_epistemic_quarantine deliberately crashes instantiation if fact_score_passed is False, physically severing the DAG to prevent epistemic contagion. Structural integrity mathematically demands that the `zero_trust_receipt_cid` be present to prove the generative extraction bypassed prompt injection boundaries.
 
     MCP ROUTING TRIGGERS: Entailment Verification, Natural Language Inference, Truth Maintenance System, Epistemic Quarantine, Hallucination Filtering
     """
@@ -12679,6 +13170,12 @@ class EpistemicAxiomVerificationReceipt(CoreasonBaseState):
     ] = Field()
     sequence_similarity_score: float = Field(ge=0.0, le=1.0)
     fact_score_passed: bool
+    zero_trust_receipt_cid: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] | None
+    ) = Field(
+        default=None,
+        description="The undeniable pointer proving the source prediction traversed the Zero-Trust contract before being verified as an axiom.",
+    )
 
     @model_validator(mode="after")
     def enforce_epistemic_quarantine(self) -> Self:
@@ -13565,12 +14062,64 @@ class InterventionReceipt(CoreasonBaseState):
         return self
 
 
+class EpistemicZeroTrustReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A cryptographically frozen historical fact proving the flawless execution of an EpistemicZeroTrustContract.
+
+    CAUSAL AFFORDANCE: Permits the orchestrator to append the transmuted payload to the global immutable ledger, certifying that prompt injection was structurally impossible and AST contracts were fulfilled.
+
+    EPISTEMIC BOUNDS: `firewall_breach_detected` must strictly be False. Hashes are bounded to RFC 8785 canonicalization requirements.
+
+    MCP ROUTING TRIGGERS: Cryptographic Ledger, Formal Verification Receipt, Immutable Provenance, Hash Canonicalization, Data Masking
+    """
+
+    event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+    )
+    prior_event_hash: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
+    ) = Field(
+        default=None,
+        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+    )
+    timestamp: float = Field(
+        ge=0.0,
+        le=253402300799.0,
+        description="Causal Ancestry markers required to resolve decentralized event ordering.",
+    )
+    topology_class: Literal["zero_trust_receipt"] = Field(
+        default="zero_trust_receipt", description="Discriminator for a zero-trust receipt."
+    )
+    intent_reference_id: Annotated[
+        str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
+    ] = Field(description="Pointer to the originating EpistemicZeroTrustContract.")
+    llm_blind_plan_hash: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] = (
+        Field(description="RFC 8785 hash of the proxy-only structural logic generated by the LLM.")
+    )
+    firewall_breach_detected: Literal[False] = Field(
+        default=False, description="A strictly False literal guaranteeing no raw entropy leaked into the LLM context."
+    )
+    remediation_epochs_consumed: int = Field(ge=0, le=10, description="The exact count of DbC retries required.")
+    transmuted_payload_hash: Annotated[
+        str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")
+    ] = Field(description="RFC 8785 canonical hash of the final executed payload.")
+
+    @model_validator(mode="after")
+    def verify_firewall_integrity(self) -> Self:
+        """Topological boundary: Ensures the CI/CD pipeline and runtime physically cannot instantiate a receipt if the OpenSymbolicAI firewall failed."""
+        if self.firewall_breach_detected is not False:
+            raise ValueError("Topological Collapse: Firewall breach detected. Receipt invalid.")
+        return self
+
+
 type AnyStateEvent = Annotated[
-    ObservationEvent
+    EpistemicZeroTrustReceipt
+    | ObservationEvent
     | BeliefMutationEvent
     | SystemFaultEvent
     | AtomicPropositionState
     | PostCoordinatedSemanticState
+    | ArtifactCorruptionEvent
     | HypothesisGenerationEvent
     | BargeInInterruptEvent
     | CounterfactualRegretEvent
@@ -13600,11 +14149,13 @@ type AnyStateEvent = Annotated[
     | Lean4VerificationReceipt
     | FormalLogicProofReceipt
     | PrologDeductionReceipt,
+    | BeliefModulationReceipt
+    | RDFExportReceipt,
     Field(discriminator="topology_class", description="A discriminated union of state events."),
 ]
 
 
-class DempsterShaferBeliefState(CoreasonBaseState):
+class DempsterShaferBeliefVector(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Replaces monolithic probability floats with a composite tri-vector. Independently measures lexical matching, latent semantic distance, and topological graph integrity to allow the orchestrator to compute epistemic conflict and execute evidence discounting.
 
@@ -13665,7 +14216,7 @@ class OntologicalReificationReceipt(CoreasonBaseState):
     algorithmic_mechanism: TransformationMechanismProfile = Field(
         description="The deterministic or probabilistic engine used to execute the transmutation."
     )
-    belief_vector: DempsterShaferBeliefState = Field(
+    belief_vector: DempsterShaferBeliefVector = Field(
         description="The composite Dempster-Shafer tri-vector capturing independent confidence dimensions and calculated epistemic conflict."
     )
     is_latent_inference: bool = Field(
@@ -14019,7 +14570,7 @@ NeurosymbolicInferenceIntent.model_rebuild()
 EpistemicUpsamplingTask.model_rebuild()
 VolumetricPartitionState.model_rebuild()
 
-DempsterShaferBeliefState.model_rebuild()
+DempsterShaferBeliefVector.model_rebuild()
 EmpiricalStatisticalProfile.model_rebuild()
 SemanticRelationalVectorState.model_rebuild()
 AtomicPropositionState.model_rebuild()
@@ -14046,6 +14597,13 @@ ComputationalThermodynamicsProfile.model_rebuild()
 FederatedSecurityMacroManifest.model_rebuild()
 CognitiveSwarmDeploymentManifest.model_rebuild()
 
+DocumentKnowledgeGraphManifest.model_rebuild()
+CausalPropagationIntent.model_rebuild()
+BeliefModulationReceipt.model_rebuild()
+RDFSerializationIntent.model_rebuild()
+RDFExportReceipt.model_rebuild()
+SchemaDrivenExtractionSLA.model_rebuild()
+EvidentiaryGroundingSLA.model_rebuild()
 EpistemicProxyState.model_rebuild()
 
 EpistemicLean4Premise.model_rebuild()
@@ -14054,3 +14612,16 @@ EpistemicLogicPremise.model_rebuild()
 FormalLogicProofReceipt.model_rebuild()
 EpistemicPrologPremise.model_rebuild()
 PrologDeductionReceipt.model_rebuild()
+OpticalParsingSLA.model_rebuild()
+TabularCellState.model_rebuild()
+TabularMatrixProfile.model_rebuild()
+HierarchicalDOMManifest.model_rebuild()
+ArtifactCorruptionEvent.model_rebuild()
+EpistemicTransmutationTask.model_rebuild()
+EpistemicConstraintPolicy.model_rebuild()
+EpistemicZeroTrustContract.model_rebuild()
+EpistemicZeroTrustReceipt.model_rebuild()
+
+
+ExecutionSubstrateProfile.model_rebuild()
+SubstrateHydrationManifest.model_rebuild()

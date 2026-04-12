@@ -49,7 +49,7 @@ This repository is a **pure data library** (Hollow Data Plane) with no runtime e
 - **No network sockets, no file writing, no global state** — importing any module triggers zero side effects.
 - **Frozen immutable models** — all Pydantic schemas enforce `frozen=True`.
 - **Cryptographic determinism** — canonical hashing via RFC 8785 guarantees reproducible builds.
-- **SLSA Level 3 provenance** — every PyPI release includes build attestations via [Sigstore](https://www.sigstore.dev/).
+- **SLSA Level 3 provenance** — every PyPI release includes build attestations via [Sigstore](https://sigstore.dev/).
 - **SBOM generation** — every release ships an SPDX Software Bill of Materials.
 - **Automated dependency auditing** — `pip-audit`, `osv-scanner`, and CodeQL run on every PR and on a weekly schedule.
 
@@ -58,6 +58,6 @@ This repository is a **pure data library** (Hollow Data Plane) with no runtime e
 All releases are:
 
 - Built deterministically and verified via reproducible build checks in CI.
-- Signed with [Sigstore](https://www.sigstore.dev/) for artifact provenance.
+- Signed with [Sigstore](https://sigstore.dev/) for artifact provenance.
 - Published to PyPI via OIDC Trusted Publishing (no static API tokens).
 - Accompanied by SLSA Level 3 provenance attestations.

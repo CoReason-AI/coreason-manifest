@@ -59,7 +59,7 @@ def test_sse_transport_profile_ssrf(url: str) -> None:
 @pytest.mark.parametrize(
     "url",
     [
-        "https://www.example.com/",
+        "https://1.1.1.1/",
         "http://1.1.1.1/",
     ],
 )
@@ -71,7 +71,7 @@ def test_http_transport_profile_valid(url: str) -> None:
 @pytest.mark.parametrize(
     "url",
     [
-        "https://www.example.com/",
+        "https://1.1.1.1/",
         "http://1.1.1.1/",
     ],
 )
