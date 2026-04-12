@@ -137,6 +137,7 @@ def test_sparql_query_result_receipt() -> None:
     )
     assert receipt.execution_time_ms == 150
 
+
 def test_rdf_serialization_intent_shacl_governance() -> None:
     from coreason_manifest.spec.ontology import RDFSerializationIntent, SHACLValidationSLA
 
@@ -146,7 +147,7 @@ def test_rdf_serialization_intent_shacl_governance() -> None:
             export_cid="export-1",
             target_graph_cid="graph-1",
             target_format="xml",
-            base_uri_namespace="http://example.com"
+            base_uri_namespace="http://example.com",
         )
 
     with pytest.raises(ValueError, match="mathematically requires a SHACLValidationSLA"):
@@ -154,7 +155,7 @@ def test_rdf_serialization_intent_shacl_governance() -> None:
             export_cid="export-1",
             target_graph_cid="graph-1",
             target_format="json-ld",
-            base_uri_namespace="http://example.com"
+            base_uri_namespace="http://example.com",
         )
 
     # Should pass when correctly supplied
@@ -164,8 +165,7 @@ def test_rdf_serialization_intent_shacl_governance() -> None:
         target_format="json-ld",
         base_uri_namespace="http://example.com",
         shacl_governance=SHACLValidationSLA(
-            shacl_shape_uri="http://example.com/shape.ttl",
-            violation_action="drop_graph"
-        )
+            shacl_shape_uri="http://example.com/shape.ttl", violation_action="drop_graph"
+        ),
     )
     assert intent.shacl_governance is not None
