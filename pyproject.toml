@@ -88,7 +88,7 @@ exclude = [
 ]
 
 [tool.pytest.ini_options]
-addopts = "--cov=src/coreason_manifest --cov-report=xml"
+addopts = "--cov=src/coreason_manifest --cov-report=xml -n auto"
 testpaths = ["tests"]
 asyncio_mode = "auto"
 filterwarnings = ["ignore:Pydantic serializer warnings:UserWarning"]
