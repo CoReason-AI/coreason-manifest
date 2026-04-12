@@ -603,9 +603,9 @@ def inject_cryptographic_provenance(files: list[str]) -> int:
 def project_ontology_manifold() -> None:
     schema = get_ontology_schema()
     output_path = REPO_ROOT / "coreason_ontology.schema.json"
-    with open(output_path, "w", newline="\n", encoding="utf-8") as f:
-        json.dump(schema, f, indent=2, sort_keys=True)
-        f.write("\n")
+    content = json.dumps(schema, indent=2, ensure_ascii=False) + "\n"
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write(content)
     print(f"Schema regenerated successfully: {output_path}")
     print(f"Total definitions: {len(schema.get('$defs', {}))}")
 
