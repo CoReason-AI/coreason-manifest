@@ -19,6 +19,7 @@ from coreason_manifest.spec.ontology import (
 
 url_adapter = TypeAdapter(AnyUrl)
 
+
 def test_ontological_crosswalk_intent_sorting() -> None:
     intent = OntologicalCrosswalkIntent(
         target_graph_cid="bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi",
@@ -28,6 +29,7 @@ def test_ontological_crosswalk_intent_sorting() -> None:
     )
     assert intent.source_strings == ["apple", "banana", "zebra"]
     assert intent.target_ontology_registries == ["CHEBI", "HP", "MONDO"]
+
 
 def test_schema_driven_extraction_sla_validation() -> None:
     with pytest.raises(ValueError, match="Epistemic Violation"):
@@ -45,6 +47,8 @@ def test_schema_driven_extraction_sla_validation() -> None:
         extraction_framework="ontogpt_spires",
         max_schema_retries=3,
         validation_failure_action="drop_edge",
-        linkml_governance=LinkMLValidationSLA(linkml_schema_uri=url_adapter.validate_python("https://example.com/linkml")),
+        linkml_governance=LinkMLValidationSLA(
+            linkml_schema_uri=url_adapter.validate_python("https://example.com/linkml")
+        ),
     )
     assert sla.linkml_governance is not None
