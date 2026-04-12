@@ -1,5 +1,13 @@
 # CoReason Manifest
 
+[![PyPI Version](https://img.shields.io/pypi/v/coreason_manifest?style=flat-square&logo=pypi&logoColor=white&label=PyPI)](https://pypi.org/project/coreason_manifest/)
+[![Python Versions](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2FCoReason-AI%2Fcoreason-manifest%2Fmain%2Fpyproject.toml&style=flat-square&logo=python&logoColor=white&label=Python)](https://pypi.org/project/coreason_manifest/)
+[![CI](https://img.shields.io/github/actions/workflow/status/CoReason-AI/coreason-manifest/ci.yml?branch=main&style=flat-square&logo=github&label=CI)](https://github.com/CoReason-AI/coreason-manifest/actions/workflows/ci.yml)
+[![Codecov](https://img.shields.io/codecov/c/github/CoReason-AI/coreason-manifest?style=flat-square&logo=codecov&logoColor=white&label=Coverage)](https://codecov.io/gh/CoReason-AI/coreason-manifest)
+[![OpenSSF Scorecard](https://img.shields.io/ossf-scorecard/github.com/CoReason-AI/coreason-manifest?style=flat-square&label=OpenSSF)](https://scorecard.dev/viewer/?uri=github.com/CoReason-AI/coreason-manifest)
+[![License](https://img.shields.io/badge/License-Prosperity%203.0-blue?style=flat-square)](./LICENSE)
+[![Security Policy](https://img.shields.io/badge/Security-Policy-green?style=flat-square)](./SECURITY.md)
+
 > **"This package is the definitive source of truth. If it isn't in the manifest, it doesn't exist. If it violates the manifest, it doesn't run."**
 
 ## Overview
@@ -105,6 +113,22 @@ uv run pytest
 uv run deptry src/
 
 ```
+
+## Security
+
+Please report vulnerabilities **privately** — do not open a public GitHub Issue.
+
+See [`SECURITY.md`](./SECURITY.md) for our full security policy, response SLAs, and responsible disclosure process. For urgent matters, email [security@coreason.ai](mailto:security@coreason.ai).
+
+## Contributing
+
+This project follows [Conventional Commits](https://www.conventionalcommits.org/) to power automated release notes and changelogs via [Release Please](https://github.com/googleapis/release-please). All commit messages should follow the format:
+
+```
+<type>(<scope>): <description>
+```
+
+Examples: `feat(ontology): add SpatialKinematicState`, `fix(algebra): correct canonical hash ordering`.
 
 ## License and Copyright
 
