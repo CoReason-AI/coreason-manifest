@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 
-def main():
+def main() -> None:
     # Ensure we are working from the project root
     project_root = Path(__file__).resolve().parent.parent
     os.chdir(project_root)
