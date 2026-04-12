@@ -72,7 +72,9 @@ def check_ast_for_sort(cls, field_name):
             # Check targets
             targets_field = False
             for target in node.targets:
-                if (isinstance(target, ast.Attribute) and target.attr == field_name) or (isinstance(target, ast.Name) and target.id == field_name):
+                if (isinstance(target, ast.Attribute) and target.attr == field_name) or (
+                    isinstance(target, ast.Name) and target.id == field_name
+                ):
                     targets_field = True
 
             if targets_field:

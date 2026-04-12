@@ -1,4 +1,4 @@
-with open("tests/test_hash_invariance.py", "r") as f:
+with open("tests/test_hash_invariance.py") as f:
     content = f.read()
 
 target_trace = """    manifest = TraceExportManifest(

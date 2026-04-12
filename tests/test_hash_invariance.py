@@ -5,13 +5,19 @@ import pytest
 
 from coreason_manifest.spec.ontology import (
     CognitiveActionSpaceManifest,
+    CognitiveAgentNodeProfile,
+    DraftingIntent,
+    EpistemicSecurityProfile,
+    ExecutionNodeReceipt,
     PermissionBoundaryPolicy,
     RedactionPolicy,
     SaeLatentPolicy,
     SemanticClassificationProfile,
     SemanticFlowPolicy,
     SideEffectProfile,
+    SpatialHardwareProfile,
     SpatialToolManifest,
+    TraceExportManifest,
     TransitionEdgeProfile,
 )
 
@@ -92,7 +98,6 @@ if __name__ == "__main__":
     pytest.main([__file__])
 
 
-
 def test_hash_invariance_cognitive_action_space() -> None:
     """
     Generative test to prove that internal @model_validator hooks correctly stabilize
@@ -116,6 +121,7 @@ def test_hash_invariance_cognitive_action_space() -> None:
     )
 
     from typing import Any
+
     capabilities: dict[str, Any] = {"cap1": cap1, "cap2": cap2}
 
     edges_payload: list[Any] = []
@@ -157,52 +163,24 @@ def test_hash_invariance_cognitive_action_space() -> None:
         "Canonical serialization fracture detected!"
     )
 
-from coreason_manifest.spec.ontology import (
-    TraceExportManifest,
-    ExecutionNodeReceipt,
-    CognitiveAgentNodeProfile,
-    DraftingIntent,
-    SpatialHardwareProfile,
-    EpistemicSecurityProfile
-)
 
 def test_trace_export_manifest_sort() -> None:
-    node1 = ExecutionNodeReceipt(
-        request_cid="req1",
-        inputs={},
-        outputs={},
-        node_hash="a" * 64
-    )
-    node2 = ExecutionNodeReceipt(
-        request_cid="req2",
-        inputs={},
-        outputs={},
-        node_hash="b" * 64
-    )
+    node1 = ExecutionNodeReceipt(request_cid="req1", inputs={}, outputs={}, node_hash="a" * 64)
+    node2 = ExecutionNodeReceipt(request_cid="req2", inputs={}, outputs={}, node_hash="b" * 64)
     # The order should be fixed by node_hash
-    manifest = TraceExportManifest(
-        batch_cid="batch-123",
-        execution_nodes=[node2, node1]
-    )
+    manifest = TraceExportManifest(batch_cid="batch-123", execution_nodes=[node2, node1])
     assert manifest.execution_nodes[0].node_hash == "a" * 64
 
-def test_cognitive_agent_node_profile_sort() -> None:
-    intent1 = DraftingIntent(
-        context_prompt="prompt1",
-        resolution_schema={},
-        timeout_action="rollback"
-    )
 
-    intent2 = DraftingIntent(
-        context_prompt="prompt2",
-        resolution_schema={},
-        timeout_action="rollback"
-    )
+def test_cognitive_agent_node_profile_sort() -> None:
+    intent1 = DraftingIntent(context_prompt="prompt1", resolution_schema={}, timeout_action="rollback")
+
+    intent2 = DraftingIntent(context_prompt="prompt2", resolution_schema={}, timeout_action="rollback")
 
     agent = CognitiveAgentNodeProfile(
         description="test agent",
         hardware=SpatialHardwareProfile(),
         security=EpistemicSecurityProfile(),
-        emitted_intents=[intent2, intent1]
+        emitted_intents=[intent2, intent1],
     )
     assert getattr(agent.emitted_intents[0], "context_prompt", "") == "prompt1"

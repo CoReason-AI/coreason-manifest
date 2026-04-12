@@ -1,5 +1,6 @@
 import re
-with open("tests/test_hash_invariance.py", "r") as f:
+
+with open("tests/test_hash_invariance.py") as f:
     content = f.read()
 
 # Replace the whole test function
@@ -26,7 +27,12 @@ new_func = """def test_cognitive_agent_node_profile_sort() -> None:
 """
 
 # Regex substitute the whole function
-content = re.sub(r'def test_cognitive_agent_node_profile_sort.*?assert agent.emitted_intents\[0\].artifact_cid == "art1"', new_func, content, flags=re.DOTALL)
+content = re.sub(
+    r'def test_cognitive_agent_node_profile_sort.*?assert agent.emitted_intents\[0\].artifact_cid == "art1"',
+    new_func,
+    content,
+    flags=re.DOTALL,
+)
 
 with open("tests/test_hash_invariance.py", "w") as f:
     f.write(content)
