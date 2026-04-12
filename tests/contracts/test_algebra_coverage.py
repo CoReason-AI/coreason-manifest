@@ -776,3 +776,58 @@ def test_canonical_sorts() -> None:
         severed_edge_cids=["z1", "a1"],
     )
     assert b.severed_edge_cids == ["a1", "z1"]
+
+def test_tabular_matrix_profile_coverage() -> None:
+    from pydantic import ValidationError
+    from coreason_manifest.spec.ontology import TabularCellState, TabularMatrixProfile, DocumentLayoutRegionState, HierarchicalDOMManifest, MultimodalTokenAnchorState, ContextualizedSourceState, MultimodalArtifactReceipt, EpistemicProxyState
+
+    cell_ok = TabularCellState(
+        cell_cid="c1", row_index=0, column_index=0, text_payload="hi"
+    )
+    cell_bad = TabularCellState(
+        cell_cid="c2", row_index=2, column_index=0, text_payload="hi"
+    )
+
+    # Test valid matrix and sorting
+    # bad is indexed 2, but total_rows=2, so it should fail physics
+    with pytest.raises(ValidationError, match="Topological Contradiction: Tabular cell geometry exceeds defined matrix dimensions."):
+        TabularMatrixProfile(matrix_cid="m1", total_rows=2, total_columns=2, cells=[cell_bad, cell_ok])
+
+    m_ok = TabularMatrixProfile(matrix_cid="m1", total_rows=5, total_columns=5, cells=[cell_bad, cell_ok])
+    assert m_ok.cells[0].cell_cid == "c1"
+
+    anchor = MultimodalTokenAnchorState.model_construct(
+        anchor_cid="a1"
+    )
+
+    with pytest.raises(ValidationError, match="Topological Contradiction: tabular_matrix can only be populated if block_class is 'table'."):
+        DocumentLayoutRegionState(
+            block_cid="b1", block_class="paragraph", anchor=anchor, tabular_matrix=m_ok
+        )
+
+    r_ok = DocumentLayoutRegionState(
+        block_cid="b1", block_class="table", anchor=anchor, tabular_matrix=m_ok
+    )
+
+    r_other = DocumentLayoutRegionState(
+        block_cid="b2", block_class="paragraph", anchor=anchor
+    )
+
+    with pytest.raises(ValidationError, match="Topological Contradiction: root_block_cid not found in blocks."):
+        HierarchicalDOMManifest(
+            dom_cid="d1", root_block_cid="missing", blocks={"b1": r_ok}
+        )
+
+    with pytest.raises(ValidationError, match="Ghost pointer: Containment edge references undefined block."):
+        HierarchicalDOMManifest(
+            dom_cid="d1", root_block_cid="b1", blocks={"b1": r_ok}, containment_edges=[("b1", "b2")]
+        )
+
+    with pytest.raises(ValidationError, match="Topological Contradiction: Hierarchical DOM tree contains a spatial cycle."):
+        HierarchicalDOMManifest(
+            dom_cid="d1", root_block_cid="b1", blocks={"b1": r_ok, "b2": r_other}, containment_edges=[("b1", "b2"), ("b2", "b1")]
+        )
+
+    dom_ok = HierarchicalDOMManifest(
+        dom_cid="d1", root_block_cid="b1", blocks={"b1": r_ok, "b2": r_other}, containment_edges=[("b1", "b2")]
+    )
