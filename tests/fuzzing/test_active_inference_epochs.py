@@ -13,7 +13,7 @@ from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import ValidationError
 
-from coreason_manifest.spec.ontology import ActiveInferenceEpoch, EpistemicRejectionReceipt
+from coreason_manifest.spec.ontology import ActiveInferenceEpochState, EpistemicRejectionReceipt
 
 receipt_strategy = st.builds(
     EpistemicRejectionReceipt,
@@ -31,7 +31,7 @@ receipt_strategy = st.builds(
 def test_referential_integrity_and_canonical_sorting(
     rejection_history: list[EpistemicRejectionReceipt], valid_free_energy: float
 ) -> None:
-    epoch = ActiveInferenceEpoch(
+    epoch = ActiveInferenceEpochState(
         epoch_cid="test",
         rejection_history=rejection_history,
         current_free_energy=valid_free_energy,
@@ -50,7 +50,7 @@ def test_referential_integrity_and_canonical_sorting(
 def test_serialization_isomorphism(
     rejection_history: list[EpistemicRejectionReceipt], valid_free_energy: float
 ) -> None:
-    epoch = ActiveInferenceEpoch(
+    epoch = ActiveInferenceEpochState(
         epoch_cid="test",
         rejection_history=rejection_history,
         current_free_energy=valid_free_energy,
@@ -60,7 +60,7 @@ def test_serialization_isomorphism(
     serialized = epoch.model_dump_canonical()
 
     # Deserialize back
-    deserialized = ActiveInferenceEpoch.model_validate_json(serialized)
+    deserialized = ActiveInferenceEpochState.model_validate_json(serialized)
 
     assert deserialized.epoch_cid == epoch.epoch_cid
     assert deserialized.current_free_energy == epoch.current_free_energy
@@ -82,7 +82,7 @@ def test_free_energy_paradox_trapping(
     rejection_history: list[EpistemicRejectionReceipt], invalid_free_energy: float
 ) -> None:
     with pytest.raises(ValidationError) as exc_info:
-        ActiveInferenceEpoch(
+        ActiveInferenceEpochState(
             epoch_cid="test",
             rejection_history=rejection_history,
             current_free_energy=invalid_free_energy,

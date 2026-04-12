@@ -16,9 +16,9 @@ from hypothesis import HealthCheck, given, settings
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
-    IdeationPhase,
+    IdeationPhaseProfile,
     LatentScratchpadReceipt,
-    StochasticTopology,
+    StochasticTopologyManifest,
     ThoughtBranchState,
 )
 
@@ -36,7 +36,9 @@ def valid_scratchpad_strategy(draw: st.DrawFn) -> dict[str, Any]:
             explored.append(ThoughtBranchState(branch_cid=b_cid, latent_content_hash="a" * 64, prm_score=0.9))
         else:
             explored.append(
-                StochasticTopology(topology_cid=b_cid, phase=IdeationPhase.STOCHASTIC_DIFFUSION, stochastic_graph=[])
+                StochasticTopologyManifest(
+                    topology_cid=b_cid, phase=IdeationPhaseProfile.STOCHASTIC_DIFFUSION, stochastic_graph=[]
+                )
             )
     discarded = draw(st.lists(st.sampled_from(branch_ids), max_size=len(branch_ids), unique=True))
     resolution_cid = draw(st.one_of(st.none(), st.sampled_from(branch_ids)))

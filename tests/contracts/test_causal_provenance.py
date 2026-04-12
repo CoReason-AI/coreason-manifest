@@ -12,14 +12,14 @@ from hypothesis import given
 from hypothesis import strategies as st
 
 from coreason_manifest.spec.ontology import (
-    CryptographicProvenanceMixin,
-    HypothesisSuperposition,
-    TargetTopologyEnum,
+    CryptographicProvenancePolicy,
+    HypothesisSuperpositionState,
+    TargetTopologyProfile,
     TopologicalProjectionIntent,
 )
 
 
-class MockDeterministicExecutionNode(CryptographicProvenanceMixin):
+class MockDeterministicExecutionNode(CryptographicProvenancePolicy):
     """
     AGENT INSTRUCTION: A local mock execution node to test cryptographic lineage traversals.
 
@@ -38,7 +38,7 @@ MockDeterministicExecutionNode.model_rebuild()
 
 @given(
     st.builds(
-        HypothesisSuperposition,
+        HypothesisSuperpositionState,
         superposition_cid=st.uuids().map(str),
         competing_manifolds=st.just({}),
         wave_collapse_function=st.just("deterministic_compiler"),
@@ -46,14 +46,14 @@ MockDeterministicExecutionNode.model_rebuild()
     ),
     st.uuids().map(str),
     st.floats(min_value=0.85, max_value=1.0),
-    st.sampled_from(TargetTopologyEnum),
+    st.sampled_from(TargetTopologyProfile),
     st.text(min_size=1, max_size=50),
 )
 def test_cryptographic_lineage_and_serialization(
-    superposition: HypothesisSuperposition,
+    superposition: HypothesisSuperpositionState,
     projection_cid: str,
     confidence: float,
-    topology: TargetTopologyEnum,
+    topology: TargetTopologyProfile,
     mock_payload: str,
 ) -> None:
     intent = TopologicalProjectionIntent(
@@ -71,7 +71,7 @@ def test_cryptographic_lineage_and_serialization(
     intent_json = intent.model_dump_canonical()
     node_json = node.model_dump_canonical()
 
-    superposition_restored = HypothesisSuperposition.model_validate_json(superposition_json)
+    superposition_restored = HypothesisSuperpositionState.model_validate_json(superposition_json)
     intent_restored = TopologicalProjectionIntent.model_validate_json(intent_json)
     node_restored = MockDeterministicExecutionNode.model_validate_json(node_json)
 

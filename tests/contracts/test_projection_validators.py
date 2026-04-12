@@ -13,17 +13,17 @@ from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import ValidationError
 
-from coreason_manifest.spec.ontology import TargetTopologyEnum, TopologicalProjectionIntent
+from coreason_manifest.spec.ontology import TargetTopologyProfile, TopologicalProjectionIntent
 
 
 @given(
     st.floats(min_value=0.0, max_value=0.84999),
     st.uuids().map(str),
     st.uuids().map(str),
-    st.sampled_from(TargetTopologyEnum),
+    st.sampled_from(TargetTopologyProfile),
 )
 def test_isomorphism_guillotine(
-    confidence: float, projection_cid: str, source_cid: str, topology: TargetTopologyEnum
+    confidence: float, projection_cid: str, source_cid: str, topology: TargetTopologyProfile
 ) -> None:
     with pytest.raises(ValidationError) as exc_info:
         TopologicalProjectionIntent(
@@ -40,10 +40,10 @@ def test_isomorphism_guillotine(
     st.floats(min_value=0.85, max_value=1.0),
     st.uuids().map(str),
     st.uuids().map(str),
-    st.sampled_from(TargetTopologyEnum),
+    st.sampled_from(TargetTopologyProfile),
 )
 def test_valid_projection_space(
-    confidence: float, projection_cid: str, source_cid: str, topology: TargetTopologyEnum
+    confidence: float, projection_cid: str, source_cid: str, topology: TargetTopologyProfile
 ) -> None:
     intent = TopologicalProjectionIntent(
         projection_cid=projection_cid,
@@ -61,11 +61,11 @@ def test_valid_projection_space(
     st.floats(min_value=0.85, max_value=1.0),
     st.uuids().map(str),
     st.uuids().map(str),
-    st.sampled_from(TargetTopologyEnum),
+    st.sampled_from(TargetTopologyProfile),
     st.sampled_from(["executed", "collapsed"]),
 )
 def test_immutability_of_status(
-    confidence: float, projection_cid: str, source_cid: str, topology: TargetTopologyEnum, invalid_status: str
+    confidence: float, projection_cid: str, source_cid: str, topology: TargetTopologyProfile, invalid_status: str
 ) -> None:
     intent = TopologicalProjectionIntent(
         projection_cid=projection_cid,

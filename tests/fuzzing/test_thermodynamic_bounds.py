@@ -13,7 +13,7 @@ from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import ValidationError
 
-from coreason_manifest.spec.ontology import ComputationalThermodynamics, ThermodynamicState
+from coreason_manifest.spec.ontology import ComputationalThermodynamicsProfile, ThermodynamicState
 
 
 @given(
@@ -26,7 +26,7 @@ def test_diffusion_overload(max_diff: int, current_diff: int, free_energy: float
     if current_diff <= max_diff:
         current_diff = max_diff + 1
     with pytest.raises(ValidationError) as exc_info:
-        ComputationalThermodynamics(
+        ComputationalThermodynamicsProfile(
             thermodynamics_cid=thermo_cid,
             target_topology_cid="topology-1234",
             max_stochastic_diffusions=max_diff,
@@ -46,7 +46,7 @@ def test_diffusion_overload(max_diff: int, current_diff: int, free_energy: float
 def test_valid_operational_state(max_diff: int, current_diff: int, free_energy: float, thermo_cid: str) -> None:
     if current_diff > max_diff:
         current_diff = max_diff
-    thermo = ComputationalThermodynamics(
+    thermo = ComputationalThermodynamicsProfile(
         thermodynamics_cid=thermo_cid,
         target_topology_cid="topology-1234",
         max_stochastic_diffusions=max_diff,
@@ -69,7 +69,7 @@ def test_thermodynamic_stagnation(
 ) -> None:
     if current_diff > max_diff:
         current_diff = max_diff
-    thermo = ComputationalThermodynamics(
+    thermo = ComputationalThermodynamicsProfile(
         thermodynamics_cid=thermo_cid,
         target_topology_cid="topology-1234",
         max_stochastic_diffusions=max_diff,
@@ -94,7 +94,7 @@ def test_thermodynamic_active_with_valid_delta(
 ) -> None:
     if current_diff > max_diff:
         current_diff = max_diff
-    thermo = ComputationalThermodynamics(
+    thermo = ComputationalThermodynamicsProfile(
         thermodynamics_cid=thermo_cid,
         target_topology_cid="topology-1234",
         max_stochastic_diffusions=max_diff,

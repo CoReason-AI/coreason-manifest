@@ -11,7 +11,7 @@
 from hypothesis import given
 from hypothesis import strategies as st
 
-from coreason_manifest.spec.ontology import ComputationalThermodynamics, ThermodynamicState
+from coreason_manifest.spec.ontology import ComputationalThermodynamicsProfile, ThermodynamicState
 
 
 @given(
@@ -23,7 +23,7 @@ from coreason_manifest.spec.ontology import ComputationalThermodynamics, Thermod
 def test_depletion_transition_mapping(max_diff: int, current_diff: int, free_energy: float, thermo_cid: str) -> None:
     if current_diff > max_diff:
         current_diff = max_diff
-    thermo = ComputationalThermodynamics(
+    thermo = ComputationalThermodynamicsProfile(
         thermodynamics_cid=thermo_cid,
         target_topology_cid="topology-1234",
         max_stochastic_diffusions=max_diff,
@@ -52,7 +52,7 @@ def test_serialization_isomorphism(
 ) -> None:
     if current_diff > max_diff:
         current_diff = max_diff
-    thermo_active = ComputationalThermodynamics(
+    thermo_active = ComputationalThermodynamicsProfile(
         thermodynamics_cid=thermo_cid_active,
         target_topology_cid="topology-1234",
         max_stochastic_diffusions=max_diff,
@@ -62,7 +62,7 @@ def test_serialization_isomorphism(
     )
     assert thermo_active.system_state == ThermodynamicState.ACTIVE_DIFFUSION
     serialized_active = thermo_active.model_dump_canonical()
-    deserialized_active = ComputationalThermodynamics.model_validate_json(serialized_active)
+    deserialized_active = ComputationalThermodynamicsProfile.model_validate_json(serialized_active)
     assert deserialized_active.thermodynamics_cid == thermo_active.thermodynamics_cid
     assert deserialized_active.target_topology_cid == thermo_active.target_topology_cid
     assert deserialized_active.max_stochastic_diffusions == thermo_active.max_stochastic_diffusions
@@ -70,7 +70,7 @@ def test_serialization_isomorphism(
     assert deserialized_active.remaining_free_energy == thermo_active.remaining_free_energy
     assert deserialized_active.system_state == thermo_active.system_state
 
-    thermo_exhausted = ComputationalThermodynamics(
+    thermo_exhausted = ComputationalThermodynamicsProfile(
         thermodynamics_cid=thermo_cid_exhausted,
         target_topology_cid="topology-1234",
         max_stochastic_diffusions=max_diff,
@@ -80,7 +80,7 @@ def test_serialization_isomorphism(
     )
     assert thermo_exhausted.system_state == ThermodynamicState.ENTROPIC_EXHAUSTION_ORACLE_INTERVENTION
     serialized_exhausted = thermo_exhausted.model_dump_canonical()
-    deserialized_exhausted = ComputationalThermodynamics.model_validate_json(serialized_exhausted)
+    deserialized_exhausted = ComputationalThermodynamicsProfile.model_validate_json(serialized_exhausted)
     assert deserialized_exhausted.thermodynamics_cid == thermo_exhausted.thermodynamics_cid
     assert deserialized_exhausted.target_topology_cid == thermo_exhausted.target_topology_cid
     assert deserialized_exhausted.max_stochastic_diffusions == thermo_exhausted.max_stochastic_diffusions

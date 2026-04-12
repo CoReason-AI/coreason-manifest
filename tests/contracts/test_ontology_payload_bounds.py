@@ -261,10 +261,10 @@ def test_ontology_discovery_intent_payload_bounds() -> None:
 
 
 def test_semantic_mapping_heuristic_proposal_payload_bounds() -> None:
-    from coreason_manifest.spec.ontology import SemanticMappingHeuristicProposal
+    from coreason_manifest.spec.ontology import SemanticMappingHeuristicIntent
 
     # Valid payload
-    proposal = SemanticMappingHeuristicProposal(
+    proposal = SemanticMappingHeuristicIntent(
         proposal_cid="prop-123",
         source_ontology_namespace="ICD-10",
         target_ontology_namespace="SNOMED-CT",
@@ -281,7 +281,7 @@ def test_semantic_mapping_heuristic_proposal_payload_bounds() -> None:
         nested_payload = {"key": nested_payload}
 
     with pytest.raises(ValidationError) as exc_info:
-        SemanticMappingHeuristicProposal(
+        SemanticMappingHeuristicIntent(
             proposal_cid="prop-123",
             source_ontology_namespace="ICD-10",
             target_ontology_namespace="SNOMED-CT",

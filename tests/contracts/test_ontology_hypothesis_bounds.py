@@ -14,11 +14,11 @@ from hypothesis import strategies as st
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
-    ActiveInferenceEpoch,
-    ComputationalThermodynamics,
+    ActiveInferenceEpochState,
+    ComputationalThermodynamicsProfile,
     EpistemicRejectionReceipt,
-    HypothesisSuperposition,
-    TargetTopologyEnum,
+    HypothesisSuperpositionState,
+    TargetTopologyProfile,
     TopologicalProjectionIntent,
 )
 
@@ -29,7 +29,7 @@ def test_topological_projection_intent_out_of_bounds(v: float) -> None:
         TopologicalProjectionIntent(
             projection_cid="test",
             source_superposition_cid="test-1234",
-            target_topology=TargetTopologyEnum.ALGEBRAIC_RING,
+            target_topology=TargetTopologyProfile.ALGEBRAIC_RING,
             isomorphism_confidence=v,
             lossy_translation_divergence=[],
         )
@@ -41,7 +41,7 @@ def test_topological_projection_intent_guillotine(v: float) -> None:
         TopologicalProjectionIntent(
             projection_cid="test",
             source_superposition_cid="test-1234",
-            target_topology=TargetTopologyEnum.ALGEBRAIC_RING,
+            target_topology=TargetTopologyProfile.ALGEBRAIC_RING,
             isomorphism_confidence=v,
             lossy_translation_divergence=[],
         )
@@ -64,12 +64,12 @@ def test_kl_divergence_paradox(v: float) -> None:
 @given(st.floats(max_value=-0.001) | st.just(float("nan")) | st.just(float("inf")))
 def test_active_inference_epoch_paradox(v: float) -> None:
     with pytest.raises(ValidationError, match=r"Mathematical paradox:|Input should be a valid number"):
-        ActiveInferenceEpoch(epoch_cid="test", current_free_energy=v, rejection_history=[])
+        ActiveInferenceEpochState(epoch_cid="test", current_free_energy=v, rejection_history=[])
 
 
 def test_hypothesis_superposition_probability_violation() -> None:
     with pytest.raises(ValidationError, match="Conservation of Probability violated"):
-        HypothesisSuperposition(
+        HypothesisSuperpositionState(
             superposition_cid="test-1234",
             competing_manifolds={"a": 0.6, "b": 0.5},
             wave_collapse_function="highest_confidence",
@@ -80,7 +80,7 @@ def test_hypothesis_superposition_probability_violation() -> None:
 @given(st.just(float("nan")) | st.just(float("inf")))
 def test_computational_thermodynamics_paradox(v: float) -> None:
     with pytest.raises(ValidationError, match="Mathematical Paradox"):
-        ComputationalThermodynamics(
+        ComputationalThermodynamicsProfile(
             thermodynamics_cid="test-1234",
             target_topology_cid="test",
             max_stochastic_diffusions=10,

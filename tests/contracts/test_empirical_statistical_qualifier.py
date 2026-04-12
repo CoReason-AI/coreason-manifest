@@ -13,7 +13,7 @@ from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import ValidationError
 
-from coreason_manifest.spec.ontology import EmpiricalStatisticalQualifier
+from coreason_manifest.spec.ontology import EmpiricalStatisticalProfile
 
 
 # Test valid cases where lower_bound is strictly less than upper_bound
@@ -23,7 +23,7 @@ from coreason_manifest.spec.ontology import EmpiricalStatisticalQualifier
 )
 def test_valid_interval_geometry(lower: float, diff: float) -> None:
     upper = lower + diff
-    q = EmpiricalStatisticalQualifier(
+    q = EmpiricalStatisticalProfile(
         qualifier_type="confidence_interval",
         algebraic_operator="le",
         value=lower + (diff / 2),
@@ -42,7 +42,7 @@ def test_valid_interval_geometry(lower: float, diff: float) -> None:
 def test_invalid_interval_geometry_hypothesis(upper: float, diff: float) -> None:
     lower = upper + diff  # This ensures lower >= upper
     with pytest.raises(ValidationError) as exc_info:
-        EmpiricalStatisticalQualifier(
+        EmpiricalStatisticalProfile(
             qualifier_type="confidence_interval",
             algebraic_operator="eq",
             value=upper,

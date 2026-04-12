@@ -14,17 +14,17 @@ from hypothesis import strategies as st
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
-    HypothesisSuperposition,
-    IdeationPhase,
-    StochasticStateNode,
-    StochasticTopology,
+    HypothesisSuperpositionState,
+    IdeationPhaseProfile,
+    StochasticNodeState,
+    StochasticTopologyManifest,
 )
 
 
 @given(
     st.lists(
         st.builds(
-            StochasticStateNode,
+            StochasticNodeState,
             node_cid=st.uuids().map(str),
             parent_node_cid=st.none(),
             epistemic_entropy=st.floats(min_value=0.0, max_value=1.0),
@@ -34,15 +34,17 @@ from coreason_manifest.spec.ontology import (
     ),
     st.uuids().map(str),
 )
-def test_acyclic_dag_forward_reference(nodes: list[StochasticStateNode], topology_cid: str) -> None:
+def test_acyclic_dag_forward_reference(nodes: list[StochasticNodeState], topology_cid: str) -> None:
     nodes[0] = nodes[0].model_copy(update={"parent_node_cid": nodes[1].node_cid})
     with pytest.raises(ValidationError) as excinfo:
-        StochasticTopology(topology_cid=topology_cid, phase=IdeationPhase.STOCHASTIC_DIFFUSION, stochastic_graph=nodes)
+        StochasticTopologyManifest(
+            topology_cid=topology_cid, phase=IdeationPhaseProfile.STOCHASTIC_DIFFUSION, stochastic_graph=nodes
+        )
     assert "must appear before child node" in str(excinfo.value)
 
 
-@given(st.builds(StochasticTopology, topology_cid=st.uuids().map(str), stochastic_graph=st.just([])))
-def test_immutability_of_epistemic_status(topology: StochasticTopology) -> None:
+@given(st.builds(StochasticTopologyManifest, topology_cid=st.uuids().map(str), stochastic_graph=st.just([])))
+def test_immutability_of_epistemic_status(topology: StochasticTopologyManifest) -> None:
     assert topology.epistemic_status == "stochastically_unbounded"
     with pytest.raises(ValidationError):
         topology.epistemic_status = "bounded"  # type: ignore[misc,assignment]
@@ -50,11 +52,11 @@ def test_immutability_of_epistemic_status(topology: StochasticTopology) -> None:
 
 @given(
     st.builds(
-        StochasticTopology,
+        StochasticTopologyManifest,
         topology_cid=st.uuids().map(str),
         stochastic_graph=st.lists(
             st.builds(
-                StochasticStateNode,
+                StochasticNodeState,
                 node_cid=st.uuids().map(str),
                 parent_node_cid=st.none(),
                 epistemic_entropy=st.floats(min_value=0.0, max_value=1.0),
@@ -64,7 +66,7 @@ def test_immutability_of_epistemic_status(topology: StochasticTopology) -> None:
         superposition=st.one_of(
             st.none(),
             st.builds(
-                HypothesisSuperposition,
+                HypothesisSuperpositionState,
                 superposition_cid=st.uuids().map(str),
                 competing_manifolds=st.just({}),
                 wave_collapse_function=st.just("deterministic_compiler"),
@@ -72,9 +74,9 @@ def test_immutability_of_epistemic_status(topology: StochasticTopology) -> None:
         ),
     )
 )
-def test_serialization_isomorphism(topology: StochasticTopology) -> None:
+def test_serialization_isomorphism(topology: StochasticTopologyManifest) -> None:
     json_data = topology.model_dump_json()
-    reconstructed = StochasticTopology.model_validate_json(json_data)
+    reconstructed = StochasticTopologyManifest.model_validate_json(json_data)
     assert topology == reconstructed
     assert topology.topology_cid == reconstructed.topology_cid
     assert len(topology.stochastic_graph) == len(reconstructed.stochastic_graph)

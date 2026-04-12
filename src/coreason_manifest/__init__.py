@@ -142,7 +142,7 @@ __all__ = [
     "EpistemicPromotionEvent",
     "EpistemicProvenanceReceipt",
     "EpistemicQuarantineSnapshot",
-    "EpistemicRewardModelPolicy",
+    "EpistemicRewardGradientPolicy",
     "EpistemicSOPManifest",
     "EpistemicScanningPolicy",
     "EpistemicSeedInjectionPolicy",

@@ -37,7 +37,7 @@ def get_all_subclasses(cls: type) -> set[type]:
 
 
 EXCLUDED_BASE_CLASSES = {
-    "CryptographicProvenanceMixin",
+    "CryptographicProvenancePolicy",
     "BoundedJSONRPCIntent",
     "AnyToolchainState",  # (if implemented as an ABC/union wrapper rather than a concrete node)
 }
@@ -123,7 +123,7 @@ ROOT_NODES = [
     "KinematicDeltaManifest",
     "TraceExportManifest",
     "FederatedSecurityMacroManifest",
-    "CognitiveSwarmDeploymentMacro",
+    "CognitiveSwarmDeploymentManifest",
     "AdversarialMarketTopologyManifest",
     "ConsensusFederationTopologyManifest",
     "CapabilityForgeTopologyManifest",
@@ -143,7 +143,7 @@ ROOT_NODES = [
     "DynamicManifoldProjectionManifest",
     "MCPClientIntent",
     "OntologyDiscoveryIntent",
-    "SemanticMappingHeuristicProposal",
+    "SemanticMappingHeuristicIntent",
     "TerminalCognitiveEvent",
     "CognitiveActionSpaceManifest",
     "EpistemicSOPManifest",
@@ -158,8 +158,8 @@ ROOT_NODES = [
     "StateDifferentialManifest",
     "ComputeEngineProfile",
     "DelegatedCapabilityManifest",
-    "ComputationalThermodynamics",
-    "ActiveInferenceEpoch",
+    "ComputationalThermodynamicsProfile",
+    "ActiveInferenceEpochState",
     "AuctionState",
     "AdversarialSimulationProfile",
     "ChaosExperimentTask",
