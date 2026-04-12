@@ -1111,13 +1111,21 @@ class KinematicDerivativeProfile(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Kinematic Derivatives, Hermite Spline Extrapolation, Continuous Collision Detection, Newtonian Mechanics
     """
 
-    linear_velocity: tuple[float, float, float] = Field(description="The 3D Euclidean velocity vector.")
+    linear_velocity: tuple[float, float, float] = Field(
+        json_schema_extra={"coreason_topological_exemption": True}, description="The 3D Euclidean velocity vector."
+    )
     # Note: linear_velocity is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
-    angular_velocity: tuple[float, float, float] = Field(description="The 3D rotational velocity vector.")
+    angular_velocity: tuple[float, float, float] = Field(
+        json_schema_extra={"coreason_topological_exemption": True}, description="The 3D rotational velocity vector."
+    )
     # Note: angular_velocity is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
-    linear_acceleration: tuple[float, float, float] = Field(description="The 3D Euclidean acceleration vector.")
+    linear_acceleration: tuple[float, float, float] = Field(
+        json_schema_extra={"coreason_topological_exemption": True}, description="The 3D Euclidean acceleration vector."
+    )
     # Note: linear_acceleration is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
-    angular_acceleration: tuple[float, float, float] = Field(description="The 3D rotational acceleration vector.")
+    angular_acceleration: tuple[float, float, float] = Field(
+        json_schema_extra={"coreason_topological_exemption": True}, description="The 3D rotational acceleration vector."
+    )
     # Note: angular_acceleration is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
 
 
@@ -1154,6 +1162,7 @@ class SE3TransformProfile(CoreasonBaseState):
         default=None, description="Tensors governing continuous momentum and velocity."
     )
     dual_quaternion_motor: tuple[float, float, float, float, float, float, float, float] | None = Field(
+        json_schema_extra={"coreason_topological_exemption": True},
         default=None,
         description="The 8-dimensional Clifford Algebra motor for mathematically flawless ScLERP interpolation.",
     )
@@ -1214,7 +1223,8 @@ class GaussianSplattingProfile(CoreasonBaseState):
         ge=0, le=3, description="Capped at 3 to physically prevent VRAM explosion during WebGL rasterization."
     )
     covariance_scale: tuple[float, float, float] = Field(
-        description="The 3D anisotropic scaling vector of the Gaussian ellipsoid."
+        json_schema_extra={"coreason_topological_exemption": True},
+        description="The 3D anisotropic scaling vector of the Gaussian ellipsoid.",
     )
     # Note: covariance_scale is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     opacity_alpha: float = Field(ge=0.0, le=1.0, description="The alpha transmittance scalar of the splat.")
@@ -2215,6 +2225,7 @@ class ContextualizedSourceState(CoreasonBaseState):
         description="The strictly bounded, un-redacted 1D string projection of the semantic artifact undergoing evaluation."
     )
     contextual_envelope: list[Annotated[str, StringConstraints(max_length=100000)]] = Field(
+        json_schema_extra={"coreason_topological_exemption": True},
         max_length=10000,
         description="The strictly bounded array of adjacent token clusters forming the semantic proximity matrix.",
     )
@@ -2247,6 +2258,7 @@ class EpistemicUpsamplingTask(CoreasonBaseState):
         description="The minimum acceptable certainty probability required to project the upsampled node.",
     )
     justification_vectors: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
+        json_schema_extra={"coreason_topological_exemption": True},
         min_length=1,
         max_length=1000,
         description="The strictly ordered matrix of reasoning paths mathematically justifying the topological expansion.",
@@ -2895,6 +2907,7 @@ class StateDifferentialManifest(CoreasonBaseState):
         description="Causal history mapping of all known Lineage Watermarks to their latest logical mutation count at the time of authoring."
     )
     patches: list[StateMutationIntent] = Field(
+        json_schema_extra={"coreason_topological_exemption": True},
         default_factory=list,
         description="The exact, ordered sequence of deterministic state vector mutations.",
         # Note: patches is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
@@ -4588,6 +4601,7 @@ class DocumentLayoutManifest(CoreasonBaseState):
         max_length=1000, description="Dictionary mapping block_cids to their strict spatial definitions."
     )
     chronological_flow_edges: list[tuple[str, str]] = Field(
+        json_schema_extra={"coreason_topological_exemption": True},
         default_factory=list,
         # Note: chronological_flow_edges is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
         description="Directed edges defining the topological sort (chronological flow) of the document.",
@@ -5456,6 +5470,7 @@ class ExecutionNodeReceipt(CoreasonBaseState):
         return _validate_payload_bounds(v)
 
     parent_hashes: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
+        json_schema_extra={"coreason_topological_exemption": True},
         # Note: parent_hashes is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
         default_factory=list,
         description="The strict array of cryptographic hashes of parent execution nodes.",
@@ -6571,6 +6586,12 @@ class TopologicalProjectionIntent(CryptographicProvenancePolicy):
     isomorphism_confidence: float
     lossy_translation_divergence: list[Annotated[str, StringConstraints(max_length=100000)]]
     epistemic_status: Literal["pending_deterministic_collapse"] = Field(default="pending_deterministic_collapse")
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        if self.lossy_translation_divergence:
+            object.__setattr__(self, "lossy_translation_divergence", sorted(self.lossy_translation_divergence))
+        return self
 
     @field_validator("isomorphism_confidence", mode="after")
     @classmethod
@@ -8147,20 +8168,26 @@ class MacroGridProfile(CoreasonBaseState):
     """
 
     layout_matrix: list[list[Annotated[str, StringConstraints(max_length=255)]]] = Field(
+        json_schema_extra={"coreason_topological_exemption": True},
         # Note: layout_matrix is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
         max_length=1000,
         description="A matrix defining the layout structure, using panel IDs.",
     )
     column_fractional_weights: list[float] = Field(
-        default_factory=list, description="Euclidean fractional weights for column partitioning."
+        json_schema_extra={"coreason_topological_exemption": True},
+        default_factory=list,
+        description="Euclidean fractional weights for column partitioning.",
     )
     # Note: column_fractional_weights is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     row_fractional_weights: list[float] = Field(
-        default_factory=list, description="Euclidean fractional weights for row partitioning."
+        json_schema_extra={"coreason_topological_exemption": True},
+        default_factory=list,
+        description="Euclidean fractional weights for row partitioning.",
     )
     # Note: row_fractional_weights is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     panels: list[AnyPanelProfile] = Field(
-        description="The ordered array of topological UI panels physically rendered in the grid."
+        json_schema_extra={"coreason_topological_exemption": True},
+        description="The ordered array of topological UI panels physically rendered in the grid.",
         # Note: panels is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     )
 
@@ -8997,10 +9024,14 @@ class EpistemicSOPManifest(CoreasonBaseState):
     structural_grammar_hashes: dict[Annotated[str, StringConstraints(max_length=255)], str] = Field(
         description="Dictionary mapping step_cids to SHA-256 hashes of strict Context-Free Grammars or JSON Schemas."
     )
-    chronological_flow_edges: list[tuple[str, str]] = Field(description="The exact topological flow between step_cids.")
+    chronological_flow_edges: list[tuple[str, str]] = Field(
+        json_schema_extra={"coreason_topological_exemption": True},
+        description="The exact topological flow between step_cids.",
+    )
     # Note: chronological_flow_edges is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     prm_evaluations: list["ProcessRewardContract"] = Field(
-        description="The strict array of Process Reward Contracts evaluating the logic."
+        json_schema_extra={"coreason_topological_exemption": True},
+        description="The strict array of Process Reward Contracts evaluating the logic.",
         # Note: prm_evaluations is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     )
 
@@ -9523,6 +9554,7 @@ class SpatialKinematicActionIntent(CoreasonBaseState):
         description="The exact temporal duration of the movement, simulating human kinematics.",
     )
     bezier_control_points: list[SE3TransformProfile] = Field(
+        json_schema_extra={"coreason_topological_exemption": True},
         default_factory=list,
         description="Waypoints for constructing non-linear, bot-evasive movement curves.",
         # Note: bezier_control_points is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
@@ -9617,6 +9649,7 @@ class StdioTransportProfile(CoreasonBaseState):
         ..., description="The command executable to run (e.g., 'node', 'python')."
     )
     args: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
+        json_schema_extra={"coreason_topological_exemption": True},
         # Note: args is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
         max_length=1000,
         default_factory=list,
@@ -10333,6 +10366,10 @@ class TraceExportManifest(CoreasonBaseState):
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Any:
         object.__setattr__(self, "spans", sorted(self.spans, key=operator.attrgetter("span_cid")))
+        if self.execution_nodes:
+            object.__setattr__(
+                self, "execution_nodes", sorted(self.execution_nodes, key=operator.attrgetter("node_hash"))
+            )
         return self
 
 
@@ -11075,6 +11112,14 @@ class CognitiveAgentNodeProfile(CoreasonBaseState):
         object.__setattr__(
             self, "intervention_policies", sorted(self.intervention_policies, key=operator.attrgetter("trigger"))
         )
+        if self.emitted_intents:
+            object.__setattr__(
+                self,
+                "emitted_intents",
+                sorted(
+                    self.emitted_intents, key=lambda x: (x.__class__.__name__, x.model_dump_json(exclude_unset=True))
+                ),
+            )
         return self
 
     @model_validator(mode="after")
@@ -12953,6 +12998,7 @@ class EpistemicTopologicalProofManifest(CoreasonBaseState):
         description="A Content Identifier (CID) for this specific topological proof.",
     )
     axiomatic_chain: list[EpistemicAxiomState] = Field(
+        json_schema_extra={"coreason_topological_exemption": True},
         min_length=1,
         description="The strictly ordered sequence of axioms forming the reasoning path.",
         # Note: axiomatic_chain is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
@@ -14011,6 +14057,7 @@ class ContinuousObservationState(CoreasonBaseState):
         description="A Content Identifier (CID) for the continuous observation stream."
     )
     token_buffer: list[Annotated[str, StringConstraints(max_length=10000)]] = Field(
+        json_schema_extra={"coreason_topological_exemption": True},
         # Note: token_buffer is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
         max_length=1000000,
         description="The array of ingested tokens representing the continuous stream. AGENT INSTRUCTION: Topological Exemption applied. Do NOT sort this array, as its chronological sequence is its mathematical state.",

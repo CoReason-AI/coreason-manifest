@@ -122,7 +122,7 @@ See [`SECURITY.md`](./SECURITY.md) for our full security policy, response SLAs, 
 
 ## Contributing
 
-This project follows [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) to power automated release notes and changelogs via [Release Please](https://github.com/googleapis/release-please). All commit messages should follow the format:
+This project follows [Conventional Commits](https://www.conventionalcommits.org/) to power automated release notes and changelogs via [Release Please](https://github.com/googleapis/release-please). All commit messages should follow the format:
 
 ```
 <type>(<scope>): <description>
