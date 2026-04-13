@@ -10378,12 +10378,6 @@ class HypothesisGenerationEvent(CoreasonBaseState):
             "falsification_conditions",
             sorted(self.falsification_conditions, key=operator.attrgetter("condition_cid")),
         )
-        if getattr(self, "falsification_conditions", None) is not None:
-            object.__setattr__(
-                self,
-                "falsification_conditions",
-                sorted(self.falsification_conditions, key=operator.attrgetter("condition_cid")),
-            )
         return self
 
 
@@ -10838,8 +10832,6 @@ class TheoryOfMindSnapshot(CoreasonBaseState):
     def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "assumed_shared_beliefs", sorted(self.assumed_shared_beliefs))
         object.__setattr__(self, "identified_knowledge_gaps", sorted(self.identified_knowledge_gaps))
-        if getattr(self, "identified_knowledge_gaps", None) is not None:
-            object.__setattr__(self, "identified_knowledge_gaps", sorted(self.identified_knowledge_gaps))
         return self
 
     empathy_confidence_score: float = Field(
@@ -11529,12 +11521,6 @@ class AgentAttestationReceipt(CoreasonBaseState):
             "credential_presentations",
             sorted(self.credential_presentations, key=operator.attrgetter("issuer_did")),
         )
-        if getattr(self, "credential_presentations", None) is not None:
-            object.__setattr__(
-                self,
-                "credential_presentations",
-                sorted(self.credential_presentations, key=operator.attrgetter("issuer_did")),
-            )
         return self
 
 
@@ -13063,18 +13049,6 @@ class EpistemicQuarantineSnapshot(CoreasonBaseState):
             "capability_attestations",
             sorted(self.capability_attestations, key=operator.attrgetter("attestation_cid")),
         )
-        if getattr(self, "theory_of_mind_matrices", None) is not None:
-            object.__setattr__(
-                self,
-                "theory_of_mind_matrices",
-                sorted(self.theory_of_mind_matrices, key=operator.attrgetter("target_agent_cid")),
-            )
-        if getattr(self, "capability_attestations", None) is not None:
-            object.__setattr__(
-                self,
-                "capability_attestations",
-                sorted(self.capability_attestations, key=operator.attrgetter("attestation_cid")),
-            )
         return self
 
 
