@@ -18,9 +18,20 @@ def main() -> None:
         print(f"Error: Schema file {schema_file} not found. Please generate it first.")
         sys.exit(1)
 
+    # Configure npm/npx environment to suppress all warnings and prompts
+    node_env = os.environ.copy()
+    node_env["npm_config_loglevel"] = "error"
+    node_env["npm_config_fund"] = "false"
+    node_env["npm_config_audit"] = "false"
+    node_env["npm_config_update_notifier"] = "false"
+    node_env["npm_config_yes"] = "true"
+    # Suppress Node.js punycode deprecation warnings
+    node_options = node_env.get("NODE_OPTIONS", "")
+    node_env["NODE_OPTIONS"] = f"{node_options} --no-deprecation".strip()
+
     print("Generating TypeScript bindings...")
     ts_cmd = ["npx", "quicktype", "-s", "schema", schema_file, "-o", ts_out, "--just-types"]
-    subprocess.run(ts_cmd, check=True)  # noqa: S603 # nosec B603
+    subprocess.run(ts_cmd, check=True, env=node_env)  # noqa: S603 # nosec B603
 
     print("Generating Rust bindings...")
     rust_cmd = [
@@ -37,7 +48,7 @@ def main() -> None:
         "--derive-clone",
         "--derive-partial-eq",
     ]
-    subprocess.run(rust_cmd, check=True)  # noqa: S603 # nosec B603
+    subprocess.run(rust_cmd, check=True, env=node_env)  # noqa: S603 # nosec B603
 
     print("Post-processing Rust bindings...")
     with open(rust_out, encoding="utf-8") as f:
@@ -49,7 +60,7 @@ def main() -> None:
         f.write(rust_code)
 
     print("Formatting TypeScript...")
-    subprocess.run(["npx", "prettier", "--write", ts_out], check=True)  # noqa: S603, S607 # nosec B603 B607
+    subprocess.run(["npx", "prettier", "--write", ts_out], check=True, env=node_env)  # noqa: S603, S607 # nosec B603 B607
 
     print("Formatting Rust...")
     subprocess.run(["cargo", "fmt", "--manifest-path", "bindings/rust/Cargo.toml"], check=True)  # noqa: S607 # nosec B603 B607
