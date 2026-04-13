@@ -10,10 +10,13 @@
 
 """Analyze coverage gaps in ontology.py by examining uncovered lines."""
 
+import sys
 import defusedxml.ElementTree as DefusedElementTree
 
 tree = DefusedElementTree.parse("coverage.xml")
 root = tree.getroot()
+if root is None:
+    sys.exit("No XML root found")
 
 for cls in root.iter("class"):
     filename = cls.get("filename", "")
