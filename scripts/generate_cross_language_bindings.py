@@ -29,13 +29,15 @@ def main() -> None:
     node_options = node_env.get("NODE_OPTIONS", "")
     node_env["NODE_OPTIONS"] = f"{node_options} --no-deprecation".strip()
 
+    npx_cmd = "npx.cmd" if os.name == "nt" else "npx"
+
     print("Generating TypeScript bindings...")
-    ts_cmd = ["npx", "quicktype", "-s", "schema", schema_file, "-o", ts_out, "--just-types"]
+    ts_cmd = [npx_cmd, "quicktype", "-s", "schema", schema_file, "-o", ts_out, "--just-types"]
     subprocess.run(ts_cmd, check=True, env=node_env)  # noqa: S603 # nosec B603
 
     print("Generating Rust bindings...")
     rust_cmd = [
-        "npx",
+        npx_cmd,
         "quicktype",
         "-s",
         "schema",
@@ -60,7 +62,7 @@ def main() -> None:
         f.write(rust_code)
 
     print("Formatting TypeScript...")
-    subprocess.run(["npx", "prettier", "--write", ts_out], check=True, env=node_env)  # noqa: S603, S607 # nosec B603 B607
+    subprocess.run([npx_cmd, "prettier", "--write", ts_out], check=True, env=node_env)  # noqa: S603, S607 # nosec B603 B607
 
     print("Formatting Rust...")
     subprocess.run(["cargo", "fmt", "--manifest-path", "bindings/rust/Cargo.toml"], check=True)  # noqa: S607 # nosec B603 B607
