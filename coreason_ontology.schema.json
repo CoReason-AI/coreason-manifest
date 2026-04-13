@@ -8144,10 +8144,12 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: This premise acts as a logic hypothesis that triggers constructive mathematical proof or software auto-formalization via Lean 4.\n\nCAUSAL AFFORDANCE: Unlocks formal theorem proving physics for the orchestrator by instantiating a Lean 4 validation track.\n\nEPISTEMIC BOUNDS: Bounded to strict string constraints for the theorem and tactics script.\n\nMCP ROUTING TRIGGERS: Calculus of Inductive Constructions, Dependent Type Theory, Theorem Proving, Auto-formalization",
       "properties": {
         "target_theorem": {
+          "maxLength": 65536,
           "title": "Target Theorem",
           "type": "string"
         },
         "tactics_script": {
+          "maxLength": 100000,
           "title": "Tactics Script",
           "type": "string"
         },
@@ -8350,6 +8352,7 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Unlocks Answer Set Programming (Clingo) for NP-hard combinatorial constraint satisfaction.\n\nCAUSAL AFFORDANCE: Physically authorizes the orchestrator to model and solve NP-hard combinatorial domains.\n\nEPISTEMIC BOUNDS: Constrained strictly to the answer set programming language inputs via tight syntactic length bounds.\n\nMCP ROUTING TRIGGERS: Answer Set Programming, Combinatorial Constraint Satisfaction, Clingo, Combinatorial Domain",
       "properties": {
         "asp_program": {
+          "maxLength": 65536,
           "title": "Asp Program",
           "type": "string"
         },
