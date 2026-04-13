@@ -10,6 +10,7 @@
 [![Node Version](https://img.shields.io/node/v/@coreason/coreason-manifest?style=flat-square&logo=nodedotjs)](https://www.npmjs.com/package/@coreason/coreason-manifest)
 
 [![CI](https://img.shields.io/github/actions/workflow/status/CoReason-AI/coreason-manifest/ci.yml?branch=main&style=flat-square&logo=github&label=CI)](https://github.com/CoReason-AI/coreason-manifest/actions/workflows/ci.yml)
+![Platforms](https://img.shields.io/badge/platforms-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey?style=flat-square)
 [![Coverage](https://img.shields.io/codecov/c/github/CoReason-AI/coreason-manifest?style=flat-square&logo=codecov&logoColor=white&label=Coverage)](https://app.codecov.io/gh/CoReason-AI/coreason-manifest)
 [![Security Audit](https://img.shields.io/github/actions/workflow/status/CoReason-AI/coreason-manifest/security.yml?branch=main&style=flat-square&logo=github&label=Security%20Audit)](https://github.com/CoReason-AI/coreason-manifest/actions/workflows/security.yml)
 [![CodeQL](https://img.shields.io/github/actions/workflow/status/CoReason-AI/coreason-manifest/codeql.yml?branch=main&style=flat-square&logo=github&label=CodeQL)](https://github.com/CoReason-AI/coreason-manifest/actions/workflows/codeql.yml)
