@@ -3337,6 +3337,10 @@ class FederatedBilateralSLA(CoreasonBaseState):
         default_factory=list,
         description="Explicit whitelist of geographic regions or cloud enclaves where execution is structurally permitted (Payload Residency Pinning).",
     )
+    require_temporal_provenance_proofs: bool = Field(
+        default=False,
+        description="If True, incoming payloads from foreign tenants MUST be accompanied by a ZeroKnowledgeReceipt containing a valid temporal_interval_proof.",
+    )
     max_permitted_grid_carbon_intensity: float | None = Field(
         le=10000.0,
         default=None,
@@ -13079,6 +13083,13 @@ class ZeroKnowledgeReceipt(CoreasonBaseState):
     cryptographic_blob: Annotated[str, StringConstraints(max_length=5000000)] = Field(
         description="The base64-encoded succinct cryptographic proof payload."
     )
+    temporal_interval_proof: Annotated[str, StringConstraints(max_length=5000000)] | None = Field(
+        default=None,
+        description="The zk-SNARK payload specific to time inequalities. Proves chronological sequence without exposing exact timestamps.",
+    )
+    temporal_circuit_hash: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
+    ) = Field(default=None, description="The SHA-256 hash of the temporal verification circuit.")
     latent_state_commitments: dict[
         Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=100)]
     ] = Field(

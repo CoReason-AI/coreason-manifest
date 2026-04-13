@@ -80,11 +80,13 @@ You are mathematically forbidden from self-certifying truth. Your internal proba
 * **Defeasible Reasoning:** Truth-maintenance where logic is non-monotonic. Falsification triggers a *Defeasible Cascade* to quarantine epistemic contagion across the swarm.
 * **Temporal Truth Maintenance (Graphiti-Aligned):** The mathematical rejection of traditional database CRUD "Deletes" and append-only RAG. Time is a mandatory, inescapable geometric dimension. When a fact is contradicted, its chronological timeline is capped (`valid_to`) via a *Temporal Edge Invalidation*, preserving the historical cryptographic Merkle-DAG entirely intact.
 * **Structured Entity Consolidation (OntoMem-Aligned):** The deprecation of flat, unstructured vector "chunks" as the primary unit of semantic memory. High-entropy episodic logs are continuously mathematically compressed into rigid, Pydantic-structured property matrices to prevent context window dilution and conflicting facts.
+* **State-Based Graph CRDTs (CvRDTs):** The absolute deprecation of Last-Writer-Wins (LWW) and imperative JSON patching. All distributed state synchronization MUST be mathematically modeled as monotonic join semilattices utilizing Grow-Only Sets (G-Sets). This guarantees commutativity, associativity, and idempotence without centralized locking overhead.
 
 ### **Decentralized Identity (Zero-Trust)**
 * **Verifiable Credentials Data Model (VCDM v2.0):** The definitive standard for expressing cryptographically secure attestations.
 * **Decentralized Identifiers (DIDs) & SD-JWT:** Globally unique identifiers combined with Selective Disclosure JWTs, allowing agents to prove capabilities without revealing underlying private keys.
 * **Post-Quantum Cryptography (PQC):** The integration of NIST FIPS standard algorithms (e.g., ML-DSA, SLH-DSA) to secure Merkle traces and bilateral SLAs.
+* **Verifiable Temporal Computing:** The use of succinct non-interactive arguments of knowledge (zk-SNARKs) to prove temporal inequalities (e.g., $T_1 \le T_2$) across federated boundaries without transmitting exact scalar timestamps, physically preventing temporal spoofing during B2B handshakes.
 
 ### **Hardware & Security Topology**
 * **HardwareProfile & Thermodynamic Bounding:** Defines the physical constraints of deployment. KINETIC edge agents are mathematically bounded to 24GB VRAM. ORACLE datacenter agents support >24GB execution.
@@ -137,8 +139,8 @@ When generating or modifying schemas, you MUST adhere to the following constrain
 ### **1. The Anti-CRUD Mandate (Causal Vocabulary over Tabular Logic)**
 You are forbidden from using highly polysemantic, tabular, or legacy human-centric terms that cause semantic drift. They flatten softmax distributions and cause probabilistic hallucinations. You must map state transitions using Judea Pearl’s Structural Causal Models. Do not use flat database nomenclature.
 
-* **FORBIDDEN:** `Data`, `Model`, `Type`, `Info`, `ID`, `Record`, `Create`, `Read`, `Update`, `Delete`, `Remove`, `Group`, `List`, `Memory`, `Link`, **`Merge`**, **`Overwrite`**, **`History`**.
-* **REQUIRED (Causal/Topological):** `Mutation`, `Transmutation`, `Differential`, `Ablation`, `Quarantine`, `Cascade`, `Topology`, `Manifold`, `Matrix`, `Edge`, `Premise`, `Receipt`, **`Consolidation`**, **`Invalidation`**.
+* **FORBIDDEN:** `Data`, `Model`, `Type`, `Info`, `ID`, `Record`, `Create`, `Read`, `Update`, `Delete`, `Remove`, `Group`, `List`, `Memory`, `Link`, **`Merge`**, **`Overwrite`**, **`History`**, **`Patch`**, **`LWW`**, **`Overwrite`**.
+* **REQUIRED (Causal/Topological):** `Mutation`, `Transmutation`, `Differential`, `Ablation`, `Quarantine`, `Cascade`, `Topology`, `Manifold`, `Matrix`, `Edge`, `Premise`, `Receipt`, **`Consolidation`**, **`Invalidation`**, **`Semilattice`**, **`G-Set`**, **`Merge`**, **`CRDT`**.
   * *Examples:* `DataUpdate` ➔ `StateDiff`, `DeleteRecord` ➔ `DefeasibleCascade` or **`TemporalEdgeInvalidation`**, `ErrorLog` ➔ `NormativeDriftEvent`, `MergeMemory` ➔ **`OntologicalConsolidation`**.
 * **The External Protocol Exemption:** If modeling an immutable standard (e.g., JSON-RPC 2.0, RFC 6902), preserve exact string literals (e.g., "data", "remove") with the comment `# Note: External Protocol Exemption.`
 
@@ -513,3 +515,11 @@ We physically separate probabilistic textual generation (System 1) from schema v
 * **Routing Constraints (Serialization):** LLMs are forbidden from generating raw Turtle, XML, or JSON-LD syntax. The Orchestrator routes the finalized JSON-native Knowledge Graph to this node to deterministically compile the graph into W3C standard formats for enterprise triplestores without stochastic variance.
 * **SHACL Execution Loop:** If the `RDFSerializationIntent` contains a `SHACLValidationSLA` (which is mathematically required for strict formats like XML or JSON-LD), the Archivist MUST run a validation pass via `pyshacl` prior to emission. If the generated triples violate the shape, the Archivist must physically execute the `violation_action` (e.g., dropping the graph or stripping invalid triples) to prevent polluting enterprise endpoints.
 * **SPARQL Execution Boundaries:** All `SPARQLQueryIntent` executions are strictly subject to SSRF network quarantine. The Archivist MUST ensure that returned bindings are passed through the volumetric hardware guillotine (`_validate_payload_bounds`), aborting the connection if the external triplestore attempts to flood the swarm's VRAM.
+
+### 8.5 `ZeroKnowledgeFederationOracle` (The Cryptographic Prover)
+* **Open-Source Substrate:** `halo2` / `gnark`
+* **Compute Plane Profile:** `CognitiveSystemNodeProfile` (Sandboxed ZK Verifier)
+* **Data Plane Boundary:** `ZeroKnowledgeReceipt` / `FederatedBilateralSLA`
+* **Routing Constraints:** The orchestrator MUST route all incoming B2B cross-tenant traffic here prior to merging graph states.
+* **Temporal Provenance Verification:** This node evaluates the arithmetic circuits bound to `temporal_circuit_hash` to mathematically prove chronologies without exposing the underlying continuous-time float variables of the foreign swarm.
+* **Mechanistic Penalty (SLA Severance):** If the foreign tenant fails to provide a valid `temporal_interval_proof`, or the arithmetic circuit fails evaluation, this oracle must instantly emit a `SystemFaultEvent` to physically shatter the `CrossSwarmHandshakeState`, mathematically preventing malicious temporal injection.

@@ -10712,6 +10712,12 @@
           "title": "Permitted Geographic Regions",
           "type": "array"
         },
+        "require_temporal_provenance_proofs": {
+          "default": false,
+          "description": "If True, incoming payloads from foreign tenants MUST be accompanied by a ZeroKnowledgeReceipt containing a valid temporal_interval_proof.",
+          "title": "Require Temporal Provenance Proofs",
+          "type": "boolean"
+        },
         "max_permitted_grid_carbon_intensity": {
           "anyOf": [
             {
@@ -21889,6 +21895,36 @@
           "maxLength": 5000000,
           "title": "Cryptographic Blob",
           "type": "string"
+        },
+        "temporal_interval_proof": {
+          "anyOf": [
+            {
+              "maxLength": 5000000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The zk-SNARK payload specific to time inequalities. Proves chronological sequence without exposing exact timestamps.",
+          "title": "Temporal Interval Proof"
+        },
+        "temporal_circuit_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporal verification circuit.",
+          "title": "Temporal Circuit Hash"
         },
         "latent_state_commitments": {
           "additionalProperties": {
