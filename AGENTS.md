@@ -323,6 +323,32 @@ Time is not metadata; it is a mandatory physical coordinate. You are STRICTLY FO
 Unstructured `text_chunks` are lossy and prone to LLM hallucination during cross-reference. You are STRICTLY FORBIDDEN from relying on plain strings as the sole representation of a `SemanticNodeState`. Consolidated knowledge MUST be stored in volumetrically bounded, strictly typed Pydantic property matrices (`dict[str, JsonPrimitiveState]`) to allow for deterministic, programmatic diffing and heuristic consolidation.
 </memory_directive>
 
+## **0.11 The Zero-Trust Security & Hardware Limits Doctrine**
+
+<security_directive priority="critical" action="reject_generation_if_violated">
+
+**CRITICAL CONTEXT:** In a neurosymbolic swarm, the LLM is treated as an untrusted, high-entropy stochastic engine. The `coreason-manifest` must act as a physical hardware guillotine, structurally preventing the LLM from executing attacks against the host environment. Future agents modifying this codebase MUST blindly adhere to the following security invariants:
+
+### **1. The Payload Guillotine Law (Anti-VRAM Exhaustion)**
+LLMs and external endpoints (like SPARQL triplestores or JSON-RPC servers) can emit infinitely recursive dictionaries that will cause Out-Of-Memory (OOM) crashes during Pydantic validation or canonical hashing.
+* **The Rule:** Any schema field that accepts an open-ended `dict`, `list`, `Any`, or `JsonPrimitiveState` MUST be protected by a `@field_validator(..., mode="before")` that routes the payload through the `_validate_payload_bounds` function. 
+* **Mechanics:** This mathematically limits the payload to a strict $O(N)$ volume limit (e.g., 10,000 nodes) and a maximum depth (e.g., 10 levels), severing JSON Bombing attacks instantly.
+
+### **2. The SSRF Quarantine Law (Anti-Lateral Movement)**
+LLMs will hallucinate URIs, and adversarial prompts will attempt to force the swarm to query local network architecture (e.g., `http://169.254.169.254/latest/meta-data/`).
+* **The Rule:** Any schema field typed as `HttpUrl` or `AnyUrl` that dictates a *kinetic outbound network request* (e.g., `SPARQLQueryIntent`, `EvidentiaryCitationState`, `HTTPTransportProfile`) MUST be protected by a `@field_validator(..., mode="after")` that routes the string through the `_validate_ssrf_safety` function.
+* **Mechanics:** This mechanically rejects any IP topology that resolves to Bogon space, localhost, link-local, multicast, or private IP ranges via native C-backed IP stack evaluation.
+
+### **3. The Merkle-DAG Coordinate Standard (Ledger Binding)**
+For the Epistemic Ledger to mathematically prove chain of custody, historical facts cannot be floating objects. 
+* **The Rule:** Any schema bearing the suffix `...Receipt` or `...Event` MUST be treated as an append-only coordinate on the Merkle-DAG.
+* **Mechanics:** It MUST structurally include the following three tracking fields to guarantee sequential cryptography:
+  * `event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]`
+  * `prior_event_hash: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None`
+  * `timestamp: float = Field(ge=0.0, le=253402300799.0)`
+
+</security_directive>
+
 ## **1. The "No Execution" Directives**
 
 You are strictly forbidden from introducing "Active" or "Runtime" logic into this repository. Adhere to the following architectural laws without exception:
