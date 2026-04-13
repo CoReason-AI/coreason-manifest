@@ -18,8 +18,6 @@ def main() -> None:
         print(f"Error: Schema file {schema_file} not found. Please generate it first.")
         sys.exit(1)
 
-    print("Checking Node.js dependencies...")
-    
     # Configure npm/npx environment to suppress all warnings and prompts
     node_env = os.environ.copy()
     node_env["npm_config_loglevel"] = "error"
@@ -27,19 +25,6 @@ def main() -> None:
     node_env["npm_config_audit"] = "false"
     node_env["npm_config_update_notifier"] = "false"
     node_env["npm_config_yes"] = "true"
-
-    try:
-        # Use shell=True for full Windows compatibility with .cmd wrappers
-        subprocess.run(
-            "npm install",
-            check=True,
-            shell=True,  # noqa: S602 # nosec B602
-            env=node_env,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
-    except subprocess.CalledProcessError:
-        print("Warning: npm install failed or not available. Continuing...")
 
     print("Generating TypeScript bindings...")
     ts_cmd = ["npx", "quicktype", "-s", "schema", schema_file, "-o", ts_out, "--just-types"]
