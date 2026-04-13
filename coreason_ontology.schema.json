@@ -1330,6 +1330,7 @@
           "macro_elicitation": "#/$defs/IntentElicitationTopologyManifest",
           "macro_federation": "#/$defs/ConsensusFederationTopologyManifest",
           "macro_forge": "#/$defs/CapabilityForgeTopologyManifest",
+          "macro_ingestion": "#/$defs/NeurosymbolicIngestionTopologyManifest",
           "macro_neurosymbolic": "#/$defs/NeurosymbolicVerificationTopologyManifest",
           "smpc": "#/$defs/SMPCTopologyManifest",
           "swarm": "#/$defs/SwarmTopologyManifest"
@@ -1369,6 +1370,9 @@
         },
         {
           "$ref": "#/$defs/IntentElicitationTopologyManifest"
+        },
+        {
+          "$ref": "#/$defs/NeurosymbolicIngestionTopologyManifest"
         },
         {
           "$ref": "#/$defs/NeurosymbolicVerificationTopologyManifest"
@@ -14625,6 +14629,157 @@
       "title": "NeurosymbolicInferenceIntent",
       "type": "object"
     },
+    "NeurosymbolicIngestionTopologyManifest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A Zero-Cost Macro abstraction that deterministically projects a 4-stage neurosymbolic ingestion pipeline into a rigid Directed Acyclic Graph (DAG).\n\nCAUSAL AFFORDANCE: Physically guarantees that unstructured artifacts pass sequentially through the Docling extractor, OntoGPT grounding specialist, CurioCat verification oracle, and PySHACL archivist without skipping verification gates.\n\nEPISTEMIC BOUNDS: The compile_to_base_topology functor mathematically enforces strict algorithmic complexity bounds (max_depth=4, max_fan_out=1, allow_cycles=False), completely severing the capacity for recursive state-space explosions during ingestion.\n\nMCP ROUTING TRIGGERS: Neurosymbolic Ingestion, Zero-Cost Macro, Substrate Oracles, Deterministic Pipeline, Functorial Semantics",
+      "properties": {
+        "epistemic_enforcement": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TruthMaintenancePolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Ties the topology to the Truth Maintenance layer."
+        },
+        "lifecycle_phase": {
+          "default": "live",
+          "description": "The execution phase of the graph.",
+          "enum": [
+            "draft",
+            "live"
+          ],
+          "title": "Lifecycle Phase",
+          "type": "string"
+        },
+        "architectural_intent": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The AI's declarative rationale for selecting this topology.",
+          "title": "Architectural Intent"
+        },
+        "justification": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cryptographic/audit justification for this topology's configuration.",
+          "title": "Justification"
+        },
+        "nodes": {
+          "additionalProperties": {
+            "$ref": "#/$defs/AnyNodeProfile"
+          },
+          "description": "Flat registry of all nodes in this topology.",
+          "propertyNames": {
+            "$ref": "#/$defs/NodeCIDState"
+          },
+          "title": "Nodes",
+          "type": "object"
+        },
+        "shared_state_contract": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StateContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The schema-on-write contract governing the internal state."
+        },
+        "semantic_flow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SemanticFlowPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The structural Payload Loss Prevention (PLP) contract."
+        },
+        "observability": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ObservabilityLODPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The dynamic Level of Detail physics bound to this graph."
+        },
+        "topology_class": {
+          "const": "macro_ingestion",
+          "default": "macro_ingestion",
+          "description": "Discriminator for the ingestion macro.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "source_artifact_cid": {
+          "$ref": "#/$defs/NodeCIDState",
+          "description": "The genesis artifact triggering the pipeline."
+        },
+        "compiler_node_cid": {
+          "$ref": "#/$defs/NodeCIDState",
+          "description": "The W3C DID assigned to the Docling extractor."
+        },
+        "grounding_specialist_cid": {
+          "$ref": "#/$defs/NodeCIDState",
+          "description": "The W3C DID assigned to the OntoGPT resolver."
+        },
+        "verification_oracle_cid": {
+          "$ref": "#/$defs/NodeCIDState",
+          "description": "The W3C DID assigned to the CurioCat NLI engine."
+        },
+        "archivist_node_cid": {
+          "$ref": "#/$defs/NodeCIDState",
+          "description": "The W3C DID assigned to the RDF egress gateway."
+        },
+        "egress_format": {
+          "default": "turtle",
+          "description": "Target serialization format.",
+          "enum": [
+            "turtle",
+            "xml",
+            "json-ld",
+            "ntriples"
+          ],
+          "title": "Egress Format",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_artifact_cid",
+        "compiler_node_cid",
+        "grounding_specialist_cid",
+        "verification_oracle_cid",
+        "archivist_node_cid"
+      ],
+      "title": "NeurosymbolicIngestionTopologyManifest",
+      "type": "object"
+    },
     "NeurosymbolicVerificationTopologyManifest": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A Zero-Cost Macro abstraction enforcing a strict Bipartite Graph for Proposer-Verifier loops. Isolates connectionist generation from symbolic validation and bounds cyclic computation.\n\n    CAUSAL AFFORDANCE: Instructs the orchestrator to enforce a strict Bipartite Graph for Proposer-Verifier loops.\n\n    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.\n\n    MCP ROUTING TRIGGERS: Proposer-Verifier Loop, Bipartite Graph, Symbolic Validation, Cyclic Computation",
@@ -19308,7 +19463,10 @@
         "OPEN_SYMBOLIC_FIREWALL",
         "DOCLING_GRAPH_EXTRACTOR",
         "ONTOGPT_SPIRES",
-        "NATIVE_PYTHON"
+        "NATIVE_PYTHON",
+        "CURIOCAT_NLI",
+        "SEMANTIC_WEB_ARCHIVIST",
+        "ZERO_KNOWLEDGE_PROVER"
       ],
       "title": "SubstrateDialectProfile",
       "type": "string"
