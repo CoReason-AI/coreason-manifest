@@ -3900,8 +3900,13 @@ class LeanExplorationIntent(BoundedJSONRPCIntent):
 
     MCP ROUTING TRIGGERS: Lean 4 Exploration, Interactive Theorem Proving, Read-Only Substrate, Tactic State Query
     """
-    topology_class: Literal["lean_exploration"] = Field(default="lean_exploration", description="Discriminator for non-kinetic Lean 4 MCP exploratory queries.")
-    method: Literal["search_theorems", "get_dependencies", "check_tactic_state"] = Field(..., description="The restricted set of Lean 4 query mechanisms.")
+
+    topology_class: Literal["lean_exploration"] = Field(
+        default="lean_exploration", description="Discriminator for non-kinetic Lean 4 MCP exploratory queries."
+    )
+    method: Literal["search_theorems", "get_dependencies", "check_tactic_state"] = Field(
+        ..., description="The restricted set of Lean 4 query mechanisms."
+    )
 
 
 class OntologyDiscoveryIntent(BoundedJSONRPCIntent):
@@ -7063,7 +7068,7 @@ class EpistemicLean4Premise(CoreasonBaseState):
     tactics_script: Annotated[str, StringConstraints(max_length=100000)]
     dependency_graph_cids: list[NodeCIDState] | None = Field(
         default=None,
-        description="Cryptographic pointers to prior verified lemmas or Mathlib4 dependencies required to evaluate this premise."
+        description="Cryptographic pointers to prior verified lemmas or Mathlib4 dependencies required to evaluate this premise.",
     )
     topology_class: Literal["epistemic_lean4_premise"] = Field(default="epistemic_lean4_premise")
 
@@ -7084,8 +7089,13 @@ class TacticStateGoal(CoreasonBaseState):
 
     MCP ROUTING TRIGGERS: Tactic State, Process-Supervised Verification, Sub-Goal Tree, Reward Shaping
     """
-    hypothesis_context: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(description="List of active assumptions/variables")
-    target_type: Annotated[str, StringConstraints(max_length=2000)] = Field(description="The mathematical target needing proof")
+
+    hypothesis_context: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
+        description="List of active assumptions/variables"
+    )
+    target_type: Annotated[str, StringConstraints(max_length=2000)] = Field(
+        description="The mathematical target needing proof"
+    )
     complexity_score: float | None = Field(default=None, ge=0.0, le=1.0, description="Optional PSV heuristic score")
 
     @model_validator(mode="after")
@@ -7107,12 +7117,10 @@ class Lean4VerificationReceipt(CoreasonBaseState):
 
     is_proved: bool
     failing_tactic_state: str | None = Field(
-        default=None,
-        description="Deprecated/Legacy flat error string. Replaced by tactic_state_tree."
+        default=None, description="Deprecated/Legacy flat error string. Replaced by tactic_state_tree."
     )
     tactic_state_tree: list[TacticStateGoal] | None = Field(
-        default=None,
-        description="The hierarchical breakdown of unresolved goals required for MCTS reward shaping."
+        default=None, description="The hierarchical breakdown of unresolved goals required for MCTS reward shaping."
     )
     topology_class: Literal["lean4_verification_receipt"] = Field(default="lean4_verification_receipt")
 
@@ -7120,7 +7128,9 @@ class Lean4VerificationReceipt(CoreasonBaseState):
     def _enforce_canonical_sort(self) -> Self:
         if self.tactic_state_tree is not None:
             # We sort by target_type as a deterministic key for the tree
-            object.__setattr__(self, "tactic_state_tree", sorted(self.tactic_state_tree, key=operator.attrgetter("target_type")))
+            object.__setattr__(
+                self, "tactic_state_tree", sorted(self.tactic_state_tree, key=operator.attrgetter("target_type"))
+            )
         return self
 
 
