@@ -5270,26 +5270,16 @@ class EpistemicScanningPolicy(CoreasonBaseState):
 
 class LinkMLValidationSLA(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Establishes Graph-Shape Governance, acting as the execution contract instructing the orchestrator to validate extracted nodes and edges against an external LinkML YAML shape graph before committing them.
+    AGENT INSTRUCTION: Instructs the Ontological Grounding Specialist to enforce bipartite crosswalks against academic schemas.
 
-    CAUSAL AFFORDANCE: Forces the structural validation of all causal edges. Authorizes the orchestrator to mechanically sever relations that violate the predicate's declared Domain, Range, or Cardinality constraints.
+    CAUSAL AFFORDANCE: Forces the structural validation of all causal edges through LinkML.
 
-    EPISTEMIC BOUNDS: The `linkml_schema_uri` strictly clamps the topological ruleset to a remote, verifiable YAML definition.
+    EPISTEMIC BOUNDS: The linkml_schema_uri strictly clamps the topological ruleset to a remote YAML definition.
 
     MCP ROUTING TRIGGERS: LinkML, Graph-Shape Governance, Structural Isomorphism, SHACL, Domain and Range Enforcement
     """
 
-    linkml_schema_uri: AnyUrl = Field(
-        description="RFC 8785 canonicalized URI pointing to the canonical LinkML YAML definition."
-    )
-    strict_domain_range_checking: bool = Field(
-        default=True,
-        description="If True, the orchestrator physically severs any CausalDirectedEdgeState where the subject/object node classes violate the predicate's declared LinkML domain/range.",
-    )
-    allow_unmapped_entities: bool = Field(
-        default=False,
-        description="A boolean gate dictating whether the resulting graph is permitted to retain high-entropy text nodes that OntoGPT failed to resolve into a formal CURIE.",
-    )
+    linkml_schema_uri: AnyUrl
 
 
 class OntologicalCrosswalkIntent(CoreasonBaseState):
@@ -7025,38 +7015,50 @@ type AnyPresentationIntent = Annotated[
 
 
 class EpistemicLean4Premise(CoreasonBaseState):
-    """AGENT INSTRUCTION: A formal theorem and tactic proof for Lean 4 validation."""
+    """
+    AGENT INSTRUCTION: This premise acts as a logic hypothesis that triggers constructive mathematical proof or software auto-formalization via Lean 4.
 
+    CAUSAL AFFORDANCE: Unlocks formal theorem proving physics for the orchestrator by instantiating a Lean 4 validation track.
+
+    EPISTEMIC BOUNDS: Bounded to strict string constraints for the theorem and tactics script.
+
+    MCP ROUTING TRIGGERS: Calculus of Inductive Constructions, Dependent Type Theory, Theorem Proving, Auto-formalization
+    """
+
+    target_theorem: str
+    tactics_script: str
     topology_class: Literal["epistemic_lean4_premise"] = Field(default="epistemic_lean4_premise")
-    ontology_node_id: NodeCIDState
-    environment_imports: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
-        default_factory=lambda: ["Mathlib"],
-        json_schema_extra={"coreason_topological_exemption": True},
-    )
-    formal_statement: Annotated[str, StringConstraints(min_length=1, max_length=10000)]
-    tactic_proof: Annotated[str, StringConstraints(min_length=1, max_length=100000)]
 
 
 class Lean4VerificationReceipt(CoreasonBaseState):
-    """AGENT INSTRUCTION: The immutable receipt of the Lean 4 kernel's execution."""
+    """
+    AGENT INSTRUCTION: A cryptographically frozen fact representing the success or failure of a Lean 4 proof. Tailored as a receipt.
 
+    CAUSAL AFFORDANCE: Unlocks System 2 remediation loops by providing deterministic failure execution traces.
+
+    EPISTEMIC BOUNDS: The boolean flag definitively represents mathematical truth, and the string accurately caps the textual bounds of failure.
+
+    MCP ROUTING TRIGGERS: System 2 Remediation, Mathematical Truth, Proof Verification, Proof Engine
+    """
+
+    is_proved: bool
+    failing_tactic_state: str | None = None
     topology_class: Literal["lean4_verification_receipt"] = Field(default="lean4_verification_receipt")
-    causal_provenance_id: NodeCIDState
-    verification_status: Literal["PROVED", "FALSIFIED_AT_TACTIC", "SORRY_DETECTED", "TIMEOUT"]
-    failing_tactic_state: Annotated[str, StringConstraints(max_length=65536)] | None = Field(default=None)
-
-    event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
-    timestamp: float
-    prior_event_hash: str | None = Field(default=None)
 
 
 class EpistemicLogicPremise(CoreasonBaseState):
-    """AGENT INSTRUCTION: Represents a formal Answer Set Programming (ASP) logic string."""
+    """
+    AGENT INSTRUCTION: Unlocks Answer Set Programming (Clingo) for NP-hard combinatorial constraint satisfaction.
 
+    CAUSAL AFFORDANCE: Physically authorizes the orchestrator to model and solve NP-hard combinatorial domains.
+
+    EPISTEMIC BOUNDS: Constrained strictly to the answer set programming language inputs via tight syntactic length bounds.
+
+    MCP ROUTING TRIGGERS: Answer Set Programming, Combinatorial Constraint Satisfaction, Clingo, Combinatorial Domain
+    """
+
+    asp_program: str
     topology_class: Literal["epistemic_logic_premise"] = Field(default="epistemic_logic_premise")
-    ontology_node_id: NodeCIDState
-    asp_program: Annotated[str, StringConstraints(min_length=1, max_length=65536)]
-    max_models: int = Field(default=1, ge=0, le=100)
 
 
 class FormalLogicProofReceipt(CoreasonBaseState):
@@ -7082,14 +7084,19 @@ class FormalLogicProofReceipt(CoreasonBaseState):
 
 
 class EpistemicPrologPremise(CoreasonBaseState):
-    """AGENT INSTRUCTION: Represents a formal Horn clause query and knowledge base."""
+    """
+    AGENT INSTRUCTION: Unlocks SWI-Prolog for backward-chaining deductive evaluation over hierarchical graphs.
 
+    CAUSAL AFFORDANCE: Instructs the orchestrator to execute exact subgraph isomorphism and deductive logic queries.
+
+    EPISTEMIC BOUNDS: Restricts logic programming bounds to strict Horn clauses and exact query boundaries.
+
+    MCP ROUTING TRIGGERS: SWI-Prolog, Backward-Chaining, Deductive Evaluation, Hierarchical Knowledge Bases
+    """
+
+    query: str
+    horn_clauses: str
     topology_class: Literal["epistemic_prolog_premise"] = Field(default="epistemic_prolog_premise")
-    ontology_node_id: NodeCIDState
-    knowledge_base_cid: NodeCIDState | None = Field(default=None)
-    ephemeral_facts: Annotated[str, StringConstraints(max_length=65536)] | None = Field(default=None)
-    prolog_query: Annotated[str, StringConstraints(min_length=1, max_length=2000)]
-    max_solutions: int = Field(default=1, ge=1, le=1000)
 
 
 class PrologDeductionReceipt(CoreasonBaseState):
@@ -7180,63 +7187,39 @@ class BeliefModulationReceipt(CoreasonBaseState):
 
 class SHACLValidationSLA(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Acts as the deterministic execution contract instructing the egress engine to validate the serialized RDF graph against a formal W3C SHACL shape graph before authorizing the export.
+    AGENT INSTRUCTION: Defines the strict SHACL shape validation pass required before RDF egress.
 
-    CAUSAL AFFORDANCE: Physically authorizes the orchestrator to evaluate emitted graphs against enterprise logic, mechanically preventing the pollution of external triplestores with hallucinated topologies.
+    CAUSAL AFFORDANCE: Unlocks formal enterprise evaluation of emitted graphs against a verified shape.
 
-    EPISTEMIC BOUNDS: The validation logic is constrained to the `violation_action` finite state automaton, dictating exactly what the runtime must do if the graph violates the SHACL shape.
+    EPISTEMIC BOUNDS: The violation action bounds the exact deterministic penalty for triple non-conformance.
 
-    MCP ROUTING TRIGGERS: SHACL, Topological Isomorphism, Semantic Web Egress, Graph-Shape Validation, Triplestore Interoperability
+    MCP ROUTING TRIGGERS: SHACL, Topological Validation, Schema Evaluation, Triplestore
     """
 
-    shacl_shape_uri: AnyUrl = Field(
-        description="A canonicalized URI pointing to the definitive .shacl or .ttl shape graph."
-    )
-    strict_mode: bool = Field(
-        default=True,
-        description="If True, a single topological shape violation causes the entire graph export to be mathematically rejected.",
-    )
-    violation_action: Literal["drop_graph", "quarantine", "strip_invalid_triples"] = Field(
-        description="A finite state automaton dictating the exact mechanistic penalty the orchestrator must apply if non-conforming triples are detected."
-    )
+    shacl_shape_graph_uri: AnyUrl
+    violation_action: Literal["DROP_GRAPH", "STRIP_TRIPLES", "HALT_EXECUTION"]
 
 
 class SPARQLQueryIntent(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: A kinetic trigger instructing the orchestrator to execute a read-only SPARQL query against an external or internal RDF triplestore.
+    AGENT INSTRUCTION: Instructs the Semantic Web Archivist to execute a strict, volumetrically bounded query against an enterprise triplestore.
 
-    CAUSAL AFFORDANCE: Authorizes the agent to retrieve formalized Semantic Web data. The query is strictly clamped to prevent buffer overflows, and the target is network-quarantined.
+    CAUSAL AFFORDANCE: Unlocks read-only retrieval of Semantic Web data.
 
-    EPISTEMIC BOUNDS: The `target_endpoint_uri` is mathematically scrubbed against Bogon and loopback IP spaces to prevent SSRF. The `expected_result_schema` is volumetrically bounded to prevent schema evaluation explosions.
+    EPISTEMIC BOUNDS: The target_endpoint implements an SSRF protection hook to mathematically reject lateral movement.
 
-    MCP ROUTING TRIGGERS: SPARQL, Semantic Web Query, Zero-Trust Egress, SSRF Quarantine, Triplestore
+    MCP ROUTING TRIGGERS: SPARQL, Semantic Web Query, Triplestore Query, Network Boundary
     """
 
+    query_string: str
+    target_endpoint: HttpUrl
     topology_class: Literal["sparql_query"] = "sparql_query"
-    target_endpoint_uri: HttpUrl = Field(description="The specific SPARQL endpoint to query.")
-    query_string: Annotated[str, StringConstraints(max_length=5000)] = Field(
-        description="The raw SPARQL syntax, mathematically clamped to prevent query buffer overflow attacks."
-    )
-    expected_result_schema: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
-        description="An untyped but volumetrically bounded dictionary defining the exact expected JSON schema of the SPARQL bindings."
-    )
 
-    @field_validator("target_endpoint_uri", mode="after")
+    @field_validator("target_endpoint", mode="after")
     @classmethod
-    def _enforce_ssrf_quarantine(cls, url: HttpUrl) -> HttpUrl:
-        """
-        AGENT INSTRUCTION: Implements Network Topology and Server-Side Request Forgery (SSRF) Quarantine logic.
-        """
-        _validate_ssrf_safety(str(url))
-        return url
-
-    @field_validator("expected_result_schema", mode="before")
-    @classmethod
-    def enforce_payload_topology(cls, v: Any) -> Any:
-        """
-        AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion.
-        """
-        return _validate_payload_bounds(v)
+    def _enforce_ssrf_safety(cls, v: HttpUrl) -> HttpUrl:
+        _validate_ssrf_safety(str(v))
+        return v
 
 
 class SPARQLQueryResultReceipt(CoreasonBaseState):

@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # Copyright (c) 2026 CoReason, Inc
 #
 # This software is proprietary and dual-licensed
