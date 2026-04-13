@@ -542,11 +542,11 @@
               "type": "object"
             },
             {
+              "maxLength": 100000,
               "type": "string"
             }
           ],
           "description": "The raw poisoned text or malicious JSON-RPC schema injected into the target's context window.",
-          "maxLength": 100000,
           "title": "Synthetic Payload"
         },
         "expected_firewall_trip": {
@@ -1880,21 +1880,17 @@
         "retained_partial_payload": {
           "anyOf": [
             {
-              "anyOf": [
-                {
-                  "additionalProperties": {
-                    "$ref": "#/$defs/JsonPrimitiveState"
-                  },
-                  "propertyNames": {
-                    "maxLength": 255
-                  },
-                  "type": "object"
-                },
-                {
-                  "type": "string"
-                }
-              ],
-              "maxLength": 100000
+              "additionalProperties": {
+                "$ref": "#/$defs/JsonPrimitiveState"
+              },
+              "propertyNames": {
+                "maxLength": 255
+              },
+              "type": "object"
+            },
+            {
+              "maxLength": 100000,
+              "type": "string"
             },
             {
               "type": "null"
@@ -5077,6 +5073,41 @@
       "title": "ContextualizedSourceState",
       "type": "object"
     },
+    "ContinuousManifoldMappingContract": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Profunctor Optics for mapping continuous N-dimensional spatial tensors (e.g., NeRFs, VQ-VAEs) into discrete semantic graph coordinates.\nCAUSAL AFFORDANCE: Authorizes the spatial rendering engine to mathematically fuse a physical coordinate (SE3) with an abstract SemanticNodeState.\nEPISTEMIC BOUNDS: Strict bounding on volumetric distance and isometry preservation.\nMCP ROUTING TRIGGERS: Cross-Modal Isomorphism, Semantic Fusion, Volumetric Projection, Profunctor Optics",
+      "properties": {
+        "topology_class": {
+          "const": "manifold_mapping",
+          "default": "manifold_mapping",
+          "description": "Discriminator for manifold mapping.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "source_semantic_node_cid": {
+          "$ref": "#/$defs/NodeCIDState",
+          "description": "The discrete semantic concept being spatially anchored."
+        },
+        "target_spatial_transform": {
+          "$ref": "#/$defs/SE3TransformProfile",
+          "description": "The absolute SE(3) physical coordinate mapping."
+        },
+        "isometry_preservation_score": {
+          "description": "Calculated geometric alignment between the semantic embedding and spatial tensor.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Isometry Preservation Score",
+          "type": "number"
+        }
+      },
+      "required": [
+        "source_semantic_node_cid",
+        "target_spatial_transform",
+        "isometry_preservation_score"
+      ],
+      "title": "ContinuousManifoldMappingContract",
+      "type": "object"
+    },
     "ContinuousMutationPolicy": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Queueing Theory and Micro-Batching Stream Processing\nheuristics for continuous, high-velocity graph updates without violating Eventual\nConsistency. As a ...Policy suffix, this defines rigid mathematical boundaries.\n\nCAUSAL AFFORDANCE: Dictates the thermodynamic flow of the orchestrator, determining\nexactly when to buffer and when to force-commit volatile StateMutationIntent\nmatrices to the EpistemicLedgerState via the mutation_paradigm\nLiteral [\"append_only\", \"merge_on_resolve\"].\n\nEPISTEMIC BOUNDS: Physically prevents Out-Of-Memory (OOM) VRAM crashes by\nmathematically enforcing max_uncommitted_edges (gt=0, le=1000000000). The\n@model_validator enforce_append_only_vram_bound further crushes this limit to\n<= 10000 for append_only operations. The commit cycle is temporally guillotined\nby micro_batch_interval_ms (gt=0, le=86400000).\n\nMCP ROUTING TRIGGERS: Queueing Theory, Stream Processing, Micro-Batching,\nBackpressure, Buffer Memory Bounding",
@@ -5901,37 +5932,6 @@
     "DAGTopologyManifest": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes a Directed Acyclic Graph (DAG) for deterministic, chronologically ordered task execution, guaranteeing strict topological sorting of operations.\n\nCAUSAL AFFORDANCE: Forces the orchestrator to evaluate causal edges and execute rigorous DFS loop-detection to verify the `allow_cycles` constraint before initiating kinetic node compute. Backpressure governs edge flow control.\n\nEPISTEMIC BOUNDS: Algorithmic complexity is mathematically bound by `max_depth` (`ge=1, le=256`) to prevent runaway agentic cyclic recursion, and `max_fan_out` (`ge=1, le=1024`) to limit horizontal compute explosion. The `@model_validator` actively measures these constraints during traversal. Edges are deterministically sorted.\n\nMCP ROUTING TRIGGERS: Directed Acyclic Graph, Kahn's Algorithm, Topological Sort, Causal Edge, Algorithmic Complexity",
-      "examples": [
-        {
-          "edges": [
-            [
-              "did:coreason:system-1",
-              "did:coreason:agent-1"
-            ],
-            [
-              "did:coreason:agent-1",
-              "did:coreason:human-1"
-            ]
-          ],
-          "max_depth": 10,
-          "max_fan_out": 5,
-          "nodes": {
-            "did:coreason:agent-1": {
-              "description": "Primary autonomous agent",
-              "type": "agent"
-            },
-            "did:coreason:human-1": {
-              "description": "Human fallback operator",
-              "type": "human"
-            },
-            "did:coreason:system-1": {
-              "description": "System orchestrator node",
-              "type": "system"
-            }
-          },
-          "type": "dag"
-        }
-      ],
       "properties": {
         "epistemic_enforcement": {
           "anyOf": [
@@ -10712,6 +10712,12 @@
           "title": "Permitted Geographic Regions",
           "type": "array"
         },
+        "require_temporal_provenance_proofs": {
+          "default": false,
+          "description": "If True, incoming payloads from foreign tenants MUST be accompanied by a ZeroKnowledgeReceipt containing a valid temporal_interval_proof.",
+          "title": "Require Temporal Provenance Proofs",
+          "type": "boolean"
+        },
         "max_permitted_grid_carbon_intensity": {
           "anyOf": [
             {
@@ -12720,7 +12726,6 @@
     "JsonPrimitiveState": {
       "anyOf": [
         {
-          "maxLength": 10000,
           "type": "string"
         },
         {
@@ -12741,9 +12746,6 @@
         {
           "additionalProperties": {
             "$ref": "#/$defs/JsonPrimitiveState"
-          },
-          "propertyNames": {
-            "maxLength": 255
           },
           "type": "object"
         },
@@ -14296,6 +14298,36 @@
           "default": null,
           "description": "The ending index in the discrete VLM context window.",
           "title": "Token Span End"
+        },
+        "temporal_frame_start_ms": {
+          "anyOf": [
+            {
+              "maximum": 86400000,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The starting millisecond coordinate in a continuous video or audio stream.",
+          "title": "Temporal Frame Start Ms"
+        },
+        "temporal_frame_end_ms": {
+          "anyOf": [
+            {
+              "maximum": 86400000,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The ending millisecond coordinate in a continuous video or audio stream.",
+          "title": "Temporal Frame End Ms"
         },
         "visual_patch_hashes": {
           "description": "The explicit array of SHA-256 hashes corresponding to specific VQ-VAE visual patches attended to.",
@@ -17981,6 +18013,14 @@
           ],
           "default": null,
           "description": "The cryptographic envelope enabling privacy-preserving computation directly on this node's encrypted state."
+        },
+        "spatial_manifold_mappings": {
+          "description": "Optional geometric projections binding this discrete node to a continuous spatial rendering environment.",
+          "items": {
+            "$ref": "#/$defs/ContinuousManifoldMappingContract"
+          },
+          "title": "Spatial Manifold Mappings",
+          "type": "array"
         }
       },
       "required": [
@@ -18903,7 +18943,14 @@
           "type": "string"
         },
         "value": {
-          "$ref": "#/$defs/JsonPrimitiveState",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/JsonPrimitiveState"
+            },
+            {
+              "type": "null"
+            }
+          ],
           "default": null,
           "description": "The payload to insert or test, if applicable, for this deterministic state vector mutation. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion."
         },
@@ -21688,27 +21735,6 @@
     "WorkflowManifest": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes the Topos Theory representation of a fully encapsulated swarm environment, serving as the macroscopic topological envelope for the entire execution payload and enforcing the Viable System Model.\n\nCAUSAL AFFORDANCE: Physically initializes the execution DAG. This structural lock guarantees that any graph execution is mathematically anchored to a CoReason Genesis Block via `genesis_provenance`; stripping this violates Topological Consistency.\n\nEPISTEMIC BOUNDS: The `@model_validator` `enforce_lbac_dominance` mathematically interlocks the local LBAC bounds with federated SLA egress bounds, ensuring federated clearance never exceeds local workflow bounds. `allowed_semantic_classifications` sorted for RFC 8785.\n\nMCP ROUTING TRIGGERS: Topos Theory, Cybernetics, Execution Envelope, Macroscopic Topology, Viable System Model",
-      "examples": [
-        {
-          "genesis_provenance": {
-            "method": "system_initialization",
-            "source_event_cid": "bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdibafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi1234567890"
-          },
-          "manifest_version": "1.0.0",
-          "topology": {
-            "edges": [],
-            "max_depth": 10,
-            "max_fan_out": 5,
-            "nodes": {
-              "did:coreason:agent-1": {
-                "description": "Primary autonomous agent",
-                "type": "agent"
-              }
-            },
-            "type": "dag"
-          }
-        }
-      ],
       "properties": {
         "genesis_provenance": {
           "$ref": "#/$defs/EpistemicProvenanceReceipt",
@@ -21889,6 +21915,36 @@
           "maxLength": 5000000,
           "title": "Cryptographic Blob",
           "type": "string"
+        },
+        "temporal_interval_proof": {
+          "anyOf": [
+            {
+              "maxLength": 5000000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The zk-SNARK payload specific to time inequalities. Proves chronological sequence without exposing exact timestamps.",
+          "title": "Temporal Interval Proof"
+        },
+        "temporal_circuit_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporal verification circuit.",
+          "title": "Temporal Circuit Hash"
         },
         "latent_state_commitments": {
           "additionalProperties": {

@@ -12,6 +12,11 @@ jobs:
     name: Lint and Audit (Zero-Pollution Tooling Injection)
     runs-on: ubuntu-latest
     steps:
+      - name: Harden Runner (Endpoint Network Security)
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@v4
 
       - name: Install uv
@@ -38,13 +43,16 @@ jobs:
       - name: Enforce Cryptographic Determinism
         run: uv run python scripts/enforce_cryptographic_determinism.py
 
-      - name: Setup Node.js (For Quicktype/Prettier)
+      - name: Setup Node.js (For json-schema-to-typescript)
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
 
-      - name: Setup Rust (For Cargo Fmt)
+      - name: Setup Rust (For Cargo Typify/Fmt)
         uses: dtolnay/rust-toolchain@stable
+
+      - name: Install cargo-typify
+        run: cargo install cargo-typify
 
       - name: Generate Cross-Language Bindings
         run: uv run python scripts/generate_cross_language_bindings.py
@@ -74,6 +82,11 @@ jobs:
     name: Schema Contracts (Semantic Backward-Compatibility)
     runs-on: ubuntu-latest
     steps:
+      - name: Harden Runner (Endpoint Network Security)
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -97,6 +110,11 @@ jobs:
     name: Security SAST (AI-Specific Fuzzing & Architectural Gate)
     runs-on: ubuntu-latest
     steps:
+      - name: Harden Runner (Endpoint Network Security)
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@v4
 
       - name: Install uv
@@ -121,6 +139,9 @@ jobs:
       - name: Install Dependencies
         run: uv sync
 
+      - name: Bandit Security Check
+        run: uvx bandit -r src/ scripts/ tests/ -s B101,B404
+
   test-ubuntu:
     name: Test (Ubuntu) - Python ${{ matrix.python-version }}
     needs: [lint-and-audit, schema-contracts]
@@ -131,6 +152,11 @@ jobs:
         python-version: ["3.14", "3.14t"]
 
     steps:
+      - name: Harden Runner (Endpoint Network Security)
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@v4
 
       - name: Install uv
@@ -169,6 +195,11 @@ jobs:
             python-version: "3.14t"
 
     steps:
+      - name: Harden Runner (Endpoint Network Security)
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@v4
 
       - name: Install uv
@@ -199,6 +230,11 @@ jobs:
     needs: [test-ubuntu, test-extended]
     runs-on: ubuntu-latest
     steps:
+      - name: Harden Runner (Endpoint Network Security)
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@v4
 
       - name: Install uv

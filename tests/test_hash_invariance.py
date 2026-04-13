@@ -50,7 +50,7 @@ def test_hash_invariance_semantic_flow_policy() -> None:
             target_regex_pattern="^pattern.*$",
             context_exclusion_zones=[f"zone-{z}" for z in range(5)],
             action="redact",
-            replacement_token="[REDACTED]",  # noqa: S106
+            replacement_token="[REDACTED]",  # noqa: S106 # nosec B106
         )
         rules_payload.append(rule)
 

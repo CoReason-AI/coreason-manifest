@@ -41,13 +41,13 @@ from pydantic import (
 )
 
 type JsonPrimitiveState = (
-    Annotated[str, StringConstraints(max_length=10000)]
+    str
     | int
     | float
     | bool
     | None
     | list["JsonPrimitiveState"]
-    | dict[Annotated[str, StringConstraints(max_length=255)], "JsonPrimitiveState"]
+    | dict[str, "JsonPrimitiveState"]
     | "EpistemicProxyState[Any]"
 )
 
@@ -577,42 +577,10 @@ def _inject_sim_examples(schema: dict[str, Any]) -> None:
 
 def _inject_dag_examples(schema: dict[str, Any]) -> None:
     _inject_topological_lock(schema)
-    schema["examples"] = [
-        {
-            "type": "dag",
-            "nodes": {
-                "did:coreason:system-1": {"type": "system", "description": "System orchestrator node"},
-                "did:coreason:agent-1": {"type": "agent", "description": "Primary autonomous agent"},
-                "did:coreason:human-1": {"type": "human", "description": "Human fallback operator"},
-            },
-            "edges": [
-                ["did:coreason:system-1", "did:coreason:agent-1"],
-                ["did:coreason:agent-1", "did:coreason:human-1"],
-            ],
-            "max_depth": 10,
-            "max_fan_out": 5,
-        }
-    ]
 
 
 def _inject_workflow_examples(schema: dict[str, Any]) -> None:
     _inject_topological_lock(schema)
-    schema["examples"] = [
-        {
-            "genesis_provenance": {
-                "source_event_cid": "bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdibafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi1234567890",
-                "method": "system_initialization",
-            },
-            "manifest_version": "1.0.0",
-            "topology": {
-                "type": "dag",
-                "nodes": {"did:coreason:agent-1": {"type": "agent", "description": "Primary autonomous agent"}},
-                "edges": [],
-                "max_depth": 10,
-                "max_fan_out": 5,
-            },
-        }
-    ]
 
 
 def _inject_spatial_cluster(schema: dict[str, Any]) -> None:
@@ -1149,6 +1117,28 @@ class KinematicDerivativeProfile(CoreasonBaseState):
         json_schema_extra={"coreason_topological_exemption": True}, description="The 3D rotational acceleration vector."
     )
     # Note: angular_acceleration is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
+
+
+class ContinuousManifoldMappingContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Formalizes Profunctor Optics for mapping continuous N-dimensional spatial tensors (e.g., NeRFs, VQ-VAEs) into discrete semantic graph coordinates.
+    CAUSAL AFFORDANCE: Authorizes the spatial rendering engine to mathematically fuse a physical coordinate (SE3) with an abstract SemanticNodeState.
+    EPISTEMIC BOUNDS: Strict bounding on volumetric distance and isometry preservation.
+    MCP ROUTING TRIGGERS: Cross-Modal Isomorphism, Semantic Fusion, Volumetric Projection, Profunctor Optics
+    """
+
+    topology_class: Literal["manifold_mapping"] = Field(
+        default="manifold_mapping", description="Discriminator for manifold mapping."
+    )
+    source_semantic_node_cid: NodeCIDState = Field(
+        description="The discrete semantic concept being spatially anchored."
+    )
+    target_spatial_transform: "SE3TransformProfile" = Field(
+        description="The absolute SE(3) physical coordinate mapping."
+    )
+    isometry_preservation_score: float = Field(
+        ge=0.0, le=1.0, description="Calculated geometric alignment between the semantic embedding and spatial tensor."
+    )
 
 
 class SE3TransformProfile(CoreasonBaseState):
@@ -2766,6 +2756,18 @@ class MultimodalTokenAnchorState(CoreasonBaseState):
     token_span_end: int | None = Field(
         le=1000000000, default=None, ge=0, description="The ending index in the discrete VLM context window."
     )
+    temporal_frame_start_ms: int | None = Field(
+        le=86400000,
+        default=None,
+        ge=0,
+        description="The starting millisecond coordinate in a continuous video or audio stream.",
+    )
+    temporal_frame_end_ms: int | None = Field(
+        le=86400000,
+        default=None,
+        ge=0,
+        description="The ending millisecond coordinate in a continuous video or audio stream.",
+    )
     visual_patch_hashes: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
         default_factory=list,
         description="The explicit array of SHA-256 hashes corresponding to specific VQ-VAE visual patches attended to.",
@@ -2780,8 +2782,9 @@ class MultimodalTokenAnchorState(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def validate_token_spans(self) -> Self:
-        """Mathematically enforce valid 1D token sequence geometry."""
+    def validate_spans(self) -> Self:
+        """Mathematically enforce valid 1D token sequence and continuous temporal geometry."""
+        # Validate discrete tokens
         if self.token_span_start is not None:
             if self.token_span_end is None:
                 raise ValueError("If token_span_start is defined, token_span_end MUST be defined.")
@@ -2789,6 +2792,16 @@ class MultimodalTokenAnchorState(CoreasonBaseState):
                 raise ValueError("token_span_end MUST be strictly greater than token_span_start.")
         elif self.token_span_end is not None:
             raise ValueError("token_span_end cannot be defined without a token_span_start.")
+
+        # Validate continuous time
+        if self.temporal_frame_start_ms is not None:
+            if self.temporal_frame_end_ms is None:
+                raise ValueError("If temporal_frame_start_ms is defined, temporal_frame_end_ms MUST be defined.")
+            if self.temporal_frame_end_ms <= self.temporal_frame_start_ms:
+                raise ValueError("temporal_frame_end_ms MUST be strictly greater than temporal_frame_start_ms.")
+        elif self.temporal_frame_end_ms is not None:
+            raise ValueError("temporal_frame_end_ms cannot be defined without a temporal_frame_start_ms.")
+
         return self
 
     @model_validator(mode="after")
@@ -2877,7 +2890,7 @@ class StateMutationIntent(CoreasonBaseState):
     path: Annotated[str, StringConstraints(max_length=2000)] = Field(
         description="The JSON pointer indicating the exact state vector to mutate deterministically."
     )
-    value: JsonPrimitiveState = Field(
+    value: JsonPrimitiveState | None = Field(
         default=None,
         description="The payload to insert or test, if applicable, for this deterministic state vector mutation. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
     )
@@ -3337,6 +3350,10 @@ class FederatedBilateralSLA(CoreasonBaseState):
         default_factory=list,
         description="Explicit whitelist of geographic regions or cloud enclaves where execution is structurally permitted (Payload Residency Pinning).",
     )
+    require_temporal_provenance_proofs: bool = Field(
+        default=False,
+        description="If True, incoming payloads from foreign tenants MUST be accompanied by a ZeroKnowledgeReceipt containing a valid temporal_interval_proof.",
+    )
     max_permitted_grid_carbon_intensity: float | None = Field(
         le=10000.0,
         default=None,
@@ -3490,8 +3507,10 @@ class AdversarialSimulationProfile(CoreasonBaseState):
     attack_vector: Literal["prompt_extraction", "data_exfiltration", "semantic_hijacking", "tool_poisoning"] = Field(
         description="The mathematically predictable category of structural sabotage being simulated."
     )
-    synthetic_payload: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] | str = Field(
-        max_length=100000,
+    synthetic_payload: (
+        dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState]
+        | Annotated[str, StringConstraints(max_length=100000)]
+    ) = Field(
         description="The raw poisoned text or malicious JSON-RPC schema injected into the target's context window.",
     )
     expected_firewall_trip: Annotated[str, StringConstraints(max_length=2000)] | None = Field(
@@ -5063,9 +5082,10 @@ class BargeInInterruptEvent(CoreasonBaseState):
         description="The continuous multimodal trigger (e.g., audio spike, user saying 'stop') that justified the interruption.",
     )
     retained_partial_payload: (
-        dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] | str | None
+        dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState]
+        | Annotated[str, StringConstraints(max_length=100000)]
+        | None
     ) = Field(
-        max_length=100000,
         default=None,
         description="The 'stutter' state: the incomplete fragment of thought or text appended before the kill signal. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
     )
@@ -10374,12 +10394,6 @@ class HypothesisGenerationEvent(CoreasonBaseState):
             "falsification_conditions",
             sorted(self.falsification_conditions, key=operator.attrgetter("condition_cid")),
         )
-        if getattr(self, "falsification_conditions", None) is not None:
-            object.__setattr__(
-                self,
-                "falsification_conditions",
-                sorted(self.falsification_conditions, key=operator.attrgetter("condition_cid")),
-            )
         return self
 
 
@@ -10834,8 +10848,6 @@ class TheoryOfMindSnapshot(CoreasonBaseState):
     def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "assumed_shared_beliefs", sorted(self.assumed_shared_beliefs))
         object.__setattr__(self, "identified_knowledge_gaps", sorted(self.identified_knowledge_gaps))
-        if getattr(self, "identified_knowledge_gaps", None) is not None:
-            object.__setattr__(self, "identified_knowledge_gaps", sorted(self.identified_knowledge_gaps))
         return self
 
     empathy_confidence_score: float = Field(
@@ -11454,6 +11466,21 @@ class SemanticNodeState(CoreasonBaseState):
         default=None,
         description="The cryptographic envelope enabling privacy-preserving computation directly on this node's encrypted state.",
     )
+    spatial_manifold_mappings: list["ContinuousManifoldMappingContract"] = Field(
+        default_factory=list,
+        description="Optional geometric projections binding this discrete node to a continuous spatial rendering environment.",
+    )
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        import operator
+
+        object.__setattr__(
+            self,
+            "spatial_manifold_mappings",
+            sorted(self.spatial_manifold_mappings, key=operator.attrgetter("source_semantic_node_cid")),
+        )
+        return self
 
 
 class VerifiableCredentialPresentationReceipt(CoreasonBaseState):
@@ -11525,12 +11552,6 @@ class AgentAttestationReceipt(CoreasonBaseState):
             "credential_presentations",
             sorted(self.credential_presentations, key=operator.attrgetter("issuer_did")),
         )
-        if getattr(self, "credential_presentations", None) is not None:
-            object.__setattr__(
-                self,
-                "credential_presentations",
-                sorted(self.credential_presentations, key=operator.attrgetter("issuer_did")),
-            )
         return self
 
 
@@ -13059,18 +13080,6 @@ class EpistemicQuarantineSnapshot(CoreasonBaseState):
             "capability_attestations",
             sorted(self.capability_attestations, key=operator.attrgetter("attestation_cid")),
         )
-        if getattr(self, "theory_of_mind_matrices", None) is not None:
-            object.__setattr__(
-                self,
-                "theory_of_mind_matrices",
-                sorted(self.theory_of_mind_matrices, key=operator.attrgetter("target_agent_cid")),
-            )
-        if getattr(self, "capability_attestations", None) is not None:
-            object.__setattr__(
-                self,
-                "capability_attestations",
-                sorted(self.capability_attestations, key=operator.attrgetter("attestation_cid")),
-            )
         return self
 
 
@@ -13105,6 +13114,13 @@ class ZeroKnowledgeReceipt(CoreasonBaseState):
     cryptographic_blob: Annotated[str, StringConstraints(max_length=5000000)] = Field(
         description="The base64-encoded succinct cryptographic proof payload."
     )
+    temporal_interval_proof: Annotated[str, StringConstraints(max_length=5000000)] | None = Field(
+        default=None,
+        description="The zk-SNARK payload specific to time inequalities. Proves chronological sequence without exposing exact timestamps.",
+    )
+    temporal_circuit_hash: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
+    ) = Field(default=None, description="The SHA-256 hash of the temporal verification circuit.")
     latent_state_commitments: dict[
         Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=100)]
     ] = Field(
@@ -15160,3 +15176,4 @@ TemporalConflictResolutionPolicy.model_rebuild()
 TemporalEdgeInvalidationIntent.model_rebuild()
 TemporalGraphCRDTManifest.model_rebuild()
 MCPToolDefinition.model_rebuild()
+ContinuousManifoldMappingContract.model_rebuild()

@@ -1,0 +1,74 @@
+name: Advanced Security (Malware & Secrets)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  secret-scan:
+    name: High-Entropy Secret Sweeper
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Harden Runner (Endpoint Network Security)
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Deep clone for complete history scanning
+      
+      - name: TruffleHog OSS
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+
+  malware-scan:
+    name: Repository-Wide Malware Scan (ClamAV)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Harden Runner (Endpoint Network Security)
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@v4
+      
+      - name: Install ClamAV
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clamav clamav-daemon
+          sudo systemctl stop clamav-freshclam
+          sudo freshclam
+      
+      - name: Run ClamAV Scan
+        run: clamscan -r -i ./
+        # Fails if an infection is found.
+
+  license-firewall:
+    name: Dependency License Firewall (Copyleft Block)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Harden Runner (Endpoint Network Security)
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Dependency Review & Legal Firewall
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: 'high'
+          deny-licenses: 'GPL-2.0, GPL-3.0, AGPL-3.0, OSL-3.0, CPAL-1.0'
