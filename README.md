@@ -1,12 +1,31 @@
 # CoReason Manifest
 
-[![PyPI Version](https://img.shields.io/pypi/v/coreason_manifest?style=flat-square&logo=pypi&logoColor=white&label=PyPI)](https://pypi.org/project/coreason_manifest/)
-[![Python Versions](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2FCoReason-AI%2Fcoreason-manifest%2Fmain%2Fpyproject.toml&style=flat-square&logo=python&logoColor=white&label=Python)](https://pypi.org/project/coreason_manifest/)
+[![PyPI](https://img.shields.io/pypi/v/coreason_manifest?style=flat-square&logo=pypi&logoColor=white&label=PyPI)](https://pypi.org/project/coreason_manifest/)
+[![PyPI Downloads](https://img.shields.io/pypi/dm/coreason_manifest?style=flat-square)](https://pypi.org/project/coreason_manifest/)
+[![Crates.io](https://img.shields.io/crates/v/coreason-manifest?style=flat-square&logo=rust&label=Crates.io)](https://crates.io/crates/coreason-manifest)
+[![Crates Downloads](https://img.shields.io/crates/dv/coreason-manifest?style=flat-square&logo=rust)](https://crates.io/crates/coreason-manifest)
+[![npm](https://img.shields.io/npm/v/@coreason/coreason-manifest?style=flat-square&logo=npm&label=npm)](https://www.npmjs.com/package/@coreason/coreason-manifest)
+[![npm Downloads](https://img.shields.io/npm/dw/@coreason/coreason-manifest?style=flat-square&logo=npm)](https://www.npmjs.com/package/@coreason/coreason-manifest)
+[![npm Types](https://img.shields.io/npm/types/@coreason/coreason-manifest?style=flat-square&logo=typescript)](https://www.npmjs.com/package/@coreason/coreason-manifest)
+[![Node Version](https://img.shields.io/node/v/@coreason/coreason-manifest?style=flat-square&logo=nodedotjs)](https://www.npmjs.com/package/@coreason/coreason-manifest)
+
 [![CI](https://img.shields.io/github/actions/workflow/status/CoReason-AI/coreason-manifest/ci.yml?branch=main&style=flat-square&logo=github&label=CI)](https://github.com/CoReason-AI/coreason-manifest/actions/workflows/ci.yml)
-[![Codecov](https://img.shields.io/codecov/c/github/CoReason-AI/coreason-manifest?style=flat-square&logo=codecov&logoColor=white&label=Coverage)](https://app.codecov.io/gh/CoReason-AI/coreason-manifest)
+[![Coverage](https://img.shields.io/codecov/c/github/CoReason-AI/coreason-manifest?style=flat-square&logo=codecov&logoColor=white&label=Coverage)](https://app.codecov.io/gh/CoReason-AI/coreason-manifest)
+[![Security Audit](https://img.shields.io/github/actions/workflow/status/CoReason-AI/coreason-manifest/security.yml?branch=main&style=flat-square&logo=github&label=Security%20Audit)](https://github.com/CoReason-AI/coreason-manifest/actions/workflows/security.yml)
+[![CodeQL](https://img.shields.io/github/actions/workflow/status/CoReason-AI/coreason-manifest/codeql.yml?branch=main&style=flat-square&logo=github&label=CodeQL)](https://github.com/CoReason-AI/coreason-manifest/actions/workflows/codeql.yml)
+[![Security: Bandit](https://img.shields.io/badge/security-bandit-yellow.svg?style=flat-square)](https://github.com/PyCQA/bandit)
+[![SLSA Level 3](https://img.shields.io/badge/SLSA-Level%203-blue?style=flat-square&logo=slsa)](https://slsa.dev/spec/v1.0/levels)
+[![Signed by Sigstore](https://img.shields.io/badge/Signed_by-Sigstore-blueviolet?style=flat-square&logo=sigstore)](https://sigstore.dev/)
+[![SBOM](https://img.shields.io/badge/SBOM-SPDX_Included-brightgreen?style=flat-square&logo=databricks)](https://spdx.dev/)
 [![OpenSSF Scorecard](https://img.shields.io/ossf-scorecard/github.com/CoReason-AI/coreason-manifest?style=flat-square&label=OpenSSF)](https://scorecard.dev/viewer/?uri=github.com/CoReason-AI/coreason-manifest)
+
+[![Python Versions](https://img.shields.io/pypi/pyversions/coreason_manifest?style=flat-square&logo=python&logoColor=white)](https://pypi.org/project/coreason_manifest/)
+[![Status](https://img.shields.io/pypi/status/coreason_manifest?style=flat-square)](https://pypi.org/project/coreason_manifest/)
+[![Format](https://img.shields.io/pypi/format/coreason_manifest?style=flat-square)](https://pypi.org/project/coreason_manifest/)
 [![License](https://img.shields.io/badge/License-Prosperity%203.0-blue?style=flat-square)](./LICENSE)
 [![Security Policy](https://img.shields.io/badge/Security-Policy-green?style=flat-square)](./SECURITY.md)
+
+[![Codecov Sunburst](https://codecov.io/gh/CoReason-AI/coreason-manifest/graphs/sunburst.svg)](https://app.codecov.io/gh/CoReason-AI/coreason-manifest)
 
 > **"This package is the definitive source of truth. If it isn't in the manifest, it doesn't exist. If it violates the manifest, it doesn't run."**
 

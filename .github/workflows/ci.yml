@@ -124,6 +124,9 @@ jobs:
       - name: Install Dependencies
         run: uv sync
 
+      - name: Bandit Security Check
+        run: uvx bandit -r src/ scripts/ tests/ -s B101,B404
+
   test-ubuntu:
     name: Test (Ubuntu) - Python ${{ matrix.python-version }}
     needs: [lint-and-audit, schema-contracts]
