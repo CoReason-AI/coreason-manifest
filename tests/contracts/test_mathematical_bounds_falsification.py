@@ -60,11 +60,11 @@ def test_superposition_variance_zero() -> None:
     obj = UtilityJustificationGraphReceipt.model_construct(
         optimizing_vectors={"a": 1.0},
         degrading_vectors={"b": 1.0},
-        ensemble_spec={"concurrent_branch_cids": ["did:example:branch"], "fusion_function": "weighted_consensus"},
+        ensemble_spec={"concurrent_branch_cids": ["did:example:branch"], "fusion_function": "weighted_consensus"},  # type: ignore[arg-type]
         superposition_variance_threshold=0.0,
     )
     with pytest.raises(ValueError, match=r"variance threshold is 0.0"):
-        obj._enforce_mathematical_interlocks()
+        obj._enforce_mathematical_interlocks()  # type: ignore[operator]
 
 
 def test_tensor_poisoning_inf() -> None:
@@ -75,4 +75,4 @@ def test_tensor_poisoning_inf() -> None:
         ensemble_spec=None,
     )
     with pytest.raises(ValueError, match="Tensor Poisoning Detected"):
-        obj._enforce_mathematical_interlocks()
+        obj._enforce_mathematical_interlocks()  # type: ignore[operator]
