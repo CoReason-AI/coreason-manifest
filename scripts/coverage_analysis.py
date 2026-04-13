@@ -11,6 +11,7 @@
 """Analyze coverage gaps in ontology.py by examining uncovered lines."""
 
 import sys
+
 import defusedxml.ElementTree as DefusedElementTree
 
 tree = DefusedElementTree.parse("coverage.xml")
