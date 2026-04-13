@@ -42,6 +42,7 @@ def main() -> None:
     npx_cmd = "npx.cmd" if os.name == "nt" else "npx"
 
     import shutil
+
     if not shutil.which(npx_cmd):
         print(f"Warning: {npx_cmd} not found in PATH. Skipping cross-language bindings generation.")
         return
