@@ -85,7 +85,7 @@ def test_adversarial_simulation_string_overflow() -> None:
     """
     massive_string = "a" * 100001
 
-    with pytest.raises(ValidationError, match="Value should have at most 100000 items after validation"):
+    with pytest.raises(ValidationError, match="String should have at most 100000 characters"):
         AdversarialSimulationProfile(
             simulation_cid="sim-chaos-003",
             target_node_cid="did:coreason:target-node:123",
