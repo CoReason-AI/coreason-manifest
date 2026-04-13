@@ -14949,7 +14949,7 @@ class EpistemicLedgerState(CoreasonBaseState):
     def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "history", sorted(self.history, key=lambda x: getattr(x, "timestamp", 0.0)))
 
-        event_times = {getattr(event, "event_cid"): getattr(event, "timestamp") for event in self.history if hasattr(event, "event_cid") and hasattr(event, "timestamp")}
+        event_times = {event.event_cid: event.timestamp for event in self.history if hasattr(event, "event_cid") and hasattr(event, "timestamp")}  # type: ignore[union-attr]
         for event in self.history:
             if hasattr(event, "causal_attributions") and getattr(event, "causal_attributions", None):
                 for attr in getattr(event, "causal_attributions", []):
