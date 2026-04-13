@@ -1151,6 +1151,28 @@ class KinematicDerivativeProfile(CoreasonBaseState):
     # Note: angular_acceleration is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
 
 
+class ContinuousManifoldMappingContract(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Formalizes Profunctor Optics for mapping continuous N-dimensional spatial tensors (e.g., NeRFs, VQ-VAEs) into discrete semantic graph coordinates.
+    CAUSAL AFFORDANCE: Authorizes the spatial rendering engine to mathematically fuse a physical coordinate (SE3) with an abstract SemanticNodeState.
+    EPISTEMIC BOUNDS: Strict bounding on volumetric distance and isometry preservation.
+    MCP ROUTING TRIGGERS: Cross-Modal Isomorphism, Semantic Fusion, Volumetric Projection, Profunctor Optics
+    """
+
+    topology_class: Literal["manifold_mapping"] = Field(
+        default="manifold_mapping", description="Discriminator for manifold mapping."
+    )
+    source_semantic_node_cid: NodeCIDState = Field(
+        description="The discrete semantic concept being spatially anchored."
+    )
+    target_spatial_transform: "SE3TransformProfile" = Field(
+        description="The absolute SE(3) physical coordinate mapping."
+    )
+    isometry_preservation_score: float = Field(
+        ge=0.0, le=1.0, description="Calculated geometric alignment between the semantic embedding and spatial tensor."
+    )
+
+
 class SE3TransformProfile(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Represents a strict rigid-body transformation within the Special Euclidean group SE(3). Projects an absolute mathematical coordinate encompassing both translation ($\mathbb{R}^3$) and rotation ($S^3$).
@@ -2766,6 +2788,18 @@ class MultimodalTokenAnchorState(CoreasonBaseState):
     token_span_end: int | None = Field(
         le=1000000000, default=None, ge=0, description="The ending index in the discrete VLM context window."
     )
+    temporal_frame_start_ms: int | None = Field(
+        le=86400000,
+        default=None,
+        ge=0,
+        description="The starting millisecond coordinate in a continuous video or audio stream.",
+    )
+    temporal_frame_end_ms: int | None = Field(
+        le=86400000,
+        default=None,
+        ge=0,
+        description="The ending millisecond coordinate in a continuous video or audio stream.",
+    )
     visual_patch_hashes: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
         default_factory=list,
         description="The explicit array of SHA-256 hashes corresponding to specific VQ-VAE visual patches attended to.",
@@ -2780,8 +2814,9 @@ class MultimodalTokenAnchorState(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def validate_token_spans(self) -> Self:
-        """Mathematically enforce valid 1D token sequence geometry."""
+    def validate_spans(self) -> Self:
+        """Mathematically enforce valid 1D token sequence and continuous temporal geometry."""
+        # Validate discrete tokens
         if self.token_span_start is not None:
             if self.token_span_end is None:
                 raise ValueError("If token_span_start is defined, token_span_end MUST be defined.")
@@ -2789,6 +2824,16 @@ class MultimodalTokenAnchorState(CoreasonBaseState):
                 raise ValueError("token_span_end MUST be strictly greater than token_span_start.")
         elif self.token_span_end is not None:
             raise ValueError("token_span_end cannot be defined without a token_span_start.")
+
+        # Validate continuous time
+        if self.temporal_frame_start_ms is not None:
+            if self.temporal_frame_end_ms is None:
+                raise ValueError("If temporal_frame_start_ms is defined, temporal_frame_end_ms MUST be defined.")
+            if self.temporal_frame_end_ms <= self.temporal_frame_start_ms:
+                raise ValueError("temporal_frame_end_ms MUST be strictly greater than temporal_frame_start_ms.")
+        elif self.temporal_frame_end_ms is not None:
+            raise ValueError("temporal_frame_end_ms cannot be defined without a temporal_frame_start_ms.")
+
         return self
 
     @model_validator(mode="after")
@@ -11450,6 +11495,21 @@ class SemanticNodeState(CoreasonBaseState):
         default=None,
         description="The cryptographic envelope enabling privacy-preserving computation directly on this node's encrypted state.",
     )
+    spatial_manifold_mappings: list["ContinuousManifoldMappingContract"] = Field(
+        default_factory=list,
+        description="Optional geometric projections binding this discrete node to a continuous spatial rendering environment.",
+    )
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        import operator
+
+        object.__setattr__(
+            self,
+            "spatial_manifold_mappings",
+            sorted(self.spatial_manifold_mappings, key=operator.attrgetter("source_semantic_node_cid")),
+        )
+        return self
 
 
 class VerifiableCredentialPresentationReceipt(CoreasonBaseState):
@@ -15145,3 +15205,4 @@ TemporalConflictResolutionPolicy.model_rebuild()
 TemporalEdgeInvalidationIntent.model_rebuild()
 TemporalGraphCRDTManifest.model_rebuild()
 MCPToolDefinition.model_rebuild()
+ContinuousManifoldMappingContract.model_rebuild()
