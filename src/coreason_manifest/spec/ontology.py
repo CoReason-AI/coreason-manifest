@@ -7025,8 +7025,8 @@ class EpistemicLean4Premise(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Calculus of Inductive Constructions, Dependent Type Theory, Theorem Proving, Auto-formalization
     """
 
-    target_theorem: str
-    tactics_script: str
+    target_theorem: Annotated[str, StringConstraints(max_length=65536)]
+    tactics_script: Annotated[str, StringConstraints(max_length=100000)]
     topology_class: Literal["epistemic_lean4_premise"] = Field(default="epistemic_lean4_premise")
 
 
@@ -7057,7 +7057,7 @@ class EpistemicLogicPremise(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Answer Set Programming, Combinatorial Constraint Satisfaction, Clingo, Combinatorial Domain
     """
 
-    asp_program: str
+    asp_program: Annotated[str, StringConstraints(max_length=65536)]
     topology_class: Literal["epistemic_logic_premise"] = Field(default="epistemic_logic_premise")
 
 
