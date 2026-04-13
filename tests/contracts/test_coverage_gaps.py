@@ -534,7 +534,7 @@ def _discover_payload_bounds_delegates() -> list[tuple[str, type[o.CoreasonBaseS
             try:
                 target = method.fget if isinstance(method, property) else method
                 source = inspect.getsource(cast("Callable[..., Any]", target))
-            except (TypeError, OSError):
+            except TypeError, OSError:
                 continue
             if "_validate_payload_bounds" in source and "def enforce_payload_topology" in source:
                 results.append((name, cls, attr_name))
@@ -576,9 +576,7 @@ def test_payload_delegate_coverage(
 # Each entry: (test_id, cls, validator_name, happy_kwargs, sad_kwargs, error_match)
 
 
-def _falsification_registry() -> (
-    list[tuple[str, type[o.CoreasonBaseState], str, dict[str, Any], dict[str, Any], str]]
-):
+def _falsification_registry() -> list[tuple[str, type[o.CoreasonBaseState], str, dict[str, Any], dict[str, Any], str]]:
     """Static registry of validator falsification cases.
 
     Each entry provides the minimal kwargs needed to exercise both the happy
