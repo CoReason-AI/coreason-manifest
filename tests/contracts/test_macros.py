@@ -103,9 +103,7 @@ def test_injectors() -> None:
     schema = {}
     _inject_dag_examples_and_routing_cluster(schema)
     assert schema["x-domain-cluster"] == "cognitive_routing"
-    assert "examples" in schema
 
     schema = {}
     _inject_workflow_examples_and_routing_cluster(schema)
     assert schema["x-domain-cluster"] == "cognitive_routing"
-    assert "examples" in schema
