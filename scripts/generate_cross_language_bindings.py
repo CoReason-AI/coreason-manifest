@@ -62,7 +62,7 @@ def main() -> None:
         f.write(rust_code)
 
     print("Formatting TypeScript...")
-    subprocess.run([npx_cmd, "prettier", "--write", ts_out], check=True, env=node_env)  # noqa: S603, S607 # nosec B603 B607
+    subprocess.run([npx_cmd, "prettier", "--write", ts_out], check=True, env=node_env)  # noqa: S603 # nosec B603 B607
 
     print("Formatting Rust...")
     subprocess.run(["cargo", "fmt", "--manifest-path", "bindings/rust/Cargo.toml"], check=True)  # noqa: S607 # nosec B603 B607
