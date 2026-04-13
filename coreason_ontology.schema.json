@@ -18878,7 +18878,14 @@
           "type": "string"
         },
         "value": {
-          "$ref": "#/$defs/JsonPrimitiveState",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/JsonPrimitiveState"
+            },
+            {
+              "type": "null"
+            }
+          ],
           "default": null,
           "description": "The payload to insert or test, if applicable, for this deterministic state vector mutation. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion."
         },
