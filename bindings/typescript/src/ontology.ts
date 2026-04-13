@@ -3594,12 +3594,10 @@ export type TargetEventCid = string;
  * The 'stutter' state: the incomplete fragment of thought or text appended before the kill signal. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.
  */
 export type RetainedPartialPayload =
-  | (
-      | {
-          [k: string]: JsonPrimitiveState;
-        }
-      | string
-    )
+  | {
+      [k: string]: JsonPrimitiveState;
+    }
+  | string
   | null;
 /**
  * Explicit instruction to the orchestrator on how to patch the shared state blackboard with the partial payload.
@@ -5758,16 +5756,6 @@ export type FallbackHeuristic = "chronological" | "entity_centric" | "semantic_c
  * MCP ROUTING TRIGGERS: IEEE 754, Von Neumann Architecture, Tensor Calculus, GPU VRAM Allocation, Memory Hierarchy
  */
 export type TensorStructuralFormatProfile1 = "float32" | "float64" | "int8" | "uint8" | "int32" | "int64";
-/**
- * AGENT INSTRUCTION: A rigid string enumeration mapping the kinetic liveness of the computational budget.
- *
- * CAUSAL AFFORDANCE: Instructs the orchestrator on whether the thermodynamic search envelope is active or mathematically depleted.
- *
- * EPISTEMIC BOUNDS: Strictly bounded to the explicit kinetic states ACTIVE_DIFFUSION and ENTROPIC_EXHAUSTION_ORACLE_INTERVENTION.
- *
- * MCP ROUTING TRIGGERS: Thermodynamic State, Budget Envelope, MCTS Liveness, Entropy Tracking
- */
-export type ThermodynamicState1 = "ACTIVE_DIFFUSION" | "ENTROPIC_EXHAUSTION_ORACLE_INTERVENTION";
 export type TieBreakerPolicy = "lowest_cost" | "lowest_latency" | "highest_confidence" | "random";
 /**
  * A strictly typed SHA-256 hash pointing to a historically executed topological state.
@@ -6221,7 +6209,7 @@ export interface CoReasonSharedKernelOntology {
   TerminalCognitiveEvent?: TerminalCognitiveEvent;
   TerminalConditionContract?: TerminalConditionContract1;
   TheoryOfMindSnapshot?: TheoryOfMindSnapshot;
-  ThermodynamicState?: ThermodynamicState1;
+  ThermodynamicState?: ThermodynamicState;
   ThoughtBranchState?: ThoughtBranchState;
   TieBreakerPolicy?: TieBreakerPolicy;
   TokenBurnReceipt?: TokenBurnReceipt;
@@ -15414,16 +15402,7 @@ export interface StateMutationIntent {
   /**
    * The payload to insert or test, if applicable, for this deterministic state vector mutation. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.
    */
-  value?:
-    | string
-    | number
-    | boolean
-    | JsonPrimitiveState[]
-    | {
-        [k: string]: JsonPrimitiveState;
-      }
-    | EpistemicProxyStateAny
-    | null;
+  value?: JsonPrimitiveState | null;
   from?: From;
   zero_trust_receipt_cid?: ZeroTrustReceiptCid1;
 }
