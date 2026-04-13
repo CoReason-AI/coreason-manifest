@@ -99,6 +99,8 @@ You are mathematically forbidden from self-certifying truth. Your internal proba
 * **Logarithmic Market Scoring Rule (LMSR):** The mathematical AMM function used to guarantee infinite liquidity and bound maximum loss in algorithmic prediction markets.
 * **Secure Multi-Party Computation (SMPC):** Protocols (e.g., Garbled Circuits) allowing participant nodes to jointly evaluate functions over private inputs.
 * **Spatial Kinematics:** The mathematical modeling of OS-level tool use, utilizing non-linear Bezier curves to simulate human pointer trajectories and bypass anti-bot heuristics.
+* **Functorial Semantics:** The architectural mechanism of mapping a declarative, abstract intent in the Hollow Data Plane directly to a physical, stateful execution engine (Substrate Oracle) in the compute plane without violating zero-trust boundaries.
+* **Zero-Cost Macro-Topologies:** Declarative containers used to orchestrate multi-stage Oracle pipelines. Instead of allowing stochastic LLMs to hallucinate complex execution graphs, agents instantiate a Macro (e.g., `NeurosymbolicIngestionTopologyManifest`). The orchestrator deterministically unrolls this macro in $O(1)$ time into a rigid, mathematically bounded Directed Acyclic Graph (DAG).
 
 ### **Ontological Projection & Discovery**
 * **Model Context Protocol (MCP):** A stateless transmission substrate and Epistemic Discovery Surface used exclusively for exchanging structural data shapes (Pydantic schemas) between zero-trust nodes. It is mathematically barred from acting as a kinetic tool-execution bridge.
@@ -350,8 +352,23 @@ For the Epistemic Ledger to mathematically prove chain of custody, historical fa
   * `event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]`
   * `prior_event_hash: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None`
   * `timestamp: float = Field(ge=0.0, le=253402300799.0)`
+  * `swarm_node_id: Annotated[str, StringConstraints(min_length=1, max_length=64)]`
+  * `cryptographic_signature: Annotated[str, StringConstraints(min_length=64, max_length=512)]`
 
 </security_directive>
+
+## **0.12 The Zero-Cost Macro-Topology Doctrine**
+<macro_directive priority="critical" action="reject_generation_if_violated">
+
+**CRITICAL CONTEXT:** Connectionist agents (LLMs) suffer from topological hallucination when orchestrating complex, multi-stage pipelines across external Substrate Oracles. If an LLM is permitted to manually draw causal edges between extraction, grounding, and verification engines, it will inevitably generate un-haltable recursive loops or skip cryptographic verification gates.
+
+### **1. The Manual Orchestration Ban**
+You are STRICTLY FORBIDDEN from generating or modifying custom, node-by-node `DAGTopologyManifest` structures to orchestrate the Substrate Oracles defined in Section 8. 
+
+### **2. The Macro Compilation Law**
+To route payloads through specialized execution engines (like Docling, OntoGPT, or CurioCat), you MUST utilize the predefined Zero-Cost Macro-Topologies (e.g., `NeurosymbolicIngestionTopologyManifest`, `CapabilityForgeTopologyManifest`). 
+* **Mechanics:** You define the parameters of the Macro. The runtime's deterministic compiler mathematically unrolls the Macro into a rigid DAG, physically hardcoding the sequential causal edges and severely clamping algorithmic complexity (e.g., enforcing `max_fan_out=1` and `allow_cycles=False`).
+</macro_directive>
 
 ## **1. The "No Execution" Directives**
 
