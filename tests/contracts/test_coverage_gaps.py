@@ -91,7 +91,7 @@ def _discover_canonical_sort_validators() -> list[
 
             try:
                 target = method.fget if isinstance(method, property) else method
-                source = inspect.getsource(cast("Callable[..., Any]", target))
+                source = inspect.getsource(cast("Any", target))
             except TypeError, OSError:
                 continue
 
@@ -532,7 +532,7 @@ def _discover_payload_bounds_delegates() -> list[tuple[str, type[o.CoreasonBaseS
                 continue
             try:
                 target = method.fget if isinstance(method, property) else method
-                source = inspect.getsource(cast("Callable[..., Any]", target))
+                source = inspect.getsource(cast("Any", target))
             except TypeError, OSError:
                 continue
             if "_validate_payload_bounds" in source and "def enforce_payload_topology" in source:
