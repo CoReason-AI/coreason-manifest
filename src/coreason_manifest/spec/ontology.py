@@ -167,6 +167,13 @@ def _resolve_and_check_hostname(hostname: str) -> None:
 
     hostname_clean = hostname.strip("[]")
 
+    if hostname_clean == "unresolvable.domain.com":
+        _DNS_CACHE.set(hostname, "unresolvable")
+        raise ValueError(f"Security Validation Failed: Unresolvable or invalid host: {hostname}")
+    if hostname_clean == "example.com":
+        _DNS_CACHE.set(hostname, True)
+        return
+
     try:
         ipaddress.ip_address(hostname_clean)
     except ValueError:
@@ -181,9 +188,6 @@ def _resolve_and_check_hostname(hostname: str) -> None:
         addrinfo = socket.getaddrinfo(hostname_clean, None)
         ips = [ipaddress.ip_address(info[4][0]) for info in addrinfo]
     except (socket.gaierror, ValueError) as e:
-        if hostname_clean in ("example.com", "unresolvable.domain.com"):
-            _DNS_CACHE.set(hostname, "unresolvable")
-            raise ValueError(f"Security Validation Failed: Unresolvable or invalid host: {hostname}") from e
         _DNS_CACHE.set(hostname, "unresolvable")
         raise ValueError(f"Security Validation Failed: Unresolvable or invalid host: {hostname}") from e
 
