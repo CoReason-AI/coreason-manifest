@@ -16,8 +16,8 @@ from typing import Annotated, Any, Union, get_args, get_origin
 
 from pydantic import BaseModel
 
-# Import all models to ensure they are registered
-from coreason_manifest.spec.ontology import *  # noqa: F403
+# Import ontology module to ensure models are registered
+import coreason_manifest.spec.ontology  # noqa: F401
 from coreason_manifest.spec.ontology import CoreasonBaseState
 
 

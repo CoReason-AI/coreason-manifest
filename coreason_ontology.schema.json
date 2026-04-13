@@ -1145,6 +1145,7 @@
           "hypothesis": "#/$defs/HypothesisGenerationEvent",
           "intent_classification": "#/$defs/IntentClassificationReceipt",
           "lean4_verification_receipt": "#/$defs/Lean4VerificationReceipt",
+          "mcp_tool_definition": "#/$defs/MCPToolDefinition",
           "normative_drift": "#/$defs/NormativeDriftEvent",
           "observation": "#/$defs/ObservationEvent",
           "ontological_reification": "#/$defs/OntologicalReificationReceipt",
@@ -1166,6 +1167,7 @@
       "oneOf": [
         {
           "$ref": "#/$defs/TemporalGraphCRDTManifest"
+          "$ref": "#/$defs/MCPToolDefinition"
         },
         {
           "$ref": "#/$defs/CrosswalkResolutionReceipt"
@@ -13837,6 +13839,72 @@
       "title": "MCPServerManifest",
       "type": "object"
     },
+    "MCPToolDefinition": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A formal Substrate Projection representing an executable Model Context Protocol (MCP) tool.",
+      "properties": {
+        "topology_class": {
+          "const": "mcp_tool_definition",
+          "default": "mcp_tool_definition",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "event_cid": {
+          "default": "mcp_tool_cid",
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The RFC 8785 Canonical hash of the immediate causal ancestor event. Null for genesis nodes.",
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "default": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "name": {
+          "maxLength": 64,
+          "pattern": "^[a-zA-Z0-9_-]+$",
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 2048,
+          "title": "Description",
+          "type": "string"
+        },
+        "inputSchema": {
+          "additionalProperties": true,
+          "description": "The JSON Schema payload mirroring our Pydantic limits.",
+          "title": "Inputschema",
+          "type": "object"
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "inputSchema"
+      ],
+      "title": "MCPToolDefinition",
+      "type": "object"
+    },
     "MCPTransportProfile": {
       "anyOf": [
         {
@@ -14543,6 +14611,17 @@
             "swi_prolog"
           ],
           "title": "Solver Protocol",
+          "type": "string"
+        },
+        "execution_substrate": {
+          "default": "mcp_local",
+          "description": "The physical transport layer topology for the execution.",
+          "enum": [
+            "mcp_local",
+            "mcp_remote",
+            "direct_ffi"
+          ],
+          "title": "Execution Substrate",
           "type": "string"
         },
         "expected_proof_receipt_cid": {

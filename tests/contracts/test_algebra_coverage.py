@@ -681,7 +681,6 @@ def test_transmutation_optical_sla_required() -> None:
 
 
 def test_edge_evidence_or_sla() -> None:
-
     import pytest
     from pydantic import ValidationError
 
@@ -716,7 +715,6 @@ def test_edge_evidence_or_sla() -> None:
 
 
 def test_canonical_sorts() -> None:
-
     # DocumentKnowledgeGraphManifest
     from coreason_manifest.spec.ontology import (
         BeliefModulationReceipt,

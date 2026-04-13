@@ -35,6 +35,7 @@ from pydantic import AnyUrl, BaseModel, ValidationError
 from pydantic.json_schema import models_json_schema
 
 import coreason_manifest.spec.ontology as ontology
+from coreason_manifest.spec.mcp import MCPToolDefinition
 from coreason_manifest.spec.ontology import (
     AnyTopologyManifest,
     CognitiveStateProfile,
@@ -53,6 +54,7 @@ from coreason_manifest.spec.ontology import (
 )
 
 SCHEMA_REGISTRY: dict[str, type[BaseModel]] = {
+    "mcp_tool_definition": MCPToolDefinition,
     "step8_vision": DocumentLayoutManifest,
     "state_differential": StateMutationIntent,
     "cognitive_sync": CognitiveStateProfile,
