@@ -2944,14 +2944,15 @@ class TemporalGraphCRDTManifest(CoreasonBaseState):
     EPISTEMIC BOUNDS: Cryptographically anchored by diff_cid. CRDT arrays are deterministically sorted via model_validator.
     MCP ROUTING TRIGGERS: Conflict-Free Replicated Data Types, State-based Semilattice, Eventual Consistency, G-Set
     """
+
     topology_class: Literal["temporal_graph_crdt"] = Field(
         default="temporal_graph_crdt", description="Discriminator for temporal graph crdt."
     )
     diff_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
         description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark."
     )
-    author_node_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="The exact Lineage Watermark of the agent that authored this state mutation."
+    author_node_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
+        Field(description="The exact Lineage Watermark of the agent that authored this state mutation.")
     )
     lamport_timestamp: int = Field(
         le=1000000000, ge=0, description="Strict scalar logical clock governing distributed ordering."
@@ -2962,15 +2963,18 @@ class TemporalGraphCRDTManifest(CoreasonBaseState):
     add_set: list[NodeCIDState] = Field(
         default_factory=list, description="The Grow-Only Set (G-Set) of newly transmutated semantic vertices."
     )
-    terminate_set: list['TemporalEdgeInvalidationIntent'] = Field(
+    terminate_set: list["TemporalEdgeInvalidationIntent"] = Field(
         default_factory=list, description="The set of non-monotonic timeline caps."
     )
 
     @model_validator(mode="after")
     def _enforce_canonical_sort_crdt(self) -> Self:
         import operator
+
         object.__setattr__(self, "add_set", sorted(self.add_set))
-        object.__setattr__(self, "terminate_set", sorted(self.terminate_set, key=operator.attrgetter("target_edge_cid")))
+        object.__setattr__(
+            self, "terminate_set", sorted(self.terminate_set, key=operator.attrgetter("target_edge_cid"))
+        )
         return self
 
 
@@ -6181,6 +6185,7 @@ class TemporalConflictResolutionPolicy(CoreasonBaseState):
     EPISTEMIC BOUNDS: Constrained to strict algebraic resolution profiles.
     MCP ROUTING TRIGGERS: Conflict Resolution, Graph CRDT, Merge Algebra, Eventual Consistency
     """
+
     merge_algebra: Literal["set_union", "lamport_dominance", "vector_clock_dominance"] = Field(
         description="The formal mathematical operation used to resolve topological forks."
     )
