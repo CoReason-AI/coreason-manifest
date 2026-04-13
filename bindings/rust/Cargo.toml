@@ -1,5 +1,5 @@
 [package]
-name = "coreason-manifest-types"
+name = "coreason-manifest"
 version = "1.0.0"
 edition = "2021"
 description = "Rust bindings for the CoReason Hollow Data Plane."
