@@ -41,13 +41,13 @@ from pydantic import (
 )
 
 type JsonPrimitiveState = (
-    Annotated[str, StringConstraints(max_length=10000)]
+    str
     | int
     | float
     | bool
     | None
     | list["JsonPrimitiveState"]
-    | dict[Annotated[str, StringConstraints(max_length=255)], "JsonPrimitiveState"]
+    | dict[str, "JsonPrimitiveState"]
     | "EpistemicProxyState[Any]"
 )
 
