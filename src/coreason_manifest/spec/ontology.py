@@ -14416,7 +14416,7 @@ class EpistemicZeroTrustReceipt(CoreasonBaseState):
         return self
 
 
-from coreason_manifest.spec.mcp import MCPToolDefinition
+from coreason_manifest.spec.mcp import MCPToolDefinition  # noqa: E402
 
 type AnyStateEvent = Annotated[
     MCPToolDefinition
