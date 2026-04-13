@@ -156,7 +156,3 @@ fix_*.py
 tmp_*.py
 .ruff_cache/
 .benchmarks/
-
-# Node.js
-node_modules/
-package-lock.json
