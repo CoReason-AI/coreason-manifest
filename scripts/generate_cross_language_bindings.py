@@ -22,9 +22,11 @@ def main() -> None:
     env["npm_config_yes"] = "true"
     env["npm_config_loglevel"] = "error"
 
+    use_shell = os.name == "nt"
+
     print("Generating TypeScript bindings...")
     ts_cmd = ["npx", "quicktype", "-s", "schema", schema_file, "-o", ts_out, "--just-types"]
-    subprocess.run(ts_cmd, check=True, env=env)  # noqa: S603 # nosec B603
+    subprocess.run(ts_cmd, check=True, env=env, shell=use_shell)  # noqa: S603 # nosec B603
 
     print("Generating Rust bindings...")
     rust_cmd = [
@@ -41,7 +43,7 @@ def main() -> None:
         "--derive-clone",
         "--derive-partial-eq",
     ]
-    subprocess.run(rust_cmd, check=True, env=env)  # noqa: S603 # nosec B603
+    subprocess.run(rust_cmd, check=True, env=env, shell=use_shell)  # noqa: S603 # nosec B603
 
     print("Post-processing Rust bindings...")
     with open(rust_out, encoding="utf-8") as f:
@@ -53,10 +55,10 @@ def main() -> None:
         f.write(rust_code)
 
     print("Formatting TypeScript...")
-    subprocess.run(["npx", "prettier", "--write", ts_out], check=True, env=env)  # noqa: S603, S607 # nosec B603 B607
+    subprocess.run(["npx", "prettier", "--write", ts_out], check=True, env=env, shell=use_shell)  # noqa: S603, S607 # nosec B603 B607
 
     print("Formatting Rust...")
-    subprocess.run(["cargo", "fmt", "--manifest-path", "bindings/rust/Cargo.toml"], check=True)  # noqa: S607 # nosec B603 B607
+    subprocess.run(["cargo", "fmt", "--manifest-path", "bindings/rust/Cargo.toml"], check=True, shell=use_shell)  # noqa: S607 # nosec B603 B607
 
     print("Cross-language bindings generated successfully.")
 
