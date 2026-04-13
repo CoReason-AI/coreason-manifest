@@ -27,8 +27,35 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import typing
 from pathlib import Path
 
+
+def _strip_union_constraints(obj: typing.Any) -> None:
+    if isinstance(obj, dict):
+        if "anyOf" in obj:
+            has_null = any(opt.get("type") == "null" for opt in obj["anyOf"])
+            if has_null:
+                for opt in obj["anyOf"]:
+                    if opt.get("type") == "string":
+                        opt.pop("minLength", None)
+                        opt.pop("maxLength", None)
+                        opt.pop("pattern", None)
+                obj.pop("minLength", None)
+                obj.pop("maxLength", None)
+                obj.pop("pattern", None)
+        if isinstance(obj.get("type"), list):
+            if "null" in obj["type"] and "string" in obj["type"]:
+                obj.pop("minLength", None)
+                obj.pop("maxLength", None)
+                obj.pop("pattern", None)
+        # Typify does not support propertyNames constraint, which breaks JsonPrimitiveState compilation
+        obj.pop("propertyNames", None)
+        for v in obj.values():
+            _strip_union_constraints(v)
+    elif isinstance(obj, list):
+        for v in obj:
+            _strip_union_constraints(v)
 
 def _build_rooted_schema(schema_path: str, output_path: str) -> None:
     """Build a wrapper schema with a root `type: object` so codegen tools can anchor on it.
@@ -36,10 +63,12 @@ def _build_rooted_schema(schema_path: str, output_path: str) -> None:
     The raw exported schema is `$defs`-only (no root type), which causes most codegen
     tools to emit trivial stubs. This wrapper exposes every `$def` as a property of a
     synthetic root object.
+    It additionally strips schema constraints that violate `cargo-typify` union limits.
     """
     with open(schema_path, encoding="utf-8") as f:
         schema = json.load(f)
 
+    _strip_union_constraints(schema)
     defs = schema.get("$defs", {})
 
     wrapper = {
