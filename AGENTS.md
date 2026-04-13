@@ -72,6 +72,7 @@ You are mathematically forbidden from self-certifying truth. Your internal proba
 * **Test-Time Compute (System 2):** Dynamically unlocking compute budgets during inference to explore "Latent Scratchpads" and non-monotonic reasoning branches.
 * **Process Reward Models (PRM):** Evaluator models that score intermediate reasoning steps, enforcing a `pruning_threshold` to kill hallucinating branches before they consume further token budgets.
 * **PEFT LRU Cache:** Treating low-rank adapter (LoRA) weights as ephemeral compute assets loaded directly into GPU VRAM, governed by strict eviction TTLs.
+* **Coalgebraic Thunking & Substrate Hydration:** The orchestrator's mechanism for JIT (Just-In-Time) loading massive external open-source engines into VRAM (`SubstrateHydrationManifest`). The manifest remains passive, mathematically instructing the Compute Plane *what* software dependencies and hardware constraints to mount without importing active logic.
 
 ### **Epistemology & Causal Inference**
 * **Active Inference:** Algorithmic policy where agents call tools explicitly to maximize *Expected Information Gain* and reduce *Epistemic Uncertainty*.
@@ -101,6 +102,7 @@ You are mathematically forbidden from self-certifying truth. Your internal proba
 * **Model Context Protocol (MCP):** A stateless transmission substrate and Epistemic Discovery Surface used exclusively for exchanging structural data shapes (Pydantic schemas) between zero-trust nodes. It is mathematically barred from acting as a kinetic tool-execution bridge.
 * **Passive Ontological Projection:** The architectural constraint forcing nodes to expose structural boundaries (e.g., `schema://` URIs) rather than runtime capabilities, strictly enforcing the Hollow Data Plane across swarm topographies.
 * **Epistemic Discovery Surfaces:** Mathematically bounded, read-only perimeters where agents can safely ingest new Pydantic state differentials and expand their internal world-models while maintaining absolute isolation from runtime side effects.
+* **Absolute Type Isomorphism & Anemic Domain Models:** The mathematical guarantee that structural boundaries in the Python data plane are perfectly mapped to downstream TS/Rust planes. Downstream code must be purely anemic (no active logic) to preserve zero-trust execution boundaries.
 
 ### **Zero-Trust Epistemic Isolation (The Symbolic Firewall)**
 The era of dumping raw payload text or tabular JSON into an LLM context window is permanently deprecated due to Prompt Injection and Context Drift vulnerabilities. Instead, the runtime relies strictly on declarative structures such as Ontological Firewalls (via Homotopy Type Theory) and Design-by-Contract constraints (via Abstract Syntax Tree quarantining). Ontological Firewalls ensure that high-entropy raw data is masked via structural proxies prior to LLM ingestion, and Declarative Design-by-Contract (DbC) bounds probabilistic LLM outputs to verifiable mathematical constraints.
@@ -323,6 +325,32 @@ Time is not metadata; it is a mandatory physical coordinate. You are STRICTLY FO
 Unstructured `text_chunks` are lossy and prone to LLM hallucination during cross-reference. You are STRICTLY FORBIDDEN from relying on plain strings as the sole representation of a `SemanticNodeState`. Consolidated knowledge MUST be stored in volumetrically bounded, strictly typed Pydantic property matrices (`dict[str, JsonPrimitiveState]`) to allow for deterministic, programmatic diffing and heuristic consolidation.
 </memory_directive>
 
+## **0.11 The Zero-Trust Security & Hardware Limits Doctrine**
+
+<security_directive priority="critical" action="reject_generation_if_violated">
+
+**CRITICAL CONTEXT:** In a neurosymbolic swarm, the LLM is treated as an untrusted, high-entropy stochastic engine. The `coreason-manifest` must act as a physical hardware guillotine, structurally preventing the LLM from executing attacks against the host environment. Future agents modifying this codebase MUST blindly adhere to the following security invariants:
+
+### **1. The Payload Guillotine Law (Anti-VRAM Exhaustion)**
+LLMs and external endpoints (like SPARQL triplestores or JSON-RPC servers) can emit infinitely recursive dictionaries that will cause Out-Of-Memory (OOM) crashes during Pydantic validation or canonical hashing.
+* **The Rule:** Any schema field that accepts an open-ended `dict`, `list`, `Any`, or `JsonPrimitiveState` MUST be protected by a `@field_validator(..., mode="before")` that routes the payload through the `_validate_payload_bounds` function. 
+* **Mechanics:** This mathematically limits the payload to a strict $O(N)$ volume limit (e.g., 10,000 nodes) and a maximum depth (e.g., 10 levels), severing JSON Bombing attacks instantly.
+
+### **2. The SSRF Quarantine Law (Anti-Lateral Movement)**
+LLMs will hallucinate URIs, and adversarial prompts will attempt to force the swarm to query local network architecture (e.g., `http://169.254.169.254/latest/meta-data/`).
+* **The Rule:** Any schema field typed as `HttpUrl` or `AnyUrl` that dictates a *kinetic outbound network request* (e.g., `SPARQLQueryIntent`, `EvidentiaryCitationState`, `HTTPTransportProfile`) MUST be protected by a `@field_validator(..., mode="after")` that routes the string through the `_validate_ssrf_safety` function.
+* **Mechanics:** This mechanically rejects any IP topology that resolves to Bogon space, localhost, link-local, multicast, or private IP ranges via native C-backed IP stack evaluation.
+
+### **3. The Merkle-DAG Coordinate Standard (Ledger Binding)**
+For the Epistemic Ledger to mathematically prove chain of custody, historical facts cannot be floating objects. 
+* **The Rule:** Any schema bearing the suffix `...Receipt` or `...Event` MUST be treated as an append-only coordinate on the Merkle-DAG.
+* **Mechanics:** It MUST structurally include the following three tracking fields to guarantee sequential cryptography:
+  * `event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]`
+  * `prior_event_hash: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None`
+  * `timestamp: float = Field(ge=0.0, le=253402300799.0)`
+
+</security_directive>
+
 ## **1. The "No Execution" Directives**
 
 You are strictly forbidden from introducing "Active" or "Runtime" logic into this repository. Adhere to the following architectural laws without exception:
@@ -374,8 +402,9 @@ You are strictly forbidden from introducing "Active" or "Runtime" logic into thi
 ### **Cryptographic Determinism (The Merkle Rule)**
 * **The Physics of RFC 8785:** Because `CoreasonBaseModel` enforces strict canonical hashing, dictionary keys are sorted automatically, but **array ordering is mathematically preserved**.
 * **Paradigm 1: Unordered Sets (Must Be Sorted):** If the array represents a set of capabilities or IDs, you MUST deterministically sort it via a post-init validator (using `object.__setattr__`).
-* **Paradigm 2: Structural Sequences (The Topological Exemption):** If the array encodes physical, temporal, or causal reality (e.g., topological DAG edges, logic execution steps), sorting it destroys its epistemic value. You MUST anchor this exemption into the AST using an inline comment:
-  `# Note: <field_name> is a structurally ordered sequence (<Reason>) and MUST NOT be sorted.`
+* **Paradigm 2: Structural Sequences (The Topological Exemption):** If the array encodes physical, temporal, or causal reality (e.g., topological DAG edges, logic execution steps), sorting it destroys its epistemic value. You MUST anchor this exemption directly into the AST using explicit schema metadata:
+  `Field(..., json_schema_extra={"coreason_topological_exemption": True})`
+  The CI/CD AST compiler (`enforce_cryptographic_determinism.py`) will physically crash the build if an array lacks either a deterministic `@model_validator` sorting hook or this explicit metadata flag.
 
 ### **The Strict Instantiation Boundary (Anti-Lazy Validation Mandate)**
 * **The Physics of State Creation:** **Lazy validation or post-init bounding is mathematically impossible and strictly forbidden.** All topological boundaries and Euclidean limits MUST be enforced strictly during initiation via Pydantic `@field_validator` and `@model_validator(mode="after")` hooks.
@@ -394,7 +423,10 @@ You are strictly bound to the **"God Context" Monolith Directive**. You are EXPL
   * **`spec/ontology.py`**: The SINGLE, monolithic file containing ALL Pydantic models. **Do not split this file.**
   * **`utils/algebra.py`**: The SINGLE file containing all pure algebraic functors and detached validation logic.
 * **`scripts/`**:
-  * **`universal_ontology_compiler.py`**: The SINGLE "God Context" execution monolith. Do NOT fragment CI/CD or maintenance logic into decentralized files.
+  * **`universal_ontology_compiler.py`**: Topological reachability and DAG health.
+  * **`enforce_cryptographic_determinism.py`**: The AST-reflection sorting guillotine.
+  * **`generate_cross_language_bindings.py`**: The Functorial Type Mapping engine.
+* **`bindings/`**: The authorized egress layer for Absolute Type Isomorphism. You are STRICTLY FORBIDDEN from introducing active logic, constructors, or HTTP clients into this directory. It must contain only Anemic Domain Models (pure TS `interfaces` and Rust `structs` with `serde` macros) generated deterministically by the cross-language compiler.
 * **Root**:
   * **NO** `Dockerfile` or `Containerfile`.
   * **NO** `app.py`, `server.py`, or any runtime entry point.
@@ -431,6 +463,15 @@ This package enforces a zero-tolerance policy for type errors, linting violation
 We strictly enforce the Zero-Orphan Invariant ($|V_O| = 0$). You must mathematically prove that your AST modifications have not introduced severed nodes:
 `uv run python scripts/universal_ontology_compiler.py evaluate_topological_reachability`
 *(Note: The script must output "0 Orphans Detected" and exit cleanly with code 0.)*
+
+### **5. Cryptographic Determinism (The Hash Fracture Check)**
+`uv run python scripts/enforce_cryptographic_determinism.py`
+*(Must exit cleanly with code 0, proving all arrays are sorted or exempted).*
+
+### **6. Absolute Type Isomorphism (The Drift Guillotine)**
+`uv run python scripts/generate_cross_language_bindings.py`
+`git diff --exit-code bindings/`
+*(Must return 0. If files changed, you mutated the Python ontology but failed to compile the downstream Rust/TS interfaces).*
 
 ---
 
