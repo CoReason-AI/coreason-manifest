@@ -577,42 +577,10 @@ def _inject_sim_examples(schema: dict[str, Any]) -> None:
 
 def _inject_dag_examples(schema: dict[str, Any]) -> None:
     _inject_topological_lock(schema)
-    schema["examples"] = [
-        {
-            "type": "dag",
-            "nodes": {
-                "did:coreason:system-1": {"type": "system", "description": "System orchestrator node"},
-                "did:coreason:agent-1": {"type": "agent", "description": "Primary autonomous agent"},
-                "did:coreason:human-1": {"type": "human", "description": "Human fallback operator"},
-            },
-            "edges": [
-                ["did:coreason:system-1", "did:coreason:agent-1"],
-                ["did:coreason:agent-1", "did:coreason:human-1"],
-            ],
-            "max_depth": 10,
-            "max_fan_out": 5,
-        }
-    ]
 
 
 def _inject_workflow_examples(schema: dict[str, Any]) -> None:
     _inject_topological_lock(schema)
-    schema["examples"] = [
-        {
-            "genesis_provenance": {
-                "source_event_cid": "bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdibafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi1234567890",
-                "method": "system_initialization",
-            },
-            "manifest_version": "1.0.0",
-            "topology": {
-                "type": "dag",
-                "nodes": {"did:coreason:agent-1": {"type": "agent", "description": "Primary autonomous agent"}},
-                "edges": [],
-                "max_depth": 10,
-                "max_fan_out": 5,
-            },
-        }
-    ]
 
 
 def _inject_spatial_cluster(schema: dict[str, Any]) -> None:

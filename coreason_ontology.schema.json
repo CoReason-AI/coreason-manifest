@@ -5901,37 +5901,6 @@
     "DAGTopologyManifest": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes a Directed Acyclic Graph (DAG) for deterministic, chronologically ordered task execution, guaranteeing strict topological sorting of operations.\n\nCAUSAL AFFORDANCE: Forces the orchestrator to evaluate causal edges and execute rigorous DFS loop-detection to verify the `allow_cycles` constraint before initiating kinetic node compute. Backpressure governs edge flow control.\n\nEPISTEMIC BOUNDS: Algorithmic complexity is mathematically bound by `max_depth` (`ge=1, le=256`) to prevent runaway agentic cyclic recursion, and `max_fan_out` (`ge=1, le=1024`) to limit horizontal compute explosion. The `@model_validator` actively measures these constraints during traversal. Edges are deterministically sorted.\n\nMCP ROUTING TRIGGERS: Directed Acyclic Graph, Kahn's Algorithm, Topological Sort, Causal Edge, Algorithmic Complexity",
-      "examples": [
-        {
-          "edges": [
-            [
-              "did:coreason:system-1",
-              "did:coreason:agent-1"
-            ],
-            [
-              "did:coreason:agent-1",
-              "did:coreason:human-1"
-            ]
-          ],
-          "max_depth": 10,
-          "max_fan_out": 5,
-          "nodes": {
-            "did:coreason:agent-1": {
-              "description": "Primary autonomous agent",
-              "type": "agent"
-            },
-            "did:coreason:human-1": {
-              "description": "Human fallback operator",
-              "type": "human"
-            },
-            "did:coreason:system-1": {
-              "description": "System orchestrator node",
-              "type": "system"
-            }
-          },
-          "type": "dag"
-        }
-      ],
       "properties": {
         "epistemic_enforcement": {
           "anyOf": [
@@ -21694,27 +21663,6 @@
     "WorkflowManifest": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes the Topos Theory representation of a fully encapsulated swarm environment, serving as the macroscopic topological envelope for the entire execution payload and enforcing the Viable System Model.\n\nCAUSAL AFFORDANCE: Physically initializes the execution DAG. This structural lock guarantees that any graph execution is mathematically anchored to a CoReason Genesis Block via `genesis_provenance`; stripping this violates Topological Consistency.\n\nEPISTEMIC BOUNDS: The `@model_validator` `enforce_lbac_dominance` mathematically interlocks the local LBAC bounds with federated SLA egress bounds, ensuring federated clearance never exceeds local workflow bounds. `allowed_semantic_classifications` sorted for RFC 8785.\n\nMCP ROUTING TRIGGERS: Topos Theory, Cybernetics, Execution Envelope, Macroscopic Topology, Viable System Model",
-      "examples": [
-        {
-          "genesis_provenance": {
-            "method": "system_initialization",
-            "source_event_cid": "bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdibafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi1234567890"
-          },
-          "manifest_version": "1.0.0",
-          "topology": {
-            "edges": [],
-            "max_depth": 10,
-            "max_fan_out": 5,
-            "nodes": {
-              "did:coreason:agent-1": {
-                "description": "Primary autonomous agent",
-                "type": "agent"
-              }
-            },
-            "type": "dag"
-          }
-        }
-      ],
       "properties": {
         "genesis_provenance": {
           "$ref": "#/$defs/EpistemicProvenanceReceipt",
