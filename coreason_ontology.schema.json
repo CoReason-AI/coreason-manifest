@@ -5077,6 +5077,41 @@
       "title": "ContextualizedSourceState",
       "type": "object"
     },
+    "ContinuousManifoldMappingContract": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Profunctor Optics for mapping continuous N-dimensional spatial tensors (e.g., NeRFs, VQ-VAEs) into discrete semantic graph coordinates.\nCAUSAL AFFORDANCE: Authorizes the spatial rendering engine to mathematically fuse a physical coordinate (SE3) with an abstract SemanticNodeState.\nEPISTEMIC BOUNDS: Strict bounding on volumetric distance and isometry preservation.\nMCP ROUTING TRIGGERS: Cross-Modal Isomorphism, Semantic Fusion, Volumetric Projection, Profunctor Optics",
+      "properties": {
+        "topology_class": {
+          "const": "manifold_mapping",
+          "default": "manifold_mapping",
+          "description": "Discriminator for manifold mapping.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "source_semantic_node_cid": {
+          "$ref": "#/$defs/NodeCIDState",
+          "description": "The discrete semantic concept being spatially anchored."
+        },
+        "target_spatial_transform": {
+          "$ref": "#/$defs/SE3TransformProfile",
+          "description": "The absolute SE(3) physical coordinate mapping."
+        },
+        "isometry_preservation_score": {
+          "description": "Calculated geometric alignment between the semantic embedding and spatial tensor.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Isometry Preservation Score",
+          "type": "number"
+        }
+      },
+      "required": [
+        "source_semantic_node_cid",
+        "target_spatial_transform",
+        "isometry_preservation_score"
+      ],
+      "title": "ContinuousManifoldMappingContract",
+      "type": "object"
+    },
     "ContinuousMutationPolicy": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Queueing Theory and Micro-Batching Stream Processing\nheuristics for continuous, high-velocity graph updates without violating Eventual\nConsistency. As a ...Policy suffix, this defines rigid mathematical boundaries.\n\nCAUSAL AFFORDANCE: Dictates the thermodynamic flow of the orchestrator, determining\nexactly when to buffer and when to force-commit volatile StateMutationIntent\nmatrices to the EpistemicLedgerState via the mutation_paradigm\nLiteral [\"append_only\", \"merge_on_resolve\"].\n\nEPISTEMIC BOUNDS: Physically prevents Out-Of-Memory (OOM) VRAM crashes by\nmathematically enforcing max_uncommitted_edges (gt=0, le=1000000000). The\n@model_validator enforce_append_only_vram_bound further crushes this limit to\n<= 10000 for append_only operations. The commit cycle is temporally guillotined\nby micro_batch_interval_ms (gt=0, le=86400000).\n\nMCP ROUTING TRIGGERS: Queueing Theory, Stream Processing, Micro-Batching,\nBackpressure, Buffer Memory Bounding",
@@ -14303,6 +14338,36 @@
           "description": "The ending index in the discrete VLM context window.",
           "title": "Token Span End"
         },
+        "temporal_frame_start_ms": {
+          "anyOf": [
+            {
+              "maximum": 86400000,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The starting millisecond coordinate in a continuous video or audio stream.",
+          "title": "Temporal Frame Start Ms"
+        },
+        "temporal_frame_end_ms": {
+          "anyOf": [
+            {
+              "maximum": 86400000,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The ending millisecond coordinate in a continuous video or audio stream.",
+          "title": "Temporal Frame End Ms"
+        },
         "visual_patch_hashes": {
           "description": "The explicit array of SHA-256 hashes corresponding to specific VQ-VAE visual patches attended to.",
           "items": {
@@ -17987,6 +18052,14 @@
           ],
           "default": null,
           "description": "The cryptographic envelope enabling privacy-preserving computation directly on this node's encrypted state."
+        },
+        "spatial_manifold_mappings": {
+          "description": "Optional geometric projections binding this discrete node to a continuous spatial rendering environment.",
+          "items": {
+            "$ref": "#/$defs/ContinuousManifoldMappingContract"
+          },
+          "title": "Spatial Manifold Mappings",
+          "type": "array"
         }
       },
       "required": [
