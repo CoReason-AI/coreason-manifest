@@ -34,7 +34,7 @@ Documentation = "https://github.com/CoReason-AI/coreason-manifest"
 
 [dependency-groups]
 dev = [
-    "pytest>=9.0.2",
+    "pytest>=9.0.3",
     "ruff>=0.15.4",
     "pre-commit>=4.5.1",
     "pytest-cov>=7.0.0",

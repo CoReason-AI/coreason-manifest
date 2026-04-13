@@ -34,7 +34,6 @@ from __future__ import annotations
 
 import inspect
 import re
-from collections.abc import Callable
 from typing import Any, cast
 
 import pytest
@@ -1477,8 +1476,13 @@ class TestMarketContractExceptClause:
         """
 
         class BadInt:
+            def __init__(self, should_raise: bool = True) -> None:
+                self._should_raise = should_raise
+
             def __int__(self) -> int:
-                raise ValueError("cannot convert")
+                if self._should_raise:
+                    raise ValueError("cannot convert")
+                return 0
 
         result = o.MarketContract._clamp_economic_escrow_invariant(  # type: ignore[operator]
             {"minimum_collateral": BadInt(), "slashing_penalty": BadInt()},

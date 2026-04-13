@@ -4,6 +4,7 @@ from coreason_manifest.spec.ontology import (
     TemporalConflictResolutionPolicy,
     TemporalEdgeInvalidationIntent,
     TemporalGraphCRDTManifest,
+    _DNS_CACHE,
     _validate_ssrf_safety,
 )
 
@@ -39,10 +40,8 @@ def test_ssrf_quarantine_mock() -> None:
     import socket
     from unittest.mock import patch
 
-    import coreason_manifest.spec.ontology as onto
-
     with patch("socket.getaddrinfo", side_effect=socket.gaierror("mocked error")):
-        onto._DNS_CACHE.cache.clear()
+        _DNS_CACHE.cache.clear()
         _validate_ssrf_safety("http://example.com")
         with pytest.raises(ValueError, match="Unresolvable or invalid host"):
             _validate_ssrf_safety("http://unresolvable.domain.com")
