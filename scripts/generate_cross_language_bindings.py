@@ -25,6 +25,9 @@ def main() -> None:
     node_env["npm_config_audit"] = "false"
     node_env["npm_config_update_notifier"] = "false"
     node_env["npm_config_yes"] = "true"
+    # Suppress Node.js punycode deprecation warnings
+    node_options = node_env.get("NODE_OPTIONS", "")
+    node_env["NODE_OPTIONS"] = f"{node_options} --no-deprecation".strip()
 
     print("Generating TypeScript bindings...")
     ts_cmd = ["npx", "quicktype", "-s", "schema", schema_file, "-o", ts_out, "--just-types"]
