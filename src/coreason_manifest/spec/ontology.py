@@ -14947,17 +14947,17 @@ class EpistemicLedgerState(CoreasonBaseState):
 
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
-        object.__setattr__(self, "history", sorted(self.history, key=operator.attrgetter("timestamp")))
+        object.__setattr__(self, "history", sorted(self.history, key=lambda x: getattr(x, "timestamp", 0.0)))
 
-        event_times = {event.event_cid: event.timestamp for event in self.history}
+        event_times = {getattr(event, "event_cid"): getattr(event, "timestamp") for event in self.history if hasattr(event, "event_cid") and hasattr(event, "timestamp")}
         for event in self.history:
-            if hasattr(event, "causal_attributions") and event.causal_attributions:
-                for attr in event.causal_attributions:
+            if hasattr(event, "causal_attributions") and getattr(event, "causal_attributions", None):
+                for attr in getattr(event, "causal_attributions", []):
                     if attr.source_event_cid in event_times:
                         parent_time = event_times[attr.source_event_cid]
-                        if event.timestamp < parent_time:
+                        if getattr(event, "timestamp", 0.0) < parent_time:
                             raise ValueError(
-                                f"Epistemic paradox: Child event {event.event_cid} ({event.timestamp}) occurs before parent event {attr.source_event_cid} ({parent_time})."
+                                f"Epistemic paradox: Child event {getattr(event, 'event_cid', 'unknown')} ({getattr(event, 'timestamp', 0.0)}) occurs before parent event {attr.source_event_cid} ({parent_time})."
                             )
 
         object.__setattr__(self, "retracted_nodes", sorted(self.retracted_nodes))
@@ -14973,7 +14973,7 @@ class EpistemicLedgerState(CoreasonBaseState):
     @model_validator(mode="after")
     def verify_merkle_chain(self) -> Self:
         for i in range(1, len(self.history)):
-            if self.history[i].prior_event_hash is None:
+            if getattr(self.history[i], "prior_event_hash", None) is None:
                 raise ValueError("Merkle Chain Broken: Event missing prior_event_hash")
         return self
 
