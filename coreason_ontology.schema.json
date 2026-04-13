@@ -1167,6 +1167,8 @@
       "oneOf": [
         {
           "$ref": "#/$defs/TemporalGraphCRDTManifest"
+        },
+        {
           "$ref": "#/$defs/MCPToolDefinition"
         },
         {
