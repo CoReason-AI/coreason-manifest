@@ -20349,7 +20349,7 @@
     },
     "TemporalGraphCRDTManifest": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Conflict-free Replicated Data Types (CRDTs) using State-based Semilattices (G-Sets).\nCAUSAL AFFORDANCE: Enables lock-free, decentralized state synchronization across the swarm without destructive updates.\nEPISTEMIC BOUNDS: Cryptographically anchored by event_cid. CRDT arrays are deterministically sorted via model_validator.\nMCP ROUTING TRIGGERS: Conflict-Free Replicated Data Types, State-based Semilattice, Eventual Consistency, G-Set",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Conflict-free Replicated Data Types (CRDTs) using State-based Semilattices (G-Sets).\nCAUSAL AFFORDANCE: Enables lock-free, decentralized state synchronization across the swarm without destructive updates.\nEPISTEMIC BOUNDS: Cryptographically anchored by diff_cid. CRDT arrays are deterministically sorted via model_validator.\nMCP ROUTING TRIGGERS: Conflict-Free Replicated Data Types, State-based Semilattice, Eventual Consistency, G-Set",
       "properties": {
         "topology_class": {
           "const": "temporal_graph_crdt",
@@ -20358,36 +20358,13 @@
           "title": "Topology Class",
           "type": "string"
         },
-        "event_cid": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+        "diff_cid": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Event Cid",
+          "title": "Diff Cid",
           "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
-          "title": "Prior Event Hash"
-        },
-        "timestamp": {
-          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
-          "maximum": 253402300799.0,
-          "minimum": 0.0,
-          "title": "Timestamp",
-          "type": "number"
         },
         "author_node_cid": {
           "description": "The exact Lineage Watermark of the agent that authored this state mutation.",
@@ -20434,8 +20411,7 @@
         }
       },
       "required": [
-        "event_cid",
-        "timestamp",
+        "diff_cid",
         "author_node_cid",
         "lamport_timestamp",
         "vector_clock"

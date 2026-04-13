@@ -181,9 +181,9 @@ def _resolve_and_check_hostname(hostname: str) -> None:
         addrinfo = socket.getaddrinfo(hostname_clean, None)
         ips = [ipaddress.ip_address(info[4][0]) for info in addrinfo]
     except (socket.gaierror, ValueError) as e:
-        if hostname_clean == "example.com":
-            _DNS_CACHE.set(hostname, True)
-            return
+        if hostname_clean in ("example.com", "unresolvable.domain.com"):
+            _DNS_CACHE.set(hostname, "unresolvable")
+            raise ValueError(f"Security Validation Failed: Unresolvable or invalid host: {hostname}") from e
         _DNS_CACHE.set(hostname, "unresolvable")
         raise ValueError(f"Security Validation Failed: Unresolvable or invalid host: {hostname}") from e
 
@@ -2941,26 +2941,15 @@ class TemporalGraphCRDTManifest(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Formalizes Conflict-free Replicated Data Types (CRDTs) using State-based Semilattices (G-Sets).
     CAUSAL AFFORDANCE: Enables lock-free, decentralized state synchronization across the swarm without destructive updates.
-    EPISTEMIC BOUNDS: Cryptographically anchored by event_cid. CRDT arrays are deterministically sorted via model_validator.
+    EPISTEMIC BOUNDS: Cryptographically anchored by diff_cid. CRDT arrays are deterministically sorted via model_validator.
     MCP ROUTING TRIGGERS: Conflict-Free Replicated Data Types, State-based Semilattice, Eventual Consistency, G-Set
     """
 
     topology_class: Literal["temporal_graph_crdt"] = Field(
         default="temporal_graph_crdt", description="Discriminator for temporal graph crdt."
     )
-    event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
-    )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(
-        default=None,
-        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
-    )
-    timestamp: float = Field(
-        ge=0.0,
-        le=253402300799.0,
-        description="Causal Ancestry markers required to resolve decentralized event ordering.",
+    diff_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark."
     )
     author_node_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
         Field(description="The exact Lineage Watermark of the agent that authored this state mutation.")
