@@ -703,7 +703,7 @@ class CoreasonBaseState(BaseModel):
     """
 
     model_config = ConfigDict(
-        frozen=True, extra="forbid", validate_assignment=True, strict=True, json_schema_extra=_inject_topological_lock
+        frozen=True, extra="forbid", validate_assignment=True, strict=True, json_schema_extra=_inject_topological_lock, populate_by_name=True
     )
 
     def __hash__(self) -> int:
@@ -8995,6 +8995,9 @@ class NeuroSymbolicHandoffContract(CoreasonBaseState):
     solver_protocol: Literal["lean4", "z3", "clingo", "swi_prolog"] = Field(
         description="The target deterministic math/logic engine."
     )
+    execution_substrate: Literal["mcp_local", "mcp_remote", "direct_ffi"] = Field(
+        default="mcp_local", description="The physical transport layer topology for the execution."
+    )
     expected_proof_receipt_cid: (
         Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] | None
     ) = Field(default=None, description="Pointer to anticipated receipt.")
@@ -14413,8 +14416,11 @@ class EpistemicZeroTrustReceipt(CoreasonBaseState):
         return self
 
 
+from coreason_manifest.spec.mcp import MCPToolDefinition
+
 type AnyStateEvent = Annotated[
-    CrosswalkResolutionReceipt
+    MCPToolDefinition
+    | CrosswalkResolutionReceipt
     | EpistemicZeroTrustReceipt
     | ObservationEvent
     | BeliefMutationEvent
@@ -15032,3 +15038,4 @@ EpistemicStarvationEvent.model_rebuild()
 SHACLValidationSLA.model_rebuild()
 SPARQLQueryIntent.model_rebuild()
 SPARQLQueryResultReceipt.model_rebuild()
+MCPToolDefinition.model_rebuild()
