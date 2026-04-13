@@ -56,6 +56,7 @@ def _strip_union_constraints(obj: typing.Any) -> None:
         for v in obj:
             _strip_union_constraints(v)
 
+
 def _build_rooted_schema(schema_path: str, output_path: str) -> None:
     """Build a wrapper schema with a root `type: object` so codegen tools can anchor on it.
 
