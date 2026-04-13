@@ -2709,6 +2709,16 @@ class DefeasibleCascadeEvent(CoreasonBaseState):
         default=False,
         description="Cryptographic proof that this cascade was broadcast to the Swarm to halt epistemic contagion.",
     )
+    temporal_blast_radius: tuple[float, float] | None = Field(
+        default=None,
+        description="Limits the cascade to sever downstream nodes whose valid_from falls within this exact window.",
+    )
+
+    @model_validator(mode="after")
+    def validate_temporal_blast_radius(self) -> Self:
+        if self.temporal_blast_radius is not None and self.temporal_blast_radius[0] > self.temporal_blast_radius[1]:
+            raise ValueError("temporal_blast_radius[0] must be <= temporal_blast_radius[1]")
+        return self
 
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
@@ -10519,7 +10529,7 @@ class EpistemicLogEvent(CoreasonBaseState):
 
 class TemporalBoundsProfile(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Implements Allen's Interval Algebra to definitively lock a state coordinate within an exact chronological boundary on the Merkle-DAG.
+    AGENT INSTRUCTION: Implements Allen's Interval Algebra to definitively lock a state coordinate within an exact chronological boundary on the Merkle-DAG. Enforces Graphiti Temporal Logic where chronological inception is mandatory.
 
     CAUSAL AFFORDANCE: Authorizes the orchestrator to computationally evaluate overlapping or preceding topological events to govern temporal state transitions and eviction.
 
@@ -10528,8 +10538,8 @@ class TemporalBoundsProfile(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Allen's Interval Algebra, Temporal Geometry, Chronological Bounding, Topological Time, State Transition
     """
 
-    valid_from: float | None = Field(
-        le=1000000000.0, default=None, ge=0.0, description="The UNIX timestamp when this coordinate became true."
+    valid_from: float = Field(
+        le=1000000000.0, ge=0.0, description="The UNIX timestamp when this coordinate became true."
     )
     valid_to: float | None = Field(
         le=1000000000.0, default=None, description="The UNIX timestamp when this coordinate was invalidated."
@@ -10537,11 +10547,32 @@ class TemporalBoundsProfile(CoreasonBaseState):
     interval_class: CausalIntervalProfile | None = Field(
         default=None, description="The Allen's interval algebra or causal relationship classification."
     )
+    probabilistic_start_interval: tuple[float, float] | None = Field(
+        default=None, description="Fuzzy bounds of inception."
+    )
+    probabilistic_end_interval: tuple[float, float] | None = Field(
+        default=None, description="Fuzzy bounds of invalidation."
+    )
+    temporal_certainty_score: float = Field(
+        ge=0.0, le=1.0, default=1.0, description="Bayesian certainty of temporal bounds."
+    )
 
     @model_validator(mode="after")
     def validate_temporal_bounds(self) -> Self:
-        if self.valid_from is not None and self.valid_to is not None and (self.valid_to < self.valid_from):
+        if self.valid_to is not None and (self.valid_to < self.valid_from):
             raise ValueError("valid_to cannot be before valid_from")
+        if self.probabilistic_start_interval is not None:
+            if self.probabilistic_start_interval[0] > self.probabilistic_start_interval[1]:
+                raise ValueError("probabilistic_start_interval[0] must be <= probabilistic_start_interval[1]")
+            if not (self.probabilistic_start_interval[0] <= self.valid_from <= self.probabilistic_start_interval[1]):
+                raise ValueError("valid_from must fall within probabilistic_start_interval")
+        if self.probabilistic_end_interval is not None:
+            if self.probabilistic_end_interval[0] > self.probabilistic_end_interval[1]:
+                raise ValueError("probabilistic_end_interval[0] must be <= probabilistic_end_interval[1]")
+            if self.valid_to is not None and not (
+                self.probabilistic_end_interval[0] <= self.valid_to <= self.probabilistic_end_interval[1]
+            ):
+                raise ValueError("valid_to must fall within probabilistic_end_interval")
         return self
 
 
@@ -10834,7 +10865,7 @@ class TruthMaintenancePolicy(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Implements a Non-Monotonic Truth Maintenance System (TMS) governing belief retraction across the Merkle-DAG. As a ...Policy suffix, this object defines rigid mathematical boundaries that the orchestrator must enforce globally.
 
-    CAUSAL AFFORDANCE: Authorizes the orchestrator to automatically sever downstream SemanticEdgeState vectors when an upstream axiom is falsified, halting epistemic contagion across the swarm topology.
+    CAUSAL AFFORDANCE: Authorizes the orchestrator to automatically sever downstream SemanticEdgeState vectors when an upstream axiom is falsified, halting epistemic contagion across the swarm topology. `cap_validity` forces the runtime to inject `valid_to` boundaries rather than executing destructive CRUD operations.
 
     EPISTEMIC BOUNDS: Physically restricts catastrophic unravelling via integer limits on `max_cascade_depth` (`le=1000000000, gt=0`) and `max_quarantine_blast_radius` (`le=1000000000, gt=0`). Modulates continuous entropy via `decay_propagation_rate` (`ge=0.0, le=1.0`).
 
@@ -10861,6 +10892,10 @@ class TruthMaintenancePolicy(CoreasonBaseState):
         le=1000000000,
         gt=0,
         description="The maximum number of nodes allowed to be severed in a single defeasible event.",
+    )
+    retroactive_falsification_mode: Literal["cap_validity", "delete_branch", "preserve_as_counterfactual"] = Field(
+        default="cap_validity",
+        description="Dictates whether to cap valid_to bounds or destructively delete branches upon retroactive falsification.",
     )
 
 
@@ -11078,7 +11113,9 @@ class VectorEmbeddingState(CoreasonBaseState):
     CAUSAL AFFORDANCE: Unlocks Maximum Inner Product Search (MIPS) and k-Nearest
     Neighbors (k-NN) retrieval without invoking stochastic token generation. The
     foundation_matrix_name (max_length=2000) traces embedding provenance. The dimensionality
-    (int, unbounded) specifies the vector array size.
+    (int, unbounded) specifies the vector array size. These fields allow the Maximum Inner
+    Product Search (MIPS) engine to automatically decay geometric similarity based on the
+    query's current timestamp.
 
     EPISTEMIC BOUNDS: The vector_base64 enforces a strict Base64 regex
     (^[A-Za-z0-9+/]*={0,2}$) and is physically capped at max_length=5000000 to
@@ -11095,6 +11132,12 @@ class VectorEmbeddingState(CoreasonBaseState):
     foundation_matrix_name: Annotated[str, StringConstraints(max_length=2000)] = Field(
         description="The provenance of the embedding model used (e.g., 'text-embedding-3-large')."
     )
+    temporal_decay_function: Literal["exponential", "cosine_annealing", "polynomial", "none"] = Field(
+        default="none", description="The temporal decay function for semantic relevance."
+    )
+    time_derivative_vector: (
+        Annotated[str, StringConstraints(pattern="^[A-Za-z0-9+/]*={0,2}$", max_length=5000000)] | None
+    ) = Field(default=None, description="A base64-encoded tensor defining the geometric rate of change over time.")
 
 
 class CognitiveCritiqueProfile(CoreasonBaseState):
@@ -11259,8 +11302,8 @@ class SemanticEdgeState(CoreasonBaseState):
         default=None,
         description="Optional distinct provenance if the relationship was inferred separately from the nodes.",
     )
-    temporal_bounds: TemporalBoundsProfile | None = Field(
-        default=None, description="The time window during which this relationship holds true."
+    temporal_bounds: TemporalBoundsProfile = Field(
+        description="The strict time window during which this relationship holds true."
     )
     causal_relationship: Literal["causes", "confounds", "correlates_with", "undirected"] = Field(
         default="undirected", description="The Pearlian directionality of the semantic relationship."
@@ -11326,8 +11369,8 @@ class SemanticNodeState(CoreasonBaseState):
     tier: CognitiveTierProfile = Field(
         default="semantic", description="The cognitive tier this latent state resides in."
     )
-    temporal_bounds: TemporalBoundsProfile | None = Field(
-        default=None, description="The time window during which this node is considered valid."
+    temporal_bounds: TemporalBoundsProfile = Field(
+        description="The strict time window during which this node is considered valid."
     )
     salience: SalienceProfile | None = Field(
         default=None, description="The mathematical importance profile governing structural pruning."
@@ -14653,9 +14696,7 @@ class SemanticRelationalVectorState(CoreasonBaseState):
     ontology_class: UpperOntologyClassProfile = Field(
         description="The domain-independent structural classification of the record."
     )
-    temporal_bounds: TemporalBoundsProfile | None = Field(
-        default=None, description="The temporal mapping of the event."
-    )
+    temporal_bounds: TemporalBoundsProfile = Field(description="The temporal mapping of the event.")
     payload_injection_zone: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
         description="The untyped domain-specific schema payload."
     )
@@ -14668,14 +14709,6 @@ class SemanticRelationalVectorState(CoreasonBaseState):
     @classmethod
     def enforce_payload_topology(cls, v: Any) -> Any:
         return _validate_payload_bounds(v)
-
-    @model_validator(mode="after")
-    def enforce_occurrent_temporality(self) -> Self:
-        if self.ontology_class == UpperOntologyClassProfile.OCCURRENT and self.temporal_bounds is None:
-            raise ValueError(
-                "Ontological Paradox: An OCCURRENT must mathematically possess a temporal_bounds coordinate."
-            )
-        return self
 
 
 class ContinuousObservationState(CoreasonBaseState):

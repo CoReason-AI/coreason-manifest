@@ -684,7 +684,7 @@ def test_edge_evidence_or_sla() -> None:
     import pytest
     from pydantic import ValidationError
 
-    from coreason_manifest.spec.ontology import CausalDirectedEdgeState, SemanticEdgeState
+    from coreason_manifest.spec.ontology import CausalDirectedEdgeState, SemanticEdgeState, TemporalBoundsProfile
 
     with pytest.raises(
         ValidationError,
@@ -710,6 +710,7 @@ def test_edge_evidence_or_sla() -> None:
             predicate_curie="test:pred",
             belief_vector=None,
             grounding_sla=None,
+            temporal_bounds=TemporalBoundsProfile(valid_from=1000000.0),
         )
 
 
@@ -724,6 +725,7 @@ def test_canonical_sorts() -> None:
         EpistemicProvenanceReceipt,
         EvidentiaryGroundingSLA,
         SemanticNodeState,
+        TemporalBoundsProfile,
     )
 
     prov = EpistemicProvenanceReceipt(
@@ -731,8 +733,22 @@ def test_canonical_sorts() -> None:
         source_event_cid="e1",
         derivation_mode=DerivationModeProfile.DIRECT_TRANSLATION,
     )
-    n1 = SemanticNodeState(node_cid="did:coreason:b", label="B", scope="session", text_chunk="B", provenance=prov)
-    n2 = SemanticNodeState(node_cid="did:coreason:a", label="A", scope="session", text_chunk="A", provenance=prov)
+    n1 = SemanticNodeState(
+        node_cid="did:coreason:b",
+        label="B",
+        scope="session",
+        text_chunk="B",
+        provenance=prov,
+        temporal_bounds=TemporalBoundsProfile(valid_from=1000000.0),
+    )
+    n2 = SemanticNodeState(
+        node_cid="did:coreason:a",
+        label="A",
+        scope="session",
+        text_chunk="A",
+        provenance=prov,
+        temporal_bounds=TemporalBoundsProfile(valid_from=1000000.0),
+    )
 
     e1 = CausalDirectedEdgeState(
         source_variable="B",

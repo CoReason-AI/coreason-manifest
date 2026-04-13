@@ -6226,6 +6226,29 @@
           "description": "Cryptographic proof that this cascade was broadcast to the Swarm to halt epistemic contagion.",
           "title": "Cross Boundary Quarantine Issued",
           "type": "boolean"
+        },
+        "temporal_blast_radius": {
+          "anyOf": [
+            {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limits the cascade to sever downstream nodes whose valid_from falls within this exact window.",
+          "title": "Temporal Blast Radius"
         }
       },
       "required": [
@@ -17747,16 +17770,8 @@
           "description": "Optional distinct provenance if the relationship was inferred separately from the nodes."
         },
         "temporal_bounds": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/TemporalBoundsProfile"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The time window during which this relationship holds true."
+          "$ref": "#/$defs/TemporalBoundsProfile",
+          "description": "The strict time window during which this relationship holds true."
         },
         "causal_relationship": {
           "default": "undirected",
@@ -17787,7 +17802,8 @@
         "edge_cid",
         "subject_node_cid",
         "object_node_cid",
-        "predicate_curie"
+        "predicate_curie",
+        "temporal_bounds"
       ],
       "title": "SemanticEdgeState",
       "type": "object"
@@ -18050,16 +18066,8 @@
           "description": "The cognitive tier this latent state resides in."
         },
         "temporal_bounds": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/TemporalBoundsProfile"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The time window during which this node is considered valid."
+          "$ref": "#/$defs/TemporalBoundsProfile",
+          "description": "The strict time window during which this node is considered valid."
         },
         "salience": {
           "anyOf": [
@@ -18090,7 +18098,8 @@
         "node_cid",
         "label",
         "text_chunk",
-        "provenance"
+        "provenance",
+        "temporal_bounds"
       ],
       "title": "SemanticNodeState",
       "type": "object"
@@ -18139,15 +18148,7 @@
           "description": "The domain-independent structural classification of the record."
         },
         "temporal_bounds": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/TemporalBoundsProfile"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
+          "$ref": "#/$defs/TemporalBoundsProfile",
           "description": "The temporal mapping of the event."
         },
         "payload_injection_zone": {
@@ -18178,6 +18179,7 @@
         "event_cid",
         "timestamp",
         "ontology_class",
+        "temporal_bounds",
         "payload_injection_zone"
       ],
       "title": "SemanticRelationalVectorState",
@@ -20213,22 +20215,14 @@
     },
     "TemporalBoundsProfile": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Allen's Interval Algebra to definitively lock a state coordinate within an exact chronological boundary on the Merkle-DAG.\n\nCAUSAL AFFORDANCE: Authorizes the orchestrator to computationally evaluate overlapping or preceding topological events to govern temporal state transitions and eviction.\n\nEPISTEMIC BOUNDS: Both `valid_from` and `valid_to` are physically clamped (`le=1000000000.0`, `ge=0.0`). The `@model_validator` mathematically forbids inverted temporal geometry by guaranteeing `valid_to` is strictly greater than `valid_from`.\n\nMCP ROUTING TRIGGERS: Allen's Interval Algebra, Temporal Geometry, Chronological Bounding, Topological Time, State Transition",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Allen's Interval Algebra to definitively lock a state coordinate within an exact chronological boundary on the Merkle-DAG. Enforces Graphiti Temporal Logic where chronological inception is mandatory.\n\nCAUSAL AFFORDANCE: Authorizes the orchestrator to computationally evaluate overlapping or preceding topological events to govern temporal state transitions and eviction.\n\nEPISTEMIC BOUNDS: Both `valid_from` and `valid_to` are physically clamped (`le=1000000000.0`, `ge=0.0`). The `@model_validator` mathematically forbids inverted temporal geometry by guaranteeing `valid_to` is strictly greater than `valid_from`.\n\nMCP ROUTING TRIGGERS: Allen's Interval Algebra, Temporal Geometry, Chronological Bounding, Topological Time, State Transition",
       "properties": {
         "valid_from": {
-          "anyOf": [
-            {
-              "maximum": 1000000000.0,
-              "minimum": 0.0,
-              "type": "number"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
           "description": "The UNIX timestamp when this coordinate became true.",
-          "title": "Valid From"
+          "maximum": 1000000000.0,
+          "minimum": 0.0,
+          "title": "Valid From",
+          "type": "number"
         },
         "valid_to": {
           "anyOf": [
@@ -20255,8 +20249,65 @@
           ],
           "default": null,
           "description": "The Allen's interval algebra or causal relationship classification."
+        },
+        "probabilistic_start_interval": {
+          "anyOf": [
+            {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Fuzzy bounds of inception.",
+          "title": "Probabilistic Start Interval"
+        },
+        "probabilistic_end_interval": {
+          "anyOf": [
+            {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Fuzzy bounds of invalidation.",
+          "title": "Probabilistic End Interval"
+        },
+        "temporal_certainty_score": {
+          "default": 1.0,
+          "description": "Bayesian certainty of temporal bounds.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Temporal Certainty Score",
+          "type": "number"
         }
       },
+      "required": [
+        "valid_from"
+      ],
       "title": "TemporalBoundsProfile",
       "type": "object"
     },
@@ -21080,7 +21131,7 @@
     },
     "TruthMaintenancePolicy": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements a Non-Monotonic Truth Maintenance System (TMS) governing belief retraction across the Merkle-DAG. As a ...Policy suffix, this object defines rigid mathematical boundaries that the orchestrator must enforce globally.\n\nCAUSAL AFFORDANCE: Authorizes the orchestrator to automatically sever downstream SemanticEdgeState vectors when an upstream axiom is falsified, halting epistemic contagion across the swarm topology.\n\nEPISTEMIC BOUNDS: Physically restricts catastrophic unravelling via integer limits on `max_cascade_depth` (`le=1000000000, gt=0`) and `max_quarantine_blast_radius` (`le=1000000000, gt=0`). Modulates continuous entropy via `decay_propagation_rate` (`ge=0.0, le=1.0`).\n\nMCP ROUTING TRIGGERS: Truth Maintenance System, Non-Monotonic Logic, Defeasible Reasoning, Belief Revision, Causal Graph Ablation",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements a Non-Monotonic Truth Maintenance System (TMS) governing belief retraction across the Merkle-DAG. As a ...Policy suffix, this object defines rigid mathematical boundaries that the orchestrator must enforce globally.\n\nCAUSAL AFFORDANCE: Authorizes the orchestrator to automatically sever downstream SemanticEdgeState vectors when an upstream axiom is falsified, halting epistemic contagion across the swarm topology. `cap_validity` forces the runtime to inject `valid_to` boundaries rather than executing destructive CRUD operations.\n\nEPISTEMIC BOUNDS: Physically restricts catastrophic unravelling via integer limits on `max_cascade_depth` (`le=1000000000, gt=0`) and `max_quarantine_blast_radius` (`le=1000000000, gt=0`). Modulates continuous entropy via `decay_propagation_rate` (`ge=0.0, le=1.0`).\n\nMCP ROUTING TRIGGERS: Truth Maintenance System, Non-Monotonic Logic, Defeasible Reasoning, Belief Revision, Causal Graph Ablation",
       "properties": {
         "decay_propagation_rate": {
           "description": "Entropy Penalty applied per edge traversal during a defeasible cascade.",
@@ -21115,6 +21166,17 @@
           "maximum": 1000000000,
           "title": "Max Quarantine Blast Radius",
           "type": "integer"
+        },
+        "retroactive_falsification_mode": {
+          "default": "cap_validity",
+          "description": "Dictates whether to cap valid_to bounds or destructively delete branches upon retroactive falsification.",
+          "enum": [
+            "cap_validity",
+            "delete_branch",
+            "preserve_as_counterfactual"
+          ],
+          "title": "Retroactive Falsification Mode",
+          "type": "string"
         }
       },
       "required": [
@@ -21195,7 +21257,7 @@
     },
     "VectorEmbeddingState": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents a declarative, frozen geometric coordinate\nwithin a high-dimensional latent manifold, acting as a dense vector anchor\nfor zero-shot semantic routing. As a ...State suffix, this is a frozen\nN-dimensional coordinate.\n\nCAUSAL AFFORDANCE: Unlocks Maximum Inner Product Search (MIPS) and k-Nearest\nNeighbors (k-NN) retrieval without invoking stochastic token generation. The\nfoundation_matrix_name (max_length=2000) traces embedding provenance. The dimensionality\n(int, unbounded) specifies the vector array size.\n\nEPISTEMIC BOUNDS: The vector_base64 enforces a strict Base64 regex\n(^[A-Za-z0-9+/]*={0,2}$) and is physically capped at max_length=5000000 to\nprevent VRAM exhaustion during deserialization.\n\nMCP ROUTING TRIGGERS: Topological Data Analysis, Dense Vector Embedding,\nLatent Manifold, Maximum Inner Product Search, k-Nearest Neighbors",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents a declarative, frozen geometric coordinate\nwithin a high-dimensional latent manifold, acting as a dense vector anchor\nfor zero-shot semantic routing. As a ...State suffix, this is a frozen\nN-dimensional coordinate.\n\nCAUSAL AFFORDANCE: Unlocks Maximum Inner Product Search (MIPS) and k-Nearest\nNeighbors (k-NN) retrieval without invoking stochastic token generation. The\nfoundation_matrix_name (max_length=2000) traces embedding provenance. The dimensionality\n(int, unbounded) specifies the vector array size. These fields allow the Maximum Inner\nProduct Search (MIPS) engine to automatically decay geometric similarity based on the\nquery's current timestamp.\n\nEPISTEMIC BOUNDS: The vector_base64 enforces a strict Base64 regex\n(^[A-Za-z0-9+/]*={0,2}$) and is physically capped at max_length=5000000 to\nprevent VRAM exhaustion during deserialization.\n\nMCP ROUTING TRIGGERS: Topological Data Analysis, Dense Vector Embedding,\nLatent Manifold, Maximum Inner Product Search, k-Nearest Neighbors",
       "properties": {
         "vector_base64": {
           "description": "The base64-encoded dense vector array.",
@@ -21214,6 +21276,33 @@
           "maxLength": 2000,
           "title": "Foundation Matrix Name",
           "type": "string"
+        },
+        "temporal_decay_function": {
+          "default": "none",
+          "description": "The temporal decay function for semantic relevance.",
+          "enum": [
+            "exponential",
+            "cosine_annealing",
+            "polynomial",
+            "none"
+          ],
+          "title": "Temporal Decay Function",
+          "type": "string"
+        },
+        "time_derivative_vector": {
+          "anyOf": [
+            {
+              "maxLength": 5000000,
+              "pattern": "^[A-Za-z0-9+/]*={0,2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A base64-encoded tensor defining the geometric rate of change over time.",
+          "title": "Time Derivative Vector"
         }
       },
       "required": [
