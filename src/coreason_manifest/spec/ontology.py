@@ -7416,8 +7416,45 @@ class TemporalEdgeInvalidationIntent(CoreasonBaseState):
     )
 
 
+class CryptographicAttestationReceipt(CoreasonBaseState):
+    topology_class: Literal["cryptographic_attestation"] = "cryptographic_attestation"
+    issuer_did: NodeCIDState
+    subject_did: NodeCIDState
+    sd_jwt_payload: Annotated[
+        str,
+        StringConstraints(
+            max_length=500000, pattern=r"^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+(~[A-Za-z0-9_-]+)*$"
+        ),
+    ]
+    pqc_signature: PostQuantumSignatureReceipt | None
+
+
+class FederatedHandshakeIntent(CoreasonBaseState):
+    topology_class: Literal["federated_handshake"] = "federated_handshake"
+    initiator_node_cid: NodeCIDState
+    target_node_cid: NodeCIDState
+    attestation: CryptographicAttestationReceipt
+    requested_scopes: list[Annotated[str, StringConstraints(max_length=255)]]
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "requested_scopes", sorted(self.requested_scopes))
+        return self
+
+
+class ConnectionSeveranceEvent(CoreasonBaseState):
+    topology_class: Literal["connection_severance"] = "connection_severance"
+    event_cid: Annotated[str, StringConstraints(pattern=r"^[a-zA-Z0-9_-]{1,128}$")] = Field(
+        description="A globally unique CID bounding string for the event."
+    )
+    timestamp: float = Field(ge=0.0, le=253402300799.0)
+    target_ip_or_did: Annotated[str, StringConstraints(max_length=1024)]
+    severance_reason: Literal["pqc_signature_invalid", "sd_jwt_tampered", "did_resolution_failed", "unauthorized_scope"]
+
+
 type AnyIntent = Annotated[
-    TemporalEdgeInvalidationIntent
+    FederatedHandshakeIntent
+    | TemporalEdgeInvalidationIntent
     | EpistemicZeroTrustContract
     | EmpiricalFalsificationContract
     | FalsificationContract
@@ -14667,7 +14704,8 @@ class MCPToolDefinition(CoreasonBaseState):
 
 
 type AnyStateEvent = Annotated[
-    TemporalGraphCRDTManifest
+    ConnectionSeveranceEvent
+    | TemporalGraphCRDTManifest
     | MCPToolDefinition
     | CrosswalkResolutionReceipt
     | EpistemicZeroTrustReceipt
@@ -15287,3 +15325,7 @@ TemporalEdgeInvalidationIntent.model_rebuild()
 TemporalGraphCRDTManifest.model_rebuild()
 MCPToolDefinition.model_rebuild()
 ContinuousManifoldMappingContract.model_rebuild()
+
+CryptographicAttestationReceipt.model_rebuild()
+FederatedHandshakeIntent.model_rebuild()
+ConnectionSeveranceEvent.model_rebuild()

@@ -25,6 +25,7 @@ dependencies = [
     "numpy>=2.4",
     "canonicaljson>=2.0.0",
     "nh3>=0.2.17",
+    "authlib>=1.6.10",
 ]
 
 [project.urls]

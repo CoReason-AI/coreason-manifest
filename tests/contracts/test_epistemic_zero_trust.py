@@ -12,6 +12,8 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
+    EpistemicSecurityProfile,
+    EpistemicSecurityPolicy,
     EmpiricalFalsificationContract,
     EpistemicAxiomVerificationReceipt,
     EpistemicConstraintPolicy,
@@ -131,3 +133,167 @@ def test_empirical_falsification_contract_instantiation() -> None:
     )
     assert contract.condition_cid == "condition-1"
     assert contract.falsifying_observation_signature == "error.*"
+
+
+from coreason_manifest.spec.ontology import (
+    EpistemicSecurityProfile,
+    EpistemicSecurityPolicy,
+    CryptographicAttestationReceipt,
+    FederatedHandshakeIntent,
+    ConnectionSeveranceEvent,
+    PostQuantumSignatureReceipt,
+)
+from coreason_manifest.utils.mcp_adapters import DecentralizedIdentityGateway
+from authlib.jose import jwt
+
+
+def test_volumetric_fuzzing_sd_jwt_payload_too_long():
+    with pytest.raises(ValidationError):
+        CryptographicAttestationReceipt(
+            issuer_did="did:coreason:issuer-1",
+            subject_did="did:coreason:subject-1",
+            sd_jwt_payload="a.b.c" + "x" * 500000,
+            pqc_signature=None,
+        )
+
+
+def test_volumetric_fuzzing_sd_jwt_payload_malformed():
+    with pytest.raises(ValidationError):
+        CryptographicAttestationReceipt(
+            issuer_did="did:coreason:issuer-1",
+            subject_did="did:coreason:subject-1",
+            sd_jwt_payload="invalid_token",
+            pqc_signature=None,
+        )
+
+
+def test_federated_handshake_intent_sorts_requested_scopes():
+    attestation = CryptographicAttestationReceipt(
+        issuer_did="did:coreason:issuer-1",
+        subject_did="did:coreason:subject-1",
+        sd_jwt_payload="header.payload.signature",
+        pqc_signature=None,
+    )
+    intent = FederatedHandshakeIntent(
+        initiator_node_cid="did:coreason:subject-1",
+        target_node_cid="did:coreason:target-1",
+        attestation=attestation,
+        requested_scopes=["scope_b", "scope_a", "scope_c"],
+    )
+    assert intent.requested_scopes == ["scope_a", "scope_b", "scope_c"]
+
+
+def test_gateway_severance_did_resolution_failed():
+    profile = EpistemicSecurityProfile(
+        epistemic_security=EpistemicSecurityPolicy.STANDARD, network_isolation=False, egress_obfuscation=False
+    )
+    gateway = DecentralizedIdentityGateway(security_profile=profile, trusted_issuers={"did:coreason:issuer-1": "key"})
+
+    attestation = CryptographicAttestationReceipt(
+        issuer_did="did:coreason:unknown",
+        subject_did="did:coreason:subject-1",
+        sd_jwt_payload="header.payload.signature",
+        pqc_signature=None,
+    )
+    intent = FederatedHandshakeIntent(
+        initiator_node_cid="did:coreason:subject-1",
+        target_node_cid="did:coreason:target-1",
+        attestation=attestation,
+        requested_scopes=["scope_a"],
+    )
+
+    with pytest.raises(PermissionError) as excinfo:
+        gateway.process_handshake(intent)
+    assert "did_resolution_failed" in str(excinfo.value)
+
+
+def test_gateway_severance_sd_jwt_tampered():
+    profile = EpistemicSecurityProfile(
+        epistemic_security=EpistemicSecurityPolicy.STANDARD, network_isolation=False, egress_obfuscation=False
+    )
+    # create a basic symmetric key jwt just to have something decodable or failing decoding
+    gateway = DecentralizedIdentityGateway(
+        security_profile=profile, trusted_issuers={"did:coreason:issuer-1": "secret-key"}
+    )
+
+    attestation = CryptographicAttestationReceipt(
+        issuer_did="did:coreason:issuer-1",
+        subject_did="did:coreason:subject-1",
+        sd_jwt_payload="header.payload.signature",
+        pqc_signature=None,
+    )
+    intent = FederatedHandshakeIntent(
+        initiator_node_cid="did:coreason:subject-1",
+        target_node_cid="did:coreason:target-1",
+        attestation=attestation,
+        requested_scopes=["scope_a"],
+    )
+
+    with pytest.raises(PermissionError) as excinfo:
+        gateway.process_handshake(intent)
+    assert "sd_jwt_tampered" in str(excinfo.value)
+
+
+def test_gateway_severance_pqc_signature_invalid():
+    profile = EpistemicSecurityProfile(
+        epistemic_security=EpistemicSecurityPolicy.CONFIDENTIAL, network_isolation=True, egress_obfuscation=True
+    )
+
+    header = {"alg": "HS256"}
+    payload = {"sub": "did:coreason:subject-1"}
+    valid_jwt = jwt.encode(header, payload, "secret-key").decode("utf-8")
+
+    gateway = DecentralizedIdentityGateway(
+        security_profile=profile, trusted_issuers={"did:coreason:issuer-1": "secret-key"}
+    )
+
+    attestation = CryptographicAttestationReceipt(
+        issuer_did="did:coreason:issuer-1",
+        subject_did="did:coreason:subject-1",
+        sd_jwt_payload=valid_jwt,
+        pqc_signature=None,
+    )
+    intent = FederatedHandshakeIntent(
+        initiator_node_cid="did:coreason:subject-1",
+        target_node_cid="did:coreason:target-1",
+        attestation=attestation,
+        requested_scopes=["scope_a"],
+    )
+
+    with pytest.raises(PermissionError) as excinfo:
+        gateway.process_handshake(intent)
+    assert "pqc_signature_invalid" in str(excinfo.value)
+
+
+def test_gateway_severance_pqc_signature_valid():
+    profile = EpistemicSecurityProfile(
+        epistemic_security=EpistemicSecurityPolicy.CONFIDENTIAL, network_isolation=True, egress_obfuscation=True
+    )
+
+    header = {"alg": "HS256"}
+    payload = {"sub": "did:coreason:subject-1"}
+    valid_jwt = jwt.encode(header, payload, "secret-key").decode("utf-8")
+
+    gateway = DecentralizedIdentityGateway(
+        security_profile=profile, trusted_issuers={"did:coreason:issuer-1": "secret-key"}
+    )
+
+    pqc = PostQuantumSignatureReceipt(
+        pq_algorithm="ml-dsa", pq_signature_blob="a" * 100, public_key_cid="did:coreason:issuer-1"
+    )
+
+    attestation = CryptographicAttestationReceipt(
+        issuer_did="did:coreason:issuer-1",
+        subject_did="did:coreason:subject-1",
+        sd_jwt_payload=valid_jwt,
+        pqc_signature=pqc,
+    )
+    intent = FederatedHandshakeIntent(
+        initiator_node_cid="did:coreason:subject-1",
+        target_node_cid="did:coreason:target-1",
+        attestation=attestation,
+        requested_scopes=["scope_a"],
+    )
+
+    # Should not raise
+    assert gateway.process_handshake(intent) == True
