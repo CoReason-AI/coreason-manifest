@@ -7336,6 +7336,9 @@ class SubstrateDialectProfile(StrEnum):
     DOCLING_GRAPH_EXTRACTOR = "DOCLING_GRAPH_EXTRACTOR"
     ONTOGPT_SPIRES = "ONTOGPT_SPIRES"
     NATIVE_PYTHON = "NATIVE_PYTHON"
+    CURIOCAT_NLI = "CURIOCAT_NLI"
+    SEMANTIC_WEB_ARCHIVIST = "SEMANTIC_WEB_ARCHIVIST"
+    ZERO_KNOWLEDGE_PROVER = "ZERO_KNOWLEDGE_PROVER"
 
 
 class ExecutionSubstrateProfile(CoreasonBaseState):
@@ -12629,6 +12632,91 @@ class ConsensusFederationTopologyManifest(CoreasonBaseState):
         )
 
 
+class NeurosymbolicIngestionTopologyManifest(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A Zero-Cost Macro abstraction that deterministically projects a 4-stage neurosymbolic ingestion pipeline into a rigid Directed Acyclic Graph (DAG).
+
+    CAUSAL AFFORDANCE: Physically guarantees that unstructured artifacts pass sequentially through the Docling extractor, OntoGPT grounding specialist, CurioCat verification oracle, and PySHACL archivist without skipping verification gates.
+
+    EPISTEMIC BOUNDS: The compile_to_base_topology functor mathematically enforces strict algorithmic complexity bounds (max_depth=4, max_fan_out=1, allow_cycles=False), completely severing the capacity for recursive state-space explosions during ingestion.
+
+    MCP ROUTING TRIGGERS: Neurosymbolic Ingestion, Zero-Cost Macro, Substrate Oracles, Deterministic Pipeline, Functorial Semantics
+    """
+
+    epistemic_enforcement: TruthMaintenancePolicy | None = Field(
+        default=None, description="Ties the topology to the Truth Maintenance layer."
+    )
+    lifecycle_phase: Literal["draft", "live"] = Field(default="live", description="The execution phase of the graph.")
+    architectural_intent: Annotated[str, StringConstraints(max_length=2000)] | None = Field(
+        default=None, description="The AI's declarative rationale for selecting this topology."
+    )
+    justification: Annotated[str, StringConstraints(max_length=2000)] | None = Field(
+        default=None, description="Cryptographic/audit justification for this topology's configuration."
+    )
+    nodes: dict[NodeCIDState, AnyNodeProfile] = Field(
+        default_factory=dict, description="Flat registry of all nodes in this topology."
+    )
+    shared_state_contract: StateContract | None = Field(
+        default=None, description="The schema-on-write contract governing the internal state."
+    )
+    semantic_flow: SemanticFlowPolicy | None = Field(
+        default=None, description="The structural Payload Loss Prevention (PLP) contract."
+    )
+    observability: ObservabilityLODPolicy | None = Field(
+        default=None, description="The dynamic Level of Detail physics bound to this graph."
+    )
+
+    topology_class: Literal["macro_ingestion"] = Field(
+        default="macro_ingestion", description="Discriminator for the ingestion macro."
+    )
+    source_artifact_cid: NodeCIDState = Field(description="The genesis artifact triggering the pipeline.")
+    compiler_node_cid: NodeCIDState = Field(description="The W3C DID assigned to the Docling extractor.")
+    grounding_specialist_cid: NodeCIDState = Field(description="The W3C DID assigned to the OntoGPT resolver.")
+    verification_oracle_cid: NodeCIDState = Field(description="The W3C DID assigned to the CurioCat NLI engine.")
+    archivist_node_cid: NodeCIDState = Field(description="The W3C DID assigned to the RDF egress gateway.")
+    egress_format: Literal["turtle", "xml", "json-ld", "ntriples"] = Field(
+        default="turtle", description="Target serialization format."
+    )
+
+    def compile_to_base_topology(self) -> DAGTopologyManifest:
+        """Deterministically unwraps the macro into a rigid DAGTopologyManifest."""
+        nodes_dict: dict[NodeCIDState, AnyNodeProfile] = dict(self.nodes)
+
+        nodes_dict[self.compiler_node_cid] = CognitiveSystemNodeProfile(
+            description="MultimodalGraphCompiler Extractor Oracle"
+        )
+        nodes_dict[self.grounding_specialist_cid] = CognitiveSystemNodeProfile(
+            description="OntologicalGroundingSpecialist Resolver Oracle"
+        )
+        nodes_dict[self.verification_oracle_cid] = CognitiveSystemNodeProfile(
+            description="EpistemicGroundingOracle NLI Engine"
+        )
+        nodes_dict[self.archivist_node_cid] = CognitiveSystemNodeProfile(
+            description="SemanticWebArchivist RDF Egress Gateway"
+        )
+
+        edges = [
+            (self.compiler_node_cid, self.grounding_specialist_cid),
+            (self.grounding_specialist_cid, self.verification_oracle_cid),
+            (self.verification_oracle_cid, self.archivist_node_cid),
+        ]
+
+        return DAGTopologyManifest(
+            epistemic_enforcement=self.epistemic_enforcement,
+            lifecycle_phase=self.lifecycle_phase,
+            architectural_intent=self.architectural_intent,
+            justification=self.justification,
+            nodes=nodes_dict,
+            shared_state_contract=self.shared_state_contract,
+            semantic_flow=self.semantic_flow,
+            observability=self.observability,
+            edges=edges,
+            allow_cycles=False,
+            max_depth=4,
+            max_fan_out=1,
+        )
+
+
 class CapabilityForgeTopologyManifest(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Create a zero-cost macro abstraction that unrolls the entire Zero-to-One generation, verification, and profiling loop.
@@ -12886,6 +12974,7 @@ type AnyTopologyManifest = Annotated[
     | ConsensusFederationTopologyManifest
     | CapabilityForgeTopologyManifest
     | IntentElicitationTopologyManifest
+    | NeurosymbolicIngestionTopologyManifest
     | NeurosymbolicVerificationTopologyManifest
     | DiscourseTreeManifest
     | DocumentKnowledgeGraphManifest
@@ -15017,6 +15106,7 @@ AdversarialMarketTopologyManifest.model_rebuild()
 ConsensusFederationTopologyManifest.model_rebuild()
 CapabilityForgeTopologyManifest.model_rebuild()
 IntentElicitationTopologyManifest.model_rebuild()
+NeurosymbolicIngestionTopologyManifest.model_rebuild()
 EpistemicSOPManifest.model_rebuild()
 DelegatedCapabilityManifest.model_rebuild()
 TokenBurnReceipt.model_rebuild()
