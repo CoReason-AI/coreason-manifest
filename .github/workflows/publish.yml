@@ -20,6 +20,11 @@ jobs:
     runs-on: ubuntu-latest
     environment: pypi
     steps:
+      - name: Harden Runner (Endpoint Network Security)
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -96,6 +101,11 @@ jobs:
       contents: read
       id-token: write # Required for npm Trusted Publishing (OIDC provenance)
     steps:
+      - name: Harden Runner (Endpoint Network Security)
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -133,6 +143,11 @@ jobs:
       contents: read
       id-token: write # Required for crates.io Trusted Publishing (OIDC)
     steps:
+      - name: Harden Runner (Endpoint Network Security)
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0

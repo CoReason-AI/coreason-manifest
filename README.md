@@ -18,6 +18,10 @@
 [![Signed by Sigstore](https://img.shields.io/badge/Signed_by-Sigstore-blueviolet?style=flat-square&logo=sigstore)](https://sigstore.dev/)
 [![SBOM](https://img.shields.io/badge/SBOM-SPDX_Included-brightgreen?style=flat-square&logo=databricks)](https://spdx.dev/)
 [![OpenSSF Scorecard](https://img.shields.io/ossf-scorecard/github.com/CoReason-AI/coreason-manifest?style=flat-square&label=OpenSSF)](https://scorecard.dev/viewer/?uri=github.com/CoReason-AI/coreason-manifest)
+[![Egress Filtered](https://img.shields.io/badge/Egress_Filtered-Step--Security-blue?style=flat-square)](#)
+[![Advanced Security](https://img.shields.io/github/actions/workflow/status/CoReason-AI/coreason-manifest/advanced-security.yml?branch=main&style=flat-square&logo=github&label=Advanced%20Security)](https://github.com/CoReason-AI/coreason-manifest/actions/workflows/advanced-security.yml)
+[![OSS-Fuzz](https://img.shields.io/badge/OSS--Fuzz-Pending-lightgray?style=flat-square)](#)
+[![CII Best Practices](https://img.shields.io/badge/CII_Best_Practices-Pending-lightgray?style=flat-square)](#)
 
 [![Python Versions](https://img.shields.io/pypi/pyversions/coreason_manifest?style=flat-square&logo=python&logoColor=white)](https://pypi.org/project/coreason_manifest/)
 [![Status](https://img.shields.io/pypi/status/coreason_manifest?style=flat-square)](https://pypi.org/project/coreason_manifest/)
