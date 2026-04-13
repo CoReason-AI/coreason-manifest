@@ -44,11 +44,10 @@ def _strip_union_constraints(obj: typing.Any) -> None:
                 obj.pop("minLength", None)
                 obj.pop("maxLength", None)
                 obj.pop("pattern", None)
-        if isinstance(obj.get("type"), list):
-            if "null" in obj["type"] and "string" in obj["type"]:
-                obj.pop("minLength", None)
-                obj.pop("maxLength", None)
-                obj.pop("pattern", None)
+        if isinstance(obj.get("type"), list) and "null" in obj["type"] and "string" in obj["type"]:
+            obj.pop("minLength", None)
+            obj.pop("maxLength", None)
+            obj.pop("pattern", None)
         # Typify does not support propertyNames constraint, which breaks JsonPrimitiveState compilation
         obj.pop("propertyNames", None)
         for v in obj.values():
