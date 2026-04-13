@@ -1168,6 +1168,7 @@ def test_epic5_discourse_tree_manifest_cycle() -> None:
     ):
         DiscourseTreeManifest(manifest_cid="manifest_1", root_node_cid="did:ex:root", discourse_nodes=nodes)
 
+
 def test_defeasible_cascade_temporal_blast_radius_validation() -> None:
     import pytest
     from pydantic import ValidationError
@@ -1180,8 +1181,9 @@ def test_defeasible_cascade_temporal_blast_radius_validation() -> None:
             root_falsified_event_cid="root_cid",
             propagated_decay_factor=0.5,
             quarantined_event_cids=["child_cid"],
-            temporal_blast_radius=(10.0, 5.0)
+            temporal_blast_radius=(10.0, 5.0),
         )
+
 
 def test_temporal_bounds_profile_validation() -> None:
     import pytest
@@ -1190,7 +1192,9 @@ def test_temporal_bounds_profile_validation() -> None:
     from coreason_manifest.spec.ontology import TemporalBoundsProfile
 
     # Start interval inverted
-    with pytest.raises(ValidationError, match=r"probabilistic_start_interval\[0\] must be <= probabilistic_start_interval\[1\]"):
+    with pytest.raises(
+        ValidationError, match=r"probabilistic_start_interval\[0\] must be <= probabilistic_start_interval\[1\]"
+    ):
         TemporalBoundsProfile(valid_from=5.0, probabilistic_start_interval=(10.0, 5.0))
 
     # valid_from not in start interval
@@ -1198,7 +1202,9 @@ def test_temporal_bounds_profile_validation() -> None:
         TemporalBoundsProfile(valid_from=15.0, probabilistic_start_interval=(5.0, 10.0))
 
     # End interval inverted
-    with pytest.raises(ValidationError, match=r"probabilistic_end_interval\[0\] must be <= probabilistic_end_interval\[1\]"):
+    with pytest.raises(
+        ValidationError, match=r"probabilistic_end_interval\[0\] must be <= probabilistic_end_interval\[1\]"
+    ):
         TemporalBoundsProfile(valid_from=5.0, probabilistic_end_interval=(10.0, 5.0))
 
     # valid_to not in end interval
