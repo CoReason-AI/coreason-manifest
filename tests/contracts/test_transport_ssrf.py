@@ -101,9 +101,8 @@ def test_sparql_query_intent_ssrf(url: str) -> None:
         match=r"(SSRF restricted IP detected|SSRF topological violation detected|Security Validation Failed: Unresolvable or invalid host)",
     ):
         SPARQLQueryIntent(
-            target_endpoint_uri=HttpUrl(url),
+            target_endpoint=HttpUrl(url),
             query_string="SELECT * WHERE { ?s ?p ?o }",
-            expected_result_schema={"bindings": {"type": "array"}},
         )
 
 
@@ -118,11 +117,10 @@ def test_sparql_query_intent_valid(url: str) -> None:
     from coreason_manifest.spec.ontology import SPARQLQueryIntent
 
     intent = SPARQLQueryIntent(
-        target_endpoint_uri=HttpUrl(url),
+        target_endpoint=HttpUrl(url),
         query_string="SELECT * WHERE { ?s ?p ?o }",
-        expected_result_schema={"bindings": {"type": "array"}},
     )
-    assert str(intent.target_endpoint_uri) == url
+    assert str(intent.target_endpoint) == url
 
 
 def test_sparql_query_result_receipt() -> None:
@@ -167,7 +165,7 @@ def test_rdf_serialization_intent_shacl_governance() -> None:
         target_format="json-ld",
         base_uri_namespace=AnyUrl("http://example.com"),
         shacl_governance=SHACLValidationSLA(
-            shacl_shape_uri=AnyUrl("http://example.com/shape.ttl"), violation_action="drop_graph"
+            shacl_shape_graph_uri=AnyUrl("http://example.com/shape.ttl"), violation_action="DROP_GRAPH"
         ),
     )
     assert intent.shacl_governance is not None

@@ -8141,43 +8141,28 @@
     },
     "EpistemicLean4Premise": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A formal theorem and tactic proof for Lean 4 validation.",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: This premise acts as a logic hypothesis that triggers constructive mathematical proof or software auto-formalization via Lean 4.\n\nCAUSAL AFFORDANCE: Unlocks formal theorem proving physics for the orchestrator by instantiating a Lean 4 validation track.\n\nEPISTEMIC BOUNDS: Bounded to strict string constraints for the theorem and tactics script.\n\nMCP ROUTING TRIGGERS: Calculus of Inductive Constructions, Dependent Type Theory, Theorem Proving, Auto-formalization",
       "properties": {
+        "target_theorem": {
+          "maxLength": 65536,
+          "title": "Target Theorem",
+          "type": "string"
+        },
+        "tactics_script": {
+          "maxLength": 100000,
+          "title": "Tactics Script",
+          "type": "string"
+        },
         "topology_class": {
           "const": "epistemic_lean4_premise",
           "default": "epistemic_lean4_premise",
           "title": "Topology Class",
           "type": "string"
-        },
-        "ontology_node_id": {
-          "$ref": "#/$defs/NodeCIDState"
-        },
-        "environment_imports": {
-          "coreason_topological_exemption": true,
-          "items": {
-            "maxLength": 255,
-            "type": "string"
-          },
-          "title": "Environment Imports",
-          "type": "array"
-        },
-        "formal_statement": {
-          "maxLength": 10000,
-          "minLength": 1,
-          "title": "Formal Statement",
-          "type": "string"
-        },
-        "tactic_proof": {
-          "maxLength": 100000,
-          "minLength": 1,
-          "title": "Tactic Proof",
-          "type": "string"
         }
       },
       "required": [
-        "ontology_node_id",
-        "formal_statement",
-        "tactic_proof"
+        "target_theorem",
+        "tactics_script"
       ],
       "title": "EpistemicLean4Premise",
       "type": "object"
@@ -8364,33 +8349,21 @@
     },
     "EpistemicLogicPremise": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents a formal Answer Set Programming (ASP) logic string.",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Unlocks Answer Set Programming (Clingo) for NP-hard combinatorial constraint satisfaction.\n\nCAUSAL AFFORDANCE: Physically authorizes the orchestrator to model and solve NP-hard combinatorial domains.\n\nEPISTEMIC BOUNDS: Constrained strictly to the answer set programming language inputs via tight syntactic length bounds.\n\nMCP ROUTING TRIGGERS: Answer Set Programming, Combinatorial Constraint Satisfaction, Clingo, Combinatorial Domain",
       "properties": {
+        "asp_program": {
+          "maxLength": 65536,
+          "title": "Asp Program",
+          "type": "string"
+        },
         "topology_class": {
           "const": "epistemic_logic_premise",
           "default": "epistemic_logic_premise",
           "title": "Topology Class",
           "type": "string"
-        },
-        "ontology_node_id": {
-          "$ref": "#/$defs/NodeCIDState"
-        },
-        "asp_program": {
-          "maxLength": 65536,
-          "minLength": 1,
-          "title": "Asp Program",
-          "type": "string"
-        },
-        "max_models": {
-          "default": 1,
-          "maximum": 100,
-          "minimum": 0,
-          "title": "Max Models",
-          "type": "integer"
         }
       },
       "required": [
-        "ontology_node_id",
         "asp_program"
       ],
       "title": "EpistemicLogicPremise",
@@ -8398,58 +8371,26 @@
     },
     "EpistemicPrologPremise": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents a formal Horn clause query and knowledge base.",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Unlocks SWI-Prolog for backward-chaining deductive evaluation over hierarchical graphs.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator to execute exact subgraph isomorphism and deductive logic queries.\n\nEPISTEMIC BOUNDS: Restricts logic programming bounds to strict Horn clauses and exact query boundaries.\n\nMCP ROUTING TRIGGERS: SWI-Prolog, Backward-Chaining, Deductive Evaluation, Hierarchical Knowledge Bases",
       "properties": {
+        "query": {
+          "title": "Query",
+          "type": "string"
+        },
+        "horn_clauses": {
+          "title": "Horn Clauses",
+          "type": "string"
+        },
         "topology_class": {
           "const": "epistemic_prolog_premise",
           "default": "epistemic_prolog_premise",
           "title": "Topology Class",
           "type": "string"
-        },
-        "ontology_node_id": {
-          "$ref": "#/$defs/NodeCIDState"
-        },
-        "knowledge_base_cid": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/NodeCIDState"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null
-        },
-        "ephemeral_facts": {
-          "anyOf": [
-            {
-              "maxLength": 65536,
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Ephemeral Facts"
-        },
-        "prolog_query": {
-          "maxLength": 2000,
-          "minLength": 1,
-          "title": "Prolog Query",
-          "type": "string"
-        },
-        "max_solutions": {
-          "default": 1,
-          "maximum": 1000,
-          "minimum": 1,
-          "title": "Max Solutions",
-          "type": "integer"
         }
       },
       "required": [
-        "ontology_node_id",
-        "prolog_query"
+        "query",
+        "horn_clauses"
       ],
       "title": "EpistemicPrologPremise",
       "type": "object"
@@ -13345,31 +13286,15 @@
     },
     "Lean4VerificationReceipt": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The immutable receipt of the Lean 4 kernel's execution.",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen fact representing the success or failure of a Lean 4 proof. Tailored as a receipt.\n\nCAUSAL AFFORDANCE: Unlocks System 2 remediation loops by providing deterministic failure execution traces.\n\nEPISTEMIC BOUNDS: The boolean flag definitively represents mathematical truth, and the string accurately caps the textual bounds of failure.\n\nMCP ROUTING TRIGGERS: System 2 Remediation, Mathematical Truth, Proof Verification, Proof Engine",
       "properties": {
-        "topology_class": {
-          "const": "lean4_verification_receipt",
-          "default": "lean4_verification_receipt",
-          "title": "Topology Class",
-          "type": "string"
-        },
-        "causal_provenance_id": {
-          "$ref": "#/$defs/NodeCIDState"
-        },
-        "verification_status": {
-          "enum": [
-            "PROVED",
-            "FALSIFIED_AT_TACTIC",
-            "SORRY_DETECTED",
-            "TIMEOUT"
-          ],
-          "title": "Verification Status",
-          "type": "string"
+        "is_proved": {
+          "title": "Is Proved",
+          "type": "boolean"
         },
         "failing_tactic_state": {
           "anyOf": [
             {
-              "maxLength": 65536,
               "type": "string"
             },
             {
@@ -13379,35 +13304,15 @@
           "default": null,
           "title": "Failing Tactic State"
         },
-        "event_cid": {
-          "maxLength": 128,
-          "minLength": 1,
-          "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Event Cid",
+        "topology_class": {
+          "const": "lean4_verification_receipt",
+          "default": "lean4_verification_receipt",
+          "title": "Topology Class",
           "type": "string"
-        },
-        "timestamp": {
-          "title": "Timestamp",
-          "type": "number"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Prior Event Hash"
         }
       },
       "required": [
-        "causal_provenance_id",
-        "verification_status",
-        "event_cid",
-        "timestamp"
+        "is_proved"
       ],
       "title": "Lean4VerificationReceipt",
       "type": "object"
@@ -13467,26 +13372,13 @@
     },
     "LinkMLValidationSLA": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes Graph-Shape Governance, acting as the execution contract instructing the orchestrator to validate extracted nodes and edges against an external LinkML YAML shape graph before committing them.\n\nCAUSAL AFFORDANCE: Forces the structural validation of all causal edges. Authorizes the orchestrator to mechanically sever relations that violate the predicate's declared Domain, Range, or Cardinality constraints.\n\nEPISTEMIC BOUNDS: The `linkml_schema_uri` strictly clamps the topological ruleset to a remote, verifiable YAML definition.\n\nMCP ROUTING TRIGGERS: LinkML, Graph-Shape Governance, Structural Isomorphism, SHACL, Domain and Range Enforcement",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Instructs the Ontological Grounding Specialist to enforce bipartite crosswalks against academic schemas.\n\nCAUSAL AFFORDANCE: Forces the structural validation of all causal edges through LinkML.\n\nEPISTEMIC BOUNDS: The linkml_schema_uri strictly clamps the topological ruleset to a remote YAML definition.\n\nMCP ROUTING TRIGGERS: LinkML, Graph-Shape Governance, Structural Isomorphism, SHACL, Domain and Range Enforcement",
       "properties": {
         "linkml_schema_uri": {
-          "description": "RFC 8785 canonicalized URI pointing to the canonical LinkML YAML definition.",
           "format": "uri",
           "minLength": 1,
           "title": "Linkml Schema Uri",
           "type": "string"
-        },
-        "strict_domain_range_checking": {
-          "default": true,
-          "description": "If True, the orchestrator physically severs any CausalDirectedEdgeState where the subject/object node classes violate the predicate's declared LinkML domain/range.",
-          "title": "Strict Domain Range Checking",
-          "type": "boolean"
-        },
-        "allow_unmapped_entities": {
-          "default": false,
-          "description": "A boolean gate dictating whether the resulting graph is permitted to retain high-entropy text nodes that OntoGPT failed to resolve into a formal CURIE.",
-          "title": "Allow Unmapped Entities",
-          "type": "boolean"
         }
       },
       "required": [
@@ -16977,34 +16869,26 @@
     },
     "SHACLValidationSLA": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Acts as the deterministic execution contract instructing the egress engine to validate the serialized RDF graph against a formal W3C SHACL shape graph before authorizing the export.\n\nCAUSAL AFFORDANCE: Physically authorizes the orchestrator to evaluate emitted graphs against enterprise logic, mechanically preventing the pollution of external triplestores with hallucinated topologies.\n\nEPISTEMIC BOUNDS: The validation logic is constrained to the `violation_action` finite state automaton, dictating exactly what the runtime must do if the graph violates the SHACL shape.\n\nMCP ROUTING TRIGGERS: SHACL, Topological Isomorphism, Semantic Web Egress, Graph-Shape Validation, Triplestore Interoperability",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the strict SHACL shape validation pass required before RDF egress.\n\nCAUSAL AFFORDANCE: Unlocks formal enterprise evaluation of emitted graphs against a verified shape.\n\nEPISTEMIC BOUNDS: The violation action bounds the exact deterministic penalty for triple non-conformance.\n\nMCP ROUTING TRIGGERS: SHACL, Topological Validation, Schema Evaluation, Triplestore",
       "properties": {
-        "shacl_shape_uri": {
-          "description": "A canonicalized URI pointing to the definitive .shacl or .ttl shape graph.",
+        "shacl_shape_graph_uri": {
           "format": "uri",
           "minLength": 1,
-          "title": "Shacl Shape Uri",
+          "title": "Shacl Shape Graph Uri",
           "type": "string"
         },
-        "strict_mode": {
-          "default": true,
-          "description": "If True, a single topological shape violation causes the entire graph export to be mathematically rejected.",
-          "title": "Strict Mode",
-          "type": "boolean"
-        },
         "violation_action": {
-          "description": "A finite state automaton dictating the exact mechanistic penalty the orchestrator must apply if non-conforming triples are detected.",
           "enum": [
-            "drop_graph",
-            "quarantine",
-            "strip_invalid_triples"
+            "DROP_GRAPH",
+            "STRIP_TRIPLES",
+            "HALT_EXECUTION"
           ],
           "title": "Violation Action",
           "type": "string"
         }
       },
       "required": [
-        "shacl_shape_uri",
+        "shacl_shape_graph_uri",
         "violation_action"
       ],
       "title": "SHACLValidationSLA",
@@ -17169,44 +17053,29 @@
     },
     "SPARQLQueryIntent": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A kinetic trigger instructing the orchestrator to execute a read-only SPARQL query against an external or internal RDF triplestore.\n\nCAUSAL AFFORDANCE: Authorizes the agent to retrieve formalized Semantic Web data. The query is strictly clamped to prevent buffer overflows, and the target is network-quarantined.\n\nEPISTEMIC BOUNDS: The `target_endpoint_uri` is mathematically scrubbed against Bogon and loopback IP spaces to prevent SSRF. The `expected_result_schema` is volumetrically bounded to prevent schema evaluation explosions.\n\nMCP ROUTING TRIGGERS: SPARQL, Semantic Web Query, Zero-Trust Egress, SSRF Quarantine, Triplestore",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Instructs the Semantic Web Archivist to execute a strict, volumetrically bounded query against an enterprise triplestore.\n\nCAUSAL AFFORDANCE: Unlocks read-only retrieval of Semantic Web data.\n\nEPISTEMIC BOUNDS: The target_endpoint implements an SSRF protection hook to mathematically reject lateral movement.\n\nMCP ROUTING TRIGGERS: SPARQL, Semantic Web Query, Triplestore Query, Network Boundary",
       "properties": {
+        "query_string": {
+          "title": "Query String",
+          "type": "string"
+        },
+        "target_endpoint": {
+          "format": "uri",
+          "maxLength": 2083,
+          "minLength": 1,
+          "title": "Target Endpoint",
+          "type": "string"
+        },
         "topology_class": {
           "const": "sparql_query",
           "default": "sparql_query",
           "title": "Topology Class",
           "type": "string"
-        },
-        "target_endpoint_uri": {
-          "description": "The specific SPARQL endpoint to query.",
-          "format": "uri",
-          "maxLength": 2083,
-          "minLength": 1,
-          "title": "Target Endpoint Uri",
-          "type": "string"
-        },
-        "query_string": {
-          "description": "The raw SPARQL syntax, mathematically clamped to prevent query buffer overflow attacks.",
-          "maxLength": 5000,
-          "title": "Query String",
-          "type": "string"
-        },
-        "expected_result_schema": {
-          "additionalProperties": {
-            "$ref": "#/$defs/JsonPrimitiveState"
-          },
-          "description": "An untyped but volumetrically bounded dictionary defining the exact expected JSON schema of the SPARQL bindings.",
-          "propertyNames": {
-            "maxLength": 255
-          },
-          "title": "Expected Result Schema",
-          "type": "object"
         }
       },
       "required": [
-        "target_endpoint_uri",
         "query_string",
-        "expected_result_schema"
+        "target_endpoint"
       ],
       "title": "SPARQLQueryIntent",
       "type": "object"

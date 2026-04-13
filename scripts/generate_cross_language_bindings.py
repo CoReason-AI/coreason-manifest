@@ -1,4 +1,14 @@
 #!/usr/bin/env python3
+# Copyright (c) 2026 CoReason, Inc
+#
+# This software is proprietary and dual-licensed
+# Licensed under the Prosperity Public License 3.0 (the "License")
+# A copy of the license is available at <https://prosperitylicense.com/versions/3.0.0>
+# For details, see the LICENSE file
+# Commercial use beyond a 30-day trial requires a separate license
+#
+# Source Code: <https://github.com/CoReason-AI/coreason-manifest>
+
 import os
 import subprocess
 import sys
@@ -30,6 +40,12 @@ def main() -> None:
     node_env["NODE_OPTIONS"] = f"{node_options} --no-deprecation".strip()
 
     npx_cmd = "npx.cmd" if os.name == "nt" else "npx"
+
+    import shutil
+
+    if not shutil.which(npx_cmd):
+        print(f"Warning: {npx_cmd} not found in PATH. Skipping cross-language bindings generation.")
+        return
 
     print("Generating TypeScript bindings...")
     ts_cmd = [npx_cmd, "quicktype", "-s", "schema", schema_file, "-o", ts_out, "--just-types"]
