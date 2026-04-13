@@ -21,12 +21,12 @@ from coreason_manifest.spec.ontology import BrowserDOMState
 # Isolate the Happy Path
 def test_browser_dom_state_valid_topology() -> None:
     state = BrowserDOMState(
-        current_url="https://www.example.com",
+        current_url="https://1.1.1.1",
         viewport_size=(1920, 1080),
         dom_hash="a" * 64,
         accessibility_tree_hash="b" * 64,
     )
-    assert state.current_url == "https://www.example.com"
+    assert state.current_url == "https://1.1.1.1"
 
 
 # Parameterize Protocol/Schema violations for atomic reporting

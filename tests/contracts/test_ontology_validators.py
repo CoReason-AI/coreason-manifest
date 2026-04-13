@@ -859,6 +859,57 @@ def test_sovereign_execution_allows_localhost_and_bare_metal() -> None:
     assert "localhost" in profile.hardware.provider_whitelist
 
 
+def test_deprecated_solver_coq() -> None:
+    from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import FormalVerificationContract
+
+    with pytest.raises(ValidationError) as exc_info:
+        FormalVerificationContract(proof_system="coq", invariant_theorem="test", compiled_proof_hash="a" * 64)  # type: ignore
+    assert "Input should be 'lean4' or 'z3'" in str(exc_info.value)
+
+
+def test_deprecated_solver_isabelle() -> None:
+    from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import FormalVerificationContract
+
+    with pytest.raises(ValidationError) as exc_info:
+        FormalVerificationContract(proof_system="isabelle", invariant_theorem="test", compiled_proof_hash="a" * 64)  # type: ignore
+    assert "Input should be 'lean4' or 'z3'" in str(exc_info.value)
+
+
+def test_deprecated_solver_tla_plus() -> None:
+    from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import NeuroSymbolicHandoffContract
+
+    with pytest.raises(ValidationError) as exc_info:
+        NeuroSymbolicHandoffContract(
+            handoff_cid="test",
+            solver_protocol="tla_plus",  # type: ignore
+            formal_grammar_payload="test",
+            timeout_ms=1000,
+        )
+    assert "Input should be 'lean4', 'z3', 'clingo' or 'swi_prolog'" in str(exc_info.value)
+
+
+def test_deprecated_solver_sympy() -> None:
+    from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import AlgebraicRefinementContract, HoareLogicProofReceipt
+
+    with pytest.raises(ValidationError) as exc_info:
+        HoareLogicProofReceipt(
+            capability_cid="test",
+            preconditions=[AlgebraicRefinementContract(target_property="x", mathematical_predicate="x > 0")],
+            postconditions=[AlgebraicRefinementContract(target_property="x", mathematical_predicate="x > 0")],
+            proof_system="sympy",  # type: ignore
+            verified_theorem_hash="a" * 64,
+        )
+    assert "Input should be 'lean4' or 'z3'" in str(exc_info.value)
+
+
 def test_agent_node_profile_network_topology_paradox() -> None:
     """Test that Mixnet routing requires strict network isolation."""
     with pytest.raises(ValueError, match="Topology Routing Violated"):
@@ -1048,7 +1099,7 @@ def test_epic5_global_semantic_invariant_profile_sorting() -> None:
         invariant_cid="invariant_1",
         categorical_cohorts=["Zebra", "Apple"],
         operational_perimeters={"test": "me"},
-        temporal_observation_horizons=[TemporalBoundsProfile(valid_from=None), TemporalBoundsProfile(valid_from=5.0)],
+        temporal_observation_horizons=[TemporalBoundsProfile(valid_from=0.0), TemporalBoundsProfile(valid_from=5.0)],
     )
     assert profile.categorical_cohorts == ["Apple", "Zebra"]
 
@@ -1116,3 +1167,46 @@ def test_epic5_discourse_tree_manifest_cycle() -> None:
         ValidationError, match="Topological Contradiction: Discourse tree contains a cyclical reference"
     ):
         DiscourseTreeManifest(manifest_cid="manifest_1", root_node_cid="did:ex:root", discourse_nodes=nodes)
+
+
+def test_defeasible_cascade_temporal_blast_radius_validation() -> None:
+    import pytest
+    from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import DefeasibleCascadeEvent
+
+    with pytest.raises(ValidationError, match=r"temporal_blast_radius\[0\] must be <= temporal_blast_radius\[1\]"):
+        DefeasibleCascadeEvent(
+            cascade_cid="test_cid",
+            root_falsified_event_cid="root_cid",
+            propagated_decay_factor=0.5,
+            quarantined_event_cids=["child_cid"],
+            temporal_blast_radius=(10.0, 5.0),
+        )
+
+
+def test_temporal_bounds_profile_validation() -> None:
+    import pytest
+    from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import TemporalBoundsProfile
+
+    # Start interval inverted
+    with pytest.raises(
+        ValidationError, match=r"probabilistic_start_interval\[0\] must be <= probabilistic_start_interval\[1\]"
+    ):
+        TemporalBoundsProfile(valid_from=5.0, probabilistic_start_interval=(10.0, 5.0))
+
+    # valid_from not in start interval
+    with pytest.raises(ValidationError, match="valid_from must fall within probabilistic_start_interval"):
+        TemporalBoundsProfile(valid_from=15.0, probabilistic_start_interval=(5.0, 10.0))
+
+    # End interval inverted
+    with pytest.raises(
+        ValidationError, match=r"probabilistic_end_interval\[0\] must be <= probabilistic_end_interval\[1\]"
+    ):
+        TemporalBoundsProfile(valid_from=5.0, probabilistic_end_interval=(10.0, 5.0))
+
+    # valid_to not in end interval
+    with pytest.raises(ValidationError, match="valid_to must fall within probabilistic_end_interval"):
+        TemporalBoundsProfile(valid_from=5.0, valid_to=20.0, probabilistic_end_interval=(5.0, 15.0))

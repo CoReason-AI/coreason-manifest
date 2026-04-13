@@ -10,6 +10,16 @@
 
 """AGENT INSTRUCTION: This module contains pure data transformations of the Hollow Data Plane."""
 
+# Copyright (c) 2026 CoReason, Inc
+#
+# This software is proprietary and dual-licensed
+# Licensed under the Prosperity Public License 3.0 (the "License")
+# A copy of the license is available at <https://prosperitylicense.com/versions/3.0.0>
+# For details, see the LICENSE file
+# Commercial use beyond a 30-day trial requires a separate license
+#
+# Source Code: <https://github.com/CoReason-AI/coreason-manifest>
+
 import ast
 import base64
 import copy
@@ -19,9 +29,9 @@ import typing
 from collections.abc import Sequence
 from typing import Any, Literal, cast
 
-import jsonpatch  # type: ignore[import-untyped]
+import jsonpatch  # type: ignore[import-untyped, unused-ignore]
 import numpy as np
-from pydantic import BaseModel, ValidationError
+from pydantic import AnyUrl, BaseModel, ValidationError
 from pydantic.json_schema import models_json_schema
 
 import coreason_manifest.spec.ontology as ontology
@@ -31,7 +41,6 @@ from coreason_manifest.spec.ontology import (
     CoreasonBaseState,
     DocumentLayoutManifest,
     DynamicRoutingManifest,
-    EpistemicCompressionSLA,
     EpistemicTransmutationTask,
     ExecutionNodeReceipt,
     ManifestViolationReceipt,
@@ -48,6 +57,13 @@ SCHEMA_REGISTRY: dict[str, type[BaseModel]] = {
     "state_differential": StateMutationIntent,
     "cognitive_sync": CognitiveStateProfile,
     "system2_remediation": System2RemediationIntent,
+    "lean4_premise": ontology.EpistemicLean4Premise,
+    "lean4_receipt": ontology.Lean4VerificationReceipt,
+    "logic_premise": ontology.EpistemicLogicPremise,
+    "logic_receipt": ontology.FormalLogicProofReceipt,
+    "prolog_premise": ontology.EpistemicPrologPremise,
+    "prolog_receipt": ontology.PrologDeductionReceipt,
+    "falsification_contract": ontology.FalsificationContract,
 }
 
 
@@ -210,19 +226,28 @@ def align_semantic_manifolds(
     target_set = set(target_modalities)
     if target_set.issubset(source_set):
         return None
-    require_dense = any(mod in ["raster_image", "tabular_grid"] for mod in target_modalities)
-    density: Literal["sparse", "dense", "exhaustive"] = "dense" if require_dense else "sparse"
-    sla = EpistemicCompressionSLA(
-        strict_probability_retention=True,
-        max_allowed_entropy_loss=0.01,
-        required_grounding_density=density,
-        minimum_fidelity_threshold=0.5,
-    )
+    schema_governance = None
+    if "semantic_graph" in target_modalities:
+        schema_governance = ontology.SchemaDrivenExtractionSLA(
+            schema_registry_uri=AnyUrl("http://example.com/schema"),
+            extraction_framework="docling_graph_explicit",
+            max_schema_retries=3,
+            validation_failure_action="escalate_to_human",
+        )
+    from coreason_manifest.spec.ontology import OpticalParsingSLA
+
+    optical_governance = None
+    if "raster_image" in target_modalities or "tabular_grid" in target_modalities:
+        optical_governance = OpticalParsingSLA(
+            force_ocr=False, bitmap_dpi_resolution=72, table_structure_recognition=True
+        )
+
     return EpistemicTransmutationTask(
         task_cid=task_cid,
         artifact_event_cid=artifact_event_cid,
-        target_modalities=target_modalities,
-        compression_sla=sla,
+        target_modalities=list(target_modalities),
+        schema_governance=schema_governance,
+        optical_governance=optical_governance,
     )
 
 

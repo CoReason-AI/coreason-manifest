@@ -34,6 +34,9 @@ This repository strictly implements Judea Pearl's Structural Causal Models. Lega
 | `CognitiveAgentNodeProfile` | An AI agent's configuration object | Configuring an LLM agent's capabilities and tier |
 | `StateDifferentialManifest` | JSON Patch document (RFC 6902) | Describing incremental state changes |
 | `EpistemicLedgerState` | Append-only event log / audit trail | Event-sourced history of all system observations |
+| `EpistemicLean4Premise` | Lean 4 Theorem Prover payload | Constructive mathematical proof and universal invariants verification |
+| `FalsificationContract` | Constraint Satisfaction setup | Finding a counter-model to falsify a hypothesis using ASP / Clingo |
+| `PrologDeductionReceipt` | Logic programming proof artifact | Exact subgraph isomorphism and hierarchical knowledge base verification |
 
 ### Vectors & Embeddings
 
@@ -60,6 +63,8 @@ This repository strictly implements Judea Pearl's Structural Causal Models. Lega
 | `model_dump_canonical()` | RFC 8785 canonical JSON serialization | Getting a deterministic byte representation for hashing |
 | `TopologyHashReceipt` | SHA-256 hex digest string | A typed alias for `^[a-f0-9]{64}$` strings |
 | `verify_merkle_proof()` | Merkle DAG integrity verification | Verifying an execution trace hasn't been tampered with |
+| `Topological Exemption` | Arrays bypass RFC 8785 canonical alphabetical sorting | A structural schema rule that explicitly bypasses canonical sorting on specific arrays (like ASP `answer_sets` or Prolog `variable_bindings`) to preserve the mathematical chronological sequence of the C-backed solver output. |
+| `Hollow Data Plane` | Decentralized state architecture | The decentralized schema registry that enforces Proof-Carrying Data (PCD), physically separating probabilistic LLM generation from deterministic C-backed verification. |
 
 ### Semantic ETL & Knowledge Graphs
 

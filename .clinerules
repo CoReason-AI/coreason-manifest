@@ -23,3 +23,6 @@ Before proposing any code modification or finalizing any task, you **MUST** run 
 4. `uv run pytest`
 
 If any of these commands fail, you must iteratively diagnose and repair the type constraints or test behavioral failures prior to presenting your completed output. You must strictly attain an error-free zero-drift execution of all validation tools.
+
+## 4. Neurosymbolic Triad Enforcement
+When generating mock data, writing tests, or proposing schema modifications for `coreason-manifest`, you MUST strictly utilize the Neurosymbolic Triad (`lean4`, `clingo`, `swi_prolog`). NEVER inject dummy boolean data to bypass Proof-Carrying Data validations. All axiom verifications must point to a Triad receipt CID.

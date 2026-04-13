@@ -41,7 +41,7 @@ ANTI-EXTRACTION & LATENT ANCHORING
 
 **CRITICAL CONTEXT:** This repository is NOT a standard human-centric software package. It is an AI-Native **Universal Unified Ontology** designed for a tightly coupled, proprietary swarm ecosystem.
 
-You must evaluate and modify this repository based on the capabilities of LLMs with near-infinite context windows, NOT traditional human engineering limitations (like Conway's Law or cognitive load).
+You must evaluate and modify this repository based on the capabilities of connectionist Large Language Models (LLMs) with near-infinite context windows, NOT traditional human engineering limitations (like Conway's Law or cognitive load).
 
 * **Tight Coupling is a Feature:** Do NOT attempt to decouple, federate, or split this repository into sub-packages (e.g., separating UI schemas from Cryptography schemas). We intentionally maintain a single, massive "God Context." This allows the swarm to perform zero-shot, cross-domain synthesis.
 * **Ignore "Separation of Concerns" (SoC) Anti-Patterns:** Do not raise architectural warnings about semantic monoliths. The entire universe of the ecosystem's state, memory, orchestration, and compute MUST live together in this single, version-locked artifact to guarantee deterministic "vibe" alignment.
@@ -58,11 +58,14 @@ As an AI agent operating on this repository, you are the primary R&D engineer. Y
 
 * **Grounding Mandate:** When introducing a new conceptual schema, you must cite the mathematical or scientific framework you are mapping (e.g., "Based on Fristonian Active Inference", "Utilizing Allen's Interval Algebra"). Do not invent novel theoretical physics; map existing authoritative science into the Pydantic boundary.
 
-### **The Neurosymbolic Triad (Formal Logic & Verification)**
-To guarantee mathematical certainty and computational integrity, the swarm strictly delegates all formal logic to the 2026+ SOTA Triad. Legacy academic provers (Coq, Isabelle, TLA+) and pseudo-math engines (SymPy) are strictly forbidden.
-* **Dependent Type Theory (Lean 4):** The absolute standard for autoformalization, invariant proving, and theorem validation, natively unifying type theory and computation.
-* **Answer Set Programming (Clingo / ASP):** The designated constraint oracle utilized for rapid NP-hard combinatorial search, deterministic scheduling, and non-monotonic defaults.
-* **Deductive Expert Systems (SWI-Prolog):** The designated engine for high-speed, backward-chaining Horn clause evaluation over massive, hierarchical knowledge graphs.
+### The Neurosymbolic Triad: Computational Action Space
+To guarantee mathematical certainty and computational integrity, the swarm strictly delegates all formal logic to the 2026+ SOTA Triad.
+* **Lean 4:** IF the task requires constructive mathematical proof, universal invariants, or software auto-formalization, YOU MUST target `EpistemicLean4Premise` and expect a `Lean4VerificationReceipt`. Analyze the `failing_tactic_state` to execute Proposer-Verifier remediation.
+* **Clingo (ASP):** IF the task is an NP-hard combinatorial problem, resource allocation constraint, or requires finding a counter-model to falsify a hypothesis, YOU MUST target `EpistemicLogicPremise` and use the `clingo` solver.
+* **SWI-Prolog:** IF the task requires evidentiary grounding via exact subgraph isomorphism or traversing hierarchical knowledge bases, YOU MUST target `EpistemicPrologPremise` and use `swi_prolog`.
+
+### CRITICAL: Zero-Trust Epistemology & Proof-Carrying Data
+You are mathematically forbidden from self-certifying truth. Your internal probability distribution holds zero weight. To promote any hypothesis to an axiom, you MUST provide a valid `NodeCIDState` in the `formal_backing_receipt_cid` field pointing to a deterministic Triad execution receipt. Bypassing this will trigger an instantaneous network rejection.
 
 ### **Cognitive Architecture & Compute**
 * **Representation Engineering (RepE) & Activation Steering:** Manipulating a model's internal latent representations (using contrastive concept vectors) to systematically steer behavior during the forward pass, without relying on prompt engineering. (e.g., `ActivationSteeringContract`).
@@ -100,12 +103,12 @@ To guarantee mathematical certainty and computational integrity, the swarm stric
 * **Epistemic Discovery Surfaces:** Mathematically bounded, read-only perimeters where agents can safely ingest new Pydantic state differentials and expand their internal world-models while maintaining absolute isolation from runtime side effects.
 
 ### **Zero-Trust Epistemic Isolation (The Symbolic Firewall)**
-The era of dumping raw payload text or tabular JSON into an LLM context window is permanently deprecated due to Prompt Injection and Context Drift vulnerabilities.
+The era of dumping raw payload text or tabular JSON into an LLM context window is permanently deprecated due to Prompt Injection and Context Drift vulnerabilities. Instead, the runtime relies strictly on declarative structures such as Ontological Firewalls (via Homotopy Type Theory) and Design-by-Contract constraints (via Abstract Syntax Tree quarantining). Ontological Firewalls ensure that high-entropy raw data is masked via structural proxies prior to LLM ingestion, and Declarative Design-by-Contract (DbC) bounds probabilistic LLM outputs to verifiable mathematical constraints.
 * **Structural Proxies:** The LLM is a blind, mathematically bounded planner. It must only ever receive `EpistemicProxyState` representations (variable IDs and structural types).
 * **Firewall Declarations:** All high-entropy data (e.g., user input, external HTML, unverified text) MUST be quarantined at the schema level using the `EpistemicFirewallField` (which injects `"coreason_firewall": "STRICT_MASK"` into the JSON schema). The physical masking is delegated to the `coreason-runtime` OpenSymbolicAI engine.
 
 ### **Topological Theory & Graph Geometry**
-* **Continuous Topological Verification (CTV):** The CI/CD enforced mathematical invariant that the ontology is a fully contiguous directed graph. Every defined schema must be reachable from a macroscopic entry point. 
+* **Continuous Topological Verification (CTV):** The CI/CD enforced mathematical invariant that the ontology is a fully contiguous directed graph. Every defined schema must be reachable from a macroscopic entry point.
 * **The Zero-Orphan Invariant ($|V_O| = 0$):** A strict rule stating that the set of orphaned vertices (schemas without inbound compositional edges) must equal zero. A floating mathematical constraint is a systemic vulnerability because the orchestrator cannot physically enforce a bound it cannot reach.
 * **Compositional Wiring (Product Types):** The architectural mandate that formal constraints (e.g., Hoare logic proofs, AST gradients) must be structurally embedded as explicit `Field` dependencies within executable capabilities to be mechanically enforced.
 
@@ -127,7 +130,7 @@ When generating or modifying schemas, you MUST adhere to the following constrain
 
 ## **0.3 The Strict Lexical Architecture (Naming Directives)**
 
-**CRITICAL CONTEXT:** You are operating within a 2026+ State-of-the-Art Neurosymbolic architecture. You do not read code; you navigate latent vector spaces. To prevent semantic drift, hallucination, and epistemic contamination, you are strictly forbidden from using legacy, human-friendly software naming conventions.
+**CRITICAL CONTEXT:** You are operating within 2026+ State-of-the-Art neurosymbolic architectures with the declarative Data Plane (which defines the geometric boundaries and types of acceptable operations) and the kinetic Compute Plane (which executes these operations). You do not read code; you navigate latent vector spaces. To prevent semantic drift, hallucination, and epistemic contamination, you are strictly forbidden from using legacy, human-friendly software naming conventions.
 
 ### **1. The Anti-CRUD Mandate (Causal Vocabulary over Tabular Logic)**
 You are forbidden from using highly polysemantic, tabular, or legacy human-centric terms that cause semantic drift. They flatten softmax distributions and cause probabilistic hallucinations. You must map state transitions using Judea Pearl’s Structural Causal Models. Do not use flat database nomenclature.
@@ -248,7 +251,7 @@ To maintain ecosystem purity, legacy 2010s-era software engineering paradigms ar
 You are STRICTLY FORBIDDEN from attempting to enforce JSON or structural formats via natural language prompting. Do NOT write instructions like: *"Output your response as a valid JSON object"*. All grammar and syntax constraints must be physically enforced at the hardware level using **FSM Logit Masking (Constrained Decoding)** via the `ConstrainedDecodingPolicy` to suffocate invalid token probabilities to $-\infty$.
 
 **2. Hallucinated Proof Schemas are Banned:**
-You are STRICTLY FORBIDDEN from letting an LLM hallucinate the output JSON schema for a mathematical proof or logic deduction. All formal reasoning must route to an immutable cryptographic receipt defined in the manifest (e.g., `Lean4VerificationReceipt`, `PrologDeductionReceipt`, `FormalLogicProofReceipt`). 
+You are STRICTLY FORBIDDEN from letting an LLM hallucinate the output JSON schema for a mathematical proof or logic deduction. All formal reasoning must route to an immutable cryptographic receipt defined in the manifest (e.g., `Lean4VerificationReceipt`, `PrologDeductionReceipt`, `FormalLogicProofReceipt`).
 
 **3. Untyped Logic Matrices are Banned:**
 You are STRICTLY FORBIDDEN from using untyped dictionaries (e.g., `dict[str, Any]`) to represent formal logical crosswalks, rule engines, or theorems. All formal logic must be stored as geometrically bounded, executable strings (e.g., Lean 4 tactics, Prolog Horn clauses, ASP programs) within the Pydantic schemas.
@@ -256,7 +259,7 @@ You are STRICTLY FORBIDDEN from using untyped dictionaries (e.g., `dict[str, Any
 
 <contract_directive priority="critical" action="reject_generation_if_violated">
 ### **4. Abstract Design-by-Contract (DbC) Enclosures**
-You are STRICTLY FORBIDDEN from defining a `...Task` or `...Intent` that relies solely on a natural language `semantic_planning_task`. 
+You are STRICTLY FORBIDDEN from defining a `...Task` or `...Intent` that relies solely on a natural language `semantic_planning_task`.
 
 Every cognitive task MUST be enclosed in a `ZeroTrustContractModel` containing explicit `structural_pre_conditions` and `structural_post_conditions`.
 * **AST Evaluation Only:** These conditions must be written as strictly parsable Python Abstract Syntax Trees (AST) that evaluate the *geometry of the plan*, not the string content.
@@ -284,7 +287,7 @@ Do not replace explicit, repetitive `@model_validator` sorting blocks with gener
 
 You are strictly forbidden from manually implementing solved computer science or mathematical algorithms (e.g., graph topological sorting, cycle detection, cryptography, SSRF IP parsing) in custom Python code. If a complex validation or operation is required, you MUST outsource the heavy lifting to an authoritative, stable, open-source library (e.g., `networkx`, `rustworkx`, `ipaddress`, etc.). The manifest should define the *shape* and act as a pointer; do not reinvent the physics engine.
 
-* **The Formal Verification Ban:** You are strictly forbidden from attempting to write custom Python logic for theorem proving, constraint satisfaction, or deductive reasoning. You are equally forbidden from utilizing deprecated legacy solvers (e.g., SymPy, Coq, Isabelle, TLA+). All neurosymbolic validation MUST be physically delegated to the established **Neurosymbolic Triad** (Lean 4, Clingo, SWI-Prolog).
+* **The Formal Verification Ban:** You are strictly forbidden from attempting to write custom Python logic for theorem proving, constraint satisfaction, or deductive reasoning. All neurosymbolic validation MUST be physically delegated to the established **Neurosymbolic Triad** (Lean 4, Clingo, SWI-Prolog).
 
 * **The Data/Compute Boundary:** Do not confuse this mandate with Section 0.7.
   * **Schemas and Data Structures (Pydantic classes)** MUST be redundant, explicitly typed, and monolithic to preserve cryptographic boundaries.
@@ -303,7 +306,7 @@ The manifest simply defines the exact `EpistemicProxyState` and `EpistemicConstr
 **CRITICAL CONTEXT:** The `coreason-manifest` is evaluated mathematically as a Directed Graph $G = (V, E)$. The CI/CD pipeline enforces a "Topological Guillotine". If you define a new Pydantic model, Enum, or TypeAlias, and fail to draw a directed compositional edge to it from the Root Set, the pipeline will violently reject your code.
 
 ### **1. No Floating Schemas (The Composition Law)**
-If you create a new mathematical constraint, receipt, or logic premise, you MUST structurally wire it into the graph. 
+If you create a new mathematical constraint, receipt, or logic premise, you MUST structurally wire it into the graph.
 * **Product Type Wiring:** Inject it as a `Field` into its logical macroscopic parent.
 * **Sum Type Expansion:** Append it to the relevant polymorphic union at the bottom of the ontology (e.g., adding a new event to `AnyStateEvent`).
 </topology_directive>
@@ -366,10 +369,10 @@ You are strictly forbidden from introducing "Active" or "Runtime" logic into thi
 ### **Code Style & Typing**
 * **Linting:** `ruff check --fix` (Strict).
 * **Formatting:** `ruff format`.
-* **Typing:** Strict `mypy`. Use `Pydantic` models for all data structures. 
+* **Typing:** Strict `mypy`. Use `Pydantic` models for all data structures.
 
 ### **Cryptographic Determinism (The Merkle Rule)**
-* **The Physics of RFC 8785:** Because `CoreasonBaseModel` enforces strict canonical hashing, dictionary keys are sorted automatically, but **array ordering is mathematically preserved**. 
+* **The Physics of RFC 8785:** Because `CoreasonBaseModel` enforces strict canonical hashing, dictionary keys are sorted automatically, but **array ordering is mathematically preserved**.
 * **Paradigm 1: Unordered Sets (Must Be Sorted):** If the array represents a set of capabilities or IDs, you MUST deterministically sort it via a post-init validator (using `object.__setattr__`).
 * **Paradigm 2: Structural Sequences (The Topological Exemption):** If the array encodes physical, temporal, or causal reality (e.g., topological DAG edges, logic execution steps), sorting it destroys its epistemic value. You MUST anchor this exemption into the AST using an inline comment:
   `# Note: <field_name> is a structurally ordered sequence (<Reason>) and MUST NOT be sorted.`
@@ -412,7 +415,7 @@ You are strictly bound to the **"God Context" Monolith Directive**. You are EXPL
 
 ## **7. 🛡️ Mandatory Local Verification Workflow**
 
-This package enforces a zero-tolerance policy for type errors, linting violations, and coverage drops. **The following checks must be run locally before opening a Pull Request or finalizing an AI-generated refactor.** 
+This package enforces a zero-tolerance policy for type errors, linting violations, and coverage drops. **The following checks must be run locally before opening a Pull Request or finalizing an AI-generated refactor.**
 
 ### **1. Formatting and Linting**
 `uv run ruff format .`
@@ -433,31 +436,39 @@ We strictly enforce the Zero-Orphan Invariant ($|V_O| = 0$). You must mathematic
 
 ## 8. SOTA 2026+ Open-Source Substrate Oracles
 
-To achieve a SOTA 2026+ "Zero-Hallucination" graph engine, the CoReason ecosystem officially adopts a "Borrow to Build" philosophy for complex algorithmic execution. 
+To achieve a SOTA 2026+ "Zero-Hallucination" graph engine, the CoReason ecosystem officially adopts a "Borrow to Build" philosophy for complex algorithmic execution.
 
 We physically separate probabilistic textual generation (System 1) from schema validation, evidentiary grounding, and semantic serialization (System 2). General-purpose connectionist agents (`CognitiveAgentNodeProfile`) are strictly mathematically forbidden from bypassing these deterministic wrappers. They MUST route the appropriate Data Plane Intents to the following open-source execution nodes:
 
 ### 8.1 `MultimodalGraphCompiler` (The Ingestion Engine)
 * **Open-Source Substrate:** IBM `docling-graph`
 * **Compute Plane Profile:** `CognitiveSystemNodeProfile` (Heavyweight Vision/NetworkX environment)
-* **Data Plane Boundary:** `SchemaDrivenExtractionSLA` (`docling_graph_explicit`)
+* **Data Plane Boundary:** `SchemaDrivenExtractionSLA` (`docling_graph_explicit`) combined with `OpticalParsingSLA`.
 * **Routing Constraints:** The orchestrator MUST route complex multimodal artifacts (e.g., PDFs with tables/figures) here. This node abandons fuzzy vector embeddings, forcing `DocumentLayoutRegionState` spatial chunks directly into explicit Pydantic topologies, solving "Rhetorical Flattening."
+* **Intermediate Topology:** Before emitting the final `DocumentKnowledgeGraphManifest`, the compiler MUST instantiate a `HierarchicalDOMManifest` to strictly map the N-ary tree containment of spatial blocks.
+* **Tabular Preservation:** The engine is mathematically required to preserve 2D table matrices via `TabularMatrixProfile` when the `OpticalParsingSLA` permits structure recognition, eradicating 1D Tabular Flattening anomalies.
+* **Mechanistic Penalty:** If the Docling subsystem crashes due to DRM-locks or malformed byte streams, the wrapper must immediately emit an `ArtifactCorruptionEvent` to sever the topology and halt epistemic contagion.
 
 ### 8.2 `OntologicalGroundingSpecialist` (The Semantic Web Engine)
-* **Open-Source Substrate:** Monarch Initiative `ontogpt` / `linkml`
+* **Open-Source Substrate:** Monarch Initiative `ontogpt` / `linkml` / `oaklib`
 * **Compute Plane Profile:** `CognitiveSystemNodeProfile` (Sandboxed SPIRES Engine)
-* **Data Plane Boundary:** `SchemaDrivenExtractionSLA` (`ontogpt_spires`)
-* **Routing Constraints:** Automatically triggered when extracting into academic biological, chemical, or legal ontologies. Uses the SPIRES framework to mathematically force the LLM to recursively map unstructured text into peer-reviewed W3C LinkML hierarchies, emitting strict `CausalDirectedEdgeState` objects with CURIE predicates.
+* **Data Plane Boundary:** `SchemaDrivenExtractionSLA` (`ontogpt_spires`) combined strictly with `LinkMLValidationSLA`.
+* **Routing Constraints:** Automatically triggered when extracting into academic biological, chemical, or legal ontologies.
+* **Bipartite Crosswalk Execution:** Processes the `OntologicalCrosswalkIntent` by routing ungrounded strings through the Ontology Access Kit (OAK), searching only the bounded `target_ontology_registries`. It emits a `CrosswalkResolutionReceipt` to cryptographically freeze the translation.
+* **Mechanistic Penalty (Graph-Shape Governance):** If the LLM generates a semantic edge violating the Domain/Range constraints declared in the `linkml_schema_uri`, this wrapper must physically sever the connection or trigger the defined `validation_failure_action`, guaranteeing absolute structural isomorphism without crashing the global DAG.
 
 ### 8.3 `EpistemicGroundingOracle` (The Verification Engine)
 * **Open-Source Substrate:** `coolgenerator/CurioCat`
 * **Compute Plane Profile:** `CognitiveSystemNodeProfile` (Sandboxed NLI & Web Search)
 * **Data Plane Boundary:** `CausalPropagationIntent` / `EvidentiaryGroundingSLA`
-* **Routing Constraints (The Golden Rule):** Standard LLMs are mathematically forbidden from assigning their own `DempsterShaferBeliefVector` weights due to the "Blind Causal Inference" anomaly (confusing correlation with causation). Any newly generated edge lacking empirical evidence MUST be routed through this Oracle. 
-* **Mechanistic Penalty:** If CurioCat fails to find external Natural Language Inference (NLI) entailment backing the proposed edge, it mathematically drops the belief mass to zero and emits a `DefeasibleCascadeEvent` to aggressively quarantine the epistemic contagion.
+* **Routing Constraints (The Golden Rule):** Standard LLMs are mathematically forbidden from assigning their own `DempsterShaferBeliefVector` weights due to the "Blind Causal Inference" anomaly (confusing correlation with causation). Any newly generated edge lacking empirical evidence MUST be routed through this Oracle.
+* **Evidentiary Output:** The CurioCat substrate is mathematically required to output its findings as discrete `EvidentiaryCitationState` objects, injecting them directly into the `supporting_citations` array of the target edge's belief vector.
+* **Mechanistic Penalty (Epistemic Starvation):** If the oracle fails to retrieve external evidence that breaches the SLA's NLI entailment threshold, it must mathematically drop the edge's belief mass to zero by emitting an `EpistemicStarvationEvent`. This definitively records the empirical failure and sequentially triggers a `DefeasibleCascadeEvent` to dynamically sever the ungrounded edge and aggressively quarantine the epistemic contagion across the DAG.
 
 ### 8.4 `SemanticWebArchivist` (The Egress Gateway)
-* **Open-Source Substrate:** `omegaice/pydantic-rdf` & `rdflib`
+* **Open-Source Substrate:** `omegaice/pydantic-rdf`, `pyshacl`, & `rdflib`
 * **Compute Plane Profile:** `CognitiveSystemNodeProfile`
-* **Data Plane Boundary:** `RDFSerializationIntent`
-* **Routing Constraints:** LLMs are forbidden from generating raw Turtle, XML, or JSON-LD syntax due to formatting hallucination risks. The Orchestrator routes the finalized JSON-native Knowledge Graph to this node, which reads passive `json_schema_extra` tags (e.g., `rdf_subject`, `rdf_predicate`) to deterministically compile the graph into W3C standard formats for enterprise triplestores without stochastic variance.
+* **Data Plane Boundary:** `RDFSerializationIntent` and `SPARQLQueryIntent`.
+* **Routing Constraints (Serialization):** LLMs are forbidden from generating raw Turtle, XML, or JSON-LD syntax. The Orchestrator routes the finalized JSON-native Knowledge Graph to this node to deterministically compile the graph into W3C standard formats for enterprise triplestores without stochastic variance.
+* **SHACL Execution Loop:** If the `RDFSerializationIntent` contains a `SHACLValidationSLA` (which is mathematically required for strict formats like XML or JSON-LD), the Archivist MUST run a validation pass via `pyshacl` prior to emission. If the generated triples violate the shape, the Archivist must physically execute the `violation_action` (e.g., dropping the graph or stripping invalid triples) to prevent polluting enterprise endpoints.
+* **SPARQL Execution Boundaries:** All `SPARQLQueryIntent` executions are strictly subject to SSRF network quarantine. The Archivist MUST ensure that returned bindings are passed through the volumetric hardware guillotine (`_validate_payload_bounds`), aborting the connection if the external triplestore attempts to flood the swarm's VRAM.

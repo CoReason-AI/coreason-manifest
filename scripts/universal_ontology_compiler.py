@@ -274,7 +274,11 @@ def evaluate_ast_instantiation_bounds() -> None:
                             has_violations = True
                         if item.name not in allowed_methods:
                             decorators = get_decorators(item)
-                            if "model_validator" not in decorators and "field_validator" not in decorators:
+                            if (
+                                "model_validator" not in decorators
+                                and "field_validator" not in decorators
+                                and "field_serializer" not in decorators
+                            ):
                                 print(
                                     f"Rule B Violation: Class '{node.name}' function '{item.name}' missing validator decorator in {filepath}",
                                     file=sys.stderr,
@@ -323,9 +327,9 @@ def evaluate_topological_reachability() -> None:
 
     excluded_base_classes = {"CryptographicProvenancePolicy", "BoundedJSONRPCIntent", "AnyToolchainState"}
     class_registry = {
-        cls.__name__: cls
+        cls.__name__.split("[")[0]: cls
         for cls in get_all_subclasses(onto.CoreasonBaseState)
-        if cls.__name__ not in excluded_base_classes
+        if cls.__name__.split("[")[0] not in excluded_base_classes
     }
     alias_registry = {name: obj.__value__ for name, obj in vars(onto).items() if isinstance(obj, TypeAliasType)}
 
@@ -342,6 +346,8 @@ def evaluate_topological_reachability() -> None:
         seen.add(ann_id)
         if isinstance(annotation, str):
             clean_string = annotation.strip("'\"")
+            if "[" in clean_string:
+                clean_string = clean_string.split("[")[0]
             if clean_string in alias_registry:
                 return extract_referenced_models(alias_registry[clean_string], seen)
             if clean_string in class_registry:
@@ -376,8 +382,9 @@ def evaluate_topological_reachability() -> None:
             hints = get_type_hints(cls, vars(onto), include_extras=True)
             for resolved_type in hints.values():
                 for ref_model in extract_referenced_models(resolved_type):
-                    if ref_model.__name__ in class_registry:
-                        graph.add_edge(cls_name, ref_model.__name__)
+                    ref_name = ref_model.__name__.split("[")[0]
+                    if ref_name in class_registry:
+                        graph.add_edge(cls_name, ref_name)
         except Exception as e:
             print(f"Warning: Failed to resolve type hints for {cls_name}: {e}")
 
@@ -485,7 +492,7 @@ def calculate_semantic_differential() -> None:
     def get_head_schema() -> dict[str, Any]:
         try:
             output = subprocess.check_output(
-                ["git", "show", "HEAD~1:coreason_ontology.schema.json"],  # noqa: S607
+                ["git", "show", "HEAD~1:coreason_ontology.schema.json"],  # noqa: S607 # nosec B603 B607
                 stderr=subprocess.DEVNULL,
                 text=True,
             )
@@ -555,7 +562,7 @@ def scan_epistemic_quarantine(source: str) -> None:
 
     try:
         if source.startswith(("http://", "https://")):
-            with urllib.request.urlopen(source, timeout=10) as response:  # noqa: S310
+            with urllib.request.urlopen(source, timeout=10) as response:  # noqa: S310 # nosec B310
                 schema_dict = json.loads(response.read().decode("utf-8"))
         else:
             with open(source, encoding="utf-8") as f:

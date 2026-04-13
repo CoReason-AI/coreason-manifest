@@ -1,0 +1,15 @@
+{
+  "name": "@coreason/manifest-types",
+  "version": "1.0.0",
+  "description": "TypeScript bindings for the CoReason Hollow Data Plane.",
+  "main": "dist/ontology.js",
+  "types": "dist/ontology.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "format": "prettier --write src/"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "prettier": "^3.0.0"
+  }
+}

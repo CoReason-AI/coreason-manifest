@@ -227,7 +227,7 @@ def test_ontology_discovery_intent_payload_bounds() -> None:
         jsonrpc="2.0",
         method="query_registry",
         id="req-123",
-        target_registry_uri="https://www.ebi.ac.uk/ols4/api",  # type: ignore
+        target_registry_uri="https://1.1.1.1/ols4/api",  # type: ignore
         query_concept_cid="SCTID:12345",
         expected_response_schema={"type": "object"},
     )
@@ -238,7 +238,7 @@ def test_ontology_discovery_intent_payload_bounds() -> None:
         jsonrpc="2.0",
         method="query_registry",
         id="req-123",
-        target_registry_uri="https://www.ebi.ac.uk/ols4/api",  # type: ignore
+        target_registry_uri="https://1.1.1.1/ols4/api",  # type: ignore
         query_concept_cid="SCTID:12345",
         expected_response_schema=None,
     )
@@ -253,7 +253,7 @@ def test_ontology_discovery_intent_payload_bounds() -> None:
         OntologyDiscoveryIntent(
             method="query_registry",
             id="req-123",
-            target_registry_uri="https://www.ebi.ac.uk/ols4/api",  # type: ignore
+            target_registry_uri="https://1.1.1.1/ols4/api",  # type: ignore
             query_concept_cid="SCTID:12345",
             expected_response_schema=nested_payload,
         )
@@ -268,24 +268,64 @@ def test_semantic_mapping_heuristic_proposal_payload_bounds() -> None:
         proposal_cid="prop-123",
         source_ontology_namespace="ICD-10",
         target_ontology_namespace="SNOMED-CT",
-        formal_rule_matrix={"rule": "SWRL_EXPRESSION"},
+        formal_logic_clauses="SWRL_EXPRESSION",
         justification_evidence_cids=["did:example:node_B", "did:example:node_A"],
     )
-    assert proposal.formal_rule_matrix == {"rule": "SWRL_EXPRESSION"}
+    assert proposal.formal_logic_clauses == "SWRL_EXPRESSION"
     # Verify canonical sorting
     assert proposal.justification_evidence_cids == ["did:example:node_A", "did:example:node_B"]
 
-    # Invalid payload (exceeds depth)
-    nested_payload: Any = "leaf"
-    for _ in range(11):
-        nested_payload = {"key": nested_payload}
+    # Invalid payload (exceeds length constraint)
+    large_string = "a" * 65537
 
     with pytest.raises(ValidationError) as exc_info:
         SemanticMappingHeuristicIntent(
             proposal_cid="prop-123",
             source_ontology_namespace="ICD-10",
             target_ontology_namespace="SNOMED-CT",
-            formal_rule_matrix=nested_payload,
+            formal_logic_clauses=large_string,
             justification_evidence_cids=["did:example:node_A"],
         )
-    assert "Payload exceeds maximum recursion depth of 10" in str(exc_info.value)
+    assert "String should have at most 65536 characters" in str(exc_info.value)
+
+
+def test_epistemic_logic_premise_bounds() -> None:
+    from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import EpistemicLogicPremise
+
+    # Valid payload
+    premise = EpistemicLogicPremise(ontology_node_id="did:example:node_123", asp_program="a :- b.", max_models=5)
+    assert premise.asp_program == "a :- b."
+
+    # Invalid payload (exceeds length constraint 65536)
+    large_string = "a" * 65537
+
+    with pytest.raises(ValidationError) as exc_info:
+        EpistemicLogicPremise(ontology_node_id="did:example:node_123", asp_program=large_string, max_models=5)
+    assert "String should have at most 65536 characters" in str(exc_info.value)
+
+
+def test_epistemic_lean4_premise_bounds() -> None:
+    from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import EpistemicLean4Premise
+
+    # Valid payload
+    premise = EpistemicLean4Premise(
+        ontology_node_id="did:example:node_123",
+        formal_statement="theorem test : True := by trivial",
+        tactic_proof="trivial",
+    )
+    assert premise.tactic_proof == "trivial"
+
+    # Invalid payload (exceeds length constraint 100000)
+    large_string = "a" * 100001
+
+    with pytest.raises(ValidationError) as exc_info:
+        EpistemicLean4Premise(
+            ontology_node_id="did:example:node_123",
+            formal_statement="theorem test : True := by trivial",
+            tactic_proof=large_string,
+        )
+    assert "String should have at most 100000 characters" in str(exc_info.value)
