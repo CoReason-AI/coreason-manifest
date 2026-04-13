@@ -1401,7 +1401,10 @@ export type SubstrateDialectProfile =
   | "OPEN_SYMBOLIC_FIREWALL"
   | "DOCLING_GRAPH_EXTRACTOR"
   | "ONTOGPT_SPIRES"
-  | "NATIVE_PYTHON";
+  | "NATIVE_PYTHON"
+  | "CURIOCAT_NLI"
+  | "SEMANTIC_WEB_ARCHIVIST"
+  | "ZERO_KNOWLEDGE_PROVER";
 /**
  * A whitelist of exact PEP 508 dependency specifiers or wheel hashes.
  */
@@ -2780,7 +2783,7 @@ export type RawHumanArtifactCid = string;
  */
 export type MaxClarificationLoops = number;
 /**
- * The execution phase of the graph. 'draft' allows incomplete structural state.
+ * The execution phase of the graph.
  */
 export type LifecyclePhase9 = "draft" | "live";
 /**
@@ -2792,9 +2795,29 @@ export type ArchitecturalIntent13 = string | null;
  */
 export type Justification15 = string | null;
 /**
+ * Discriminator for the ingestion macro.
+ */
+export type TopologyClass63 = "macro_ingestion";
+/**
+ * Target serialization format.
+ */
+export type EgressFormat = "turtle" | "xml" | "json-ld" | "ntriples";
+/**
+ * The execution phase of the graph. 'draft' allows incomplete structural state.
+ */
+export type LifecyclePhase10 = "draft" | "live";
+/**
+ * The AI's declarative rationale for selecting this topology.
+ */
+export type ArchitecturalIntent14 = string | null;
+/**
+ * Cryptographic/audit justification for this topology's configuration.
+ */
+export type Justification16 = string | null;
+/**
  * Discriminator for a macro neurosymbolic loop.
  */
-export type TopologyClass63 = "macro_neurosymbolic";
+export type TopologyClass64 = "macro_neurosymbolic";
 /**
  * The connectionist agent generating hypotheses.
  */
@@ -2814,7 +2837,7 @@ export type CritiqueSchemaCid = string | null;
 /**
  * Discriminator for a discourse tree topology.
  */
-export type TopologyClass64 = "discourse_tree";
+export type TopologyClass65 = "discourse_tree";
 /**
  * Cryptographic identifier for this topology.
  */
@@ -2827,7 +2850,7 @@ export type DiscourseType = "preamble" | "methodology" | "argumentation" | "find
  * Explicit pointers linking this discourse block to the specific AtomicPropositionState nodes extracted from its text.
  */
 export type ContainedPropositions = NodeCIDState[];
-export type TopologyClass65 = "document_knowledge_graph";
+export type TopologyClass66 = "document_knowledge_graph";
 export type GraphCid = string;
 export type SourceArtifactCid1 = string;
 /**
@@ -2891,7 +2914,7 @@ export type CiphertextBlob = string;
 /**
  * Discriminator for manifold mapping.
  */
-export type TopologyClass66 = "manifold_mapping";
+export type TopologyClass67 = "manifold_mapping";
 /**
  * Calculated geometric alignment between the semantic embedding and spatial tensor.
  */
@@ -2903,13 +2926,13 @@ export type SpatialManifoldMappings = ContinuousManifoldMappingContract[];
 /**
  * @maxItems 100000
  */
-export type Nodes11 = SemanticNodeState[];
+export type Nodes12 = SemanticNodeState[];
 /**
  * @maxItems 100000
  */
 export type CausalEdges = CausalDirectedEdgeState[];
 export type IsomorphismHash = string;
-export type TopologyClass67 = "hierarchical_dom";
+export type TopologyClass68 = "hierarchical_dom";
 export type DomCid = string;
 export type RootBlockCid = string;
 /**
@@ -2993,11 +3016,11 @@ export type Description8 = string;
 /**
  * The AI's declarative rationale for selecting this node.
  */
-export type ArchitecturalIntent14 = string | null;
+export type ArchitecturalIntent15 = string | null;
 /**
  * Cryptographic/audit justification for this node's existence in the graph.
  */
-export type Justification16 = string | null;
+export type Justification17 = string | null;
 /**
  * The declarative array of proactive oversight hooks bound to this node's lifecycle.
  */
@@ -3011,7 +3034,7 @@ export type DomainExtensions4 = {
 /**
  * Discriminator for a Memoized node.
  */
-export type TopologyClass68 = "memoized";
+export type TopologyClass69 = "memoized";
 /**
  * A discriminated union of presentation UI panels.
  */
@@ -3023,7 +3046,7 @@ export type PanelCid = string;
 /**
  * Discriminator for Grammar of Graphics charts.
  */
-export type TopologyClass69 = "grammar";
+export type TopologyClass70 = "grammar";
 /**
  * The declarative semantic anchor summarizing the underlying visual grammar.
  */
@@ -3063,7 +3086,7 @@ export type Field = string;
 /**
  * The strictly typed mathematical mapping function distorting metrics into Euclidean pixel space.
  */
-export type TopologyClass70 = "linear" | "log" | "time" | "ordinal" | "nominal";
+export type TopologyClass71 = "linear" | "log" | "time" | "ordinal" | "nominal";
 /**
  * The optional minimum bound of the scale domain.
  */
@@ -3091,7 +3114,7 @@ export type PanelCid1 = string;
 /**
  * Discriminator for markdown insight cards.
  */
-export type TopologyClass71 = "insight_card";
+export type TopologyClass72 = "insight_card";
 /**
  * The declarative semantic anchor summarizing the underlying matrix or markdown projection.
  */
@@ -3151,7 +3174,7 @@ export type AnyStateEvent =
 /**
  * Discriminator for temporal graph crdt.
  */
-export type TopologyClass72 = "temporal_graph_crdt";
+export type TopologyClass73 = "temporal_graph_crdt";
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark.
  */
@@ -3172,7 +3195,7 @@ export type AddSet = NodeCIDState[];
  * The set of non-monotonic timeline caps.
  */
 export type TerminateSet = TemporalEdgeInvalidationIntent[];
-export type TopologyClass73 = "mcp_tool_definition";
+export type TopologyClass74 = "mcp_tool_definition";
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
  */
@@ -3187,7 +3210,7 @@ export type Description9 = string;
 export type EventCid3 = string;
 export type PriorEventHash3 = string | null;
 export type Timestamp3 = number;
-export type TopologyClass74 = "crosswalk_resolution";
+export type TopologyClass75 = "crosswalk_resolution";
 export type ReceiptCid1 = string;
 export type TargetGraphCid3 = string;
 /**
@@ -3205,7 +3228,7 @@ export type Timestamp4 = number;
 /**
  * Discriminator for a zero-trust receipt.
  */
-export type TopologyClass75 = "zero_trust_receipt";
+export type TopologyClass76 = "zero_trust_receipt";
 /**
  * Pointer to the originating EpistemicZeroTrustContract.
  */
@@ -3241,7 +3264,7 @@ export type Timestamp5 = number;
 /**
  * Discriminator type for an observation event.
  */
-export type TopologyClass76 = "observation";
+export type TopologyClass77 = "observation";
 /**
  * The physical silicon architecture generating the root-of-trust quote.
  */
@@ -3261,7 +3284,7 @@ export type AnyToolchainState = BrowserDOMState | TerminalBufferState;
 /**
  * Discriminator for Causal Actuators representing structural shifts.
  */
-export type TopologyClass77 = "browser";
+export type TopologyClass78 = "browser";
 /**
  * Spatial Execution Bounds where the agent interacts.
  */
@@ -3288,7 +3311,7 @@ export type ScreenshotCid = string | null;
 /**
  * Discriminator for Causal Actuators on structural buffers.
  */
-export type TopologyClass78 = "terminal";
+export type TopologyClass79 = "terminal";
 /**
  * Capability Perimeters defining context bounds.
  */
@@ -3386,7 +3409,7 @@ export type Timestamp6 = number;
 /**
  * Discriminator type for a Belief Assertion event.
  */
-export type TopologyClass79 = "belief_mutation";
+export type TopologyClass80 = "belief_mutation";
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the source event in the Merkle-DAG.
  */
@@ -3438,8 +3461,8 @@ export type Timestamp7 = number;
 /**
  * Discriminator type for a system fault event.
  */
-export type TopologyClass80 = "system_fault";
-export type TopologyClass81 = "atomic_proposition";
+export type TopologyClass81 = "system_fault";
+export type TopologyClass82 = "atomic_proposition";
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
  */
@@ -3501,7 +3524,7 @@ export type UpperBound = number | null;
  * Explicit mathematical boundaries extracted from the text that empirically limit the certainty or scope of the proposition.
  */
 export type StatisticalQualifiers = EmpiricalStatisticalProfile[];
-export type TopologyClass82 = "post_coordinated_concept";
+export type TopologyClass83 = "post_coordinated_concept";
 /**
  * Cryptographic Lineage Watermark binding this node to the Merkle-DAG.
  */
@@ -3529,7 +3552,7 @@ export type IsometryScore = number;
 export type EventCid10 = string;
 export type PriorEventHash10 = string | null;
 export type Timestamp10 = number;
-export type TopologyClass83 = "artifact_corruption";
+export type TopologyClass84 = "artifact_corruption";
 /**
  * The genesis artifact that caused the ingestion engine to crash.
  */
@@ -3551,7 +3574,7 @@ export type Timestamp11 = number;
 /**
  * Discriminator for a hypothesis generation event.
  */
-export type TopologyClass84 = "hypothesis";
+export type TopologyClass85 = "hypothesis";
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this abductive leap to the Merkle-DAG.
  */
@@ -3605,7 +3628,7 @@ export type Timestamp12 = number;
 /**
  * Discriminator type for a barge-in interruption event.
  */
-export type TopologyClass85 = "barge_in";
+export type TopologyClass86 = "barge_in";
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the active node generation cycle that was killed in the Merkle-DAG.
  */
@@ -3638,7 +3661,7 @@ export type Timestamp13 = number;
 /**
  * Discriminator type for a counterfactual regret event.
  */
-export type TopologyClass86 = "counterfactual_regret";
+export type TopologyClass87 = "counterfactual_regret";
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the specific historical state node where the agent mathematically diverged to simulate an alternative path.
  */
@@ -3674,7 +3697,7 @@ export type Timestamp14 = number;
 /**
  * Discriminator type for a tool invocation event.
  */
-export type TopologyClass87 = "tool_invocation";
+export type TopologyClass88 = "tool_invocation";
 /**
  * The exact tool targeted in the CognitiveActionSpaceManifest.
  */
@@ -3698,7 +3721,7 @@ export type Timestamp15 = number;
 /**
  * Discriminator type for an epistemic promotion event.
  */
-export type TopologyClass88 = "epistemic_promotion";
+export type TopologyClass89 = "epistemic_promotion";
 /**
  * The strict array of CIDs (Content Identifiers) representing the raw logs being compressed and archived.
  */
@@ -3726,7 +3749,7 @@ export type Timestamp16 = number;
 /**
  * Discriminator type for a normative drift event.
  */
-export type TopologyClass89 = "normative_drift";
+export type TopologyClass90 = "normative_drift";
 /**
  * The Content Identifier (CID) of the specific ConstitutionalPolicy causing logical friction.
  */
@@ -3754,7 +3777,7 @@ export type Timestamp17 = number;
 /**
  * Discriminator type for a persistence commit receipt.
  */
-export type TopologyClass90 = "persistence_commit";
+export type TopologyClass91 = "persistence_commit";
 /**
  * The external cryptographic receipt generated by Iceberg/Delta.
  */
@@ -3782,7 +3805,7 @@ export type Timestamp18 = number;
 /**
  * Discriminator type for a token burn receipt.
  */
-export type TopologyClass91 = "token_burn";
+export type TopologyClass92 = "token_burn";
 /**
  * A string linking this burn back to the specific ToolInvocationEvent CID.
  */
@@ -3814,7 +3837,7 @@ export type Timestamp19 = number;
 /**
  * Discriminator type for a budget exhaustion event.
  */
-export type TopologyClass92 = "budget_exhaustion";
+export type TopologyClass93 = "budget_exhaustion";
 /**
  * A string representing the original escrow boundary breached.
  */
@@ -3838,7 +3861,7 @@ export type Timestamp20 = number;
 /**
  * Discriminator type for telemetry events.
  */
-export type TopologyClass93 = "epistemic_telemetry";
+export type TopologyClass94 = "epistemic_telemetry";
 /**
  * The exact topological action the human operator performed on the projected manifold.
  */
@@ -3863,7 +3886,7 @@ export type PriorEventHash21 = string | null;
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
 export type Timestamp21 = number;
-export type TopologyClass94 = "cognitive_prediction";
+export type TopologyClass95 = "cognitive_prediction";
 export type SourceChainCid = string;
 export type TargetSourceConcept = string;
 /**
@@ -3882,7 +3905,7 @@ export type PriorEventHash22 = string | null;
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
 export type Timestamp22 = number;
-export type TopologyClass95 = "epistemic_axiom_verification";
+export type TopologyClass96 = "epistemic_axiom_verification";
 export type SourcePredictionCid = string;
 export type SequenceSimilarityScore = number;
 export type FactScorePassed = boolean;
@@ -3902,7 +3925,7 @@ export type PriorEventHash23 = string | null;
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
 export type Timestamp23 = number;
-export type TopologyClass96 = "cognitive_reward_evaluation";
+export type TopologyClass97 = "cognitive_reward_evaluation";
 /**
  * The globally unique decentralized identifier (DID) anchoring the LLM's raw generated text trajectory.
  */
@@ -3943,7 +3966,7 @@ export type PriorEventHash24 = string | null;
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
 export type Timestamp24 = number;
-export type TopologyClass97 = "epistemic_flow_state";
+export type TopologyClass98 = "epistemic_flow_state";
 /**
  * The globally unique decentralized identifier (DID) anchoring the partial CognitiveReasoningTraceState.
  */
@@ -3971,7 +3994,7 @@ export type Timestamp25 = number;
 /**
  * Discriminator type for a causal explanation event.
  */
-export type TopologyClass98 = "causal_explanation";
+export type TopologyClass99 = "causal_explanation";
 /**
  * The globally unique decentralized identifier (DID) anchoring the collective outcome being explained.
  */
@@ -4023,7 +4046,7 @@ export type Timestamp26 = number;
 /**
  * Discriminator type for an intent classification receipt.
  */
-export type TopologyClass99 = "intent_classification";
+export type TopologyClass100 = "intent_classification";
 /**
  * The raw, unparsed human natural language instruction.
  */
@@ -4040,7 +4063,7 @@ export type ConfidenceScore1 = number;
  * The TaxonomicRoutingPolicy CID that governed this classification.
  */
 export type RoutingPolicyCid = string | null;
-export type TopologyClass100 = "semantic_relational_record";
+export type TopologyClass101 = "semantic_relational_record";
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
  */
@@ -4060,7 +4083,7 @@ export type UpperOntologyClassProfile = "continuant" | "occurrent";
 /**
  * Discriminator for the reification receipt.
  */
-export type TopologyClass101 = "ontological_reification";
+export type TopologyClass102 = "ontological_reification";
 /**
  * Cryptographic Lineage Watermark binding this node to the Merkle-DAG.
  */
@@ -4108,7 +4131,7 @@ export type Timestamp29 = number;
 /**
  * The type of the resilience payload.
  */
-export type TopologyClass102 = "circuit_breaker_event";
+export type TopologyClass103 = "circuit_breaker_event";
 /**
  * Signature or summary of the error causing the trip.
  */
@@ -4128,7 +4151,7 @@ export type Timestamp30 = number;
 /**
  * Discriminator type for an exogenous event.
  */
-export type TopologyClass103 = "exogenous_event";
+export type TopologyClass104 = "exogenous_event";
 /**
  * Cryptographic identifier for the Black Swan event.
  */
@@ -4156,7 +4179,7 @@ export type PriorEventHash31 = string | null;
 /**
  * Discriminator type for a log event.
  */
-export type TopologyClass104 = "epistemic_log";
+export type TopologyClass105 = "epistemic_log";
 /**
  * The UNIX timestamp of the log event.
  */
@@ -4173,7 +4196,7 @@ export type TelemetryScalarState = string | number | boolean | null;
 /**
  * The type of the intervention payload.
  */
-export type TopologyClass105 = "verdict";
+export type TopologyClass106 = "verdict";
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
  */
@@ -4226,7 +4249,7 @@ export type PriorEventHash33 = string | null;
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
 export type Timestamp33 = number;
-export type TopologyClass106 = "custody_receipt";
+export type TopologyClass107 = "custody_receipt";
 /**
  * Unique identifier for this chain-of-custody entry.
  */
@@ -4263,7 +4286,7 @@ export type PriorEventHash34 = string | null;
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
 export type Timestamp34 = number;
-export type TopologyClass107 = "defeasible_attack";
+export type TopologyClass108 = "defeasible_attack";
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this directed attack edge.
  */
@@ -4278,8 +4301,8 @@ export type SourceClaimCid = string;
 export type TargetClaimCid = string;
 export type IsProved = boolean;
 export type FailingTacticState = string | null;
-export type TopologyClass108 = "lean4_verification_receipt";
-export type TopologyClass109 = "formal_logic_proof";
+export type TopologyClass109 = "lean4_verification_receipt";
+export type TopologyClass110 = "formal_logic_proof";
 export type EventCid35 = string;
 export type Timestamp35 = number;
 export type PriorEventHash35 = string | null;
@@ -4288,7 +4311,7 @@ export type Satisfiability = "SATISFIABLE" | "UNSATISFIABLE" | "UNKNOWN" | "OPTI
  * Topological Exemption: DO NOT SORT.
  */
 export type AnswerSets = string[][];
-export type TopologyClass110 = "prolog_deduction_receipt";
+export type TopologyClass111 = "prolog_deduction_receipt";
 export type EventCid36 = string;
 export type Timestamp36 = number;
 export type PriorEventHash36 = string | null;
@@ -4299,7 +4322,7 @@ export type TruthValue = boolean;
 export type VariableBindings = {
   [k: string]: JsonPrimitiveState;
 }[];
-export type TopologyClass111 = "belief_modulation";
+export type TopologyClass112 = "belief_modulation";
 export type ReceiptCid2 = string;
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
@@ -4315,7 +4338,7 @@ export type PriorEventHash37 = string | null;
 export type Timestamp37 = number;
 export type TargetGraphCid4 = string;
 export type SeveredEdgeCids = string[];
-export type TopologyClass112 = "rdf_export_receipt";
+export type TopologyClass113 = "rdf_export_receipt";
 export type ExportCid1 = string;
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
@@ -4335,7 +4358,7 @@ export type Sha256GraphHash = string;
 export type EventCid39 = string;
 export type PriorEventHash39 = string | null;
 export type Timestamp39 = number;
-export type TopologyClass113 = "epistemic_starvation";
+export type TopologyClass114 = "epistemic_starvation";
 /**
  * The cryptographic pointer to the specific edge that failed empirical grounding.
  */
@@ -4351,7 +4374,7 @@ export type DiagnosticReason = string;
 export type EventCid40 = string;
 export type PriorEventHash40 = string | null;
 export type Timestamp40 = number;
-export type TopologyClass114 = "sparql_query_result";
+export type TopologyClass115 = "sparql_query_result";
 /**
  * A pointer back to the SPARQLQueryIntent that authorized this execution.
  */
@@ -4375,6 +4398,7 @@ export type AnyTopologyManifest =
   | ConsensusFederationTopologyManifest
   | CapabilityForgeTopologyManifest
   | IntentElicitationTopologyManifest
+  | NeurosymbolicIngestionTopologyManifest
   | NeurosymbolicVerificationTopologyManifest
   | DiscourseTreeManifest
   | DocumentKnowledgeGraphManifest
@@ -4383,7 +4407,7 @@ export type AnyTransitionEdge = TransitionEdgeProfile | CyclicEdgeProfile;
 /**
  * Discriminator type for an acyclic edge.
  */
-export type TopologyClass115 = "acyclic";
+export type TopologyClass116 = "acyclic";
 /**
  * The coinductive pointer to the destination capability.
  */
@@ -4415,7 +4439,7 @@ export type ComputeWeightMagnitude = number;
 /**
  * Discriminator type for a cyclic edge.
  */
-export type TopologyClass116 = "cyclic";
+export type TopologyClass117 = "cyclic";
 /**
  * The coinductive pointer to the destination capability.
  */
@@ -4496,7 +4520,7 @@ export type ArtifactEventCid = string;
 /**
  * The deterministic reason the orchestrator severed this execution branch.
  */
-export type Justification17 = "modality_mismatch" | "budget_exhaustion" | "sla_timeout";
+export type Justification18 = "modality_mismatch" | "budget_exhaustion" | "sla_timeout";
 /**
  * The SHA-256 null-hash representing the skipped state to satisfy the Epistemic Ledger.
  */
@@ -4857,7 +4881,7 @@ export type MaxAstNodeBudget = number;
 /**
  * Discriminator for the dynamic manifold projection.
  */
-export type TopologyClass117 = "dynamic_manifold";
+export type TopologyClass118 = "dynamic_manifold";
 /**
  * Unique identifier for this projection.
  */
@@ -4925,7 +4949,7 @@ export type SourceSemanticNodeCid = string | null;
 /**
  * The logical premise explaining why this evidence supports the claim.
  */
-export type Justification18 = string;
+export type Justification19 = string;
 /**
  * The foundational premises supporting this claim.
  */
@@ -5742,7 +5766,10 @@ export type SubstrateDialectProfile1 =
   | "OPEN_SYMBOLIC_FIREWALL"
   | "DOCLING_GRAPH_EXTRACTOR"
   | "ONTOGPT_SPIRES"
-  | "NATIVE_PYTHON";
+  | "NATIVE_PYTHON"
+  | "CURIOCAT_NLI"
+  | "SEMANTIC_WEB_ARCHIVIST"
+  | "ZERO_KNOWLEDGE_PROVER";
 /**
  * Unique identifier for this simulation profile.
  */
@@ -6109,6 +6136,7 @@ export interface CoReasonSharedKernelOntology {
   NeuralAuditAttestationReceipt?: NeuralAuditAttestationReceipt;
   NeuroSymbolicHandoffContract?: NeuroSymbolicHandoffContract;
   NeurosymbolicInferenceIntent?: NeurosymbolicInferenceIntent;
+  NeurosymbolicIngestionTopologyManifest?: NeurosymbolicIngestionTopologyManifest;
   NeurosymbolicVerificationTopologyManifest?: NeurosymbolicVerificationTopologyManifest;
   NodeCIDState?: NodeCIDState;
   NormativeDriftEvent?: NormativeDriftEvent;
@@ -9266,6 +9294,7 @@ export interface CompositeNodeProfile {
     | ConsensusFederationTopologyManifest
     | CapabilityForgeTopologyManifest
     | IntentElicitationTopologyManifest
+    | NeurosymbolicIngestionTopologyManifest
     | NeurosymbolicVerificationTopologyManifest
     | DiscourseTreeManifest
     | DocumentKnowledgeGraphManifest
@@ -10539,6 +10568,67 @@ export interface Nodes9 {
 /**
  * CoReason Shared Kernel Ontology
  *
+ * AGENT INSTRUCTION: A Zero-Cost Macro abstraction that deterministically projects a 4-stage neurosymbolic ingestion pipeline into a rigid Directed Acyclic Graph (DAG).
+ *
+ * CAUSAL AFFORDANCE: Physically guarantees that unstructured artifacts pass sequentially through the Docling extractor, OntoGPT grounding specialist, CurioCat verification oracle, and PySHACL archivist without skipping verification gates.
+ *
+ * EPISTEMIC BOUNDS: The compile_to_base_topology functor mathematically enforces strict algorithmic complexity bounds (max_depth=4, max_fan_out=1, allow_cycles=False), completely severing the capacity for recursive state-space explosions during ingestion.
+ *
+ * MCP ROUTING TRIGGERS: Neurosymbolic Ingestion, Zero-Cost Macro, Substrate Oracles, Deterministic Pipeline, Functorial Semantics
+ */
+export interface NeurosymbolicIngestionTopologyManifest {
+  /**
+   * Ties the topology to the Truth Maintenance layer.
+   */
+  epistemic_enforcement?: TruthMaintenancePolicy | null;
+  lifecycle_phase?: LifecyclePhase9;
+  architectural_intent?: ArchitecturalIntent13;
+  justification?: Justification15;
+  nodes?: Nodes10;
+  /**
+   * The schema-on-write contract governing the internal state.
+   */
+  shared_state_contract?: StateContract | null;
+  /**
+   * The structural Payload Loss Prevention (PLP) contract.
+   */
+  semantic_flow?: SemanticFlowPolicy | null;
+  /**
+   * The dynamic Level of Detail physics bound to this graph.
+   */
+  observability?: ObservabilityLODPolicy | null;
+  topology_class?: TopologyClass63;
+  /**
+   * A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.
+   */
+  source_artifact_cid: string;
+  /**
+   * A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.
+   */
+  compiler_node_cid: string;
+  /**
+   * A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.
+   */
+  grounding_specialist_cid: string;
+  /**
+   * A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.
+   */
+  verification_oracle_cid: string;
+  /**
+   * A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.
+   */
+  archivist_node_cid: string;
+  egress_format?: EgressFormat;
+}
+/**
+ * Flat registry of all nodes in this topology.
+ */
+export interface Nodes10 {
+  [k: string]: AnyNodeProfile;
+}
+/**
+ * CoReason Shared Kernel Ontology
+ *
  * AGENT INSTRUCTION: A Zero-Cost Macro abstraction enforcing a strict Bipartite Graph for Proposer-Verifier loops. Isolates connectionist generation from symbolic validation and bounds cyclic computation.
  *
  *     CAUSAL AFFORDANCE: Instructs the orchestrator to enforce a strict Bipartite Graph for Proposer-Verifier loops.
@@ -10552,10 +10642,10 @@ export interface NeurosymbolicVerificationTopologyManifest {
    * Ties the topology to the Truth Maintenance layer.
    */
   epistemic_enforcement?: TruthMaintenancePolicy | null;
-  lifecycle_phase?: LifecyclePhase9;
-  architectural_intent?: ArchitecturalIntent13;
-  justification?: Justification15;
-  nodes: Nodes10;
+  lifecycle_phase?: LifecyclePhase10;
+  architectural_intent?: ArchitecturalIntent14;
+  justification?: Justification16;
+  nodes: Nodes11;
   /**
    * The schema-on-write contract governing the internal state of this topology.
    */
@@ -10568,7 +10658,7 @@ export interface NeurosymbolicVerificationTopologyManifest {
    * The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph.
    */
   observability?: ObservabilityLODPolicy | null;
-  topology_class?: TopologyClass63;
+  topology_class?: TopologyClass64;
   proposer_node_cid: ProposerNodeCid;
   verifier_node_cid: VerifierNodeCid;
   max_revision_loops: MaxRevisionLoops1;
@@ -10577,7 +10667,7 @@ export interface NeurosymbolicVerificationTopologyManifest {
 /**
  * Flat registry of all nodes in this topology.
  */
-export interface Nodes10 {
+export interface Nodes11 {
   [k: string]: AnyNodeProfile;
 }
 /**
@@ -10592,7 +10682,7 @@ export interface Nodes10 {
  *     MCP ROUTING TRIGGERS: Discourse Geometry, Rhetorical Flattening, Directed Acyclic Graph, Hierarchical Extraction
  */
 export interface DiscourseTreeManifest {
-  topology_class?: TopologyClass64;
+  topology_class?: TopologyClass65;
   manifest_cid: ManifestCid1;
   /**
    * A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.
@@ -10633,10 +10723,10 @@ export interface DiscourseNodeState {
  * CoReason Shared Kernel Ontology
  */
 export interface DocumentKnowledgeGraphManifest {
-  topology_class?: TopologyClass65;
+  topology_class?: TopologyClass66;
   graph_cid: GraphCid;
   source_artifact_cid: SourceArtifactCid1;
-  nodes: Nodes11;
+  nodes: Nodes12;
   causal_edges: CausalEdges;
   isomorphism_hash: IsomorphismHash;
 }
@@ -10781,7 +10871,7 @@ export interface HomomorphicEncryptionProfile {
  * MCP ROUTING TRIGGERS: Cross-Modal Isomorphism, Semantic Fusion, Volumetric Projection, Profunctor Optics
  */
 export interface ContinuousManifoldMappingContract {
-  topology_class?: TopologyClass66;
+  topology_class?: TopologyClass67;
   /**
    * A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.
    */
@@ -10828,7 +10918,7 @@ export interface SE3TransformProfile4 {
  * MCP ROUTING TRIGGERS: Spatial-Semantic Isomorphism, Document Object Model, Containment DAG, Visual Hierarchy, Rhetorical Bounding
  */
 export interface HierarchicalDOMManifest {
-  topology_class?: TopologyClass67;
+  topology_class?: TopologyClass68;
   dom_cid: DomCid;
   root_block_cid: RootBlockCid;
   blocks: Blocks;
@@ -10993,8 +11083,8 @@ export interface OutputMappingContract {
  */
 export interface MemoizedNodeProfile {
   description: Description8;
-  architectural_intent?: ArchitecturalIntent14;
-  justification?: Justification16;
+  architectural_intent?: ArchitecturalIntent15;
+  justification?: Justification17;
   intervention_policies?: InterventionPolicies4;
   domain_extensions?: DomainExtensions4;
   /**
@@ -11013,7 +11103,7 @@ export interface MemoizedNodeProfile {
    * The volumetric Gaussian Splatting configuration for non-polygonal rendering.
    */
   neural_optics?: GaussianSplattingProfile | null;
-  topology_class?: TopologyClass68;
+  topology_class?: TopologyClass69;
   /**
    * The exact SHA-256 fingerprint of the executed topology.
    */
@@ -11039,7 +11129,7 @@ export interface ExpectedOutputSchema {
  */
 export interface GrammarPanelProfile {
   panel_cid: PanelCid;
-  topology_class?: TopologyClass69;
+  topology_class?: TopologyClass70;
   title: Title;
   ledger_source_cid: LedgerSourceCid;
   /**
@@ -11105,7 +11195,7 @@ export interface VisualEncodingProfile {
  * MCP ROUTING TRIGGERS: Grammar of Graphics, Metric Tensor Distortion, Levels of Measurement, Scale Projection, FSM Literal
  */
 export interface ScalePolicy {
-  topology_class: TopologyClass70;
+  topology_class: TopologyClass71;
   domain_min?: DomainMin;
   domain_max?: DomainMax;
 }
@@ -11137,7 +11227,7 @@ export interface FacetMatrixProfile {
  */
 export interface InsightCardProfile {
   panel_cid: PanelCid1;
-  topology_class?: TopologyClass71;
+  topology_class?: TopologyClass72;
   title: Title1;
   markdown_content: MarkdownContent;
   /**
@@ -11154,7 +11244,7 @@ export interface InsightCardProfile {
  * MCP ROUTING TRIGGERS: Conflict-Free Replicated Data Types, State-based Semilattice, Eventual Consistency, G-Set
  */
 export interface TemporalGraphCRDTManifest {
-  topology_class?: TopologyClass72;
+  topology_class?: TopologyClass73;
   diff_cid: DiffCid;
   author_node_cid: AuthorNodeCid;
   lamport_timestamp: LamportTimestamp;
@@ -11174,7 +11264,7 @@ export interface VectorClock {
  * AGENT INSTRUCTION: A formal Substrate Projection representing an executable Model Context Protocol (MCP) tool.
  */
 export interface MCPToolDefinition {
-  topology_class?: TopologyClass73;
+  topology_class?: TopologyClass74;
   event_cid?: EventCid2;
   prior_event_hash?: PriorEventHash2;
   timestamp?: Timestamp2;
@@ -11203,7 +11293,7 @@ export interface CrosswalkResolutionReceipt {
   event_cid: EventCid3;
   prior_event_hash?: PriorEventHash3;
   timestamp: Timestamp3;
-  topology_class?: TopologyClass74;
+  topology_class?: TopologyClass75;
   receipt_cid: ReceiptCid1;
   target_graph_cid: TargetGraphCid3;
   resolved_curies: ResolvedCuries;
@@ -11248,7 +11338,7 @@ export interface EpistemicZeroTrustReceipt {
   event_cid: EventCid4;
   prior_event_hash?: PriorEventHash4;
   timestamp: Timestamp4;
-  topology_class?: TopologyClass75;
+  topology_class?: TopologyClass76;
   intent_reference_id: IntentReferenceId;
   llm_blind_plan_hash: LlmBlindPlanHash;
   firewall_breach_detected?: FirewallBreachDetected;
@@ -11270,7 +11360,7 @@ export interface ObservationEvent {
   event_cid: EventCid5;
   prior_event_hash?: PriorEventHash5;
   timestamp: Timestamp5;
-  topology_class?: TopologyClass76;
+  topology_class?: TopologyClass77;
   payload: Payload;
   /**
    * The specific topological node that appended this observation.
@@ -11340,7 +11430,7 @@ export interface HardwareEnclaveReceipt {
  * MCP ROUTING TRIGGERS: Exogenous Perturbation, DOM Topography, SSRF Quarantine, Spatial Execution Bound, Accessibility Tree
  */
 export interface BrowserDOMState {
-  topology_class?: TopologyClass77;
+  topology_class?: TopologyClass78;
   current_url: CurrentUrl;
   viewport_size: ViewportSize;
   dom_hash: DomHash;
@@ -11359,7 +11449,7 @@ export interface BrowserDOMState {
  * MCP ROUTING TRIGGERS: POSIX Environment, Exogenous Perturbation, TTY Buffer, Causal Actuator, Stream Crystallization
  */
 export interface TerminalBufferState {
-  topology_class?: TopologyClass78;
+  topology_class?: TopologyClass79;
   working_directory: WorkingDirectory;
   stdout_hash: StdoutHash;
   stderr_hash: StderrHash;
@@ -11474,7 +11564,7 @@ export interface BeliefMutationEvent {
   event_cid: EventCid6;
   prior_event_hash?: PriorEventHash6;
   timestamp: Timestamp6;
-  topology_class?: TopologyClass79;
+  topology_class?: TopologyClass80;
   payload: Payload1;
   /**
    * The specific topological node that synthesized this belief assertion.
@@ -11589,7 +11679,7 @@ export interface SystemFaultEvent {
   event_cid: EventCid7;
   prior_event_hash?: PriorEventHash7;
   timestamp: Timestamp7;
-  topology_class?: TopologyClass80;
+  topology_class?: TopologyClass81;
 }
 /**
  * CoReason Shared Kernel Ontology
@@ -11603,7 +11693,7 @@ export interface SystemFaultEvent {
  *     MCP ROUTING TRIGGERS: Atomic Proposition, Discourse Extraction, Labeled Property Graph, Verifiable Statement
  */
 export interface AtomicPropositionState {
-  topology_class?: TopologyClass81;
+  topology_class?: TopologyClass82;
   event_cid: EventCid8;
   prior_event_hash?: PriorEventHash8;
   timestamp: Timestamp8;
@@ -11644,7 +11734,7 @@ export interface EmpiricalStatisticalProfile {
  *     MCP ROUTING TRIGGERS: Post-Coordinated Semantics, Latent Manifold Alignment, Semantic Specificity, Entity Assembly
  */
 export interface PostCoordinatedSemanticState {
-  topology_class?: TopologyClass82;
+  topology_class?: TopologyClass83;
   event_cid: EventCid9;
   prior_event_hash?: PriorEventHash9;
   timestamp: Timestamp9;
@@ -11678,7 +11768,7 @@ export interface ArtifactCorruptionEvent {
   event_cid: EventCid10;
   prior_event_hash?: PriorEventHash10;
   timestamp: Timestamp10;
-  topology_class?: TopologyClass83;
+  topology_class?: TopologyClass84;
   artifact_cid: ArtifactCid;
   corruption_class: CorruptionClass;
   diagnostic_hash: DiagnosticHash;
@@ -11698,7 +11788,7 @@ export interface HypothesisGenerationEvent {
   event_cid: EventCid11;
   prior_event_hash?: PriorEventHash11;
   timestamp: Timestamp11;
-  topology_class?: TopologyClass84;
+  topology_class?: TopologyClass85;
   hypothesis_cid: HypothesisCid;
   premise_text: PremiseText;
   bayesian_prior: BayesianPrior;
@@ -11740,7 +11830,7 @@ export interface BargeInInterruptEvent {
   event_cid: EventCid12;
   prior_event_hash?: PriorEventHash12;
   timestamp: Timestamp12;
-  topology_class?: TopologyClass85;
+  topology_class?: TopologyClass86;
   target_event_cid: TargetEventCid;
   /**
    * The continuous multimodal trigger (e.g., audio spike, user saying 'stop') that justified the interruption.
@@ -11764,7 +11854,7 @@ export interface CounterfactualRegretEvent {
   event_cid: EventCid13;
   prior_event_hash?: PriorEventHash13;
   timestamp: Timestamp13;
-  topology_class?: TopologyClass86;
+  topology_class?: TopologyClass87;
   historical_event_cid: HistoricalEventCid;
   counterfactual_intervention: CounterfactualIntervention;
   expected_utility_actual: ExpectedUtilityActual;
@@ -11793,7 +11883,7 @@ export interface ToolInvocationEvent {
   event_cid: EventCid14;
   prior_event_hash?: PriorEventHash14;
   timestamp: Timestamp14;
-  topology_class?: TopologyClass87;
+  topology_class?: TopologyClass88;
   tool_name: ToolName1;
   parameters: Parameters;
   authorized_budget_magnitude: AuthorizedBudgetMagnitude;
@@ -11859,7 +11949,7 @@ export interface EpistemicPromotionEvent {
   event_cid: EventCid15;
   prior_event_hash?: PriorEventHash15;
   timestamp: Timestamp15;
-  topology_class?: TopologyClass88;
+  topology_class?: TopologyClass89;
   source_episodic_event_cids: SourceEpisodicEventCids;
   crystallized_semantic_node_cid: CrystallizedSemanticNodeCid;
   compression_ratio: CompressionRatio;
@@ -11879,7 +11969,7 @@ export interface NormativeDriftEvent {
   event_cid: EventCid16;
   prior_event_hash?: PriorEventHash16;
   timestamp: Timestamp16;
-  topology_class?: TopologyClass89;
+  topology_class?: TopologyClass90;
   tripped_rule_cid: TrippedRuleCid1;
   measured_semantic_drift: MeasuredSemanticDrift;
   contradiction_proof_hash: ContradictionProofHash;
@@ -11899,7 +11989,7 @@ export interface PersistenceCommitReceipt {
   event_cid: EventCid17;
   prior_event_hash?: PriorEventHash17;
   timestamp: Timestamp17;
-  topology_class?: TopologyClass90;
+  topology_class?: TopologyClass91;
   lakehouse_snapshot_cid: LakehouseSnapshotCid;
   committed_temporal_crdt_cid: CommittedTemporalCrdtCid;
   target_table_uri: TargetTableUri;
@@ -11919,7 +12009,7 @@ export interface TokenBurnReceipt {
   event_cid: EventCid18;
   prior_event_hash?: PriorEventHash18;
   timestamp: Timestamp18;
-  topology_class?: TopologyClass91;
+  topology_class?: TopologyClass92;
   tool_invocation_cid: ToolInvocationCid;
   input_tokens: InputTokens;
   output_tokens: OutputTokens;
@@ -11940,7 +12030,7 @@ export interface BudgetExhaustionEvent {
   event_cid: EventCid19;
   prior_event_hash?: PriorEventHash19;
   timestamp: Timestamp19;
-  topology_class?: TopologyClass92;
+  topology_class?: TopologyClass93;
   exhausted_escrow_cid: ExhaustedEscrowCid;
   final_burn_receipt_cid: FinalBurnReceiptCid;
 }
@@ -11959,7 +12049,7 @@ export interface EpistemicTelemetryEvent {
   event_cid: EventCid20;
   prior_event_hash?: PriorEventHash20;
   timestamp: Timestamp20;
-  topology_class?: TopologyClass93;
+  topology_class?: TopologyClass94;
   interaction_modality: InteractionModality;
   target_node_cid: TargetNodeCid1;
   dwell_duration_ms?: DwellDurationMs;
@@ -11983,7 +12073,7 @@ export interface CognitivePredictionReceipt {
   event_cid: EventCid21;
   prior_event_hash?: PriorEventHash21;
   timestamp: Timestamp21;
-  topology_class?: TopologyClass94;
+  topology_class?: TopologyClass95;
   source_chain_cid: SourceChainCid;
   target_source_concept: TargetSourceConcept;
   predicted_top_k_tokens: PredictedTopKTokens;
@@ -12003,7 +12093,7 @@ export interface EpistemicAxiomVerificationReceipt {
   event_cid: EventCid22;
   prior_event_hash?: PriorEventHash22;
   timestamp: Timestamp22;
-  topology_class?: TopologyClass95;
+  topology_class?: TopologyClass96;
   source_prediction_cid: SourcePredictionCid;
   sequence_similarity_score: SequenceSimilarityScore;
   fact_score_passed: FactScorePassed;
@@ -12037,7 +12127,7 @@ export interface CognitiveRewardEvaluationReceipt {
   event_cid: EventCid23;
   prior_event_hash?: PriorEventHash23;
   timestamp: Timestamp23;
-  topology_class?: TopologyClass96;
+  topology_class?: TopologyClass97;
   source_generation_cid: SourceGenerationCid;
   extracted_axioms?: ExtractedAxioms;
   calculated_r_path: CalculatedRPath;
@@ -12083,7 +12173,7 @@ export interface EpistemicFlowStateReceipt {
   event_cid: EventCid24;
   prior_event_hash?: PriorEventHash24;
   timestamp: Timestamp24;
-  topology_class?: TopologyClass97;
+  topology_class?: TopologyClass98;
   source_trajectory_cid: SourceTrajectoryCid;
   estimated_flow_value: EstimatedFlowValue;
   terminal_reward_factorized: TerminalRewardFactorized;
@@ -12112,7 +12202,7 @@ export interface CausalExplanationEvent {
   event_cid: EventCid25;
   prior_event_hash?: PriorEventHash25;
   timestamp: Timestamp25;
-  topology_class?: TopologyClass98;
+  topology_class?: TopologyClass99;
   target_outcome_event_cid: TargetOutcomeEventCid;
   collective_intelligence: CollectiveIntelligenceProfile;
   agent_attributions: AgentAttributions;
@@ -12176,7 +12266,7 @@ export interface IntentClassificationReceipt {
   event_cid: EventCid26;
   prior_event_hash?: PriorEventHash26;
   timestamp: Timestamp26;
-  topology_class?: TopologyClass99;
+  topology_class?: TopologyClass100;
   raw_input_string: RawInputString;
   classified_intent: ClassifiedIntent;
   confidence_score: ConfidenceScore1;
@@ -12194,7 +12284,7 @@ export interface IntentClassificationReceipt {
  *     MCP ROUTING TRIGGERS: Semantic Relational Record, Payload Injection, Hardware Guillotine, Structured Telemetry
  */
 export interface SemanticRelationalVectorState {
-  topology_class?: TopologyClass100;
+  topology_class?: TopologyClass101;
   event_cid: EventCid27;
   prior_event_hash?: PriorEventHash27;
   timestamp: Timestamp27;
@@ -12238,7 +12328,7 @@ export interface PayloadInjectionZone {
  *     MCP ROUTING TRIGGERS: Ontological Reification, Bimodal Semantic Transformation, Epistemic Ledger, Traceability Collapse
  */
 export interface OntologicalReificationReceipt {
-  topology_class?: TopologyClass101;
+  topology_class?: TopologyClass102;
   event_cid: EventCid28;
   prior_event_hash?: PriorEventHash28;
   timestamp: Timestamp28;
@@ -12281,7 +12371,7 @@ export interface CircuitBreakerEvent {
   event_cid: EventCid29;
   prior_event_hash?: PriorEventHash29;
   timestamp: Timestamp29;
-  topology_class?: TopologyClass102;
+  topology_class?: TopologyClass103;
   /**
    * A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.
    */
@@ -12312,7 +12402,7 @@ export interface ExogenousEpistemicEvent {
   event_cid: EventCid30;
   prior_event_hash?: PriorEventHash30;
   timestamp: Timestamp30;
-  topology_class?: TopologyClass103;
+  topology_class?: TopologyClass104;
   shock_cid: ShockCid;
   target_node_hash: TargetNodeHash;
   bayesian_surprise_score: BayesianSurpriseScore1;
@@ -12345,7 +12435,7 @@ export interface SimulationEscrowContract {
 export interface EpistemicLogEvent {
   event_cid: EventCid31;
   prior_event_hash?: PriorEventHash31;
-  topology_class?: TopologyClass104;
+  topology_class?: TopologyClass105;
   timestamp: Timestamp31;
   level: Level;
   message: Message1;
@@ -12376,7 +12466,7 @@ export interface TelemetryContextProfile {
  * MCP ROUTING TRIGGERS: Cryptographic Nonce, State Resumption, Replay Attack Prevention, Wetware Attestation, Liveness Resolution
  */
 export interface InterventionReceipt {
-  topology_class?: TopologyClass105;
+  topology_class?: TopologyClass106;
   event_cid: EventCid32;
   prior_event_hash?: PriorEventHash32;
   timestamp: Timestamp32;
@@ -12440,7 +12530,7 @@ export interface CustodyReceipt {
   event_cid: EventCid33;
   prior_event_hash?: PriorEventHash33;
   timestamp: Timestamp33;
-  topology_class?: TopologyClass106;
+  topology_class?: TopologyClass107;
   custody_cid: CustodyCid;
   source_node_cid: SourceNodeCid;
   applied_policy_cid: AppliedPolicyCid;
@@ -12463,7 +12553,7 @@ export interface DefeasibleAttackEvent {
   event_cid: EventCid34;
   prior_event_hash?: PriorEventHash34;
   timestamp: Timestamp34;
-  topology_class?: TopologyClass107;
+  topology_class?: TopologyClass108;
   attack_cid: AttackCid;
   source_claim_cid: SourceClaimCid;
   target_claim_cid: TargetClaimCid;
@@ -12486,7 +12576,7 @@ export interface DefeasibleAttackEvent {
 export interface Lean4VerificationReceipt {
   is_proved: IsProved;
   failing_tactic_state?: FailingTacticState;
-  topology_class?: TopologyClass108;
+  topology_class?: TopologyClass109;
 }
 /**
  * CoReason Shared Kernel Ontology
@@ -12494,7 +12584,7 @@ export interface Lean4VerificationReceipt {
  * AGENT INSTRUCTION: The immutable receipt from the Clingo solver.
  */
 export interface FormalLogicProofReceipt {
-  topology_class?: TopologyClass109;
+  topology_class?: TopologyClass110;
   causal_provenance_id: NodeCIDState;
   event_cid: EventCid35;
   timestamp: Timestamp35;
@@ -12508,7 +12598,7 @@ export interface FormalLogicProofReceipt {
  * AGENT INSTRUCTION: The immutable receipt representing SWI-Prolog backward-chaining execution.
  */
 export interface PrologDeductionReceipt {
-  topology_class?: TopologyClass110;
+  topology_class?: TopologyClass111;
   causal_provenance_id: NodeCIDState;
   event_cid: EventCid36;
   timestamp: Timestamp36;
@@ -12520,7 +12610,7 @@ export interface PrologDeductionReceipt {
  * CoReason Shared Kernel Ontology
  */
 export interface BeliefModulationReceipt {
-  topology_class?: TopologyClass111;
+  topology_class?: TopologyClass112;
   receipt_cid: ReceiptCid2;
   event_cid: EventCid37;
   prior_event_hash?: PriorEventHash37;
@@ -12536,7 +12626,7 @@ export interface GroundedEdges {
  * CoReason Shared Kernel Ontology
  */
 export interface RDFExportReceipt {
-  topology_class?: TopologyClass112;
+  topology_class?: TopologyClass113;
   export_cid: ExportCid1;
   event_cid: EventCid38;
   prior_event_hash?: PriorEventHash38;
@@ -12560,7 +12650,7 @@ export interface EpistemicStarvationEvent {
   event_cid: EventCid39;
   prior_event_hash?: PriorEventHash39;
   timestamp: Timestamp39;
-  topology_class?: TopologyClass113;
+  topology_class?: TopologyClass114;
   starved_edge_cid: StarvedEdgeCid;
   failed_citations: FailedCitations;
   diagnostic_reason: DiagnosticReason;
@@ -12580,7 +12670,7 @@ export interface SPARQLQueryResultReceipt {
   event_cid: EventCid40;
   prior_event_hash?: PriorEventHash40;
   timestamp: Timestamp40;
-  topology_class?: TopologyClass114;
+  topology_class?: TopologyClass115;
   query_intent_cid: QueryIntentCid;
   returned_bindings: ReturnedBindings;
   execution_time_ms: ExecutionTimeMs;
@@ -12603,7 +12693,7 @@ export interface ReturnedBindings {
  * MCP ROUTING TRIGGERS: Markov Decision Process, Acyclic Edge, Stochastic Routing, Transition Probability, Directed Graph
  */
 export interface TransitionEdgeProfile {
-  topology_class?: TopologyClass115;
+  topology_class?: TopologyClass116;
   target_node_cid?: TargetNodeCid2;
   /**
    * Dynamic discovery intent for bridging nodes.
@@ -12647,7 +12737,7 @@ export interface EdgeMappingContract {
  * MCP ROUTING TRIGGERS: Markov Decision Process, Cyclic Edge, Bellman Equation, Thermodynamic Discounting, Recursive Traversal
  */
 export interface CyclicEdgeProfile {
-  topology_class?: TopologyClass116;
+  topology_class?: TopologyClass117;
   target_node_cid?: TargetNodeCid3;
   /**
    * Dynamic discovery intent for bridging nodes.
@@ -12786,7 +12876,7 @@ export interface BypassReceipt {
    * A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.
    */
   bypassed_node_cid: string;
-  justification: Justification17;
+  justification: Justification18;
   cryptographic_null_hash: CryptographicNullHash;
 }
 /**
@@ -13485,7 +13575,7 @@ export interface DynamicLayoutManifest {
  * MCP ROUTING TRIGGERS: Grammar of Graphics, Retinal Variables, UI Rendering, Semantic Zooming, Dynamic Manifold
  */
 export interface DynamicManifoldProjectionManifest {
-  topology_class?: TopologyClass117;
+  topology_class?: TopologyClass118;
   manifest_cid: ManifestCid2;
   active_forge_cid: ActiveForgeCid;
   ast_gradient_visual_mapping: GrammarPanelProfile1;
@@ -13508,7 +13598,7 @@ export interface DynamicManifoldProjectionManifest {
  */
 export interface GrammarPanelProfile1 {
   panel_cid: PanelCid;
-  topology_class?: TopologyClass69;
+  topology_class?: TopologyClass70;
   title: Title;
   ledger_source_cid: LedgerSourceCid;
   /**
@@ -13622,7 +13712,7 @@ export interface EpistemicArgumentClaimState {
 export interface EvidentiaryWarrantState {
   source_event_cid?: SourceEventCid2;
   source_semantic_node_cid?: SourceSemanticNodeCid;
-  justification: Justification18;
+  justification: Justification19;
 }
 /**
  * CoReason Shared Kernel Ontology
@@ -15807,6 +15897,7 @@ export interface WorkflowManifest {
     | ConsensusFederationTopologyManifest
     | CapabilityForgeTopologyManifest
     | IntentElicitationTopologyManifest
+    | NeurosymbolicIngestionTopologyManifest
     | NeurosymbolicVerificationTopologyManifest
     | DiscourseTreeManifest
     | DocumentKnowledgeGraphManifest
