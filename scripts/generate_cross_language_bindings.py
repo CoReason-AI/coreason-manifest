@@ -74,8 +74,12 @@ def _build_rooted_schema(schema_path: str, output_path: str) -> None:
     _strip_union_constraints(schema)
     defs = schema.get("$defs", {})
 
+    # Extract the schema version from the original file, or default to 2020-12
+    # since we are using $defs instead of definitions.
+    schema_dialect = schema.get("$schema", "https://json-schema.org/draft/2020-12/schema")
+
     wrapper = {
-        "$schema": "http://json-schema.org/draft-07/schema#",
+        "$schema": schema_dialect,
         "title": schema.get("title", "Ontology"),
         "description": schema.get("description", ""),
         "type": "object",
