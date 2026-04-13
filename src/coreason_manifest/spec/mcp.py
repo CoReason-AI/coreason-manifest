@@ -23,6 +23,5 @@ class MCPToolDefinition(CoreasonBaseState):
     name: Annotated[str, StringConstraints(max_length=64, pattern="^[a-zA-Z0-9_-]+$")]
     description: Annotated[str, StringConstraints(max_length=2048)]
     input_schema: dict[str, Any] = Field(
-        alias="inputSchema",
-        description="The JSON Schema payload mirroring our Pydantic limits."
+        alias="inputSchema", description="The JSON Schema payload mirroring our Pydantic limits."
     )

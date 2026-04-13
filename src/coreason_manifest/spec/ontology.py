@@ -703,7 +703,12 @@ class CoreasonBaseState(BaseModel):
     """
 
     model_config = ConfigDict(
-        frozen=True, extra="forbid", validate_assignment=True, strict=True, json_schema_extra=_inject_topological_lock, populate_by_name=True
+        frozen=True,
+        extra="forbid",
+        validate_assignment=True,
+        strict=True,
+        json_schema_extra=_inject_topological_lock,
+        populate_by_name=True,
     )
 
     def __hash__(self) -> int:
