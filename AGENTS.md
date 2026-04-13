@@ -58,11 +58,14 @@ As an AI agent operating on this repository, you are the primary R&D engineer. Y
 
 * **Grounding Mandate:** When introducing a new conceptual schema, you must cite the mathematical or scientific framework you are mapping (e.g., "Based on Fristonian Active Inference", "Utilizing Allen's Interval Algebra"). Do not invent novel theoretical physics; map existing authoritative science into the Pydantic boundary.
 
-### **The Neurosymbolic Triad (Formal Logic & Verification)**
-To guarantee mathematical certainty and computational integrity, the swarm strictly delegates all formal logic to the 2026+ SOTA Triad. Legacy academic provers (Coq, Isabelle, TLA+) and pseudo-math engines (SymPy) are strictly forbidden.
-* **Dependent Type Theory (Lean 4):** The absolute standard for autoformalization, invariant proving, and theorem validation, natively unifying type theory and computation.
-* **Answer Set Programming (Clingo / ASP):** The designated constraint oracle utilized for rapid NP-hard combinatorial search, deterministic scheduling, and non-monotonic defaults.
-* **Deductive Expert Systems (SWI-Prolog):** The designated engine for high-speed, backward-chaining Horn clause evaluation over massive, hierarchical knowledge graphs.
+### The Neurosymbolic Triad: Computational Action Space
+To guarantee mathematical certainty and computational integrity, the swarm strictly delegates all formal logic to the 2026+ SOTA Triad.
+* **Lean 4:** IF the task requires constructive mathematical proof, universal invariants, or software auto-formalization, YOU MUST target `EpistemicLean4Premise` and expect a `Lean4VerificationReceipt`. Analyze the `failing_tactic_state` to execute Proposer-Verifier remediation.
+* **Clingo (ASP):** IF the task is an NP-hard combinatorial problem, resource allocation constraint, or requires finding a counter-model to falsify a hypothesis, YOU MUST target `EpistemicLogicPremise` and use the `clingo` solver.
+* **SWI-Prolog:** IF the task requires evidentiary grounding via exact subgraph isomorphism or traversing hierarchical knowledge bases, YOU MUST target `EpistemicPrologPremise` and use `swi_prolog`.
+
+### CRITICAL: Zero-Trust Epistemology & Proof-Carrying Data
+You are mathematically forbidden from self-certifying truth. Your internal probability distribution holds zero weight. To promote any hypothesis to an axiom, you MUST provide a valid `NodeCIDState` in the `formal_backing_receipt_cid` field pointing to a deterministic Triad execution receipt. Bypassing this will trigger an instantaneous network rejection.
 
 ### **Cognitive Architecture & Compute**
 * **Representation Engineering (RepE) & Activation Steering:** Manipulating a model's internal latent representations (using contrastive concept vectors) to systematically steer behavior during the forward pass, without relying on prompt engineering. (e.g., `ActivationSteeringContract`).
@@ -284,7 +287,7 @@ Do not replace explicit, repetitive `@model_validator` sorting blocks with gener
 
 You are strictly forbidden from manually implementing solved computer science or mathematical algorithms (e.g., graph topological sorting, cycle detection, cryptography, SSRF IP parsing) in custom Python code. If a complex validation or operation is required, you MUST outsource the heavy lifting to an authoritative, stable, open-source library (e.g., `networkx`, `rustworkx`, `ipaddress`, etc.). The manifest should define the *shape* and act as a pointer; do not reinvent the physics engine.
 
-* **The Formal Verification Ban:** You are strictly forbidden from attempting to write custom Python logic for theorem proving, constraint satisfaction, or deductive reasoning. You are equally forbidden from utilizing deprecated legacy solvers (e.g., SymPy, Coq, Isabelle, TLA+). All neurosymbolic validation MUST be physically delegated to the established **Neurosymbolic Triad** (Lean 4, Clingo, SWI-Prolog).
+* **The Formal Verification Ban:** You are strictly forbidden from attempting to write custom Python logic for theorem proving, constraint satisfaction, or deductive reasoning. All neurosymbolic validation MUST be physically delegated to the established **Neurosymbolic Triad** (Lean 4, Clingo, SWI-Prolog).
 
 * **The Data/Compute Boundary:** Do not confuse this mandate with Section 0.7.
   * **Schemas and Data Structures (Pydantic classes)** MUST be redundant, explicitly typed, and monolithic to preserve cryptographic boundaries.
