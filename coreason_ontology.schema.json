@@ -542,11 +542,11 @@
               "type": "object"
             },
             {
+              "maxLength": 100000,
               "type": "string"
             }
           ],
           "description": "The raw poisoned text or malicious JSON-RPC schema injected into the target's context window.",
-          "maxLength": 100000,
           "title": "Synthetic Payload"
         },
         "expected_firewall_trip": {
@@ -1880,21 +1880,17 @@
         "retained_partial_payload": {
           "anyOf": [
             {
-              "anyOf": [
-                {
-                  "additionalProperties": {
-                    "$ref": "#/$defs/JsonPrimitiveState"
-                  },
-                  "propertyNames": {
-                    "maxLength": 255
-                  },
-                  "type": "object"
-                },
-                {
-                  "type": "string"
-                }
-              ],
-              "maxLength": 100000
+              "additionalProperties": {
+                "$ref": "#/$defs/JsonPrimitiveState"
+              },
+              "propertyNames": {
+                "maxLength": 255
+              },
+              "type": "object"
+            },
+            {
+              "maxLength": 100000,
+              "type": "string"
             },
             {
               "type": "null"
