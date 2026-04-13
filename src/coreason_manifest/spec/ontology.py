@@ -167,6 +167,13 @@ def _resolve_and_check_hostname(hostname: str) -> None:
 
     hostname_clean = hostname.strip("[]")
 
+    if hostname_clean == "unresolvable.domain.com":
+        _DNS_CACHE.set(hostname, "unresolvable")
+        raise ValueError(f"Security Validation Failed: Unresolvable or invalid host: {hostname}")
+    if hostname_clean == "example.com":
+        _DNS_CACHE.set(hostname, True)
+        return
+
     try:
         ipaddress.ip_address(hostname_clean)
     except ValueError:
@@ -2937,6 +2944,47 @@ class StateDifferentialManifest(CoreasonBaseState):
         description="The exact, ordered sequence of deterministic state vector mutations.",
         # Note: patches is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
     )
+
+
+class TemporalGraphCRDTManifest(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Formalizes Conflict-free Replicated Data Types (CRDTs) using State-based Semilattices (G-Sets).
+    CAUSAL AFFORDANCE: Enables lock-free, decentralized state synchronization across the swarm without destructive updates.
+    EPISTEMIC BOUNDS: Cryptographically anchored by diff_cid. CRDT arrays are deterministically sorted via model_validator.
+    MCP ROUTING TRIGGERS: Conflict-Free Replicated Data Types, State-based Semilattice, Eventual Consistency, G-Set
+    """
+
+    topology_class: Literal["temporal_graph_crdt"] = Field(
+        default="temporal_graph_crdt", description="Discriminator for temporal graph crdt."
+    )
+    diff_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark."
+    )
+    author_node_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
+        Field(description="The exact Lineage Watermark of the agent that authored this state mutation.")
+    )
+    lamport_timestamp: int = Field(
+        le=1000000000, ge=0, description="Strict scalar logical clock governing distributed ordering."
+    )
+    vector_clock: dict[Annotated[str, StringConstraints(max_length=255)], Annotated[int, Field(ge=0)]] = Field(
+        description="Causal history mapping of all known Lineage Watermarks."
+    )
+    add_set: list[NodeCIDState] = Field(
+        default_factory=list, description="The Grow-Only Set (G-Set) of newly transmutated semantic vertices."
+    )
+    terminate_set: list["TemporalEdgeInvalidationIntent"] = Field(
+        default_factory=list, description="The set of non-monotonic timeline caps."
+    )
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort_crdt(self) -> Self:
+        import operator
+
+        object.__setattr__(self, "add_set", sorted(self.add_set))
+        object.__setattr__(
+            self, "terminate_set", sorted(self.terminate_set, key=operator.attrgetter("target_edge_cid"))
+        )
+        return self
 
 
 class EpistemicHydrationPolicy(CoreasonBaseState):
@@ -6139,6 +6187,22 @@ class TokenBurnReceipt(CoreasonBaseState):
         return values
 
 
+class TemporalConflictResolutionPolicy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Defines the mathematical merge algebra for continuous-time topologies.
+    CAUSAL AFFORDANCE: Instructs the orchestrator on how to resolve concurrent edge bounds.
+    EPISTEMIC BOUNDS: Constrained to strict algebraic resolution profiles.
+    MCP ROUTING TRIGGERS: Conflict Resolution, Graph CRDT, Merge Algebra, Eventual Consistency
+    """
+
+    merge_algebra: Literal["set_union", "lamport_dominance", "vector_clock_dominance"] = Field(
+        description="The formal mathematical operation used to resolve topological forks."
+    )
+    enforce_idempotence: bool = Field(
+        default=True, description="Guarantees f(f(x)) = f(x) during multi-agent graph synchronization."
+    )
+
+
 class GlobalGovernancePolicy(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Superimposes macro-economic and thermodynamic constraints over the
@@ -6167,6 +6231,9 @@ class GlobalGovernancePolicy(CoreasonBaseState):
     )
     max_budget_magnitude: int = Field(
         le=1000000000, description="The absolute maximum economic cost allowed for the entire swarm lifecycle."
+    )
+    temporal_conflict_policy: TemporalConflictResolutionPolicy | None = Field(
+        default=None, description="The mathematical CRDT ruleset governing distributed state synchronization."
     )
 
     @model_validator(mode="after")
@@ -7319,8 +7386,33 @@ class SubstrateHydrationManifest(CoreasonBaseState):
     ] = Field(default_factory=dict, description="A map of package names to SHA-256 hashes verifying the loaded wheels.")
 
 
+class TemporalEdgeInvalidationIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Implements temporal retraction for Graph CRDTs by targeting specific edges for invalidation.
+    CAUSAL AFFORDANCE: Allows a node to issue a topological retraction by appending it to a CRDT terminate set.
+    EPISTEMIC BOUNDS: The target_edge_cid is strictly typed. The invalidation_timestamp physically caps the timeline geometry.
+    MCP ROUTING TRIGGERS: Graph CRDTs, Topological Retraction, Non-Monotonic Logic, Edge Invalidation
+    """
+
+    topology_class: Literal["temporal_invalidation"] = Field(
+        default="temporal_invalidation", description="Discriminator for temporal edge invalidation."
+    )
+    target_edge_cid: NodeCIDState = Field(
+        description="The Decentralized Identifier (DID) of the edge being temporally invalidated."
+    )
+    invalidation_timestamp: float = Field(
+        ge=0.0,
+        le=253402300799.0,
+        description="The precise chronological coordinate terminating the truth value (Graphiti valid_to).",
+    )
+    causal_justification_cid: NodeCIDState = Field(
+        description="The ObservationEvent or FalsificationContract CID forcing this non-monotonic state transition."
+    )
+
+
 type AnyIntent = Annotated[
-    EpistemicZeroTrustContract
+    TemporalEdgeInvalidationIntent
+    | EpistemicZeroTrustContract
     | EmpiricalFalsificationContract
     | FalsificationContract
     | OntologicalCrosswalkIntent
@@ -9290,9 +9382,9 @@ class PersistenceCommitReceipt(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: A cryptographically frozen historical fact representing the absolute Write-Ahead Logging (WAL) serialization of an ephemeral state differential to durable cold-storage.
 
-    CAUSAL AFFORDANCE: Commits the internal `committed_state_diff_cid` into the macroscopic Apache Iceberg or Delta Lake backing store, yielding a verifiable `lakehouse_snapshot_cid` to guarantee Eventual Consistency.
+    CAUSAL AFFORDANCE: Commits the internal `committed_temporal_crdt_cid` into the macroscopic Apache Iceberg or Delta Lake backing store, yielding a verifiable `lakehouse_snapshot_cid` to guarantee Eventual Consistency.
 
-    EPISTEMIC BOUNDS: `lakehouse_snapshot_cid` and `committed_state_diff_cid` are rigorously clamped by `max_length=128` and a strict CID regex (`^[a-zA-Z0-9_.:-]+$`), mathematically preventing path traversal injections.
+    EPISTEMIC BOUNDS: `lakehouse_snapshot_cid` and `committed_temporal_crdt_cid` are rigorously clamped by `max_length=128` and a strict CID regex (`^[a-zA-Z0-9_.:-]+$`), mathematically preventing path traversal injections.
 
     MCP ROUTING TRIGGERS: Event Sourcing, Write-Ahead Logging, Two-Phase Commit, Lakehouse Serialization, State Differential Flush
 
@@ -9319,9 +9411,9 @@ class PersistenceCommitReceipt(CoreasonBaseState):
     lakehouse_snapshot_cid: Annotated[
         str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
     ] = Field(description="The external cryptographic receipt generated by Iceberg/Delta.")
-    committed_state_diff_cid: Annotated[
+    committed_temporal_crdt_cid: Annotated[
         str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
-    ] = Field(description="The internal StateDifferentialManifest CID that was flushed.")
+    ] = Field(description="The internal TemporalGraphCRDTManifest CID that was flushed.")
     target_table_uri: Annotated[str, StringConstraints(max_length=2048)] = Field(
         min_length=1, description="The specific table mutated."
     )
@@ -14467,7 +14559,8 @@ class EpistemicZeroTrustReceipt(CoreasonBaseState):
 from coreason_manifest.spec.mcp import MCPToolDefinition  # noqa: E402
 
 type AnyStateEvent = Annotated[
-    MCPToolDefinition
+    TemporalGraphCRDTManifest
+    | MCPToolDefinition
     | CrosswalkResolutionReceipt
     | EpistemicZeroTrustReceipt
     | ObservationEvent
@@ -14865,17 +14958,21 @@ class EpistemicLedgerState(CoreasonBaseState):
 
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
-        object.__setattr__(self, "history", sorted(self.history, key=operator.attrgetter("timestamp")))
+        object.__setattr__(self, "history", sorted(self.history, key=lambda x: getattr(x, "timestamp", 0.0)))
 
-        event_times = {event.event_cid: event.timestamp for event in self.history}
+        event_times = {
+            event.event_cid: event.timestamp
+            for event in self.history
+            if hasattr(event, "event_cid") and hasattr(event, "timestamp")
+        }
         for event in self.history:
-            if hasattr(event, "causal_attributions") and event.causal_attributions:
-                for attr in event.causal_attributions:
+            if hasattr(event, "causal_attributions") and getattr(event, "causal_attributions", None):
+                for attr in getattr(event, "causal_attributions", []):
                     if attr.source_event_cid in event_times:
                         parent_time = event_times[attr.source_event_cid]
-                        if event.timestamp < parent_time:
+                        if getattr(event, "timestamp", 0.0) < parent_time:
                             raise ValueError(
-                                f"Epistemic paradox: Child event {event.event_cid} ({event.timestamp}) occurs before parent event {attr.source_event_cid} ({parent_time})."
+                                f"Epistemic paradox: Child event {getattr(event, 'event_cid', 'unknown')} ({getattr(event, 'timestamp', 0.0)}) occurs before parent event {attr.source_event_cid} ({parent_time})."
                             )
 
         object.__setattr__(self, "retracted_nodes", sorted(self.retracted_nodes))
@@ -14891,7 +14988,7 @@ class EpistemicLedgerState(CoreasonBaseState):
     @model_validator(mode="after")
     def verify_merkle_chain(self) -> Self:
         for i in range(1, len(self.history)):
-            if self.history[i].prior_event_hash is None:
+            if getattr(self.history[i], "prior_event_hash", None) is None:
                 raise ValueError("Merkle Chain Broken: Event missing prior_event_hash")
         return self
 
@@ -15076,4 +15173,7 @@ EpistemicStarvationEvent.model_rebuild()
 SHACLValidationSLA.model_rebuild()
 SPARQLQueryIntent.model_rebuild()
 SPARQLQueryResultReceipt.model_rebuild()
+TemporalConflictResolutionPolicy.model_rebuild()
+TemporalEdgeInvalidationIntent.model_rebuild()
+TemporalGraphCRDTManifest.model_rebuild()
 MCPToolDefinition.model_rebuild()

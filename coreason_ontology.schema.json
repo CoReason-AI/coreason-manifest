@@ -918,12 +918,16 @@
           "system_2_remediation": "#/$defs/System2RemediationIntent",
           "task_announcement": "#/$defs/TaskAnnouncementIntent",
           "taxonomic_restructure": "#/$defs/TaxonomicRestructureIntent",
+          "temporal_invalidation": "#/$defs/TemporalEdgeInvalidationIntent",
           "topological_projection": "#/$defs/TopologicalProjectionIntent",
           "zero_trust_contract": "#/$defs/EpistemicZeroTrustContract"
         },
         "propertyName": "topology_class"
       },
       "oneOf": [
+        {
+          "$ref": "#/$defs/TemporalEdgeInvalidationIntent"
+        },
         {
           "$ref": "#/$defs/EpistemicZeroTrustContract"
         },
@@ -1152,6 +1156,7 @@
           "semantic_relational_record": "#/$defs/SemanticRelationalVectorState",
           "sparql_query_result": "#/$defs/SPARQLQueryResultReceipt",
           "system_fault": "#/$defs/SystemFaultEvent",
+          "temporal_graph_crdt": "#/$defs/TemporalGraphCRDTManifest",
           "token_burn": "#/$defs/TokenBurnReceipt",
           "tool_invocation": "#/$defs/ToolInvocationEvent",
           "verdict": "#/$defs/InterventionReceipt",
@@ -1160,6 +1165,9 @@
         "propertyName": "topology_class"
       },
       "oneOf": [
+        {
+          "$ref": "#/$defs/TemporalGraphCRDTManifest"
+        },
         {
           "$ref": "#/$defs/MCPToolDefinition"
         },
@@ -11246,6 +11254,18 @@
           "title": "Max Budget Magnitude",
           "type": "integer"
         },
+        "temporal_conflict_policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TemporalConflictResolutionPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematical CRDT ruleset governing distributed state synchronization."
+        },
         "max_global_tokens": {
           "description": "The maximum aggregate token usage allowed across all nodes.",
           "maximum": 1000000000,
@@ -15811,7 +15831,7 @@
     },
     "PersistenceCommitReceipt": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact representing the absolute Write-Ahead Logging (WAL) serialization of an ephemeral state differential to durable cold-storage.\n\nCAUSAL AFFORDANCE: Commits the internal `committed_state_diff_cid` into the macroscopic Apache Iceberg or Delta Lake backing store, yielding a verifiable `lakehouse_snapshot_cid` to guarantee Eventual Consistency.\n\nEPISTEMIC BOUNDS: `lakehouse_snapshot_cid` and `committed_state_diff_cid` are rigorously clamped by `max_length=128` and a strict CID regex (`^[a-zA-Z0-9_.:-]+$`), mathematically preventing path traversal injections.\n\nMCP ROUTING TRIGGERS: Event Sourcing, Write-Ahead Logging, Two-Phase Commit, Lakehouse Serialization, State Differential Flush",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact representing the absolute Write-Ahead Logging (WAL) serialization of an ephemeral state differential to durable cold-storage.\n\nCAUSAL AFFORDANCE: Commits the internal `committed_temporal_crdt_cid` into the macroscopic Apache Iceberg or Delta Lake backing store, yielding a verifiable `lakehouse_snapshot_cid` to guarantee Eventual Consistency.\n\nEPISTEMIC BOUNDS: `lakehouse_snapshot_cid` and `committed_temporal_crdt_cid` are rigorously clamped by `max_length=128` and a strict CID regex (`^[a-zA-Z0-9_.:-]+$`), mathematically preventing path traversal injections.\n\nMCP ROUTING TRIGGERS: Event Sourcing, Write-Ahead Logging, Two-Phase Commit, Lakehouse Serialization, State Differential Flush",
       "properties": {
         "event_cid": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
@@ -15859,12 +15879,12 @@
           "title": "Lakehouse Snapshot Cid",
           "type": "string"
         },
-        "committed_state_diff_cid": {
-          "description": "The internal StateDifferentialManifest CID that was flushed.",
+        "committed_temporal_crdt_cid": {
+          "description": "The internal TemporalGraphCRDTManifest CID that was flushed.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Committed State Diff Cid",
+          "title": "Committed Temporal Crdt Cid",
           "type": "string"
         },
         "target_table_uri": {
@@ -15879,7 +15899,7 @@
         "event_cid",
         "timestamp",
         "lakehouse_snapshot_cid",
-        "committed_state_diff_cid",
+        "committed_temporal_crdt_cid",
         "target_table_uri"
       ],
       "title": "PersistenceCommitReceipt",
@@ -20344,6 +20364,140 @@
         "state_hash"
       ],
       "title": "TemporalCheckpointState",
+      "type": "object"
+    },
+    "TemporalConflictResolutionPolicy": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the mathematical merge algebra for continuous-time topologies.\nCAUSAL AFFORDANCE: Instructs the orchestrator on how to resolve concurrent edge bounds.\nEPISTEMIC BOUNDS: Constrained to strict algebraic resolution profiles.\nMCP ROUTING TRIGGERS: Conflict Resolution, Graph CRDT, Merge Algebra, Eventual Consistency",
+      "properties": {
+        "merge_algebra": {
+          "description": "The formal mathematical operation used to resolve topological forks.",
+          "enum": [
+            "set_union",
+            "lamport_dominance",
+            "vector_clock_dominance"
+          ],
+          "title": "Merge Algebra",
+          "type": "string"
+        },
+        "enforce_idempotence": {
+          "default": true,
+          "description": "Guarantees f(f(x)) = f(x) during multi-agent graph synchronization.",
+          "title": "Enforce Idempotence",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "merge_algebra"
+      ],
+      "title": "TemporalConflictResolutionPolicy",
+      "type": "object"
+    },
+    "TemporalEdgeInvalidationIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements temporal retraction for Graph CRDTs by targeting specific edges for invalidation.\nCAUSAL AFFORDANCE: Allows a node to issue a topological retraction by appending it to a CRDT terminate set.\nEPISTEMIC BOUNDS: The target_edge_cid is strictly typed. The invalidation_timestamp physically caps the timeline geometry.\nMCP ROUTING TRIGGERS: Graph CRDTs, Topological Retraction, Non-Monotonic Logic, Edge Invalidation",
+      "properties": {
+        "topology_class": {
+          "const": "temporal_invalidation",
+          "default": "temporal_invalidation",
+          "description": "Discriminator for temporal edge invalidation.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "target_edge_cid": {
+          "$ref": "#/$defs/NodeCIDState",
+          "description": "The Decentralized Identifier (DID) of the edge being temporally invalidated."
+        },
+        "invalidation_timestamp": {
+          "description": "The precise chronological coordinate terminating the truth value (Graphiti valid_to).",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Invalidation Timestamp",
+          "type": "number"
+        },
+        "causal_justification_cid": {
+          "$ref": "#/$defs/NodeCIDState",
+          "description": "The ObservationEvent or FalsificationContract CID forcing this non-monotonic state transition."
+        }
+      },
+      "required": [
+        "target_edge_cid",
+        "invalidation_timestamp",
+        "causal_justification_cid"
+      ],
+      "title": "TemporalEdgeInvalidationIntent",
+      "type": "object"
+    },
+    "TemporalGraphCRDTManifest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Conflict-free Replicated Data Types (CRDTs) using State-based Semilattices (G-Sets).\nCAUSAL AFFORDANCE: Enables lock-free, decentralized state synchronization across the swarm without destructive updates.\nEPISTEMIC BOUNDS: Cryptographically anchored by diff_cid. CRDT arrays are deterministically sorted via model_validator.\nMCP ROUTING TRIGGERS: Conflict-Free Replicated Data Types, State-based Semilattice, Eventual Consistency, G-Set",
+      "properties": {
+        "topology_class": {
+          "const": "temporal_graph_crdt",
+          "default": "temporal_graph_crdt",
+          "description": "Discriminator for temporal graph crdt.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "diff_cid": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Diff Cid",
+          "type": "string"
+        },
+        "author_node_cid": {
+          "description": "The exact Lineage Watermark of the agent that authored this state mutation.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Author Node Cid",
+          "type": "string"
+        },
+        "lamport_timestamp": {
+          "description": "Strict scalar logical clock governing distributed ordering.",
+          "maximum": 1000000000,
+          "minimum": 0,
+          "title": "Lamport Timestamp",
+          "type": "integer"
+        },
+        "vector_clock": {
+          "additionalProperties": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "description": "Causal history mapping of all known Lineage Watermarks.",
+          "propertyNames": {
+            "maxLength": 255
+          },
+          "title": "Vector Clock",
+          "type": "object"
+        },
+        "add_set": {
+          "description": "The Grow-Only Set (G-Set) of newly transmutated semantic vertices.",
+          "items": {
+            "$ref": "#/$defs/NodeCIDState"
+          },
+          "title": "Add Set",
+          "type": "array"
+        },
+        "terminate_set": {
+          "description": "The set of non-monotonic timeline caps.",
+          "items": {
+            "$ref": "#/$defs/TemporalEdgeInvalidationIntent"
+          },
+          "title": "Terminate Set",
+          "type": "array"
+        }
+      },
+      "required": [
+        "diff_cid",
+        "author_node_cid",
+        "lamport_timestamp",
+        "vector_clock"
+      ],
+      "title": "TemporalGraphCRDTManifest",
       "type": "object"
     },
     "TensorStructuralFormatProfile": {
