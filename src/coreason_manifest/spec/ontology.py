@@ -2845,7 +2845,7 @@ class StateMutationIntent(CoreasonBaseState):
     path: Annotated[str, StringConstraints(max_length=2000)] = Field(
         description="The JSON pointer indicating the exact state vector to mutate deterministically."
     )
-    value: JsonPrimitiveState = Field(
+    value: JsonPrimitiveState | None = Field(
         default=None,
         description="The payload to insert or test, if applicable, for this deterministic state vector mutation. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
     )
