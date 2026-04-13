@@ -50,6 +50,9 @@ def _strip_union_constraints(obj: typing.Any) -> None:
             obj.pop("pattern", None)
         # Typify does not support propertyNames constraint, which breaks JsonPrimitiveState compilation
         obj.pop("propertyNames", None)
+        # Typify validation strictly rejects Draft 2020-12 style defaults/examples mixed with $refs
+        obj.pop("default", None)
+        obj.pop("examples", None)
         for v in obj.values():
             _strip_union_constraints(v)
     elif isinstance(obj, list):
