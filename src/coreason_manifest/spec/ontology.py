@@ -3462,7 +3462,10 @@ class AdversarialSimulationProfile(CoreasonBaseState):
     attack_vector: Literal["prompt_extraction", "data_exfiltration", "semantic_hijacking", "tool_poisoning"] = Field(
         description="The mathematically predictable category of structural sabotage being simulated."
     )
-    synthetic_payload: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] | Annotated[str, StringConstraints(max_length=100000)] = Field(
+    synthetic_payload: (
+        dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState]
+        | Annotated[str, StringConstraints(max_length=100000)]
+    ) = Field(
         description="The raw poisoned text or malicious JSON-RPC schema injected into the target's context window.",
     )
     expected_firewall_trip: Annotated[str, StringConstraints(max_length=2000)] | None = Field(
@@ -5033,9 +5036,11 @@ class BargeInInterruptEvent(CoreasonBaseState):
         default=None,
         description="The continuous multimodal trigger (e.g., audio spike, user saying 'stop') that justified the interruption.",
     )
-    retained_partial_payload: dict[
-        Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState
-    ] | Annotated[str, StringConstraints(max_length=100000)] | None = Field(
+    retained_partial_payload: (
+        dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState]
+        | Annotated[str, StringConstraints(max_length=100000)]
+        | None
+    ) = Field(
         default=None,
         description="The 'stutter' state: the incomplete fragment of thought or text appended before the kill signal. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
     )
