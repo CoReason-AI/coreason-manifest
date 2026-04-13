@@ -27,8 +27,8 @@ def test_spatial_bounds_reject_inf() -> None:
     with pytest.raises(ValidationError, match="Spatial bounds cannot be Infinity"):
         MultimodalTokenAnchorState.model_validate(
             {
-                "token_span_start": 0,
-                "token_span_end": 10,
+                "token_span_start": 0,  # nosec B105
+                "token_span_end": 10,  # nosec B105
                 "block_class": "paragraph",
                 "bounding_box": (0.0, 0.0, float("inf"), 100.0),
                 "visual_patch_hashes": [],
@@ -40,8 +40,8 @@ def test_spatial_bounds_reject_nan() -> None:
     with pytest.raises(ValidationError, match="Spatial bounds cannot be NaN"):
         MultimodalTokenAnchorState.model_validate(
             {
-                "token_span_start": 0,
-                "token_span_end": 10,
+                "token_span_start": 0,  # nosec B105
+                "token_span_end": 10,  # nosec B105
                 "block_class": "paragraph",
                 "bounding_box": (0.0, float("nan"), 100.0, 100.0),
                 "visual_patch_hashes": [],

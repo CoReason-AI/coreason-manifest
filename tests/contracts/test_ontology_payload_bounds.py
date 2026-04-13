@@ -161,7 +161,7 @@ def test_neurosymbolic_inference_request_requires_contextualized_entity() -> Non
             source_entity="Amoxicillin 500mg",  # type: ignore
             fidelity_receipt={  # type: ignore
                 "contextual_completeness_score": 0.9,
-                "surrounding_token_density": 10,
+                "surrounding_token_density": 10,  # nosec B105
             },
             uncertainty_profile={  # type: ignore
                 "aleatoric_noise_ratio": 0.05,
