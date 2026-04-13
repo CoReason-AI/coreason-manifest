@@ -14665,6 +14665,7 @@ class MCPToolDefinition(CoreasonBaseState):
         alias="inputSchema", description="The JSON Schema payload mirroring our Pydantic limits."
     )
 
+
 type AnyStateEvent = Annotated[
     TemporalGraphCRDTManifest
     | MCPToolDefinition
