@@ -42,7 +42,7 @@ def test_ssrf_quarantine_mock() -> None:
     import coreason_manifest.spec.ontology as onto
     with patch('socket.getaddrinfo', side_effect=socket.gaierror("mocked error")):
         onto._DNS_CACHE.cache.clear()
-        with pytest.raises(ValueError, match="Unresolvable or invalid host: some-other-domain.com"):
+        with pytest.raises(ValueError, match=r"Unresolvable or invalid host: some-other-domain\.com"):
             _validate_ssrf_safety("http://some-other-domain.com")
 
 
@@ -58,7 +58,7 @@ def test_ssrf_quarantine_mock_bypass() -> None:
         _validate_ssrf_safety("http://example.com")
 
         # Test success (unresolvable.domain.com) - this should raise because it's set to "unresolvable"
-        with pytest.raises(ValueError, match="Unresolvable or invalid host: unresolvable.domain.com"):
+        with pytest.raises(ValueError, match=r"Unresolvable or invalid host: unresolvable\.domain\.com"):
             _validate_ssrf_safety("http://unresolvable.domain.com")
 
 
