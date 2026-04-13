@@ -1169,9 +1169,10 @@ def test_epic5_discourse_tree_manifest_cycle() -> None:
         DiscourseTreeManifest(manifest_cid="manifest_1", root_node_cid="did:ex:root", discourse_nodes=nodes)
 
 def test_defeasible_cascade_temporal_blast_radius_validation() -> None:
-    from coreason_manifest.spec.ontology import DefeasibleCascadeEvent
     import pytest
     from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import DefeasibleCascadeEvent
 
     with pytest.raises(ValidationError, match=r"temporal_blast_radius\[0\] must be <= temporal_blast_radius\[1\]"):
         DefeasibleCascadeEvent(
@@ -1183,9 +1184,10 @@ def test_defeasible_cascade_temporal_blast_radius_validation() -> None:
         )
 
 def test_temporal_bounds_profile_validation() -> None:
-    from coreason_manifest.spec.ontology import TemporalBoundsProfile
     import pytest
     from pydantic import ValidationError
+
+    from coreason_manifest.spec.ontology import TemporalBoundsProfile
 
     # Start interval inverted
     with pytest.raises(ValidationError, match=r"probabilistic_start_interval\[0\] must be <= probabilistic_start_interval\[1\]"):
