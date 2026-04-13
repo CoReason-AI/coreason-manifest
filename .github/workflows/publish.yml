@@ -92,30 +92,70 @@ jobs:
   publish-npm:
     needs: release
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # Required for npm Trusted Publishing (OIDC provenance)
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '20.x'
           registry-url: 'https://registry.npmjs.org'
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          python-version: "3.14"
+      - name: Install dependencies
+        run: uv sync
+      - name: Export JSON Schema
+        run: uv run python -c "import json; from coreason_manifest.utils.algebra import get_ontology_schema; schema = get_ontology_schema(); open('coreason_ontology.schema.json', 'w', encoding='utf-8').write(json.dumps(schema, indent=2, ensure_ascii=False) + '\n')"
+      - name: Generate TypeScript Bindings from Schema
+        run: uv run python scripts/generate_cross_language_bindings.py
+      - name: Sync Version from Tag
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          cd bindings/typescript
+          npm version "$VERSION" --no-git-tag-version
       - name: Publish TypeScript Bindings
         run: |
           cd bindings/typescript
           npm ci
           npm run build
-          npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          npm publish --provenance --access public
 
   publish-crate:
     needs: release
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # Required for crates.io Trusted Publishing (OIDC)
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: dtolnay/rust-toolchain@stable
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          python-version: "3.14"
+      - name: Install dependencies
+        run: uv sync
+      - name: Install cargo-typify
+        run: cargo install cargo-typify
+      - name: Export JSON Schema
+        run: uv run python -c "import json; from coreason_manifest.utils.algebra import get_ontology_schema; schema = get_ontology_schema(); open('coreason_ontology.schema.json', 'w', encoding='utf-8').write(json.dumps(schema, indent=2, ensure_ascii=False) + '\n')"
+      - name: Generate Rust Bindings from Schema
+        run: uv run python scripts/generate_cross_language_bindings.py
+      - name: Sync Version from Tag
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          cd bindings/rust
+          sed -i "s/^version = .*/version = \"$VERSION\"/" Cargo.toml
       - name: Publish Rust Bindings
         run: |
           cd bindings/rust
-          cargo publish --token ${CARGO_REGISTRY_TOKEN}
-        env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+          cargo publish

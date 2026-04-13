@@ -38,13 +38,16 @@ jobs:
       - name: Enforce Cryptographic Determinism
         run: uv run python scripts/enforce_cryptographic_determinism.py
 
-      - name: Setup Node.js (For Quicktype/Prettier)
+      - name: Setup Node.js (For json-schema-to-typescript)
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
 
-      - name: Setup Rust (For Cargo Fmt)
+      - name: Setup Rust (For Cargo Typify/Fmt)
         uses: dtolnay/rust-toolchain@stable
+
+      - name: Install cargo-typify
+        run: cargo install cargo-typify
 
       - name: Generate Cross-Language Bindings
         run: uv run python scripts/generate_cross_language_bindings.py
