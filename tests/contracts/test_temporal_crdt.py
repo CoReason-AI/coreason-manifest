@@ -1,5 +1,12 @@
-from coreason_manifest.spec.ontology import TemporalGraphCRDTManifest, TemporalEdgeInvalidationIntent, _validate_ssrf_safety, TemporalConflictResolutionPolicy
 import pytest
+
+from coreason_manifest.spec.ontology import (
+    TemporalConflictResolutionPolicy,
+    TemporalEdgeInvalidationIntent,
+    TemporalGraphCRDTManifest,
+    _validate_ssrf_safety,
+)
+
 
 def test_temporal_crdt_manifest_sorts_correctly() -> None:
     intent1 = TemporalEdgeInvalidationIntent(
@@ -31,6 +38,7 @@ def test_temporal_crdt_manifest_sorts_correctly() -> None:
 def test_ssrf_quarantine_mock() -> None:
     import socket
     from unittest.mock import patch
+
     import coreason_manifest.spec.ontology as onto
     with patch('socket.getaddrinfo', side_effect=socket.gaierror("mocked error")):
         onto._DNS_CACHE.cache.clear()
@@ -41,6 +49,7 @@ def test_ssrf_quarantine_mock() -> None:
 def test_ssrf_quarantine_mock_bypass() -> None:
     import socket
     from unittest.mock import patch
+
     import coreason_manifest.spec.ontology as onto
     with patch('socket.getaddrinfo', side_effect=socket.gaierror("mocked error")):
         onto._DNS_CACHE.cache.clear()
@@ -58,4 +67,4 @@ def test_temporal_conflict_resolution() -> None:
         merge_algebra="lamport_dominance"
     )
     assert policy.merge_algebra == "lamport_dominance"
-    assert policy.enforce_idempotence == True
+    assert policy.enforce_idempotence
