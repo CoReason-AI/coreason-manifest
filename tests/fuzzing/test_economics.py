@@ -116,7 +116,7 @@ def test_routing_frontier_policy_invalid_types() -> None:
     with pytest.raises(ValidationError, match=r"(?i)validation error"):
         RoutingFrontierPolicy(
             max_latency_ms="invalid",  # type: ignore[arg-type]
-            max_cost_magnitude_per_token="invalid",  # type: ignore[arg-type]  # noqa: S106
+            max_cost_magnitude_per_token="invalid",  # type: ignore[arg-type]  # noqa: S106 # nosec B106
             min_capability_score="invalid",  # type: ignore[arg-type]
             tradeoff_preference="balanced",
             max_carbon_intensity_gco2eq_kwh="invalid",  # type: ignore[arg-type]

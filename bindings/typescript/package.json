@@ -1,9 +1,19 @@
 {
-  "name": "@coreason/manifest-types",
+  "name": "@coreason/coreason-manifest",
   "version": "1.0.0",
   "description": "TypeScript bindings for the CoReason Hollow Data Plane.",
+  "license": "SEE LICENSE IN LICENSE",
+  "author": "CoReason, Inc <license@coreason.ai>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CoReason-AI/coreason-manifest",
+    "directory": "bindings/typescript"
+  },
+  "homepage": "https://github.com/CoReason-AI/coreason-manifest",
+  "keywords": ["coreason", "ontology", "manifest", "schema", "types"],
   "main": "dist/ontology.js",
   "types": "dist/ontology.d.ts",
+  "files": ["dist", "README.md"],
   "scripts": {
     "build": "tsc",
     "format": "prettier --write src/"

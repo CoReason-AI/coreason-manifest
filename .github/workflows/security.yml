@@ -16,6 +16,11 @@ jobs:
     name: Dependency Audit
     runs-on: ubuntu-latest
     steps:
+      - name: Harden Runner (Endpoint Network Security)
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@v4
 
       - name: Install uv
@@ -35,6 +40,11 @@ jobs:
     permissions:
       security-events: write
     steps:
+      - name: Harden Runner (Endpoint Network Security)
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@v4
 
       - name: OSV Scan

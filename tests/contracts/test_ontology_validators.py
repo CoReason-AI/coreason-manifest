@@ -424,7 +424,7 @@ def test_browser_dom_state_safety_valid_fuzzing(url: str) -> None:
             "192.168.1.1",
             "10.0.0.1",
             "169.254.169.254",
-            "0.0.0.0",  # noqa: S104
+            "0.0.0.0",  # noqa: S104 # nosec B104
         ]
     )
 )

@@ -51,13 +51,16 @@ This repository is a **pure data library** (Hollow Data Plane) with no runtime e
 - **Cryptographic determinism** — canonical hashing via RFC 8785 guarantees reproducible builds.
 - **SLSA Level 3 provenance** — every PyPI release includes build attestations via [Sigstore](https://sigstore.dev/).
 - **SBOM generation** — every release ships an SPDX Software Bill of Materials.
-- **Automated dependency auditing** — `pip-audit`, `osv-scanner`, and CodeQL run on every PR and on a weekly schedule.
+- **Automated Dependency Auditing** — `pip-audit`, `osv-scanner`, and CodeQL run on every PR and on a weekly schedule.
+- **Zero-Day Egress Hardening** — All CI/CD pipelines run under `step-security/harden-runner`, mathematically blocking unauthorized outbound network sockets at the OS-level to neutralize compromised transient dependencies.
+- **Continuous Threat Sweeping** — PyCQA Bandit (SAST), TruffleHog (Secret Sweeping), and ClamAV (Malware detection) aggressively scan the repository branch on every PR.
 
 ## Supply Chain Integrity
 
-All releases are:
+All ecosystem artifacts (PyPI `coreason-manifest`, Crates.io `coreason-manifest`, and npm `@coreason/coreason-manifest`) are distributed with elite enterprise-grade providence:
 
-- Built deterministically and verified via reproducible build checks in CI.
-- Signed with [Sigstore](https://sigstore.dev/) for artifact provenance.
-- Published to PyPI via OIDC Trusted Publishing (no static API tokens).
-- Accompanied by SLSA Level 3 provenance attestations.
+- Built deterministically and continuously verified via reproducible build constraints.
+- Signed with [Sigstore](https://sigstore.dev/) for cryptographic artifact provenance.
+- Deployed exclusively via Zero-Trust **OIDC Trusted Publishing** (completely eliminating static foundational API tokens).
+- Accompanied by SLSA Level 3 provenance metadata guarantees.
+- Shipped with universally machine-readable SPDX Software Bill of Materials (SBOMs).

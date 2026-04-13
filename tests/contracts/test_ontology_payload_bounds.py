@@ -161,7 +161,7 @@ def test_neurosymbolic_inference_request_requires_contextualized_entity() -> Non
             source_entity="Amoxicillin 500mg",  # type: ignore
             fidelity_receipt={  # type: ignore
                 "contextual_completeness_score": 0.9,
-                "surrounding_token_density": 10,
+                "surrounding_token_density": 10,  # nosec B105
             },
             uncertainty_profile={  # type: ignore
                 "aleatoric_noise_ratio": 0.05,
@@ -295,14 +295,14 @@ def test_epistemic_logic_premise_bounds() -> None:
     from coreason_manifest.spec.ontology import EpistemicLogicPremise
 
     # Valid payload
-    premise = EpistemicLogicPremise(ontology_node_id="did:example:node_123", asp_program="a :- b.", max_models=5)
+    premise = EpistemicLogicPremise(asp_program="a :- b.")
     assert premise.asp_program == "a :- b."
 
     # Invalid payload (exceeds length constraint 65536)
     large_string = "a" * 65537
 
     with pytest.raises(ValidationError) as exc_info:
-        EpistemicLogicPremise(ontology_node_id="did:example:node_123", asp_program=large_string, max_models=5)
+        EpistemicLogicPremise(asp_program=large_string)
     assert "String should have at most 65536 characters" in str(exc_info.value)
 
 
@@ -313,19 +313,17 @@ def test_epistemic_lean4_premise_bounds() -> None:
 
     # Valid payload
     premise = EpistemicLean4Premise(
-        ontology_node_id="did:example:node_123",
-        formal_statement="theorem test : True := by trivial",
-        tactic_proof="trivial",
+        target_theorem="theorem test : True := by trivial",
+        tactics_script="trivial",
     )
-    assert premise.tactic_proof == "trivial"
+    assert premise.tactics_script == "trivial"
 
     # Invalid payload (exceeds length constraint 100000)
     large_string = "a" * 100001
 
     with pytest.raises(ValidationError) as exc_info:
         EpistemicLean4Premise(
-            ontology_node_id="did:example:node_123",
-            formal_statement="theorem test : True := by trivial",
-            tactic_proof=large_string,
+            target_theorem="theorem test : True := by trivial",
+            tactics_script=large_string,
         )
     assert "String should have at most 100000 characters" in str(exc_info.value)
