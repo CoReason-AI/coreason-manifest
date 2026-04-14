@@ -2970,7 +2970,6 @@ class TemporalGraphCRDTManifest(CoreasonBaseState):
         return self
 
 
-
 class EpistemicHydrationPolicy(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Defines the limits of infinite graph unfolding to protect UI VRAM when pulling from the EpistemicLedgerState.
