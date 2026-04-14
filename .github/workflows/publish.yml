@@ -90,10 +90,6 @@ jobs:
         with:
           path: site
 
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
-
   publish-npm:
     needs: release
     runs-on: ubuntu-latest
@@ -174,3 +170,22 @@ jobs:
         run: |
           cd bindings/rust
           cargo publish
+
+  publish-docs:
+    needs: release
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - name: Harden Runner (Endpoint Network Security)
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
