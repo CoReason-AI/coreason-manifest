@@ -1194,13 +1194,13 @@ class TestSOPManifestGhostReturn:
         assert result is instance
 
 
-class TestGlobalGovernanceLicenseReturn:
-    """Exercise the return self path on enforce_prosperity_license."""
+class TestGlobalGovernanceAnchorReturn:
+    """Exercise the return self path on enforce_governance_anchor."""
 
-    def test_valid_license_passes(self) -> None:
-        """Covers line 6238: return self when license valid."""
+    def test_valid_governance_anchor_passes(self) -> None:
+        """Covers return self when governance anchor has critical severity."""
         license_rule = o.ConstitutionalPolicy.model_construct(  # type: ignore[call-arg]
-            rule_cid="PPL_3_0_COMPLIANCE",
+            rule_cid="ANY_GOVERNANCE_RULE",
             severity="critical",
         )
         instance = o.GlobalGovernancePolicy.model_construct(
@@ -1209,7 +1209,7 @@ class TestGlobalGovernanceLicenseReturn:
             max_global_tokens=100000,
             global_timeout_seconds=3600,
         )
-        result = instance.enforce_prosperity_license()  # type: ignore[operator]
+        result = instance.enforce_governance_anchor()  # type: ignore[operator]
         assert result is instance
 
 

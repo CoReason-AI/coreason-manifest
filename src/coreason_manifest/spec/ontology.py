@@ -6276,9 +6276,8 @@ class GlobalGovernancePolicy(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Acts as the ultimate hardware guillotine, authorizing the orchestrator
     to physically sever the execution thread if thermodynamic, economic, or temporal budgets
-    are breached. Includes a mandatory zero-trust @model_validator enforcing the Prosperity
-    Public License 3.0 via mandatory_license_rule (rule_cid="PPL_3_0_COMPLIANCE",
-    severity="critical").
+    are breached. Includes a mandatory zero-trust @model_validator enforcing that a
+    critical-severity root governance anchor exists in the DAG.
 
     EPISTEMIC BOUNDS: Enforces absolute physical ceilings: max_budget_magnitude
     (le=18446744073709551615), max_global_tokens (le=18446744073709551615), global_timeout_seconds (ge=0,
@@ -6291,7 +6290,7 @@ class GlobalGovernancePolicy(CoreasonBaseState):
     """
 
     mandatory_license_rule: ConstitutionalPolicy = Field(
-        description="The mathematical licensing constraint enforced on all execution paths."
+        description="The mathematical governance constraint enforcing the root safety and licensing boundary on all execution paths."
     )
     max_budget_magnitude: int = Field(
         le=18446744073709551615,
@@ -6302,13 +6301,11 @@ class GlobalGovernancePolicy(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def enforce_prosperity_license(self) -> Self:
-        if (
-            self.mandatory_license_rule.rule_cid != "PPL_3_0_COMPLIANCE"
-            or self.mandatory_license_rule.severity != "critical"
-        ):
+    def enforce_governance_anchor(self) -> Self:
+        """Mathematically guarantees a critical root governance node exists in the DAG."""
+        if self.mandatory_license_rule.severity != "critical":
             raise ValueError(
-                "CRITICAL LICENSE VIOLATION: The execution graph has been stripped of its Prosperity Public License 3.0 mathematical anchor. Execution is strictly forbidden."
+                "TOPOLOGICAL GOVERNANCE VIOLATION: The execution graph lacks a 'critical' severity root governance anchor. Execution is structurally forbidden."
             )
         return self
 

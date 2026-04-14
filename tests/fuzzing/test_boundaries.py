@@ -93,12 +93,12 @@ def test_continuous_mutation_oom_buffer_limit(rows: int) -> None:
         )
 
 
-def test_epistemic_license_enforcement() -> None:
-    """Prove that instantiating GlobalGovernancePolicy with invalid mandatory_license_rule triggers ValidationError."""
+def test_epistemic_governance_anchor_enforcement() -> None:
+    """Prove that instantiating GlobalGovernancePolicy with non-critical severity triggers ValidationError."""
     invalid_license = ConstitutionalPolicy(
-        rule_cid="MIT_LICENSE", severity="low", description="test", forbidden_intents=[]
+        rule_cid="ANY_RULE", severity="low", description="test", forbidden_intents=[]
     )
-    with pytest.raises(ValidationError, match="CRITICAL LICENSE VIOLATION"):
+    with pytest.raises(ValidationError, match="TOPOLOGICAL GOVERNANCE VIOLATION"):
         GlobalGovernancePolicy(
             mandatory_license_rule=invalid_license,
             max_budget_magnitude=1000,

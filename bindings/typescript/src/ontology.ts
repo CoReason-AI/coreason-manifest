@@ -14609,9 +14609,8 @@ export interface GenerativeTaxonomyManifest1 {
  *
  * CAUSAL AFFORDANCE: Acts as the ultimate hardware guillotine, authorizing the orchestrator
  * to physically sever the execution thread if thermodynamic, economic, or temporal budgets
- * are breached. Includes a mandatory zero-trust @model_validator enforcing the Prosperity
- * Public License 3.0 via mandatory_license_rule (rule_cid="PPL_3_0_COMPLIANCE",
- * severity="critical").
+ * are breached. Includes a mandatory zero-trust @model_validator enforcing that a
+ * critical-severity root governance anchor exists in the DAG.
  *
  * EPISTEMIC BOUNDS: Enforces absolute physical ceilings: max_budget_magnitude
  * (le=18446744073709551615), max_global_tokens (le=18446744073709551615), global_timeout_seconds (ge=0,
