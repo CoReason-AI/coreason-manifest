@@ -1,5 +1,6 @@
 import time
 import uuid
+from typing import Literal
 
 from authlib.jose import JoseError, jwt
 
@@ -58,7 +59,11 @@ class DecentralizedIdentityGateway:
         self.security_profile = security_profile
         self.trusted_issuers = trusted_issuers
 
-    def _trigger_instant_severance(self, target_id: str, reason: str):
+    def _trigger_instant_severance(
+        self,
+        target_id: str,
+        reason: Literal["pqc_signature_invalid", "sd_jwt_tampered", "did_resolution_failed", "unauthorized_scope"],
+    ) -> None:
         # We need event_cid and timestamp for ConnectionSeveranceEvent
         event = ConnectionSeveranceEvent(
             event_cid=str(uuid.uuid4()),

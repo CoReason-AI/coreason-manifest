@@ -140,7 +140,7 @@ def test_empirical_falsification_contract_instantiation() -> None:
     assert contract.falsifying_observation_signature == "error.*"
 
 
-def test_volumetric_fuzzing_sd_jwt_payload_too_long():
+def test_volumetric_fuzzing_sd_jwt_payload_too_long() -> None:
     with pytest.raises(ValidationError):
         CryptographicAttestationReceipt(
             issuer_did="did:coreason:issuer-1",
@@ -150,7 +150,7 @@ def test_volumetric_fuzzing_sd_jwt_payload_too_long():
         )
 
 
-def test_volumetric_fuzzing_sd_jwt_payload_malformed():
+def test_volumetric_fuzzing_sd_jwt_payload_malformed() -> None:
     with pytest.raises(ValidationError):
         CryptographicAttestationReceipt(
             issuer_did="did:coreason:issuer-1",
@@ -160,7 +160,7 @@ def test_volumetric_fuzzing_sd_jwt_payload_malformed():
         )
 
 
-def test_federated_handshake_intent_sorts_requested_scopes():
+def test_federated_handshake_intent_sorts_requested_scopes() -> None:
     attestation = CryptographicAttestationReceipt(
         issuer_did="did:coreason:issuer-1",
         subject_did="did:coreason:subject-1",
@@ -176,7 +176,7 @@ def test_federated_handshake_intent_sorts_requested_scopes():
     assert intent.requested_scopes == ["scope_a", "scope_b", "scope_c"]
 
 
-def test_gateway_severance_did_resolution_failed():
+def test_gateway_severance_did_resolution_failed() -> None:
     profile = EpistemicSecurityProfile(
         epistemic_security=EpistemicSecurityPolicy.STANDARD, network_isolation=False, egress_obfuscation=False
     )
@@ -200,7 +200,7 @@ def test_gateway_severance_did_resolution_failed():
     assert "did_resolution_failed" in str(excinfo.value)
 
 
-def test_gateway_severance_sd_jwt_tampered():
+def test_gateway_severance_sd_jwt_tampered() -> None:
     profile = EpistemicSecurityProfile(
         epistemic_security=EpistemicSecurityPolicy.STANDARD, network_isolation=False, egress_obfuscation=False
     )
@@ -227,7 +227,7 @@ def test_gateway_severance_sd_jwt_tampered():
     assert "sd_jwt_tampered" in str(excinfo.value)
 
 
-def test_gateway_severance_pqc_signature_invalid():
+def test_gateway_severance_pqc_signature_invalid() -> None:
     profile = EpistemicSecurityProfile(
         epistemic_security=EpistemicSecurityPolicy.CONFIDENTIAL, network_isolation=True, egress_obfuscation=True
     )
@@ -261,7 +261,7 @@ def test_gateway_severance_pqc_signature_invalid():
     assert "pqc_signature_invalid" in str(excinfo.value)
 
 
-def test_gateway_severance_pqc_signature_valid():
+def test_gateway_severance_pqc_signature_valid() -> None:
     profile = EpistemicSecurityProfile(
         epistemic_security=EpistemicSecurityPolicy.CONFIDENTIAL, network_isolation=True, egress_obfuscation=True
     )
