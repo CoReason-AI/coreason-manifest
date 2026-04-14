@@ -901,6 +901,7 @@
           "fyi": "#/$defs/FYIIntent",
           "human_directive": "#/$defs/HumanDirectiveIntent",
           "informational": "#/$defs/SemanticIntent",
+          "interventional_task": "#/$defs/InterventionalTaskIntent",
           "latent_projection": "#/$defs/LatentProjectionIntent",
           "latent_schema_inference": "#/$defs/LatentSchemaInferenceIntent",
           "neurosymbolic_inference": "#/$defs/NeurosymbolicInferenceIntent",
@@ -925,6 +926,9 @@
         "propertyName": "topology_class"
       },
       "oneOf": [
+        {
+          "$ref": "#/$defs/InterventionalTaskIntent"
+        },
         {
           "$ref": "#/$defs/TemporalEdgeInvalidationIntent"
         },
@@ -1129,6 +1133,7 @@
           "circuit_breaker_event": "#/$defs/CircuitBreakerEvent",
           "cognitive_prediction": "#/$defs/CognitivePredictionReceipt",
           "cognitive_reward_evaluation": "#/$defs/CognitiveRewardEvaluationReceipt",
+          "counterfactual_receipt": "#/$defs/CounterfactualReceipt",
           "counterfactual_regret": "#/$defs/CounterfactualRegretEvent",
           "crosswalk_resolution": "#/$defs/CrosswalkResolutionReceipt",
           "custody_receipt": "#/$defs/CustodyReceipt",
@@ -1165,6 +1170,9 @@
         "propertyName": "topology_class"
       },
       "oneOf": [
+        {
+          "$ref": "#/$defs/CounterfactualReceipt"
+        },
         {
           "$ref": "#/$defs/TemporalGraphCRDTManifest"
         },
@@ -5399,6 +5407,117 @@
         "adjudicator_cid"
       ],
       "title": "CouncilTopologyManifest",
+      "type": "object"
+    },
+    "CounterfactualReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: This schema is the immutable, append-only Merkle-DAG coordinate recording the output of the PyWhy substrate verification of a Structural Causal Model.\n\nCAUSAL AFFORDANCE: Validates or falsifies a hypothesized DAG. If falsified, it physically triggers a `DefeasibleCascadeEvent` to sever the hallucinated causal edge.\n\nEPISTEMIC BOUNDS: Bounded structurally. The `enforce_cascade_on_refutation` validator mechanically mandates that a falsified causal model (refutation_passed=False) MUST contain a cascade_event, and vice versa.\n\nMCP ROUTING TRIGGERS: Pearlian Do-Calculus, Causal Estimate, Refutation Tests, Defeasible Logic, Truth Maintenance System",
+      "properties": {
+        "event_cid": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "swarm_node_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Swarm Node Id",
+          "type": "string"
+        },
+        "cryptographic_signature": {
+          "maxLength": 512,
+          "minLength": 64,
+          "title": "Cryptographic Signature",
+          "type": "string"
+        },
+        "topology_class": {
+          "const": "counterfactual_receipt",
+          "default": "counterfactual_receipt",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "receipt_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Receipt Cid",
+          "type": "string"
+        },
+        "task_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Task Cid",
+          "type": "string"
+        },
+        "causal_estimate_value": {
+          "title": "Causal Estimate Value",
+          "type": "number"
+        },
+        "refutation_passed": {
+          "title": "Refutation Passed",
+          "type": "boolean"
+        },
+        "p_values": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "propertyNames": {
+            "maxLength": 255
+          },
+          "title": "P Values",
+          "type": "object"
+        },
+        "cascade_event": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DefeasibleCascadeEvent"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "event_cid",
+        "timestamp",
+        "swarm_node_id",
+        "cryptographic_signature",
+        "receipt_cid",
+        "task_cid",
+        "causal_estimate_value",
+        "refutation_passed",
+        "p_values"
+      ],
+      "title": "CounterfactualReceipt",
       "type": "object"
     },
     "CounterfactualRegretEvent": {
@@ -12643,6 +12762,86 @@
         "execution_cost_budget_magnitude"
       ],
       "title": "InterventionalCausalTask",
+      "type": "object"
+    },
+    "InterventionalTaskIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: This schema represents the kinetic execution trigger emitted by an agent when it needs to verify a hypothesized causal DAG using Structural Causal Models (SCMs) and Do-Calculus.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator to route the payload to a determinist mathematical solver (PyWhy/DoWhy) to eliminate blind causal inference.\n\nEPISTEMIC BOUNDS: Bounded structurally. The `empirical_data_uri` is physically routed through SSRF quarantine to block Bogon space/loopback resolution.\n\nMCP ROUTING TRIGGERS: Pearlian Do-Calculus, Structural Causal Models, Causal Inference, Directed Acyclic Graph, Counterfactual Engine",
+      "properties": {
+        "topology_class": {
+          "const": "interventional_task",
+          "default": "interventional_task",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "task_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Task Cid",
+          "type": "string"
+        },
+        "target_hypothesis_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Target Hypothesis Cid",
+          "type": "string"
+        },
+        "structural_causal_model": {
+          "$ref": "#/$defs/StructuralCausalGraphProfile"
+        },
+        "treatment_variables": {
+          "items": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Treatment Variables",
+          "type": "array"
+        },
+        "outcome_variables": {
+          "items": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Outcome Variables",
+          "type": "array"
+        },
+        "refutation_tests": {
+          "items": {
+            "enum": [
+              "random_common_cause",
+              "placebo_treatment",
+              "data_subset",
+              "dummy_outcome",
+              "add_unobserved_common_cause"
+            ],
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Refutation Tests",
+          "type": "array"
+        },
+        "empirical_data_uri": {
+          "format": "uri",
+          "maxLength": 2083,
+          "minLength": 1,
+          "title": "Empirical Data Uri",
+          "type": "string"
+        }
+      },
+      "required": [
+        "task_cid",
+        "target_hypothesis_cid",
+        "structural_causal_model",
+        "treatment_variables",
+        "outcome_variables",
+        "refutation_tests",
+        "empirical_data_uri"
+      ],
+      "title": "InterventionalTaskIntent",
       "type": "object"
     },
     "JSONRPCErrorResponseState": {
