@@ -61,7 +61,7 @@ except ModuleNotFoundError:
 
 
 def _pure_python_is_dag(adjacency: dict[str, list[str]]) -> bool:
-    """Kahn's algorithm – returns True iff the graph is a DAG (no cycles)."""
+    """Kahn's algorithm - returns True iff the graph is a DAG (no cycles)."""
     in_degree: dict[str, int] = {n: 0 for n in adjacency}
     for targets in adjacency.values():
         for t in targets:
