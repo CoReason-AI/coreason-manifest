@@ -3984,6 +3984,25 @@ class BoundedJSONRPCIntent(CoreasonBaseState):
         return _validate_payload_bounds(v)
 
 
+class LeanExplorationIntent(BoundedJSONRPCIntent):
+    """
+    AGENT INSTRUCTION: Represents a non-kinetic, read-only exploratory action within the Lean 4 formal environment.
+
+    CAUSAL AFFORDANCE: Unlocks exploratory search and state verification without committing to destructive proof steps in the execution tree.
+
+    EPISTEMIC BOUNDS: Inherits hardware volume guillotine constraints from BoundedJSONRPCIntent. Restricts execution to specific literals ('search_theorems', 'get_dependencies', 'check_tactic_state').
+
+    MCP ROUTING TRIGGERS: Lean 4 Exploration, Interactive Theorem Proving, Read-Only Substrate, Tactic State Query
+    """
+
+    topology_class: Literal["lean_exploration"] = Field(
+        default="lean_exploration", description="Discriminator for non-kinetic Lean 4 MCP exploratory queries."
+    )
+    method: Literal["search_theorems", "get_dependencies", "check_tactic_state"] = Field(
+        ..., description="The restricted set of Lean 4 query mechanisms."
+    )
+
+
 class OntologyDiscoveryIntent(BoundedJSONRPCIntent):
     """
     AGENT INSTRUCTION: Authorizes a Semantic Watchdog Agent to perform strict, SSRF-protected out-of-band polling against external semantic registries to monitor for ontological deprecation or semantic drift.
@@ -6165,7 +6184,7 @@ class FormalVerificationContract(CoreasonBaseState):
     )
     verified_receipt_cid: NodeCIDState | None = Field(
         default=None,
-        description="Pointer to a Lean4VerificationReceipt or HoareLogicProofReceipt validating the logic.",
+        description="Pointer to a Lean4VerificationReceipt (or Z3 equivalent) that evaluated to is_proved=True against the invariant_theorem.",
     )
 
 
@@ -7157,7 +7176,42 @@ class EpistemicLean4Premise(CoreasonBaseState):
 
     target_theorem: Annotated[str, StringConstraints(max_length=65536)]
     tactics_script: Annotated[str, StringConstraints(max_length=100000)]
+    dependency_graph_cids: list[NodeCIDState] | None = Field(
+        default=None,
+        description="Cryptographic pointers to prior verified lemmas or Mathlib4 dependencies required to evaluate this premise.",
+    )
     topology_class: Literal["epistemic_lean4_premise"] = Field(default="epistemic_lean4_premise")
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        if self.dependency_graph_cids is not None:
+            object.__setattr__(self, "dependency_graph_cids", sorted(self.dependency_graph_cids))
+        return self
+
+
+class TacticStateGoal(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Captures a discrete Lean 4 goal state within a hierarchical breakdown of unresolved goals.
+
+    CAUSAL AFFORDANCE: Permits the Process Reward Model to evaluate and assign heuristic scores to intermediate tactical branches.
+
+    EPISTEMIC BOUNDS: Bounded to maximum string lengths and valid heuristic scores (ge=0.0, le=1.0). Arrays must be canonically sorted.
+
+    MCP ROUTING TRIGGERS: Tactic State, Process-Supervised Verification, Sub-Goal Tree, Reward Shaping
+    """
+
+    hypothesis_context: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
+        default_factory=list, description="List of active assumptions/variables"
+    )
+    target_type: Annotated[str, StringConstraints(max_length=2000)] = Field(
+        description="The mathematical target needing proof"
+    )
+    complexity_score: float | None = Field(default=None, ge=0.0, le=1.0, description="Optional PSV heuristic score")
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "hypothesis_context", sorted(self.hypothesis_context))
+        return self
 
 
 class Lean4VerificationReceipt(CoreasonBaseState):
@@ -7172,8 +7226,19 @@ class Lean4VerificationReceipt(CoreasonBaseState):
     """
 
     is_proved: bool
-    failing_tactic_state: str | None = None
+    tactic_state_tree: list[TacticStateGoal] | None = Field(
+        default=None, description="The hierarchical breakdown of unresolved goals required for MCTS reward shaping."
+    )
     topology_class: Literal["lean4_verification_receipt"] = Field(default="lean4_verification_receipt")
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        if self.tactic_state_tree is not None:
+            # We sort by target_type as a deterministic key for the tree
+            object.__setattr__(
+                self, "tactic_state_tree", sorted(self.tactic_state_tree, key=operator.attrgetter("target_type"))
+            )
+        return self
 
 
 class CombinatorialCounterModel(CoreasonBaseState):
@@ -7484,6 +7549,7 @@ class SubstrateDialectProfile(StrEnum):
     DOCLING_GRAPH_EXTRACTOR = "DOCLING_GRAPH_EXTRACTOR"
     ONTOGPT_SPIRES = "ONTOGPT_SPIRES"
     NATIVE_PYTHON = "NATIVE_PYTHON"
+    LEAN4_MCP_SERVER = "LEAN4_MCP_SERVER"
     CURIOCAT_NLI = "CURIOCAT_NLI"
     SEMANTIC_WEB_ARCHIVIST = "SEMANTIC_WEB_ARCHIVIST"
     ZERO_KNOWLEDGE_PROVER = "ZERO_KNOWLEDGE_PROVER"
@@ -7643,7 +7709,8 @@ type AnyIntent = Annotated[
     | EpistemicPrologPremise
     | CausalPropagationIntent
     | RDFSerializationIntent
-    | SPARQLQueryIntent,
+    | SPARQLQueryIntent
+    | LeanExplorationIntent,
     Field(discriminator="topology_class"),
 ]
 
@@ -15485,6 +15552,7 @@ EvidentiaryGroundingSLA.model_rebuild()
 EpistemicProxyState.model_rebuild()
 
 EpistemicLean4Premise.model_rebuild()
+TacticStateGoal.model_rebuild()
 Lean4VerificationReceipt.model_rebuild()
 EpistemicLogicPremise.model_rebuild()
 CombinatorialCounterModel.model_rebuild()
@@ -15522,6 +15590,7 @@ TemporalConflictResolutionPolicy.model_rebuild()
 TemporalEdgeInvalidationIntent.model_rebuild()
 TemporalGraphCRDTManifest.model_rebuild()
 MCPToolDefinition.model_rebuild()
+LeanExplorationIntent.model_rebuild()
 ContinuousManifoldMappingContract.model_rebuild()
 
 TopologicalSortIntent.model_rebuild()

@@ -904,6 +904,7 @@
           "informational": "#/$defs/SemanticIntent",
           "latent_projection": "#/$defs/LatentProjectionIntent",
           "latent_schema_inference": "#/$defs/LatentSchemaInferenceIntent",
+          "lean_exploration": "#/$defs/LeanExplorationIntent",
           "neurosymbolic_inference": "#/$defs/NeurosymbolicInferenceIntent",
           "ontological_crosswalk": "#/$defs/OntologicalCrosswalkIntent",
           "ontology_discovery": "#/$defs/OntologyDiscoveryIntent",
@@ -1042,6 +1043,9 @@
         },
         {
           "$ref": "#/$defs/SPARQLQueryIntent"
+        },
+        {
+          "$ref": "#/$defs/LeanExplorationIntent"
         }
       ]
     },
@@ -8271,6 +8275,22 @@
           "title": "Tactics Script",
           "type": "string"
         },
+        "dependency_graph_cids": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/NodeCIDState"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cryptographic pointers to prior verified lemmas or Mathlib4 dependencies required to evaluate this premise.",
+          "title": "Dependency Graph Cids"
+        },
         "topology_class": {
           "const": "epistemic_lean4_premise",
           "default": "epistemic_lean4_premise",
@@ -11210,7 +11230,7 @@
             }
           ],
           "default": null,
-          "description": "Pointer to a Lean4VerificationReceipt or HoareLogicProofReceipt validating the logic."
+          "description": "Pointer to a Lean4VerificationReceipt (or Z3 equivalent) that evaluated to is_proved=True against the invariant_theorem."
         }
       },
       "required": [
@@ -13449,17 +13469,21 @@
           "title": "Is Proved",
           "type": "boolean"
         },
-        "failing_tactic_state": {
+        "tactic_state_tree": {
           "anyOf": [
             {
-              "type": "string"
+              "items": {
+                "$ref": "#/$defs/TacticStateGoal"
+              },
+              "type": "array"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "title": "Failing Tactic State"
+          "description": "The hierarchical breakdown of unresolved goals required for MCTS reward shaping.",
+          "title": "Tactic State Tree"
         },
         "topology_class": {
           "const": "lean4_verification_receipt",
@@ -13472,6 +13496,81 @@
         "is_proved"
       ],
       "title": "Lean4VerificationReceipt",
+      "type": "object"
+    },
+    "LeanExplorationIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents a non-kinetic, read-only exploratory action within the Lean 4 formal environment.\n\nCAUSAL AFFORDANCE: Unlocks exploratory search and state verification without committing to destructive proof steps in the execution tree.\n\nEPISTEMIC BOUNDS: Inherits hardware volume guillotine constraints from BoundedJSONRPCIntent. Restricts execution to specific literals ('search_theorems', 'get_dependencies', 'check_tactic_state').\n\nMCP ROUTING TRIGGERS: Lean 4 Exploration, Interactive Theorem Proving, Read-Only Substrate, Tactic State Query",
+      "properties": {
+        "jsonrpc": {
+          "const": "2.0",
+          "description": "JSON-RPC version.",
+          "title": "Jsonrpc",
+          "type": "string"
+        },
+        "method": {
+          "description": "The restricted set of Lean 4 query mechanisms.",
+          "enum": [
+            "search_theorems",
+            "get_dependencies",
+            "check_tactic_state"
+          ],
+          "title": "Method",
+          "type": "string"
+        },
+        "params": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/JsonPrimitiveState"
+              },
+              "maxProperties": 86400000,
+              "propertyNames": {
+                "maxLength": 255
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Payload parameters. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
+          "title": "Params"
+        },
+        "id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9_.:-]+$",
+              "type": "string"
+            },
+            {
+              "maximum": 1000000000,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Unique request identifier.",
+          "title": "Id"
+        },
+        "topology_class": {
+          "const": "lean_exploration",
+          "default": "lean_exploration",
+          "description": "Discriminator for non-kinetic Lean 4 MCP exploratory queries.",
+          "title": "Topology Class",
+          "type": "string"
+        }
+      },
+      "required": [
+        "jsonrpc",
+        "method"
+      ],
+      "title": "LeanExplorationIntent",
       "type": "object"
     },
     "LifecycleTriggerEvent": {
@@ -19615,6 +19714,7 @@
         "DOCLING_GRAPH_EXTRACTOR",
         "ONTOGPT_SPIRES",
         "NATIVE_PYTHON",
+        "LEAN4_MCP_SERVER",
         "CURIOCAT_NLI",
         "SEMANTIC_WEB_ARCHIVIST",
         "ZERO_KNOWLEDGE_PROVER"
@@ -20083,6 +20183,47 @@
         "cells"
       ],
       "title": "TabularMatrixProfile",
+      "type": "object"
+    },
+    "TacticStateGoal": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Captures a discrete Lean 4 goal state within a hierarchical breakdown of unresolved goals.\n\nCAUSAL AFFORDANCE: Permits the Process Reward Model to evaluate and assign heuristic scores to intermediate tactical branches.\n\nEPISTEMIC BOUNDS: Bounded to maximum string lengths and valid heuristic scores (ge=0.0, le=1.0). Arrays must be canonically sorted.\n\nMCP ROUTING TRIGGERS: Tactic State, Process-Supervised Verification, Sub-Goal Tree, Reward Shaping",
+      "properties": {
+        "hypothesis_context": {
+          "description": "List of active assumptions/variables",
+          "items": {
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "title": "Hypothesis Context",
+          "type": "array"
+        },
+        "target_type": {
+          "description": "The mathematical target needing proof",
+          "maxLength": 2000,
+          "title": "Target Type",
+          "type": "string"
+        },
+        "complexity_score": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional PSV heuristic score",
+          "title": "Complexity Score"
+        }
+      },
+      "required": [
+        "target_type"
+      ],
+      "title": "TacticStateGoal",
       "type": "object"
     },
     "TargetTopologyProfile": {
